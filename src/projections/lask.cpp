@@ -17,7 +17,7 @@ PROJ_HEAD(lask, "Laskowski") "\n\tMisc Sph, no inv";
 #define b05 -0.0491032
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY lask_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     double l2, p2;
     (void) P;
@@ -33,7 +33,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 
 PJ *PROJECTION(lask) {
 
-    P->fwd = s_forward;
+    P->fwd = lask_s_forward;
     P->es = 0.;
 
     return P;

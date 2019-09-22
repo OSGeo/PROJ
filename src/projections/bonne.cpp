@@ -2,7 +2,7 @@
 #include <errno.h>
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 
 PROJ_HEAD(bonne, "Bonne (Werner lat_1=90)")
@@ -20,20 +20,25 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY bonne_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double rh, E, c;
 
     rh = Q->am1 + Q->m1 - pj_mlfn(lp.phi, E = sin(lp.phi), c = cos(lp.phi), Q->en);
-    E = c * lp.lam / (rh * sqrt(1. - P->es * E * E));
-    xy.x = rh * sin(E);
-    xy.y = Q->am1 - rh * cos(E);
+    if (fabs(rh) > EPS10) {
+        E = c * lp.lam / (rh * sqrt(1. - P->es * E * E));
+        xy.x = rh * sin(E);
+        xy.y = Q->am1 - rh * cos(E);
+    } else {
+        xy.x = 0.;
+        xy.y = 0.;
+    }
     return xy;
 }
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY bonne_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double E, rh;
@@ -48,7 +53,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP bonne_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double rh;
@@ -67,7 +72,7 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP bonne_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double s, rh;
@@ -120,15 +125,15 @@ PJ *PROJECTION(bonne) {
         Q->m1 = pj_mlfn(Q->phi1, Q->am1 = sin(Q->phi1),
             c = cos(Q->phi1), Q->en);
         Q->am1 = c / (sqrt(1. - P->es * Q->am1 * Q->am1) * Q->am1);
-        P->inv = e_inverse;
-        P->fwd = e_forward;
+        P->inv = bonne_e_inverse;
+        P->fwd = bonne_e_forward;
     } else {
         if (fabs(Q->phi1) + EPS10 >= M_HALFPI)
             Q->cphi1 = 0.;
         else
             Q->cphi1 = 1. / tan(Q->phi1);
-        P->inv = s_inverse;
-        P->fwd = s_forward;
+        P->inv = bonne_s_inverse;
+        P->fwd = bonne_s_forward;
     }
     return P;
 }

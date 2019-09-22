@@ -61,12 +61,13 @@ namespace { // anonymous namespace
 struct OutputOptions {
     bool quiet = false;
     bool PROJ5 = false;
-    bool WKT2_2018 = false;
-    bool WKT2_2018_SIMPLIFIED = false;
+    bool WKT2_2019 = false;
+    bool WKT2_2019_SIMPLIFIED = false;
     bool WKT2_2015 = false;
     bool WKT2_2015_SIMPLIFIED = false;
     bool WKT1_GDAL = false;
     bool WKT1_ESRI = false;
+    bool PROJJSON = false;
     bool c_ify = false;
     bool singleLine = false;
     bool strict = true;
@@ -77,7 +78,8 @@ struct OutputOptions {
 
 static void usage() {
     std::cerr
-        << "usage: projinfo [-o formats] [-k crs|operation] [--summary] [-q]"
+        << "usage: projinfo [-o formats] [-k crs|operation|ellipsoid] "
+           "[--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
            "[--bbox west_long,south_lat,east_long,north_lat]) "
@@ -93,14 +95,14 @@ static void usage() {
         << "                [--boundcrs-to-wgs84]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
-        << "                [--identify]" << std::endl
+        << "                [--identify] [--3d]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
         << "                {object_definition} | (-s {srs_def} -t {srs_def})"
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
-                 "all,default,PROJ,WKT_ALL,WKT2_2015,WKT2_2018,WKT1_GDAL,"
-                 "WKT1_ESRI"
+                 "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
+                 "WKT1:ESRI,PROJJSON"
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
@@ -138,9 +140,10 @@ static std::string c_ify_string(const std::string &str) {
 
 static BaseObjectNNPtr buildObject(
     DatabaseContextPtr dbContext, const std::string &user_string,
-    bool kindIsCRS, const std::string &context, bool buildBoundCRSToWGS84,
+    const std::string &kind, const std::string &context,
+    bool buildBoundCRSToWGS84,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
-    bool quiet) {
+    bool promoteTo3D, bool quiet) {
     BaseObjectPtr obj;
 
     std::string l_user_string(user_string);
@@ -174,9 +177,12 @@ static BaseObjectNNPtr buildObject(
 
     try {
         auto tokens = split(l_user_string, ':');
-        if (!kindIsCRS && tokens.size() == 2) {
+        if (kind == "operation" && tokens.size() == 2) {
             auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
                        tokens[1];
+            obj = createFromUserInput(urn, dbContext).as_nullable();
+        } else if (kind == "ellipsoid" && tokens.size() == 2) {
+            auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
             // Convenience to be able to use C escaped strings...
@@ -216,6 +222,13 @@ static BaseObjectNNPtr buildObject(
             obj = crs->createBoundCRSToWGS84IfPossible(dbContext,
                                                        allowUseIntermediateCRS)
                       .as_nullable();
+        }
+    }
+
+    if (promoteTo3D) {
+        auto crs = std::dynamic_pointer_cast<CRS>(obj);
+        if (crs) {
+            obj = crs->promoteTo3D(std::string(), dbContext).as_nullable();
         }
     }
 
@@ -303,7 +316,7 @@ static void outputObject(
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2015 string:" << std::endl;
+                    std::cout << "WKT2:2015 string:" << std::endl;
                 }
                 auto formatter =
                     WKTFormatter::create(WKTFormatter::Convention::WKT2_2015);
@@ -317,7 +330,7 @@ static void outputObject(
                 }
                 std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT2_2015: " << e.what()
+                std::cerr << "Error when exporting to WKT2:2015: " << e.what()
                           << std::endl;
             }
             alreadyOutputed = true;
@@ -329,7 +342,7 @@ static void outputObject(
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2015_SIMPLIFIED string:" << std::endl;
+                    std::cout << "WKT2:2015_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
                     WKTFormatter::Convention::WKT2_2015_SIMPLIFIED);
@@ -343,22 +356,22 @@ static void outputObject(
                 }
                 std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT2_2015_SIMPLIFIED: "
+                std::cerr << "Error when exporting to WKT2:2015_SIMPLIFIED: "
                           << e.what() << std::endl;
             }
             alreadyOutputed = true;
         }
 
-        if (outputOpt.WKT2_2018) {
+        if (outputOpt.WKT2_2019) {
             try {
                 if (alreadyOutputed) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2018 string:" << std::endl;
+                    std::cout << "WKT2:2019 string:" << std::endl;
                 }
                 auto formatter =
-                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2018);
+                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -369,22 +382,22 @@ static void outputObject(
                 }
                 std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT2_2018: " << e.what()
+                std::cerr << "Error when exporting to WKT2:2019: " << e.what()
                           << std::endl;
             }
             alreadyOutputed = true;
         }
 
-        if (outputOpt.WKT2_2018_SIMPLIFIED) {
+        if (outputOpt.WKT2_2019_SIMPLIFIED) {
             try {
                 if (alreadyOutputed) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT2_2018_SIMPLIFIED string:" << std::endl;
+                    std::cout << "WKT2:2019_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
-                    WKTFormatter::Convention::WKT2_2018_SIMPLIFIED);
+                    WKTFormatter::Convention::WKT2_2019_SIMPLIFIED);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -395,7 +408,7 @@ static void outputObject(
                 }
                 std::cout << wkt << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT2_2018_SIMPLIFIED: "
+                std::cerr << "Error when exporting to WKT2:2019_SIMPLIFIED: "
                           << e.what() << std::endl;
             }
             alreadyOutputed = true;
@@ -407,7 +420,7 @@ static void outputObject(
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT1_GDAL:" << std::endl;
+                    std::cout << "WKT1:GDAL string:" << std::endl;
                 }
 
                 auto crs = nn_dynamic_pointer_cast<CRS>(obj);
@@ -434,7 +447,7 @@ static void outputObject(
                 std::cout << wkt << std::endl;
                 std::cout << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT1_GDAL: " << e.what()
+                std::cerr << "Error when exporting to WKT1:GDAL: " << e.what()
                           << std::endl;
             }
             alreadyOutputed = true;
@@ -446,7 +459,7 @@ static void outputObject(
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
-                    std::cout << "WKT1_ESRI:" << std::endl;
+                    std::cout << "WKT1:ESRI string:" << std::endl;
                 }
 
                 auto formatter = WKTFormatter::create(
@@ -459,9 +472,37 @@ static void outputObject(
                 std::cout << wkt << std::endl;
                 std::cout << std::endl;
             } catch (const std::exception &e) {
-                std::cerr << "Error when exporting to WKT1_ESRI: " << e.what()
+                std::cerr << "Error when exporting to WKT1:ESRI: " << e.what()
                           << std::endl;
             }
+            alreadyOutputed = true;
+        }
+    }
+
+    auto JSONExportable = nn_dynamic_pointer_cast<IJSONExportable>(obj);
+    if (JSONExportable) {
+        if (outputOpt.PROJJSON) {
+            try {
+                if (alreadyOutputed) {
+                    std::cout << std::endl;
+                }
+                if (!outputOpt.quiet) {
+                    std::cout << "PROJJSON:" << std::endl;
+                }
+                auto formatter(JSONFormatter::create(dbContext));
+                if (outputOpt.singleLine) {
+                    formatter->setMultiLine(false);
+                }
+                auto jsonString(JSONExportable->exportToJSON(formatter.get()));
+                if (outputOpt.c_ify) {
+                    jsonString = c_ify_string(jsonString);
+                }
+                std::cout << jsonString << std::endl;
+            } catch (const std::exception &e) {
+                std::cerr << "Error when exporting to PROJJSON: " << e.what()
+                          << std::endl;
+            }
+            // alreadyOutputed = true;
         }
     }
 
@@ -560,6 +601,37 @@ static void outputOperationSummary(const CoordinateOperationNNPtr &op,
 
 // ---------------------------------------------------------------------------
 
+static size_t getAxisCount(const CRSNNPtr &crs) {
+    const auto singleCRS = dynamic_cast<const SingleCRS *>(crs.get());
+    if (singleCRS) {
+        return singleCRS->coordinateSystem()->axisList().size();
+    }
+    const auto compoundCRS = dynamic_cast<const CompoundCRS *>(crs.get());
+    if (compoundCRS) {
+        size_t axisCount = 0;
+        const auto &components = compoundCRS->componentReferenceSystems();
+        for (const auto &subCRS : components) {
+            axisCount += getAxisCount(subCRS);
+        }
+        return axisCount;
+    }
+    const auto boundCRS = dynamic_cast<const BoundCRS *>(crs.get());
+    if (boundCRS) {
+        return getAxisCount(boundCRS->baseCRS());
+    }
+    return 0;
+}
+
+// ---------------------------------------------------------------------------
+
+static bool is2D(const CRSNNPtr &crs) { return getAxisCount(crs) == 2; }
+
+// ---------------------------------------------------------------------------
+
+static bool is3D(const CRSNNPtr &crs) { return getAxisCount(crs) == 3; }
+
+// ---------------------------------------------------------------------------
+
 static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
     const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
@@ -570,23 +642,37 @@ static void outputOperations(
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
-    bool showSuperseded, const OutputOptions &outputOpt, bool summary) {
-    auto sourceObj = buildObject(
-        dbContext, sourceCRSStr, true, "source CRS", false,
-        CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
+    bool showSuperseded, bool promoteTo3D, const OutputOptions &outputOpt,
+    bool summary) {
+    auto sourceObj =
+        buildObject(dbContext, sourceCRSStr, "crs", "source CRS", false,
+                    CoordinateOperationContext::IntermediateCRSUse::NEVER,
+                    promoteTo3D, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
+    auto nnSourceCRS = NN_NO_CHECK(sourceCRS);
 
-    auto targetObj = buildObject(
-        dbContext, targetCRSStr, true, "target CRS", false,
-        CoordinateOperationContext::IntermediateCRSUse::NEVER, outputOpt.quiet);
+    auto targetObj =
+        buildObject(dbContext, targetCRSStr, "crs", "target CRS", false,
+                    CoordinateOperationContext::IntermediateCRSUse::NEVER,
+                    promoteTo3D, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
         std::exit(1);
+    }
+    auto nnTargetCRS = NN_NO_CHECK(targetCRS);
+
+    if (!promoteTo3D && !outputOpt.quiet &&
+        ((is2D(nnSourceCRS) && is3D(nnTargetCRS)) ||
+         (is3D(nnSourceCRS) && is2D(nnTargetCRS)))) {
+        std::cerr << "Warning: mix of 2D and 3D CRS. Vertical transformations, "
+                     "if available, will not be applied. Consider using 3D "
+                     "version of the CRS, or the --3d switch"
+                  << std::endl;
     }
 
     std::vector<CoordinateOperationNNPtr> list;
@@ -607,7 +693,7 @@ static void outputOperations(
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         ctxt->setDiscardSuperseded(!showSuperseded);
         list = CoordinateOperationFactory::create()->createOperations(
-            NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS), ctxt);
+            nnSourceCRS, nnTargetCRS, ctxt);
         if (!spatialCriterionExplicitlySpecified &&
             spatialCriterion == CoordinateOperationContext::SpatialCriterion::
                                     STRICT_CONTAINMENT) {
@@ -617,8 +703,7 @@ static void outputOperations(
                         PARTIAL_INTERSECTION);
                 spatialCriterionPartialIntersectionResultCount =
                     CoordinateOperationFactory::create()
-                        ->createOperations(NN_NO_CHECK(sourceCRS),
-                                           NN_NO_CHECK(targetCRS), ctxt)
+                        ->createOperations(nnSourceCRS, nnTargetCRS, ctxt)
                         .size();
             } catch (const std::exception &) {
             }
@@ -678,7 +763,7 @@ int main(int argc, char **argv) {
     std::string targetCRSStr;
     bool outputSwithSpecified = false;
     OutputOptions outputOpt;
-    bool kindIsCRS = true;
+    std::string objectKind;
     bool summary = false;
     ExtentPtr bboxFilter = nullptr;
     std::string area;
@@ -701,6 +786,7 @@ int main(int argc, char **argv) {
     std::string authority;
     bool identify = false;
     bool showSuperseded = false;
+    bool promoteTo3D = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -711,13 +797,14 @@ int main(int argc, char **argv) {
             for (auto format : formats) {
                 if (ci_equal(format, "all")) {
                     outputOpt.PROJ5 = true;
-                    outputOpt.WKT2_2018 = true;
+                    outputOpt.WKT2_2019 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                     outputOpt.WKT1_ESRI = true;
+                    outputOpt.PROJJSON = true;
                 } else if (ci_equal(format, "default")) {
                     outputOpt.PROJ5 = true;
-                    outputOpt.WKT2_2018 = true;
+                    outputOpt.WKT2_2019 = true;
                     outputOpt.WKT2_2015 = false;
                     outputOpt.WKT1_GDAL = false;
                 } else if (ci_equal(format, "PROJ")) {
@@ -726,26 +813,38 @@ int main(int argc, char **argv) {
                     outputOpt.PROJ5 = false;
                 } else if (ci_equal(format, "WKT_ALL") ||
                            ci_equal(format, "WKT-ALL")) {
-                    outputOpt.WKT2_2018 = true;
+                    outputOpt.WKT2_2019 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                 } else if (ci_equal(format, "-WKT_ALL") ||
                            ci_equal(format, "-WKT-ALL")) {
-                    outputOpt.WKT2_2018 = false;
+                    outputOpt.WKT2_2019 = false;
                     outputOpt.WKT2_2015 = false;
                     outputOpt.WKT1_GDAL = false;
-                } else if (ci_equal(format, "WKT2_2018") ||
+                } else if (ci_equal(format, "WKT2_2019") ||
+                           ci_equal(format, "WKT2-2019") ||
+                           ci_equal(format, "WKT2:2019") ||
+                           /* legacy: undocumented */
+                           ci_equal(format, "WKT2_2018") ||
                            ci_equal(format, "WKT2-2018") ||
                            ci_equal(format, "WKT2:2018")) {
-                    outputOpt.WKT2_2018 = true;
-                } else if (ci_equal(format, "WKT2_2018_SIMPLIFIED") ||
+                    outputOpt.WKT2_2019 = true;
+                } else if (ci_equal(format, "WKT2_2019_SIMPLIFIED") ||
+                           ci_equal(format, "WKT2-2019_SIMPLIFIED") ||
+                           ci_equal(format, "WKT2:2019_SIMPLIFIED") ||
+                           /* legacy: undocumented */
+                           ci_equal(format, "WKT2_2018_SIMPLIFIED") ||
                            ci_equal(format, "WKT2-2018_SIMPLIFIED") ||
                            ci_equal(format, "WKT2:2018_SIMPLIFIED")) {
-                    outputOpt.WKT2_2018_SIMPLIFIED = true;
-                } else if (ci_equal(format, "-WKT2_2018") ||
+                    outputOpt.WKT2_2019_SIMPLIFIED = true;
+                } else if (ci_equal(format, "-WKT2_2019") ||
+                           ci_equal(format, "-WKT2-2019") ||
+                           ci_equal(format, "-WKT2:2019") ||
+                           /* legacy: undocumented */
+                           ci_equal(format, "-WKT2_2018") ||
                            ci_equal(format, "-WKT2-2018") ||
                            ci_equal(format, "-WKT2:2018")) {
-                    outputOpt.WKT2_2018 = false;
+                    outputOpt.WKT2_2019 = false;
                 } else if (ci_equal(format, "WKT2_2015") ||
                            ci_equal(format, "WKT2-2015") ||
                            ci_equal(format, "WKT2:2015")) {
@@ -774,6 +873,10 @@ int main(int argc, char **argv) {
                            ci_equal(format, "-WKT1-ESRI") ||
                            ci_equal(format, "-WKT1:ESRI")) {
                     outputOpt.WKT1_ESRI = false;
+                } else if (ci_equal(format, "PROJJSON")) {
+                    outputOpt.PROJJSON = true;
+                } else if (ci_equal(format, "-PROJJSON")) {
+                    outputOpt.PROJJSON = false;
                 } else {
                     std::cerr << "Unrecognized value for option -o: " << format
                               << std::endl;
@@ -806,9 +909,11 @@ int main(int argc, char **argv) {
             i++;
             std::string kind(argv[i]);
             if (ci_equal(kind, "crs") || ci_equal(kind, "srs")) {
-                kindIsCRS = true;
+                objectKind = "crs";
             } else if (ci_equal(kind, "operation")) {
-                kindIsCRS = false;
+                objectKind = "operation";
+            } else if (ci_equal(kind, "ellipsoid")) {
+                objectKind = "ellipsoid";
             } else {
                 std::cerr << "Unrecognized value for option -k: " << kind
                           << std::endl;
@@ -931,6 +1036,8 @@ int main(int argc, char **argv) {
             showSuperseded = true;
         } else if (arg == "--lax") {
             outputOpt.strict = false;
+        } else if (ci_equal(arg, "--3d")) {
+            promoteTo3D = true;
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {
@@ -986,81 +1093,91 @@ int main(int argc, char **argv) {
 
     if (!outputSwithSpecified) {
         outputOpt.PROJ5 = true;
-        outputOpt.WKT2_2018 = true;
+        outputOpt.WKT2_2019 = true;
     }
 
     if (outputOpt.quiet &&
-        (outputOpt.PROJ5 + outputOpt.WKT2_2018 + outputOpt.WKT2_2015 +
-         outputOpt.WKT1_GDAL) != 1) {
+        (outputOpt.PROJ5 + outputOpt.WKT2_2019 + outputOpt.WKT2_2015 +
+         outputOpt.WKT1_GDAL + outputOpt.PROJJSON) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
         usage();
     }
 
     if (!user_string.empty()) {
-        auto obj(buildObject(dbContext, user_string, kindIsCRS, "input string",
-                             buildBoundCRSToWGS84, allowUseIntermediateCRS,
-                             outputOpt.quiet));
-        if (guessDialect) {
-            auto dialect = WKTParser().guessDialect(user_string);
-            std::cout << "Guessed WKT dialect: ";
-            if (dialect == WKTParser::WKTGuessedDialect::WKT2_2018) {
-                std::cout << "WKT2_2018";
-            } else if (dialect == WKTParser::WKTGuessedDialect::WKT2_2015) {
-                std::cout << "WKT2_2015";
-            } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_GDAL) {
-                std::cout << "WKT1_GDAL";
-            } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_ESRI) {
-                std::cout << "WKT1_ESRI";
-            } else {
-                std::cout << "Not WKT / unknown";
+        try {
+            auto obj(buildObject(dbContext, user_string, objectKind,
+                                 "input string", buildBoundCRSToWGS84,
+                                 allowUseIntermediateCRS, promoteTo3D,
+                                 outputOpt.quiet));
+            if (guessDialect) {
+                auto dialect = WKTParser().guessDialect(user_string);
+                std::cout << "Guessed WKT dialect: ";
+                if (dialect == WKTParser::WKTGuessedDialect::WKT2_2019) {
+                    std::cout << "WKT2_2019";
+                } else if (dialect == WKTParser::WKTGuessedDialect::WKT2_2015) {
+                    std::cout << "WKT2_2015";
+                } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_GDAL) {
+                    std::cout << "WKT1_GDAL";
+                } else if (dialect == WKTParser::WKTGuessedDialect::WKT1_ESRI) {
+                    std::cout << "WKT1_ESRI";
+                } else {
+                    std::cout << "Not WKT / unknown";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
-        }
-        outputObject(dbContext, obj, allowUseIntermediateCRS, outputOpt);
-        if (identify) {
-            auto crs = dynamic_cast<CRS *>(obj.get());
-            if (crs) {
-                try {
-                    auto res = crs->identify(
-                        dbContext
-                            ? AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                       authority)
-                                  .as_nullable()
-                            : nullptr);
-                    std::cout << std::endl;
-                    std::cout << "Identification match count: " << res.size()
-                              << std::endl;
-                    for (const auto &pair : res) {
-                        const auto &identifiedCRS = pair.first;
-                        const auto &ids = identifiedCRS->identifiers();
-                        if (!ids.empty()) {
-                            std::cout << *ids[0]->codeSpace() << ":"
-                                      << ids[0]->code() << ": " << pair.second
-                                      << " %" << std::endl;
-                        } else {
-                            auto boundCRS =
-                                dynamic_cast<BoundCRS *>(identifiedCRS.get());
-                            if (boundCRS &&
-                                !boundCRS->baseCRS()->identifiers().empty()) {
-                                const auto &idsBase =
-                                    boundCRS->baseCRS()->identifiers();
-                                std::cout << "BoundCRS of "
-                                          << *idsBase[0]->codeSpace() << ":"
-                                          << idsBase[0]->code() << ": "
+            outputObject(dbContext, obj, allowUseIntermediateCRS, outputOpt);
+            if (identify) {
+                auto crs = dynamic_cast<CRS *>(obj.get());
+                if (crs) {
+                    try {
+                        auto res = crs->identify(
+                            dbContext
+                                ? AuthorityFactory::create(
+                                      NN_NO_CHECK(dbContext), authority)
+                                      .as_nullable()
+                                : nullptr);
+                        std::cout << std::endl;
+                        std::cout
+                            << "Identification match count: " << res.size()
+                            << std::endl;
+                        for (const auto &pair : res) {
+                            const auto &identifiedCRS = pair.first;
+                            const auto &ids = identifiedCRS->identifiers();
+                            if (!ids.empty()) {
+                                std::cout << *ids[0]->codeSpace() << ":"
+                                          << ids[0]->code() << ": "
                                           << pair.second << " %" << std::endl;
                             } else {
-                                std::cout
-                                    << "un-identifier CRS: " << pair.second
-                                    << " %" << std::endl;
+                                auto boundCRS = dynamic_cast<BoundCRS *>(
+                                    identifiedCRS.get());
+                                if (boundCRS &&
+                                    !boundCRS->baseCRS()
+                                         ->identifiers()
+                                         .empty()) {
+                                    const auto &idsBase =
+                                        boundCRS->baseCRS()->identifiers();
+                                    std::cout << "BoundCRS of "
+                                              << *idsBase[0]->codeSpace() << ":"
+                                              << idsBase[0]->code() << ": "
+                                              << pair.second << " %"
+                                              << std::endl;
+                                } else {
+                                    std::cout
+                                        << "un-identifier CRS: " << pair.second
+                                        << " %" << std::endl;
+                                }
                             }
                         }
+                    } catch (const std::exception &e) {
+                        std::cerr << "Identification failed: " << e.what()
+                                  << std::endl;
                     }
-                } catch (const std::exception &e) {
-                    std::cerr << "Identification failed: " << e.what()
-                              << std::endl;
                 }
             }
+        } catch (const std::exception &e) {
+            std::cerr << "buildObject failed: " << e.what() << std::endl;
+            std::exit(1);
         }
     } else {
 
@@ -1125,11 +1242,18 @@ int main(int argc, char **argv) {
             }
         }
 
-        outputOperations(
-            dbContext, sourceCRSStr, targetCRSStr, bboxFilter, spatialCriterion,
-            spatialCriterionExplicitlySpecified, crsExtentUse,
-            gridAvailabilityUse, allowUseIntermediateCRS, pivots, authority,
-            usePROJGridAlternatives, showSuperseded, outputOpt, summary);
+        try {
+            outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
+                             spatialCriterion,
+                             spatialCriterionExplicitlySpecified, crsExtentUse,
+                             gridAvailabilityUse, allowUseIntermediateCRS,
+                             pivots, authority, usePROJGridAlternatives,
+                             showSuperseded, promoteTo3D, outputOpt, summary);
+        } catch (const std::exception &e) {
+            std::cerr << "outputOperations() failed with: " << e.what()
+                      << std::endl;
+            std::exit(1);
+        }
     }
 
     return 0;

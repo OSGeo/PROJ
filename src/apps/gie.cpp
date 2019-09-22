@@ -115,9 +115,8 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 #include "proj_strtod.h"
-#include "proj_internal.h"
 
 #include "optargpm.h"
 
@@ -249,6 +248,7 @@ int main (int argc, char **argv) {
     T.ignore = 5555; /* Error code that will not be issued by proj_create() */
     T.use_proj4_init_rules = FALSE;
 
+    /* coverity[tainted_data] */
     o = opt_parse (argc, argv, "hlvq", "o", longflags, longkeys);
     if (nullptr==o)
         return 0;
@@ -1005,7 +1005,8 @@ Tell GIE what to expect, when transforming the ACCEPTed input
     else
         d = proj_xyz_dist (co, ce);
 
-    if (d > T.tolerance)
+    // Test written like that to handle NaN
+    if (!(d <= T.tolerance))
         return expect_message (d, args);
     succs++;
 
@@ -1096,7 +1097,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_no_colon_in_init_string"  ,  -3},
     {"pjd_err_proj_not_named"           ,  -4},
     {"pjd_err_unknown_projection_id"    ,  -5},
-    {"pjd_err_eccentricity_is_one"      ,  -6},
+    {"pjd_err_invalid_eccentricity"      ,  -6},
     {"pjd_err_unknown_unit_id"          ,  -7},
     {"pjd_err_invalid_boolean_param"    ,  -8},
     {"pjd_err_unknown_ellp_param"       ,  -9},
@@ -1120,7 +1121,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_w_or_m_zero_or_less"      ,  -27},
     {"pjd_err_lsat_not_in_range"        ,  -28},
     {"pjd_err_path_not_in_range"        ,  -29},
-    {"pjd_err_h_less_than_zero"         ,  -30},
+    {"pjd_err_invalid_h"                ,  -30},
     {"pjd_err_k_less_than_zero"         ,  -31},
     {"pjd_err_lat_1_or_2_zero_or_90"    ,  -32},
     {"pjd_err_lat_0_or_alpha_eq_90"     ,  -33},
@@ -1151,6 +1152,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_invalid_arg"              ,  -58},
     {"pjd_err_inconsistent_unit"        ,  -59},
     {"pjd_err_mutually_exclusive_args"  ,  -60},
+    {"pjd_err_generic_error"            ,  -61},
     {"pjd_err_dont_skip"                ,  5555},
     {"pjd_err_unknown"                  ,  9999},
     {"pjd_err_enomem"                   ,  ENOMEM},

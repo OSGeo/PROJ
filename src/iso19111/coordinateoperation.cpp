@@ -56,6 +56,12 @@
 #include <string>
 #include <vector>
 
+// #define DEBUG
+// #define DEBUG_SORT
+#if defined(DEBUG) || defined(DEBUG_SORT)
+#include <iostream>
+#endif
+
 using namespace NS_PROJ::internal;
 
 #if 0
@@ -552,13 +558,22 @@ struct CoordinateOperation::Private {
 
 // ---------------------------------------------------------------------------
 
-GridDescription::GridDescription() = default;
+GridDescription::GridDescription()
+    : shortName{}, fullName{}, packageName{}, url{}, directDownload(false),
+      openLicense(false), available(false) {}
 
 GridDescription::~GridDescription() = default;
 
 GridDescription::GridDescription(const GridDescription &) = default;
 
-GridDescription::GridDescription(GridDescription &&) noexcept = default;
+GridDescription::GridDescription(GridDescription &&other) noexcept
+    : shortName(std::move(other.shortName)),
+      fullName(std::move(other.fullName)),
+      packageName(std::move(other.packageName)),
+      url(std::move(other.url)),
+      directDownload(other.directDownload),
+      openLicense(other.openLicense),
+      available(other.available) {}
 
 //! @endcond
 
@@ -754,6 +769,63 @@ void CoordinateOperation::setHasBallparkTransformation(bool b) {
 
 // ---------------------------------------------------------------------------
 
+void CoordinateOperation::setProperties(
+    const util::PropertyMap &properties) // throw(InvalidValueTypeException)
+{
+    ObjectUsage::setProperties(properties);
+    properties.getStringValue(OPERATION_VERSION_KEY, d->operationVersion_);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a variation of the current coordinate operation whose axis
+ * order is the one expected for visualization purposes.
+ */
+CoordinateOperationNNPtr
+CoordinateOperation::normalizeForVisualization() const {
+    auto l_sourceCRS = sourceCRS();
+    auto l_targetCRS = targetCRS();
+    if (!l_sourceCRS || !l_targetCRS) {
+        throw util::UnsupportedOperationException(
+            "Cannot retrieve source or target CRS");
+    }
+    const bool swapSource =
+        l_sourceCRS->mustAxisOrderBeSwitchedForVisualization();
+    const bool swapTarget =
+        l_targetCRS->mustAxisOrderBeSwitchedForVisualization();
+    auto l_this = NN_NO_CHECK(std::dynamic_pointer_cast<CoordinateOperation>(
+        shared_from_this().as_nullable()));
+    if (!swapSource && !swapTarget) {
+        return l_this;
+    }
+    std::vector<CoordinateOperationNNPtr> subOps;
+    if (swapSource) {
+        auto op = Conversion::createAxisOrderReversal(false);
+        op->setCRSs(l_sourceCRS->normalizeForVisualization(),
+                    NN_NO_CHECK(l_sourceCRS), nullptr);
+        subOps.emplace_back(op);
+    }
+    subOps.emplace_back(l_this);
+    if (swapTarget) {
+        auto op = Conversion::createAxisOrderReversal(false);
+        op->setCRSs(NN_NO_CHECK(l_targetCRS),
+                    l_targetCRS->normalizeForVisualization(), nullptr);
+        subOps.emplace_back(op);
+    }
+    return util::nn_static_pointer_cast<CoordinateOperation>(
+        ConcatenatedOperation::createComputeMetadata(subOps, true));
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+CoordinateOperationNNPtr CoordinateOperation::shallowClone() const {
+    return _shallowClone();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 struct OperationMethod::Private {
     util::optional<std::string> formula_{};
@@ -917,6 +989,24 @@ void OperationMethod::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->endNode();
 }
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void OperationMethod::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext("OperationMethod",
+                                                    !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    writer.Add(nameStr());
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1092,6 +1182,42 @@ void OperationParameterValue::_exportToWKT(io::WKTFormatter *formatter,
         parameter()->formatID(formatter);
     }
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void OperationParameterValue::_exportToJSON(
+    io::JSONFormatter *formatter) const {
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext(
+        "ParameterValue", !parameter()->identifiers().empty()));
+
+    writer.AddObjKey("name");
+    writer.Add(parameter()->nameStr());
+
+    const auto &l_value(parameterValue());
+    if (l_value->type() == ParameterValue::Type::MEASURE) {
+        writer.AddObjKey("value");
+        writer.Add(l_value->value().value(), 15);
+        writer.AddObjKey("unit");
+        const auto &l_unit(l_value->value().unit());
+        if (l_unit == common::UnitOfMeasure::METRE ||
+            l_unit == common::UnitOfMeasure::DEGREE ||
+            l_unit == common::UnitOfMeasure::SCALE_UNITY) {
+            writer.Add(l_unit.name());
+        } else {
+            l_unit._exportToJSON(formatter);
+        }
+    } else if (l_value->type() == ParameterValue::Type::FILENAME) {
+        writer.AddObjKey("value");
+        writer.Add(l_value->valueFile());
+    }
+
+    if (formatter->outputId()) {
+        parameter()->formatID(formatter);
+    }
 }
 //! @endcond
 
@@ -2291,6 +2417,10 @@ ConversionNNPtr Conversion::shallowClone() const {
     conv->setCRSs(this, false);
     return conv;
 }
+
+CoordinateOperationNNPtr Conversion::_shallowClone() const {
+    return util::nn_static_pointer_cast<CoordinateOperation>(shallowClone());
+}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -2633,7 +2763,7 @@ createParams(const common::Measure &m1, const common::Measure &m2,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a [Universal Transverse Mercator]
- *(https://proj4.org/operations/projections/utm.html) conversion.
+ *(https://proj.org/operations/projections/utm.html) conversion.
  *
  * UTM is a family of conversions, of EPSG codes from 16001 to 16060 for the
  * northern hemisphere, and 17001 to 17060 for the southern hemisphere,
@@ -2662,7 +2792,7 @@ ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Transverse Mercator]
- *(https://proj4.org/operations/projections/tmerc.html) projection method.
+ *(https://proj.org/operations/projections/tmerc.html) projection method.
  *
  * This method is defined as [EPSG:9807]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9807)
@@ -2689,7 +2819,7 @@ ConversionNNPtr Conversion::createTransverseMercator(
 
 /** \brief Instantiate a conversion based on the [Gauss Schreiber Transverse
  *Mercator]
- *(https://proj4.org/operations/projections/gstmerc.html) projection method.
+ *(https://proj.org/operations/projections/gstmerc.html) projection method.
  *
  * This method is also known as Gauss-Laborde Reunion.
  *
@@ -2718,7 +2848,7 @@ ConversionNNPtr Conversion::createGaussSchreiberTransverseMercator(
 
 /** \brief Instantiate a conversion based on the [Transverse Mercator South
  *Orientated]
- *(https://proj4.org/operations/projections/tmerc.html) projection method.
+ *(https://proj.org/operations/projections/tmerc.html) projection method.
  *
  * This method is defined as [EPSG:9808]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9808)
@@ -2745,7 +2875,7 @@ ConversionNNPtr Conversion::createTransverseMercatorSouthOriented(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the  [Two Point Equidistant]
- *(https://proj4.org/operations/projections/tpeqd.html) projection method.
+ *(https://proj.org/operations/projections/tpeqd.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -2803,7 +2933,7 @@ ConversionNNPtr Conversion::createTunisiaMappingGrid(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Albers Conic Equal Area]
- *(https://proj4.org/operations/projections/aea.html) projection method.
+ *(https://proj.org/operations/projections/aea.html) projection method.
  *
  * This method is defined as [EPSG:9822]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9822)
@@ -2838,7 +2968,7 @@ Conversion::createAlbersEqualArea(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Lambert Conic Conformal 1SP]
- *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *(https://proj.org/operations/projections/lcc.html) projection method.
  *
  * This method is defined as [EPSG:9801]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9801)
@@ -2864,7 +2994,7 @@ ConversionNNPtr Conversion::createLambertConicConformal_1SP(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Lambert Conic Conformal (2SP)]
- *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *(https://proj.org/operations/projections/lcc.html) projection method.
  *
  * This method is defined as [EPSG:9802]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9802)
@@ -2900,7 +3030,7 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP(
 
 /** \brief Instantiate a conversion based on the [Lambert Conic Conformal (2SP
  *Michigan)]
- *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *(https://proj.org/operations/projections/lcc.html) projection method.
  *
  * This method is defined as [EPSG:1051]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1051)
@@ -2937,7 +3067,7 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP_Michigan(
 
 /** \brief Instantiate a conversion based on the [Lambert Conic Conformal (2SP
  *Belgium)]
- *(https://proj4.org/operations/projections/lcc.html) projection method.
+ *(https://proj.org/operations/projections/lcc.html) projection method.
  *
  * This method is defined as [EPSG:9803]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9803)
@@ -2978,7 +3108,7 @@ ConversionNNPtr Conversion::createLambertConicConformal_2SP_Belgium(
 
 /** \brief Instantiate a conversion based on the [Modified Azimuthal
  *Equidistant]
- *(https://proj4.org/operations/projections/aeqd.html) projection method.
+ *(https://proj.org/operations/projections/aeqd.html) projection method.
  *
  * This method is defined as [EPSG:9832]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9832)
@@ -3003,7 +3133,7 @@ ConversionNNPtr Conversion::createAzimuthalEquidistant(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Guam Projection]
- *(https://proj4.org/operations/projections/aeqd.html) projection method.
+ *(https://proj.org/operations/projections/aeqd.html) projection method.
  *
  * This method is defined as [EPSG:9831]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9831)
@@ -3029,7 +3159,7 @@ ConversionNNPtr Conversion::createGuamProjection(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Bonne]
- *(https://proj4.org/operations/projections/bonne.html) projection method.
+ *(https://proj.org/operations/projections/bonne.html) projection method.
  *
  * This method is defined as [EPSG:9827]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9827)
@@ -3057,7 +3187,7 @@ ConversionNNPtr Conversion::createBonne(const util::PropertyMap &properties,
 
 /** \brief Instantiate a conversion based on the [Lambert Cylindrical Equal Area
  *(Spherical)]
- *(https://proj4.org/operations/projections/cea.html) projection method.
+ *(https://proj.org/operations/projections/cea.html) projection method.
  *
  * This method is defined as [EPSG:9834]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9834)
@@ -3088,7 +3218,7 @@ ConversionNNPtr Conversion::createLambertCylindricalEqualAreaSpherical(
 
 /** \brief Instantiate a conversion based on the [Lambert Cylindrical Equal Area
  *(ellipsoidal form)]
- *(https://proj4.org/operations/projections/cea.html) projection method.
+ *(https://proj.org/operations/projections/cea.html) projection method.
  *
  * This method is defined as [EPSG:9835]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9835)
@@ -3114,7 +3244,7 @@ ConversionNNPtr Conversion::createLambertCylindricalEqualArea(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Cassini-Soldner]
- * (https://proj4.org/operations/projections/cass.html) projection method.
+ * (https://proj.org/operations/projections/cass.html) projection method.
  *
  * This method is defined as [EPSG:9806]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9806)
@@ -3139,7 +3269,7 @@ ConversionNNPtr Conversion::createCassiniSoldner(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Equidistant Conic]
- *(https://proj4.org/operations/projections/eqdc.html) projection method.
+ *(https://proj.org/operations/projections/eqdc.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3171,7 +3301,7 @@ ConversionNNPtr Conversion::createEquidistantConic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert I]
- * (https://proj4.org/operations/projections/eck1.html) projection method.
+ * (https://proj.org/operations/projections/eck1.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3193,7 +3323,7 @@ ConversionNNPtr Conversion::createEckertI(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert II]
- * (https://proj4.org/operations/projections/eck2.html) projection method.
+ * (https://proj.org/operations/projections/eck2.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3214,7 +3344,7 @@ ConversionNNPtr Conversion::createEckertII(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert III]
- * (https://proj4.org/operations/projections/eck3.html) projection method.
+ * (https://proj.org/operations/projections/eck3.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3235,7 +3365,7 @@ ConversionNNPtr Conversion::createEckertIII(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert IV]
- * (https://proj4.org/operations/projections/eck4.html) projection method.
+ * (https://proj.org/operations/projections/eck4.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3256,7 +3386,7 @@ ConversionNNPtr Conversion::createEckertIV(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert V]
- * (https://proj4.org/operations/projections/eck5.html) projection method.
+ * (https://proj.org/operations/projections/eck5.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3278,7 +3408,7 @@ ConversionNNPtr Conversion::createEckertV(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Eckert VI]
- * (https://proj4.org/operations/projections/eck6.html) projection method.
+ * (https://proj.org/operations/projections/eck6.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3299,7 +3429,7 @@ ConversionNNPtr Conversion::createEckertVI(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Equidistant Cylindrical]
- *(https://proj4.org/operations/projections/eqc.html) projection method.
+ *(https://proj.org/operations/projections/eqc.html) projection method.
  *
  * This is also known as the Equirectangular method, and in the particular case
  * where the latitude of first parallel is 0.
@@ -3333,7 +3463,7 @@ ConversionNNPtr Conversion::createEquidistantCylindrical(
 
 /** \brief Instantiate a conversion based on the [Equidistant Cylindrical
  *(Spherical)]
- *(https://proj4.org/operations/projections/eqc.html) projection method.
+ *(https://proj.org/operations/projections/eqc.html) projection method.
  *
  * This is also known as the Equirectangular method, and in the particular case
  * where the latitude of first parallel is 0.
@@ -3367,7 +3497,7 @@ ConversionNNPtr Conversion::createEquidistantCylindricalSpherical(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Gall (Stereographic)]
- * (https://proj4.org/operations/projections/gall.html) projection method.
+ * (https://proj.org/operations/projections/gall.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3389,7 +3519,7 @@ ConversionNNPtr Conversion::createGall(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Goode Homolosine]
- * (https://proj4.org/operations/projections/goode.html) projection method.
+ * (https://proj.org/operations/projections/goode.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3410,7 +3540,7 @@ ConversionNNPtr Conversion::createGoodeHomolosine(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Interrupted Goode Homolosine]
- * (https://proj4.org/operations/projections/igh.html) projection method.
+ * (https://proj.org/operations/projections/igh.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3436,7 +3566,7 @@ ConversionNNPtr Conversion::createInterruptedGoodeHomolosine(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Geostationary Satellite View]
- * (https://proj4.org/operations/projections/geos.html) projection method,
+ * (https://proj.org/operations/projections/geos.html) projection method,
  * with the sweep angle axis of the viewing instrument being x
  *
  * There is no equivalent in EPSG.
@@ -3461,7 +3591,7 @@ ConversionNNPtr Conversion::createGeostationarySatelliteSweepX(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Geostationary Satellite View]
- * (https://proj4.org/operations/projections/geos.html) projection method,
+ * (https://proj.org/operations/projections/geos.html) projection method,
  * with the sweep angle axis of the viewing instrument being y.
  *
  * There is no equivalent in EPSG.
@@ -3486,7 +3616,7 @@ ConversionNNPtr Conversion::createGeostationarySatelliteSweepY(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Gnomonic]
- *(https://proj4.org/operations/projections/gnom.html) projection method.
+ *(https://proj.org/operations/projections/gnom.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3511,7 +3641,7 @@ ConversionNNPtr Conversion::createGnomonic(
 
 /** \brief Instantiate a conversion based on the [Hotine Oblique Mercator
  *(Variant A)]
- *(https://proj4.org/operations/projections/omerc.html) projection method
+ *(https://proj.org/operations/projections/omerc.html) projection method
  *
  * This is the variant with the no_uoff parameter, which corresponds to
  * GDAL &gt;=2.3 Hotine_Oblique_Mercator projection.
@@ -3526,7 +3656,7 @@ ConversionNNPtr Conversion::createGnomonic(
  * \note In the case where azimuthInitialLine = angleFromRectifiedToSkrewGrid =
  *90deg,
  * this maps to the  [Swiss Oblique Mercator]
- *(https://proj4.org/operations/projections/somerc.html) formulas.
+ *(https://proj.org/operations/projections/somerc.html) formulas.
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -3559,7 +3689,7 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorVariantA(
 
 /** \brief Instantiate a conversion based on the [Hotine Oblique Mercator
  *(Variant B)]
- *(https://proj4.org/operations/projections/omerc.html) projection method
+ *(https://proj.org/operations/projections/omerc.html) projection method
  *
  * This is the variant without the no_uoff parameter, which corresponds to
  * GDAL &gt;=2.3 Hotine_Oblique_Mercator_Azimuth_Center projection.
@@ -3572,7 +3702,7 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorVariantA(
  * \note In the case where azimuthInitialLine = angleFromRectifiedToSkrewGrid =
  *90deg,
  * this maps to the  [Swiss Oblique Mercator]
- *(https://proj4.org/operations/projections/somerc.html) formulas.
+ *(https://proj.org/operations/projections/somerc.html) formulas.
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
@@ -3605,7 +3735,7 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorVariantB(
 
 /** \brief Instantiate a conversion based on the [Hotine Oblique Mercator Two
  *Point Natural Origin]
- *(https://proj4.org/operations/projections/omerc.html) projection method.
+ *(https://proj.org/operations/projections/omerc.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3646,7 +3776,7 @@ ConversionNNPtr Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Laborde Oblique Mercator]
- *(https://proj4.org/operations/projections/labrd.html) projection method.
+ *(https://proj.org/operations/projections/labrd.html) projection method.
  *
  * This method is defined as [EPSG:9813]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9813)
@@ -3677,7 +3807,7 @@ ConversionNNPtr Conversion::createLabordeObliqueMercator(
 
 /** \brief Instantiate a conversion based on the [International Map of the World
  *Polyconic]
- *(https://proj4.org/operations/projections/imw_p.html) projection method.
+ *(https://proj.org/operations/projections/imw_p.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3708,7 +3838,7 @@ ConversionNNPtr Conversion::createInternationalMapWorldPolyconic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Krovak (north oriented)]
- *(https://proj4.org/operations/projections/krovak.html) projection method.
+ *(https://proj.org/operations/projections/krovak.html) projection method.
  *
  * This method is defined as [EPSG:1041]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1041)
@@ -3758,7 +3888,7 @@ ConversionNNPtr Conversion::createKrovakNorthOriented(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Krovak]
- *(https://proj4.org/operations/projections/krovak.html) projection method.
+ *(https://proj.org/operations/projections/krovak.html) projection method.
  *
  * This method is defined as [EPSG:9819]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9819)
@@ -3810,7 +3940,7 @@ Conversion::createKrovak(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Lambert Azimuthal Equal Area]
- *(https://proj4.org/operations/projections/laea.html) projection method.
+ *(https://proj.org/operations/projections/laea.html) projection method.
  *
  * This method is defined as [EPSG:9820]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9820)
@@ -3835,7 +3965,7 @@ ConversionNNPtr Conversion::createLambertAzimuthalEqualArea(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Miller Cylindrical]
- *(https://proj4.org/operations/projections/mill.html) projection method.
+ *(https://proj.org/operations/projections/mill.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3856,7 +3986,7 @@ ConversionNNPtr Conversion::createMillerCylindrical(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Mercator]
- *(https://proj4.org/operations/projections/merc.html) projection method.
+ *(https://proj.org/operations/projections/merc.html) projection method.
  *
  * This is the variant, also known as Mercator (1SP), defined with the scale
  * factor. Note that latitude of natural origin (centerLat) is a parameter,
@@ -3886,7 +4016,7 @@ ConversionNNPtr Conversion::createMercatorVariantA(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Mercator]
- *(https://proj4.org/operations/projections/merc.html) projection method.
+ *(https://proj.org/operations/projections/merc.html) projection method.
  *
  * This is the variant, also known as Mercator (2SP), defined with the latitude
  * of the first standard parallel (the second standard parallel is implicitly
@@ -3916,7 +4046,7 @@ ConversionNNPtr Conversion::createMercatorVariantB(
 
 /** \brief Instantiate a conversion based on the [Popular Visualisation Pseudo
  *Mercator]
- *(https://proj4.org/operations/projections/webmerc.html) projection method.
+ *(https://proj.org/operations/projections/webmerc.html) projection method.
  *
  * Also known as WebMercator. Mostly/only used for Projected CRS EPSG:3857
  * (WGS 84 / Pseudo-Mercator)
@@ -3944,7 +4074,7 @@ ConversionNNPtr Conversion::createPopularVisualisationPseudoMercator(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Mollweide]
- * (https://proj4.org/operations/projections/moll.html) projection method.
+ * (https://proj.org/operations/projections/moll.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -3965,7 +4095,7 @@ ConversionNNPtr Conversion::createMollweide(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [New Zealand Map Grid]
- * (https://proj4.org/operations/projections/nzmg.html) projection method.
+ * (https://proj.org/operations/projections/nzmg.html) projection method.
  *
  * This method is defined as [EPSG:9811]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9811)
@@ -3991,7 +4121,7 @@ ConversionNNPtr Conversion::createNewZealandMappingGrid(
 
 /** \brief Instantiate a conversion based on the [Oblique Stereographic
  *(Alternative)]
- *(https://proj4.org/operations/projections/sterea.html) projection method.
+ *(https://proj.org/operations/projections/sterea.html) projection method.
  *
  * This method is defined as [EPSG:9809]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9809)
@@ -4017,7 +4147,7 @@ ConversionNNPtr Conversion::createObliqueStereographic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Orthographic]
- *(https://proj4.org/operations/projections/ortho.html) projection method.
+ *(https://proj.org/operations/projections/ortho.html) projection method.
  *
  * This method is defined as [EPSG:9840]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9840)
@@ -4044,7 +4174,7 @@ ConversionNNPtr Conversion::createOrthographic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [American Polyconic]
- *(https://proj4.org/operations/projections/poly.html) projection method.
+ *(https://proj.org/operations/projections/poly.html) projection method.
  *
  * This method is defined as [EPSG:9818]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9818)
@@ -4070,7 +4200,7 @@ ConversionNNPtr Conversion::createAmericanPolyconic(
 
 /** \brief Instantiate a conversion based on the [Polar Stereographic (Variant
  *A)]
- *(https://proj4.org/operations/projections/stere.html) projection method.
+ *(https://proj.org/operations/projections/stere.html) projection method.
  *
  * This method is defined as [EPSG:9810]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9810)
@@ -4099,7 +4229,7 @@ ConversionNNPtr Conversion::createPolarStereographicVariantA(
 
 /** \brief Instantiate a conversion based on the [Polar Stereographic (Variant
  *B)]
- *(https://proj4.org/operations/projections/stere.html) projection method.
+ *(https://proj.org/operations/projections/stere.html) projection method.
  *
  * This method is defined as [EPSG:9829]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9829)
@@ -4128,7 +4258,7 @@ ConversionNNPtr Conversion::createPolarStereographicVariantB(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Robinson]
- * (https://proj4.org/operations/projections/robin.html) projection method.
+ * (https://proj.org/operations/projections/robin.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4149,7 +4279,7 @@ ConversionNNPtr Conversion::createRobinson(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Sinusoidal]
- * (https://proj4.org/operations/projections/sinu.html) projection method.
+ * (https://proj.org/operations/projections/sinu.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4170,7 +4300,7 @@ ConversionNNPtr Conversion::createSinusoidal(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Stereographic]
- *(https://proj4.org/operations/projections/stere.html) projection method.
+ *(https://proj.org/operations/projections/stere.html) projection method.
  *
  * There is no equivalent in EPSG. This method implements the original "Oblique
  * Stereographic" method described in "Snyder's Map Projections - A Working
@@ -4199,7 +4329,7 @@ ConversionNNPtr Conversion::createStereographic(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Van der Grinten]
- * (https://proj4.org/operations/projections/vandg.html) projection method.
+ * (https://proj.org/operations/projections/vandg.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4220,7 +4350,7 @@ ConversionNNPtr Conversion::createVanDerGrinten(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner I]
- * (https://proj4.org/operations/projections/wag1.html) projection method.
+ * (https://proj.org/operations/projections/wag1.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4242,7 +4372,7 @@ ConversionNNPtr Conversion::createWagnerI(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner II]
- * (https://proj4.org/operations/projections/wag2.html) projection method.
+ * (https://proj.org/operations/projections/wag2.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4263,7 +4393,7 @@ ConversionNNPtr Conversion::createWagnerII(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner III]
- * (https://proj4.org/operations/projections/wag3.html) projection method.
+ * (https://proj.org/operations/projections/wag3.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4287,7 +4417,7 @@ ConversionNNPtr Conversion::createWagnerIII(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner IV]
- * (https://proj4.org/operations/projections/wag4.html) projection method.
+ * (https://proj.org/operations/projections/wag4.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4308,7 +4438,7 @@ ConversionNNPtr Conversion::createWagnerIV(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner V]
- * (https://proj4.org/operations/projections/wag5.html) projection method.
+ * (https://proj.org/operations/projections/wag5.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4330,7 +4460,7 @@ ConversionNNPtr Conversion::createWagnerV(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner VI]
- * (https://proj4.org/operations/projections/wag6.html) projection method.
+ * (https://proj.org/operations/projections/wag6.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4351,7 +4481,7 @@ ConversionNNPtr Conversion::createWagnerVI(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Wagner VII]
- * (https://proj4.org/operations/projections/wag7.html) projection method.
+ * (https://proj.org/operations/projections/wag7.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4373,7 +4503,7 @@ ConversionNNPtr Conversion::createWagnerVII(
 
 /** \brief Instantiate a conversion based on the [Quadrilateralized Spherical
  *Cube]
- *(https://proj4.org/operations/projections/qsc.html) projection method.
+ *(https://proj.org/operations/projections/qsc.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4397,7 +4527,7 @@ ConversionNNPtr Conversion::createQuadrilateralizedSphericalCube(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Spherical Cross-Track Height]
- *(https://proj4.org/operations/projections/sch.html) projection method.
+ *(https://proj.org/operations/projections/sch.html) projection method.
  *
  * There is no equivalent in EPSG.
  *
@@ -4422,7 +4552,7 @@ ConversionNNPtr Conversion::createSphericalCrossTrackHeight(
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Equal Earth]
- * (https://proj4.org/operations/projections/eqearth.html) projection method.
+ * (https://proj.org/operations/projections/eqearth.html) projection method.
  *
  * This method is defined as [EPSG:1078]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1078)
@@ -4628,6 +4758,16 @@ InverseConversion::create(const ConversionNNPtr &forward) {
     return conv;
 }
 
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr InverseConversion::_shallowClone() const {
+    auto op = InverseConversion::nn_make_shared<InverseConversion>(
+        inverseAsConversion()->shallowClone());
+    op->assignSelf(op);
+    op->setCRSs(this, false);
+    return util::nn_static_pointer_cast<CoordinateOperation>(op);
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -4814,7 +4954,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             common::Length(
                 parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_NORTHING)));
         conv->setCRSs(this, false);
-        return std::move(conv);
+        return conv.as_nullable();
     }
 
     if (current_epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
@@ -4835,7 +4975,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             common::Length(
                 parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_NORTHING)));
         conv->setCRSs(this, false);
-        return std::move(conv);
+        return conv.as_nullable();
     }
 
     if (current_epsg_code == EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP &&
@@ -4870,7 +5010,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                 common::Length(
                     parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_NORTHING)));
             conv->setCRSs(this, false);
-            return std::move(conv);
+            return conv.as_nullable();
         } else {
             const double K = k0 * m0 / std::pow(t0, n);
             const double phi1 =
@@ -4926,7 +5066,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                             EPSG_CODE_PARAMETER_FALSE_EASTING)),
                         common::Length(FN_corrected_rounded));
                     conv->setCRSs(this, false);
-                    return std::move(conv);
+                    return conv.as_nullable();
                 }
             }
 
@@ -4940,7 +5080,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                     parameterValueMeasure(EPSG_CODE_PARAMETER_FALSE_EASTING)),
                 common::Length(FN));
             conv->setCRSs(this, false);
-            return std::move(conv);
+            return conv.as_nullable();
         }
     }
 
@@ -5004,7 +5144,7 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
                     EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN) +
                 (std::fabs(FN_correction) > 1e-8 ? FN_correction : 0)));
         conv->setCRSs(this, false);
-        return std::move(conv);
+        return conv.as_nullable();
     }
 
     return nullptr;
@@ -5043,10 +5183,11 @@ static void getESRIMethodNameAndParams(const Conversion *conv,
             }
         } else if (esriMapping->epsg_code ==
                    EPSG_CODE_METHOD_TRANSVERSE_MERCATOR) {
-            if (l_targetCRS &&
-                (ci_find(l_targetCRS->nameStr(), "Gauss") !=
-                     std::string::npos ||
-                 ci_find(l_targetCRS->nameStr(), "GK_") != std::string::npos)) {
+            if (ci_find(conv->nameStr(), "Gauss Kruger") != std::string::npos ||
+                (l_targetCRS && (ci_find(l_targetCRS->nameStr(), "Gauss") !=
+                                     std::string::npos ||
+                                 ci_find(l_targetCRS->nameStr(), "GK_") !=
+                                     std::string::npos))) {
                 esriParams = paramsESRI_Gauss_Kruger;
                 esriMethodName = "Gauss_Kruger";
             } else {
@@ -5130,6 +5271,7 @@ const char *Conversion::getWKT1GDALMethodName() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
 void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
     const auto &l_method = method();
     const auto &methodName = l_method->nameStr();
@@ -5158,6 +5300,17 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->pushOutputUnit(false);
         formatter->pushOutputId(false);
     }
+
+#ifdef DEBUG_CONVERSION_ID
+    if (sourceCRS() && targetCRS()) {
+        formatter->startNode("SOURCECRS_ID", false);
+        sourceCRS()->formatID(formatter);
+        formatter->endNode();
+        formatter->startNode("TARGETCRS_ID", false);
+        targetCRS()->formatID(formatter);
+        formatter->endNode();
+    }
+#endif
 
     bool bAlreadyWritten = false;
     if (!isWKT2 && formatter->useESRIDialect()) {
@@ -5308,6 +5461,49 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->leave();
     }
 }
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void Conversion::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("Conversion", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("method");
+    formatter->setOmitTypeInImmediateChild();
+    formatter->setAllowIDInImmediateChild();
+    method()->_exportToJSON(formatter);
+
+    const auto &l_parameterValues = parameterValues();
+    if (!l_parameterValues.empty()) {
+        writer.AddObjKey("parameters");
+        {
+            auto parametersContext(writer.MakeArrayContext(false));
+            for (const auto &genOpParamvalue : l_parameterValues) {
+                formatter->setAllowIDInImmediateChild();
+                formatter->setOmitTypeInImmediateChild();
+                genOpParamvalue->_exportToJSON(formatter);
+            }
+        }
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -5796,7 +5992,7 @@ void Conversion::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 /** \brief Return whether a conversion is a [Universal Transverse Mercator]
- * (https://proj4.org/operations/projections/utm.html) conversion.
+ * (https://proj.org/operations/projections/utm.html) conversion.
  *
  * @param[out] zone UTM zone number between 1 and 60.
  * @param[out] north true for UTM northern hemisphere, false for UTM southern
@@ -5985,10 +6181,14 @@ const crs::CRSNNPtr &Transformation::targetCRS() PROJ_PURE_DEFN {
 
 //! @cond Doxygen_Suppress
 TransformationNNPtr Transformation::shallowClone() const {
-    auto conv = Transformation::nn_make_shared<Transformation>(*this);
-    conv->assignSelf(conv);
-    conv->setCRSs(this, false);
-    return conv;
+    auto transf = Transformation::nn_make_shared<Transformation>(*this);
+    transf->assignSelf(transf);
+    transf->setCRSs(this, false);
+    return transf;
+}
+
+CoordinateOperationNNPtr Transformation::_shallowClone() const {
+    return util::nn_static_pointer_cast<CoordinateOperation>(shallowClone());
 }
 //! @endcond
 
@@ -6173,17 +6373,17 @@ TransformationNNPtr Transformation::create(
         throw InvalidOperation(
             "Inconsistent number of parameters and parameter values");
     }
-    auto conv = Transformation::nn_make_shared<Transformation>(
+    auto transf = Transformation::nn_make_shared<Transformation>(
         sourceCRSIn, targetCRSIn, interpolationCRSIn, methodIn, values,
         accuracies);
-    conv->assignSelf(conv);
-    conv->setProperties(properties);
+    transf->assignSelf(transf);
+    transf->setProperties(properties);
     std::string name;
     if (properties.getStringValue(common::IdentifiedObject::NAME_KEY, name) &&
         ci_find(name, "ballpark") != std::string::npos) {
-        conv->setHasBallparkTransformation(true);
+        transf->setHasBallparkTransformation(true);
     }
-    return conv;
+    return transf;
 }
 
 // ---------------------------------------------------------------------------
@@ -6864,11 +7064,11 @@ TransformationNNPtr Transformation::createNTv2(
 static TransformationNNPtr _createGravityRelatedHeightToGeographic3D(
     const util::PropertyMap &properties, bool inverse,
     const crs::CRSNNPtr &sourceCRSIn, const crs::CRSNNPtr &targetCRSIn,
-    const std::string &filename,
+    const crs::CRSPtr &interpolationCRSIn, const std::string &filename,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
 
     return Transformation::create(
-        properties, sourceCRSIn, targetCRSIn, nullptr,
+        properties, sourceCRSIn, targetCRSIn, interpolationCRSIn,
         util::PropertyMap().set(
             common::IdentifiedObject::NAME_KEY,
             inverse ? INVERSE_OF + PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D
@@ -6887,17 +7087,20 @@ static TransformationNNPtr _createGravityRelatedHeightToGeographic3D(
  * At minimum the name should be defined.
  * @param sourceCRSIn Source CRS.
  * @param targetCRSIn Target CRS.
+ * @param interpolationCRSIn Interpolation CRS. (might be null)
  * @param filename GRID filename.
  * @param accuracies Vector of positional accuracy (might be empty).
  * @return new Transformation.
  */
 TransformationNNPtr Transformation::createGravityRelatedHeightToGeographic3D(
     const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
-    const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+    const crs::CRSNNPtr &targetCRSIn, const crs::CRSPtr &interpolationCRSIn,
+    const std::string &filename,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies) {
 
     return _createGravityRelatedHeightToGeographic3D(
-        properties, false, sourceCRSIn, targetCRSIn, filename, accuracies);
+        properties, false, sourceCRSIn, targetCRSIn, interpolationCRSIn,
+        filename, accuracies);
 }
 
 // ---------------------------------------------------------------------------
@@ -7208,8 +7411,20 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
     auto targetCRS = op->targetCRS();
     std::string name;
     if (!forwardName.empty()) {
-        if (starts_with(forwardName, INVERSE_OF)) {
-            name = forwardName.substr(INVERSE_OF.size());
+        if (starts_with(forwardName, INVERSE_OF) ||
+            forwardName.find(" + ") != std::string::npos) {
+            auto tokens = split(forwardName, " + ");
+            for (size_t i = tokens.size(); i > 0;) {
+                i--;
+                if (!name.empty()) {
+                    name += " + ";
+                }
+                if (starts_with(tokens[i], INVERSE_OF)) {
+                    name += tokens[i].substr(INVERSE_OF.size());
+                } else {
+                    name += INVERSE_OF + tokens[i];
+                }
+            }
         } else if (!sourceCRS || !targetCRS ||
                    forwardName != buildOpName(opType, sourceCRS, targetCRS)) {
             name = INVERSE_OF + forwardName;
@@ -7224,6 +7439,11 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
 
     if (!name.empty()) {
         map.set(common::IdentifiedObject::NAME_KEY, name);
+    }
+
+    const std::string &remarks = op->remarks();
+    if (!remarks.empty()) {
+        map.set(common::IdentifiedObject::REMARKS_KEY, remarks);
     }
 
     addModifiedIdentifier(map, op, true, derivedFrom);
@@ -7391,6 +7611,8 @@ Transformation::Private::registerInv(util::BaseObjectNNPtr thisIn,
                                      TransformationNNPtr invTransform) {
     invTransform->d->forwardOperation_ =
         util::nn_dynamic_pointer_cast<Transformation>(thisIn);
+    invTransform->setHasBallparkTransformation(
+        invTransform->d->forwardOperation_->hasBallparkTransformation());
     return invTransform;
 }
 //! @endcond
@@ -7605,6 +7827,13 @@ InverseTransformation::create(const TransformationNNPtr &forward) {
 
 // ---------------------------------------------------------------------------
 
+TransformationNNPtr InverseTransformation::inverseAsTransformation() const {
+    return NN_NO_CHECK(
+        util::nn_dynamic_pointer_cast<Transformation>(forwardOperation_));
+}
+
+// ---------------------------------------------------------------------------
+
 void InverseTransformation::_exportToWKT(io::WKTFormatter *formatter) const {
 
     auto approxInverse = createApproximateInverseIfPossible(
@@ -7614,6 +7843,16 @@ void InverseTransformation::_exportToWKT(io::WKTFormatter *formatter) const {
     } else {
         Transformation::_exportToWKT(formatter);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr InverseTransformation::_shallowClone() const {
+    auto op = InverseTransformation::nn_make_shared<InverseTransformation>(
+        inverseAsTransformation()->shallowClone());
+    op->assignSelf(op);
+    op->setCRSs(this, false);
+    return util::nn_static_pointer_cast<CoordinateOperation>(op);
 }
 
 //! @endcond
@@ -7628,6 +7867,123 @@ void Transformation::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void Transformation::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext(
+        formatter->abridgedTransformation() ? "AbridgedTransformation"
+                                            : "Transformation",
+        !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    if (!formatter->abridgedTransformation()) {
+        writer.AddObjKey("source_crs");
+        formatter->setAllowIDInImmediateChild();
+        sourceCRS()->_exportToJSON(formatter);
+
+        writer.AddObjKey("target_crs");
+        formatter->setAllowIDInImmediateChild();
+        targetCRS()->_exportToJSON(formatter);
+
+        const auto &l_interpolationCRS = interpolationCRS();
+        if (l_interpolationCRS) {
+            writer.AddObjKey("interpolation_crs");
+            formatter->setAllowIDInImmediateChild();
+            l_interpolationCRS->_exportToJSON(formatter);
+        }
+    }
+
+    writer.AddObjKey("method");
+    formatter->setOmitTypeInImmediateChild();
+    formatter->setAllowIDInImmediateChild();
+    method()->_exportToJSON(formatter);
+
+    writer.AddObjKey("parameters");
+    {
+        auto parametersContext(writer.MakeArrayContext(false));
+        for (const auto &genOpParamvalue : parameterValues()) {
+            formatter->setAllowIDInImmediateChild();
+            formatter->setOmitTypeInImmediateChild();
+            genOpParamvalue->_exportToJSON(formatter);
+        }
+    }
+
+    if (!formatter->abridgedTransformation()) {
+        if (!coordinateOperationAccuracies().empty()) {
+            writer.AddObjKey("accuracy");
+            writer.Add(coordinateOperationAccuracies()[0]->value());
+        }
+    }
+
+    if (formatter->abridgedTransformation()) {
+        if (formatter->outputId()) {
+            formatID(formatter);
+        }
+    } else {
+        ObjectUsage::baseExportToJSON(formatter);
+    }
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+static void exportSourceCRSAndTargetCRSToWKT(const CoordinateOperation *co,
+                                             io::WKTFormatter *formatter) {
+    auto l_sourceCRS = co->sourceCRS();
+    assert(l_sourceCRS);
+    auto l_targetCRS = co->targetCRS();
+    assert(l_targetCRS);
+    const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
+    const bool canExportCRSId =
+        (isWKT2 && formatter->use2019Keywords() &&
+         !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId()));
+
+    const bool hasDomains = !co->domains().empty();
+    if (hasDomains) {
+        formatter->pushDisableUsage();
+    }
+
+    formatter->startNode(io::WKTConstants::SOURCECRS, false);
+    if (canExportCRSId && !l_sourceCRS->identifiers().empty()) {
+        // fake that top node has no id, so that the sourceCRS id is
+        // considered
+        formatter->pushHasId(false);
+        l_sourceCRS->_exportToWKT(formatter);
+        formatter->popHasId();
+    } else {
+        l_sourceCRS->_exportToWKT(formatter);
+    }
+    formatter->endNode();
+
+    formatter->startNode(io::WKTConstants::TARGETCRS, false);
+    if (canExportCRSId && !l_targetCRS->identifiers().empty()) {
+        // fake that top node has no id, so that the targetCRS id is
+        // considered
+        formatter->pushHasId(false);
+        l_targetCRS->_exportToWKT(formatter);
+        formatter->popHasId();
+    } else {
+        l_targetCRS->_exportToWKT(formatter);
+    }
+    formatter->endNode();
+
+    if (hasDomains) {
+        formatter->popDisableUsage();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 void SingleOperation::exportTransformationToWKT(
     io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
@@ -7635,11 +7991,6 @@ void SingleOperation::exportTransformationToWKT(
         throw io::FormattingException(
             "Transformation can only be exported to WKT2");
     }
-
-    auto l_sourceCRS = sourceCRS();
-    assert(l_sourceCRS);
-    auto l_targetCRS = targetCRS();
-    assert(l_targetCRS);
 
     if (formatter->abridgedTransformation()) {
         formatter->startNode(io::WKTConstants::ABRIDGEDTRANSFORMATION,
@@ -7651,22 +8002,23 @@ void SingleOperation::exportTransformationToWKT(
 
     formatter->addQuotedString(nameStr());
 
-    if (!formatter->abridgedTransformation()) {
-        formatter->startNode(io::WKTConstants::SOURCECRS, false);
-        l_sourceCRS->_exportToWKT(formatter);
-        formatter->endNode();
+    if (formatter->use2019Keywords()) {
+        const auto &version = operationVersion();
+        if (version.has_value()) {
+            formatter->startNode(io::WKTConstants::VERSION, false);
+            formatter->addQuotedString(*version);
+            formatter->endNode();
+        }
+    }
 
-        formatter->startNode(io::WKTConstants::TARGETCRS, false);
-        l_targetCRS->_exportToWKT(formatter);
-        formatter->endNode();
+    if (!formatter->abridgedTransformation()) {
+        exportSourceCRSAndTargetCRSToWKT(this, formatter);
     }
 
     method()->_exportToWKT(formatter);
 
-    const MethodMapping *mapping =
-        !isWKT2 ? getMapping(method().get()) : nullptr;
     for (const auto &paramValue : parameterValues()) {
-        paramValue->_exportToWKT(formatter, mapping);
+        paramValue->_exportToWKT(formatter, nullptr);
     }
 
     if (!formatter->abridgedTransformation()) {
@@ -8039,13 +8391,14 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
                 return createGravityRelatedHeightToGeographic3D(
                            createPropertiesForInverse(self.as_nullable().get(),
                                                       true, false),
-                           targetCRS(), sourceCRS(), projFilename,
-                           coordinateOperationAccuracies())
+                           targetCRS(), sourceCRS(), interpolationCRS(),
+                           projFilename, coordinateOperationAccuracies())
                     ->inverseAsTransformation();
             } else {
                 return createGravityRelatedHeightToGeographic3D(
                     createSimilarPropertiesTransformation(self), sourceCRS(),
-                    targetCRS(), projFilename, coordinateOperationAccuracies());
+                    targetCRS(), interpolationCRS(), projFilename,
+                    coordinateOperationAccuracies());
             }
         }
     }
@@ -8722,13 +9075,25 @@ void Transformation::_exportToPROJString(
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             auto filename = fileParameter->valueFile();
-            if (isMethodInverseOf) {
+            bool doInversion = isMethodInverseOf;
+            if (!identifiers().empty() &&
+                *identifiers().front()->codeSpace() ==
+                    metadata::Identifier::EPSG &&
+                method()->nameStr() ==
+                    "Geographic3D to GravityRelatedHeight (US .gtx)" &&
+                ends_with(filename, ".gtx")) {
+                // gtx files, from straight EPSG definition, must be applied in
+                // reverse order for "Geographic3D to GravityRelatedHeight"
+                // method
+                doInversion = !doInversion;
+            }
+            if (doInversion) {
                 formatter->startInversion();
             }
             formatter->addStep("vgridshift");
             formatter->addParam("grids", filename);
             formatter->addParam("multiplier", 1.0);
-            if (isMethodInverseOf) {
+            if (doInversion) {
                 formatter->stopInversion();
             }
             return;
@@ -8957,6 +9322,7 @@ struct ConcatenatedOperation::Private {
 
     explicit Private(const std::vector<CoordinateOperationNNPtr> &operationsIn)
         : operations_(operationsIn) {}
+    Private(const Private &) = default;
 };
 //! @endcond
 
@@ -8964,6 +9330,14 @@ struct ConcatenatedOperation::Private {
 
 //! @cond Doxygen_Suppress
 ConcatenatedOperation::~ConcatenatedOperation() = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+ConcatenatedOperation::ConcatenatedOperation(const ConcatenatedOperation &other)
+    : CoordinateOperation(other),
+      d(internal::make_unique<Private>(*(other.d))) {}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -9030,6 +9404,22 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
         }
         if (i >= 1) {
             if (!compareStepCRS(l_sourceCRS.get(), lastTargetCRS.get())) {
+#ifdef DEBUG_CONCATENATED_OPERATION
+                {
+                    auto f(io::WKTFormatter::create(
+                        io::WKTFormatter::Convention::WKT2_2019));
+                    std::cerr << "Source CRS of step " << i << ":" << std::endl;
+                    std::cerr << l_sourceCRS->exportToWKT(f.get()) << std::endl;
+                }
+                {
+                    auto f(io::WKTFormatter::create(
+                        io::WKTFormatter::Convention::WKT2_2019));
+                    std::cerr << "Target CRS of step " << i - 1 << ":"
+                              << std::endl;
+                    std::cerr << lastTargetCRS->exportToWKT(f.get())
+                              << std::endl;
+                }
+#endif
                 throw InvalidOperation(
                     "Inconsistent chaining of CRS in operations");
             }
@@ -9043,6 +9433,14 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
     op->setCRSs(NN_NO_CHECK(operationsIn[0]->sourceCRS()),
                 NN_NO_CHECK(operationsIn.back()->targetCRS()), nullptr);
     op->setAccuracies(accuracies);
+#ifdef DEBUG_CONCATENATED_OPERATION
+    {
+        auto f(
+            io::WKTFormatter::create(io::WKTFormatter::Convention::WKT2_2019));
+        std::cerr << "ConcatenatedOperation::create()" << std::endl;
+        std::cerr << op->exportToWKT(f.get()) << std::endl;
+    }
+#endif
     return op;
 }
 
@@ -9095,6 +9493,7 @@ void ConcatenatedOperation::fixStepsDirection(
                     op = op->inverse();
                 }
             } else if (i + 1 < operationsInOut.size()) {
+                /* coverity[copy_paste_error] */
                 l_targetCRS = operationsInOut[i + 1]->sourceCRS();
                 if (l_targetCRS) {
                     op->setCRSs(concatOpSourceCRS, NN_NO_CHECK(l_targetCRS),
@@ -9291,6 +9690,7 @@ CoordinateOperationNNPtr ConcatenatedOperation::inverse() const {
     auto op =
         create(properties, inversedOperations, coordinateOperationAccuracies());
     op->d->computedName_ = d->computedName_;
+    op->setHasBallparkTransformation(hasBallparkTransformation());
     return op;
 }
 
@@ -9299,31 +9699,111 @@ CoordinateOperationNNPtr ConcatenatedOperation::inverse() const {
 //! @cond Doxygen_Suppress
 void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2 || !formatter->use2018Keywords()) {
+    if (!isWKT2 || !formatter->use2019Keywords()) {
         throw io::FormattingException(
-            "Transformation can only be exported to WKT2:2018");
+            "Transformation can only be exported to WKT2:2019");
     }
 
     formatter->startNode(io::WKTConstants::CONCATENATEDOPERATION,
                          !identifiers().empty());
     formatter->addQuotedString(nameStr());
 
-    formatter->startNode(io::WKTConstants::SOURCECRS, false);
-    sourceCRS()->_exportToWKT(formatter);
-    formatter->endNode();
+    if (isWKT2 && formatter->use2019Keywords()) {
+        const auto &version = operationVersion();
+        if (version.has_value()) {
+            formatter->startNode(io::WKTConstants::VERSION, false);
+            formatter->addQuotedString(*version);
+            formatter->endNode();
+        }
+    }
 
-    formatter->startNode(io::WKTConstants::TARGETCRS, false);
-    targetCRS()->_exportToWKT(formatter);
-    formatter->endNode();
+    exportSourceCRSAndTargetCRSToWKT(this, formatter);
+
+    const bool canExportOperationId =
+        !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId());
+
+    const bool hasDomains = !domains().empty();
+    if (hasDomains) {
+        formatter->pushDisableUsage();
+    }
 
     for (const auto &operation : operations()) {
         formatter->startNode(io::WKTConstants::STEP, false);
-        operation->_exportToWKT(formatter);
+        if (canExportOperationId && !operation->identifiers().empty()) {
+            // fake that top node has no id, so that the operation id is
+            // considered
+            formatter->pushHasId(false);
+            operation->_exportToWKT(formatter);
+            formatter->popHasId();
+        } else {
+            operation->_exportToWKT(formatter);
+        }
         formatter->endNode();
+    }
+
+    if (hasDomains) {
+        formatter->popDisableUsage();
     }
 
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void ConcatenatedOperation::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext("ConcatenatedOperation",
+                                                    !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("source_crs");
+    formatter->setAllowIDInImmediateChild();
+    sourceCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("target_crs");
+    formatter->setAllowIDInImmediateChild();
+    targetCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("steps");
+    {
+        auto parametersContext(writer.MakeArrayContext(false));
+        for (const auto &operation : operations()) {
+            formatter->setAllowIDInImmediateChild();
+            operation->_exportToJSON(formatter);
+        }
+    }
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+CoordinateOperationNNPtr ConcatenatedOperation::_shallowClone() const {
+    auto op =
+        ConcatenatedOperation::nn_make_shared<ConcatenatedOperation>(*this);
+    std::vector<CoordinateOperationNNPtr> ops;
+    for (const auto &subOp : d->operations_) {
+        ops.emplace_back(subOp->shallowClone());
+    }
+    op->d->operations_ = ops;
+    op->assignSelf(op);
+    op->setCRSs(this, false);
+    return util::nn_static_pointer_cast<CoordinateOperation>(op);
 }
 //! @endcond
 
@@ -9691,6 +10171,9 @@ struct CoordinateOperationFactory::Private {
         const crs::CRSNNPtr &targetCRS;
         const CoordinateOperationContextNNPtr &context;
         bool inCreateOperationsWithDatumPivotAntiRecursion = false;
+        bool inCreateOperationsThroughPreferredHub = false;
+        bool inCreateOperationsGeogToVertWithIntermediate = false;
+        bool skipHorizontalTransformation = false;
 
         Context(const crs::CRSNNPtr &sourceCRSIn,
                 const crs::CRSNNPtr &targetCRSIn,
@@ -9715,6 +10198,17 @@ struct CoordinateOperationFactory::Private {
         const crs::GeodeticCRS *geodSrc, const crs::GeodeticCRS *geodDst,
         Context &context);
 
+    static void createOperationsThroughPreferredHub(
+        std::vector<CoordinateOperationNNPtr> &res,
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        const crs::GeodeticCRS *geodSrc, const crs::GeodeticCRS *geodDst,
+        Context &context);
+
+    static std::vector<CoordinateOperationNNPtr>
+    createOperationsGeogToVertWithIntermediate(const crs::CRSNNPtr &sourceCRS,
+                                               const crs::CRSNNPtr &targetCRS,
+                                               Context &context);
+
     static bool
     hasPerfectAccuracyResult(const std::vector<CoordinateOperationNNPtr> &res,
                              const Context &context);
@@ -9722,6 +10216,9 @@ struct CoordinateOperationFactory::Private {
     static ConversionNNPtr
     createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
                                const crs::CRSNNPtr &targetCRS);
+
+    static void setCRSs(CoordinateOperation *co, const crs::CRSNNPtr &sourceCRS,
+                        const crs::CRSNNPtr &targetCRS);
 };
 //! @endcond
 
@@ -9828,16 +10325,12 @@ struct SortFunction {
             return false;
         }
 
-        if (iterA->second.hasGrids_ && iterB->second.hasGrids_) {
-            // Operations where grids are all available go before other
-            if (iterA->second.gridsAvailable_ &&
-                !iterB->second.gridsAvailable_) {
-                return true;
-            }
-            if (iterB->second.gridsAvailable_ &&
-                !iterA->second.gridsAvailable_) {
-                return false;
-            }
+        // Operations where grids are all available go before other
+        if (iterA->second.gridsAvailable_ && !iterB->second.gridsAvailable_) {
+            return true;
+        }
+        if (iterB->second.gridsAvailable_ && !iterA->second.gridsAvailable_) {
+            return false;
         }
 
         // Operations where grids are all known in our DB go before other
@@ -9964,7 +10457,8 @@ struct FilterResults {
         // results
         // ...
         removeSyntheticNullTransforms();
-        removeUninterestingOps();
+        if (context->getDiscardSuperseded())
+            removeUninterestingOps();
         removeDuplicateOps();
         removeSyntheticNullTransforms();
         return *this;
@@ -10198,7 +10692,35 @@ struct FilterResults {
         }
 
         // Sort !
-        std::sort(res.begin(), res.end(), SortFunction(map));
+        SortFunction sortFunc(map);
+        std::sort(res.begin(), res.end(), sortFunc);
+
+// Debug code to check consistency of the sort function
+#ifdef DEBUG_SORT
+        constexpr bool debugSort = true;
+#elif !defined(NDEBUG)
+        const bool debugSort = getenv("PROJ_DEBUG_SORT_FUNCT") != nullptr;
+#endif
+#if defined(DEBUG_SORT) || !defined(NDEBUG)
+        if (debugSort) {
+            const bool assertIfIssue =
+                !(getenv("PROJ_DEBUG_SORT_FUNCT_ASSERT") != nullptr);
+            for (size_t i = 0; i < res.size(); ++i) {
+                for (size_t j = i + 1; j < res.size(); ++j) {
+                    if (sortFunc(res[j], res[i])) {
+#ifdef DEBUG_SORT
+                        std::cerr << "Sorting issue with entry " << i << "("
+                                  << res[i]->nameStr() << ") and " << j << "("
+                                  << res[j]->nameStr() << ")" << std::endl;
+#endif
+                        if (assertIfIssue) {
+                            assert(false);
+                        }
+                    }
+                }
+            }
+        }
+#endif
     }
 
     // ----------------------------------------------------------------------
@@ -10435,18 +10957,21 @@ applyInverse(const std::vector<CoordinateOperationNNPtr> &list) {
 
 //! @cond Doxygen_Suppress
 
-static void buildSourceAndTargetCRSIds(
-    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    const CoordinateOperationContextNNPtr &context,
-    std::list<std::pair<std::string, std::string>> &sourceIds,
-    std::list<std::pair<std::string, std::string>> &targetIds) {
+static void buildCRSIds(const crs::CRSNNPtr &crs,
+                        const CoordinateOperationContextNNPtr &context,
+                        std::list<std::pair<std::string, std::string>> &ids) {
     const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
     const auto &authFactoryName = authFactory->getAuthority();
 
-    const auto findObjectInDB = [&authFactory, &authFactoryName](
-        const crs::CRSNNPtr &crs,
-        std::list<std::pair<std::string, std::string>> &idList) {
+    for (const auto &id : crs->identifiers()) {
+        const auto &authName = *(id->codeSpace());
+        const auto &code = id->code();
+        if (!authName.empty()) {
+            ids.emplace_back(authName, code);
+        }
+    }
+    if (ids.empty()) {
         try {
             const auto tmpAuthFactory = io::AuthorityFactory::create(
                 authFactory->databaseContext(),
@@ -10472,35 +10997,37 @@ static void buildSourceAndTargetCRSIds(
                         matches.front().get(),
                         util::IComparable::Criterion::EQUIVALENT) &&
                     !matches.front()->identifiers().empty()) {
-                    const auto &ids = matches.front()->identifiers();
-                    idList.emplace_back(*(ids[0]->codeSpace()), ids[0]->code());
+                    const auto &tmpIds = matches.front()->identifiers();
+                    ids.emplace_back(*(tmpIds[0]->codeSpace()),
+                                     tmpIds[0]->code());
                 }
             }
         } catch (const std::exception &) {
         }
-    };
+    }
+}
 
-    for (const auto &id : sourceCRS->identifiers()) {
-        const auto &authName = *(id->codeSpace());
-        const auto &code = id->code();
-        if (!authName.empty()) {
-            sourceIds.emplace_back(authName, code);
-        }
-    }
-    if (sourceIds.empty()) {
-        findObjectInDB(sourceCRS, sourceIds);
-    }
+// ---------------------------------------------------------------------------
 
-    for (const auto &id : targetCRS->identifiers()) {
-        const auto &authName = *(id->codeSpace());
-        const auto &code = id->code();
-        if (!authName.empty()) {
-            targetIds.emplace_back(authName, code);
+static std::vector<std::string>
+getCandidateAuthorities(const io::AuthorityFactoryPtr &authFactory,
+                        const std::string &srcAuthName,
+                        const std::string &targetAuthName) {
+    const auto &authFactoryName = authFactory->getAuthority();
+    std::vector<std::string> authorities;
+    if (authFactoryName == "any") {
+        authorities.emplace_back();
+    }
+    if (authFactoryName.empty()) {
+        authorities = authFactory->databaseContext()->getAllowedAuthorities(
+            srcAuthName, targetAuthName);
+        if (authorities.empty()) {
+            authorities.emplace_back();
         }
+    } else {
+        authorities.emplace_back(authFactoryName);
     }
-    if (targetIds.empty()) {
-        findObjectInDB(targetCRS, targetIds);
-    }
+    return authorities;
 }
 
 // ---------------------------------------------------------------------------
@@ -10512,12 +11039,11 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
                         const CoordinateOperationContextNNPtr &context) {
     const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
-    const auto &authFactoryName = authFactory->getAuthority();
 
     std::list<std::pair<std::string, std::string>> sourceIds;
     std::list<std::pair<std::string, std::string>> targetIds;
-    buildSourceAndTargetCRSIds(sourceCRS, targetCRS, context, sourceIds,
-                               targetIds);
+    buildCRSIds(sourceCRS, context, sourceIds);
+    buildCRSIds(targetCRS, context, targetIds);
 
     for (const auto &idSrc : sourceIds) {
         const auto &srcAuthName = idSrc.first;
@@ -10526,20 +11052,8 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
             const auto &targetAuthName = idTarget.first;
             const auto &targetCode = idTarget.second;
 
-            std::vector<std::string> authorities;
-            if (authFactoryName == "any") {
-                authorities.emplace_back();
-            }
-            if (authFactoryName.empty()) {
-                authorities =
-                    authFactory->databaseContext()->getAllowedAuthorities(
-                        srcAuthName, targetAuthName);
-                if (authorities.empty()) {
-                    authorities.emplace_back();
-                }
-            } else {
-                authorities.emplace_back(authFactoryName);
-            }
+            const auto authorities(getCandidateAuthorities(
+                authFactory, srcAuthName, targetAuthName));
             for (const auto &authority : authorities) {
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
                     authFactory->databaseContext(),
@@ -10560,6 +11074,81 @@ findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
     }
     return std::vector<CoordinateOperationNNPtr>();
 }
+
+// ---------------------------------------------------------------------------
+
+// Look in the authority registry for operations from sourceCRS
+static std::vector<CoordinateOperationNNPtr>
+findOpsInRegistryDirectFrom(const crs::CRSNNPtr &sourceCRS,
+                            const CoordinateOperationContextNNPtr &context) {
+    const auto &authFactory = context->getAuthorityFactory();
+    assert(authFactory);
+
+    std::list<std::pair<std::string, std::string>> ids;
+    buildCRSIds(sourceCRS, context, ids);
+
+    for (const auto &id : ids) {
+        const auto &srcAuthName = id.first;
+        const auto &srcCode = id.second;
+
+        const auto authorities(
+            getCandidateAuthorities(authFactory, srcAuthName, srcAuthName));
+        for (const auto &authority : authorities) {
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(),
+                authority == "any" ? std::string() : authority);
+            auto res = tmpAuthFactory->createFromCoordinateReferenceSystemCodes(
+                srcAuthName, srcCode, std::string(), std::string(),
+                context->getUsePROJAlternativeGridNames(),
+                context->getGridAvailabilityUse() ==
+                    CoordinateOperationContext::GridAvailabilityUse::
+                        DISCARD_OPERATION_IF_MISSING_GRID,
+                context->getDiscardSuperseded());
+            if (!res.empty()) {
+                return res;
+            }
+        }
+    }
+    return std::vector<CoordinateOperationNNPtr>();
+}
+
+// ---------------------------------------------------------------------------
+
+// Look in the authority registry for operations to targetCRS
+static std::vector<CoordinateOperationNNPtr>
+findOpsInRegistryDirectTo(const crs::CRSNNPtr &targetCRS,
+                          const CoordinateOperationContextNNPtr &context) {
+    const auto &authFactory = context->getAuthorityFactory();
+    assert(authFactory);
+
+    std::list<std::pair<std::string, std::string>> ids;
+    buildCRSIds(targetCRS, context, ids);
+
+    for (const auto &id : ids) {
+        const auto &targetAuthName = id.first;
+        const auto &targetCode = id.second;
+
+        const auto authorities(getCandidateAuthorities(
+            authFactory, targetAuthName, targetAuthName));
+        for (const auto &authority : authorities) {
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(),
+                authority == "any" ? std::string() : authority);
+            auto res = tmpAuthFactory->createFromCoordinateReferenceSystemCodes(
+                std::string(), std::string(), targetAuthName, targetCode,
+                context->getUsePROJAlternativeGridNames(),
+                context->getGridAvailabilityUse() ==
+                    CoordinateOperationContext::GridAvailabilityUse::
+                        DISCARD_OPERATION_IF_MISSING_GRID,
+                context->getDiscardSuperseded());
+            if (!res.empty()) {
+                return res;
+            }
+        }
+    }
+    return std::vector<CoordinateOperationNNPtr>();
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -10574,12 +11163,11 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
 
     const auto &authFactory = context->getAuthorityFactory();
     assert(authFactory);
-    const auto &authFactoryName = authFactory->getAuthority();
 
     std::list<std::pair<std::string, std::string>> sourceIds;
     std::list<std::pair<std::string, std::string>> targetIds;
-    buildSourceAndTargetCRSIds(sourceCRS, targetCRS, context, sourceIds,
-                               targetIds);
+    buildCRSIds(sourceCRS, context, sourceIds);
+    buildCRSIds(targetCRS, context, targetIds);
 
     for (const auto &idSrc : sourceIds) {
         const auto &srcAuthName = idSrc.first;
@@ -10588,20 +11176,8 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
             const auto &targetAuthName = idTarget.first;
             const auto &targetCode = idTarget.second;
 
-            std::vector<std::string> authorities;
-            if (authFactoryName == "any") {
-                authorities.emplace_back();
-            }
-            if (authFactoryName.empty()) {
-                authorities =
-                    authFactory->databaseContext()->getAllowedAuthorities(
-                        srcAuthName, targetAuthName);
-                if (authorities.empty()) {
-                    authorities.emplace_back();
-                }
-            } else {
-                authorities.emplace_back(authFactoryName);
-            }
+            const auto authorities(getCandidateAuthorities(
+                authFactory, srcAuthName, targetAuthName));
             for (const auto &authority : authorities) {
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
                     authFactory->databaseContext(),
@@ -10616,6 +11192,31 @@ static std::vector<CoordinateOperationNNPtr> findsOpsInRegistryWithIntermediate(
                     context->getDiscardSuperseded(),
                     context->getIntermediateCRS());
                 if (!res.empty()) {
+
+                    // If doing GeogCRS --> GeogCRS, only use GeogCRS as
+                    // intermediate CRS
+                    // Avoid weird behaviour when doing NAD83 -> NAD83(2011)
+                    // that would go through NAVD88 otherwise.
+                    if (context->getIntermediateCRS().empty() &&
+                        dynamic_cast<const crs::GeographicCRS *>(
+                            sourceCRS.get()) &&
+                        dynamic_cast<const crs::GeographicCRS *>(
+                            targetCRS.get())) {
+                        std::vector<CoordinateOperationNNPtr> res2;
+                        for (const auto &op : res) {
+                            auto concatOp =
+                                dynamic_cast<ConcatenatedOperation *>(op.get());
+                            if (concatOp &&
+                                dynamic_cast<const crs::GeographicCRS *>(
+                                    concatOp->operations()
+                                        .front()
+                                        ->targetCRS()
+                                        .get())) {
+                                res2.emplace_back(op);
+                            }
+                        }
+                        res = std::move(res2);
+                    }
                     return res;
                 }
             }
@@ -10734,19 +11335,19 @@ struct MyPROJStringExportableHorizVertical final
         // cppcheck-suppress functionStatic
         _exportToPROJString(io::PROJStringFormatter *formatter) const override {
 
-        formatter->setOmitZUnitConversion(true);
+        formatter->pushOmitZUnitConversion();
         horizTransform->_exportToPROJString(formatter);
 
         formatter->startInversion();
         geogDst->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
-        formatter->setOmitZUnitConversion(false);
+        formatter->popOmitZUnitConversion();
 
         verticalTransform->_exportToPROJString(formatter);
 
-        formatter->setOmitZUnitConversion(true);
+        formatter->pushOmitZUnitConversion();
         geogDst->addAngularUnitConvertAndAxisSwap(formatter);
-        formatter->setOmitZUnitConversion(false);
+        formatter->popOmitZUnitConversion();
     }
 };
 
@@ -10778,7 +11379,7 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
         // cppcheck-suppress functionStatic
         _exportToPROJString(io::PROJStringFormatter *formatter) const override {
 
-        formatter->setOmitZUnitConversion(true);
+        formatter->pushOmitZUnitConversion();
 
         opSrcCRSToGeogCRS->_exportToPROJString(formatter);
 
@@ -10786,23 +11387,23 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
         interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
 
-        formatter->setOmitZUnitConversion(false);
+        formatter->popOmitZUnitConversion();
 
         verticalTransform->_exportToPROJString(formatter);
 
-        formatter->setOmitZUnitConversion(true);
+        formatter->pushOmitZUnitConversion();
 
         interpolationGeogCRS->addAngularUnitConvertAndAxisSwap(formatter);
 
         opGeogCRStoDstCRS->_exportToPROJString(formatter);
 
-        formatter->setOmitZUnitConversion(false);
+        formatter->popOmitZUnitConversion();
     }
 };
 
 MyPROJStringExportableHorizVerticalHorizPROJBased::
     ~MyPROJStringExportableHorizVerticalHorizPROJBased() = default;
-}
+} // namespace operation
 NS_PROJ_END
 
 #if 0
@@ -11015,12 +11616,38 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
         geogSrc->datum()->_isEquivalentTo(
             geogDst->datum().get(), util::IComparable::Criterion::EQUIVALENT);
 
+    // Do the CRS differ by their axis order ?
+    bool axisReversal2D = false;
+    bool axisReversal3D = false;
+    if (!srcCS->_isEquivalentTo(dstCS.get(),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+        auto srcOrder = srcCS->axisOrder();
+        auto dstOrder = dstCS->axisOrder();
+        if (((srcOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST ||
+              srcOrder == cs::EllipsoidalCS::AxisOrder::
+                              LAT_NORTH_LONG_EAST_HEIGHT_UP) &&
+             (dstOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH ||
+              dstOrder == cs::EllipsoidalCS::AxisOrder::
+                              LONG_EAST_LAT_NORTH_HEIGHT_UP)) ||
+            ((srcOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH ||
+              srcOrder == cs::EllipsoidalCS::AxisOrder::
+                              LONG_EAST_LAT_NORTH_HEIGHT_UP) &&
+             (dstOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST ||
+              dstOrder == cs::EllipsoidalCS::AxisOrder::
+                              LAT_NORTH_LONG_EAST_HEIGHT_UP))) {
+            if (srcAxisList.size() == 3 || dstAxisList.size() == 3)
+                axisReversal3D = true;
+            else
+                axisReversal2D = true;
+        }
+    }
+
     // Do they differ by vertical units ?
     if (vconvSrc != vconvDst &&
         geogSrc->ellipsoid()->_isEquivalentTo(
             geogDst->ellipsoid().get(),
             util::IComparable::Criterion::EQUIVALENT)) {
-        if (offset_pm.value() == 0) {
+        if (offset_pm.value() == 0 && !axisReversal2D && !axisReversal3D) {
             // If only by vertical units, use a Change of Vertical
             // Unit
             // transformation
@@ -11042,33 +11669,11 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
     }
 
     // Do the CRS differ only by their axis order ?
-    if (sameDatum &&
-        !srcCS->_isEquivalentTo(dstCS.get(),
-                                util::IComparable::Criterion::EQUIVALENT)) {
-        auto srcOrder = srcCS->axisOrder();
-        auto dstOrder = dstCS->axisOrder();
-        if ((srcOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST &&
-             dstOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH) ||
-            (srcOrder == cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH &&
-             dstOrder == cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST)) {
-            auto conv = Conversion::createAxisOrderReversal(false);
-            conv->setCRSs(sourceCRS, targetCRS, nullptr);
-            res.emplace_back(conv);
-            return res;
-        }
-        if ((srcOrder ==
-                 cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST_HEIGHT_UP &&
-             dstOrder ==
-                 cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH_HEIGHT_UP) ||
-            (srcOrder ==
-                 cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH_HEIGHT_UP &&
-             dstOrder ==
-                 cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST_HEIGHT_UP)) {
-            auto conv = Conversion::createAxisOrderReversal(true);
-            conv->setCRSs(sourceCRS, targetCRS, nullptr);
-            res.emplace_back(conv);
-            return res;
-        }
+    if (sameDatum && (axisReversal2D || axisReversal3D)) {
+        auto conv = Conversion::createAxisOrderReversal(axisReversal3D);
+        conv->setCRSs(sourceCRS, targetCRS, nullptr);
+        res.emplace_back(conv);
+        return res;
     }
 
     std::vector<CoordinateOperationNNPtr> steps;
@@ -11181,16 +11786,37 @@ static bool hasIdentifiers(const CoordinateOperationNNPtr &op) {
 
 static std::vector<crs::CRSNNPtr>
 findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
-                             const datum::GeodeticReferenceFramePtr &datum) {
+                             const datum::GeodeticReferenceFrame *datum) {
     std::vector<crs::CRSNNPtr> candidates;
-    for (const auto &id : datum->identifiers()) {
-        const auto &authName = *(id->codeSpace());
-        const auto &code = id->code();
-        if (!authName.empty()) {
-            auto l_candidates = authFactory->createGeodeticCRSFromDatum(
-                authName, code, std::string());
-            for (const auto &candidate : l_candidates) {
-                candidates.emplace_back(candidate);
+    assert(datum);
+    const auto &ids = datum->identifiers();
+    const auto &datumName = datum->nameStr();
+    if (!ids.empty()) {
+        for (const auto &id : ids) {
+            const auto &authName = *(id->codeSpace());
+            const auto &code = id->code();
+            if (!authName.empty()) {
+                auto l_candidates = authFactory->createGeodeticCRSFromDatum(
+                    authName, code, std::string());
+                for (const auto &candidate : l_candidates) {
+                    candidates.emplace_back(candidate);
+                }
+            }
+        }
+    } else if (datumName != "unknown" && datumName != "unnamed") {
+        auto matches = authFactory->createObjectsFromName(
+            datumName,
+            {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, false,
+            2);
+        if (matches.size() == 1) {
+            const auto &match = matches.front();
+            if (datum->_isEquivalentTo(
+                    match.get(), util::IComparable::Criterion::EQUIVALENT) &&
+                !match->identifiers().empty()) {
+                return findCandidateGeodCRSForDatum(
+                    authFactory,
+                    dynamic_cast<const datum::GeodeticReferenceFrame *>(
+                        match.get()));
             }
         }
     }
@@ -11208,11 +11834,77 @@ static bool isNullTransformation(const std::string &name) {
 
 // ---------------------------------------------------------------------------
 
+#ifdef DEBUG
+
+static int nCallLevel = 0;
+
+struct EnterDebugLevel {
+    EnterDebugLevel() { ++nCallLevel; }
+    ~EnterDebugLevel() { --nCallLevel; }
+};
+
+static void debugTrace(const std::string &str) {
+    for (int i = 1; i < nCallLevel; i++)
+        std::cerr << " ";
+    std::cerr << str << std::endl;
+}
+
+static std::string objectAsStr(const common::IdentifiedObject *obj) {
+    std::string ret(obj->nameStr());
+    const auto &ids = obj->identifiers();
+    if (!ids.empty()) {
+        ret += " (";
+        ret += (*ids[0]->codeSpace()) + ":" + ids[0]->code();
+        ret += ")";
+    }
+    return ret;
+}
+#endif
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperationFactory::Private::setCRSs(
+    CoordinateOperation *co, const crs::CRSNNPtr &sourceCRS,
+    const crs::CRSNNPtr &targetCRS) {
+    co->setCRSs(sourceCRS, targetCRS, nullptr);
+    auto concat = dynamic_cast<ConcatenatedOperation *>(co);
+    if (concat) {
+        auto first = concat->operations().front().get();
+        auto &firstTarget(first->targetCRS());
+        if (firstTarget) {
+            setCRSs(first, sourceCRS, NN_NO_CHECK(firstTarget));
+            auto invCO = dynamic_cast<InverseCoordinateOperation *>(first);
+            if (invCO) {
+                setCRSs(invCO->forwardOperation().get(),
+                        NN_NO_CHECK(firstTarget), sourceCRS);
+            }
+        }
+        auto last = concat->operations().back().get();
+        auto &lastSource(last->sourceCRS());
+        if (lastSource) {
+            setCRSs(last, NN_NO_CHECK(lastSource), targetCRS);
+            auto invCO = dynamic_cast<InverseCoordinateOperation *>(last);
+            if (invCO) {
+                setCRSs(invCO->forwardOperation().get(), targetCRS,
+                        NN_NO_CHECK(lastSource));
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
     const crs::CRSNNPtr &targetCRS, const crs::GeodeticCRS *geodSrc,
     const crs::GeodeticCRS *geodDst, Private::Context &context) {
 
+#ifdef DEBUG
+    EnterDebugLevel enterFunction;
+    debugTrace("createOperationsWithDatumPivot(" +
+               objectAsStr(sourceCRS.get()) + "," +
+               objectAsStr(targetCRS.get()) + ")");
+#endif
     const bool allowEmptyIntersection = true;
 
     struct CreateOperationsWithDatumPivotAntiRecursion {
@@ -11232,9 +11924,9 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 
     const auto &authFactory = context.context->getAuthorityFactory();
     const auto candidatesSrcGeod(
-        findCandidateGeodCRSForDatum(authFactory, geodSrc->datum()));
+        findCandidateGeodCRSForDatum(authFactory, geodSrc->datum().get()));
     const auto candidatesDstGeod(
-        findCandidateGeodCRSForDatum(authFactory, geodDst->datum()));
+        findCandidateGeodCRSForDatum(authFactory, geodDst->datum().get()));
 
     auto createTransformations = [&](const crs::CRSNNPtr &candidateSrcGeod,
                                      const crs::CRSNNPtr &candidateDstGeod,
@@ -11260,20 +11952,73 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
             }
 
             std::vector<CoordinateOperationNNPtr> subOps;
+            const bool isNullThird =
+                isNullTransformation(opsThird[0]->nameStr());
+            CoordinateOperationNNPtr opSecondCloned(
+                (isNullFirst || isNullThird) ? opSecond->shallowClone()
+                                             : opSecond);
+            CoordinateOperation *invCOForward = nullptr;
+            if (isNullFirst || isNullThird) {
+                if (opSecondCloned->identifiers().size() == 1 &&
+                    (*opSecondCloned->identifiers()[0]->codeSpace())
+                            .find("DERIVED_FROM") == std::string::npos) {
+                    {
+                        util::PropertyMap map;
+                        addModifiedIdentifier(map, opSecondCloned.get(), false,
+                                              true);
+                        opSecondCloned->setProperties(map);
+                    }
+                    auto invCO = dynamic_cast<InverseCoordinateOperation *>(
+                        opSecondCloned.get());
+                    if (invCO) {
+                        invCOForward = invCO->forwardOperation().get();
+                        if (invCOForward->identifiers().size() == 1 &&
+                            (*invCOForward->identifiers()[0]->codeSpace())
+                                    .find("DERIVED_FROM") ==
+                                std::string::npos) {
+                            util::PropertyMap map;
+                            addModifiedIdentifier(map, invCOForward, false,
+                                                  true);
+                            invCOForward->setProperties(map);
+                        }
+                    }
+                }
+            }
             if (isNullFirst) {
-                opSecond->setCRSs(
-                    sourceCRS, NN_CHECK_ASSERT(opSecond->targetCRS()), nullptr);
+                auto oldTarget(NN_CHECK_ASSERT(opSecondCloned->targetCRS()));
+                setCRSs(opSecondCloned.get(), sourceCRS, oldTarget);
+                if (invCOForward) {
+                    setCRSs(invCOForward, oldTarget, sourceCRS);
+                }
             } else {
                 subOps.emplace_back(opFirst);
             }
-            if (isNullTransformation(opsThird[0]->nameStr())) {
-                opSecond->setCRSs(NN_CHECK_ASSERT(opSecond->sourceCRS()),
-                                  targetCRS, nullptr);
-                subOps.emplace_back(opSecond);
+            if (isNullThird) {
+                auto oldSource(NN_CHECK_ASSERT(opSecondCloned->sourceCRS()));
+                setCRSs(opSecondCloned.get(), oldSource, targetCRS);
+                if (invCOForward) {
+                    setCRSs(invCOForward, targetCRS, oldSource);
+                }
+                subOps.emplace_back(opSecondCloned);
             } else {
-                subOps.emplace_back(opSecond);
+                subOps.emplace_back(opSecondCloned);
                 subOps.emplace_back(opsThird[0]);
             }
+#ifdef DEBUG
+            std::string debugStr;
+            for (const auto &op : subOps) {
+                if (!debugStr.empty()) {
+                    debugStr += " + ";
+                }
+                debugStr += objectAsStr(op.get());
+                debugStr += " (";
+                debugStr += objectAsStr(op->sourceCRS().get());
+                debugStr += "->";
+                debugStr += objectAsStr(op->targetCRS().get());
+                debugStr += ")";
+            }
+            debugTrace("transformation " + debugStr);
+#endif
             res.emplace_back(ConcatenatedOperation::createComputeMetadata(
                 subOps, !allowEmptyIntersection));
         }
@@ -11285,6 +12030,14 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
         if (candidateSrcGeod->nameStr() == sourceCRS->nameStr()) {
             for (const auto &candidateDstGeod : candidatesDstGeod) {
                 if (candidateDstGeod->nameStr() == targetCRS->nameStr()) {
+#ifdef DEBUG
+                    EnterDebugLevel loopLevel;
+                    debugTrace("try " + objectAsStr(sourceCRS.get()) + "->" +
+                               objectAsStr(candidateSrcGeod.get()) + "->" +
+                               objectAsStr(candidateDstGeod.get()) + "->" +
+                               objectAsStr(targetCRS.get()) + ")");
+                    EnterDebugLevel loopLevel2;
+#endif
                     const auto opsFirst =
                         createOperations(sourceCRS, candidateSrcGeod, context);
                     assert(!opsFirst.empty());
@@ -11303,19 +12056,191 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     }
 
     for (const auto &candidateSrcGeod : candidatesSrcGeod) {
+#ifdef DEBUG
+        EnterDebugLevel loopLevel;
+#endif
         const auto opsFirst =
             createOperations(sourceCRS, candidateSrcGeod, context);
         assert(!opsFirst.empty());
         const bool isNullFirst = isNullTransformation(opsFirst[0]->nameStr());
 
         for (const auto &candidateDstGeod : candidatesDstGeod) {
+#ifdef DEBUG
+            EnterDebugLevel loopLevel2;
+            debugTrace("try " + objectAsStr(sourceCRS.get()) + "->" +
+                       objectAsStr(candidateSrcGeod.get()) + "->" +
+                       objectAsStr(candidateDstGeod.get()) + "->" +
+                       objectAsStr(targetCRS.get()) + ")");
+            EnterDebugLevel loopLevel3;
+#endif
             createTransformations(candidateSrcGeod, candidateDstGeod,
                                   opsFirst[0], isNullFirst);
-        }
-        if (!res.empty()) {
-            return;
+            if (!res.empty()) {
+                return;
+            }
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperationFactory::Private::createOperationsThroughPreferredHub(
+    std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
+    const crs::CRSNNPtr &targetCRS, const crs::GeodeticCRS *geodSrc,
+    const crs::GeodeticCRS *geodDst, Private::Context &context) {
+
+    const auto &srcDatum = geodSrc->datum();
+    const auto &dstDatum = geodDst->datum();
+
+    if (!srcDatum || !dstDatum)
+        return;
+    const auto &srcDatumIds = srcDatum->identifiers();
+    const auto &dstDatumIds = dstDatum->identifiers();
+    if (srcDatumIds.empty() || dstDatumIds.empty())
+        return;
+
+    const auto &authFactory = context.context->getAuthorityFactory();
+
+    const auto srcAuthFactory = io::AuthorityFactory::create(
+        authFactory->databaseContext(), *(srcDatumIds.front()->codeSpace()));
+    const auto srcPreferredHubs =
+        srcAuthFactory->getPreferredHubGeodeticReferenceFrames(
+            srcDatumIds.front()->code());
+
+    const auto dstAuthFactory = io::AuthorityFactory::create(
+        authFactory->databaseContext(), *(dstDatumIds.front()->codeSpace()));
+    const auto dstPreferredHubs =
+        dstAuthFactory->getPreferredHubGeodeticReferenceFrames(
+            dstDatumIds.front()->code());
+    if (srcPreferredHubs.empty() && dstPreferredHubs.empty())
+        return;
+
+    // Currently if we have prefered hubs for both source and target, we
+    // will use only the one for target, arbitrarily... We could use boths
+    // but that would complicate things.
+    if (!srcPreferredHubs.empty() && dstPreferredHubs.empty()) {
+        std::vector<CoordinateOperationNNPtr> resTmp;
+        createOperationsThroughPreferredHub(resTmp, targetCRS, sourceCRS,
+                                            geodDst, geodSrc, context);
+        if (!resTmp.empty()) {
+            resTmp = applyInverse(resTmp);
+            res.insert(res.end(), resTmp.begin(), resTmp.end());
+        }
+        return;
+    }
+    assert(!dstPreferredHubs.empty());
+
+#ifdef DEBUG
+    EnterDebugLevel enterFunction;
+    debugTrace("createOperationsThroughPreferredHub(" +
+               objectAsStr(sourceCRS.get()) + "," +
+               objectAsStr(targetCRS.get()) + ")");
+#endif
+
+    struct AntiRecursionGuard {
+        Context &context;
+
+        explicit AntiRecursionGuard(Context &contextIn) : context(contextIn) {
+            assert(!context.inCreateOperationsThroughPreferredHub);
+            context.inCreateOperationsThroughPreferredHub = true;
+        }
+
+        ~AntiRecursionGuard() {
+            context.inCreateOperationsThroughPreferredHub = false;
+        }
+    };
+    AntiRecursionGuard guard(context);
+
+    std::vector<crs::CRSNNPtr> candidatesIntermCRS;
+    for (const auto &datumHub : dstPreferredHubs) {
+        auto candidates =
+            findCandidateGeodCRSForDatum(authFactory, datumHub.get());
+        bool addedGeog2D = false;
+        for (const auto &intermCRS : candidates) {
+            auto geogCRS = dynamic_cast<crs::GeographicCRS *>(intermCRS.get());
+            if (geogCRS &&
+                geogCRS->coordinateSystem()->axisList().size() == 2) {
+                candidatesIntermCRS.emplace_back(intermCRS);
+                addedGeog2D = true;
+                break;
+            }
+        }
+        if (!addedGeog2D) {
+            candidatesIntermCRS.insert(candidatesIntermCRS.end(),
+                                       candidates.begin(), candidates.end());
+        }
+    }
+
+    const bool allowEmptyIntersection = true;
+    for (const auto &intermCRS : candidatesIntermCRS) {
+#ifdef DEBUG
+        EnterDebugLevel loopLevel;
+        debugTrace("try " + objectAsStr(sourceCRS.get()) + "->" +
+                   objectAsStr(intermCRS.get()) + "->" +
+                   objectAsStr(targetCRS.get()) + ")");
+        EnterDebugLevel loopLevel2;
+#endif
+        const auto opsFirst = createOperations(sourceCRS, intermCRS, context);
+        const auto opsLast = createOperations(intermCRS, targetCRS, context);
+        for (const auto &opFirst : opsFirst) {
+            for (const auto &opLast : opsLast) {
+                if (!opFirst->hasBallparkTransformation() ||
+                    !opLast->hasBallparkTransformation()) {
+                    try {
+                        res.emplace_back(
+                            ConcatenatedOperation::createComputeMetadata(
+                                {opFirst, opLast}, !allowEmptyIntersection));
+                    } catch (const InvalidOperationEmptyIntersection &) {
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<CoordinateOperationNNPtr>
+CoordinateOperationFactory::Private::createOperationsGeogToVertWithIntermediate(
+    const crs::CRSNNPtr & /*sourceCRS*/, // geographic CRS
+    const crs::CRSNNPtr &targetCRS,      // vertical CRS
+    Private::Context &context) {
+
+    std::vector<CoordinateOperationNNPtr> res;
+
+    struct AntiRecursionGuard {
+        Context &context;
+
+        explicit AntiRecursionGuard(Context &contextIn) : context(contextIn) {
+            assert(!context.inCreateOperationsGeogToVertWithIntermediate);
+            context.inCreateOperationsGeogToVertWithIntermediate = true;
+        }
+
+        ~AntiRecursionGuard() {
+            context.inCreateOperationsGeogToVertWithIntermediate = false;
+        }
+    };
+    AntiRecursionGuard guard(context);
+
+    for (int i = 0; i < 2; i++) {
+
+        // Generally EPSG has operations from GeogCrs to VertCRS
+        auto ops =
+            i == 0 ? findOpsInRegistryDirectTo(targetCRS, context.context)
+                   : findOpsInRegistryDirectFrom(targetCRS, context.context);
+
+        for (const auto &op : ops) {
+            const auto tmpCRS = i == 0 ? op->sourceCRS() : op->targetCRS();
+            if (tmpCRS &&
+                dynamic_cast<const crs::GeographicCRS *>(tmpCRS.get())) {
+                res.emplace_back(i == 0 ? op : op->inverse());
+            }
+        }
+        if (!res.empty())
+            break;
+    }
+
+    return res;
 }
 
 // ---------------------------------------------------------------------------
@@ -11368,17 +12293,33 @@ CoordinateOperationFactory::Private::createOperations(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     Private::Context &context) {
 
+#ifdef DEBUG
+    EnterDebugLevel enterFunction;
+    auto debugStr("createOperations(" + objectAsStr(sourceCRS.get()) + "," +
+                  objectAsStr(targetCRS.get()) + ")");
+    debugTrace(debugStr);
+#endif
+
     std::vector<CoordinateOperationNNPtr> res;
     const bool allowEmptyIntersection = true;
 
-    const auto &sourceProj4Ext = sourceCRS->getExtensionProj4();
-    const auto &targetProj4Ext = targetCRS->getExtensionProj4();
+    auto boundSrc = dynamic_cast<const crs::BoundCRS *>(sourceCRS.get());
+    auto boundDst = dynamic_cast<const crs::BoundCRS *>(targetCRS.get());
+
+    const auto &sourceProj4Ext = boundSrc
+                                     ? boundSrc->baseCRS()->getExtensionProj4()
+                                     : sourceCRS->getExtensionProj4();
+    const auto &targetProj4Ext = boundDst
+                                     ? boundDst->baseCRS()->getExtensionProj4()
+                                     : targetCRS->getExtensionProj4();
     if (!sourceProj4Ext.empty() || !targetProj4Ext.empty()) {
 
         auto sourceProjExportable =
-            dynamic_cast<io::IPROJStringExportable *>(sourceCRS.get());
+            dynamic_cast<const io::IPROJStringExportable *>(
+                boundSrc ? boundSrc : sourceCRS.get());
         auto targetProjExportable =
-            dynamic_cast<io::IPROJStringExportable *>(targetCRS.get());
+            dynamic_cast<const io::IPROJStringExportable *>(
+                boundDst ? boundDst : targetCRS.get());
         if (!sourceProjExportable) {
             throw InvalidOperation("Source CRS is not PROJ exportable");
         }
@@ -11387,7 +12328,7 @@ CoordinateOperationFactory::Private::createOperations(
         }
         auto projFormatter = io::PROJStringFormatter::create();
         projFormatter->setCRSExport(true);
-        projFormatter->setDropEarlyBindingsTerms(true);
+        projFormatter->setLegacyCRSToCRSContext(true);
         projFormatter->startInversion();
         sourceProjExportable->_exportToPROJString(projFormatter.get());
         auto geogSrc =
@@ -11420,11 +12361,16 @@ CoordinateOperationFactory::Private::createOperations(
 
     auto geodSrc = dynamic_cast<const crs::GeodeticCRS *>(sourceCRS.get());
     auto geodDst = dynamic_cast<const crs::GeodeticCRS *>(targetCRS.get());
+    auto geogSrc = dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
+    auto geogDst = dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
+    auto vertSrc = dynamic_cast<const crs::VerticalCRS *>(sourceCRS.get());
+    auto vertDst = dynamic_cast<const crs::VerticalCRS *>(targetCRS.get());
 
     // First look-up if the registry provide us with operations.
     auto derivedSrc = dynamic_cast<const crs::DerivedCRS *>(sourceCRS.get());
     auto derivedDst = dynamic_cast<const crs::DerivedCRS *>(targetCRS.get());
-    if (context.context->getAuthorityFactory() &&
+    const auto &authFactory = context.context->getAuthorityFactory();
+    if (authFactory &&
         (derivedSrc == nullptr ||
          !derivedSrc->baseCRS()->_isEquivalentTo(
              targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) &&
@@ -11447,45 +12393,130 @@ CoordinateOperationFactory::Private::createOperations(
 
             doFilterAndCheckPerfectOp = false;
 
+            bool sameGeodeticDatum = false;
+            if (geodSrc && geodDst) {
+                const auto &srcDatum = geodSrc->datum();
+                const auto &dstDatum = geodDst->datum();
+                sameGeodeticDatum =
+                    srcDatum != nullptr && dstDatum != nullptr &&
+                    srcDatum->_isEquivalentTo(
+                        dstDatum.get(),
+                        util::IComparable::Criterion::EQUIVALENT);
+            }
+
+            // NAD83 only exists in 2D version in EPSG, so if it has been
+            // promotted to 3D, when researching a vertical to geog
+            // transformation,
+            // try to down cast to 2D.
+            if (res.empty() && geogSrc && vertDst &&
+                geogSrc->coordinateSystem()->axisList().size() == 3 &&
+                geogSrc->datum()) {
+                const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
+                    authFactory, geogSrc->datum().get()));
+                for (const auto &candidate : candidatesSrcGeod) {
+                    auto geogCandidate =
+                        util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                            candidate);
+                    if (geogCandidate &&
+                        geogCandidate->coordinateSystem()->axisList().size() ==
+                            2) {
+                        res =
+                            findOpsInRegistryDirect(NN_NO_CHECK(geogCandidate),
+                                                    targetCRS, context.context);
+                        if (res.empty()) {
+                            res = applyInverse(findOpsInRegistryDirect(
+                                targetCRS, NN_NO_CHECK(geogCandidate),
+                                context.context));
+                        }
+                        break;
+                    }
+                }
+            } else if (res.empty() && geogDst && vertSrc &&
+                       geogDst->coordinateSystem()->axisList().size() == 3 &&
+                       geogDst->datum()) {
+                const auto candidatesDstGeod(findCandidateGeodCRSForDatum(
+                    authFactory, geogDst->datum().get()));
+                for (const auto &candidate : candidatesDstGeod) {
+                    auto geogCandidate =
+                        util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                            candidate);
+                    if (geogCandidate &&
+                        geogCandidate->coordinateSystem()->axisList().size() ==
+                            2) {
+                        res = findOpsInRegistryDirect(
+                            sourceCRS, NN_NO_CHECK(geogCandidate),
+                            context.context);
+                        if (res.empty()) {
+                            res = applyInverse(findOpsInRegistryDirect(
+                                NN_NO_CHECK(geogCandidate), sourceCRS,
+                                context.context));
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // There's no direct transformation from NAVD88 height to WGS84,
+            // so try to research all transformations from NAVD88 to another
+            // intermediate GeographicCRS.
+            if (res.empty() &&
+                !context.inCreateOperationsGeogToVertWithIntermediate &&
+                geogSrc && vertDst) {
+                res = createOperationsGeogToVertWithIntermediate(
+                    sourceCRS, targetCRS, context);
+            } else if (res.empty() &&
+                       !context.inCreateOperationsGeogToVertWithIntermediate &&
+                       geogDst && vertSrc) {
+                res = applyInverse(createOperationsGeogToVertWithIntermediate(
+                    targetCRS, sourceCRS, context));
+            }
+
+            if (res.empty() && !sameGeodeticDatum &&
+                !context.inCreateOperationsWithDatumPivotAntiRecursion &&
+                geodSrc && geodDst) {
+                // If we still didn't find a transformation, and that the source
+                // and target are GeodeticCRS, then go through their underlying
+                // datum to find potential transformations between other
+                // GeodeticRSs
+                // that are made of those datum
+                // The typical example is if transforming between two
+                // GeographicCRS,
+                // but transformations are only available between their
+                // corresponding geocentric CRS.
+                const auto &srcDatum = geodSrc->datum();
+                const auto &dstDatum = geodDst->datum();
+                if (srcDatum != nullptr && dstDatum != nullptr) {
+                    createOperationsWithDatumPivot(res, sourceCRS, targetCRS,
+                                                   geodSrc, geodDst, context);
+                    doFilterAndCheckPerfectOp = !res.empty();
+                }
+            }
+
             // NAD27 to NAD83 has tens of results already. No need to look
             // for a pivot
-            if ((res.empty() &&
+            if (!sameGeodeticDatum &&
+                ((res.empty() &&
+                  context.context->getAllowUseIntermediateCRS() ==
+                      CoordinateOperationContext::IntermediateCRSUse::
+                          IF_NO_DIRECT_TRANSFORMATION) ||
                  context.context->getAllowUseIntermediateCRS() ==
-                     CoordinateOperationContext::IntermediateCRSUse::
-                         IF_NO_DIRECT_TRANSFORMATION) ||
-                context.context->getAllowUseIntermediateCRS() ==
-                    CoordinateOperationContext::IntermediateCRSUse::ALWAYS ||
-                getenv("PROJ_FORCE_SEARCH_PIVOT")) {
+                     CoordinateOperationContext::IntermediateCRSUse::ALWAYS ||
+                 getenv("PROJ_FORCE_SEARCH_PIVOT"))) {
                 auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
                     sourceCRS, targetCRS, context.context);
                 res.insert(res.end(), resWithIntermediate.begin(),
                            resWithIntermediate.end());
-                doFilterAndCheckPerfectOp = true;
-            }
-        }
-
-        if (res.empty() &&
-            !context.inCreateOperationsWithDatumPivotAntiRecursion && geodSrc &&
-            geodDst) {
-            // If we still didn't find a transformation, and that the source
-            // and target are GeodeticCRS, then go through their underlying
-            // datum to find potential transformations between other GeodeticRSs
-            // that are made of those datum
-            // The typical example is if transforming between two GeographicCRS,
-            // but transformations are only available between their
-            // corresponding geocentric CRS.
-            const auto &srcDatum = geodSrc->datum();
-            const bool srcHasDatumWithId =
-                srcDatum && !srcDatum->identifiers().empty();
-            const auto &dstDatum = geodDst->datum();
-            const bool dstHasDatumWithId =
-                dstDatum && !dstDatum->identifiers().empty();
-            if (srcHasDatumWithId && dstHasDatumWithId &&
-                !srcDatum->_isEquivalentTo(
-                    dstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
-                createOperationsWithDatumPivot(res, sourceCRS, targetCRS,
-                                               geodSrc, geodDst, context);
                 doFilterAndCheckPerfectOp = !res.empty();
+
+                // If transforming from/to WGS84 (Gxxxx), try through 'neutral'
+                // WGS84
+                if (res.empty() && geodSrc && geodDst &&
+                    !context.inCreateOperationsThroughPreferredHub &&
+                    !context.inCreateOperationsWithDatumPivotAntiRecursion) {
+                    createOperationsThroughPreferredHub(
+                        res, sourceCRS, targetCRS, geodSrc, geodDst, context);
+                    doFilterAndCheckPerfectOp = !res.empty();
+                }
             }
         }
 
@@ -11508,10 +12539,6 @@ CoordinateOperationFactory::Private::createOperations(
                 "celestial body");
         }
 
-        auto geogSrc =
-            dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
-        auto geogDst =
-            dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
         if (geogSrc && geogDst) {
             return createOperationsGeogToGeog(res, sourceCRS, targetCRS,
                                               geogSrc, geogDst);
@@ -11599,15 +12626,13 @@ CoordinateOperationFactory::Private::createOperations(
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
-    // boundCRS to a geogCRS that is the same as the hubCRS
-    auto boundSrc = dynamic_cast<const crs::BoundCRS *>(sourceCRS.get());
-    auto geogDst = dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
     if (boundSrc && geogDst) {
         const auto &hubSrc = boundSrc->hubCRS();
         auto hubSrcGeog =
             dynamic_cast<const crs::GeographicCRS *>(hubSrc.get());
         auto geogCRSOfBaseOfBoundSrc =
             boundSrc->baseCRS()->extractGeographicCRS();
+        // Is it: boundCRS to a geogCRS that is the same as the hubCRS ?
         if (hubSrcGeog && geogCRSOfBaseOfBoundSrc &&
             (hubSrcGeog->_isEquivalentTo(
                  geogDst, util::IComparable::Criterion::EQUIVALENT) ||
@@ -11725,19 +12750,81 @@ CoordinateOperationFactory::Private::createOperations(
             return res;
         }
 
+        if (hubSrcGeog && geogCRSOfBaseOfBoundSrc) {
+            // This one should go to the above 'Is it: boundCRS to a geogCRS
+            // that is the same as the hubCRS ?' case
+            auto opsFirst = createOperations(sourceCRS, hubSrc, context);
+            auto opsLast = createOperations(hubSrc, targetCRS, context);
+            if (!opsFirst.empty() && !opsLast.empty()) {
+                for (const auto &opFirst : opsFirst) {
+                    for (const auto &opLast : opsLast) {
+                        // Exclude artificial transformations from the hub
+                        // to the target CRS
+                        if (!opLast->hasBallparkTransformation()) {
+                            try {
+                                res.emplace_back(
+                                    ConcatenatedOperation::
+                                        createComputeMetadata(
+                                            {opFirst, opLast},
+                                            !allowEmptyIntersection));
+                            } catch (
+                                const InvalidOperationEmptyIntersection &) {
+                            }
+                        }
+                    }
+                }
+                if (!res.empty()) {
+                    return res;
+                }
+            }
+        }
+
+        auto vertCRSOfBaseOfBoundSrc =
+            dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get());
+        if (vertCRSOfBaseOfBoundSrc && hubSrcGeog &&
+            hubSrcGeog->coordinateSystem()->axisList().size() == 3 &&
+            geogDst->coordinateSystem()->axisList().size() == 3) {
+            auto opsFirst = createOperations(sourceCRS, hubSrc, context);
+            if (context.skipHorizontalTransformation) {
+                if (!opsFirst.empty())
+                    return opsFirst;
+            } else {
+                auto opsSecond = createOperations(hubSrc, targetCRS, context);
+                if (!opsFirst.empty() && !opsSecond.empty()) {
+                    for (const auto &opFirst : opsFirst) {
+                        for (const auto &opLast : opsSecond) {
+                            // Exclude artificial transformations from the hub
+                            // to the target CRS
+                            if (!opLast->hasBallparkTransformation()) {
+                                try {
+                                    res.emplace_back(
+                                        ConcatenatedOperation::
+                                            createComputeMetadata(
+                                                {opFirst, opLast},
+                                                !allowEmptyIntersection));
+                                } catch (
+                                    const InvalidOperationEmptyIntersection &) {
+                                }
+                            }
+                        }
+                    }
+                    if (!res.empty()) {
+                        return res;
+                    }
+                }
+            }
+        }
+
         return createOperations(boundSrc->baseCRS(), targetCRS, context);
     }
 
     // reverse of previous case
-    auto boundDst = dynamic_cast<const crs::BoundCRS *>(targetCRS.get());
-    auto geogSrc = dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
     if (geogSrc && boundDst) {
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
     // vertCRS (as boundCRS with transformation to target vertCRS) to
     // vertCRS
-    auto vertDst = dynamic_cast<const crs::VerticalCRS *>(targetCRS.get());
     if (boundSrc && vertDst) {
         auto baseSrcVert =
             dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get());
@@ -11754,7 +12841,6 @@ CoordinateOperationFactory::Private::createOperations(
     }
 
     // reverse of previous case
-    auto vertSrc = dynamic_cast<const crs::VerticalCRS *>(sourceCRS.get());
     if (boundDst && vertSrc) {
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
@@ -11796,6 +12882,30 @@ CoordinateOperationFactory::Private::createOperations(
     // A bit odd case as we are comparing apples to oranges, but in case
     // the vertical unit differ, do something useful.
     if (vertSrc && geogDst) {
+
+        if (vertSrc->identifiers().empty()) {
+            const auto &vertSrcName = vertSrc->nameStr();
+            if (authFactory != nullptr && vertSrcName != "unnamed" &&
+                vertSrcName != "unknown") {
+                auto matches = authFactory->createObjectsFromName(
+                    vertSrcName,
+                    {io::AuthorityFactory::ObjectType::VERTICAL_CRS}, false, 2);
+                if (matches.size() == 1) {
+                    const auto &match = matches.front();
+                    if (vertSrc->_isEquivalentTo(
+                            match.get(),
+                            util::IComparable::Criterion::EQUIVALENT) &&
+                        !match->identifiers().empty()) {
+                        return createOperations(
+                            NN_NO_CHECK(
+                                util::nn_dynamic_pointer_cast<crs::VerticalCRS>(
+                                    match)),
+                            targetCRS, context);
+                    }
+                }
+            }
+        }
+
         const double convSrc =
             vertSrc->coordinateSystem()->axisList()[0]->unit().conversionToSI();
         double convDst = 1.0;
@@ -11877,6 +12987,34 @@ CoordinateOperationFactory::Private::createOperations(
             }
         }
 
+        auto vertCRSOfBaseOfBoundSrc =
+            boundSrc->baseCRS()->extractVerticalCRS();
+        auto vertCRSOfBaseOfBoundDst =
+            boundDst->baseCRS()->extractVerticalCRS();
+        if (hubSrcGeog && hubDstGeog &&
+            hubSrcGeog->_isEquivalentTo(
+                hubDstGeog, util::IComparable::Criterion::EQUIVALENT) &&
+            vertCRSOfBaseOfBoundSrc && vertCRSOfBaseOfBoundDst) {
+            auto opsFirst = createOperations(sourceCRS, hubSrc, context);
+            auto opsLast = createOperations(hubSrc, targetCRS, context);
+            if (!opsFirst.empty() && !opsLast.empty()) {
+                for (const auto &opFirst : opsFirst) {
+                    for (const auto &opLast : opsLast) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {opFirst, opLast},
+                                    !allowEmptyIntersection));
+                        } catch (const InvalidOperationEmptyIntersection &) {
+                        }
+                    }
+                }
+                if (!res.empty()) {
+                    return res;
+                }
+            }
+        }
+
         return createOperations(boundSrc->baseCRS(), boundDst->baseCRS(),
                                 context);
     }
@@ -11886,25 +13024,147 @@ CoordinateOperationFactory::Private::createOperations(
         const auto &componentsSrc = compoundSrc->componentReferenceSystems();
         if (!componentsSrc.empty()) {
             std::vector<CoordinateOperationNNPtr> horizTransforms;
-            if (componentsSrc[0]->extractGeographicCRS()) {
+            auto srcGeogCRS = componentsSrc[0]->extractGeographicCRS();
+            if (srcGeogCRS) {
                 horizTransforms =
                     createOperations(componentsSrc[0], targetCRS, context);
             }
             std::vector<CoordinateOperationNNPtr> verticalTransforms;
             if (componentsSrc.size() >= 2 &&
                 componentsSrc[1]->extractVerticalCRS()) {
+
+                struct SetSkipHorizontalTransform {
+                    Context &context;
+
+                    explicit SetSkipHorizontalTransform(Context &contextIn)
+                        : context(contextIn) {
+                        assert(!context.skipHorizontalTransformation);
+                        context.skipHorizontalTransformation = true;
+                    }
+
+                    ~SetSkipHorizontalTransform() {
+                        context.skipHorizontalTransformation = false;
+                    }
+                };
+                SetSkipHorizontalTransform setSkipHorizontalTransform(context);
+
                 verticalTransforms =
                     createOperations(componentsSrc[1], targetCRS, context);
+                bool foundRegisteredTransformWithAllGridsAvailable = false;
+                for (const auto &op : verticalTransforms) {
+                    if (!op->identifiers().empty() && authFactory) {
+                        bool missingGrid = false;
+                        const auto gridsNeeded =
+                            op->gridsNeeded(authFactory->databaseContext());
+                        for (const auto &gridDesc : gridsNeeded) {
+                            if (!gridDesc.available) {
+                                missingGrid = true;
+                                break;
+                            }
+                        }
+                        if (!missingGrid) {
+                            foundRegisteredTransformWithAllGridsAvailable =
+                                true;
+                            break;
+                        }
+                    }
+                }
+                if (!foundRegisteredTransformWithAllGridsAvailable &&
+                    srcGeogCRS &&
+                    !srcGeogCRS->_isEquivalentTo(
+                        geogDst, util::IComparable::Criterion::EQUIVALENT) &&
+                    !srcGeogCRS->is2DPartOf3D(NN_NO_CHECK(geogDst))) {
+                    auto verticalTransformsTmp = createOperations(
+                        componentsSrc[1], NN_NO_CHECK(srcGeogCRS), context);
+                    bool foundRegisteredTransform = false;
+                    foundRegisteredTransformWithAllGridsAvailable = false;
+                    for (const auto &op : verticalTransformsTmp) {
+                        if (!op->identifiers().empty() && authFactory) {
+                            bool missingGrid = false;
+                            const auto gridsNeeded =
+                                op->gridsNeeded(authFactory->databaseContext());
+                            for (const auto &gridDesc : gridsNeeded) {
+                                if (!gridDesc.available) {
+                                    missingGrid = true;
+                                    break;
+                                }
+                            }
+                            foundRegisteredTransform = true;
+                            if (!missingGrid) {
+                                foundRegisteredTransformWithAllGridsAvailable =
+                                    true;
+                                break;
+                            }
+                        }
+                    }
+                    if (foundRegisteredTransformWithAllGridsAvailable) {
+                        verticalTransforms = verticalTransformsTmp;
+                    } else if (foundRegisteredTransform) {
+                        verticalTransforms.insert(verticalTransforms.end(),
+                                                  verticalTransformsTmp.begin(),
+                                                  verticalTransformsTmp.end());
+                    }
+                }
             }
             if (!horizTransforms.empty() && !verticalTransforms.empty()) {
                 for (const auto &horizTransform : horizTransforms) {
                     for (const auto &verticalTransform : verticalTransforms) {
 
-                        auto op = createHorizVerticalPROJBased(
-                            sourceCRS, targetCRS, horizTransform,
-                            verticalTransform);
+                        crs::GeographicCRSPtr interpolationGeogCRS;
+                        auto transformationVerticalTransform =
+                            dynamic_cast<const Transformation *>(
+                                verticalTransform.get());
+                        if (transformationVerticalTransform) {
+                            auto interpTransformCRS =
+                                transformationVerticalTransform
+                                    ->interpolationCRS();
+                            if (interpTransformCRS) {
+                                auto nn_interpTransformCRS =
+                                    NN_NO_CHECK(interpTransformCRS);
+                                if (dynamic_cast<const crs::GeographicCRS *>(
+                                        nn_interpTransformCRS.get())) {
+                                    interpolationGeogCRS =
+                                        util::nn_dynamic_pointer_cast<
+                                            crs::GeographicCRS>(
+                                            nn_interpTransformCRS);
+                                }
+                            }
+                        }
+                        bool done = false;
+                        if (interpolationGeogCRS &&
+                            (interpolationGeogCRS->_isEquivalentTo(
+                                 srcGeogCRS.get(),
+                                 util::IComparable::Criterion::EQUIVALENT) ||
+                             interpolationGeogCRS->is2DPartOf3D(
+                                 NN_NO_CHECK(srcGeogCRS.get())))) {
+                            auto srcToInterp = createOperations(
+                                componentsSrc[0],
+                                NN_NO_CHECK(interpolationGeogCRS), context);
+                            auto interpToCompoundHoriz = createOperations(
+                                NN_NO_CHECK(interpolationGeogCRS),
+                                componentsSrc[0], context);
+                            if (!srcToInterp.empty() &&
+                                !interpToCompoundHoriz.empty()) {
+                                auto op = createHorizVerticalHorizPROJBased(
+                                    sourceCRS, componentsSrc[0],
+                                    srcToInterp.front(), verticalTransform,
+                                    interpToCompoundHoriz.front(),
+                                    interpolationGeogCRS);
+                                done = true;
+                                res.emplace_back(
+                                    ConcatenatedOperation::
+                                        createComputeMetadata(
+                                            {op, horizTransform},
+                                            !allowEmptyIntersection));
+                            }
+                        }
+                        if (!done) {
+                            auto op = createHorizVerticalPROJBased(
+                                sourceCRS, targetCRS, horizTransform,
+                                verticalTransform);
 
-                        res.emplace_back(op);
+                            res.emplace_back(op);
+                        }
                     }
                 }
                 return res;
@@ -11912,11 +13172,40 @@ CoordinateOperationFactory::Private::createOperations(
                 return horizTransforms;
             }
         }
+    } else if (compoundSrc && geodDst) {
+        auto datum = geodDst->datum();
+        if (datum) {
+            auto cs =
+                cs::EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
+                    common::UnitOfMeasure::DEGREE,
+                    common::UnitOfMeasure::METRE);
+            auto intermGeog3DCRS = util::nn_static_pointer_cast<crs::CRS>(
+                crs::GeographicCRS::create(
+                    util::PropertyMap()
+                        .set(common::IdentifiedObject::NAME_KEY,
+                             geodDst->nameStr())
+                        .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                             metadata::Extent::WORLD),
+                    NN_NO_CHECK(datum), cs));
+            auto sourceToGeog3DOps =
+                createOperations(sourceCRS, intermGeog3DCRS, context);
+            auto geog3DToTargetOps =
+                createOperations(intermGeog3DCRS, targetCRS, context);
+            if (!geog3DToTargetOps.empty()) {
+                for (const auto &op : sourceToGeog3DOps) {
+                    res.emplace_back(
+                        ConcatenatedOperation::createComputeMetadata(
+                            {op, geog3DToTargetOps.front()},
+                            !allowEmptyIntersection));
+                }
+                return res;
+            }
+        }
     }
 
     // reverse of previous case
     auto compoundDst = dynamic_cast<const crs::CompoundCRS *>(targetCRS.get());
-    if (geogSrc && compoundDst) {
+    if (geodSrc && compoundDst) {
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
@@ -11956,6 +13245,21 @@ CoordinateOperationFactory::Private::createOperations(
                                         nn_interpTransformCRS));
                             }
                         }
+                    } else {
+                        auto compSrc0BoundCrs = dynamic_cast<crs::BoundCRS *>(
+                            componentsSrc[0].get());
+                        auto compDst0BoundCrs = dynamic_cast<crs::BoundCRS *>(
+                            componentsDst[0].get());
+                        if (compSrc0BoundCrs && compDst0BoundCrs &&
+                            dynamic_cast<crs::GeographicCRS *>(
+                                compSrc0BoundCrs->hubCRS().get()) &&
+                            compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
+                                compDst0BoundCrs->hubCRS().get())) {
+                            interpolationGeogCRS =
+                                NN_NO_CHECK(util::nn_dynamic_pointer_cast<
+                                            crs::GeographicCRS>(
+                                    compSrc0BoundCrs->hubCRS()));
+                        }
                     }
                     auto opSrcCRSToGeogCRS = createOperations(
                         componentsSrc[0], interpolationGeogCRS, context);
@@ -11980,9 +13284,154 @@ CoordinateOperationFactory::Private::createOperations(
         }
     }
 
+    // '+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +type=crs' to
+    // '+proj=longlat +ellps=GRS80 +nadgrids=@bar.gsb +geoidgrids=@bar.gtx
+    // +type=crs'
+    if (boundSrc && compoundDst) {
+        const auto &componentsDst = compoundDst->componentReferenceSystems();
+        if (!componentsDst.empty()) {
+            auto compDst0BoundCrs =
+                dynamic_cast<crs::BoundCRS *>(componentsDst[0].get());
+            if (compDst0BoundCrs) {
+                auto boundSrcHubAsGeogCRS = dynamic_cast<crs::GeographicCRS *>(
+                    boundSrc->hubCRS().get());
+                auto compDst0BoundCrsHubAsGeogCRS =
+                    dynamic_cast<crs::GeographicCRS *>(
+                        compDst0BoundCrs->hubCRS().get());
+                if (boundSrcHubAsGeogCRS && compDst0BoundCrsHubAsGeogCRS) {
+                    const auto &boundSrcHubAsGeogCRSDatum =
+                        boundSrcHubAsGeogCRS->datum();
+                    const auto &compDst0BoundCrsHubAsGeogCRSDatum =
+                        compDst0BoundCrsHubAsGeogCRS->datum();
+                    if (boundSrcHubAsGeogCRSDatum &&
+                        compDst0BoundCrsHubAsGeogCRSDatum &&
+                        boundSrcHubAsGeogCRSDatum->_isEquivalentTo(
+                            compDst0BoundCrsHubAsGeogCRSDatum.get())) {
+                        auto cs = cs::EllipsoidalCS::
+                            createLatitudeLongitudeEllipsoidalHeight(
+                                common::UnitOfMeasure::DEGREE,
+                                common::UnitOfMeasure::METRE);
+                        auto intermGeog3DCRS = util::nn_static_pointer_cast<
+                            crs::CRS>(crs::GeographicCRS::create(
+                            util::PropertyMap()
+                                .set(common::IdentifiedObject::NAME_KEY,
+                                     boundSrcHubAsGeogCRS->nameStr())
+                                .set(
+                                    common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                                    metadata::Extent::WORLD),
+                            NN_NO_CHECK(boundSrcHubAsGeogCRSDatum), cs));
+                        auto sourceToGeog3DOps = createOperations(
+                            sourceCRS, intermGeog3DCRS, context);
+                        auto geog3DToTargetOps = createOperations(
+                            intermGeog3DCRS, targetCRS, context);
+                        for (const auto &opSrc : sourceToGeog3DOps) {
+                            for (const auto &opDst : geog3DToTargetOps) {
+                                if (opSrc->targetCRS() && opDst->sourceCRS() &&
+                                    !opSrc->targetCRS()->_isEquivalentTo(
+                                        opDst->sourceCRS().get())) {
+                                    // Shouldn't happen normally, but typically
+                                    // one of them can be 2D and the other 3D
+                                    // due to above createOperations() not
+                                    // exactly setting the expected source and
+                                    // target CRS.
+                                    // So create an adapter operation...
+                                    auto intermOps = createOperations(
+                                        NN_NO_CHECK(opSrc->targetCRS()),
+                                        NN_NO_CHECK(opDst->sourceCRS()),
+                                        context);
+                                    if (!intermOps.empty()) {
+                                        res.emplace_back(
+                                            ConcatenatedOperation::
+                                                createComputeMetadata(
+                                                    {opSrc, intermOps.front(),
+                                                     opDst},
+                                                    !allowEmptyIntersection));
+                                    }
+                                } else {
+                                    res.emplace_back(
+                                        ConcatenatedOperation::
+                                            createComputeMetadata(
+                                                {opSrc, opDst},
+                                                !allowEmptyIntersection));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // reverse of previous case
+    if (boundDst && compoundSrc) {
+        return applyInverse(createOperations(targetCRS, sourceCRS, context));
+    }
+
     return res;
 }
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+static crs::CRSNNPtr
+getResolvedCRS(const crs::CRSNNPtr &crs,
+               const CoordinateOperationContextNNPtr &context) {
+    const auto &authFactory = context->getAuthorityFactory();
+
+    auto projectedCrs = dynamic_cast<crs::ProjectedCRS *>(crs.get());
+    if (projectedCrs && authFactory) {
+        const auto &ids = projectedCrs->identifiers();
+        if (!ids.empty() && projectedCrs->baseCRS()->identifiers().empty()) {
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(), *ids.front()->codeSpace());
+            try {
+                auto resolvedCrs(
+                    tmpAuthFactory->createProjectedCRS(ids.front()->code()));
+                if (resolvedCrs->isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
+                    return util::nn_static_pointer_cast<crs::CRS>(resolvedCrs);
+                }
+            } catch (const std::exception &) {
+            }
+        }
+    }
+
+    auto compoundCrs = dynamic_cast<crs::CompoundCRS *>(crs.get());
+    // If we get a CompoundCRS that has an EPSG code, but whose component CRS
+    // lack one, typically from WKT2, this might be an issue to get proper
+    // results in createOperations(), so import the CompoundCRS from the
+    // registry, and if equivalent to the original one, then use the version
+    // from the registry.
+    if (compoundCrs && authFactory) {
+        const auto &ids = compoundCrs->identifiers();
+        if (!ids.empty()) {
+            const auto &components = compoundCrs->componentReferenceSystems();
+            bool hasMissingId = false;
+            for (const auto &comp : components) {
+                if (comp->identifiers().empty()) {
+                    hasMissingId = true;
+                    break;
+                }
+            }
+            if (hasMissingId) {
+                const auto tmpAuthFactory = io::AuthorityFactory::create(
+                    authFactory->databaseContext(), *ids.front()->codeSpace());
+                try {
+                    auto resolvedCrs(
+                        tmpAuthFactory->createCompoundCRS(ids.front()->code()));
+                    if (resolvedCrs->isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        return util::nn_static_pointer_cast<crs::CRS>(
+                            resolvedCrs);
+                    }
+                } catch (const std::exception &) {
+                }
+            }
+        }
+    }
+    return crs;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -12014,10 +13463,25 @@ CoordinateOperationFactory::createOperations(
     auto l_sourceCRS = srcBoundCRS ? NN_NO_CHECK(srcBoundCRS) : sourceCRS;
     auto l_targetCRS = targetBoundCRS ? NN_NO_CHECK(targetBoundCRS) : targetCRS;
 
-    Private::Context contextPrivate(sourceCRS, targetCRS, context);
-    return filterAndSort(
-        Private::createOperations(l_sourceCRS, l_targetCRS, contextPrivate),
-        context, l_sourceCRS, l_targetCRS);
+    auto l_resolvedSourceCRS = getResolvedCRS(l_sourceCRS, context);
+    auto l_resolvedTargetCRS = getResolvedCRS(l_targetCRS, context);
+    Private::Context contextPrivate(l_resolvedSourceCRS, l_resolvedTargetCRS,
+                                    context);
+
+    if (context->getSourceAndTargetCRSExtentUse() ==
+        CoordinateOperationContext::SourceTargetCRSExtentUse::INTERSECTION) {
+        auto sourceCRSExtent(getExtent(l_resolvedSourceCRS));
+        auto targetCRSExtent(getExtent(l_resolvedTargetCRS));
+        if (sourceCRSExtent && targetCRSExtent &&
+            !sourceCRSExtent->intersects(NN_NO_CHECK(targetCRSExtent))) {
+            return std::vector<CoordinateOperationNNPtr>();
+        }
+    }
+
+    return filterAndSort(Private::createOperations(l_resolvedSourceCRS,
+                                                   l_resolvedTargetCRS,
+                                                   contextPrivate),
+                         context, l_resolvedSourceCRS, l_resolvedTargetCRS);
 }
 
 // ---------------------------------------------------------------------------
@@ -12038,8 +13502,9 @@ InverseCoordinateOperation::~InverseCoordinateOperation() = default;
 // ---------------------------------------------------------------------------
 
 InverseCoordinateOperation::InverseCoordinateOperation(
-    const CoordinateOperationNNPtr &forwardOperation, bool wktSupportsInversion)
-    : forwardOperation_(forwardOperation),
+    const CoordinateOperationNNPtr &forwardOperationIn,
+    bool wktSupportsInversion)
+    : forwardOperation_(forwardOperationIn),
       wktSupportsInversion_(wktSupportsInversion) {}
 
 // ---------------------------------------------------------------------------
@@ -12051,6 +13516,8 @@ void InverseCoordinateOperation::setPropertiesFromForward() {
     if (forwardOperation_->sourceCRS() && forwardOperation_->targetCRS()) {
         setCRSs(forwardOperation_.get(), true);
     }
+    setHasBallparkTransformation(
+        forwardOperation_->hasBallparkTransformation());
 }
 
 // ---------------------------------------------------------------------------
@@ -12133,7 +13600,7 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
 
     auto method = OperationMethod::create(
         util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                "PROJ-based operation method (approximate) : " +
+                                "PROJ-based operation method (approximate): " +
                                     projString),
         std::vector<GeneralOperationParameterNNPtr>{});
     auto op = PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method);
@@ -12206,6 +13673,53 @@ void PROJBasedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+void PROJBasedOperation::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext(
+        (sourceCRS() && targetCRS()) ? "Transformation" : "Conversion",
+        !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    if (sourceCRS() && targetCRS()) {
+        writer.AddObjKey("source_crs");
+        formatter->setAllowIDInImmediateChild();
+        sourceCRS()->_exportToJSON(formatter);
+
+        writer.AddObjKey("target_crs");
+        formatter->setAllowIDInImmediateChild();
+        targetCRS()->_exportToJSON(formatter);
+    }
+
+    writer.AddObjKey("method");
+    formatter->setOmitTypeInImmediateChild();
+    formatter->setAllowIDInImmediateChild();
+    method()->_exportToJSON(formatter);
+
+    const auto &l_parameterValues = parameterValues();
+    if (!l_parameterValues.empty()) {
+        writer.AddObjKey("parameters");
+        {
+            auto parametersContext(writer.MakeArrayContext(false));
+            for (const auto &genOpParamvalue : l_parameterValues) {
+                formatter->setAllowIDInImmediateChild();
+                formatter->setOmitTypeInImmediateChild();
+                genOpParamvalue->_exportToJSON(formatter);
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 void PROJBasedOperation::_exportToPROJString(
     io::PROJStringFormatter *formatter) const {
     if (projStringExportable_) {
@@ -12226,6 +13740,15 @@ void PROJBasedOperation::_exportToPROJString(
             std::string("PROJBasedOperation::exportToPROJString() failed: ") +
             e.what());
     }
+}
+
+// ---------------------------------------------------------------------------
+
+CoordinateOperationNNPtr PROJBasedOperation::_shallowClone() const {
+    auto op = PROJBasedOperation::nn_make_shared<PROJBasedOperation>(*this);
+    op->assignSelf(op);
+    op->setCRSs(this, false);
+    return util::nn_static_pointer_cast<CoordinateOperation>(op);
 }
 
 // ---------------------------------------------------------------------------

@@ -44,7 +44,7 @@ struct pj_opaque {
 PROJ_HEAD(rouss, "Roussilhe Stereographic") "\n\tAzi, Ell";
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY rouss_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double s, al, cp, sp, al2, s2;
@@ -65,7 +65,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP rouss_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double s, al, x = xy.x / P->k0, y = xy.y / P->k0, x2, y2;;
@@ -150,8 +150,8 @@ PJ *PROJECTION(rouss) {
     Q->D10 = R_R0_4 * t * (29. + t2 * (86. + t2 * 48.))/(96. * N0);
     Q->D11 = R_R0_4 * t * (37. + t2 * 44.)/(96. * N0);
 
-    P->fwd = e_forward;
-    P->inv = e_inverse;
+    P->fwd = rouss_e_forward;
+    P->inv = rouss_e_inverse;
     P->destructor = destructor;
 
     return P;

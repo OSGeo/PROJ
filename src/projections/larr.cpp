@@ -10,7 +10,7 @@ PROJ_HEAD(larr, "Larrivee") "\n\tMisc Sph, no inv";
 #define SIXTH .16666666666666666
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY larr_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     (void) P;
 
@@ -23,7 +23,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 PJ *PROJECTION(larr) {
 
     P->es = 0;
-    P->fwd = s_forward;
+    P->fwd = larr_s_forward;
 
     return P;
 }

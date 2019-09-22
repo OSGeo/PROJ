@@ -16,7 +16,7 @@ PROJ_HEAD(mbt_fps, "McBryde-Thomas Flat-Pole Sine (No. 2)") "\n\tCyl, Sph";
 #define C_y 1.44492
 #define C1_2 0.33333333333333333333333333
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY mbt_fps_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     double k, V, t;
     int i;
@@ -37,7 +37,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP mbt_fps_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     double t;
 
@@ -51,8 +51,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 PJ *PROJECTION(mbt_fps) {
 
     P->es = 0;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = mbt_fps_s_inverse;
+    P->fwd = mbt_fps_s_forward;
 
     return P;
 }

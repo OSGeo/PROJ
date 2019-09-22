@@ -63,15 +63,15 @@ namespace operation {
 
 /** \brief Grid description */
 struct GridDescription {
-    std::string shortName{};   /**< Grid short filename */
-    std::string fullName{};    /**< Grid full path name (if found) */
-    std::string packageName{}; /**< Package name (or empty) */
-    std::string url{}; /**< Grid URL (if packageName is empty), or package
-                            URL (or empty) */
-    bool directDownload = false; /**< Whether url can be fetched directly. */
+    std::string shortName;   /**< Grid short filename */
+    std::string fullName;    /**< Grid full path name (if found) */
+    std::string packageName; /**< Package name (or empty) */
+    std::string url;         /**< Grid URL (if packageName is empty), or package
+                                    URL (or empty) */
+    bool directDownload;     /**< Whether url can be fetched directly. */
     /** Whether the grid is released with an open license. */
-    bool openLicense = false;
-    bool available = false; /**< Whether GRID is available. */
+    bool openLicense;
+    bool available; /**< Whether GRID is available. */
 
     //! @cond Doxygen_Suppress
     bool operator<(const GridDescription &other) const {
@@ -116,7 +116,8 @@ using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
  * \remark Implements CoordinateOperation from \ref ISO_19111_2019
  */
 class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
-                                         public io::IPROJStringExportable {
+                                         public io::IPROJStringExportable,
+                                         public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateOperation() override;
@@ -150,6 +151,16 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
 
     PROJ_DLL bool hasBallparkTransformation() const;
 
+    PROJ_DLL static const std::string OPERATION_VERSION_KEY;
+
+    PROJ_DLL CoordinateOperationNNPtr normalizeForVisualization() const;
+
+    PROJ_PRIVATE :
+        //! @cond Doxygen_Suppress
+        PROJ_FOR_TEST CoordinateOperationNNPtr
+        shallowClone() const;
+    //! @endcond
+
   protected:
     PROJ_INTERNAL CoordinateOperation();
     PROJ_INTERNAL CoordinateOperation(const CoordinateOperation &other);
@@ -170,6 +181,12 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     void setAccuracies(
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
     PROJ_INTERNAL void setHasBallparkTransformation(bool b);
+
+    PROJ_INTERNAL void
+    setProperties(const util::PropertyMap
+                      &properties); // throw(InvalidValueTypeException)
+
+    PROJ_INTERNAL virtual CoordinateOperationNNPtr _shallowClone() const = 0;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -275,6 +292,7 @@ struct MethodMapping;
  */
 class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
                                            public io::IWKTExportable,
+                                           public io::IJSONExportable,
                                            public util::IComparable {
   public:
     //! @cond Doxygen_Suppress
@@ -282,6 +300,9 @@ class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override = 0; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override = 0; // throw(FormattingException)
 
     PROJ_INTERNAL bool _isEquivalentTo(
         const util::IComparable *other,
@@ -426,6 +447,9 @@ class PROJ_GCC_DLL OperationParameterValue final
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
                     util::IComparable::Criterion criterion =
@@ -465,7 +489,8 @@ using OperationMethodNNPtr = util::nn<OperationMethodPtr>;
  *
  * \remark Implements OperationMethod from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
+class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject,
+                                     public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~OperationMethod() override;
@@ -490,6 +515,9 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL bool
     _isEquivalentTo(const util::IComparable *other,
@@ -1299,6 +1327,9 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         _exportToPROJString(io::PROJStringFormatter *formatter)
             const override; // throw(FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL const char *getESRIMethodName() const;
 
     PROJ_INTERNAL const char *getWKT1GDALMethodName() const;
@@ -1319,6 +1350,8 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
 
     PROJ_FRIEND(crs::ProjectedCRS);
     PROJ_INTERNAL bool addWKTExtensionNode(io::WKTFormatter *formatter) const;
+
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1458,7 +1491,8 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_DLL static TransformationNNPtr
     createGravityRelatedHeightToGeographic3D(
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
-        const crs::CRSNNPtr &targetCRSIn, const std::string &filename,
+        const crs::CRSNNPtr &targetCRSIn, const crs::CRSPtr &interpolationCRSIn,
+        const std::string &filename,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
     PROJ_DLL static TransformationNNPtr createVERTCON(
@@ -1516,6 +1550,9 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL TransformationNNPtr shallowClone() const;
 
     //! @endcond
@@ -1534,6 +1571,8 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
         const override; // throw(FormattingException)
 
     PROJ_INTERNAL TransformationNNPtr inverseAsTransformation() const;
+
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -1619,6 +1658,9 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
                     util::IComparable::Criterion criterion =
                         util::IComparable::Criterion::STRICT) const override;
 
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
+
     PROJ_INTERNAL static void
     fixStepsDirection(const crs::CRSNNPtr &concatOpSourceCRS,
                       const crs::CRSNNPtr &concatOpTargetCRS,
@@ -1626,11 +1668,14 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
     //! @endcond
 
   protected:
+    PROJ_INTERNAL ConcatenatedOperation(const ConcatenatedOperation &other);
     PROJ_INTERNAL explicit ConcatenatedOperation(
         const std::vector<CoordinateOperationNNPtr> &operationsIn);
 
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
+
+    PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;
 
     INLINED_MAKE_SHARED
 

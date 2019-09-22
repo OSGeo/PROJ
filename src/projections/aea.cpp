@@ -31,7 +31,7 @@
 #include "proj.h"
 #include <errno.h>
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 
 # define EPS10  1.e-10
@@ -99,7 +99,7 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
 
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
+static PJ_XY aea_e_forward (PJ_LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     Q->rho = Q->c - (Q->ellips ? Q->n * pj_qsfn(sin(lp.phi), P->e, P->one_es) : Q->n2 * sin(lp.phi));;
@@ -114,7 +114,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {   /* Ellipsoid/spheroid, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
+static PJ_LP aea_e_inverse (PJ_XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     if( (Q->rho = hypot(xy.x, xy.y = Q->rho0 - xy.y)) != 0.0 ) {
@@ -127,6 +127,10 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {   /* Ellipsoid/spheroid, inverse */
         if (Q->ellips) {
             lp.phi = (Q->c - lp.phi * lp.phi) / Q->n;
             if (fabs(Q->ec - fabs(lp.phi)) > TOL7) {
+                if (fabs(lp.phi) > 2 ) {
+                    proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                    return lp;
+                }
                 if ((lp.phi = phi1_(lp.phi, P->e, P->one_es)) == HUGE_VAL) {
                     proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
                     return lp;
@@ -152,9 +156,11 @@ static PJ *setup(PJ *P) {
     int secant;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = aea_e_inverse;
+    P->fwd = aea_e_forward;
 
+    if (fabs(Q->phi1) > M_HALFPI || fabs(Q->phi2) > M_HALFPI)
+        return destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
     if (fabs(Q->phi1 + Q->phi2) < EPS10)
         return destructor(P, PJD_ERR_CONIC_LAT_EQUAL);
     Q->n = sinphi = sin(Q->phi1);
@@ -178,6 +184,10 @@ static PJ *setup(PJ *P) {
                 return destructor(P, 0);
 
             Q->n = (m1 * m1 - m2 * m2) / (ml2 - ml1);
+            if (Q->n == 0) {
+                // Not quite, but es is very close to 1...
+                return destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+            }
         }
         Q->ec = 1. - .5 * P->one_es * log((1. - P->e) /
             (1. + P->e)) / P->e;

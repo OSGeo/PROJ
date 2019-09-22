@@ -1,7 +1,7 @@
 SUBDIRS	=	include src man data jniwrap cmake
 DIST_SUBDIRS = include src man data jniwrap cmake test
 
-EXTRA_DIST = CMakeLists.txt CITATION
+EXTRA_DIST = CMakeLists.txt CITATION README.md
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = proj.pc

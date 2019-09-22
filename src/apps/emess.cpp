@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "proj_api.h"
+#include "proj_config.h"
 #define EMESS_ROUTINE
 #include "emess.h"
 
@@ -29,7 +30,7 @@ emess(int code, const char *fmt, ...) {
 
 	va_start(args, fmt);
 	/* prefix program name, if given */
-	if (fmt != nullptr)
+	if (emess_dat.Prog_name != nullptr)
 		(void)fprintf(stderr,"%s\n<%s>: ",pj_get_release(),
                               emess_dat.Prog_name);
 	/* print file name and line, if given */

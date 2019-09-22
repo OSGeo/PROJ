@@ -43,8 +43,10 @@
 // PROJ include order is sensitive
 // clang-format off
 #include "proj.h"
+#include "proj_experimental.h"
 #include "proj_internal.h"
 #include "emess.h"
+#include "utils.h"
 // clang-format on
 
 #define MAX_LINE 1000
@@ -68,8 +70,8 @@ static const char *oform =
 static char oform_buffer[16]; /* buffer for oform when using -d */
 static const char *oterr = "*\t*"; /* output line for unprojectable input */
 static const char *usage =
-    "%s\nusage: %s [ -dDeEfIlrstvwW [args] ] [ +opts[=arg] ]\n"
-    "                   [+to [+opts[=arg] [ files ]\n";
+    "%s\nusage: %s [-dDeEfIlrstvwW [args]] [+opt[=arg] ...]\n"
+    "                   [+to +opt[=arg] ...] [file ...]\n";
 
 static double (*informat)(const char *,
                           char **); /* input data deformatter function */
@@ -113,6 +115,19 @@ static void process(FILE *fid)
 
         z = strtod(s, &s);
 
+        /* To avoid breaking existing tests, we read what is a possible t    */
+        /* component of the input and rewind the s-pointer so that the final */
+        /* output has consistant behaviour, with or without t values.        */
+        /* This is a bit of a hack, in most cases 4D coordinates will be     */
+        /* written to STDOUT (except when using -E) but the output format    */
+        /* speficied with -f is not respected for the t component, rather it */
+        /* is forward verbatim from the input.                               */
+        char *before_time = s;
+        double t = strtod(s, &s);
+        if( s == before_time )
+            t = HUGE_VAL;
+        s = before_time;
+
         if (data.v == HUGE_VAL)
             data.u = HUGE_VAL;
 
@@ -120,11 +135,11 @@ static void process(FILE *fid)
             --s; /* assumed we gobbled \n */
 
         if (echoin) {
-            char t;
-            t = *s;
+            char temp;
+            temp = *s;
             *s = '\0';
             (void)fputs(line, stdout);
-            *s = t;
+            *s = temp;
             putchar('\t');
         }
 
@@ -141,7 +156,7 @@ static void process(FILE *fid)
             coord.xyzt.x = data.u;
             coord.xyzt.y = data.v;
             coord.xyzt.z = z;
-            coord.xyzt.t = HUGE_VAL;
+            coord.xyzt.t = t;
             coord = proj_trans(transformation, PJ_FWD, coord);
             data.u = coord.xyz.x;
             data.v = coord.xyz.y;
@@ -263,13 +278,6 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ *src,
                                                           double &toRadians,
                                                           bool &isLatFirst) {
     auto srcType = proj_get_type(src);
-    if (srcType == PJ_TYPE_BOUND_CRS) {
-        auto base = proj_get_source_crs(nullptr, src);
-        assert(base);
-        proj_destroy(src);
-        src = base;
-        srcType = proj_get_type(src);
-    }
     if (srcType != PJ_TYPE_PROJECTED_CRS) {
         return std::string();
     }
@@ -518,6 +526,13 @@ int main(int argc, char **argv) {
     if (eargc == 0) /* if no specific files force sysin */
         eargv[eargc++] = const_cast<char *>("-");
 
+    if( oform ) {
+        if( !validate_form_string_for_numbers(oform) ) {
+            emess(3, "invalid format string");
+            exit(0);
+        }
+    }
+
     /*
      * If the user has requested inverse, then just reverse the
      * coordinate systems.
@@ -577,12 +592,33 @@ int main(int argc, char **argv) {
         }
         srcIsGeog = true;
     }
+    proj_destroy(src);
+    proj_destroy(dst);
+
+    src = proj_create(nullptr, pj_add_type_crs_if_needed(fromStr).c_str());
+    dst = proj_create(nullptr, pj_add_type_crs_if_needed(toStr).c_str());
+
+    if( proj_get_type(src) == PJ_TYPE_COMPOUND_CRS ||
+        proj_get_type(dst) == PJ_TYPE_COMPOUND_CRS ) {
+        auto src3D = proj_crs_promote_to_3D(nullptr, nullptr, src);
+        if( src3D ) {
+            proj_destroy(src);
+            src = src3D;
+        }
+
+        auto dst3D = proj_crs_promote_to_3D(nullptr, nullptr, dst);
+        if( dst3D ) {
+            proj_destroy(dst);
+            dst = dst3D;
+        }
+    }
+
+    transformation = proj_create_crs_to_crs_from_pj(nullptr, src, dst,
+                                                    nullptr, nullptr);
 
     proj_destroy(src);
     proj_destroy(dst);
 
-    transformation = proj_create_crs_to_crs(nullptr, fromStr.c_str(),
-                                            toStr.c_str(), nullptr);
     if (!transformation) {
         emess(3, "cannot initialize transformation\ncause: %s",
               pj_strerrno(pj_errno));
@@ -631,7 +667,7 @@ int main(int argc, char **argv) {
 
     proj_destroy(transformation);
 
-    pj_deallocate_grids();
+    proj_cleanup();
 
     exit(0); /* normal completion */
 }

@@ -40,7 +40,7 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {           /* Ellipsoidal/spheroidal, forward */
+static PJ_XY eqearth_e_forward (PJ_LP lp, PJ *P) {           /* Ellipsoidal/spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double sbeta;
@@ -74,7 +74,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {           /* Ellipsoidal/spheroidal, 
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal/spheroidal, inverse */
+static PJ_LP eqearth_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal/spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double yc, y2, y6;
@@ -148,8 +148,8 @@ PJ *PROJECTION(eqearth) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;
-    P->fwd = e_forward;
-    P->inv = e_inverse;
+    P->fwd = eqearth_e_forward;
+    P->inv = eqearth_e_inverse;
     Q->rqda = 1.0;
 
     /* Ellipsoidal case */

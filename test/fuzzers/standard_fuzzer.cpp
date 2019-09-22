@@ -64,6 +64,14 @@ int LLVMFuzzerInitialize(int* /*argc*/, char*** argv)
 
 int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
 {
+    if( len > 1000 )
+    {
+#ifdef STANDALONE
+        fprintf(stderr, "Input too large\n");
+#endif
+        return 0;
+    }
+
     /* We expect the blob to be 3 lines: */
     /* source proj string\ndestination proj string\nx y */
     char* buf_dup = (char*)malloc(len+1);
@@ -97,8 +105,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
     {
         free(buf_dup);
         pj_free(pj_src);
+#ifndef OMIT_DEALLOCATION
         pj_gc_unloadall(pj_get_default_ctx());
         pj_deallocate_grids();
+#endif
         return 0;
     }
     double x = 0, y = 0, z = 9;
@@ -125,8 +135,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
         free(buf_dup);
         pj_free(pj_src);
         pj_free(pj_dst);
+#ifndef OMIT_DEALLOCATION
         pj_gc_unloadall(pj_get_default_ctx());
         pj_deallocate_grids();
+#endif
         return 0;
     }
 #ifdef STANDALONE
@@ -149,8 +161,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
     free(buf_dup);
     pj_free(pj_src);
     pj_free(pj_dst);
+#ifndef OMIT_DEALLOCATION
     pj_gc_unloadall(pj_get_default_ctx());
     pj_deallocate_grids();
+#endif
     return 0;
 }
 

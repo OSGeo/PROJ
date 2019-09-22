@@ -28,11 +28,11 @@
 
 #define PJ_LIB__
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "proj_math.h"
-#include "proj_internal.h"
+#include <math.h>
 #include "proj_internal.h"
 
 static int is_nodata(float value, double vmultiplier)
@@ -63,9 +63,19 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier, int *
 
         ct = gi->ct;
 
-        /* skip tables that don't match our point at all.  */
-        if( ct->ll.phi > input.phi || ct->ll.lam > input.lam
-            || ct->ll.phi + (ct->lim.phi-1) * ct->del.phi < input.phi
+        /* skip tables that don't match our point at all (latitude check).  */
+        if( ct->ll.phi > input.phi
+            || ct->ll.phi + (ct->lim.phi-1) * ct->del.phi < input.phi )
+            continue;
+
+        bool fullWorldLongExtent = false;
+        if( fabs(ct->lim.lam * ct->del.lam - 2 * M_PI) < 1e-10 )
+        {
+            fullWorldLongExtent = true;
+        }
+
+        /* skip tables that don't match our point at all (longitude check).  */
+        else if( ct->ll.lam > input.lam
             || ct->ll.lam + (ct->lim.lam-1) * ct->del.lam < input.lam )
             continue;
 
@@ -78,8 +88,17 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier, int *
             {
                 struct CTABLE *ct1 = child->ct;
 
-                if( ct1->ll.phi > input.phi || ct1->ll.lam > input.lam
-                  || ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi < input.phi
+                fullWorldLongExtent = false;
+
+                if( ct1->ll.phi > input.phi
+                  || ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi < input.phi)
+                    continue;
+
+                if( fabs(ct1->lim.lam * ct1->del.lam - 2 * M_PI) < 1e-10 )
+                {
+                    fullWorldLongExtent = true;
+                }
+                else if( ct1->ll.lam > input.lam
                   || ct1->ll.lam+(ct1->lim.lam-1)*ct1->del.lam < input.lam)
                     continue;
 
@@ -98,24 +117,41 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier, int *
         }
 
         /* load the grid shift info if we don't have it. */
-        if( ct->cvs == nullptr && !pj_gridinfo_load( pj_get_ctx(defn), gi ) )
+        if( ct->cvs == nullptr )
         {
-            pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-            return PJD_ERR_FAILED_TO_LOAD_GRID;
+            if( !pj_gridinfo_load( pj_get_ctx(defn), gi ) || ct->cvs == nullptr )
+            {
+                pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+                return PJD_ERR_FAILED_TO_LOAD_GRID;
+            }
         }
 
 
         /* Interpolation a location within the grid */
         grid_x = (input.lam - ct->ll.lam) / ct->del.lam;
+        if( fullWorldLongExtent ) {
+            // The first fmod goes to ]-lim, lim[ range
+            // So we add lim again to be in ]0, 2*lim[ and fmod again
+            grid_x = fmod(
+                fmod(grid_x + ct->lim.lam, ct->lim.lam) + ct->lim.lam,
+                ct->lim.lam);
+        }
         grid_y = (input.phi - ct->ll.phi) / ct->del.phi;
         grid_ix = lround(floor(grid_x));
+        assert(grid_ix >= 0 && grid_ix < ct->lim.lam);
         grid_iy = lround(floor(grid_y));
+        assert(grid_iy >= 0 && grid_iy < ct->lim.phi);
         grid_x -= grid_ix;
         grid_y -= grid_iy;
 
         grid_ix2 = grid_ix + 1;
-        if( grid_ix2 >= ct->lim.lam )
-            grid_ix2 = ct->lim.lam - 1;
+        if( grid_ix2 >= ct->lim.lam ) {
+            if( fullWorldLongExtent ) {
+              grid_ix2 = 0;
+            } else {
+              grid_ix2 = ct->lim.lam - 1;
+            }
+        }
         grid_iy2 = grid_iy + 1;
         if( grid_iy2 >= ct->lim.phi )
             grid_iy2 = ct->lim.phi - 1;

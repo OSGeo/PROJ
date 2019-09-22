@@ -54,7 +54,7 @@ master_doc = 'index'
 # General information about the project.
 
 # Keep legacy project name
-project = 'PROJ.4'
+project = 'PROJ'
 
 # See CITATION file
 title = 'PROJ coordinate transformation software library'
@@ -66,7 +66,7 @@ copyright = u'1983-{0}'.format(now.year)
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-version = '6.1.0'
+version = '7.0.0'
 
 # use same |release| as |version|
 release = version
@@ -243,7 +243,7 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 'preamble': preamble,
-'inputenc':'\usepackage[utf8]{inputenc}'
+'inputenc':'\\usepackage[utf8]{inputenc}'
 
 # Latex figure (float) alignment
 #'figure_align': 'htbp',

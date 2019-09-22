@@ -15,7 +15,7 @@ PROJ_HEAD(putp2, "Putnins P2") "\n\tPCyl, Sph";
 #define PI_DIV_3	1.0471975511965977
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY putp2_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
 	double p, c, s, V;
 	int i;
@@ -41,7 +41,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP putp2_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
 	double c;
 
@@ -55,8 +55,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 PJ *PROJECTION(putp2) {
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = putp2_s_inverse;
+    P->fwd = putp2_s_forward;
 
     return P;
 }

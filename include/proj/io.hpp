@@ -38,6 +38,7 @@
 
 #include "proj.h"
 
+#include "proj_json_streaming_writer.hpp"
 #include "util.hpp"
 
 NS_PROJ_START
@@ -181,22 +182,27 @@ class PROJ_GCC_DLL WKTFormatter {
         WKT2_SIMPLIFIED,
         WKT2_2015_SIMPLIFIED = WKT2_SIMPLIFIED,
 
-        /** Full WKT2 string, conforming to ISO 19162:2018 / OGC 18-010, with
-         * (\ref WKT2_2018) all possible nodes and new keyword names.
+        /** Full WKT2 string, conforming to ISO 19162:2019 / OGC 18-010, with
+         * (\ref WKT2_2019) all possible nodes and new keyword names.
          * Non-normative list of differences:
          * <ul>
-         *      <li>WKT2_2018 uses GEOGCRS / BASEGEOGCRS keywords for
+         *      <li>WKT2_2019 uses GEOGCRS / BASEGEOGCRS keywords for
          * GeographicCRS.</li>
          * </ul>
          */
-        WKT2_2018,
+        WKT2_2019,
 
-        /** WKT2_2018 with the simplification rule of WKT2_SIMPLIFIED */
-        WKT2_2018_SIMPLIFIED,
+        /** Deprecated alias for WKT2_2019 */
+        WKT2_2018 = WKT2_2019,
+
+        /** WKT2_2019 with the simplification rule of WKT2_SIMPLIFIED */
+        WKT2_2019_SIMPLIFIED,
+
+        /** Deprecated alias for WKT2_2019_SIMPLIFIED */
+        WKT2_2018_SIMPLIFIED = WKT2_2019_SIMPLIFIED,
 
         /** WKT1 as traditionally output by GDAL, deriving from OGC 01-009.
-            A notable departuPROJ_GCC_DLLre from WKT1_GDAL with respect to OGC
-           01-009 is
+            A notable departure from WKT1_GDAL with respect to OGC 01-009 is
             that in WKT1_GDAL, the unit of the PRIMEM value is always degrees.
            */
         WKT1_GDAL,
@@ -262,6 +268,13 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL void popOutputId();
     PROJ_INTERNAL bool outputId() const;
 
+    PROJ_INTERNAL void pushHasId(bool hasId);
+    PROJ_INTERNAL void popHasId();
+
+    PROJ_INTERNAL void pushDisableUsage();
+    PROJ_INTERNAL void popDisableUsage();
+    PROJ_INTERNAL bool outputUsage() const;
+
     PROJ_INTERNAL void
     pushAxisLinearUnit(const common::UnitOfMeasureNNPtr &unit);
     PROJ_INTERNAL void popAxisLinearUnit();
@@ -303,6 +316,8 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL bool primeMeridianOrParameterUnitOmittedIfSameAsAxis() const;
     PROJ_INTERNAL bool primeMeridianInDegree() const;
     PROJ_INTERNAL bool outputCSUnitOnlyOnceIfSame() const;
+    PROJ_INTERNAL bool idOnTopLevelOnly() const;
+    PROJ_INTERNAL bool topLevelHasId() const;
 
     /** WKT version. */
     enum class Version {
@@ -313,7 +328,7 @@ class PROJ_GCC_DLL WKTFormatter {
     };
 
     PROJ_INTERNAL Version version() const;
-    PROJ_INTERNAL bool use2018Keywords() const;
+    PROJ_INTERNAL bool use2019Keywords() const;
     PROJ_INTERNAL bool useESRIDialect() const;
 
     PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
@@ -419,11 +434,12 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_INTERNAL void setOmitProjLongLatIfPossible(bool omit);
     PROJ_INTERNAL bool omitProjLongLatIfPossible() const;
 
-    PROJ_INTERNAL void setOmitZUnitConversion(bool omit);
+    PROJ_INTERNAL void pushOmitZUnitConversion();
+    PROJ_INTERNAL void popOmitZUnitConversion();
     PROJ_INTERNAL bool omitZUnitConversion() const;
 
-    PROJ_INTERNAL void setDropEarlyBindingsTerms(bool drop);
-    PROJ_INTERNAL bool getDropEarlyBindingsTerms() const;
+    PROJ_INTERNAL void setLegacyCRSToCRSContext(bool legacyContext);
+    PROJ_INTERNAL bool getLegacyCRSToCRSContext() const;
 
     PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
 
@@ -442,6 +458,102 @@ class PROJ_GCC_DLL PROJStringFormatter {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+class JSONFormatter;
+/** JSONFormatter unique pointer. */
+using JSONFormatterPtr = std::unique_ptr<JSONFormatter>;
+/** Non-null JSONFormatter unique pointer. */
+using JSONFormatterNNPtr = util::nn<JSONFormatterPtr>;
+
+/** \brief Formatter to JSON strings.
+ *
+ * An instance of this class can only be used by a single
+ * thread at a time.
+ */
+class PROJ_GCC_DLL JSONFormatter {
+  public:
+    PROJ_DLL static JSONFormatterNNPtr
+    create(DatabaseContextPtr dbContext = nullptr);
+    //! @cond Doxygen_Suppress
+    PROJ_DLL ~JSONFormatter();
+    //! @endcond
+
+    PROJ_DLL JSONFormatter &setMultiLine(bool multiLine) noexcept;
+    PROJ_DLL JSONFormatter &setIndentationWidth(int width) noexcept;
+    PROJ_DLL JSONFormatter &setSchema(const std::string &schema) noexcept;
+
+    PROJ_DLL const std::string &toString() const;
+
+    PROJ_PRIVATE :
+
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL CPLJSonStreamingWriter &
+        writer() const;
+
+    struct ObjectContext {
+        JSONFormatter &m_formatter;
+
+        ObjectContext(const ObjectContext &) = delete;
+        ObjectContext(ObjectContext &&) = default;
+
+        explicit ObjectContext(JSONFormatter &formatter, const char *objectType,
+                               bool hasId);
+        ~ObjectContext();
+    };
+    PROJ_INTERNAL inline ObjectContext MakeObjectContext(const char *objectType,
+                                                         bool hasId) {
+        return ObjectContext(*this, objectType, hasId);
+    }
+
+    PROJ_INTERNAL void setAllowIDInImmediateChild();
+
+    PROJ_INTERNAL void setOmitTypeInImmediateChild();
+
+    PROJ_INTERNAL void setAbridgedTransformation(bool abriged);
+    PROJ_INTERNAL bool abridgedTransformation() const;
+
+    // cppcheck-suppress functionStatic
+    PROJ_INTERNAL bool outputId() const;
+
+    PROJ_INTERNAL bool outputUsage() const;
+
+    //! @endcond
+
+  protected:
+    //! @cond Doxygen_Suppress
+    PROJ_INTERNAL explicit JSONFormatter();
+    JSONFormatter(const JSONFormatter &other) = delete;
+
+    INLINED_MAKE_UNIQUE
+    //! @endcond
+
+  private:
+    PROJ_OPAQUE_PRIVATE_DATA
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Interface for an object that can be exported to JSON. */
+class PROJ_GCC_DLL IJSONExportable {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_DLL virtual ~IJSONExportable();
+    //! @endcond
+
+    /** Builds a JSON representation. May throw a FormattingException */
+    PROJ_DLL std::string
+    exportToJSON(JSONFormatter *formatter) const; // throw(FormattingException)
+
+    PROJ_PRIVATE :
+
+        //! @cond Doxygen_Suppress
+        PROJ_INTERNAL virtual void
+        _exportToJSON(
+            JSONFormatter *formatter) const = 0; // throw(FormattingException)
+    //! @endcond
 };
 
 // ---------------------------------------------------------------------------
@@ -630,8 +742,10 @@ class PROJ_GCC_DLL WKTParser {
 
     /** Guessed WKT "dialect" */
     enum class PROJ_MSVC_DLL WKTGuessedDialect {
-        /** \ref WKT2_2018 */
-        WKT2_2018,
+        /** \ref WKT2_2019 */
+        WKT2_2019,
+        /** Deprecated alias for WKT2_2019 */
+        WKT2_2018 = WKT2_2019,
         /** \ref WKT2_2015 */
         WKT2_2015,
         /** \ref WKT1 */
@@ -891,31 +1005,35 @@ class PROJ_GCC_DLL AuthorityFactory {
     /** CRS information */
     struct CRSInfo {
         /** Authority name */
-        std::string authName{};
+        std::string authName;
         /** Code */
-        std::string code{};
+        std::string code;
         /** Name */
-        std::string name{};
+        std::string name;
         /** Type */
-        ObjectType type{ObjectType::CRS};
+        ObjectType type;
         /** Whether the object is deprecated */
-        bool deprecated{};
+        bool deprecated;
         /** Whereas the west_lon_degree, south_lat_degree, east_lon_degree and
-        * north_lat_degree fields are valid. */
-        bool bbox_valid{};
+         * north_lat_degree fields are valid. */
+        bool bbox_valid;
         /** Western-most longitude of the area of use, in degrees. */
-        double west_lon_degree{};
+        double west_lon_degree;
         /** Southern-most latitude of the area of use, in degrees. */
-        double south_lat_degree{};
+        double south_lat_degree;
         /** Eastern-most longitude of the area of use, in degrees. */
-        double east_lon_degree{};
+        double east_lon_degree;
         /** Northern-most latitude of the area of use, in degrees. */
-        double north_lat_degree{};
+        double north_lat_degree;
         /** Name of the area of use. */
-        std::string areaName{};
+        std::string areaName;
         /** Name of the projection method for a projected CRS. Might be empty
          * even for projected CRS in some cases. */
-        std::string projectionMethodName{};
+        std::string projectionMethodName;
+
+        //! @cond Doxygen_Suppress
+        CRSInfo();
+        //! @endcond
     };
 
     PROJ_DLL std::list<CRSInfo> getCRSInfoList() const;
@@ -981,15 +1099,20 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_INTERNAL std::list<crs::CompoundCRSNNPtr>
     createCompoundCRSFromExisting(const crs::CompoundCRSNNPtr &crs) const;
+
+    PROJ_INTERNAL crs::CRSNNPtr
+    createCoordinateReferenceSystem(const std::string &code,
+                                    bool allowCompound) const;
+
+    PROJ_INTERNAL std::list<datum::GeodeticReferenceFrameNNPtr>
+    getPreferredHubGeodeticReferenceFrames(
+        const std::string &geodeticReferenceFrameCode) const;
+
     //! @endcond
 
   protected:
     PROJ_INTERNAL AuthorityFactory(const DatabaseContextNNPtr &context,
                                    const std::string &authorityName);
-
-    PROJ_INTERNAL crs::CRSNNPtr
-    createCoordinateReferenceSystem(const std::string &code,
-                                    bool allowCompound) const;
 
     PROJ_INTERNAL crs::GeodeticCRSNNPtr
     createGeodeticCRS(const std::string &code, bool geographicOnly) const;

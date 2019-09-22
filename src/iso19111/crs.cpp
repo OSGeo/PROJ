@@ -591,6 +591,104 @@ CRSNNPtr CRS::alterId(const std::string &authName,
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+static bool isAxisListNorthEast(
+    const std::vector<cs::CoordinateSystemAxisNNPtr> &axisList) {
+    const auto &dir0 = axisList[0]->direction();
+    const auto &dir1 = axisList[1]->direction();
+    return (&dir0 == &cs::AxisDirection::NORTH &&
+            &dir1 == &cs::AxisDirection::EAST);
+}
+// ---------------------------------------------------------------------------
+
+bool CRS::mustAxisOrderBeSwitchedForVisualization() const {
+
+    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        const auto &comps = compoundCRS->componentReferenceSystems();
+        if (!comps.empty()) {
+            return comps[0]->mustAxisOrderBeSwitchedForVisualization();
+        }
+    }
+
+    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        return isAxisListNorthEast(geogCRS->coordinateSystem()->axisList());
+    }
+
+    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        return isAxisListNorthEast(projCRS->coordinateSystem()->axisList());
+    }
+
+    return false;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+CRSNNPtr CRS::normalizeForVisualization() const {
+    auto props = util::PropertyMap().set(
+        common::IdentifiedObject::NAME_KEY,
+        nameStr() + " (with axis order normalized for visualization)");
+
+    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        const auto &comps = compoundCRS->componentReferenceSystems();
+        if (!comps.empty()) {
+            std::vector<CRSNNPtr> newComps;
+            newComps.emplace_back(comps[0]->normalizeForVisualization());
+            for (size_t i = 1; i < comps.size(); i++) {
+                newComps.emplace_back(comps[i]);
+            }
+            return util::nn_static_pointer_cast<CRS>(
+                CompoundCRS::create(props, newComps));
+        }
+    }
+
+    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        const auto &axisList = geogCRS->coordinateSystem()->axisList();
+        if (isAxisListNorthEast(axisList)) {
+            auto cs = axisList.size() == 2
+                          ? cs::EllipsoidalCS::create(util::PropertyMap(),
+                                                      axisList[1], axisList[0])
+                          : cs::EllipsoidalCS::create(util::PropertyMap(),
+                                                      axisList[1], axisList[0],
+                                                      axisList[2]);
+            return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
+                props, geogCRS->datum(), geogCRS->datumEnsemble(), cs));
+        }
+    }
+
+    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        const auto &axisList = projCRS->coordinateSystem()->axisList();
+        if (isAxisListNorthEast(axisList)) {
+            auto cs =
+                axisList.size() == 2
+                    ? cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0])
+                    : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                              axisList[0], axisList[2]);
+            return util::nn_static_pointer_cast<CRS>(
+                ProjectedCRS::create(props, projCRS->baseCRS(),
+                                     projCRS->derivingConversionRef(), cs));
+        }
+    }
+
+    return NN_NO_CHECK(
+        std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Identify the CRS with reference CRSs.
  *
  * The candidate CRSs are either hard-coded, or looked in the database when
@@ -654,6 +752,96 @@ CRS::getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const {
                              ->createCoordinateReferenceSystem(pair.second));
     }
     return res;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a variant of this CRS "promoted" to a 3D one, if not already
+ * the case.
+ *
+ * The new axis will be ellipsoidal height, oriented upwards, and with metre
+ * units.
+ *
+ * @param newName Name of the new CRS. If empty, nameStr() will be used.
+ * @param dbContext Database context to look for potentially already registered
+ *                  3D CRS. May be nullptr.
+ * @return a new CRS promoted to 3D, or the current one if already 3D or not
+ * applicable.
+ * @since 7.0
+ */
+CRSNNPtr CRS::promoteTo3D(const std::string &newName,
+                          const io::DatabaseContextPtr &dbContext) const {
+
+    const auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        const auto &axisList = geogCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 2) {
+            const auto &l_identifiers = identifiers();
+            // First check if there is a Geographic 3D CRS in the database
+            // of the same name.
+            // This is the common practice in the EPSG dataset.
+            if (dbContext && l_identifiers.size() == 1) {
+                auto authFactory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), *(l_identifiers[0]->codeSpace()));
+                auto res = authFactory->createObjectsFromName(
+                    nameStr(),
+                    {io::AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS},
+                    false);
+                if (!res.empty()) {
+                    const auto &firstRes = res.front();
+                    if (geogCRS->is2DPartOf3D(NN_NO_CHECK(
+                            dynamic_cast<GeographicCRS *>(firstRes.get())))) {
+                        return NN_NO_CHECK(
+                            util::nn_dynamic_pointer_cast<CRS>(firstRes));
+                    }
+                }
+            }
+
+            auto upAxis = cs::CoordinateSystemAxis::create(
+                util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                        cs::AxisName::Ellipsoidal_height),
+                cs::AxisAbbreviation::h, cs::AxisDirection::UP,
+                common::UnitOfMeasure::METRE);
+            auto cs = cs::EllipsoidalCS::create(
+                util::PropertyMap(), axisList[0], axisList[1], upAxis);
+            return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        !newName.empty() ? newName : nameStr()),
+                geogCRS->datum(), geogCRS->datumEnsemble(), cs));
+        }
+    }
+
+    const auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        const auto &axisList = projCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 2) {
+            auto base3DCRS =
+                projCRS->baseCRS()->promoteTo3D(std::string(), dbContext);
+            auto upAxis = cs::CoordinateSystemAxis::create(
+                util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                        cs::AxisName::Ellipsoidal_height),
+                cs::AxisAbbreviation::h, cs::AxisDirection::UP,
+                common::UnitOfMeasure::METRE);
+            auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                              axisList[1], upAxis);
+            return util::nn_static_pointer_cast<CRS>(ProjectedCRS::create(
+                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                        !newName.empty() ? newName : nameStr()),
+                NN_NO_CHECK(
+                    util::nn_dynamic_pointer_cast<GeodeticCRS>(base3DCRS)),
+                projCRS->derivingConversionRef(), cs));
+        }
+    }
+
+    const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+    if (boundCRS) {
+        return BoundCRS::create(
+            boundCRS->baseCRS()->promoteTo3D(newName, dbContext),
+            boundCRS->hubCRS(), boundCRS->transformation());
+    }
+
+    return NN_NO_CHECK(
+        std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
 
 // ---------------------------------------------------------------------------
@@ -1050,7 +1238,7 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isGeographic =
         dynamic_cast<const GeographicCRS *>(this) != nullptr;
     formatter->startNode(isWKT2
-                             ? ((formatter->use2018Keywords() && isGeographic)
+                             ? ((formatter->use2019Keywords() && isGeographic)
                                     ? io::WKTConstants::GEOGCRS
                                     : io::WKTConstants::GEODCRS)
                              : isGeocentric() ? io::WKTConstants::GEOCCS
@@ -1210,7 +1398,7 @@ void GeodeticCRS::addDatumInfoToPROJString(
     const auto &nadgrids = formatter->getHDatumExtension();
     const auto &l_datum = datum();
     if (formatter->getCRSExport() && l_datum && TOWGS84Params.empty() &&
-        nadgrids.empty() && !formatter->getDropEarlyBindingsTerms()) {
+        nadgrids.empty()) {
         if (l_datum->_isEquivalentTo(
                 datum::GeodeticReferenceFrame::EPSG_6326.get(),
                 util::IComparable::Criterion::EQUIVALENT)) {
@@ -1225,7 +1413,12 @@ void GeodeticCRS::addDatumInfoToPROJString(
                        datum::GeodeticReferenceFrame::EPSG_6269.get(),
                        util::IComparable::Criterion::EQUIVALENT)) {
             datumWritten = true;
-            formatter->addParam("datum", "NAD83");
+            if (formatter->getLegacyCRSToCRSContext()) {
+                // We do not want datum=NAD83 to cause a useless towgs84=0,0,0
+                formatter->addParam("ellps", "GRS80");
+            } else {
+                formatter->addParam("datum", "NAD83");
+            }
         }
     }
     if (!datumWritten) {
@@ -1238,6 +1431,42 @@ void GeodeticCRS::addDatumInfoToPROJString(
     if (!nadgrids.empty()) {
         formatter->addParam("nadgrids", nadgrids);
     }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void GeodeticCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("GeodeticCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    const auto &l_datum(datum());
+    if (l_datum) {
+        writer.AddObjKey("datum");
+        l_datum->_exportToJSON(formatter);
+    } else {
+        writer.AddObjKey("datum_ensemble");
+        formatter->setOmitTypeInImmediateChild();
+        datumEnsemble()->_exportToJSON(formatter);
+    }
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
 
@@ -1286,6 +1515,36 @@ GeodeticCRSNNPtr GeodeticCRS::createEPSG_4978() {
         datum::GeodeticReferenceFrame::EPSG_6326,
         cs::CartesianCS::createGeocentric(common::UnitOfMeasure::METRE));
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+static bool hasCodeCompatibleOfAuthorityFactory(
+    const common::IdentifiedObject *obj,
+    const io::AuthorityFactoryPtr &authorityFactory) {
+    const auto &ids = obj->identifiers();
+    if (!ids.empty() && authorityFactory->getAuthority().empty()) {
+        return true;
+    }
+    for (const auto &id : ids) {
+        if (*(id->codeSpace()) == authorityFactory->getAuthority()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool hasCodeCompatibleOfAuthorityFactory(
+    const metadata::IdentifierNNPtr &id,
+    const io::AuthorityFactoryPtr &authorityFactory) {
+    if (authorityFactory->getAuthority().empty()) {
+        return true;
+    }
+    return *(id->codeSpace()) == authorityFactory->getAuthority();
+}
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1432,19 +1691,22 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     searchByEllipsoid();
                 }
             }
-        } else if (!identifiers().empty()) {
+        } else if (hasCodeCompatibleOfAuthorityFactory(this,
+                                                       authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createGeodeticCRS(id->code());
-                    bool match = _isEquivalentTo(crs.get(), crsCriterion);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createGeodeticCRS(id->code());
+                        bool match = _isEquivalentTo(crs.get(), crsCriterion);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else {
@@ -1726,14 +1988,18 @@ bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
     const auto &secondAxis = axis[1];
     const auto &otherFirstAxis = otherAxis[0];
     const auto &otherSecondAxis = otherAxis[1];
-    if (!(firstAxis->_isEquivalentTo(otherFirstAxis.get()) &&
-          secondAxis->_isEquivalentTo(otherSecondAxis.get()))) {
+    if (!(firstAxis->_isEquivalentTo(
+              otherFirstAxis.get(), util::IComparable::Criterion::EQUIVALENT) &&
+          secondAxis->_isEquivalentTo(
+              otherSecondAxis.get(),
+              util::IComparable::Criterion::EQUIVALENT))) {
         return false;
     }
     const auto &thisDatum = GeodeticCRS::getPrivate()->datum_;
     const auto &otherDatum = other->GeodeticCRS::getPrivate()->datum_;
     if (thisDatum && otherDatum) {
-        return thisDatum->_isEquivalentTo(otherDatum.get());
+        return thisDatum->_isEquivalentTo(
+            otherDatum.get(), util::IComparable::Criterion::EQUIVALENT);
     }
     return false;
 }
@@ -1892,9 +2158,7 @@ void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     if (order[0] && order[1] && (order[0] != one || order[1] != two)) {
         formatter->addStep("axisswap");
         char orderStr[10];
-        strcpy(orderStr, order[0]);
-        strcat(orderStr, ",");
-        strcat(orderStr, order[1]);
+        sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
         formatter->addParam("order", orderStr);
     }
 }
@@ -1918,12 +2182,71 @@ void GeographicCRS::_exportToPROJString(
         primeMeridian()->longitude().getSIValue() != 0.0 ||
         !formatter->getTOWGS84Parameters().empty() ||
         !formatter->getHDatumExtension().empty()) {
+
         formatter->addStep("longlat");
-        addDatumInfoToPROJString(formatter);
+        bool done = false;
+        if (formatter->getLegacyCRSToCRSContext() &&
+            formatter->getHDatumExtension().empty() &&
+            formatter->getTOWGS84Parameters().empty()) {
+            const auto &l_datum = datum();
+            if (l_datum &&
+                l_datum->_isEquivalentTo(
+                    datum::GeodeticReferenceFrame::EPSG_6326.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                done = true;
+                formatter->addParam("ellps", "WGS84");
+            } else if (l_datum &&
+                       l_datum->_isEquivalentTo(
+                           datum::GeodeticReferenceFrame::EPSG_6269.get(),
+                           util::IComparable::Criterion::EQUIVALENT)) {
+                done = true;
+                // We do not want datum=NAD83 to cause a useless towgs84=0,0,0
+                formatter->addParam("ellps", "GRS80");
+            }
+        }
+        if (!done) {
+            addDatumInfoToPROJString(formatter);
+        }
     }
     if (!formatter->getCRSExport()) {
         addAngularUnitConvertAndAxisSwap(formatter);
     }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void GeographicCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("GeographicCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    const auto &l_datum(datum());
+    if (l_datum) {
+        writer.AddObjKey("datum");
+        l_datum->_exportToJSON(formatter);
+    } else {
+        writer.AddObjKey("datum_ensemble");
+        formatter->setOmitTypeInImmediateChild();
+        datumEnsemble()->_exportToJSON(formatter);
+    }
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
 
@@ -2068,6 +2391,7 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
 void VerticalCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
@@ -2087,6 +2411,43 @@ void VerticalCRS::_exportToPROJString(
         }
     }
 }
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void VerticalCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("VerticalCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    const auto &l_datum(datum());
+    if (l_datum) {
+        writer.AddObjKey("datum");
+        l_datum->_exportToJSON(formatter);
+    } else {
+        writer.AddObjKey("datum_ensemble");
+        formatter->setOmitTypeInImmediateChild();
+        datumEnsemble()->_exportToJSON(formatter);
+    }
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -2096,7 +2457,6 @@ void VerticalCRS::addLinearUnitConvert(
     auto &axisList = coordinateSystem()->axisList();
 
     if (!axisList.empty()) {
-        auto projUnit = axisList[0]->unit().exportToPROJString();
         if (axisList[0]->unit().conversionToSI() != 1.0) {
             formatter->addStep("unitconvert");
             formatter->addParam("z_in", "m");
@@ -2204,20 +2564,23 @@ VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const bool unsignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
                                        ci_equal(thisName, "unnamed");
-        if (!identifiers().empty()) {
+        if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createVerticalCRS(id->code());
-                    bool match = _isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createVerticalCRS(id->code());
+                        bool match = _isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else if (!unsignificantName) {
@@ -2422,16 +2785,21 @@ void DerivedCRS::setDerivingConversionCRS() {
 
 // ---------------------------------------------------------------------------
 
-void DerivedCRS::baseExportToWKT(io::WKTFormatter *&formatter,
+void DerivedCRS::baseExportToWKT(io::WKTFormatter *formatter,
                                  const std::string &keyword,
                                  const std::string &baseKeyword) const {
     formatter->startNode(keyword, !identifiers().empty());
     formatter->addQuotedString(nameStr());
 
     const auto &l_baseCRS = d->baseCRS_;
-    formatter->startNode(baseKeyword, !l_baseCRS->identifiers().empty());
+    formatter->startNode(baseKeyword, formatter->use2019Keywords() &&
+                                          !l_baseCRS->identifiers().empty());
     formatter->addQuotedString(l_baseCRS->nameStr());
     l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
+    if (formatter->use2019Keywords() &&
+        !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
+        l_baseCRS->formatID(formatter);
+    }
     formatter->endNode();
 
     formatter->setUseDerivingConversion(true);
@@ -2442,6 +2810,39 @@ void DerivedCRS::baseExportToWKT(io::WKTFormatter *&formatter,
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void DerivedCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext(className(), !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("base_crs");
+    baseCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("conversion");
+    formatter->setOmitTypeInImmediateChild();
+    derivingConversionRef()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -2576,9 +2977,9 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     const auto &l_coordinateSystem = d->coordinateSystem();
     const auto &axisList = l_coordinateSystem->axisList();
-    if (axisList.size() == 3 && !(isWKT2 && formatter->use2018Keywords())) {
+    if (axisList.size() == 3 && !(isWKT2 && formatter->use2019Keywords())) {
         io::FormattingException::Throw(
-            "Projected 3D CRS can only be exported since WKT2:2018");
+            "Projected 3D CRS can only be exported since WKT2:2019");
     }
 
     const auto exportAxis = [&l_coordinateSystem, &axisList, &formatter]() {
@@ -2655,11 +3056,11 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     if (isWKT2) {
         formatter->startNode(
-            (formatter->use2018Keywords() &&
+            (formatter->use2019Keywords() &&
              dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                 ? io::WKTConstants::BASEGEOGCRS
                 : io::WKTConstants::BASEGEODCRS,
-            !l_baseCRS->identifiers().empty());
+            formatter->use2019Keywords() && !l_baseCRS->identifiers().empty());
         formatter->addQuotedString(l_baseCRS->nameStr());
         l_baseCRS->exportDatumOrDatumEnsembleToWkt(formatter);
         // insert ellipsoidal cs unit when the units of the map
@@ -2670,6 +3071,10 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             geodeticCRSAxisList[0]->unit()._exportToWKT(formatter);
         }
         l_baseCRS->primeMeridian()->_exportToWKT(formatter);
+        if (formatter->use2019Keywords() &&
+            !(formatter->idOnTopLevelOnly() && formatter->topLevelHasId())) {
+            l_baseCRS->formatID(formatter);
+        }
         formatter->endNode();
     } else {
         const auto oldAxisOutputRule = formatter->outputAxis();
@@ -2711,6 +3116,41 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
     return;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void ProjectedCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("ProjectedCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("base_crs");
+    formatter->setAllowIDInImmediateChild();
+    formatter->setOmitTypeInImmediateChild();
+    baseCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("conversion");
+    formatter->setOmitTypeInImmediateChild();
+    derivingConversionRef()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
 
@@ -2814,7 +3254,8 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                 formatter->addParam("units", projUnit);
             }
         }
-    } else if (formatter->getCRSExport()) {
+    } else if (formatter->getCRSExport() &&
+               !formatter->getLegacyCRSToCRSContext()) {
         formatter->addParam("units", "m");
     }
 
@@ -2843,9 +3284,7 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
             if (order[0] && order[1]) {
                 formatter->addStep("axisswap");
                 char orderStr[10];
-                strcpy(orderStr, order[0]);
-                strcat(orderStr, ",");
-                strcat(orderStr, order[1]);
+                sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
                 formatter->addParam("order", orderStr);
             }
         } else {
@@ -2998,21 +3437,24 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                        ci_equal(thisName, "unnamed");
         bool foundEquivalentName = false;
 
-        if (!identifiers().empty()) {
+        if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createProjectedCRS(id->code());
-                    bool match = _isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::
-                                       EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createProjectedCRS(id->code());
+                        bool match = _isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::
+                                EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else if (!unsignificantName) {
@@ -3087,8 +3529,8 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         // Sort results
         res.sort(lambdaSort);
 
-        if (identifiers().empty() && !foundEquivalentName &&
-            (res.empty() || res.front().second < 50)) {
+        if (!hasCodeCompatibleOfAuthorityFactory(this, authorityFactory) &&
+            !foundEquivalentName && (res.empty() || res.front().second < 50)) {
             std::set<std::pair<std::string, std::string>> alreadyKnown;
             for (const auto &pair : res) {
                 const auto &ids = pair.first->identifiers();
@@ -3270,6 +3712,36 @@ void CompoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void CompoundCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("CompoundCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("components");
+    {
+        auto componentsContext(writer.MakeArrayContext(false));
+        for (const auto &crs : componentReferenceSystems()) {
+            crs->_exportToJSON(formatter);
+        }
+    }
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 void CompoundCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
@@ -3346,20 +3818,23 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                        ci_equal(thisName, "unnamed");
         bool foundEquivalentName = false;
 
-        if (!identifiers().empty()) {
+        if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
             // If the CRS has already an id, check in the database for the
             // official object, and verify that they are equivalent.
             for (const auto &id : identifiers()) {
-                try {
-                    auto crs = io::AuthorityFactory::create(
-                                   authorityFactory->databaseContext(),
-                                   *id->codeSpace())
-                                   ->createCompoundCRS(id->code());
-                    bool match = _isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT);
-                    res.emplace_back(crs, match ? 100 : 25);
-                    return res;
-                } catch (const std::exception &) {
+                if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
+                    try {
+                        auto crs = io::AuthorityFactory::create(
+                                       authorityFactory->databaseContext(),
+                                       *id->codeSpace())
+                                       ->createCompoundCRS(id->code());
+                        bool match = _isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::EQUIVALENT);
+                        res.emplace_back(crs, match ? 100 : 25);
+                        return res;
+                    } catch (const std::exception &) {
+                    }
                 }
             }
         } else if (!unsignificantName) {
@@ -3757,6 +4232,30 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void BoundCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("BoundCRS", !identifiers().empty()));
+
+    writer.AddObjKey("source_crs");
+    d->baseCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("target_crs");
+    d->hubCRS()->_exportToJSON(formatter);
+
+    writer.AddObjKey("transformation");
+    formatter->setOmitTypeInImmediateChild();
+    formatter->setAbridgedTransformation(true);
+    d->transformation()->_exportToJSON(formatter);
+    formatter->setAbridgedTransformation(false);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 void BoundCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
@@ -3765,11 +4264,6 @@ void BoundCRS::_exportToPROJString(
     if (!crs_exportable) {
         io::FormattingException::Throw(
             "baseCRS of BoundCRS cannot be exported as a PROJ string");
-    }
-
-    if (formatter->getDropEarlyBindingsTerms()) {
-        crs_exportable->_exportToPROJString(formatter);
-        return;
     }
 
     auto vdatumProj4GridName = getVDatumPROJ4GRIDS();
@@ -4022,7 +4516,7 @@ void DerivedGeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->addQuotedString(nameStr());
 
     auto l_baseCRS = baseCRS();
-    formatter->startNode((formatter->use2018Keywords() &&
+    formatter->startNode((formatter->use2019Keywords() &&
                           dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                              ? io::WKTConstants::BASEGEOGCRS
                              : io::WKTConstants::BASEGEODCRS,
@@ -4160,14 +4654,14 @@ void DerivedGeographicCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         io::FormattingException::Throw(
             "DerivedGeographicCRS can only be exported to WKT2");
     }
-    formatter->startNode(formatter->use2018Keywords()
+    formatter->startNode(formatter->use2019Keywords()
                              ? io::WKTConstants::GEOGCRS
                              : io::WKTConstants::GEODCRS,
                          !identifiers().empty());
     formatter->addQuotedString(nameStr());
 
     auto l_baseCRS = baseCRS();
-    formatter->startNode((formatter->use2018Keywords() &&
+    formatter->startNode((formatter->use2019Keywords() &&
                           dynamic_cast<const GeographicCRS *>(l_baseCRS.get()))
                              ? io::WKTConstants::BASEGEOGCRS
                              : io::WKTConstants::BASEGEODCRS,
@@ -4293,9 +4787,9 @@ DerivedProjectedCRSNNPtr DerivedProjectedCRS::create(
 //! @cond Doxygen_Suppress
 void DerivedProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2 || !formatter->use2018Keywords()) {
+    if (!isWKT2 || !formatter->use2019Keywords()) {
         io::FormattingException::Throw(
-            "DerivedProjectedCRS can only be exported to WKT2:2018");
+            "DerivedProjectedCRS can only be exported to WKT2:2019");
     }
     formatter->startNode(io::WKTConstants::DERIVEDPROJCRS,
                          !identifiers().empty());
@@ -4445,6 +4939,36 @@ void TemporalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void TemporalCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("TemporalCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("datum");
+    formatter->setOmitTypeInImmediateChild();
+    datum()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 bool TemporalCRS::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -4553,6 +5077,36 @@ void EngineeringCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+void EngineeringCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("EngineeringCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("datum");
+    formatter->setOmitTypeInImmediateChild();
+    datum()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 bool EngineeringCRS::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
@@ -4650,6 +5204,36 @@ void ParametricCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     coordinateSystem()->_exportToWKT(formatter);
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void ParametricCRS::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(io::FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("ParametricCRS", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    auto l_name = nameStr();
+    if (l_name.empty()) {
+        writer.Add("unnamed");
+    } else {
+        writer.Add(l_name);
+    }
+
+    writer.AddObjKey("datum");
+    formatter->setOmitTypeInImmediateChild();
+    datum()->_exportToJSON(formatter);
+
+    writer.AddObjKey("coordinate_system");
+    formatter->setOmitTypeInImmediateChild();
+    coordinateSystem()->_exportToJSON(formatter);
+
+    ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
 
@@ -4849,14 +5433,21 @@ DerivedCRSTemplate<DerivedCRSTraits>::create(
 
 // ---------------------------------------------------------------------------
 
-static void DerivedCRSTemplateCheckExportToWKT(io::WKTFormatter *&formatter,
+template <class DerivedCRSTraits>
+const char *DerivedCRSTemplate<DerivedCRSTraits>::className() const {
+    return DerivedCRSTraits::CRSName().c_str();
+}
+
+// ---------------------------------------------------------------------------
+
+static void DerivedCRSTemplateCheckExportToWKT(io::WKTFormatter *formatter,
                                                const std::string &crsName,
-                                               bool wkt2_2018_only) {
+                                               bool wkt2_2019_only) {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    if (!isWKT2 || (wkt2_2018_only && !formatter->use2018Keywords())) {
+    if (!isWKT2 || (wkt2_2019_only && !formatter->use2019Keywords())) {
         io::FormattingException::Throw(crsName +
                                        " can only be exported to WKT2" +
-                                       (wkt2_2018_only ? ":2018" : ""));
+                                       (wkt2_2019_only ? ":2019" : ""));
     }
 }
 
@@ -4866,7 +5457,7 @@ template <class DerivedCRSTraits>
 void DerivedCRSTemplate<DerivedCRSTraits>::_exportToWKT(
     io::WKTFormatter *formatter) const {
     DerivedCRSTemplateCheckExportToWKT(formatter, DerivedCRSTraits::CRSName(),
-                                       DerivedCRSTraits::wkt2_2018_only);
+                                       DerivedCRSTraits::wkt2_2019_only);
     baseExportToWKT(formatter, DerivedCRSTraits::WKTKeyword(),
                     DerivedCRSTraits::WKTBaseKeyword());
 }

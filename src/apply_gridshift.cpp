@@ -34,7 +34,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "proj_internal.h"
 #include "proj.h"
 #include "proj_internal.h"
 
@@ -59,7 +58,10 @@ int pj_apply_gridshift( projCtx ctx, const char *nadgrids, int inverse,
     gridlist = pj_gridlist_from_nadgrids( ctx, nadgrids, &grid_count );
 
     if( gridlist == nullptr || grid_count == 0 )
+    {
+        pj_dalloc( gridlist );
         return ctx->last_errno;
+    }
 
     ret = pj_apply_gridshift_3( ctx, gridlist, grid_count, inverse,
                                 point_count, point_offset, x, y, z );
@@ -342,7 +344,14 @@ PJ_LP proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction) {
     ct = find_ctable(P->ctx, lp, P->gridlist_count, P->gridlist);
 
     if (ct == nullptr || ct->cvs == nullptr) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+        if( P->gridlist_count == 1 &&
+            strcmp(P->gridlist[0]->gridname, "null") == 0) {
+          // TODO: remove this particular case that is put there just to be
+          // able to handle longitudes outside of -180,180
+          out = lp;
+        } else {
+          pj_ctx_set_errno( P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+        }
         return out;
     }
 

@@ -198,7 +198,7 @@ git push --tags
 -------------------------------------------------------------------------------
 
 When the new tag is pushed upstream GitHub picks up that a new release has been
-issued. Update the new release on https://github.com/OSGeo/proj.4/releases with
+issued. Update the new release on https://github.com/OSGeo/PROJ/releases with
 the release notes from `NEWS` and add the prepared source distribution archives
 to the release (otherwise GitHub will just package the entire repository - we
 don't want that).
@@ -220,8 +220,6 @@ Make some noise on Twitter and other relevant social media.
 3.1 Update version numbers
 -------------------------------------------------------------------------------
 
-*Skip this step if you are preparing a patch release.*
-
 PROJ uses [semantic versioning](http://semver.org/). Depending on the changes
 in the release will be either a major, minor or patch release. Update the
 version numbers in the files.
@@ -235,4 +233,13 @@ version numbers in the files.
   - doc/source/conf.py:   Update version number
 
 
-*Commit changes to master branch.*
+*Commit changes. Either to master or maintenance branch depending on the nature
+of the release.*
+
+3.2 Disable website deployment when releasing a new non-bugfix version
+-------------------------------------------------------------------------------
+
+If the previous active version was, let's say, 6.1 and the new version is, let's say, 6.2,
+then checkout 6.1 branch, and in travis/after_success.sh, remove the code
+that causes commits to 6.1 to cause a website refresh, that is remove the
+code under `if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "6.1"; then`.

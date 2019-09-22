@@ -20,6 +20,10 @@ shifts has slowly worked its way into PROJ as well. Today PROJ supports more
 than a hundred different map projections and can transform coordinates between
 datums using all but the most obscure geodetic techniques.
 
+  .. image:: ../images/OSGeo_community.png
+     :scale: 30 %
+     :alt: OSGeo Community
+
 Citation
 -------------------------------------------------------------------------------
 

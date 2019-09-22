@@ -11,11 +11,11 @@ cs2cs
 Synopsis
 ********
 
-    **cs2cs** [ **-eEfIlrstvwW** [ args ] ] [ *+opts[=arg]* ] [ +to [*+opts[=arg]*] ] file[s]
+    **cs2cs** [**-eEfIlrstvwW** [args]] [*+opt[=arg]* ...] [+to *+opt[=arg]* ...] file ...
 
 or
 
-    **cs2cs** [ **-eEfIlrstvwW** [ args ] ] {source_crs} +to {target_crs} file[s]
+    **cs2cs** [**-eEfIlrstvwW** [args]] {source_crs} +to {target_crs} file ...
 
     where {source_crs} or {target_crs} is a PROJ string, a WKT string or a AUTHORITY:CODE
     (where AUTHORITY is the name of a CRS authority and CODE the code of a CRS
@@ -25,7 +25,7 @@ or
 
 or
 
-    **cs2cs** [ **-eEfIlrstvwW** [ args ] ] {source_crs} {target_crs}
+    **cs2cs** [**-eEfIlrstvwW** [args]] {source_crs} {target_crs}
 
 .. versionadded:: 6.0.0
 
@@ -132,12 +132,12 @@ The following control parameters can appear in any order:
 
 .. only:: man
 
-    The *+args* run-line arguments are associated with cartographic
+    The *+opt* run-line arguments are associated with cartographic
     parameters.
 
 .. only:: html
 
-    The *+args* run-line arguments are associated with cartographic
+    The *+opt* run-line arguments are associated with cartographic
     parameters. Usage varies with projection and for a complete description
     consult the :ref:`projection pages <projections>`.
 
@@ -229,10 +229,10 @@ outputs
     Bugs
     ****
 
-    A list of know bugs can be found at https://github.com/OSGeo/proj.4/issues
+    A list of know bugs can be found at https://github.com/OSGeo/PROJ/issues
     where new bug reports can be submitted to.
 
     Home page
     *********
 
-    https://proj4.org/
+    https://proj.org/

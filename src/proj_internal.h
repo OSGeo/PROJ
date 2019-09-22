@@ -76,10 +76,6 @@
 
 #define STATIC_ASSERT(COND) ((void)sizeof(char[(COND) ? 1 : -1]))
 
-#if !defined(HAVE_C99_MATH)
-#define HAVE_C99_MATH 0
-#endif
-
 #ifndef PJ_TODEG
 #define PJ_TODEG(rad)  ((rad)*180.0/M_PI)
 #endif
@@ -517,6 +513,7 @@ struct PJconsts {
     // cached results
     mutable std::string lastWKT{};
     mutable std::string lastPROJString{};
+    mutable std::string lastJSONString{};
     mutable bool gridsNeededAsked = false;
     mutable std::vector<NS_PROJ::operation::GridDescription> gridsNeeded{};
 
@@ -624,7 +621,7 @@ struct FACTORS {
 #define PJD_ERR_NO_COLON_IN_INIT_STRING  -3
 #define PJD_ERR_PROJ_NOT_NAMED           -4
 #define PJD_ERR_UNKNOWN_PROJECTION_ID    -5
-#define PJD_ERR_ECCENTRICITY_IS_ONE      -6
+#define PJD_ERR_INVALID_ECCENTRICITY     -6
 #define PJD_ERR_UNKNOWN_UNIT_ID          -7
 #define PJD_ERR_INVALID_BOOLEAN_PARAM    -8
 #define PJD_ERR_UNKNOWN_ELLP_PARAM       -9
@@ -648,7 +645,7 @@ struct FACTORS {
 #define PJD_ERR_W_OR_M_ZERO_OR_LESS     -27
 #define PJD_ERR_LSAT_NOT_IN_RANGE       -28
 #define PJD_ERR_PATH_NOT_IN_RANGE       -29
-#define PJD_ERR_H_LESS_THAN_ZERO        -30
+#define PJD_ERR_INVALID_H               -30
 #define PJD_ERR_K_LESS_THAN_ZERO        -31
 #define PJD_ERR_LAT_1_OR_2_ZERO_OR_90   -32
 #define PJD_ERR_LAT_0_OR_ALPHA_EQ_90    -33
@@ -679,6 +676,7 @@ struct FACTORS {
 #define PJD_ERR_INVALID_ARG             -58
 #define PJD_ERR_INCONSISTENT_UNIT       -59
 #define PJD_ERR_MUTUALLY_EXCLUSIVE_ARGS -60
+#define PJD_ERR_GENERIC_ERROR           -61
 /* NOTE: Remember to update src/strerrno.cpp, src/apps/gie.cpp and transient_error in */
 /* src/transform.cpp when adding new value */
 
@@ -704,7 +702,7 @@ struct projCtx_t {
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
 
-    std::string curStringInCreateFromPROJString{};
+    int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
 
     projCtx_t() = default;
     projCtx_t(const projCtx_t&);
@@ -897,12 +895,6 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
 int pj_gc_apply_gridshift( PJ *defn, int inverse,
                            long point_count, int point_offset,
                            double *x, double *y, double *z );
-
-PJ_GRIDINFO *pj_gc_findgrid( projCtx_t *ctx,
-                             PJ_GridCatalog *catalog, int after,
-                             PJ_LP location, double date,
-                             PJ_Region *optional_region,
-                             double *grid_date );
 
 double pj_gc_parsedate( projCtx_t *, const char * );
 

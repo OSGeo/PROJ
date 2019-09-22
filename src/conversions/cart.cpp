@@ -43,8 +43,7 @@
 #define PJ_LIB__
 
 #include "proj_internal.h"
-#include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
 
@@ -163,6 +162,12 @@ static PJ_LPZ geodetic (PJ_XYZ cart,  PJ *P) {
     c  =  cos(theta);
     s  =  sin(theta);
     lpz.phi  =  atan2 (cart.z + P->e2s*P->b*s*s*s,  p - P->es*P->a*c*c*c);
+    if( fabs(lpz.phi) > M_HALFPI ) {
+        // this happen on non-sphere ellipsoid when x,y,z is very close to 0
+        // there is no single solution to the cart->geodetic conversion in
+        // that case, so arbitrarily pickup phi = 0.
+        lpz.phi = 0;
+    }
     lpz.lam  =  atan2 (cart.y, cart.x);
     N        =  normal_radius_of_curvature (P->a, P->es, lpz.phi);
 

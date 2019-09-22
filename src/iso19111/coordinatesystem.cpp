@@ -311,8 +311,8 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
                                         bool disableAbbrev) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(io::WKTConstants::AXIS, !identifiers().empty());
-    std::string axisName = *(name()->description());
-    std::string abbrev = abbreviation();
+    const std::string &axisName = nameStr();
+    const std::string &abbrev = abbreviation();
     std::string parenthesizedAbbrev = "(" + abbrev + ")";
     std::string dir = direction().toString();
     std::string axisDesignation;
@@ -387,6 +387,41 @@ void CoordinateSystemAxis::_exportToWKT(io::WKTFormatter *formatter, int order,
         formatID(formatter);
     }
     formatter->endNode();
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void CoordinateSystemAxis::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("Axis", !identifiers().empty()));
+
+    writer.AddObjKey("name");
+    writer.Add(nameStr());
+
+    writer.AddObjKey("abbreviation");
+    writer.Add(abbreviation());
+
+    writer.AddObjKey("direction");
+    writer.Add(direction().toString());
+
+    const auto &l_unit(unit());
+    if (l_unit == common::UnitOfMeasure::METRE ||
+        l_unit == common::UnitOfMeasure::DEGREE) {
+        writer.AddObjKey("unit");
+        writer.Add(l_unit.name());
+    } else if (l_unit.type() != common::UnitOfMeasure::Type::NONE) {
+        writer.AddObjKey("unit");
+        l_unit._exportToJSON(formatter);
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
 }
 //! @endcond
 
@@ -484,7 +519,7 @@ void CoordinateSystem::_exportToWKT(
     const auto &l_axisList = axisList();
     if (isWKT2) {
         formatter->startNode(io::WKTConstants::CS_, !identifiers().empty());
-        formatter->add(getWKT2Type(formatter->use2018Keywords()));
+        formatter->add(getWKT2Type(formatter->use2019Keywords()));
         formatter->add(static_cast<int>(l_axisList.size()));
         formatter->endNode();
         formatter->startNode(std::string(),
@@ -530,6 +565,34 @@ void CoordinateSystem::_exportToWKT(
         formatter->endNode();
     }
 }
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+void CoordinateSystem::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto &writer = formatter->writer();
+    auto objectContext(formatter->MakeObjectContext("CoordinateSystem",
+                                                    !identifiers().empty()));
+
+    writer.AddObjKey("subtype");
+    writer.Add(getWKT2Type(true));
+
+    writer.AddObjKey("axis");
+    auto axisContext(writer.MakeArrayContext(false));
+    const auto &l_axisList = axisList();
+    for (auto &axis : l_axisList) {
+        formatter->setOmitTypeInImmediateChild();
+        axis->_exportToJSON(formatter);
+    }
+
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -722,6 +785,28 @@ EllipsoidalCS::createLongitudeLatitude(const common::UnitOfMeasure &unit) {
     return EllipsoidalCS::create(util::PropertyMap(),
                                  CoordinateSystemAxis::createLONG_EAST(unit),
                                  CoordinateSystemAxis::createLAT_NORTH(unit));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a EllipsoidalCS with a Longitude (first), Latitude
+ * (second) axis and ellipsoidal height (third) axis.
+ *
+ * @param angularUnit Angular unit of the latitude and longitude axes.
+ * @param linearUnit Linear unit of the ellipsoidal height axis.
+ * @return a new EllipsoidalCS.
+ * @since 7.0
+ */
+EllipsoidalCSNNPtr EllipsoidalCS::createLongitudeLatitudeEllipsoidalHeight(
+    const common::UnitOfMeasure &angularUnit,
+    const common::UnitOfMeasure &linearUnit) {
+    return EllipsoidalCS::create(
+        util::PropertyMap(), CoordinateSystemAxis::createLONG_EAST(angularUnit),
+        CoordinateSystemAxis::createLAT_NORTH(angularUnit),
+        CoordinateSystemAxis::create(
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                    AxisName::Ellipsoidal_height),
+            AxisAbbreviation::h, AxisDirection::UP, linearUnit));
 }
 
 // ---------------------------------------------------------------------------
@@ -1205,8 +1290,8 @@ DateTimeTemporalCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string DateTimeTemporalCS::getWKT2Type(bool use2018Keywords) const {
-    return use2018Keywords ? "TemporalDateTime" : "temporal";
+std::string DateTimeTemporalCS::getWKT2Type(bool use2019Keywords) const {
+    return use2019Keywords ? "TemporalDateTime" : "temporal";
 }
 
 // ---------------------------------------------------------------------------
@@ -1238,8 +1323,8 @@ TemporalCountCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string TemporalCountCS::getWKT2Type(bool use2018Keywords) const {
-    return use2018Keywords ? "TemporalCount" : "temporal";
+std::string TemporalCountCS::getWKT2Type(bool use2019Keywords) const {
+    return use2019Keywords ? "TemporalCount" : "temporal";
 }
 
 // ---------------------------------------------------------------------------
@@ -1271,8 +1356,8 @@ TemporalMeasureCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
-std::string TemporalMeasureCS::getWKT2Type(bool use2018Keywords) const {
-    return use2018Keywords ? "TemporalMeasure" : "temporal";
+std::string TemporalMeasureCS::getWKT2Type(bool use2019Keywords) const {
+    return use2019Keywords ? "TemporalMeasure" : "temporal";
 }
 
 } // namespace cs

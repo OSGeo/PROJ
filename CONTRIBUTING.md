@@ -19,8 +19,8 @@ the [GitHub Flow](https://guides.github.com/introduction/flow/) is an advantage.
 
 ## Help a fellow PROJ.4 user
 The main forum for support for PROJ.4 is the mailing list. You can subscribe to
-the mailing list [here](http://lists.maptools.org/mailman/listinfo/proj) and read
-the archive [here](http://lists.maptools.org/pipermail/proj/).
+the mailing list [here](http://lists.osgeo.org/mailman/listinfo/proj) and read
+the archive [here](http://lists.osgeo.org/pipermail/proj/).
 
 If you have questions about the usage of PROJ.4 the mailing list is also the place to go.
 Please *do not* use the GitHub issue tracker as a support forum. Your question is much
@@ -29,7 +29,7 @@ the issue tracker.
 
 ## Adding bug reports
 
-Bug reports are handled in the [issue tracker](https://github.com/OSGeo/proj.4/issues)
+Bug reports are handled in the [issue tracker](https://github.com/OSGeo/PROJ/issues)
 on PROJ.4's home on GitHub. Writing a good bug report is not easy. But fixing a poorly
 documented bug is not easy either, so please put in the effort it takes to create a
 thorough bug report.
@@ -56,7 +56,7 @@ definitely a problem with PROJ.4.
 ## Feature requests
 
 Got an idea for a new feature in PROJ.4? Submit a thorough description of the new
-feature in the [issue tracker](https://github.com/OSGeo/proj.4/issues). Please
+feature in the [issue tracker](https://github.com/OSGeo/PROJ/issues). Please
 include any technical documents that can help the developer make the new feature a
 reality. An example of this could be a publicly available academic paper that
 describes a new projection. Also, including a numerical test case will make it
@@ -68,18 +68,18 @@ Note that not all feature requests are accepted.
 ## Write documentation
 
 PROJ.4 is in dire need of better documentation. Any contributions of documentation
-are greatly appreciated. The PROJ.4 documentation is available on [proj4.org](https://proj4.org).
+are greatly appreciated. The PROJ.4 documentation is available on [proj.org](https://proj.org).
 The website is generated with [Sphinx](http://www.sphinx-doc.org/en/stable/). Contributions
-to the documentation should be made as [Pull Requests](https://github.com/OSGeo/proj.4/pulls)
+to the documentation should be made as [Pull Requests](https://github.com/OSGeo/PROJ/pulls)
 on GitHub.
 
 If you intend to document one of PROJ.4's supported projections please use the
-[Mercator projection](https://proj4.org/projections/merc.html) as a template.
+[Mercator projection](https://proj.org/operations/projections/merc.html) as a template.
 
 
 ## Code contributions
 
-See [Code Contributions](https://proj4.org/development/for_proj_contributors.html)
+See [Code Contributions](https://proj.org/community/code_contributions.html)
 
 #### Legalese
 Committers are the front line gatekeepers to keep the code base clear of improperly contributed code.

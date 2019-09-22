@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test ISO19111:2018 implementation
+ * Purpose:  Test ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -85,8 +85,6 @@ TEST(factory, AuthorityFactory_createUnitOfMeasure_linear) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createUnitOfMeasure("-1"),
                  NoSuchAuthorityCodeException);
-    EXPECT_TRUE(nn_dynamic_pointer_cast<UnitOfMeasure>(
-                    factory->createObject("9001")) != nullptr);
     auto uom = factory->createUnitOfMeasure("9001");
     EXPECT_EQ(uom->name(), "metre");
     EXPECT_EQ(uom->type(), UnitOfMeasure::Type::LINEAR);
@@ -150,7 +148,8 @@ TEST(factory, AuthorityFactory_createPrimeMeridian) {
     EXPECT_THROW(factory->createPrimeMeridian("-1"),
                  NoSuchAuthorityCodeException);
     EXPECT_TRUE(nn_dynamic_pointer_cast<PrimeMeridian>(
-                    factory->createObject("8903")) != nullptr);
+                    AuthorityFactory::create(DatabaseContext::create(), "ESRI")
+                        ->createObject("108900")) != nullptr);
     auto pm = factory->createPrimeMeridian("8903");
     ASSERT_EQ(pm->identifiers().size(), 1U);
     EXPECT_EQ(pm->identifiers()[0]->code(), "8903");
@@ -706,7 +705,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_8_CF) {
                     "        ID[\"EPSG\",1049]],\n";
 
     auto wkt = op->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     EXPECT_TRUE(wkt.find(expected) != std::string::npos) << wkt;
 }
 
@@ -717,6 +716,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
     auto op = factory->createCoordinateOperation("6276", false);
     auto expected =
         "COORDINATEOPERATION[\"ITRF2008 to GDA94 (1)\",\n"
+        "    VERSION[\"GA-Aus 2010\"],\n"
         "    SOURCECRS[\n"
         "        GEODCRS[\"ITRF2008\",\n"
         "            DATUM[\"International Terrestrial Reference Frame "
@@ -734,7 +734,8 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
         "                    LENGTHUNIT[\"metre\",1]],\n"
         "                AXIS[\"(Z)\",geocentricZ,\n"
         "                    ORDER[3],\n"
-        "                    LENGTHUNIT[\"metre\",1]]]],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",5332]]],\n"
         "    TARGETCRS[\n"
         "        GEODCRS[\"GDA94\",\n"
         "            DATUM[\"Geocentric Datum of Australia 1994\",\n"
@@ -751,7 +752,8 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
         "                    LENGTHUNIT[\"metre\",1]],\n"
         "                AXIS[\"(Z)\",geocentricZ,\n"
         "                    ORDER[3],\n"
-        "                    LENGTHUNIT[\"metre\",1]]]],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",4938]]],\n"
         "    METHOD[\"Time-dependent Coordinate Frame rotation (geocen)\",\n"
         "        ID[\"EPSG\",1056]],\n"
         "    PARAMETER[\"X-axis translation\",-84.68,\n"
@@ -805,14 +807,18 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
         "        ID[\"EPSG\",1047]],\n"
         "    OPERATIONACCURACY[0.03],\n"
         "    USAGE[\n"
-        "        SCOPE[\"unknown\"],\n"
+        "        SCOPE[\"Geodesy. RMS residuals 5mm north, 8mm east and 28mm "
+        "vertical, maximum residuals 10mm north, 13mm east and 51mm "
+        "vertical.\"],\n"
         "        AREA[\"Australia - onshore and EEZ\"],\n"
         "        BBOX[-47.2,109.23,-8.88,163.2]],\n"
-        "    ID[\"EPSG\",6276]]";
+        "    ID[\"EPSG\",6276],\n"
+        "    REMARK[\"Scale difference in ppb and scale difference rate in "
+        "ppb/yr where 1/billion = 1E-9 or nm/m.\"]]";
 
     EXPECT_EQ(
         op->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -872,6 +878,7 @@ TEST(
     auto op = factory->createCoordinateOperation("1295", false);
     auto expected =
         "COORDINATEOPERATION[\"RGNC91-93 to NEA74 Noumea (4)\",\n"
+        "    VERSION[\"ESRI-Ncl 0.05m\"],\n"
         "    SOURCECRS[\n"
         "        GEOGCRS[\"RGNC91-93\",\n"
         "            DATUM[\"Reseau Geodesique de Nouvelle Caledonie 91-93\",\n"
@@ -885,7 +892,8 @@ TEST(
         "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "                AXIS[\"geodetic longitude (Lon)\",east,\n"
         "                    ORDER[2],\n"
-        "                    ANGLEUNIT[\"degree\",0.0174532925199433]]]],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",4749]]],\n"
         "    TARGETCRS[\n"
         "        GEOGCRS[\"NEA74 Noumea\",\n"
         "            DATUM[\"NEA74 Noumea\",\n"
@@ -899,20 +907,24 @@ TEST(
         "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "                AXIS[\"geodetic longitude (Lon)\",east,\n"
         "                    ORDER[2],\n"
-        "                    ANGLEUNIT[\"degree\",0.0174532925199433]]]],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",4644]]],\n"
         "    METHOD[\"NTv2\",\n"
         "        ID[\"EPSG\",9615]],\n"
         "    PARAMETERFILE[\"Latitude and longitude difference "
         "file\",\"RGNC1991_NEA74Noumea.gsb\"],\n"
         "    OPERATIONACCURACY[0.05],\n"
         "    USAGE[\n"
-        "        SCOPE[\"unknown\"],\n"
+        "        SCOPE[\"Accuracy 5-10cm.\"],\n"
         "        AREA[\"New Caledonia - Grande Terre - Noumea\"],\n"
         "        BBOX[-22.37,166.35,-22.19,166.54]],\n"
-        "    ID[\"EPSG\",1295]]";
+        "    ID[\"EPSG\",1295],\n"
+        "    REMARK[\"Emulation using NTv2 method of tfm NEA74 Noumea to "
+        "RGNC91-93 (3) (code 15943). Note reversal of sign of parameter values "
+        "in grid file.\"]]";
     EXPECT_EQ(
         op->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -928,7 +940,7 @@ TEST(
         "    PARAMETERFILE[\"Longitude difference file\",\"alaska.los\"],\n";
 
     auto wkt = op->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     EXPECT_TRUE(wkt.find(expected) != std::string::npos) << wkt;
 }
 
@@ -939,6 +951,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
     auto op = factory->createCoordinateOperation("1884", false);
     auto expected =
         "COORDINATEOPERATION[\"S-JTSK (Ferro) to S-JTSK (1)\",\n"
+        "    VERSION[\"EPSG-Cze\"],\n"
         "    SOURCECRS[\n"
         "        GEOGCRS[\"S-JTSK (Ferro)\",\n"
         "            DATUM[\"System of the Unified Trigonometrical Cadastral "
@@ -953,7 +966,8 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
         "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "                AXIS[\"geodetic longitude (Lon)\",east,\n"
         "                    ORDER[2],\n"
-        "                    ANGLEUNIT[\"degree\",0.0174532925199433]]]],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",4818]]],\n"
         "    TARGETCRS[\n"
         "        GEOGCRS[\"S-JTSK\",\n"
         "            DATUM[\"System of the Unified Trigonometrical Cadastral "
@@ -968,7 +982,8 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
         "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
         "                AXIS[\"geodetic longitude (Lon)\",east,\n"
         "                    ORDER[2],\n"
-        "                    ANGLEUNIT[\"degree\",0.0174532925199433]]]],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",4156]]],\n"
         "    METHOD[\"Longitude rotation\",\n"
         "        ID[\"EPSG\",9601]],\n"
         "    PARAMETER[\"Longitude offset\",-17.6666666666667,\n"
@@ -976,14 +991,14 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
         "        ID[\"EPSG\",8602]],\n"
         "    OPERATIONACCURACY[0.0],\n"
         "    USAGE[\n"
-        "        SCOPE[\"unknown\"],\n"
+        "        SCOPE[\"Change of prime meridian.\"],\n"
         "        AREA[\"Europe - Czechoslovakia\"],\n"
         "        BBOX[47.73,12.09,51.06,22.56]],\n"
         "    ID[\"EPSG\",1884]]";
 
     EXPECT_EQ(
         op->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -1465,7 +1480,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "'EPSG','4326','EPSG','1262',44.0,-143."
             "0,-90.0,-294.0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
 
         ASSERT_TRUE(execute(
@@ -1474,7 +1489,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "'EPSG','9615'"
             ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
             "8656','Latitude and longitude difference "
-            "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+            "0);"))
             << last_error();
 
         ASSERT_TRUE(execute(
@@ -1491,7 +1507,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "offset',-17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
 
         ASSERT_TRUE(execute(
@@ -1499,7 +1515,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "VALUES('EPSG','DUMMY_CONCATENATED','name',NULL,NULL,"
             "'EPSG','4326','EPSG'"
             ",'4326','EPSG','1262',NULL,'EPSG','DUMMY_OTHER_TRANSFORMATION'"
-            ",'EPSG','DUMMY_OTHER_TRANSFORMATION',NULL,NULL,0);"))
+            ",'EPSG','DUMMY_OTHER_TRANSFORMATION',NULL,NULL,NULL,0);"))
             << last_error();
     }
 
@@ -1507,12 +1523,20 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         const auto vals = std::vector<std::string>{"SOURCE", "TARGET", "PIVOT"};
         for (const auto &val : vals) {
 
+            ASSERT_TRUE(
+                execute("INSERT INTO geodetic_datum "
+                        "VALUES('FOO','" +
+                        val + "','" + val +
+                        "','',NULL,"
+                        "'EPSG','7030','EPSG','8901','EPSG','1262',0);"))
+                << last_error();
             ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
                                 "VALUES('NS_" +
                                 val + "','" + val + "','" + val +
                                 "',NULL,NULL,'geographic 2D','EPSG','6422',"
-                                "'EPSG','6326',"
-                                "'EPSG','1262',NULL,0);"))
+                                "'FOO','" +
+                                val + "',"
+                                      "'EPSG','1262',NULL,0);"))
                 << last_error();
         }
     }
@@ -1530,7 +1554,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "','EPSG'"
             ",'1262',1.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
     }
 
@@ -1838,7 +1862,7 @@ TEST_F(FactoryWithTmpDatabase,
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','OTHER','OTHER_4326','EPSG','1262',1.0,'EPSG','"
         "8656','Latitude and longitude difference "
-        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     {
         auto res = factoryGeneral->createFromCoordinateReferenceSystemCodes(
@@ -1870,7 +1894,7 @@ TEST_F(FactoryWithTmpDatabase,
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',10.0,'EPSG','"
         "8656','Latitude and longitude difference "
-        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(
@@ -1879,7 +1903,8 @@ TEST_F(FactoryWithTmpDatabase,
                 "TRANSFORMATION_1M_SMALL_EXTENT',NULL,NULL,'EPSG','9615'"
                 ",'NTv2','EPSG','4326','EPSG','4326','EPSG','2060',1.0,'EPSG','"
                 "8656','Latitude and longitude difference "
-                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(execute(
@@ -1888,7 +1913,7 @@ TEST_F(FactoryWithTmpDatabase,
         "'EPSG','9615'"
         ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
         "8656','Latitude and longitude difference "
-        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(
@@ -1897,7 +1922,8 @@ TEST_F(FactoryWithTmpDatabase,
                 "TRANSFORMATION_0.5M_DEPRECATED',NULL,NULL,'EPSG','9615'"
                 ",'NTv2','EPSG','4326','EPSG','4326','EPSG','1262',1.0,'EPSG','"
                 "8656','Latitude and longitude difference "
-                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,1);"))
+                "file','nzgd2kgrid0005.gsb',NULL,NULL,NULL,NULL,NULL,NULL,"
+                "NULL,1);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2000,7 +2026,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-        "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2061,7 +2087,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2096,7 +2122,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2123,7 +2149,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto factoryOTHER =
@@ -2613,7 +2639,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     ASSERT_TRUE(
@@ -2625,7 +2651,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
 
     auto dbContext = DatabaseContext::create(m_ctxt);
@@ -2669,7 +2695,8 @@ TEST(factory, createObjectsFromName) {
     {
         auto res = factoryEPSG->createObjectsFromName(
             "WGS84", {AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS}, true);
-        EXPECT_EQ(res.size(), 2U); // EPSG:4326 and EPSG:4030
+        EXPECT_EQ(res.size(),
+                  8U); // EPSG:4326 and EPSG:4030 and the 6 WGS84 realizations
         if (!res.empty()) {
             EXPECT_EQ(res.front()->getEPSGCode(), 4326);
         }
@@ -2792,7 +2819,7 @@ TEST(factory, getMetadata) {
     EXPECT_EQ(ctxt->getMetadata("i_do_not_exist"), nullptr);
     const char *IGNF_VERSION = ctxt->getMetadata("IGNF.VERSION");
     ASSERT_TRUE(IGNF_VERSION != nullptr);
-    EXPECT_EQ(std::string(IGNF_VERSION), "3.0.2");
+    EXPECT_EQ(std::string(IGNF_VERSION), "3.0.3");
 }
 
 // ---------------------------------------------------------------------------

@@ -36,11 +36,13 @@ the place to go. Please *do not* use the GitHub issue tracker as a
 support forum. Your question is much more likely to be answered on the
 mailing list, as many more people follow that than the issue tracker.
 
+.. _add_bug_report:
+
 Adding bug reports
 ------------------
 
 Bug reports are handled in the `issue
-tracker <https://github.com/OSGeo/proj.4/issues>`__ on PROJ's home on
+tracker <https://github.com/OSGeo/PROJ/issues>`__ on PROJ's home on
 GitHub. Writing a good bug report is not easy. But fixing a poorly
 documented bug is not easy either, so please put in the effort it takes
 to create a thorough bug report.
@@ -72,7 +74,7 @@ Feature requests
 
 Got an idea for a new feature in PROJ? Submit a thorough description
 of the new feature in the `issue
-tracker <https://github.com/OSGeo/proj.4/issues>`__. Please include any
+tracker <https://github.com/OSGeo/PROJ/issues>`__. Please include any
 technical documents that can help the developer make the new feature a
 reality. An example of this could be a publicly available academic paper
 that describes a new projection. Also, including a numerical test case
@@ -86,10 +88,10 @@ Write documentation
 
 PROJ is in dire need of better documentation. Any contributions of
 documentation are greatly appreciated. The PROJ documentation is
-available on `proj4.org <https://proj4.org>`__. The website is generated
+available on `proj.org <https://proj.org>`__. The website is generated
 with `Sphinx <http://www.sphinx-doc.org/en/stable/>`__. Contributions to
 the documentation should be made as `Pull
-Requests <https://github.com/OSGeo/proj.4/pulls>`__ on GitHub.
+Requests <https://github.com/OSGeo/PROJ/pulls>`__ on GitHub.
 
 If you intend to document one of PROJ's supported projections please
 use the :doc:`Mercator projection <../operations/projections/merc>`

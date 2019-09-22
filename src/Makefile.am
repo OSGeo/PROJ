@@ -8,19 +8,19 @@ check_PROGRAMS = geodtest
 
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ @JNI_INCLUDE@ -I$(top_srcdir)/include @SQLITE3_CFLAGS@
-AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@ -DPROJ_COMPILATION
+AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@
 
 include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesic.h \
-	org_proj4_PJ.h proj_symbol_rename.h
+	org_proj4_PJ.h proj_symbol_rename.h proj_json_streaming_writer.hpp
 
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	bin_geod.cmake bin_proj.cmake bin_projinfo.cmake \
 	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake tests/geodtest.cpp \
-	wkt1_grammar.y wkt2_grammar.y apps/emess.h
+	wkt1_grammar.y wkt2_grammar.y apps/emess.h apps/utils.h
 
-proj_SOURCES = apps/proj.cpp apps/emess.cpp
+proj_SOURCES = apps/proj.cpp apps/emess.cpp apps/utils.cpp
 projinfo_SOURCES = apps/projinfo.cpp
-cs2cs_SOURCES = apps/cs2cs.cpp apps/emess.cpp
+cs2cs_SOURCES = apps/cs2cs.cpp apps/emess.cpp apps/utils.cpp
 cct_SOURCES = apps/cct.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
 geod_SOURCES = apps/geod.cpp apps/geod_set.cpp apps/geod_interface.cpp apps/geod_interface.h apps/emess.cpp
 
@@ -42,11 +42,11 @@ geodtest_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 15:0:0
+libproj_la_LDFLAGS = -no-undefined -version-info 17:0:2
 libproj_la_LIBADD = @SQLITE3_LIBS@
 
 libproj_la_SOURCES = \
-	pj_list.h proj_internal.h proj_math.h \
+	pj_list.h proj_internal.h \
 	\
 	iso19111/static.cpp \
 	iso19111/util.cpp \
@@ -173,6 +173,7 @@ libproj_la_SOURCES = \
 	conversions/cart.cpp \
 	conversions/geoc.cpp \
 	conversions/geocent.cpp \
+	conversions/noop.cpp \
 	conversions/unitconvert.cpp \
 	\
 	transformations/affine.cpp \
@@ -199,7 +200,7 @@ libproj_la_SOURCES = \
 	apply_gridshift.cpp datums.cpp datum_set.cpp transform.cpp \
 	geocent.cpp geocent.h utils.cpp gridinfo.cpp gridlist.cpp \
 	jniproj.cpp mutex.cpp initcache.cpp apply_vgridshift.cpp geodesic.c \
-	strtod.cpp math.cpp \
+	strtod.cpp \
 	\
 	4D_api.cpp pipeline.cpp \
 	internal.cpp \
@@ -207,7 +208,9 @@ libproj_la_SOURCES = \
 	wkt1_parser.h wkt1_parser.cpp \
 	wkt1_generated_parser.h wkt1_generated_parser.c \
 	wkt2_parser.h wkt2_parser.cpp \
-	wkt2_generated_parser.h wkt2_generated_parser.c
+	wkt2_generated_parser.h wkt2_generated_parser.c \
+	\
+	proj_json_streaming_writer.cpp
 
 
 # The sed hack is to please MSVC

@@ -17,7 +17,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 
 PROJ_HEAD(tmerc, "Transverse Mercator") "\n\tCyl, Sph&Ell\n\tapprox";
@@ -188,6 +188,10 @@ static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
     double h, g;
 
     h = exp(xy.x / static_cast<struct pj_opaque_approx*>(P->opaque)->esp);
+    if( h == 0 ) {
+        proj_errno_set(P, PJD_ERR_INVALID_X_OR_Y);
+        return proj_coord_error().lp;
+    }
     g = .5 * (h - 1. / h);
     h = cos (P->phi0 + xy.y / static_cast<struct pj_opaque_approx*>(P->opaque)->esp);
     lp.phi = asin(sqrt((1. - h * h) / (1. + g * g)));

@@ -85,7 +85,6 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_internal.h"
 
 PROJ_HEAD(horner, "Horner polynomial evaluation");
 

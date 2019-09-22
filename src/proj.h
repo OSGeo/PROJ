@@ -152,8 +152,8 @@ extern "C" {
 #endif
 
 /* The version numbers should be updated with every release! **/
-#define PROJ_VERSION_MAJOR 6
-#define PROJ_VERSION_MINOR 1
+#define PROJ_VERSION_MAJOR 7
+#define PROJ_VERSION_MINOR 0
 #define PROJ_VERSION_PATCH 0
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
@@ -277,7 +277,8 @@ struct PJ_INFO {
     const char  *version;           /* Full version number                  */
     const char  *searchpath;        /* Paths where init and grid files are  */
                                     /* looked for. Paths are separated by   */
-                                    /* semi-colons.                         */
+                                    /* semi-colons on Windows, and colons   */
+                                    /* on non-Windows platforms.            */
     const char * const *paths;
     size_t path_count;
 };
@@ -356,6 +357,12 @@ int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_leg
 PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ PROJ_DLL *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
 PJ PROJ_DLL *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *source_crs, const char *target_crs, PJ_AREA *area);
+PJ PROJ_DLL *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx,
+                                            const PJ *source_crs,
+                                            const PJ *target_crs,
+                                            PJ_AREA *area,
+                                            const char* const *options);
+PJ PROJ_DLL *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ* obj);
 PJ PROJ_DLL *proj_destroy (PJ *P);
 
 
@@ -451,6 +458,8 @@ double PROJ_DLL proj_todeg (double angle_in_radians);
 double PROJ_DLL proj_dmstor(const char *is, char **rs);
 char PROJ_DLL * proj_rtodms(char *s, double r, int pos, int neg);
 
+void PROJ_DLL proj_cleanup(void);
+
 /*! @endcond */
 
 /* ------------------------------------------------------------------------- */
@@ -469,8 +478,11 @@ typedef char **PROJ_STRING_LIST;
 /** \brief Guessed WKT "dialect". */
 typedef enum
 {
-    /** \ref WKT2_2018 */
-    PJ_GUESSED_WKT2_2018,
+    /** \ref WKT2_2019 */
+    PJ_GUESSED_WKT2_2019,
+
+    /** Deprecated alias for PJ_GUESSED_WKT2_2019 */
+    PJ_GUESSED_WKT2_2018 = PJ_GUESSED_WKT2_2019,
 
     /** \ref WKT2_2015 */
     PJ_GUESSED_WKT2_2015,
@@ -566,10 +578,14 @@ typedef enum
     PJ_WKT2_2015,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_SIMPLIFIED */
     PJ_WKT2_2015_SIMPLIFIED,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018 */
-    PJ_WKT2_2018,
-    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2018_SIMPLIFIED */
-    PJ_WKT2_2018_SIMPLIFIED,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2019 */
+    PJ_WKT2_2019,
+    /** Deprecated alias for PJ_WKT2_2019 */
+    PJ_WKT2_2018 = PJ_WKT2_2019,
+    /** cf osgeo::proj::io::WKTFormatter::Convention::WKT2_2019_SIMPLIFIED */
+    PJ_WKT2_2019_SIMPLIFIED,
+    /** Deprecated alias for PJ_WKT2_2019 */
+    PJ_WKT2_2018_SIMPLIFIED = PJ_WKT2_2019_SIMPLIFIED,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_GDAL */
     PJ_WKT1_GDAL,
     /** cf osgeo::proj::io::WKTFormatter::Convention::WKT1_ESRI */
@@ -753,6 +769,9 @@ typedef struct PJ_OBJ_LIST PJ_OBJ_LIST;
 
 void PROJ_DLL proj_string_list_destroy(PROJ_STRING_LIST list);
 
+void PROJ_DLL proj_context_set_autoclose_database(PJ_CONTEXT *ctx,
+                                                  int autoclose);
+
 int PROJ_DLL proj_context_set_database_path(PJ_CONTEXT *ctx,
                                             const char *dbPath,
                                             const char *const *auxDbPaths,
@@ -786,6 +805,15 @@ int PROJ_DLL proj_uom_get_info_from_database(PJ_CONTEXT *ctx,
                                double *out_conv_factor,
                                const char **out_category);
 
+int PROJ_DLL proj_grid_get_info_from_database(PJ_CONTEXT *ctx,
+                               const char *grid_name,
+                               const char **out_full_name,
+                               const char **out_package_name,
+                               const char **out_url,
+                               int *out_direct_download,
+                               int *out_open_license,
+                               int *out_available);
+
 PJ PROJ_DLL *proj_clone(PJ_CONTEXT *ctx, const PJ *obj);
 
 PJ_OBJ_LIST PROJ_DLL *proj_create_from_name(PJ_CONTEXT *ctx,
@@ -815,6 +843,10 @@ const char PROJ_DLL* proj_get_id_auth_name(const PJ *obj, int index);
 
 const char PROJ_DLL* proj_get_id_code(const PJ *obj, int index);
 
+const char PROJ_DLL* proj_get_remarks(const PJ *obj);
+
+const char PROJ_DLL* proj_get_scope(const PJ *obj);
+
 int PROJ_DLL proj_get_area_of_use(PJ_CONTEXT *ctx,
                                       const PJ *obj,
                                       double* out_west_lon_degree,
@@ -831,6 +863,10 @@ const char PROJ_DLL* proj_as_proj_string(PJ_CONTEXT *ctx,
                                              const PJ *obj,
                                              PJ_PROJ_STRING_TYPE type,
                                              const char* const *options);
+
+const char PROJ_DLL* proj_as_projjson(PJ_CONTEXT *ctx,
+                                      const PJ *obj,
+                                      const char* const *options);
 
 PJ PROJ_DLL *proj_get_source_crs(PJ_CONTEXT *ctx,
                                          const PJ *obj);
@@ -925,6 +961,11 @@ void PROJ_DLL proj_operation_factory_context_set_allowed_intermediate_crs(
     PJ_CONTEXT *ctx,
     PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
     const char* const *list_of_auth_name_codes);
+
+void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
+    PJ_CONTEXT *ctx,
+    PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    int discard);
 
 /* ------------------------------------------------------------------------- */
 
@@ -1048,6 +1089,13 @@ int PROJ_DLL proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
                                                     double *out_values,
                                                     int value_count,
                                                     int emit_error_if_incompatible);
+
+int PROJ_DLL proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
+                                                 const PJ *concatoperation);
+
+PJ PROJ_DLL *proj_concatoperation_get_step(PJ_CONTEXT *ctx,
+                                           const PJ *concatoperation,
+                                           int i_step);
 
 /**@}*/
 

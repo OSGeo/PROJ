@@ -5,7 +5,7 @@
 ** Copyright (c) 2012   Martin Raspaud
 **
 ** See also (section 4.4.3.2):
-**   http://www.eumetsat.int/en/area4/msg/news/us_doc/cgms_03_26.pdf
+**   https://www.cgms-info.org/documents/pdf_cgms_03.pdf
 **
 ** Permission is hereby granted, free of charge, to any person obtaining
 ** a copy of this software and associated documentation files (the
@@ -34,7 +34,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 namespace { // anonymous namespace
 struct pj_opaque {
@@ -52,7 +52,7 @@ struct pj_opaque {
 PROJ_HEAD(geos, "Geostationary Satellite View") "\n\tAzi, Sph&Ell\n\th=";
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY geos_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double Vx, Vy, Vz, tmp;
@@ -82,7 +82,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY geos_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double r, Vx, Vy, Vz, tmp;
@@ -118,7 +118,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP geos_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double Vx, Vy, Vz, a, b, det, k;
@@ -126,11 +126,11 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     /* Setting three components of vector from satellite to position.*/
     Vx = -1.0;
     if(Q->flip_axis) {
-        Vz = tan (xy.y / (Q->radius_g - 1.0));
-        Vy = tan (xy.x / (Q->radius_g - 1.0)) * sqrt (1.0 + Vz * Vz);
+        Vz = tan (xy.y / Q->radius_g_1);
+        Vy = tan (xy.x / Q->radius_g_1) * sqrt (1.0 + Vz * Vz);
     } else {
-        Vy = tan (xy.x / (Q->radius_g - 1.0));
-        Vz = tan (xy.y / (Q->radius_g - 1.0)) * sqrt (1.0 + Vy * Vy);
+        Vy = tan (xy.x / Q->radius_g_1);
+        Vz = tan (xy.y / Q->radius_g_1) * sqrt (1.0 + Vy * Vy);
     }
 
     /* Calculation of terms in cubic equation and determinant.*/
@@ -155,7 +155,7 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP geos_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double Vx, Vy, Vz, a, b, det, k;
@@ -202,8 +202,7 @@ PJ *PROJECTION(geos) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
-    if ((Q->h = pj_param(P->ctx, P->params, "dh").f) <= 0.)
-        return pj_default_destructor (P, PJD_ERR_H_LESS_THAN_ZERO);
+    Q->h = pj_param(P->ctx, P->params, "dh").f;
 
     sweep_axis = pj_param(P->ctx, P->params, "ssweep").s;
     if (sweep_axis == nullptr)
@@ -220,18 +219,20 @@ PJ *PROJECTION(geos) {
     }
 
     Q->radius_g_1 = Q->h / P->a;
+    if ( Q->radius_g_1 <= 0 || Q->radius_g_1 > 1e10 )
+        return pj_default_destructor (P, PJD_ERR_INVALID_H);
     Q->radius_g = 1. + Q->radius_g_1;
     Q->C  = Q->radius_g * Q->radius_g - 1.0;
     if (P->es != 0.0) {
         Q->radius_p      = sqrt (P->one_es);
         Q->radius_p2     = P->one_es;
         Q->radius_p_inv2 = P->rone_es;
-        P->inv = e_inverse;
-        P->fwd = e_forward;
+        P->inv = geos_e_inverse;
+        P->fwd = geos_e_forward;
     } else {
         Q->radius_p = Q->radius_p2 = Q->radius_p_inv2 = 1.0;
-        P->inv = s_inverse;
-        P->fwd = s_forward;
+        P->inv = geos_s_inverse;
+        P->fwd = geos_s_forward;
     }
 
     return P;

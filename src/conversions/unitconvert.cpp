@@ -71,8 +71,7 @@ Last update: 2017-05-16
 #include <time.h>
 
 #include "proj_internal.h"
-#include "proj_math.h"
-#include "proj_internal.h"
+#include <math.h>
 
 PROJ_HEAD(unitconvert, "Unit conversion");
 
@@ -473,11 +472,11 @@ PJ *CONVERSION(unitconvert,0) {
         if (f != 0.0) {
             proj_log_debug(P, "xy_in unit: %s", normalized_name);
         } else {
-            if ( (f = pj_param (P->ctx, P->params, "dxy_in").f) == 0.0)
+            f = pj_param (P->ctx, P->params, "dxy_in").f;
+            if (f == 0.0 || 1.0 / f == 0.0)
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
-        if (f != 0.0)
-            Q->xy_factor *= f;
+        Q->xy_factor = f;
         if (normalized_name != nullptr && strcmp(normalized_name, "Radian") == 0)
             P->left = PJ_IO_UNITS_RADIANS;
     }
@@ -488,11 +487,11 @@ PJ *CONVERSION(unitconvert,0) {
         if (f != 0.0) {
             proj_log_debug(P, "xy_out unit: %s", normalized_name);
         } else {
-            if ( (f = pj_param (P->ctx, P->params, "dxy_out").f) == 0.0)
+            f = pj_param (P->ctx, P->params, "dxy_out").f;
+            if (f == 0.0 || 1.0 / f == 0.0)
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
-        if (f != 0.0)
-            Q->xy_factor /= f;
+        Q->xy_factor /= f;
         if (normalized_name != nullptr && strcmp(normalized_name, "Radian") == 0)
             P->right= PJ_IO_UNITS_RADIANS;
     }
@@ -509,11 +508,11 @@ PJ *CONVERSION(unitconvert,0) {
         if (f != 0.0) {
             proj_log_debug(P, "z_in unit: %s", normalized_name);
         } else {
-            if ( (f = pj_param (P->ctx, P->params, "dz_in").f) == 0.0)
+            f = pj_param (P->ctx, P->params, "dz_in").f;
+            if (f == 0.0 || 1.0 / f == 0.0)
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
-        if (f != 0.0)
-            Q->z_factor *= f;
+        Q->z_factor = f;
     }
 
     if ((name = pj_param (P->ctx, P->params, "sz_out").s) != nullptr) {
@@ -522,11 +521,11 @@ PJ *CONVERSION(unitconvert,0) {
         if (f != 0.0) {
             proj_log_debug(P, "z_out unit: %s", normalized_name);
         } else {
-            if ( (f = pj_param (P->ctx, P->params, "dz_out").f) == 0.0)
+            f = pj_param (P->ctx, P->params, "dz_out").f;
+            if (f == 0.0 || 1.0 / f == 0.0)
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
-        if (f != 0.0)
-            Q->z_factor /= f;
+        Q->z_factor /= f;
     }
 
     if( z_in_is_linear >= 0 && z_out_is_linear >= 0 &&

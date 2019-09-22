@@ -13,7 +13,7 @@ cct
 Synopsis
 ********
 
-    **cct** [ **-cIostvz** [ args ] ] *+opts[=arg]* file[s]
+    **cct** [**-cIostvz** [args]] *+opt[=arg]* ... file ...
 
 Description
 ***********
@@ -70,7 +70,7 @@ The following control parameters can appear in any order:
 
     Print version number.
 
-The *+args* arguments are associated with coordinate operation parameters.
+The *+opt* arguments are associated with coordinate operation parameters.
 Usage varies with operation.
 
 .. only:: html
@@ -184,10 +184,10 @@ Hence, in honour of *cct* (the geodesist) this is :program:`cct` (the program).
     Bugs
     ****
 
-    A list of know bugs can be found at https://github.com/OSGeo/proj.4/issues
+    A list of know bugs can be found at https://github.com/OSGeo/PROJ/issues
     where new bug reports can be submitted to.
 
     Home page
     *********
 
-    https://proj4.org/
+    https://proj.org/

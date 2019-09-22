@@ -25,7 +25,7 @@ struct pj_opaque {
 
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY cass_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double n, t, a1, c, a2, tn;
     PJ_XY xy = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
@@ -47,7 +47,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY cass_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     xy.x  =  asin (cos (lp.phi) * sin (lp.lam));
     xy.y  =  atan2 (tan (lp.phi), cos (lp.lam)) - P->phi0;
@@ -55,7 +55,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP cass_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     double n, t, r, dd, d2, tn, ph1;
     PJ_LP lp = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
@@ -76,7 +76,7 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP cass_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     double dd;
     lp.phi = asin(sin(dd = xy.y + P->phi0) * cos(xy.x));
@@ -101,8 +101,8 @@ PJ *PROJECTION(cass) {
 
     /* Spheroidal? */
     if (0==P->es) {
-        P->inv = s_inverse;
-        P->fwd = s_forward;
+        P->inv = cass_s_inverse;
+        P->fwd = cass_s_forward;
         return P;
     }
 
@@ -117,8 +117,8 @@ PJ *PROJECTION(cass) {
         return pj_default_destructor (P, ENOMEM);
 
     static_cast<struct pj_opaque*>(P->opaque)->m0 = pj_mlfn (P->phi0,  sin (P->phi0),  cos (P->phi0),  static_cast<struct pj_opaque*>(P->opaque)->en);
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = cass_e_inverse;
+    P->fwd = cass_e_forward;
 
     return P;
 }

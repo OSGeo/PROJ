@@ -471,6 +471,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
+                      VALUES ('RAF18.tac',
+                              'RAF18.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
                       VALUES ('RAC09.mnt',
                               'RAC09.gtx',
                               'GTX',
@@ -782,4 +797,123 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'hgridshift',
                               0,
                               'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+-- Netherlands / RDNAP (non-free grids)
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('naptrans2008.gtx',
+                              'naptrans2008.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              NULL, -- package name
+                              'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/naptrans2008.gtx',
+                              1, -- direct download
+                              0, -- non-freely licensed. See https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/master/debian/copyright
+                              NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('rdtrans2008.gsb',
+                              'rdtrans2008.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              NULL, -- package name
+                              'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',
+                              1, -- direct download
+                              0, -- non-freely licensed. See https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/master/debian/copyright
+                              NULL);
+
+-- Belgium
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('bd72lb72_etrs89lb08.gsb',
+                              'bd72lb72_etrs89lb08.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+-- Switzerland
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CHENyx06a.gsb',
+                              'CHENyx06a.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CHENyx06_ETRS.gsb',
+                              'CHENyx06_ETRS.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+-- Portugal
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('DLx_ETRS89_geo.gsb',
+                              'DLx_ETRS89_geo.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('D73_ETRS89_geo.gsb',
+                              'D73_ETRS89_geo.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);

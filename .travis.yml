@@ -1,5 +1,10 @@
 # This is the config file for building proj.4 and running its test suite
 # with Travis-ci.org
+language: cpp
+
+branches:
+  except:
+  - /^(cherry-pick-)?backport-\d+-to-/
 
 cache:
     directories:
@@ -12,7 +17,6 @@ matrix:
     - os: linux
       dist: trusty
       compiler: gcc
-      language: cpp
       sudo: required
       services:
         - docker
@@ -22,6 +26,7 @@ matrix:
 
     - os: linux
       dist: trusty
+      compiler: gcc
       sudo: required
       services:
         - docker
@@ -40,7 +45,6 @@ matrix:
     - os: linux
       dist: trusty
       compiler: clang
-      language: cpp
       sudo: required
       services:
         - docker
@@ -49,7 +53,6 @@ matrix:
         - DETAILS="linux, clang"
 
     - os: osx
-      language: cpp
       env:
         - BUILD_NAME=osx
         - DETAILS="osx"
@@ -57,7 +60,6 @@ matrix:
     - os: linux
       dist: trusty
       compiler: gcc
-      language: cpp
       sudo: required
       env:
         - BUILD_NAME=mingw32
@@ -65,7 +67,6 @@ matrix:
 
     - os: linux
       compiler: gcc
-      language: cpp
       dist: trusty
       sudo: required
       env:

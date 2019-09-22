@@ -97,8 +97,8 @@ Effectively this means that the direction of the operation has been reversed,
 so that what in PROJ 5 was a forward operation is now an inverse operation and
 vice versa.
 
-Pipelines written for PROJ 5 can be migrated to PROJ 6 by adding :option:`
-+inv` to forward steps involving the deformation operation. Similarly
+Pipelines written for PROJ 5 can be migrated to PROJ 6 by adding :option:`+inv`
+to forward steps involving the deformation operation. Similarly
 :option:`+inv` should be removed from inverse steps to be compatible with
 PROJ 6.
 

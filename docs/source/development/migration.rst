@@ -1,6 +1,187 @@
 .. _API_migration:
 
 ================================================================================
+Version 4 to 6 API Migration
+================================================================================
+
+This is a transition guide for developers wanting to migrate their code to use
+PROJ version 6.
+
+Code example
+###############################################################################
+
+The difference between the old and new API is shown here with a few examples. Below
+we implement the same program with the two different API's. The program reads
+input longitude and latitude from the command line and convert them to
+projected coordinates with the Mercator projection.
+
+We start by writing the program for PROJ 4:
+
+.. code-block:: C
+
+    #include <proj_api.h>
+
+    main(int argc, char **argv) {
+        projPJ pj_merc, pj_longlat;
+        double x, y;
+        int p;
+
+        if (!(pj_longlat = pj_init_plus("+proj=longlat +ellps=clrk66")) )
+            return 1;
+        if (!(pj_merc = pj_init_plus("+proj=merc +datum=clrk66 +lat_ts=33")) )
+            return 1;
+
+        while (scanf("%lf %lf", &x, &y) == 2) {
+            x *= DEG_TO_RAD; /* longitude */
+            y *= DEG_TO_RAD; /* latitude */
+            p = pj_transform(pj_longlat, pj_merc, 1, 1, &x, &y, NULL);
+            printf("%.2f\t%.2f\n", x, y);
+        }
+
+        pj_free(pj_longlat);
+        pj_free(pj_merc);
+
+        return 0;
+    }
+
+The same program implemented using PROJ 6:
+
+.. code-block:: C
+
+    #include <proj.h>
+
+    main(int argc, char **argv) {
+        PJ *P;
+        PJ_COORD c, c_out;
+
+        /* NOTE: the use of PROJ strings to describe CRS is strongly discouraged */
+        /* in PROJ 6, as PROJ strings are a poor way of describing a CRS, and */
+        /* more precise its geodetic datum. */
+        /* Use of codes provided by authorities (such as "EPSG:4326", etc...) */
+        /* or WKT strings will bring the full power of the "transformation */
+        /* engine" used by PROJ to determine the best transformation(s) between */
+        /* two CRS. */
+        P = proj_create_crs_to_crs(PJ_DEFAULT_CTX,
+                                   "+proj=longlat +ellps=clrs66",
+                                   "+proj=merc +ellps=clrk66 +lat_ts=33",
+                                   NULL);
+        if (P==0)
+            return 1;
+
+        {
+            /* For that particular use case, this is not needed. */
+            /* proj_normalize_for_visualization() ensures that the coordinate */
+            /* order expected and returned by proj_trans() will be longitude, */
+            /* latitude for geographic CRS, and easting, northing for projected */
+            /* CRS. If instead of using PROJ strings as above, "EPSG:XXXX" codes */
+            /* had been used, this might had been necessary. */
+            PJ* P_for_GIS = proj_normalize_for_visualization(PJ_DEFAULT_CTX, P);
+            if( 0 == P_for_GIS )  {
+                proj_destroy(P);
+                return 1;
+            }
+            proj_destroy(P);
+            P = P_for_GIS;
+        }
+
+        /* For reliable geographic <--> geocentric conversions, z shall not */
+        /* be some random value. Also t shall be initialized to HUGE_VAL to */
+        /* allow for proper selection of time-dependent operations if one of */
+        /* the CRS is dynamic. */
+        c.lpzt.z = 0.0;
+        c.lpzt.t = HUGE_VAL;
+
+        while (scanf("%lf %lf", &c.lpzt.lam, &c.lpzt.phi) == 2) {
+            /* No need to convert to radian */
+            c_out = proj_trans(P, PJ_FWD, c);
+            printf("%.2f\t%.2f\n", c_out.xy.x, c_out.xy.y);
+        }
+
+        proj_destroy(P);
+
+        return 0;
+    }
+
+
+Function mapping from old to new API
+###############################################################################
+
++---------------------------------------+-------------------------------------------------+
+| Old API functions                     | New API functions                               |
++=======================================+=================================================+
+| pj_fwd                                | :c:func:`proj_trans`                            |
++---------------------------------------+-------------------------------------------------+
+| pj_inv                                | :c:func:`proj_trans`                            |
++---------------------------------------+-------------------------------------------------+
+| pj_fwd3                               | :c:func:`proj_trans`                            |
++---------------------------------------+-------------------------------------------------+
+| pj_inv3                               | :c:func:`proj_trans`                            |
++---------------------------------------+-------------------------------------------------+
+| pj_transform                          | :c:func:`proj_create_crs_to_crs`                |
+|                                       | or :c:func:`proj_create_crs_to_crs_from_pj` +   |
+|                                       | (:c:func:`proj_normalize_for_visualization` +)  |
+|                                       | :c:func:`proj_trans`,                           |
+|                                       | :c:func:`proj_trans_array` or                   |
+|                                       | :c:func:`proj_trans_generic`                    |
++---------------------------------------+-------------------------------------------------+
+| pj_init                               | :c:func:`proj_create` /                         |
+|                                       | :c:func:`proj_create_crs_to_crs`                |
++---------------------------------------+-------------------------------------------------+
+| pj_init                               | :c:func:`proj_create` /                         |
+|                                       | :c:func:`proj_create_crs_to_crs`                |
++---------------------------------------+-------------------------------------------------+
+| pj_free                               | :c:func:`proj_destroy`                          |
++---------------------------------------+-------------------------------------------------+
+| pj_is_latlong                         | :c:func:`proj_get_type`                         |
++---------------------------------------+-------------------------------------------------+
+| pj_is_geocent                         | :c:func:`proj_get_type`                         |
++---------------------------------------+-------------------------------------------------+
+| pj_get_def                            | :c:func:`proj_pj_info`                          |
++---------------------------------------+-------------------------------------------------+
+| pj_latlong_from_proj                  | *No direct equivalent*, but can be accomplished |
+|                                       | by chaining :c:func:`proj_create`,              |
+|                                       | :c:func:`proj_crs_get_horizontal_datum` and     |
+|                                       | :c:func:`proj_create_geographic_crs_from_datum` |
++---------------------------------------+-------------------------------------------------+
+| pj_set_finder                         | :c:func:`proj_context_set_file_finder`          |
++---------------------------------------+-------------------------------------------------+
+| pj_set_searchpath                     | :c:func:`proj_context_set_search_paths`         |
++---------------------------------------+-------------------------------------------------+
+| pj_deallocate_grids                   | *No equivalent*                                 |
++---------------------------------------+-------------------------------------------------+
+| pj_strerrno                           | *No equivalent*                                 |
++---------------------------------------+-------------------------------------------------+
+| pj_get_errno_ref                      | :c:func:`proj_errno`                            |
++---------------------------------------+-------------------------------------------------+
+| pj_get_release                        | :c:func:`proj_info`                             |
++---------------------------------------+-------------------------------------------------+
+
+
+Backward incompatibilities
+###############################################################################
+
+Access to the proj_api.h is still possible but requires to define the
+``ACCEPT_USE_OF_DEPRECATED_PROJ_API_H`` macro.
+
+The emulation of the now deprecated ``+init=epsg:XXXX`` syntax in PROJ 6 is not
+fully compatible with previous versions.
+
+In particular, when used with the ``pj_transform()`` function, no datum shift term
+(``towgs84``, ``nadgrids``, ``geoidgrids``) will be added during the expansion of the
+``+init=epsg:XXXX`` string to ``+proj=YYYY ....``. If you still uses ``pj_transform()``
+and want datum shift to be applied, then you need to provide a fully expanded
+string with appropriate ``towgs84``, ``nadgrids`` or ``geoidgrids`` terms to ``pj_init()``.
+
+To use the ``+init=epsg:XXXX`` syntax with :c:func:`proj_create` and then
+:c:func:`proj_create_crs_to_crs`, ``proj_context_use_proj4_init_rules(ctx, TRUE)``
+or the ``PROJ_USE_PROJ4_INIT_RULES=YES`` environment variable must have been
+previously set. In that context, datum shift will be researched. However they
+might be different than with PROJ 4 or PROJ 5, since a "late-binding" approach
+will be used (that is trying to find as much as possible the most direct
+transformation between the source and target datum), whereas PROJ 4 or PROJ 5
+used an "early-binding" approach consisting in always going to EPSG:4326 / WGS 84.
+
+================================================================================
 Version 4 to 5 API Migration
 ================================================================================
 
@@ -66,7 +247,7 @@ Code example
 
 The difference between the old and new API is shown here with a few examples. Below
 we implement the same program with the two different API's. The program reads
-input latitude and longitude from the command line and convert them to
+input longitude and latitude from the command line and convert them to
 projected coordinates with the Mercator projection.
 
 We start by writing the program for PROJ v. 4:
@@ -76,20 +257,23 @@ We start by writing the program for PROJ v. 4:
     #include <proj_api.h>
 
     main(int argc, char **argv) {
-        projPJ pj_merc, pj_latlong;
+        projPJ pj_merc, pj_longlat;
         double x, y;
 
-        if (!(pj_merc = pj_init_plus("+proj=merc +ellps=clrk66 +lat_ts=33")) )
+        if (!(pj_longlat = pj_init_plus("+proj=longlat +ellps=clrk66")) )
             return 1;
-        if (!(pj_latlong = pj_init_plus("+proj=latlong +ellps=clrk66")) )
+        if (!(pj_merc = pj_init_plus("+proj=merc +ellps=clrk66 +lat_ts=33")) )
             return 1;
 
         while (scanf("%lf %lf", &x, &y) == 2) {
-            x *= DEG_TO_RAD;
-            y *= DEG_TO_RAD;
-            p = pj_transform(pj_latlong, pj_merc, 1, 1, &x, &y, NULL );
+            x *= DEG_TO_RAD; /* longitude */
+            y *= DEG_TO_RAD; /* latitude */
+            p = pj_transform(pj_longlat, pj_merc, 1, 1, &x, &y, NULL );
             printf("%.2f\t%.2f\n", x, y);
         }
+
+        pj_free(pj_longlat);
+        pj_free(pj_merc);
 
         return 0;
     }
@@ -115,6 +299,7 @@ The same program implemented using PROJ v. 5:
             printf("%.2f\t%.2f\n", c.xy.x, c.xy.y);
         }
 
+        proj_destroy(P);
     }
 
 Looking at the two different programs, there's a few immediate
@@ -155,27 +340,27 @@ Function mapping from old to new API
 +---------------------------------------+---------------------------------------+
 | Old API functions                     | New API functions                     |
 +=======================================+=======================================+
-| pj_fwd                                | proj_trans                            |
+| pj_fwd                                | :c:func:`proj_trans`                  |
 +---------------------------------------+---------------------------------------+
-| pj_inv                                | proj_trans                            |
+| pj_inv                                | :c:func:`proj_trans`                  |
 +---------------------------------------+---------------------------------------+
-| pj_fwd3                               | proj_trans                            |
+| pj_fwd3                               | :c:func:`proj_trans`                  |
 +---------------------------------------+---------------------------------------+
-| pj_inv3                               | proj_trans                            |
+| pj_inv3                               | :c:func:`proj_trans`                  |
 +---------------------------------------+---------------------------------------+
 | pj_transform                          | proj_trans_array or proj_trans_generic|
 +---------------------------------------+---------------------------------------+
-| pj_init                               | proj_create                           |
+| pj_init                               | :c:func:`proj_create`                 |
 +---------------------------------------+---------------------------------------+
-| pj_init_plus                          | proj_create                           |
+| pj_init_plus                          | :c:func:`proj_create`                 |
 +---------------------------------------+---------------------------------------+
-| pj_free                               | proj_destroy                          |
+| pj_free                               | :c:func:`proj_destroy`                |
 +---------------------------------------+---------------------------------------+
-| pj_is_latlong                         | proj_angular_output                   |
+| pj_is_latlong                         | :c:func:`proj_angular_output`         |
 +---------------------------------------+---------------------------------------+
-| pj_is_geocent                         | proj_angular_outout                   |
+| pj_is_geocent                         | :c:func:`proj_angular_output`         |
 +---------------------------------------+---------------------------------------+
-| pj_get_def                            | proj_pj_info                          |
+| pj_get_def                            | :c:func:`proj_pj_info`                |
 +---------------------------------------+---------------------------------------+
 | pj_latlong_from_proj                  | *No equivalent*                       |
 +---------------------------------------+---------------------------------------+
@@ -187,7 +372,7 @@ Function mapping from old to new API
 +---------------------------------------+---------------------------------------+
 | pj_strerrno                           | *No equivalent*                       |
 +---------------------------------------+---------------------------------------+
-| pj_get_errno_ref                      | proj_errno                            |
+| pj_get_errno_ref                      | :c:func:`proj_errno`                  |
 +---------------------------------------+---------------------------------------+
-| pj_get_release                        | proj_info                             |
+| pj_get_release                        | :c:func:`proj_info`                   |
 +---------------------------------------+---------------------------------------+

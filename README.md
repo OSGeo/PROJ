@@ -1,20 +1,20 @@
 # PROJ
 
-[![Travis Status](https://travis-ci.com/OSGeo/proj.4.svg?branch=master)](https://travis-ci.com/OSGeo/proj.4)
-[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/584j49uguwoo5evi?svg=true)](https://ci.appveyor.com/project/OSGeo/proj-4)
-[![Coveralls Status](https://coveralls.io/repos/github/OSGeo/proj.4/badge.svg?branch=master)](https://coveralls.io/github/OSGeo/proj.4?branch=master)
+[![Travis Status](https://travis-ci.com/OSGeo/PROJ.svg?branch=master)](https://travis-ci.com/OSGeo/PROJ)
+[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/por8r52bjt8ocga9?svg=true)](https://ci.appveyor.com/project/OSGeo/PROJ)
+[![Coveralls Status](https://coveralls.io/repos/github/OSGeo/PROJ/badge.svg?branch=master)](https://coveralls.io/github/OSGeo/PROJ?branch=master)
 [![Gitter](https://badges.gitter.im/OSGeo/proj.4.svg)](https://gitter.im/OSGeo/proj.4)
-[![Mailing List](https://img.shields.io/badge/PROJ-mailing%20list-4eb899.svg)](http://lists.maptools.org/mailman/listinfo/proj)
+[![Mailing List](https://img.shields.io/badge/PROJ-mailing%20list-4eb899.svg)](http://lists.osgeo.org/mailman/listinfo/proj)
 
 PROJ is a generic coordinate transformation software, that transforms
 coordinates from one coordinate reference system (CRS) to another.
 This includes cartographic projections as well as geodetic transformations.
 
-For more information on the PROJ.4 project please see the web page at:
+For more information on the PROJ project please see the web page at:
 
-https://proj4.org/
+https://proj.org/
 
-The PROJ.4 mailing list can be found at:
+The PROJ mailing list can be found at:
 
 https://lists.osgeo.org/mailman/listinfo/proj/
 
@@ -27,7 +27,7 @@ The following command line utilities are included in the PROJ package:
 - geod, for geodesic (great circle) computations.
 - cct, for generic Coordinate Conversions and Transformations.
 - gie, the Geospatial Integrity Investigation Environment.
-
+- projinfo, for geodetic object and coordinate operation queries
 
 ## Installation
 ### Build dependencies

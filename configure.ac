@@ -1,8 +1,8 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([PROJ], [6.1.0],
-        [https://github.com/OSGeo/proj.4/issues], proj, [https://proj4.org])
+AC_INIT([PROJ], [7.0.0],
+        [https://github.com/OSGeo/PROJ/issues], proj, [https://proj.org])
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG(C)
 
@@ -12,6 +12,7 @@ AM_CONFIG_HEADER(src/proj_config.h)
 
 dnl Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 AC_PROG_INSTALL
@@ -82,20 +83,6 @@ AX_CHECK_COMPILE_FLAG([-Wfloat-conversion], [C_WFLAGS="$C_WFLAGS -Wfloat-convers
 dnl clang >= 3.2
 AX_CHECK_COMPILE_FLAG([-Wdocumentation -Wno-documentation-deprecated-sync], [C_WFLAGS="$C_WFLAGS -Wdocumentation -Wno-documentation-deprecated-sync" CXX_WFLAGS="$CXX_WFLAGS -Wdocumentation -Wno-documentation-deprecated-sync"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 
-dnl gnu89 is a reasonable target to get MSVC compatibility.
-dnl but only apply it with gcc, since clang will throw a lot of warnings
-SAVED_CFLAGS=$CFLAGS
-CFLAGS="$CFLAGS $ERROR_ON_UNKNOWN_OPTIONS -std=gnu89"
-AC_MSG_CHECKING([if -std=gnu89 can be enabled])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-  [[#if defined(__clang__) || !defined(__GNUC__)
-    #error "not gcc"
-    #endif]])],
-  [C_WFLAGS="$C_WFLAGS -std=gnu89"]
-  [AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
-CFLAGS=$SAVED_CFLAGS
-
 dnl C++ specific stuff
 
 AC_LANG_PUSH([C++])
@@ -130,9 +117,6 @@ AX_CHECK_COMPILE_FLAG([-Wweak-vtables], [CXX_WFLAGS="$CXX_WFLAGS -Wweak-vtables"
 AX_CHECK_COMPILE_FLAG([-Wdeprecated], [CXX_WFLAGS="$CXX_WFLAGS -Wdeprecated"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 AX_CHECK_COMPILE_FLAG([-Wabstract-vbase-init], [CXX_WFLAGS="$CXX_WFLAGS -Wabstract-vbase-init"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 AX_CHECK_COMPILE_FLAG([-Winconsistent-missing-destructor-override], [CXX_WFLAGS="$CXX_WFLAGS -Winconsistent-missing-destructor-override"],,[$ERROR_ON_UNKNOWN_OPTIONS])
-
-dnl Forbid use of 'or', 'and', ... alias operators
-AX_CHECK_COMPILE_FLAG([-fno-operator-names], [CXX_WFLAGS="$CXX_WFLAGS -fno-operator-names"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 
 HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT=no
 AX_CHECK_COMPILE_FLAG([-Wzero-as-null-pointer-constant], [CXX_WFLAGS="$CXX_WFLAGS -Wzero-as-null-pointer-constant" HAVE_GCC_WARNING_ZERO_AS_NULL_POINTER_CONSTANT=yes NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG="-Wno-zero-as-null-pointer-constant"],,[$ERROR_ON_UNKNOWN_OPTIONS])
@@ -200,25 +184,11 @@ dnl like (a + b) + c and from simplifying 0.0 + x to x (which is wrong if
 dnl x = -0.0).
 AX_CHECK_COMPILE_FLAG([-fp-model precise],
         [CFLAGS="$CFLAGS -fp-model precise"],,[-Werror])
-dnl Check for C99 math functions
-save_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -Wall -Werror"
-AC_MSG_CHECKING([for C99 math functions])
-AC_LINK_IFELSE([AC_LANG_PROGRAM(
-        [#include <math.h>],
-        [int q;
-         return (int)(hypot(3.0, 4.0) + atanh(0.8) + cbrt(8.0) +
-                      remquo(100.0, 90.0, &q) +
-                      remainder(100.0, 90.0) + copysign(1.0, -0.0) +
-                      log1p(0.1) + asinh(0.1)) +
-		      isnan(0.0);])],
-        [AC_MSG_RESULT([yes]);C99_MATH="-DHAVE_C99_MATH=1"],
-        [AC_MSG_RESULT([no]);C99_MATH="-DHAVE_C99_MATH=0"])
-CFLAGS="$save_CFLAGS $C99_MATH"
 
 AC_SEARCH_LIBS([sqrt], [m])
 
 AC_CHECK_FUNC(localeconv, [AC_DEFINE(HAVE_LOCALECONV,1,[Define to 1 if you have localeconv])])
+AC_CHECK_FUNCS([strerror])
 
 dnl ---------------------------------------------------------------------------
 dnl Check for JNI support.
@@ -343,6 +313,7 @@ dnl Generate files
 dnl ---------------------------------------------------------------------------
 
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile include/proj/internal/Makefile
+                 include/proj/internal/nlohmann/Makefile
                  test/Makefile test/cli/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
                  man/Makefile man/man1/Makefile man/man3/Makefile data/Makefile
                  jniwrap/Makefile jniwrap/org.osgeo.proj/Makefile jniwrap/org.osgeo.proj/org/Makefile jniwrap/org.osgeo.proj/org/proj4/Makefile])

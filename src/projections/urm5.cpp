@@ -15,7 +15,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY urm5_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double t;
@@ -45,12 +45,16 @@ PJ *PROJECTION(urm5) {
     Q->q3 = pj_param(P->ctx, P->params, "dq").f / 3.;
     alpha = pj_param(P->ctx, P->params, "ralpha").f;
     t = Q->n * sin (alpha);
-    Q->m = cos (alpha) / sqrt (1. - t * t);
+    const double denom = sqrt (1. - t * t);
+    if( denom == 0 ) {
+        return pj_default_destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+    }
+    Q->m = cos (alpha) / denom;
     Q->rmn = 1. / (Q->m * Q->n);
 
     P->es = 0.;
     P->inv = nullptr;
-    P->fwd = s_forward;
+    P->fwd = urm5_s_forward;
 
     return P;
 }

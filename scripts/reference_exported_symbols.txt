@@ -1,0 +1,990 @@
+adjlon(double)
+dmstor(char const*, char**)
+geod_direct
+geod_directline
+geod_gendirect
+geod_gendirectline
+geod_geninverse
+geod_genposition
+geod_gensetdistance
+geod_init
+geod_inverse
+geod_inverseline
+geod_lineinit
+geod_polygon_addedge
+geod_polygon_addpoint
+geod_polygonarea
+geod_polygon_clear
+geod_polygon_compute
+geod_polygon_init
+geod_polygon_testedge
+geod_polygon_testpoint
+geod_position
+geod_setdistance
+osgeo::proj::common::Angle::~Angle()
+osgeo::proj::common::Angle::Angle(double)
+osgeo::proj::common::Angle::Angle(double, osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::common::Angle::Angle(osgeo::proj::common::Angle const&)
+osgeo::proj::common::DataEpoch::coordinateEpoch() const
+osgeo::proj::common::DataEpoch::~DataEpoch()
+osgeo::proj::common::DataEpoch::DataEpoch(osgeo::proj::common::DataEpoch const&)
+osgeo::proj::common::DataEpoch::DataEpoch(osgeo::proj::common::Measure const&)
+osgeo::proj::common::DateTime::create(std::string const&)
+osgeo::proj::common::DateTime::~DateTime()
+osgeo::proj::common::DateTime::DateTime(osgeo::proj::common::DateTime const&)
+osgeo::proj::common::DateTime::isISO_8601() const
+osgeo::proj::common::DateTime::toString() const
+osgeo::proj::common::IdentifiedObject::alias() const
+osgeo::proj::common::IdentifiedObject::aliases() const
+osgeo::proj::common::IdentifiedObject::formatID(osgeo::proj::io::WKTFormatter*) const
+osgeo::proj::common::IdentifiedObject::getEPSGCode() const
+osgeo::proj::common::IdentifiedObject::~IdentifiedObject()
+osgeo::proj::common::IdentifiedObject::IdentifiedObject()
+osgeo::proj::common::IdentifiedObject::IdentifiedObject(osgeo::proj::common::IdentifiedObject const&)
+osgeo::proj::common::IdentifiedObject::identifiers() const
+osgeo::proj::common::IdentifiedObject::isDeprecated() const
+osgeo::proj::common::IdentifiedObject::name() const
+osgeo::proj::common::IdentifiedObject::nameStr() const
+osgeo::proj::common::IdentifiedObject::remarks() const
+osgeo::proj::common::IdentifiedObject::setProperties(osgeo::proj::util::PropertyMap const&)
+osgeo::proj::common::Length::~Length()
+osgeo::proj::common::Length::Length(double)
+osgeo::proj::common::Length::Length(double, osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::common::Length::Length(osgeo::proj::common::Length const&)
+osgeo::proj::common::Measure::convertToUnit(osgeo::proj::common::UnitOfMeasure const&) const
+osgeo::proj::common::Measure::getSIValue() const
+osgeo::proj::common::Measure::~Measure()
+osgeo::proj::common::Measure::Measure(double, osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::common::Measure::Measure(osgeo::proj::common::Measure const&)
+osgeo::proj::common::Measure::operator==(osgeo::proj::common::Measure const&) const
+osgeo::proj::common::Measure::unit() const
+osgeo::proj::common::Measure::value() const
+osgeo::proj::common::ObjectDomain::create(osgeo::proj::util::optional<std::string> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&)
+osgeo::proj::common::ObjectDomain::domainOfValidity() const
+osgeo::proj::common::ObjectDomain::_exportToWKT(osgeo::proj::io::WKTFormatter*) const
+osgeo::proj::common::ObjectDomain::_isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion) const
+osgeo::proj::common::ObjectDomain::~ObjectDomain()
+osgeo::proj::common::ObjectDomain::ObjectDomain(osgeo::proj::common::ObjectDomain const&)
+osgeo::proj::common::ObjectDomain::ObjectDomain(osgeo::proj::util::optional<std::string> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&)
+osgeo::proj::common::ObjectDomain::scope() const
+osgeo::proj::common::ObjectUsage::baseExportToJSON(osgeo::proj::io::JSONFormatter*) const
+osgeo::proj::common::ObjectUsage::baseExportToWKT(osgeo::proj::io::WKTFormatter*) const
+osgeo::proj::common::ObjectUsage::domains() const
+osgeo::proj::common::ObjectUsage::_isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion) const
+osgeo::proj::common::ObjectUsage::~ObjectUsage()
+osgeo::proj::common::ObjectUsage::ObjectUsage()
+osgeo::proj::common::ObjectUsage::ObjectUsage(osgeo::proj::common::ObjectUsage const&)
+osgeo::proj::common::ObjectUsage::setProperties(osgeo::proj::util::PropertyMap const&)
+osgeo::proj::common::Scale::~Scale()
+osgeo::proj::common::Scale::Scale(double)
+osgeo::proj::common::Scale::Scale(double, osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::common::Scale::Scale(osgeo::proj::common::Scale const&)
+osgeo::proj::common::UnitOfMeasure::code() const
+osgeo::proj::common::UnitOfMeasure::codeSpace() const
+osgeo::proj::common::UnitOfMeasure::conversionToSI() const
+osgeo::proj::common::UnitOfMeasure::name() const
+osgeo::proj::common::UnitOfMeasure::operator=(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::common::UnitOfMeasure::operator==(osgeo::proj::common::UnitOfMeasure const&) const
+osgeo::proj::common::UnitOfMeasure::operator!=(osgeo::proj::common::UnitOfMeasure const&) const
+osgeo::proj::common::UnitOfMeasure::type() const
+osgeo::proj::common::UnitOfMeasure::~UnitOfMeasure()
+osgeo::proj::common::UnitOfMeasure::UnitOfMeasure(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::common::UnitOfMeasure::UnitOfMeasure(std::string const&, double, osgeo::proj::common::UnitOfMeasure::Type, std::string const&, std::string const&)
+osgeo::proj::crs::BoundCRS::baseCRS() const
+osgeo::proj::crs::BoundCRS::baseCRSWithCanonicalBoundCRS() const
+osgeo::proj::crs::BoundCRS::~BoundCRS()
+osgeo::proj::crs::BoundCRS::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Transformation> > const&)
+osgeo::proj::crs::BoundCRS::createFromNadgrids(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::string const&)
+osgeo::proj::crs::BoundCRS::createFromTOWGS84(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::vector<double, std::allocator<double> > const&)
+osgeo::proj::crs::BoundCRS::hubCRS() const
+osgeo::proj::crs::BoundCRS::transformation() const
+osgeo::proj::crs::CompoundCRS::componentReferenceSystems() const
+osgeo::proj::crs::CompoundCRS::~CompoundCRS()
+osgeo::proj::crs::CompoundCRS::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > > > const&)
+osgeo::proj::crs::CompoundCRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
+osgeo::proj::crs::CRS::alterCSLinearUnit(osgeo::proj::common::UnitOfMeasure const&) const
+osgeo::proj::crs::CRS::alterGeodeticCRS(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::GeodeticCRS> > const&) const
+osgeo::proj::crs::CRS::alterId(std::string const&, std::string const&) const
+osgeo::proj::crs::CRS::alterName(std::string const&) const
+osgeo::proj::crs::CRS::canonicalBoundCRS() const
+osgeo::proj::crs::CRS::createBoundCRSToWGS84IfPossible(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, osgeo::proj::operation::CoordinateOperationContext::IntermediateCRSUse) const
+osgeo::proj::crs::CRS::~CRS()
+osgeo::proj::crs::CRS::extractGeodeticCRS() const
+osgeo::proj::crs::CRS::extractGeographicCRS() const
+osgeo::proj::crs::CRS::extractVerticalCRS() const
+osgeo::proj::crs::CRS::getNonDeprecated(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> > const&) const
+osgeo::proj::crs::CRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
+osgeo::proj::crs::CRS::promoteTo3D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::crs::CRS::shallowClone() const
+osgeo::proj::crs::CRS::stripVerticalComponent() const
+osgeo::proj::crs::DerivedCRS::baseCRS() const
+osgeo::proj::crs::DerivedCRS::~DerivedCRS()
+osgeo::proj::crs::DerivedCRS::derivingConversion() const
+osgeo::proj::crs::DerivedGeodeticCRS::baseCRS() const
+osgeo::proj::crs::DerivedGeodeticCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::GeodeticCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CartesianCS> > const&)
+osgeo::proj::crs::DerivedGeodeticCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::GeodeticCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::SphericalCS> > const&)
+osgeo::proj::crs::DerivedGeodeticCRS::~DerivedGeodeticCRS()
+osgeo::proj::crs::DerivedGeodeticCRS::_exportToWKT(osgeo::proj::io::WKTFormatter*) const
+osgeo::proj::crs::DerivedGeographicCRS::baseCRS() const
+osgeo::proj::crs::DerivedGeographicCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::GeodeticCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::EllipsoidalCS> > const&)
+osgeo::proj::crs::DerivedGeographicCRS::~DerivedGeographicCRS()
+osgeo::proj::crs::DerivedProjectedCRS::baseCRS() const
+osgeo::proj::crs::DerivedProjectedCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::ProjectedCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystem> > const&)
+osgeo::proj::crs::DerivedProjectedCRS::~DerivedProjectedCRS()
+osgeo::proj::crs::DerivedVerticalCRS::baseCRS() const
+osgeo::proj::crs::DerivedVerticalCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::VerticalCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::VerticalCS> > const&)
+osgeo::proj::crs::DerivedVerticalCRS::~DerivedVerticalCRS()
+osgeo::proj::crs::EngineeringCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::EngineeringDatum> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystem> > const&)
+osgeo::proj::crs::EngineeringCRS::datum() const
+osgeo::proj::crs::EngineeringCRS::~EngineeringCRS()
+osgeo::proj::crs::GeodeticCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CartesianCS> > const&)
+osgeo::proj::crs::GeodeticCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::SphericalCS> > const&)
+osgeo::proj::crs::GeodeticCRS::create(osgeo::proj::util::PropertyMap const&, std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> const&, std::shared_ptr<osgeo::proj::datum::DatumEnsemble> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CartesianCS> > const&)
+osgeo::proj::crs::GeodeticCRS::create(osgeo::proj::util::PropertyMap const&, std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> const&, std::shared_ptr<osgeo::proj::datum::DatumEnsemble> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::SphericalCS> > const&)
+osgeo::proj::crs::GeodeticCRS::datum() const
+osgeo::proj::crs::GeodeticCRS::ellipsoid() const
+osgeo::proj::crs::GeodeticCRS::~GeodeticCRS()
+osgeo::proj::crs::GeodeticCRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
+osgeo::proj::crs::GeodeticCRS::isGeocentric() const
+osgeo::proj::crs::GeodeticCRS::primeMeridian() const
+osgeo::proj::crs::GeodeticCRS::velocityModel() const
+osgeo::proj::crs::GeographicCRS::coordinateSystem() const
+osgeo::proj::crs::GeographicCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::EllipsoidalCS> > const&)
+osgeo::proj::crs::GeographicCRS::create(osgeo::proj::util::PropertyMap const&, std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> const&, std::shared_ptr<osgeo::proj::datum::DatumEnsemble> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::EllipsoidalCS> > const&)
+osgeo::proj::crs::GeographicCRS::~GeographicCRS()
+osgeo::proj::crs::GeographicCRS::is2DPartOf3D(dropbox::oxygen::nn<osgeo::proj::crs::GeographicCRS const*>) const
+osgeo::proj::crs::ParametricCRS::coordinateSystem() const
+osgeo::proj::crs::ParametricCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::ParametricDatum> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::ParametricCS> > const&)
+osgeo::proj::crs::ParametricCRS::datum() const
+osgeo::proj::crs::ParametricCRS::~ParametricCRS()
+osgeo::proj::crs::ProjectedCRS::alterParametersLinearUnit(osgeo::proj::common::UnitOfMeasure const&, bool) const
+osgeo::proj::crs::ProjectedCRS::baseCRS() const
+osgeo::proj::crs::ProjectedCRS::coordinateSystem() const
+osgeo::proj::crs::ProjectedCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::GeodeticCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CartesianCS> > const&)
+osgeo::proj::crs::ProjectedCRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
+osgeo::proj::crs::ProjectedCRS::~ProjectedCRS()
+osgeo::proj::crs::SingleCRS::coordinateSystem() const
+osgeo::proj::crs::SingleCRS::datum() const
+osgeo::proj::crs::SingleCRS::datumEnsemble() const
+osgeo::proj::crs::SingleCRS::~SingleCRS()
+osgeo::proj::crs::TemporalCRS::coordinateSystem() const
+osgeo::proj::crs::TemporalCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::TemporalDatum> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::TemporalCS> > const&)
+osgeo::proj::crs::TemporalCRS::datum() const
+osgeo::proj::crs::TemporalCRS::~TemporalCRS()
+osgeo::proj::crs::VerticalCRS::coordinateSystem() const
+osgeo::proj::crs::VerticalCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::VerticalReferenceFrame> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::VerticalCS> > const&)
+osgeo::proj::crs::VerticalCRS::create(osgeo::proj::util::PropertyMap const&, std::shared_ptr<osgeo::proj::datum::VerticalReferenceFrame> const&, std::shared_ptr<osgeo::proj::datum::DatumEnsemble> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::VerticalCS> > const&)
+osgeo::proj::crs::VerticalCRS::datum() const
+osgeo::proj::crs::VerticalCRS::geoidModel() const
+osgeo::proj::crs::VerticalCRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
+osgeo::proj::crs::VerticalCRS::velocityModel() const
+osgeo::proj::crs::VerticalCRS::~VerticalCRS()
+osgeo::proj::cs::AxisDirection::valueOf(std::string const&)
+osgeo::proj::cs::CartesianCS::~CartesianCS()
+osgeo::proj::cs::CartesianCS::createEastingNorthing(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::CartesianCS::createGeocentric(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::CartesianCS::createNorthingEasting(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::CartesianCS::createNorthPoleEastingSouthNorthingSouth(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::CartesianCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::CartesianCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::CartesianCS::createSouthPoleEastingNorthNorthingNorth(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::CartesianCS::createWestingSouthing(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::CoordinateSystemAxis::abbreviation() const
+osgeo::proj::cs::CoordinateSystemAxis::~CoordinateSystemAxis()
+osgeo::proj::cs::CoordinateSystemAxis::create(osgeo::proj::util::PropertyMap const&, std::string const&, osgeo::proj::cs::AxisDirection const&, osgeo::proj::common::UnitOfMeasure const&, std::shared_ptr<osgeo::proj::cs::Meridian> const&)
+osgeo::proj::cs::CoordinateSystemAxis::direction() const
+osgeo::proj::cs::CoordinateSystem::axisList() const
+osgeo::proj::cs::CoordinateSystemAxis::maximumValue() const
+osgeo::proj::cs::CoordinateSystemAxis::meridian() const
+osgeo::proj::cs::CoordinateSystemAxis::minimumValue() const
+osgeo::proj::cs::CoordinateSystemAxis::unit() const
+osgeo::proj::cs::CoordinateSystem::~CoordinateSystem()
+osgeo::proj::cs::DateTimeTemporalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::DateTimeTemporalCS::~DateTimeTemporalCS()
+osgeo::proj::cs::EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(osgeo::proj::common::UnitOfMeasure const&, osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::EllipsoidalCS::createLatitudeLongitude(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::EllipsoidalCS::createLongitudeLatitudeEllipsoidalHeight(osgeo::proj::common::UnitOfMeasure const&, osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::EllipsoidalCS::createLongitudeLatitude(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::EllipsoidalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::EllipsoidalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::EllipsoidalCS::~EllipsoidalCS()
+osgeo::proj::cs::Meridian::create(osgeo::proj::common::Angle const&)
+osgeo::proj::cs::Meridian::longitude() const
+osgeo::proj::cs::Meridian::~Meridian()
+osgeo::proj::cs::OrdinalCS::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > > > const&)
+osgeo::proj::cs::OrdinalCS::~OrdinalCS()
+osgeo::proj::cs::ParametricCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::ParametricCS::~ParametricCS()
+osgeo::proj::cs::SphericalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::SphericalCS::~SphericalCS()
+osgeo::proj::cs::TemporalCountCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::TemporalCountCS::~TemporalCountCS()
+osgeo::proj::cs::TemporalCS::~TemporalCS()
+osgeo::proj::cs::TemporalMeasureCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::TemporalMeasureCS::~TemporalMeasureCS()
+osgeo::proj::cs::VerticalCS::createGravityRelatedHeight(osgeo::proj::common::UnitOfMeasure const&)
+osgeo::proj::cs::VerticalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
+osgeo::proj::cs::VerticalCS::~VerticalCS()
+osgeo::proj::datum::Datum::anchorDefinition() const
+osgeo::proj::datum::Datum::conventionalRS() const
+osgeo::proj::datum::Datum::~Datum()
+osgeo::proj::datum::DatumEnsemble::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Datum> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Datum> > > > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > const&)
+osgeo::proj::datum::DatumEnsemble::~DatumEnsemble()
+osgeo::proj::datum::DatumEnsemble::datums() const
+osgeo::proj::datum::DatumEnsemble::positionalAccuracy() const
+osgeo::proj::datum::Datum::publicationDate() const
+osgeo::proj::datum::DynamicGeodeticReferenceFrame::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Ellipsoid> > const&, osgeo::proj::util::optional<std::string> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::PrimeMeridian> > const&, osgeo::proj::common::Measure const&, osgeo::proj::util::optional<std::string> const&)
+osgeo::proj::datum::DynamicGeodeticReferenceFrame::deformationModelName() const
+osgeo::proj::datum::DynamicGeodeticReferenceFrame::~DynamicGeodeticReferenceFrame()
+osgeo::proj::datum::DynamicGeodeticReferenceFrame::frameReferenceEpoch() const
+osgeo::proj::datum::DynamicVerticalReferenceFrame::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&, osgeo::proj::util::optional<osgeo::proj::datum::RealizationMethod> const&, osgeo::proj::common::Measure const&, osgeo::proj::util::optional<std::string> const&)
+osgeo::proj::datum::DynamicVerticalReferenceFrame::deformationModelName() const
+osgeo::proj::datum::DynamicVerticalReferenceFrame::~DynamicVerticalReferenceFrame()
+osgeo::proj::datum::DynamicVerticalReferenceFrame::frameReferenceEpoch() const
+osgeo::proj::datum::Ellipsoid::celestialBody() const
+osgeo::proj::datum::Ellipsoid::computedInverseFlattening() const
+osgeo::proj::datum::Ellipsoid::computeSemiMinorAxis() const
+osgeo::proj::datum::Ellipsoid::createFlattenedSphere(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Length const&, osgeo::proj::common::Scale const&, std::string const&)
+osgeo::proj::datum::Ellipsoid::createSphere(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Length const&, std::string const&)
+osgeo::proj::datum::Ellipsoid::createTwoAxis(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&, std::string const&)
+osgeo::proj::datum::Ellipsoid::~Ellipsoid()
+osgeo::proj::datum::Ellipsoid::identify() const
+osgeo::proj::datum::Ellipsoid::inverseFlattening() const
+osgeo::proj::datum::Ellipsoid::isSphere() const
+osgeo::proj::datum::Ellipsoid::semiMajorAxis() const
+osgeo::proj::datum::Ellipsoid::semiMedianAxis() const
+osgeo::proj::datum::Ellipsoid::semiMinorAxis() const
+osgeo::proj::datum::Ellipsoid::squaredEccentricity() const
+osgeo::proj::datum::EngineeringDatum::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&)
+osgeo::proj::datum::EngineeringDatum::~EngineeringDatum()
+osgeo::proj::datum::GeodeticReferenceFrame::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Ellipsoid> > const&, osgeo::proj::util::optional<std::string> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::PrimeMeridian> > const&)
+osgeo::proj::datum::GeodeticReferenceFrame::ellipsoid() const
+osgeo::proj::datum::GeodeticReferenceFrame::~GeodeticReferenceFrame()
+osgeo::proj::datum::GeodeticReferenceFrame::primeMeridian() const
+osgeo::proj::datum::ParametricDatum::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&)
+osgeo::proj::datum::ParametricDatum::~ParametricDatum()
+osgeo::proj::datum::PrimeMeridian::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&)
+osgeo::proj::datum::PrimeMeridian::longitude() const
+osgeo::proj::datum::PrimeMeridian::~PrimeMeridian()
+osgeo::proj::datum::RealizationMethod::operator=(osgeo::proj::datum::RealizationMethod const&)
+osgeo::proj::datum::RealizationMethod::RealizationMethod(osgeo::proj::datum::RealizationMethod const&)
+osgeo::proj::datum::RealizationMethod::RealizationMethod(std::string const&)
+osgeo::proj::datum::TemporalDatum::calendar() const
+osgeo::proj::datum::TemporalDatum::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::DateTime const&, std::string const&)
+osgeo::proj::datum::TemporalDatum::~TemporalDatum()
+osgeo::proj::datum::TemporalDatum::temporalOrigin() const
+osgeo::proj::datum::VerticalReferenceFrame::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&, osgeo::proj::util::optional<osgeo::proj::datum::RealizationMethod> const&)
+osgeo::proj::datum::VerticalReferenceFrame::realizationMethod() const
+osgeo::proj::datum::VerticalReferenceFrame::~VerticalReferenceFrame()
+osgeo::proj::internal::ci_equal(std::string const&, char const*)
+osgeo::proj::internal::ci_equal(std::string const&, std::string const&)
+osgeo::proj::internal::ci_find(std::string const&, char const*)
+osgeo::proj::internal::c_locale_stod(std::string const&)
+osgeo::proj::internal::replaceAll(std::string const&, std::string const&, std::string const&)
+osgeo::proj::internal::split(std::string const&, char)
+osgeo::proj::internal::split(std::string const&, std::string const&)
+osgeo::proj::internal::tolower(std::string const&)
+osgeo::proj::internal::toString(double, int)
+osgeo::proj::io::AuthorityFactory::~AuthorityFactory()
+osgeo::proj::io::AuthorityFactory::createCompoundCRS(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createConversion(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createCoordinateOperation(std::string const&, bool) const
+osgeo::proj::io::AuthorityFactory::createCoordinateReferenceSystem(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createCoordinateSystem(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createDatum(std::string const&) const
+osgeo::proj::io::AuthorityFactory::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> > const&, std::string const&)
+osgeo::proj::io::AuthorityFactory::createEllipsoid(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createExtent(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&) const
+osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool) const
+osgeo::proj::io::AuthorityFactory::createFromCRSCodesWithIntermediates(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, std::vector<std::pair<std::string, std::string>, std::allocator<std::pair<std::string, std::string> > > const&) const
+osgeo::proj::io::AuthorityFactory::createGeodeticCRS(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createGeodeticDatum(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createGeographicCRS(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createObjectsFromName(std::string const&, std::vector<osgeo::proj::io::AuthorityFactory::ObjectType, std::allocator<osgeo::proj::io::AuthorityFactory::ObjectType> > const&, bool, unsigned long) const
+osgeo::proj::io::AuthorityFactory::createObject(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createPrimeMeridian(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createProjectedCRS(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createUnitOfMeasure(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createVerticalCRS(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createVerticalDatum(std::string const&) const
+osgeo::proj::io::AuthorityFactory::CRSInfo::CRSInfo()
+osgeo::proj::io::AuthorityFactory::databaseContext() const
+osgeo::proj::io::AuthorityFactory::getAuthorityCodes(osgeo::proj::io::AuthorityFactory::ObjectType const&, bool) const
+osgeo::proj::io::AuthorityFactory::getAuthority() const
+osgeo::proj::io::AuthorityFactory::getCRSInfoList() const
+osgeo::proj::io::AuthorityFactory::getDescriptionText(std::string const&) const
+osgeo::proj::io::AuthorityFactory::getOfficialNameFromAlias(std::string const&, std::string const&, std::string const&, bool, std::string&, std::string&, std::string&) const
+osgeo::proj::io::AuthorityFactory::identifyBodyFromSemiMajorAxis(double, double) const
+osgeo::proj::io::AuthorityFactory::listAreaOfUseFromName(std::string const&, bool) const
+osgeo::proj::io::createFromUserInput(std::string const&, projCtx_t*)
+osgeo::proj::io::createFromUserInput(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool)
+osgeo::proj::io::DatabaseContext::create(std::string const&, std::vector<std::string, std::allocator<std::string> > const&, projCtx_t*)
+osgeo::proj::io::DatabaseContext::create(void*)
+osgeo::proj::io::DatabaseContext::~DatabaseContext()
+osgeo::proj::io::DatabaseContext::getAuthorities() const
+osgeo::proj::io::DatabaseContext::getDatabaseStructure() const
+osgeo::proj::io::DatabaseContext::getMetadata(char const*) const
+osgeo::proj::io::DatabaseContext::getPath() const
+osgeo::proj::io::DatabaseContext::getSqliteHandle() const
+osgeo::proj::io::DatabaseContext::lookForGridInfo(std::string const&, std::string&, std::string&, std::string&, bool&, bool&, bool&) const
+osgeo::proj::io::FactoryException::~FactoryException()
+osgeo::proj::io::FactoryException::FactoryException(char const*)
+osgeo::proj::io::FactoryException::FactoryException(osgeo::proj::io::FactoryException const&)
+osgeo::proj::io::FactoryException::FactoryException(std::string const&)
+osgeo::proj::io::FormattingException::~FormattingException()
+osgeo::proj::io::FormattingException::FormattingException(osgeo::proj::io::FormattingException const&)
+osgeo::proj::io::IJSONExportable::exportToJSON(osgeo::proj::io::JSONFormatter*) const
+osgeo::proj::io::IJSONExportable::~IJSONExportable()
+osgeo::proj::io::IPROJStringExportable::exportToPROJString(osgeo::proj::io::PROJStringFormatter*) const
+osgeo::proj::io::IPROJStringExportable::~IPROJStringExportable()
+osgeo::proj::io::IWKTExportable::exportToWKT(osgeo::proj::io::WKTFormatter*) const
+osgeo::proj::io::IWKTExportable::~IWKTExportable()
+osgeo::proj::io::JSONFormatter::create(std::shared_ptr<osgeo::proj::io::DatabaseContext>)
+osgeo::proj::io::JSONFormatter::~JSONFormatter()
+osgeo::proj::io::JSONFormatter::ObjectContext::~ObjectContext()
+osgeo::proj::io::JSONFormatter::ObjectContext::ObjectContext(osgeo::proj::io::JSONFormatter&, char const*, bool)
+osgeo::proj::io::JSONFormatter::setIndentationWidth(int)
+osgeo::proj::io::JSONFormatter::setMultiLine(bool)
+osgeo::proj::io::JSONFormatter::setSchema(std::string const&)
+osgeo::proj::io::JSONFormatter::toString() const
+osgeo::proj::io::NoSuchAuthorityCodeException::getAuthorityCode() const
+osgeo::proj::io::NoSuchAuthorityCodeException::getAuthority() const
+osgeo::proj::io::NoSuchAuthorityCodeException::~NoSuchAuthorityCodeException()
+osgeo::proj::io::NoSuchAuthorityCodeException::NoSuchAuthorityCodeException(osgeo::proj::io::NoSuchAuthorityCodeException const&)
+osgeo::proj::io::NoSuchAuthorityCodeException::NoSuchAuthorityCodeException(std::string const&, std::string const&, std::string const&)
+osgeo::proj::io::ParsingException::~ParsingException()
+osgeo::proj::io::ParsingException::ParsingException(osgeo::proj::io::ParsingException const&)
+osgeo::proj::io::PROJStringFormatter::addParam(char const*, char const*)
+osgeo::proj::io::PROJStringFormatter::addParam(char const*, double)
+osgeo::proj::io::PROJStringFormatter::addParam(char const*, int)
+osgeo::proj::io::PROJStringFormatter::addParam(char const*, std::string const&)
+osgeo::proj::io::PROJStringFormatter::addParam(char const*, std::vector<double, std::allocator<double> > const&)
+osgeo::proj::io::PROJStringFormatter::addParam(std::string const&)
+osgeo::proj::io::PROJStringFormatter::addParam(std::string const&, char const*)
+osgeo::proj::io::PROJStringFormatter::addParam(std::string const&, double)
+osgeo::proj::io::PROJStringFormatter::addParam(std::string const&, int)
+osgeo::proj::io::PROJStringFormatter::addParam(std::string const&, std::string const&)
+osgeo::proj::io::PROJStringFormatter::addStep(char const*)
+osgeo::proj::io::PROJStringFormatter::addStep(std::string const&)
+osgeo::proj::io::PROJStringFormatter::create(osgeo::proj::io::PROJStringFormatter::Convention, std::shared_ptr<osgeo::proj::io::DatabaseContext>)
+osgeo::proj::io::PROJStringFormatter::ingestPROJString(std::string const&)
+osgeo::proj::io::PROJStringFormatter::~PROJStringFormatter()
+osgeo::proj::io::PROJStringFormatter::setCRSExport(bool)
+osgeo::proj::io::PROJStringFormatter::setCurrentStepInverted(bool)
+osgeo::proj::io::PROJStringFormatter::setUseApproxTMerc(bool)
+osgeo::proj::io::PROJStringFormatter::startInversion()
+osgeo::proj::io::PROJStringFormatter::stopInversion()
+osgeo::proj::io::PROJStringFormatter::toString() const
+osgeo::proj::io::PROJStringParser::attachContext(projCtx_t*)
+osgeo::proj::io::PROJStringParser::attachDatabaseContext(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&)
+osgeo::proj::io::PROJStringParser::createFromPROJString(std::string const&)
+osgeo::proj::io::PROJStringParser::~PROJStringParser()
+osgeo::proj::io::PROJStringParser::PROJStringParser()
+osgeo::proj::io::PROJStringParser::setUsePROJ4InitRules(bool)
+osgeo::proj::io::PROJStringParser::warningList() const
+osgeo::proj::io::WKTFormatter::create(dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::io::WKTFormatter, std::default_delete<osgeo::proj::io::WKTFormatter> > > const&)
+osgeo::proj::io::WKTFormatter::create(osgeo::proj::io::WKTFormatter::Convention, std::shared_ptr<osgeo::proj::io::DatabaseContext>)
+osgeo::proj::io::WKTFormatter::isStrict() const
+osgeo::proj::io::WKTFormatter::setIndentationWidth(int)
+osgeo::proj::io::WKTFormatter::setMultiLine(bool)
+osgeo::proj::io::WKTFormatter::setOutputAxis(osgeo::proj::io::WKTFormatter::OutputAxisRule)
+osgeo::proj::io::WKTFormatter::setOutputId(bool)
+osgeo::proj::io::WKTFormatter::setStrict(bool)
+osgeo::proj::io::WKTFormatter::simulCurNodeHasId()
+osgeo::proj::io::WKTFormatter::toString() const
+osgeo::proj::io::WKTFormatter::~WKTFormatter()
+osgeo::proj::io::WKTNode::addChild(dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::io::WKTNode, std::default_delete<osgeo::proj::io::WKTNode> > >&&)
+osgeo::proj::io::WKTNode::children() const
+osgeo::proj::io::WKTNode::countChildrenOfName(std::string const&) const
+osgeo::proj::io::WKTNode::createFrom(std::string const&, unsigned long)
+osgeo::proj::io::WKTNode::lookForChild(std::string const&, int) const
+osgeo::proj::io::WKTNode::toString() const
+osgeo::proj::io::WKTNode::value() const
+osgeo::proj::io::WKTNode::~WKTNode()
+osgeo::proj::io::WKTNode::WKTNode(std::string const&)
+osgeo::proj::io::WKTParser::attachDatabaseContext(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&)
+osgeo::proj::io::WKTParser::createFromWKT(std::string const&)
+osgeo::proj::io::WKTParser::guessDialect(std::string const&)
+osgeo::proj::io::WKTParser::setStrict(bool)
+osgeo::proj::io::WKTParser::warningList() const
+osgeo::proj::io::WKTParser::~WKTParser()
+osgeo::proj::io::WKTParser::WKTParser()
+osgeo::proj::metadata::Citation::~Citation()
+osgeo::proj::metadata::Citation::Citation()
+osgeo::proj::metadata::Citation::Citation(osgeo::proj::metadata::Citation const&)
+osgeo::proj::metadata::Citation::Citation(std::string const&)
+osgeo::proj::metadata::Citation::title() const
+osgeo::proj::metadata::Extent::contains(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::Extent> > const&) const
+osgeo::proj::metadata::Extent::createFromBBOX(double, double, double, double, osgeo::proj::util::optional<std::string> const&)
+osgeo::proj::metadata::Extent::create(osgeo::proj::util::optional<std::string> const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::GeographicExtent> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::GeographicExtent> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::VerticalExtent> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::VerticalExtent> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::TemporalExtent> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::TemporalExtent> > > > const&)
+osgeo::proj::metadata::Extent::description() const
+osgeo::proj::metadata::Extent::~Extent()
+osgeo::proj::metadata::Extent::Extent(osgeo::proj::metadata::Extent const&)
+osgeo::proj::metadata::Extent::geographicElements() const
+osgeo::proj::metadata::Extent::intersection(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::Extent> > const&) const
+osgeo::proj::metadata::Extent::intersects(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::Extent> > const&) const
+osgeo::proj::metadata::Extent::temporalElements() const
+osgeo::proj::metadata::Extent::verticalElements() const
+osgeo::proj::metadata::GeographicBoundingBox::create(double, double, double, double)
+osgeo::proj::metadata::GeographicBoundingBox::eastBoundLongitude() const
+osgeo::proj::metadata::GeographicBoundingBox::~GeographicBoundingBox()
+osgeo::proj::metadata::GeographicBoundingBox::northBoundLatitude() const
+osgeo::proj::metadata::GeographicBoundingBox::southBoundLatitude() const
+osgeo::proj::metadata::GeographicBoundingBox::westBoundLongitude() const
+osgeo::proj::metadata::GeographicExtent::~GeographicExtent()
+osgeo::proj::metadata::Identifier::authority() const
+osgeo::proj::metadata::Identifier::code() const
+osgeo::proj::metadata::Identifier::codeSpace() const
+osgeo::proj::metadata::Identifier::create(std::string const&, osgeo::proj::util::PropertyMap const&)
+osgeo::proj::metadata::Identifier::description() const
+osgeo::proj::metadata::Identifier::~Identifier()
+osgeo::proj::metadata::Identifier::Identifier(osgeo::proj::metadata::Identifier const&)
+osgeo::proj::metadata::Identifier::isEquivalentName(char const*, char const*)
+osgeo::proj::metadata::Identifier::uri() const
+osgeo::proj::metadata::Identifier::version() const
+osgeo::proj::metadata::PositionalAccuracy::create(std::string const&)
+osgeo::proj::metadata::PositionalAccuracy::~PositionalAccuracy()
+osgeo::proj::metadata::PositionalAccuracy::value() const
+osgeo::proj::metadata::TemporalExtent::contains(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::TemporalExtent> > const&) const
+osgeo::proj::metadata::TemporalExtent::create(std::string const&, std::string const&)
+osgeo::proj::metadata::TemporalExtent::intersects(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::TemporalExtent> > const&) const
+osgeo::proj::metadata::TemporalExtent::start() const
+osgeo::proj::metadata::TemporalExtent::stop() const
+osgeo::proj::metadata::TemporalExtent::~TemporalExtent()
+osgeo::proj::metadata::VerticalExtent::contains(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::VerticalExtent> > const&) const
+osgeo::proj::metadata::VerticalExtent::create(double, double, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::common::UnitOfMeasure> > const&)
+osgeo::proj::metadata::VerticalExtent::intersects(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::VerticalExtent> > const&) const
+osgeo::proj::metadata::VerticalExtent::maximumValue() const
+osgeo::proj::metadata::VerticalExtent::minimumValue() const
+osgeo::proj::metadata::VerticalExtent::unit() const
+osgeo::proj::metadata::VerticalExtent::~VerticalExtent()
+osgeo::proj::operation::ConcatenatedOperation::~ConcatenatedOperation()
+osgeo::proj::operation::ConcatenatedOperation::createComputeMetadata(std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> > > > const&, bool)
+osgeo::proj::operation::ConcatenatedOperation::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::ConcatenatedOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::operation::ConcatenatedOperation::inverse() const
+osgeo::proj::operation::ConcatenatedOperation::operations() const
+osgeo::proj::operation::Conversion::~Conversion()
+osgeo::proj::operation::Conversion::convertToOtherMethod(int) const
+osgeo::proj::operation::Conversion::createAlbersEqualArea(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createAmericanPolyconic(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createAxisOrderReversal(bool)
+osgeo::proj::operation::Conversion::createAzimuthalEquidistant(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createBonne(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createCassiniSoldner(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createChangeVerticalUnit(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Scale const&)
+osgeo::proj::operation::Conversion::createEckertIII(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createEckertII(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createEckertI(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createEckertIV(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createEckertVI(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createEckertV(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createEqualEarth(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createEquidistantConic(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createEquidistantCylindrical(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createEquidistantCylindricalSpherical(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createGall(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createGaussSchreiberTransverseMercator(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createGeographicGeocentric(osgeo::proj::util::PropertyMap const&)
+osgeo::proj::operation::Conversion::createGeostationarySatelliteSweepX(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createGeostationarySatelliteSweepY(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createGnomonic(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createGoodeHomolosine(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createGuamProjection(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createHotineObliqueMercatorTwoPointNaturalOrigin(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createHotineObliqueMercatorVariantA(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createHotineObliqueMercatorVariantB(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createInternationalMapWorldPolyconic(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createInterruptedGoodeHomolosine(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createKrovakNorthOriented(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createKrovak(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createLabordeObliqueMercator(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createLambertAzimuthalEqualArea(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createLambertConicConformal_1SP(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createLambertConicConformal_2SP_Belgium(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createLambertConicConformal_2SP_Michigan(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&, osgeo::proj::common::Scale const&)
+osgeo::proj::operation::Conversion::createLambertConicConformal_2SP(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createLambertCylindricalEqualArea(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createLambertCylindricalEqualAreaSpherical(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createMercatorVariantA(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createMercatorVariantB(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createMillerCylindrical(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createMollweide(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createNewZealandMappingGrid(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createObliqueStereographic(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createOrthographic(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationMethod> > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::GeneralParameterValue> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::GeneralParameterValue> > > > const&)
+osgeo::proj::operation::Conversion::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationParameter> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationParameter> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::ParameterValue> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::ParameterValue> > > > const&)
+osgeo::proj::operation::Conversion::createPolarStereographicVariantA(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createPolarStereographicVariantB(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createPopularVisualisationPseudoMercator(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createQuadrilateralizedSphericalCube(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createRobinson(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createSinusoidal(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createSphericalCrossTrackHeight(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createStereographic(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createTransverseMercator(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createTransverseMercatorSouthOriented(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createTunisiaMappingGrid(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createTwoPointEquidistant(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createUTM(osgeo::proj::util::PropertyMap const&, int, bool)
+osgeo::proj::operation::Conversion::createVanDerGrinten(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createWagnerIII(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createWagnerII(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createWagnerI(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createWagnerIV(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createWagnerVII(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createWagnerVI(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createWagnerV(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::identify() const
+osgeo::proj::operation::Conversion::inverse() const
+osgeo::proj::operation::Conversion::isUTM(int&, bool&) const
+osgeo::proj::operation::CoordinateOperationContext::~CoordinateOperationContext()
+osgeo::proj::operation::CoordinateOperationContext::create(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&, double)
+osgeo::proj::operation::CoordinateOperationContext::getAllowUseIntermediateCRS() const
+osgeo::proj::operation::CoordinateOperationContext::getAreaOfInterest() const
+osgeo::proj::operation::CoordinateOperationContext::getAuthorityFactory() const
+osgeo::proj::operation::CoordinateOperationContext::getDesiredAccuracy() const
+osgeo::proj::operation::CoordinateOperationContext::getDiscardSuperseded() const
+osgeo::proj::operation::CoordinateOperationContext::getGridAvailabilityUse() const
+osgeo::proj::operation::CoordinateOperationContext::getIntermediateCRS() const
+osgeo::proj::operation::CoordinateOperationContext::getSourceAndTargetCRSExtentUse() const
+osgeo::proj::operation::CoordinateOperationContext::getSpatialCriterion() const
+osgeo::proj::operation::CoordinateOperationContext::getUsePROJAlternativeGridNames() const
+osgeo::proj::operation::CoordinateOperationContext::setAllowUseIntermediateCRS(osgeo::proj::operation::CoordinateOperationContext::IntermediateCRSUse)
+osgeo::proj::operation::CoordinateOperationContext::setAreaOfInterest(std::shared_ptr<osgeo::proj::metadata::Extent> const&)
+osgeo::proj::operation::CoordinateOperationContext::setDesiredAccuracy(double)
+osgeo::proj::operation::CoordinateOperationContext::setDiscardSuperseded(bool)
+osgeo::proj::operation::CoordinateOperationContext::setGridAvailabilityUse(osgeo::proj::operation::CoordinateOperationContext::GridAvailabilityUse)
+osgeo::proj::operation::CoordinateOperationContext::setIntermediateCRS(std::vector<std::pair<std::string, std::string>, std::allocator<std::pair<std::string, std::string> > > const&)
+osgeo::proj::operation::CoordinateOperationContext::setSourceAndTargetCRSExtentUse(osgeo::proj::operation::CoordinateOperationContext::SourceTargetCRSExtentUse)
+osgeo::proj::operation::CoordinateOperationContext::setSpatialCriterion(osgeo::proj::operation::CoordinateOperationContext::SpatialCriterion)
+osgeo::proj::operation::CoordinateOperationContext::setUsePROJAlternativeGridNames(bool)
+osgeo::proj::operation::CoordinateOperation::~CoordinateOperation()
+osgeo::proj::operation::CoordinateOperation::coordinateOperationAccuracies() const
+osgeo::proj::operation::CoordinateOperationFactory::~CoordinateOperationFactory()
+osgeo::proj::operation::CoordinateOperationFactory::create()
+osgeo::proj::operation::CoordinateOperationFactory::createOperation(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&) const
+osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
+osgeo::proj::operation::CoordinateOperation::hasBallparkTransformation() const
+osgeo::proj::operation::CoordinateOperation::interpolationCRS() const
+osgeo::proj::operation::CoordinateOperation::isPROJInstantiable(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::operation::CoordinateOperation::normalizeForVisualization() const
+osgeo::proj::operation::CoordinateOperation::operationVersion() const
+osgeo::proj::operation::CoordinateOperation::shallowClone() const
+osgeo::proj::operation::CoordinateOperation::sourceCoordinateEpoch() const
+osgeo::proj::operation::CoordinateOperation::sourceCRS() const
+osgeo::proj::operation::CoordinateOperation::targetCoordinateEpoch() const
+osgeo::proj::operation::CoordinateOperation::targetCRS() const
+osgeo::proj::operation::GeneralOperationParameter::~GeneralOperationParameter()
+osgeo::proj::operation::GeneralParameterValue::~GeneralParameterValue()
+osgeo::proj::operation::GridDescription::~GridDescription()
+osgeo::proj::operation::GridDescription::GridDescription()
+osgeo::proj::operation::GridDescription::GridDescription(osgeo::proj::operation::GridDescription&&)
+osgeo::proj::operation::GridDescription::GridDescription(osgeo::proj::operation::GridDescription const&)
+osgeo::proj::operation::InvalidOperation::~InvalidOperation()
+osgeo::proj::operation::InvalidOperation::InvalidOperation(osgeo::proj::operation::InvalidOperation const&)
+osgeo::proj::operation::OperationMethod::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::GeneralOperationParameter> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::GeneralOperationParameter> > > > const&)
+osgeo::proj::operation::OperationMethod::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationParameter> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationParameter> > > > const&)
+osgeo::proj::operation::OperationMethod::formulaCitation() const
+osgeo::proj::operation::OperationMethod::formula() const
+osgeo::proj::operation::OperationMethod::getEPSGCode() const
+osgeo::proj::operation::OperationMethod::~OperationMethod()
+osgeo::proj::operation::OperationMethod::parameters() const
+osgeo::proj::operation::OperationParameter::create(osgeo::proj::util::PropertyMap const&)
+osgeo::proj::operation::OperationParameter::getEPSGCode() const
+osgeo::proj::operation::OperationParameter::getNameForEPSGCode(int)
+osgeo::proj::operation::OperationParameter::~OperationParameter()
+osgeo::proj::operation::OperationParameterValue::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationParameter> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::ParameterValue> > const&)
+osgeo::proj::operation::OperationParameterValue::~OperationParameterValue()
+osgeo::proj::operation::OperationParameterValue::parameter() const
+osgeo::proj::operation::OperationParameterValue::parameterValue() const
+osgeo::proj::operation::ParameterValue::booleanValue() const
+osgeo::proj::operation::ParameterValue::create(bool)
+osgeo::proj::operation::ParameterValue::create(char const*)
+osgeo::proj::operation::ParameterValue::createFilename(std::string const&)
+osgeo::proj::operation::ParameterValue::create(int)
+osgeo::proj::operation::ParameterValue::create(osgeo::proj::common::Measure const&)
+osgeo::proj::operation::ParameterValue::create(std::string const&)
+osgeo::proj::operation::ParameterValue::integerValue() const
+osgeo::proj::operation::ParameterValue::~ParameterValue()
+osgeo::proj::operation::ParameterValue::stringValue() const
+osgeo::proj::operation::ParameterValue::type() const
+osgeo::proj::operation::ParameterValue::value() const
+osgeo::proj::operation::ParameterValue::valueFile() const
+osgeo::proj::operation::PointMotionOperation::~PointMotionOperation()
+osgeo::proj::operation::SingleOperation::createPROJBased(osgeo::proj::util::PropertyMap const&, std::string const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::SingleOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::operation::SingleOperation::method() const
+osgeo::proj::operation::SingleOperation::parameterValue(int) const
+osgeo::proj::operation::SingleOperation::parameterValueMeasure(int) const
+osgeo::proj::operation::SingleOperation::parameterValueMeasure(std::string const&, int) const
+osgeo::proj::operation::SingleOperation::parameterValueNumeric(int, osgeo::proj::common::UnitOfMeasure const&) const
+osgeo::proj::operation::SingleOperation::parameterValues() const
+osgeo::proj::operation::SingleOperation::parameterValue(std::string const&, int) const
+osgeo::proj::operation::SingleOperation::~SingleOperation()
+osgeo::proj::operation::SingleOperation::validateParameters() const
+osgeo::proj::operation::Transformation::createAbridgedMolodensky(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, double, double, double, double, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createChangeVerticalUnit(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, osgeo::proj::common::Scale const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createCoordinateFrameRotation(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, double, double, double, double, double, double, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createGeocentricTranslations(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, double, double, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createGeographic2DOffsets(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createGeographic2DWithHeightOffsets(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createGeographic3DOffsets(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createGravityRelatedHeightToGeographic3D(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, std::string const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createLongitudeRotation(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, osgeo::proj::common::Angle const&)
+osgeo::proj::operation::Transformation::createMolodensky(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, double, double, double, double, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createNTv2(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::string const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationMethod> > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::GeneralParameterValue> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::GeneralParameterValue> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationParameter> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::OperationParameter> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::ParameterValue> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::ParameterValue> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createPositionVector(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, double, double, double, double, double, double, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createTimeDependentCoordinateFrameRotation(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createTimeDependentPositionVector(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createTOWGS84(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::vector<double, std::allocator<double> > const&)
+osgeo::proj::operation::Transformation::createVERTCON(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::string const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::createVerticalOffset(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, osgeo::proj::common::Length const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
+osgeo::proj::operation::Transformation::getTOWGS84Parameters() const
+osgeo::proj::operation::Transformation::inverse() const
+osgeo::proj::operation::Transformation::sourceCRS() const
+osgeo::proj::operation::Transformation::substitutePROJAlternativeGridNames(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> >) const
+osgeo::proj::operation::Transformation::targetCRS() const
+osgeo::proj::operation::Transformation::~Transformation()
+osgeo::proj::util::ArrayOfBaseObject::add(osgeo::proj::util::BaseObjectNNPtr const&)
+osgeo::proj::util::ArrayOfBaseObject::~ArrayOfBaseObject()
+osgeo::proj::util::ArrayOfBaseObject::create()
+osgeo::proj::util::BaseObject::~BaseObject()
+osgeo::proj::util::BaseObjectNNPtr::~BaseObjectNNPtr()
+osgeo::proj::util::BoxedValue::~BoxedValue()
+osgeo::proj::util::BoxedValue::BoxedValue(bool)
+osgeo::proj::util::BoxedValue::BoxedValue(char const*)
+osgeo::proj::util::BoxedValue::BoxedValue(int)
+osgeo::proj::util::BoxedValue::BoxedValue(std::string const&)
+osgeo::proj::util::CodeList::~CodeList()
+osgeo::proj::util::Exception::~Exception()
+osgeo::proj::util::Exception::Exception(osgeo::proj::util::Exception const&)
+osgeo::proj::util::Exception::what() const
+osgeo::proj::util::GenericName::~GenericName()
+osgeo::proj::util::IComparable::~IComparable()
+osgeo::proj::util::IComparable::isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion) const
+osgeo::proj::util::InvalidValueTypeException::~InvalidValueTypeException()
+osgeo::proj::util::InvalidValueTypeException::InvalidValueTypeException(osgeo::proj::util::InvalidValueTypeException const&)
+osgeo::proj::util::LocalName::~LocalName()
+osgeo::proj::util::LocalName::scope() const
+osgeo::proj::util::LocalName::toFullyQualifiedName() const
+osgeo::proj::util::LocalName::toString() const
+osgeo::proj::util::NameFactory::createGenericName(std::shared_ptr<osgeo::proj::util::NameSpace> const&, std::vector<std::string, std::allocator<std::string> > const&)
+osgeo::proj::util::NameFactory::createLocalName(std::shared_ptr<osgeo::proj::util::NameSpace> const&, std::string const&)
+osgeo::proj::util::NameFactory::createNameSpace(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::util::GenericName> > const&, osgeo::proj::util::PropertyMap const&)
+osgeo::proj::util::NameSpace::isGlobal() const
+osgeo::proj::util::NameSpace::name() const
+osgeo::proj::util::NameSpace::~NameSpace()
+osgeo::proj::util::PropertyMap::~PropertyMap()
+osgeo::proj::util::PropertyMap::PropertyMap()
+osgeo::proj::util::PropertyMap::PropertyMap(osgeo::proj::util::PropertyMap const&)
+osgeo::proj::util::PropertyMap::set(std::string const&, bool)
+osgeo::proj::util::PropertyMap::set(std::string const&, char const*)
+osgeo::proj::util::PropertyMap::set(std::string const&, int)
+osgeo::proj::util::PropertyMap::set(std::string const&, osgeo::proj::util::BaseObjectNNPtr const&)
+osgeo::proj::util::PropertyMap::set(std::string const&, std::string const&)
+osgeo::proj::util::PropertyMap::set(std::string const&, std::vector<std::string, std::allocator<std::string> > const&)
+osgeo::proj::util::UnsupportedOperationException::~UnsupportedOperationException()
+osgeo::proj::util::UnsupportedOperationException::UnsupportedOperationException(osgeo::proj::util::UnsupportedOperationException const&)
+pj_acquire_lock
+pj_add_type_crs_if_needed(std::string const&)
+pj_apply_gridshift
+pj_approx_2D_trans(PJconsts*, PJ_DIRECTION, PJ_COORD)
+pj_approx_3D_trans(PJconsts*, PJ_DIRECTION, PJ_COORD)
+pj_atof(char const*)
+pj_calloc
+pj_chomp(char*)
+pj_cleanup_lock
+pj_clear_initcache
+pj_compare_datums
+pj_ctx_alloc
+pj_ctx_fclose
+pj_ctx_fgets
+pj_ctx_fopen
+pj_ctx_fread
+pj_ctx_free
+pj_ctx_fseek
+pj_ctx_ftell
+pj_ctx_get_app_data
+pj_ctx_get_errno
+pj_ctx_get_fileapi
+pj_ctx_set_app_data
+pj_ctx_set_debug
+pj_ctx_set_errno
+pj_ctx_set_fileapi
+pj_ctx_set_logger
+pj_dalloc
+pj_datum_transform
+pj_dealloc
+pj_deallocate_grids
+pj_ell_set(projCtx_t*, ARG_list*, double*, double*)
+pj_find_file
+pj_free
+pj_fwd
+pj_fwd3d
+pj_geocentric_to_geodetic
+pj_geodetic_to_geocentric
+pj_get_ctx
+pj_get_datums_ref()
+pj_get_def
+pj_get_default_ctx
+pj_get_default_fileapi
+pj_get_errno_ref
+pj_get_release
+pj_get_spheroid_defn
+pj_has_inverse
+pj_init
+pj_init_ctx
+pj_init_plus
+pj_init_plus_ctx
+pj_inv
+pj_inv3d
+pj_is_geocent
+pj_is_latlong
+pj_latlong_from_proj
+pj_log
+pj_malloc
+pj_mkparam(char const*)
+pj_open_lib
+pj_param_exists(ARG_list*, char const*)
+pj_param(projCtx_t*, ARG_list*, char const*)
+pj_phi2(projCtx_t*, double, double)
+pj_pr_list
+pj_release_lock
+pj_set_ctx
+pj_set_finder
+pj_set_searchpath
+pj_shrink(char*)
+pj_stderr_logger
+pj_strdup
+pj_strerrno
+pj_transform
+proj_alter_id
+proj_alter_name
+proj_angular_input
+proj_angular_output
+proj_area_create
+proj_area_destroy
+proj_area_set_bbox
+proj_as_projjson
+proj_as_proj_string
+proj_assign_context
+proj_as_wkt
+proj_cleanup
+proj_clone
+proj_concatoperation_get_step
+proj_concatoperation_get_step_count
+proj_context_create
+proj_context_delete_cpp_context(projCppContext*)
+proj_context_destroy
+proj_context_errno
+proj_context_get_database_metadata
+proj_context_get_database_path
+proj_context_get_use_proj4_init_rules
+proj_context_guess_wkt_dialect
+proj_context_set_autoclose_database
+proj_context_set_database_path
+proj_context_set_file_finder
+proj_context_set(PJconsts*, projCtx_t*)
+proj_context_set_search_paths
+proj_context_use_proj4_init_rules
+proj_convert_conversion_to_other_method
+proj_coord
+proj_coord_error()
+proj_coordoperation_get_accuracy
+proj_coordoperation_get_grid_used
+proj_coordoperation_get_grid_used_count
+proj_coordoperation_get_method_info
+proj_coordoperation_get_param
+proj_coordoperation_get_param_count
+proj_coordoperation_get_param_index
+proj_coordoperation_get_towgs84_values
+proj_coordoperation_has_ballpark_transformation
+proj_coordoperation_is_instantiable
+proj_create
+proj_create_argv
+proj_create_cartesian_2D_cs
+proj_create_compound_crs
+proj_create_conversion
+proj_create_conversion_albers_equal_area
+proj_create_conversion_american_polyconic
+proj_create_conversion_azimuthal_equidistant
+proj_create_conversion_bonne
+proj_create_conversion_cassini_soldner
+proj_create_conversion_eckert_i
+proj_create_conversion_eckert_ii
+proj_create_conversion_eckert_iii
+proj_create_conversion_eckert_iv
+proj_create_conversion_eckert_v
+proj_create_conversion_eckert_vi
+proj_create_conversion_equal_earth
+proj_create_conversion_equidistant_conic
+proj_create_conversion_equidistant_cylindrical
+proj_create_conversion_equidistant_cylindrical_spherical
+proj_create_conversion_gall
+proj_create_conversion_gauss_schreiber_transverse_mercator
+proj_create_conversion_geostationary_satellite_sweep_x
+proj_create_conversion_geostationary_satellite_sweep_y
+proj_create_conversion_gnomonic
+proj_create_conversion_goode_homolosine
+proj_create_conversion_guam_projection
+proj_create_conversion_hotine_oblique_mercator_two_point_natural_origin
+proj_create_conversion_hotine_oblique_mercator_variant_a
+proj_create_conversion_hotine_oblique_mercator_variant_b
+proj_create_conversion_international_map_world_polyconic
+proj_create_conversion_interrupted_goode_homolosine
+proj_create_conversion_krovak
+proj_create_conversion_krovak_north_oriented
+proj_create_conversion_laborde_oblique_mercator
+proj_create_conversion_lambert_azimuthal_equal_area
+proj_create_conversion_lambert_conic_conformal_1sp
+proj_create_conversion_lambert_conic_conformal_2sp
+proj_create_conversion_lambert_conic_conformal_2sp_belgium
+proj_create_conversion_lambert_conic_conformal_2sp_michigan
+proj_create_conversion_lambert_cylindrical_equal_area
+proj_create_conversion_lambert_cylindrical_equal_area_spherical
+proj_create_conversion_mercator_variant_a
+proj_create_conversion_mercator_variant_b
+proj_create_conversion_miller_cylindrical
+proj_create_conversion_mollweide
+proj_create_conversion_new_zealand_mapping_grid
+proj_create_conversion_oblique_stereographic
+proj_create_conversion_orthographic
+proj_create_conversion_polar_stereographic_variant_a
+proj_create_conversion_polar_stereographic_variant_b
+proj_create_conversion_popular_visualisation_pseudo_mercator
+proj_create_conversion_quadrilateralized_spherical_cube
+proj_create_conversion_robinson
+proj_create_conversion_sinusoidal
+proj_create_conversion_spherical_cross_track_height
+proj_create_conversion_stereographic
+proj_create_conversion_transverse_mercator
+proj_create_conversion_transverse_mercator_south_oriented
+proj_create_conversion_tunisia_mapping_grid
+proj_create_conversion_two_point_equidistant
+proj_create_conversion_utm
+proj_create_conversion_van_der_grinten
+proj_create_conversion_wagner_i
+proj_create_conversion_wagner_ii
+proj_create_conversion_wagner_iii
+proj_create_conversion_wagner_iv
+proj_create_conversion_wagner_v
+proj_create_conversion_wagner_vi
+proj_create_conversion_wagner_vii
+proj_create_crs_to_crs
+proj_create_crs_to_crs_from_pj
+proj_create_cs
+proj_create_ellipsoidal_2D_cs
+proj_create_ellipsoidal_3D_cs
+proj_create_engineering_crs
+proj_create_from_database
+proj_create_from_name
+proj_create_from_wkt
+proj_create_geocentric_crs
+proj_create_geocentric_crs_from_datum
+proj_create_geographic_crs
+proj_create_geographic_crs_from_datum
+proj_create_operation_factory_context
+proj_create_operations
+proj_create_projected_crs
+proj_create_transformation
+proj_create_vertical_crs
+proj_crs_alter_cs_angular_unit
+proj_crs_alter_cs_linear_unit
+proj_crs_alter_geodetic_crs
+proj_crs_alter_parameters_linear_unit
+proj_crs_create_bound_crs
+proj_crs_create_bound_crs_to_WGS84
+proj_crs_create_bound_vertical_crs_to_WGS84
+proj_crs_create_projected_3D_crs_from_2D
+proj_crs_get_coordinate_system
+proj_crs_get_coordoperation
+proj_crs_get_datum
+proj_crs_get_geodetic_crs
+proj_crs_get_horizontal_datum
+proj_crs_get_sub_crs
+proj_crs_info_list_destroy
+proj_crs_promote_to_3D
+proj_cs_get_axis_count
+proj_cs_get_axis_info
+proj_cs_get_type
+proj_destroy
+proj_dmstor
+proj_ellipsoid_get_parameters
+proj_errno
+proj_errno_reset
+proj_errno_restore
+proj_errno_set
+proj_errno_string
+proj_factors
+proj_geod
+proj_get_area_of_use
+proj_get_authorities_from_database
+proj_get_codes_from_database
+proj_get_crs_info_list_from_database
+proj_get_crs_list_parameters_create
+proj_get_crs_list_parameters_destroy
+proj_get_ellipsoid
+proj_get_id_auth_name
+proj_get_id_code
+proj_get_name
+proj_get_non_deprecated
+proj_get_prime_meridian
+proj_get_remarks
+proj_get_scope
+proj_get_source_crs
+proj_get_target_crs
+proj_get_type
+proj_grid_get_info_from_database
+proj_grid_info
+proj_identify
+proj_info
+proj_init_info
+proj_int_list_destroy
+proj_is_crs
+proj_is_deprecated
+proj_is_equivalent_to
+proj_list_angular_units
+proj_list_destroy
+proj_list_ellps
+proj_list_get
+proj_list_get_count
+proj_list_operations
+proj_list_prime_meridians
+proj_list_units
+proj_log_error(PJconsts*, char const*, ...)
+proj_log_func
+proj_log_level
+proj_lp_dist
+proj_lpz_dist
+proj_normalize_for_visualization
+proj_operation_factory_context_destroy
+proj_operation_factory_context_set_allowed_intermediate_crs
+proj_operation_factory_context_set_allow_use_intermediate_crs
+proj_operation_factory_context_set_area_of_interest
+proj_operation_factory_context_set_crs_extent_use
+proj_operation_factory_context_set_desired_accuracy
+proj_operation_factory_context_set_discard_superseded
+proj_operation_factory_context_set_grid_availability_use
+proj_operation_factory_context_set_spatial_criterion
+proj_operation_factory_context_set_use_proj_alternative_grid_names
+proj_pj_info
+proj_prime_meridian_get_parameters
+proj_query_geodetic_crs_from_datum
+proj_roundtrip
+proj_rtodms
+proj_string_list_destroy
+proj_todeg
+proj_torad
+proj_trans
+proj_trans_array
+proj_trans_generic
+proj_uom_get_info_from_database
+proj_xy_dist
+proj_xyz_dist
+rtodms(char*, double, int, int)
+set_rtodms(int, int)

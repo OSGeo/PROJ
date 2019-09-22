@@ -31,8 +31,7 @@
 #include <math.h>
 
 #include "proj_internal.h"
-#include "proj_math.h"
-#include "proj_internal.h"
+#include <math.h>
 
 #define INPUT_UNITS  P->right
 #define OUTPUT_UNITS P->left

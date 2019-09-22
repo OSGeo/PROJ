@@ -1,3 +1,5 @@
+SUBDIRS = nlohmann
+
 noinst_HEADERS = \
 	coordinateoperation_constants.hpp \
 	coordinateoperation_internal.hpp \
@@ -5,4 +7,5 @@ noinst_HEADERS = \
 	coordinatesystem_internal.hpp \
 	internal.hpp \
 	io_internal.hpp \
-	lru_cache.hpp
+	lru_cache.hpp \
+	include_nlohmann_json.hpp

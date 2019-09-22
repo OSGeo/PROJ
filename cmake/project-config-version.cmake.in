@@ -11,6 +11,16 @@ else ()
   set (CMAKE_CROSSCOMPILING_STR "OFF")
 endif ()
 
+if (MSVC)
+  # For checking the compatibility of MSVC_TOOLSET_VERSION; see
+  # https://docs.microsoft.com/en-us/cpp/porting/overview-of-potential-upgrade-issues-visual-cpp
+  # Assume major version number is obtained by dropping the last decimal
+  # digit.  LIBR, resp. PROJ, refer to @PROJECT_NAME@, resp. the package
+  # trying to find and link against @PROJECT_NAME@.
+  math (EXPR _MSVC_PROJ_MAJOR "${MSVC_TOOLSET_VERSION}/10")
+  math (EXPR _MSVC_LIBR_MAJOR  "@MSVC_TOOLSET_VERSION@/10")
+endif ()
+
 if (NOT PACKAGE_FIND_NAME STREQUAL "@PROJECT_NAME@")
   # Check package name (in particular, because of the way cmake finds
   # package config files, the capitalization could easily be "wrong").
@@ -24,9 +34,13 @@ elseif (NOT (APPLE OR (NOT DEFINED CMAKE_SIZEOF_VOID_P) OR
   # since a multi-architecture library is built for that platform).
   set (REASON "sizeof(*void) =  @CMAKE_SIZEOF_VOID_P@")
   set (PACKAGE_VERSION_UNSUITABLE TRUE)
-elseif (MSVC AND NOT MSVC_VERSION STREQUAL "@MSVC_VERSION@")
+elseif (MSVC AND NOT (
+    # toolset version must be at least as great as @PROJECT_NAME@'s
+    ${MSVC_TOOLSET_VERSION} GREATER_EQUAL @MSVC_TOOLSET_VERSION@
+      # and major versions must match
+      AND _MSVC_PROJ_MAJOR EQUAL _MSVC_LIBR_MAJOR ))
   # Reject if there's a mismatch in MSVC compiler versions
-  set (REASON "_MSC_VER = @MSVC_VERSION@")
+  set (REASON "MSVC_TOOLSET_VERSION = @MSVC_TOOLSET_VERSION@")
   set (PACKAGE_VERSION_UNSUITABLE TRUE)
 elseif (NOT CMAKE_CROSSCOMPILING_STR STREQUAL "@CMAKE_CROSSCOMPILING_STR@")
   # Reject if there's a mismatch in ${CMAKE_CROSSCOMPILING}

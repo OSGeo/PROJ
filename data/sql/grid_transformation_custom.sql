@@ -11,7 +11,7 @@ INSERT INTO "grid_transformation" VALUES(
     'EPSG','3237', -- area of use: Denmark onshore
     NULL,
     'EPSG','8666','Geoid (height correction) model file','dvr90.gtx',
-    NULL,NULL,NULL,NULL,NULL,NULL,0);
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "grid_transformation" VALUES(
     'PROJ','EPSG_5733_TO_EPSG_4937','DNN height to ETRS89',
@@ -22,7 +22,7 @@ INSERT INTO "grid_transformation" VALUES(
     'EPSG','3237', -- area of use: Denmark onshore
     NULL,
     'EPSG','8666','Geoid (height correction) model file','dnn.gtx',
-    NULL,NULL,NULL,NULL,NULL,NULL,0);
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 -- Faroe Islands
 
@@ -35,17 +35,17 @@ INSERT INTO "grid_transformation" VALUES(
     'EPSG','3248', -- area of use: Faroe Islands - onshore
     NULL,
     'EPSG','8666','Geoid (height correction) model file','fvr09.gtx',
-    NULL,NULL,NULL,NULL,NULL,NULL,0);
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 -- Sweden
 
 INSERT INTO "grid_transformation" VALUES(
-    'PROJ','EPSG_5613_TO_EPSG_4377','RH2000 height to SWEREF99',
+    'PROJ','EPSG_5613_TO_EPSG_4977','RH2000 height to SWEREF99',
     NULL,NULL,
     'PROJ','HEIGHT_TO_GEOGRAPHIC3D','GravityRelatedHeight to Geographic3D',
     'EPSG','5613', -- source CRS (RH2000 height)
-    'EPSG','4377', -- target CRS (SWEREF99)
+    'EPSG','4977', -- target CRS (SWEREF99)
     'EPSG','3313', -- area of use: Sweden onshore
     NULL,
     'EPSG','8666','Geoid (height correction) model file','SWEN17_RH2000.gtx',
-    NULL,NULL,NULL,NULL,NULL,NULL,0);
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);

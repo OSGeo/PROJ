@@ -45,7 +45,7 @@ struct pj_opaque {
 #define EPS 1.e-10
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY omerc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double S, T, U, V, W, temp, u, v;
@@ -84,7 +84,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP omerc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  u, v, Qp, Sp, Tp, Vp, Up;
@@ -97,6 +97,10 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         u = xy.y * Q->cosrot + xy.x * Q->sinrot + Q->u_0;
     }
     Qp = exp(- Q->BrA * v);
+    if( Qp == 0 ) {
+        proj_errno_set(P, PJD_ERR_INVALID_X_OR_Y);
+        return proj_coord_error().lp;
+    }
     Sp = .5 * (Qp - 1. / Qp);
     Tp = .5 * (Qp + 1. / Qp);
     Vp = sin(Q->BrA * u);
@@ -150,6 +154,8 @@ PJ *PROJECTION(omerc) {
         phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
         lam2 = pj_param(P->ctx, P->params, "rlon_2").f;
         phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
+        if (fabs(phi1) > M_HALFPI || fabs(phi2) > M_HALFPI)
+            return pj_default_destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
         if (fabs(phi1 - phi2) <= TOL ||
             (con = fabs(phi1)) <= TOL ||
             fabs(con - M_HALFPI) <= TOL ||
@@ -187,6 +193,9 @@ PJ *PROJECTION(omerc) {
                 gamma = alpha_c;
         } else
             alpha_c = aasin(P->ctx, D*sin(gamma0 = gamma));
+        if( fabs(fabs(P->phi0) - M_HALFPI) <= TOL ) {
+            return pj_default_destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+        }
         P->lam0 = lamc - aasin(P->ctx, .5 * (F - 1. / F) *
            tan(gamma0)) / Q->B;
     } else {
@@ -194,6 +203,10 @@ PJ *PROJECTION(omerc) {
         L = pow(pj_tsfn(phi2, sin(phi2), P->e), Q->B);
         F = Q->E / H;
         p = (L - H) / (L + H);
+        if( p == 0 ) {
+            // Not quite, but es is very close to 1...
+            return pj_default_destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+        }
         J = Q->E * Q->E;
         J = (J - L * H) / (J + L * H);
         if ((con = lam1 - lam2) < -M_PI)
@@ -202,8 +215,11 @@ PJ *PROJECTION(omerc) {
             lam2 += M_TWOPI;
         P->lam0 = adjlon(.5 * (lam1 + lam2) - atan(
            J * tan(.5 * Q->B * (lam1 - lam2)) / p) / Q->B);
-        gamma0 = atan(2. * sin(Q->B * adjlon(lam1 - P->lam0)) /
-           (F - 1. / F));
+        const double denom = F - 1. / F;
+        if( denom == 0 ) {
+            return pj_default_destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+        }
+        gamma0 = atan(2. * sin(Q->B * adjlon(lam1 - P->lam0)) / denom);
         gamma = alpha_c = aasin(P->ctx, D * sin(gamma0));
     }
     Q->singam = sin(gamma0);
@@ -222,8 +238,8 @@ PJ *PROJECTION(omerc) {
     F = 0.5 * gamma0;
     Q->v_pole_n = Q->ArB * log(tan(M_FORTPI - F));
     Q->v_pole_s = Q->ArB * log(tan(M_FORTPI + F));
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = omerc_e_inverse;
+    P->fwd = omerc_e_forward;
 
     return P;
 }

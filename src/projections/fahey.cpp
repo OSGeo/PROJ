@@ -10,7 +10,7 @@ PROJ_HEAD(fahey, "Fahey") "\n\tPcyl, Sph";
 #define TOL 1e-6
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY fahey_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     (void) P;
 
@@ -21,7 +21,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP fahey_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     (void) P;
 
@@ -35,8 +35,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 PJ *PROJECTION(fahey) {
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = fahey_s_inverse;
+    P->fwd = fahey_s_forward;
 
     return P;
 }

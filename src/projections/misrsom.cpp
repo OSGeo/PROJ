@@ -62,7 +62,7 @@ static void seraz0(double lam, double mult, PJ *P) {
 }
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY misrsom_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int l, nn;
@@ -123,7 +123,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP misrsom_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int nn;
@@ -151,10 +151,14 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
         lamdp -= TOL;
     spp = sin(phidp);
     sppsq = spp * spp;
+    const double denom = 1. - sppsq * (1. + Q->u);
+    if( denom == 0.0 ) {
+        proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+        return proj_coord_error().lp;
+    }
     lamt = atan(((1. - sppsq * P->rone_es) * tan(lamdp) *
             Q->ca - spp * Q->sa * sqrt((1. + Q->q * dd) * (
-            1. - sppsq) - sppsq * Q->u) / cos(lamdp)) / (1. - sppsq
-            * (1. + Q->u)));
+            1. - sppsq) - sppsq * Q->u) / cos(lamdp)) / denom);
     sl = lamt >= 0. ? 1. : -1.;
     scl = cos(lamdp) >= 0. ? 1. : -1;
     lamt -= M_HALFPI * (1. - scl) * sl;
@@ -212,8 +216,8 @@ PJ *PROJECTION(misrsom) {
     Q->c1 /= 15.;
     Q->c3 /= 45.;
 
-    P->inv = e_inverse;
-    P->fwd = e_forward;
+    P->inv = misrsom_e_inverse;
+    P->fwd = misrsom_e_forward;
 
    return P;
 }

@@ -13,7 +13,7 @@ PROJ_HEAD(eck2, "Eckert II") "\n\tPCyl, Sph";
 #define ONEEPS  1.0000001
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY eck2_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     (void) P;
 
@@ -25,7 +25,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP eck2_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     (void) P;
 
@@ -49,8 +49,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 PJ *PROJECTION(eck2) {
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = eck2_s_inverse;
+    P->fwd = eck2_s_forward;
 
     return P;
 }

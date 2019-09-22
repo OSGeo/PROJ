@@ -23,7 +23,7 @@ struct pj_opaque {
 #define ITOL 1.e-12
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY poly_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  ms, sp, cp;
@@ -42,7 +42,7 @@ static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
 }
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY poly_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double  cot, E;
@@ -60,7 +60,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP poly_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -104,7 +104,7 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP poly_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     double B, dphi, tp;
     int i;
@@ -159,12 +159,12 @@ PJ *PROJECTION(poly) {
         if (!(Q->en = pj_enfn(P->es)))
             return pj_default_destructor (P, ENOMEM);
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
-        P->inv = e_inverse;
-        P->fwd = e_forward;
+        P->inv = poly_e_inverse;
+        P->fwd = poly_e_forward;
     } else {
         Q->ml0 = -P->phi0;
-        P->inv = s_inverse;
-        P->fwd = s_forward;
+        P->inv = poly_s_inverse;
+        P->fwd = poly_s_forward;
     }
 
     return P;

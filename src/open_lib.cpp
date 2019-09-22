@@ -34,6 +34,7 @@
 #define FROM_PROJ_CPP
 #endif
 
+#include <assert.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -190,7 +191,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         else if (strchr(dir_chars,*name)
                 || (*name == '.' && strchr(dir_chars,name[1])) 
                 || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
-                || (name[1] == ':' && strchr(dir_chars,name[2])) )
+                || (name[0] != '\0' && name[1] == ':' && strchr(dir_chars,name[2])) )
             sysname = name;
 
         /* or try to use application provided file finder */
@@ -200,42 +201,8 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         else if( ctx->file_finder_legacy != nullptr && (sysname = ctx->file_finder_legacy( name )) != nullptr )
             ;
 
-        /* or is environment PROJ_LIB defined */
-        else if ((sysname = getenv("PROJ_LIB")) != nullptr) {
-
-            auto paths = NS_PROJ::internal::split(std::string(sysname), dirSeparator);
-            for( const auto& path: paths ) {
-                fname = path;
-                fname += DIR_CHAR;
-                fname += name;
-                sysname = fname.c_str();
-                fid = pj_ctx_fopen(ctx, sysname, mode);
-                if( fid )
-                    break;
-            }
-
-        /* or hardcoded path */
-        } else if ((sysname = proj_lib_name) != nullptr) {
-            fname = sysname;
-            fname += DIR_CHAR;
-            fname += name;
-            sysname = fname.c_str();
-        } else /* just try it bare bones */
-            sysname = name;
-
-        if ( fid != nullptr || (fid = pj_ctx_fopen(ctx, sysname, mode)) != nullptr)
-        {
-            if( out_full_filename != nullptr && out_full_filename_size > 0 )
-            {
-                strncpy(out_full_filename, sysname, out_full_filename_size);
-                out_full_filename[out_full_filename_size-1] = '\0';
-            }
-            errno = 0;
-        }
-
-        /* If none of those work and we have a search path, try it */
-        if( !fid && !ctx->search_paths.empty() )
-        {
+        /* The user has search paths set */
+        else if( !ctx->search_paths.empty() ) {
             for( const auto& path: ctx->search_paths ) {
                 try {
                     fname = path;
@@ -249,15 +216,39 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                 if( fid )
                     break;
             }
-            if (fid)
-            {
-                if( out_full_filename != nullptr && out_full_filename_size > 0 )
-                {
-                    strncpy(out_full_filename, sysname, out_full_filename_size);
-                    out_full_filename[out_full_filename_size-1] = '\0';
-                }
-                errno = 0;
+        }
+        /* if is environment PROJ_LIB defined */
+        else if ((sysname = getenv("PROJ_LIB")) != nullptr) {
+            auto paths = NS_PROJ::internal::split(std::string(sysname), dirSeparator);
+            for( const auto& path: paths ) {
+                fname = path;
+                fname += DIR_CHAR;
+                fname += name;
+                sysname = fname.c_str();
+                fid = pj_ctx_fopen(ctx, sysname, mode);
+                if( fid )
+                    break;
             }
+        /* or hardcoded path */
+        } else if ((sysname = proj_lib_name) != nullptr) {
+            fname = sysname;
+            fname += DIR_CHAR;
+            fname += name;
+            sysname = fname.c_str();
+        /* just try it bare bones */
+        } else {
+            sysname = name;
+        }
+
+        assert(sysname); // to make Coverity Scan happy
+        if ( fid != nullptr || (fid = pj_ctx_fopen(ctx, sysname, mode)) != nullptr)
+        {
+            if( out_full_filename != nullptr && out_full_filename_size > 0 )
+            {
+                strncpy(out_full_filename, sysname, out_full_filename_size);
+                out_full_filename[out_full_filename_size-1] = '\0';
+            }
+            errno = 0;
         }
 
         if( ctx->last_errno == 0 && errno != 0 )
@@ -297,7 +288,7 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
  *  as a short filename.
  * 
  * @param ctx context.
- * @param short_filename short filename (e.g. egm96_15.gtx)
+ * @param short_filename short filename (e.g. egm96_15.gtx). Must not be NULL.
  * @param out_full_filename output buffer, of size out_full_filename_size, that
  *                          will receive the full filename on success.
  *                          Will be zero-terminated.

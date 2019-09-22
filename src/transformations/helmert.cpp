@@ -53,7 +53,6 @@ Last update: 2018-10-26
 #include <math.h>
 
 #include "proj_internal.h"
-#include "proj_internal.h"
 #include "geocent.h"
 
 PROJ_HEAD(helmert, "3(6)-, 4(8)- and 7(14)-parameter Helmert shift");
@@ -567,14 +566,14 @@ PJ *TRANSFORMATION(helmert, 0) {
     if (pj_param_exists (P->params, "theta")) {
         P->left  = PJ_IO_UNITS_PROJECTED;
         P->right = PJ_IO_UNITS_PROJECTED;
+        P->fwd    = helmert_forward;
+        P->inv    = helmert_reverse;
     }
 
     P->fwd4d  = helmert_forward_4d;
     P->inv4d  = helmert_reverse_4d;
     P->fwd3d  = helmert_forward_3d;
     P->inv3d  = helmert_reverse_3d;
-    P->fwd    = helmert_forward;
-    P->inv    = helmert_reverse;
 
     Q = (struct pj_opaque_helmert *)P->opaque;
 
@@ -613,6 +612,8 @@ PJ *TRANSFORMATION(helmert, 0) {
     /* Scale */
     if (pj_param (P->ctx, P->params, "ts").i) {
         Q->scale_0 = pj_param (P->ctx, P->params, "ds").f;
+        if( Q->scale_0 <= -1.0e6 )
+            return pj_default_destructor (P, PJD_ERR_INVALID_SCALE);
         if (pj_param (P->ctx, P->params, "ttheta").i && Q->scale_0 == 0.0)
             return pj_default_destructor (P, PJD_ERR_INVALID_SCALE);
     }

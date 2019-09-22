@@ -165,8 +165,8 @@ using CoordinateSystemAxisNNPtr = util::nn<CoordinateSystemAxisPtr>;
  *
  * \remark Implements CoordinateSystemAxis from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL CoordinateSystemAxis final
-    : public common::IdentifiedObject {
+class PROJ_GCC_DLL CoordinateSystemAxis final : public common::IdentifiedObject,
+                                                public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystemAxis() override;
@@ -200,6 +200,9 @@ class PROJ_GCC_DLL CoordinateSystemAxis final
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL static std::string normalizeAxisName(const std::string &str);
 
@@ -235,7 +238,8 @@ class PROJ_GCC_DLL CoordinateSystemAxis final
  *
  * \remark Implements CoordinateSystem from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject {
+class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject,
+                                      public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~CoordinateSystem() override;
@@ -250,6 +254,9 @@ class PROJ_GCC_DLL CoordinateSystem : public common::IdentifiedObject {
         PROJ_INTERNAL void
         _exportToWKT(io::WKTFormatter *formatter)
             const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
 
     PROJ_INTERNAL virtual std::string getWKT2Type(bool) const = 0;
 
@@ -345,18 +352,26 @@ class PROJ_GCC_DLL EllipsoidalCS final : public CoordinateSystem {
     create(const util::PropertyMap &properties,
            const CoordinateSystemAxisNNPtr &axis1,
            const CoordinateSystemAxisNNPtr &axis2);
+
     PROJ_DLL static EllipsoidalCSNNPtr
     create(const util::PropertyMap &properties,
            const CoordinateSystemAxisNNPtr &axis1,
            const CoordinateSystemAxisNNPtr &axis2,
            const CoordinateSystemAxisNNPtr &axis3);
+
     PROJ_DLL static EllipsoidalCSNNPtr
     createLatitudeLongitude(const common::UnitOfMeasure &unit);
+
     PROJ_DLL static EllipsoidalCSNNPtr createLatitudeLongitudeEllipsoidalHeight(
         const common::UnitOfMeasure &angularUnit,
         const common::UnitOfMeasure &linearUnit);
+
     PROJ_DLL static EllipsoidalCSNNPtr
     createLongitudeLatitude(const common::UnitOfMeasure &unit);
+
+    PROJ_DLL static EllipsoidalCSNNPtr createLongitudeLatitudeEllipsoidalHeight(
+        const common::UnitOfMeasure &angularUnit,
+        const common::UnitOfMeasure &linearUnit);
 
     //! @cond Doxygen_Suppress
 
@@ -616,7 +631,7 @@ class PROJ_GCC_DLL TemporalCS : public CoordinateSystem {
     INLINED_MAKE_SHARED
 
     PROJ_INTERNAL std::string
-    getWKT2Type(bool use2018Keywords) const override = 0;
+    getWKT2Type(bool use2019Keywords) const override = 0;
 
   private:
     TemporalCS(const TemporalCS &other) = delete;
@@ -654,7 +669,7 @@ class PROJ_GCC_DLL DateTimeTemporalCS final : public TemporalCS {
         const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2019Keywords) const override;
 
   private:
     DateTimeTemporalCS(const DateTimeTemporalCS &other) = delete;
@@ -690,7 +705,7 @@ class PROJ_GCC_DLL TemporalCountCS final : public TemporalCS {
         const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2019Keywords) const override;
 
   private:
     TemporalCountCS(const TemporalCountCS &other) = delete;
@@ -726,7 +741,7 @@ class PROJ_GCC_DLL TemporalMeasureCS final : public TemporalCS {
         const CoordinateSystemAxisNNPtr &axis);
     INLINED_MAKE_SHARED
 
-    PROJ_INTERNAL std::string getWKT2Type(bool use2018Keywords) const override;
+    PROJ_INTERNAL std::string getWKT2Type(bool use2019Keywords) const override;
 
   private:
     TemporalMeasureCS(const TemporalMeasureCS &other) = delete;

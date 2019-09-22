@@ -97,14 +97,14 @@ static PJ_XY loc_for(PJ_LP lp, PJ *P, double *yc) {
 }
 
 
-static PJ_XY e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY imw_p_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     double yc;
     PJ_XY xy = loc_for(lp, P, &yc);
     return (xy);
 }
 
 
-static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP imw_p_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     PJ_XY t;
@@ -116,15 +116,25 @@ static PJ_LP e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     lp.lam = xy.x / cos(lp.phi);
     do {
         t = loc_for(lp, P, &yc);
-        lp.phi = ((lp.phi - Q->phi_1) * (xy.y - yc) / (t.y - yc)) + Q->phi_1;
-        lp.lam = lp.lam * xy.x / t.x;
+        const double denom = t.y - yc;
+        if( denom != 0 || fabs(t.y - xy.y) > TOL )
+        {
+            if( denom == 0 ) {
+                proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+                return proj_coord_error().lp;
+            }
+            lp.phi = ((lp.phi - Q->phi_1) * (xy.y - yc) / denom) + Q->phi_1;
+        }
+        if( t.x != 0 && fabs(t.x - xy.x) > TOL )
+            lp.lam = lp.lam * xy.x / t.x;
         i ++;
     } while (i < N_MAX_ITER &&
              (fabs(t.x - xy.x) > TOL || fabs(t.y - xy.y) > TOL));
 
     if( i == N_MAX_ITER )
     {
-        lp.lam = lp.phi = HUGE_VAL;
+        proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+        return proj_coord_error().lp;
     }
 
     return lp;
@@ -209,8 +219,8 @@ PJ *PROJECTION(imw_p) {
     Q->Pp = (m2 * x1 - m1 * x2) * t;
     Q->Qp = (x2 - x1) * t;
 
-    P->fwd = e_forward;
-    P->inv = e_inverse;
+    P->fwd = imw_p_e_forward;
+    P->inv = imw_p_e_inverse;
     P->destructor = destructor;
 
     return P;

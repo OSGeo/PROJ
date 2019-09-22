@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test ISO19111:2018 implementation
+ * Purpose:  Test ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -175,7 +175,7 @@ TEST(datum, prime_meridian_to_PROJString) {
 
     EXPECT_EQ(PrimeMeridian::GREENWICH->exportToPROJString(
                   PROJStringFormatter::create().get()),
-              "");
+              "+proj=noop");
 
     EXPECT_EQ(PrimeMeridian::PARIS->exportToPROJString(
                   PROJStringFormatter::create().get()),
@@ -195,12 +195,48 @@ TEST(datum, prime_meridian_to_PROJString) {
             PropertyMap().set(IdentifiedObject::NAME_KEY, "Origin meridian"),
             Angle(0))
             ->exportToPROJString(PROJStringFormatter::create().get()),
-        "");
+        "+proj=noop");
 
     EXPECT_TRUE(PrimeMeridian::GREENWICH->isEquivalentTo(
         PrimeMeridian::GREENWICH.get()));
     EXPECT_FALSE(PrimeMeridian::GREENWICH->isEquivalentTo(
         createUnrelatedObject().get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(datum, prime_meridian_to_JSON) {
+
+    EXPECT_EQ(PrimeMeridian::GREENWICH->exportToJSON(
+                  &(JSONFormatter::create()->setSchema(""))),
+              "{\n"
+              "  \"type\": \"PrimeMeridian\",\n"
+              "  \"name\": \"Greenwich\",\n"
+              "  \"longitude\": 0,\n"
+              "  \"id\": {\n"
+              "    \"authority\": \"EPSG\",\n"
+              "    \"code\": 8901\n"
+              "  }\n"
+              "}");
+
+    EXPECT_EQ(PrimeMeridian::PARIS->exportToJSON(
+                  &(JSONFormatter::create()->setSchema(""))),
+              "{\n"
+              "  \"type\": \"PrimeMeridian\",\n"
+              "  \"name\": \"Paris\",\n"
+              "  \"longitude\": {\n"
+              "    \"value\": 2.5969213,\n"
+              "    \"unit\": {\n"
+              "      \"type\": \"AngularUnit\",\n"
+              "      \"name\": \"grad\",\n"
+              "      \"conversion_factor\": 0.015707963267949\n"
+              "    }\n"
+              "  },\n"
+              "  \"id\": {\n"
+              "    \"authority\": \"EPSG\",\n"
+              "    \"code\": 8903\n"
+              "  }\n"
+              "}");
 }
 
 // ---------------------------------------------------------------------------
@@ -237,7 +273,7 @@ TEST(datum, dynamic_geodetic_reference_frame) {
 
     EXPECT_EQ(drf->exportToWKT(WKTFormatter::create().get()), expected);
 
-    auto expected_wtk2_2018 =
+    auto expected_wtk2_2019 =
         "DYNAMIC[\n"
         "    FRAMEEPOCH[2018.5],\n"
         "    MODEL[\"My model\"]],\n"
@@ -248,8 +284,8 @@ TEST(datum, dynamic_geodetic_reference_frame) {
         "    ANCHOR[\"My anchor\"]]";
     EXPECT_EQ(
         drf->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
-        expected_wtk2_2018);
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        expected_wtk2_2019);
 }
 
 // ---------------------------------------------------------------------------
@@ -319,7 +355,7 @@ TEST(datum, temporal_datum_time_origin_non_ISO8601) {
 
 // ---------------------------------------------------------------------------
 
-TEST(datum, temporal_datum_WKT2_2018) {
+TEST(datum, temporal_datum_WKT2_2019) {
     auto datum = TemporalDatum::create(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "Gregorian calendar"),
         DateTime::create("0000-01-01"),
@@ -331,7 +367,7 @@ TEST(datum, temporal_datum_WKT2_2018) {
 
     EXPECT_EQ(
         datum->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -349,15 +385,15 @@ TEST(datum, dynamic_vertical_reference_frame) {
 
     EXPECT_EQ(drf->exportToWKT(WKTFormatter::create().get()), expected);
 
-    auto expected_wtk2_2018 = "DYNAMIC[\n"
+    auto expected_wtk2_2019 = "DYNAMIC[\n"
                               "    FRAMEEPOCH[2018.5],\n"
                               "    MODEL[\"My model\"]],\n"
                               "VDATUM[\"test\",\n"
                               "    ANCHOR[\"My anchor\"]]";
     EXPECT_EQ(
         drf->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
-        expected_wtk2_2018);
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        expected_wtk2_2019);
 }
 
 // ---------------------------------------------------------------------------
@@ -376,7 +412,7 @@ TEST(datum, datum_ensemble) {
                  FormattingException);
     EXPECT_EQ(
         ensemble->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         "ENSEMBLE[\"test\",\n"
         "    MEMBER[\"World Geodetic System 1984\",\n"
         "        ID[\"EPSG\",6326]],\n"
@@ -400,7 +436,7 @@ TEST(datum, datum_ensemble_vertical) {
         PositionalAccuracy::create("100"));
     EXPECT_EQ(
         ensemble->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         "ENSEMBLE[\"unnamed\",\n"
         "    MEMBER[\"vdatum1\"],\n"
         "    MEMBER[\"vdatum2\"],\n"

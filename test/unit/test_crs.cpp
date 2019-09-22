@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  Test ISO19111:2018 implementation
+ * Purpose:  Test ISO19111:2019 implementation
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -148,32 +148,72 @@ TEST(crs, GeographicCRS_datum_ensemble) {
         std::vector<DatumNNPtr>{GeodeticReferenceFrame::EPSG_6326,
                                 GeodeticReferenceFrame::EPSG_6326},
         PositionalAccuracy::create("100"));
-    auto crs = GeographicCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), nullptr,
-        ensemble_vdatum,
-        EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
-    WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
-    f->simulCurNodeHasId();
-    crs->exportToWKT(f.get());
-    auto expected = "GEOGCRS[\"unnamed\",\n"
-                    "    ENSEMBLE[\"unnamed\",\n"
-                    "        MEMBER[\"World Geodetic System 1984\"],\n"
-                    "        MEMBER[\"World Geodetic System 1984\"],\n"
-                    "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-                    "            LENGTHUNIT[\"metre\",1]],\n"
-                    "        ENSEMBLEACCURACY[100]],\n"
-                    "    PRIMEM[\"Greenwich\",0,\n"
-                    "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-                    "    CS[ellipsoidal,2],\n"
-                    "        AXIS[\"latitude\",north,\n"
-                    "            ORDER[1],\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
-                    "        AXIS[\"longitude\",east,\n"
-                    "            ORDER[2],\n"
-                    "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+    {
+        auto crs = GeographicCRS::create(
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY, "unnamed")
+                .set(Identifier::CODESPACE_KEY, "MY_CODESPACE")
+                .set(Identifier::CODE_KEY, "MY_ID"),
+            nullptr, ensemble_vdatum,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+        WKTFormatterNNPtr f(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
+        crs->exportToWKT(f.get());
+        auto expected =
+            "GEOGCRS[\"unnamed\",\n"
+            "    ENSEMBLE[\"unnamed\",\n"
+            "        MEMBER[\"World Geodetic System 1984\"],\n"
+            "        MEMBER[\"World Geodetic System 1984\"],\n"
+            "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        ENSEMBLEACCURACY[100]],\n"
+            "    PRIMEM[\"Greenwich\",0,\n"
+            "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "    CS[ellipsoidal,2],\n"
+            "        AXIS[\"latitude\",north,\n"
+            "            ORDER[1],\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        AXIS[\"longitude\",east,\n"
+            "            ORDER[2],\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "    ID[\"MY_CODESPACE\",\"MY_ID\"]]";
 
-    EXPECT_EQ(f->toString(), expected);
+        EXPECT_EQ(f->toString(), expected);
+    }
+
+    {
+        auto crs = GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), nullptr,
+            ensemble_vdatum,
+            EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
+        WKTFormatterNNPtr f(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
+        crs->exportToWKT(f.get());
+        auto expected = "GEOGCRS[\"unnamed\",\n"
+                        "    ENSEMBLE[\"unnamed\",\n"
+                        "        MEMBER[\"World Geodetic System 1984\",\n"
+                        "            ID[\"EPSG\",6326]],\n"
+                        "        MEMBER[\"World Geodetic System 1984\",\n"
+                        "            ID[\"EPSG\",6326]],\n"
+                        "        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+                        "            LENGTHUNIT[\"metre\",1],\n"
+                        "            ID[\"EPSG\",7030]],\n"
+                        "        ENSEMBLEACCURACY[100]],\n"
+                        "    PRIMEM[\"Greenwich\",0,\n"
+                        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+                        "        ID[\"EPSG\",8901]],\n"
+                        "    CS[ellipsoidal,2],\n"
+                        "        AXIS[\"latitude\",north,\n"
+                        "            ORDER[1],\n"
+                        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                        "                ID[\"EPSG\",9122]]],\n"
+                        "        AXIS[\"longitude\",east,\n"
+                        "            ORDER[2],\n"
+                        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+                        "                ID[\"EPSG\",9122]]]]";
+
+        EXPECT_EQ(f->toString(), expected);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -223,10 +263,10 @@ TEST(crs, EPSG_4326_as_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, EPSG_4326_as_WKT2_2018) {
+TEST(crs, EPSG_4326_as_WKT2_2019) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
     crs->exportToWKT(f.get());
     EXPECT_EQ(f->toString(),
               "GEOGCRS[\"WGS 84\",\n"
@@ -282,10 +322,10 @@ TEST(crs, EPSG_4326_as_WKT2_SIMPLIFIED_single_line) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, EPSG_4326_as_WKT2_2018_SIMPLIFIED) {
+TEST(crs, EPSG_4326_as_WKT2_2019_SIMPLIFIED) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019_SIMPLIFIED));
     crs->exportToWKT(f.get());
     EXPECT_EQ(f->toString(),
               "GEOGCRS[\"WGS 84\",\n"
@@ -414,10 +454,10 @@ TEST(crs, EPSG_4979_as_WKT2_SIMPLIFIED) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, EPSG_4979_as_WKT2_2018_SIMPLIFIED) {
+TEST(crs, EPSG_4979_as_WKT2_2019_SIMPLIFIED) {
     auto crs = GeographicCRS::EPSG_4979;
     WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019_SIMPLIFIED));
     crs->exportToWKT(f.get());
     EXPECT_EQ(f->toString(),
               "GEOGCRS[\"WGS 84\",\n"
@@ -1029,7 +1069,7 @@ TEST(crs, geocentricCRS_as_WKT2) {
     EXPECT_EQ(crs->exportToWKT(WKTFormatter::create().get()), expected);
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 
     EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
@@ -1458,6 +1498,19 @@ TEST(crs, geodeticcrs_identify_db) {
                 ->identify(factory);
         ASSERT_EQ(res.size(), 0U);
     }
+    {
+        // Test identification from PROJ string
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=longlat +datum=WGS84 +type=crs");
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1U);
+        ASSERT_TRUE(!res.front().first->identifiers().empty());
+        EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "EPSG");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "4326");
+        EXPECT_EQ(res.front().second, 70);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1561,6 +1614,52 @@ TEST(crs, projectedCRS_as_WKT2) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_as_WKT2_2019) {
+    auto crs = createProjected();
+
+    auto expected =
+        "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
+        "    BASEGEOGCRS[\"WGS 84\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",4326]],\n"
+        "    CONVERSION[\"UTM zone 31N\",\n"
+        "        METHOD[\"Transverse Mercator\",\n"
+        "            ID[\"EPSG\",9807]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",3,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8805]],\n"
+        "        PARAMETER[\"False easting\",500000,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    ID[\"EPSG\",32631]]";
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        expected);
+}
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_as_WKT2_simplified) {
     auto crs = createProjected();
 
@@ -1591,7 +1690,7 @@ TEST(crs, projectedCRS_as_WKT2_simplified) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, projectedCRS_as_WKT2_2018_simplified) {
+TEST(crs, projectedCRS_as_WKT2_2019_simplified) {
     auto crs = createProjected();
 
     auto expected =
@@ -1615,7 +1714,7 @@ TEST(crs, projectedCRS_as_WKT2_2018_simplified) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018_SIMPLIFIED)
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019_SIMPLIFIED)
                 .get()),
         expected);
 }
@@ -1885,13 +1984,35 @@ TEST(crs, projectedCRS_identify_no_db) {
 TEST(crs, projectedCRS_identify_db) {
     auto dbContext = DatabaseContext::create();
     auto factoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto factoryIGNF = AuthorityFactory::create(dbContext, "IGNF");
+    auto factoryAnonymous = AuthorityFactory::create(dbContext, std::string());
     {
         // Identify by existing code
-        auto res =
-            factoryEPSG->createProjectedCRS("2172")->identify(factoryEPSG);
-        ASSERT_EQ(res.size(), 1U);
-        EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
-        EXPECT_EQ(res.front().second, 100);
+        auto crs = factoryEPSG->createProjectedCRS("2172");
+        {
+            auto res = crs->identify(factoryEPSG);
+            ASSERT_EQ(res.size(), 1U);
+            EXPECT_EQ(res.front().first->getEPSGCode(), 2172);
+            EXPECT_EQ(res.front().second, 100);
+        }
+        {
+            auto res = crs->identify(factoryAnonymous);
+            ASSERT_EQ(res.size(), 1U);
+        }
+        {
+            auto res = crs->identify(factoryIGNF);
+            ASSERT_EQ(res.size(), 0U);
+        }
+    }
+    {
+        // Identify by existing code
+        auto crs = factoryIGNF->createProjectedCRS("ETRS89UTM28");
+        {
+            auto res = crs->identify(factoryEPSG);
+            ASSERT_EQ(res.size(), 1U);
+            EXPECT_EQ(res.front().first->getEPSGCode(), 25828);
+            EXPECT_EQ(res.front().second, 70);
+        }
     }
     {
         // Non-existing code
@@ -2724,7 +2845,7 @@ TEST(crs, usage) {
     ASSERT_TRUE(crs != nullptr);
 
     auto got_wkt = crs->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
     auto expected = "GEODCRS[\"JGD2000\",\n"
                     "    DATUM[\"Japanese Geodetic Datum 2000\",\n"
                     "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
@@ -2940,7 +3061,7 @@ TEST(crs, verticalCRS_datum_ensemble) {
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), nullptr,
         ensemble, VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
     WKTFormatterNNPtr f(
-        WKTFormatter::create(WKTFormatter::Convention::WKT2_2018));
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
     f->simulCurNodeHasId();
     crs->exportToWKT(f.get());
     auto expected = "VERTCRS[\"unnamed\",\n"
@@ -3896,7 +4017,7 @@ TEST(crs, derivedGeographicCRS_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, derivedGeographicCRS_WKT2_2018) {
+TEST(crs, derivedGeographicCRS_WKT2_2019) {
 
     auto expected = "GEOGCRS[\"WMO Atlantic Pole\",\n"
                     "    BASEGEOGCRS[\"WGS 84\",\n"
@@ -3928,7 +4049,7 @@ TEST(crs, derivedGeographicCRS_WKT2_2018) {
 
     EXPECT_EQ(
         createDerivedGeographicCRS()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4086,7 +4207,7 @@ TEST(crs, derivedGeodeticCRS_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, derivedGeodeticCRS_WKT2_2018) {
+TEST(crs, derivedGeodeticCRS_WKT2_2019) {
 
     auto expected = "GEODCRS[\"Derived geodetic CRS\",\n"
                     "    BASEGEOGCRS[\"WGS 84\",\n"
@@ -4113,7 +4234,7 @@ TEST(crs, derivedGeodeticCRS_WKT2_2018) {
 
     EXPECT_EQ(
         createDerivedGeodeticCRS()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4145,7 +4266,7 @@ static DerivedProjectedCRSNNPtr createDerivedProjectedCRS() {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, derivedProjectedCRS_WKT2_2018) {
+TEST(crs, derivedProjectedCRS_WKT2_2019) {
 
     auto expected =
         "DERIVEDPROJCRS[\"derived projectedCRS\",\n"
@@ -4189,7 +4310,7 @@ TEST(crs, derivedProjectedCRS_WKT2_2018) {
     auto crs = createDerivedProjectedCRS();
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 
     EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
@@ -4260,7 +4381,7 @@ TEST(crs, dateTimeTemporalCRS_WKT2) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, dateTimeTemporalCRS_WKT2_2018) {
+TEST(crs, dateTimeTemporalCRS_WKT2_2019) {
 
     auto expected = "TIMECRS[\"Temporal CRS\",\n"
                     "    TDATUM[\"Gregorian calendar\",\n"
@@ -4271,7 +4392,7 @@ TEST(crs, dateTimeTemporalCRS_WKT2_2018) {
 
     EXPECT_EQ(
         createDateTimeTemporalCRS()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4297,7 +4418,7 @@ static TemporalCRSNNPtr createTemporalCountCRSWithConvFactor() {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, temporalCountCRSWithConvFactor_WKT2_2018) {
+TEST(crs, temporalCountCRSWithConvFactor_WKT2_2019) {
 
     auto expected = "TIMECRS[\"GPS milliseconds\",\n"
                     "    TDATUM[\"GPS time origin\",\n"
@@ -4309,7 +4430,7 @@ TEST(crs, temporalCountCRSWithConvFactor_WKT2_2018) {
 
     EXPECT_EQ(
         createTemporalCountCRSWithConvFactor()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4337,7 +4458,7 @@ static TemporalCRSNNPtr createTemporalCountCRSWithoutConvFactor() {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, temporalCountCRSWithoutConvFactor_WKT2_2018) {
+TEST(crs, temporalCountCRSWithoutConvFactor_WKT2_2019) {
 
     auto expected = "TIMECRS[\"Calendar hours from 1979-12-29\",\n"
                     "    TDATUM[\"29 December 1979\",\n"
@@ -4349,7 +4470,7 @@ TEST(crs, temporalCountCRSWithoutConvFactor_WKT2_2018) {
 
     EXPECT_EQ(
         createTemporalCountCRSWithoutConvFactor()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4375,7 +4496,7 @@ static TemporalCRSNNPtr createTemporalMeasureCRSWithoutConvFactor() {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
+TEST(crs, temporalMeasureCRSWithoutConvFactor_WKT2_2019) {
 
     auto expected = "TIMECRS[\"Decimal Years CE\",\n"
                     "    TDATUM[\"Common Era\",\n"
@@ -4387,7 +4508,7 @@ TEST(crs, temporalMeasureCRSWithoutConvFactor_WKT2_2018) {
 
     EXPECT_EQ(
         createTemporalMeasureCRSWithoutConvFactor()->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4522,7 +4643,8 @@ TEST(crs, DerivedVerticalCRS_WKT2) {
 
     auto expected = "VERTCRS[\"Derived vertCRS\",\n"
                     "    BASEVERTCRS[\"ODN height\",\n"
-                    "        VDATUM[\"Ordnance Datum Newlyn\"]],\n"
+                    "        VDATUM[\"Ordnance Datum Newlyn\",\n"
+                    "            ID[\"EPSG\",5101]]],\n"
                     "    DERIVINGCONVERSION[\"unnamed\",\n"
                     "        METHOD[\"PROJ unimplemented\"]],\n"
                     "    CS[vertical,1],\n"
@@ -4596,7 +4718,7 @@ TEST(crs, DerivedEngineeringCRS_WKT2) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
     EXPECT_THROW(
         createDerivedEngineeringCRS()->exportToWKT(
@@ -4653,7 +4775,7 @@ TEST(crs, DerivedParametricCRS_WKT2) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -4708,7 +4830,7 @@ TEST(crs, DeriveTemporalCRS_WKT2) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT2_2018).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected);
 }
 
@@ -5100,5 +5222,62 @@ TEST(crs, getNonDeprecated) {
         auto crs = factory->createCompoundCRS("7401");
         auto list = crs->getNonDeprecated(dbContext);
         ASSERT_EQ(list.size(), 1U);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, promoteTo3D) {
+    auto dbContext = DatabaseContext::create();
+    {
+        auto crs = GeographicCRS::EPSG_4326;
+        auto crs3D = crs->promoteTo3D(std::string(), nullptr);
+        auto crs3DAsGeog = nn_dynamic_pointer_cast<GeographicCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsGeog != nullptr);
+        EXPECT_EQ(crs3DAsGeog->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_TRUE(crs3D->promoteTo3D(std::string(), nullptr)
+                        ->isEquivalentTo(crs3D.get()));
+    }
+    {
+        auto crs = GeographicCRS::EPSG_4326;
+        auto crs3D = crs->promoteTo3D(std::string(), dbContext);
+        auto crs3DAsGeog = nn_dynamic_pointer_cast<GeographicCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsGeog != nullptr);
+        EXPECT_EQ(crs3DAsGeog->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_TRUE(!crs3DAsGeog->identifiers().empty());
+    }
+    {
+        auto crs = createProjected();
+        auto crs3D = crs->promoteTo3D(std::string(), nullptr);
+        auto crs3DAsProjected = nn_dynamic_pointer_cast<ProjectedCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsProjected != nullptr);
+        EXPECT_EQ(crs3DAsProjected->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_EQ(
+            crs3DAsProjected->baseCRS()->coordinateSystem()->axisList().size(),
+            3U);
+        EXPECT_TRUE(crs3D->promoteTo3D(std::string(), nullptr)
+                        ->isEquivalentTo(crs3D.get()));
+    }
+    {
+        auto crs = createProjected();
+        auto crs3D = crs->promoteTo3D(std::string(), dbContext);
+        auto crs3DAsProjected = nn_dynamic_pointer_cast<ProjectedCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsProjected != nullptr);
+        EXPECT_EQ(crs3DAsProjected->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_EQ(
+            crs3DAsProjected->baseCRS()->coordinateSystem()->axisList().size(),
+            3U);
+        EXPECT_TRUE(!crs3DAsProjected->baseCRS()->identifiers().empty());
+    }
+    {
+        auto crs = BoundCRS::createFromTOWGS84(
+            createProjected(), std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+        auto crs3D = crs->promoteTo3D(std::string(), dbContext);
+        auto crs3DAsBound = nn_dynamic_pointer_cast<BoundCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsBound != nullptr);
+        auto baseCRS =
+            nn_dynamic_pointer_cast<ProjectedCRS>(crs3DAsBound->baseCRS());
+        ASSERT_TRUE(baseCRS != nullptr);
+        EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 3U);
     }
 }

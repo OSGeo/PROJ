@@ -1,9 +1,8 @@
 /* Determine nad table correction value */
 #define PJ_LIB__
-#include "proj_internal.h"
-#include "proj_math.h"
 #include "proj.h"
 #include "proj_internal.h"
+#include <math.h>
 
 PJ_LP nad_intr(PJ_LP t, struct CTABLE *ct) {
 	PJ_LP val, frct;

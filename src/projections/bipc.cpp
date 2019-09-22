@@ -4,7 +4,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 
 PROJ_HEAD(bipc, "Bipolar conic of western hemisphere") "\n\tConic Sph";
 
@@ -36,7 +36,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY bipc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cphi, sphi, tphi, t, al, Az, z, Av, cdlam, sdlam, r;
@@ -113,7 +113,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP bipc_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double t, r, rp, rl, al, z = 0.0, fAz, Az, s, c, Av;
@@ -169,8 +169,8 @@ PJ *PROJECTION(bipc) {
     P->opaque = Q;
 
     Q->noskew = pj_param(P->ctx, P->params, "bns").i;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = bipc_s_inverse;
+    P->fwd = bipc_s_forward;
     P->es = 0.;
     return P;
 }

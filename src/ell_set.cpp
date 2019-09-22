@@ -6,7 +6,6 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_internal.h"
 
 
 /* Prototypes of the pj_ellipsoid helper functions */
@@ -280,8 +279,8 @@ static int ellps_shape (PJ *P) {
         P->es = pj_atof (pj_param_value (par));
         if (HUGE_VAL==P->es)
             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (1==P->es)
-            return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
+        if (P->es >= 1)
+            return proj_errno_set (P, PJD_ERR_INVALID_ECCENTRICITY);
         break;
 
     /* eccentricity, e */
@@ -289,10 +288,8 @@ static int ellps_shape (PJ *P) {
         P->e = pj_atof (pj_param_value (par));
         if (HUGE_VAL==P->e)
             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0==P->e)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (1==P->e)
-             return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
+        if (P->e < 0 || P->e >= 1)
+             return proj_errno_set (P, PJD_ERR_INVALID_ECCENTRICITY);
         P->es = P->e * P->e;
         break;
 
@@ -301,8 +298,8 @@ static int ellps_shape (PJ *P) {
         P->b = pj_atof (pj_param_value (par));
         if (HUGE_VAL==P->b)
             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (0==P->b)
-            return proj_errno_set (P, PJD_ERR_ECCENTRICITY_IS_ONE);
+        if (P->b <= 0)
+            return proj_errno_set (P, PJD_ERR_INVALID_ECCENTRICITY);
         if (P->b==P->a)
             break;
         P->f = (P->a - P->b) / P->a;
@@ -392,11 +389,18 @@ static int ellps_spherification (PJ *P) {
             return proj_errno_set (P, PJD_ERR_REF_RAD_LARGER_THAN_90);
         t = sin (t);
         t = 1 - P->es * t * t;
+        if (t == 0.) {
+            return proj_errno_set(P, PJD_ERR_INVALID_ECCENTRICITY);
+        }
         if (i==5)   /* arithmetic */
             P->a *= (1. - P->es + t) / (2 * t * sqrt(t));
         else        /* geometric */
             P->a *= sqrt (1 - P->es) / t;
         break;
+    }
+
+    if (P->a <= 0.) {
+        return proj_errno_set(P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
     }
 
     /* Clean up the ellipsoidal parameters to reflect the sphere */
@@ -538,6 +542,10 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es) {
     /* flattening */
     if (0==P->f)
         P->f  = 1 - cos (P->alpha);   /* = 1 - sqrt (1 - PIN->es); */
+    if (P->f == 1.0) {
+        pj_ctx_set_errno( P->ctx, PJD_ERR_INVALID_ECCENTRICITY);
+        return PJD_ERR_INVALID_ECCENTRICITY;
+    }
     P->rf = P->f != 0.0 ? 1.0/P->f: HUGE_VAL;
 
     /* second flattening */
@@ -556,8 +564,8 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es) {
 
     P->one_es = 1. - P->es;
     if (P->one_es == 0.) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_ECCENTRICITY_IS_ONE);
-        return PJD_ERR_ECCENTRICITY_IS_ONE;
+        pj_ctx_set_errno( P->ctx, PJD_ERR_INVALID_ECCENTRICITY);
+        return PJD_ERR_INVALID_ECCENTRICITY;
     }
 
     P->rone_es = 1./P->one_es;
@@ -644,6 +652,10 @@ int pj_ell_set (projCtx ctx, paralist *pl, double *a, double *es) {
             *es = pj_param(ctx,pl, "des").f;
         else if (pj_param(ctx,pl, "te").i) { /* eccentricity */
             e = pj_param(ctx,pl, "de").f;
+            if (e < 0) {
+                pj_ctx_set_errno(ctx, PJD_ERR_INVALID_ECCENTRICITY);
+                return 1;
+            }
             *es = e * e;
         } else if (pj_param(ctx,pl, "trf").i) { /* recip flattening */
             *es = pj_param(ctx,pl, "drf").f;
@@ -710,6 +722,10 @@ bomb:
     /* some remaining checks */
     if (*es < 0.) {
         pj_ctx_set_errno(ctx, PJD_ERR_ES_LESS_THAN_ZERO);
+        return 1;
+    }
+    if (*es >= 1.) {
+        pj_ctx_set_errno(ctx, PJD_ERR_INVALID_ECCENTRICITY);
         return 1;
     }
     if (*a <= 0.) {

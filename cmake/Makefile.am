@@ -1,6 +1,5 @@
 EXTRA_DIST = CMakeLists.txt \
 			ProjInstallPath.cmake \
-			ProjSystemInfo.cmake \
 			ProjUtilities.cmake   \
 			proj_config.cmake.in \
 			ProjConfig.cmake \

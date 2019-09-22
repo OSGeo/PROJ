@@ -14,7 +14,6 @@
 #include <errno.h>
 #include <math.h>
 
-#include "proj_internal.h"
 #include "proj.h"
 #include "proj_internal.h"
 
@@ -28,7 +27,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {
+static PJ_XY bertin1953_s_forward (PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
@@ -68,7 +67,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {
       xy.x *= 1. + d;
     }
     if (xy.y > 0.) {
-      xy.x *= 1. + d / 1.5 * xy.x * xy.x;
+      xy.y *= 1. + d / 1.5 * xy.x * xy.x;
     }
 
     return xy;
@@ -90,7 +89,7 @@ PJ *PROJECTION(bertin1953) {
     Q->sin_delta_gamma = 0.;
 
     P->es = 0.;
-    P->fwd = s_forward;
+    P->fwd = bertin1953_s_forward;
 
     return P;
 }

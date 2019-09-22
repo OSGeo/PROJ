@@ -45,12 +45,13 @@
 #include "proj.h"
 #include "proj_experimental.h"
 #include "proj_internal.h"
-#include "proj_math.h"
+#include <math.h>
 #include "geodesic.h"
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
 #include "proj/internal/internal.hpp"
+#include "proj/internal/io_internal.hpp"
 
 using namespace NS_PROJ::internal;
 
@@ -192,6 +193,8 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
         direction = opposite_direction(direction);
 
     if( !P->alternativeCoordinateOperations.empty() ) {
+        // Do a first pass and select the first coordinate operation whose area
+        // of use is compatible with the input coordinate
         int i = 0;
         for( const auto &alt: P->alternativeCoordinateOperations ) {
             if( direction == PJ_FWD ) {
@@ -223,6 +226,41 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             }
             i ++;
         }
+
+        // In case we did not find an operation whose area of use is compatible
+        // with the input coordinate, then goes through again the list, and
+        // use the first operation that does not require grids.
+        i = 0;
+        NS_PROJ::io::DatabaseContextPtr dbContext;
+        try
+        {
+            if( P->ctx->cpp_context ) {
+                dbContext = P->ctx->cpp_context->getDatabaseContext().as_nullable();
+            }
+        }
+        catch( const std::exception& ) {}
+        for( const auto &alt: P->alternativeCoordinateOperations ) {
+            auto coordOperation = dynamic_cast<
+            NS_PROJ::operation::CoordinateOperation*>(alt.pj->iso_obj.get());
+            if( coordOperation ) {
+                if( coordOperation->gridsNeeded(dbContext).empty() ) {
+                    if( P->iCurCoordOp != i ) {
+                        std::string msg("Using coordinate operation ");
+                        msg += alt.name;
+                        pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
+                        P->iCurCoordOp = i;
+                    }
+                    if( direction == PJ_FWD ) {
+                        return pj_fwd4d( coord, alt.pj );
+                    }
+                    else {
+                        return pj_inv4d( coord, alt.pj );
+                    }
+                }
+            }
+            i++;
+        }
+
         proj_errno_set (P, EINVAL);
         return proj_coord_error ();
     }
@@ -324,6 +362,7 @@ size_t proj_trans_generic (
     PJ_COORD coord = {{0,0,0,0}};
     size_t i, nmin;
     double null_broadcast = 0;
+    double invalid_time = HUGE_VAL;
 
     if (nullptr==P)
         return 0;
@@ -341,7 +380,7 @@ size_t proj_trans_generic (
     if (0==nx) x = &null_broadcast;
     if (0==ny) y = &null_broadcast;
     if (0==nz) z = &null_broadcast;
-    if (0==nt) t = &null_broadcast;
+    if (0==nt) t = &invalid_time;
 
     /* nothing to do? */
     if (0==nx+ny+nz+nt)
@@ -908,7 +947,7 @@ static PJ* add_coord_op_to_list(PJ* op,
 }
 
 /*****************************************************************************/
-static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, PJ* crs) {
+static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, const PJ* crs) {
 /*****************************************************************************/
     // Create a geographic 2D long-lat degrees CRS that is related to the
     // CRS
@@ -1007,10 +1046,27 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         return nullptr;
     }
 
+    auto ret = proj_create_crs_to_crs_from_pj(ctx, src, dst, area, nullptr);
+    proj_destroy(src);
+    proj_destroy(dst);
+    return ret;
+}
+
+/*****************************************************************************/
+PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, const PJ *target_crs, PJ_AREA *area, const char* const *) {
+/******************************************************************************
+    Create a transformation pipeline between two known coordinate reference
+    systems.
+
+    See docs/source/development/reference/functions.rst
+
+******************************************************************************/
+    if( !ctx ) {
+        ctx = pj_get_default_ctx();
+    }
+
     auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
     if( !operation_ctx ) {
-        proj_destroy(src);
-        proj_destroy(dst);
         return nullptr;
     }
 
@@ -1029,12 +1085,10 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
 
-    auto op_list = proj_create_operations(ctx, src, dst, operation_ctx);
+    auto op_list = proj_create_operations(ctx, source_crs, target_crs, operation_ctx);
 
     if( !op_list ) {
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         return nullptr;
     }
 
@@ -1042,8 +1096,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     if( op_count == 0 ) {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
+
         proj_context_log_debug(ctx, "No operation found matching criteria");
         return nullptr;
     }
@@ -1052,35 +1105,29 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     assert(P);
 
     if( P == nullptr || op_count == 1 || (area && area->bbox_set) ||
-        proj_get_type(src) == PJ_TYPE_GEOCENTRIC_CRS ||
-        proj_get_type(dst) == PJ_TYPE_GEOCENTRIC_CRS ) {
+        proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
+        proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS ) {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         return P;
     }
 
-    auto pjGeogToSrc = create_operation_to_base_geog_crs(ctx, src);
+    auto pjGeogToSrc = create_operation_to_base_geog_crs(ctx, source_crs);
     if( !pjGeogToSrc )
     {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         proj_context_log_debug(ctx,
             "Cannot create transformation from geographic CRS of source CRS to source CRS");
         proj_destroy(P);
         return nullptr;
     }
 
-    auto pjGeogToDst = create_operation_to_base_geog_crs(ctx, dst);
+    auto pjGeogToDst = create_operation_to_base_geog_crs(ctx, target_crs);
     if( !pjGeogToDst )
     {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         proj_context_log_debug(ctx,
             "Cannot create transformation from geographic CRS of target CRS to target CRS");
         proj_destroy(P);
@@ -1139,8 +1186,6 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
         proj_list_destroy(op_list);
 
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         proj_destroy(pjGeogToSrc);
         proj_destroy(pjGeogToDst);
 
@@ -1167,8 +1212,6 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     {
         proj_list_destroy(op_list);
         proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(src);
-        proj_destroy(dst);
         proj_destroy(pjGeogToSrc);
         proj_destroy(pjGeogToDst);
         proj_destroy(P);
@@ -1333,10 +1376,11 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
         pj_dealloc (buf);
         buf = p;
     }
+    assert(buf);
 
-    /* Only append a semicolon if something's already there */
+    /* Only append a delimiter if something's already there */
     if (0 != buflen)
-        strcat (buf, ";");
+        strcat (buf, delim);
     strcat (buf, app);
     return buf;
 }
@@ -1370,16 +1414,17 @@ PJ_INFO proj_info (void) {
     info.release    = pj_get_release ();
 
     /* build search path string */
-    const char* envPROJ_LIB = getenv ("PROJ_LIB");
-    buf = path_append (buf, envPROJ_LIB, &buf_size);
-#ifdef PROJ_LIB
-    if( envPROJ_LIB == nullptr ) {
-        buf = path_append (buf, PROJ_LIB, &buf_size);
-    }
-#endif
     auto ctx = pj_get_default_ctx();
-    if( ctx ) {
-        for( const auto& path: ctx->search_paths ) {
+    if (!ctx || ctx->search_paths.empty()) {
+        const char *envPROJ_LIB = getenv("PROJ_LIB");
+        buf = path_append(buf, envPROJ_LIB, &buf_size);
+#ifdef PROJ_LIB
+        if (envPROJ_LIB == nullptr) {
+            buf = path_append(buf, PROJ_LIB, &buf_size);
+        }
+#endif
+    } else {
+        for (const auto &path : ctx->search_paths) {
             buf = path_append(buf, path.c_str(), &buf_size);
         }
     }

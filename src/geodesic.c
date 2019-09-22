@@ -24,14 +24,15 @@
  */
 
 #include "geodesic.h"
-#ifdef PJ_LIB__
-#include "proj_math.h"
-#else
 #include <math.h>
-#endif
 
 #if !defined(HAVE_C99_MATH)
+#if defined(PROJ_LIB)
+/* PROJ requires C99 so HAVE_C99_MATH is implicit */
+#define HAVE_C99_MATH 1
+#else
 #define HAVE_C99_MATH 0
+#endif
 #endif
 
 #if !defined(__cplusplus)

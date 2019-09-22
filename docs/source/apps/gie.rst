@@ -172,7 +172,7 @@ gie command language
                     proj=urm5 n=0.5 inv
         expect      failure pjd_err_malformed_pipeline
 
-    See ``gie -l`` for a list of error codes that can be expected.
+    See :option:`gie --list<--list>` for a list of error codes that can be expected.
 
 .. option:: tolerance <tolerance>
 
@@ -273,7 +273,7 @@ gie command language
         expect    173                 -45
 
 
-    See ``gie -l`` for a list of error codes that can be ignored.
+    See :option:`gie --list<--list>` for a list of error codes that can be ignored.
 
 .. option:: require_grid <grid_name>
 
@@ -371,10 +371,10 @@ So in honour, and hopefully also in the spirit, of Gerald Ian Evenden
     Bugs
     ****
 
-    A list of know bugs can be found at https://github.com/OSGeo/proj.4/issues
+    A list of know bugs can be found at https://github.com/OSGeo/PROJ/issues
     where new bug reports can be submitted to.
 
     Home page
     *********
 
-    https://proj4.org/
+    https://proj.org/

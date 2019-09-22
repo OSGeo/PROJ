@@ -109,7 +109,7 @@ accept    80 7
 expect    0.929377425352 -0.215443296201
 
 accept    128 35
-expect    0.937431733950 0.700084268525
+expect    0.920230566844   0.713170409026
 
 accept    170 -41
 expect    2.162845830414 -0.046534568425
@@ -242,7 +242,7 @@ Some tests from PJ_vgridshift.c
 operation  proj=vgridshift  grids=egm96_15.gtx  ellps=GRS80
 -------------------------------------------------------------------------------
 Appears there is a difference between the egm96_15.gtx distributed by OSGeo4W,
-and the one from http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
+and the one from https://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx
 N(12.5, 55.5) = -36.021305084228515625  (download.osgeo.org)
 N(12.5, 55.5) = -35.880001068115234000  (OSGeo4W)
 This is annoying, but must be handled elsewhere. We jump through the hoop by
@@ -252,6 +252,24 @@ tolerance 15 cm
 ignore    pjd_err_failed_to_load_grid
 accept    12.5 55.5   0                  0
 expect    12.5 55.5 -36.021305084228516  0
+
+accept    -180.1 0 0
+expect    -180.1 0 -21.2423
+
+accept    179.9 0 0
+expect    179.9 0 -21.2423
+
+accept    180 0 0
+expect    180 0 -21.1533 
+
+accept    540 0 0
+expect    540 0 -21.1533 
+
+accept    -180 0 0
+expect    -180 0 -21.1533 
+
+accept    -540 0 0
+expect    -540 0 -21.1533 
 
 roundtrip 100 1 nm
 -------------------------------------------------------------------------------
@@ -433,6 +451,11 @@ expect     failure   errno invalid_arg
 operation  proj=helmert transpose
 expect     failure   errno invalid_arg
 
+# Use of 2D Helmert interface with 3D Helmert setup
+operation  +proj=ob_tran +o_proj=helmert +o_lat_p=0
+direction  inverse
+accept     0 0
+expect     failure   errno 22
 
 -------------------------------------------------------------------------------
 Molodensky-Badekas from IOGP Guidance 7.2, Transformation from La Canoa to REGVEN
@@ -750,5 +773,85 @@ accept    -1 10 0
 expect    359 10 0
 
 -------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+# No-op
+-------------------------------------------------------------------------------
+operation +proj=noop
+direction forward
+accept  25  25
+expect  25  25
+
+accept  25  25  25
+expect  25  25  25
+
+accept  25  25  25  25
+expect  25  25  25  25
+-------------------------------------------------------------------------------
+
+
+# Test invalid lat_0
+operation +proj=aeqd +R=1 +lat_0=91
+expect  failure errno lat_larger_than_90
+
+-------------------------------------------------------------------------------
+# cart
+-------------------------------------------------------------------------------
+
+operation   +proj=cart +ellps=GRS80
+tolerance 0.001mm
+
+accept      0 0 0
+expect      6378137 0 0
+
+accept      0 90 0
+expect      0 0 6356752.314140347
+
+accept      0 -90 0
+expect      0 0 -6356752.314140347
+
+accept      90 0 0
+expect      0 6378137 0
+
+accept      -90 0 0
+expect      0 -6378137 0
+
+accept      180 0 0
+expect      -6378137 0 0
+
+accept      -180 0 0
+expect      -6378137 0 0
+
+# Center of Earth !
+accept      0 0 -6378137
+expect      0 0 0
+
+accept      0 90 -6356752.314140347
+expect      0 0 0
+
+direction inverse
+
+accept      6378137 0 0
+expect      0 0 0
+
+accept      0 0 6356752.314140347
+expect      0 90 0
+
+accept      0 0 -6356752.314140347
+expect      0 -90 0
+
+accept      0 6378137 0
+expect      90 0 0
+
+accept      0 -6378137 0
+expect      -90 0 0
+
+accept      -6378137 0 0
+expect      180 0 0
+
+# Center of Earth !
+accept      0 0 0
+expect      0 0 -6378137
+
 
 </gie>

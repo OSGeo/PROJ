@@ -1,3 +1,183 @@
+6.2.0 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Introduced PROJJSON, a JSON encoding of WKT2 (#1547)
+
+ o Support CRS instantiation of OGC URN's (#1505)
+
+ o Expose scope and remarks of database objects (#1537)
+
+ o EPSG Database updated to version 9.7.0 (#1558)
+
+ o Added C API function proj_grid_get_info_from_database() (#1494)
+
+ o Added C API function
+   proj_operation_factory_context_set_discard_superseded() (#1534)
+
+ o Added C API function proj_context_set_autoclose_database() (#1566)
+
+ o Added C API function proj_create_crs_to_crs_from_pj() (#1567)
+
+ o Added C API function proj_cleanup() (#1569)
+
+ Bug Fixes
+ ---------
+
+ o Fixed build failure on Solaris systems (#1554)
+
+ THANKS TO
+ ---------
+
+ Version 6.2.0 is made possible by the following contributors:
+
+ GitHub user @edechaux
+ Michael D. Smith
+ Matt Littlemore
+ Kristian Evers
+ Even Rouault
+
+6.1.1 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Update EPSG registry to version 9.6.3 (1485)
+
+
+ Bug Fixes
+ ---------
+
+ o Take the passed authority into account when identifying
+   objects (#1466)
+
+ o Avoid exception when transforming from NAD83 to projected
+   CRS using NAD83(2011) (#1477)
+
+ o Avoid off-by-one reading of name argument if name of resource
+   file has length 1 (#1489)
+
+ o Do not include PROJ_LIB in proj_info().searchpath when context
+   search path is set (#1498)
+
+ o Use  correct delimeter for the current platform when parsing
+   PROJ_LIB (#1497)
+
+ o Do not confuse 'ID74' CRS with WKT2 ID[] node (#1506)
+
+ o WKT1 importer: do case insensitive comparison for axis
+   direction (#1509)
+
+ o Avoid compile errors on GCC 4.9.3 (#1512)
+
+ o Make sure that pipelines including +proj=ob_tran can be
+   created (#1526)
+
+
+ THANKS TO
+ ------------
+
+ Version 6.1.1 is made possible by the following contributors:
+
+
+ Alan D. Snow
+ Paul Menzel
+ Mateusz Łoskot
+ Bas Couwenberg
+ Peter Limkilde Svendsen
+ Mike Taves
+ Howard Butler
+ Nyall Dawson
+ Andrew Bell
+ Kristian Evers
+ Even Rouault
+
+6.1.0 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Include custom ellipsoid definitions from QGIS (#1337)
+
+ o Add "-k ellipsoid" option to projinfo (#1338)
+
+ o Make cs2cs support 4D coordinates (#1355)
+
+ o WKT2 parser: update to OGC 18-010r6 (#1360 #1366)
+
+ o Update internal version of googletest to v1.8.1 (#1361)
+
+ o Database update: EPSG v9.6.2 (#1462), IGNF v3.0.3, ESRI 10.7.0
+   and add operation_version column (#1368)
+
+ o Add proj_normalize_for_visualization() that attempts to apply axis
+   ordering as used by most GIS applications and PROJ <6 (#1387)
+
+ o Added noop operation (#1391)
+
+ o Paths set by user take priority over PROJ_LIB for search paths (#1398)
+
+ o Reduced database size (#1438)
+
+ o add support for compoundCRS and concatenatedOperation named from
+   their components (#1441)
+
+ Bug fixes
+ ---------
+
+ o Have gie return non-zero code when file can't be opened (#1312)
+
+ o CMake cross-compilation fix (#1316)
+
+ o Use 1st eccentricity instead of 2nd eccentricity in Molodensky (#1324)
+
+ o Make sure to include grids when doing Geocentric to CompoundCRS with
+   nadgrids+geoidgrids transformations (#1326)
+
+ o Handle coordinates outside of bbox better (#1333)
+
+ o Enable system error messages in command line automatically in builds (#1336)
+
+ o Make sure to install projinfo man page with CMake (#1347)
+
+ o Add data dir to pkg-config file proj.pc (#1348)
+
+ o Fix GCC 9 warning about useless std::move() (#1352)
+
+ o Grid related fixes (#1369)
+
+ o Make sure that ISO19111 C++ code sets pj_errno on errors (#1405)
+
+ o vgridshift: handle longitude wrap-around for grids with 360deg
+   longitude extent (#1429)
+
+ o proj/cs2cs: validate value of -f parameter to avoid potential crashes (#1434)
+
+ o Many division by zero and similar bug fixes found by OSS Fuzz.
+
+ THANKS TO
+ ------------
+
+ Version 6.1.0 is made possible by the following contributors:
+
+ Andrew Hardin
+ Sean Warren
+ Dan Baston
+ Howard Butler
+ Joris Van den Bossche
+ Elliott Sales de Andrade
+ Alan D. Snow
+ Nyall Dawson
+ Chris Mayo
+ Mike Taves
+ Kristian Evers
+ Even Rouault
+
+
 6.0.0 Release Notes
 -------------------
 

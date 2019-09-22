@@ -158,7 +158,7 @@ EOF
 #
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"
-diff -b ${OUT} ${TEST_CLI_DIR}/${OUT}.dist
+diff -u -b ${OUT} ${TEST_CLI_DIR}/${OUT}.dist
 if [ $? -ne 0 ] ; then
 echo  ""
 echo "PROBLEMS HAVE OCCURRED"

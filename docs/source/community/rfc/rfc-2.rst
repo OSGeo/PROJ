@@ -303,9 +303,9 @@ transformations)
     unknown id, Inverse of Tokyo to WGS 84 (1) + Tokyo to JGD2011 (2), 29.2 m, Asia - Japan and South Korea
 
 
-.. _`coordinate operations`: https://proj4.org/operations/index.html
+.. _`coordinate operations`: https://proj.org/operations/index.html
 
-.. _`PROJ transformation grid`: https://proj4.org/resource_files.html#transformation-grids
+.. _`PROJ transformation grid`: https://proj.org/resource_files.html#transformation-grids
 
 
 Code repository

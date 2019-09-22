@@ -13,7 +13,7 @@ PROJ_HEAD(vandg, "van der Grinten (I)") "\n\tMisc Sph";
 # define HPISQ      4.93480220054467930934
 
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY vandg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     double  al, al2, g, g2, p2;
 
@@ -58,7 +58,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP vandg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     double t, c0, c1, c2, c3, al, r2, r, m, d, ay, x2, y2;
 
@@ -80,7 +80,14 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     al = c1 / c3 - THIRD * c2 * c2;
     m = 2. * sqrt(-THIRD * al);
     d = C2_27 * c2 * c2 * c2 + (c0 * c0 - THIRD * c2 * c1) / c3;
-    if (((t = fabs(d = 3. * d / (al * m))) - TOL) <= 1.) {
+    const double al_mul_m = al * m;
+    if( al_mul_m == 0 ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        return proj_coord_error().lp;
+    }
+    d = 3. * d /al_mul_m;
+    t = fabs(d);
+    if ((t - TOL) <= 1.) {
         d = t > 1. ? (d > 0. ? 0. : M_PI) : acos(d);
         lp.phi = M_PI * (m * cos(d * THIRD + PI4_3) - THIRD * c2);
         if (xy.y < 0.) lp.phi = -lp.phi;
@@ -98,8 +105,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 PJ *PROJECTION(vandg) {
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = vandg_s_inverse;
+    P->fwd = vandg_s_forward;
 
     return P;
 }

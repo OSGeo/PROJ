@@ -1,8 +1,7 @@
 #define PJ_LIB__
-#include "proj_math.h"
-#include "proj_internal.h"
 #include "proj.h"
 #include "proj_internal.h"
+#include <math.h>
 
 PROJ_HEAD(robin, "Robinson") "\n\tPCyl, Sph";
 
@@ -78,7 +77,7 @@ static const struct COEFS Y[] = {
 /* Not sure at all of the appropriate number for MAX_ITER... */
 #define MAX_ITER 100
 
-static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
+static PJ_XY robin_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     long i;
     double dphi;
@@ -100,7 +99,7 @@ static PJ_XY s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
 }
 
 
-static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
+static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     long i;
     double t, t1;
@@ -150,8 +149,8 @@ static PJ_LP s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
 
 PJ *PROJECTION(robin) {
     P->es = 0.;
-    P->inv = s_inverse;
-    P->fwd = s_forward;
+    P->inv = robin_s_inverse;
+    P->fwd = robin_s_forward;
 
     return P;
 }

@@ -93,7 +93,7 @@ The routines also calculate several other quantities of interest
   On a flat surface, we have :math:`m_{12}=s_{12}`.
 * :math:`M_{12}` and :math:`M_{21}` are geodesic scales.  If two
   geodesics are parallel at point 1 and separated by a small distance
-  :\math`dt`, then they are separated by a distance :math:`M_{12}\,dt` at
+  :math:`dt`, then they are separated by a distance :math:`M_{12}\,dt` at
   point 2.  :math:`M_{21}` is defined similarly (with the geodesics
   being parallel to one another at point 2).  :math:`M_{12}` and
   :math:`M_{21}` are dimensionless quantities.  On a flat surface,
@@ -159,7 +159,7 @@ areas is based on :cite:`Danielsen1989`.  These improve on the work of
 :cite:`Vincenty1975` in the following respects:
 
 * The results are accurate to round-off for terrestrial ellipsoids (the
-  error in the distance is less then 15 nanometers, compared to 0.1 mm
+  error in the distance is less than 15 nanometers, compared to 0.1 mm
   for Vincenty).
 * The solution of the inverse problem is always found.  (Vincenty's
   method fails to converge for nearly antipodal points.)

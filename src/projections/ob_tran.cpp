@@ -154,6 +154,11 @@ static ARGS ob_tran_target_params (paralist *params) {
         if (0!=strncmp (args.argv[i], "o_proj=", 7))
             continue;
         args.argv[i] += 2;
+        if (strcmp(args.argv[i], "proj=ob_tran") == 0 ) {
+            pj_dealloc (args.argv);
+            args.argc = 0;
+            args.argv = nullptr;
+        }
         break;
     }
 
@@ -164,7 +169,6 @@ static ARGS ob_tran_target_params (paralist *params) {
 
 PJ *PROJECTION(ob_tran) {
     double phip;
-    char *name;
     ARGS args;
     PJ *R; /* projection to rotate */
 
@@ -176,15 +180,15 @@ PJ *PROJECTION(ob_tran) {
     P->destructor = destructor;
 
     /* get name of projection to be translated */
-    if (!(name = pj_param(P->ctx, P->params, "so_proj").s))
+    if (pj_param(P->ctx, P->params, "so_proj").s == nullptr)
         return destructor(P, PJD_ERR_NO_ROTATION_PROJ);
-
-    /* avoid endless recursion */
-    if( strcmp(name, "ob_tran") == 0 )
-        return destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
 
     /* Create the target projection object to rotate */
     args = ob_tran_target_params (P->params);
+    /* avoid endless recursion */
+    if (args.argv == nullptr ) {
+        return destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+    }
     R = pj_init_ctx (pj_get_ctx(P), args.argc, args.argv);
     pj_dealloc (args.argv);
 
@@ -238,7 +242,7 @@ PJ *PROJECTION(ob_tran) {
     /* Support some rather speculative test cases, where the rotated projection */
     /* is actually latlong. We do not want scaling in that case... */
     if (Q->link->right==PJ_IO_UNITS_RADIANS)
-        P->right = PJ_IO_UNITS_PROJECTED;
+        P->right = PJ_IO_UNITS_WHATEVER;
 
 
     return P;
