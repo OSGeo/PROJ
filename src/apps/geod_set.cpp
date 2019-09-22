@@ -46,7 +46,6 @@ geod_set(int argc, char **argv) {
 	/* check if line or arc mode */
 	if (pj_param(nullptr,start, "tlat_1").i) {
 		double del_S;
-#undef f
 		phi1 = pj_param(nullptr,start, "rlat_1").f;
 		lam1 = pj_param(nullptr,start, "rlon_1").f;
 		if (pj_param(nullptr,start, "tlat_2").i) {
