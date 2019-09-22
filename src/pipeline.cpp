@@ -330,7 +330,7 @@ static void set_ellipsoid(PJ *P) {
 
     pj_calc_ellipsoid_params (P, P->a, P->es);
 
-    geod_init(P->geod, P->a,  (1 - sqrt (1 - P->es)));
+    geod_init(P->geod, P->a,  P->es / (1 + sqrt(P->one_es)));
 
     /* Re-attach the dangling list */
     /* Note: cur will always be non 0 given argv_sentinel presence, */
