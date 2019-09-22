@@ -15,7 +15,10 @@ sudo apt-get install -qq openjdk-7-jdk
 scripts/cppcheck.sh
 scripts/doxygen.sh
 
-pip3 install --user sphinxcontrib-bibtex
+# Force sphinxcontrib-bibtex version to 0.4.2, because 1.0.0 requires
+# sphinx >= 2.0 which is only available on Python >= 3.5, and this config
+# has only 3.4
+pip3 install --user sphinxcontrib-bibtex==0.4.2
 pip3 install --user cpp-coveralls
 
 ./travis/docker.sh
