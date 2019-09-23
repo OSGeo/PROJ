@@ -934,3 +934,8 @@ unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 1 m, World
 unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.5 m, World
 unknown id, Inverse of UTM zone 31N + Inverse of Transformation from EGM2008 height to WGS 84 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
 
+Testing -s EPSG:4936 -t EPSG:4978 --spatial-test intersects --summary where WGS 84 to ETRS89 (2) uses a transformation method not supported by PROJ currently (time-specific Helmert), and thus must be sorted last
+Candidate operations found: 2
+unknown id, Ballpark geocentric translation from ETRS89 to WGS 84, unknown accuracy, World, has ballpark transformation
+INVERSE(EPSG):9225, Inverse of WGS 84 to ETRS89 (2), 0.1 m, Europe - offshore North Sea - Germany and Netherlands east of 5°E
+
