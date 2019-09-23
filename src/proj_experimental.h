@@ -922,12 +922,6 @@ PJ PROJ_DLL *proj_create_conversion_equal_earth(
 
 /**@}*/
 
-/*! @cond Doxygen_Suppress */
-
-void PROJ_DLL proj_assign_context( PJ* pj, PJ_CONTEXT* ctx );
-
-/*! @endcond */
-
 #ifdef __cplusplus
 }
 #endif
