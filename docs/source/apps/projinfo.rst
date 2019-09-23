@@ -224,9 +224,12 @@ The following control parameters can appear in any order:
 
     .. versionadded:: 7.0
 
-    "Promote" the CRS(s) to their 3D version. Useful for example when wanting
-    to transform between a 2D projected CRS with elevations as ellipsoidal
-    height to a 3D geographic CRS or a compoundCRS.
+    "Promote" the CRS(s) to their 3D version. In the context of researching
+    available coordinate transformations, explicitly specifying this option is
+    not necessary, because when one of the source or target CRS has a vertical
+    component but not the other one, the one that has no vertical component is
+    automatically promoted to a 3D version, where its vertical axis is the
+    ellipsoidal height in metres, using the ellipsoid of the base geodetic CRS.
 
 .. option:: --c-ify
 

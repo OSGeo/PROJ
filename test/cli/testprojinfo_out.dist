@@ -821,8 +821,57 @@ INVERSE(EPSG):10000, Inverse of RGF93 to NGF IGN69 height (1), 0.5 m, France - m
 PROJ string:
 +proj=pipeline +step +inv +proj=vgridshift +grids=ggf97a.txt +multiplier=1
 
+Testing EPSG:32631 --3d
+PROJ.4 string:
++proj=utm +zone=31 +datum=WGS84 +units=m +no_defs +type=crs
+
+WKT2:2019 string:
+PROJCRS["WGS 84 / UTM zone 31N",
+    BASEGEOGCRS["WGS 84",
+        DATUM["World Geodetic System 1984",
+            ELLIPSOID["WGS 84",6378137,298.257223563,
+                LENGTHUNIT["metre",1]]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        ID["EPSG",4979]],
+    CONVERSION["UTM zone 31N",
+        METHOD["Transverse Mercator",
+            ID["EPSG",9807]],
+        PARAMETER["Latitude of natural origin",0,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8801]],
+        PARAMETER["Longitude of natural origin",3,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["Scale factor at natural origin",0.9996,
+            SCALEUNIT["unity",1],
+            ID["EPSG",8805]],
+        PARAMETER["False easting",500000,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]],
+        ID["EPSG",16031]],
+    CS[Cartesian,3],
+        AXIS["(E)",east,
+            ORDER[1],
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]],
+        AXIS["(N)",north,
+            ORDER[2],
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]],
+        AXIS["ellipsoidal height (h)",up,
+            ORDER[3],
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]]]
+
 Testing -s EPSG:32631 -t EPSG:4326+3855 --summary
-Warning: mix of 2D and 3D CRS. Vertical transformations, if available, will not be applied. Consider using 3D version of the CRS, or the --3d switch
+Candidate operations found: 3
+unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 1 m, World
+unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.5 m, World
+unknown id, Inverse of UTM zone 31N + Inverse of Transformation from EGM2008 height to WGS 84 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
 
 Testing -s EPSG:32631 -t EPSG:4326+3855 --3d --summary
 Candidate operations found: 3

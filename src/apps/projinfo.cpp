@@ -601,37 +601,6 @@ static void outputOperationSummary(const CoordinateOperationNNPtr &op,
 
 // ---------------------------------------------------------------------------
 
-static size_t getAxisCount(const CRSNNPtr &crs) {
-    const auto singleCRS = dynamic_cast<const SingleCRS *>(crs.get());
-    if (singleCRS) {
-        return singleCRS->coordinateSystem()->axisList().size();
-    }
-    const auto compoundCRS = dynamic_cast<const CompoundCRS *>(crs.get());
-    if (compoundCRS) {
-        size_t axisCount = 0;
-        const auto &components = compoundCRS->componentReferenceSystems();
-        for (const auto &subCRS : components) {
-            axisCount += getAxisCount(subCRS);
-        }
-        return axisCount;
-    }
-    const auto boundCRS = dynamic_cast<const BoundCRS *>(crs.get());
-    if (boundCRS) {
-        return getAxisCount(boundCRS->baseCRS());
-    }
-    return 0;
-}
-
-// ---------------------------------------------------------------------------
-
-static bool is2D(const CRSNNPtr &crs) { return getAxisCount(crs) == 2; }
-
-// ---------------------------------------------------------------------------
-
-static bool is3D(const CRSNNPtr &crs) { return getAxisCount(crs) == 3; }
-
-// ---------------------------------------------------------------------------
-
 static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
     const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
@@ -665,15 +634,6 @@ static void outputOperations(
         std::exit(1);
     }
     auto nnTargetCRS = NN_NO_CHECK(targetCRS);
-
-    if (!promoteTo3D && !outputOpt.quiet &&
-        ((is2D(nnSourceCRS) && is3D(nnTargetCRS)) ||
-         (is3D(nnSourceCRS) && is2D(nnTargetCRS)))) {
-        std::cerr << "Warning: mix of 2D and 3D CRS. Vertical transformations, "
-                     "if available, will not be applied. Consider using 3D "
-                     "version of the CRS, or the --3d switch"
-                  << std::endl;
-    }
 
     std::vector<CoordinateOperationNNPtr> list;
     size_t spatialCriterionPartialIntersectionResultCount = 0;
