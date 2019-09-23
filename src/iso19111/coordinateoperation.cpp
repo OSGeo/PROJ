@@ -13445,8 +13445,13 @@ getResolvedCRS(const crs::CRSNNPtr &crs,
  * by increasing accuracy. Operations with unknown accuracy are sorted last,
  * whatever their area.
  *
+ * When one of the source or target CRS has a vertical component but not the
+ * other one, the one that has no vertical component is automatically promoted
+ * to a 3D version, where its vertical axis is the ellipsoidal height in metres,
+ * using the ellipsoid of the base geodetic CRS.
+ *
  * @param sourceCRS source CRS.
- * @param targetCRS source CRS.
+ * @param targetCRS target CRS.
  * @param context Search context.
  * @return a list
  */

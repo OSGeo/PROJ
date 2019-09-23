@@ -7080,6 +7080,11 @@ void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
  * by increasing accuracy. Operations with unknown accuracy are sorted last,
  * whatever their area.
  *
+ * When one of the source or target CRS has a vertical component but not the
+ * other one, the one that has no vertical component is automatically promoted
+ * to a 3D version, where its vertical axis is the ellipsoidal height in metres,
+ * using the ellipsoid of the base geodetic CRS.
+ *
  * @param ctx PROJ context, or NULL for default context
  * @param source_crs source CRS. Must not be NULL.
  * @param target_crs source CRS. Must not be NULL.
