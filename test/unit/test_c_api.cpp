@@ -1344,7 +1344,7 @@ TEST_F(CApi, proj_create_operations) {
     ASSERT_NE(res, nullptr);
     ObjListKeeper keeper_res(res);
 
-    EXPECT_EQ(proj_list_get_count(res), 7);
+    EXPECT_EQ(proj_list_get_count(res), 8);
 
     EXPECT_EQ(proj_list_get(m_ctxt, res, -1), nullptr);
     EXPECT_EQ(proj_list_get(m_ctxt, res, proj_list_get_count(res)), nullptr);
