@@ -88,12 +88,7 @@ cppcheck static analyzer
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can run locally ``scripts/cppcheck.sh`` that is a wrapper script around the
-cppcheck utility. It is known to work with cppcheck 1.61 of Ubuntu Trusty 14.0,
-since this is what is currently used on Travis-CI
-(``travis/linux_gcc/before_install.sh``).
-At the time of writing, this also works with cppcheck 1.72 of Ubuntu Xenial
-16.04, and latest cppcheck
-master.
+cppcheck utility. This tool is used as part of the quality control of the code.
 
 cppcheck can have false positives. In general, it is preferable to rework the
 code a bit to make it more 'obvious' and avoid those false positives. When not
@@ -115,9 +110,9 @@ Preliminary step: install clang. For example:
 
 ::
 
-    wget http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
-    tar xJf clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
-    mv clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04 clang+llvm-6
+    wget http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+    tar xJf clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+    mv clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04 clang+llvm-6
 
 Run configure under the scan-build utility of clang:
 

@@ -6,10 +6,8 @@ set -e
 ./travis/before_install_pip.sh
 
 sudo apt-get install -qq \
-        cppcheck \
         lcov \
         doxygen graphviz \
-        openjdk-7-jdk \
         sqlite3 libsqlite3-dev
 
 #scripts/cppcheck.sh

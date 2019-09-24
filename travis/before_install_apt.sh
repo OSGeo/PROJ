@@ -4,4 +4,4 @@
 # "global" before_install script.
 
 sudo apt-get update -qq
-sudo apt-get install -qq python3-pip
+sudo apt-get install -qq python3-pip python3-setuptools

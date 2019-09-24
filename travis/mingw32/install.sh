@@ -6,12 +6,13 @@ export CCACHE_CPP2=yes
 export PROJ_DB_CACHE_DIR="$HOME/.ccache"
 
 MINGW_ARCH=x86_64-w64-mingw32
-MINGW_PREFIX=/usr/lib/gcc/$MINGW_ARCH/4.8
+MINGW_PREFIX=/usr/lib/gcc/$MINGW_ARCH/5.3-posix
 
 # prepare wine environment
 WINE_SYSDIR=$HOME/.wine/drive_c/windows
 wine64 cmd /c dir
 ln -s $MINGW_PREFIX/libstdc++-6.dll $WINE_SYSDIR
+ln -s $MINGW_PREFIX/libgcc_s_seh-1.dll $WINE_SYSDIR
 ln -s $MINGW_PREFIX/libgcc_s_sjlj-1.dll $WINE_SYSDIR
 ln -s /usr/$MINGW_ARCH/lib/libwinpthread-1.dll $WINE_SYSDIR
 
