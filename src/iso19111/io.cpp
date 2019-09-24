@@ -4444,12 +4444,12 @@ class JSONParser {
     }
 
     template <class TargetCRS, class DatumBuilderType,
-              class CS = CoordinateSystem>
+              class CSClass = CoordinateSystem>
     util::nn<std::shared_ptr<TargetCRS>> buildCRS(const json &j,
                                                   DatumBuilderType f) {
         auto datum = (this->*f)(getObject(j, "datum"));
         auto cs = buildCS(getObject(j, "coordinate_system"));
-        auto csCast = util::nn_dynamic_pointer_cast<CS>(cs);
+        auto csCast = util::nn_dynamic_pointer_cast<CSClass>(cs);
         if (!csCast) {
             throw ParsingException("coordinate_system not of expected type");
         }
@@ -4457,7 +4457,7 @@ class JSONParser {
                                  NN_NO_CHECK(csCast));
     }
 
-    template <class TargetCRS, class BaseCRS, class CS = CoordinateSystem>
+    template <class TargetCRS, class BaseCRS, class CSClass = CoordinateSystem>
     util::nn<std::shared_ptr<TargetCRS>> buildDerivedCRS(const json &j) {
         auto baseCRSObj = create(getObject(j, "base_crs"));
         auto baseCRS = util::nn_dynamic_pointer_cast<BaseCRS>(baseCRSObj);
@@ -4465,7 +4465,7 @@ class JSONParser {
             throw ParsingException("base_crs not of expected type");
         }
         auto cs = buildCS(getObject(j, "coordinate_system"));
-        auto csCast = util::nn_dynamic_pointer_cast<CS>(cs);
+        auto csCast = util::nn_dynamic_pointer_cast<CSClass>(cs);
         if (!csCast) {
             throw ParsingException("coordinate_system not of expected type");
         }
