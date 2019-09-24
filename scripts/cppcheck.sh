@@ -1,6 +1,6 @@
 #!/bin/bash
-# Note: tested with cppcheck 1.72 as shipped with Ubuntu 16.04
-# as well as with cppcheck 1.76.1
+# Note: tested with cppcheck 1.61 as shipped with Ubuntu 14.04
+echo `cppcheck --version`
 
 LOG_FILE=/tmp/cppcheck_proj.txt
 
