@@ -476,6 +476,15 @@ def fill_concatenated_operation(proj_db_cursor):
         max_n_params = 3
         step_code = [None for i in range(max_n_params)]
 
+        proj_db_cursor.execute("SELECT COUNT(*) FROM epsg_coordoperationpath WHERE concat_operation_code = ?", (code,))
+        (nsteps, ) = proj_db_cursor.fetchone()
+        # Our database model has only provision for up to 3 steps currently.
+        # As of EPSG v9.8.2, only EPSG:9103 (NAD27 to ITRF2014 (1)) and 9104 (NAD27 to ITRF2014 (2)) have respectively 4 and 7 steps.
+        # Tracked as https://github.com/OSGeo/PROJ/issues/1632
+        if nsteps > 3:
+            print('Cannot import concatenated_operation ' + str(code) + ', as it has more than 3 steps.')
+            continue
+
         iterator = proj_db_cursor.execute("SELECT op_path_step, single_operation_code FROM epsg_coordoperationpath WHERE concat_operation_code = ? ORDER BY op_path_step", (code,))
         for (order, single_operation_code) in iterator:
             assert order <= max_n_params
