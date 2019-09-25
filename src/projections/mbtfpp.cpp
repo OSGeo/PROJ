@@ -7,7 +7,7 @@
 
 PROJ_HEAD(mbtfpp, "McBride-Thomas Flat-Polar Parabolic") "\n\tCyl, Sph";
 
-#define CS  .95257934441568037152
+#define CSy .95257934441568037152
 #define FXC .92582009977255146156
 #define FYC 3.40168025708304504493
 #define C23 .66666666666666666666
@@ -19,7 +19,7 @@ static PJ_XY mbtfpp_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
     PJ_XY xy = {0.0,0.0};
     (void) P;
 
-    lp.phi = asin(CS * sin(lp.phi));
+    lp.phi = asin(CSy * sin(lp.phi));
     xy.x = FXC * lp.lam * (2. * cos(C23 * lp.phi) - 1.);
     xy.y = FYC * sin(C13 * lp.phi);
     return xy;
@@ -41,7 +41,7 @@ static PJ_LP mbtfpp_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
         lp.phi = asin(lp.phi);
 
     lp.lam = xy.x / ( FXC * (2. * cos(C23 * (lp.phi *= 3.)) - 1.) );
-    if (fabs(lp.phi = sin(lp.phi) / CS) >= 1.) {
+    if (fabs(lp.phi = sin(lp.phi) / CSy) >= 1.) {
         if (fabs(lp.phi) > ONEEPS) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return lp;
