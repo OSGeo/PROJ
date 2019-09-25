@@ -79,10 +79,10 @@ static double sign (double v) {
     return v > 0 ? 1 : (v < 0 ? -1 : 0);
 }
 
-static PJ_XY rotate(PJ_XY p, double a) {
+static PJ_XY rotate(PJ_XY p, double angle) {
     PJ_XY result;
-    result.x = p.x * cos(a) - p.y * sin(a);
-    result.y = p.y * cos(a) + p.x * sin(a);
+    result.x = p.x * cos(angle) - p.y * sin(angle);
+    result.y = p.y * cos(angle) + p.x * sin(angle);
     return result;
 }
 
@@ -637,7 +637,8 @@ PJ *PROJECTION(healpix) {
     P->opaque = Q;
     P->destructor = destructor;
 
-    Q->rot = pj_param(P->ctx, P->params,"drot").f * M_PI / 180.0;
+    double angle = pj_param(P->ctx, P->params,"drot").f;
+    Q->rot = PJ_TORAD(angle);
 
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es);             /* For auth_lat(). */
