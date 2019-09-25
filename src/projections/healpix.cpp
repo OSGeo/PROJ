@@ -36,7 +36,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-PROJ_HEAD(healpix, "HEAPJ_LPix") "\n\tSph&Ell\n\trot=";
+PROJ_HEAD(healpix, "HEAPJ_LPix") "\n\tSph&Ell\n\trot_xy=";
 PROJ_HEAD(rhealpix, "rHEAPJ_LPix") "\n\tSph&Ell\n\tnorth_square= south_square=";
 
 /* Matrix for counterclockwise rotation by pi/2: */
@@ -56,7 +56,7 @@ namespace { // anonymous namespace
 struct pj_opaque {
     int north_square;
     int south_square;
-    double rot;
+    double rot_xy;
     double qp;
     double *apa;
 };
@@ -522,20 +522,20 @@ static PJ_XY combine_caps(double x, double y, int north_square, int south_square
 static PJ_XY s_healpix_forward(PJ_LP lp, PJ *P) { /* sphere  */
     (void) P;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    return rotate(healpix_sphere(lp), -Q->rot);
+    return rotate(healpix_sphere(lp), -Q->rot_xy);
 }
 
 
 static PJ_XY e_healpix_forward(PJ_LP lp, PJ *P) { /* ellipsoid  */
     lp.phi = auth_lat(P, lp.phi, 0);
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    return rotate(healpix_sphere(lp), -Q->rot);
+    return rotate(healpix_sphere(lp), -Q->rot_xy);
 }
 
 
 static PJ_LP s_healpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    xy = rotate(xy, Q->rot);
+    xy = rotate(xy, Q->rot_xy);
 
     /* Check whether (x, y) lies in the HEAPJ_LPix image */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
@@ -552,7 +552,7 @@ static PJ_LP s_healpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
 static PJ_LP e_healpix_inverse(PJ_XY xy, PJ *P) { /* ellipsoid */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    xy = rotate(xy, Q->rot);
+    xy = rotate(xy, Q->rot_xy);
 
     /* Check whether (x, y) lies in the HEAPJ_LPix image. */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
@@ -637,8 +637,8 @@ PJ *PROJECTION(healpix) {
     P->opaque = Q;
     P->destructor = destructor;
 
-    double angle = pj_param(P->ctx, P->params,"drot").f;
-    Q->rot = PJ_TORAD(angle);
+    double angle = pj_param(P->ctx, P->params,"drot_xy").f;
+    Q->rot_xy = PJ_TORAD(angle);
 
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es);             /* For auth_lat(). */
