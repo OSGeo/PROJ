@@ -51,6 +51,12 @@ Parameters
 
 .. note:: All parameters for the projection are optional.
 
+.. option:: +rot
+
+    Rotation of the HEALPix map in degrees.
+
+    *Defaults to 0.0.*
+
 .. include:: ../options/lon_0.rst
 
 .. include:: ../options/x_0.rst
