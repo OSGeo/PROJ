@@ -668,10 +668,10 @@ static int isea_tri_plane(int tri, struct isea_pt *pt, double radius) {
 
 /* convert projected triangle coords to quad xy coords, return quad number */
 static int isea_ptdd(int tri, struct isea_pt *pt) {
-    int             downtri, quad;
+    int             downtri, quadz;
 
     downtri = (((tri - 1) / 5) % 2 == 1);
-    quad = ((tri - 1) % 5) + ((tri - 1) / 10) * 5 + 1;
+    quadz = ((tri - 1) % 5) + ((tri - 1) / 10) * 5 + 1;
 
     isea_rotate(pt, downtri ? 240.0 : 60.0);
     if (downtri) {
@@ -679,10 +679,10 @@ static int isea_ptdd(int tri, struct isea_pt *pt) {
         /* pt->y += cos(30.0 * M_PI / 180.0); */
         pt->y += .86602540378443864672;
     }
-    return quad;
+    return quadz;
 }
 
-static int isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt,
+static int isea_dddi_ap3odd(struct isea_dgg *g, int quadz, struct isea_pt *pt,
                             struct isea_pt *di)
 {
     struct isea_pt  v;
@@ -715,40 +715,40 @@ static int isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt,
      * you want to test for max coords for the next quad in the same
      * "row" first to get the case where both are max
      */
-    if (quad <= 5) {
+    if (quadz <= 5) {
         if (d == 0 && i == maxcoord) {
             /* north pole */
-            quad = 0;
+            quadz = 0;
             d = 0;
             i = 0;
         } else if (i == maxcoord) {
             /* upper right in next quad */
-            quad += 1;
-            if (quad == 6)
-                quad = 1;
+            quadz += 1;
+            if (quadz == 6)
+                quadz = 1;
             i = maxcoord - d;
             d = 0;
         } else if (d == maxcoord) {
             /* lower right in quad to lower right */
-            quad += 5;
+            quadz += 5;
             d = 0;
         }
-    } else if (quad >= 6) {
+    } else if (quadz >= 6) {
         if (i == 0 && d == maxcoord) {
             /* south pole */
-            quad = 11;
+            quadz = 11;
             d = 0;
             i = 0;
         } else if (d == maxcoord) {
             /* lower right in next quad */
-            quad += 1;
-            if (quad == 11)
-                quad = 6;
+            quadz += 1;
+            if (quadz == 11)
+                quadz = 6;
             d = maxcoord - i;
             i = 0;
         } else if (i == maxcoord) {
             /* upper right in quad to upper right */
-            quad = (quad - 4) % 5;
+            quadz = (quadz - 4) % 5;
             i = 0;
         }
     }
@@ -756,11 +756,11 @@ static int isea_dddi_ap3odd(struct isea_dgg *g, int quad, struct isea_pt *pt,
     di->x = d;
     di->y = i;
 
-    g->quad = quad;
-    return quad;
+    g->quad = quadz;
+    return quadz;
 }
 
-static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
+static int isea_dddi(struct isea_dgg *g, int quadz, struct isea_pt *pt,
                      struct isea_pt *di) {
     struct isea_pt  v;
     double          hexwidth;
@@ -768,7 +768,7 @@ static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
     struct hex      h;
 
     if (g->aperture == 3 && g->resolution % 2 != 0) {
-        return isea_dddi_ap3odd(g, quad, pt, di);
+        return isea_dddi_ap3odd(g, quadz, pt, di);
     }
     /* todo might want to do this as an iterated loop */
     if (g->aperture >0) {
@@ -793,41 +793,41 @@ static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
     hex_iso(&h);
 
     /* we may actually be on another quad */
-    if (quad <= 5) {
+    if (quadz <= 5) {
         if (h.x == 0 && h.z == -sidelength) {
             /* north pole */
-            quad = 0;
+            quadz = 0;
             h.z = 0;
             h.y = 0;
             h.x = 0;
         } else if (h.z == -sidelength) {
-            quad = quad + 1;
-            if (quad == 6)
-                quad = 1;
+            quadz = quadz + 1;
+            if (quadz == 6)
+                quadz = 1;
             h.y = sidelength - h.x;
             h.z = h.x - sidelength;
             h.x = 0;
         } else if (h.x == sidelength) {
-            quad += 5;
+            quadz += 5;
             h.y = -h.z;
             h.x = 0;
         }
-    } else if (quad >= 6) {
+    } else if (quadz >= 6) {
         if (h.z == 0 && h.x == sidelength) {
             /* south pole */
-            quad = 11;
+            quadz = 11;
             h.x = 0;
             h.y = 0;
             h.z = 0;
         } else if (h.x == sidelength) {
-            quad = quad + 1;
-            if (quad == 11)
-                quad = 6;
+            quadz = quadz + 1;
+            if (quadz == 11)
+                quadz = 6;
             h.x = h.y + sidelength;
             h.y = 0;
             h.z = -h.x;
         } else if (h.y == -sidelength) {
-            quad -= 4;
+            quadz -= 4;
             h.y = 0;
             h.z = -h.x;
         }
@@ -835,35 +835,35 @@ static int isea_dddi(struct isea_dgg *g, int quad, struct isea_pt *pt,
     di->x = h.x;
     di->y = -h.z;
 
-    g->quad = quad;
-    return quad;
+    g->quad = quadz;
+    return quadz;
 }
 
 static int isea_ptdi(struct isea_dgg *g, int tri, struct isea_pt *pt,
                      struct isea_pt *di) {
     struct isea_pt  v;
-    int             quad;
+    int             quadz;
 
     v = *pt;
-    quad = isea_ptdd(tri, &v);
-    quad = isea_dddi(g, quad, &v, di);
-    return quad;
+    quadz = isea_ptdd(tri, &v);
+    quadz = isea_dddi(g, quadz, &v, di);
+    return quadz;
 }
 
 /* q2di to seqnum */
 
-static long isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
+static long isea_disn(struct isea_dgg *g, int quadz, struct isea_pt *di) {
     long             sidelength;
     long             sn, height;
     long             hexes;
 
-    if (quad == 0) {
+    if (quadz == 0) {
         g->serial = 1;
         return g->serial;
     }
     /* hexes in a quad */
     hexes = lround(pow(static_cast<double>(g->aperture), static_cast<double>(g->resolution)));
-    if (quad == 11) {
+    if (quadz == 11) {
         g->serial = 1 + 10 * hexes + 1;
         return g->serial;
     }
@@ -871,11 +871,11 @@ static long isea_disn(struct isea_dgg *g, int quad, struct isea_pt *di) {
         height = lround(floor((pow(g->aperture, (g->resolution - 1) / 2.0))));
         sn = ((long)di->x) * height;
         sn += ((long)di->y) / height;
-        sn += (quad - 1) * hexes;
+        sn += (quadz - 1) * hexes;
         sn += 2;
     } else {
         sidelength = lround((pow(g->aperture, g->resolution / 2.0)));
-        sn = lround(floor(((quad - 1) * hexes + sidelength * di->x + di->y + 2)));
+        sn = lround(floor(((quadz - 1) * hexes + sidelength * di->x + di->y + 2)));
     }
 
     g->serial = sn;
@@ -894,15 +894,15 @@ static int isea_hex(struct isea_dgg *g, int tri,
     long sidelength;
     long d, i, x, y;
 #endif
-    int quad;
+    int quadz;
 
-    quad = isea_ptdi(g, tri, pt, &v);
+    quadz = isea_ptdi(g, tri, pt, &v);
 
     if( v.x < (INT_MIN >> 4) || v.x > (INT_MAX >> 4) )
     {
         throw "Invalid shift";
     }
-    hex->x = ((int)v.x * 16) + quad;
+    hex->x = ((int)v.x * 16) + quadz;
     hex->y = v.y;
 
     return 1;
@@ -914,16 +914,16 @@ static int isea_hex(struct isea_dgg *g, int tri,
     if (g->aperture == 3 && g->resolution % 2 != 0) {
         long offset = lround((pow(3.0, g->resolution - 1) + 0.5));
 
-        d += offset * ((g->quad-1) % 5);
-        i += offset * ((g->quad-1) % 5);
+        d += offset * ((g->quadz-1) % 5);
+        i += offset * ((g->quadz-1) % 5);
 
-        if (quad == 0) {
+        if (quadz == 0) {
             d = 0;
             i = offset;
-        } else if (quad == 11) {
+        } else if (quadz == 11) {
             d = 2 * offset;
             i = 0;
-        } else if (quad > 5) {
+        } else if (quadz > 5) {
             d += offset;
         }
 
