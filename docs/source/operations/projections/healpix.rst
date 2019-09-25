@@ -53,8 +53,8 @@ Parameters
 
 .. option:: +rot_xy
 
-    Rotation of the HEALPix map in degrees. A positive value results in a
-    clockwise rotation in the cartesian / projected coordinate space.
+    Rotation of the HEALPix map in degrees. A positive value results in a clockwise
+    rotation around (x_0, y_0) in the cartesian / projected coordinate space.
 
     *Defaults to 0.0.*
 
