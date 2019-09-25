@@ -11,7 +11,7 @@ PROJ_HEAD(hatano, "Hatano Asymmetrical Equal Area") "\n\tPCyl, Sph";
 #define EPS 1e-7
 #define ONETOL 1.000001
 #define CN  2.67595
-#define CS  2.43763
+#define CSz 2.43763
 #define RCN 0.37369906014686373063
 #define RCS 0.41023453108141924738
 #define FYCN    1.75859
@@ -28,7 +28,7 @@ static PJ_XY hatano_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
     int i;
     (void) P;
 
-    c = sin(lp.phi) * (lp.phi < 0. ? CS : CN);
+    c = sin(lp.phi) * (lp.phi < 0. ? CSz : CN);
     for (i = NITER; i; --i) {
         lp.phi -= th1 = (lp.phi + sin(lp.phi) - c) / (1. + cos(lp.phi));
         if (fabs(th1) < EPS) break;
