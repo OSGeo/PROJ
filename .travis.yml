@@ -1,4 +1,4 @@
-# This is the config file for building proj.4 and running its test suite
+# This is the config file for building proj and running its test suite
 # with Travis-ci.org
 language: cpp
 
@@ -15,9 +15,8 @@ matrix:
   include:
 
     - os: linux
-      dist: trusty
+      dist: xenial
       compiler: gcc
-      sudo: required
       services:
         - docker
       env:
@@ -25,9 +24,8 @@ matrix:
         - DETAILS="linux, gcc"
 
     - os: linux
-      dist: trusty
+      dist: xenial
       compiler: gcc
-      sudo: required
       services:
         - docker
       env:
@@ -40,12 +38,15 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-          packages: ['g++-7','make','autoconf','automake']
+          packages:
+            - g++-7
+            - make
+            - autoconf
+            - automake
 
     - os: linux
-      dist: trusty
+      dist: xenial
       compiler: clang
-      sudo: required
       services:
         - docker
       env:
@@ -58,17 +59,15 @@ matrix:
         - DETAILS="osx"
 
     - os: linux
-      dist: trusty
+      dist: xenial
       compiler: gcc
-      sudo: required
       env:
         - BUILD_NAME=mingw32
         - DETAILS="mingw32"
 
     - os: linux
       compiler: gcc
-      dist: trusty
-      sudo: required
+      dist: xenial
       env:
         - BUILD_NAME=csa
         - DETAILS="CLang Static Analyzer"
