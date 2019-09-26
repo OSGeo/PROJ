@@ -3811,4 +3811,30 @@ TEST_F(CApi, proj_crs_create_projected_3D_crs_from_2D) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_crs_to_crs_with_only_ballpark_transformations) {
+    // ETRS89 / UTM zone 31N + EGM96 height to WGS 84 (G1762)
+    auto P =
+        proj_create_crs_to_crs(m_ctxt, "EPSG:25831+5773", "EPSG:7665", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper keeper_Pnormalized(Pnormalized);
+    ASSERT_NE(Pnormalized, nullptr);
+
+    PJ_COORD coord;
+    coord.xyzt.x = 500000;
+    coord.xyzt.y = 4500000;
+    coord.xyzt.z = 0;
+    coord.xyzt.t = 0;
+    coord = proj_trans(Pnormalized, PJ_FWD, coord);
+    EXPECT_NEAR(coord.xyzt.x, 3.0, 1e-9);
+    EXPECT_NEAR(coord.xyzt.y, 40.65085651660555, 1e-9);
+    if (coord.xyzt.z != 0) {
+        // z will depend if the egm96_15.gtx grid is there or not
+        EXPECT_NEAR(coord.xyzt.z, 47.04784081844435, 1e-3);
+    }
+}
+
 } // namespace
