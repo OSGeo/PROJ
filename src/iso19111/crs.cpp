@@ -2111,6 +2111,58 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return a variant of this CRS "demoted" to a 2D one, if not already
+ * the case.
+ *
+ *
+ * @param newName Name of the new CRS. If empty, nameStr() will be used.
+ * @param dbContext Database context to look for potentially already registered
+ *                  2D CRS. May be nullptr.
+ * @return a new CRS demoted to 2D, or the current one if already 2D or not
+ * applicable.
+ * @since 7.0
+ */
+GeographicCRSNNPtr
+GeographicCRS::demoteTo2D(const std::string &newName,
+                          const io::DatabaseContextPtr &dbContext) const {
+
+    const auto &axisList = coordinateSystem()->axisList();
+    if (axisList.size() == 3) {
+        const auto &l_identifiers = identifiers();
+        // First check if there is a Geographic 3D CRS in the database
+        // of the same name.
+        // This is the common practice in the EPSG dataset.
+        if (dbContext && l_identifiers.size() == 1) {
+            auto authFactory = io::AuthorityFactory::create(
+                NN_NO_CHECK(dbContext), *(l_identifiers[0]->codeSpace()));
+            auto res = authFactory->createObjectsFromName(
+                nameStr(),
+                {io::AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS}, false);
+            if (!res.empty()) {
+                const auto &firstRes = res.front();
+                auto firstResAsGeogCRS =
+                    util::nn_dynamic_pointer_cast<GeographicCRS>(firstRes);
+                if (firstResAsGeogCRS &&
+                    firstResAsGeogCRS->is2DPartOf3D(NN_NO_CHECK(this))) {
+                    return NN_NO_CHECK(firstResAsGeogCRS);
+                }
+            }
+        }
+
+        auto cs = cs::EllipsoidalCS::create(util::PropertyMap(), axisList[0],
+                                            axisList[1]);
+        return GeographicCRS::create(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    !newName.empty() ? newName : nameStr()),
+            datum(), datumEnsemble(), cs);
+    }
+
+    return NN_NO_CHECK(std::dynamic_pointer_cast<GeographicCRS>(
+        shared_from_this().as_nullable()));
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 void GeographicCRS::addAngularUnitConvertAndAxisSwap(
     io::PROJStringFormatter *formatter) const {

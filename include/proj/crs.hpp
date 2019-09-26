@@ -345,6 +345,10 @@ class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
            const datum::DatumEnsemblePtr &datumEnsemble,
            const cs::EllipsoidalCSNNPtr &cs);
 
+    PROJ_DLL GeographicCRSNNPtr
+    demoteTo2D(const std::string &newName,
+               const io::DatabaseContextPtr &dbContext) const;
+
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4267; // NAD27
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4269; // NAD83
     PROJ_DLL static const GeographicCRSNNPtr EPSG_4326; // WGS 84 2D
