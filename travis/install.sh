@@ -31,6 +31,9 @@ TAR_DIRECTORY=`basename $TAR_FILENAME .tar.gz`
 tar xvzf $TAR_FILENAME
 cd $TAR_DIRECTORY
 
+# There's a nasty #define CS in a Solaris system header. Avoid being caught about that again
+CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"
+
 # autoconf build from generated tarball
 mkdir build_autoconf
 cd build_autoconf
