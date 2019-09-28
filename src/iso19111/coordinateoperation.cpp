@@ -10260,6 +10260,7 @@ CoordinateOperationPtr CoordinateOperationFactory::createOperation(
 struct PrecomputedOpCharacteristics {
     double area_{};
     double accuracy_{};
+    bool isPROJExportable_ = false;
     bool hasGrids_ = false;
     bool gridsAvailable_ = false;
     bool gridsKnown_ = false;
@@ -10268,13 +10269,14 @@ struct PrecomputedOpCharacteristics {
     bool isNullTransformation_ = false;
 
     PrecomputedOpCharacteristics() = default;
-    PrecomputedOpCharacteristics(double area, double accuracy, bool hasGrids,
+    PrecomputedOpCharacteristics(double area, double accuracy,
+                                 bool isPROJExportable, bool hasGrids,
                                  bool gridsAvailable, bool gridsKnown,
                                  size_t stepCount, bool isApprox,
                                  bool isNullTransformation)
-        : area_(area), accuracy_(accuracy), hasGrids_(hasGrids),
-          gridsAvailable_(gridsAvailable), gridsKnown_(gridsKnown),
-          stepCount_(stepCount), isApprox_(isApprox),
+        : area_(area), accuracy_(accuracy), isPROJExportable_(isPROJExportable),
+          hasGrids_(hasGrids), gridsAvailable_(gridsAvailable),
+          gridsKnown_(gridsKnown), stepCount_(stepCount), isApprox_(isApprox),
           isNullTransformation_(isNullTransformation) {}
 };
 
@@ -10301,6 +10303,15 @@ struct SortFunction {
 
         // CAUTION: the order of the comparisons is extremely important
         // to get the intended result.
+
+        if (iterA->second.isPROJExportable_ &&
+            !iterB->second.isPROJExportable_) {
+            return true;
+        }
+        if (!iterA->second.isPROJExportable_ &&
+            iterB->second.isPROJExportable_) {
+            return false;
+        }
 
         if (!iterA->second.isApprox_ && iterB->second.isApprox_) {
             return true;
@@ -10679,9 +10690,21 @@ struct FilterResults {
                     std::string::npos ||
                 op->nameStr().find(BALLPARK_GEOCENTRIC_TRANSLATION) !=
                     std::string::npos;
+
+            bool isPROJExportable = false;
+            auto formatter = io::PROJStringFormatter::create();
+            try {
+                op->exportToPROJString(formatter.get());
+                // Grids might be missing, but at least this is something
+                // PROJ could potentially process
+                isPROJExportable = true;
+            } catch (const std::exception &) {
+            }
+
             map[op.get()] = PrecomputedOpCharacteristics(
-                area, getAccuracy(op), hasGrids, gridsAvailable, gridsKnown,
-                stepCount, isApprox, isNullTransformation);
+                area, getAccuracy(op), isPROJExportable, hasGrids,
+                gridsAvailable, gridsKnown, stepCount, isApprox,
+                isNullTransformation);
         }
 
         // Sort !
