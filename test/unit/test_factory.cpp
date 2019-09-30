@@ -1324,6 +1324,11 @@ TEST(factory, AuthorityFactory_getDescriptionText) {
                  NoSuchAuthorityCodeException);
     EXPECT_EQ(factory->getDescriptionText("10000"),
               "RGF93 to NGF IGN69 height (1)");
+
+    // Several objects have 4326 code, including an area of use, but return
+    // the CRS one.
+    EXPECT_EQ(factory->getDescriptionText("4326"),
+              "WGS 84");
 }
 
 // ---------------------------------------------------------------------------

@@ -3947,7 +3947,8 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
 /** \brief Gets a description of the object corresponding to a code.
  *
  * \note In case of several objects of different types with the same code,
- * one of them will be arbitrarily selected.
+ * one of them will be arbitrarily selected. But if a CRS object is found, it
+ * will be selected.
  *
  * @param code Object code allocated by authority. (e.g. "4326")
  * @return description.
@@ -3956,14 +3957,24 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
  */
 std::string
 AuthorityFactory::getDescriptionText(const std::string &code) const {
-    auto sql = "SELECT name FROM object_view WHERE auth_name = ? AND code = "
-               "? ORDER BY table_name";
-    auto res = d->runWithCodeParam(sql, code);
-    if (res.empty()) {
+    auto sql = "SELECT name, table_name FROM object_view WHERE auth_name = ? "
+               "AND code = ? ORDER BY table_name";
+    auto sqlRes = d->runWithCodeParam(sql, code);
+    if (sqlRes.empty()) {
         throw NoSuchAuthorityCodeException("object not found", d->authority(),
                                            code);
     }
-    return res.front()[0];
+    std::string text;
+    for (const auto &row : sqlRes) {
+        const auto &tableName = row[1];
+        if (tableName == "geodetic_crs" || tableName == "projected_crs" ||
+            tableName == "vertical_crs" || tableName == "compound_crs") {
+            return row[0];
+        } else if (text.empty()) {
+            text = row[0];
+        }
+    }
+    return text;
 }
 
 // ---------------------------------------------------------------------------
