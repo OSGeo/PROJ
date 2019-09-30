@@ -8235,6 +8235,21 @@ static double getAngularValue(const std::string &paramValue,
 
 // ---------------------------------------------------------------------------
 
+static bool is_in_stringlist(const std::string &str, const char *stringlist) {
+    const char *haystack = stringlist;
+    while (true) {
+        const char *res = strstr(haystack, str.c_str());
+        if (res == nullptr)
+            return false;
+        if ((res == stringlist || res[-1] == ',') &&
+            (res[str.size()] == ',' || res[str.size()] == '\0'))
+            return true;
+        haystack += str.size();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     int iStep, GeographicCRSNNPtr geogCRS, int iUnitConvert, int iAxisSwap) {
     auto &step = steps_[iStep];
@@ -8539,28 +8554,34 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         std::vector<ParameterValueNNPtr> values;
         std::string methodName = "PROJ " + step.name;
         for (const auto &param : step.paramValues) {
-            if (param.key == "wktext" || param.key == "no_defs" ||
-                param.key == "datum" || param.key == "ellps" ||
-                param.key == "a" || param.key == "b" || param.key == "R" ||
-                param.key == "towgs84" || param.key == "nadgrids" ||
-                param.key == "geoidgrids" || param.key == "units" ||
-                param.key == "to_meter" || param.key == "vunits" ||
-                param.key == "vto_meter" || param.key == "type") {
+            if (is_in_stringlist(param.key,
+                                 "wktext,no_defs,datum,ellps,a,b,R,towgs84,"
+                                 "nadgrids,geoidgrids,"
+                                 "units,to_meter,vunits,vto_meter,type")) {
                 continue;
             }
             if (param.value.empty()) {
                 methodName += " " + param.key;
-            } else if (param.key == "o_proj") {
+            } else if (isalpha(param.value[0])) {
                 methodName += " " + param.key + "=" + param.value;
             } else {
                 parameters.push_back(OperationParameter::create(
                     PropertyMap().set(IdentifiedObject::NAME_KEY, param.key)));
                 bool hasError = false;
-                if (param.key == "x_0" || param.key == "y_0") {
+                if (is_in_stringlist(param.key, "x_0,y_0,h,h_0")) {
                     double value = getNumericValue(param.value, &hasError);
                     values.push_back(ParameterValue::create(
                         Measure(value, UnitOfMeasure::METRE)));
-                } else if (param.key == "k" || param.key == "k_0") {
+                } else if (is_in_stringlist(
+                               param.key,
+                               "k,k_0,"
+                               "north_square,south_square," // rhealpix
+                               "n,m,"                       // sinu
+                               "q,"                         // urm5
+                               "path,lsat,"                 // lsat
+                               "W,M,"                       // hammer
+                               "aperture,resolution,"       // isea
+                               )) {
                     double value = getNumericValue(param.value, &hasError);
                     values.push_back(ParameterValue::create(
                         Measure(value, UnitOfMeasure::SCALE_UNITY)));
@@ -8580,10 +8601,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                    parameters, values)
                    .as_nullable();
 
-        if (methodName == "PROJ ob_tran o_proj=longlat" ||
-            methodName == "PROJ ob_tran o_proj=lonlat" ||
-            methodName == "PROJ ob_tran o_proj=latlon" ||
-            methodName == "PROJ ob_tran o_proj=latlong") {
+        if (is_in_stringlist(methodName, "PROJ ob_tran o_proj=longlat,"
+                                         "PROJ ob_tran o_proj=lonlat,"
+                                         "PROJ ob_tran o_proj=latlon,"
+                                         "PROJ ob_tran o_proj=latlong")) {
             return DerivedGeographicCRS::create(
                 PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
                 geogCRS, NN_NO_CHECK(conv),
