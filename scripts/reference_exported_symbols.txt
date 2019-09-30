@@ -151,6 +151,7 @@ osgeo::proj::crs::GeodeticCRS::velocityModel() const
 osgeo::proj::crs::GeographicCRS::coordinateSystem() const
 osgeo::proj::crs::GeographicCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::EllipsoidalCS> > const&)
 osgeo::proj::crs::GeographicCRS::create(osgeo::proj::util::PropertyMap const&, std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> const&, std::shared_ptr<osgeo::proj::datum::DatumEnsemble> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::EllipsoidalCS> > const&)
+osgeo::proj::crs::GeographicCRS::demoteTo2D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::GeographicCRS::~GeographicCRS()
 osgeo::proj::crs::GeographicCRS::is2DPartOf3D(dropbox::oxygen::nn<osgeo::proj::crs::GeographicCRS const*>) const
 osgeo::proj::crs::ParametricCRS::coordinateSystem() const

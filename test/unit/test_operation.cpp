@@ -6115,10 +6115,10 @@ TEST(operation, WGS84_G1762_to_compoundCRS_with_bound_vertCRS) {
         src, NN_NO_CHECK(dst), ctxt);
     ASSERT_GE(list.size(), 53U);
     EXPECT_EQ(list[0]->nameStr(),
-              "Inverse of unknown to WGS84 ellipsoidal height + "
               "Inverse of WGS 84 to WGS 84 (G1762) + "
+              "Inverse of unknown to WGS84 ellipsoidal height + "
               "Inverse of NAD83 to WGS 84 (1) + "
-              "Inverse of axis order change (2D)");
+              "axis order change (2D)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
               "+step +proj=axisswap +order=2,1 "
@@ -6465,15 +6465,19 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
     // Not completely sure the order of horizontal and vertical operations
     // makes sense
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
-              "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=push +v_3 "
-              "+step +proj=cart +ellps=clrk80ign +step +proj=helmert +x=1 +y=2 "
-              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +convention=position_vector +step "
-              "+inv +proj=cart +ellps=WGS84 +step +proj=pop +v_3 +step "
-              "+proj=vgridshift +grids=egm08_25.gtx +multiplier=1 +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
-              "+order=2,1");
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=grad +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=clrk80ign +pm=paris "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=clrk80ign "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=vgridshift +grids=egm08_25.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 
     auto grids = op->gridsNeeded(DatabaseContext::create());
     EXPECT_EQ(grids.size(), 1U);
@@ -6503,13 +6507,17 @@ TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
     // Not completely sure the order of horizontal and vertical operations
     // makes sense
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +inv +proj=utm +zone=31 +ellps=clrk80ign "
-              "+pm=paris +step +proj=push +v_3 +step +proj=cart "
-              "+ellps=clrk80ign +step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 "
-              "+rz=6 +s=7 +convention=position_vector +step +inv +proj=cart "
-              "+ellps=WGS84 +step +proj=pop +v_3 +step +proj=vgridshift "
-              "+grids=egm08_25.gtx +multiplier=1 +step +proj=unitconvert "
-              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+              "+proj=pipeline "
+              "+step +inv +proj=utm +zone=31 +ellps=clrk80ign +pm=paris "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=clrk80ign "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=vgridshift +grids=egm08_25.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4979, compound);
@@ -6890,8 +6898,9 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                   "+proj=axisswap +order=2,1");
     }
 
-    // CompoundCRS to Geog3DCRS, with same vertical unit, but without
-    // ellipsoid height <--> vertical height correction
+    // CompoundCRS to Geog3DCRS, with same vertical unit, and with
+    // direct ellipsoid height <--> vertical height correction and
+    // direct horizontal transform (no-op here)
     {
         auto ctxt =
             CoordinateOperationContext::create(authFactory, nullptr, 0.0);
@@ -6905,16 +6914,142 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
             ctxt);
         ASSERT_GE(list.size(), 1U);
         EXPECT_EQ(list[0]->nameStr(),
-                  "NAD83(NSRS2007) to WGS 84 (1) + "
-                  "Inverse of NAD83(2011) to NAVD88 height (1)");
+                  "Inverse of NAD83(NSRS2007) to NAVD88 height (1) + "
+                  "NAD83(NSRS2007) to WGS 84 (1)");
         EXPECT_EQ(list[0]->exportToPROJString(
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_5,
                           authFactory->databaseContext())
                           .get()),
-                  "+proj=pipeline +step +proj=axisswap +order=2,1 "
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-                  "+step +proj=vgridshift +grids=g2012bu0.gtx +multiplier=1 "
+                  // Inv here since the grid is not known
+                  "+step +inv +proj=vgridshift +grids=geoid09_conus.bin "
+                  "+multiplier=1 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+    }
+
+    // CompoundCRS to Geog3DCRS, with same vertical unit, and with
+    // ellipsoid height <--> vertical height correction that requires a
+    // horizontal adjustment before and after (which is empty in practice here
+    // as NAD83 to NAD83(2011) is no-op)
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
+        // NAD83 + NAVD88 height
+        auto srcObj = createFromUserInput(
+            "EPSG:4269+5703", authFactory->databaseContext(), false);
+        auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+        ASSERT_TRUE(src != nullptr);
+        auto nnSrc = NN_NO_CHECK(src);
+
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            nnSrc,
+            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
+            ctxt);
+        ASSERT_GE(list.size(), 2U);
+
+        EXPECT_EQ(list[0]->nameStr(),
+                  "NAD83 to NAD83(2011) (1) + "
+                  "Inverse of NAD83(2011) to NAVD88 height (1) + "
+                  "Inverse of NAD83 to NAD83(2011) (1) + "
+                  "NAD83 to WGS 84 (1)");
+        EXPECT_EQ(list[0]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=vgridshift +grids=g2012bu0.gtx "
+                  "+multiplier=1 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+
+        // Shows vertical step, and then horizontal step
+        EXPECT_EQ(list[1]->nameStr(),
+                  "NAD83 to NAD83(2011) (1) + "
+                  "Inverse of NAD83(2011) to NAVD88 height (1) + "
+                  "Inverse of NAD83 to NAD83(2011) (1) + "
+                  "NAD83 to WGS 84 (18)");
+        EXPECT_EQ(list[1]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=vgridshift +grids=g2012bu0.gtx "
+                  "+multiplier=1 "
+                  "+step +proj=hgridshift +grids=FL "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+    }
+
+    // Another variation, but post horizontal adjustment is in two steps
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
+        // NAD83(2011) + NAVD88 height
+        auto srcObj = createFromUserInput(
+            "EPSG:6318+5703", authFactory->databaseContext(), false);
+        auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+        ASSERT_TRUE(src != nullptr);
+        auto nnSrc = NN_NO_CHECK(src);
+
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            nnSrc,
+            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
+            ctxt);
+        ASSERT_GE(list.size(), 2U);
+
+        EXPECT_EQ(list[0]->nameStr(),
+                  "Inverse of NAD83(2011) to NAVD88 height (1) + "
+                  "Inverse of NAD83 to NAD83(2011) (1) + "
+                  "NAD83 to WGS 84 (1)");
+        EXPECT_EQ(list[0]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=vgridshift +grids=g2012bu0.gtx "
+                  "+multiplier=1 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                  "+step +proj=axisswap +order=2,1");
+
+        // Shows vertical step, and then horizontal step
+        EXPECT_EQ(list[1]->nameStr(),
+                  "Inverse of NAD83(2011) to NAVD88 height (1) + "
+                  "Inverse of NAD83 to NAD83(2011) (1) + "
+                  "NAD83 to WGS 84 (18)");
+        EXPECT_EQ(list[1]->exportToPROJString(
+                      PROJStringFormatter::create(
+                          PROJStringFormatter::Convention::PROJ_5,
+                          authFactory->databaseContext())
+                          .get()),
+                  "+proj=pipeline "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=vgridshift +grids=g2012bu0.gtx "
+                  "+multiplier=1 "
+                  "+step +proj=hgridshift +grids=FL "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
     }
@@ -7002,7 +7137,7 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
             "+ellps=bessel "
             "+step +proj=vgridshift +grids=naptrans2008.gtx +multiplier=1 "
             "+step +proj=hgridshift +grids=rdtrans2008.gsb "
-            "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
             "+step +proj=axisswap +order=2,1");
     }
 
