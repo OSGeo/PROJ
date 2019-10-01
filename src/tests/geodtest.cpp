@@ -35,7 +35,7 @@ static int checkEquals(double x, double y, double d) {
 
 static int checkNaN(double x) {
   /* cppcheck-suppress duplicateExpression */
-  if (x != x)
+  if (isnan(x))
     return 0;
   printf("checkNaN fails: %.7g\n", x);
   return 1;
@@ -353,16 +353,11 @@ static int GeodSolve12() {
 
 static int GeodSolve14() {
   /* Check fix for inverse ignoring lon12 = nan */
-  double azi1, azi2, s12, nan;
+  double azi1, azi2, s12;
   struct geod_geodesic g;
   int result = 0;
-  {
-    double minus1 = -1;
-    /* cppcheck-suppress wrongmathcall */
-    nan = sqrt(minus1);
-  }
   geod_init(&g, wgs84_a, wgs84_f);
-  geod_inverse(&g, 0, 0, 1, nan, &s12, &azi1, &azi2);
+  geod_inverse(&g, 0, 0, 1, nan("0"), &s12, &azi1, &azi2);
   result += checkNaN(azi1);
   result += checkNaN(azi2);
   result += checkNaN(s12);
@@ -498,20 +493,15 @@ static int GeodSolve33() {
 static int GeodSolve55() {
   /* Check fix for nan + point on equator or pole not returning all nans in
    * Geodesic::Inverse, found 2015-09-23. */
-  double azi1, azi2, s12, nan;
+  double azi1, azi2, s12;
   struct geod_geodesic g;
   int result = 0;
-  {
-    double minus1 = -1;
-    /* cppcheck-suppress wrongmathcall */
-    nan = sqrt(minus1);
-  }
   geod_init(&g, wgs84_a, wgs84_f);
-  geod_inverse(&g, nan, 0, 0, 90, &s12, &azi1, &azi2);
+  geod_inverse(&g, nan("0"), 0, 0, 90, &s12, &azi1, &azi2);
   result += checkNaN(azi1);
   result += checkNaN(azi2);
   result += checkNaN(s12);
-  geod_inverse(&g, nan, 0, 90, 9, &s12, &azi1, &azi2);
+  geod_inverse(&g, nan("0"), 0, 90, 9, &s12, &azi1, &azi2);
   result += checkNaN(azi1);
   result += checkNaN(azi2);
   result += checkNaN(s12);
@@ -771,7 +761,7 @@ static int GeodSolve84() {
   /* Tests for python implementation to check fix for range errors with
    * {fmod,sin,cos}(inf) (includes GeodSolve84 - GeodSolve86). */
 
-  double lat2, lon2, azi2, inf, nan;
+  double lat2, lon2, azi2, inf;
   struct geod_geodesic g;
   int result = 0;
   geod_init(&g, wgs84_a, wgs84_f);
@@ -781,16 +771,11 @@ static int GeodSolve84() {
     /* so that this doesn't give a compiler time error on Windows */
     inf = 1.0/inf;
   }
-  {
-    double minus1 = -1;
-    /* cppcheck-suppress wrongmathcall */
-    nan = sqrt(minus1);
-  }
   geod_direct(&g, 0, 0, 90, inf, &lat2, &lon2, &azi2);
   result += checkNaN(lat2);
   result += checkNaN(lon2);
   result += checkNaN(azi2);
-  geod_direct(&g, 0, 0, 90, nan, &lat2, &lon2, &azi2);
+  geod_direct(&g, 0, 0, 90, nan("0"), &lat2, &lon2, &azi2);
   result += checkNaN(lat2);
   result += checkNaN(lon2);
   result += checkNaN(azi2);
@@ -798,7 +783,7 @@ static int GeodSolve84() {
   result += checkNaN(lat2);
   result += checkNaN(lon2);
   result += checkNaN(azi2);
-  geod_direct(&g, 0, 0, nan, 1000, &lat2, &lon2, &azi2);
+  geod_direct(&g, 0, 0, nan("0"), 1000, &lat2, &lon2, &azi2);
   result += checkNaN(lat2);
   result += checkNaN(lon2);
   result += checkNaN(azi2);
@@ -806,7 +791,7 @@ static int GeodSolve84() {
   result += lat2 == 0 ? 0 : 1;
   result += checkNaN(lon2);
   result += azi2 == 90 ? 0 : 1;
-  geod_direct(&g, 0, nan, 90, 1000, &lat2, &lon2, &azi2);
+  geod_direct(&g, 0, nan("0"), 90, 1000, &lat2, &lon2, &azi2);
   result += lat2 == 0 ? 0 : 1;
   result += checkNaN(lon2);
   result += azi2 == 90 ? 0 : 1;
@@ -814,7 +799,7 @@ static int GeodSolve84() {
   result += checkNaN(lat2);
   result += checkNaN(lon2);
   result += checkNaN(azi2);
-  geod_direct(&g, nan, 0, 90, 1000, &lat2, &lon2, &azi2);
+  geod_direct(&g, nan("0"), 0, 90, 1000, &lat2, &lon2, &azi2);
   result += checkNaN(lat2);
   result += checkNaN(lon2);
   result += checkNaN(azi2);
