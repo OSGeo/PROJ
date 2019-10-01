@@ -36,7 +36,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-PROJ_HEAD(healpix, "HEAPJ_LPix") "\n\tSph&Ell";
+PROJ_HEAD(healpix, "HEAPJ_LPix") "\n\tSph&Ell\n\trot_xy=";
 PROJ_HEAD(rhealpix, "rHEAPJ_LPix") "\n\tSph&Ell\n\tnorth_square= south_square=";
 
 /* Matrix for counterclockwise rotation by pi/2: */
@@ -56,6 +56,7 @@ namespace { // anonymous namespace
 struct pj_opaque {
     int north_square;
     int south_square;
+    double rot_xy;
     double qp;
     double *apa;
 };
@@ -78,6 +79,12 @@ static double sign (double v) {
     return v > 0 ? 1 : (v < 0 ? -1 : 0);
 }
 
+static PJ_XY rotate(PJ_XY p, double angle) {
+    PJ_XY result;
+    result.x = p.x * cos(angle) - p.y * sin(angle);
+    result.y = p.y * cos(angle) + p.x * sin(angle);
+    return result;
+}
 
 /**
  * Return the index of the matrix in ROT.
@@ -178,7 +185,8 @@ static int in_image(double x, double y, int proj, int north_square,
             {-M_FORTPI,   -M_HALFPI - EPS},
             {-M_HALFPI,   -M_FORTPI - EPS},
             {-3*M_FORTPI, -M_HALFPI - EPS},
-            {-M_PI - EPS, -M_FORTPI}
+            {-M_PI - EPS, -M_FORTPI},
+            {-M_PI - EPS,  M_FORTPI}
         };
         return pnpoly((int)sizeof(healpixVertsJit)/
                       sizeof(healpixVertsJit[0]), healpixVertsJit, x, y);
@@ -513,17 +521,22 @@ static PJ_XY combine_caps(double x, double y, int north_square, int south_square
 
 static PJ_XY s_healpix_forward(PJ_LP lp, PJ *P) { /* sphere  */
     (void) P;
-    return healpix_sphere(lp);
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    return rotate(healpix_sphere(lp), -Q->rot_xy);
 }
 
 
 static PJ_XY e_healpix_forward(PJ_LP lp, PJ *P) { /* ellipsoid  */
     lp.phi = auth_lat(P, lp.phi, 0);
-    return healpix_sphere(lp);
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    return rotate(healpix_sphere(lp), -Q->rot_xy);
 }
 
 
 static PJ_LP s_healpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    xy = rotate(xy, Q->rot_xy);
+
     /* Check whether (x, y) lies in the HEAPJ_LPix image */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
         PJ_LP lp;
@@ -538,6 +551,8 @@ static PJ_LP s_healpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
 
 static PJ_LP e_healpix_inverse(PJ_XY xy, PJ *P) { /* ellipsoid */
     PJ_LP lp = {0.0,0.0};
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    xy = rotate(xy, Q->rot_xy);
 
     /* Check whether (x, y) lies in the HEAPJ_LPix image. */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
@@ -621,6 +636,9 @@ PJ *PROJECTION(healpix) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
     P->destructor = destructor;
+
+    double angle = pj_param(P->ctx, P->params,"drot_xy").f;
+    Q->rot_xy = PJ_TORAD(angle);
 
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es);             /* For auth_lat(). */

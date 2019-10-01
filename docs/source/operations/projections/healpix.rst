@@ -51,6 +51,15 @@ Parameters
 
 .. note:: All parameters for the projection are optional.
 
+.. option:: +rot_xy
+
+    .. versionadded:: 7.0.0
+
+    Rotation of the HEALPix map in degrees. A positive value results in a clockwise
+    rotation around (x_0, y_0) in the cartesian / projected coordinate space.
+
+    *Defaults to 0.0.*
+
 .. include:: ../options/lon_0.rst
 
 .. include:: ../options/x_0.rst
