@@ -531,6 +531,7 @@ osgeo::proj::operation::Conversion::createTunisiaMappingGrid(osgeo::proj::util::
 osgeo::proj::operation::Conversion::createTwoPointEquidistant(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createUTM(osgeo::proj::util::PropertyMap const&, int, bool)
 osgeo::proj::operation::Conversion::createVanDerGrinten(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
+osgeo::proj::operation::Conversion::createVerticalPerspective(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createWagnerIII(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createWagnerII(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createWagnerI(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
@@ -869,6 +870,7 @@ proj_create_conversion_tunisia_mapping_grid
 proj_create_conversion_two_point_equidistant
 proj_create_conversion_utm
 proj_create_conversion_van_der_grinten
+proj_create_conversion_vertical_perspective
 proj_create_conversion_wagner_i
 proj_create_conversion_wagner_ii
 proj_create_conversion_wagner_iii
