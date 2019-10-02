@@ -1311,6 +1311,15 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
                      const common::Length &falseNorthing);
 
     PROJ_DLL static ConversionNNPtr
+    createVerticalPerspective(const util::PropertyMap &properties,
+                              const common::Angle &topoOriginLat,
+                              const common::Angle &topoOriginLong,
+                              const common::Length &topoOriginHeight,
+                              const common::Length &viewPointHeight,
+                              const common::Length &falseEasting,
+                              const common::Length &falseNorthing);
+
+    PROJ_DLL static ConversionNNPtr
     createChangeVerticalUnit(const util::PropertyMap &properties,
                              const common::Scale &factor);
 

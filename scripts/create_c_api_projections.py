@@ -157,7 +157,7 @@ for sectiondef in compounddef.iter('sectiondef'):
                     cppfile.write(", Scale(" + param[1] + ")")
 
             cppfile.write(");\n")
-            cppfile.write("    return proj_create_conversion(conv);\n")
+            cppfile.write("    return proj_create_conversion(ctx, conv);\n")
             cppfile.write("  } catch (const std::exception &e) {\n");
             cppfile.write("    proj_log_error(ctx, __FUNCTION__, e.what());\n")
             cppfile.write("  }\n")

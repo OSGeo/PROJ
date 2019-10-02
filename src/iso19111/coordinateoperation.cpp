@@ -4577,6 +4577,52 @@ ConversionNNPtr Conversion::createEqualEarth(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a conversion based on the [Vertical Perspective]
+ * (https://proj.org/operations/projections/nsper.html) projection method.
+ *
+ * This method is defined as [EPSG:9838]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9838)
+ *
+ * The PROJ implementation of the EPSG Vertical Perspective has the current
+ * limitations with respect to the method described in EPSG:
+ * <ul>
+ * <li> it is a 2D-only method, ignoring the ellipsoidal height of the point to
+ *      project.</li>
+ * <li> it has only a spherical development.</li>
+ * <li> the height of the topocentric origin is ignored, and thus assumed to be
+ * 0.</li>
+ * </ul>
+ *
+ * For completness, PROJ adds the falseEasting and falseNorthing parameter,
+ * which are not described in EPSG. They should usually be set to 0.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param topoOriginLat Latitude of topocentric origin
+ * @param topoOriginLong Longitude of topocentric origin
+ * @param topoOriginHeight Ellipsoidal height of topocentric origin. Ignored by
+ * PROJ (that is assumed to be 0)
+ * @param viewPointHeight Viewpoint height with respect to the
+ * topocentric/mapping plane. In the case where topoOriginHeight = 0, this is
+ * the height above the ellipsoid surface at topoOriginLat, topoOriginLong.
+ * @param falseEasting See \ref false_easting . (not in EPSG)
+ * @param falseNorthing See \ref false_northing . (not in EPSG)
+ * @return a new Conversion.
+ *
+ * @since 7.0
+ */
+ConversionNNPtr Conversion::createVerticalPerspective(
+    const util::PropertyMap &properties, const common::Angle &topoOriginLat,
+    const common::Angle &topoOriginLong, const common::Length &topoOriginHeight,
+    const common::Length &viewPointHeight, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    return create(properties, EPSG_CODE_METHOD_VERTICAL_PERSPECTIVE,
+                  createParams(topoOriginLat, topoOriginLong, topoOriginHeight,
+                               viewPointHeight, falseEasting, falseNorthing));
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 static OperationParameterNNPtr createOpParamNameEPSGCode(int code) {
@@ -5446,6 +5492,27 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
                         const auto &measure = paramValue->value();
                         if (measure.getSIValue() == 0) {
                             continue;
+                        }
+                    }
+                }
+            }
+            // Same for false easting / false northing for Vertical Perspective
+            else if (methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_PERSPECTIVE) {
+                auto opParamvalue =
+                    dynamic_cast<const OperationParameterValue *>(
+                        genOpParamvalue.get());
+                if (opParamvalue) {
+                    const auto paramEPSGCode =
+                        opParamvalue->parameter()->getEPSGCode();
+                    if (paramEPSGCode == EPSG_CODE_PARAMETER_FALSE_EASTING ||
+                        paramEPSGCode == EPSG_CODE_PARAMETER_FALSE_NORTHING) {
+                        const auto &paramValue = opParamvalue->parameterValue();
+                        if (paramValue->type() ==
+                            ParameterValue::Type::MEASURE) {
+                            const auto &measure = paramValue->value();
+                            if (measure.getSIValue() == 0) {
+                                continue;
+                            }
                         }
                     }
                 }

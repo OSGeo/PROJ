@@ -4091,6 +4091,74 @@ TEST(operation, eqearth_export) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, vertical_perspective_export) {
+
+    auto conv = Conversion::createVerticalPerspective(
+        PropertyMap(), Angle(1), Angle(2), Length(3), Length(4), Length(5),
+        Length(6));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=nsper +lat_0=1 +lon_0=2 +h=4 +x_0=5 +y_0=6");
+
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
+              "CONVERSION[\"Vertical Perspective\",\n"
+              "    METHOD[\"Vertical Perspective\",\n"
+              "        ID[\"EPSG\",9838]],\n"
+              "    PARAMETER[\"Latitude of topocentric origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8834]],\n"
+              "    PARAMETER[\"Longitude of topocentric origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8835]],\n"
+              "    PARAMETER[\"Ellipsoidal height of topocentric origin\",3,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8836]],\n"
+              "    PARAMETER[\"Viewpoint height\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8840]],\n"
+              "    PARAMETER[\"False easting\",5,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8806]],\n"
+              "    PARAMETER[\"False northing\",6,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8807]]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    vertical_perspective_export_no_topocentric_height_and_false_easting_northing) {
+
+    auto conv = Conversion::createVerticalPerspective(
+        PropertyMap(), Angle(1), Angle(2), Length(0), Length(4), Length(0),
+        Length(0));
+
+    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=nsper +lat_0=1 +lon_0=2 +h=4 +x_0=0 +y_0=0");
+
+    // Check that False esting and False northing are not exported, when they
+    // are 0.
+    EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
+              "CONVERSION[\"Vertical Perspective\",\n"
+              "    METHOD[\"Vertical Perspective\",\n"
+              "        ID[\"EPSG\",9838]],\n"
+              "    PARAMETER[\"Latitude of topocentric origin\",1,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8834]],\n"
+              "    PARAMETER[\"Longitude of topocentric origin\",2,\n"
+              "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+              "        ID[\"EPSG\",8835]],\n"
+              "    PARAMETER[\"Ellipsoidal height of topocentric origin\",0,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8836]],\n"
+              "    PARAMETER[\"Viewpoint height\",4,\n"
+              "        LENGTHUNIT[\"metre\",1],\n"
+              "        ID[\"EPSG\",8840]]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, laborde_oblique_mercator) {
 
     // Content of EPSG:29701 "Tananarive (Paris) / Laborde Grid"

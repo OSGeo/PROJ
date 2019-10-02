@@ -212,6 +212,9 @@
 #define EPSG_NAME_METHOD_LABORDE_OBLIQUE_MERCATOR "Laborde Oblique Mercator"
 #define EPSG_CODE_METHOD_LABORDE_OBLIQUE_MERCATOR 9813
 
+#define EPSG_NAME_METHOD_VERTICAL_PERSPECTIVE "Vertical Perspective"
+#define EPSG_CODE_METHOD_VERTICAL_PERSPECTIVE 9838
+
 /* ------------------------------------------------------------------------ */
 
 /* Projection parameters */
@@ -300,6 +303,18 @@
 
 #define EPSG_NAME_PARAMETER_ELLIPSOID_SCALE_FACTOR "Ellipsoid scaling factor"
 #define EPSG_CODE_PARAMETER_ELLIPSOID_SCALE_FACTOR 1038
+
+#define EPSG_NAME_PARAMETER_LATITUDE_TOPOGRAPHIC_ORIGIN "Latitude of topocentric origin"
+#define EPSG_CODE_PARAMETER_LATITUDE_TOPOGRAPHIC_ORIGIN 8834
+
+#define EPSG_NAME_PARAMETER_LONGITUDE_TOPOGRAPHIC_ORIGIN "Longitude of topocentric origin"
+#define EPSG_CODE_PARAMETER_LONGITUDE_TOPOGRAPHIC_ORIGIN 8835
+
+#define EPSG_NAME_PARAMETER_ELLIPSOIDAL_HEIGHT_TOPOCENTRIC_ORIGIN "Ellipsoidal height of topocentric origin"
+#define EPSG_CODE_PARAMETER_ELLIPSOIDAL_HEIGHT_TOPOCENTRIC_ORIGIN 8836
+
+#define EPSG_NAME_PARAMETER_VIEWPOINT_HEIGHT "Viewpoint height"
+#define EPSG_CODE_PARAMETER_VIEWPOINT_HEIGHT 8840
 
 /* ------------------------------------------------------------------------ */
 

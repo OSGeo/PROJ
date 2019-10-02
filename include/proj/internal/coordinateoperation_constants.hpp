@@ -490,6 +490,35 @@ static const ParamMapping *const paramsLabordeObliqueMercator[] = {
     &paramFalseNorthing,
     nullptr};
 
+static const ParamMapping paramLatTopoOrigin = {
+    EPSG_NAME_PARAMETER_LATITUDE_TOPOGRAPHIC_ORIGIN,
+    EPSG_CODE_PARAMETER_LATITUDE_TOPOGRAPHIC_ORIGIN, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, lat_0};
+
+static const ParamMapping paramLonTopoOrigin = {
+    EPSG_NAME_PARAMETER_LONGITUDE_TOPOGRAPHIC_ORIGIN,
+    EPSG_CODE_PARAMETER_LONGITUDE_TOPOGRAPHIC_ORIGIN, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, lon_0};
+
+static const ParamMapping paramHeightTopoOrigin = {
+    EPSG_NAME_PARAMETER_ELLIPSOIDAL_HEIGHT_TOPOCENTRIC_ORIGIN,
+    EPSG_CODE_PARAMETER_ELLIPSOIDAL_HEIGHT_TOPOCENTRIC_ORIGIN, nullptr,
+    common::UnitOfMeasure::Type::LINEAR,
+    nullptr}; // unsupported by PROJ right now
+
+static const ParamMapping paramViewpointHeight = {
+    EPSG_NAME_PARAMETER_VIEWPOINT_HEIGHT, EPSG_CODE_PARAMETER_VIEWPOINT_HEIGHT,
+    nullptr, common::UnitOfMeasure::Type::LINEAR, "h"};
+
+static const ParamMapping *const paramsVerticalPerspective[] = {
+    &paramLatTopoOrigin,
+    &paramLonTopoOrigin,
+    &paramHeightTopoOrigin,
+    &paramViewpointHeight,
+    &paramFalseEasting,  // PROJ addition
+    &paramFalseNorthing, // PROJ addition
+    nullptr};
+
 static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
      "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScaleK},
@@ -756,6 +785,9 @@ static const MethodMapping projectionMethodMappings[] = {
      EPSG_CODE_METHOD_LABORDE_OBLIQUE_MERCATOR, "Laborde_Oblique_Mercator",
      "labrd", nullptr, paramsLabordeObliqueMercator},
 
+    {EPSG_NAME_METHOD_VERTICAL_PERSPECTIVE,
+     EPSG_CODE_METHOD_VERTICAL_PERSPECTIVE, nullptr, "nsper", nullptr,
+     paramsVerticalPerspective},
 };
 
 #define METHOD_NAME_CODE(method)                                               \
@@ -791,6 +823,7 @@ static const struct MethodNameCode {
     METHOD_NAME_CODE(POLAR_STEREOGRAPHIC_VARIANT_A),
     METHOD_NAME_CODE(POLAR_STEREOGRAPHIC_VARIANT_B),
     METHOD_NAME_CODE(EQUAL_EARTH), METHOD_NAME_CODE(LABORDE_OBLIQUE_MERCATOR),
+    METHOD_NAME_CODE(VERTICAL_PERSPECTIVE),
     // Other conversions
     METHOD_NAME_CODE(CHANGE_VERTICAL_UNIT),
     METHOD_NAME_CODE(AXIS_ORDER_REVERSAL_2D),
