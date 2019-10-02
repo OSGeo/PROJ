@@ -91,11 +91,15 @@ static void Init() {
 #if defined(NAN)
     NaN = NAN;                  /* NAN is defined in C99 */
 #else
+#if HAVE_C99_MATH
+    NaN = nan("0");
+#else
     {
       real minus1 = -1;
       /* cppcheck-suppress wrongmathcall */
       NaN = sqrt(minus1);
     }
+#endif
 #endif
     init = 1;
   }
@@ -546,7 +550,7 @@ real geod_genposition(const struct geod_geodesicline* l,
     (pS12 ? GEOD_AREA : GEOD_NONE);
 
   outmask &= l->caps & OUT_ALL;
-  if (!( TRUE /*Init()*/ &&
+  if (!( /*Init() &&*/
          (flags & GEOD_ARCMODE || (l->caps & (GEOD_DISTANCE_IN & OUT_ALL))) ))
     /* Uninitialized or impossible distance calculation requested */
     return NaN;
