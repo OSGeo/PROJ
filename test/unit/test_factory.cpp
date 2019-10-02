@@ -1327,8 +1327,7 @@ TEST(factory, AuthorityFactory_getDescriptionText) {
 
     // Several objects have 4326 code, including an area of use, but return
     // the CRS one.
-    EXPECT_EQ(factory->getDescriptionText("4326"),
-              "WGS 84");
+    EXPECT_EQ(factory->getDescriptionText("4326"), "WGS 84");
 }
 
 // ---------------------------------------------------------------------------
