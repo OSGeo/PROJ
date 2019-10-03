@@ -151,7 +151,7 @@ oblcon:
                 return xy;
             }
             else
-                xy.x = xy.y = 0.;
+                return aeqd_e_forward(lp, P);
         else {
             xy.y = acos(xy.y);
             xy.y /= sin(xy.y);
