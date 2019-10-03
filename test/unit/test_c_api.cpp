@@ -3454,6 +3454,29 @@ TEST_F(CApi, proj_normalize_for_visualization_with_alternatives_reverse) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_normalize_for_visualization_on_crs) {
+
+    auto P = proj_create(m_ctxt, "EPSG:4326");
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper keeper_Pnormalized(Pnormalized);
+    ASSERT_NE(Pnormalized, nullptr);
+    EXPECT_EQ(proj_get_id_code(Pnormalized, 0), nullptr);
+
+    auto cs = proj_crs_get_coordinate_system(m_ctxt, Pnormalized);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeperCs(cs);
+
+    const char *name = nullptr;
+    ASSERT_TRUE(proj_cs_get_axis_info(m_ctxt, cs, 0, &name, nullptr, nullptr,
+                                      nullptr, nullptr, nullptr, nullptr));
+    ASSERT_NE(name, nullptr);
+    EXPECT_EQ(std::string(name), "Geodetic longitude");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_get_remarks) {
     auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
                                         PJ_CATEGORY_COORDINATE_OPERATION, false,

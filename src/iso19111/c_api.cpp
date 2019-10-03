@@ -7434,14 +7434,19 @@ int proj_cs_get_axis_info(PJ_CONTEXT *ctx, const PJ *cs, int index,
 /** \brief Returns a PJ* object whose axis order is the one expected for
  * visualization purposes.
  *
- * The input object must be a coordinate operation, that has been created with
- * proj_create_crs_to_crs().
- * If the axis order of its source or target CRS is northing,easting, then an
- * axis swap operation will be inserted.
+ * The input object must be either:
+ * <ul>
+ * <li>a coordinate operation, that has been created with
+ *     proj_create_crs_to_crs(). If the axis order of its source or target CRS
+ *     is northing,easting, then an axis swap operation will be inserted.</li>
+ * <li>or a CRS. The axis order of geographic CRS will be longitude, latitude
+ *     [,height], and the one of projected CRS will be easting, northing
+ *     [, height]</li>
+ * </ul>
  *
  * @param ctx PROJ context, or NULL for default context
- * @param obj Object of type CoordinateOperation,
- * created with proj_create_crs_to_crs() (must not be NULL)
+ * @param obj Object of type CRS, or CoordinateOperation created with
+ * proj_create_crs_to_crs() (must not be NULL)
  * @return a new PJ* object to free with proj_destroy() in case of success, or
  * nullptr in case of error
  */
@@ -7493,6 +7498,16 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
                 }
             }
             return pjNew.release();
+        } catch (const std::exception &e) {
+            proj_log_debug(ctx, __FUNCTION__, e.what());
+            return nullptr;
+        }
+    }
+
+    auto crs = dynamic_cast<const CRS *>(obj->iso_obj.get());
+    if (crs) {
+        try {
+            return pj_obj_create(ctx, crs->normalizeForVisualization());
         } catch (const std::exception &e) {
             proj_log_debug(ctx, __FUNCTION__, e.what());
             return nullptr;
