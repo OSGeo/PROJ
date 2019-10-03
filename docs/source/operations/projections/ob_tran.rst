@@ -19,9 +19,10 @@ oblique projection by means of the General Oblique Transformation. The user
 performs the oblique transformation by selecting the oblique projection
 ``+proj=ob_tran``, specifying the translation factors, :option:`+o_lat_p`, and
 :option:`+o_lon_p`, and the projection to be used, :option:`+o_proj`. In the
-example of the Fairgrieve projection the latitude and longitude of the pole of
-the new coordinates, :math:`\alpha` and :math:`\beta` respectively, are to be placed
-at 45°N and 90°W and use the :ref:`moll` projection. Because the central meridian
+example of the Fairgrieve projection, the latitude and longitude of the North pole
+of the unrotated geographic CRS, :math:`\alpha` and :math:`\beta` respectively,
+expressed in the rotated geographic CRS, are to be placed
+at 45°N and 90°W  and the :ref:`moll` projection is used. Because the central meridian
 of the translated coordinates will follow the :math:`\beta` meridian it is
 necessary to translate the translated system so that the Greenwich meridian
 will pass through the center of the projection by offsetting the central meridian.
@@ -50,11 +51,11 @@ New pole
 
 .. option:: +o_lat_p=<latitude>
 
-    Latitude of new pole for oblique projection.
+    Latitude of the North pole of the unrotated source CRS, expressed in the rotated geographic CRS.
 
 .. option:: +o_lon_p=<longitude>
 
-    Longitude of new pole for oblique projection.
+    Longitude of the North pole of the unrotated source CRS, expressed in the rotated geographic CRS.
 
 Rotate about point
 ................................................................................
