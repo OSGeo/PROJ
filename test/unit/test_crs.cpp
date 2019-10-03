@@ -4093,6 +4093,11 @@ TEST(crs, derivedGeographicCRS_to_PROJ) {
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(
+        crs->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=ob_tran +o_proj=longlat +o_lat_p=52 +o_lon_p=-30 +lon_0=-25 "
+        "+datum=WGS84 +no_defs +type=crs");
+
     auto op = CoordinateOperationFactory::create()->createOperation(
         crs->baseCRS(), NN_NO_CHECK(crs));
     ASSERT_TRUE(op != nullptr);

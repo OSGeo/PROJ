@@ -4736,8 +4736,18 @@ void DerivedGeographicCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 void DerivedGeographicCRS::_exportToPROJString(
-    io::PROJStringFormatter *) const // throw(io::FormattingException)
+    io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
+    const auto &l_conv = derivingConversionRef();
+    const auto &methodName = l_conv->method()->nameStr();
+    if (methodName == "PROJ ob_tran o_proj=longlat" ||
+        methodName == "PROJ ob_tran o_proj=lonlat" ||
+        methodName == "PROJ ob_tran o_proj=latlong" ||
+        methodName == "PROJ ob_tran o_proj=latlon") {
+        l_conv->_exportToPROJString(formatter);
+        return;
+    }
+
     throw io::FormattingException(
         "DerivedGeographicCRS cannot be exported to PROJ string");
 }
