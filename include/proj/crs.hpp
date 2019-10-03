@@ -111,6 +111,9 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
     promoteTo3D(const std::string &newName,
                 const io::DatabaseContextPtr &dbContext) const;
 
+    PROJ_DLL CRSNNPtr demoteTo2D(const std::string &newName,
+                                 const io::DatabaseContextPtr &dbContext) const;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL const GeodeticCRS *
@@ -587,6 +590,10 @@ class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS,
 
     PROJ_DLL std::list<std::pair<ProjectedCRSNNPtr, int>>
     identify(const io::AuthorityFactoryPtr &authorityFactory) const;
+
+    PROJ_DLL ProjectedCRSNNPtr
+    demoteTo2D(const std::string &newName,
+               const io::DatabaseContextPtr &dbContext) const;
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress

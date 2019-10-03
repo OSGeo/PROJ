@@ -235,6 +235,10 @@ PJ PROJ_DLL *proj_crs_create_projected_3D_crs_from_2D(PJ_CONTEXT *ctx,
                                                       const PJ* projected_2D_crs,
                                                       const PJ* geog_3D_crs);
 
+PJ PROJ_DLL *proj_crs_demote_to_2D(PJ_CONTEXT *ctx,
+                                   const char* crs_2D_name,
+                                   const PJ* crs_3D);
+
 PJ PROJ_DLL *proj_create_engineering_crs(PJ_CONTEXT *ctx,
                                                  const char *crsName);
 

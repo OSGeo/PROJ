@@ -3388,6 +3388,48 @@ PJ *proj_crs_create_projected_3D_crs_from_2D(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Create a 2D CRS from an existing 3D CRS.
+ *
+ * See osgeo::proj::crs::CRS::demoteTo2D().
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs_2D_name CRS name. Or NULL (in which case the name of crs_3D
+ * will be used)
+ * @param crs_3D 3D CRS to be "demoted" to 2D. Must not be NULL.
+ *
+ * @return Object that must be unreferenced with
+ * proj_destroy(), or NULL in case of error.
+ * @since 7.0
+ */
+PJ *proj_crs_demote_to_2D(PJ_CONTEXT *ctx, const char *crs_2D_name,
+                          const PJ *crs_3D) {
+    SANITIZE_CTX(ctx);
+    auto cpp_3D_crs = dynamic_cast<const CRS *>(crs_3D->iso_obj.get());
+    if (!cpp_3D_crs) {
+        proj_log_error(ctx, __FUNCTION__, "crs_3D is not a CRS");
+        return nullptr;
+    }
+    try {
+        auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+        return pj_obj_create(
+            ctx, cpp_3D_crs->demoteTo2D(crs_2D_name ? std::string(crs_2D_name)
+                                                    : cpp_3D_crs->nameStr(),
+                                        dbContext));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ctx->cpp_context) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+        }
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instantiate a EngineeringCRS with just a name
  *
  * The returned object must be unreferenced with proj_destroy() after

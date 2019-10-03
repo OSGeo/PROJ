@@ -5232,7 +5232,7 @@ TEST(crs, getNonDeprecated) {
 
 // ---------------------------------------------------------------------------
 
-TEST(crs, promoteTo3D) {
+TEST(crs, promoteTo3D_and_demoteTo2D) {
     auto dbContext = DatabaseContext::create();
     {
         auto crs = GeographicCRS::EPSG_4326;
@@ -5250,6 +5250,10 @@ TEST(crs, promoteTo3D) {
         ASSERT_TRUE(crs3DAsGeog != nullptr);
         EXPECT_EQ(crs3DAsGeog->coordinateSystem()->axisList().size(), 3U);
         EXPECT_TRUE(!crs3DAsGeog->identifiers().empty());
+
+        auto demoted = crs3DAsGeog->demoteTo2D(std::string(), dbContext);
+        EXPECT_EQ(demoted->coordinateSystem()->axisList().size(), 2U);
+        EXPECT_TRUE(!demoted->identifiers().empty());
     }
     {
         auto crs = createProjected();
@@ -5262,6 +5266,11 @@ TEST(crs, promoteTo3D) {
             3U);
         EXPECT_TRUE(crs3D->promoteTo3D(std::string(), nullptr)
                         ->isEquivalentTo(crs3D.get()));
+
+        auto demoted = crs3DAsProjected->demoteTo2D(std::string(), nullptr);
+        EXPECT_EQ(demoted->coordinateSystem()->axisList().size(), 2U);
+        EXPECT_EQ(demoted->baseCRS()->coordinateSystem()->axisList().size(),
+                  2U);
     }
     {
         auto crs = createProjected();
@@ -5273,6 +5282,12 @@ TEST(crs, promoteTo3D) {
             crs3DAsProjected->baseCRS()->coordinateSystem()->axisList().size(),
             3U);
         EXPECT_TRUE(!crs3DAsProjected->baseCRS()->identifiers().empty());
+
+        auto demoted = crs3DAsProjected->demoteTo2D(std::string(), dbContext);
+        EXPECT_EQ(demoted->coordinateSystem()->axisList().size(), 2U);
+        EXPECT_EQ(demoted->baseCRS()->coordinateSystem()->axisList().size(),
+                  2U);
+        EXPECT_TRUE(!demoted->baseCRS()->identifiers().empty());
     }
     {
         auto crs = BoundCRS::createFromTOWGS84(
@@ -5280,9 +5295,28 @@ TEST(crs, promoteTo3D) {
         auto crs3D = crs->promoteTo3D(std::string(), dbContext);
         auto crs3DAsBound = nn_dynamic_pointer_cast<BoundCRS>(crs3D);
         ASSERT_TRUE(crs3DAsBound != nullptr);
-        auto baseCRS =
-            nn_dynamic_pointer_cast<ProjectedCRS>(crs3DAsBound->baseCRS());
-        ASSERT_TRUE(baseCRS != nullptr);
-        EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 3U);
+        {
+            auto baseCRS =
+                nn_dynamic_pointer_cast<ProjectedCRS>(crs3DAsBound->baseCRS());
+            ASSERT_TRUE(baseCRS != nullptr);
+            EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 3U);
+        }
+
+        auto demoted = crs3DAsBound->demoteTo2D(std::string(), nullptr);
+        auto crs2DAsBound = nn_dynamic_pointer_cast<BoundCRS>(demoted);
+        ASSERT_TRUE(crs2DAsBound != nullptr);
+        {
+            auto baseCRS =
+                nn_dynamic_pointer_cast<ProjectedCRS>(crs2DAsBound->baseCRS());
+            ASSERT_TRUE(baseCRS != nullptr);
+            EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 2U);
+        }
+    }
+
+    {
+        auto compoundCRS = createCompoundCRS();
+        auto demoted = compoundCRS->demoteTo2D(std::string(), nullptr);
+        EXPECT_TRUE(dynamic_cast<const ProjectedCRS *>(demoted.get()) !=
+                    nullptr);
     }
 }
