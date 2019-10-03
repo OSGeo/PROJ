@@ -307,7 +307,9 @@ dnl ---------------------------------------------------------------------------
 dnl Check for sqlite3 library and binary
 dnl ---------------------------------------------------------------------------
 
-PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.7])
+if test "x$SQLITE3_CFLAGS$SQLITE3_LIBS" = "x" ; then
+    PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.7])
+fi
 AC_SUBST(SQLITE3_CFLAGS,$SQLITE3_CFLAGS)
 AC_SUBST(SQLITE3_LIBS,$SQLITE3_LIBS)
 
