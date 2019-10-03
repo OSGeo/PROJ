@@ -31,8 +31,10 @@ static PJ_XY o_forward(PJ_LP lp, PJ *P) {             /* spheroid */
     coslam = cos(lp.lam);
     sinphi = sin(lp.phi);
     cosphi = cos(lp.phi);
+    /* Formula (5-8b) of Snyder's "Map projections: a working manual" */
     lp.lam = adjlon(aatan2(cosphi * sin(lp.lam), Q->sphip * cosphi * coslam +
         Q->cphip * sinphi) + Q->lamp);
+    /* Formula (5-7) */
     lp.phi = aasin(P->ctx,Q->sphip * sinphi - Q->cphip * cosphi * coslam);
 
     return Q->link->fwd(lp, Q->link);
@@ -62,7 +64,9 @@ static PJ_LP o_inverse(PJ_XY xy, PJ *P) {             /* spheroid */
         coslam = cos(lp.lam -= Q->lamp);
         sinphi = sin(lp.phi);
         cosphi = cos(lp.phi);
+        /* Formula (5-9) */
         lp.phi = aasin(P->ctx,Q->sphip * sinphi + Q->cphip * cosphi * coslam);
+        /* Formula (5-10b) */
         lp.lam = aatan2(cosphi * sin(lp.lam), Q->sphip * cosphi * coslam -
             Q->cphip * sinphi);
     }
