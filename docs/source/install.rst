@@ -24,7 +24,15 @@ Conda
 The conda package manager includes several PROJ packages. We recommend installing
 from the ``conda-forge`` channel::
 
-    conda install -c conda-forge proj4
+    conda install -c conda-forge proj
+
+Using ``conda`` you can also install the PROJ grid packages. Here's how to install
+the `proj-datumgrid-europe` package::
+
+    conda install -c conda-forge proj-datumgrid-europe
+
+Available is also the ``proj-datumgrid-north-america``, ``proj-datumgrid-oceania``
+and ``proj-datumgrid-world``.
 
 Docker
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
