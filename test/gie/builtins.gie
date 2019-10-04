@@ -136,6 +136,29 @@ accept  45  45
 expect  3_860_398.3783  5_430_089.0490
 roundtrip   100
 
+
+# Test oblique aeqd with point very close lon_0, lat_0, on a perfect sphere
+operation +proj=aeqd +a=6371008.771415 +b=6371008.771415 +lat_0=30.2345 +lon_0=-120.2345
+tolerance 1 mm
+accept    -120.234501 30.234501
+expect    -0.096      0.111
+roundtrip 1
+
+accept    -120.2345   30.2345
+expect    0.000       0.000
+roundtrip 1
+
+# Same on an ellipsoid very close to the sphere
+operation +proj=aeqd +a=6371008.771415 +b=6371008.771414 +lat_0=30.2345 +lon_0=-120.2345
+tolerance 1 mm
+accept    -120.234501 30.234501
+expect    -0.096      0.111
+roundtrip 1
+
+accept    -120.2345   30.2345
+expect    0.000       0.000
+roundtrip 1
+
 -------------------------------------------------------------------------------
 # Test the Modified Azimuthal Equidistant / EPSG 9832. Test data from the EPSG
 Guidance Note 7 part 2, April 2018,  p. 85
