@@ -109,6 +109,7 @@ osgeo::proj::crs::CRS::alterName(std::string const&) const
 osgeo::proj::crs::CRS::canonicalBoundCRS() const
 osgeo::proj::crs::CRS::createBoundCRSToWGS84IfPossible(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, osgeo::proj::operation::CoordinateOperationContext::IntermediateCRSUse) const
 osgeo::proj::crs::CRS::~CRS()
+osgeo::proj::crs::CRS::demoteTo2D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::CRS::extractGeodeticCRS() const
 osgeo::proj::crs::CRS::extractGeographicCRS() const
 osgeo::proj::crs::CRS::extractVerticalCRS() const
@@ -162,6 +163,7 @@ osgeo::proj::crs::ProjectedCRS::alterParametersLinearUnit(osgeo::proj::common::U
 osgeo::proj::crs::ProjectedCRS::baseCRS() const
 osgeo::proj::crs::ProjectedCRS::coordinateSystem() const
 osgeo::proj::crs::ProjectedCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::GeodeticCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CartesianCS> > const&)
+osgeo::proj::crs::ProjectedCRS::demoteTo2D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::ProjectedCRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
 osgeo::proj::crs::ProjectedCRS::~ProjectedCRS()
 osgeo::proj::crs::SingleCRS::coordinateSystem() const
@@ -904,6 +906,7 @@ proj_crs_create_bound_crs
 proj_crs_create_bound_crs_to_WGS84
 proj_crs_create_bound_vertical_crs_to_WGS84
 proj_crs_create_projected_3D_crs_from_2D
+proj_crs_demote_to_2D
 proj_crs_get_coordinate_system
 proj_crs_get_coordoperation
 proj_crs_get_datum

@@ -843,6 +843,49 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
     return NN_NO_CHECK(
         std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
+// ---------------------------------------------------------------------------
+
+/** \brief Return a variant of this CRS "demoted" to a 2D one, if not already
+ * the case.
+ *
+ *
+ * @param newName Name of the new CRS. If empty, nameStr() will be used.
+ * @param dbContext Database context to look for potentially already registered
+ *                  2D CRS. May be nullptr.
+ * @return a new CRS demoted to 2D, or the current one if already 2D or not
+ * applicable.
+ * @since 7.0
+ */
+CRSNNPtr CRS::demoteTo2D(const std::string &newName,
+                         const io::DatabaseContextPtr &dbContext) const {
+    const auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        return geogCRS->demoteTo2D(newName, dbContext);
+    }
+
+    const auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        return projCRS->demoteTo2D(newName, dbContext);
+    }
+
+    const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+    if (boundCRS) {
+        return BoundCRS::create(
+            boundCRS->baseCRS()->demoteTo2D(newName, dbContext),
+            boundCRS->hubCRS(), boundCRS->transformation());
+    }
+
+    const auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        const auto &components = compoundCRS->componentReferenceSystems();
+        if (components.size() >= 2) {
+            return components[0];
+        }
+    }
+
+    return NN_NO_CHECK(
+        std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
+}
 
 // ---------------------------------------------------------------------------
 
@@ -3646,6 +3689,44 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     }
 
     return res;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a variant of this CRS "demoted" to a 2D one, if not already
+ * the case.
+ *
+ *
+ * @param newName Name of the new CRS. If empty, nameStr() will be used.
+ * @param dbContext Database context to look for potentially already registered
+ *                  2D CRS. May be nullptr.
+ * @return a new CRS demoted to 2D, or the current one if already 2D or not
+ * applicable.
+ * @since 7.0
+ */
+ProjectedCRSNNPtr
+ProjectedCRS::demoteTo2D(const std::string &newName,
+                         const io::DatabaseContextPtr &dbContext) const {
+
+    const auto &axisList = coordinateSystem()->axisList();
+    if (axisList.size() == 3) {
+        auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                          axisList[1]);
+        const auto &l_baseCRS = baseCRS();
+        const auto geogCRS =
+            dynamic_cast<const GeographicCRS *>(l_baseCRS.get());
+        const auto newBaseCRS =
+            geogCRS ? util::nn_static_pointer_cast<GeodeticCRS>(
+                          geogCRS->demoteTo2D(std::string(), dbContext))
+                    : l_baseCRS;
+        return ProjectedCRS::create(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    !newName.empty() ? newName : nameStr()),
+            newBaseCRS, derivingConversionRef(), cs);
+    }
+
+    return NN_NO_CHECK(std::dynamic_pointer_cast<ProjectedCRS>(
+        shared_from_this().as_nullable()));
 }
 
 // ---------------------------------------------------------------------------

@@ -3949,6 +3949,31 @@ TEST_F(CApi, proj_crs_promote_to_3D) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_crs_demote_to_2D) {
+
+    auto crs3D =
+        proj_create(m_ctxt, GeographicCRS::EPSG_4979
+                                ->exportToWKT(WKTFormatter::create().get())
+                                .c_str());
+    ObjectKeeper keeper_crs3D(crs3D);
+    EXPECT_NE(crs3D, nullptr);
+
+    auto crs2D = proj_crs_demote_to_2D(m_ctxt, nullptr, crs3D);
+    ObjectKeeper keeper_crs2D(crs2D);
+    EXPECT_NE(crs2D, nullptr);
+
+    auto cs = proj_crs_get_coordinate_system(m_ctxt, crs2D);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeperCs(cs);
+    EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 2);
+
+    auto code = proj_get_id_code(crs2D, 0);
+    ASSERT_TRUE(code != nullptr);
+    EXPECT_EQ(code, std::string("4326"));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_crs_create_projected_3D_crs_from_2D) {
 
     auto projCRS = proj_create_from_database(m_ctxt, "EPSG", "32631",
