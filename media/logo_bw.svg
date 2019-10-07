@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="134.18155mm"
+   height="43.65625mm"
+   viewBox="0 0 134.18155 43.65625"
+   version="1.1"
+   id="svg3821"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="logo_bw.svg">
+  <defs
+     id="defs3815" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4"
+     inkscape:cx="58.485496"
+     inkscape:cy="-11.535695"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata3818">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>PROJ Logo</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+        <dc:date>2019/10/01</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Sylvain Beorchia</dc:title>
+          </cc:Agent>
+        </dc:creator>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-17.575893,-18.998503)">
+    <g
+       transform="translate(-19.341303,-95.718792)"
+       id="g913"
+       inkscape:export-xdpi="180.14684"
+       inkscape:export-ydpi="180.14684">
+      <path
+         inkscape:connector-curvature="0"
+         id="path1386-1-6-8-6"
+         d="m 126.52135,121.32293 a 18.171912,15.127886 0 0 0 -18.1718,15.12826 18.171912,15.127886 0 0 0 18.1718,15.1278 18.171912,15.127886 0 0 0 18.17182,-15.1278 18.171912,15.127886 0 0 0 -18.17182,-15.12826 z m 0,5.30497 a 11.799942,9.8233022 0 0 1 11.79996,9.82329 11.799942,9.8233022 0 0 1 -11.79996,9.8233 11.799942,9.8233022 0 0 1 -11.79994,-9.8233 11.799942,9.8233022 0 0 1 11.79994,-9.82329 z"
+         style="opacity:1;fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.76500005;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers" />
+      <rect
+         transform="rotate(15.768155)"
+         ry="2.064862"
+         rx="2.064862"
+         y="77.58268"
+         x="157.07016"
+         height="38.703815"
+         width="3.5399821"
+         id="rect1404-8-1-7-7"
+         style="opacity:1;fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.76500005;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers" />
+      <path
+         d="m 43.809823,125.76769 h 8.778896 q 3.050416,0 4.840566,1.76151 1.790151,1.76151 1.790151,4.49686 0,2.74967 -1.775829,4.49685 -1.761508,1.74719 -4.854888,1.73287 h -6.80257 v 8.56408 h -1.976326 z m 1.976326,1.97633 v 8.53543 h 6.80257 q 2.176823,0.0143 3.408446,-1.17434 1.245945,-1.20298 1.245945,-3.05041 0,-1.86176 -1.260266,-3.09338 -1.260266,-1.23163 -3.394125,-1.2173 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.32982063px;line-height:0;font-family:AnjaliOldLipi;-inkscape-font-specification:'AnjaliOldLipi, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#868686;fill-opacity:1;stroke:none;stroke-width:0.26458335"
+         id="path856-5"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 79.612824,125.76769 h 8.778897 q 3.079058,0 4.854887,1.63262 1.775829,1.63261 1.775829,4.33932 0,1.94768 -0.916557,3.32252 -0.916557,1.36051 -2.678065,2.00497 2.076575,1.50372 3.193628,4.31068 0.315067,0.81631 0.859272,2.33436 0.544206,1.50372 1.045448,2.44892 l -1.747186,0.9452 q -0.630133,-1.16002 -1.174339,-2.73535 -0.529884,-1.57533 -0.930878,-2.47757 -1.288908,-3.07906 -4.5255,-4.35364 h -6.55911 v 9.28014 h -1.976326 z m 1.976326,1.97633 v 7.81937 h 6.802571 q 2.26275,0 3.451409,-1.00248 1.202981,-1.00249 1.202981,-2.80696 0,-1.81879 -1.245944,-2.92152 -1.245945,-1.10274 -3.408446,-1.08841 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.32982063px;line-height:0;font-family:AnjaliOldLipi;-inkscape-font-specification:'AnjaliOldLipi, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#868686;fill-opacity:1;stroke:none;stroke-width:0.26458335"
+         id="path858-3"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 158.27918,140.81927 q 0,2.84992 1.70422,3.90969 0.64446,0.40099 1.63262,0.40099 1.83311,0 2.82128,-1.38915 0.81631,-1.13138 0.81631,-2.59214 v -15.38097 h 1.97632 v 15.38097 q 0,2.19114 -1.26026,3.88105 -1.54669,2.09089 -4.35365,2.07657 -3.69487,0 -4.86921,-3.39412 -0.44396,-1.27459 -0.44396,-2.89289 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.32982063px;line-height:0;font-family:AnjaliOldLipi;-inkscape-font-specification:'AnjaliOldLipi, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#868686;fill-opacity:1;stroke:none;stroke-width:0.26458335"
+         id="path860-5"
+         inkscape:connector-curvature="0" />
+    </g>
+  </g>
+</svg>
