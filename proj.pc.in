@@ -9,4 +9,5 @@ Description: Cartographic Projections Library.
 Requires:
 Version: @VERSION@
 Libs: -L${libdir} -lproj
+Libs.Private: -lstdc++
 Cflags: -I${includedir}
