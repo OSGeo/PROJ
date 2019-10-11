@@ -939,3 +939,6 @@ Candidate operations found: 2
 unknown id, Ballpark geocentric translation from ETRS89 to WGS 84, unknown accuracy, World, has ballpark transformation
 INVERSE(EPSG):9225, Inverse of WGS 84 to ETRS89 (2), 0.1 m, Europe - offshore North Sea - Germany and Netherlands east of 5°E
 
+Testing -s +proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs -t EPSG:4326 -o PROJ -q
++proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=@foo.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
+

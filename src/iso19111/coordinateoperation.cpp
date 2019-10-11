@@ -12937,9 +12937,7 @@ CoordinateOperationFactory::Private::createOperations(
 
         auto vertCRSOfBaseOfBoundSrc =
             dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get());
-        if (vertCRSOfBaseOfBoundSrc && hubSrcGeog &&
-            hubSrcGeog->coordinateSystem()->axisList().size() == 3 &&
-            geogDst->coordinateSystem()->axisList().size() == 3) {
+        if (vertCRSOfBaseOfBoundSrc && hubSrcGeog) {
             auto opsFirst = createOperations(sourceCRS, hubSrc, context);
             if (context.skipHorizontalTransformation) {
                 if (!opsFirst.empty())
