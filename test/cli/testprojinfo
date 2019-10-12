@@ -115,6 +115,10 @@ echo "Testing NGF IGN69 height to RGF93: projinfo -s EPSG:5720 -t EPSG:4965 -o P
 $EXE -s EPSG:5720 -t EPSG:4965 -o PROJ >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo "Testing -s "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs" -t EPSG:4326 -o PROJ -q" >> ${OUT}
+$EXE -s "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs" -t EPSG:4326 -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
