@@ -1137,8 +1137,6 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
 
     try
     {
-        bool skipDefaultTransforms = true;
-
         // Iterate over source->target candidate transformations and reproject
         // their long-lat bounding box into the source CRS.
         for( int i = 0; i < op_count; i++ )
@@ -1150,26 +1148,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
             double east_lon = 0.0;
             double north_lat = 0.0;
 
-            const char* name = proj_get_name(op);
-            bool canUseOp = true;
-            if( skipDefaultTransforms &&
-                name && (strstr(name, "Ballpark geographic offset") ||
-                         strstr(name, "Ballpark geocentric translation")) )
-            {
-                // Skip default transformations unless there is already one at
-                // the beginning (in which case all of them will have one)
-                if( i == 0 )
-                {
-                    skipDefaultTransforms = false;
-                }
-                else
-                {
-                    canUseOp = false;
-                }
-            }
-
-            if( canUseOp &&
-                proj_get_area_of_use(ctx, op,
+            if( proj_get_area_of_use(ctx, op,
                         &west_lon, &south_lat, &east_lon, &north_lat, nullptr) )
             {
                 if( west_lon <= east_lon )

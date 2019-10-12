@@ -4078,4 +4078,66 @@ TEST_F(CApi, proj_create_crs_to_crs_with_only_ballpark_transformations) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(
+    CApi,
+    proj_create_crs_to_crs_from_custom_compound_crs_with_NAD83_2011_and_geoidgrid_to_WGS84_G1762) {
+
+    if( strcmp(proj_grid_info("egm96_15.gtx").format, "missing") == 0 ) {
+        return; // use GTEST_SKIP() if we upgrade gtest
+    }
+
+    PJ *P;
+
+    PJ *inCrsH = proj_create_from_database(m_ctxt, "EPSG", "6340",
+                                           PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(inCrsH, nullptr);
+
+    PJ *inDummyCrs = proj_create_vertical_crs(m_ctxt, "VerticalDummyCrs",
+                                              "DummyDatum", "metre", 1.0);
+    ASSERT_NE(inDummyCrs, nullptr);
+
+    PJ *inCrsV = proj_crs_create_bound_vertical_crs_to_WGS84(m_ctxt, inDummyCrs,
+                                                             "egm96_15.gtx");
+    ASSERT_NE(inCrsV, nullptr);
+    proj_destroy(inDummyCrs);
+
+    PJ *inCompound =
+        proj_create_compound_crs(m_ctxt, "Compound", inCrsH, inCrsV);
+    ASSERT_NE(inCompound, nullptr);
+    proj_destroy(inCrsH);
+    proj_destroy(inCrsV);
+
+    PJ *outCrs = proj_create(m_ctxt, "EPSG:7665");
+    ASSERT_NE(outCrs, nullptr);
+
+    // In this particular case, PROJ computes a transformation from NAD83(2011)
+    // (EPSG:6318) to WGS84 (EPSG:4979) for the initial horizontal adjustment
+    // before the geoidgrids application. There are 6 candidate transformations
+    // for that in subzones of the US and one last no-op tranformation flagged
+    // as ballpark. That one used to be eliminated because by
+    // proj_create_crs_to_crs() because there were non Ballpark transformations
+    // available. This resulted thus in an error when transforming outside of
+    // those few subzones.s
+    P = proj_create_crs_to_crs_from_pj(m_ctxt, inCompound, outCrs, nullptr,
+                                       nullptr);
+    ASSERT_NE(P, nullptr);
+    proj_destroy(inCompound);
+    proj_destroy(outCrs);
+
+    PJ_COORD in_coord;
+    in_coord.xyzt.x = 350499.911;
+    in_coord.xyzt.y = 3884807.956;
+    in_coord.xyzt.z = 150.072;
+    in_coord.xyzt.t = 2010;
+
+    PJ_COORD outcoord = proj_trans(P, PJ_FWD, in_coord);
+    proj_destroy(P);
+
+    EXPECT_NEAR(outcoord.xyzt.x, 35.09499307271, 1e-9);
+    EXPECT_NEAR(outcoord.xyzt.y, -118.64014868921, 1e-9);
+    EXPECT_NEAR(outcoord.xyzt.z, 118.059, 1e-3);
+}
+
 } // namespace
