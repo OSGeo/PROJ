@@ -962,9 +962,7 @@ const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() PROJ_PURE_DEFN {
 
 /** \brief Return the cs::CoordinateSystem associated with the CRS.
  *
- * This might be null, in which case datumEnsemble() return will not be null.
- *
- * @return a CoordinateSystem that might be null.
+ * @return a CoordinateSystem.
  */
 const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() PROJ_PURE_DEFN {
     return d->coordinateSystem;
