@@ -82,3 +82,16 @@ INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1150','WGS 8
 INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1674','WGS 84 to WGS 84 (G1674)','','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9056','EPSG','1262',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
 INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1762','WGS 84 to WGS 84 (G1762)','','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9057','EPSG','1262',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
 INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_TRANSIT','WGS 84 to WGS 84 (Transit)','','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','8888','EPSG','1262',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
+
+--- Remove a few supersessions ---
+
+-- TODO: remove this once https://github.com/OSGeo/proj-datumgrid/issues/55 is dealt with
+-- The following supersessions are for geoid2012, replaced by geoid2018
+-- but we don't have geoid2018 yet as PROJ grids, so remove for now those
+-- supersessions
+-- INSERT INTO "supersession" VALUES('grid_transformation','EPSG','6326','grid_transformation','EPSG','9229','EPSG');
+-- INSERT INTO "supersession" VALUES('grid_transformation','EPSG','7646','grid_transformation','EPSG','9230','EPSG');
+-- INSERT INTO "supersession" VALUES('grid_transformation','EPSG','7647','grid_transformation','EPSG','9231','EPSG');
+DELETE FROM supersession WHERE superseded_table_name = 'grid_transformation' AND superseded_auth_name = 'EPSG' AND superseded_code = '6326';
+DELETE FROM supersession WHERE superseded_table_name = 'grid_transformation' AND superseded_auth_name = 'EPSG' AND superseded_code = '7646';
+DELETE FROM supersession WHERE superseded_table_name = 'grid_transformation' AND superseded_auth_name = 'EPSG' AND superseded_code = '7647';

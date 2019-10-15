@@ -3486,13 +3486,9 @@ TEST_F(CApi, proj_get_remarks) {
 
     auto remarks = proj_get_remarks(co);
     ASSERT_NE(remarks, nullptr);
-    EXPECT_EQ(
-        remarks,
-        std::string("Scale difference in ppb where 1/billion = 1E-9. "
-                    "Derivation excluded Cocos, Christmas and Macquarie "
-                    "Islands but is applied there. See codes 8444-46 for "
-                    "equivalents using NTv2 method. See code 8447 for "
-                    "alternative including distortion model for Aus only."));
+    EXPECT_TRUE(std::string(remarks).find(
+                    "Scale difference in ppb where 1/billion = 1E-9.") == 0)
+        << remarks;
 }
 
 // ---------------------------------------------------------------------------
