@@ -206,7 +206,7 @@ template <class T> class optional {
     inline explicit optional(T &&val)
         : hasVal_(true), val_(std::forward<T>(val)) {}
 
-    inline optional(const optional &other) = default;
+    inline optional(const optional &) = default;
     inline optional(optional &&other) PROJ_NOEXCEPT
         : hasVal_(other.hasVal_),
           // cppcheck-suppress functionStatic
@@ -224,7 +224,7 @@ template <class T> class optional {
         val_ = std::forward<T>(val);
         return *this;
     }
-    inline optional &operator=(const optional &other) = default;
+    inline optional &operator=(const optional &) = default;
     inline optional &operator=(optional &&other) noexcept {
         hasVal_ = other.hasVal_;
         val_ = std::forward<T>(other.val_);
