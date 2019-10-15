@@ -4084,7 +4084,7 @@ TEST_F(
     CApi,
     proj_create_crs_to_crs_from_custom_compound_crs_with_NAD83_2011_and_geoidgrid_to_WGS84_G1762) {
 
-    if( strcmp(proj_grid_info("egm96_15.gtx").format, "missing") == 0 ) {
+    if (strcmp(proj_grid_info("egm96_15.gtx").format, "missing") == 0) {
         return; // use GTEST_SKIP() if we upgrade gtest
     }
 
