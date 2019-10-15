@@ -21,10 +21,10 @@ pushd "${TOPDIR}" > /dev/null || exit
 # HTML generation
 # Check that doxygen runs warning free
 rm -rf docs/build/html/
-mkdir -p docs/build/
-doxygen > /tmp/docs_log.txt 2>&1
-if grep -i warning /tmp/docs_log.txt; then
-    echo "Doxygen warnings found" && cat /tmp/docs_log.txt && /bin/false;
+mkdir -p docs/build/html/
+doxygen > docs/build/html/docs_log.txt 2>&1
+if grep -i warning docs/build/html/docs_log.txt; then
+    echo "Doxygen warnings found" && cat docs/build/html/docs_log.txt && /bin/false;
 else
     echo "No Doxygen warnings found";
 fi
@@ -34,9 +34,9 @@ fi
 mkdir -p docs/build/tmp_breathe
 python scripts/generate_breathe_friendly_general_doc.py
 rm -rf docs/build/xml/
-(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src/iso19111 include/proj src/proj.h docs/build/tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > /tmp/docs_log.txt 2>&1
-if grep -i warning /tmp/docs_log.txt; then
-    echo "Doxygen warnings found" && cat /tmp/docs_log.txt && /bin/false;
+(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src/iso19111 include/proj src/proj.h docs/build/tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > docs/build/tmp_breathe/docs_log.txt 2>&1
+if grep -i warning docs/build/tmp_breathe/docs_log.txt; then
+    echo "Doxygen warnings found" && cat docs/build/tmp_breathe/docs_log.txt && /bin/false;
 else
     echo "No Doxygen warnings found";
 fi
