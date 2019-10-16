@@ -35,7 +35,7 @@ INSERT INTO "area" VALUES('EPSG','1055','Brunei','Brunei Darussalam - onshore an
 INSERT INTO "area" VALUES('EPSG','1056','Bulgaria','Bulgaria - onshore and offshore.',41.24,44.23,22.36,31.35,0);
 INSERT INTO "area" VALUES('EPSG','1057','Burkina Faso','Burkina Faso.',9.39,15.09,-5.53,2.4,0);
 INSERT INTO "area" VALUES('EPSG','1058','Burundi','Burundi.',-4.45,-2.3,28.98,30.86,0);
-INSERT INTO "area" VALUES('EPSG','1059','Cambodia','Cambodia - onshore and offshore.',8.78,14.71,101.33,107.64,0);
+INSERT INTO "area" VALUES('EPSG','1059','Cambodia','Cambodia - onshore and offshore.',8.78,14.73,101.33,107.64,0);
 INSERT INTO "area" VALUES('EPSG','1060','Cameroon','Cameroon - onshore and offshore.',1.65,13.09,8.32,16.21,0);
 INSERT INTO "area" VALUES('EPSG','1061','Canada','Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.',40.04,86.46,-141.01,-47.74,0);
 INSERT INTO "area" VALUES('EPSG','1062','Cape Verde','Cape Verde - onshore and offshore. Includes Boa Vista, Brava, Fogo, Maio, Sal, Santo Antao, Sao Nicolau, Sao Tiago, Sao Vicente.',11.47,20.54,-28.85,-19.53,0);
@@ -114,7 +114,7 @@ INSERT INTO "area" VALUES('EPSG','1134','Korea, Democratic People''s Republic of
 INSERT INTO "area" VALUES('EPSG','1135','Korea, Republic of (South Korea)','Republic of Korea (South Korea) - onshore and offshore.',28.6,40.27,122.71,134.28,0);
 INSERT INTO "area" VALUES('EPSG','1136','Kuwait','Kuwait - onshore and offshore.',28.53,30.09,46.54,49.53,0);
 INSERT INTO "area" VALUES('EPSG','1137','Kyrgyzstan','Kyrgyzstan.',39.19,43.22,69.24,80.29,0);
-INSERT INTO "area" VALUES('EPSG','1138','Laos','Laos.',13.92,22.5,100.09,107.7,0);
+INSERT INTO "area" VALUES('EPSG','1138','Laos','Laos.',13.92,22.5,100.09,107.64,0);
 INSERT INTO "area" VALUES('EPSG','1139','Latvia','Latvia - onshore and offshore.',55.67,58.09,19.06,28.24,0);
 INSERT INTO "area" VALUES('EPSG','1140','Lebanon','Lebanon - onshore and offshore.',33.06,34.84,33.75,36.63,0);
 INSERT INTO "area" VALUES('EPSG','1141','Lesotho','Lesotho.',-30.66,-28.57,27.01,29.46,0);
@@ -228,7 +228,7 @@ INSERT INTO "area" VALUES('EPSG','1248','Uzbekistan','Uzbekistan.',37.18,45.58,5
 INSERT INTO "area" VALUES('EPSG','1249','Vanuatu','Vanuatu - onshore and offshore.',-21.65,-12.27,163.16,173.59,0);
 INSERT INTO "area" VALUES('EPSG','1250','Holy See (Vatican City State)','Holy See (Vatican City State).',41.9,41.91,12.44,12.46,0);
 INSERT INTO "area" VALUES('EPSG','1251','Venezuela','Venezuela - onshore and offshore.',0.64,16.75,-73.38,-58.95,0);
-INSERT INTO "area" VALUES('EPSG','1252','Vietnam','Vietnam - onshore and offshore.',5.67,23.33,102.14,112.55,0);
+INSERT INTO "area" VALUES('EPSG','1252','Vietnam','Vietnam - onshore and offshore.',5.67,23.4,102.14,112.55,0);
 INSERT INTO "area" VALUES('EPSG','1253','Virgin Islands, British','British Virgin Islands - onshore and offshore - Anegada, Jost Van Dyke, Tortola, and Virgin Gorda.',17.96,22.09,-65.85,-63.29,0);
 INSERT INTO "area" VALUES('EPSG','1254','Virgin Islands, US','US Virgin Islands - onshore and offshore - St Croix, St John, and St Thomas.',16.22,21.83,-66.05,-63.88,0);
 INSERT INTO "area" VALUES('EPSG','1255','Wallis and Futuna','Wallis and Futuna - onshore and offshore - Uvea, Futuna, and Alofi.',-15.94,-9.84,179.49,-174.27,0);
@@ -278,7 +278,7 @@ INSERT INTO "area" VALUES('EPSG','1298','Europe - ETRS89','Europe - onshore and 
 INSERT INTO "area" VALUES('EPSG','1299','Europe - EVRF2000','Europe - onshore - Andorra; Austria; Belgium; Bosnia and Herzegovina; Croatia; Czechia; Denmark; Estonia; Finland; France - mainland; Germany; Gibraltar; Hungary; Italy - mainland and Sicily; Latvia; Liechtenstein; Lithuania; Luxembourg; Netherlands; Norway; Poland; Portugal - mainland; Romania; San Marino; Slovakia; Slovenia; Spain - mainland; Sweden; Switzerland; United Kingdom (UK) - Great Britain mainland; Vatican City State.',35.95,71.21,-9.56,31.59,0);
 INSERT INTO "area" VALUES('EPSG','1300','Iran - FD58','Iran - Arwaz area and onshore Gulf coast west of 54°E, Lavan Island, offshore Balal field and South Pars blocks 2 and 3.',26.21,33.22,47.13,53.61,0);
 INSERT INTO "area" VALUES('EPSG','1301','Portugal - Azores C - onshore','Portugal - central Azores onshore - Faial, Graciosa, Pico, Sao Jorge, Terceira.',38.32,39.14,-28.9,-26.97,0);
-INSERT INTO "area" VALUES('EPSG','1302','Asia - Cambodia and Vietnam - mainland','Cambodia - mainland onshore; Vietnam - mainland onshore.',8.5,23.33,102.14,109.52,0);
+INSERT INTO "area" VALUES('EPSG','1302','Asia - Cambodia and Vietnam - mainland','Cambodia - mainland onshore; Vietnam - mainland onshore.',8.33,23.4,102.14,109.53,0);
 INSERT INTO "area" VALUES('EPSG','1303','South America - Tierra del Fuego','Argentina and Chile - Tierra del Fuego, onshore.',-55.96,-51.99,-74.83,-63.73,0);
 INSERT INTO "area" VALUES('EPSG','1304','Asia - Myanmar and Thailand onshore','Myanmar (Burma) - onshore; Thailand - onshore.',5.63,28.55,92.2,105.64,0);
 INSERT INTO "area" VALUES('EPSG','1305','Europe - Ireland (Republic and Ulster) - onshore','Ireland - onshore. United Kingdom (UK) - Northern Ireland (Ulster) - onshore.',51.39,55.43,-10.56,-5.34,0);
@@ -428,8 +428,8 @@ INSERT INTO "area" VALUES('EPSG','1448','Canada - 72°W to 66°W, south of 62°N
 INSERT INTO "area" VALUES('EPSG','1449','Canada - 66°W to 60°W, south of 60°N','Canada south of 60°N and between 66°W and 60°W - New Brunswick (NB), Labrador, Nova Scotia (NS), Prince Edward Island (PEI), Quebec.',43.2,60.0,-66.0,-60.0,1);
 INSERT INTO "area" VALUES('EPSG','1450','Cote d''Ivoire (Ivory Coast) - east of 6°W','Côte d''Ivoire (Ivory Coast) east of 6°W.',4.92,10.46,-6.0,-2.48,0);
 INSERT INTO "area" VALUES('EPSG','1451','Cote d''Ivoire (Ivory Coast) - west of 6°W','Côte d''Ivoire (Ivory Coast) west of 6°W.',4.29,10.74,-8.61,-6.0,0);
-INSERT INTO "area" VALUES('EPSG','1452','Vietnam - west of 108°E onshore','Vietnam - onshore west of 108°E.',8.5,23.33,102.14,108.0,0);
-INSERT INTO "area" VALUES('EPSG','1453','Vietnam - east of 108°E onshore','Vietnam - onshore east of 108°E.',10.42,21.56,108.0,109.52,0);
+INSERT INTO "area" VALUES('EPSG','1452','Vietnam - west of 108°E onshore','Vietnam - onshore west of 108°E.',8.33,23.4,102.14,108.0,0);
+INSERT INTO "area" VALUES('EPSG','1453','Vietnam - east of 108°E onshore','Vietnam - onshore east of 108°E.',10.43,21.56,108.0,109.53,0);
 INSERT INTO "area" VALUES('EPSG','1454','Namibia - Walvis Bay','Namibia - Walvis Bay.',-23.15,-22.68,14.35,14.6,0);
 INSERT INTO "area" VALUES('EPSG','1455','South Africa - west of 18°E','South Africa - onshore west of 18°E.',-33.1,-28.03,16.45,18.0,0);
 INSERT INTO "area" VALUES('EPSG','1456','South Africa - 18°E to 20°E','South Africa - onshore between 18°E and 20°E.',-34.88,-28.38,17.99,20.0,0);
@@ -470,7 +470,7 @@ INSERT INTO "area" VALUES('EPSG','1490','Yemen - 42°E to 48°E','Yemen - betwee
 INSERT INTO "area" VALUES('EPSG','1491','Yemen - 48°E to 54°E','Yemen - between 48°E and 54°E, onshore and offshore.',9.45,19.0,48.0,54.0,0);
 INSERT INTO "area" VALUES('EPSG','1492','Yemen - South Yemen - mainland west of 48°E','Yemen - South Yemen onshore mainland west of 48°E.',12.54,17.44,43.37,48.0,0);
 INSERT INTO "area" VALUES('EPSG','1493','Yemen - South Yemen - mainland east of 48°E','Yemen - South Yemen onshore mainland east of 48°E.',13.94,19.0,48.0,53.14,0);
-INSERT INTO "area" VALUES('EPSG','1494','Vietnam - onshore Vung Tau area','Vietnam - onshore Vung Tau area.',9.02,11.03,105.49,107.59,0);
+INSERT INTO "area" VALUES('EPSG','1494','Vietnam - onshore Vung Tau area','Vietnam - onshore Vung Tau area.',9.03,11.04,105.49,107.58,0);
 INSERT INTO "area" VALUES('EPSG','1495','Vietnam - offshore Cuu Long basin','Vietnam - offshore - Cuu Long basin and northwestern part of Nam Con Son basin.',7.99,11.15,106.54,110.0,0);
 INSERT INTO "area" VALUES('EPSG','1496','Korea, Republic of (South Korea) - east of 128°E onshore','Republic of Korea (South Korea) - onshore east of 128°E.',34.49,38.64,128.0,129.65,0);
 INSERT INTO "area" VALUES('EPSG','1497','Korea, Republic of (South Korea) - 126°E to 128°E onshore','Republic of Korea (South Korea) - onshore between 126°E and 128°E.',33.14,38.33,126.0,128.0,0);
@@ -514,11 +514,11 @@ INSERT INTO "area" VALUES('EPSG','1534','Canada - Nova Scotia - east of 63°W','
 INSERT INTO "area" VALUES('EPSG','1535','Canada - Nova Scotia - west of 63°W','Canada - Nova Scotia - west of 63°W.',43.41,46.02,-66.28,-63.0,0);
 INSERT INTO "area" VALUES('EPSG','1536','Finland - 19.5°E to 22.5°E onshore','Finland - onshore between 19°30''E and 22°30''E.',59.76,69.33,19.5,22.5,0);
 INSERT INTO "area" VALUES('EPSG','1537','Finland - 22.5°E to 25.5°E onshore','Finland - onshore between 22°30''E and 25°30''E.',59.75,68.9,22.5,25.5,0);
-INSERT INTO "area" VALUES('EPSG','1538','Finland - 25.5°E to 28.5°E onshore. Also all country.','Finland - onshore between 25°30''E and 28°30''E for Basic Coordinate System and all onshore Finland for Uniform Coordinate System.',59.75,70.09,19.24,31.59,0);
+INSERT INTO "area" VALUES('EPSG','1538','Finland - 25.5°E to 28.5°E onshore.','Finland - onshore between 25°30''E and 28°30''E for Basic Coordinate System and all onshore Finland for Uniform Coordinate System.',60.18,70.09,25.5,28.51,0);
 INSERT INTO "area" VALUES('EPSG','1539','Finland - 28.5°E to 31.5°E','Finland - between 28°30''E and 31°30''E.',60.94,69.81,28.5,31.5,0);
 INSERT INTO "area" VALUES('EPSG','1540','Mozambique - onshore west of 36°E','Mozambique - onshore west of 36°E.',-26.87,-11.41,30.21,36.0,0);
 INSERT INTO "area" VALUES('EPSG','1541','Mozambique - onshore east of 36°E','Mozambique - onshore east of 36°E.',-18.98,-10.42,35.99,40.9,0);
-INSERT INTO "area" VALUES('EPSG','1542','Asia - Cambodia and Vietnam - west of 108°E','Cambodia; Vietnam west of 108°E.',8.5,23.33,102.14,108.0,0);
+INSERT INTO "area" VALUES('EPSG','1542','Asia - Cambodia and Vietnam - west of 108°E','Cambodia; Vietnam west of 108°E.',8.33,23.4,102.14,108.0,0);
 INSERT INTO "area" VALUES('EPSG','1543','Austria - Styria','Austria - Styria.',46.64,47.84,13.58,16.17,0);
 INSERT INTO "area" VALUES('EPSG','1544','Oman - onshore west of 54°E','Oman - onshore west of 54°E.',16.59,19.67,51.99,54.0,0);
 INSERT INTO "area" VALUES('EPSG','1545','Oman - onshore east of 54°E','Oman - onshore east of 54°E. Includes Musandam and the Kuria Muria (Al Hallaniyah) islands.',16.89,26.58,54.0,59.91,0);
@@ -1335,8 +1335,8 @@ INSERT INTO "area" VALUES('EPSG','2355','Falkland Islands - East Falkland Island
 INSERT INTO "area" VALUES('EPSG','2356','Ecuador - Galapagos onshore','Ecuador - Baltra; Galapagos - onshore.',-1.41,0.18,-91.72,-89.19,0);
 INSERT INTO "area" VALUES('EPSG','2357','Argentina - Tierra del Fuego onshore','Argentina - Tierra del Fuego onshore.',-55.11,-52.59,-68.64,-63.73,0);
 INSERT INTO "area" VALUES('EPSG','2358','Thailand - Bongkot field','Thailand - Bongkot field.',6.74,8.16,102.16,103.05,0);
-INSERT INTO "area" VALUES('EPSG','2359','Vietnam - 14°N to 18°N onshore','Vietnam - onshore between 14°N and 18°N.',14.0,18.0,105.61,109.32,0);
-INSERT INTO "area" VALUES('EPSG','2360','Vietnam - Con Son Island','Vietnam - Con Son Island.',8.58,8.83,106.49,106.79,0);
+INSERT INTO "area" VALUES('EPSG','2359','Vietnam - 14°N to 18°N onshore','Vietnam - onshore between 14°N and 18°N.',14.0,18.01,105.61,109.36,0);
+INSERT INTO "area" VALUES('EPSG','2360','Vietnam - Con Son Island','Vietnam - Con Son Island.',8.57,8.83,106.48,106.8,0);
 INSERT INTO "area" VALUES('EPSG','2361','Myanmar (Burma) - Moattama area','Myanmar (Burma) - Moattama area.',9.48,17.87,93.94,99.66,0);
 INSERT INTO "area" VALUES('EPSG','2362','Iran - Kangan district','Iran - Kangan district.',27.3,28.2,51.8,53.01,0);
 INSERT INTO "area" VALUES('EPSG','2363','Venezuela - east','Venezuela - east - Delta Amacuro; Anzoategui; Bolivar; Monagas; Sucre states.',3.56,10.8,-67.49,-59.8,0);
@@ -1697,8 +1697,8 @@ INSERT INTO "area" VALUES('EPSG','2717','China - 91.5°E to 94.5°E','China - be
 INSERT INTO "area" VALUES('EPSG','2718','China - 94.5°E to 97.5°E','China - between 94°30''E and 97°30''E.',28.23,44.5,94.5,97.51,0);
 INSERT INTO "area" VALUES('EPSG','2719','China - 97.5°E to 100.5°E','China - between 97°30''E and 100°30''E.',21.43,42.76,97.5,100.5,0);
 INSERT INTO "area" VALUES('EPSG','2720','China - 100.5°E to 103.5°E','China - between 100°30''E and 103°30''E.',21.13,42.69,100.5,103.5,0);
-INSERT INTO "area" VALUES('EPSG','2721','China - 103.5°E to 106.5°E','China - between 103°30''E and 106°30''E.',22.5,42.21,103.5,106.5,0);
-INSERT INTO "area" VALUES('EPSG','2722','China - 106.5°E to 109.5°E onshore','China - onshore between 106°30''E and 109°30''E.',18.19,42.47,106.5,109.5,0);
+INSERT INTO "area" VALUES('EPSG','2721','China - 103.5°E to 106.5°E','China - between 103°30''E and 106°30''E.',22.5,42.21,103.5,106.51,0);
+INSERT INTO "area" VALUES('EPSG','2722','China - 106.5°E to 109.5°E onshore','China - onshore between 106°30''E and 109°30''E.',18.19,42.47,106.5,109.51,0);
 INSERT INTO "area" VALUES('EPSG','2723','China - 109.5°E to 112.5°E onshore','China - onshore between 109°30''E and 112°30''E.',18.11,45.11,109.5,112.5,0);
 INSERT INTO "area" VALUES('EPSG','2724','China - 112.5°E to 115.5°E onshore','China - onshore between 112°30''E and 115°30''E.',21.52,45.45,112.5,115.5,0);
 INSERT INTO "area" VALUES('EPSG','2725','China - 115.5°E to 118.5°E onshore','China - onshore between 115°30''E and 118°30''E.',22.6,49.88,115.5,118.5,0);
@@ -2201,7 +2201,7 @@ INSERT INTO "area" VALUES('EPSG','3221','Bermuda - onshore','Bermuda - onshore.'
 INSERT INTO "area" VALUES('EPSG','3222','Bouvet Island - onshore','Bouvet Island - onshore.',-54.52,-54.33,3.29,3.54,0);
 INSERT INTO "area" VALUES('EPSG','3223','Brazil - onshore','Brazil - onshore.',-33.78,5.28,-74.01,-34.74,0);
 INSERT INTO "area" VALUES('EPSG','3224','Bulgaria - onshore','Bulgaria - onshore.',41.24,44.23,22.36,28.68,0);
-INSERT INTO "area" VALUES('EPSG','3225','Cambodia - onshore','Cambodia - onshore.',10.39,14.71,102.34,107.64,0);
+INSERT INTO "area" VALUES('EPSG','3225','Cambodia - onshore','Cambodia - onshore.',10.39,14.73,102.34,107.64,0);
 INSERT INTO "area" VALUES('EPSG','3226','Cameroon - onshore','Cameroon - onshore.',1.65,13.09,8.45,16.21,0);
 INSERT INTO "area" VALUES('EPSG','3227','Chile - onshore north of 45°S','Chile - onshore north of 45°S.',-45.0,-17.5,-75.22,-67.0,0);
 INSERT INTO "area" VALUES('EPSG','3228','China - onshore','China - onshore.',18.11,53.56,73.62,134.77,0);
@@ -2304,7 +2304,7 @@ INSERT INTO "area" VALUES('EPSG','3324','Ukraine - onshore','Ukraine - onshore.'
 INSERT INTO "area" VALUES('EPSG','3325','UAE - onshore','United Arab Emirates (UAE) - onshore. Abu Dhabi, Dubai, Sharjah, Umm al Qaywayn, Al Fujairah, Ras al Khaymah.',22.63,26.1,51.56,56.44,0);
 INSERT INTO "area" VALUES('EPSG','3326','Uruguay - onshore','Uruguay - onshore.',-35.0,-30.09,-58.49,-53.09,0);
 INSERT INTO "area" VALUES('EPSG','3327','Venezuela - onshore','Venezuela - onshore.',0.64,12.25,-73.38,-59.8,0);
-INSERT INTO "area" VALUES('EPSG','3328','Vietnam - onshore','Vietnam - onshore.',8.5,23.33,102.14,109.52,0);
+INSERT INTO "area" VALUES('EPSG','3328','Vietnam - onshore','Vietnam - onshore.',8.33,23.4,102.14,109.53,0);
 INSERT INTO "area" VALUES('EPSG','3329','Virgin Islands, British - onshore','British Virgin Islands - onshore - Anegada, Jost Van Dyke, Tortola, and Virgin Gorda.',18.28,18.78,-64.88,-64.25,0);
 INSERT INTO "area" VALUES('EPSG','3330','Virgin Islands, US - onshore','US Virgin Islands - onshore - St Croix, St John, and St Thomas.',17.62,18.44,-65.09,-64.51,0);
 INSERT INTO "area" VALUES('EPSG','3331','Western Sahara - onshore','Western Sahara - onshore.',20.71,27.67,-17.16,-8.66,0);
@@ -2746,7 +2746,7 @@ INSERT INTO "area" VALUES('EPSG','3766','French Guiana - coastal area east of 54
 INSERT INTO "area" VALUES('EPSG','3767','Ireland - onshore','Ireland - onshore.',51.39,55.43,-10.56,-5.93,0);
 INSERT INTO "area" VALUES('EPSG','3768','New Zealand - North Island - Moturiki vcrs','New Zealand - North Island - Moturiki vertical CRS area.',-40.59,-37.52,174.57,177.26,0);
 INSERT INTO "area" VALUES('EPSG','3769','New Zealand - North Island - Taranaki vcrs','New Zealand - North Island - Taranaki vertical CRS area.',-39.92,-38.41,173.68,174.95,0);
-INSERT INTO "area" VALUES('EPSG','3770','Vietnam - DBSCL 02 and 03','Vietnam - Mekong delta blocks DBSCL 02 and 03.',9.34,11.03,104.25,107.11,0);
+INSERT INTO "area" VALUES('EPSG','3770','Vietnam - DBSCL 02 and 03','Vietnam - Mekong delta blocks DBSCL 02 and 03.',9.35,11.04,104.24,107.11,0);
 INSERT INTO "area" VALUES('EPSG','3771','New Zealand - North Island - Gisborne vcrs','New Zealand - North Island - Gisborne vertical CRS area.',-39.04,-37.49,176.41,178.63,0);
 INSERT INTO "area" VALUES('EPSG','3772','New Zealand - North Island - Hawkes Bay mc Napier vcrs','New Zealand - North Island - Hawkes Bay meridional circuit and Napier vertical crs area.',-40.57,-38.87,175.8,178.07,0);
 INSERT INTO "area" VALUES('EPSG','3773','New Zealand - North Island - Wellington vcrs','New Zealand - North Island - Wellington vertical CRS area.',-41.67,-40.12,174.52,176.56,0);
@@ -2983,7 +2983,7 @@ INSERT INTO "area" VALUES('EPSG','4003','Germany - East Germany - east of 13.5°
 INSERT INTO "area" VALUES('EPSG','4004','Australia - Northern Territory mainland','Australia - Northern Territory mainland onshore.',-26.01,-10.92,128.99,138.0,0);
 INSERT INTO "area" VALUES('EPSG','4005','Indonesia - Kalimantan W - coastal','Indonesia - west Kalimantan - onshore coastal area.',0.06,2.13,108.79,109.78,0);
 INSERT INTO "area" VALUES('EPSG','4006','Yemen - west of 42°E','Yemen - west of 42°E, onshore and offshore.',14.73,16.36,41.08,42.0,0);
-INSERT INTO "area" VALUES('EPSG','4007','Asia - Cambodia and Vietnam - onshore & Cuu Long basin','Cambodia - onshore; Vietnam - onshore and offshore Cuu Long basin.',7.99,23.33,102.14,110.0,0);
+INSERT INTO "area" VALUES('EPSG','4007','Asia - Cambodia and Vietnam - onshore & Cuu Long basin','Cambodia - onshore; Vietnam - onshore and offshore Cuu Long basin.',7.99,23.4,102.14,110.0,0);
 INSERT INTO "area" VALUES('EPSG','4008','Oman - mainland east of 54°E','Oman - mainland onshore east of 54°E.',16.89,26.42,54.0,59.91,0);
 INSERT INTO "area" VALUES('EPSG','4009','Oman - mainland','Oman - mainland onshore.',16.59,26.42,51.99,59.91,0);
 INSERT INTO "area" VALUES('EPSG','4010','Solomon Islands','Solomon Islands - onshore and offshore.',-16.13,-4.14,154.58,173.58,0);
@@ -2991,7 +2991,7 @@ INSERT INTO "area" VALUES('EPSG','4011','Tuvalu - onshore','Tuvalu - onshore.',-
 INSERT INTO "area" VALUES('EPSG','4012','Congo DR (Zaire) - Bas Congo east of 15°E','The Democratic Republic of the Congo (Zaire) - Bas Congo east of 15°E.',-5.87,-4.42,14.99,16.28,0);
 INSERT INTO "area" VALUES('EPSG','4013','Papua New Guinea - PFTB','Papua New Guinea - Papuan fold and thrust belt.',-8.28,-5.59,142.24,144.75,0);
 INSERT INTO "area" VALUES('EPSG','4014','Australia - Western Australia mainland','Australia - Western Australia mainland.',-35.19,-13.67,112.85,129.01,0);
-INSERT INTO "area" VALUES('EPSG','4015','Vietnam - mainland','Vietnam - mainland onshore.',8.5,23.33,102.14,109.52,0);
+INSERT INTO "area" VALUES('EPSG','4015','Vietnam - mainland','Vietnam - mainland onshore.',8.33,23.4,102.14,109.53,0);
 INSERT INTO "area" VALUES('EPSG','4016','South America -  onshore north of 45°S','South America - onshore north of 45°S excluding Amazonia.',-45.0,12.52,-81.41,-34.74,0);
 INSERT INTO "area" VALUES('EPSG','4017','Australia - SE Australia (ACT NSW)','Australia - Australian Capital Territory and New South Wales onshore.',-37.53,-28.15,140.99,153.69,0);
 INSERT INTO "area" VALUES('EPSG','4018','Congo DR (Zaire) - south and 29°E to 31°E','The Democratic Republic of the Congo (Zaire) - south of a line through Bandundu, Seke and Pweto and east of 29°E.',-13.46,-12.15,29.0,29.81,0);
@@ -3169,7 +3169,7 @@ INSERT INTO "area" VALUES('EPSG','4189','Cocos (Keeling) Islands - west of 96°E
 INSERT INTO "area" VALUES('EPSG','4190','Cocos (Keeling) Islands - east of 96°E','Cocos (Keeling) Islands - onshore and offshore east of 96°E.',-15.56,-8.47,96.0,100.34,0);
 INSERT INTO "area" VALUES('EPSG','4191','Australasia - Australia and Christmas Island - west of 108°E','Australia - offshore west of 108°E. Christmas Island - onshore and offshore west of 108°E.',-34.68,-8.87,102.14,108.01,0);
 INSERT INTO "area" VALUES('EPSG','4192','USA - Oregon - Bend-Klamath Falls','United States (USA) - Oregon - Bend-Klamath Falls area.',41.88,43.89,-122.45,-120.77,0);
-INSERT INTO "area" VALUES('EPSG','4193','Vietnam - west of 103°30''E onshore','Vietnam - onshore west of 103°30''E.',9.23,22.8,102.14,103.51,0);
+INSERT INTO "area" VALUES('EPSG','4193','Vietnam - west of 103°30''E onshore','Vietnam - onshore west of 103°30''E.',9.2,22.82,102.14,103.51,0);
 INSERT INTO "area" VALUES('EPSG','4194','Japan onshore excluding northern main province','Japan - onshore, excluding northern prefectures of ''main province'' (see remarks).',20.37,45.54,122.83,154.05,0);
 INSERT INTO "area" VALUES('EPSG','4195','USA - Oregon - Bend-Redmond-Prineville','United States (USA) - Oregon - Bend-Redmond-Prineville area.',43.76,44.98,-121.88,-119.79,0);
 INSERT INTO "area" VALUES('EPSG','4196','Australia and Macquarie - 156°E to 162°E','Australia including Lord Howe Island and Macquarie Islands - onshore and offshore between 156°E and 162°E.',-60.56,-14.08,156.0,162.01,0);
@@ -3191,9 +3191,9 @@ INSERT INTO "area" VALUES('EPSG','4211','USA - Oregon - Portland','United States
 INSERT INTO "area" VALUES('EPSG','4212','USA - Oregon - Salem','United States (USA) - Oregon - Salem area.',44.32,45.3,-123.73,-121.89,0);
 INSERT INTO "area" VALUES('EPSG','4213','USA - Oregon - Sweet Home-Sisters','United States (USA) - Oregon - Sweet Home-Santiam Pass-Sisters area.',44.1,44.66,-122.51,-121.69,0);
 INSERT INTO "area" VALUES('EPSG','4214','Papua New Guinea - mainland onshore','Papua New Guinea - mainland onshore.',-10.76,-2.53,140.85,150.96,0);
-INSERT INTO "area" VALUES('EPSG','4215','Vietnam - 103.5°E to 106.5°E onshore','Vietnam - between 103°30''E and 106°30''E, onshore.',8.5,23.33,103.5,106.51,0);
+INSERT INTO "area" VALUES('EPSG','4215','Vietnam - 103.5°E to 106.5°E onshore','Vietnam - between 103°30''E and 106°30''E, onshore.',8.33,23.4,103.5,106.51,0);
 INSERT INTO "area" VALUES('EPSG','4216','Papua New Guinea - North Fly','Papua New Guinea - North Fly area (between 5°04''S and 6°36''S and west of 141°32''E).',-6.6,-5.05,140.89,141.54,0);
-INSERT INTO "area" VALUES('EPSG','4217','Vietnam - east of 106.5°E onshore','Vietnam - onshore east of 106°30''E.',8.58,22.94,106.5,109.52,0);
+INSERT INTO "area" VALUES('EPSG','4217','Vietnam - east of 106.5°E onshore','Vietnam - onshore east of 106°30''E.',8.57,22.95,106.5,109.53,0);
 INSERT INTO "area" VALUES('EPSG','4218','Vietnam - Quang Ninh; Da Nang, Quang Nam; Ba Ria-Vung Tau, Dong Nai, Lam Dong','Vietnam - Quang Ninh province; Da Nang municipality and Quang Nam province; Ba Ria-Vung Tau, Dong Nai and Lam Dong provinces.',8.57,21.67,106.43,108.76,0);
 INSERT INTO "area" VALUES('EPSG','4219','USA - Iowa - Mason City','United States (USA) - Iowa - counties of Cerro Gordo; Chickasaw; Floyd; Hancock; Howard; Mitchell; Winnebago; Winneshiek; Worth.',42.9,43.51,-93.98,-91.6,0);
 INSERT INTO "area" VALUES('EPSG','4220','Equatorial Guinea - Bioko','Equatorial Guinea - Bioko onshore.',3.14,3.82,8.37,9.02,0);
