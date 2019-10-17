@@ -553,7 +553,7 @@ Ellipsoid::inverseFlattening() PROJ_PURE_DEFN {
  * has been defined with this value.
  *
  * @see computeSemiMinorAxis() that will always return a valid value of the
- * inverse flattening, whether the ellipsoid has been defined through inverse
+ * semi-minor axis, whether the ellipsoid has been defined through inverse
  * flattening or semi-minor axis.
  *
  * @return the semi-minor axis of the ellipsoid, or empty.

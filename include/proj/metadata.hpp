@@ -55,8 +55,7 @@ namespace metadata {
 
 /** \brief Standardized resource reference.
  *
- * Local names are names which are directly accessible to and maintained by a
- * NameSpace within which they are local, indicated by the scope.
+ * A citation contains a title.
  *
  * \remark Simplified version of [Citation]
  * (http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/citation/Citation.html)
