@@ -14,4 +14,5 @@ contributor the community is always very welcoming.
    channels
    contributing
    code_contributions
+   code_of_conduct
    rfc/index
