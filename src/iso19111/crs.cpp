@@ -3239,13 +3239,16 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
         if (!formatter->getCRSExport()) {
             formatter->addStep("unitconvert");
             formatter->addParam("xy_in", "m");
-            formatter->addParam("z_in", "m");
+            if (!formatter->omitZUnitConversion())
+                formatter->addParam("z_in", "m");
             if (projUnit.empty()) {
                 formatter->addParam("xy_out", toSI);
-                formatter->addParam("z_out", toSI);
+                if (!formatter->omitZUnitConversion())
+                    formatter->addParam("z_out", toSI);
             } else {
                 formatter->addParam("xy_out", projUnit);
-                formatter->addParam("z_out", projUnit);
+                if (!formatter->omitZUnitConversion())
+                    formatter->addParam("z_out", projUnit);
             }
         } else {
             if (projUnit.empty()) {
