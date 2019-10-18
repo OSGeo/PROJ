@@ -85,10 +85,22 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
             entry[ sizeof(entry) - 1 ] = '\0';
 
             curr = curr->next = pj_mkparam(entry);
+            if (nullptr == curr)
+            {
+                pj_ctx_set_errno(ctx, ENOMEM);
+                return 1;
+            }
         }
         
         if( pj_datums[i].defn && strlen(pj_datums[i].defn) > 0 )
+        {
             curr = curr->next = pj_mkparam(pj_datums[i].defn);
+            if (nullptr == curr)
+            {
+                pj_ctx_set_errno(ctx, ENOMEM);
+                return 1;
+            }
+        }
 
         (void)curr; /* make clang static analyzer happy */
     }
