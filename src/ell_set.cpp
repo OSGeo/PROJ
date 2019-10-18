@@ -160,7 +160,7 @@ static int ellps_ellps (PJ *P) {
     if (nullptr == new_params)
         return proj_errno_set (P, ENOMEM);
     new_params->next = pj_mkparam (ellps->ell);
-    if (nullptr == new_params)
+    if (nullptr == new_params->next)
     {
         pj_dealloc(new_params);
         return proj_errno_set (P, ENOMEM);
