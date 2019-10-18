@@ -7252,6 +7252,30 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_with_non_meter_horiz_and_vertical_to_geog) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=31 +datum=WGS84 +units=us-ft +vunits=us-ft +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), authFactory->createCoordinateReferenceSystem("4326"),
+        ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    // Check that vertical unit conversion is done just once
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=us-ft +xy_out=m "
+              "+step +inv +proj=utm +zone=31 +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=us-ft "
+              "+xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, boundCRS_to_compoundCRS) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +type=crs");
