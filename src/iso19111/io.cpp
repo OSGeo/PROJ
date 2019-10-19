@@ -8236,6 +8236,8 @@ static double getAngularValue(const std::string &paramValue,
 // ---------------------------------------------------------------------------
 
 static bool is_in_stringlist(const std::string &str, const char *stringlist) {
+    if (str.empty())
+        return false;
     const char *haystack = stringlist;
     while (true) {
         const char *res = strstr(haystack, str.c_str());

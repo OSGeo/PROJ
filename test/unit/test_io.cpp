@@ -8805,6 +8805,10 @@ TEST(io, projparse_longlat_errors) {
                      "+proj=pipeline +step +proj=longlat +ellps=GRS80 +step "
                      "+proj=axisswap +order=0,0"),
                  ParsingException);
+
+    // We just want to check that we don't loop forever
+    PROJStringParser().createFromPROJString(
+        "+=x;proj=pipeline step proj=push +type=crs");
 }
 
 // ---------------------------------------------------------------------------
