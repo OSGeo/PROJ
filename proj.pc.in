@@ -9,5 +9,5 @@ Description: Cartographic Projections Library.
 Requires:
 Version: @VERSION@
 Libs: -L${libdir} -lproj
-Libs.Private: -lstdc++
+Libs.Private: @SQLITE3_LIBS@ -lstdc++
 Cflags: -I${includedir}
