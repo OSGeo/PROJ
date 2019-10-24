@@ -4019,15 +4019,23 @@ TEST_F(CApi, proj_crs_create_projected_3D_crs_from_2D) {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_crs_create_bound_vertical_crs_to_WGS84) {
+TEST_F(CApi, proj_crs_create_bound_vertical_crs) {
 
     auto vert_crs = proj_create_vertical_crs(m_ctxt, "myVertCRS", "myVertDatum",
                                              nullptr, 0.0);
     ObjectKeeper keeper_vert_crs(vert_crs);
     ASSERT_NE(vert_crs, nullptr);
 
-    auto bound_crs = proj_crs_create_bound_vertical_crs_to_WGS84(
-        m_ctxt, vert_crs, "foo.gtx");
+    auto crs4979 = proj_create_from_wkt(
+        m_ctxt,
+        GeographicCRS::EPSG_4979->exportToWKT(WKTFormatter::create().get())
+            .c_str(),
+        nullptr, nullptr, nullptr);
+    ObjectKeeper keeper_crs4979(crs4979);
+    ASSERT_NE(crs4979, nullptr);
+
+    auto bound_crs = proj_crs_create_bound_vertical_crs(m_ctxt, vert_crs,
+                                                        crs4979, "foo.gtx");
     ObjectKeeper keeper_bound_crs(bound_crs);
     ASSERT_NE(bound_crs, nullptr);
 
@@ -4078,7 +4086,7 @@ TEST_F(CApi, proj_create_crs_to_crs_with_only_ballpark_transformations) {
 
 TEST_F(
     CApi,
-    proj_create_crs_to_crs_from_custom_compound_crs_with_NAD83_2011_and_geoidgrid_to_WGS84_G1762) {
+    proj_create_crs_to_crs_from_custom_compound_crs_with_NAD83_2011_and_geoidgrid_ref_against_WGS84_to_WGS84_G1762) {
 
     if (strcmp(proj_grid_info("egm96_15.gtx").format, "missing") == 0) {
         return; // use GTEST_SKIP() if we upgrade gtest
@@ -4094,10 +4102,15 @@ TEST_F(
                                               "DummyDatum", "metre", 1.0);
     ASSERT_NE(inDummyCrs, nullptr);
 
-    PJ *inCrsV = proj_crs_create_bound_vertical_crs_to_WGS84(m_ctxt, inDummyCrs,
-                                                             "egm96_15.gtx");
+    auto crs4979 = proj_create_from_database(m_ctxt, "EPSG", "4979",
+                                           PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(crs4979, nullptr);
+
+    PJ *inCrsV = proj_crs_create_bound_vertical_crs(m_ctxt, inDummyCrs, crs4979,
+                                                    "egm96_15.gtx");
     ASSERT_NE(inCrsV, nullptr);
     proj_destroy(inDummyCrs);
+    proj_destroy(crs4979);
 
     PJ *inCompound =
         proj_create_compound_crs(m_ctxt, "Compound", inCrsH, inCrsV);
@@ -4115,7 +4128,7 @@ TEST_F(
     // as ballpark. That one used to be eliminated because by
     // proj_create_crs_to_crs() because there were non Ballpark transformations
     // available. This resulted thus in an error when transforming outside of
-    // those few subzones.s
+    // those few subzones.
     P = proj_create_crs_to_crs_from_pj(m_ctxt, inCompound, outCrs, nullptr,
                                        nullptr);
     ASSERT_NE(P, nullptr);
@@ -4134,6 +4147,70 @@ TEST_F(
     EXPECT_NEAR(outcoord.xyzt.x, 35.09499307271, 1e-9);
     EXPECT_NEAR(outcoord.xyzt.y, -118.64014868921, 1e-9);
     EXPECT_NEAR(outcoord.xyzt.z, 118.059, 1e-3);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(
+    CApi,
+    proj_create_crs_to_crs_from_custom_compound_crs_with_NAD83_2011_and_geoidgrid_ref_against_NAD83_2011_to_WGS84_G1762) {
+
+    if (strcmp(proj_grid_info("egm96_15.gtx").format, "missing") == 0) {
+        return; // use GTEST_SKIP() if we upgrade gtest
+    }
+
+    PJ *P;
+
+    // NAD83(2011) 2D
+    PJ *inCrsH = proj_create_from_database(m_ctxt, "EPSG", "6318",
+                                           PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(inCrsH, nullptr);
+
+    PJ *inDummyCrs = proj_create_vertical_crs(m_ctxt, "VerticalDummyCrs",
+                                              "DummyDatum", "metre", 1.0);
+    ASSERT_NE(inDummyCrs, nullptr);
+
+    // NAD83(2011) 3D
+    PJ *inGeog3DCRS = proj_create_from_database(
+        m_ctxt, "EPSG", "6319", PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(inCrsH, nullptr);
+
+    // Note: this is actually a bad example since we tell here that egm96_15.gtx
+    // is referenced against NAD83(2011)
+    PJ *inCrsV = proj_crs_create_bound_vertical_crs(
+        m_ctxt, inDummyCrs, inGeog3DCRS, "egm96_15.gtx");
+    ASSERT_NE(inCrsV, nullptr);
+    proj_destroy(inDummyCrs);
+    proj_destroy(inGeog3DCRS);
+
+    PJ *inCompound =
+        proj_create_compound_crs(m_ctxt, "Compound", inCrsH, inCrsV);
+    ASSERT_NE(inCompound, nullptr);
+    proj_destroy(inCrsH);
+    proj_destroy(inCrsV);
+
+    // WGS84 (G1762)
+    PJ *outCrs = proj_create(m_ctxt, "EPSG:7665");
+    ASSERT_NE(outCrs, nullptr);
+
+    P = proj_create_crs_to_crs_from_pj(m_ctxt, inCompound, outCrs, nullptr,
+                                       nullptr);
+    ASSERT_NE(P, nullptr);
+    proj_destroy(inCompound);
+    proj_destroy(outCrs);
+
+    PJ_COORD in_coord;
+    in_coord.xyzt.x = 35;
+    in_coord.xyzt.y = -118;
+    in_coord.xyzt.z = 0;
+    in_coord.xyzt.t = 2010;
+
+    PJ_COORD outcoord = proj_trans(P, PJ_FWD, in_coord);
+    proj_destroy(P);
+
+    EXPECT_NEAR(outcoord.xyzt.x, 35.000003665064803, 1e-9);
+    EXPECT_NEAR(outcoord.xyzt.y, -118.00001414221214, 1e-9);
+    EXPECT_NEAR(outcoord.xyzt.z, -32.5823, 1e-3);
 }
 
 } // namespace
