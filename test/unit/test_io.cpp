@@ -5096,6 +5096,79 @@ TEST(wkt_parse, wkt1_esri_krovak_south_west) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse,
+     wkt1_esri_krovak_east_north_non_standard_likely_from_GDAL_wkt1) {
+    auto wkt = "PROJCS[\"S_JTSK_Krovak_East_North\",GEOGCS[\"GCS_S-JTSK\","
+               "DATUM[\"D_S_JTSK\",SPHEROID[\"Bessel_1841\","
+               "6377397.155,299.1528128]],PRIMEM[\"Greenwich\",0],"
+               "UNIT[\"Degree\",0.017453292519943295]],PROJECTION[\"Krovak\"],"
+               "PARAMETER[\"latitude_of_center\",49.5],"
+               "PARAMETER[\"longitude_of_center\",24.83333333333333],"
+               "PARAMETER[\"azimuth\",30.28813972222222],"
+               "PARAMETER[\"pseudo_standard_parallel_1\",78.5],"
+               "PARAMETER[\"scale_factor\",0.9999],"
+               "PARAMETER[\"false_easting\",0],"
+               "PARAMETER[\"false_northing\",0],UNIT[\"Meter\",1]]";
+
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
+              "Krovak (North Orientated)");
+
+    auto expected_wkt2 =
+        "PROJCRS[\"S_JTSK_Krovak_East_North\",\n"
+        "    BASEGEODCRS[\"GCS_S-JTSK\",\n"
+        "        DATUM[\"System of the Unified Trigonometrical Cadastral "
+        "Network\",\n"
+        "            ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",6156]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433]]],\n"
+        "    CONVERSION[\"unnamed\",\n"
+        "        METHOD[\"Krovak (North Orientated)\",\n"
+        "            ID[\"EPSG\",1041]],\n"
+        "        PARAMETER[\"Latitude of projection centre\",49.5,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8811]],\n"
+        "        PARAMETER[\"Longitude of origin\",24.8333333333333,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8833]],\n"
+        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",1036]],\n"
+        "        PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
+        "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8818]],\n"
+        "        PARAMETER[\"Scale factor on pseudo standard "
+        "parallel\",0.9999,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8819]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]]]";
+
+    EXPECT_EQ(crs->exportToWKT(WKTFormatter::create().get()), expected_wkt2);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt1_esri_normalize_unit) {
     auto wkt = "PROJCS[\"Accra_Ghana_Grid\",GEOGCS[\"GCS_Accra\","
                "DATUM[\"D_Accra\",SPHEROID[\"War_Office\",6378300.0,296.0]],"
