@@ -4103,7 +4103,7 @@ TEST_F(
     ASSERT_NE(inDummyCrs, nullptr);
 
     auto crs4979 = proj_create_from_database(m_ctxt, "EPSG", "4979",
-                                           PJ_CATEGORY_CRS, false, nullptr);
+                                             PJ_CATEGORY_CRS, false, nullptr);
     ASSERT_NE(crs4979, nullptr);
 
     PJ *inCrsV = proj_crs_create_bound_vertical_crs(m_ctxt, inDummyCrs, crs4979,
