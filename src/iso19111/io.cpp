@@ -3185,7 +3185,16 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
         }
     }
 
-    const auto *wkt2_mapping = getMapping(esriMapping->wkt2_name);
+    const char *projectionMethodWkt2Name = esriMapping->wkt2_name;
+    if (ci_equal(esriProjectionName, "Krovak")) {
+        const std::string projCRSName =
+            stripQuotes(projCRSNode->GP()->children()[0]);
+        if (projCRSName.find("_East_North") != std::string::npos) {
+            projectionMethodWkt2Name = EPSG_NAME_METHOD_KROVAK_NORTH_ORIENTED;
+        }
+    }
+
+    const auto *wkt2_mapping = getMapping(projectionMethodWkt2Name);
     if (ci_equal(esriProjectionName, "Stereographic")) {
         try {
             if (std::fabs(io::asDouble(
