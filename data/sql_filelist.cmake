@@ -22,6 +22,7 @@ set(SQL_FILES
   "${SQL_DIR}/grid_transformation_custom.sql"
   "${SQL_DIR}/other_transformation.sql"
   "${SQL_DIR}/concatenated_operation.sql"
+  "${SQL_DIR}/concatenated_operation_step.sql"
   "${SQL_DIR}/alias_name.sql"
   "${SQL_DIR}/supersession.sql"
   "${SQL_DIR}/deprecation.sql"

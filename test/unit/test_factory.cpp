@@ -1116,6 +1116,28 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(
+    factory,
+    AuthorityFactory_createCoordinateOperation_concatenated_operation_epsg_9103) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("9103", false);
+    auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
+    ASSERT_TRUE(concatenated != nullptr);
+    auto operations = concatenated->operations();
+    ASSERT_EQ(operations.size(),
+              5U); // we've added an explicit geographic -> geocentric step
+    EXPECT_EQ(operations[0]->nameStr(), "NAD27 to NAD83 (1)");
+    EXPECT_EQ(operations[1]->nameStr(), "NAD83 to NAD83(2011) (1)");
+    EXPECT_EQ(
+        operations[2]->nameStr(),
+        "Conversion from NAD83(2011) (geog2D) to NAD83(2011) (geocentric)");
+    EXPECT_EQ(operations[3]->nameStr(),
+              "Inverse of ITRF2008 to NAD83(2011) (1)");
+    EXPECT_EQ(operations[4]->nameStr(), "ITRF2008 to ITRF2014 (1)");
+}
+
+// ---------------------------------------------------------------------------
+
 static bool in(const std::string &str, const std::vector<std::string> &list) {
     for (const auto &listItem : list) {
         if (str == listItem) {
@@ -1514,12 +1536,21 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
 
-        ASSERT_TRUE(execute(
-            "INSERT INTO concatenated_operation "
-            "VALUES('EPSG','DUMMY_CONCATENATED','name',NULL,NULL,"
-            "'EPSG','4326','EPSG'"
-            ",'4326','EPSG','1262',NULL,'EPSG','DUMMY_OTHER_TRANSFORMATION'"
-            ",'EPSG','DUMMY_OTHER_TRANSFORMATION',NULL,NULL,NULL,0);"))
+        ASSERT_TRUE(
+            execute("INSERT INTO concatenated_operation "
+                    "VALUES('EPSG','DUMMY_CONCATENATED','name',NULL,NULL,"
+                    "'EPSG','4326','EPSG'"
+                    ",'4326','EPSG','1262',NULL,NULL,0);"))
+            << last_error();
+
+        ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                            "VALUES('EPSG','DUMMY_CONCATENATED',1,"
+                            "'EPSG','DUMMY_OTHER_TRANSFORMATION');"))
+            << last_error();
+
+        ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                            "VALUES('EPSG','DUMMY_CONCATENATED',2,"
+                            "'EPSG','DUMMY_OTHER_TRANSFORMATION');"))
             << last_error();
     }
 
