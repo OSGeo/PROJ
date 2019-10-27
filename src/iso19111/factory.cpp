@@ -3141,8 +3141,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             "source_crs_auth_name, source_crs_code, "
             "target_crs_auth_name, target_crs_code, "
             "area_of_use_auth_name, area_of_use_code, accuracy, "
-            "step1_auth_name, step1_code, step2_auth_name, step2_code, "
-            "step3_auth_name, step3_code, operation_version, deprecated FROM "
+            "operation_version, deprecated FROM "
             "concatenated_operation WHERE auth_name = ? AND code = ?",
             code);
         if (res.empty()) {
@@ -3150,6 +3149,13 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             throw NoSuchAuthorityCodeException(
                 "concatenated_operation not found", d->authority(), code);
         }
+
+        auto resSteps = d->runWithCodeParam(
+            "SELECT step_auth_name, step_code FROM "
+            "concatenated_operation_step WHERE operation_auth_name = ? "
+            "AND operation_code = ? ORDER BY step_number",
+            code);
+
         try {
             const auto &row = res.front();
             size_t idx = 0;
@@ -3163,32 +3169,17 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &area_of_use_auth_name = row[idx++];
             const auto &area_of_use_code = row[idx++];
             const auto &accuracy = row[idx++];
-            const auto &step1_auth_name = row[idx++];
-            const auto &step1_code = row[idx++];
-            const auto &step2_auth_name = row[idx++];
-            const auto &step2_code = row[idx++];
-            const auto &step3_auth_name = row[idx++];
-            const auto &step3_code = row[idx++];
             const auto &operation_version = row[idx++];
             const auto &deprecated_str = row[idx++];
             const bool deprecated = deprecated_str == "1";
 
             std::vector<operation::CoordinateOperationNNPtr> operations;
-            operations.push_back(
-                d->createFactory(step1_auth_name)
-                    ->createCoordinateOperation(step1_code, false,
-                                                usePROJAlternativeGridNames,
-                                                std::string()));
-            operations.push_back(
-                d->createFactory(step2_auth_name)
-                    ->createCoordinateOperation(step2_code, false,
-                                                usePROJAlternativeGridNames,
-                                                std::string()));
-
-            if (!step3_auth_name.empty()) {
+            for (const auto &rowStep : resSteps) {
+                const auto &step_auth_name = rowStep[0];
+                const auto &step_code = rowStep[1];
                 operations.push_back(
-                    d->createFactory(step3_auth_name)
-                        ->createCoordinateOperation(step3_code, false,
+                    d->createFactory(step_auth_name)
+                        ->createCoordinateOperation(step_code, false,
                                                     usePROJAlternativeGridNames,
                                                     std::string()));
             }

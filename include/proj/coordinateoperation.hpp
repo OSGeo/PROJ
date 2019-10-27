@@ -1348,6 +1348,10 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     PROJ_INTERNAL ConversionNNPtr alterParametersLinearUnit(
         const common::UnitOfMeasure &unit, bool convertToNewUnit) const;
 
+    PROJ_INTERNAL static ConversionNNPtr
+    createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
+                               const crs::CRSNNPtr &targetCRS);
+
     //! @endcond
 
   protected:

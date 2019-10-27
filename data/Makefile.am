@@ -27,6 +27,7 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/grid_transformation_custom.sql \
 		sql/other_transformation.sql \
 		sql/concatenated_operation.sql \
+		sql/concatenated_operation_step.sql \
 		sql/alias_name.sql \
 		sql/supersession.sql \
 		sql/deprecation.sql \

@@ -4710,6 +4710,64 @@ Conversion::createGeographicGeocentric(const util::PropertyMap &properties) {
 
 //! @cond Doxygen_Suppress
 
+static const char *getCRSQualifierStr(const crs::CRSPtr &crs) {
+    auto geod = dynamic_cast<crs::GeodeticCRS *>(crs.get());
+    if (geod) {
+        if (geod->isGeocentric()) {
+            return " (geocentric)";
+        }
+        auto geog = dynamic_cast<crs::GeographicCRS *>(geod);
+        if (geog) {
+            if (geog->coordinateSystem()->axisList().size() == 2) {
+                return " (geog2D)";
+            } else {
+                return " (geog3D)";
+            }
+        }
+    }
+    return "";
+}
+
+// ---------------------------------------------------------------------------
+
+static std::string buildOpName(const char *opType, const crs::CRSPtr &source,
+                               const crs::CRSPtr &target) {
+    std::string res(opType);
+    const auto &srcName = source->nameStr();
+    const auto &targetName = target->nameStr();
+    const char *srcQualifier = "";
+    const char *targetQualifier = "";
+    if (srcName == targetName) {
+        srcQualifier = getCRSQualifierStr(source);
+        targetQualifier = getCRSQualifierStr(target);
+        if (strcmp(srcQualifier, targetQualifier) == 0) {
+            srcQualifier = "";
+            targetQualifier = "";
+        }
+    }
+    res += " from ";
+    res += srcName;
+    res += srcQualifier;
+    res += " to ";
+    res += targetName;
+    res += targetQualifier;
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr
+Conversion::createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
+                                       const crs::CRSNNPtr &targetCRS) {
+    auto properties = util::PropertyMap().set(
+        common::IdentifiedObject::NAME_KEY,
+        buildOpName("Conversion", sourceCRS, targetCRS));
+    auto conv = createGeographicGeocentric(properties);
+    conv->setCRSs(sourceCRS, targetCRS, nullptr);
+    return conv;
+}
+// ---------------------------------------------------------------------------
+
 static util::PropertyMap &addDomains(util::PropertyMap &map,
                                      const common::ObjectUsage *obj) {
 
@@ -7403,52 +7461,6 @@ TransformationNNPtr Transformation::createChangeVerticalUnit(
 
 // ---------------------------------------------------------------------------
 
-static const char *getCRSQualifierStr(const crs::CRSPtr &crs) {
-    auto geod = dynamic_cast<crs::GeodeticCRS *>(crs.get());
-    if (geod) {
-        if (geod->isGeocentric()) {
-            return " (geocentric)";
-        }
-        auto geog = dynamic_cast<crs::GeographicCRS *>(geod);
-        if (geog) {
-            if (geog->coordinateSystem()->axisList().size() == 2) {
-                return " (geog2D)";
-            } else {
-                return " (geog3D)";
-            }
-        }
-    }
-    return "";
-}
-
-// ---------------------------------------------------------------------------
-
-static std::string buildOpName(const char *opType, const crs::CRSPtr &source,
-                               const crs::CRSPtr &target) {
-    std::string res(opType);
-    const auto &srcName = source->nameStr();
-    const auto &targetName = target->nameStr();
-    const char *srcQualifier = "";
-    const char *targetQualifier = "";
-    if (srcName == targetName) {
-        srcQualifier = getCRSQualifierStr(source);
-        targetQualifier = getCRSQualifierStr(target);
-        if (strcmp(srcQualifier, targetQualifier) == 0) {
-            srcQualifier = "";
-            targetQualifier = "";
-        }
-    }
-    res += " from ";
-    res += srcName;
-    res += srcQualifier;
-    res += " to ";
-    res += targetName;
-    res += targetQualifier;
-    return res;
-}
-
-// ---------------------------------------------------------------------------
-
 static util::PropertyMap
 createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
                            bool approximateInversion) {
@@ -9524,6 +9536,9 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+// ---------------------------------------------------------------------------
+
 void ConcatenatedOperation::fixStepsDirection(
     const crs::CRSNNPtr &concatOpSourceCRS,
     const crs::CRSNNPtr &concatOpTargetCRS,
@@ -9620,13 +9635,46 @@ void ConcatenatedOperation::fixStepsDirection(
                             nullptr);
             }
         } else if (!conv && l_sourceCRS && l_targetCRS) {
+
+            const auto isGeographic = [](const crs::CRS *crs) -> bool {
+                return dynamic_cast<const crs::GeographicCRS *>(crs) != nullptr;
+            };
+
+            const auto isGeocentric = [](const crs::CRS *crs) -> bool {
+                auto geodCRS = dynamic_cast<const crs::GeodeticCRS *>(crs);
+                if (geodCRS &&
+                    geodCRS->coordinateSystem()->axisList().size() == 3)
+                    return true;
+                return false;
+            };
+
             // Transformations might be mentioned in their forward directions,
             // whereas we should instead use the reverse path.
             auto prevOpTarget = (i == 0) ? concatOpSourceCRS.as_nullable()
                                          : operationsInOut[i - 1]->targetCRS();
-            if (!compareStepCRS(l_sourceCRS.get(), prevOpTarget.get()) &&
-                compareStepCRS(l_targetCRS.get(), prevOpTarget.get())) {
+            if (compareStepCRS(l_sourceCRS.get(), prevOpTarget.get())) {
+                // do nothing
+            } else if (compareStepCRS(l_targetCRS.get(), prevOpTarget.get())) {
                 op = op->inverse();
+            }
+            // Below is needed for EPSG:9103 which chains NAD83(2011) geographic
+            // 2D with NAD83(2011) geocentric
+            else if (l_sourceCRS->nameStr() == prevOpTarget->nameStr() &&
+                     ((isGeographic(l_sourceCRS.get()) &&
+                       isGeocentric(prevOpTarget.get())) ||
+                      (isGeocentric(l_sourceCRS.get()) &&
+                       isGeographic(prevOpTarget.get())))) {
+                auto newOp(Conversion::createGeographicGeocentric(
+                    NN_NO_CHECK(prevOpTarget), NN_NO_CHECK(l_sourceCRS)));
+                operationsInOut.insert(operationsInOut.begin() + i, newOp);
+            } else if (l_targetCRS->nameStr() == prevOpTarget->nameStr() &&
+                       ((isGeographic(l_targetCRS.get()) &&
+                         isGeocentric(prevOpTarget.get())) ||
+                        (isGeocentric(l_targetCRS.get()) &&
+                         isGeographic(prevOpTarget.get())))) {
+                auto newOp(Conversion::createGeographicGeocentric(
+                    NN_NO_CHECK(prevOpTarget), NN_NO_CHECK(l_targetCRS)));
+                operationsInOut.insert(operationsInOut.begin() + i, newOp);
             }
         }
     }
@@ -10289,10 +10337,6 @@ struct CoordinateOperationFactory::Private {
     static bool
     hasPerfectAccuracyResult(const std::vector<CoordinateOperationNNPtr> &res,
                              const Context &context);
-
-    static ConversionNNPtr
-    createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
-                               const crs::CRSNNPtr &targetCRS);
 
     static void setCRSs(CoordinateOperation *co, const crs::CRSNNPtr &sourceCRS,
                         const crs::CRSNNPtr &targetCRS);
@@ -11659,18 +11703,6 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
 
 //! @cond Doxygen_Suppress
 
-ConversionNNPtr CoordinateOperationFactory::Private::createGeographicGeocentric(
-    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) {
-    auto properties = util::PropertyMap().set(
-        common::IdentifiedObject::NAME_KEY,
-        buildOpName("Conversion", sourceCRS, targetCRS));
-    auto conv = Conversion::createGeographicGeocentric(properties);
-    conv->setCRSs(sourceCRS, targetCRS, nullptr);
-    return conv;
-}
-
-// ---------------------------------------------------------------------------
-
 std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::createOperationsGeogToGeog(
     std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
@@ -12712,8 +12744,8 @@ CoordinateOperationFactory::Private::createOperations(
             if (geodSrc->datum()->_isEquivalentTo(
                     geodDst->datum().get(),
                     util::IComparable::Criterion::EQUIVALENT)) {
-                res.emplace_back(
-                    createGeographicGeocentric(sourceCRS, targetCRS));
+                res.emplace_back(Conversion::createGeographicGeocentric(
+                    sourceCRS, targetCRS));
             } else if (isSrcGeocentric) {
                 std::string interm_crs_name(geogDst->nameStr());
                 interm_crs_name += " (geocentric)";
@@ -12729,8 +12761,8 @@ CoordinateOperationFactory::Private::createOperations(
                                 geodSrc->coordinateSystem()))));
                 auto opFirst =
                     createBallparkGeocentricTranslation(sourceCRS, interm_crs);
-                auto opSecond =
-                    createGeographicGeocentric(interm_crs, targetCRS);
+                auto opSecond = Conversion::createGeographicGeocentric(
+                    interm_crs, targetCRS);
                 res.emplace_back(ConcatenatedOperation::createComputeMetadata(
                     {opFirst, opSecond}, !allowEmptyIntersection));
             } else {
@@ -13364,9 +13396,7 @@ CoordinateOperationFactory::Private::createOperations(
                                     verticalTransform, interpToTarget,
                                     interpolationGeogCRS, true);
                                 res.emplace_back(op);
-                            } catch (
-                                const InvalidOperationEmptyIntersection &) {
-                                continue;
+                            } catch (const std::exception &) {
                             }
                         }
                     }
@@ -13377,10 +13407,13 @@ CoordinateOperationFactory::Private::createOperations(
                     // involve a grid, because of the rather arbitrary order
                     // horizontal then vertical applied
                     for (const auto &horizTransform : horizTransforms) {
-                        auto op = createHorizVerticalPROJBased(
-                            sourceCRS, targetCRS, horizTransform,
-                            verticalTransform);
-                        res.emplace_back(op);
+                        try {
+                            auto op = createHorizVerticalPROJBased(
+                                sourceCRS, targetCRS, horizTransform,
+                                verticalTransform);
+                            res.emplace_back(op);
+                        } catch (const std::exception &) {
+                        }
                     }
                 }
             }

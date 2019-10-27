@@ -1310,15 +1310,6 @@ CREATE TABLE concatenated_operation(
 
     accuracy FLOAT CHECK (accuracy >= 0),
 
-    step1_auth_name TEXT NOT NULL,
-    step1_code TEXT NOT NULL,
-
-    step2_auth_name TEXT NOT NULL,
-    step2_code TEXT NOT NULL,
-
-    step3_auth_name TEXT,
-    step3_code TEXT,
-
     operation_version TEXT, -- normally mandatory in OGC Topic 2 but optional here
 
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
@@ -1327,9 +1318,6 @@ CREATE TABLE concatenated_operation(
     --CONSTRAINT fk_concatenated_operation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     --CONSTRAINT fk_concatenated_operation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     --CONSTRAINT fk_concatenated_operation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
-    --CONSTRAINT fk_concatenated_operation_step1 FOREIGN KEY (step1_auth_name, step1_code) REFERENCES coordinate_operation(auth_name, code),
-    --CONSTRAINT fk_concatenated_operation_step2 FOREIGN KEY (step2_auth_name, step2_code) REFERENCES coordinate_operation(auth_name, code),
-    --CONSTRAINT fk_concatenated_operation_step3 FOREIGN KEY (step3_auth_name, step3_code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_concatenated_operation_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
 
@@ -1340,27 +1328,11 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: (auth_name, code) must not already exist in coordinate_operation_with_conversion_view')
         WHERE EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.auth_name AND covwv.code = NEW.code);
 
-    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step1(auth_name, code) must already exist in coordinate_operation_with_conversion_view')
-        WHERE NOT EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.step1_auth_name AND covwv.code = NEW.step1_code);
-
-    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step2(auth_name, code) must already exist in coordinate_operation_with_conversion_view')
-        WHERE NOT EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.step2_auth_name AND covwv.code = NEW.step2_code);
-
-    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step3(auth_name, code) must already exist in coordinate_operation_with_conversion_view')
-        WHERE NEW.step3_auth_name IS NOT NULL AND NOT EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.step3_auth_name AND covwv.code = NEW.step3_code);
-
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: source_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.source_crs_auth_name AND crs_view.code = NEW.source_crs_code);
 
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: target_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.target_crs_auth_name AND crs_view.code = NEW.target_crs_code);
-
-    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step1 should not be a concatenated_operation')
-        WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step1_auth_name AND code = NEW.step1_code);
-    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step2 should not be a concatenated_operation')
-        WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step2_auth_name AND code = NEW.step2_code);
-    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: step3 should not be a concatenated_operation')
-        WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step3_auth_name AND code = NEW.step3_code);
 
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: source_crs must not be deprecated when concatenated_operation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
@@ -1370,6 +1342,28 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
+CREATE TABLE concatenated_operation_step(
+    operation_auth_name TEXT NOT NULL CHECK (length(operation_auth_name) >= 1),
+    operation_code TEXT NOT NULL CHECK (length(operation_code) >= 1),
+    step_number INTEGER NOT NULL CHECK (step_number >= 1),
+    step_auth_name TEXT NOT NULL CHECK (length(step_auth_name) >= 1),
+    step_code TEXT NOT NULL CHECK (length(step_code) >= 1),
+
+    CONSTRAINT pk_concatenated_operation_step PRIMARY KEY (operation_auth_name, operation_code, step_number)
+    --CONSTRAINT fk_concatenated_operation_step_to_operation FOREIGN KEY (step_auth_name, step_code) REFERENCES coordinate_operation(auth_name, code)
+);
+
+CREATE TRIGGER concatenated_operation_step_insert_trigger
+BEFORE INSERT ON concatenated_operation_step
+FOR EACH ROW BEGIN
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation_step violates constraint: (step_auth_name, step_code) must already exist in coordinate_operation_with_conversion_view')
+        WHERE NOT EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.step_auth_name AND covwv.code = NEW.step_code);
+
+    SELECT RAISE(ABORT, 'insert on concatenated_operation_step violates constraint: step should not be a concatenated_operation')
+        WHERE EXISTS(SELECT 1 FROM concatenated_operation WHERE auth_name = NEW.step_auth_name AND code = NEW.step_code);
+
+END;
 
 CREATE TABLE alias_name(
     table_name TEXT NOT NULL CHECK (table_name IN (

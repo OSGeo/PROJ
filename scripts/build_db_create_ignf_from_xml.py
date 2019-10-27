@@ -504,7 +504,7 @@ for node in root.iterfind('.//Transformation'):
             print('Fixing URL of ' + filename + ' to ' + mapGridURLs[filename])
             filename = mapGridURLs[filename]
 
-        if not filename.endswith('RAF09.mnt'): # no longer available
+        if not filename.endswith('RAF09.mnt') and not filename.endswith('ggspm06v1.mnt'): # no longer available
             r = requests.head(filename, allow_redirects = True  )
             if r.status_code not in (200, 302):
                 assert False, (r.status_code, id, name, filename)
@@ -693,7 +693,13 @@ for node in root.iterfind('.//Transformation'):
                             #sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','%s','concatenated_operation');""" % (id_concat)
                             #all_sql_concat.append(sql)
 
-                            sql = """INSERT INTO "concatenated_operation" VALUES('IGNF','%s','Nouvelle Triangulation Francaise Paris grades to %s',NULL,'%s','IGNF','%s','%s','%s','%s','%s',NULL,'IGNF','%s','IGNF','%s',NULL,NULL,'%s',0);""" % (id_concat, target[1], scope, NTFPalias, target[0], target[1], area_of_use[0], area_of_use[1], idFirstOp, id_geog, operation_version)
+                            sql = """INSERT INTO "concatenated_operation" VALUES('IGNF','%s','Nouvelle Triangulation Francaise Paris grades to %s',NULL,'%s','IGNF','%s','%s','%s','%s','%s',NULL,'%s',0);""" % (id_concat, target[1], scope, NTFPalias, target[0], target[1], area_of_use[0], area_of_use[1], operation_version)
+                            all_sql_concat.append(sql)
+
+                            sql = """INSERT INTO "concatenated_operation_step" VALUES('IGNF','%s',1,'IGNF','%s');""" % (id_concat, idFirstOp)
+                            all_sql_concat.append(sql)
+
+                            sql = """INSERT INTO "concatenated_operation_step" VALUES('IGNF','%s',2,'IGNF','%s');""" % (id_concat, id_geog)
                             all_sql_concat.append(sql)
 
 

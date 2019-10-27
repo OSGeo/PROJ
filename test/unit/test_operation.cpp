@@ -4516,7 +4516,7 @@ TEST(operation, geogCRS_to_geogCRS_context_ntv1_ntv2_ctable2) {
         authFactory->createCoordinateReferenceSystem("4267"), // NAD27
         authFactory->createCoordinateReferenceSystem("4269"), // NAD83
         ctxt);
-    ASSERT_EQ(list.size(), 8U);
+    ASSERT_EQ(list.size(), 10U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
