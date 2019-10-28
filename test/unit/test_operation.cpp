@@ -7652,6 +7652,26 @@ TEST(operation, createOperation_on_crs_with_bound_crs_and_wktext) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createOperation_ossfuzz_18587) {
+    auto objSrc =
+        createFromUserInput("EPSG:4326", DatabaseContext::create(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    // Extremly weird string ! We should likely reject it
+    auto objDst = PROJStringParser().createFromPROJString(
+        "type=crs proj=pipeline step proj=merc vunits=m nadgrids=@x "
+        "proj=\"\nproj=pipeline step\n\"");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    // Just check that we don't go into an infinite recursion
+    CoordinateOperationFactory::create()->createOperation(NN_CHECK_ASSERT(src),
+                                                          NN_CHECK_ASSERT(dst));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, mercator_variant_A_to_variant_B) {
     auto projCRS = ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,

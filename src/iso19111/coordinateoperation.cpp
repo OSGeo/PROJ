@@ -12820,11 +12820,13 @@ CoordinateOperationFactory::Private::createOperations(
             dynamic_cast<const crs::GeographicCRS *>(hubSrc.get());
         auto geogCRSOfBaseOfBoundSrc =
             boundSrc->baseCRS()->extractGeographicCRS();
+        bool triedBoundCrsToGeogCRSSameAsHubCRS = false;
         // Is it: boundCRS to a geogCRS that is the same as the hubCRS ?
         if (hubSrcGeog && geogCRSOfBaseOfBoundSrc &&
             (hubSrcGeog->_isEquivalentTo(
                  geogDst, util::IComparable::Criterion::EQUIVALENT) ||
              hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst)))) {
+            triedBoundCrsToGeogCRSSameAsHubCRS = true;
             if (boundSrc->baseCRS() == geogCRSOfBaseOfBoundSrc) {
                 // Optimization to avoid creating a useless concatenated
                 // operation
@@ -12938,7 +12940,8 @@ CoordinateOperationFactory::Private::createOperations(
             return res;
         }
 
-        if (hubSrcGeog && geogCRSOfBaseOfBoundSrc) {
+        if (!triedBoundCrsToGeogCRSSameAsHubCRS && hubSrcGeog &&
+            geogCRSOfBaseOfBoundSrc) {
             // This one should go to the above 'Is it: boundCRS to a geogCRS
             // that is the same as the hubCRS ?' case
             auto opsFirst = createOperations(sourceCRS, hubSrc, context);
