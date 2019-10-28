@@ -1,3 +1,83 @@
+6.2.1 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Update the EPSG database to version 9.8.2
+
+ Bug fixes
+ -------
+
+ o Fixed erroneous spelling of "Potsdam" (#1573)
+
+ o Calculate y-coordinate correctly in bertin1953 in all cases (#1579)
+
+ o proj_create_crs_to_crs_from_pj(): make the PJ* arguments const PJ* (#1583)
+
+ o PROJStringParser::createFromPROJString(): avoid potential infinite
+   recursion (#1574)
+
+ o Avoid core dump when setting ctx==NULL in functions
+   proj_coordoperation_is_instantiable and
+   proj_coordoperation_has_ballpark_transformation (#1590)
+
+ o createOperations(): fix conversion from/to PROJ.4 CRS strings with
+   non-ISO-kosher options and +towgs84/+nadgrids (#1602)
+
+ o proj_trans_generic(): properly set coordinate time to HUGE_VAL when no
+   value is passed to the function (#1604)
+
+ o Fix support for +proj=ob_tran +o_proj=lonlat/latlong/latlon instead of only
+   only allowing +o_proj=longlat (#1601)
+
+ o Improve backwards compatibility of vertical transforms (#1613)
+
+ o Improve emulation of deprecated +init style initialization (#1614)
+
+ o cs2cs: autopromote CRS to 3D when there's a mix of 2D and 3D (#1563)
+
+ o Avoid divisions by zero in odd situations (#1620)
+
+ o Avoid compile error on Solaris (#1639)
+
+ o proj_create_crs_to_crs(): fix when there are only transformations with
+   ballpark steps (#1643)
+
+ o PROJ string CRS ingester: recognize more unit-less parameters, and general
+   handling of +key=string_value parameters (#1645)
+
+ o Only call pkg-config in configure when necessary (#1652)
+
+ o aeqd: for spherical forward path, go to higher precision ellipsoidal
+   case when the point coordinates are super close to the origin (#1654)
+
+ o proj_create_crs_to_crs(): remove elimination of Ballpark operations
+   that caused transformation failures in some cases (#1665)
+
+ o createOperations(): allow transforming from a compoundCRS of a bound
+   verticalCRS to a 2D CRS (#1667)
+
+ o Avoid segfaults in case of out-of-memory situations (#1679)
+
+ o createOperations(): fix double vertical unit conversion from CompoundCRS
+   to other CRS when the horizontal part of the projected CRS uses non-metre
+   unit (#1683)
+
+ o importFromWkt(): fix axis orientation for non-standard ESRI WKT (#1690)
+
+
+ THANKS TO
+ ---------
+
+ R. Schmunk
+ Jakob Egger
+ Alan D. Snow
+ Stephan Hügel
+ Kai Pastor
+ Kristian Evers
+ Even Rouault
+
 6.2.0 Release Notes
 -------------------
 
