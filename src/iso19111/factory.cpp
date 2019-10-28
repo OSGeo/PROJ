@@ -4379,9 +4379,8 @@ AuthorityFactory::createObjectsFromName(
                 const auto &listOfRow = pair.second;
                 for (const auto &row : listOfRow) {
                     const auto &name = row[3];
-                    bool match =
-                        ci_find(name, searchedNameWithoutDeprecated) !=
-                        std::string::npos;
+                    bool match = ci_find(name, searchedNameWithoutDeprecated) !=
+                                 std::string::npos;
                     if (!match) {
                         const auto &canonicalizedName(pair.first);
                         match = ci_find(canonicalizedName,
