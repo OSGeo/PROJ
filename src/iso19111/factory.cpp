@@ -4379,19 +4379,17 @@ AuthorityFactory::createObjectsFromName(
                 const auto &listOfRow = pair.second;
                 for (const auto &row : listOfRow) {
                     const auto &name = row[3];
-                    if (approximateMatch) {
-                        bool match =
-                            ci_find(name, searchedNameWithoutDeprecated) !=
-                            std::string::npos;
-                        if (!match) {
-                            const auto &canonicalizedName(pair.first);
-                            match = ci_find(canonicalizedName,
-                                            canonicalizedSearchedName) !=
-                                    std::string::npos;
-                        }
-                        if (!match) {
-                            continue;
-                        }
+                    bool match =
+                        ci_find(name, searchedNameWithoutDeprecated) !=
+                        std::string::npos;
+                    if (!match) {
+                        const auto &canonicalizedName(pair.first);
+                        match = ci_find(canonicalizedName,
+                                        canonicalizedSearchedName) !=
+                                std::string::npos;
+                    }
+                    if (!match) {
+                        continue;
                     }
 
                     const auto &auth_name = row[1];

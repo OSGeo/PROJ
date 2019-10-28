@@ -119,13 +119,13 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier, int *
         /* load the grid shift info if we don't have it. */
         if( ct->cvs == nullptr )
         {
-            if( !pj_gridinfo_load( pj_get_ctx(defn), gi ) || ct->cvs == nullptr )
-            {
-                pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-                return PJD_ERR_FAILED_TO_LOAD_GRID;
-            }
+            pj_gridinfo_load( pj_get_ctx(defn), gi );
         }
-
+        if( ct->cvs == nullptr )
+        {
+            pj_ctx_set_errno( defn->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+            return PJD_ERR_FAILED_TO_LOAD_GRID;
+        }
 
         /* Interpolation a location within the grid */
         grid_x = (input.lam - ct->ll.lam) / ct->del.lam;
@@ -271,7 +271,7 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
         if( value == HUGE_VAL )
         {
             int itable;
-            char gridlist[3000];
+            std::string gridlist;
 
             proj_log_debug(defn,
                 "pj_apply_vgridshift(): failed to find a grid shift table for\n"
@@ -279,23 +279,17 @@ int pj_apply_vgridshift( PJ *defn, const char *listname,
                 x[io] * RAD_TO_DEG,
                 y[io] * RAD_TO_DEG );
 
-            gridlist[0] = '\0';
             for( itable = 0; itable < *gridlist_count_p; itable++ )
             {
                 PJ_GRIDINFO *gi = tables[itable];
-                if( strlen(gridlist) + strlen(gi->gridname) > sizeof(gridlist)-100 )
-                {
-                    strcat( gridlist, "..." );
-                    break;
-                }
-
                 if( itable == 0 )
-                    sprintf( gridlist, "   tried: %s", gi->gridname );
+                    gridlist += "   tried: ";
                 else
-                    sprintf( gridlist+strlen(gridlist), ",%s", gi->gridname );
+                    gridlist += ',';
+                gridlist += gi->gridname;
             }
 
-            proj_log_debug(defn, "%s", gridlist);
+            proj_log_debug(defn, "%s", gridlist.c_str());
             pj_ctx_set_errno( defn->ctx, PJD_ERR_GRID_AREA );
 
             return PJD_ERR_GRID_AREA;

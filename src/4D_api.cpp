@@ -879,7 +879,9 @@ static void reproject_bbox(PJ* pjGeogToCrs,
         maxx = -maxx;
         maxy = -maxy;
 
-        double x[21 * 4], y[21 * 4];
+        std::vector<double> x, y;
+        x.resize(21 * 4);
+        y.resize(21 * 4);
         for( int j = 0; j <= 20; j++ )
         {
             x[j] = west_lon + j * (east_lon - west_lon) / 20;
@@ -893,8 +895,8 @@ static void reproject_bbox(PJ* pjGeogToCrs,
         }
         proj_trans_generic (
             pjGeogToCrs, PJ_FWD,
-                x, sizeof(double), 21 * 4,
-                y, sizeof(double), 21 * 4,
+                &x[0], sizeof(double), 21 * 4,
+                &y[0], sizeof(double), 21 * 4,
                 nullptr, 0, 0,
                 nullptr, 0, 0);
         for( int j = 0; j < 21 * 4; j++ )

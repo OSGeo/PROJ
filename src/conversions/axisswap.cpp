@@ -78,7 +78,8 @@ static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     unsigned int i;
     PJ_COORD out, in;
 
-    in.lp = lp;
+    in.v[0] = lp.lam;
+    in.v[1] = lp.phi;
     out = proj_coord_error();
 
     for (i=0; i<2; i++)
@@ -93,7 +94,8 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
     unsigned int i;
     PJ_COORD out, in;
 
-    in.xy = xy;
+    in.v[0] = xy.x;
+    in.v[1] = xy.y;
     out = proj_coord_error();
 
     for (i=0; i<2; i++)
@@ -108,7 +110,9 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     unsigned int i;
     PJ_COORD out, in;
 
-    in.lpz = lpz;
+    in.v[0] = lpz.lam;
+    in.v[1] = lpz.phi;
+    in.v[2] = lpz.z;
     out = proj_coord_error();
 
     for (i=0; i<3; i++)
@@ -123,7 +127,9 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     PJ_COORD in, out;
 
     out = proj_coord_error();
-    in.xyz = xyz;
+    in.v[0] = xyz.x;
+    in.v[1] = xyz.y;
+    in.v[2] = xyz.z;
 
     for (i=0; i<3; i++)
         out.v[Q->axis[i]] = in.v[i] * Q->sign[i];

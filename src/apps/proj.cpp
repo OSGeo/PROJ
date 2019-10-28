@@ -290,7 +290,8 @@ static void vprocess(FILE *fid) {
 }
 
 int main(int argc, char **argv) {
-    char *arg, *pargv[MAX_PARGS];
+    char *arg;
+    char *pargv[MAX_PARGS] = {};
     char **eargv = argv;
     FILE *fid;
     int pargc = 0, eargc = 0, mon = 0;

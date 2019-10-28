@@ -49,8 +49,8 @@ struct MDIST {
 	void *
 proj_mdist_ini(double es) {
 	double numf, numfi, twon1, denf, denfi, ens, T, twon;
-	double den, El, Es;
-	double E[MAX_ITER];
+	double den, El = 1., Es = 1.;
+	double E[MAX_ITER] = { 1. };
 	struct MDIST *b;
 	int i, j;
 
@@ -59,7 +59,6 @@ proj_mdist_ini(double es) {
 	numf = twon1 = denfi = 1.;
 	denf = 1.;
 	twon = 4.;
-	Es = El = E[0] = 1.;
 	for (i = 1; i < MAX_ITER ; ++i) {
 		numf *= (twon1 * twon1);
 		den = twon * denf * denf * twon1;

@@ -245,6 +245,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         {
             if( out_full_filename != nullptr && out_full_filename_size > 0 )
             {
+                // cppcheck-suppress nullPointer
                 strncpy(out_full_filename, sysname, out_full_filename_size);
                 out_full_filename[out_full_filename_size-1] = '\0';
             }
