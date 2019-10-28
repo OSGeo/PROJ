@@ -71,7 +71,7 @@ struct pj_opaque {
 } // anonymous namespace
 
 /********************************************************************************/
-static PJ_XYZ get_grid_shift(PJ* P, PJ_XYZ cartesian) {
+static PJ_XYZ get_grid_shift(PJ* P, const PJ_XYZ& cartesian) {
 /********************************************************************************
     Read correction values from grid. The cartesian input coordinates are
     converted to geodetic coordinates in order look up the correction values
@@ -95,7 +95,7 @@ static PJ_XYZ get_grid_shift(PJ* P, PJ_XYZ cartesian) {
 
     if (proj_errno(P) == PJD_ERR_GRID_AREA)
         proj_log_debug(P, "deformation: coordinate (%.3f, %.3f) outside deformation model",
-                       proj_todeg(geodetic.lp.lam), proj_todeg(geodetic.lp.phi));
+                       proj_todeg(geodetic.lpz.lam), proj_todeg(geodetic.lpz.phi));
 
     /* grid values are stored as mm/yr, we need m/yr */
     shift.xyz.x /= 1000;
@@ -103,10 +103,10 @@ static PJ_XYZ get_grid_shift(PJ* P, PJ_XYZ cartesian) {
     shift.xyz.z /= 1000;
 
     /* pre-calc cosines and sines */
-    sp = sin(geodetic.lp.phi);
-    cp = cos(geodetic.lp.phi);
-    sl = sin(geodetic.lp.lam);
-    cl = cos(geodetic.lp.lam);
+    sp = sin(geodetic.lpz.phi);
+    cp = cos(geodetic.lpz.phi);
+    sl = sin(geodetic.lpz.lam);
+    cl = cos(geodetic.lpz.lam);
 
     /* ENU -> PJ_XYZ */
     temp.xyz.x = -sp*cl*shift.enu.n - sl*shift.enu.e + cp*cl*shift.enu.u;

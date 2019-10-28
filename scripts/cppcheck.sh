@@ -1,5 +1,4 @@
 #!/bin/bash
-# Note: tested with cppcheck 1.61 as shipped with Ubuntu 14.04
 echo `cppcheck --version`
 
 LOG_FILE=/tmp/cppcheck_proj.txt
@@ -23,7 +22,7 @@ for dirname in ${TOPDIR}/src; do
     echo "Running cppcheck on $dirname... (can be long)"
     if ! cppcheck --inline-suppr --template='{file}:{line},{severity},{id},{message}' \
         --enable=all --inconclusive --std=posix \
-        -DCPPCHECK -D__cplusplus=201103L -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H \
+        -DCPPCHECK -D__cplusplus=201103L -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H -DNAN \
         -I${TOPDIR}/src -I${TOPDIR}/include \
         "$dirname" \
         -j 8 >>${LOG_FILE} 2>&1 ; then
@@ -34,7 +33,17 @@ done
 
 ret_code=0
 
-grep -v "unmatchedSuppression" ${LOG_FILE} | grep -v "nn.hpp" | grep -v "nlohmann/json.hpp" | grep -v "wkt1_generated_parser" | grep -v "wkt2_generated_parser" > ${LOG_FILE}.tmp
+grep -v "unmatchedSuppression" ${LOG_FILE} \
+    | grep -v "nn.hpp" \
+    | grep -v "nlohmann/json.hpp" \
+    | grep -v "wkt1_generated_parser" \
+    | grep -v "wkt2_generated_parser" \
+    | grep -v "passedByValue,Function parameter 'coo' should be passed by const reference" \
+    | grep -v "passedByValue,Function parameter 'lpz' should be passed by const reference" \
+    | grep -v "passedByValue,Function parameter 'xyz' should be passed by const reference" \
+    | grep -v "passedByValue,Function parameter 'in' should be passed by const reference" \
+    | grep -v "knownConditionTrueFalse,Condition '!allowEmptyIntersection' is always false" \
+    > ${LOG_FILE}.tmp
 mv ${LOG_FILE}.tmp ${LOG_FILE}
 
 if grep "null pointer" ${LOG_FILE} ; then

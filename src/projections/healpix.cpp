@@ -192,39 +192,24 @@ static int in_image(double x, double y, int proj, int north_square,
                       sizeof(healpixVertsJit[0]), healpixVertsJit, x, y);
     } else {
         /**
-         * Assigning each element by index to avoid warnings such as
-         * 'initializer element is not computable at load time'.
-         * Before C99 this was not allowed and to keep as portable as
-         * possible we do it the C89 way here.
          * We need to assign the array this way because the input is
          * dynamic (north_square and south_square vars are unknown at
          * compile time).
          **/
-        double rhealpixVertsJit[12][2];
-        rhealpixVertsJit[0][0]  = -M_PI - EPS;
-        rhealpixVertsJit[0][1]  =  M_FORTPI + EPS;
-        rhealpixVertsJit[1][0]  = -M_PI + north_square*M_HALFPI- EPS;
-        rhealpixVertsJit[1][1]  =  M_FORTPI + EPS;
-        rhealpixVertsJit[2][0]  = -M_PI + north_square*M_HALFPI- EPS;
-        rhealpixVertsJit[2][1]  =  3*M_FORTPI + EPS;
-        rhealpixVertsJit[3][0]  = -M_PI + (north_square + 1.0)*M_HALFPI + EPS;
-        rhealpixVertsJit[3][1]  =  3*M_FORTPI + EPS;
-        rhealpixVertsJit[4][0]  = -M_PI + (north_square + 1.0)*M_HALFPI + EPS;
-        rhealpixVertsJit[4][1]  =  M_FORTPI + EPS;
-        rhealpixVertsJit[5][0]  =  M_PI + EPS;
-        rhealpixVertsJit[5][1]  =  M_FORTPI + EPS;
-        rhealpixVertsJit[6][0]  =  M_PI + EPS;
-        rhealpixVertsJit[6][1]  = -M_FORTPI - EPS;
-        rhealpixVertsJit[7][0]  = -M_PI + (south_square + 1.0)*M_HALFPI + EPS;
-        rhealpixVertsJit[7][1]  = -M_FORTPI - EPS;
-        rhealpixVertsJit[8][0]  = -M_PI + (south_square + 1.0)*M_HALFPI + EPS;
-        rhealpixVertsJit[8][1]  = -3*M_FORTPI - EPS;
-        rhealpixVertsJit[9][0]  = -M_PI + south_square*M_HALFPI - EPS;
-        rhealpixVertsJit[9][1]  = -3*M_FORTPI - EPS;
-        rhealpixVertsJit[10][0] = -M_PI + south_square*M_HALFPI - EPS;
-        rhealpixVertsJit[10][1] = -M_FORTPI - EPS;
-        rhealpixVertsJit[11][0] = -M_PI - EPS;
-        rhealpixVertsJit[11][1] = -M_FORTPI - EPS;
+        double rhealpixVertsJit[][2] = {
+            { -M_PI - EPS,                                  M_FORTPI + EPS },
+            { -M_PI + north_square*M_HALFPI- EPS,           M_FORTPI + EPS },
+            { -M_PI + north_square*M_HALFPI- EPS,           3*M_FORTPI + EPS },
+            { -M_PI + (north_square + 1.0)*M_HALFPI + EPS,  3*M_FORTPI + EPS },
+            { -M_PI + (north_square + 1.0)*M_HALFPI + EPS,  M_FORTPI + EPS},
+            {  M_PI + EPS,                                  M_FORTPI + EPS },
+            {  M_PI + EPS,                                  -M_FORTPI - EPS },
+            { -M_PI + (south_square + 1.0)*M_HALFPI + EPS,  -M_FORTPI - EPS },
+            { -M_PI + (south_square + 1.0)*M_HALFPI + EPS,  -3*M_FORTPI - EPS },
+            { -M_PI + south_square*M_HALFPI - EPS,          -3*M_FORTPI - EPS },
+            { -M_PI + south_square*M_HALFPI - EPS,          -M_FORTPI - EPS },
+            { -M_PI - EPS,                                  -M_FORTPI - EPS }
+        };
 
         return pnpoly((int)sizeof(rhealpixVertsJit)/
                       sizeof(rhealpixVertsJit[0]), rhealpixVertsJit, x, y);
@@ -459,8 +444,6 @@ static CapMap get_cap(double x, double y, int north_square, int south_square,
 static PJ_XY combine_caps(double x, double y, int north_square, int south_square,
                        int inverse) {
     PJ_XY xy;
-    double v[2];
-    double c[2];
     double vector[2];
     double v_min_c[2];
     double ret_dot[2];
@@ -474,8 +457,8 @@ static PJ_XY combine_caps(double x, double y, int north_square, int south_square
         return xy;
     }
 
-    v[0] = x; v[1] = y;
-    c[0] = capmap.x; c[1] = capmap.y;
+    double v[] = {x, y};
+    double c[] = {capmap.x, capmap.y};
 
     if (inverse == 0) {
         /* Rotate (x, y) about its polar cap tip and then translate it to
@@ -505,11 +488,10 @@ static PJ_XY combine_caps(double x, double y, int north_square, int south_square
     vector_sub(v, c, v_min_c);
     dot_product(tmpRot, v_min_c, ret_dot);
     {
-        double a[2];
-        /* Workaround cppcheck git issue */
-        double* pa = a;
-        pa[0] = -3*M_FORTPI + ((inverse == 0) ? pole : capmap.cn) *M_HALFPI;
-        pa[1] = ((capmap.region == CapMap::north) ? 1 : -1) *M_HALFPI;
+        double a[] = {
+            -3*M_FORTPI + ((inverse == 0) ? pole : capmap.cn) *M_HALFPI,
+            ((capmap.region == CapMap::north) ? 1 : -1) *M_HALFPI
+        };
         vector_add(ret_dot, a, vector);
     }
 

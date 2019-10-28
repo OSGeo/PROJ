@@ -141,7 +141,6 @@ static PJ_LP stere_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cosphi, sinphi, tp=0.0, phi_l=0.0, rho, halfe=0.0, halfpi=0.0;
-    int i;
 
     rho = hypot (xy.x, xy.y);
 
@@ -171,7 +170,7 @@ static PJ_LP stere_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
         break;
     }
 
-    for (i = NITER;  i--; ) {
+    for (int i = NITER; i > 0; --i) {
         sinphi = P->e * sin(phi_l);
         lp.phi = 2. * atan (tp * pow ((1.+sinphi)/(1.-sinphi), halfe)) - halfpi;
         if (fabs (phi_l - lp.phi) < CONV) {

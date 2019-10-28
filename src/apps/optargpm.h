@@ -286,9 +286,7 @@ int opt_input_loop (OPTARGS *opt, int binary) {
         return 1;
 
     /* ignore non-existing files - go on! */
-    if (nullptr==opt->input)
-        return opt_input_loop (opt, binary);
-    return 0;
+    return opt_input_loop (opt, binary);
 }
 
 

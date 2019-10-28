@@ -59,12 +59,12 @@ static PJ_LPZ sch_inverse3d(PJ_XYZ xyz, PJ *P) {
     PJ_LPZ lpz = {0.0, 0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double temp[3];
-    double pxyz[3];
-
     /* Local lat,lon using radius */
-    pxyz[0] = xyz.y * P->a / Q->rcurv;
-    pxyz[1] = xyz.x * P->a / Q->rcurv;
-    pxyz[2] = xyz.z;
+    double pxyz[] = {
+        xyz.y * P->a / Q->rcurv,
+        xyz.x * P->a / Q->rcurv,
+        xyz.z
+    };
 
     if( pj_Convert_Geodetic_To_Geocentric( &(Q->sph), pxyz[0], pxyz[1], pxyz[2], temp, temp+1, temp+2) != 0) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -97,8 +97,6 @@ static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
     PJ_XYZ xyz = {0.0, 0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double temp[3];
-    double pxyz[3];
-
 
     /* Convert lat lon to geocentric coordinates */
     if( pj_Convert_Geodetic_To_Geocentric( &(Q->elp_0), lpz.phi, lpz.lam, lpz.z, temp, temp+1, temp+2 ) != 0 ) {
@@ -114,9 +112,11 @@ static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
 
 
     /* Apply rotation */
-    pxyz[0] = Q->transMat[0] * temp[0] + Q->transMat[3] * temp[1] + Q->transMat[6] * temp[2];
-    pxyz[1] = Q->transMat[1] * temp[0] + Q->transMat[4] * temp[1] + Q->transMat[7] * temp[2];
-    pxyz[2] = Q->transMat[2] * temp[0] + Q->transMat[5] * temp[1] + Q->transMat[8] * temp[2];
+    double pxyz[] = {
+        Q->transMat[0] * temp[0] + Q->transMat[3] * temp[1] + Q->transMat[6] * temp[2],
+        Q->transMat[1] * temp[0] + Q->transMat[4] * temp[1] + Q->transMat[7] * temp[2],
+        Q->transMat[2] * temp[0] + Q->transMat[5] * temp[1] + Q->transMat[8] * temp[2]
+    };
 
     /* Convert to local lat,lon */
     pj_Convert_Geocentric_To_Geodetic( &(Q->sph), pxyz[0], pxyz[1], pxyz[2],
