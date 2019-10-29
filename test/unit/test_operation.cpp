@@ -7129,6 +7129,11 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
     // NAD83 + NAVD88 height
     auto srcObj = createFromUserInput("EPSG:4269+5703",
                                       authFactory->databaseContext(), false);
@@ -7136,17 +7141,26 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
     ASSERT_TRUE(src != nullptr);
     auto nnSrc = NN_NO_CHECK(src);
     auto dst = authFactory->createCoordinateReferenceSystem("4269"); // NAD83
-    dst = dst->promoteTo3D(std::string(), authFactory->databaseContext());
-    {
-        auto list = CoordinateOperationFactory::create()->createOperations(
-            nnSrc, dst, ctxt);
-        ASSERT_GE(list.size(), 8U);
-    }
-    {
-        auto list = CoordinateOperationFactory::create()->createOperations(
-            dst, nnSrc, ctxt);
-        ASSERT_GE(list.size(), 8U);
-    }
+
+    auto listCompoundToGeog2D =
+        CoordinateOperationFactory::create()->createOperations(nnSrc, dst,
+                                                               ctxt);
+    // The checked value is not that important, but in case this changes,
+    // likely due to a EPSG upgrade, worth checking
+    ASSERT_EQ(listCompoundToGeog2D.size(), 469U);
+
+    auto listGeog2DToCompound =
+        CoordinateOperationFactory::create()->createOperations(dst, nnSrc,
+                                                               ctxt);
+    ASSERT_EQ(listGeog2DToCompound.size(), listCompoundToGeog2D.size());
+
+    auto listCompoundToGeog3D =
+        CoordinateOperationFactory::create()->createOperations(
+            nnSrc,
+            dst->promoteTo3D(std::string(), authFactory->databaseContext()),
+            ctxt);
+    // It includes a trailing ballpart transformation
+    ASSERT_EQ(listCompoundToGeog3D.size(), listCompoundToGeog2D.size() + 1);
 }
 
 // ---------------------------------------------------------------------------

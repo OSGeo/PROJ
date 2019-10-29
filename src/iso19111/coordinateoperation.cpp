@@ -10297,7 +10297,7 @@ struct CoordinateOperationFactory::Private {
         const CoordinateOperationContextNNPtr &context;
         bool inCreateOperationsWithDatumPivotAntiRecursion = false;
         bool inCreateOperationsThroughPreferredHub = false;
-        bool inCreateOperationsGeogToVertWithIntermediate = false;
+        bool inCreateOperationsGeogToVertWithAlternativeGeog = false;
         bool skipHorizontalTransformation = false;
 
         Context(const crs::CRSNNPtr &sourceCRSIn,
@@ -10330,9 +10330,9 @@ struct CoordinateOperationFactory::Private {
         Context &context);
 
     static std::vector<CoordinateOperationNNPtr>
-    createOperationsGeogToVertWithIntermediate(const crs::CRSNNPtr &sourceCRS,
-                                               const crs::CRSNNPtr &targetCRS,
-                                               Context &context);
+    createOperationsGeogToVertWithAlternativeGeog(
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        Context &context);
 
     static bool
     hasPerfectAccuracyResult(const std::vector<CoordinateOperationNNPtr> &res,
@@ -12327,11 +12327,11 @@ void CoordinateOperationFactory::Private::createOperationsThroughPreferredHub(
 
 // ---------------------------------------------------------------------------
 
-std::vector<CoordinateOperationNNPtr>
-CoordinateOperationFactory::Private::createOperationsGeogToVertWithIntermediate(
-    const crs::CRSNNPtr & /*sourceCRS*/, // geographic CRS
-    const crs::CRSNNPtr &targetCRS,      // vertical CRS
-    Private::Context &context) {
+std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
+    createOperationsGeogToVertWithAlternativeGeog(
+        const crs::CRSNNPtr & /*sourceCRS*/, // geographic CRS
+        const crs::CRSNNPtr &targetCRS,      // vertical CRS
+        Private::Context &context) {
 
     std::vector<CoordinateOperationNNPtr> res;
 
@@ -12339,12 +12339,12 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertWithIntermediate(
         Context &context;
 
         explicit AntiRecursionGuard(Context &contextIn) : context(contextIn) {
-            assert(!context.inCreateOperationsGeogToVertWithIntermediate);
-            context.inCreateOperationsGeogToVertWithIntermediate = true;
+            assert(!context.inCreateOperationsGeogToVertWithAlternativeGeog);
+            context.inCreateOperationsGeogToVertWithAlternativeGeog = true;
         }
 
         ~AntiRecursionGuard() {
-            context.inCreateOperationsGeogToVertWithIntermediate = false;
+            context.inCreateOperationsGeogToVertWithAlternativeGeog = false;
         }
     };
     AntiRecursionGuard guard(context);
@@ -12594,69 +12594,63 @@ CoordinateOperationFactory::Private::createOperations(
 
             // NAD83 only exists in 2D version in EPSG, so if it has been
             // promotted to 3D, when researching a vertical to geog
-            // transformation,
-            // try to down cast to 2D.
-            if (res.empty() && geogSrc && vertDst &&
-                geogSrc->coordinateSystem()->axisList().size() == 3 &&
-                geogSrc->datum()) {
-                const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
-                    authFactory, geogSrc->datum().get()));
-                for (const auto &candidate : candidatesSrcGeod) {
-                    auto geogCandidate =
-                        util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
-                            candidate);
-                    if (geogCandidate &&
-                        geogCandidate->coordinateSystem()->axisList().size() ==
-                            2) {
-                        res =
-                            findOpsInRegistryDirect(NN_NO_CHECK(geogCandidate),
-                                                    targetCRS, context.context);
-                        if (res.empty()) {
-                            res = applyInverse(findOpsInRegistryDirect(
-                                targetCRS, NN_NO_CHECK(geogCandidate),
-                                context.context));
+            // transformation, try to down cast to 2D.
+            const auto geog3DToVertTryThroughGeog2D = [&res, &authFactory,
+                                                       &context](
+                const crs::GeographicCRS *geogSrcIn,
+                const crs::VerticalCRS *vertDstIn,
+                const crs::CRSNNPtr &targetCRSIn) {
+                if (res.empty() && geogSrcIn && vertDstIn &&
+                    geogSrcIn->coordinateSystem()->axisList().size() == 3 &&
+                    geogSrcIn->datum()) {
+                    const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
+                        authFactory, geogSrcIn->datum().get()));
+                    for (const auto &candidate : candidatesSrcGeod) {
+                        auto geogCandidate =
+                            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                                candidate);
+                        if (geogCandidate &&
+                            geogCandidate->coordinateSystem()
+                                    ->axisList()
+                                    .size() == 2) {
+                            res = findOpsInRegistryDirect(
+                                NN_NO_CHECK(geogCandidate), targetCRSIn,
+                                context.context);
+                            if (res.empty()) {
+                                res = applyInverse(findOpsInRegistryDirect(
+                                    targetCRSIn, NN_NO_CHECK(geogCandidate),
+                                    context.context));
+                            }
+                            break;
                         }
-                        break;
                     }
+                    return true;
                 }
-            } else if (res.empty() && geogDst && vertSrc &&
-                       geogDst->coordinateSystem()->axisList().size() == 3 &&
-                       geogDst->datum()) {
-                const auto candidatesDstGeod(findCandidateGeodCRSForDatum(
-                    authFactory, geogDst->datum().get()));
-                for (const auto &candidate : candidatesDstGeod) {
-                    auto geogCandidate =
-                        util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
-                            candidate);
-                    if (geogCandidate &&
-                        geogCandidate->coordinateSystem()->axisList().size() ==
-                            2) {
-                        res = findOpsInRegistryDirect(
-                            sourceCRS, NN_NO_CHECK(geogCandidate),
-                            context.context);
-                        if (res.empty()) {
-                            res = applyInverse(findOpsInRegistryDirect(
-                                NN_NO_CHECK(geogCandidate), sourceCRS,
-                                context.context));
-                        }
-                        break;
-                    }
-                }
+                return false;
+            };
+
+            if (geog3DToVertTryThroughGeog2D(geogSrc, vertDst, targetCRS)) {
+                // do nothing
+            } else if (geog3DToVertTryThroughGeog2D(geogDst, vertSrc,
+                                                    sourceCRS)) {
+                res = applyInverse(res);
             }
 
             // There's no direct transformation from NAVD88 height to WGS84,
             // so try to research all transformations from NAVD88 to another
             // intermediate GeographicCRS.
             if (res.empty() &&
-                !context.inCreateOperationsGeogToVertWithIntermediate &&
+                !context.inCreateOperationsGeogToVertWithAlternativeGeog &&
                 geogSrc && vertDst) {
-                res = createOperationsGeogToVertWithIntermediate(
+                res = createOperationsGeogToVertWithAlternativeGeog(
                     sourceCRS, targetCRS, context);
             } else if (res.empty() &&
-                       !context.inCreateOperationsGeogToVertWithIntermediate &&
+                       !context
+                            .inCreateOperationsGeogToVertWithAlternativeGeog &&
                        geogDst && vertSrc) {
-                res = applyInverse(createOperationsGeogToVertWithIntermediate(
-                    targetCRS, sourceCRS, context));
+                res =
+                    applyInverse(createOperationsGeogToVertWithAlternativeGeog(
+                        targetCRS, sourceCRS, context));
             }
 
             if (res.empty() && !sameGeodeticDatum &&
@@ -13219,6 +13213,10 @@ CoordinateOperationFactory::Private::createOperations(
                     createOperations(componentsSrc[0], targetCRS, context);
             }
             std::vector<CoordinateOperationNNPtr> verticalTransforms;
+
+            const auto dbContext =
+                authFactory ? authFactory->databaseContext().as_nullable()
+                            : nullptr;
             if (componentsSrc.size() >= 2 &&
                 componentsSrc[1]->extractVerticalCRS()) {
 
@@ -13237,18 +13235,24 @@ CoordinateOperationFactory::Private::createOperations(
                 };
                 SetSkipHorizontalTransform setSkipHorizontalTransform(context);
 
-                verticalTransforms =
-                    createOperations(componentsSrc[1], targetCRS, context);
+                verticalTransforms = createOperations(
+                    componentsSrc[1],
+                    targetCRS->promoteTo3D(std::string(), dbContext), context);
                 bool foundRegisteredTransformWithAllGridsAvailable = false;
+                const bool ignoreMissingGrids =
+                    context.context->getGridAvailabilityUse() ==
+                    CoordinateOperationContext::GridAvailabilityUse::
+                        IGNORE_GRID_AVAILABILITY;
                 for (const auto &op : verticalTransforms) {
-                    if (!op->identifiers().empty() && authFactory) {
+                    if (!op->identifiers().empty() && dbContext) {
                         bool missingGrid = false;
-                        const auto gridsNeeded =
-                            op->gridsNeeded(authFactory->databaseContext());
-                        for (const auto &gridDesc : gridsNeeded) {
-                            if (!gridDesc.available) {
-                                missingGrid = true;
-                                break;
+                        if (!ignoreMissingGrids) {
+                            const auto gridsNeeded = op->gridsNeeded(dbContext);
+                            for (const auto &gridDesc : gridsNeeded) {
+                                if (!gridDesc.available) {
+                                    missingGrid = true;
+                                    break;
+                                }
                             }
                         }
                         if (!missingGrid) {
@@ -13264,18 +13268,23 @@ CoordinateOperationFactory::Private::createOperations(
                         geogDst, util::IComparable::Criterion::EQUIVALENT) &&
                     !srcGeogCRS->is2DPartOf3D(NN_NO_CHECK(geogDst))) {
                     auto verticalTransformsTmp = createOperations(
-                        componentsSrc[1], NN_NO_CHECK(srcGeogCRS), context);
+                        componentsSrc[1],
+                        NN_NO_CHECK(srcGeogCRS)
+                            ->promoteTo3D(std::string(), dbContext),
+                        context);
                     bool foundRegisteredTransform = false;
                     foundRegisteredTransformWithAllGridsAvailable = false;
                     for (const auto &op : verticalTransformsTmp) {
-                        if (!op->identifiers().empty() && authFactory) {
+                        if (!op->identifiers().empty() && dbContext) {
                             bool missingGrid = false;
-                            const auto gridsNeeded =
-                                op->gridsNeeded(authFactory->databaseContext());
-                            for (const auto &gridDesc : gridsNeeded) {
-                                if (!gridDesc.available) {
-                                    missingGrid = true;
-                                    break;
+                            if (!ignoreMissingGrids) {
+                                const auto gridsNeeded =
+                                    op->gridsNeeded(dbContext);
+                                for (const auto &gridDesc : gridsNeeded) {
+                                    if (!gridDesc.available) {
+                                        missingGrid = true;
+                                        break;
+                                    }
                                 }
                             }
                             foundRegisteredTransform = true;
@@ -13335,10 +13344,6 @@ CoordinateOperationFactory::Private::createOperations(
                     if (interpolationGeogCRS->coordinateSystem()
                             ->axisList()
                             .size() == 3) {
-                        io::DatabaseContextPtr dbContext;
-                        if (authFactory) {
-                            dbContext = authFactory->databaseContext();
-                        }
                         // We need to force the interpolation CRS, which
                         // will
                         // frequently be 3D, to 2D to avoid transformations
@@ -13367,7 +13372,8 @@ CoordinateOperationFactory::Private::createOperations(
                                 componentsSrc[0],
                                 NN_NO_CHECK(interpolationGeogCRS), context);
                             interpToTargetOps = createOperations(
-                                NN_NO_CHECK(interpolationGeogCRS), targetCRS,
+                                NN_NO_CHECK(interpolationGeogCRS),
+                                targetCRS->demoteTo2D(std::string(), dbContext),
                                 context);
                             cacheHorizToInterpAndInterpToTarget[key] =
                                 PairOfTransforms(srcToInterpOps,
@@ -13380,9 +13386,10 @@ CoordinateOperationFactory::Private::createOperations(
                         srcToInterpOps = createOperations(
                             componentsSrc[0], NN_NO_CHECK(interpolationGeogCRS),
                             context);
-                        interpToTargetOps =
-                            createOperations(NN_NO_CHECK(interpolationGeogCRS),
-                                             targetCRS, context);
+                        interpToTargetOps = createOperations(
+                            NN_NO_CHECK(interpolationGeogCRS),
+                            targetCRS->demoteTo2D(std::string(), dbContext),
+                            context);
                     }
 
                     for (const auto &srcToInterp : srcToInterpOps) {
