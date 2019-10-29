@@ -7165,6 +7165,127 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_geogCRS_with_vertical_unit_change) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // NAD83(2011) + NAVD88 height (ftUS)
+    auto srcObj = createFromUserInput("EPSG:6318+6360",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto nnSrc = NN_NO_CHECK(src);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("6319"); // NAD83(2011) 3D
+
+    auto listCompoundToGeog =
+        CoordinateOperationFactory::create()->createOperations(nnSrc, dst,
+                                                               ctxt);
+    ASSERT_TRUE(!listCompoundToGeog.empty());
+
+    // NAD83(2011) + NAVD88 height
+    auto srcObjCompoundVMetre = createFromUserInput(
+        "EPSG:6318+5703", authFactory->databaseContext(), false);
+    auto srcCompoundVMetre = nn_dynamic_pointer_cast<CRS>(srcObjCompoundVMetre);
+    ASSERT_TRUE(srcCompoundVMetre != nullptr);
+    auto listCompoundMetreToGeog =
+        CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(srcCompoundVMetre), dst, ctxt);
+
+    // Check that we get the same and similar results whether we start from
+    // regular NAVD88 height or its ftUs variant
+    ASSERT_EQ(listCompoundToGeog.size(), listCompoundMetreToGeog.size());
+
+    EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
+              "Transformation from NAVD88 height (ftUS) to NAVD88 height + " +
+                  listCompoundMetreToGeog[0]->nameStr());
+    EXPECT_EQ(
+        listCompoundToGeog[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        replaceAll(listCompoundMetreToGeog[0]->exportToPROJString(
+                       PROJStringFormatter::create(
+                           PROJStringFormatter::Convention::PROJ_5,
+                           authFactory->databaseContext())
+                           .get()),
+                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad",
+                   "+step +proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad "
+                   "+z_out=m"));
+
+    // Check reverse path
+    auto listGeogToCompound =
+        CoordinateOperationFactory::create()->createOperations(dst, nnSrc,
+                                                               ctxt);
+    EXPECT_EQ(listGeogToCompound.size(), listCompoundToGeog.size());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    compoundCRS_to_geogCRS_with_vertical_unit_change_and_complex_horizontal_change) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // NAD83(2011) + NAVD88 height (ftUS)
+    auto srcObj = createFromUserInput("EPSG:6318+6360",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto nnSrc = NN_NO_CHECK(src);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("7665"); // WGS84(G1762) 3D
+
+    auto listCompoundToGeog =
+        CoordinateOperationFactory::create()->createOperations(nnSrc, dst,
+                                                               ctxt);
+
+    // NAD83(2011) + NAVD88 height
+    auto srcObjCompoundVMetre = createFromUserInput(
+        "EPSG:6318+5703", authFactory->databaseContext(), false);
+    auto srcCompoundVMetre = nn_dynamic_pointer_cast<CRS>(srcObjCompoundVMetre);
+    ASSERT_TRUE(srcCompoundVMetre != nullptr);
+    auto listCompoundMetreToGeog =
+        CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(srcCompoundVMetre), dst, ctxt);
+
+    // Check that we get the same and similar results whether we start from
+    // regular NAVD88 height or its ftUs variant
+    ASSERT_EQ(listCompoundToGeog.size(), listCompoundMetreToGeog.size());
+
+    ASSERT_GE(listCompoundToGeog.size(), 1U);
+
+    EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
+              "Transformation from NAVD88 height (ftUS) to NAVD88 height + " +
+                  listCompoundMetreToGeog[0]->nameStr());
+    EXPECT_EQ(
+        listCompoundToGeog[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        replaceAll(listCompoundMetreToGeog[0]->exportToPROJString(
+                       PROJStringFormatter::create(
+                           PROJStringFormatter::Convention::PROJ_5,
+                           authFactory->databaseContext())
+                           .get()),
+                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad",
+                   "+step +proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad "
+                   "+z_out=m"));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_from_WKT2_to_geogCRS_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");

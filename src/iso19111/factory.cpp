@@ -4603,6 +4603,30 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+std::list<crs::VerticalCRSNNPtr> AuthorityFactory::createVerticalCRSFromDatum(
+    const std::string &datum_auth_name, const std::string &datum_code) const {
+    std::string sql(
+        "SELECT auth_name, code FROM vertical_crs WHERE "
+        "datum_auth_name = ? AND datum_code = ? AND deprecated = 0");
+    ListOfParams params{datum_auth_name, datum_code};
+    if (d->hasAuthorityRestriction()) {
+        sql += " AND auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+    auto sqlRes = d->run(sql, params);
+    std::list<crs::VerticalCRSNNPtr> res;
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        res.emplace_back(d->createFactory(auth_name)->createVerticalCRS(code));
+    }
+    return res;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 std::list<crs::GeodeticCRSNNPtr>
 AuthorityFactory::createGeodeticCRSFromEllipsoid(
     const std::string &ellipsoid_auth_name, const std::string &ellipsoid_code,
