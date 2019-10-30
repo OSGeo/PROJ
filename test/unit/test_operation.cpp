@@ -7196,8 +7196,7 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
             nnSrc,
             dst->promoteTo3D(std::string(), authFactory->databaseContext()),
             ctxt);
-    // It includes a trailing ballpart transformation
-    ASSERT_EQ(listCompoundToGeog3D.size(), listCompoundToGeog2D.size() + 1);
+    ASSERT_EQ(listCompoundToGeog3D.size(), listCompoundToGeog2D.size());
 }
 
 // ---------------------------------------------------------------------------
@@ -7242,6 +7241,83 @@ TEST(operation, compoundCRS_from_wkt_without_id_to_geogCRS) {
         NN_NO_CHECK(src), dst, ctxt);
     // NAD83(2011) + NAVD88 height
     auto srcRefObj = createFromUserInput("EPSG:6318+5703",
+                                         authFactory->databaseContext(), false);
+    auto srcRef = nn_dynamic_pointer_cast<CRS>(srcRefObj);
+    ASSERT_TRUE(srcRef != nullptr);
+    ASSERT_TRUE(
+        src->isEquivalentTo(srcRef.get(), IComparable::Criterion::EQUIVALENT));
+    auto listRef = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcRef), dst, ctxt);
+
+    EXPECT_EQ(list.size(), listRef.size());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     compoundCRS_of_projCRS_from_wkt_without_id_or_extent_to_geogCRS) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto wkt =
+        "COMPOUNDCRS[\"NAD83 / Pennsylvania South + NAVD88 height\",\n"
+        "    PROJCRS[\"NAD83 / Pennsylvania South\",\n"
+        "        BASEGEOGCRS[\"NAD83\",\n"
+        "            DATUM[\"North American Datum 1983\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "        CONVERSION[\"SPCS83 Pennsylvania South zone (meters)\",\n"
+        "            METHOD[\"Lambert Conic Conformal (2SP)\",\n"
+        "                ID[\"EPSG\",9802]],\n"
+        "            PARAMETER[\"Latitude of false origin\",39.3333333333333,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8821]],\n"
+        "            PARAMETER[\"Longitude of false origin\",-77.75,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8822]],\n"
+        "            PARAMETER[\"Latitude of 1st standard "
+        "parallel\",40.9666666666667,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8823]],\n"
+        "            PARAMETER[\"Latitude of 2nd standard "
+        "parallel\",39.9333333333333,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8824]],\n"
+        "            PARAMETER[\"Easting at false origin\",600000,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8826]],\n"
+        "            PARAMETER[\"Northing at false origin\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8827]]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"easting (X)\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            AXIS[\"northing (Y)\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "    VERTCRS[\"NAVD88 height\",\n"
+        "        VDATUM[\"North American Vertical Datum 1988\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"metre\",1]]]]";
+    auto srcObj =
+        createFromUserInput(wkt, authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto dst = authFactory->createCoordinateReferenceSystem("4269"); // NAD83
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    // NAD83 / Pennsylvania South + NAVD88 height
+    auto srcRefObj = createFromUserInput("EPSG:32129+5703",
                                          authFactory->databaseContext(), false);
     auto srcRef = nn_dynamic_pointer_cast<CRS>(srcRefObj);
     ASSERT_TRUE(srcRef != nullptr);
