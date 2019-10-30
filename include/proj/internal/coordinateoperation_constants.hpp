@@ -826,6 +826,7 @@ static const struct MethodNameCode {
     METHOD_NAME_CODE(VERTICAL_PERSPECTIVE),
     // Other conversions
     METHOD_NAME_CODE(CHANGE_VERTICAL_UNIT),
+    METHOD_NAME_CODE(HEIGHT_DEPTH_REVERSAL),
     METHOD_NAME_CODE(AXIS_ORDER_REVERSAL_2D),
     METHOD_NAME_CODE(AXIS_ORDER_REVERSAL_3D),
     METHOD_NAME_CODE(GEOGRAPHIC_GEOCENTRIC),
@@ -1152,6 +1153,9 @@ static const ParamMapping *const paramsVERTCON[] = {&paramVerticalOffsetFile,
 static const MethodMapping otherMethodMappings[] = {
     {EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT,
      EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT, nullptr, nullptr, nullptr,
+     paramsChangeVerticalUnit},
+    {EPSG_NAME_METHOD_HEIGHT_DEPTH_REVERSAL,
+     EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL, nullptr, nullptr, nullptr,
      paramsChangeVerticalUnit},
     {EPSG_NAME_METHOD_AXIS_ORDER_REVERSAL_2D,
      EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_2D, nullptr, nullptr, nullptr,

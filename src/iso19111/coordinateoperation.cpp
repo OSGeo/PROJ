@@ -4661,6 +4661,26 @@ Conversion::createChangeVerticalUnit(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a conversion based on the Height Depth Reversal
+ * method.
+ *
+ * This method is defined as [EPSG:1068]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1068)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @return a new Conversion.
+ * @since 7.0
+ */
+ConversionNNPtr
+Conversion::createHeightDepthReversal(const util::PropertyMap &properties) {
+    return create(properties, createMethodMapNameEPSGCode(
+                                  EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL),
+                  {}, {});
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instantiate a conversion based on the Axis order reversal method
  *
  * This swaps the longitude, latitude axis.
@@ -4922,6 +4942,14 @@ CoordinateOperationNNPtr Conversion::inverse() const {
     if (methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC) {
 
         auto conv = createGeographicGeocentric(
+            createPropertiesForInverse(this, false, false));
+        conv->setCRSs(this, true);
+        return conv;
+    }
+
+    if (methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
+
+        auto conv = createHeightDepthReversal(
             createPropertiesForInverse(this, false, false));
         conv->setCRSs(this, true);
         return conv;
@@ -5808,9 +5836,12 @@ void Conversion::_exportToPROJString(
         methodEPSGCode == EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION;
     const bool isGeographicGeocentric =
         methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC;
+    const bool isHeightDepthReversal =
+        methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL;
     const bool applySourceCRSModifiers =
         !isZUnitConversion && !isAffineParametric &&
-        !isAxisOrderReversal(methodEPSGCode) && !isGeographicGeocentric;
+        !isAxisOrderReversal(methodEPSGCode) && !isGeographicGeocentric &&
+        !isHeightDepthReversal;
     bool applyTargetCRSModifiers = applySourceCRSModifiers;
 
     auto l_sourceCRS = sourceCRS();
@@ -7876,6 +7907,17 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
                 coordinateOperationAccuracies()));
     }
 
+#ifdef notdef
+    // We dont need that currently, but we might...
+    if (methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
+        return d->registerInv(
+            shared_from_this(),
+            createHeightDepthReversal(
+                createPropertiesForInverse(this, false, false), l_targetCRS,
+                l_sourceCRS, coordinateOperationAccuracies()));
+    }
+#endif
+
     return InverseTransformation::create(NN_NO_CHECK(
         util::nn_dynamic_pointer_cast<Transformation>(shared_from_this())));
 }
@@ -9386,6 +9428,12 @@ bool SingleOperation::exportToPROJStringGeneric(
             formatter->addStep("affine");
             formatter->addParam("s33", convFactor);
         }
+        return true;
+    }
+
+    if (methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
+        formatter->addStep("axisswap");
+        formatter->addParam("order", "1,2,-3");
         return true;
     }
 
@@ -13306,10 +13354,16 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
          srcDatum->_isEquivalentTo(dstDatum.get(),
                                    util::IComparable::Criterion::EQUIVALENT));
 
-    const double convSrc =
-        vertSrc->coordinateSystem()->axisList()[0]->unit().conversionToSI();
-    const double convDst =
-        vertDst->coordinateSystem()->axisList()[0]->unit().conversionToSI();
+    const auto &srcAxis = vertSrc->coordinateSystem()->axisList()[0];
+    const double convSrc = srcAxis->unit().conversionToSI();
+    const auto &dstAxis = vertDst->coordinateSystem()->axisList()[0];
+    const double convDst = dstAxis->unit().conversionToSI();
+    const bool srcIsUp = srcAxis->direction() == cs::AxisDirection::UP;
+    const bool srcIsDown = srcAxis->direction() == cs::AxisDirection::DOWN;
+    const bool dstIsUp = dstAxis->direction() == cs::AxisDirection::UP;
+    const bool dstIsDown = dstAxis->direction() == cs::AxisDirection::DOWN;
+    const bool heightDepthReversal =
+        ((srcIsUp && dstIsDown) || (srcIsDown && dstIsUp));
 
     const double factor = convSrc / convDst;
     auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
@@ -13317,13 +13371,23 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
         name += BALLPARK_VERTICAL_TRANSFORMATION;
         auto conv = Transformation::createChangeVerticalUnit(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name),
-            sourceCRS, targetCRS, common::Scale(factor), {});
+            sourceCRS, targetCRS,
+            // In case of a height depth reversal, we should probably have
+            // 2 steps instead of putting a negative factor...
+            common::Scale(heightDepthReversal ? -factor : factor), {});
         conv->setHasBallparkTransformation(true);
         res.push_back(conv);
     } else if (convSrc != convDst) {
         auto conv = Conversion::createChangeVerticalUnit(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name),
-            common::Scale(factor));
+            // In case of a height depth reversal, we should probably have
+            // 2 steps instead of putting a negative factor...
+            common::Scale(heightDepthReversal ? -factor : factor));
+        conv->setCRSs(sourceCRS, targetCRS, nullptr);
+        res.push_back(conv);
+    } else if (heightDepthReversal) {
+        auto conv = Conversion::createHeightDepthReversal(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name));
         conv->setCRSs(sourceCRS, targetCRS, nullptr);
         res.push_back(conv);
     }
@@ -13536,11 +13600,19 @@ getInterpolationGeogCRS(const CoordinateOperationNNPtr &verticalTransform,
             verticalTransform.get());
         if (concat) {
             const auto &steps = concat->operations();
-            // Is this change of unit + transformation ?
-            if (steps.size() == 2 &&
-                dynamic_cast<const Conversion *>(steps[0].get())) {
-                transformationVerticalTransform =
-                    dynamic_cast<const Transformation *>(steps[1].get());
+            // Is this change of unit and/or height depth reversal +
+            // transformation ?
+            for (const auto &step : steps) {
+                const auto transf =
+                    dynamic_cast<const Transformation *>(step.get());
+                if (transf) {
+                    // Only support a single Transformation in the steps
+                    if (transformationVerticalTransform != nullptr) {
+                        transformationVerticalTransform = nullptr;
+                        break;
+                    }
+                    transformationVerticalTransform = transf;
+                }
             }
         }
     }

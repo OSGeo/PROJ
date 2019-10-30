@@ -6872,6 +6872,43 @@ TEST(operation, vertCRS_to_vertCRS) {
         EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=affine +s33=0.999998");
     }
+
+    auto vertCRSMetreUp =
+        nn_dynamic_pointer_cast<VerticalCRS>(WKTParser().createFromWKT(
+            "VERTCRS[\"my height\",VDATUM[\"my datum\"],CS[vertical,1],"
+            "AXIS[\"gravity-related height (H)\",up,"
+            "LENGTHUNIT[\"metre\",1]]]"));
+    ASSERT_TRUE(vertCRSMetreUp != nullptr);
+
+    auto vertCRSMetreDown =
+        nn_dynamic_pointer_cast<VerticalCRS>(WKTParser().createFromWKT(
+            "VERTCRS[\"my depth\",VDATUM[\"my datum\"],CS[vertical,1],"
+            "AXIS[\"depth (D)\",down,LENGTHUNIT[\"metre\",1]]]"));
+    ASSERT_TRUE(vertCRSMetreDown != nullptr);
+
+    auto vertCRSMetreDownFtUS =
+        nn_dynamic_pointer_cast<VerticalCRS>(WKTParser().createFromWKT(
+            "VERTCRS[\"my depth (ftUS)\",VDATUM[\"my datum\"],CS[vertical,1],"
+            "AXIS[\"depth (D)\",down,LENGTHUNIT[\"US survey "
+            "foot\",0.304800609601219]]]"));
+    ASSERT_TRUE(vertCRSMetreDownFtUS != nullptr);
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(vertCRSMetreUp), NN_CHECK_ASSERT(vertCRSMetreDown));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=axisswap +order=1,2,-3");
+    }
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(vertCRSMetreUp),
+            NN_CHECK_ASSERT(vertCRSMetreDownFtUS));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=affine +s33=-3.28083333333333");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -7202,7 +7239,7 @@ TEST(operation, compoundCRS_to_geogCRS_with_vertical_unit_change) {
     ASSERT_EQ(listCompoundToGeog.size(), listCompoundMetreToGeog.size());
 
     EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
-              "Transformation from NAVD88 height (ftUS) to NAVD88 height + " +
+              "Inverse of NAVD88 height to NAVD88 height (ftUS) + " +
                   listCompoundMetreToGeog[0]->nameStr());
     EXPECT_EQ(
         listCompoundToGeog[0]->exportToPROJString(
@@ -7267,7 +7304,7 @@ TEST(
     ASSERT_GE(listCompoundToGeog.size(), 1U);
 
     EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
-              "Transformation from NAVD88 height (ftUS) to NAVD88 height + " +
+              "Inverse of NAVD88 height to NAVD88 height (ftUS) + " +
                   listCompoundMetreToGeog[0]->nameStr());
     EXPECT_EQ(
         listCompoundToGeog[0]->exportToPROJString(
@@ -7282,6 +7319,134 @@ TEST(
                    "+step +proj=unitconvert +xy_in=deg +xy_out=rad",
                    "+step +proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad "
                    "+z_out=m"));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_to_geogCRS_with_height_depth_reversal) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // NAD83(2011) + NAVD88 depth
+    auto srcObj = createFromUserInput("EPSG:6318+6357",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto nnSrc = NN_NO_CHECK(src);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("6319"); // NAD83(2011) 3D
+
+    auto listCompoundToGeog =
+        CoordinateOperationFactory::create()->createOperations(nnSrc, dst,
+                                                               ctxt);
+    ASSERT_TRUE(!listCompoundToGeog.empty());
+
+    // NAD83(2011) + NAVD88 height
+    auto srcObjCompoundVMetre = createFromUserInput(
+        "EPSG:6318+5703", authFactory->databaseContext(), false);
+    auto srcCompoundVMetre = nn_dynamic_pointer_cast<CRS>(srcObjCompoundVMetre);
+    ASSERT_TRUE(srcCompoundVMetre != nullptr);
+    auto listCompoundMetreToGeog =
+        CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(srcCompoundVMetre), dst, ctxt);
+
+    // Check that we get the same and similar results whether we start from
+    // regular NAVD88 height or its depth variant
+    ASSERT_EQ(listCompoundToGeog.size(), listCompoundMetreToGeog.size());
+
+    EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
+              "Inverse of NAVD88 height to NAVD88 depth + " +
+                  listCompoundMetreToGeog[0]->nameStr());
+    EXPECT_EQ(
+        listCompoundToGeog[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        replaceAll(listCompoundMetreToGeog[0]->exportToPROJString(
+                       PROJStringFormatter::create(
+                           PROJStringFormatter::Convention::PROJ_5,
+                           authFactory->databaseContext())
+                           .get()),
+                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad",
+                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                   "+step +proj=axisswap +order=1,2,-3"));
+
+    // Check reverse path
+    auto listGeogToCompound =
+        CoordinateOperationFactory::create()->createOperations(dst, nnSrc,
+                                                               ctxt);
+    EXPECT_EQ(listGeogToCompound.size(), listCompoundToGeog.size());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    compoundCRS_to_geogCRS_with_vertical_unit_change_and_height_depth_reversal) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // NAD83(2011) + NAVD88 depth (ftUS)
+    auto srcObj = createFromUserInput("EPSG:6318+6358",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto nnSrc = NN_NO_CHECK(src);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("6319"); // NAD83(2011) 3D
+
+    auto listCompoundToGeog =
+        CoordinateOperationFactory::create()->createOperations(nnSrc, dst,
+                                                               ctxt);
+    ASSERT_TRUE(!listCompoundToGeog.empty());
+
+    // NAD83(2011) + NAVD88 height
+    auto srcObjCompoundVMetre = createFromUserInput(
+        "EPSG:6318+5703", authFactory->databaseContext(), false);
+    auto srcCompoundVMetre = nn_dynamic_pointer_cast<CRS>(srcObjCompoundVMetre);
+    ASSERT_TRUE(srcCompoundVMetre != nullptr);
+    auto listCompoundMetreToGeog =
+        CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(srcCompoundVMetre), dst, ctxt);
+
+    // Check that we get the same and similar results whether we start from
+    // regular NAVD88 height or its depth (ftUS) variant
+    ASSERT_EQ(listCompoundToGeog.size(), listCompoundMetreToGeog.size());
+
+    EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
+              "Inverse of NAVD88 height (ftUS) to NAVD88 depth (ftUS) + "
+              "Inverse of NAVD88 height to NAVD88 height (ftUS) + " +
+                  listCompoundMetreToGeog[0]->nameStr());
+    EXPECT_EQ(
+        listCompoundToGeog[0]->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_5,
+                                        authFactory->databaseContext())
+                .get()),
+        replaceAll(listCompoundMetreToGeog[0]->exportToPROJString(
+                       PROJStringFormatter::create(
+                           PROJStringFormatter::Convention::PROJ_5,
+                           authFactory->databaseContext())
+                           .get()),
+                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad",
+                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                   "+step +proj=axisswap +order=1,2,-3 "
+                   "+step +proj=unitconvert +z_in=us-ft +z_out=m"));
+
+    // Check reverse path
+    auto listGeogToCompound =
+        CoordinateOperationFactory::create()->createOperations(dst, nnSrc,
+                                                               ctxt);
+    EXPECT_EQ(listGeogToCompound.size(), listCompoundToGeog.size());
 }
 
 // ---------------------------------------------------------------------------

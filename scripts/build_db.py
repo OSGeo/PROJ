@@ -137,7 +137,12 @@ BEFORE INSERT ON conversion
 BEGIN
 """
 
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, area_of_use_code, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH'")
+    # 1068 and 1069 are Height Depth Reversal and Change of Vertical Unit
+    # In EPSG, there is one generic instance of those as 7812 and 7813 that
+    # don't refer to particular CRS, and instances pointing to CRS names
+    # The later are imported in the other_transformation table since we recover
+    # the source/target CRS names from the transformation name.
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, area_of_use_code, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH' AND (coord_op_method_code NOT IN (1068, 1069) OR coord_op_code IN (7812,7813))")
     for (code, name, area_of_use_code, method_code, method_name, deprecated) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 7
@@ -423,8 +428,31 @@ def fill_other_transformation(proj_db_cursor):
     # 9619: Geographic2D offsets
     # 9624: Affine Parametric Transformation
     # 9660: Geographic3D offsets
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, coord_op_scope, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'transformation' AND coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660)")
+    # 1068: Height Depth Reversal
+    # 1069: Change of Vertical Unit
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, coord_op_scope, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660, 1068, 1069)")
     for (code, name, method_code, method_name, source_crs_code, target_crs_code, area_of_use_code, coord_op_accuracy, coord_tfm_version, deprecated, scope, remarks) in proj_db_cursor.fetchall():
+
+        # 1068 and 1069 are Height Depth Reversal and Change of Vertical Unit
+        # In EPSG, there is one generic instance of those as 7812 and 7813 that
+        # don't refer to particular CRS, and instances pointing to CRS names
+        # The later are imported in the other_transformation table since we recover
+        # the source/target CRS names from the transformation name.
+        if method_code in (1068, 1069) and source_crs_code is None and target_crs_code is None:
+            parts = name.split(" to ")
+            if len(parts) != 2:
+                continue
+
+            proj_db_cursor.execute("SELECT coord_ref_sys_code FROM epsg_coordinatereferencesystem WHERE coord_ref_sys_name = ?", (parts[0],))
+            source_codes = proj_db_cursor.fetchall()
+            proj_db_cursor.execute("SELECT coord_ref_sys_code FROM epsg_coordinatereferencesystem WHERE coord_ref_sys_name = ?", (parts[1],))
+            target_codes = proj_db_cursor.fetchall()
+            if len(source_codes) != 1 and len(target_codes) != 1:
+                continue
+
+            source_crs_code = source_codes[0][0]
+            target_crs_code = target_codes[0][0]
+
         expected_order = 1
         max_n_params = 7
         param_auth_name = [None for i in range(max_n_params)]
@@ -471,6 +499,7 @@ def fill_other_transformation(proj_db_cursor):
                deprecated)
 
         #proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'other_transformation')", (EPSG_AUTHORITY, code))
+        #print(arg)
         proj_db_cursor.execute('INSERT INTO other_transformation VALUES (' +
             '?,?,?, ?,?, ?,?,?, ?,?, ?,?, ?,?, ?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ' +
             '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?)', arg)

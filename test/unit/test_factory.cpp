@@ -542,6 +542,15 @@ TEST(factory, AuthorityFactory_createConversion) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createConversion_from_other_transformation) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto op = factory->createCoordinateOperation("7984", false);
+    auto conversion = nn_dynamic_pointer_cast<Conversion>(op);
+    ASSERT_TRUE(conversion != nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createProjectedCRS) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createProjectedCRS("-1"),
@@ -1157,9 +1166,7 @@ TEST(factory, AuthorityFactory_build_all_concatenated) {
         AuthorityFactory::ObjectType::CONCATENATED_OPERATION, false);
     EXPECT_LT(setConcatenatedNoDeprecated.size(), setConcatenated.size());
     for (const auto &code : setConcatenated) {
-        if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572",
-                      // the issue with 7987 is the chaining of two conversions
-                      "7987"})) {
+        if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572"})) {
             EXPECT_THROW(factory->createCoordinateOperation(code, false),
                          FactoryException)
                 << code;
