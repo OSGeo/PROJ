@@ -7202,6 +7202,59 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_from_wkt_without_id_to_geogCRS) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto wkt =
+        "COMPOUNDCRS[\"NAD83(2011) + NAVD88 height\",\n"
+        "    GEOGCRS[\"NAD83(2011)\",\n"
+        "        DATUM[\"NAD83 (National Spatial Reference System 2011)\",\n"
+        "            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        CS[ellipsoidal,2],\n"
+        "            AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                ORDER[1],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                ORDER[2],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+        "    VERTCRS[\"NAVD88 height\",\n"
+        "        VDATUM[\"North American Vertical Datum 1988\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"metre\",1]]]]";
+    auto srcObj =
+        createFromUserInput(wkt, authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("6319"); // NAD83(2011)
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    // NAD83(2011) + NAVD88 height
+    auto srcRefObj = createFromUserInput("EPSG:6318+5703",
+                                         authFactory->databaseContext(), false);
+    auto srcRef = nn_dynamic_pointer_cast<CRS>(srcRefObj);
+    ASSERT_TRUE(srcRef != nullptr);
+    ASSERT_TRUE(
+        src->isEquivalentTo(srcRef.get(), IComparable::Criterion::EQUIVALENT));
+    auto listRef = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcRef), dst, ctxt);
+
+    EXPECT_EQ(list.size(), listRef.size());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_to_geogCRS_with_vertical_unit_change) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
