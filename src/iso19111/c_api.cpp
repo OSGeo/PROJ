@@ -498,7 +498,7 @@ template <class T> static PROJ_STRING_LIST to_string_list(T &&set) {
  * proj_string_list_destroy().
  * @param out_grammar_errors Pointer to a PROJ_STRING_LIST object, or NULL.
  * If provided, *out_grammar_errors will contain a list of errors regarding the
- * WKT grammaer. It must be freed with proj_string_list_destroy().
+ * WKT grammar. It must be freed with proj_string_list_destroy().
  * @return Object that must be unreferenced with proj_destroy(), or NULL in
  * case of error.
  */
@@ -522,6 +522,7 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
         if (dbContext) {
             parser.attachDatabaseContext(NN_NO_CHECK(dbContext));
         }
+        parser.setStrict(false);
         for (auto iter = options; iter && iter[0]; ++iter) {
             const char *value;
             if ((value = getOptionValue(*iter, "STRICT="))) {
@@ -536,10 +537,19 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
         auto obj = nn_dynamic_pointer_cast<IdentifiedObject>(
             parser.createFromWKT(wkt));
 
+        std::vector<std::string> warningsFromParsing;
         if (out_grammar_errors) {
-            auto warnings = parser.warningList();
-            if (!warnings.empty()) {
-                *out_grammar_errors = to_string_list(warnings);
+            auto rawWarnings = parser.warningList();
+            std::vector<std::string> grammarWarnings;
+            for (const auto &msg : rawWarnings) {
+                if (msg.find("Default it to") != std::string::npos) {
+                    warningsFromParsing.push_back(msg);
+                } else {
+                    grammarWarnings.push_back(msg);
+                }
+            }
+            if (!grammarWarnings.empty()) {
+                *out_grammar_errors = to_string_list(grammarWarnings);
             }
         }
 
@@ -548,6 +558,8 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
             if (derivedCRS) {
                 auto warnings =
                     derivedCRS->derivingConversionRef()->validateParameters();
+                warnings.insert(warnings.end(), warningsFromParsing.begin(),
+                                warningsFromParsing.end());
                 if (!warnings.empty()) {
                     *out_warnings = to_string_list(warnings);
                 }

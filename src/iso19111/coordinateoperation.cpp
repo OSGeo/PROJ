@@ -6056,24 +6056,31 @@ void Conversion::_exportToPROJString(
                 if (!param->proj_name) {
                     continue;
                 }
-                auto value =
+                const auto value =
                     parameterValueMeasure(param->wkt2_name, param->epsg_code);
+                double valueConverted = 0;
+                if (value == nullMeasure) {
+                    // Deal with missing values. In an ideal world, this would
+                    // not happen
+                    if (param->epsg_code ==
+                        EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN) {
+                        valueConverted = 1.0;
+                    }
+                } else if (param->unit_type ==
+                           common::UnitOfMeasure::Type::ANGULAR) {
+                    valueConverted =
+                        value.convertToUnit(common::UnitOfMeasure::DEGREE);
+                } else {
+                    valueConverted = value.getSIValue();
+                }
+
                 if (mapping->epsg_code ==
                         EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP &&
                     strcmp(param->proj_name, "lat_1") == 0) {
-                    formatter->addParam(
-                        param->proj_name,
-                        value.convertToUnit(common::UnitOfMeasure::DEGREE));
-                    formatter->addParam(
-                        "lat_0",
-                        value.convertToUnit(common::UnitOfMeasure::DEGREE));
-                } else if (param->unit_type ==
-                           common::UnitOfMeasure::Type::ANGULAR) {
-                    formatter->addParam(
-                        param->proj_name,
-                        value.convertToUnit(common::UnitOfMeasure::DEGREE));
+                    formatter->addParam(param->proj_name, valueConverted);
+                    formatter->addParam("lat_0", valueConverted);
                 } else {
-                    formatter->addParam(param->proj_name, value.getSIValue());
+                    formatter->addParam(param->proj_name, valueConverted);
                 }
             }
 
