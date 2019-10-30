@@ -10334,14 +10334,14 @@ CoordinateOperationContextNNPtr CoordinateOperationContext::create(
 struct CoordinateOperationFactory::Private {
 
     struct Context {
-        // This is the source CRS and target CRS of the initial
+        // This is the extent of the source CRS and target CRS of the initial
         // CoordinateOperationFactory::createOperations() public call, not
         // necessarily the ones of intermediate
         // CoordinateOperationFactory::Private::createOperations() calls.
         // This is used to compare transformations area of use against the
         // area of use of the source & target CRS.
-        const crs::CRSNNPtr &sourceCRS;
-        const crs::CRSNNPtr &targetCRS;
+        const metadata::ExtentPtr &extent1;
+        const metadata::ExtentPtr &extent2;
         const CoordinateOperationContextNNPtr &context;
         bool inCreateOperationsWithDatumPivotAntiRecursion = false;
         bool inCreateOperationsThroughPreferredHub = false;
@@ -10349,11 +10349,10 @@ struct CoordinateOperationFactory::Private {
         bool inCreateOperationsGeogToVertWithIntermediateVert = false;
         bool skipHorizontalTransformation = false;
 
-        Context(const crs::CRSNNPtr &sourceCRSIn,
-                const crs::CRSNNPtr &targetCRSIn,
+        Context(const metadata::ExtentPtr &extent1In,
+                const metadata::ExtentPtr &extent2In,
                 const CoordinateOperationContextNNPtr &contextIn)
-            : sourceCRS(sourceCRSIn), targetCRS(targetCRSIn),
-              context(contextIn) {}
+            : extent1(extent1In), extent2(extent2In), context(contextIn) {}
     };
 
     static std::vector<CoordinateOperationNNPtr>
@@ -10708,13 +10707,11 @@ struct FilterResults {
 
     FilterResults(const std::vector<CoordinateOperationNNPtr> &sourceListIn,
                   const CoordinateOperationContextNNPtr &contextIn,
-                  const crs::CRSNNPtr &sourceCRSIn,
-                  const crs::CRSNNPtr &targetCRSIn,
+                  const metadata::ExtentPtr &extent1In,
+                  const metadata::ExtentPtr &extent2In,
                   bool forceStrictContainmentTest)
-        : sourceList(sourceListIn), context(contextIn), sourceCRS(sourceCRSIn),
-          targetCRS(targetCRSIn), sourceCRSExtent(getExtent(sourceCRS)),
-          targetCRSExtent(getExtent(targetCRS)),
-          areaOfInterest(context->getAreaOfInterest()),
+        : sourceList(sourceListIn), context(contextIn), extent1(extent1In),
+          extent2(extent2In), areaOfInterest(context->getAreaOfInterest()),
           desiredAccuracy(context->getDesiredAccuracy()),
           sourceAndTargetCRSExtentUse(
               context->getSourceAndTargetCRSExtentUse()) {
@@ -10746,10 +10743,8 @@ struct FilterResults {
   private:
     const std::vector<CoordinateOperationNNPtr> &sourceList;
     const CoordinateOperationContextNNPtr &context;
-    const crs::CRSNNPtr &sourceCRS;
-    const crs::CRSNNPtr &targetCRS;
-    const metadata::ExtentPtr &sourceCRSExtent;
-    const metadata::ExtentPtr &targetCRSExtent;
+    const metadata::ExtentPtr &extent1;
+    const metadata::ExtentPtr &extent2;
     metadata::ExtentPtr areaOfInterest;
     const double desiredAccuracy = context->getDesiredAccuracy();
     const CoordinateOperationContext::SourceTargetCRSExtentUse
@@ -10767,24 +10762,23 @@ struct FilterResults {
             if (sourceAndTargetCRSExtentUse ==
                 CoordinateOperationContext::SourceTargetCRSExtentUse::
                     INTERSECTION) {
-                if (sourceCRSExtent && targetCRSExtent) {
-                    areaOfInterest = sourceCRSExtent->intersection(
-                        NN_NO_CHECK(targetCRSExtent));
+                if (extent1 && extent2) {
+                    areaOfInterest =
+                        extent1->intersection(NN_NO_CHECK(extent2));
                 }
             } else if (sourceAndTargetCRSExtentUse ==
                        CoordinateOperationContext::SourceTargetCRSExtentUse::
                            SMALLEST) {
-                if (sourceCRSExtent && targetCRSExtent) {
-                    if (getPseudoArea(sourceCRSExtent) <
-                        getPseudoArea(targetCRSExtent)) {
-                        areaOfInterest = sourceCRSExtent;
+                if (extent1 && extent2) {
+                    if (getPseudoArea(extent1) < getPseudoArea(extent2)) {
+                        areaOfInterest = extent1;
                     } else {
-                        areaOfInterest = targetCRSExtent;
+                        areaOfInterest = extent2;
                     }
-                } else if (sourceCRSExtent) {
-                    areaOfInterest = sourceCRSExtent;
+                } else if (extent1) {
+                    areaOfInterest = extent1;
                 } else {
-                    areaOfInterest = targetCRSExtent;
+                    areaOfInterest = extent2;
                 }
             }
         }
@@ -10842,13 +10836,11 @@ struct FilterResults {
                 if (!extent)
                     continue;
                 hasFoundOpWithExtent = true;
-                bool extentContainsSource =
-                    !sourceCRSExtent ||
-                    extent->contains(NN_NO_CHECK(sourceCRSExtent));
-                bool extentContainsTarget =
-                    !targetCRSExtent ||
-                    extent->contains(NN_NO_CHECK(targetCRSExtent));
-                if (extentContainsSource && extentContainsTarget) {
+                bool extentContainsExtent1 =
+                    !extent1 || extent->contains(NN_NO_CHECK(extent1));
+                bool extentContainsExtent2 =
+                    !extent2 || extent->contains(NN_NO_CHECK(extent2));
+                if (extentContainsExtent1 && extentContainsExtent2) {
                     if (!op->hasBallparkTransformation()) {
                         hasOpThatContainsAreaOfInterest = true;
                     }
@@ -10856,19 +10848,17 @@ struct FilterResults {
                 if (spatialCriterion ==
                     CoordinateOperationContext::SpatialCriterion::
                         STRICT_CONTAINMENT) {
-                    if (!extentContainsSource || !extentContainsTarget) {
+                    if (!extentContainsExtent1 || !extentContainsExtent2) {
                         continue;
                     }
                 } else if (spatialCriterion ==
                            CoordinateOperationContext::SpatialCriterion::
                                PARTIAL_INTERSECTION) {
-                    bool extentIntersectsSource =
-                        !sourceCRSExtent ||
-                        extent->intersects(NN_NO_CHECK(sourceCRSExtent));
-                    bool extentIntersectsTarget =
-                        targetCRSExtent &&
-                        extent->intersects(NN_NO_CHECK(targetCRSExtent));
-                    if (!extentIntersectsSource || !extentIntersectsTarget) {
+                    bool extentIntersectsExtent1 =
+                        !extent1 || extent->intersects(NN_NO_CHECK(extent1));
+                    bool extentIntersectsExtent2 =
+                        extent2 && extent->intersects(NN_NO_CHECK(extent2));
+                    if (!extentIntersectsExtent1 || !extentIntersectsExtent2) {
                         continue;
                     }
                 }
@@ -10907,21 +10897,19 @@ struct FilterResults {
                 if (areaOfInterest) {
                     area = getPseudoArea(
                         extentOp->intersection(NN_NO_CHECK(areaOfInterest)));
-                } else if (sourceCRSExtent && targetCRSExtent) {
-                    auto x =
-                        extentOp->intersection(NN_NO_CHECK(sourceCRSExtent));
-                    auto y =
-                        extentOp->intersection(NN_NO_CHECK(targetCRSExtent));
+                } else if (extent1 && extent2) {
+                    auto x = extentOp->intersection(NN_NO_CHECK(extent1));
+                    auto y = extentOp->intersection(NN_NO_CHECK(extent2));
                     area = getPseudoArea(x) + getPseudoArea(y) -
                            ((x && y)
                                 ? getPseudoArea(x->intersection(NN_NO_CHECK(y)))
                                 : 0.0);
-                } else if (sourceCRSExtent) {
+                } else if (extent1) {
                     area = getPseudoArea(
-                        extentOp->intersection(NN_NO_CHECK(sourceCRSExtent)));
-                } else if (targetCRSExtent) {
+                        extentOp->intersection(NN_NO_CHECK(extent1)));
+                } else if (extent2) {
                     area = getPseudoArea(
-                        extentOp->intersection(NN_NO_CHECK(targetCRSExtent)));
+                        extentOp->intersection(NN_NO_CHECK(extent2)));
                 } else {
                     area = getPseudoArea(extentOp);
                 }
@@ -11217,8 +11205,9 @@ struct FilterResults {
 static std::vector<CoordinateOperationNNPtr>
 filterAndSort(const std::vector<CoordinateOperationNNPtr> &sourceList,
               const CoordinateOperationContextNNPtr &context,
-              const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS) {
-    return FilterResults(sourceList, context, sourceCRS, targetCRS, false)
+              const metadata::ExtentPtr &extent1,
+              const metadata::ExtentPtr &extent2) {
+    return FilterResults(sourceList, context, extent1, extent2, false)
         .andSort()
         .getRes();
 }
@@ -12485,8 +12474,8 @@ createBallparkGeocentricTranslation(const crs::CRSNNPtr &sourceCRS,
 
 bool CoordinateOperationFactory::Private::hasPerfectAccuracyResult(
     const std::vector<CoordinateOperationNNPtr> &res, const Context &context) {
-    auto resTmp = FilterResults(res, context.context, context.sourceCRS,
-                                context.targetCRS, true)
+    auto resTmp = FilterResults(res, context.context, context.extent1,
+                                context.extent2, true)
                       .getRes();
     for (const auto &op : resTmp) {
         const double acc = getAccuracy(op);
@@ -14139,13 +14128,12 @@ CoordinateOperationFactory::createOperations(
 
     auto l_resolvedSourceCRS = getResolvedCRS(l_sourceCRS, context);
     auto l_resolvedTargetCRS = getResolvedCRS(l_targetCRS, context);
-    Private::Context contextPrivate(l_resolvedSourceCRS, l_resolvedTargetCRS,
-                                    context);
+    auto sourceCRSExtent(getExtent(l_resolvedSourceCRS));
+    auto targetCRSExtent(getExtent(l_resolvedTargetCRS));
+    Private::Context contextPrivate(sourceCRSExtent, targetCRSExtent, context);
 
     if (context->getSourceAndTargetCRSExtentUse() ==
         CoordinateOperationContext::SourceTargetCRSExtentUse::INTERSECTION) {
-        auto sourceCRSExtent(getExtent(l_resolvedSourceCRS));
-        auto targetCRSExtent(getExtent(l_resolvedTargetCRS));
         if (sourceCRSExtent && targetCRSExtent &&
             !sourceCRSExtent->intersects(NN_NO_CHECK(targetCRSExtent))) {
             return std::vector<CoordinateOperationNNPtr>();
@@ -14155,7 +14143,7 @@ CoordinateOperationFactory::createOperations(
     return filterAndSort(Private::createOperations(l_resolvedSourceCRS,
                                                    l_resolvedTargetCRS,
                                                    contextPrivate),
-                         context, l_resolvedSourceCRS, l_resolvedTargetCRS);
+                         context, sourceCRSExtent, targetCRSExtent);
 }
 
 // ---------------------------------------------------------------------------
