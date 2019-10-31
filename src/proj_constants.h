@@ -592,4 +592,9 @@
 #define EPSG_NAME_METHOD_AXIS_ORDER_REVERSAL_3D \
     "Axis Order Reversal (Geographic3D horizontal)"
 
+/* ------------------------------------------------------------------------ */
+
+#define EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL 1068
+#define EPSG_NAME_METHOD_HEIGHT_DEPTH_REVERSAL "Height Depth Reversal"
+
 #endif /* PROJ_CONSTANTS_INCLUDED */
