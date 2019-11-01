@@ -13,7 +13,7 @@ distribution of the source code and various resource file archives. See
 Current Release
 --------------------------------------------------------------------------------
 
-* **2019-09-01** `proj-6.2.0.tar.gz`_ (`md5`_)
+* **2019-11-01** `proj-6.2.1.tar.gz`_ (`md5`_)
 * **2018-09-15** `proj-datumgrid-1.8.zip`_
 * **2019-09-01** `proj-datumgrid-europe-1.4.zip`_
 * **2019-03-01** `proj-datumgrid-north-america-1.2.zip`_
@@ -24,6 +24,7 @@ Current Release
 Past Releases
 --------------------------------------------------------------------------------
 
+* **2019-09-01** `proj-6.2.0.tar.gz`_
 * **2019-07-01** `proj-6.1.1.tar.gz`_
 * **2019-05-15** `proj-6.1.0.tar.gz`_
 * **2019-03-01** `proj-6.0.0.tar.gz`_
@@ -44,6 +45,7 @@ Past Releases
 * **2018-03-01** `proj-datumgrid-europe-1.0.zip`_
 * **2018-03-01** `proj-datumgrid-north-america-1.0.zip`_
 
+.. _`proj-6.2.1.tar.gz`: https://download.osgeo.org/proj/proj-6.2.1.tar.gz
 .. _`proj-6.2.0.tar.gz`: https://download.osgeo.org/proj/proj-6.2.0.tar.gz
 .. _`proj-6.1.1.tar.gz`: https://download.osgeo.org/proj/proj-6.1.1.tar.gz
 .. _`proj-6.1.0.tar.gz`: https://download.osgeo.org/proj/proj-6.1.0.tar.gz
@@ -68,5 +70,5 @@ Past Releases
 .. _`proj-datumgrid-north-america-1.2.zip`: https://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip
 .. _`proj-datumgrid-oceania-1.0.zip`: https://download.osgeo.org/proj/proj-datumgrid-oceania-1.0.zip
 .. _`proj-datumgrid-world-1.0.zip`: https://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip
-.. _`md5`: https://download.osgeo.org/proj/proj-6.2.0.tar.gz.md5
+.. _`md5`: https://download.osgeo.org/proj/proj-6.2.1.tar.gz.md5
 .. _`proj.pdf`: https://raw.githubusercontent.com/OSGeo/PROJ/gh-pages/proj.pdf
