@@ -1323,6 +1323,9 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     createChangeVerticalUnit(const util::PropertyMap &properties,
                              const common::Scale &factor);
 
+    PROJ_DLL static ConversionNNPtr
+    createHeightDepthReversal(const util::PropertyMap &properties);
+
     PROJ_DLL static ConversionNNPtr createAxisOrderReversal(bool is3D);
 
     PROJ_DLL static ConversionNNPtr

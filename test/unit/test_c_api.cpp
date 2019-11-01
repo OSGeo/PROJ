@@ -231,7 +231,8 @@ TEST_F(CApi, proj_create_from_wkt) {
             "    PRIMEM[\"Greenwich\",0],\n"
             "    UNIT[\"degree\",0.0174532925199433]]",
             nullptr, nullptr, nullptr);
-        EXPECT_EQ(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
     }
     {
         PROJ_STRING_LIST warningList = nullptr;
@@ -244,7 +245,8 @@ TEST_F(CApi, proj_create_from_wkt) {
             "    PRIMEM[\"Greenwich\",0],\n"
             "    UNIT[\"degree\",0.0174532925199433]]",
             nullptr, &warningList, &errorList);
-        EXPECT_EQ(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
         EXPECT_EQ(warningList, nullptr);
         proj_string_list_destroy(warningList);
         EXPECT_NE(errorList, nullptr);

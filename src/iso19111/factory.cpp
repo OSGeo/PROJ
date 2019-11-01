@@ -2295,6 +2295,20 @@ AuthorityFactory::createConversion(const std::string &code) const {
 
     auto res = d->runWithCodeParam(sql, code);
     if (res.empty()) {
+        try {
+            // Conversions using methods Change of Vertical Unit or
+            // Height Depth Reveral are stored in other_transformation
+            auto op = createCoordinateOperation(
+                code, false /* allowConcatenated */,
+                false /* usePROJAlternativeGridNames */,
+                "other_transformation");
+            auto conv =
+                util::nn_dynamic_pointer_cast<operation::Conversion>(op);
+            if (conv) {
+                return NN_NO_CHECK(conv);
+            }
+        } catch (const std::exception &) {
+        }
         throw NoSuchAuthorityCodeException("conversion not found",
                                            d->authority(), code);
     }
@@ -3118,13 +3132,16 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     .set(metadata::Identifier::CODE_KEY, method_code)
                     .set(common::IdentifiedObject::NAME_KEY, method_name);
 
-            if (method_auth_name == metadata::Identifier::EPSG &&
-                operation::isAxisOrderReversal(
-                    std::atoi(method_code.c_str()))) {
-                auto op = operation::Conversion::create(props, propsMethod,
-                                                        parameters, values);
-                op->setCRSs(sourceCRS, targetCRS, nullptr);
-                return op;
+            if (method_auth_name == metadata::Identifier::EPSG) {
+                int method_code_int = std::atoi(method_code.c_str());
+                if (operation::isAxisOrderReversal(method_code_int) ||
+                    method_code_int == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT ||
+                    method_code_int == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
+                    auto op = operation::Conversion::create(props, propsMethod,
+                                                            parameters, values);
+                    op->setCRSs(sourceCRS, targetCRS, nullptr);
+                    return op;
+                }
             }
             return operation::Transformation::create(
                 props, sourceCRS, targetCRS, nullptr, propsMethod, parameters,
@@ -4595,6 +4612,30 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
         const auto &auth_name = row[0];
         const auto &code = row[1];
         res.emplace_back(d->createFactory(auth_name)->createGeodeticCRS(code));
+    }
+    return res;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+std::list<crs::VerticalCRSNNPtr> AuthorityFactory::createVerticalCRSFromDatum(
+    const std::string &datum_auth_name, const std::string &datum_code) const {
+    std::string sql(
+        "SELECT auth_name, code FROM vertical_crs WHERE "
+        "datum_auth_name = ? AND datum_code = ? AND deprecated = 0");
+    ListOfParams params{datum_auth_name, datum_code};
+    if (d->hasAuthorityRestriction()) {
+        sql += " AND auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+    auto sqlRes = d->run(sql, params);
+    std::list<crs::VerticalCRSNNPtr> res;
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        res.emplace_back(d->createFactory(auth_name)->createVerticalCRS(code));
     }
     return res;
 }

@@ -81,7 +81,7 @@ Bug fixes
 Updates
 -------
 
- * Introduced PROJJSON, a JSON encoding of WKT2 (`#1547 <https://github.com/OSGeo/PROJ/issues/15475>`_)
+ * Introduced :ref:`PROJJSON`, a JSON encoding of WKT2 (`#1547 <https://github.com/OSGeo/PROJ/issues/1547>`_)
  * Support CRS instantiation of OGC URN's (`#1505 <https://github.com/OSGeo/PROJ/issues/1505>`_)
 
  * Expose scope and remarks of database objects (`#1537 <https://github.com/OSGeo/PROJ/issues/1537>`_)

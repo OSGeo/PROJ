@@ -2170,7 +2170,7 @@ GeographicCRS::demoteTo2D(const std::string &newName,
     const auto &axisList = coordinateSystem()->axisList();
     if (axisList.size() == 3) {
         const auto &l_identifiers = identifiers();
-        // First check if there is a Geographic 3D CRS in the database
+        // First check if there is a Geographic 2D CRS in the database
         // of the same name.
         // This is the common practice in the EPSG dataset.
         if (dbContext && l_identifiers.size() == 1) {
