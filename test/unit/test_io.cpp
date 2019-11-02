@@ -1960,16 +1960,21 @@ TEST(wkt_parse, vertcrs_VRF_WKT2) {
 // ---------------------------------------------------------------------------
 
 TEST(wkt_parse, vertcrs_with_GEOIDMODEL) {
-    auto wkt = "VERTCRS[\"CGVD2013\","
-               "    VRF[\"Canadian Geodetic Vertical Datum of 2013\"],"
-               "    CS[vertical,1],"
-               "        AXIS[\"gravity-related height (H)\",up],"
-               "        LENGTHUNIT[\"metre\",1.0],"
-               "    GEOIDMODEL[\"CGG2013\",ID[\"EPSG\",6648]]]";
+    auto wkt = "VERTCRS[\"CGVD2013\",\n"
+               "    VDATUM[\"Canadian Geodetic Vertical Datum of 2013\"],\n"
+               "    CS[vertical,1],\n"
+               "        AXIS[\"gravity-related height (H)\",up,\n"
+               "            LENGTHUNIT[\"metre\",1]],\n"
+               "    GEOIDMODEL[\"CGG2013\",\n"
+               "        ID[\"EPSG\",6648]]]";
 
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        wkt);
 }
 
 // ---------------------------------------------------------------------------
@@ -10795,6 +10800,45 @@ TEST(json_import, vertical_crs_with_datum_ensemble) {
                 "        \"unit\": \"metre\"\n"
                 "      }\n"
                 "    ]\n"
+                "  }\n"
+                "}";
+
+    // No database
+    auto obj = createFromUserInput(json, nullptr);
+    auto vcrs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(vcrs != nullptr);
+    EXPECT_EQ(vcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, vertical_crs_with_geoid_model) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"VerticalCRS\",\n"
+                "  \"name\": \"CGVD2013\",\n"
+                "  \"datum\": {\n"
+                "    \"type\": \"VerticalReferenceFrame\",\n"
+                "    \"name\": \"Canadian Geodetic Vertical Datum of 2013\"\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"vertical\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Gravity-related height\",\n"
+                "        \"abbreviation\": \"H\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"geoid_model\": {\n"
+                "    \"name\": \"CGG2013\",\n"
+                "    \"id\": {\n"
+                "      \"authority\": \"EPSG\",\n"
+                "      \"code\": 6648\n"
+                "    }\n"
                 "  }\n"
                 "}";
 

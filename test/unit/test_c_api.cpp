@@ -3600,7 +3600,7 @@ TEST_F(CApi, proj_as_projjson) {
         EXPECT_EQ(std::string(projjson),
                   "{\n"
                   "  \"$schema\": "
-                  "\"https://proj.org/schemas/v0.1/projjson.schema.json\",\n"
+                  "\"https://proj.org/schemas/v0.2/projjson.schema.json\",\n"
                   "  \"type\": \"Ellipsoid\",\n"
                   "  \"name\": \"WGS 84\",\n"
                   "  \"semi_major_axis\": 6378137,\n"

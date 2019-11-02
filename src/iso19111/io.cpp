@@ -89,7 +89,7 @@ static const std::string emptyString{};
 
 // If changing that value, change it in data/projjson.schema.json as well
 #define PROJJSON_CURRENT_VERSION                                               \
-    "https://proj.org/schemas/v0.1/projjson.schema.json"
+    "https://proj.org/schemas/v0.2/projjson.schema.json"
 //! @endcond
 
 #if 0
@@ -3820,8 +3820,22 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
         ThrowNotExpectedCSType("vertical");
     }
 
+    auto &props = buildProperties(node);
+    auto &geoidModelNode = nodeP->lookForChild(WKTConstants::GEOIDMODEL);
+    if (!isNull(geoidModelNode)) {
+        auto &propsModel = buildProperties(geoidModelNode);
+        const auto dummyCRS = VerticalCRS::create(
+            PropertyMap(), datum, datumEnsemble, NN_NO_CHECK(verticalCS));
+        const auto model(Transformation::create(
+            propsModel, dummyCRS, dummyCRS, nullptr,
+            OperationMethod::create(PropertyMap(),
+                                    std::vector<OperationParameterNNPtr>()),
+            {}, {}));
+        props.set("GEOID_MODEL", model);
+    }
+
     auto crs = nn_static_pointer_cast<CRS>(VerticalCRS::create(
-        buildProperties(node), datum, datumEnsemble, NN_NO_CHECK(verticalCS)));
+        props, datum, datumEnsemble, NN_NO_CHECK(verticalCS)));
 
     if (!isNull(datumNode)) {
         auto &extensionNode = datumNode->lookForChild(WKTConstants::EXTENSION);
@@ -4987,7 +5001,22 @@ VerticalCRSNNPtr JSONParser::buildVerticalCRS(const json &j) {
     if (!verticalCS) {
         throw ParsingException("expected a vertical CS");
     }
-    return VerticalCRS::create(buildProperties(j), datum, datumEnsemble,
+
+    auto props = buildProperties(j);
+    if (j.contains("geoid_model")) {
+        auto geoidModelJ = getObject(j, "geoid_model");
+        auto propsModel = buildProperties(geoidModelJ);
+        const auto dummyCRS = VerticalCRS::create(
+            PropertyMap(), datum, datumEnsemble, NN_NO_CHECK(verticalCS));
+        const auto model(Transformation::create(
+            propsModel, dummyCRS, dummyCRS, nullptr,
+            OperationMethod::create(PropertyMap(),
+                                    std::vector<OperationParameterNNPtr>()),
+            {}, {}));
+        props.set("GEOID_MODEL", model);
+    }
+
+    return VerticalCRS::create(props, datum, datumEnsemble,
                                NN_NO_CHECK(verticalCS));
 }
 

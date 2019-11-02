@@ -2478,6 +2478,14 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     cs->_exportToWKT(formatter);
     formatter->setOutputAxis(oldAxisOutputRule);
 
+    if (isWKT2 && formatter->use2019Keywords() && !d->geoidModel.empty()) {
+        const auto &model = d->geoidModel[0];
+        formatter->startNode(io::WKTConstants::GEOIDMODEL, false);
+        formatter->addQuotedString(model->nameStr());
+        model->formatID(formatter);
+        formatter->endNode();
+    }
+
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
 }
@@ -2539,6 +2547,15 @@ void VerticalCRS::_exportToJSON(
     formatter->setOmitTypeInImmediateChild();
     coordinateSystem()->_exportToJSON(formatter);
 
+    if (!d->geoidModel.empty()) {
+        const auto &model = d->geoidModel[0];
+        writer.AddObjKey("geoid_model");
+        auto objectContext2(formatter->MakeObjectContext(nullptr, false));
+        writer.AddObjKey("name");
+        writer.Add(model->nameStr());
+        model->formatID(formatter);
+    }
+
     ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
@@ -2572,7 +2589,8 @@ void VerticalCRS::addLinearUnitConvert(
  * cs::VerticalCS.
  *
  * @param properties See \ref general_properties.
- * At minimum the name should be defined.
+ * At minimum the name should be defined. The GEOID_MODEL property can be set
+ * to a TransformationNNPtr object.
  * @param datumIn The datum of the CRS.
  * @param csIn a VerticalCS.
  * @return new VerticalCRS.
@@ -2592,7 +2610,8 @@ VerticalCRS::create(const util::PropertyMap &properties,
  * One and only one of datum or datumEnsemble should be set to a non-null value.
  *
  * @param properties See \ref general_properties.
- * At minimum the name should be defined.
+ * At minimum the name should be defined. The GEOID_MODEL property can be set
+ * to a TransformationNNPtr object.
  * @param datumIn The datum of the CRS, or nullptr
  * @param datumEnsembleIn The datum ensemble of the CRS, or nullptr.
  * @param csIn a VerticalCS.
@@ -2607,6 +2626,14 @@ VerticalCRS::create(const util::PropertyMap &properties,
                                                       csIn));
     crs->assignSelf(crs);
     crs->setProperties(properties);
+    const auto geoidModelPtr = properties.get("GEOID_MODEL");
+    if (geoidModelPtr) {
+        auto transf = util::nn_dynamic_pointer_cast<operation::Transformation>(
+            *geoidModelPtr);
+        if (transf) {
+            crs->d->geoidModel.emplace_back(NN_NO_CHECK(transf));
+        }
+    }
     return crs;
 }
 
