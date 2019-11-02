@@ -10442,6 +10442,12 @@ struct CoordinateOperationFactory::Private {
         std::vector<CoordinateOperationNNPtr> &res);
 
     static std::vector<CoordinateOperationNNPtr>
+    createOperationsGeogToVertFromGeoid(const crs::CRSNNPtr &sourceCRS,
+                                        const crs::CRSNNPtr &targetCRS,
+                                        const crs::VerticalCRS *vertDst,
+                                        Context &context);
+
+    static std::vector<CoordinateOperationNNPtr>
     createOperationsGeogToVertWithIntermediateVert(
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
         const crs::VerticalCRS *vertDst, Context &context);
@@ -12775,6 +12781,18 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
 
     ENTER_FUNCTION();
 
+    if (geogSrc && vertDst) {
+        res = createOperationsGeogToVertFromGeoid(sourceCRS, targetCRS, vertDst,
+                                                  context);
+    } else if (geogDst && vertSrc) {
+        res = applyInverse(createOperationsGeogToVertFromGeoid(
+            targetCRS, sourceCRS, vertSrc, context));
+    }
+
+    if (!res.empty()) {
+        return true;
+    }
+
     res = findOpsInRegistryDirect(sourceCRS, targetCRS, context);
 
     // If we get at least a result with perfect accuracy, do not
@@ -12894,6 +12912,116 @@ findCandidateVertCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
         }
     }
     return candidates;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<CoordinateOperationNNPtr>
+CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    const crs::VerticalCRS *vertDst, Private::Context &context) {
+
+    ENTER_FUNCTION();
+
+    const auto useTransf = [&targetCRS, &context,
+                            vertDst](const CoordinateOperationNNPtr &op) {
+        const auto targetOp =
+            dynamic_cast<const crs::VerticalCRS *>(op->targetCRS().get());
+        assert(targetOp);
+        if (targetOp->_isEquivalentTo(
+                vertDst, util::IComparable::Criterion::EQUIVALENT)) {
+            return op;
+        }
+        std::vector<CoordinateOperationNNPtr> tmp;
+        createOperationsVertToVert(NN_NO_CHECK(op->targetCRS()), targetCRS,
+                                   context, targetOp, vertDst, tmp);
+        assert(!tmp.empty());
+        auto ret = ConcatenatedOperation::createComputeMetadata(
+            {op, tmp.front()}, !allowEmptyIntersection);
+        return ret;
+    };
+
+    const auto getProjGeoidTransformation = [&sourceCRS, &targetCRS, &vertDst](
+        const CoordinateOperationNNPtr &model,
+        const std::string &projFilename) {
+
+        const auto getNameVertCRSMetre = [](const std::string &name) {
+            if (name.empty())
+                return std::string("unnamed");
+            auto ret(name);
+            bool haveOriginalUnit = false;
+            if (name.back() == ')') {
+                const auto pos = ret.rfind(" (");
+                if (pos != std::string::npos) {
+                    haveOriginalUnit = true;
+                    ret = ret.substr(0, pos);
+                }
+            }
+            const auto pos = ret.rfind(" depth");
+            if (pos != std::string::npos) {
+                ret = ret.substr(0, pos) + " height";
+            }
+            if (!haveOriginalUnit) {
+                ret += " (metre)";
+            }
+            return ret;
+        };
+
+        const auto &axis = vertDst->coordinateSystem()->axisList()[0];
+        const auto geogSrcCRS =
+            dynamic_cast<crs::GeographicCRS *>(model->interpolationCRS().get())
+                ? NN_NO_CHECK(model->interpolationCRS())
+                : sourceCRS;
+        const auto vertCRSMetre =
+            axis->unit() == common::UnitOfMeasure::METRE &&
+                    axis->direction() == cs::AxisDirection::UP
+                ? targetCRS
+                : util::nn_static_pointer_cast<crs::CRS>(
+                      crs::VerticalCRS::create(
+                          util::PropertyMap().set(
+                              common::IdentifiedObject::NAME_KEY,
+                              getNameVertCRSMetre(targetCRS->nameStr())),
+                          vertDst->datum(), vertDst->datumEnsemble(),
+                          cs::VerticalCS::createGravityRelatedHeight(
+                              common::UnitOfMeasure::METRE)));
+        const auto properties = util::PropertyMap().set(
+            common::IdentifiedObject::NAME_KEY,
+            buildOpName("Transformation", vertCRSMetre, geogSrcCRS));
+        return Transformation::createGravityRelatedHeightToGeographic3D(
+            properties, vertCRSMetre, geogSrcCRS, nullptr, projFilename, {});
+    };
+
+    std::vector<CoordinateOperationNNPtr> res;
+    const auto &authFactory = context.context->getAuthorityFactory();
+    if (authFactory) {
+        const auto &models = vertDst->geoidModel();
+        for (const auto &model : models) {
+            const auto &modelName = model->nameStr();
+            const auto transformations =
+                starts_with(modelName, "PROJ ")
+                    ? std::vector<
+                          CoordinateOperationNNPtr>{getProjGeoidTransformation(
+                          model, modelName.substr(strlen("PROJ ")))}
+                    : authFactory->getTransformationsForGeoid(
+                          modelName,
+                          context.context->getUsePROJAlternativeGridNames());
+            for (const auto &transf : transformations) {
+                if (dynamic_cast<crs::GeographicCRS *>(
+                        transf->sourceCRS().get()) &&
+                    dynamic_cast<crs::VerticalCRS *>(
+                        transf->targetCRS().get())) {
+                    res.push_back(useTransf(transf));
+                } else if (dynamic_cast<crs::GeographicCRS *>(
+                               transf->targetCRS().get()) &&
+                           dynamic_cast<crs::VerticalCRS *>(
+                               transf->sourceCRS().get())) {
+                    res.push_back(useTransf(transf->inverse()));
+                }
+            }
+        }
+    }
+
+    return res;
 }
 
 // ---------------------------------------------------------------------------
@@ -14223,16 +14351,25 @@ getResolvedCRS(const crs::CRSNNPtr &crs,
         } else {
             auto outCrs = tryToIdentifyByName(
                 io::AuthorityFactory::ObjectType::COMPOUND_CRS);
+            const auto &components = compoundCrs->componentReferenceSystems();
             if (outCrs.get() != crs.get()) {
-                return outCrs;
+                bool hasGeoid = false;
+                if (components.size() == 2) {
+                    auto vertCRS =
+                        dynamic_cast<crs::VerticalCRS *>(components[1].get());
+                    if (vertCRS && !vertCRS->geoidModel().empty()) {
+                        hasGeoid = true;
+                    }
+                }
+                if (!hasGeoid) {
+                    return outCrs;
+                }
             }
             if (approxExtent || !extentOut) {
                 // If we still did not get a reliable extent, then try to
                 // resolve the components of the compoundCRS, and take the
                 // intersection of their extent.
                 extentOut = metadata::ExtentPtr();
-                const auto &components =
-                    compoundCrs->componentReferenceSystems();
                 for (const auto &component : components) {
                     metadata::ExtentPtr componentExtent;
                     getResolvedCRS(component, context, componentExtent);

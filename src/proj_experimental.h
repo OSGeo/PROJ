@@ -248,6 +248,19 @@ PJ PROJ_DLL *proj_create_vertical_crs(PJ_CONTEXT *ctx,
                                               const char *linear_units,
                                               double linear_units_conv);
 
+PJ PROJ_DLL *proj_create_vertical_crs_ex(PJ_CONTEXT *ctx,
+                                              const char *crs_name,
+                                              const char *datum_name,
+                                              const char *datum_auth_name,
+                                              const char* datum_code,
+                                              const char *linear_units,
+                                              double linear_units_conv,
+                                              const char* geoid_model_name,
+                                              const char* geoid_model_auth_name,
+                                              const char* geoid_model_code,
+                                              const PJ* geoid_geog_crs,
+                                              const char *const *options);
+
 PJ PROJ_DLL *proj_create_compound_crs(PJ_CONTEXT *ctx,
                                               const char *crs_name,
                                               PJ* horiz_crs,

@@ -29,6 +29,22 @@ FOR EACH ROW BEGIN
         WHERE (SELECT 1 FROM object_view LIMIT 1) = 0;
     SELECT RAISE(ABORT, 'corrupt definition of authority_list')
         WHERE (SELECT 1 FROM authority_list LIMIT 1) = 0;
+
+    -- check geoid_model table
+    SELECT RAISE(ABORT, 'missing GEOID99 in geoid_model')
+        WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID99');
+    SELECT RAISE(ABORT, 'missing GEOID03 in geoid_model')
+        WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID03');
+    SELECT RAISE(ABORT, 'missing GEOID06 in geoid_model')
+        WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID06');
+    SELECT RAISE(ABORT, 'missing GEOID09 in geoid_model')
+        WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID09');
+    SELECT RAISE(ABORT, 'missing GEOID12A in geoid_model')
+        WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID12A');
+    SELECT RAISE(ABORT, 'missing GEOID12B in geoid_model')
+        WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID12B');
+    SELECT RAISE(ABORT, 'missing GEOID18 in geoid_model')
+        WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID18');
 END;
 INSERT INTO dummy DEFAULT VALUES;
 DROP TRIGGER final_checks;

@@ -95,3 +95,20 @@ INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_TRANSIT','WGS
 DELETE FROM supersession WHERE superseded_table_name = 'grid_transformation' AND superseded_auth_name = 'EPSG' AND superseded_code = '6326';
 DELETE FROM supersession WHERE superseded_table_name = 'grid_transformation' AND superseded_auth_name = 'EPSG' AND superseded_code = '7646';
 DELETE FROM supersession WHERE superseded_table_name = 'grid_transformation' AND superseded_auth_name = 'EPSG' AND superseded_code = '7647';
+
+---- Geoid models -----
+
+INSERT INTO "geoid_model" SELECT 'GEOID99', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE 'g1999%' AND deprecated = 0;
+
+INSERT INTO "geoid_model" SELECT 'GEOID03', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE 'geoid03%' AND deprecated = 0;
+
+INSERT INTO "geoid_model" SELECT 'GEOID06', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE 'geoid06%' AND deprecated = 0;
+
+INSERT INTO "geoid_model" SELECT 'GEOID09', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE 'geoid09%' AND deprecated = 0;
+
+-- Geoid12A and Geoid12B are identical
+INSERT INTO "geoid_model" SELECT 'GEOID12A', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE 'g2012b%' AND deprecated = 0;
+
+INSERT INTO "geoid_model" SELECT 'GEOID12B', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE 'g2012b%' AND deprecated = 0;
+
+INSERT INTO "geoid_model" SELECT 'GEOID18', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE 'g2018%' AND deprecated = 0;

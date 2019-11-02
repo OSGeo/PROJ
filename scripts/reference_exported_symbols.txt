@@ -899,6 +899,7 @@ proj_create_operations
 proj_create_projected_crs
 proj_create_transformation
 proj_create_vertical_crs
+proj_create_vertical_crs_ex
 proj_crs_alter_cs_angular_unit
 proj_crs_alter_cs_linear_unit
 proj_crs_alter_geodetic_crs

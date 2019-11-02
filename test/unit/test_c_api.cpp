@@ -4213,4 +4213,111 @@ TEST_F(
     EXPECT_NEAR(outcoord.xyzt.z, -32.5823, 1e-3);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_vertical_crs_ex) {
+
+    // NAD83(2011) / UTM zone 11N
+    auto horiz_crs = proj_create_from_database(m_ctxt, "EPSG", "6340",
+                                               PJ_CATEGORY_CRS, false, nullptr);
+    ObjectKeeper keeper_horiz_crs(horiz_crs);
+    ASSERT_NE(horiz_crs, nullptr);
+
+    auto vert_crs = proj_create_vertical_crs_ex(
+        m_ctxt, "myVertCRS (ftUS)", "myVertDatum", nullptr, nullptr,
+        "US survey foot", 0.304800609601219, "PROJ @foo.gtx", nullptr, nullptr,
+        nullptr, nullptr);
+    ObjectKeeper keeper_vert_crs(vert_crs);
+    ASSERT_NE(vert_crs, nullptr);
+
+    auto compound =
+        proj_create_compound_crs(m_ctxt, "Compound", horiz_crs, vert_crs);
+    ObjectKeeper keeper_compound(compound);
+    ASSERT_NE(compound, nullptr);
+
+    // NAD83(2011) 3D
+    PJ *geog_crs = proj_create(m_ctxt, "EPSG:6319");
+    ObjectKeeper keeper_geog_crs(geog_crs);
+    ASSERT_NE(geog_crs, nullptr);
+
+    auto P = proj_create_crs_to_crs_from_pj(m_ctxt, compound, geog_crs, nullptr,
+                                            nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+
+    auto name = proj_get_name(P);
+    ASSERT_TRUE(name != nullptr);
+    EXPECT_EQ(name,
+              std::string("Inverse of UTM zone 11N + "
+                          "Transformation from myVertCRS (ftUS) to myVertCRS + "
+                          "Transformation from myVertCRS to NAD83(2011)"));
+
+    auto proj_5 = proj_as_proj_string(m_ctxt, P, PJ_PROJ_5, nullptr);
+    ASSERT_NE(proj_5, nullptr);
+    EXPECT_EQ(std::string(proj_5),
+              "+proj=pipeline "
+              "+step +inv +proj=utm +zone=11 +ellps=GRS80 "
+              "+step +proj=unitconvert +z_in=us-ft +z_out=m "
+              "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
+
+    // NAD83(2011) / UTM zone 11N
+    auto horiz_crs = proj_create_from_database(m_ctxt, "EPSG", "6340",
+                                               PJ_CATEGORY_CRS, false, nullptr);
+    ObjectKeeper keeper_horiz_crs(horiz_crs);
+    ASSERT_NE(horiz_crs, nullptr);
+
+    // WGS84
+    PJ *wgs84 = proj_create(m_ctxt, "EPSG:4979");
+    ObjectKeeper keeper_wgs84(wgs84);
+    ASSERT_NE(wgs84, nullptr);
+
+    auto vert_crs = proj_create_vertical_crs_ex(
+        m_ctxt, "myVertCRS", "myVertDatum", nullptr, nullptr, "US survey foot",
+        0.304800609601219, "PROJ @foo.gtx", nullptr, nullptr, wgs84, nullptr);
+    ObjectKeeper keeper_vert_crs(vert_crs);
+    ASSERT_NE(vert_crs, nullptr);
+
+    auto compound =
+        proj_create_compound_crs(m_ctxt, "Compound", horiz_crs, vert_crs);
+    ObjectKeeper keeper_compound(compound);
+    ASSERT_NE(compound, nullptr);
+
+    // NAD83(2011) 3D
+    PJ *geog_crs = proj_create(m_ctxt, "EPSG:6319");
+    ObjectKeeper keeper_geog_crs(geog_crs);
+    ASSERT_NE(geog_crs, nullptr);
+
+    auto P = proj_create_crs_to_crs_from_pj(m_ctxt, compound, geog_crs, nullptr,
+                                            nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+
+    auto name = proj_get_name(P);
+    ASSERT_TRUE(name != nullptr);
+    EXPECT_EQ(
+        name,
+        std::string("Inverse of UTM zone 11N + "
+                    "Ballpark geographic offset from NAD83(2011) to WGS 84 + "
+                    "Transformation from myVertCRS to myVertCRS (metre) + "
+                    "Transformation from myVertCRS (metre) to WGS 84 + "
+                    "Ballpark geographic offset from WGS 84 to NAD83(2011)"));
+
+    auto proj_5 = proj_as_proj_string(m_ctxt, P, PJ_PROJ_5, nullptr);
+    ASSERT_NE(proj_5, nullptr);
+    EXPECT_EQ(std::string(proj_5),
+              "+proj=pipeline "
+              "+step +inv +proj=utm +zone=11 +ellps=GRS80 "
+              "+step +proj=unitconvert +z_in=us-ft +z_out=m "
+              "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
 } // namespace

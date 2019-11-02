@@ -2603,12 +2603,18 @@ int proj_coordoperation_get_method_info(PJ_CONTEXT *ctx,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static PropertyMap createPropertyMapName(const char *c_name) {
+static PropertyMap createPropertyMapName(const char *c_name,
+                                         const char *auth_name = nullptr,
+                                         const char *code = nullptr) {
     std::string name(c_name ? c_name : "unnamed");
     PropertyMap properties;
     if (ends_with(name, " (deprecated)")) {
         name.resize(name.size() - strlen(" (deprecated)"));
         properties.set(common::IdentifiedObject::DEPRECATED_KEY, true);
+    }
+    if (auth_name && code) {
+        properties.set(metadata::Identifier::CODESPACE_KEY, auth_name);
+        properties.set(metadata::Identifier::CODE_KEY, code);
     }
     return properties.set(common::IdentifiedObject::NAME_KEY, name);
 }
@@ -2934,15 +2940,73 @@ PJ *proj_create_vertical_crs(PJ_CONTEXT *ctx, const char *crs_name,
                              const char *datum_name, const char *linear_units,
                              double linear_units_conv) {
 
+    return proj_create_vertical_crs_ex(
+        ctx, crs_name, datum_name, nullptr, nullptr, linear_units,
+        linear_units_conv, nullptr, nullptr, nullptr, nullptr, nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Create a VerticalCRS
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs_name Name of the GeographicCRS. Or NULL
+ * @param datum_name Name of the VerticalReferenceFrame. Or NULL
+ * @param datum_auth_name Authority name of the VerticalReferenceFrame. Or NULL
+ * @param datum_code Code of the VerticalReferenceFrame. Or NULL
+ * @param linear_units Name of the linear units. Or NULL for Metre
+ * @param linear_units_conv Conversion factor from the linear unit to metre. Or
+ * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
+ * @param geoid_model_name Geoid model name, or NULL. Can be a name from the
+ * geoid_model name or a string "PROJ foo.gtx"
+ * @param geoid_model_auth_name Authority name of the transformation for
+ * the geoid model. or NULL
+ * @param geoid_model_code Code of the transformation for
+ * the geoid model. or NULL
+ * @param geoid_geog_crs Geographic CRS for the geoid transformation, or NULL.
+ * @param options should be set to NULL for now
+ * @return Object of type VerticalCRS that must be unreferenced with
+ * proj_destroy(), or NULL in case of error.
+ */
+PJ *proj_create_vertical_crs_ex(
+    PJ_CONTEXT *ctx, const char *crs_name, const char *datum_name,
+    const char *datum_auth_name, const char *datum_code,
+    const char *linear_units, double linear_units_conv,
+    const char *geoid_model_name, const char *geoid_model_auth_name,
+    const char *geoid_model_code, const PJ *geoid_geog_crs,
+    const char *const *options) {
     SANITIZE_CTX(ctx);
+    (void)options;
     try {
         const UnitOfMeasure linearUnit(
             createLinearUnit(linear_units, linear_units_conv));
-        auto datum =
-            VerticalReferenceFrame::create(createPropertyMapName(datum_name));
-        auto vertCRS = VerticalCRS::create(
-            createPropertyMapName(crs_name), datum,
-            cs::VerticalCS::createGravityRelatedHeight(linearUnit));
+        auto datum = VerticalReferenceFrame::create(
+            createPropertyMapName(datum_name, datum_auth_name, datum_code));
+        auto props = createPropertyMapName(crs_name);
+        auto cs = cs::VerticalCS::createGravityRelatedHeight(linearUnit);
+        if (geoid_model_name) {
+            auto propsModel = createPropertyMapName(
+                geoid_model_name, geoid_model_auth_name, geoid_model_code);
+            const auto vertCRSWithoutGeoid =
+                VerticalCRS::create(props, datum, cs);
+            const auto interpCRS =
+                geoid_geog_crs && std::dynamic_pointer_cast<GeographicCRS>(
+                                      geoid_geog_crs->iso_obj)
+                    ? std::dynamic_pointer_cast<CRS>(geoid_geog_crs->iso_obj)
+                    : nullptr;
+            const auto model(Transformation::create(
+                propsModel, vertCRSWithoutGeoid, GeographicCRS::EPSG_4979,
+                interpCRS,
+                OperationMethod::create(PropertyMap(),
+                                        std::vector<OperationParameterNNPtr>()),
+                {}, {}));
+            props.set("GEOID_MODEL", model);
+        }
+        auto vertCRS = VerticalCRS::create(props, datum, cs);
         return pj_obj_create(ctx, vertCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
