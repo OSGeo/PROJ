@@ -993,7 +993,8 @@ bool SingleCRS::baseIsEquivalentTo(
 
     // TODO test DatumEnsemble
     return d->coordinateSystem->_isEquivalentTo(
-        otherSingleCRS->d->coordinateSystem.get(), criterion);
+               otherSingleCRS->d->coordinateSystem.get(), criterion) &&
+           getExtensionProj4() == otherSingleCRS->getExtensionProj4();
 }
 
 // ---------------------------------------------------------------------------

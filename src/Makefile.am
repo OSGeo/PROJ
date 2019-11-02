@@ -210,7 +210,9 @@ libproj_la_SOURCES = \
 	wkt2_parser.h wkt2_parser.cpp \
 	wkt2_generated_parser.h wkt2_generated_parser.c \
 	\
-	proj_json_streaming_writer.cpp
+	proj_json_streaming_writer.cpp \
+	\
+	tracing.cpp
 
 
 # The sed hack is to please MSVC

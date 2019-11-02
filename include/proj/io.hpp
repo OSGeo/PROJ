@@ -1050,7 +1050,10 @@ class PROJ_GCC_DLL AuthorityFactory {
         const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
         const std::string &targetCRSAuthName, const std::string &targetCRSCode,
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-        bool discardSuperseded) const;
+        bool discardSuperseded, bool tryReverseOrder = false,
+        bool reportOnlyIntersectingTransformations = false,
+        const metadata::ExtentPtr &intersectingExtent1 = nullptr,
+        const metadata::ExtentPtr &intersectingExtent2 = nullptr) const;
 
     PROJ_DLL std::vector<operation::CoordinateOperationNNPtr>
     createFromCRSCodesWithIntermediates(
@@ -1059,7 +1062,10 @@ class PROJ_GCC_DLL AuthorityFactory {
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
         bool discardSuperseded,
         const std::vector<std::pair<std::string, std::string>>
-            &intermediateCRSAuthCodes) const;
+            &intermediateCRSAuthCodes,
+        ObjectType allowedIntermediateObjectType = ObjectType::CRS,
+        const metadata::ExtentPtr &intersectingExtent1 = nullptr,
+        const metadata::ExtentPtr &intersectingExtent2 = nullptr) const;
 
     PROJ_DLL std::string getOfficialNameFromAlias(
         const std::string &aliasedName, const std::string &tableName,

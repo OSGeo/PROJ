@@ -8,4 +8,6 @@ noinst_HEADERS = \
 	internal.hpp \
 	io_internal.hpp \
 	lru_cache.hpp \
-	include_nlohmann_json.hpp
+	include_nlohmann_json.hpp \
+	tracing.hpp
+
