@@ -284,6 +284,7 @@ set(SRC_LIBPROJ_CORE
   wkt_parser.hpp
   zpoly1.cpp
   proj_json_streaming_writer.cpp
+  tracing.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
