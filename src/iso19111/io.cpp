@@ -3900,20 +3900,30 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
         const auto &extensionChildren = extensionNode->GP()->children();
         if (extensionChildren.size() == 2) {
             if (ci_equal(stripQuotes(extensionChildren[0]), "PROJ4_GRIDS")) {
-                std::string transformationName(crs->nameStr());
-                if (!ends_with(transformationName, " height")) {
-                    transformationName += " height";
+                const auto gridName(stripQuotes(extensionChildren[1]));
+                // This is the expansion of EPSG:5703 by old GDAL versions.
+                // See
+                // https://trac.osgeo.org/metacrs/changeset?reponame=&new=2281%40geotiff%2Ftrunk%2Flibgeotiff%2Fcsv%2Fvertcs.override.csv&old=1893%40geotiff%2Ftrunk%2Flibgeotiff%2Fcsv%2Fvertcs.override.csv
+                // It is unlikely that the user really explictly wants this.
+                if (gridName != "g2003conus.gtx,g2003alaska.gtx,"
+                                "g2003h01.gtx,g2003p01.gtx" &&
+                    gridName != "g2012a_conus.gtx,g2012a_alaska.gtx,"
+                                "g2012a_guam.gtx,g2012a_hawaii.gtx,"
+                                "g2012a_puertorico.gtx,g2012a_samoa.gtx") {
+                    std::string transformationName(crs->nameStr());
+                    if (!ends_with(transformationName, " height")) {
+                        transformationName += " height";
+                    }
+                    transformationName += " to WGS84 ellipsoidal height";
+                    auto transformation = Transformation::
+                        createGravityRelatedHeightToGeographic3D(
+                            PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                              transformationName),
+                            crs, GeographicCRS::EPSG_4979, nullptr, gridName,
+                            std::vector<PositionalAccuracyNNPtr>());
+                    return nn_static_pointer_cast<CRS>(BoundCRS::create(
+                        crs, GeographicCRS::EPSG_4979, transformation));
                 }
-                transformationName += " to WGS84 ellipsoidal height";
-                auto transformation =
-                    Transformation::createGravityRelatedHeightToGeographic3D(
-                        PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                          transformationName),
-                        crs, GeographicCRS::EPSG_4979, nullptr,
-                        stripQuotes(extensionChildren[1]),
-                        std::vector<PositionalAccuracyNNPtr>());
-                return nn_static_pointer_cast<CRS>(BoundCRS::create(
-                    crs, GeographicCRS::EPSG_4979, transformation));
             }
         }
     }
