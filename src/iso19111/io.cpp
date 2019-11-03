@@ -3821,6 +3821,64 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     }
 
     auto &props = buildProperties(node);
+
+    // Deal with Lidar WKT1 VertCRS that embeds geoid model in CRS name,
+    // following conventions from
+    // https://pubs.usgs.gov/tm/11b4/pdf/tm11-B4.pdf
+    // page 9
+    if (ci_equal(nodeValue, WKTConstants::VERT_CS)) {
+        std::string name;
+        if (props.getStringValue(IdentifiedObject::NAME_KEY, name)) {
+            std::string geoidName;
+            for (const char *prefix :
+                 {"NAVD88 - ", "NAVD88 via ", "NAVD88 height - ",
+                  "NAVD88 height (ftUS) - "}) {
+                if (starts_with(name, prefix)) {
+                    geoidName = name.substr(strlen(prefix));
+                    auto pos = geoidName.find_first_of(" (");
+                    if (pos != std::string::npos) {
+                        geoidName.resize(pos);
+                    }
+                    break;
+                }
+            }
+            if (!geoidName.empty()) {
+                const auto &axis = verticalCS->axisList()[0];
+                const auto &dir = axis->direction();
+                if (dir == cs::AxisDirection::UP) {
+                    if (axis->unit() == common::UnitOfMeasure::METRE) {
+                        props.set(IdentifiedObject::NAME_KEY, "NAVD88 height");
+                        props.set(Identifier::CODE_KEY, 5703);
+                        props.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+                    } else if (axis->unit().name() == "US survey foot") {
+                        props.set(IdentifiedObject::NAME_KEY,
+                                  "NAVD88 height (ftUS)");
+                        props.set(Identifier::CODE_KEY, 6360);
+                        props.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+                    }
+                }
+                PropertyMap propsModel;
+                propsModel.set(IdentifiedObject::NAME_KEY, toupper(geoidName));
+                PropertyMap propsDatum;
+                propsDatum.set(IdentifiedObject::NAME_KEY,
+                               "North American Vertical Datum 1988");
+                propsDatum.set(Identifier::CODE_KEY, 5103);
+                propsDatum.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+                datum =
+                    VerticalReferenceFrame::create(propsDatum).as_nullable();
+                const auto dummyCRS =
+                    VerticalCRS::create(PropertyMap(), datum, datumEnsemble,
+                                        NN_NO_CHECK(verticalCS));
+                const auto model(Transformation::create(
+                    propsModel, dummyCRS, dummyCRS, nullptr,
+                    OperationMethod::create(
+                        PropertyMap(), std::vector<OperationParameterNNPtr>()),
+                    {}, {}));
+                props.set("GEOID_MODEL", model);
+            }
+        }
+    }
+
     auto &geoidModelNode = nodeP->lookForChild(WKTConstants::GEOIDMODEL);
     if (!isNull(geoidModelNode)) {
         auto &propsModel = buildProperties(geoidModelNode);

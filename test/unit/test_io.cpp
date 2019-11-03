@@ -2031,6 +2031,71 @@ TEST(wkt_parse, vertcrs_WKT1_GDAL_minimum) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, vertcrs_WKT1_LAS_ftUS) {
+    auto wkt = "VERT_CS[\"NAVD88 - Geoid03 (Feet)\","
+               "    VERT_DATUM[\"unknown\",2005],"
+               "    UNIT[\"US survey foot\",0.3048006096012192,"
+               "        AUTHORITY[\"EPSG\",\"9003\"]],"
+               "    AXIS[\"Up\",UP]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->nameStr(), "NAVD88 height (ftUS)");
+    ASSERT_EQ(crs->identifiers().size(), 1U);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "6360");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
+
+    const auto &geoidModel = crs->geoidModel();
+    ASSERT_TRUE(!geoidModel.empty());
+    EXPECT_EQ(geoidModel[0]->nameStr(), "GEOID03");
+
+    auto datum = crs->datum();
+    EXPECT_EQ(datum->nameStr(), "North American Vertical Datum 1988");
+    ASSERT_EQ(datum->identifiers().size(), 1U);
+    EXPECT_EQ(datum->identifiers()[0]->code(), "5103");
+    EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
+
+    const auto &axis = crs->coordinateSystem()->axisList()[0];
+    EXPECT_EQ(axis->direction(), AxisDirection::UP);
+    EXPECT_EQ(axis->unit().name(), "US survey foot");
+    EXPECT_NEAR(axis->unit().conversionToSI(), 0.3048006096012192, 1e-16);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, vertcrs_WKT1_LAS_metre) {
+    auto wkt = "VERT_CS[\"NAVD88 via Geoid09\","
+               "    VERT_DATUM[\"unknown\",2005],"
+               "    UNIT[\"metre\",1.0,"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],"
+               "    AXIS[\"Up\",UP]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->nameStr(), "NAVD88 height");
+    ASSERT_EQ(crs->identifiers().size(), 1U);
+    EXPECT_EQ(crs->identifiers()[0]->code(), "5703");
+    EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
+
+    const auto &geoidModel = crs->geoidModel();
+    ASSERT_TRUE(!geoidModel.empty());
+    EXPECT_EQ(geoidModel[0]->nameStr(), "GEOID09");
+
+    auto datum = crs->datum();
+    EXPECT_EQ(datum->nameStr(), "North American Vertical Datum 1988");
+    ASSERT_EQ(datum->identifiers().size(), 1U);
+    EXPECT_EQ(datum->identifiers()[0]->code(), "5103");
+    EXPECT_EQ(*(datum->identifiers()[0]->codeSpace()), "EPSG");
+
+    const auto &axis = crs->coordinateSystem()->axisList()[0];
+    EXPECT_EQ(axis->direction(), AxisDirection::UP);
+    EXPECT_EQ(axis->unit(), UnitOfMeasure::METRE);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, dynamic_vertical_reference_frame) {
     auto obj = WKTParser().createFromWKT(
         "VERTCRS[\"RH2000\","
