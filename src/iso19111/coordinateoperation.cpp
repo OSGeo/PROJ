@@ -6513,6 +6513,24 @@ static void getTransformationType(const crs::CRSNNPtr &sourceCRSIn,
     isGeog2D = nSrcAxisCount == 2 && nTargetAxisCount == 2;
     isGeog3D = !isGeog2D && nSrcAxisCount >= 2 && nTargetAxisCount >= 2;
 }
+
+// ---------------------------------------------------------------------------
+
+static int
+useOperationMethodEPSGCodeIfPresent(const util::PropertyMap &properties,
+                                    int nDefaultOperationMethodEPSGCode) {
+    const auto *operationMethodEPSGCode =
+        properties.get("OPERATION_METHOD_EPSG_CODE");
+    if (operationMethodEPSGCode) {
+        const auto boxedValue = dynamic_cast<const util::BoxedValue *>(
+            (*operationMethodEPSGCode).get());
+        if (boxedValue &&
+            boxedValue->type() == util::BoxedValue::Type::INTEGER) {
+            return boxedValue->integerValue();
+        }
+    }
+    return nDefaultOperationMethodEPSGCode;
+}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -6541,12 +6559,13 @@ TransformationNNPtr Transformation::createGeocentricTranslations(
                           isGeog3D);
     return create(
         properties, sourceCRSIn, targetCRSIn, nullptr,
-        createMethodMapNameEPSGCode(
+        createMethodMapNameEPSGCode(useOperationMethodEPSGCodeIfPresent(
+            properties,
             isGeocentric
                 ? EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC
                 : isGeog2D
                       ? EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D
-                      : EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D),
+                      : EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D)),
         VectorOfParameters{
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION),
             createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION),
@@ -6599,11 +6618,12 @@ TransformationNNPtr Transformation::createPositionVector(
                           isGeog3D);
     return createSevenParamsTransform(
         properties,
-        createMethodMapNameEPSGCode(
+        createMethodMapNameEPSGCode(useOperationMethodEPSGCodeIfPresent(
+            properties,
             isGeocentric
                 ? EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC
                 : isGeog2D ? EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D
-                           : EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D),
+                           : EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D)),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXArcSecond, rotationYArcSecond,
         rotationZArcSecond, scaleDifferencePPM, accuracies);
@@ -6648,11 +6668,12 @@ TransformationNNPtr Transformation::createCoordinateFrameRotation(
                           isGeog3D);
     return createSevenParamsTransform(
         properties,
-        createMethodMapNameEPSGCode(
+        createMethodMapNameEPSGCode(useOperationMethodEPSGCodeIfPresent(
+            properties,
             isGeocentric
                 ? EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC
                 : isGeog2D ? EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D
-                           : EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D),
+                           : EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D)),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXArcSecond, rotationYArcSecond,
         rotationZArcSecond, scaleDifferencePPM, accuracies);
@@ -6791,12 +6812,13 @@ TransformationNNPtr Transformation::createTimeDependentPositionVector(
                           isGeog3D);
     return createFifteenParamsTransform(
         properties,
-        createMethodMapNameEPSGCode(
+        createMethodMapNameEPSGCode(useOperationMethodEPSGCodeIfPresent(
+            properties,
             isGeocentric
                 ? EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC
                 : isGeog2D
                       ? EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D
-                      : EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D),
+                      : EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D)),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXArcSecond, rotationYArcSecond,
         rotationZArcSecond, scaleDifferencePPM, rateTranslationX,
@@ -6868,12 +6890,13 @@ TransformationNNPtr Transformation::createTimeDependentCoordinateFrameRotation(
                           isGeog3D);
     return createFifteenParamsTransform(
         properties,
-        createMethodMapNameEPSGCode(
+        createMethodMapNameEPSGCode(useOperationMethodEPSGCodeIfPresent(
+            properties,
             isGeocentric
                 ? EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC
                 : isGeog2D
                       ? EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D
-                      : EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D),
+                      : EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D)),
         sourceCRSIn, targetCRSIn, translationXMetre, translationYMetre,
         translationZMetre, rotationXArcSecond, rotationYArcSecond,
         rotationZArcSecond, scaleDifferencePPM, rateTranslationX,
@@ -7454,6 +7477,14 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
     }
 
     addModifiedIdentifier(map, op, true, derivedFrom);
+
+    const auto so = dynamic_cast<const SingleOperation *>(op);
+    if (so) {
+        const int soMethodEPSGCode = so->method()->getEPSGCode();
+        if (soMethodEPSGCode > 0) {
+            map.set("OPERATION_METHOD_EPSG_CODE", soMethodEPSGCode);
+        }
+    }
 
     return map;
 }
