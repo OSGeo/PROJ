@@ -2965,6 +2965,9 @@ PJ *proj_create_vertical_crs(PJ_CONTEXT *ctx, const char *crs_name,
  * use.
  * It should be used by at most one thread at a time.
  *
+ * This is an extented (_ex) version of proj_create_vertical_crs() that adds
+ * the capability of defining a geoid model.
+ *
  * @param ctx PROJ context, or NULL for default context
  * @param crs_name Name of the GeographicCRS. Or NULL
  * @param datum_name Name of the VerticalReferenceFrame. Or NULL
