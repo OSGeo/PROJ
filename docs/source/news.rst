@@ -3,6 +3,77 @@
 News
 ###############################################################################
 
+6.2.1 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*November 1st 2019*
+
+Updates
+-------
+
+* Update the EPSG database to version 9.8.2
+
+Bug fixes
+----------
+
+* Fixed erroneous spelling of "Potsdam" (`#1573 <https://github.com/OSGeo/PROJ/issues/1573>`_)
+
+* Calculate y-coordinate correctly in :ref:`bertin1953` in all cases (`#1579 <https://github.com/OSGeo/PROJ/issues/1579>`_)
+
+* :c:func:`proj_create_crs_to_crs_from_pj()`: make the PJ* arguments const PJ* (`#1583 <https://github.com/OSGeo/PROJ/issues/1583>`_)
+
+* :c:func:`PROJStringParser::createFromPROJString()`: avoid potential infinite
+  recursion (`#1574 <https://github.com/OSGeo/PROJ/issues/1574>`_)
+
+* Avoid core dump when setting ``ctx==NULL`` in functions
+  :c:func:`proj_coordoperation_is_instantiable` and
+  :c:func:`proj_coordoperation_has_ballpark_transformation` (`#1590 <https://github.com/OSGeo/PROJ/issues/1590>`_)
+
+* :c:func:`createOperations()`: fix conversion from/to PROJ.4 CRS strings with
+  non-ISO-kosher options and ``+towgs84``/``+nadgrids`` (`#1602 <https://github.com/OSGeo/PROJ/issues/1602>`_)
+
+* :c:func:`proj_trans_generic()`: properly set coordinate time to ``HUGE_VAL``
+  when no value is passed to the function (`#1604 <https://github.com/OSGeo/PROJ/issues/1604>`_)
+
+* Fix support for ``+proj=ob_tran +o_proj=lonlat/latlong/latlon`` instead of only
+  only allowing ``+o_proj=longlat`` (`#1601 <https://github.com/OSGeo/PROJ/issues/1601>`_)
+
+* Improve backwards compatibility of vertical transforms (`#1613 <https://github.com/OSGeo/PROJ/issues/1613>`_)
+
+* Improve emulation of deprecated ``+init`` style initialization (`#1614 <https://github.com/OSGeo/PROJ/issues/1614>`_)
+
+* :program:`cs2cs`: autopromote CRS to 3D when there's a mix of 2D and 3D (`#1563 <https://github.com/OSGeo/PROJ/issues/1563>`_)
+
+* Avoid divisions by zero in odd situations (`#1620 <https://github.com/OSGeo/PROJ/issues/1620>`_)
+
+* Avoid compile error on Solaris (`#1639 <https://github.com/OSGeo/PROJ/issues/1639>`_)
+
+* :c:func:`proj_create_crs_to_crs()`: fix when there are only transformations with
+  ballpark steps (`#1643 <https://github.com/OSGeo/PROJ/issues/1643>`_)
+
+* PROJ string CRS ingester: recognize more unit-less parameters, and general
+  handling of ``+key=string_value`` parameters (`#1645 <https://github.com/OSGeo/PROJ/issues/1645>`_)
+
+* Only call pkg-config in configure when necessary (`#1652 <https://github.com/OSGeo/PROJ/issues/1652>`_)
+
+* :ref:`aeqd`: for spherical forward path, go to higher precision ellipsoidal
+  case when the point coordinates are super close to the origin (`#1654 <https://github.com/OSGeo/PROJ/issues/1654>`_)
+
+* :c:func:`proj_create_crs_to_crs()`: remove elimination of Ballpark operations
+  that caused transformation failures in some cases (`#1665 <https://github.com/OSGeo/PROJ/issues/1665>`_)
+
+* :c:func:`createOperations()`: allow transforming from a compoundCRS of a bound
+  verticalCRS to a 2D CRS (`#1667 <https://github.com/OSGeo/PROJ/issues/1667>`_)
+
+* Avoid segfaults in case of out-of-memory situations (`#1679 <https://github.com/OSGeo/PROJ/issues/1679>`_)
+
+* :c:func:`createOperations()`: fix double vertical unit conversion from CompoundCRS
+  to other CRS when the horizontal part of the projected CRS uses non-metre
+  unit (#1683)(`#1683 <https://github.com/OSGeo/PROJ/issues/1683>`_)
+
+* :c:func:`importFromWkt()`: fix axis orientation for non-standard ESRI WKT (`#1690 <https://github.com/OSGeo/PROJ/issues/1690>`_)
+
+
+
 6.2.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *September 1st 2019*
@@ -10,7 +81,7 @@ News
 Updates
 -------
 
- * Introduced PROJJSON, a JSON encoding of WKT2 (`#1547 <https://github.com/OSGeo/PROJ/issues/15475>`_)
+ * Introduced :ref:`PROJJSON`, a JSON encoding of WKT2 (`#1547 <https://github.com/OSGeo/PROJ/issues/1547>`_)
  * Support CRS instantiation of OGC URN's (`#1505 <https://github.com/OSGeo/PROJ/issues/1505>`_)
 
  * Expose scope and remarks of database objects (`#1537 <https://github.com/OSGeo/PROJ/issues/1537>`_)

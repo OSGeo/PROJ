@@ -36,7 +36,7 @@ endfunction()
 
 function(proj_add_gie_test TESTNAME TESTCASE)
 
-    set(GIE_BIN "gie")
+    set(GIE_BIN $<TARGET_FILE_NAME:gie>)
     set(TESTFILE ${CMAKE_SOURCE_DIR}/test/${TESTCASE})
     add_test(NAME ${TESTNAME}
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test
