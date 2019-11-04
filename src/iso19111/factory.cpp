@@ -5380,6 +5380,28 @@ AuthorityFactory::getPreferredHubGeodeticReferenceFrames(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+std::vector<operation::CoordinateOperationNNPtr>
+AuthorityFactory::getTransformationsForGeoid(
+    const std::string &geoidName, bool usePROJAlternativeGridNames) const {
+    std::vector<operation::CoordinateOperationNNPtr> res;
+
+    const std::string sql("SELECT operation_auth_name, operation_code FROM "
+                          "geoid_model WHERE name = ?");
+    auto sqlRes = d->run(sql, {geoidName});
+    for (const auto &row : sqlRes) {
+        const auto &auth_name = row[0];
+        const auto &code = row[1];
+        res.emplace_back(d->createFactory(auth_name)->createCoordinateOperation(
+            code, usePROJAlternativeGridNames));
+    }
+
+    return res;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 FactoryException::FactoryException(const char *message) : Exception(message) {}
 
 // ---------------------------------------------------------------------------

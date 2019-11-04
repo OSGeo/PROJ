@@ -361,6 +361,74 @@ INSERT INTO grid_alternatives(original_grid_name,
                               NULL, NULL, NULL, NULL);
 
 ----------------------------
+-- US GEOID99 height models
+----------------------------
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g1999u01.bin', 'g1999u01.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g1999u02.bin', 'g1999u02.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g1999u03.bin', 'g1999u03.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g1999u04.bin', 'g1999u04.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g1999u05.bin', 'g1999u05.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g1999u06.bin', 'g1999u06.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g1999u07.bin', 'g1999u07.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g1999u08.bin', 'g1999u08.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+-- Not mapped:
+-- g1999a01.gtx to g1999a04.gtx : Alaska
+-- g1999h01.gtx : Hawaii
+-- g1999p01.gtx : Puerto Rico
+
+----------------------------
+-- US GEOID03 height models
+----------------------------
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('geoid03_conus.bin', 'geoid03_conus.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+-- Not mapped:
+-- g2003a01.gtx to g2003a04.gtx : Alaska
+-- g2003h01.gtx : Hawaii
+---g2003p01.gtx : Puerto Rico
+
+----------------------------
+-- US GEOID06 height models
+----------------------------
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('geoid06_ak.bin', 'geoid06_ak.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+----------------------------
+-- US GEOID09 height models
+----------------------------
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('geoid09_ak.bin', 'geoid09_ak.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('geoid09_conus.bin', 'geoid09_conus.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+-- Not mapped:
+-- g2009h01.gtx : Hawaii
+-- g2009g01.gtx : Guam and Northern Mariana Islands.
+-- g2009s01.gtx : American Samoa.
+-- g2009p01.gtx : Puerto Rico / U.S. Vigin Islands.
+
+----------------------------
 -- US GEOID12B height models
 ----------------------------
 
@@ -444,6 +512,15 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
+----------------------------
+-- US GEOID18 height models
+----------------------------
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g2018u0.bin', 'g2018u0.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g2018p0.bin', 'g2018p0.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 ----------------------------
 -- French vertical grids

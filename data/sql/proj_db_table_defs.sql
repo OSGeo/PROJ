@@ -1365,6 +1365,23 @@ FOR EACH ROW BEGIN
 
 END;
 
+
+CREATE TABLE geoid_model(
+    name TEXT NOT NULL,
+    operation_auth_name TEXT NOT NULL,
+    operation_code TEXT NOT NULL,
+    CONSTRAINT pk_geoid_model PRIMARY KEY (name, operation_auth_name, operation_code)
+    -- CONSTRATINT fk_geoid_model_operation FOREIGN KEY (operation_auth_name, operation_code) REFERENCES coordinate_operation(auth_name, code)
+);
+
+CREATE TRIGGER geoid_model_insert_trigger
+BEFORE INSERT ON geoid_model
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on geoid_model violates constraint: (operation_auth_name, operation_code) must already exist in coordinate_operation_with_conversion_view')
+        WHERE NOT EXISTS (SELECT 1 FROM coordinate_operation_with_conversion_view covwv WHERE covwv.auth_name = NEW.operation_auth_name AND covwv.code = NEW.operation_code);
+END;
+
+
 CREATE TABLE alias_name(
     table_name TEXT NOT NULL CHECK (table_name IN (
         'unit_of_measure', 'celestial_body', 'ellipsoid', 
