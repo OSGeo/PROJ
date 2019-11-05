@@ -13,7 +13,7 @@ geodetic high precision level. This chapter delves into the details of how
 geodetic transformations of varying complexity can be performed.
 
 In PROJ, two frameworks for geodetic transformations exists, the
-*PROJ 4.x/5.x :program:`cs2cs` / :c:func:`pj_transform`*
+*PROJ 4.x/5.x* / :program:`cs2cs` / :c:func:`pj_transform`
 framework and the *transformation pipelines* framework. The first is the original,
 and limited, framework for doing geodetic transforms in PROJ The latter is a
 newer addition that aims to be a more complete transformation framework. Both are
