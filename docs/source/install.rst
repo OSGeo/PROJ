@@ -42,8 +42,8 @@ files is available on `DockerHub`_. Get the package with::
 
     docker pull osgeo/proj
 
-.. _`Docker`: https://docker.org
-.. _`DockerHub`: https://hub.docker.com/r/osgeo/proj.4/
+.. _`Docker`: https://www.docker.com/
+.. _`DockerHub`: https://hub.docker.com/r/osgeo/proj/
 
 Windows
 --------------------------------------------------------------------------------
@@ -93,6 +93,13 @@ Debian
 On Debian and similar systems (e.g. Ubuntu) the APT package manager is used::
 
     sudo apt-get install proj-bin
+
+Fedora
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+On Fedora the dnf package manager is used::
+
+    sudo dnf install proj
 
 Red Hat
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
