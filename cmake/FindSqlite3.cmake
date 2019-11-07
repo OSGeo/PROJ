@@ -10,6 +10,7 @@
 # and following variables are set:
 #    SQLITE3_INCLUDE_DIR
 #    SQLITE3_LIBRARY
+#    SQLITE3_VERSION
 
 
 # find_path and find_library normally search standard locations
@@ -53,9 +54,21 @@ if(SQLITE3_INCLUDE_DIR AND SQLITE3_LIBRARY)
   set(SQLITE3_FOUND TRUE)
 endif()
 
+# Extract version information from the header file
+if(SQLITE3_INCLUDE_DIR)
+    file(STRINGS ${SQLITE3_INCLUDE_DIR}/sqlite3.h _ver_line
+         REGEX "^#define SQLITE_VERSION  *\"[0-9]+\\.[0-9]+\\.[0-9]+\""
+         LIMIT_COUNT 1)
+    string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+"
+           SQLITE3_VERSION "${_ver_line}")
+    unset(_ver_line)
+endif()
+
+
 if(SQLITE3_FOUND)
   if(NOT SQLITE3_FIND_QUIETLY)
     message(STATUS "Found Sqlite3: ${SQLITE3_LIBRARY}")
+    message(STATUS "Sqlite3 version: ${SQLITE3_VERSION}")
   endif()
 
 else()
