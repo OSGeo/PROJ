@@ -1,8 +1,8 @@
 # PROJ
 
-[![Travis Status](https://travis-ci.com/OSGeo/proj.4.svg?branch=master)](https://travis-ci.com/OSGeo/proj.4)
-[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/584j49uguwoo5evi?svg=true)](https://ci.appveyor.com/project/OSGeo/proj-4)
-[![Coveralls Status](https://coveralls.io/repos/github/OSGeo/proj.4/badge.svg?branch=master)](https://coveralls.io/github/OSGeo/proj.4?branch=master)
+[![Travis Status](https://travis-ci.com/OSGeo/PROJ.svg?branch=6.1)](https://travis-ci.com/OSGeo/PROJ)
+[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/github/OSGeo/PROJ?branch=6.1&svg=true)](https://ci.appveyor.com/project/OSGeo/PROJ?branch=6.1)
+[![Coveralls Status](https://coveralls.io/repos/github/OSGeo/PROJ/badge.svg?branch=6.1)](https://coveralls.io/github/OSGeo/PROJ?branch=6.1)
 [![Gitter](https://badges.gitter.im/OSGeo/proj.4.svg)](https://gitter.im/OSGeo/proj.4)
 [![Mailing List](https://img.shields.io/badge/PROJ-mailing%20list-4eb899.svg)](http://lists.osgeo.org/mailman/listinfo/proj)
 
