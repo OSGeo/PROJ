@@ -126,14 +126,19 @@ Compilation and installation from source code
 The classical way of installing PROJ is via the source code distribution. The
 most recent version is available from the :ref:`download page<current_release>`.
 
-PROJ requires C and C++11 compilers. It also requires SQLite3 (headers,
-library and executable).
-
 You will need that and at least the standard *proj-datumgrid* package for a
 successful installation.
 
 The following guides show how to compile and install the software using the
 Autotools and CMake build systems.
+
+Build requirements
+--------------------------------------------------------------------------------
+
+- C99 compiler
+- C++11 compiler
+- SQLite3 >= 3.11 (headers, library and executable)
+- GNU make for autotools build or CMake >= 3.5
 
 Autotools
 --------------------------------------------------------------------------------
