@@ -255,9 +255,9 @@ INSERT INTO "axis" VALUES('EPSG','111','Gravity-related height','H','up','EPSG',
 INSERT INTO "axis" VALUES('EPSG','112','Gravity-related height','H','up','EPSG','6497',1,'EPSG','9003');
 INSERT INTO "axis" VALUES('EPSG','113','Depth','D','down','EPSG','6498',1,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','114','Gravity-related height','H','up','EPSG','6499',1,'EPSG','9001');
-INSERT INTO "axis" VALUES('EPSG','115','Geocentric X','X','Geocentre > equator/0°E','EPSG','6500',1,'EPSG','9001');
-INSERT INTO "axis" VALUES('EPSG','116','Geocentric Y','Y','Geocentre > equator/90°E','EPSG','6500',2,'EPSG','9001');
-INSERT INTO "axis" VALUES('EPSG','117','Geocentric Z','Z','Geocentre > north pole','EPSG','6500',3,'EPSG','9001');
+INSERT INTO "axis" VALUES('EPSG','115','Geocentric X','X','geocentricX','EPSG','6500',1,'EPSG','9001');
+INSERT INTO "axis" VALUES('EPSG','116','Geocentric Y','Y','geocentricY','EPSG','6500',2,'EPSG','9001');
+INSERT INTO "axis" VALUES('EPSG','117','Geocentric Z','Z','geocentricZ','EPSG','6500',3,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','119','Southing','X','south','EPSG','6501',1,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','118','Westing','Y','west','EPSG','6501',2,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','120','Westing','Y','west','EPSG','6502',1,'EPSG','9031');

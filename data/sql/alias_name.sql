@@ -475,6 +475,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1251','KOSOVAREF01','EP
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1251','KOSOVAREF01 (2012)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1252','SIRGAS-Chile 2013','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1253','SIRGAS-Chile 2016','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1256','CGVD2013 (CGG2013a)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1042','Red Geodesica Nacional 1992','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1046','Morro do Papagaio','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1046','Island of Principe datum','EPSG');
@@ -559,7 +560,7 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1125','ASVD02','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1121','Tutuila62','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1124','VIVD09','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1123','PRVD02','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1127','CGVD2013','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1127','CGVD2013 (CGG2013)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1128','JGD2011','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1131','JGD2011 (vertical)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1130','JGD2000 (vertical)','EPSG');

@@ -46,7 +46,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1123','Puerto Rico Vertical Datum of
 INSERT INTO "vertical_datum" VALUES('EPSG','1124','Virgin Islands Vertical Datum of 2009',NULL,NULL,'EPSG','3330',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1125','American Samoa Vertical Datum of 2002',NULL,NULL,'EPSG','2288',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1126','Guam Vertical Datum of 2004',NULL,NULL,'EPSG','3255',0);
-INSERT INTO "vertical_datum" VALUES('EPSG','1127','Canadian Geodetic Vertical Datum of 2013',NULL,NULL,'EPSG','1061',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1127','Canadian Geodetic Vertical Datum of 2013 (CGG2013)',NULL,NULL,'EPSG','1061',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1129','Japanese Standard Levelling Datum 1972',NULL,NULL,'EPSG','4168',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1130','Japanese Geodetic Datum 2000 (vertical)',NULL,NULL,'EPSG','3263',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1131','Japanese Geodetic Datum 2011 (vertical)',NULL,NULL,'EPSG','3263',0);
@@ -79,6 +79,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1219','MOMRA Vertical Geodetic Contr
 INSERT INTO "vertical_datum" VALUES('EPSG','1224','Taiwan Vertical Datum 2001',NULL,NULL,'EPSG','3982',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1226','Datum Altimetrico de Costa Rica 1952',NULL,NULL,'EPSG','3232',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1250','IGN 2008 LD',NULL,NULL,'EPSG','2893',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1256','Canadian Geodetic Vertical Datum of 2013 (CGG2013a)',NULL,NULL,'EPSG','1061',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,'EPSG','1262',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,NULL,'EPSG','2792',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5102','National Geodetic Vertical Datum 1929',NULL,NULL,'EPSG','1323',0);
