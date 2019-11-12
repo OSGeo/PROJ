@@ -136,7 +136,11 @@ static PJ_LPZ    pipeline_reverse_3d (PJ_XYZ xyz, PJ *P);
 static PJ_XY     pipeline_forward (PJ_LP lp, PJ *P);
 static PJ_LP     pipeline_reverse (PJ_XY xy, PJ *P);
 
-
+void pj_pipeline_assign_context_to_steps( PJ* P, PJ_CONTEXT* ctx )
+{
+    for (int i = 1; i <= static_cast<struct pj_opaque*>(P->opaque)->steps; i++)
+        proj_assign_context(static_cast<struct pj_opaque*>(P->opaque)->pipeline[i], ctx);
+}
 
 
 static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
