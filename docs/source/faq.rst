@@ -115,7 +115,7 @@ There are however exceptions, especially when dealing with coordinate systems th
 don't align with the cardinal directions of a compass. For example it is not
 obvious which coordinate component aligns to which axis in a skewed coordinate
 system with a 45 degrees angle against the north direction. Similarly, a geocentric
-cartesain coordinate system usually has the z-component aligned with the rotational
+cartesian coordinate system usually has the z-component aligned with the rotational
 axis of the earth and hence the axis points towards north. Both cases are
 incompatible with the convention of always having the x-component be the east/west
 axis, the y-component the north/south axis and the z-component the up/down axis.
