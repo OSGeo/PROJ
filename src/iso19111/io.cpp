@@ -5129,8 +5129,16 @@ VerticalCRSNNPtr JSONParser::buildVerticalCRS(const json &j) {
         auto propsModel = buildProperties(geoidModelJ);
         const auto dummyCRS = VerticalCRS::create(
             PropertyMap(), datum, datumEnsemble, NN_NO_CHECK(verticalCS));
+        CRSPtr interpolationCRS;
+        if (geoidModelJ.contains("interpolation_crs")) {
+            auto interpolationCRSJ =
+                getObject(geoidModelJ, "interpolation_crs");
+            interpolationCRS = buildCRS(interpolationCRSJ).as_nullable();
+        }
         const auto model(Transformation::create(
-            propsModel, dummyCRS, dummyCRS, nullptr,
+            propsModel, dummyCRS,
+            GeographicCRS::EPSG_4979, // arbitrarily chosen. Ignored,
+            interpolationCRS,
             OperationMethod::create(PropertyMap(),
                                     std::vector<OperationParameterNNPtr>()),
             {}, {}));

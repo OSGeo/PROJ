@@ -10951,6 +10951,82 @@ TEST(json_import, vertical_crs_with_geoid_model) {
 
 // ---------------------------------------------------------------------------
 
+TEST(json_import, vertical_crs_with_geoid_model_and_interpolation_crs) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"VerticalCRS\",\n"
+                "  \"name\": \"foo\",\n"
+                "  \"datum\": {\n"
+                "    \"type\": \"VerticalReferenceFrame\",\n"
+                "    \"name\": \"bar\"\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"vertical\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Gravity-related height\",\n"
+                "        \"abbreviation\": \"H\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"geoid_model\": {\n"
+                "    \"name\": \"baz\",\n"
+                "    \"interpolation_crs\": {\n"
+                "      \"type\": \"GeographicCRS\",\n"
+                "      \"name\": \"NAD83(2011)\",\n"
+                "      \"datum\": {\n"
+                "        \"type\": \"GeodeticReferenceFrame\",\n"
+                "        \"name\": \"NAD83 (National Spatial Reference System "
+                "2011)\",\n"
+                "        \"ellipsoid\": {\n"
+                "          \"name\": \"GRS 1980\",\n"
+                "          \"semi_major_axis\": 6378137,\n"
+                "          \"inverse_flattening\": 298.257222101\n"
+                "        }\n"
+                "      },\n"
+                "      \"coordinate_system\": {\n"
+                "        \"subtype\": \"ellipsoidal\",\n"
+                "        \"axis\": [\n"
+                "          {\n"
+                "            \"name\": \"Geodetic latitude\",\n"
+                "            \"abbreviation\": \"Lat\",\n"
+                "            \"direction\": \"north\",\n"
+                "            \"unit\": \"degree\"\n"
+                "          },\n"
+                "          {\n"
+                "            \"name\": \"Geodetic longitude\",\n"
+                "            \"abbreviation\": \"Lon\",\n"
+                "            \"direction\": \"east\",\n"
+                "            \"unit\": \"degree\"\n"
+                "          },\n"
+                "          {\n"
+                "            \"name\": \"Ellipsoidal height\",\n"
+                "            \"abbreviation\": \"h\",\n"
+                "            \"direction\": \"up\",\n"
+                "            \"unit\": \"metre\"\n"
+                "          }\n"
+                "        ]\n"
+                "      },\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 6319\n"
+                "      }\n"
+                "    }\n"
+                "  }\n"
+                "}";
+
+    // No database
+    auto obj = createFromUserInput(json, nullptr);
+    auto vcrs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(vcrs != nullptr);
+    EXPECT_EQ(vcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(json_import, parametric_crs) {
     auto json = "{\n"
                 "  \"$schema\": \"foo\",\n"
