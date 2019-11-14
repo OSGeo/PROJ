@@ -712,9 +712,12 @@ CRSNNPtr CRS::normalizeForVisualization() const {
  * but rather isEquivalentTo(EPSG_4326,
  * util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS)
  * </li>
- * <li>90% means that CRS are equivalent, but the names are not exactly the same.</li>
- * <li>70% means that CRS are equivalent), but the names do not match at all.</li>
- * <li>25% means that the CRS are not equivalent, but there is some similarity in
+ * <li>90% means that CRS are equivalent, but the names are not exactly the
+ * same.</li>
+ * <li>70% means that CRS are equivalent), but the names do not match at
+ * all.</li>
+ * <li>25% means that the CRS are not equivalent, but there is some similarity
+ * in
  * the names.</li>
  * </ul>
  * Other confidence values may be returned by some specialized implementations.
@@ -1624,12 +1627,15 @@ static bool hasCodeCompatibleOfAuthorityFactory(
  * but rather isEquivalentTo(EPSG_4326,
  * util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS)
  * </li>
- * <li>90% means that CRS are equivalent, but the names are not exactly the same.
- * <li>70% means that CRS are equivalent (equivalent datum and coordinate system),
+ * <li>90% means that CRS are equivalent, but the names are not exactly the
+ * same.
+ * <li>70% means that CRS are equivalent (equivalent datum and coordinate
+ * system),
  * but the names do not match at all.</li>
  * <li>60% means that ellipsoid, prime meridian and coordinate systems are
  * equivalent, but the CRS and datum names do not match.</li>
- * <li>25% means that the CRS are not equivalent, but there is some similarity in
+ * <li>25% means that the CRS are not equivalent, but there is some similarity
+ * in
  * the names.</li>
  * </ul>
  *

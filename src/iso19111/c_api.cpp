@@ -2173,9 +2173,12 @@ PJ *proj_get_target_crs(PJ_CONTEXT *ctx, const PJ *obj) {
  * but rather isEquivalentTo(EPSG_4326,
  * util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS)
  * </li>
- * <li>90% means that CRS are equivalent, but the names are not exactly the same.</li>
- * <li>70% means that CRS are equivalent), but the names do not match at all.</li>
- * <li>25% means that the CRS are not equivalent, but there is some similarity in
+ * <li>90% means that CRS are equivalent, but the names are not exactly the
+ * same.</li>
+ * <li>70% means that CRS are equivalent), but the names do not match at
+ * all.</li>
+ * <li>25% means that the CRS are not equivalent, but there is some similarity
+ * in
  * the names.</li>
  * </ul>
  * Other confidence values may be returned by some specialized implementations.
