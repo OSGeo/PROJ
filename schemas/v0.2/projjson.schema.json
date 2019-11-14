@@ -936,6 +936,7 @@
           "type": "object",
           "properties": {
             "name": { "type": "string" },
+            "interpolation_crs": { "$ref": "#/definitions/crs" },
             "id": { "$ref": "#/definitions/id" }
           },
           "required" : [ "name" ],
