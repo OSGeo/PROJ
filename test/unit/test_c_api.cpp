@@ -4320,6 +4320,27 @@ TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
               "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
+
+    // Check that we get the same results after an export of compoundCRS to
+    // PROJJSON and a re-import from it.
+    auto projjson = proj_as_projjson(m_ctxt, compound, nullptr);
+    ASSERT_NE(projjson, nullptr);
+    auto compound_from_projjson = proj_create(m_ctxt, projjson);
+    ObjectKeeper keeper_compound_from_projjson(compound_from_projjson);
+    ASSERT_NE(compound_from_projjson, nullptr);
+
+    auto P2 = proj_create_crs_to_crs_from_pj(m_ctxt, compound_from_projjson,
+                                             geog_crs, nullptr, nullptr);
+    ObjectKeeper keeper_P2(P2);
+    ASSERT_NE(P2, nullptr);
+
+    auto name_bis = proj_get_name(P2);
+    ASSERT_TRUE(name_bis != nullptr);
+    EXPECT_EQ(std::string(name_bis), std::string(name));
+
+    auto proj_5_bis = proj_as_proj_string(m_ctxt, P2, PJ_PROJ_5, nullptr);
+    ASSERT_NE(proj_5_bis, nullptr);
+    EXPECT_EQ(std::string(proj_5_bis), std::string(proj_5));
 }
 
 } // namespace

@@ -3029,7 +3029,8 @@ PJ *proj_create_vertical_crs_ex(
                     ? std::dynamic_pointer_cast<CRS>(geoid_geog_crs->iso_obj)
                     : nullptr;
             const auto model(Transformation::create(
-                propsModel, vertCRSWithoutGeoid, GeographicCRS::EPSG_4979,
+                propsModel, vertCRSWithoutGeoid,
+                GeographicCRS::EPSG_4979, // arbitrarily chosen. Ignored
                 interpCRS,
                 OperationMethod::create(PropertyMap(),
                                         std::vector<OperationParameterNNPtr>()),

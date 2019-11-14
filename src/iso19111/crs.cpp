@@ -2584,6 +2584,15 @@ void VerticalCRS::_exportToJSON(
         auto objectContext2(formatter->MakeObjectContext(nullptr, false));
         writer.AddObjKey("name");
         writer.Add(model->nameStr());
+
+        if (model->identifiers().empty()) {
+            const auto &interpCRS = model->interpolationCRS();
+            if (interpCRS) {
+                writer.AddObjKey("interpolation_crs");
+                interpCRS->_exportToJSON(formatter);
+            }
+        }
+
         model->formatID(formatter);
     }
 
