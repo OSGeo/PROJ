@@ -6638,6 +6638,53 @@ TEST(operation, compoundCRS_with_boundProjCRS_and_boundVerticalCRS_to_geogCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation,
+     compoundCRS_with_boundVerticalCRS_from_geoidgrids_with_m_to_geogCRS) {
+
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_NO_CHECK(src), GeographicCRS::EPSG_4979);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->nameStr(), "axis order change (2D) + "
+                             "unknown to WGS84 ellipsoidal height");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     compoundCRS_with_boundVerticalCRS_from_geoidgrids_with_ftus_to_geogCRS) {
+
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +vunits=us-ft "
+        "+type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_NO_CHECK(src), GeographicCRS::EPSG_4979);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->nameStr(), "axis order change (2D) + "
+                             "Transformation from unknown to unknown + "
+                             "unknown to WGS84 ellipsoidal height");
+    EXPECT_EQ(
+        op->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=deg +z_in=us-ft +xy_out=rad +z_out=m "
+        "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+        "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geocent_to_compoundCRS) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=geocent +datum=WGS84 +units=m +type=crs");

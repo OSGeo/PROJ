@@ -13100,10 +13100,16 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
                 // which is likely/hopefully the only one.
                 for (const auto &opFirst : resTmp) {
                     if (hasIdentifiers(opFirst)) {
-                        res.emplace_back(
-                            ConcatenatedOperation::createComputeMetadata(
-                                {opFirst, opsSecond.front()},
-                                !allowEmptyIntersection));
+                        if (candidateVert->_isEquivalentTo(
+                                targetCRS.get(),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+                            res.emplace_back(opFirst);
+                        } else {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {opFirst, opsSecond.front()},
+                                    !allowEmptyIntersection));
+                        }
                     }
                 }
                 if (!res.empty())
@@ -13456,6 +13462,24 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         hubSrcGeog->_isEquivalentTo(geogDst,
                                     util::IComparable::Criterion::EQUIVALENT) &&
         dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get())) {
+        auto transfSrc = boundSrc->transformation()->sourceCRS();
+        if (dynamic_cast<const crs::VerticalCRS *>(transfSrc.get()) &&
+            !boundSrc->baseCRS()->_isEquivalentTo(
+                transfSrc.get(), util::IComparable::Criterion::EQUIVALENT)) {
+            auto opsFirst =
+                createOperations(boundSrc->baseCRS(), transfSrc, context);
+            for (const auto &opFirst : opsFirst) {
+                try {
+                    res.emplace_back(
+                        ConcatenatedOperation::createComputeMetadata(
+                            {opFirst, boundSrc->transformation()},
+                            !allowEmptyIntersection));
+                } catch (const InvalidOperationEmptyIntersection &) {
+                }
+            }
+            return;
+        }
+
         res.emplace_back(boundSrc->transformation());
         return;
     }
@@ -13590,7 +13614,7 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
             common::Scale(heightDepthReversal ? -factor : factor), {});
         conv->setHasBallparkTransformation(true);
         res.push_back(conv);
-    } else if (convSrc != convDst) {
+    } else if (convSrc != convDst || !heightDepthReversal) {
         auto conv = Conversion::createChangeVerticalUnit(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name),
             // In case of a height depth reversal, we should probably have
@@ -13598,7 +13622,7 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
             common::Scale(heightDepthReversal ? -factor : factor));
         conv->setCRSs(sourceCRS, targetCRS, nullptr);
         res.push_back(conv);
-    } else if (heightDepthReversal) {
+    } else {
         auto conv = Conversion::createHeightDepthReversal(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name));
         conv->setCRSs(sourceCRS, targetCRS, nullptr);
@@ -14131,10 +14155,13 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         if (componentsSrc[0]->extractGeographicCRS() &&
             componentsDst[0]->extractGeographicCRS()) {
 
+            bool verticalTransfIsNoOp = false;
             std::vector<CoordinateOperationNNPtr> verticalTransforms;
             if (componentsSrc.size() >= 2 &&
                 componentsSrc[1]->extractVerticalCRS() &&
                 componentsDst[1]->extractVerticalCRS()) {
+                verticalTransfIsNoOp =
+                    componentsSrc[1]->_isEquivalentTo(componentsDst[1].get());
                 verticalTransforms = createOperations(
                     componentsSrc[1], componentsDst[1], context);
             }
@@ -14181,9 +14208,15 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                     for (const auto &opDst : opGeogCRStoDstCRS) {
 
                         try {
-                            auto op = createHorizVerticalHorizPROJBased(
-                                sourceCRS, targetCRS, opSrc, verticalTransform,
-                                opDst, interpolationGeogCRS, true);
+                            auto op = verticalTransfIsNoOp
+                                          ? ConcatenatedOperation::
+                                                createComputeMetadata(
+                                                    {opSrc, opDst},
+                                                    !allowEmptyIntersection)
+                                          : createHorizVerticalHorizPROJBased(
+                                                sourceCRS, targetCRS, opSrc,
+                                                verticalTransform, opDst,
+                                                interpolationGeogCRS, true);
                             res.emplace_back(op);
                         } catch (const InvalidOperationEmptyIntersection &) {
                         }

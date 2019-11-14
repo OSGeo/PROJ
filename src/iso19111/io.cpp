@@ -8364,7 +8364,10 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
             Transformation::createGravityRelatedHeightToGeographic3D(
                 PropertyMap().set(IdentifiedObject::NAME_KEY,
                                   "unknown to WGS84 ellipsoidal height"),
-                crs, GeographicCRS::EPSG_4979, nullptr, geoidgrids,
+                VerticalCRS::create(createMapWithUnknownName(), vdatum,
+                                    VerticalCS::createGravityRelatedHeight(
+                                        common::UnitOfMeasure::METRE)),
+                GeographicCRS::EPSG_4979, nullptr, geoidgrids,
                 std::vector<PositionalAccuracyNNPtr>());
         auto boundvcrs =
             BoundCRS::create(vcrs, GeographicCRS::EPSG_4979, transformation);
