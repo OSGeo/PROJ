@@ -12863,7 +12863,7 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
             // If we still didn't find a transformation, and that the source
             // and target are GeodeticCRS, then go through their underlying
             // datum to find potential transformations between other
-            // GeodeticRSs
+            // GeodeticCRSs
             // that are made of those datum
             // The typical example is if transforming between two
             // GeographicCRS,
