@@ -949,7 +949,7 @@ static PJ* add_coord_op_to_list(PJ* op,
 }
 
 /*****************************************************************************/
-static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, const PJ* crs) {
+static PJ* create_operation_to_geog_crs(PJ_CONTEXT* ctx, const PJ* crs) {
 /*****************************************************************************/
     // Create a geographic 2D long-lat degrees CRS that is related to the
     // CRS
@@ -969,9 +969,19 @@ static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, const PJ* crs) {
         {
             auto cs = proj_create_ellipsoidal_2D_cs(
                 ctx, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
-            auto temp = proj_create_geographic_crs_from_datum(
-                ctx,"unnamed", datum, cs);
+            auto ellps = proj_get_ellipsoid(ctx, datum);
             proj_destroy(datum);
+            double semi_major_metre = 0;
+            double inv_flattening = 0;
+            proj_ellipsoid_get_parameters(ctx, ellps, &semi_major_metre,
+                                          nullptr, nullptr, &inv_flattening);
+            auto temp = proj_create_geographic_crs(
+                ctx, "unnamed crs", "unnamed datum",
+                proj_get_name(ellps),
+                semi_major_metre, inv_flattening,
+                "Reference prime meridian", 0, nullptr, 0,
+                cs);
+            proj_destroy(ellps);
             proj_destroy(cs);
             proj_destroy(geodetic_crs);
             geodetic_crs = temp;
@@ -1114,7 +1124,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         return P;
     }
 
-    auto pjGeogToSrc = create_operation_to_base_geog_crs(ctx, source_crs);
+    auto pjGeogToSrc = create_operation_to_geog_crs(ctx, source_crs);
     if( !pjGeogToSrc )
     {
         proj_list_destroy(op_list);
@@ -1125,7 +1135,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         return nullptr;
     }
 
-    auto pjGeogToDst = create_operation_to_base_geog_crs(ctx, target_crs);
+    auto pjGeogToDst = create_operation_to_geog_crs(ctx, target_crs);
     if( !pjGeogToDst )
     {
         proj_list_destroy(op_list);

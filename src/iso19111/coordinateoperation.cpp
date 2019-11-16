@@ -9346,7 +9346,8 @@ void Transformation::_exportToPROJString(
         }
 
         if (!sourceCRSGeog->ellipsoid()->_isEquivalentTo(
-                targetCRSGeog->ellipsoid().get())) {
+                targetCRSGeog->ellipsoid().get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
             // This is arguable if we should check this...
             throw io::FormattingException("Can apply Longitude rotation "
                                           "only to SRS with same "
