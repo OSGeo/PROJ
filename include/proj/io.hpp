@@ -1116,10 +1116,6 @@ class PROJ_GCC_DLL AuthorityFactory {
     createCoordinateReferenceSystem(const std::string &code,
                                     bool allowCompound) const;
 
-    PROJ_INTERNAL std::list<datum::GeodeticReferenceFrameNNPtr>
-    getPreferredHubGeodeticReferenceFrames(
-        const std::string &geodeticReferenceFrameCode) const;
-
     PROJ_INTERNAL std::vector<operation::CoordinateOperationNNPtr>
     getTransformationsForGeoid(const std::string &geoidName,
                                bool usePROJAlternativeGridNames) const;

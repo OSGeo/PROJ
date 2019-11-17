@@ -10428,7 +10428,6 @@ struct CoordinateOperationFactory::Private {
         const metadata::ExtentPtr &extent2;
         const CoordinateOperationContextNNPtr &context;
         bool inCreateOperationsWithDatumPivotAntiRecursion = false;
-        bool inCreateOperationsThroughPreferredHub = false;
         bool inCreateOperationsGeogToVertWithAlternativeGeog = false;
         bool inCreateOperationsGeogToVertWithIntermediateVert = false;
         bool skipHorizontalTransformation = false;
@@ -10574,12 +10573,6 @@ struct CoordinateOperationFactory::Private {
         const crs::GeographicCRS *geogSrc, const crs::GeographicCRS *geogDst);
 
     static void createOperationsWithDatumPivot(
-        std::vector<CoordinateOperationNNPtr> &res,
-        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-        const crs::GeodeticCRS *geodSrc, const crs::GeodeticCRS *geodDst,
-        Context &context);
-
-    static void createOperationsThroughPreferredHub(
         std::vector<CoordinateOperationNNPtr> &res,
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
         const crs::GeodeticCRS *geodSrc, const crs::GeodeticCRS *geodDst,
@@ -12451,118 +12444,6 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 
 // ---------------------------------------------------------------------------
 
-void CoordinateOperationFactory::Private::createOperationsThroughPreferredHub(
-    std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
-    const crs::CRSNNPtr &targetCRS, const crs::GeodeticCRS *geodSrc,
-    const crs::GeodeticCRS *geodDst, Private::Context &context) {
-
-    const auto &srcDatum = geodSrc->datum();
-    const auto &dstDatum = geodDst->datum();
-
-    if (!srcDatum || !dstDatum)
-        return;
-    const auto &srcDatumIds = srcDatum->identifiers();
-    const auto &dstDatumIds = dstDatum->identifiers();
-    if (srcDatumIds.empty() || dstDatumIds.empty())
-        return;
-
-    const auto &authFactory = context.context->getAuthorityFactory();
-
-    const auto srcAuthFactory = io::AuthorityFactory::create(
-        authFactory->databaseContext(), *(srcDatumIds.front()->codeSpace()));
-    const auto srcPreferredHubs =
-        srcAuthFactory->getPreferredHubGeodeticReferenceFrames(
-            srcDatumIds.front()->code());
-
-    const auto dstAuthFactory = io::AuthorityFactory::create(
-        authFactory->databaseContext(), *(dstDatumIds.front()->codeSpace()));
-    const auto dstPreferredHubs =
-        dstAuthFactory->getPreferredHubGeodeticReferenceFrames(
-            dstDatumIds.front()->code());
-    if (srcPreferredHubs.empty() && dstPreferredHubs.empty())
-        return;
-
-    // Currently if we have prefered hubs for both source and target, we
-    // will use only the one for target, arbitrarily... We could use boths
-    // but that would complicate things.
-    if (!srcPreferredHubs.empty() && dstPreferredHubs.empty()) {
-        std::vector<CoordinateOperationNNPtr> resTmp;
-        createOperationsThroughPreferredHub(resTmp, targetCRS, sourceCRS,
-                                            geodDst, geodSrc, context);
-        if (!resTmp.empty()) {
-            resTmp = applyInverse(resTmp);
-            res.insert(res.end(), resTmp.begin(), resTmp.end());
-        }
-        return;
-    }
-    assert(!dstPreferredHubs.empty());
-
-#ifdef TRACE_CREATE_OPERATIONS
-    ENTER_BLOCK("createOperationsThroughPreferredHub(" +
-                objectAsStr(sourceCRS.get()) + " --> " +
-                objectAsStr(targetCRS.get()) + ")");
-#endif
-
-    struct AntiRecursionGuard {
-        Context &context;
-
-        explicit AntiRecursionGuard(Context &contextIn) : context(contextIn) {
-            assert(!context.inCreateOperationsThroughPreferredHub);
-            context.inCreateOperationsThroughPreferredHub = true;
-        }
-
-        ~AntiRecursionGuard() {
-            context.inCreateOperationsThroughPreferredHub = false;
-        }
-    };
-    AntiRecursionGuard guard(context);
-
-    std::vector<crs::CRSNNPtr> candidatesIntermCRS;
-    for (const auto &datumHub : dstPreferredHubs) {
-        auto candidates =
-            findCandidateGeodCRSForDatum(authFactory, geodDst, datumHub.get());
-        bool addedGeog2D = false;
-        for (const auto &intermCRS : candidates) {
-            auto geogCRS = dynamic_cast<crs::GeographicCRS *>(intermCRS.get());
-            if (geogCRS &&
-                geogCRS->coordinateSystem()->axisList().size() == 2) {
-                candidatesIntermCRS.emplace_back(intermCRS);
-                addedGeog2D = true;
-                break;
-            }
-        }
-        if (!addedGeog2D) {
-            candidatesIntermCRS.insert(candidatesIntermCRS.end(),
-                                       candidates.begin(), candidates.end());
-        }
-    }
-
-    for (const auto &intermCRS : candidatesIntermCRS) {
-#ifdef TRACE_CREATE_OPERATIONS
-        ENTER_BLOCK("try " + objectAsStr(sourceCRS.get()) + "->" +
-                    objectAsStr(intermCRS.get()) + "->" +
-                    objectAsStr(targetCRS.get()) + ")");
-#endif
-        const auto opsFirst = createOperations(sourceCRS, intermCRS, context);
-        const auto opsLast = createOperations(intermCRS, targetCRS, context);
-        for (const auto &opFirst : opsFirst) {
-            for (const auto &opLast : opsLast) {
-                if (!opFirst->hasBallparkTransformation() ||
-                    !opLast->hasBallparkTransformation()) {
-                    try {
-                        res.emplace_back(
-                            ConcatenatedOperation::createComputeMetadata(
-                                {opFirst, opLast}, !allowEmptyIntersection));
-                    } catch (const InvalidOperationEmptyIntersection &) {
-                    }
-                }
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-
 static CoordinateOperationNNPtr
 createBallparkGeocentricTranslation(const crs::CRSNNPtr &sourceCRS,
                                     const crs::CRSNNPtr &targetCRS) {
@@ -12895,16 +12776,6 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         res.insert(res.end(), resWithIntermediate.begin(),
                    resWithIntermediate.end());
         doFilterAndCheckPerfectOp = !res.empty();
-
-        // If transforming from/to WGS84 (Gxxxx), try through 'neutral'
-        // WGS84
-        if (res.empty() && geodSrc && geodDst &&
-            !context.inCreateOperationsThroughPreferredHub &&
-            !context.inCreateOperationsWithDatumPivotAntiRecursion) {
-            createOperationsThroughPreferredHub(res, sourceCRS, targetCRS,
-                                                geodSrc, geodDst, context);
-            doFilterAndCheckPerfectOp = !res.empty();
-        }
     }
 
     if (doFilterAndCheckPerfectOp) {

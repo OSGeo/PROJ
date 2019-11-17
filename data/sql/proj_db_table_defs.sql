@@ -126,19 +126,6 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
--- indicates that if there is no transformation from/into (src_auth_name, src_code),
--- a research going through (hub_auth_name, hub_code) should be made
-CREATE TABLE geodetic_datum_preferred_hub(
-    src_auth_name TEXT NOT NULL CHECK (length(src_auth_name) >= 1),
-    src_code TEXT NOT NULL CHECK (length(src_code) >= 1),
-    hub_auth_name TEXT NOT NULL CHECK (length(hub_auth_name) >= 1),
-    hub_code TEXT NOT NULL CHECK (length(hub_code) >= 1),
-
-    CONSTRAINT unique_geodetic_datum_preferred_hub UNIQUE (src_auth_name, src_code, hub_auth_name, hub_code),
-    CONSTRAINT fk_geodetic_datum_preferred_hub_src FOREIGN KEY (src_auth_name, src_code) REFERENCES geodetic_datum(auth_name, code),
-    CONSTRAINT fk_geodetic_datum_preferred_hub_src FOREIGN KEY (hub_auth_name, hub_code) REFERENCES geodetic_datum(auth_name, code)
-);
-
 CREATE TABLE vertical_datum (
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code TEXT NOT NULL CHECK (length(code) >= 1),
