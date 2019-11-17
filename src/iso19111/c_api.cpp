@@ -6913,7 +6913,7 @@ struct PJ_OPERATION_FACTORY_CONTEXT {
  * If authority is set to "any", then coordinate
  * operations from any authority will be searched
  * If authority is a non-empty string different of "any",
- * then coordinate operatiosn will be searched only in that authority namespace.
+ * then coordinate operations will be searched only in that authority namespace.
  *
  * @param ctx Context, or NULL for default context.
  * @param authority Name of authority to which to restrict the search of
