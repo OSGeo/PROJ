@@ -300,7 +300,7 @@ osgeo::proj::io::AuthorityFactory::createEllipsoid(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createExtent(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&) const
 osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, bool, bool, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
-osgeo::proj::io::AuthorityFactory::createFromCRSCodesWithIntermediates(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, std::vector<std::pair<std::string, std::string>, std::allocator<std::pair<std::string, std::string> > > const&, osgeo::proj::io::AuthorityFactory::ObjectType, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
+osgeo::proj::io::AuthorityFactory::createFromCRSCodesWithIntermediates(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, std::vector<std::pair<std::string, std::string>, std::allocator<std::pair<std::string, std::string> > > const&, osgeo::proj::io::AuthorityFactory::ObjectType, std::vector<std::string, std::allocator<std::string> > const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
 osgeo::proj::io::AuthorityFactory::createGeodeticCRS(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createGeodeticDatum(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createGeographicCRS(std::string const&) const

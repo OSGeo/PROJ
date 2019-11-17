@@ -1064,6 +1064,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         const std::vector<std::pair<std::string, std::string>>
             &intermediateCRSAuthCodes,
         ObjectType allowedIntermediateObjectType = ObjectType::CRS,
+        const std::vector<std::string> &allowedAuthorities =
+            std::vector<std::string>(),
         const metadata::ExtentPtr &intersectingExtent1 = nullptr,
         const metadata::ExtentPtr &intersectingExtent2 = nullptr) const;
 

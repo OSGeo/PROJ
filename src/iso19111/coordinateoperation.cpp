@@ -11587,46 +11587,51 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
 
             const auto authorities(getCandidateAuthorities(
                 authFactory, srcAuthName, targetAuthName));
-            for (const auto &authority : authorities) {
-                const auto tmpAuthFactory = io::AuthorityFactory::create(
-                    authFactory->databaseContext(),
-                    authority == "any" ? std::string() : authority);
+            assert(!authorities.empty());
 
-                io::AuthorityFactory::ObjectType intermediateObjectType =
-                    io::AuthorityFactory::ObjectType::CRS;
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(),
+                (authFactory->getAuthority() == "any" || authorities.size() > 1)
+                    ? std::string()
+                    : authorities.front());
 
-                // If doing GeogCRS --> GeogCRS, only use GeogCRS as
-                // intermediate CRS
-                // Avoid weird behaviour when doing NAD83 -> NAD83(2011)
-                // that would go through NAVD88 otherwise.
-                if (context.context->getIntermediateCRS().empty() &&
-                    dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get()) &&
-                    dynamic_cast<const crs::GeographicCRS *>(targetCRS.get())) {
-                    intermediateObjectType =
-                        io::AuthorityFactory::ObjectType::GEOGRAPHIC_CRS;
-                }
-                auto res = tmpAuthFactory->createFromCRSCodesWithIntermediates(
-                    srcAuthName, srcCode, targetAuthName, targetCode,
-                    context.context->getUsePROJAlternativeGridNames(),
-                    context.context->getGridAvailabilityUse() ==
-                        CoordinateOperationContext::GridAvailabilityUse::
-                            DISCARD_OPERATION_IF_MISSING_GRID,
-                    context.context->getDiscardSuperseded(),
-                    context.context->getIntermediateCRS(),
-                    intermediateObjectType, context.extent1, context.extent2);
-                if (!res.empty()) {
+            io::AuthorityFactory::ObjectType intermediateObjectType =
+                io::AuthorityFactory::ObjectType::CRS;
 
-                    auto resFiltered =
-                        FilterResults(res, context.context, context.extent1,
-                                      context.extent2, false)
-                            .getRes();
+            // If doing GeogCRS --> GeogCRS, only use GeogCRS as
+            // intermediate CRS
+            // Avoid weird behaviour when doing NAD83 -> NAD83(2011)
+            // that would go through NAVD88 otherwise.
+            if (context.context->getIntermediateCRS().empty() &&
+                dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get()) &&
+                dynamic_cast<const crs::GeographicCRS *>(targetCRS.get())) {
+                intermediateObjectType =
+                    io::AuthorityFactory::ObjectType::GEOGRAPHIC_CRS;
+            }
+            auto res = tmpAuthFactory->createFromCRSCodesWithIntermediates(
+                srcAuthName, srcCode, targetAuthName, targetCode,
+                context.context->getUsePROJAlternativeGridNames(),
+                context.context->getGridAvailabilityUse() ==
+                    CoordinateOperationContext::GridAvailabilityUse::
+                        DISCARD_OPERATION_IF_MISSING_GRID,
+                context.context->getDiscardSuperseded(),
+                context.context->getIntermediateCRS(), intermediateObjectType,
+                authFactory->getAuthority() != "any" && authorities.size() > 1
+                    ? authorities
+                    : std::vector<std::string>(),
+                context.extent1, context.extent2);
+            if (!res.empty()) {
+
+                auto resFiltered =
+                    FilterResults(res, context.context, context.extent1,
+                                  context.extent2, false)
+                        .getRes();
 #ifdef TRACE_CREATE_OPERATIONS
-                    logTrace("filtering reduced from " +
-                             toString(static_cast<int>(res.size())) + " to " +
-                             toString(static_cast<int>(resFiltered.size())));
+                logTrace("filtering reduced from " +
+                         toString(static_cast<int>(res.size())) + " to " +
+                         toString(static_cast<int>(resFiltered.size())));
 #endif
-                    return resFiltered;
-                }
+                return resFiltered;
             }
         }
     }
