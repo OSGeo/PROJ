@@ -12268,6 +12268,37 @@ void CoordinateOperationFactory::Private::setCRSs(
 
 // ---------------------------------------------------------------------------
 
+static bool hasResultSetOnlyResultsWithPROJStep(
+    const std::vector<CoordinateOperationNNPtr> &res) {
+    for (const auto &op : res) {
+        auto concat = dynamic_cast<const ConcatenatedOperation *>(op.get());
+        if (concat) {
+            bool hasPROJStep = false;
+            const auto &steps = concat->operations();
+            for (const auto &step : steps) {
+                const auto &ids = step->identifiers();
+                if (!ids.empty()) {
+                    const auto &opAuthority = *(ids.front()->codeSpace());
+                    if (opAuthority == "PROJ" ||
+                        opAuthority == "INVERSE(PROJ)" ||
+                        opAuthority == "DERIVED_FROM(PROJ)") {
+                        hasPROJStep = true;
+                        break;
+                    }
+                }
+            }
+            if (!hasPROJStep) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
 void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
     const crs::CRSNNPtr &targetCRS, const crs::GeodeticCRS *geodSrc,
@@ -12416,16 +12447,19 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                     createTransformations(candidateSrcGeod, candidateDstGeod,
                                           opsFirst[0], isNullFirst);
                     if (!res.empty()) {
+                        if (hasResultSetOnlyResultsWithPROJStep(res)) {
+                            continue;
+                        }
                         return;
                     }
-                    break;
                 }
             }
-            break;
         }
     }
 
     for (const auto &candidateSrcGeod : candidatesSrcGeod) {
+        const bool bSameSrcName =
+            candidateSrcGeod->nameStr() == sourceCRS->nameStr();
 #ifdef TRACE_CREATE_OPERATIONS
         ENTER_BLOCK("");
 #endif
@@ -12435,6 +12469,11 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
         const bool isNullFirst = isNullTransformation(opsFirst[0]->nameStr());
 
         for (const auto &candidateDstGeod : candidatesDstGeod) {
+            if (bSameSrcName &&
+                candidateDstGeod->nameStr() == targetCRS->nameStr()) {
+                continue;
+            }
+
 #ifdef TRACE_CREATE_OPERATIONS
             ENTER_BLOCK("try " + objectAsStr(sourceCRS.get()) + "->" +
                         objectAsStr(candidateSrcGeod.get()) + "->" +
@@ -12443,7 +12482,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 #endif
             createTransformations(candidateSrcGeod, candidateDstGeod,
                                   opsFirst[0], isNullFirst);
-            if (!res.empty()) {
+            if (!res.empty() && hasResultSetOnlyResultsWithPROJStep(res)) {
                 return;
             }
         }

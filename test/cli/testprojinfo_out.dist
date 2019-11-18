@@ -1048,3 +1048,8 @@ INVERSE(EPSG):9225, Inverse of WGS 84 to ETRS89 (2), 0.1 m, Europe - offshore No
 Testing -s +proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs -t EPSG:4326 -o PROJ -q
 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=@foo.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
+Testing -s "GDA94" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include a transformation with Inverse of ITRF2008 to GDA94 (1) + Inverse of WGS 84 (G1762) to ITRF2008 (1)
+Candidate operations found: 2
+unknown id, GDA94 to WGS 84 (1) + WGS 84 to WGS 84 (G1762), 5 m, Australia - GDA
+unknown id, Conversion from GDA94 (geog2D) to GDA94 (geocentric) + Inverse of ITRF2008 to GDA94 (1) + Inverse of WGS 84 (G1762) to ITRF2008 (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.04 m, Australia - onshore and EEZ
+

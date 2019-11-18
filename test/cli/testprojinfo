@@ -135,6 +135,10 @@ echo "Testing -s "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs" -t 
 $EXE -s "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs" -t EPSG:4326 -o PROJ -q >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo 'Testing -s "GDA94" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include a transformation with Inverse of ITRF2008 to GDA94 (1) + Inverse of WGS 84 (G1762) to ITRF2008 (1)' >> ${OUT}
+$EXE -s "GDA94" -t "WGS 84 (G1762)" --spatial-test intersects --summary >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
