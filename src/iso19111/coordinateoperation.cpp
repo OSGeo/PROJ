@@ -10464,9 +10464,10 @@ struct CoordinateOperationFactory::Private {
                               Private::Context &context);
 
     static std::vector<CoordinateOperationNNPtr>
-    findsOpsInRegistryWithIntermediate(const crs::CRSNNPtr &sourceCRS,
-                                       const crs::CRSNNPtr &targetCRS,
-                                       Private::Context &context);
+    findsOpsInRegistryWithIntermediate(
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        Private::Context &context,
+        bool useCreateBetweenGeodeticCRSWithDatumBasedIntermediates);
 
     static void createOperationsFromProj4Ext(
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
@@ -11562,7 +11563,8 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirectTo(
 std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    Private::Context &context) {
+    Private::Context &context,
+    bool useCreateBetweenGeodeticCRSWithDatumBasedIntermediates) {
 
 #ifdef TRACE_CREATE_OPERATIONS
     ENTER_BLOCK("findsOpsInRegistryWithIntermediate(" +
@@ -11595,31 +11597,52 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
                     ? std::string()
                     : authorities.front());
 
-            io::AuthorityFactory::ObjectType intermediateObjectType =
-                io::AuthorityFactory::ObjectType::CRS;
+            std::vector<CoordinateOperationNNPtr> res;
+            if (useCreateBetweenGeodeticCRSWithDatumBasedIntermediates) {
+                res = tmpAuthFactory
+                          ->createBetweenGeodeticCRSWithDatumBasedIntermediates(
+                              sourceCRS, srcAuthName, srcCode, targetCRS,
+                              targetAuthName, targetCode,
+                              context.context->getUsePROJAlternativeGridNames(),
+                              context.context->getGridAvailabilityUse() ==
+                                  CoordinateOperationContext::
+                                      GridAvailabilityUse::
+                                          DISCARD_OPERATION_IF_MISSING_GRID,
+                              context.context->getDiscardSuperseded(),
+                              authFactory->getAuthority() != "any" &&
+                                      authorities.size() > 1
+                                  ? authorities
+                                  : std::vector<std::string>(),
+                              context.extent1, context.extent2);
+            } else {
+                io::AuthorityFactory::ObjectType intermediateObjectType =
+                    io::AuthorityFactory::ObjectType::CRS;
 
-            // If doing GeogCRS --> GeogCRS, only use GeogCRS as
-            // intermediate CRS
-            // Avoid weird behaviour when doing NAD83 -> NAD83(2011)
-            // that would go through NAVD88 otherwise.
-            if (context.context->getIntermediateCRS().empty() &&
-                dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get()) &&
-                dynamic_cast<const crs::GeographicCRS *>(targetCRS.get())) {
-                intermediateObjectType =
-                    io::AuthorityFactory::ObjectType::GEOGRAPHIC_CRS;
+                // If doing GeogCRS --> GeogCRS, only use GeogCRS as
+                // intermediate CRS
+                // Avoid weird behaviour when doing NAD83 -> NAD83(2011)
+                // that would go through NAVD88 otherwise.
+                if (context.context->getIntermediateCRS().empty() &&
+                    dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get()) &&
+                    dynamic_cast<const crs::GeographicCRS *>(targetCRS.get())) {
+                    intermediateObjectType =
+                        io::AuthorityFactory::ObjectType::GEOGRAPHIC_CRS;
+                }
+                res = tmpAuthFactory->createFromCRSCodesWithIntermediates(
+                    srcAuthName, srcCode, targetAuthName, targetCode,
+                    context.context->getUsePROJAlternativeGridNames(),
+                    context.context->getGridAvailabilityUse() ==
+                        CoordinateOperationContext::GridAvailabilityUse::
+                            DISCARD_OPERATION_IF_MISSING_GRID,
+                    context.context->getDiscardSuperseded(),
+                    context.context->getIntermediateCRS(),
+                    intermediateObjectType,
+                    authFactory->getAuthority() != "any" &&
+                            authorities.size() > 1
+                        ? authorities
+                        : std::vector<std::string>(),
+                    context.extent1, context.extent2);
             }
-            auto res = tmpAuthFactory->createFromCRSCodesWithIntermediates(
-                srcAuthName, srcCode, targetAuthName, targetCode,
-                context.context->getUsePROJAlternativeGridNames(),
-                context.context->getGridAvailabilityUse() ==
-                    CoordinateOperationContext::GridAvailabilityUse::
-                        DISCARD_OPERATION_IF_MISSING_GRID,
-                context.context->getDiscardSuperseded(),
-                context.context->getIntermediateCRS(), intermediateObjectType,
-                authFactory->getAuthority() != "any" && authorities.size() > 1
-                    ? authorities
-                    : std::vector<std::string>(),
-                context.extent1, context.extent2);
             if (!res.empty()) {
 
                 auto resFiltered =
@@ -12820,11 +12843,47 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
          context.context->getAllowUseIntermediateCRS() ==
              CoordinateOperationContext::IntermediateCRSUse::ALWAYS ||
          getenv("PROJ_FORCE_SEARCH_PIVOT"))) {
-        auto resWithIntermediate =
-            findsOpsInRegistryWithIntermediate(sourceCRS, targetCRS, context);
+        auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
+            sourceCRS, targetCRS, context, false);
         res.insert(res.end(), resWithIntermediate.begin(),
                    resWithIntermediate.end());
         doFilterAndCheckPerfectOp = !res.empty();
+
+    } else if (!context.inCreateOperationsWithDatumPivotAntiRecursion &&
+               !resFindDirectNonEmptyBeforeFiltering && geodSrc && geodDst &&
+               !sameGeodeticDatum &&
+               context.context->getIntermediateCRS().empty() &&
+               context.context->getAllowUseIntermediateCRS() !=
+                   CoordinateOperationContext::IntermediateCRSUse::NEVER) {
+
+        bool tryWithGeodeticDatumIntermediate = res.empty();
+        if (!tryWithGeodeticDatumIntermediate) {
+            // This is in particular for the GDA94 to WGS 84 (G1762) case
+            // As we have a WGS 84 -> WGS 84 (G1762) null-transformation in the
+            // PROJ authority, previous steps might have use that WGS 84
+            // intermediate directly. They might also have generated a path
+            // through ITRF2008, as there is a path
+            // GDA94 (geoc.) -> ITRF2008 (geoc.) -> WGS84 (G1762) (geoc.)
+            // But there's a better path using
+            // GDA94 (geog.) --> GDA2020 (geog.) and
+            // GDA2020 (geoc.) -> WGS84 (G1762) (geoc.) that requires to
+            // explore intermediates through their datum, and not directly
+            // trough the CRS code.
+            // Do that only if the number of results we got through other
+            // algorithms is small, or if all results we have go through an
+            // operation in the PROJ authority.
+            constexpr size_t ARBITRARY_SMALL_NUMBER = 5U;
+            tryWithGeodeticDatumIntermediate =
+                res.size() < ARBITRARY_SMALL_NUMBER ||
+                hasResultSetOnlyResultsWithPROJStep(res);
+        }
+        if (tryWithGeodeticDatumIntermediate) {
+            auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
+                sourceCRS, targetCRS, context, true);
+            res.insert(res.end(), resWithIntermediate.begin(),
+                       resWithIntermediate.end());
+            doFilterAndCheckPerfectOp = !res.empty();
+        }
     }
 
     if (doFilterAndCheckPerfectOp) {
