@@ -10455,10 +10455,9 @@ struct CoordinateOperationFactory::Private {
     buildCRSIds(const crs::CRSNNPtr &crs, Private::Context &context,
                 std::list<std::pair<std::string, std::string>> &ids);
 
-    static std::vector<CoordinateOperationNNPtr>
-    findOpsInRegistryDirect(const crs::CRSNNPtr &sourceCRS,
-                            const crs::CRSNNPtr &targetCRS,
-                            Private::Context &context);
+    static std::vector<CoordinateOperationNNPtr> findOpsInRegistryDirect(
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        Private::Context &context, bool &resNonEmptyBeforeFiltering);
 
     static std::vector<CoordinateOperationNNPtr>
     findOpsInRegistryDirectTo(const crs::CRSNNPtr &targetCRS,
@@ -11444,7 +11443,7 @@ getCandidateAuthorities(const io::AuthorityFactoryPtr &authFactory,
 std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::findOpsInRegistryDirect(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    Private::Context &context) {
+    Private::Context &context, bool &resNonEmptyBeforeFiltering) {
     const auto &authFactory = context.context->getAuthorityFactory();
     assert(authFactory);
 
@@ -11453,6 +11452,7 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
                 " --> " + objectAsStr(targetCRS.get()) + ")");
 #endif
 
+    resNonEmptyBeforeFiltering = false;
     std::list<std::pair<std::string, std::string>> sourceIds;
     std::list<std::pair<std::string, std::string>> targetIds;
     buildCRSIds(sourceCRS, context, sourceIds);
@@ -11481,6 +11481,7 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
                         context.context->getDiscardSuperseded(), true, false,
                         context.extent1, context.extent2);
                 if (!res.empty()) {
+                    resNonEmptyBeforeFiltering = true;
                     auto resFiltered =
                         FilterResults(res, context.context, context.extent1,
                                       context.extent2, false)
@@ -12725,7 +12726,9 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         return true;
     }
 
-    res = findOpsInRegistryDirect(sourceCRS, targetCRS, context);
+    bool resFindDirectNonEmptyBeforeFiltering = false;
+    res = findOpsInRegistryDirect(sourceCRS, targetCRS, context,
+                                  resFindDirectNonEmptyBeforeFiltering);
 
     // If we get at least a result with perfect accuracy, do not
     // bother generating synthetic transforms.
@@ -12771,7 +12774,7 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
     // NAD27 to NAD83 has tens of results already. No need to look
     // for a pivot
     if (!sameGeodeticDatum &&
-        ((res.empty() &&
+        ((res.empty() && !resFindDirectNonEmptyBeforeFiltering &&
           context.context->getAllowUseIntermediateCRS() ==
               CoordinateOperationContext::IntermediateCRSUse::
                   IF_NO_DIRECT_TRANSFORMATION) ||
@@ -13086,8 +13089,10 @@ void CoordinateOperationFactory::Private::
                         candidate);
                 if (geogCandidate &&
                     geogCandidate->coordinateSystem()->axisList().size() == 2) {
-                    res = findOpsInRegistryDirect(NN_NO_CHECK(geogCandidate),
-                                                  targetCRSIn, context);
+                    bool ignored;
+                    res =
+                        findOpsInRegistryDirect(NN_NO_CHECK(geogCandidate),
+                                                targetCRSIn, context, ignored);
                     break;
                 }
             }
