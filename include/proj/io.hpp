@@ -1064,6 +1064,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         const std::vector<std::pair<std::string, std::string>>
             &intermediateCRSAuthCodes,
         ObjectType allowedIntermediateObjectType = ObjectType::CRS,
+        const std::vector<std::string> &allowedAuthorities =
+            std::vector<std::string>(),
         const metadata::ExtentPtr &intersectingExtent1 = nullptr,
         const metadata::ExtentPtr &intersectingExtent2 = nullptr) const;
 
@@ -1113,10 +1115,6 @@ class PROJ_GCC_DLL AuthorityFactory {
     PROJ_INTERNAL crs::CRSNNPtr
     createCoordinateReferenceSystem(const std::string &code,
                                     bool allowCompound) const;
-
-    PROJ_INTERNAL std::list<datum::GeodeticReferenceFrameNNPtr>
-    getPreferredHubGeodeticReferenceFrames(
-        const std::string &geodeticReferenceFrameCode) const;
 
     PROJ_INTERNAL std::vector<operation::CoordinateOperationNNPtr>
     getTransformationsForGeoid(const std::string &geoidName,

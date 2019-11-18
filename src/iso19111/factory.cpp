@@ -3775,6 +3775,11 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  * @param allowedIntermediateObjectType Restrict the type of the intermediate
  * object considered.
  * Only ObjectType::CRS and ObjectType::GEOGRAPHIC_CRS supported currently
+ * @param allowedAuthorities One or several authority name allowed for the two
+ * coordinate operations that are going to be searched. When this vector is
+ * no empty, it overrides the authority of this object. This is useful for
+ * example when the coordinate operations to chain belong to two different
+ * allowed authorities.
  * @param intersectingExtent1 Optional extent that the resulting operations
  * must intersect.
  * @param intersectingExtent2 Optional extent that the resulting operations
@@ -3793,6 +3798,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     const std::vector<std::pair<std::string, std::string>>
         &intermediateCRSAuthCodes,
     ObjectType allowedIntermediateObjectType,
+    const std::vector<std::string> &allowedAuthorities,
     const metadata::ExtentPtr &intersectingExtent1,
     const metadata::ExtentPtr &intersectingExtent2) const {
 
@@ -3887,6 +3893,27 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         "AND v1.deprecated = 0 AND v2.deprecated = 0 "
         "AND intersects_bbox(south_lat1, west_lon1, north_lat1, east_lon1, "
         "south_lat2, west_lon2, north_lat2, east_lon2) = 1 ");
+    if (!allowedAuthorities.empty()) {
+        additionalWhere += "AND v1.auth_name IN (";
+        for (size_t i = 0; i < allowedAuthorities.size(); i++) {
+            if (i > 0)
+                additionalWhere += ',';
+            additionalWhere += '?';
+        }
+        additionalWhere += ") AND v2.auth_name IN (";
+        for (size_t i = 0; i < allowedAuthorities.size(); i++) {
+            if (i > 0)
+                additionalWhere += ',';
+            additionalWhere += '?';
+        }
+        additionalWhere += ')';
+        for (const auto &allowedAuthority : allowedAuthorities) {
+            params.emplace_back(allowedAuthority);
+        }
+        for (const auto &allowedAuthority : allowedAuthorities) {
+            params.emplace_back(allowedAuthority);
+        }
+    }
     if (d->hasAuthorityRestriction()) {
         additionalWhere += "AND v1.auth_name = ? AND v2.auth_name = ? ";
         params.emplace_back(d->authority());
@@ -5353,29 +5380,6 @@ AuthorityFactory::createCompoundCRSFromExisting(
     }
     return res;
 }
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-std::list<datum::GeodeticReferenceFrameNNPtr>
-AuthorityFactory::getPreferredHubGeodeticReferenceFrames(
-    const std::string &geodeticReferenceFrameCode) const {
-    std::list<datum::GeodeticReferenceFrameNNPtr> res;
-
-    const std::string sql("SELECT hub_auth_name, hub_code FROM "
-                          "geodetic_datum_preferred_hub WHERE "
-                          "src_auth_name = ? AND src_code = ?");
-    auto sqlRes = d->run(sql, {d->authority(), geodeticReferenceFrameCode});
-    for (const auto &row : sqlRes) {
-        const auto &auth_name = row[0];
-        const auto &code = row[1];
-        res.emplace_back(
-            d->createFactory(auth_name)->createGeodeticDatum(code));
-    }
-
-    return res;
-}
-//! @endcond
 
 // ---------------------------------------------------------------------------
 
