@@ -144,7 +144,7 @@ def ingest_datums(root, all_sql, mapEllpsId, mapPmId):
                 assert ellpsCode in mapEllpsId
 
                 # We sheat by using EPSG:1262 = World for area of use
-                sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s',NULL,NULL,'%s','%s','%s','%s','EPSG','1262',0);""" % (id, names[0], mapEllpsId[ellpsCode][0], mapEllpsId[ellpsCode][1], mapPmId[pmCode][0], mapPmId[pmCode][1])
+                sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s',NULL,NULL,'%s','%s','%s','%s','EPSG','1262',NULL,0);""" % (id, names[0], mapEllpsId[ellpsCode][0], mapEllpsId[ellpsCode][1], mapPmId[pmCode][0], mapPmId[pmCode][1])
                 all_sql.append(sql)
 
                 mapDatumId[id] = ('IGNF', id)
@@ -154,7 +154,7 @@ def ingest_datums(root, all_sql, mapEllpsId, mapPmId):
                 id = node.attrib['id']
                 names = [_name.text for _name in node.iter('name')]
 
-                sql = """INSERT INTO "vertical_datum" VALUES('IGNF','%s','%s',NULL,NULL,'EPSG','1262',0);"""% (id, names[0])
+                sql = """INSERT INTO "vertical_datum" VALUES('IGNF','%s','%s',NULL,NULL,'EPSG','1262',NULL,0);"""% (id, names[0])
                 all_sql.append(sql)
 
                 mapVerticalDatumId[id] = ('IGNF', id)

@@ -94,12 +94,12 @@ def fill_geodetic_datum(proj_db_cursor):
         raise Exception('Found unexpected datum_type in epsg_datum: %s' % str(res))
 
     proj_db_cursor.execute(
-        "INSERT INTO geodetic_datum SELECT ?, datum_code, datum_name, NULL, NULL, ?, ellipsoid_code, ?, prime_meridian_code, ?, area_of_use_code, deprecated FROM epsg.epsg_datum WHERE datum_type = 'geodetic'", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+        "INSERT INTO geodetic_datum SELECT ?, datum_code, datum_name, NULL, NULL, ?, ellipsoid_code, ?, prime_meridian_code, ?, area_of_use_code, CASE WHEN realization_epoch = '' THEN NULL ELSE realization_epoch END, deprecated FROM epsg.epsg_datum WHERE datum_type = 'geodetic'", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 
 def fill_vertical_datum(proj_db_cursor):
     proj_db_cursor.execute(
-        "INSERT INTO vertical_datum SELECT ?, datum_code, datum_name, NULL, NULL, ?, area_of_use_code, deprecated FROM epsg.epsg_datum WHERE datum_type = 'vertical'", (EPSG_AUTHORITY,EPSG_AUTHORITY))
+        "INSERT INTO vertical_datum SELECT ?, datum_code, datum_name, NULL, NULL, ?, area_of_use_code, CASE WHEN realization_epoch = '' THEN NULL ELSE realization_epoch END, deprecated FROM epsg.epsg_datum WHERE datum_type = 'vertical'", (EPSG_AUTHORITY,EPSG_AUTHORITY))
 
 
 def fill_coordinate_system(proj_db_cursor):

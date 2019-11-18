@@ -560,7 +560,7 @@ def import_geogcs():
 
                         p = map_datum_esri_to_parameters[datum_code]
 
-                        sql = """INSERT INTO "geodetic_datum" VALUES('ESRI','%s','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',%d);""" % (
+                        sql = """INSERT INTO "geodetic_datum" VALUES('ESRI','%s','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
                             datum_code, p['esri_name'], p['description'], p['ellps_auth_name'], p['ellps_code'], pm_auth_name, pm_code, area_auth_name, area_code, p['deprecated'])
                         all_sql.append(sql)
                         p['pm_auth_name'] = pm_auth_name
@@ -589,7 +589,7 @@ def import_geogcs():
                                 'deprecated': p['deprecated']
                             }
 
-                            sql = """INSERT INTO "geodetic_datum" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s','%s',%d);""" % (
+                            sql = """INSERT INTO "geodetic_datum" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
                                 datum_code, p['esri_name'], p['description'], p['ellps_auth_name'], p['ellps_code'], pm_auth_name, pm_code, area_auth_name, area_code, p['deprecated'])
                             all_sql.append(sql)
                             p['pm_auth_name'] = pm_auth_name
@@ -1198,7 +1198,7 @@ def import_vertcs():
                         datum_written.add(datum_code)
 
                         p = map_vdatum_esri_to_parameters[datum_code]
-                        sql = """INSERT INTO "vertical_datum" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s',%d);""" % (
+                        sql = """INSERT INTO "vertical_datum" VALUES('ESRI','%s','%s',NULL,NULL,'%s','%s',NULL,%d);""" % (
                             datum_code, p['esri_name'], area_auth_name, area_code, p['deprecated'])
                         all_sql.append(sql)
 

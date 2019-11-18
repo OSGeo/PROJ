@@ -1414,11 +1414,11 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_datum "
                     "VALUES('EPSG','6326','World Geodetic System 1984','',NULL,"
-                    "'EPSG','7030','EPSG','8901','EPSG','1262',0);"))
+                    "'EPSG','7030','EPSG','8901','EPSG','1262',NULL,0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO vertical_datum VALUES('EPSG','1027','EGM2008 "
-                    "geoid',NULL,NULL,'EPSG','1262',0);"))
+                    "geoid',NULL,NULL,'EPSG','1262',NULL,0);"))
             << last_error();
         ASSERT_TRUE(execute("INSERT INTO coordinate_system "
                             "VALUES('EPSG','6422','ellipsoidal',2);"))
@@ -1570,7 +1570,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                         "VALUES('FOO','" +
                         val + "','" + val +
                         "','',NULL,"
-                        "'EPSG','7030','EPSG','8901','EPSG','1262',0);"))
+                        "'EPSG','7030','EPSG','8901','EPSG','1262',NULL,0);"))
                 << last_error();
             ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
                                 "VALUES('NS_" +

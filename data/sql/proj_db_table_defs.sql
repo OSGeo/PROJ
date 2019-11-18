@@ -108,6 +108,7 @@ CREATE TABLE geodetic_datum (
     prime_meridian_code TEXT NOT NULL,
     area_of_use_auth_name TEXT NOT NULL,
     area_of_use_code TEXT NOT NULL,
+    publication_date TEXT, --- YYYY-MM-DD format
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_datum_ellipsoid FOREIGN KEY (ellipsoid_auth_name, ellipsoid_code) REFERENCES ellipsoid(auth_name, code),
@@ -134,6 +135,7 @@ CREATE TABLE vertical_datum (
     scope TEXT,
     area_of_use_auth_name TEXT NOT NULL,
     area_of_use_code TEXT NOT NULL,
+    publication_date TEXT CHECK (NULL OR length(publication_date) = 10), --- YYYY-MM-DD format
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_vertical_datum_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
