@@ -592,9 +592,7 @@ static GeodeticCRSNNPtr createGeocentricDatumWGS84() {
 
 static GeodeticCRSNNPtr createGeocentricKM() {
     PropertyMap propertiesCRS;
-    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
-        .set(Identifier::CODE_KEY, 4328)
-        .set(IdentifiedObject::NAME_KEY, "WGS 84");
+    propertiesCRS.set(IdentifiedObject::NAME_KEY, "Based on WGS 84");
     return GeodeticCRS::create(
         propertiesCRS, GeodeticReferenceFrame::EPSG_6326,
         CartesianCS::createGeocentric(
@@ -5077,16 +5075,38 @@ TEST(operation, geogCRS_to_geocentricCRS_different_datum) {
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, geocentricCRS_to_geocentricCRS_noop) {
+TEST(operation, geocentricCRS_to_geocentricCRS_same_noop) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
         createGeocentricDatumWGS84(), createGeocentricDatumWGS84());
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->nameStr(),
-              "Ballpark geocentric translation from WGS 84 to WGS 84");
+              "Null geocentric translation from WGS 84 to WGS 84");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=noop");
     EXPECT_EQ(op->inverse()->nameStr(), op->nameStr());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geocentricCRS_to_geocentricCRS_different_ballpark) {
+
+    PropertyMap propertiesCRS;
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 4328)
+        .set(IdentifiedObject::NAME_KEY, "unknown");
+    auto otherGeocentricCRS = GeodeticCRS::create(
+        propertiesCRS, GeodeticReferenceFrame::EPSG_6269,
+        CartesianCS::createGeocentric(UnitOfMeasure::METRE));
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        createGeocentricKM(), otherGeocentricCRS);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(
+        op->nameStr(),
+        "Ballpark geocentric translation from Based on WGS 84 to unknown");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=unitconvert +xy_in=km +z_in=km +xy_out=m +z_out=m");
 }
 
 // ---------------------------------------------------------------------------

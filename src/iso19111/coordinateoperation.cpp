@@ -115,6 +115,7 @@ static const std::string INVERSE_OF = "Inverse of ";
 static const char *BALLPARK_GEOCENTRIC_TRANSLATION =
     "Ballpark geocentric translation";
 static const char *NULL_GEOGRAPHIC_OFFSET = "Null geographic offset";
+static const char *NULL_GEOCENTRIC_TRANSLATION = "Null geocentric translation";
 static const char *BALLPARK_GEOGRAPHIC_OFFSET = "Ballpark geographic offset";
 static const char *BALLPARK_VERTICAL_TRANSFORMATION_PREFIX =
     " (ballpark vertical transformation";
@@ -7587,6 +7588,8 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
         opType = BALLPARK_GEOGRAPHIC_OFFSET;
     } else if (starts_with(forwardName, NULL_GEOGRAPHIC_OFFSET)) {
         opType = NULL_GEOGRAPHIC_OFFSET;
+    } else if (starts_with(forwardName, NULL_GEOCENTRIC_TRANSLATION)) {
+        opType = NULL_GEOCENTRIC_TRANSLATION;
     } else if (dynamic_cast<const Transformation *>(op) ||
                starts_with(forwardName, "Transformation from ")) {
         opType = "Transformation";
@@ -11049,6 +11052,8 @@ struct FilterResults {
                     std::string::npos ||
                 op->nameStr().find(NULL_GEOGRAPHIC_OFFSET) !=
                     std::string::npos ||
+                op->nameStr().find(NULL_GEOCENTRIC_TRANSLATION) !=
+                    std::string::npos ||
                 op->nameStr().find(BALLPARK_GEOCENTRIC_TRANSLATION) !=
                     std::string::npos;
 
@@ -11114,6 +11119,7 @@ struct FilterResults {
             const std::string &name = res.back()->nameStr();
             if (name.find(BALLPARK_GEOGRAPHIC_OFFSET) != std::string::npos ||
                 name.find(NULL_GEOGRAPHIC_OFFSET) != std::string::npos ||
+                name.find(NULL_GEOCENTRIC_TRANSLATION) != std::string::npos ||
                 name.find(BALLPARK_GEOCENTRIC_TRANSLATION) !=
                     std::string::npos) {
                 std::vector<CoordinateOperationNNPtr> resTemp;
@@ -12224,7 +12230,8 @@ static bool isNullTransformation(const std::string &name) {
 
     return starts_with(name, BALLPARK_GEOCENTRIC_TRANSLATION) ||
            starts_with(name, BALLPARK_GEOGRAPHIC_OFFSET) ||
-           starts_with(name, NULL_GEOGRAPHIC_OFFSET);
+           starts_with(name, NULL_GEOGRAPHIC_OFFSET) ||
+           starts_with(name, NULL_GEOCENTRIC_TRANSLATION);
 }
 
 // ---------------------------------------------------------------------------
@@ -13170,15 +13177,40 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
             res.emplace_back(ConcatenatedOperation::createComputeMetadata(
                 {opFirst, opSecond}, !allowEmptyIntersection));
         } else {
-            res = applyInverse(createOperations(targetCRS, sourceCRS, context));
+            // Apply previous case in reverse way
+            std::vector<CoordinateOperationNNPtr> resTmp;
+            createOperationsGeodToGeod(targetCRS, sourceCRS, context, geodDst,
+                                       geodSrc, resTmp);
+            assert(resTmp.size() == 1);
+            res.emplace_back(resTmp.front()->inverse());
         }
 
         return;
     }
 
     if (isSrcGeocentric && isTargetGeocentric) {
-        res.emplace_back(
-            createBallparkGeocentricTranslation(sourceCRS, targetCRS));
+        if (sourceCRS->_isEquivalentTo(
+                targetCRS.get(), util::IComparable::Criterion::EQUIVALENT) ||
+            (geodSrc->datum() != nullptr && geodDst->datum() != nullptr &&
+             geodSrc->datum()->_isEquivalentTo(
+                 geodDst->datum().get(),
+                 util::IComparable::Criterion::EQUIVALENT))) {
+            std::string name(NULL_GEOCENTRIC_TRANSLATION);
+            name += " from ";
+            name += sourceCRS->nameStr();
+            name += " to ";
+            name += targetCRS->nameStr();
+            res.emplace_back(Transformation::createGeocentricTranslations(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY, name)
+                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                         metadata::Extent::WORLD),
+                sourceCRS, targetCRS, 0.0, 0.0, 0.0,
+                {metadata::PositionalAccuracy::create("0")}));
+        } else {
+            res.emplace_back(
+                createBallparkGeocentricTranslation(sourceCRS, targetCRS));
+        }
         return;
     }
 
