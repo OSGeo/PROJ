@@ -533,23 +533,31 @@ struct PJconsts {
         double maxyDst = 0.0;
         PJ* pj = nullptr;
         std::string name{};
+        double accuracy = -1.0;
+        bool isOffshore = false;
 
         CoordOperation(double minxSrcIn, double minySrcIn, double maxxSrcIn, double maxySrcIn,
                        double minxDstIn, double minyDstIn, double maxxDstIn, double maxyDstIn,
-                       PJ* pjIn, const std::string& nameIn):
+                       PJ* pjIn, const std::string& nameIn, double accuracyIn, bool isOffshoreIn):
             minxSrc(minxSrcIn), minySrc(minySrcIn), maxxSrc(maxxSrcIn), maxySrc(maxySrcIn),
             minxDst(minxDstIn), minyDst(minyDstIn), maxxDst(maxxDstIn), maxyDst(maxyDstIn),
-            pj(pjIn), name(nameIn) {}
+            pj(pjIn), name(nameIn),
+            accuracy(accuracyIn),
+            isOffshore(isOffshoreIn)
+        {
+        }
 
         CoordOperation(const CoordOperation&) = delete;
 
         CoordOperation(CoordOperation&& other):
             minxSrc(other.minxSrc), minySrc(other.minySrc), maxxSrc(other.maxxSrc), maxySrc(other.maxySrc),
             minxDst(other.minxDst), minyDst(other.minyDst), maxxDst(other.maxxDst), maxyDst(other.maxyDst),
-            name(std::move(other.name)) {
-                pj = other.pj;
-                other.pj = nullptr;
-            }
+            name(std::move(other.name)),
+            accuracy(other.accuracy),
+            isOffshore(other.isOffshore) {
+            pj = other.pj;
+            other.pj = nullptr;
+        }
 
         CoordOperation& operator=(const CoordOperation&) = delete;
 

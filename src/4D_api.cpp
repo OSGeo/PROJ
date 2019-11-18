@@ -193,38 +193,56 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
         direction = opposite_direction(direction);
 
     if( !P->alternativeCoordinateOperations.empty() ) {
-        // Do a first pass and select the first coordinate operation whose area
-        // of use is compatible with the input coordinate
+        // Do a first pass and select the operations that match the area of use
+        // and has the best accuracy.
+        int iBest = -1;
+        double bestAccuracy = std::numeric_limits<double>::max();
         int i = 0;
         for( const auto &alt: P->alternativeCoordinateOperations ) {
+            bool spatialCriterionOK = false;
             if( direction == PJ_FWD ) {
                 if( coord.xyzt.x >= alt.minxSrc &&
                     coord.xyzt.y >= alt.minySrc &&
                     coord.xyzt.x <= alt.maxxSrc &&
-                    coord.xyzt.y <= alt.maxySrc ) {
-                    if( P->iCurCoordOp != i ) {
-                        std::string msg("Using coordinate operation ");
-                        msg += alt.name;
-                        pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
-                        P->iCurCoordOp = i;
-                    }
-                    return pj_fwd4d( coord, alt.pj );
+                    coord.xyzt.y <= alt.maxySrc) {
+                    spatialCriterionOK = true;
                 }
             } else {
                 if( coord.xyzt.x >= alt.minxDst &&
                     coord.xyzt.y >= alt.minyDst &&
                     coord.xyzt.x <= alt.maxxDst &&
                     coord.xyzt.y <= alt.maxyDst ) {
-                    if( P->iCurCoordOp != i ) {
-                        std::string msg("Using coordinate operation ");
-                        msg += alt.name;
-                        pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
-                        P->iCurCoordOp = i;
-                    }
-                    return pj_inv4d( coord, alt.pj );
+                    spatialCriterionOK = true;
                 }
             }
+
+            if( spatialCriterionOK ) {
+                // The offshore test is for the "Test bug 245 (use +datum=carthage)"
+                // of testvarious. The long=10 lat=34 point belongs both to the
+                // onshore and offshore Tunisia area of uses, but is slightly
+                // onshore. So in a general way, prefer a onshore area to a
+                // offshore one.
+                if( iBest < 0 ||
+                    (alt.accuracy >= 0 && alt.accuracy < bestAccuracy &&
+                    !alt.isOffshore) ) {
+                    iBest = i;
+                    bestAccuracy = alt.accuracy;
+                }
+            }
+
             i ++;
+        }
+
+        if( iBest >= 0 ) {
+            const auto& alt = P->alternativeCoordinateOperations[iBest];
+            if( P->iCurCoordOp != iBest ) {
+                std::string msg("Using coordinate operation ");
+                msg += alt.name;
+                pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
+                P->iCurCoordOp = iBest;
+            }
+            return direction == PJ_FWD ?
+                        pj_fwd4d( coord, alt.pj ) : pj_inv4d( coord, alt.pj );
         }
 
         // In case we did not find an operation whose area of use is compatible
@@ -919,6 +937,7 @@ static PJ* add_coord_op_to_list(PJ* op,
                             double east_lon, double north_lat,
                             PJ* pjGeogToSrc,
                             PJ* pjGeogToDst,
+                            bool isOffshore,
                             std::vector<PJconsts::CoordOperation>& altCoordOps) {
 /*****************************************************************************/
 
@@ -940,9 +959,11 @@ static PJ* add_coord_op_to_list(PJ* op,
     {
         const char* c_name = proj_get_name(op);
         std::string name(c_name ? c_name : "");
+
+        const double accuracy = proj_coordoperation_get_accuracy(op->ctx, op);
         altCoordOps.emplace_back(minxSrc, minySrc, maxxSrc, maxySrc,
                                     minxDst, minyDst, maxxDst, maxyDst,
-                                    op, name);
+                                    op, name, accuracy, isOffshore);
         op = nullptr;
     }
     return op;
@@ -1160,14 +1181,17 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
             double east_lon = 0.0;
             double north_lat = 0.0;
 
+            const char* areaName = nullptr;
             if( proj_get_area_of_use(ctx, op,
-                        &west_lon, &south_lat, &east_lon, &north_lat, nullptr) )
+                        &west_lon, &south_lat, &east_lon, &north_lat, &areaName) )
             {
+                const bool isOffshore =
+                    areaName && strstr(areaName, "offshore");
                 if( west_lon <= east_lon )
                 {
                     op = add_coord_op_to_list(op,
                         west_lon, south_lat, east_lon, north_lat,
-                        pjGeogToSrc, pjGeogToDst,
+                        pjGeogToSrc, pjGeogToDst, isOffshore,
                         P->alternativeCoordinateOperations);
                 }
                 else
@@ -1176,11 +1200,11 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
 
                     op = add_coord_op_to_list(op,
                         west_lon, south_lat, 180, north_lat,
-                        pjGeogToSrc, pjGeogToDst,
+                        pjGeogToSrc, pjGeogToDst, isOffshore,
                         P->alternativeCoordinateOperations);
                     op_clone = add_coord_op_to_list(op_clone,
                         -180, south_lat, east_lon, north_lat,
-                        pjGeogToSrc, pjGeogToDst,
+                        pjGeogToSrc, pjGeogToDst, isOffshore,
                         P->alternativeCoordinateOperations);
                     proj_destroy(op_clone);
                 }

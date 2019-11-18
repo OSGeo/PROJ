@@ -7642,7 +7642,7 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
                         minxSrc, minySrc, maxxSrc, maxySrc, minxDst, minyDst,
                         maxxDst, maxyDst,
                         pj_obj_create(ctx, co->normalizeForVisualization()),
-                        co->nameStr());
+                        co->nameStr(), alt.accuracy, alt.isOffshore);
                 }
             }
             return pjNew.release();
