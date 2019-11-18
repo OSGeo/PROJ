@@ -3886,11 +3886,45 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         joinArea +
         "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
         "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ");
+    std::string minDate;
+    std::string criterionOnIntermediateCRS;
     if (allowedIntermediateObjectType == ObjectType::GEOGRAPHIC_CRS) {
-        sql += "AND EXISTS(SELECT 1 FROM geodetic_crs x WHERE "
-               "x.auth_name = v1.target_crs_auth_name AND "
-               "x.code = v1.target_crs_code AND "
-               "x.type IN ('geographic 2D', 'geographic 3D')) ";
+        auto sourceCRS = d->createFactory(sourceCRSAuthName)
+                             ->createGeodeticCRS(sourceCRSCode);
+        auto targetCRS = d->createFactory(targetCRSAuthName)
+                             ->createGeodeticCRS(targetCRSCode);
+        const auto &sourceDatum = sourceCRS->datum();
+        const auto &targetDatum = targetCRS->datum();
+        if (sourceDatum && sourceDatum->publicationDate().has_value() &&
+            targetDatum && targetDatum->publicationDate().has_value()) {
+            const auto sourceDate(sourceDatum->publicationDate()->toString());
+            const auto targetDate(targetDatum->publicationDate()->toString());
+            minDate = std::min(sourceDate, targetDate);
+            // Check that the datum of the intermediateCRS has a publication
+            // date most recent that the one of the source and the target CRS
+            // Except when using the usual WGS84 pivot which happens to have a
+            // NULL publication date.
+            criterionOnIntermediateCRS =
+                "AND EXISTS(SELECT 1 FROM geodetic_crs x "
+                "JOIN geodetic_datum y "
+                "ON "
+                "y.auth_name = x.datum_auth_name AND "
+                "y.code = x.datum_code "
+                "WHERE "
+                "x.auth_name = v1.target_crs_auth_name AND "
+                "x.code = v1.target_crs_code AND "
+                "x.type IN ('geographic 2D', 'geographic 3D') AND "
+                "(y.publication_date IS NULL OR "
+                "(y.publication_date >= '" +
+                minDate + "'))) ";
+        } else {
+            criterionOnIntermediateCRS =
+                "AND EXISTS(SELECT 1 FROM geodetic_crs x WHERE "
+                "x.auth_name = v1.target_crs_auth_name AND "
+                "x.code = v1.target_crs_code AND "
+                "x.type IN ('geographic 2D', 'geographic 3D')) ";
+        }
+        sql += criterionOnIntermediateCRS;
     }
     auto params = ListOfParams{sourceCRSAuthName, sourceCRSCode,
                                targetCRSAuthName, targetCRSCode};
@@ -4049,10 +4083,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
           "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
     if (allowedIntermediateObjectType == ObjectType::GEOGRAPHIC_CRS) {
-        sql += "AND EXISTS(SELECT 1 FROM geodetic_crs x WHERE "
-               "x.auth_name = v1.target_crs_auth_name AND "
-               "x.code = v1.target_crs_code AND "
-               "x.type IN ('geographic 2D', 'geographic 3D')) ";
+        sql += criterionOnIntermediateCRS;
     }
     intermediateWhere =
         buildIntermediateWhere(intermediateCRSAuthCodes, "target", "target");
@@ -4096,10 +4127,28 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
           "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
           "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ";
     if (allowedIntermediateObjectType == ObjectType::GEOGRAPHIC_CRS) {
-        sql += "AND EXISTS(SELECT 1 FROM geodetic_crs x WHERE "
-               "x.auth_name = v1.source_crs_auth_name AND "
-               "x.code = v1.source_crs_code AND "
-               "x.type IN ('geographic 2D', 'geographic 3D')) ";
+        if (!minDate.empty()) {
+            criterionOnIntermediateCRS =
+                "AND EXISTS(SELECT 1 FROM geodetic_crs x "
+                "JOIN geodetic_datum y "
+                "ON "
+                "y.auth_name = x.datum_auth_name AND "
+                "y.code = x.datum_code "
+                "WHERE "
+                "x.auth_name = v1.source_crs_auth_name AND "
+                "x.code = v1.source_crs_code AND "
+                "x.type IN ('geographic 2D', 'geographic 3D') AND "
+                "(y.publication_date IS NULL OR "
+                "(y.publication_date >= '" +
+                minDate + "'))) ";
+        } else {
+            criterionOnIntermediateCRS =
+                "AND EXISTS(SELECT 1 FROM geodetic_crs x WHERE "
+                "x.auth_name = v1.source_crs_auth_name AND "
+                "x.code = v1.source_crs_code AND "
+                "x.type IN ('geographic 2D', 'geographic 3D')) ";
+        }
+        sql += criterionOnIntermediateCRS;
     }
     intermediateWhere =
         buildIntermediateWhere(intermediateCRSAuthCodes, "source", "source");
@@ -4143,10 +4192,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
           "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
     if (allowedIntermediateObjectType == ObjectType::GEOGRAPHIC_CRS) {
-        sql += "AND EXISTS(SELECT 1 FROM geodetic_crs x WHERE "
-               "x.auth_name = v1.source_crs_auth_name AND "
-               "x.code = v1.source_crs_code AND "
-               "x.type IN ('geographic 2D', 'geographic 3D')) ";
+        sql += criterionOnIntermediateCRS;
     }
     intermediateWhere =
         buildIntermediateWhere(intermediateCRSAuthCodes, "source", "target");

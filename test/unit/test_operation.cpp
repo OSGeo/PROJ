@@ -4783,6 +4783,27 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_ED50_to_WGS72_no_NTF_intermediate) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4230"), // ED50
+        authFactory->createCoordinateReferenceSystem("4322"), // WGS 72
+        ctxt);
+    ASSERT_GE(list.size(), 2U);
+    // We should not use the ancient NTF as an intermediate when looking for
+    // ED50 -> WGS 72 operations.
+    for (const auto &op : list) {
+        EXPECT_TRUE(op->nameStr().find("NTF") == std::string::npos)
+            << op->nameStr();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS_context_same_grid_name) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
