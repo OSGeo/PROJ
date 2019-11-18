@@ -200,6 +200,19 @@ void Datum::setAnchor(const util::optional<std::string> &anchor) {
 
 // ---------------------------------------------------------------------------
 
+void Datum::setProperties(
+    const util::PropertyMap &properties) // throw(InvalidValueTypeException)
+{
+    std::string publicationDate;
+    properties.getStringValue("PUBLICATION_DATE", publicationDate);
+    if (!publicationDate.empty()) {
+        d->publicationDate = common::DateTime::create(publicationDate);
+    }
+    ObjectUsage::setProperties(properties);
+}
+
+// ---------------------------------------------------------------------------
+
 bool Datum::__isEquivalentTo(const util::IComparable *other,
                              util::IComparable::Criterion criterion) const {
     auto otherDatum = dynamic_cast<const Datum *>(other);

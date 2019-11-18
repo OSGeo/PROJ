@@ -251,6 +251,17 @@ TEST(factory, AuthorityFactory_createGeodeticDatum) {
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
     EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
+    EXPECT_FALSE(grf->publicationDate().has_value());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createGeodeticDatum_with_publication_date) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    //'World Geodetic System 1984 (G1762)
+    auto grf = factory->createGeodeticDatum("1156");
+    EXPECT_TRUE(grf->publicationDate().has_value());
+    EXPECT_EQ(grf->publicationDate()->toString(), "2005-01-01");
 }
 
 // ---------------------------------------------------------------------------

@@ -89,6 +89,10 @@ class PROJ_GCC_DLL Datum : public common::ObjectUsage,
   protected:
     PROJ_INTERNAL void setAnchor(const util::optional<std::string> &anchor);
 
+    PROJ_INTERNAL void
+    setProperties(const util::PropertyMap
+                      &properties); // throw(InvalidValueTypeException)
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
     Datum &operator=(const Datum &other) = delete;

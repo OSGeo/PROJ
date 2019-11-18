@@ -1887,7 +1887,8 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
     auto res = d->runWithCodeParam(
         "SELECT name, ellipsoid_auth_name, ellipsoid_code, "
         "prime_meridian_auth_name, prime_meridian_code, area_of_use_auth_name, "
-        "area_of_use_code, deprecated FROM geodetic_datum WHERE "
+        "area_of_use_code, publication_date, deprecated FROM geodetic_datum "
+        "WHERE "
         "auth_name = ? AND code = ?",
         code);
     if (res.empty()) {
@@ -1903,7 +1904,8 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
         const auto &prime_meridian_code = row[4];
         const auto &area_of_use_auth_name = row[5];
         const auto &area_of_use_code = row[6];
-        const bool deprecated = row[7] == "1";
+        const auto &publication_date = row[7];
+        const bool deprecated = row[8] == "1";
         auto ellipsoid = d->createFactory(ellipsoid_auth_name)
                              ->createEllipsoid(ellipsoid_code);
         auto pm = d->createFactory(prime_meridian_auth_name)
@@ -1911,6 +1913,9 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
         auto props = d->createProperties(
             code, name, deprecated, area_of_use_auth_name, area_of_use_code);
         auto anchor = util::optional<std::string>();
+        if (!publication_date.empty()) {
+            props.set("PUBLICATION_DATE", publication_date);
+        }
         auto datum =
             datum::GeodeticReferenceFrame::create(props, ellipsoid, anchor, pm);
         d->context()->d->cache(cacheKey, datum);

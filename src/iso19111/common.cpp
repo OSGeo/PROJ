@@ -552,6 +552,15 @@ DateTime::DateTime(const DateTime &other)
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+DateTime &DateTime::operator=(const DateTime &other) {
+    d->str_ = other.d->str_;
+    return *this;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 DateTime::~DateTime() = default;
 //! @endcond
 

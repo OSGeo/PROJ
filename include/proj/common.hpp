@@ -253,10 +253,10 @@ class DateTime {
   protected:
     DateTime();
     PROJ_FRIEND_OPTIONAL(DateTime);
+    DateTime &operator=(const DateTime &other);
 
   private:
     explicit DateTime(const std::string &str);
-    DateTime &operator=(const DateTime &other) = delete;
 
     PROJ_OPAQUE_PRIVATE_DATA
 };
