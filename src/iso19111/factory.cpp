@@ -3691,32 +3691,6 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static std::string
-buildIntermediateWhere(const std::vector<std::pair<std::string, std::string>>
-                           &intermediateCRSAuthCodes,
-                       const std::string &first_field,
-                       const std::string &second_field) {
-    if (intermediateCRSAuthCodes.empty()) {
-        return std::string();
-    }
-    std::string sql(" AND (");
-    for (size_t i = 0; i < intermediateCRSAuthCodes.size(); ++i) {
-        if (i > 0) {
-            sql += " OR";
-        }
-        sql += "(v1." + first_field + "_crs_auth_name = ? AND ";
-        sql += "v1." + first_field + "_crs_code = ? AND ";
-        sql += "v2." + second_field + "_crs_auth_name = ? AND ";
-        sql += "v2." + second_field + "_crs_code = ?) ";
-    }
-    sql += ")";
-    return sql;
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
 static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
                                const std::string &sourceCRSAuthName,
                                const std::string &sourceCRSCode,
@@ -3990,8 +3964,27 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
             }
         }
     }
-    std::string intermediateWhere =
-        buildIntermediateWhere(intermediateCRSAuthCodes, "target", "source");
+
+    const auto buildIntermediateWhere = [&intermediateCRSAuthCodes](
+        const std::string &first_field, const std::string &second_field) {
+        if (intermediateCRSAuthCodes.empty()) {
+            return std::string();
+        }
+        std::string l_sql(" AND (");
+        for (size_t i = 0; i < intermediateCRSAuthCodes.size(); ++i) {
+            if (i > 0) {
+                l_sql += " OR";
+            }
+            l_sql += "(v1." + first_field + "_crs_auth_name = ? AND ";
+            l_sql += "v1." + first_field + "_crs_code = ? AND ";
+            l_sql += "v2." + second_field + "_crs_auth_name = ? AND ";
+            l_sql += "v2." + second_field + "_crs_code = ?) ";
+        }
+        l_sql += ')';
+        return l_sql;
+    };
+
+    std::string intermediateWhere = buildIntermediateWhere("target", "source");
     for (const auto &pair : intermediateCRSAuthCodes) {
         params.emplace_back(pair.first);
         params.emplace_back(pair.second);
@@ -4085,8 +4078,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     if (allowedIntermediateObjectType == ObjectType::GEOGRAPHIC_CRS) {
         sql += criterionOnIntermediateCRS;
     }
-    intermediateWhere =
-        buildIntermediateWhere(intermediateCRSAuthCodes, "target", "target");
+    intermediateWhere = buildIntermediateWhere("target", "target");
     res = d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
     if (discardSuperseded) {
         res = filterOutSuperseded(std::move(res));
@@ -4150,8 +4142,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         }
         sql += criterionOnIntermediateCRS;
     }
-    intermediateWhere =
-        buildIntermediateWhere(intermediateCRSAuthCodes, "source", "source");
+    intermediateWhere = buildIntermediateWhere("source", "source");
     res = d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
     if (discardSuperseded) {
         res = filterOutSuperseded(std::move(res));
@@ -4194,8 +4185,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     if (allowedIntermediateObjectType == ObjectType::GEOGRAPHIC_CRS) {
         sql += criterionOnIntermediateCRS;
     }
-    intermediateWhere =
-        buildIntermediateWhere(intermediateCRSAuthCodes, "source", "target");
+    intermediateWhere = buildIntermediateWhere("source", "target");
     res = d->run(sql + additionalWhere + intermediateWhere + orderBy, params);
     if (discardSuperseded) {
         res = filterOutSuperseded(std::move(res));
@@ -4238,6 +4228,609 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
     return list;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+std::vector<operation::CoordinateOperationNNPtr>
+AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
+    const crs::CRSNNPtr &sourceCRS, const std::string &sourceCRSAuthName,
+    const std::string &sourceCRSCode, const crs::CRSNNPtr &targetCRS,
+    const std::string &targetCRSAuthName, const std::string &targetCRSCode,
+    bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+    bool discardSuperseded, const std::vector<std::string> &allowedAuthorities,
+    const metadata::ExtentPtr &intersectingExtent1,
+    const metadata::ExtentPtr &intersectingExtent2) const {
+
+    std::vector<operation::CoordinateOperationNNPtr> listTmp;
+
+    if (sourceCRSAuthName == targetCRSAuthName &&
+        sourceCRSCode == targetCRSCode) {
+        return listTmp;
+    }
+
+    std::string minDate;
+    const auto &sourceDatum =
+        dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get())->datum();
+    const auto &targetDatum =
+        dynamic_cast<crs::GeodeticCRS *>(targetCRS.get())->datum();
+    if (sourceDatum && sourceDatum->publicationDate().has_value() &&
+        targetDatum && targetDatum->publicationDate().has_value()) {
+        const auto sourceDate(sourceDatum->publicationDate()->toString());
+        const auto targetDate(targetDatum->publicationDate()->toString());
+        minDate = std::min(sourceDate, targetDate);
+    }
+
+    // For some reason, filtering on v1.deprecated and v2.deprecated kills
+    // performance
+    std::string sqlProlog("SELECT v1.table_name as table1, "
+                          "v1.auth_name AS auth_name1, v1.code AS code1, "
+                          "v1.deprecated AS deprecated1, "
+                          "v2.table_name as table2, "
+                          "v2.auth_name AS auth_name2, v2.code AS code2, "
+                          "v2.deprecated AS deprecated2, "
+                          "a1.south_lat AS south_lat1, "
+                          "a1.west_lon AS west_lon1, "
+                          "a1.north_lat AS north_lat1, "
+                          "a1.east_lon AS east_lon1, "
+                          "a2.south_lat AS south_lat2, "
+                          "a2.west_lon AS west_lon2, "
+                          "a2.north_lat AS north_lat2, "
+                          "a2.east_lon AS east_lon2 ");
+    if (discardSuperseded) {
+        sqlProlog += ", ss1.replacement_auth_name AS replacement_auth_name1, "
+                     "ss1.replacement_code AS replacement_code1, "
+                     "ss2.replacement_auth_name AS replacement_auth_name2, "
+                     "ss2.replacement_code AS replacement_code2 ";
+    }
+    sqlProlog += "FROM coordinate_operation_view v1 "
+                 "JOIN coordinate_operation_view v2 "
+                 "JOIN geodetic_crs g_source "
+                 "JOIN geodetic_crs g_v1s "
+                 "JOIN geodetic_crs g_v1t "
+                 "JOIN geodetic_crs g_v2s "
+                 "JOIN geodetic_crs g_v2t "
+                 "JOIN geodetic_crs g_target "
+                 "ON g_v1s.auth_name = v1.source_crs_auth_name "
+                 "AND g_v1s.code = v1.source_crs_code "
+                 "AND g_v1t.auth_name = v1.target_crs_auth_name "
+                 "AND g_v1t.code = v1.target_crs_code "
+                 "AND g_v2s.auth_name = v2.source_crs_auth_name "
+                 "AND g_v2s.code = v2.source_crs_code "
+                 "AND g_v2t.auth_name = v2.target_crs_auth_name "
+                 "AND g_v2t.code = v2.target_crs_code ";
+
+    const std::string joinSupersession(
+        "LEFT JOIN supersession ss1 ON "
+        "ss1.superseded_table_name = v1.table_name AND "
+        "ss1.superseded_auth_name = v1.auth_name AND "
+        "ss1.superseded_code = v1.code AND "
+        "ss1.superseded_table_name = ss1.replacement_table_name "
+        "LEFT JOIN supersession ss2 ON "
+        "ss2.superseded_table_name = v2.table_name AND "
+        "ss2.superseded_auth_name = v2.auth_name AND "
+        "ss2.superseded_code = v2.code AND "
+        "ss2.superseded_table_name = ss2.replacement_table_name ");
+    const std::string joinArea(
+        (discardSuperseded ? joinSupersession : std::string()) +
+        "JOIN area a1 ON v1.area_of_use_auth_name = a1.auth_name "
+        "AND v1.area_of_use_code = a1.code "
+        "JOIN area a2 ON v2.area_of_use_auth_name = a2.auth_name "
+        "AND v2.area_of_use_code = a2.code ");
+
+    auto params = ListOfParams{sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode};
+
+    std::string additionalWhere(joinArea);
+    additionalWhere +=
+        "WHERE g_source.auth_name = ? AND g_source.code = ? "
+        "AND g_target.auth_name = ? AND g_target.code = ? "
+        "AND intersects_bbox(south_lat1, west_lon1, north_lat1, east_lon1, "
+        "south_lat2, west_lon2, north_lat2, east_lon2) = 1 ";
+
+    if (!allowedAuthorities.empty()) {
+        additionalWhere += "AND v1.auth_name IN (";
+        for (size_t i = 0; i < allowedAuthorities.size(); i++) {
+            if (i > 0)
+                additionalWhere += ',';
+            additionalWhere += '?';
+        }
+        additionalWhere += ") AND v2.auth_name IN (";
+        for (size_t i = 0; i < allowedAuthorities.size(); i++) {
+            if (i > 0)
+                additionalWhere += ',';
+            additionalWhere += '?';
+        }
+        additionalWhere += ')';
+        for (const auto &allowedAuthority : allowedAuthorities) {
+            params.emplace_back(allowedAuthority);
+        }
+        for (const auto &allowedAuthority : allowedAuthorities) {
+            params.emplace_back(allowedAuthority);
+        }
+    }
+    if (d->hasAuthorityRestriction()) {
+        additionalWhere += "AND v1.auth_name = ? AND v2.auth_name = ? ";
+        params.emplace_back(d->authority());
+        params.emplace_back(d->authority());
+    }
+    for (const auto &extent : {intersectingExtent1, intersectingExtent2}) {
+        if (extent) {
+            const auto &geogExtent = extent->geographicElements();
+            if (geogExtent.size() == 1) {
+                auto bbox =
+                    dynamic_cast<const metadata::GeographicBoundingBox *>(
+                        geogExtent[0].get());
+                if (bbox) {
+                    const double south_lat = bbox->southBoundLatitude();
+                    const double west_lon = bbox->westBoundLongitude();
+                    const double north_lat = bbox->northBoundLatitude();
+                    const double east_lon = bbox->eastBoundLongitude();
+                    if (south_lat != -90.0 || west_lon != -180.0 ||
+                        north_lat != 90.0 || east_lon != 180.0) {
+                        additionalWhere +=
+                            "AND intersects_bbox(south_lat1, "
+                            "west_lon1, north_lat1, east_lon1, ?, ?, ?, ?) AND "
+                            "intersects_bbox(south_lat2, west_lon2, "
+                            "north_lat2, east_lon2, ?, ?, ?, ?) ";
+                        params.emplace_back(south_lat);
+                        params.emplace_back(west_lon);
+                        params.emplace_back(north_lat);
+                        params.emplace_back(east_lon);
+                        params.emplace_back(south_lat);
+                        params.emplace_back(west_lon);
+                        params.emplace_back(north_lat);
+                        params.emplace_back(east_lon);
+                    }
+                }
+            }
+        }
+    }
+
+    // Case (source->intermediate) and (intermediate->target)
+    std::string sql(sqlProlog +
+                    "AND g_v1t.datum_auth_name = g_v2s.datum_auth_name "
+                    "AND g_v1t.datum_code = g_v2s.datum_code "
+                    "AND g_v1s.datum_auth_name = g_source.datum_auth_name "
+                    "AND g_v1s.datum_code = g_source.datum_code "
+                    "AND g_v2t.datum_auth_name = g_target.datum_auth_name "
+                    "AND g_v2t.datum_code = g_target.datum_code ");
+
+    if (!minDate.empty()) {
+        sql += "AND EXISTS(SELECT 1 FROM geodetic_datum y "
+               "WHERE "
+               "y.auth_name = g_v1t.datum_auth_name AND "
+               "y.code = g_v1t.datum_code AND "
+               "(y.publication_date IS NULL OR "
+               "(y.publication_date >= '" +
+               minDate + "'))) ";
+    }
+
+    // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
+    auto res = d->run(sql + additionalWhere, params);
+    // fprintf(stderr, "after\n");
+
+    const auto filterOutSuperseded = [](SQLResultSet &&resultSet) {
+        std::set<std::pair<std::string, std::string>> setTransf1;
+        std::set<std::pair<std::string, std::string>> setTransf2;
+        for (const auto &row : resultSet) {
+            // table1
+            const auto &auth_name1 = row[1];
+            const auto &code1 = row[2];
+            const auto &deprecated1 = row[3];
+            // table2
+            const auto &auth_name2 = row[5];
+            const auto &code2 = row[6];
+            const auto &deprecated2 = row[7];
+            if (deprecated1 == "1" || deprecated2 == "1") {
+                continue;
+            }
+            setTransf1.insert(
+                std::pair<std::string, std::string>(auth_name1, code1));
+            setTransf2.insert(
+                std::pair<std::string, std::string>(auth_name2, code2));
+        }
+        SQLResultSet filteredResultSet;
+        for (const auto &row : resultSet) {
+            const auto &replacement_auth_name1 = row[16];
+            const auto &replacement_code1 = row[17];
+            const auto &replacement_auth_name2 = row[18];
+            const auto &replacement_code2 = row[19];
+            if (!replacement_auth_name1.empty() &&
+                setTransf1.find(std::pair<std::string, std::string>(
+                    replacement_auth_name1, replacement_code1)) !=
+                    setTransf1.end()) {
+                // Skip transformations that are superseded by others that got
+                // returned in the result set.
+                continue;
+            }
+            if (!replacement_auth_name2.empty() &&
+                setTransf2.find(std::pair<std::string, std::string>(
+                    replacement_auth_name2, replacement_code2)) !=
+                    setTransf2.end()) {
+                // Skip transformations that are superseded by others that got
+                // returned in the result set.
+                continue;
+            }
+            filteredResultSet.emplace_back(row);
+        }
+        return filteredResultSet;
+    };
+
+    if (discardSuperseded) {
+        res = filterOutSuperseded(std::move(res));
+    }
+
+    auto opFactory = operation::CoordinateOperationFactory::create();
+
+    for (const auto &row : res) {
+        const auto &table1 = row[0];
+        const auto &auth_name1 = row[1];
+        const auto &code1 = row[2];
+        const auto &deprecated1 = row[3];
+        const auto &table2 = row[4];
+        const auto &auth_name2 = row[5];
+        const auto &code2 = row[6];
+        const auto &deprecated2 = row[7];
+        if (deprecated1 == "1" || deprecated2 == "1") {
+            continue;
+        }
+        auto op1 = d->createFactory(auth_name1)
+                       ->createCoordinateOperation(
+                           code1, true, usePROJAlternativeGridNames, table1);
+        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+        auto op2 = d->createFactory(auth_name2)
+                       ->createCoordinateOperation(
+                           code2, true, usePROJAlternativeGridNames, table2);
+        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+
+        const auto &op1Source = op1->sourceCRS();
+        const auto &op1Target = op1->targetCRS();
+        const auto &op2Source = op2->sourceCRS();
+        const auto &op2Target = op2->targetCRS();
+        if (op1Source && op1Target && op2Source && op2Target) {
+            std::vector<operation::CoordinateOperationNNPtr> steps;
+
+            if (!sourceCRS->isEquivalentTo(
+                    op1Source.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opFirst = opFactory->createOperation(
+                    sourceCRS, NN_NO_CHECK(op1Source));
+                assert(opFirst);
+                steps.emplace_back(NN_NO_CHECK(opFirst));
+            }
+
+            steps.emplace_back(op1);
+
+            if (!op1Target->isEquivalentTo(
+                    op2Source.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opMiddle = opFactory->createOperation(
+                    NN_NO_CHECK(op1Target), NN_NO_CHECK(op2Source));
+                assert(opMiddle);
+                steps.emplace_back(NN_NO_CHECK(opMiddle));
+            }
+
+            steps.emplace_back(op2);
+
+            if (!op2Target->isEquivalentTo(
+                    targetCRS.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opLast = opFactory->createOperation(NN_NO_CHECK(op2Target),
+                                                         targetCRS);
+                assert(opLast);
+                steps.emplace_back(NN_NO_CHECK(opLast));
+            }
+
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(steps,
+                                                                        false));
+        }
+    }
+
+    // Case (source->intermediate) and (target->intermediate)
+    sql = sqlProlog + "AND g_v1t.datum_auth_name = g_v2t.datum_auth_name "
+                      "AND g_v1t.datum_code = g_v2t.datum_code "
+                      "AND g_v1s.datum_auth_name = g_source.datum_auth_name "
+                      "AND g_v1s.datum_code = g_source.datum_code "
+                      "AND g_v2s.datum_auth_name = g_target.datum_auth_name "
+                      "AND g_v2s.datum_code = g_target.datum_code ";
+
+    if (!minDate.empty()) {
+        sql += "AND EXISTS(SELECT 1 FROM geodetic_datum y "
+               "WHERE "
+               "y.auth_name = g_v1t.datum_auth_name AND "
+               "y.code = g_v1t.datum_code AND "
+               "(y.publication_date IS NULL OR "
+               "(y.publication_date >= '" +
+               minDate + "'))) ";
+    }
+
+    // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
+    res = d->run(sql + additionalWhere, params);
+    // fprintf(stderr, "after\n");
+    if (discardSuperseded) {
+        res = filterOutSuperseded(std::move(res));
+    }
+    for (const auto &row : res) {
+        const auto &table1 = row[0];
+        const auto &auth_name1 = row[1];
+        const auto &code1 = row[2];
+        const auto &deprecated1 = row[3];
+        const auto &table2 = row[4];
+        const auto &auth_name2 = row[5];
+        const auto &code2 = row[6];
+        const auto &deprecated2 = row[7];
+        if (deprecated1 == "1" || deprecated2 == "1") {
+            continue;
+        }
+        auto op1 = d->createFactory(auth_name1)
+                       ->createCoordinateOperation(
+                           code1, true, usePROJAlternativeGridNames, table1);
+        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+        auto op2 = d->createFactory(auth_name2)
+                       ->createCoordinateOperation(
+                           code2, true, usePROJAlternativeGridNames, table2);
+        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+
+        const auto &op1Source = op1->sourceCRS();
+        const auto &op1Target = op1->targetCRS();
+        const auto &op2Source = op2->sourceCRS();
+        const auto &op2Target = op2->targetCRS();
+        if (op1Source && op1Target && op2Source && op2Target) {
+            std::vector<operation::CoordinateOperationNNPtr> steps;
+
+            if (!sourceCRS->isEquivalentTo(
+                    op1Source.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opFirst = opFactory->createOperation(
+                    sourceCRS, NN_NO_CHECK(op1Source));
+                assert(opFirst);
+                steps.emplace_back(NN_NO_CHECK(opFirst));
+            }
+
+            steps.emplace_back(op1);
+
+            if (!op1Target->isEquivalentTo(
+                    op2Target.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opMiddle = opFactory->createOperation(
+                    NN_NO_CHECK(op1Target), NN_NO_CHECK(op2Target));
+                assert(opMiddle);
+                steps.emplace_back(NN_NO_CHECK(opMiddle));
+            }
+
+            steps.emplace_back(op2->inverse());
+
+            if (!op2Source->isEquivalentTo(
+                    targetCRS.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opLast = opFactory->createOperation(NN_NO_CHECK(op2Source),
+                                                         targetCRS);
+                assert(opLast);
+                steps.emplace_back(NN_NO_CHECK(opLast));
+            }
+
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(steps,
+                                                                        false));
+        }
+    }
+
+    // Case (intermediate->source) and (intermediate->target)
+    sql = sqlProlog + "AND g_v1s.datum_auth_name = g_v2s.datum_auth_name "
+                      "AND g_v1s.datum_code = g_v2s.datum_code "
+                      "AND g_v1t.datum_auth_name = g_source.datum_auth_name "
+                      "AND g_v1t.datum_code = g_source.datum_code "
+                      "AND g_v2t.datum_auth_name = g_target.datum_auth_name "
+                      "AND g_v2t.datum_code = g_target.datum_code ";
+
+    if (!minDate.empty()) {
+        sql += "AND EXISTS(SELECT 1 FROM geodetic_datum y "
+               "WHERE "
+               "y.auth_name = g_v1s.datum_auth_name AND "
+               "y.code = g_v1s.datum_code AND "
+               "(y.publication_date IS NULL OR "
+               "(y.publication_date >= '" +
+               minDate + "'))) ";
+    }
+
+    // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
+    res = d->run(sql + additionalWhere, params);
+    // fprintf(stderr, "after\n");
+    if (discardSuperseded) {
+        res = filterOutSuperseded(std::move(res));
+    }
+    for (const auto &row : res) {
+        const auto &table1 = row[0];
+        const auto &auth_name1 = row[1];
+        const auto &code1 = row[2];
+        const auto &deprecated1 = row[3];
+        const auto &table2 = row[4];
+        const auto &auth_name2 = row[5];
+        const auto &code2 = row[6];
+        const auto &deprecated2 = row[7];
+        if (deprecated1 == "1" || deprecated2 == "1") {
+            continue;
+        }
+        auto op1 = d->createFactory(auth_name1)
+                       ->createCoordinateOperation(
+                           code1, true, usePROJAlternativeGridNames, table1);
+        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+        auto op2 = d->createFactory(auth_name2)
+                       ->createCoordinateOperation(
+                           code2, true, usePROJAlternativeGridNames, table2);
+        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+
+        const auto &op1Source = op1->sourceCRS();
+        const auto &op1Target = op1->targetCRS();
+        const auto &op2Source = op2->sourceCRS();
+        const auto &op2Target = op2->targetCRS();
+        if (op1Source && op1Target && op2Source && op2Target) {
+            std::vector<operation::CoordinateOperationNNPtr> steps;
+
+            if (!sourceCRS->isEquivalentTo(
+                    op1Target.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opFirst = opFactory->createOperation(
+                    sourceCRS, NN_NO_CHECK(op1Target));
+                assert(opFirst);
+                steps.emplace_back(NN_NO_CHECK(opFirst));
+            }
+
+            steps.emplace_back(op1->inverse());
+
+            if (!op1Source->isEquivalentTo(
+                    op2Source.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opMiddle = opFactory->createOperation(
+                    NN_NO_CHECK(op1Source), NN_NO_CHECK(op2Source));
+                assert(opMiddle);
+                steps.emplace_back(NN_NO_CHECK(opMiddle));
+            }
+
+            steps.emplace_back(op2);
+
+            if (!op2Target->isEquivalentTo(
+                    targetCRS.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opLast = opFactory->createOperation(NN_NO_CHECK(op2Target),
+                                                         targetCRS);
+                assert(opLast);
+                steps.emplace_back(NN_NO_CHECK(opLast));
+            }
+
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(steps,
+                                                                        false));
+        }
+    }
+
+    // Case (intermediate->source) and (target->intermediate)
+    sql = sqlProlog + "AND g_v1s.datum_auth_name = g_v2t.datum_auth_name "
+                      "AND g_v1s.datum_code = g_v2t.datum_code "
+                      "AND g_v1t.datum_auth_name = g_source.datum_auth_name "
+                      "AND g_v1t.datum_code = g_source.datum_code "
+                      "AND g_v2s.datum_auth_name = g_target.datum_auth_name "
+                      "AND g_v2s.datum_code = g_target.datum_code ";
+
+    if (!minDate.empty()) {
+        sql += "AND EXISTS(SELECT 1 FROM geodetic_datum y "
+               "WHERE "
+               "y.auth_name = g_v1s.datum_auth_name AND "
+               "y.code = g_v1s.datum_code AND "
+               "(y.publication_date IS NULL OR "
+               "(y.publication_date >= '" +
+               minDate + "'))) ";
+    }
+
+    // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
+    res = d->run(sql + additionalWhere, params);
+    // fprintf(stderr, "after\n");
+    if (discardSuperseded) {
+        res = filterOutSuperseded(std::move(res));
+    }
+    for (const auto &row : res) {
+        const auto &table1 = row[0];
+        const auto &auth_name1 = row[1];
+        const auto &code1 = row[2];
+        const auto &deprecated1 = row[3];
+        const auto &table2 = row[4];
+        const auto &auth_name2 = row[5];
+        const auto &code2 = row[6];
+        const auto &deprecated2 = row[7];
+        if (deprecated1 == "1" || deprecated2 == "1") {
+            continue;
+        }
+        auto op1 = d->createFactory(auth_name1)
+                       ->createCoordinateOperation(
+                           code1, true, usePROJAlternativeGridNames, table1);
+        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+        auto op2 = d->createFactory(auth_name2)
+                       ->createCoordinateOperation(
+                           code2, true, usePROJAlternativeGridNames, table2);
+        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
+                               targetCRSAuthName, targetCRSCode)) {
+            continue;
+        }
+
+        const auto &op1Source = op1->sourceCRS();
+        const auto &op1Target = op1->targetCRS();
+        const auto &op2Source = op2->sourceCRS();
+        const auto &op2Target = op2->targetCRS();
+        if (op1Source && op1Target && op2Source && op2Target) {
+            std::vector<operation::CoordinateOperationNNPtr> steps;
+
+            if (!sourceCRS->isEquivalentTo(
+                    op1Target.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opFirst = opFactory->createOperation(
+                    sourceCRS, NN_NO_CHECK(op1Target));
+                assert(opFirst);
+                steps.emplace_back(NN_NO_CHECK(opFirst));
+            }
+
+            steps.emplace_back(op1->inverse());
+
+            if (!op1Source->isEquivalentTo(
+                    op2Target.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opMiddle = opFactory->createOperation(
+                    NN_NO_CHECK(op1Source), NN_NO_CHECK(op2Target));
+                assert(opMiddle);
+                steps.emplace_back(NN_NO_CHECK(opMiddle));
+            }
+
+            steps.emplace_back(op2->inverse());
+
+            if (!op2Source->isEquivalentTo(
+                    targetCRS.get(),
+                    util::IComparable::Criterion::EQUIVALENT)) {
+                auto opLast = opFactory->createOperation(NN_NO_CHECK(op2Source),
+                                                         targetCRS);
+                assert(opLast);
+                steps.emplace_back(NN_NO_CHECK(opLast));
+            }
+
+            listTmp.emplace_back(
+                operation::ConcatenatedOperation::createComputeMetadata(steps,
+                                                                        false));
+        }
+    }
+
+    std::vector<operation::CoordinateOperationNNPtr> list;
+    for (const auto &op : listTmp) {
+        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+            list.emplace_back(op);
+        }
+    }
+
+    return list;
+}
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

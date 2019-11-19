@@ -1120,6 +1120,17 @@ class PROJ_GCC_DLL AuthorityFactory {
     getTransformationsForGeoid(const std::string &geoidName,
                                bool usePROJAlternativeGridNames) const;
 
+    PROJ_INTERNAL std::vector<operation::CoordinateOperationNNPtr>
+    createBetweenGeodeticCRSWithDatumBasedIntermediates(
+        const crs::CRSNNPtr &sourceCRS, const std::string &sourceCRSAuthName,
+        const std::string &sourceCRSCode, const crs::CRSNNPtr &targetCRS,
+        const std::string &targetCRSAuthName, const std::string &targetCRSCode,
+        bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
+        bool discardSuperseded,
+        const std::vector<std::string> &allowedAuthorities,
+        const metadata::ExtentPtr &intersectingExtent1,
+        const metadata::ExtentPtr &intersectingExtent2) const;
+
     //! @endcond
 
   protected:
