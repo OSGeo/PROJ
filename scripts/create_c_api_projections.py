@@ -171,7 +171,7 @@ for sectiondef in compounddef.iter('sectiondef'):
                 test_cppfile.write(", 0")
             if has_angle:
                 test_cppfile.write(", \"Degree\", 0.0174532925199433")
-            if has_angle:
+            if has_linear:
                 test_cppfile.write(", \"Metre\", 1.0")
             test_cppfile.write(");\n")
             test_cppfile.write("    ObjectKeeper keeper_projCRS(projCRS);\n")
