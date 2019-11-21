@@ -171,6 +171,12 @@ html_logo = '../images/logo.png'
 html_static_path = ['_static']
 
 html_context = {
+    'display_github': True,
+    'theme_vcs_pageview_mode': 'edit',
+    'github_user': 'OSGeo',
+    'github_repo': 'PROJ',
+    # TODO: edit when switching active branch
+    'github_version': '/6.2/docs/source/',
     'css_files': [
         '_static/theme_overrides.css',  # override wide tables in RTD theme
     ],
