@@ -3957,7 +3957,7 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
                 // This is the expansion of EPSG:5703 by old GDAL versions.
                 // See
                 // https://trac.osgeo.org/metacrs/changeset?reponame=&new=2281%40geotiff%2Ftrunk%2Flibgeotiff%2Fcsv%2Fvertcs.override.csv&old=1893%40geotiff%2Ftrunk%2Flibgeotiff%2Fcsv%2Fvertcs.override.csv
-                // It is unlikely that the user really explictly wants this.
+                // It is unlikely that the user really explicitly wants this.
                 if (gridName != "g2003conus.gtx,g2003alaska.gtx,"
                                 "g2003h01.gtx,g2003p01.gtx" &&
                     gridName != "g2012a_conus.gtx,g2012a_alaska.gtx,"

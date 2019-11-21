@@ -117,7 +117,7 @@ static void process(FILE *fid)
 
         /* To avoid breaking existing tests, we read what is a possible t    */
         /* component of the input and rewind the s-pointer so that the final */
-        /* output has consistant behaviour, with or without t values.        */
+        /* output has consistent behaviour, with or without t values.        */
         /* This is a bit of a hack, in most cases 4D coordinates will be     */
         /* written to STDOUT (except when using -E) but the output format    */
         /* speficied with -f is not respected for the t component, rather it */

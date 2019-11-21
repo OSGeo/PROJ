@@ -8276,7 +8276,7 @@ TEST(operation, createOperation_ossfuzz_18587) {
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
 
-    // Extremly weird string ! We should likely reject it
+    // Extremely weird string ! We should likely reject it
     auto objDst = PROJStringParser().createFromPROJString(
         "type=crs proj=pipeline step proj=merc vunits=m nadgrids=@x "
         "proj=\"\nproj=pipeline step\n\"");

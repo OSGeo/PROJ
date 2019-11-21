@@ -2386,7 +2386,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
     if (res.empty()) {
         try {
             // Conversions using methods Change of Vertical Unit or
-            // Height Depth Reveral are stored in other_transformation
+            // Height Depth Reversal are stored in other_transformation
             auto op = createCoordinateOperation(
                 code, false /* allowConcatenated */,
                 false /* usePROJAlternativeGridNames */,

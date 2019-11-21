@@ -7994,7 +7994,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
     }
 
 #ifdef notdef
-    // We dont need that currently, but we might...
+    // We don't need that currently, but we might...
     if (methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
         return d->registerInv(
             shared_from_this(),
@@ -13170,7 +13170,7 @@ void CoordinateOperationFactory::Private::
     }
 
     // NAD83 only exists in 2D version in EPSG, so if it has been
-    // promotted to 3D, when researching a vertical to geog
+    // promoted to 3D, when researching a vertical to geog
     // transformation, try to down cast to 2D.
     const auto geog3DToVertTryThroughGeog2D = [&res, &context](
         const crs::GeographicCRS *geogSrcIn, const crs::VerticalCRS *vertDstIn,
@@ -14103,7 +14103,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                 }
             } else {
                 // This case is probably only correct if
-                // verticalTransform and horizTransform are independant
+                // verticalTransform and horizTransform are independent
                 // and in particular that verticalTransform does not
                 // involve a grid, because of the rather arbitrary order
                 // horizontal then vertical applied
