@@ -8,7 +8,7 @@ PROJJSON is a JSON encoding of
 `WKT2:2019 / ISO-19162:2019 <http://docs.opengeospatial.org/is/18-010r7/18-010r7.html>`_,
 which itself implements the model of
 `OGC Topic 2: Referencing by coordinates <http://docs.opengeospatial.org/as/18-005r4/18-005r4.html>`_.
-Apart from the difference of encodings, the semantics is intented to be exactly
+Apart from the difference of encodings, the semantics is intended to be exactly
 the same as WKT2:2019.
 
 PROJJSON is available as input and output of PROJ since PROJ 6.2.
