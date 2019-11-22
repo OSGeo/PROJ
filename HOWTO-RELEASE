@@ -243,3 +243,6 @@ If the previous active version was, let's say, 6.1 and the new version is, let's
 then checkout 6.1 branch, and in travis/after_success.sh, remove the code
 that causes commits to 6.1 to cause a website refresh, that is remove the
 code under `if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "6.1"; then`.
+
+Also edit docs/source/conf.py to change the active branch for documentation
+in the `github_version` variable.
