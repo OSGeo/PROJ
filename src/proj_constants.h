@@ -215,6 +215,8 @@
 #define EPSG_NAME_METHOD_VERTICAL_PERSPECTIVE "Vertical Perspective"
 #define EPSG_CODE_METHOD_VERTICAL_PERSPECTIVE 9838
 
+#define PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION "Pole rotation (GRIB convention)"
+
 /* ------------------------------------------------------------------------ */
 
 /* Projection parameters */
@@ -473,6 +475,15 @@
     "Semi-major axis length difference"
 #define \
     EPSG_NAME_PARAMETER_FLATTENING_DIFFERENCE "Flattening difference"
+
+#define PROJ_WKT2_NAME_PARAMETER_SOUTH_POLE_LATITUDE_GRIB_CONVENTION \
+    "Latitude of the southern pole (GRIB convention)"
+
+#define PROJ_WKT2_NAME_PARAMETER_SOUTH_POLE_LONGITUDE_GRIB_CONVENTION \
+    "Longitude of the southern pole (GRIB convention)"
+
+#define PROJ_WKT2_NAME_PARAMETER_AXIS_ROTATION_GRIB_CONVENTION \
+    "Axis rotation (GRIB convention)"
 
 /* ------------------------------------------------------------------------ */
 

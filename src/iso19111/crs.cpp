@@ -45,6 +45,8 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
+#include "proj_constants.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -4893,7 +4895,9 @@ void DerivedGeographicCRS::_exportToPROJString(
     if (methodName == "PROJ ob_tran o_proj=longlat" ||
         methodName == "PROJ ob_tran o_proj=lonlat" ||
         methodName == "PROJ ob_tran o_proj=latlong" ||
-        methodName == "PROJ ob_tran o_proj=latlon") {
+        methodName == "PROJ ob_tran o_proj=latlon" ||
+        ci_equal(methodName,
+                 PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION)) {
         l_conv->_exportToPROJString(formatter);
         return;
     }

@@ -1150,6 +1150,22 @@ static const ParamMapping paramVerticalOffsetFile = {
 static const ParamMapping *const paramsVERTCON[] = {&paramVerticalOffsetFile,
                                                     nullptr};
 
+static const ParamMapping paramSouthPoleLatGRIB = {
+    PROJ_WKT2_NAME_PARAMETER_SOUTH_POLE_LATITUDE_GRIB_CONVENTION, 0, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping paramSouthPoleLonGRIB = {
+    PROJ_WKT2_NAME_PARAMETER_SOUTH_POLE_LONGITUDE_GRIB_CONVENTION, 0, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping paramAxisRotationGRIB = {
+    PROJ_WKT2_NAME_PARAMETER_AXIS_ROTATION_GRIB_CONVENTION, 0, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping *const paramsPoleRotationGRIBConvention[] = {
+    &paramSouthPoleLatGRIB, &paramSouthPoleLonGRIB, &paramAxisRotationGRIB,
+    nullptr};
+
 static const MethodMapping otherMethodMappings[] = {
     {EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT,
      EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT, nullptr, nullptr, nullptr,
@@ -1171,6 +1187,9 @@ static const MethodMapping otherMethodMappings[] = {
     {EPSG_NAME_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION,
      EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION, nullptr, nullptr,
      nullptr, paramsAffineParametricTransformation},
+
+    {PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION, 0, nullptr, nullptr,
+     nullptr, paramsPoleRotationGRIBConvention},
 
     {EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC,
      EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC, nullptr, nullptr,
