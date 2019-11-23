@@ -422,11 +422,17 @@ INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_form
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
     VALUES ('geoid09_conus.bin', 'geoid09_conus.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g2009g01.bin', 'g2009g01.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g2009s01.bin', 'g2009s01.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
+    VALUES ('g2009p01.bin', 'g2009p01.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+
 -- Not mapped:
 -- g2009h01.gtx : Hawaii
--- g2009g01.gtx : Guam and Northern Mariana Islands.
--- g2009s01.gtx : American Samoa.
--- g2009p01.gtx : Puerto Rico / U.S. Vigin Islands.
 
 ----------------------------
 -- US GEOID12B height models
