@@ -328,6 +328,7 @@ struct PJconsts {
     struct geod_geodesic *geod = nullptr;    /* For geodesic computations */
     void *opaque = nullptr;                  /* Projection specific parameters, Defined in PJ_*.c */
     int inverted = 0;                        /* Tell high level API functions to swap inv/fwd */
+    bool only_on_forward = false;            /* Tell high level API functions to only apply in forward */
 
 
     /*************************************************************************************

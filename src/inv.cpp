@@ -145,6 +145,9 @@ PJ_LP pj_inv(PJ_XY xy, PJ *P) {
     PJ_COORD coo = {{0,0,0,0}};
     coo.xy = xy;
 
+    if( P->only_on_forward )
+        return coo.lp;
+
     last_errno = proj_errno_reset(P);
 
     if (!P->skip_inv_prepare)
@@ -179,6 +182,9 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
     PJ_COORD coo = {{0,0,0,0}};
     coo.xyz = xyz;
 
+    if( P->only_on_forward )
+        return coo.lpz;
+
     last_errno = proj_errno_reset(P);
 
     if (!P->skip_inv_prepare)
@@ -209,6 +215,9 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
 
 
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
+    if( P->only_on_forward )
+        return coo;
+
     int last_errno = proj_errno_reset(P);
 
     if (!P->skip_inv_prepare)

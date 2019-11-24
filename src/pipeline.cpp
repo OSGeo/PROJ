@@ -388,6 +388,10 @@ PJ *OPERATION(pipeline,0) {
     P->destructor  =  destructor;
     P->is_pipeline =  1;
 
+    // as pj_init_ctx_with_allow_init_epsg() will have interpreted the
+    // +only_on_forward of step for the pipeline itself...
+    P->only_on_forward = false;
+
     /* Currently, the pipeline driver is a raw bit mover, enabling other operations */
     /* to collaborate efficiently. All prep/fin stuff is done at the step levels. */
     P->skip_fwd_prepare  = 1;

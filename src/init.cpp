@@ -837,6 +837,8 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
     else
         PIN->from_greenwich = 0.0;
 
+    PIN->only_on_forward = pj_param(ctx, start, "bonly_on_forward").i != 0;
+
     /* Private object for the geodesic functions */
     PIN->geod = static_cast<struct geod_geodesic*>(pj_calloc (1, sizeof (struct geod_geodesic)));
     if (nullptr==PIN->geod)

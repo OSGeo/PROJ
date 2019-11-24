@@ -386,6 +386,31 @@ operation   +proj=pop +v_3
 accept      12 56 0 0
 expect      12 56 0 0
 
+-------------------------------------------------------------------------------
+Test Pipeline +only_on_forward
+-------------------------------------------------------------------------------
+
+operation   +proj=pipeline
+                +step +proj=affine +xoff=1 +yoff=1 +only_on_forward
+
+accept      2 49 0 0
+expect      3 50 0 0
+
+direction inverse
+accept      2 49 0 0
+expect      2 49 0 0
+
+
+operation   +proj=pipeline
+                +step +inv +proj=affine +xoff=1 +yoff=1 +only_on_forward
+
+accept      2 49 0 0
+expect      2 49 0 0
+
+direction inverse
+accept      2 49 0 0
+expect      3 50 0 0
+
 
 -------------------------------------------------------------------------------
 Test bugfix of https://github.com/OSGeo/proj.4/issues/1002
