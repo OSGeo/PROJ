@@ -12264,27 +12264,23 @@ void CoordinateOperationFactory::Private::setCRSs(
     CoordinateOperation *co, const crs::CRSNNPtr &sourceCRS,
     const crs::CRSNNPtr &targetCRS) {
     co->setCRSs(sourceCRS, targetCRS, nullptr);
+
+    auto invCO = dynamic_cast<InverseCoordinateOperation *>(co);
+    if (invCO) {
+        setCRSs(invCO->forwardOperation().get(), targetCRS, sourceCRS);
+    }
+
     auto concat = dynamic_cast<ConcatenatedOperation *>(co);
     if (concat) {
         auto first = concat->operations().front().get();
         auto &firstTarget(first->targetCRS());
         if (firstTarget) {
             setCRSs(first, sourceCRS, NN_NO_CHECK(firstTarget));
-            auto invCO = dynamic_cast<InverseCoordinateOperation *>(first);
-            if (invCO) {
-                setCRSs(invCO->forwardOperation().get(),
-                        NN_NO_CHECK(firstTarget), sourceCRS);
-            }
         }
         auto last = concat->operations().back().get();
         auto &lastSource(last->sourceCRS());
         if (lastSource) {
             setCRSs(last, NN_NO_CHECK(lastSource), targetCRS);
-            auto invCO = dynamic_cast<InverseCoordinateOperation *>(last);
-            if (invCO) {
-                setCRSs(invCO->forwardOperation().get(), targetCRS,
-                        NN_NO_CHECK(lastSource));
-            }
         }
     }
 }
