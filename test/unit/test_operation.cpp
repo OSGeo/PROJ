@@ -5343,8 +5343,8 @@ TEST(operation, esri_projectedCRS_to_geogCRS_with_ITRF_intermediate_context) {
     EXPECT_PRED_FORMAT2(
         ComparePROJString,
         list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-        "+proj=pipeline +step +proj=unitconvert +xy_in=us-ft +z_in=us-ft "
-        "+xy_out=m +z_out=m +step +inv +proj=lcc +lat_0=33.75 +lon_0=-79 "
+        "+proj=pipeline +step +proj=unitconvert +xy_in=us-ft "
+        "+xy_out=m +step +inv +proj=lcc +lat_0=33.75 +lon_0=-79 "
         "+lat_1=34.3333333333333 +lat_2=36.1666666666667 "
         "+x_0=609601.219202438 +y_0=0 +ellps=GRS80 +step +proj=cart "
         "+ellps=GRS80 +step +inv +proj=helmert +x=0.9956 +y=-1.9013 "
@@ -7291,19 +7291,63 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
                                                                ctxt);
     // The checked value is not that important, but in case this changes,
     // likely due to a EPSG upgrade, worth checking
-    ASSERT_EQ(listCompoundToGeog2D.size(), 467U);
+    EXPECT_EQ(listCompoundToGeog2D.size(), 141U);
 
     auto listGeog2DToCompound =
         CoordinateOperationFactory::create()->createOperations(dst, nnSrc,
                                                                ctxt);
-    ASSERT_EQ(listGeog2DToCompound.size(), listCompoundToGeog2D.size());
+    EXPECT_EQ(listGeog2DToCompound.size(), listCompoundToGeog2D.size());
 
     auto listCompoundToGeog3D =
         CoordinateOperationFactory::create()->createOperations(
             nnSrc,
             dst->promoteTo3D(std::string(), authFactory->databaseContext()),
             ctxt);
-    ASSERT_EQ(listCompoundToGeog3D.size(), listCompoundToGeog2D.size());
+    EXPECT_EQ(listCompoundToGeog3D.size(), listCompoundToGeog2D.size());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_of_projCRS_to_geogCRS_2D_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // SPCS83 California zone 1 (US Survey feet) + NAVD88 height (ftUS)
+    auto srcObj = createFromUserInput("EPSG:2225+6360",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto nnSrc = NN_NO_CHECK(src);
+    auto dst = authFactory->createCoordinateReferenceSystem("4269"); // NAD83
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        nnSrc, dst, ctxt);
+    // The checked value is not that important, but in case this changes,
+    // likely due to a EPSG upgrade, worth checking
+    // We want to make sure that the horizontal adjustments before and after
+    // the vertical transformation are the reverse of each other, and there are
+    // not mixes with different alternative operations (like California grid
+    // forward and Nevada grid reverse)
+    ASSERT_EQ(list.size(), 14U);
+
+    // Check that unit conversion is OK
+    auto op_proj =
+        list[0]->exportToPROJString(PROJStringFormatter::create().get());
+    EXPECT_EQ(op_proj,
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=us-ft +xy_out=m "
+              "+step +inv +proj=lcc +lat_0=39.3333333333333 +lon_0=-122 "
+              "+lat_1=41.6666666666667 +lat_2=40 +x_0=2000000.0001016 "
+              "+y_0=500000.0001016 +ellps=GRS80 "
+              "+step +proj=unitconvert +z_in=us-ft +z_out=m "
+              "+step +proj=vgridshift +grids=geoid09_conus.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -8284,8 +8328,11 @@ TEST(operation, createOperation_ossfuzz_18587) {
     ASSERT_TRUE(dst != nullptr);
 
     // Just check that we don't go into an infinite recursion
-    CoordinateOperationFactory::create()->createOperation(NN_CHECK_ASSERT(src),
-                                                          NN_CHECK_ASSERT(dst));
+    try {
+        CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+    } catch (const std::exception &) {
+    }
 }
 
 // ---------------------------------------------------------------------------
