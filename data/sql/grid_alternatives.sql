@@ -1149,3 +1149,322 @@ INSERT INTO grid_alternatives(original_grid_name,
                               0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
+
+-- Canada provincial grids
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('AB_CSRS.DAC',
+                              'ABCSRSV4.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CRD27_00.GSB',
+                              'CRD27_00.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CRD93_00.GSB',
+                              'CRD93_00.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NVI93_05.GSB',
+                              'NVI93_05.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('BC_27_05.GSB',
+                              'BC_27_05.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('BC_93_05.GSB',
+                              'BC_93_05.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NB7783v2.gsb', -- case difference on extension !
+                              'NB7783v2.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NB2783v2.gsb', -- case difference on extension !
+                              'NB2783v2.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('GS7783.GSB',
+                              'GS7783.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NS778302.gsb', -- case difference on extension !
+                              'NS778302.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('ON27CSv1.GSB',
+                              'ON27CSv1.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('ON76CSv1.GSB',
+                              'ON76CSv1.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('ON83CSv1.GSB',
+                              'ON83CSv1.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('PE7783V2.gsb', -- case difference on extension !
+                              'PE7783V2.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+-- two grid names in EPSG point to the same file distributed by NRCan
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NA27SCRS.GSB',
+                              'NA27SCRS.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('QUE27-98.gsb',
+                              'NA27SCRS.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CQ77NA83.GSB',
+                              'CQ77SCRS.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+ -- two grid names in EPSG point to the same file distributed by NRCan
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NA83SCRS.GSB',
+                              'NA83SCRS.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NAD83-98.gsb',
+                              'NA83SCRS.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('SK27-98.gsb', -- case difference on extension !
+                              'SK27-98.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('SK83-98.gsb', -- case difference on extension !
+                              'SK83-98.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
