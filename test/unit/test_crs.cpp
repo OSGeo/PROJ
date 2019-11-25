@@ -5320,3 +5320,83 @@ TEST(crs, promoteTo3D_and_demoteTo2D) {
                     nullptr);
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projected_normalizeForVisualization_do_not_mess_deriving_conversion) {
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // Something with non standard order
+    auto projCRS = authFactory->createProjectedCRS("3035");
+    {
+        auto src = GeographicCRS::EPSG_4326;
+        auto op =
+            CoordinateOperationFactory::create()->createOperation(src, projCRS);
+        ASSERT_TRUE(op != nullptr);
+        // Make sure to run that in a scope, so that the object get destroyed
+        op->normalizeForVisualization();
+    }
+    EXPECT_EQ(projCRS->derivingConversion()->targetCRS().get(), projCRS.get());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projected_promoteTo3D_do_not_mess_deriving_conversion) {
+
+    auto projCRS = createProjected();
+    {
+        // Make sure to run that in a scope, so that the object get destroyed
+        projCRS->promoteTo3D(std::string(), nullptr);
+    }
+    EXPECT_EQ(projCRS->derivingConversion()->targetCRS().get(), projCRS.get());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projected_demoteTo2D_do_not_mess_deriving_conversion) {
+
+    auto projCRS = nn_dynamic_pointer_cast<ProjectedCRS>(
+        createProjected()->promoteTo3D(std::string(), nullptr));
+    {
+        // Make sure to run that in a scope, so that the object get destroyed
+        projCRS->demoteTo2D(std::string(), nullptr);
+    }
+    EXPECT_EQ(projCRS->derivingConversion()->targetCRS().get(), projCRS.get());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projected_alterGeodeticCRS_do_not_mess_deriving_conversion) {
+
+    auto projCRS = createProjected();
+    {
+        // Make sure to run that in a scope, so that the object get destroyed
+        projCRS->alterGeodeticCRS(NN_NO_CHECK(projCRS->extractGeographicCRS()));
+    }
+    EXPECT_EQ(projCRS->derivingConversion()->targetCRS().get(), projCRS.get());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projected_alterCSLinearUnit_do_not_mess_deriving_conversion) {
+
+    auto projCRS = createProjected();
+    {
+        // Make sure to run that in a scope, so that the object get destroyed
+        projCRS->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
+    }
+    EXPECT_EQ(projCRS->derivingConversion()->targetCRS().get(), projCRS.get());
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projected_alterParametersLinearUnit_do_not_mess_deriving_conversion) {
+
+    auto projCRS = createProjected();
+    {
+        // Make sure to run that in a scope, so that the object get destroyed
+        projCRS->alterParametersLinearUnit(UnitOfMeasure::METRE, false);
+    }
+    EXPECT_EQ(projCRS->derivingConversion()->targetCRS().get(), projCRS.get());
+}

@@ -514,6 +514,9 @@ class PROJ_GCC_DLL DerivedCRS : virtual public SingleCRS {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
+
+        // Use this method with extreme care ! It should never be used
+        // to recreate a new Derived/ProjectedCRS !
         PROJ_INTERNAL const operation::ConversionNNPtr &
         derivingConversionRef() PROJ_PURE_DECL;
 

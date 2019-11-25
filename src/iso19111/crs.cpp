@@ -237,7 +237,7 @@ CRSNNPtr CRS::alterGeodeticCRS(const GeodeticCRSNNPtr &newGeodCRS) const {
     auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
     if (projCRS) {
         return ProjectedCRS::create(createPropertyMap(this), newGeodCRS,
-                                    projCRS->derivingConversionRef(),
+                                    projCRS->derivingConversion(),
                                     projCRS->coordinateSystem());
     }
 
@@ -264,7 +264,7 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
         if (projCRS) {
             return ProjectedCRS::create(
                 createPropertyMap(this), projCRS->baseCRS(),
-                projCRS->derivingConversionRef(),
+                projCRS->derivingConversion(),
                 projCRS->coordinateSystem()->alterUnit(unit));
         }
     }
@@ -675,9 +675,8 @@ CRSNNPtr CRS::normalizeForVisualization() const {
                                               axisList[0])
                     : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
                                               axisList[0], axisList[2]);
-            return util::nn_static_pointer_cast<CRS>(
-                ProjectedCRS::create(props, projCRS->baseCRS(),
-                                     projCRS->derivingConversionRef(), cs));
+            return util::nn_static_pointer_cast<CRS>(ProjectedCRS::create(
+                props, projCRS->baseCRS(), projCRS->derivingConversion(), cs));
         }
     }
 
@@ -844,7 +843,7 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                                         !newName.empty() ? newName : nameStr()),
                 NN_NO_CHECK(
                     util::nn_dynamic_pointer_cast<GeodeticCRS>(base3DCRS)),
-                projCRS->derivingConversionRef(), cs));
+                projCRS->derivingConversion(), cs));
         }
     }
 
@@ -3379,10 +3378,10 @@ bool ProjectedCRS::_isEquivalentTo(
 ProjectedCRSNNPtr
 ProjectedCRS::alterParametersLinearUnit(const common::UnitOfMeasure &unit,
                                         bool convertToNewUnit) const {
-    return create(createPropertyMap(this), baseCRS(),
-                  derivingConversionRef()->alterParametersLinearUnit(
-                      unit, convertToNewUnit),
-                  coordinateSystem());
+    return create(
+        createPropertyMap(this), baseCRS(),
+        derivingConversion()->alterParametersLinearUnit(unit, convertToNewUnit),
+        coordinateSystem());
 }
 //! @endcond
 
@@ -3791,7 +3790,7 @@ ProjectedCRS::demoteTo2D(const std::string &newName,
         return ProjectedCRS::create(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                     !newName.empty() ? newName : nameStr()),
-            newBaseCRS, derivingConversionRef(), cs);
+            newBaseCRS, derivingConversion(), cs);
     }
 
     return NN_NO_CHECK(std::dynamic_pointer_cast<ProjectedCRS>(
