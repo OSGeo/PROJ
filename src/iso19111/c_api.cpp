@@ -1836,7 +1836,7 @@ PJ *proj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx, const PJ *crs,
  * @param grid_name Grid name (typically a .gtx file)
  * @return Object that must be unreferenced with proj_destroy(), or NULL
  * in case of error.
- * @since 7.0
+ * @since 6.3
  */
 PJ *proj_crs_create_bound_vertical_crs(PJ_CONTEXT *ctx, const PJ *vert_crs,
                                        const PJ *hub_geographic_3D_crs,
@@ -3367,7 +3367,7 @@ PJ *proj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx, const PJ *obj,
  *
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
- * @since 7.0
+ * @since 6.3
  */
 PJ *proj_crs_promote_to_3D(PJ_CONTEXT *ctx, const char *crs_3D_name,
                            const PJ *crs_2D) {
@@ -3422,7 +3422,7 @@ PJ *proj_crs_promote_to_3D(PJ_CONTEXT *ctx, const char *crs_3D_name,
  *
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
- * @since 7.0
+ * @since 6.3
  */
 PJ *proj_crs_create_projected_3D_crs_from_2D(PJ_CONTEXT *ctx,
                                              const char *crs_name,
@@ -3509,7 +3509,7 @@ PJ *proj_crs_create_projected_3D_crs_from_2D(PJ_CONTEXT *ctx,
  *
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
- * @since 7.0
+ * @since 6.3
  */
 PJ *proj_crs_demote_to_2D(PJ_CONTEXT *ctx, const char *crs_2D_name,
                           const PJ *crs_3D) {
@@ -4119,7 +4119,7 @@ PJ *proj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
  *
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
- * @since 7.0
+ * @since 6.3
  */
 
 PJ *proj_create_ellipsoidal_3D_cs(PJ_CONTEXT *ctx,
@@ -6426,7 +6426,7 @@ PJ *proj_create_conversion_equal_earth(PJ_CONTEXT *ctx, double center_long,
  * linear_unit_conv_factor).
  * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
  *
- * @since 7.0
+ * @since 6.3
  */
 PJ *proj_create_conversion_vertical_perspective(
     PJ_CONTEXT *ctx, double topo_origin_lat, double topo_origin_long,

@@ -222,7 +222,7 @@ The following control parameters can appear in any order:
 
 .. option:: --3d
 
-    .. versionadded:: 7.0
+    .. versionadded:: 6.3
 
     "Promote" the CRS(s) to their 3D version. In the context of researching
     available coordinate transformations, explicitly specifying this option is
