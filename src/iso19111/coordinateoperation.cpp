@@ -5960,8 +5960,17 @@ void Conversion::_exportToPROJString(
 
     auto l_sourceCRS = sourceCRS();
     if (!formatter->getCRSExport() && l_sourceCRS && applySourceCRSModifiers) {
-        auto geogCRS =
-            dynamic_cast<const crs::GeographicCRS *>(l_sourceCRS.get());
+
+        crs::CRS *horiz = l_sourceCRS.get();
+        const auto compound = dynamic_cast<const crs::CompoundCRS *>(horiz);
+        if (compound) {
+            const auto &components = compound->componentReferenceSystems();
+            if (!components.empty()) {
+                horiz = components.front().get();
+            }
+        }
+
+        auto geogCRS = dynamic_cast<const crs::GeographicCRS *>(horiz);
         if (geogCRS) {
             formatter->setOmitProjLongLatIfPossible(true);
             formatter->startInversion();
@@ -5970,11 +5979,12 @@ void Conversion::_exportToPROJString(
             formatter->setOmitProjLongLatIfPossible(false);
         }
 
-        auto projCRS =
-            dynamic_cast<const crs::ProjectedCRS *>(l_sourceCRS.get());
+        auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(horiz);
         if (projCRS) {
             formatter->startInversion();
+            formatter->pushOmitZUnitConversion();
             projCRS->addUnitConvertAndAxisSwap(formatter, false);
+            formatter->popOmitZUnitConversion();
             formatter->stopInversion();
         }
     }
@@ -6256,8 +6266,17 @@ void Conversion::_exportToPROJString(
 
     auto l_targetCRS = targetCRS();
     if (l_targetCRS && applyTargetCRSModifiers) {
+        crs::CRS *horiz = l_targetCRS.get();
+        const auto compound = dynamic_cast<const crs::CompoundCRS *>(horiz);
+        if (compound) {
+            const auto &components = compound->componentReferenceSystems();
+            if (!components.empty()) {
+                horiz = components.front().get();
+            }
+        }
+
         if (!bEllipsoidParametersDone) {
-            auto targetGeogCRS = l_targetCRS->extractGeographicCRS();
+            auto targetGeogCRS = horiz->extractGeographicCRS();
             if (targetGeogCRS) {
                 if (formatter->getCRSExport()) {
                     targetGeogCRS->addDatumInfoToPROJString(formatter);
@@ -6269,14 +6288,15 @@ void Conversion::_exportToPROJString(
             }
         }
 
-        auto projCRS =
-            dynamic_cast<const crs::ProjectedCRS *>(l_targetCRS.get());
+        auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(horiz);
         if (projCRS) {
+            formatter->pushOmitZUnitConversion();
             projCRS->addUnitConvertAndAxisSwap(formatter, bAxisSpecFound);
+            formatter->popOmitZUnitConversion();
         }
 
         auto derivedGeographicCRS =
-            dynamic_cast<const crs::DerivedGeographicCRS *>(l_targetCRS.get());
+            dynamic_cast<const crs::DerivedGeographicCRS *>(horiz);
         if (derivedGeographicCRS) {
             auto baseGeodCRS = derivedGeographicCRS->baseCRS();
             formatter->setOmitProjLongLatIfPossible(true);
@@ -13997,6 +14017,37 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
     const auto &authFactory = context.context->getAuthorityFactory();
     const auto &componentsSrc = compoundSrc->componentReferenceSystems();
     if (!componentsSrc.empty()) {
+
+        if (componentsSrc.size() == 2) {
+            auto derivedHSrc =
+                dynamic_cast<const crs::DerivedCRS *>(componentsSrc[0].get());
+            if (derivedHSrc) {
+                std::vector<crs::CRSNNPtr> intermComponents{
+                    derivedHSrc->baseCRS(), componentsSrc[1]};
+                auto properties = util::PropertyMap().set(
+                    common::IdentifiedObject::NAME_KEY,
+                    intermComponents[0]->nameStr() + " + " +
+                        intermComponents[1]->nameStr());
+                auto intermCompound =
+                    crs::CompoundCRS::create(properties, intermComponents);
+                auto opsFirst =
+                    createOperations(sourceCRS, intermCompound, context);
+                assert(!opsFirst.empty());
+                auto opsLast =
+                    createOperations(intermCompound, targetCRS, context);
+                for (const auto &opLast : opsLast) {
+                    try {
+                        res.emplace_back(
+                            ConcatenatedOperation::createComputeMetadata(
+                                {opsFirst.front(), opLast},
+                                !allowEmptyIntersection));
+                    } catch (const std::exception &) {
+                    }
+                }
+                return;
+            }
+        }
+
         std::vector<CoordinateOperationNNPtr> horizTransforms;
         auto srcGeogCRS = componentsSrc[0]->extractGeographicCRS();
         if (srcGeogCRS) {
@@ -14125,6 +14176,26 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                     key =
                         (*ids.front()->codeSpace()) + ':' + ids.front()->code();
                 }
+
+                const auto computeOpsToInterp =
+                    [&srcToInterpOps, &interpToTargetOps, &componentsSrc,
+                     &interpolationGeogCRS, &targetCRS, &dbContext,
+                     &context]() {
+                        srcToInterpOps = createOperations(
+                            componentsSrc[0], NN_NO_CHECK(interpolationGeogCRS),
+                            context);
+                        auto target2D =
+                            targetCRS->demoteTo2D(std::string(), dbContext);
+                        if (!componentsSrc[0]->isEquivalentTo(
+                                target2D.get(),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+                            interpToTargetOps = createOperations(
+                                NN_NO_CHECK(interpolationGeogCRS),
+                                targetCRS->demoteTo2D(std::string(), dbContext),
+                                context);
+                        }
+                    };
+
                 if (!key.empty()) {
                     auto iter = cacheHorizToInterpAndInterpToTarget.find(key);
                     if (iter == cacheHorizToInterpAndInterpToTarget.end()) {
@@ -14133,13 +14204,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                                     "from source to interpCRS and interpCRS to "
                                     "target");
 #endif
-                        srcToInterpOps = createOperations(
-                            componentsSrc[0], NN_NO_CHECK(interpolationGeogCRS),
-                            context);
-                        interpToTargetOps = createOperations(
-                            NN_NO_CHECK(interpolationGeogCRS),
-                            targetCRS->demoteTo2D(std::string(), dbContext),
-                            context);
+                        computeOpsToInterp();
                         cacheHorizToInterpAndInterpToTarget[key] =
                             PairOfTransforms(srcToInterpOps, interpToTargetOps);
                     } else {
@@ -14152,33 +14217,38 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                                 "from source to interpCRS and interpCRS to "
                                 "target");
 #endif
-                    srcToInterpOps = createOperations(
-                        componentsSrc[0], NN_NO_CHECK(interpolationGeogCRS),
-                        context);
-                    interpToTargetOps = createOperations(
-                        NN_NO_CHECK(interpolationGeogCRS),
-                        targetCRS->demoteTo2D(std::string(), dbContext),
-                        context);
+                    computeOpsToInterp();
                 }
 
 #ifdef TRACE_CREATE_OPERATIONS
                 ENTER_BLOCK("creating HorizVerticalHorizPROJBased operations");
 #endif
                 for (const auto &srcToInterp : srcToInterpOps) {
-                    for (const auto &interpToTarget : interpToTargetOps) {
-
-                        if (useDifferentTransformationsForSameSourceTarget(
-                                srcToInterp, interpToTarget)) {
-                            continue;
-                        }
-
+                    if (interpToTargetOps.empty()) {
                         try {
                             auto op = createHorizVerticalHorizPROJBased(
                                 sourceCRS, targetCRS, srcToInterp,
-                                verticalTransform, interpToTarget,
+                                verticalTransform, srcToInterp->inverse(),
                                 interpolationGeogCRS, true);
                             res.emplace_back(op);
                         } catch (const std::exception &) {
+                        }
+                    } else {
+                        for (const auto &interpToTarget : interpToTargetOps) {
+
+                            if (useDifferentTransformationsForSameSourceTarget(
+                                    srcToInterp, interpToTarget)) {
+                                continue;
+                            }
+
+                            try {
+                                auto op = createHorizVerticalHorizPROJBased(
+                                    sourceCRS, targetCRS, srcToInterp,
+                                    verticalTransform, interpToTarget,
+                                    interpolationGeogCRS, true);
+                                res.emplace_back(op);
+                            } catch (const std::exception &) {
+                            }
                         }
                     }
                 }
@@ -14248,15 +14318,15 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         if (componentsSrc[0]->extractGeographicCRS() &&
             componentsDst[0]->extractGeographicCRS()) {
 
-            bool verticalTransfIsNoOp = false;
             std::vector<CoordinateOperationNNPtr> verticalTransforms;
             if (componentsSrc.size() >= 2 &&
                 componentsSrc[1]->extractVerticalCRS() &&
                 componentsDst[1]->extractVerticalCRS()) {
-                verticalTransfIsNoOp =
-                    componentsSrc[1]->_isEquivalentTo(componentsDst[1].get());
-                verticalTransforms = createOperations(
-                    componentsSrc[1], componentsDst[1], context);
+                if (!componentsSrc[1]->_isEquivalentTo(
+                        componentsDst[1].get())) {
+                    verticalTransforms = createOperations(
+                        componentsSrc[1], componentsDst[1], context);
+                }
             }
 
             for (const auto &verticalTransform : verticalTransforms) {
@@ -14301,15 +14371,9 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                     for (const auto &opDst : opGeogCRStoDstCRS) {
 
                         try {
-                            auto op = verticalTransfIsNoOp
-                                          ? ConcatenatedOperation::
-                                                createComputeMetadata(
-                                                    {opSrc, opDst},
-                                                    !allowEmptyIntersection)
-                                          : createHorizVerticalHorizPROJBased(
-                                                sourceCRS, targetCRS, opSrc,
-                                                verticalTransform, opDst,
-                                                interpolationGeogCRS, true);
+                            auto op = createHorizVerticalHorizPROJBased(
+                                sourceCRS, targetCRS, opSrc, verticalTransform,
+                                opDst, interpolationGeogCRS, true);
                             res.emplace_back(op);
                         } catch (const InvalidOperationEmptyIntersection &) {
                         }
@@ -14318,8 +14382,13 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
             }
 
             if (verticalTransforms.empty()) {
-                res = createOperations(componentsSrc[0], componentsDst[0],
-                                       context);
+                auto resTmp = createOperations(componentsSrc[0],
+                                               componentsDst[0], context);
+                for (const auto &op : resTmp) {
+                    auto opClone = op->shallowClone();
+                    setCRSs(opClone.get(), sourceCRS, targetCRS);
+                    res.emplace_back(opClone);
+                }
             }
         }
     }

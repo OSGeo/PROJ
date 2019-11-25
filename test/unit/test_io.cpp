@@ -8389,7 +8389,7 @@ TEST(io, projparse_axisswap_unitconvert_proj_unitconvert) {
         "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
         "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=unitconvert +xy_in=m "
-        "+z_in=m +xy_out=ft +z_out=ft";
+        "+xy_out=ft";
     auto obj = PROJStringParser().createFromPROJString(input);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -8400,7 +8400,7 @@ TEST(io, projparse_axisswap_unitconvert_proj_unitconvert) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
               "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=unitconvert "
-              "+xy_in=m +z_in=m +xy_out=ft +z_out=ft");
+              "+xy_in=m +xy_out=ft");
 }
 
 // ---------------------------------------------------------------------------
@@ -8410,7 +8410,7 @@ TEST(io, projparse_axisswap_unitconvert_proj_unitconvert_numeric_axisswap) {
         "+type=crs +proj=pipeline +step +proj=axisswap +order=2,1 +step "
         "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
         "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=unitconvert +xy_in=m "
-        "+z_in=m +xy_out=2.5 +z_out=2.5 +step +proj=axisswap +order=-2,-1";
+        "+xy_out=2.5 +step +proj=axisswap +order=-2,-1";
     auto obj = PROJStringParser().createFromPROJString(input);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
@@ -8421,7 +8421,7 @@ TEST(io, projparse_axisswap_unitconvert_proj_unitconvert_numeric_axisswap) {
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=igh "
               "+lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80 +step +proj=unitconvert "
-              "+xy_in=m +z_in=m +xy_out=2.5 +z_out=2.5 +step +proj=axisswap "
+              "+xy_in=m +xy_out=2.5 +step +proj=axisswap "
               "+order=-2,-1");
 }
 
