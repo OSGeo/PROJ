@@ -14,3 +14,4 @@ the project.
    rfc-1
    rfc-2
    rfc-3
+   rfc-4
