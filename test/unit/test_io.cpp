@@ -6832,6 +6832,95 @@ TEST(io, projstringformatter_axisswap_unitconvert_axisswap) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_optim_hgridshift_vgridshift_hgridshift_inv) {
+    // Nominal case
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("hgridshift");
+        fmt->addParam("grids", "foo");
+
+        fmt->addStep("vgridshift");
+        fmt->addParam("grids", "bar");
+
+        fmt->startInversion();
+        fmt->addStep("hgridshift");
+        fmt->addParam("grids", "foo");
+        fmt->stopInversion();
+
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline "
+                  "+step +proj=push +v_1 +v_2 "
+                  "+step +proj=hgridshift +grids=foo +omit_inv "
+                  "+step +proj=vgridshift +grids=bar "
+                  "+step +inv +proj=hgridshift +grids=foo +omit_fwd "
+                  "+step +proj=pop +v_1 +v_2");
+    }
+
+    // Variant with first hgridshift inverted, and second forward
+    {
+        auto fmt = PROJStringFormatter::create();
+
+        fmt->startInversion();
+        fmt->addStep("hgridshift");
+        fmt->addParam("grids", "foo");
+        fmt->stopInversion();
+
+        fmt->addStep("vgridshift");
+        fmt->addParam("grids", "bar");
+
+        fmt->addStep("hgridshift");
+        fmt->addParam("grids", "foo");
+
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline "
+                  "+step +proj=push +v_1 +v_2 "
+                  "+step +inv +proj=hgridshift +grids=foo +omit_inv "
+                  "+step +proj=vgridshift +grids=bar "
+                  "+step +proj=hgridshift +grids=foo +omit_fwd "
+                  "+step +proj=pop +v_1 +v_2");
+    }
+
+    // Do not apply ! not same grid name
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("hgridshift");
+        fmt->addParam("grids", "foo");
+
+        fmt->addStep("vgridshift");
+        fmt->addParam("grids", "bar");
+
+        fmt->startInversion();
+        fmt->addStep("hgridshift");
+        fmt->addParam("grids", "foo2");
+        fmt->stopInversion();
+
+        EXPECT_EQ(fmt->toString(), "+proj=pipeline "
+                                   "+step +proj=hgridshift +grids=foo "
+                                   "+step +proj=vgridshift +grids=bar "
+                                   "+step +inv +proj=hgridshift +grids=foo2");
+    }
+
+    // Do not apply ! missing inversion
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("hgridshift");
+        fmt->addParam("grids", "foo");
+
+        fmt->addStep("vgridshift");
+        fmt->addParam("grids", "bar");
+
+        fmt->addStep("hgridshift");
+        fmt->addParam("grids", "foo");
+
+        EXPECT_EQ(fmt->toString(), "+proj=pipeline "
+                                   "+step +proj=hgridshift +grids=foo "
+                                   "+step +proj=vgridshift +grids=bar "
+                                   "+step +proj=hgridshift +grids=foo");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat) {
 
     auto expected = "GEODCRS[\"unknown\",\n"

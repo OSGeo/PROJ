@@ -6278,6 +6278,10 @@ struct Step {
             return key == otherKey && value == otherVal;
         }
 
+        bool operator==(const KeyValue &other) const noexcept {
+            return key == other.key && value == other.value;
+        }
+
         bool operator!=(const KeyValue &other) const noexcept {
             return key != other.key || value != other.value;
         }
@@ -6796,6 +6800,46 @@ const std::string &PROJStringFormatter::toString() const {
                         changeDone = true;
                         break;
                     }
+                }
+            }
+
+            // +step +proj=hgridshift +grids=grid_A
+            // +step +proj=vgridshift [...] <== curStep
+            // +step +inv +proj=hgridshift +grids=grid_A
+            // ==>
+            // +step +proj=push +v_1 +v_2
+            // +step +proj=hgridshift +grids=grid_A +omit_inv
+            // +step +proj=vgridshift [...]
+            // +step +inv +proj=hgridshift +grids=grid_A +omit_fwd
+            // +step +proj=pop +v_1 +v_2
+            if (i + 1 < d->steps_.size() && prevStep.name == "hgridshift" &&
+                prevStepParamCount == 1 && curStep.name == "vgridshift") {
+                auto iterNext = iterCur;
+                ++iterNext;
+                auto &nextStep = *iterNext;
+                if (nextStep.name == "hgridshift" &&
+                    nextStep.inverted != prevStep.inverted &&
+                    nextStep.paramValues.size() == 1 &&
+                    prevStep.paramValues[0] == nextStep.paramValues[0]) {
+                    Step pushStep;
+                    pushStep.name = "push";
+                    pushStep.paramValues.emplace_back("v_1");
+                    pushStep.paramValues.emplace_back("v_2");
+                    d->steps_.insert(iterPrev, pushStep);
+
+                    prevStep.paramValues.emplace_back("omit_inv");
+
+                    nextStep.paramValues.emplace_back("omit_fwd");
+
+                    Step popStep;
+                    popStep.name = "pop";
+                    popStep.paramValues.emplace_back("v_1");
+                    popStep.paramValues.emplace_back("v_2");
+                    ++iterNext;
+                    d->steps_.insert(iterNext, popStep);
+
+                    changeDone = true;
+                    break;
                 }
             }
 
