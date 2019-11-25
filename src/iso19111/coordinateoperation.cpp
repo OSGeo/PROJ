@@ -4655,7 +4655,7 @@ ConversionNNPtr Conversion::createEqualEarth(
  * @param falseNorthing See \ref false_northing . (not in EPSG)
  * @return a new Conversion.
  *
- * @since 7.0
+ * @since 6.3
  */
 ConversionNNPtr Conversion::createVerticalPerspective(
     const util::PropertyMap &properties, const common::Angle &topoOriginLat,
@@ -4716,7 +4716,7 @@ Conversion::createChangeVerticalUnit(const util::PropertyMap &properties,
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.
  * @return a new Conversion.
- * @since 7.0
+ * @since 6.3
  */
 ConversionNNPtr
 Conversion::createHeightDepthReversal(const util::PropertyMap &properties) {

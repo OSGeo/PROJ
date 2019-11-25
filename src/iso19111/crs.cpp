@@ -781,7 +781,7 @@ CRS::getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const {
  *                  3D CRS. May be nullptr.
  * @return a new CRS promoted to 3D, or the current one if already 3D or not
  * applicable.
- * @since 7.0
+ * @since 6.3
  */
 CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                           const io::DatabaseContextPtr &dbContext) const {
@@ -868,7 +868,7 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
  *                  2D CRS. May be nullptr.
  * @return a new CRS demoted to 2D, or the current one if already 2D or not
  * applicable.
- * @since 7.0
+ * @since 6.3
  */
 CRSNNPtr CRS::demoteTo2D(const std::string &newName,
                          const io::DatabaseContextPtr &dbContext) const {
@@ -2192,7 +2192,7 @@ GeographicCRSNNPtr GeographicCRS::createEPSG_4807() {
  *                  2D CRS. May be nullptr.
  * @return a new CRS demoted to 2D, or the current one if already 2D or not
  * applicable.
- * @since 7.0
+ * @since 6.3
  */
 GeographicCRSNNPtr
 GeographicCRS::demoteTo2D(const std::string &newName,
@@ -3770,7 +3770,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
  *                  2D CRS. May be nullptr.
  * @return a new CRS demoted to 2D, or the current one if already 2D or not
  * applicable.
- * @since 7.0
+ * @since 6.3
  */
 ProjectedCRSNNPtr
 ProjectedCRS::demoteTo2D(const std::string &newName,
