@@ -116,9 +116,14 @@ namespace { // anonymous namespace
 
 struct Step {
     PJ* pj = nullptr;
+    bool omit_fwd = false;
+    bool omit_inv = false;
 
-    Step(PJ* pjIn): pj(pjIn) {}
-    Step(Step&& other): pj(std::move(other.pj)) { other.pj = nullptr; }
+    Step(PJ* pjIn, bool omitFwdIn, bool omitInvIn):
+        pj(pjIn), omit_fwd(omitFwdIn), omit_inv(omitInvIn) {}
+    Step(Step&& other): pj(std::move(other.pj)),
+                        omit_fwd(other.omit_fwd),
+                        omit_inv(other.omit_inv) { other.pj = nullptr; }
     Step(const Step&) = delete;
     Step& operator=(const Step&) = delete;
 
@@ -161,7 +166,12 @@ void pj_pipeline_assign_context_to_steps( PJ* P, PJ_CONTEXT* ctx )
 static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
     auto opaque = static_cast<struct pj_opaque*>(P->opaque);
     for( auto& step: opaque->steps )
-         point = proj_trans (step.pj, PJ_FWD, point);
+    {
+        if( !step.omit_fwd )
+        {
+            point = proj_trans (step.pj, PJ_FWD, point);
+        }
+    }
 
     return point;
 }
@@ -171,7 +181,11 @@ static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
     auto opaque = static_cast<struct pj_opaque*>(P->opaque);
     for( auto it = opaque->steps.rbegin(); it != opaque->steps.rend(); ++it )
     {
-        point = proj_trans (it->pj, PJ_INV, point);
+        const auto& step = *it;
+        if( !step.omit_inv )
+        {
+            point = proj_trans (step.pj, PJ_INV, point);
+        }
     }
 
     return point;
@@ -185,7 +199,12 @@ static PJ_XYZ pipeline_forward_3d (PJ_LPZ lpz, PJ *P) {
     point.lpz = lpz;
     auto opaque = static_cast<struct pj_opaque*>(P->opaque);
     for( auto& step: opaque->steps )
-         point = pj_approx_3D_trans (step.pj, PJ_FWD, point);
+    {
+        if( !step.omit_fwd )
+        {
+            point = pj_approx_3D_trans (step.pj, PJ_FWD, point);
+        }
+    }
 
     return point.xyz;
 }
@@ -197,7 +216,11 @@ static PJ_LPZ pipeline_reverse_3d (PJ_XYZ xyz, PJ *P) {
     auto opaque = static_cast<struct pj_opaque*>(P->opaque);
     for( auto it = opaque->steps.rbegin(); it != opaque->steps.rend(); ++it )
     {
-        point = proj_trans (it->pj, PJ_INV, point);
+        const auto& step = *it;
+        if( !step.omit_inv )
+        {
+            point = proj_trans (step.pj, PJ_INV, point);
+        }
     }
 
     return point.lpz;
@@ -211,7 +234,12 @@ static PJ_XY pipeline_forward (PJ_LP lp, PJ *P) {
     point.lp = lp;
     auto opaque = static_cast<struct pj_opaque*>(P->opaque);
     for( auto& step: opaque->steps )
-         point = pj_approx_2D_trans (step.pj, PJ_FWD, point);
+    {
+        if( !step.omit_fwd )
+        {
+            point = pj_approx_2D_trans (step.pj, PJ_FWD, point);
+        }
+    }
 
     return point.xy;
 }
@@ -223,7 +251,11 @@ static PJ_LP pipeline_reverse (PJ_XY xy, PJ *P) {
     auto opaque = static_cast<struct pj_opaque*>(P->opaque);
     for( auto it = opaque->steps.rbegin(); it != opaque->steps.rend(); ++it )
     {
-        point = pj_approx_2D_trans (it->pj, PJ_INV, point);
+        const auto& step = *it;
+        if( !step.omit_inv )
+        {
+            point = pj_approx_2D_trans (step.pj, PJ_INV, point);
+        }
     }
 
     return point.lp;
@@ -476,13 +508,16 @@ PJ *OPERATION(pipeline,0) {
         proj_errno_restore (P, err);
 
         /* Is this step inverted? */
-        for (j = 0;  j < current_argc; j++)
+        for (j = 0;  j < current_argc; j++) {
             if (0==strcmp("inv", current_argv[j])) {
                 /* if +inv exists in both global and local args the forward operation should be used */
                 next_step->inverted = next_step->inverted == 0 ? 1 : 0;
             }
+        }
 
-        opaque->steps.emplace_back(next_step);
+        bool omit_fwd = pj_param(P->ctx, next_step->params, "bomit_fwd").i != 0;
+        bool omit_inv = pj_param(P->ctx, next_step->params, "bomit_inv").i != 0;
+        opaque->steps.emplace_back(next_step, omit_fwd, omit_inv);
 
         proj_log_trace (P, "Pipeline at [%p]:    step at [%p] (%s) done", P, next_step, current_argv[0]);
     }

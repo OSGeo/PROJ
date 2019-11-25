@@ -6284,6 +6284,15 @@ struct Step {
     };
 
     std::vector<KeyValue> paramValues{};
+
+    bool hasKey(const char *keyName) const {
+        for (const auto &kv : paramValues) {
+            if (kv.key == keyName) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 Step::KeyValue::KeyValue(const char *keyIn, const std::string &valueIn)
@@ -6813,7 +6822,9 @@ const std::string &PROJStringFormatter::toString() const {
 
     if (d->steps_.size() > 1 ||
         (d->steps_.size() == 1 &&
-         (d->steps_.front().inverted || !d->globalParamValues_.empty()))) {
+         (d->steps_.front().inverted || d->steps_.front().hasKey("omit_inv") ||
+          d->steps_.front().hasKey("omit_fwd") ||
+          !d->globalParamValues_.empty()))) {
         d->appendToResult("+proj=pipeline");
 
         for (const auto &paramValue : d->globalParamValues_) {
