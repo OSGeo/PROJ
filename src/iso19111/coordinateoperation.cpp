@@ -296,6 +296,12 @@ const MethodMapping *getMapping(const char *wkt2_name) noexcept {
             return &mapping;
         }
     }
+    for (const auto &mapping : otherMethodMappings) {
+        if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
+                                                   wkt2_name)) {
+            return &mapping;
+        }
+    }
     return nullptr;
 }
 
@@ -1691,6 +1697,16 @@ double SingleOperation::parameterValueNumericAsSI(int epsg_code) const
 double SingleOperation::parameterValueNumeric(
     int epsg_code, const common::UnitOfMeasure &targetUnit) const noexcept {
     const auto &val = parameterValue(epsg_code);
+    if (val && val->type() == ParameterValue::Type::MEASURE) {
+        return val->value().convertToUnit(targetUnit);
+    }
+    return 0.0;
+}
+
+double SingleOperation::parameterValueNumeric(
+    const char *param_name, const common::UnitOfMeasure &targetUnit) const
+    noexcept {
+    const auto &val = parameterValue(param_name, 0);
     if (val && val->type() == ParameterValue::Type::MEASURE) {
         return val->value().convertToUnit(targetUnit);
     }
@@ -4669,6 +4685,58 @@ ConversionNNPtr Conversion::createVerticalPerspective(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a conversion based on the Pole Rotation method, using
+ * the conventions of the GRIB 1 and GRIB 2 data formats.
+ *
+ * Those are mentionned in the Note 2 of
+ * https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_temp3-1.shtml
+ *
+ * Several conventions for the pole rotation method exists.
+ * The parameters provided in this method are remapped to the PROJ ob_tran
+ * operation with:
+ * <pre>
+ * +proj=ob_tran +o_proj=longlat +o_lon_p=-rotationAngle
+ *                               +o_lat_p=-southPoleLatInUnrotatedCRS
+ *                               +lon_0=southPoleLongInUnrotatedCRS
+ * </pre>
+ *
+ * Another implementation of that convention is also in the netcdf-java library:
+ * https://github.com/Unidata/netcdf-java/blob/3ce72c0cd167609ed8c69152bb4a004d1daa9273/cdm/core/src/main/java/ucar/unidata/geoloc/projection/RotatedLatLon.java
+ *
+ * The PROJ implementation of this method assumes a spherical ellipsoid.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param southPoleLatInUnrotatedCRS Latitude of the point from the unrotated
+ * CRS, expressed in the unrotated CRS, that will become the south pole of the
+ * rotated CRS.
+ * @param southPoleLongInUnrotatedCRS Longitude of the point from the unrotated
+ * CRS, expressed in the unrotated CRS, that will become the south pole of the
+ * rotated CRS.
+ * @param axisRotation The angle of rotation about the new polar
+ * axis (measured clockwise when looking from the southern to the northern pole)
+ * of the coordinate system, assuming the new axis to have been obtained by
+ * first rotating the sphere through southPoleLongInUnrotatedCRS degrees about
+ * the geographic polar axis and then rotating through
+ * (90 + southPoleLatInUnrotatedCRS) degrees so that the southern pole moved
+ * along the (previously rotated) Greenwich meridian.
+ * @return a new Conversion.
+ *
+ * @since 7.0
+ */
+ConversionNNPtr Conversion::createPoleRotationGRIBConvention(
+    const util::PropertyMap &properties,
+    const common::Angle &southPoleLatInUnrotatedCRS,
+    const common::Angle &southPoleLongInUnrotatedCRS,
+    const common::Angle &axisRotation) {
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION,
+                  createParams(southPoleLatInUnrotatedCRS,
+                               southPoleLongInUnrotatedCRS, axisRotation));
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 static OperationParameterNNPtr createOpParamNameEPSGCode(int code) {
@@ -6069,6 +6137,23 @@ void Conversion::_exportToPROJString(
     } else if (starts_with(methodName, "PROJ ")) {
         bConversionDone = true;
         createPROJExtensionFromCustomProj(this, formatter, false);
+    } else if (ci_equal(methodName,
+                        PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION)) {
+        double southPoleLat = parameterValueNumeric(
+            PROJ_WKT2_NAME_PARAMETER_SOUTH_POLE_LATITUDE_GRIB_CONVENTION,
+            common::UnitOfMeasure::DEGREE);
+        double southPoleLon = parameterValueNumeric(
+            PROJ_WKT2_NAME_PARAMETER_SOUTH_POLE_LONGITUDE_GRIB_CONVENTION,
+            common::UnitOfMeasure::DEGREE);
+        double rotation = parameterValueNumeric(
+            PROJ_WKT2_NAME_PARAMETER_AXIS_ROTATION_GRIB_CONVENTION,
+            common::UnitOfMeasure::DEGREE);
+        formatter->addStep("ob_tran");
+        formatter->addParam("o_proj", "longlat");
+        formatter->addParam("o_lon_p", -rotation);
+        formatter->addParam("o_lat_p", -southPoleLat);
+        formatter->addParam("lon_0", southPoleLon);
+        bConversionDone = true;
     } else if (formatter->convention() ==
                    io::PROJStringFormatter::Convention::PROJ_5 &&
                isZUnitConversion) {

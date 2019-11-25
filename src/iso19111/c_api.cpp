@@ -2947,6 +2947,66 @@ PJ *proj_create_geocentric_crs_from_datum(PJ_CONTEXT *ctx, const char *crs_name,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Create a DerivedGeograhicCRS.
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs_name Name of the GeographicCRS. Or NULL
+ * @param base_geographic_crs Base Geographic CRS. Must not be NULL.
+ * @param conversion Conversion from the base Geographic to the
+ * DerivedGeograhicCRS. Must not be NULL.
+ * @param ellipsoidal_cs Coordinate system. Must not be NULL.
+ *
+ * @return Object of type GeodeticCRS that must be unreferenced with
+ * proj_destroy(), or NULL in case of error.
+ *
+ * @since 7.0
+ */
+PJ *proj_create_derived_geographic_crs(PJ_CONTEXT *ctx, const char *crs_name,
+                                       const PJ *base_geographic_crs,
+                                       const PJ *conversion,
+                                       const PJ *ellipsoidal_cs) {
+    SANITIZE_CTX(ctx);
+    auto base_crs =
+        std::dynamic_pointer_cast<GeographicCRS>(base_geographic_crs->iso_obj);
+    auto conversion_cpp =
+        std::dynamic_pointer_cast<Conversion>(conversion->iso_obj);
+    auto cs = std::dynamic_pointer_cast<EllipsoidalCS>(ellipsoidal_cs->iso_obj);
+    if (!base_crs || !conversion_cpp || !cs) {
+        return nullptr;
+    }
+    try {
+        auto derivedCRS = DerivedGeographicCRS::create(
+            createPropertyMapName(crs_name), NN_NO_CHECK(base_crs),
+            NN_NO_CHECK(conversion_cpp), NN_NO_CHECK(cs));
+        return pj_obj_create(ctx, derivedCRS);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether a CRS is a Derived CRS.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs CRS. Must not be NULL.
+ *
+ * @return whether a CRS is a Derived CRS.
+ *
+ * @since 7.0
+ */
+int proj_is_derived_crs(PJ_CONTEXT *ctx, const PJ *crs) {
+    SANITIZE_CTX(ctx);
+    return dynamic_cast<DerivedCRS *>(crs->iso_obj.get()) != nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Create a VerticalCRS
  *
  * The returned object must be unreferenced with proj_destroy() after
@@ -6447,6 +6507,36 @@ PJ *proj_create_conversion_vertical_perspective(
             Length(view_point_height, linearUnit),
             Length(false_easting, linearUnit),
             Length(false_northing, linearUnit));
+        return proj_create_conversion(ctx, conv);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion based on the Pole Rotation method, using the
+ * conventions of the GRIB 1 and GRIB 2 data formats.
+ *
+ * See osgeo::proj::operation::Conversion::createPoleRotationGRIBConvention().
+ *
+ * Linear parameters are expressed in (linear_unit_name,
+ * linear_unit_conv_factor).
+ * Angular parameters are expressed in (ang_unit_name, ang_unit_conv_factor).
+ */
+PJ *proj_create_conversion_pole_rotation_grib_convention(
+    PJ_CONTEXT *ctx, double south_pole_lat_in_unrotated_crs,
+    double south_pole_long_in_unrotated_crs, double axis_rotation,
+    const char *ang_unit_name, double ang_unit_conv_factor) {
+    SANITIZE_CTX(ctx);
+    try {
+        UnitOfMeasure angUnit(
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createPoleRotationGRIBConvention(
+            PropertyMap(), Angle(south_pole_lat_in_unrotated_crs, angUnit),
+            Angle(south_pole_long_in_unrotated_crs, angUnit),
+            Angle(axis_rotation, angUnit));
         return proj_create_conversion(ctx, conv);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
