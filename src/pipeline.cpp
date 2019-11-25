@@ -132,14 +132,14 @@ struct Step {
     }
 };
 
-struct pj_opaque {
+struct Pipeline {
     char **argv = nullptr;
     char **current_argv = nullptr;
     std::vector<Step> steps{};
     std::stack<double> stack[4];
 };
 
-struct pj_opaque_pushpop {
+struct PushPop {
     bool v1;
     bool v2;
     bool v3;
@@ -157,15 +157,15 @@ static PJ_LP     pipeline_reverse (PJ_XY xy, PJ *P);
 
 void pj_pipeline_assign_context_to_steps( PJ* P, PJ_CONTEXT* ctx )
 {
-    auto opaque = static_cast<struct pj_opaque*>(P->opaque);
-    for( auto& step: opaque->steps )
+    auto pipeline = static_cast<struct Pipeline*>(P->opaque);
+    for( auto& step: pipeline->steps )
         proj_assign_context(step.pj, ctx);
 }
 
 
 static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
-    auto opaque = static_cast<struct pj_opaque*>(P->opaque);
-    for( auto& step: opaque->steps )
+    auto pipeline = static_cast<struct Pipeline*>(P->opaque);
+    for( auto& step: pipeline->steps )
     {
         if( !step.omit_fwd )
         {
@@ -178,10 +178,11 @@ static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
 
 
 static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
-    auto opaque = static_cast<struct pj_opaque*>(P->opaque);
-    for( auto it = opaque->steps.rbegin(); it != opaque->steps.rend(); ++it )
+    auto pipeline = static_cast<struct Pipeline*>(P->opaque);
+    for( auto iterStep = pipeline->steps.rbegin();
+              iterStep != pipeline->steps.rend(); ++iterStep )
     {
-        const auto& step = *it;
+        const auto& step = *iterStep;
         if( !step.omit_inv )
         {
             point = proj_trans (step.pj, PJ_INV, point);
@@ -197,8 +198,8 @@ static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
 static PJ_XYZ pipeline_forward_3d (PJ_LPZ lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
-    auto opaque = static_cast<struct pj_opaque*>(P->opaque);
-    for( auto& step: opaque->steps )
+    auto pipeline = static_cast<struct Pipeline*>(P->opaque);
+    for( auto& step: pipeline->steps )
     {
         if( !step.omit_fwd )
         {
@@ -213,10 +214,11 @@ static PJ_XYZ pipeline_forward_3d (PJ_LPZ lpz, PJ *P) {
 static PJ_LPZ pipeline_reverse_3d (PJ_XYZ xyz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
-    auto opaque = static_cast<struct pj_opaque*>(P->opaque);
-    for( auto it = opaque->steps.rbegin(); it != opaque->steps.rend(); ++it )
+    auto pipeline = static_cast<struct Pipeline*>(P->opaque);
+    for( auto iterStep = pipeline->steps.rbegin();
+              iterStep != pipeline->steps.rend(); ++iterStep )
     {
-        const auto& step = *it;
+        const auto& step = *iterStep;
         if( !step.omit_inv )
         {
             point = proj_trans (step.pj, PJ_INV, point);
@@ -232,8 +234,8 @@ static PJ_LPZ pipeline_reverse_3d (PJ_XYZ xyz, PJ *P) {
 static PJ_XY pipeline_forward (PJ_LP lp, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lp = lp;
-    auto opaque = static_cast<struct pj_opaque*>(P->opaque);
-    for( auto& step: opaque->steps )
+    auto pipeline = static_cast<struct Pipeline*>(P->opaque);
+    for( auto& step: pipeline->steps )
     {
         if( !step.omit_fwd )
         {
@@ -248,10 +250,11 @@ static PJ_XY pipeline_forward (PJ_LP lp, PJ *P) {
 static PJ_LP pipeline_reverse (PJ_XY xy, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xy = xy;
-    auto opaque = static_cast<struct pj_opaque*>(P->opaque);
-    for( auto it = opaque->steps.rbegin(); it != opaque->steps.rend(); ++it )
+    auto pipeline = static_cast<struct Pipeline*>(P->opaque);
+    for( auto iterStep = pipeline->steps.rbegin();
+               iterStep != pipeline->steps.rend(); ++iterStep )
     {
-        const auto& step = *it;
+        const auto& step = *iterStep;
         if( !step.omit_inv )
         {
             point = pj_approx_2D_trans (step.pj, PJ_INV, point);
@@ -271,12 +274,12 @@ static PJ *destructor (PJ *P, int errlev) {
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    auto opaque = static_cast<struct pj_opaque*>(P->opaque);
+    auto pipeline = static_cast<struct Pipeline*>(P->opaque);
 
-    pj_dealloc (opaque->argv);
-    pj_dealloc (opaque->current_argv);
+    pj_dealloc (pipeline->argv);
+    pj_dealloc (pipeline->current_argv);
 
-    delete opaque;
+    delete pipeline;
     P->opaque = nullptr;
 
     return pj_default_destructor(P, errlev);
@@ -367,8 +370,8 @@ static void set_ellipsoid(PJ *P) {
 }
 
 
-static enum pj_io_units get_next_non_whatever_unit(struct pj_opaque* opaque, size_t step, PJ_DIRECTION dir) {
-    const auto& steps = opaque->steps;
+static enum pj_io_units get_next_non_whatever_unit(struct Pipeline* pipeline, size_t step, PJ_DIRECTION dir) {
+    const auto& steps = pipeline->steps;
     const auto nsteps = steps.size();
 
     if (dir == PJ_FWD) {
@@ -420,17 +423,17 @@ PJ *OPERATION(pipeline,0) {
     P->skip_inv_finalize = 1;
 
 
-    P->opaque  = new (std::nothrow) pj_opaque();
+    P->opaque  = new (std::nothrow) Pipeline();
     if (nullptr==P->opaque)
         return destructor(P, ENOMEM);
 
     argc = (int)argc_params (P->params);
-    auto opaque = static_cast<struct pj_opaque*>(P->opaque);
-    opaque->argv = argv = argv_params (P->params, argc);
+    auto pipeline = static_cast<struct Pipeline*>(P->opaque);
+    pipeline->argv = argv = argv_params (P->params, argc);
     if (nullptr==argv)
         return destructor (P, ENOMEM);
 
-    opaque->current_argv = current_argv = static_cast<char**>(pj_calloc (argc, sizeof (char *)));
+    pipeline->current_argv = current_argv = static_cast<char**>(pj_calloc (argc, sizeof (char *)));
     if (nullptr==current_argv)
         return destructor (P, ENOMEM);
 
@@ -517,13 +520,13 @@ PJ *OPERATION(pipeline,0) {
 
         bool omit_fwd = pj_param(P->ctx, next_step->params, "bomit_fwd").i != 0;
         bool omit_inv = pj_param(P->ctx, next_step->params, "bomit_inv").i != 0;
-        opaque->steps.emplace_back(next_step, omit_fwd, omit_inv);
+        pipeline->steps.emplace_back(next_step, omit_fwd, omit_inv);
 
         proj_log_trace (P, "Pipeline at [%p]:    step at [%p] (%s) done", P, next_step, current_argv[0]);
     }
 
     /* Require a forward path through the pipeline */
-    for( auto& step: opaque->steps) {
+    for( auto& step: pipeline->steps) {
         PJ *Q = step.pj;
         if ( ( Q->inverted && (Q->inv || Q->inv3d || Q->fwd4d) ) ||
              (!Q->inverted && (Q->fwd || Q->fwd3d || Q->fwd4d) ) ) {
@@ -535,7 +538,7 @@ PJ *OPERATION(pipeline,0) {
     }
 
     /* determine if an inverse operation is possible */
-    for( auto& step: opaque->steps) {
+    for( auto& step: pipeline->steps) {
         PJ *Q = step.pj;
         if ( pj_has_inverse(Q) ) {
             continue;
@@ -554,26 +557,26 @@ PJ *OPERATION(pipeline,0) {
     /* where the left-hand side units of the first step shouldn't be changed to RADIANS */
     /* as it will result in deg->rad conversions in cs2cs and other applications.       */
     for (i=0; i<nsteps; i++) {
-        auto pj = opaque->steps[i].pj;
+        auto pj = pipeline->steps[i].pj;
         if (pj_left(pj) == PJ_IO_UNITS_WHATEVER && pj_right(pj) == PJ_IO_UNITS_WHATEVER) {
-            pj->left = get_next_non_whatever_unit(opaque, i, PJ_FWD);
-            pj->right = get_next_non_whatever_unit(opaque, i, PJ_FWD);
+            pj->left = get_next_non_whatever_unit(pipeline, i, PJ_FWD);
+            pj->right = get_next_non_whatever_unit(pipeline, i, PJ_FWD);
         }
     }
 
     for (i=nsteps; i>0;) {
         --i;
-        auto pj = opaque->steps[i].pj;
+        auto pj = pipeline->steps[i].pj;
         if (pj_left(pj) == PJ_IO_UNITS_WHATEVER && pj_right(pj) == PJ_IO_UNITS_WHATEVER) {
-            pj->right = get_next_non_whatever_unit(opaque, i, PJ_INV);
-            pj->left = get_next_non_whatever_unit(opaque, i, PJ_INV);
+            pj->right = get_next_non_whatever_unit(pipeline, i, PJ_INV);
+            pj->left = get_next_non_whatever_unit(pipeline, i, PJ_INV);
         }
     }
 
     /* Check that units between each steps match each other, fail if they don't */
     for (i = 0; i + 1 < nsteps; i++) {
-        enum pj_io_units curr_step_output = pj_right (opaque->steps[i].pj);
-        enum pj_io_units next_step_input  = pj_left  (opaque->steps[i+1].pj);
+        enum pj_io_units curr_step_output = pj_right (pipeline->steps[i].pj);
+        enum pj_io_units next_step_input  = pj_left  (pipeline->steps[i+1].pj);
 
         if ( curr_step_output == PJ_IO_UNITS_WHATEVER || next_step_input == PJ_IO_UNITS_WHATEVER )
             continue;
@@ -587,10 +590,10 @@ PJ *OPERATION(pipeline,0) {
     proj_log_trace (P, "Pipeline: %d steps built. Determining i/o characteristics", nsteps);
 
     /* Determine forward input (= reverse output) data type */
-    P->left = pj_left (opaque->steps.front().pj);
+    P->left = pj_left (pipeline->steps.front().pj);
 
     /* Now, correspondingly determine forward output (= reverse input) data type */
-    P->right = pj_right (opaque->steps.back().pj);
+    P->right = pj_right (pipeline->steps.back().pj);
     return P;
 }
 
@@ -598,16 +601,16 @@ static PJ_COORD push(PJ_COORD point, PJ *P) {
     if (P->parent == nullptr)
         return point;
 
-    struct pj_opaque *pipeline = static_cast<struct pj_opaque*>(P->parent->opaque);
-    struct pj_opaque_pushpop *opaque = static_cast<struct pj_opaque_pushpop*>(P->opaque);
+    struct Pipeline *pipeline = static_cast<struct Pipeline*>(P->parent->opaque);
+    struct PushPop *pushpop = static_cast<struct PushPop*>(P->opaque);
 
-    if (opaque->v1)
+    if (pushpop->v1)
         pipeline->stack[0].push(point.v[0]);
-    if (opaque->v2)
+    if (pushpop->v2)
         pipeline->stack[1].push(point.v[1]);
-    if (opaque->v3)
+    if (pushpop->v3)
         pipeline->stack[2].push(point.v[2]);
-    if (opaque->v4)
+    if (pushpop->v4)
         pipeline->stack[3].push(point.v[3]);
 
     return point;
@@ -617,25 +620,25 @@ static PJ_COORD pop(PJ_COORD point, PJ *P) {
     if (P->parent == nullptr)
         return point;
 
-    struct pj_opaque *pipeline = static_cast<struct pj_opaque*>(P->parent->opaque);
-    struct pj_opaque_pushpop *opaque = static_cast<struct pj_opaque_pushpop*>(P->opaque);
+    struct Pipeline *pipeline = static_cast<struct Pipeline*>(P->parent->opaque);
+    struct PushPop *pushpop = static_cast<struct PushPop*>(P->opaque);
 
-    if (opaque->v1 && !pipeline->stack[0].empty()) {
+    if (pushpop->v1 && !pipeline->stack[0].empty()) {
             point.v[0] = pipeline->stack[0].top();
             pipeline->stack[0].pop();
     }
 
-    if (opaque->v2 && !pipeline->stack[1].empty()) {
+    if (pushpop->v2 && !pipeline->stack[1].empty()) {
             point.v[1] = pipeline->stack[1].top();
             pipeline->stack[1].pop();
     }
 
-    if (opaque->v3 && !pipeline->stack[2].empty()) {
+    if (pushpop->v3 && !pipeline->stack[2].empty()) {
             point.v[2] = pipeline->stack[2].top();
             pipeline->stack[2].pop();
     }
 
-    if (opaque->v4 && !pipeline->stack[3].empty()) {
+    if (pushpop->v4 && !pipeline->stack[3].empty()) {
             point.v[3] = pipeline->stack[3].top();
             pipeline->stack[3].pop();
     }
@@ -646,22 +649,22 @@ static PJ_COORD pop(PJ_COORD point, PJ *P) {
 
 
 static PJ *setup_pushpop(PJ *P) {
-    auto opaque = static_cast<struct pj_opaque_pushpop*>(pj_calloc (1, sizeof(struct pj_opaque_pushpop)));
-    P->opaque = opaque;
+    auto pushpop = static_cast<struct PushPop*>(pj_calloc (1, sizeof(struct PushPop)));
+    P->opaque = pushpop;
     if (nullptr==P->opaque)
         return destructor(P, ENOMEM);
 
     if (pj_param_exists(P->params, "v_1"))
-        opaque->v1 = true;
+        pushpop->v1 = true;
 
     if (pj_param_exists(P->params, "v_2"))
-        opaque->v2 = true;
+        pushpop->v2 = true;
 
     if (pj_param_exists(P->params, "v_3"))
-        opaque->v3 = true;
+        pushpop->v3 = true;
 
     if (pj_param_exists(P->params, "v_4"))
-        opaque->v4 = true;
+        pushpop->v4 = true;
 
     P->left  = PJ_IO_UNITS_WHATEVER;
     P->right = PJ_IO_UNITS_WHATEVER;
