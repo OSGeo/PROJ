@@ -165,6 +165,9 @@ access. This is very similar to the behaviour of the GDAL
 I/O layer. The plan is to mostly copy GDAL's vsicurl implementation inside PROJ, with
 needed adjustmeents and proper namespacing of it.
 
+A retry strategy (typically a delay with an exponential back-off and some random
+jitter) will be added to account for intermittent network or server-side failure.
+
 URL building
 ++++++++++++
 
