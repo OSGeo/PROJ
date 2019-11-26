@@ -6278,12 +6278,25 @@ struct Step {
             return key == otherKey && value == otherVal;
         }
 
+        bool operator==(const KeyValue &other) const noexcept {
+            return key == other.key && value == other.value;
+        }
+
         bool operator!=(const KeyValue &other) const noexcept {
             return key != other.key || value != other.value;
         }
     };
 
     std::vector<KeyValue> paramValues{};
+
+    bool hasKey(const char *keyName) const {
+        for (const auto &kv : paramValues) {
+            if (kv.key == keyName) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 Step::KeyValue::KeyValue(const char *keyIn, const std::string &valueIn)
@@ -6790,6 +6803,46 @@ const std::string &PROJStringFormatter::toString() const {
                 }
             }
 
+            // +step +proj=hgridshift +grids=grid_A
+            // +step +proj=vgridshift [...] <== curStep
+            // +step +inv +proj=hgridshift +grids=grid_A
+            // ==>
+            // +step +proj=push +v_1 +v_2
+            // +step +proj=hgridshift +grids=grid_A +omit_inv
+            // +step +proj=vgridshift [...]
+            // +step +inv +proj=hgridshift +grids=grid_A +omit_fwd
+            // +step +proj=pop +v_1 +v_2
+            if (i + 1 < d->steps_.size() && prevStep.name == "hgridshift" &&
+                prevStepParamCount == 1 && curStep.name == "vgridshift") {
+                auto iterNext = iterCur;
+                ++iterNext;
+                auto &nextStep = *iterNext;
+                if (nextStep.name == "hgridshift" &&
+                    nextStep.inverted != prevStep.inverted &&
+                    nextStep.paramValues.size() == 1 &&
+                    prevStep.paramValues[0] == nextStep.paramValues[0]) {
+                    Step pushStep;
+                    pushStep.name = "push";
+                    pushStep.paramValues.emplace_back("v_1");
+                    pushStep.paramValues.emplace_back("v_2");
+                    d->steps_.insert(iterPrev, pushStep);
+
+                    prevStep.paramValues.emplace_back("omit_inv");
+
+                    nextStep.paramValues.emplace_back("omit_fwd");
+
+                    Step popStep;
+                    popStep.name = "pop";
+                    popStep.paramValues.emplace_back("v_1");
+                    popStep.paramValues.emplace_back("v_2");
+                    ++iterNext;
+                    d->steps_.insert(iterNext, popStep);
+
+                    changeDone = true;
+                    break;
+                }
+            }
+
             // detect a step and its inverse
             if (curStep.inverted != prevStep.inverted &&
                 curStep.name == prevStep.name &&
@@ -6813,7 +6866,9 @@ const std::string &PROJStringFormatter::toString() const {
 
     if (d->steps_.size() > 1 ||
         (d->steps_.size() == 1 &&
-         (d->steps_.front().inverted || !d->globalParamValues_.empty()))) {
+         (d->steps_.front().inverted || d->steps_.front().hasKey("omit_inv") ||
+          d->steps_.front().hasKey("omit_fwd") ||
+          !d->globalParamValues_.empty()))) {
         d->appendToResult("+proj=pipeline");
 
         for (const auto &paramValue : d->globalParamValues_) {

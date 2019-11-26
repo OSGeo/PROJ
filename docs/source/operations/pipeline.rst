@@ -128,3 +128,34 @@ Optional
 .. option:: +inv
 
     Invert a step in a pipeline.
+
+.. option:: +omit_fwd
+
+    .. versionadded:: 6.3.0
+
+    Skip a step of the pipeline when it is followed in the forward path.
+
+    The following example shows a combined use of :ref:`push <push>` and :ref:`pop <pop>` operators,
+    with ``omit_fwd`` and ``omit_inv`` options, to implement a vertical adjustment that must
+    be done in a interpolation CRS that is different from the horizontal CRS
+    used in input and output. +omit_fwd in the forward path avoid a useless
+    inverse horizontal transformation and relies on the pop operator to restore
+    initial horizontal coordinates. +omit_inv serves the similar purpose when
+    the pipeline is executed in the reverse direction
+
+    ::
+
+        +proj=pipeline
+        +step +proj=unitconvert +xy_in=deg +xy_out=rad
+        +step +proj=push +v_1 +v_2
+        +step +proj=hgridshift +grids=nvhpgn.gsb +omit_inv
+        +step +proj=vgridshift +grids=g1999u05.gtx +multiplier=1
+        +step +inv +proj=hgridshift +grids=nvhpgn.gsb +omit_fwd
+        +step +proj=pop +v_1 +v_2
+        +step +proj=unitconvert +xy_in=rad +xy_out=deg
+
+.. option:: +omit_inv
+
+    .. versionadded:: 6.3.0
+
+    Skip a step of the pipeline when it is followed in the reverse path.

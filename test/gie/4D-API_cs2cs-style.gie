@@ -386,6 +386,55 @@ operation   +proj=pop +v_3
 accept      12 56 0 0
 expect      12 56 0 0
 
+-------------------------------------------------------------------------------
+Test Pipeline +omit_inv
+-------------------------------------------------------------------------------
+
+operation   +proj=pipeline
+                +step +proj=affine +xoff=1 +yoff=1 +omit_inv
+
+accept      2 49 0 0
+expect      3 50 0 0
+
+direction inverse
+accept      2 49 0 0
+expect      2 49 0 0
+
+
+operation   +proj=pipeline
+                +step +inv +proj=affine +xoff=1 +yoff=1 +omit_inv
+
+accept      2 49 0 0
+expect      1 48 0 0
+
+direction inverse
+accept      2 49 0 0
+expect      2 49 0 0
+
+-------------------------------------------------------------------------------
+Test Pipeline +omit_fwd
+-------------------------------------------------------------------------------
+
+operation   +proj=pipeline
+                +step +proj=affine +xoff=1 +yoff=1 +omit_fwd
+
+accept      2 49 0 0
+expect      2 49 0 0
+
+direction inverse
+accept      2 49 0 0
+expect      1 48 0 0
+
+
+operation   +proj=pipeline
+                +step +inv +proj=affine +xoff=1 +yoff=1 +omit_fwd
+
+accept      2 49 0 0
+expect      2 49 0 0
+
+direction inverse
+accept      2 49 0 0
+expect      3 50 0 0
 
 -------------------------------------------------------------------------------
 Test bugfix of https://github.com/OSGeo/proj.4/issues/1002
