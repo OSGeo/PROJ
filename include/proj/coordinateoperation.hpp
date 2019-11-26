@@ -1597,6 +1597,7 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
+    PROJ_FRIEND(CoordinateOperationFactory);
     PROJ_INTERNAL TransformationNNPtr inverseAsTransformation() const;
 
     PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;

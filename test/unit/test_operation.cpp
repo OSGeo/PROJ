@@ -5564,6 +5564,65 @@ TEST(operation, projCRS_no_id_to_geogCRS_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, projCRS_3D_to_projCRS_2D_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto wkt =
+        "PROJCRS[\"Projected 3d CRS\",\n"
+        "    BASEGEOGCRS[\"JGD2000\",\n"
+        "        DATUM[\"Japanese Geodetic Datum 2000\",\n"
+        "            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",4947]],\n" // the code is what triggered the bug
+        "    CONVERSION[\"Japan Plane Rectangular CS zone VII\",\n"
+        "        METHOD[\"Transverse Mercator\",\n"
+        "            ID[\"EPSG\",9807]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",36,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",137.166666666667,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",0.9999,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8805]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]],\n"
+        "        ID[\"EPSG\",17807]],\n"
+        "    CS[Cartesian,3],\n"
+        "        AXIS[\"northing (X)\",north,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]],\n"
+        "        AXIS[\"easting (Y)\",east,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]],\n"
+        "        AXIS[\"ellipsoidal height (h)\",up,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto src = NN_CHECK_ASSERT(nn_dynamic_pointer_cast<CRS>(obj));
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("32653"); // WGS 84 UTM 53
+    // We just want to check that we don't get inconsistent chaining exception
+    auto list =
+        CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
+    ASSERT_GE(list.size(), 1U);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_3D_to_projCRS_with_2D_geocentric_translation) {
 
     auto authFactory =

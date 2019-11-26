@@ -11447,7 +11447,14 @@ static std::vector<CoordinateOperationNNPtr>
 applyInverse(const std::vector<CoordinateOperationNNPtr> &list) {
     auto res = list;
     for (auto &op : res) {
+#ifdef DEBUG
+        auto opNew = op->inverse();
+        assert(opNew->targetCRS()->isEquivalentTo(op->sourceCRS().get()));
+        assert(opNew->sourceCRS()->isEquivalentTo(op->targetCRS().get()));
+        op = opNew;
+#else
         op = op->inverse();
+#endif
     }
     return res;
 }
@@ -12372,7 +12379,13 @@ void CoordinateOperationFactory::Private::setCRSs(
 
     auto invCO = dynamic_cast<InverseCoordinateOperation *>(co);
     if (invCO) {
-        setCRSs(invCO->forwardOperation().get(), targetCRS, sourceCRS);
+        invCO->forwardOperation()->setCRSs(targetCRS, sourceCRS, nullptr);
+    }
+
+    auto transf = dynamic_cast<Transformation *>(co);
+    if (transf) {
+        transf->inverseAsTransformation()->setCRSs(targetCRS, sourceCRS,
+                                                   nullptr);
     }
 
     auto concat = dynamic_cast<ConcatenatedOperation *>(co);
