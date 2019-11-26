@@ -288,6 +288,19 @@ The following CDN providers have offered to store PROJ grids:
 - `Amazon Public Datasets <https://aws.amazon.com/opendata/public-datasets/>`_
 - `Fastly <https://www.fastly.com/>`_
 
+Regarding AWS Public Dataset Program, an application must be submitted at
+https://application.opendata.aws. The program covers storage and egress
+(bandwidth) of the data. They generally don't allow usage of CloudFront
+(their CDN) as part of the program (we would usually look to have it covered
+by credits), but in this instance, they would be fine to provide it.
+They'd only ask that we keep the CloudFront URL "visible" (as appropriate for
+the use case) so people can see where the data is hosted in case they go looking.
+Their terms can be seen at https://aws.amazon.com/service-terms/ and CloudFront
+has its own, small section. Those terms may change a bit from time to time for
+minor changes. Major changing service terms is assumed to be unfrequent.
+There are also the Public Dataset Program terms at http://aws.amazon.com/public-datasets/terms/.
+Those also do not effectively change over time and are renewed on a 2 year basis.
+
 Criteria for grid hosting
 +++++++++++++++++++++++++
 
