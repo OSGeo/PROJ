@@ -151,6 +151,59 @@ void pj_set_searchpath ( int count, const char **path )
     proj_context_set_search_paths( nullptr, count, const_cast<const char* const*>(path) );
 }
 
+
+#ifdef WIN32
+#include <windows.h>
+char *get_projlib_dir(const char *name) {
+    /* Check if proj.db lieves in a share/proj dir parallel to bin/proj.dll */
+    /* Based in https://stackoverflow.com/questions/9112893/how-to-get-path-to-executable-in-c-running-on-windows */
+    size_t k;
+    DWORD last_error;
+    DWORD result;
+    DWORD path_size = 1024;
+    char* path      = (char *)malloc(1024);
+    struct stat fileInfo; 
+
+    for (;;) {
+        memset(path, 0, path_size);
+        result     = GetModuleFileNameA(NULL, path, path_size - 1);
+        last_error = GetLastError();
+
+        if (result == 0) {
+            free(path);
+            path = nullptr;
+            break;
+        }
+        else if (result == path_size - 1) {
+            free(path);
+            if (ERROR_INSUFFICIENT_BUFFER != last_error) {
+                path = nullptr;
+                break;
+            }
+            path_size = path_size * 2;
+            path = (char *)malloc(path_size);
+        }
+        else {
+            break;
+        }
+    }
+    // Now remove the program's name. It was (example) "C:\programs\gmt6\bin\gdal_translate.exe"
+    k = strlen(path);
+    while (path[k] != '\\') k--;
+    path[k] = '\0';
+
+    strcat(path, "/../share/proj/");
+    strcat(path, name);
+
+    if (stat(path, &fileInfo) == 0)	// Check if file exists (probably there are simpler ways)
+        return path;
+    else {
+        free(path);
+        return nullptr;
+    }
+}
+#endif
+
 /************************************************************************/
 /*                          pj_open_lib_ex()                            */
 /************************************************************************/
@@ -229,6 +282,10 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                 if( fid )
                     break;
             }
+#ifdef _WIN32
+        /* check if it lieves in a ../share/proj dir of the proj dll */
+        } else if ((sysname = get_projlib_dir(name)) != nullptr) {
+#endif
         /* or hardcoded path */
         } else if ((sysname = proj_lib_name) != nullptr) {
             fname = sysname;
