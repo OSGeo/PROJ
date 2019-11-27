@@ -269,7 +269,9 @@ The recently_used table will act as a least recently used list of chunk ids.
 The directory used to locate this database will be ${XDG_DATA_HOME}/proj
 (per https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
 where ${XDG_DATA_HOME} defaults to ${HOME}/.local/share on Unix builds
-and ${USERPROFILE}/.local/share on Windows builds.
+and ${LOCALAPPDATA} on Windows builds. Exact details to be sorted out, but
+https://github.com/ActiveState/appdirs/blob/a54ea98feed0a7593475b94de3a359e9e1fe8fdb/appdirs.py#L45-L97
+can be a good reference.
 
 As this database might be accesse by several threads or processes at the same
 time, the code accessing to it will carefully honour SQLite3 errors regarding
