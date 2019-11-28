@@ -4675,6 +4675,18 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             "+proj=pipeline +step +inv +proj=vgridshift +grids=egm08_25.gtx "
             "+multiplier=1");
     }
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            // NGVD29 depth (ftUS)
+            authFactory->createCoordinateReferenceSystem("6359"),
+            authFactory->createCoordinateReferenceSystem("4326"), ctxt);
+        ASSERT_EQ(list.size(), 1U);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=affine +s33=-0.304800609601219");
+    }
 }
 
 // ---------------------------------------------------------------------------

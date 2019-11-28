@@ -13817,13 +13817,22 @@ void CoordinateOperationFactory::Private::createOperationsVertToGeog(
         }
     }
 
-    const double convSrc =
-        vertSrc->coordinateSystem()->axisList()[0]->unit().conversionToSI();
+    const auto &srcAxis = vertSrc->coordinateSystem()->axisList()[0];
+    const double convSrc = srcAxis->unit().conversionToSI();
     double convDst = 1.0;
     const auto &geogAxis = geogDst->coordinateSystem()->axisList();
+    bool dstIsUp = true;
+    bool dstIsDown = true;
     if (geogAxis.size() == 3) {
-        convDst = geogAxis[2]->unit().conversionToSI();
+        const auto &dstAxis = geogAxis[2];
+        convDst = dstAxis->unit().conversionToSI();
+        dstIsUp = dstAxis->direction() == cs::AxisDirection::UP;
+        dstIsDown = dstAxis->direction() == cs::AxisDirection::DOWN;
     }
+    const bool srcIsUp = srcAxis->direction() == cs::AxisDirection::UP;
+    const bool srcIsDown = srcAxis->direction() == cs::AxisDirection::DOWN;
+    const bool heightDepthReversal =
+        ((srcIsUp && dstIsDown) || (srcIsDown && dstIsUp));
 
     const double factor = convSrc / convDst;
     auto conv = Transformation::createChangeVerticalUnit(
@@ -13831,7 +13840,8 @@ void CoordinateOperationFactory::Private::createOperationsVertToGeog(
             common::IdentifiedObject::NAME_KEY,
             buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr()) +
                 BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT),
-        sourceCRS, targetCRS, common::Scale(factor), {});
+        sourceCRS, targetCRS,
+        common::Scale(heightDepthReversal ? -factor : factor), {});
     conv->setHasBallparkTransformation(true);
     res.push_back(conv);
 }
