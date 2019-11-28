@@ -275,7 +275,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                     break;
             }
 #ifdef _WIN32
-        /* check if it lieves in a ../share/proj dir of the proj dll */
+        /* check if it lives in a ../share/proj dir of the proj dll */
         } else if ((sysname = get_path_from_win32_projlib(name, fname)) != nullptr) {
 #endif
         /* or hardcoded path */
