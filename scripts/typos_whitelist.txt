@@ -1,1 +1,2 @@
 $EXE +units=us-ft +init=${INIT_FILE}:404 -E -f '%.3f' >>${OUT} <<EOF
+  (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)

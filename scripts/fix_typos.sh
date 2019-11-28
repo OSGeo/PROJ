@@ -47,7 +47,7 @@ if ! test -d fix_typos; then
 fi
 
 EXCLUDED_FILES="*configure,config.status,config.sub,*/autom4te.cache/*,libtool,aclocal.m4,depcomp,ltmain.sh,*.pdf,./m4/*,./fix_typos/*,./docs/build/*,./src/*generated*,./test/googletest/*,./include/proj/internal/nlohmann/json.hpp,*.before_reformat"
-WORDS_WHITE_LIST="metres,als,lsat,twon,ang,PJD_ERR_LSAT_NOT_IN_RANGE,COLOR_GRAT"
+WORDS_WHITE_LIST="metres,als,lsat,twon,ang,PJD_ERR_LSAT_NOT_IN_RANGE,COLOR_GRAT,interm"
 
 python3 fix_typos/codespell/codespell.py -w -i 3 -q 2 -S $EXCLUDED_FILES \
     -x scripts/typos_whitelist.txt --words-white-list=$WORDS_WHITE_LIST \
