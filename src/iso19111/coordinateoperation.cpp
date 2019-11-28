@@ -12947,10 +12947,25 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         }
     }
 
+    bool foundInstantiableOp = false;
+    if (!res.empty()) {
+        for (const auto &op : res) {
+            if (op->isPROJInstantiable(context.context->getAuthorityFactory()
+                                           ->databaseContext())) {
+                foundInstantiableOp = true;
+                break;
+            }
+        }
+        if (!foundInstantiableOp) {
+            resFindDirectNonEmptyBeforeFiltering = false;
+        }
+    }
+
     // NAD27 to NAD83 has tens of results already. No need to look
     // for a pivot
     if (!sameGeodeticDatum &&
-        ((res.empty() && !resFindDirectNonEmptyBeforeFiltering &&
+        (((res.empty() || !foundInstantiableOp) &&
+          !resFindDirectNonEmptyBeforeFiltering &&
           context.context->getAllowUseIntermediateCRS() ==
               CoordinateOperationContext::IntermediateCRSUse::
                   IF_NO_DIRECT_TRANSFORMATION) ||
@@ -14389,6 +14404,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                                 opDst, interpolationGeogCRS, true);
                             res.emplace_back(op);
                         } catch (const InvalidOperationEmptyIntersection &) {
+                        } catch (const io::FormattingException &) {
                         }
                     }
                 }
