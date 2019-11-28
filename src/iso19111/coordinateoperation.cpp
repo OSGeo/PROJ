@@ -12948,17 +12948,28 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
     }
 
     bool foundInstantiableOp = false;
-    if (!res.empty()) {
-        for (const auto &op : res) {
-            if (op->isPROJInstantiable(context.context->getAuthorityFactory()
-                                           ->databaseContext())) {
-                foundInstantiableOp = true;
-                break;
-            }
+    // FIXME: the limitation to .size() == 1 is just for the
+    // -s EPSG:4959+5759 -t "EPSG:4959+7839" case
+    // finding EPSG:7860 'NZVD2016 height to Auckland 1946
+    // height (1)', which uses the EPSG:1071 'Vertical Offset by Grid
+    // Interpolation (NZLVD)' method which is not currently implemented by PROJ
+    // (cannot deal with .csv files)
+    // Initially the test was written to iterate over for all operations of a
+    // non-empty res, but this causes failures in the test suite when no grids
+    // are installed at all. Ideally we should tweak the test suite to be
+    // robust to that, or skip some tests.
+    if (res.size() == 1) {
+        try {
+            res.front()->exportToPROJString(
+                io::PROJStringFormatter::create().get());
+            foundInstantiableOp = true;
+        } catch (const std::exception &) {
         }
         if (!foundInstantiableOp) {
             resFindDirectNonEmptyBeforeFiltering = false;
         }
+    } else if (res.size() > 1) {
+        foundInstantiableOp = true;
     }
 
     // NAD27 to NAD83 has tens of results already. No need to look
