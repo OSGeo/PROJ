@@ -162,7 +162,7 @@ static const char *get_path_from_win32_projlib(const char *name, std::string& ou
     for (;;) {
         out.resize(path_size);
         memset(&out[0], 0, path_size);
-        DWORD result     = GetModuleFileNameA(NULL, &out[0], path_size - 1);
+        DWORD result     = GetModuleFileNameA(nullptr, &out[0], path_size - 1);
         DWORD last_error = GetLastError();
 
         if (result == 0) {
