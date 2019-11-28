@@ -4,9 +4,9 @@ About
 
 .. include:: about_core.rst
 
-.. image:: ../images/OSGeo_community.png
+.. image:: ../images/OSGeo_project.png
     :scale: 30 %
-    :alt: OSGeo Community
+    :alt: OSGeo Project
 
 Citation
 -------------------------------------------------------------------------------
