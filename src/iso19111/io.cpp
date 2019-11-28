@@ -3185,7 +3185,16 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
         }
     }
 
-    const auto *wkt2_mapping = getMapping(esriMapping->wkt2_name);
+    const char *projectionMethodWkt2Name = esriMapping->wkt2_name;
+    if (ci_equal(esriProjectionName, "Krovak")) {
+        const std::string projCRSName =
+            stripQuotes(projCRSNode->GP()->children()[0]);
+        if (projCRSName.find("_East_North") != std::string::npos) {
+            projectionMethodWkt2Name = EPSG_NAME_METHOD_KROVAK_NORTH_ORIENTED;
+        }
+    }
+
+    const auto *wkt2_mapping = getMapping(projectionMethodWkt2Name);
     if (ci_equal(esriProjectionName, "Stereographic")) {
         try {
             if (std::fabs(io::asDouble(
@@ -3467,6 +3476,14 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     }
     propertiesMethod.set(IdentifiedObject::NAME_KEY, projectionName);
 
+    std::vector<bool> foundParameters;
+    if (mapping) {
+        size_t countParams = 0;
+        while (mapping->params[countParams] != nullptr) {
+            ++countParams;
+        }
+        foundParameters.resize(countParams);
+    }
     for (const auto &childNode : projCRSNode->GP()->children()) {
         if (ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER)) {
             const auto &childNodeChildren = childNode->GP()->children();
@@ -3487,11 +3504,18 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                     continue;
                 }
             }
-            const auto *paramMapping =
+            auto *paramMapping =
                 mapping ? getMappingFromWKT1(mapping, parameterName) : nullptr;
             if (mapping &&
                 mapping->epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
                 ci_equal(parameterName, "latitude_of_origin")) {
+                for (size_t idx = 0; mapping->params[idx] != nullptr; ++idx) {
+                    if (mapping->params[idx]->epsg_code ==
+                        EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) {
+                        foundParameters[idx] = true;
+                        break;
+                    }
+                }
                 parameterName = EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN;
                 propertiesParameter.set(
                     Identifier::CODE_KEY,
@@ -3499,6 +3523,12 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                 propertiesParameter.set(Identifier::CODESPACE_KEY,
                                         Identifier::EPSG);
             } else if (paramMapping) {
+                for (size_t idx = 0; mapping->params[idx] != nullptr; ++idx) {
+                    if (mapping->params[idx] == paramMapping) {
+                        foundParameters[idx] = true;
+                        break;
+                    }
+                }
                 parameterName = paramMapping->wkt2_name;
                 if (paramMapping->epsg_code != 0) {
                     propertiesParameter.set(Identifier::CODE_KEY,
@@ -3518,6 +3548,38 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
             } catch (const std::exception &) {
                 throw ParsingException(
                     concat("unhandled parameter value type : ", paramValue));
+            }
+        }
+    }
+
+    // Add back important parameters that should normally be present, but
+    // are sometimes missing. Currently we only deal with Scale factor at
+    // natural origin. This is to avoid a default value of 0 to slip in later.
+    // But such WKT should be considered invalid.
+    if (mapping) {
+        for (size_t idx = 0; mapping->params[idx] != nullptr; ++idx) {
+            if (!foundParameters[idx] &&
+                mapping->params[idx]->epsg_code ==
+                    EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN) {
+
+                emitRecoverableWarning(
+                    "The WKT string lacks a value "
+                    "for " EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
+                    ". Default it to 1.");
+
+                PropertyMap propertiesParameter;
+                propertiesParameter.set(
+                    Identifier::CODE_KEY,
+                    EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN);
+                propertiesParameter.set(Identifier::CODESPACE_KEY,
+                                        Identifier::EPSG);
+                propertiesParameter.set(
+                    IdentifiedObject::NAME_KEY,
+                    EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN);
+                parameters.push_back(
+                    OperationParameter::create(propertiesParameter));
+                values.push_back(ParameterValue::create(
+                    Measure(1.0, UnitOfMeasure::SCALE_UNITY)));
             }
         }
     }

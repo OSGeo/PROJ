@@ -5388,6 +5388,49 @@ TEST(operation, projCRS_no_id_to_geogCRS_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_3D_to_projCRS_with_2D_geocentric_translation) {
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto src =
+        authFactory->createCoordinateReferenceSystem("4979"); // WGS 84 3D
+
+    // Azores Central 1948 / UTM zone 26N
+    auto dst = authFactory->createCoordinateReferenceSystem("2189");
+
+    auto list =
+        CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=push +v_3 " // this is what we check
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +proj=helmert +x=104 +y=-167 +z=38 "
+              "+step +inv +proj=cart +ellps=intl "
+              "+step +proj=pop +v_3 " // this is what we check
+              "+step +proj=utm +zone=26 +ellps=intl");
+
+    auto listReverse =
+        CoordinateOperationFactory::create()->createOperations(dst, src, ctxt);
+    ASSERT_GE(listReverse.size(), 1U);
+    EXPECT_EQ(
+        listReverse[0]->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +inv +proj=utm +zone=26 +ellps=intl "
+        "+step +proj=push +v_3 " // this is what we check
+        "+step +proj=cart +ellps=intl "
+        "+step +proj=helmert +x=-104 +y=167 +z=-38 "
+        "+step +inv +proj=cart +ellps=WGS84 "
+        "+step +proj=pop +v_3 " // this is what we check
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+        "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, projCRS_to_projCRS) {
 
     auto op = CoordinateOperationFactory::create()->createOperation(
@@ -6951,6 +6994,30 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
         EXPECT_EQ(op_proj, op2_proj) << "op=" << op->nameStr()
                                      << " op2=" << op2->nameStr();
     }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_with_non_meter_horiz_and_vertical_to_geog) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=31 +datum=WGS84 +units=us-ft +vunits=us-ft +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), authFactory->createCoordinateReferenceSystem("4326"),
+        ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    // Check that vertical unit conversion is done just once
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=us-ft +xy_out=m "
+              "+step +inv +proj=utm +zone=31 +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=us-ft "
+              "+xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------

@@ -32,24 +32,24 @@
 # Z. Altamimi et al, 2017, ITRF2014 plate motion model,
 # doi: 10.1093/gji/ggx136
 
-<ANTA> +proj=helmert +drx=−0.000248 +dry=−0.000324 +drz=0.000675 +convention=position_vector
+<ANTA> +proj=helmert +drx=-0.000248 +dry=-0.000324 +drz=0.000675 +convention=position_vector
 
-<ARAB> +proj=helmert +drx=0.001154 +dry=−0.000136 +drz=0.001444 +convention=position_vector
+<ARAB> +proj=helmert +drx=0.001154 +dry=-0.000136 +drz=0.001444 +convention=position_vector
 
 <AUST> +proj=helmert +drx=0.001510 +dry=0.001182 +drz=0.001215 +convention=position_vector
 
-<EURA> +proj=helmert +drx=−0.000085 +dry=−0.000531 +drz=0.000770 +convention=position_vector
+<EURA> +proj=helmert +drx=-0.000085 +dry=-0.000531 +drz=0.000770 +convention=position_vector
 
-<INDI> +proj=helmert +drx=0.001154 +dry=−0.000005 +drz=0.001454 +convention=position_vector
+<INDI> +proj=helmert +drx=0.001154 +dry=-0.000005 +drz=0.001454 +convention=position_vector
 
-<NAZC> +proj=helmert +drx=−0.000333 +dry=−0.001544 +drz=0.001623 +convention=position_vector
+<NAZC> +proj=helmert +drx=-0.000333 +dry=-0.001544 +drz=0.001623 +convention=position_vector
 
 <NOAM> +proj=helmert +drx=0.000024 +dry=-0.000694 +drz=-0.000063 +convention=position_vector
 
-<NUBI> +proj=helmert +drx=0.000099 +dry=−0.000614 +drz=0.000733 +convention=position_vector
+<NUBI> +proj=helmert +drx=0.000099 +dry=-0.000614 +drz=0.000733 +convention=position_vector
 
-<PCFC> +proj=helmert +drx=−0.000409 +dry=0.001047 +drz=-0.002169 +convention=position_vector
+<PCFC> +proj=helmert +drx=-0.000409 +dry=0.001047 +drz=-0.002169 +convention=position_vector
 
-<SOAM> +proj=helmert +drx=−0.000270 +dry=−0.000301 +drz=−0.000140 +convention=position_vector
+<SOAM> +proj=helmert +drx=-0.000270 +dry=-0.000301 +drz=-0.000140 +convention=position_vector
 
-<SOMA> +proj=helmert +drx=−0.000121 +dry=−0.000794 +drz=0.000884 +convention=position_vector
+<SOMA> +proj=helmert +drx=-0.000121 +dry=-0.000794 +drz=0.000884 +convention=position_vector

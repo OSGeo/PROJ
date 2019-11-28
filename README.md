@@ -1,10 +1,11 @@
 # PROJ
 
-[![Travis Status](https://travis-ci.com/OSGeo/PROJ.svg?branch=master)](https://travis-ci.com/OSGeo/PROJ)
-[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/por8r52bjt8ocga9?svg=true)](https://ci.appveyor.com/project/OSGeo/PROJ)
-[![Coveralls Status](https://coveralls.io/repos/github/OSGeo/PROJ/badge.svg?branch=master)](https://coveralls.io/github/OSGeo/PROJ?branch=master)
+[![Travis Status](https://travis-ci.com/OSGeo/PROJ.svg?branch=6.2)](https://travis-ci.com/OSGeo/PROJ)
+[![AppVeyor Status](https://ci.appveyor.com/api/projects/status/github/OSGeo/PROJ?branch=6.2&svg=true)](https://ci.appveyor.com/project/OSGeo/PROJ?branch=6.2)
+[![Coveralls Status](https://coveralls.io/repos/github/OSGeo/PROJ/badge.svg?branch=6.2)](https://coveralls.io/github/OSGeo/PROJ?branch=6.2)
 [![Gitter](https://badges.gitter.im/OSGeo/proj.4.svg)](https://gitter.im/OSGeo/proj.4)
 [![Mailing List](https://img.shields.io/badge/PROJ-mailing%20list-4eb899.svg)](http://lists.osgeo.org/mailman/listinfo/proj)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](code-of-conduct.md)
 
 PROJ is a generic coordinate transformation software, that transforms
 coordinates from one coordinate reference system (CRS) to another.

@@ -17,3 +17,5 @@ command line applications or the C API that is a part of the software package.
    transformation
    environmentvars
    differences
+   projjson
+

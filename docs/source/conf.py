@@ -20,6 +20,7 @@ import datetime
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('_extensions'))
 
 import bibstyle
 
@@ -35,6 +36,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinxcontrib.bibtex',
     'breathe',
+    'redirects',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -66,7 +68,7 @@ copyright = u'1983-{0}'.format(now.year)
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-version = '6.2.0'
+version = '6.2.1'
 
 # use same |release| as |version|
 release = version
@@ -130,8 +132,20 @@ html_theme = "sphinx_rtd_theme"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {}
-
+html_theme_options = {
+    'canonical_url': 'https://proj.org',
+    'logo_only': True,
+    'display_version': True,
+    'prev_next_buttons_location': 'both',
+    'style_external_links': False,
+    'style_nav_header_background': '#353130',
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    #'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
 # Add any paths that contain custom themes here, relative to this directory.
 
 
@@ -144,7 +158,7 @@ html_theme_options = {}
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = '../images/logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -157,6 +171,12 @@ html_theme_options = {}
 html_static_path = ['_static']
 
 html_context = {
+    'display_github': True,
+    'theme_vcs_pageview_mode': 'edit',
+    'github_user': 'OSGeo',
+    'github_repo': 'PROJ',
+    # TODO: edit when switching active branch
+    'github_version': '/6.2/docs/source/',
     'css_files': [
         '_static/theme_overrides.css',  # override wide tables in RTD theme
     ],
@@ -358,3 +378,6 @@ texinfo_documents = [
 breathe_projects = {
     "cpp_stuff":"../build/xml/",
 }
+
+import redirects
+redirect_files = redirects.gather_redirects()

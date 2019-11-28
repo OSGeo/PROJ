@@ -6,7 +6,7 @@ PROJ RFC 2: Initial integration of "GDAL SRS barn" work
 
 :Author: Even Rouault
 :Contact: even.rouault at spatialys.com
-:Status: Adopted (not yet merged into master)
+:Status: Adopted, implemented in PROJ 6.0
 :Initial version: 2018-10-09
 :Last Updated: 2018-10-31
 

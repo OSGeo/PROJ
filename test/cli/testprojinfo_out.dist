@@ -876,3 +876,6 @@ INVERSE(EPSG):10000, Inverse of RGF93 to NGF IGN69 height (1), 0.5 m, France - m
 PROJ string:
 +proj=pipeline +step +inv +proj=vgridshift +grids=ggf97a.txt +multiplier=1
 
+Testing -s +proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs -t EPSG:4326 -o PROJ -q
++proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=@foo.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
+

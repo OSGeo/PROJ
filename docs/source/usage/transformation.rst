@@ -12,7 +12,8 @@ large scale cartographic projections as well as coordinate transformation at a
 geodetic high precision level. This chapter delves into the details of how
 geodetic transformations of varying complexity can be performed.
 
-In PROJ, two frameworks for geodetic transformations exists, the *cs2cs*
+In PROJ, two frameworks for geodetic transformations exists, the
+*PROJ 4.x/5.x* / :program:`cs2cs` / :c:func:`pj_transform`
 framework and the *transformation pipelines* framework. The first is the original,
 and limited, framework for doing geodetic transforms in PROJ The latter is a
 newer addition that aims to be a more complete transformation framework. Both are
@@ -133,7 +134,7 @@ coordinate timestamps back to GPS weeks.
     step proj=unitconvert t_in=decimalyear t_out=gps_week
 
 
-cs2cs paradigm
+PROJ 4.x/5.x paradigm
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 .. _cs2cs_specific_options:
 
@@ -148,9 +149,19 @@ cs2cs paradigm
     +vto_meter     Vertical conversion to meters
     ============   ==============================================================
 
-The *cs2cs* framework delivers a subset of the geodetic transformations available
+.. warning::
+    This section documents the behaviour of PROJ 4.x and 5.x. In PROJ 6.x,
+    :program:`cs2cs` has been reworked to use :c:func:`proj_create_crs_to_crs` internally,
+    with *late binding* capabilities, and thus is no longer constrained to using
+    WGS84 as a pivot (also called as *early binding* method).
+    When :program:`cs2cs` of PROJ 6 is used with PROJ.4 expanded strings to describe the CRS,
+    including ``+towgs84``, ``+nadgrids`` and ``+geoidgrids``, it will generally give
+    the same results as earlier PROJ versions. When used with AUTHORITY:CODE
+    CRS descriptions, it may return different results.
+
+The *cs2cs* framework in PROJ 4 and 5 delivers a subset of the geodetic transformations available
 with the *pipeline* framework. Coordinate transformations done in this framework
-are transformed in a two-step process with WGS84 as a pivot datum That is, the
+were transformed in a two-step process with WGS84 as a pivot datum. That is, the
 input coordinates are transformed to WGS84 geodetic coordinates and then transformed
 from WGS84 coordinates to the specified output coordinate reference system, by
 utilizing either the Helmert transform, datum shift grids or a combination of both.
@@ -173,7 +184,7 @@ Both grid correction methods allow inclusion of more than one grid in the same
 transformation
 
 In contrast to the *transformation pipeline* framework, transformations with the
-*cs2cs* framework are expressed as two separate proj-strings. One proj-string *to*
+*cs2cs* framework in PROJ 4 and 5 were expressed as two separate proj-strings. One proj-string *to*
 WGS84 and one *from* WGS84. Together they form the mapping from the source
 coordinate reference system to the destination coordinate reference system.
 When used with the ``cs2cs`` the source and destination CRS's are separated by the
@@ -189,6 +200,21 @@ to WGS84 with the ``+towgs84`` parameter.
     20 35
     20d0'5.467"E    35d0'9.575"N 0.000
 
+With PROJ 6, you can simply use the following:
+
+.. note:: With PROJ 6, the order of coordinates for EPSG geographic coordinate
+          reference systems is latitude first, longitude second.
+
+::
+
+    cs2cs "GGRS87" "WGS 84"
+    35 20
+    35d0'9.575"N	20d0'5.467"E 0.000
+
+    cs2cs EPSG:4121 EPSG:4326
+    35 20
+    35d0'9.575"N	20d0'5.467"E 0.000
+
 The EPSG database provides this example for transforming from WGS72 to WGS84
 using an approximated 7 parameter transformation.
 
@@ -198,6 +224,19 @@ using an approximated 7 parameter transformation.
         +to +proj=latlong +datum=WGS84
     4 55
     4d0'0.554"E     55d0'0.09"N 0.000
+
+With PROJ 6, you can simply use the following (note the reversed order for
+latitude and longitude)
+
+::
+
+    cs2cs "WGS 72" "WGS 84"
+    55 4
+    55d0'0.09"N	4d0'0.554"E 0.000
+
+    cs2cs EPSG:4322 EPSG:4326
+    55 4
+    55d0'0.09"N	4d0'0.554"E 0.000
 
 
 Grid Based Datum Adjustments
@@ -266,8 +305,8 @@ fallback to using the ``ntv1_can.dat`` file.
 The null Grid
 ................................................................................
 
-A special ``null`` grid shift file is shift with releases after 4.4.6 (not
-inclusive).  This file provides a zero shift for the whole world.  It may be
+A special ``null`` grid shift file is distributed with PROJ.
+This file provides a zero shift for the whole world.  It may be
 listed at the end of a nadgrids file list if you want a zero shift to be
 applied to points outside the valid region of all the other grids.  Normally if
 no grid is found that contains the point to be transformed an error will occur.
@@ -301,13 +340,7 @@ Caveats
   Careful selection of files and file order is necessary.  In some cases
   border spanning datasets may need to be pre-segmented into Canadian and
   American points so they can be properly grid shifted
-* There are additional grids for shifting between NAD83 and various HPGN
-  versions of the NAD83 datum.  Use of these haven't been tried recently so
-  you may encounter problems.  The FL.lla, WO.lla, MD.lla, TN.lla and WI.lla
-  are examples of high precision grid shifts.  Take care!
 * Additional detail on the grid shift being applied can be found by setting
   the PROJ_DEBUG environment variable to a value.  This will result in output
   to stderr on what grid is used to shift points, the bounds of the various
   grids loaded and so forth
-* The *cs2cs* framework always assumes that grids contain a shift **to**  NAD83 (essentially
-  WGS84). Other types of grids can be used with the *pipeline* framework.
