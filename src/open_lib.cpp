@@ -153,6 +153,7 @@ void pj_set_searchpath ( int count, const char **path )
 
 #ifdef _WIN32
 #include <windows.h>
+#include <sys/stat.h>
 static const char *get_path_from_win32_projlib(const char *name, std::string& out) {
     /* Check if proj.db lieves in a share/proj dir parallel to bin/proj.dll */
     /* Based in https://stackoverflow.com/questions/9112893/how-to-get-path-to-executable-in-c-running-on-windows */
