@@ -50,8 +50,7 @@ geographic CRS:
 
 The algorithm involves many cases, so we will progress in the explanation from
 the most simple case to more complex ones. We document here the working of this
-algorithm as implemented in PROJ 6.3dev, november 2019,
-revision cef7a8a209717938a08e909dcc03c05b09c5cd77
+algorithm as implemented in PROJ 6.3.0.
 The results of some examples might also be quite sensitive to the content of the
 PROJ database and the PROJ version used.
 
