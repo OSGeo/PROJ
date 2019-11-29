@@ -215,7 +215,7 @@ and will add at the end a conversion between the second intermediate CRS and the
 target CRS. Those conversions are conversion between geographic 2D and geographic 3D
 CRS or geographic 2D/3D and geocentric CRS.
 
-This is done by the createOperationsWithDatumPivot() method.
+This is done by the :c:func:`createOperationsWithDatumPivot()` method.
 
 So if transforming between EPSG:7042, RGF93 (lon-lat), geographic 3D and
 EPSG:4936, ETRS89, geocentric, one get the following concatenated operation,
