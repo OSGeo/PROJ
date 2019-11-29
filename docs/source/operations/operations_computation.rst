@@ -26,7 +26,7 @@ strings, all CRS WKT variants), to be compared to 30 000 for the purely computat
 This document is meant as a plain text explanation of the code for developers,
 but also as a in-depth examination of what happens under the hood for curious PROJ
 users. It is important to keep in mind that it is not meant to be the ultimate
-source of truth of how coordinate operations should be computed. They are clearly
+source of truth of how coordinate operations should be computed. There are clearly
 implementation choices and compromises that can be questionned.
 
 Let us start with an example to research operations between the NAD27 and NAD83
