@@ -68,7 +68,7 @@ Geographic CRS to Geographic CRS, with known identifiers
 --------------------------------------------------------
 
 With the above example of two geographic CRS, that have an identified identifier,
-(projinfo internally resolves NAD27 to EPSG:4267 and NAD83 to EPSG:4269)
+(:program:`projinfo` internally resolves NAD27 to EPSG:4267 and NAD83 to EPSG:4269)
 the algorithm will first research
 in the coordinate operation related tables of the proj.db if there are records
 that list direct transformations between the source and the target CRS. The
