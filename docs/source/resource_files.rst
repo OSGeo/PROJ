@@ -23,17 +23,35 @@ A proj installation includes a SQLite database of transformation information
 that must be accessible for the library to work properly.  The library will
 print an error if the database can't be found.
 
-External resources
+Transformation grids
 -------------------------------------------------------------------------------
 
-For a functioning PROJ installation of the
+Grid files are important for shifting and transforming between datums.
+
+PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections and
+the GTX file format for vertical corrections. Details about the formats can be
+found in the `GDAL documentation <http://gdal.org/>`_. GDAL reads and writes
+all formats. Using GDAL for construction of new grids is recommended.
+
+External resources and packaged grids
+-------------------------------------------------------------------------------
+
+proj-datumgrid
+++++++++++++++
+
+For a functioning PROJ, installation of the
 `proj-datumgrid <https://github.com/OSGeo/proj-datumgrid>`_ is needed. If you
 have installed PROJ from a package system chances are that this will already be
 done for you. The *proj-datumgrid* package provides transformation grids that
 are essential for many of the predefined transformations in PROJ. Which grids
 are included in the package can be seen on the
 `proj-datumgrid repository <https://github.com/OSGeo/proj-datumgrid>`_ as well
-as descriptions of those grids.
+as descriptions of those grids. This is the main grid package and the only one
+that is required. It includes various older grids that is mostly needed for
+legacy reasons. Without this package, the test suite fails miserably.
+
+Regional packages
++++++++++++++++++
 
 In addition to the default *proj-datumgrid* package regional packages are also
 distributed. These include grids and init-files that are valid within the given
@@ -47,22 +65,34 @@ At the moment three regional resource file packages are distributed:
 * `Oceania <https://github.com/OSGeo/proj-datumgrid/tree/master/oceania#proj-datumgrid-oceania>`_
 * `North America <https://github.com/OSGeo/proj-datumgrid/tree/master/north-america#proj-datumgrid-north-america>`_
 
+If someone supplies grids relevant for Africa, South-America, Asia or Antarctica
+we will create new regional packages.
+
 Click the links to jump to the relevant README files for each package. Details
 on the content of the packages maintained there.
 
 Links to the resource packages can be found in the :ref:`download section <download>`.
 
+World package
++++++++++++++
+
+The `world package <https://github.com/OSGeo/proj-datumgrid/tree/master/world#proj-datumgrid-world>`_
+includes grids that have global extent, e.g. the global geoid model EGM08.
+
+-latest packages
+++++++++++++++++
+
+All packages above come in different versions, e.g proj-datumgrid-1.8 or
+proj-datumgrid-europe-1.4. The -latest packages are symbolic links to the
+latest version of a given packages. That means that the link
+https://download.osgeo.org/proj/proj-datumgrid-north-america-latest.zip is
+equivalent to https://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip
+(as of the time of writing this).
+
 .. _transformation_grids:
 
-Transformation grids
+Other transformation grids
 -------------------------------------------------------------------------------
-
-Grid files are important for shifting and transforming between datums.
-
-PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections and
-the GTX file format for vertical corrections. Details about the formats can be
-found in the `GDAL documentation <http://gdal.org/>`_. GDAL reads and writes
-all formats. Using GDAL for construction of new grids is recommended.
 
 Below is a given a list of grid resources for various countries which are not
 included in the grid distributions mentioned above.
@@ -71,22 +101,6 @@ Free grids
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Below is a list of grids distributed under a free and open license.
-
-Switzerland
-................................................................................
-
-Background in ticket `#145 <https://github.com/OSGeo/PROJ/issues/145>`__
-
-We basically have two shift grids available. An official here:
-
-`Swiss CHENyx06 dataset in NTv2 format <https://shop.swisstopo.admin.ch/en/products/geo_software/GIS_info>`__
-
-And a derived in a temporary location which is probably going to disappear soon.
-
-Main problem seems to be there's no mention of distributivity of the grid from
-the official website.  It just tells: "you can use freely".  The "contact" link
-is also broken, but maybe someone could make a phone call to ask for rephrasing
-that.
 
 Hungary
 ................................................................................
@@ -133,45 +147,6 @@ Spain
 
 `Spanish grids <http://www.ign.es/ign/layoutIn/herramientas.do#DATUM>`__ for ED50.
 
-
-
-HARN
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-With the support of `i-cubed <http://www.i3.com>`__, Frank Warmerdam has
-written tools to translate the HPGN grids from NOAA/NGS from ``.los/.las`` format
-into NTv2 format for convenient use with PROJ.  This project included
-implementing a `.los/.las reader <https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/loslasdataset.cpp>`__
-for GDAL, and an `NTv2 reader/writer <https://github.com/OSGeo/gdal/tree/trunk/gdal/frmts/raw/ntv2dataset.cpp>`__.
-Also, a script to do the bulk translation was implemented in
-https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/loslas2ntv2.py.
-The command to do the translation was:
-
-::
-
-    loslas2ntv2.py -auto *hpgn.los
-
-As GDAL uses NAD83/WGS84 as a pivot datum, the sense of the HPGN datum shift offsets were negated to map from HPGN to NAD83 instead of the other way.  The files can be used with PROJ like this:
-
-::
-
-      cs2cs +proj=latlong +datum=NAD83
-            +to +proj=latlong +nadgrids=./azhpgn.gsb +ellps=GRS80
-
-::
-
-    # input:
-    -112 34
-
-::
-
-    # output:
-    111d59'59.996"W 34d0'0.006"N -0.000
-
-This was confirmed against the `NGS HPGN calculator
-<http://www.ngs.noaa.gov/cgi-bin/nadcon2.prl>`__.
-
-The grids are available at https://download.osgeo.org/proj/hpgn_ntv2.zip
 
 HTDP
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -398,11 +373,3 @@ Below is a list of the init files that are packaged with PROJ.
     nad27       State plane coordinate systems, North American Datum 1927
     nad83       State plane coordinate systems, North American Datum 1983
     ========    ================================================================
-
-
-The defaults file
--------------------------------------------------------------------------------
-
-Before PROJ 6.0, a ``proj_def.dat`` file could be used to supply default
-parameters to PROJ. It has been removed due to the confusion and errors it
-caused.
