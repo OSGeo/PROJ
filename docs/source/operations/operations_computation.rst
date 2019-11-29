@@ -183,7 +183,7 @@ For EPSG:6171, there are 10 matching (non-deprecated) geodetic CRSs:
 - IGNF:RGF93G, RGF93 geographiques (dms), geographic 2D
 - IGNF:RGF93GEO, RGF93 geographiques (dms), geographic 3D
 
-The 3 first ones entries from the EPSG dataset are typical: for each datum,
+The first three entries from the EPSG dataset are typical: for each datum,
 one can define a geographic 2D CRS (latitude, longitude), a geographic 3D crs
 (latitude, longitude, ellipsoidal height) and a geocentric one. For that particular
 case, the EPSG dataset has also included two extra definitions corresponding to a
