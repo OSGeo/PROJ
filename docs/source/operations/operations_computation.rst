@@ -469,7 +469,7 @@ whereas GDA2020 to WGS 84 (G1762) operate on the geocentric CRS. Consequently,
 GDA2020 cannot be identifier as a hub by a "simple" self-join SQL request on
 the coordinate operation table. This requires to do the join based on the datum
 referenced by the source and target CRS of each operation rather than the
-source and target CRS themselves. Then we there is a match, PROJ inserts the required
+source and target CRS themselves. When there is a match, PROJ inserts the required
 conversions between geographic and geocentric CRS to have a consistent concatenated
 operation, like the following:
 1. GDA94 to GDA2020 (1): from EPSG
