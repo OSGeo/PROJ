@@ -105,7 +105,7 @@ operations between those CRS in the EPSG registry itself, transformations from
 other authorities will be ignored (except if they are in the PROJ authority,
 which can be used as an override).
 
-As those results all involve operations that have not perfect accuracy and that
+As those results all involve operations that does not have a perfect accuracy and that
 there are of use does not cover the area of use of the 2 CRSs, a
 'Ballpark geographic offset from NAD27 to NAD83' operation is synthetized by PROJ.
 This operation is a rather dummy operation that only takes into account potential
