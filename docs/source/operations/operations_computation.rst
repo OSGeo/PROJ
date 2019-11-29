@@ -71,7 +71,7 @@ With the above example of two geographic CRS, that have an identified identifier
 the algorithm will first search
 in the coordinate operation related tables of the ``proj.db`` if there are records
 that list direct transformations between the source and the target CRS. The
-transformations typically involve :ref:`Helmert <helmert>-style operations or datum shift based on
+transformations typically involve :ref:`Helmert <helmert>`-style operations or datum shift based on
 grids (more esoteric operations are possible).
 
 A request similar to the following will be emitted:
@@ -405,10 +405,9 @@ Actually, WGS 84 has been considered during the above lookup, because there are
 transformations between AGD84 and WGS 84 and WGS 84 and GDA2020. However those
 have been discarded in a step which we did not mention previously: just after
 the initial filtering of results and their sorting, there is a final filtering
-that is done. In the list of sorted results, if a less prioritary result than
-its previous one has the same area of use, but a lesser accuracy and that the
-more accurace results does not use grids, or the grids are available, then the
-less accurate result is discarded.
+that is done. In the list of sorted results, given two operations A and B that
+have the same area of use, if B has an accuracy lower than A, and A does not use
+grids, or all the needed grids are available, then B is discarded.
 
 If one forces the datum hub to be considered to be EPSG:4326, ones gets:
 
@@ -593,7 +592,7 @@ the transformation from a compound CRS made of a geographic CRS to another geogr
 
 It first starts by the vertical transformations from the vertical CRS of the
 source compound CRS to the target geographic CRS, using the strategy detailed
-in verttogeog_
+in :ref:`Vertical CRS to a Geographic CRS <verttogeog>`
 
 What we did not mention is that when there is not a transformation registered
 between the vertical CRS and the target geographic CRS, PROJ attempts to find
