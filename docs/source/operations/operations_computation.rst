@@ -323,7 +323,7 @@ being concatenated.
 This logic is implement by the ``findsOpsInRegistryWithIntermediate()`` method.
 
 Assuming that the proj-datumgrid-oceania package is installed, we get the
-following results for the AGD84 to GDA2020 coordinate operations research:
+following results for the AGD84 to GDA2020 coordinate operations lookup:
 
 .. code-block:: shell
 
