@@ -161,7 +161,7 @@ the CRS to identify and whose name exactly matches the one provided to the
 
 If this search did not succeed, or if the previous case with known CRS identifiers
 did not result in matches in the database, the search will be based on the
-datums. That is: a list of geographic CRS whose datum matches the datum of the
+datums. That is, a list of geographic CRS whose datum matches the datum of the
 source and target CRS is researched in the database (by querying the `geodetic_crs`
 database table). If the datum has a known
 identifier, we will use it, otherwise we will research an equivalent datum in the
