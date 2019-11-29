@@ -449,7 +449,7 @@ If one forces the datum hub to be considered to be EPSG:4326, ones gets:
 
 Those operations are less accurate, since WGS 84 is assumed to be equivalent to
 GDA2020 with an accuracy of 4 metre. This is an instance demonstrating that using
-systematically the WGS 84 hub can be sub-optimal.
+WGS 84 as a hub systematically can be sub-optimal.
 
 There are still situations where the attempt to find a hub CRS does not work,
 because there is no such hub. This can occur for example when transforming from
