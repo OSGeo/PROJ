@@ -116,7 +116,7 @@ not attempt any datum shift, hence the "ballpark" qualifier in its name.
 Filtering and sorting of coordinate operations
 ----------------------------------------------
 
-The last step is to filter and sort results in a relevance order.
+The last step is to filter and sort results in order of relevance.
 
 The filtering
 takes into account a minimum accuracy that the user might have expressed, an
