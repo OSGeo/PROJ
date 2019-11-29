@@ -397,7 +397,7 @@ following results for the AGD84 to GDA2020 coordinate operations lookup:
                    +step +proj=axisswap +order=2,1
 
 One can see that the selected intermediate CRS that has been used is GDA94.
-This is a completely novel behaviour of PROJ 6 regarding to the PROJ.4 logic
+This is a completely novel behaviour of PROJ 6 as opposed to the logic of PROJ.4 
 where datum transformations implied using EPSG:4326 / WGS 84 has the mandatory
 datum hub. PROJ 6 no longer hardcodes it as the mandatory datum hub, and relies
 on the database to find the appropriate hub(s).
