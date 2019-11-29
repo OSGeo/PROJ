@@ -483,7 +483,7 @@ Projected CRS to any target CRS
 This actually extends to any Derived CRS, whose Projected CRS is a well-known
 particular case. Such transformations are done in 2 steps:
 
-1. Use the inverse conversion of the derived CRS to its base CRS, typically a
+1. Use the inverse conversion of the derived CRS to its base CRS, typically an
    inverse map projection.
 2. Find transformations from this base CRS to the target CRS. If the base CRS
    is the target CRS, this step can be skipped.
