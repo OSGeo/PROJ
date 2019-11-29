@@ -461,7 +461,7 @@ techniques, we would only find one non-ballpark operation taking the route:
 3. Inverse of WGS 84 (G1762) to ITRF2008 (1): from EPSG
 4. Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762): synthetized by PROJ
 
-This is not bad, but the global validity area of is "Australia - onshore and EEZ",
+This is not bad, but the global validity area of use is "Australia - onshore and EEZ",
 whereas GDA94 has a larger area of use.
 There is another road that can be taken by going throug GDA2020 instead of ITRF2008.
 The GDA94 to GDA2020 transformations operate on the respective geographic CRS,
