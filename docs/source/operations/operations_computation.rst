@@ -505,7 +505,7 @@ This is implemented by the ``createOperationsDerivedTo`` method
 
 For the symetric case, source CRS to a derived CRS, the above algorithm is applied
 by switching the source and target CRS, and then inverting the resulting operation(s).
-This is mostly a matter of avoiding to write twice very similar code. This logic
+This is mostly a matter of avoiding to write very similar code twice. This logic
 is also applied to all below cases when considering the transformation between 2 different
 types of objects.
 
