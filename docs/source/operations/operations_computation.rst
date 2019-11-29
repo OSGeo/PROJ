@@ -207,7 +207,7 @@ So the 3 typical EPSG entries, 3 equivalent (with long, lat ordering for the
 geographic CRS) and one from the ESRI registry;
 
 PROJ can now test 10 x 7 different combinations of source x target CRSs, using
-the database research explained in the previous section. As soon as
+the database searching method explained in the previous section. As soon as
 one of this combination returns at least one non-ballpark combination, the result
 set coming from that combination is used. PROJ will then add before that
 transformation a conversion between the source CRS and the first intermediate CRS,
