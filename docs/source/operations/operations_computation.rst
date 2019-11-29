@@ -159,7 +159,7 @@ the CRS to identify and whose name exactly matches the one provided to the
 :c:func:`createOperations` method. If there is exactly one match and that the CRS are
 "computationnaly" equivalent, then use the code of the CRS for further computations.
 
-If this research did not succeed, or if the previous case with known CRS identifiers
+If this search did not succeed, or if the previous case with known CRS identifiers
 did not result in matches in the database, the research will be based on the
 datums. That is: a list of geographic CRS whose datum matches the datum of the
 source and target CRS is researched in the database (by querying the `geodetic_crs`
