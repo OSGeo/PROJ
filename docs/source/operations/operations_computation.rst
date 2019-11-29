@@ -157,7 +157,7 @@ In a number of situations, the source and/or target CRS do not have an identifie
 (WKT without identifier, PROJ string, ..)
 The first step is to try to find in the ``proj.db`` a CRS of the same nature of
 the CRS to identify and whose name exactly matches the one provided to the
-createOperations method. If there is exactly one match and that the CRS are
+:c:func:`createOperations` method. If there is exactly one match and that the CRS are
 "computationnaly" equivalent, then use the code of the CRS for further computations.
 
 If this research did not succeed, or if the previous case with known CRS identifiers
