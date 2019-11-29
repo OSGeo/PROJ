@@ -102,7 +102,7 @@ research.
 One can note in the above result set that a ESRI:108003 operation was found,
 but as the source and target CRS are in the EPSG registry, and there are
 operations between those CRS in the EPSG registry itself, transformations from
-other authorities will be ignored (except if there are in the PROJ authority,
+other authorities will be ignored (except if they are in the PROJ authority,
 which can be used as an override).
 
 As those results all involve operations that have not perfect accuracy and that
