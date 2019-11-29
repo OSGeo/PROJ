@@ -164,7 +164,7 @@ did not result in matches in the database, the search will be based on the
 datums. That is, a list of geographic CRS whose datum matches the datum of the
 source and target CRS is searched for in the database (by querying the `geodetic_crs`
 database table). If the datum has a known
-identifier, we will use it, otherwise we will research an equivalent datum in the
+identifier, we will use it, otherwise we will look for an equivalent datum in the
 database based on the datum name.
 
 Let's consider the case where the datum of the source CRS is EPSG:6171 "Reseau
