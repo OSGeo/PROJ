@@ -34,6 +34,9 @@ the `proj-datumgrid-europe` package::
 Available is also the ``proj-datumgrid-north-america``, ``proj-datumgrid-oceania``
 and ``proj-datumgrid-world``.
 
+.. tip::
+   Read more about the various datumgrid packages available :ref:`here<datumgrid>`.
+
 Docker
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -123,7 +126,7 @@ PROJ is also available from the MacPorts system::
 Compilation and installation from source code
 ################################################################################
 
-The classical way of installing PROJ is via the source code distribution. The
+The classic way of installing PROJ is via the source code distribution. The
 most recent version is available from the :ref:`download page<current_release>`.
 
 You will need that and at least the standard *proj-datumgrid* package for a
