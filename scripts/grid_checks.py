@@ -55,9 +55,9 @@ proj_datumgrid = args.path_to_proj_datumgrid
 
 if args.not_in_grid_alternatives:
     conn = sqlite3.connect(dbname)
-    print('Authority, code, name, grid_name')
+    print('Authority, code, name, grid_name, is_superseded')
     res = conn.execute("""
-        SELECT auth_name, code, name, grid_name FROM grid_transformation
+        SELECT auth_name, code, name, grid_name, EXISTS (SELECT 1 FROM supersession WHERE superseded_table_name = 'grid_transformation' AND superseded_auth_name = auth_name AND superseded_code = code) AS superseded FROM grid_transformation
         WHERE deprecated = 0 AND
         NOT EXISTS (SELECT 1 FROM grid_alternatives WHERE original_grid_name = grid_name)""")
     for row in res:
