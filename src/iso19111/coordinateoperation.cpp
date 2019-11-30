@@ -12923,9 +12923,40 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
     bool sameGeodeticDatum = false;
 
     if (vertSrc || vertDst) {
-        createOperationsFromDatabaseWithVertCRS(sourceCRS, targetCRS, context,
-                                                geogSrc, geogDst, vertSrc,
-                                                vertDst, res);
+        if (res.empty()) {
+            if (geogSrc &&
+                geogSrc->coordinateSystem()->axisList().size() == 2 &&
+                vertDst) {
+                auto dbContext =
+                    context.context->getAuthorityFactory()->databaseContext();
+                auto resTmp = findOpsInRegistryDirect(
+                    sourceCRS->promoteTo3D(std::string(), dbContext), targetCRS,
+                    context, resFindDirectNonEmptyBeforeFiltering);
+                for (auto &op : resTmp) {
+                    auto newOp = op->shallowClone();
+                    setCRSs(newOp.get(), sourceCRS, targetCRS);
+                    res.emplace_back(newOp);
+                }
+            } else if (geogDst &&
+                       geogDst->coordinateSystem()->axisList().size() == 2 &&
+                       vertSrc) {
+                auto dbContext =
+                    context.context->getAuthorityFactory()->databaseContext();
+                auto resTmp = findOpsInRegistryDirect(
+                    sourceCRS, targetCRS->promoteTo3D(std::string(), dbContext),
+                    context, resFindDirectNonEmptyBeforeFiltering);
+                for (auto &op : resTmp) {
+                    auto newOp = op->shallowClone();
+                    setCRSs(newOp.get(), sourceCRS, targetCRS);
+                    res.emplace_back(newOp);
+                }
+            }
+        }
+        if (res.empty()) {
+            createOperationsFromDatabaseWithVertCRS(sourceCRS, targetCRS,
+                                                    context, geogSrc, geogDst,
+                                                    vertSrc, vertDst, res);
+        }
     } else if (geodSrc && geodDst) {
 
         const auto &srcDatum = geodSrc->datum();
