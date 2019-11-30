@@ -57,7 +57,9 @@ Summary of work planned by this RFC
 -------------------------------------------------------------------------------
 
 - Grids will be hosted by one or several Content Delivery Networks (CDN)
-- Users no longer have to manually fetch grid files and place them in PROJ_LIB.
+- Grid loading mechanism will be reworked to be able to download grids or parts
+  of grids from a online repository. When opted in, users will no longer have to
+  manually fetch grid files and place them in PROJ_LIB.
   Full and accurate capability of the software will no longer require hundreds
   of megabytes of grid shift files in advance, even if only just a few of them
   are needed for the transformations done by the user.
@@ -288,7 +290,7 @@ CDN providers
 The following CDN providers have offered to store PROJ grids:
 
 - `Amazon Public Datasets <https://aws.amazon.com/opendata/public-datasets/>`_
-- `Fastly <https://www.fastly.com/>`_
+- `Fastly <https://www.fastly.com/>`_ (pending confirmation and more details from the provider)
 
 Regarding AWS Public Dataset Program, an application must be submitted at
 https://application.opendata.aws. The program covers storage and egress
