@@ -98,7 +98,7 @@ they will be tried in sequence. The user may also override this setting with the
 environment variable.
 
 The rationale for putting proj.ini in that location is
-that it is a well-known place by PROJ users, with the exiting PROJ_LIB mechanics
+that it is a well-known place by PROJ users, with the existing PROJ_LIB mechanics
 for systems like Windows where hardcoded paths at runtime aren't generaly usable.
 
 C API
