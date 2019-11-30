@@ -336,7 +336,7 @@ not formalized, is around the following lines:
 - Geodetic agencies release regularly new version of grids. Typically for the
   USA, NOAA has released GEOID99, GEOID03, GEOID06, GEOID09, GEOID12A, GEOID12B,
   GEOID18 for the NAVD88 to NAD83/NAD83(2011) vertical adjustments. Each of this
-  grid is considered by EPSG and PROJ has a separate object, which distinct filenames.
+  grids is considered by EPSG and PROJ has a separate object, with distinct filenames.
   The release of a new version does not cause the old grid to be automatically removed.
   That said, due to advertized accuracies and supersession rules of the EPSG dataset, the
   most recent grid will generally be used for a CRS -> CRS transformation if the
