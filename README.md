@@ -21,7 +21,7 @@ https://lists.osgeo.org/mailman/listinfo/proj/
 
 See the NEWS file for changes between versions.
 
-The following commandline utilities are included in the PROJ package:
+The following command line utilities are included in the PROJ package:
 
 - `proj`: for cartographic projection of geodetic coordinates
 - `cs2cs`: for transformation from one CRS to another CRS.
