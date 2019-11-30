@@ -6,11 +6,11 @@ Resource files
 
 A number of files containing preconfigured transformations and default parameters
 for certain projections are bundled with the PROJ distribution. Init files
-contains preconfigured proj-strings for various coordinate reference systems
-and the defaults file contains default values for parameters of select
+contain preconfigured proj-strings for various coordinate reference systems
+and the `defaults` file contains default values for parameters of select
 projections.
 
-In addition to the bundled init-files the PROJ.4 project also distribute a number
+In addition to the bundled init-files the PROJ project also distributes a number
 of packages containing transformation grids and additional init-files not included
 in the main PROJ package.
 
@@ -32,6 +32,8 @@ PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections and
 the GTX file format for vertical corrections. Details about the formats can be
 found in the `GDAL documentation <http://gdal.org/>`_. GDAL reads and writes
 all formats. Using GDAL for construction of new grids is recommended.
+
+.. _datumgrid:
 
 External resources and packaged grids
 -------------------------------------------------------------------------------
@@ -71,7 +73,8 @@ we will create new regional packages.
 Click the links to jump to the relevant README files for each package. Details
 on the content of the packages maintained there.
 
-Links to the resource packages can be found in the :ref:`download section <download>`.
+.. tip::
+   To download the various datumgrid packages head to the :ref:`download section <download>`.
 
 World package
 +++++++++++++
@@ -83,7 +86,7 @@ includes grids that have global extent, e.g. the global geoid model EGM08.
 ++++++++++++++++
 
 All packages above come in different versions, e.g proj-datumgrid-1.8 or
-proj-datumgrid-europe-1.4. The -latest packages are symbolic links to the
+proj-datumgrid-europe-1.4. The `-latest` packages are symbolic links to the
 latest version of a given packages. That means that the link
 https://download.osgeo.org/proj/proj-datumgrid-north-america-latest.zip is
 equivalent to https://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip
@@ -94,13 +97,13 @@ equivalent to https://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.z
 Other transformation grids
 -------------------------------------------------------------------------------
 
-Below is a given a list of grid resources for various countries which are not
+Below is a list of grid resources for various countries which are not
 included in the grid distributions mentioned above.
 
 Free grids
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Below is a list of grids distributed under a free and open license.
+The following is a list of grids distributed under a free and open license.
 
 Hungary
 ................................................................................
@@ -151,7 +154,7 @@ Spain
 HTDP
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This page documents use of the `crs2crs2grid.py` script and the HTDP
+This section describes the use of the `crs2crs2grid.py` script and the HTDP
 (Horizontal Time Dependent Positioning) grid shift modelling program from
 NGS/NOAA to produce PROJ compatible grid shift files for fine grade
 conversions between various NAD83 epochs and WGS84.  Traditionally PROJ has
@@ -187,7 +190,8 @@ Getting crs2crs2grid.py
 The `crs2crs2grid.py` script can be found at
 https://github.com/OSGeo/gdal/tree/trunk/gdal/swig/python/samples/crs2crs2grid.py
 
-It depends on having the GDAL Python bindings operational.  If they are not
+The script depends on having the GDAL Python bindings operational; if they are not you
+will get an error such as:
 
 
 ::
@@ -286,7 +290,7 @@ Init files
 Init files are used for preconfiguring proj-strings for often used
 transformations, such as those found in the EPSG database. Most init files contain
 transformations from a given coordinate reference system to WGS84. This makes
-it easy to transformations between any two coordinate reference systems with
+it easy to transform between any two coordinate reference systems with
 ``cs2cs``. Init files can however contain any proj-string and don't necessarily
 have to follow the *cs2cs* paradigm where WGS84 is used as a pivot datum. The
 ITRF init file is a good example of that.
@@ -295,7 +299,7 @@ A number of init files come pre-bundled with PROJ but it is also possible to
 add your own custom init files. PROJ looks for the init files in the directory
 listed in the ``PROJ_LIB`` environment variable.
 
-The format of init files made up of a identifier in angled brackets and a
+The format of init files is an identifier in angled brackets and a
 proj-string:
 
 ::

@@ -23,18 +23,21 @@ See the NEWS file for changes between versions.
 
 The following command line utilities are included in the PROJ package:
 
-- proj, for cartographic projection of geodetic coordinates
-- cs2cs, for transformation from one CRS to another CRS.
-- geod, for geodesic (great circle) computations.
-- cct, for generic Coordinate Conversions and Transformations.
-- gie, the Geospatial Integrity Investigation Environment.
-- projinfo, for geodetic object and coordinate operation queries
+- `proj`: for cartographic projection of geodetic coordinates
+- `cs2cs`: for transformation from one CRS to another CRS.
+- `geod`: for geodesic (great circle) computations.
+- `cct`: for generic Coordinate Conversions and Transformations.
+- `gie`: the Geospatial Integrity Investigation Environment.
+- `projinfo`: for geodetic object and coordinate operation queries
+
+> More information on the utilities can be found on the [PROJ website](https://proj.org/apps).
 
 ## Installation
 ### Build dependencies
 
 PROJ requires C and C++11 compilers.
-It also requires SQLite3 (headers, library and executable).
+It also requires SQLite3 (headers, library and executable).  The minimum 
+version of SQLite3 required is 3.11
 
 ### Building with CMake
 
@@ -105,14 +108,14 @@ which will generate a configure script that can be used as described above.
 ### Distribution files and format
 
 Sources are distributed in one or more files.  The principle elements
-of the system are in a compress tar file named `proj-x.y.z.tar.gz` where
-"x" will indicate major release number, "y" indicates minor release
-number and "z" indicates the patch number of the release.
+of the system are stored in a compressed tar file named `proj-x.y.z.tar.gz` where
+"x" will indicate the major release number, "y" indicates the minor release
+number, and "z" indicates the patch number of the release.
 
 In addition to the PROJ software package, distributions of datum
 conversion grid files and PROJ parameter files are also available.
 The grid package is distributed under the name `proj-datumgrid-x.y.zip`,
-where "x" is the major release version and "y" the minor release
+where "x" is the major release version and "y" is the minor release
 version numbers. Similarly regional packages are distributed. The
 regional packages contain resources that are not essential to the
 functionality of PROJ but still of value to users in the region
@@ -120,7 +123,7 @@ specific to the package. All grids that were in proj-datumgrids-1.6
 remain in proj-datumgrids-1.7; the regional datumgrid files contain
 grids for datums not previously supported (prior to PROJ 5.0.0).
 
-The resource packages can be downloaded from the PROJ.4 website.
+The resource packages can be downloaded from the [PROJ website](https://proj.org/download.html).
 
 More info on the contents of the various resource packages can be
 found at the
