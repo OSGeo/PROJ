@@ -411,7 +411,7 @@ Strong points:
 * TIFF can contain multiple images (IFD: Image File Directory) chained together.
   This is the mechanism used for multiple-page scanned TIFF files, or in the
   geospatial field to store multi-resolution/pyramid rasters. So it can be
-  used to sub-grids as in the NTv2 format.
+  used with sub-grids as in the NTv2 format.
 
 * Extensive experience with the TIFF format, and its appropriatness for network
   access, in particular through the `Cloud Optimized GeoTIFF initiative <https://www.cogeo.org/>`_
