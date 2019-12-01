@@ -685,8 +685,12 @@ is an easy way to inspect such grid files:
 
     * SamplesPerPixel = 1 for vertical shift grids.
 
-   On the reading side, extra samples may be present (to indicate for example
-   uncertainties), but will be ignored.
+   In the future, different values of SamplesPerPixel may be used to accomodate
+   for other needs. For example for deformation models, SamplesPerPixel = 3 to combine
+   horizontal and vertical adjustments.
+   And even for the current identified needs of horizontal or vertical shifts,
+   more samples may be present (to indicate for example uncertainties), but
+   will be ignored by PROJ.
 
    The `ExtraSamples <https://www.awaresystems.be/imaging/tiff/tifftags/extrasamples.html>`_
    tag should be set to a value of SamplesPerPixel - 1 (given the rules that
