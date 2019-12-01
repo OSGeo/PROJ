@@ -1468,3 +1468,34 @@ INSERT INTO grid_alternatives(original_grid_name,
                               0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
+ -- Iceland
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('ISN93_ISN2016.gsb',
+                              'ISN93_ISN2016.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              1,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('ISN2004_ISN2016.gsb',
+                              'ISN2004_ISN2016.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              1,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
