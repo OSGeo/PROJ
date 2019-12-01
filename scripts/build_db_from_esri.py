@@ -51,10 +51,10 @@ cursor = conn.cursor()
 all_sql = []
 
 # TODO: update this !
-version = 'ArcMap 10.7.0'
+version = 'ArcMap 10.8.0'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.VERSION', '%s');""" % (version))
-date = '2019-03-25'
+date = '2019-12-01'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.DATE', '%s');""" % (date))
 
@@ -1392,9 +1392,11 @@ def import_geogtran():
                     if 'Molodensky_Badekas' in wkt:
                         # print('Skipping GEOGTRAN %s (EPSG source) since it uses a non-supported yet suported method'% esri_name)
                         continue
+                    if 'NADCON5' in wkt:
+                        print('Skipping NADCON5 %s (EPSG source) since it uses a non-supported yet suported method'% esri_name)
+                        continue
 
-                # Don't do anything particular in part of checking we now
-                # it
+                # Don't do anything particular except checking we know it
                 assert src_row, row
 
             else:
