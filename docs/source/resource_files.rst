@@ -30,6 +30,10 @@ The following paths are checked in order:
   next tests will not be run.
 - Path(s) set with by the environment variable :envvar:`PROJ_LIB`.
   On Linux/MacOSX/Unix, use ``:`` to separate paths. On Windows, ``;``
+- On Windows, the *..\\share\\proj\\* and its contents are found automatically
+  at run-time if the installation respects the build structure. That is, the
+  binaries and proj.dll are installed under *..\\bin\\*, and resource files
+  are in *..\\share\\proj\\*.
 - A path built into PROJ as its resource installation directory (whose value is
   $(pkgdatadir)), for builds using the Makefile build system. Note, however,
   that since this is a hard-wired path setting, it only works if the whole
