@@ -518,7 +518,7 @@ Strong points:
 * While the netCDF API does not provide an alternate I/O layer, this is
   possible with the HDF5 API.
 
-* Grids can have be indexed by more than 2 dimensions (for current needs, we
+* Grids can be indexed by more than 2 dimensions (for current needs, we
   don't need more than 2D support)
 
 Weak points:
