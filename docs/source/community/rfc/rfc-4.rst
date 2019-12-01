@@ -581,10 +581,10 @@ is an easy way to inspect such grid files:
   based (could possibly be BigTIFF without code changes, if we ever
   need some day to handle grids larger than 4GB)
 
-- `GeoTIFF 1.0 <http://geotiff.maptools.org/spec/geotiffhome.html>`_ or
-  `1.1 <http://docs.opengeospatial.org/is/19-008r4/19-008r4.html>`_ for the georeferencing.
-  If no vertical reference is used, 1.0 will be used for maximum backward
-  compatibility.
+- `GeoTIFF 1.1 <http://docs.opengeospatial.org/is/19-008r4/19-008r4.html>`_ for the georeferencing.
+  GeoTIFF 1.1 is a recent standard, compared to the original GeoTIFF 1.0 version,
+  but its backward compatibility is excellent, so that should not cause much trouble
+  to readers that are not official GeoTIFF 1.1 compliant.
 
 - Files hosted on the CDN will use a Geographic 2D CRS for the GeoTIFF GeoKeys.
   That CRS is intended to be the interpolation CRS as defined in
