@@ -1496,6 +1496,6 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'ISN2004_ISN2016.gsb',
                               'NTv2',
                               'hgridshift',
-                              1,
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
