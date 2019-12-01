@@ -13437,7 +13437,7 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
                 util::IComparable::Criterion::EQUIVALENT)) {
             res.emplace_back(
                 Conversion::createGeographicGeocentric(sourceCRS, targetCRS));
-        } else if (isSrcGeocentric) {
+        } else if (isSrcGeocentric && geogDst) {
             std::string interm_crs_name(geogDst->nameStr());
             interm_crs_name += " (geocentric)";
             auto interm_crs =
@@ -13570,7 +13570,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
             }
         }
         // If the datum are equivalent, this is also fine
-    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog->datum() &&
+    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
                geogDst->datum() &&
                hubSrcGeog->datum()->_isEquivalentTo(
                    geogDst->datum().get(),
@@ -13599,7 +13599,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         // Case of "+proj=latlong +ellps=clrk66
         // +nadgrids=ntv1_can.dat,conus"
         // to "+proj=latlong +datum=NAD83"
-    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog->datum() &&
+    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
                geogDst->datum() &&
                geogCRSOfBaseOfBoundSrc->ellipsoid()->_isEquivalentTo(
                    datum::Ellipsoid::CLARKE_1866.get(),
