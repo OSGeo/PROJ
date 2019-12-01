@@ -389,11 +389,7 @@ Below is a list of the init files that are packaged with PROJ.
     ========    ================================================================
     Name        Description
     ========    ================================================================
-    esri        Auto-generated mapping from Esri projection index. Not
-                maintained any more
-    epsg        EPSG database
     GL27        Great Lakes Grids
-    IGNF        French coordinate systems supplied by the IGNF
     ITRF2000    Full set of transformation parameters between ITRF2000 and other
                 ITRF's
     ITRF2008    Full set of transformation parameters between ITRF2008 and other
