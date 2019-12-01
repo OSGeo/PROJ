@@ -14,6 +14,28 @@ In addition to the bundled init-files the PROJ project also distributes a number
 of packages containing transformation grids and additional init-files not included
 in the main PROJ package.
 
+Where are PROJ resource files looked for ?
+-------------------------------------------------------------------------------
+
+PROJ will attempt to locate its resource files - database, transformation grids
+or init-files - from several dictionaries.
+The following paths are checked in order:
+
+- For transformation grids that have an explict relative or absolute path,
+  the directory specified in the grid filename.
+- Path resolved by the callback function set with
+  the :c:func:`proj_context_set_file_finder`. If it is set, the next tests
+  will not be run.
+- Path(s) set with the :c:func:`proj_context_set_search_paths`. If set, the
+  next tests will not be run.
+- Path(s) set with by the environment variable :envvar:`PROJ_LIB`.
+  On Linux/MacOSX/Unix, use ``:`` to separate paths. On Windows, ``;``
+- A path built into PROJ as its resource installation directory (whose value is
+  $(pkgdatadir)), for builds using the Makefile build system. Note, however,
+  that since this is a hard-wired path setting, it only works if the whole
+  PROJ installation is not moved somewhere else.
+- The current directory
+
 .. _proj-db:
 
 proj.db
