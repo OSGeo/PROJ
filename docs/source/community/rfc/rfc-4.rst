@@ -891,6 +891,161 @@ is an easy way to inspect such grid files:
     of this grid).
     Will be ignored by PROJ (this information can be inferred by the grids extent)
 
+Example
++++++++
+
+https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntf_r93.tif has
+been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/ntf_r93.gsb
+
+::
+
+    $ tiffinfo ntf_r93.tif 
+
+    TIFF Directory at offset 0x8 (8)
+    Image Width: 156 Image Length: 111
+    Bits/Sample: 32
+    Sample Format: IEEE floating point
+    Compression Scheme: AdobeDeflate
+    Photometric Interpretation: min-is-black
+    Extra Samples: 1<unspecified>
+    Samples/Pixel: 2
+    Rows/Strip: 111
+    Planar Configuration: single image plane
+    ImageDescription: NTF (EPSG:4275) to RGF93 (EPSG:4171). Converted from ntf_r93.gsb
+    Copyright: Derived from work by IGN France. Open License https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Open_Licence.pdf
+    Tag 33550: 0.100000,0.100000,0.000000
+    Tag 33922: 0.000000,0.000000,0.000000,-5.500000,52.000000,0.000000
+    Tag 34735: 1,1,1,3,1024,0,1,2,1025,0,1,2,2048,0,1,4275
+    Tag 42112: <GDALMetadata>
+    <Item name="target_crs_epsg_code">4171</Item>
+    <Item name="TYPE">HORIZONTAL_OFFSET</Item>
+    <Item name="UNITTYPE" sample="0" role="unittype">arc-second</Item>
+    <Item name="DESCRIPTION" sample="0" role="description">longitude_offset</Item>
+    <Item name="UNITTYPE" sample="1" role="unittype">arc-second</Item>
+    <Item name="DESCRIPTION" sample="1" role="description">latitude_offset</Item>
+    </GDALMetadata>
+
+    Predictor: floating point predictor 3 (0x3)
+
+::
+
+    $ listgeo ntf_r93.tif 
+
+    Geotiff_Information:
+        Version: 1
+        Key_Revision: 1.1
+        Tagged_Information:
+            ModelTiepointTag (2,3):
+                0                 0                 0                
+                -5.5              52                0                
+            ModelPixelScaleTag (1,3):
+                0.1               0.1               0                
+            End_Of_Tags.
+        Keyed_Information:
+            GTModelTypeGeoKey (Short,1): ModelTypeGeographic
+            GTRasterTypeGeoKey (Short,1): RasterPixelIsPoint
+            GeodeticCRSGeoKey (Short,1): Code-4275 (NTF)
+            End_Of_Keys.
+        End_Of_Geotiff.
+
+    GCS: 4275/NTF
+    Datum: 6275/Nouvelle Triangulation Francaise
+    Ellipsoid: 7011/Clarke 1880 (IGN) (6378249.20,6356515.00)
+    Prime Meridian: 8901/Greenwich (0.000000/  0d 0' 0.00"E)
+    Projection Linear Units: User-Defined (1.000000m)
+
+    Corner Coordinates:
+    Upper Left    (  5d30' 0.00"W, 52d 0' 0.00"N)
+    Lower Left    (  5d30' 0.00"W, 40d54' 0.00"N)
+    Upper Right   ( 10d 6' 0.00"E, 52d 0' 0.00"N)
+    Lower Right   ( 10d 6' 0.00"E, 40d54' 0.00"N)
+    Center        (  2d18' 0.00"E, 46d27' 0.00"N)
+
+::
+
+    $ gdalinfo ntf_r93.tif
+
+    Driver: GTiff/GeoTIFF
+    Files: ntf_r93.tif
+    Size is 156, 111
+    Coordinate System is:
+    BOUNDCRS[
+        SOURCECRS[
+            GEOGCRS["NTF",
+                DATUM["Nouvelle Triangulation Francaise",
+                    ELLIPSOID["Clarke 1880 (IGN)",6378249.2,293.466021293627,
+                        LENGTHUNIT["metre",1]]],
+                PRIMEM["Greenwich",0,
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                CS[ellipsoidal,2],
+                    AXIS["geodetic latitude (Lat)",north,
+                        ORDER[1],
+                        ANGLEUNIT["degree",0.0174532925199433]],
+                    AXIS["geodetic longitude (Lon)",east,
+                        ORDER[2],
+                        ANGLEUNIT["degree",0.0174532925199433]],
+                USAGE[
+                    SCOPE["unknown"],
+                    AREA["France - onshore - mainland and Corsica"],
+                    BBOX[41.31,-4.87,51.14,9.63]],
+                ID["EPSG",4275]]],
+        TARGETCRS[
+            GEOGCRS["WGS 84",
+                DATUM["World Geodetic System 1984",
+                    ELLIPSOID["WGS 84",6378137,298.257223563,
+                        LENGTHUNIT["metre",1]]],
+                PRIMEM["Greenwich",0,
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                CS[ellipsoidal,2],
+                    AXIS["latitude",north,
+                        ORDER[1],
+                        ANGLEUNIT["degree",0.0174532925199433]],
+                    AXIS["longitude",east,
+                        ORDER[2],
+                        ANGLEUNIT["degree",0.0174532925199433]],
+                ID["EPSG",4326]]],
+        ABRIDGEDTRANSFORMATION["NTF to WGS 84 (1)",
+            VERSION["IGN-Fra"],
+            METHOD["Geocentric translations (geog2D domain)",
+                ID["EPSG",9603]],
+            PARAMETER["X-axis translation",-168,
+                ID["EPSG",8605]],
+            PARAMETER["Y-axis translation",-60,
+                ID["EPSG",8606]],
+            PARAMETER["Z-axis translation",320,
+                ID["EPSG",8607]],
+            USAGE[
+                SCOPE["For applications to an accuracy of 2 metres."],
+                AREA["France - onshore - mainland and Corsica"],
+                BBOX[41.31,-4.87,51.14,9.63]],
+            ID["EPSG",1193],
+            REMARK["These same parameter values are used to transform to ETRS89. See NTF to ETRS89 (1) (code 1651)."]]]
+    Data axis to CRS axis mapping: 2,1
+    Origin = (-5.550000000000000,52.049999999999997)
+    Pixel Size = (0.100000000000000,-0.100000000000000)
+    Metadata:
+      AREA_OR_POINT=Point
+      target_crs_epsg_code=4171
+      TIFFTAG_COPYRIGHT=Derived from work by IGN France. Open License https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Open_Licence.pdf
+      TIFFTAG_IMAGEDESCRIPTION=NTF (EPSG:4275) to RGF93 (EPSG:4171). Converted from ntf_r93.gsb
+     TYPE=HORIZONTAL_OFFSET
+    Image Structure Metadata:
+      COMPRESSION=DEFLATE
+      INTERLEAVE=PIXEL
+    Corner Coordinates:
+    Upper Left  (  -5.5500000,  52.0500000) (  5d33' 0.00"W, 52d 3' 0.00"N)
+    Lower Left  (  -5.5500000,  40.9500000) (  5d33' 0.00"W, 40d57' 0.00"N)
+    Upper Right (  10.0500000,  52.0500000) ( 10d 3' 0.00"E, 52d 3' 0.00"N)
+    Lower Right (  10.0500000,  40.9500000) ( 10d 3' 0.00"E, 40d57' 0.00"N)
+    Center      (   2.2500000,  46.5000000) (  2d15' 0.00"E, 46d30' 0.00"N)
+    Band 1 Block=156x111 Type=Float32, ColorInterp=Gray
+      Description = longitude_offset
+      Unit Type: arc-second
+    Band 2 Block=156x111 Type=Float32, ColorInterp=Undefined
+      Description = latitude_offset
+      Unit Type: arc-second
+
+
 Multi-grid storage
 ++++++++++++++++++
 
