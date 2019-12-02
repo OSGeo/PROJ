@@ -49,3 +49,39 @@ INSERT INTO "grid_transformation" VALUES(
     NULL,
     'EPSG','8666','Geoid (height correction) model file','SWEN17_RH2000.gtx',
     NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+
+-- Iceland
+
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_5323_TO_EPSG_8089','ISN2004 height to vertical datum ISH2004',
+    NULL,NULL,
+    'PROJ','HEIGHT_TO_GEOGRAPHIC3D','GravityRelatedHeight to Geographic3D',
+    'EPSG','5323', -- source CRS (ISN2004 height)
+    'EPSG','8089', -- target CRS (ISH2004)
+    'EPSG','1120', -- area of use: Iceland - onshore and offshore
+    NULL,
+    'EPSG','8666','Geoid (height correction) model file','Icegeoid_ISN2004.gtx',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+    
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_4945_TO_EPSG_8089','ISN93 height to vertical datum ISH2004',
+    NULL,NULL,
+    'PROJ','HEIGHT_TO_GEOGRAPHIC3D','GravityRelatedHeight to Geographic3D',
+    'EPSG','4945', -- source CRS (ISN93 height)
+    'EPSG','8089', -- target CRS (ISH2004)
+    'EPSG','1120', -- area of use: Iceland - onshore and offshore
+    NULL,
+    'EPSG','8666','Geoid (height correction) model file','Icegeoid_ISN93.gtx',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+    
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_8085_TO_EPSG_8089','ISN2016 height to vertical datum ISH2004',
+    NULL,NULL,
+    'PROJ','HEIGHT_TO_GEOGRAPHIC3D','GravityRelatedHeight to Geographic3D',
+    'EPSG','8085', -- source CRS (ISN2016 height)
+    'EPSG','8089', -- target CRS (ISH2004)
+    'EPSG','1120', -- area of use: Iceland - onshore and offshore
+    NULL,
+    'EPSG','8666','Geoid (height correction) model file','Icegeoid_ISN2016.gtx',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+    
