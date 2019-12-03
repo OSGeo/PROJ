@@ -12923,9 +12923,40 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
     bool sameGeodeticDatum = false;
 
     if (vertSrc || vertDst) {
-        createOperationsFromDatabaseWithVertCRS(sourceCRS, targetCRS, context,
-                                                geogSrc, geogDst, vertSrc,
-                                                vertDst, res);
+        if (res.empty()) {
+            if (geogSrc &&
+                geogSrc->coordinateSystem()->axisList().size() == 2 &&
+                vertDst) {
+                auto dbContext =
+                    context.context->getAuthorityFactory()->databaseContext();
+                auto resTmp = findOpsInRegistryDirect(
+                    sourceCRS->promoteTo3D(std::string(), dbContext), targetCRS,
+                    context, resFindDirectNonEmptyBeforeFiltering);
+                for (auto &op : resTmp) {
+                    auto newOp = op->shallowClone();
+                    setCRSs(newOp.get(), sourceCRS, targetCRS);
+                    res.emplace_back(newOp);
+                }
+            } else if (geogDst &&
+                       geogDst->coordinateSystem()->axisList().size() == 2 &&
+                       vertSrc) {
+                auto dbContext =
+                    context.context->getAuthorityFactory()->databaseContext();
+                auto resTmp = findOpsInRegistryDirect(
+                    sourceCRS, targetCRS->promoteTo3D(std::string(), dbContext),
+                    context, resFindDirectNonEmptyBeforeFiltering);
+                for (auto &op : resTmp) {
+                    auto newOp = op->shallowClone();
+                    setCRSs(newOp.get(), sourceCRS, targetCRS);
+                    res.emplace_back(newOp);
+                }
+            }
+        }
+        if (res.empty()) {
+            createOperationsFromDatabaseWithVertCRS(sourceCRS, targetCRS,
+                                                    context, geogSrc, geogDst,
+                                                    vertSrc, vertDst, res);
+        }
     } else if (geodSrc && geodDst) {
 
         const auto &srcDatum = geodSrc->datum();
@@ -13406,7 +13437,7 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
                 util::IComparable::Criterion::EQUIVALENT)) {
             res.emplace_back(
                 Conversion::createGeographicGeocentric(sourceCRS, targetCRS));
-        } else if (isSrcGeocentric) {
+        } else if (isSrcGeocentric && geogDst) {
             std::string interm_crs_name(geogDst->nameStr());
             interm_crs_name += " (geocentric)";
             auto interm_crs =
@@ -13539,7 +13570,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
             }
         }
         // If the datum are equivalent, this is also fine
-    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog->datum() &&
+    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
                geogDst->datum() &&
                hubSrcGeog->datum()->_isEquivalentTo(
                    geogDst->datum().get(),
@@ -13568,7 +13599,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         // Case of "+proj=latlong +ellps=clrk66
         // +nadgrids=ntv1_can.dat,conus"
         // to "+proj=latlong +datum=NAD83"
-    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog->datum() &&
+    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
                geogDst->datum() &&
                geogCRSOfBaseOfBoundSrc->ellipsoid()->_isEquivalentTo(
                    datum::Ellipsoid::CLARKE_1866.get(),
