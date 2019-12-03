@@ -140,6 +140,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
+                      VALUES ('NTv2_SN.gsb',
+                              'NTv2_SN.gsb', -- no change. Just document the package
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
                       VALUES ('AT_GIS_GRID.gsb',
                               'AT_GIS_GRID.gsb', -- no change. Just document the package
                               'NTv2',
