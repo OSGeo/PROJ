@@ -8,7 +8,7 @@ PROJ RFC 4: Remote access to grids and GeoTIFF grids
 :Contact: even.rouault@spatialys.com, howard@hobu.co
 :Status: Draft
 :Implementation target: PROJ 7
-:Last Updated: 2019-11-25
+:Last Updated: 2019-12-03
 
 Motivation
 -------------------------------------------------------------------------------
@@ -664,8 +664,10 @@ is an easy way to inspect such grid files:
   side, libtiff will transparently handle both little-endian and big-endian
   ordering.
 
-- Files hosted on the CDN will use PlanarConfiguration=Contig. On the reading side,
-  PROJ will handle also PlanarConfiguration=Separate.
+- Files hosted on the CDN will use PlanarConfiguration=Separate.
+  The tools described in a later section will order blocks so that blocks needed
+  for a given location are close to each other.
+  On the reading side, PROJ will handle also PlanarConfiguration=Contig.
 
 - Files hosted on the CDN will use Signed Int 16 (
   `BitsPerSample <https://www.awaresystems.be/imaging/tiff/tifftags/bitspersample.html>`_ =16 and
@@ -753,8 +755,8 @@ is an easy way to inspect such grid files:
     Values recognized by PROJ currently are:
 
     - ``HORIZONTAL_OFFSET``: implies the presence of at least two samples.
-      The first sample must contain the longitude offset and the second
-      sample must contain the latitude offset.
+      The first sample must contain the latitude offset and the second
+      sample must contain the longitude offset.
 
     - ``VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL``: implies the presence of at least one sample.
       The first sample must contain the vertical adjustment. Must be used when
@@ -775,13 +777,13 @@ is an easy way to inspect such grid files:
 
     Values recognized by PROJ for this Item are currently:
 
-    + ``longitude_offset``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
-      the value to add a longitude expressed in the CRS encoded in the GeoKeys
-      to obtain a longitude value expressed in the target CRS.
-
     + ``latitude_offset``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
       the value to add a latitude expressed in the CRS encoded in the GeoKeys
       to obtain a latitude value expressed in the target CRS.
+
+    + ``longitude_offset``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
+      the value to add a longitude expressed in the CRS encoded in the GeoKeys
+      to obtain a longitude value expressed in the target CRS.
 
     + ``geoid_undulation``: valid for TYPE=VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL.
       For a source CRS being a geographic CRS and a target CRS being a vertical CRS,
@@ -804,8 +806,16 @@ is an easy way to inspect such grid files:
 
     .. code-block:: xml
 
-        <Item name="DESCRIPTION" sample="0" role="description">longitude_offset</Item>
-        <Item name="DESCRIPTION" sample="1" role="description">latitude_offset</Item>
+        <Item name="DESCRIPTION" sample="0" role="description">latitude_offset</Item>
+        <Item name="DESCRIPTION" sample="1" role="description">longitude_offset</Item>
+
+    Other values may be used (not used by PROJ):
+
+    + ``latitude_offset_accuracy``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
+      the accuracy of corresponding latitude_offset samples. Generally in metre (if converted from NTv2)
+
+    + ``longitude_offset_accuracy``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
+      the accuracy of corresponding longitude_offset samples. Generally in metre (if converted from NTv2)
 
   * The unit of the values stored in the grid must be specified for each
     sample through an Item of name ``UNITTYPE`` and role ``unittype``
@@ -896,36 +906,43 @@ Example
 
 https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntf_r93.tif has
 been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/ntf_r93.gsb
+with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtiff.py
 
 ::
 
     $ tiffinfo ntf_r93.tif 
 
-    TIFF Directory at offset 0x8 (8)
+    TIFF Directory at offset 0x32 (50)
     Image Width: 156 Image Length: 111
     Bits/Sample: 32
     Sample Format: IEEE floating point
     Compression Scheme: AdobeDeflate
     Photometric Interpretation: min-is-black
-    Extra Samples: 1<unspecified>
-    Samples/Pixel: 2
+    Extra Samples: 3<unspecified, unspecified, unspecified>
+    Samples/Pixel: 4
     Rows/Strip: 111
-    Planar Configuration: single image plane
+    Planar Configuration: separate image planes
     ImageDescription: NTF (EPSG:4275) to RGF93 (EPSG:4171). Converted from ntf_r93.gsb
     Copyright: Derived from work by IGN France. Open License https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Open_Licence.pdf
     Tag 33550: 0.100000,0.100000,0.000000
     Tag 33922: 0.000000,0.000000,0.000000,-5.500000,52.000000,0.000000
     Tag 34735: 1,1,1,3,1024,0,1,2,1025,0,1,2,2048,0,1,4275
     Tag 42112: <GDALMetadata>
+    <Item name="grid_name">FRANCE</Item>
     <Item name="target_crs_epsg_code">4171</Item>
     <Item name="TYPE">HORIZONTAL_OFFSET</Item>
     <Item name="UNITTYPE" sample="0" role="unittype">arc-second</Item>
-    <Item name="DESCRIPTION" sample="0" role="description">longitude_offset</Item>
+    <Item name="DESCRIPTION" sample="0" role="description">latitude_offset</Item>
     <Item name="UNITTYPE" sample="1" role="unittype">arc-second</Item>
-    <Item name="DESCRIPTION" sample="1" role="description">latitude_offset</Item>
+    <Item name="DESCRIPTION" sample="1" role="description">longitude_offset</Item>
+    <Item name="UNITTYPE" sample="2" role="unittype">metre</Item>
+    <Item name="DESCRIPTION" sample="2" role="description">latitude_offset_accuracy</Item>
+    <Item name="UNITTYPE" sample="3" role="unittype">metre</Item>
+    <Item name="DESCRIPTION" sample="3" role="description">longitude_offset_accuracy</Item>
     </GDALMetadata>
 
     Predictor: floating point predictor 3 (0x3)
+
 
 ::
 
@@ -1025,13 +1042,14 @@ been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/ntf_r93.
     Pixel Size = (0.100000000000000,-0.100000000000000)
     Metadata:
       AREA_OR_POINT=Point
+      grid_name=FRANCE
       target_crs_epsg_code=4171
       TIFFTAG_COPYRIGHT=Derived from work by IGN France. Open License https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Open_Licence.pdf
       TIFFTAG_IMAGEDESCRIPTION=NTF (EPSG:4275) to RGF93 (EPSG:4171). Converted from ntf_r93.gsb
-     TYPE=HORIZONTAL_OFFSET
+      TYPE=HORIZONTAL_OFFSET
     Image Structure Metadata:
       COMPRESSION=DEFLATE
-      INTERLEAVE=PIXEL
+      INTERLEAVE=BAND
     Corner Coordinates:
     Upper Left  (  -5.5500000,  52.0500000) (  5d33' 0.00"W, 52d 3' 0.00"N)
     Lower Left  (  -5.5500000,  40.9500000) (  5d33' 0.00"W, 40d57' 0.00"N)
@@ -1039,12 +1057,17 @@ been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/ntf_r93.
     Lower Right (  10.0500000,  40.9500000) ( 10d 3' 0.00"E, 40d57' 0.00"N)
     Center      (   2.2500000,  46.5000000) (  2d15' 0.00"E, 46d30' 0.00"N)
     Band 1 Block=156x111 Type=Float32, ColorInterp=Gray
-      Description = longitude_offset
-      Unit Type: arc-second
-    Band 2 Block=156x111 Type=Float32, ColorInterp=Undefined
       Description = latitude_offset
       Unit Type: arc-second
-
+    Band 2 Block=156x111 Type=Float32, ColorInterp=Undefined
+      Description = longitude_offset
+      Unit Type: arc-second
+    Band 3 Block=156x111 Type=Float32, ColorInterp=Undefined
+      Description = latitude_offset_accuracy
+      Unit Type: metre
+    Band 4 Block=156x111 Type=Float32, ColorInterp=Undefined
+      Description = longitude_offset_accuracy
+      Unit Type: metre
 
 Multi-grid storage
 ++++++++++++++++++
@@ -1057,7 +1080,8 @@ The first IFD should have a full description according to the
 :ref:`Description of the PROJ GeoTIFF format <description_geotiff_format>`.
 Subsequent IFD might have a more compact description, omitting for example, CRS
 information if it is identical to the main IFD (which should be the case for
-the currently envisionned use cases).
+the currently envisionned use cases), or Copyright / ImageDescription metadata
+items.
 
 Each IFD will have its
 `NewSubfileType <https://www.awaresystems.be/imaging/tiff/tifftags/newsubfiletype.html>`_
@@ -1068,8 +1092,50 @@ higher-resolution in the chain of IFD linking. On reading, PROJ will use the
 value from the highest-resoluted grid that contains the point of interest.
 
 For efficient reading from the network, files hosted on the CDN will use
-a layout as described in the `low level paragraph of the Cloud Optimized GeoTIFF
+a layout similar to the one described in the `low level paragraph of the Cloud Optimized GeoTIFF
 GDAL driver page <https://gdal.org/drivers/raster/cog.html#low-level>`_
+
+The layout for a file converted from NTv2 will for example be:
+
+- TIFF/BigTIFF header/signature and pointer to first IFD (Image File Directory)
+- "ghost area" indicating the generated process
+- IFD of the first grid, followed by TIFF tags values, excluding the TileOffsets and TileByteCounts arrays
+- ...
+- IFD of the last grid, followed by TIFF tags values, excluding the GDAL_METADATA tag, TileOffsets and TileByteCounts arrays
+- TileOffsets and TileByteCounts arrays for first IFD
+- ...
+- TileOffsets and TileByteCounts arrays for last IFD
+- Value of GDAL_METADATA tag for IFDs following the first IFD
+- First IFD: Data corresponding to latitude offset of Block_0_0
+- First IFD: Data corresponding to longitude offset of Block_0_0
+- First IFD: Data corresponding to latitude offset of Block_0_1
+- First IFD: Data corresponding to longitude offset of Block_0_1
+- ...
+- First IFD: Data corresponding to latitude offset of Block_n_m
+- First IFD: Data corresponding to longitude offset of Block_n_m
+- ...
+- Last IFD: Data corresponding to latitude offset of Block_0_0
+- Last IFD: Data corresponding to longitude offset of Block_0_0
+- Last IFD: Data corresponding to latitude offset of Block_0_1
+- Last IFD: Data corresponding to longitude offset of Block_0_1
+- ...
+- Last IFD: Data corresponding to latitude offset of Block_n_m
+- Last IFD: Data corresponding to longitude offset of Block_n_m
+
+If longitude_offset_accuracy and latitude_offset_accuracy are present, this
+will be followed by:
+
+- First IFD: Data corresponding to latitude offset accuracy of Block_0_0
+- First IFD: Data corresponding to longitude offset accuracy of Block_0_0
+- ...
+- First IFD: Data corresponding to latitude offset accuracy of Block_n_m
+- First IFD: Data corresponding to longitude offset accuracy of Block_n_m
+- ...
+- Last IFD: Data corresponding to latitude offset accuracy of Block_0_0
+- Last IFD: Data corresponding to longitude offset accuracy of Block_0_0
+- ...
+- Last IFD: Data corresponding to latitude offset accuracy of Block_n_m
+- Last IFD: Data corresponding to longitude offset accuracy of Block_n_m
 
 .. note::
 
@@ -1079,13 +1145,33 @@ GDAL driver page <https://gdal.org/drivers/raster/cog.html#low-level>`_
     need to have a nested hiearchy, so "flat" organization with the standard IFD chaining
     mechanism is adopted.
 
+Examples of multi-grid dataset
+++++++++++++++++++++++++++++++
+
+https://github.com/rouault/sample_proj_gtiff_grids/blob/master/GDA94_GDA2020_conformal.tif has
+been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/oceania/GDA94_GDA2020_conformal.gsb
+with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtiff.py
+
+It contains 5 subgrids. All essential metadata to list the subgrids and their
+georeferencing is contained within the first 3 KB of the file.
+
+The file size is 4.8 MB using DEFLATE compression and floating-point predictor.
+To be compared with the 83 MB of the original .gsb file.
+
+https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_0.tif  has
+been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/north-america/ntv2_0.gsb
+
+It contains 114 subgrids. All essential metadata to list the subgrids and their
+georeferencing is contained within the first 40 KB of the file.
+
+
 Tooling
 +++++++
 
-The `GDAL COG driver <https://gdal.org/drivers/raster/cog.htm>`_ will be extended
-to accept a list of individual grids to combine together in a single fil.
+A script will be deveoped to accept a list of individual grids to combine
+together into a single file.
 
-A ntv2_to_cog.py convenience script will be created in the samples script
+A ntv2_to_gtiff.py convenience script will be created in the samples script
 directory of GDAL to convert NTv2 grids, including their subgrids, to the above
 described GeoTIFF layout.
 
