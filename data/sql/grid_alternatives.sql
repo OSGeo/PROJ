@@ -1713,3 +1713,231 @@ INSERT INTO grid_alternatives(original_grid_name,
                               0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
+
+-- New Zealand grid shift models.  EPSG names are not for GTX files (at time of writing)
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('auckland-1946-to-nzvd2016-conversion.csv',
+                              'auckht1946-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('bluff-1955-to-nzvd2016-conversion.csv',
+                              'blufht1955-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('dunedin-1958-to-nzvd2016-conversion.csv',
+                              'duneht1958-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('dunedin-bluff-1960-to-nzvd2016-conversion.csv',
+                              'dublht1960-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('gisborne-1926-to-nzvd2016-conversion.csv',
+                              'gisbht1926-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('lyttelton-1937-to-nzvd2016-conversion.csv',
+                              'lyttht1937-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('moturiki-1953-to-nzvd2016-conversion.csv',
+                              'motuht1953-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('napier-1962-to-nzvd2016-conversion.csv',
+                              'napiht1962-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('nelson-1955-to-nzvd2016-conversion.csv',
+                              'nelsht1955-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('onetreepoint-1964-to-nzvd2016-conversion.csv',
+                              'ontpht1964-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('stewartisland-1977-to-nzvd2016-conversion.csv',
+                              'stisht1977-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('taranaki-1970-to-nzvd2016-conversion.csv',
+                              'taraht1970-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('wellington-1953-to-nzvd2016-conversion.csv',
+                              'wellht1953-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('New_Zealand_Quasigeoid_2016.csv',
+                              'nzgeoid2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('nzgeoid09.sid',
+                              'nzgeoid2009.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+
