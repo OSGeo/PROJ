@@ -125,6 +125,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
+                      VALUES ('BWTA2017.gsb',
+                              'BWTA2017.gsb', -- no change. Just document the package
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
                       VALUES ('nzgd2kgrid0005.gsb',
                               'nzgd2kgrid0005.gsb', -- no change. Just document the package
                               'NTv2',

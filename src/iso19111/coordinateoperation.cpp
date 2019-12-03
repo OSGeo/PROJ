@@ -11580,11 +11580,13 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
 
             const auto authorities(getCandidateAuthorities(
                 authFactory, srcAuthName, targetAuthName));
+            std::vector<CoordinateOperationNNPtr> res;
             for (const auto &authority : authorities) {
+                const auto authName =
+                    authority == "any" ? std::string() : authority;
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
-                    authFactory->databaseContext(),
-                    authority == "any" ? std::string() : authority);
-                auto res =
+                    authFactory->databaseContext(), authName);
+                auto resTmp =
                     tmpAuthFactory->createFromCoordinateReferenceSystemCodes(
                         srcAuthName, srcCode, targetAuthName, targetCode,
                         context.context->getUsePROJAlternativeGridNames(),
@@ -11593,6 +11595,10 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
                                 DISCARD_OPERATION_IF_MISSING_GRID,
                         context.context->getDiscardSuperseded(), true, false,
                         context.extent1, context.extent2);
+                res.insert(res.end(), resTmp.begin(), resTmp.end());
+                if (authName == "PROJ") {
+                    continue;
+                }
                 if (!res.empty()) {
                     resNonEmptyBeforeFiltering = true;
                     auto resFiltered =
