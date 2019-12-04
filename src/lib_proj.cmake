@@ -234,11 +234,9 @@ set(SRC_LIBPROJ_CORE
   fileapi.cpp
   fwd.cpp
   gauss.cpp
-  gc_reader.cpp
   geocent.cpp
   geocent.h
   geodesic.c
-  gridcatalog.cpp
   gridinfo.cpp
   gridlist.cpp
   init.cpp

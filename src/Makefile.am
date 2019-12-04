@@ -195,7 +195,6 @@ libproj_la_SOURCES = \
 	release.cpp gauss.cpp \
 	fileapi.cpp \
 	\
-	gc_reader.cpp gridcatalog.cpp \
 	nad_cvt.cpp nad_init.cpp nad_intr.cpp \
 	apply_gridshift.cpp datums.cpp datum_set.cpp transform.cpp \
 	geocent.cpp geocent.h utils.cpp gridinfo.cpp gridlist.cpp \

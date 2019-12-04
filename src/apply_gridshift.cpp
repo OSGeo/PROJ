@@ -89,10 +89,6 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
                           double *x, double *y, double *z )
 
 {
-    if( defn->catalog_name != nullptr )
-        return pj_gc_apply_gridshift( defn, inverse, point_count, point_offset,
-                                      x, y, z );
-
     if( defn->gridlist == nullptr )
     {
         defn->gridlist =

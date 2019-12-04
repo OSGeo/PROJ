@@ -490,20 +490,6 @@ struct PJconsts {
     int     is_long_wrap_set = 0;
     char    axis[4] = {0,0,0,0};        /* Axis order, pj_transform/pj_adjust_axis */
 
-    /* New Datum Shift Grid Catalogs */
-    char   *catalog_name = nullptr;
-    struct _PJ_GridCatalog *catalog = nullptr;
-
-    double  datum_date = 0.0;           /* TODO: Description needed */
-
-    struct _pj_gi *last_before_grid = nullptr;    /* TODO: Description needed */
-    PJ_Region     last_before_region = {0,0,0,0}; /* TODO: Description needed */
-    double        last_before_date = 0.0;         /* TODO: Description needed */
-
-    struct _pj_gi *last_after_grid = nullptr;     /* TODO: Description needed */
-    PJ_Region     last_after_region = {0,0,0,0};  /* TODO: Description needed */
-    double        last_after_date = 0.0;          /* TODO: Description needed */
-
     /*************************************************************************************
      ISO-19111 interface
     **************************************************************************************/
@@ -795,27 +781,6 @@ typedef struct _pj_gi {
     struct _pj_gi *child;
 } PJ_GRIDINFO;
 
-typedef struct {
-    PJ_Region region;
-    int  priority;      /* higher used before lower */
-    double date;        /* year.fraction */
-    char *definition;   /* usually the gridname */
-
-    PJ_GRIDINFO  *gridinfo;
-    int available;      /* 0=unknown, 1=true, -1=false */
-} PJ_GridCatalogEntry;
-
-typedef struct _PJ_GridCatalog {
-    char *catalog_name;
-
-    PJ_Region region;   /* maximum extent of catalog data */
-
-    int entry_count;
-    PJ_GridCatalogEntry *entries;
-
-    struct _PJ_GridCatalog *next;
-} PJ_GridCatalog;
-
 /* procedure prototypes */
 double PROJ_DLL dmstor(const char *, char **);
 double dmstor_ctx(projCtx_t *ctx, const char *, char **);
@@ -893,18 +858,6 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx_t *, const char *, int * );
 PJ_GRIDINFO *pj_gridinfo_init( projCtx_t *, const char * );
 int          pj_gridinfo_load( projCtx_t *, PJ_GRIDINFO * );
 void         pj_gridinfo_free( projCtx_t *, PJ_GRIDINFO * );
-
-PJ_GridCatalog *pj_gc_findcatalog( projCtx_t *, const char * );
-PJ_GridCatalog *pj_gc_readcatalog( projCtx_t *, const char * );
-void pj_gc_unloadall( projCtx_t *);
-int pj_gc_apply_gridshift( PJ *defn, int inverse,
-                           long point_count, int point_offset,
-                           double *x, double *y, double *z );
-int pj_gc_apply_gridshift( PJ *defn, int inverse,
-                           long point_count, int point_offset,
-                           double *x, double *y, double *z );
-
-double pj_gc_parsedate( projCtx_t *, const char * );
 
 void  *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
