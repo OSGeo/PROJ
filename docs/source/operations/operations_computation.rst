@@ -117,37 +117,46 @@ Filtering and sorting of coordinate operations
 
 The last step is to filter and sort results in order of relevance.
 
-The filtering
-takes into account a minimum accuracy that the user might have expressed, an
-area of use on which the coordinate operation(s) must apply and if the absence
-of grids needed by some operations must result in discarding the operations.
+The filtering takes into account the following criteria to decide which operations
+must be retained or discarded:
 
-The sorting algorithm is a set of heuristics. It is implement by the `operator ()`
+* a minimum accuracy that the user might have expressed,
+* an area of use on which the coordinate operation(s) must apply
+* if the absence of grids needed by an operation must result in discarding it.
+
+The sorting algorithm determines the order of relevance of the operations we got.
+A comparison function compares pair of operations to determine which of the
+two is the most releavant. This is implemented by the :cpp:func:`operator ()`
 method of the SortFunction structure.
-The following criteria are used in the following order (first listed, first applied):
+When comparing two operations, the following criteria are used. The tests are
+performed in the order they are listed below:
 
-* put at top operations that can be expressed as a PROJ instanciable operation
-  (the database might list operations whose method is not (yet) implemented by PROJ)
-* put at top operations that do not have a synthetic ballpark vertical transformation
-  (occurs when there is a geoid model)
-* put at top operations that do not have a synthetic ballpark horizontal tranformation
-* put at top operations that refer to shift grids that are locally available
-* put at top operations that refer to grids that are available in one of the proj-datumgrid
-  packages, but not necessarily locally available
-* put at top operations that have a known accuracy
-* if two operations have unknown accuracy, then put at top the one that use grid
-  if the other one does not (grid based operations are assumed to be more precise
-  than operations relying on a few parameters)
-* put at top operations whose area of use is larger (note: the computation of the
-  are of use is approximate, based on a bounding box)
-* put at top operations that have a better accuracy
-* in case of same accuracy, put at top operations that do not use grids (operations
-  that use only parameters will be faster)
-* put at top operations that involve less transformation steps
-* and for completness, if two operations are comparable given all the above criteria,
-  put at first the one that has the shorter name, and if they have the same lengt, sort
-  by lexicographic order (obviously completely arbitrary, but a sorting
-  algorithm must be able to compare all entries)
+1. consider as more relevant an operation that can be expressed as a PROJ operation string
+   (the database might list operations whose method is not (yet) implemented by PROJ)
+2. if both operations evaluate identically with respect to the above criterion,
+   consider as more relevant an operation that does not include a synthetic
+   ballpark vertical transformation (occurs when there is a geoid model).
+3. if both operations evaluate identically with respect to the above criterion,
+   consider as more relevant an operation that does not include a synthetic
+   ballpark horizontal tranformation.
+4. consider as more relevant an operation that refers to shift grids that are locally available.
+5. consider as more relevant an operation that refers to grids that are available
+   in one of the proj-datumgrid packages, but not necessarily locally available
+6. consider as more relevant an operation that has a known accuracy.
+7. if two operations have unknown accuracy, consider as more relevant an operation
+   that uses grid(s) if the other one does not (grid based operations are assumed
+   to be more precise than operations relying on a few parameters)
+8. consider as more relevant an operation whose area of use is larger
+   (note: the computation of the are of use is approximate, based on a bounding box)
+9. consider as more relevant an operation that has a better accuracy.
+10. in case of same accuracy, consider as more relevant an operation that does
+    not use grids (operations that use only parameters will be faster)
+11. consider as more relevant an operation that involves less transformation steps
+12. and for completness, if two operations are comparable given all the above criteria,
+    consider as more relevant the one which has the shorter name, and if they
+    have the same length, consider as more relevant the one whose name comes first in
+    lexicographic order (obviously completely arbitrary, but a sorting
+    algorithm must be able to compare all entries)
 
 Geodetic/geographic CRS to Geodetic/geographic CRS, without known identifiers
 -----------------------------------------------------------------------------
