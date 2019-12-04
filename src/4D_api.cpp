@@ -1557,7 +1557,7 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
     memset(&grinfo, 0, sizeof(PJ_GRID_INFO));
 
     /* in case the grid wasn't found */
-    if (gridinfo->filename == nullptr) {
+    if (gridinfo->filename == nullptr || gridinfo->ct == nullptr) {
         pj_gridinfo_free(ctx, gridinfo);
         strcpy(grinfo.format, "missing");
         return grinfo;

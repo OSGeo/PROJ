@@ -386,6 +386,10 @@ TEST(gie, info_functions) {
     grid_info = proj_grid_info("nonexistinggrid");
     ASSERT_EQ(std::string(grid_info.filename), "");
 
+    // File exists, but is not a grid
+    grid_info = proj_grid_info("proj.db");
+    ASSERT_EQ(std::string(grid_info.filename), "");
+
     /* proj_init_info() */
     init_info = proj_init_info("unknowninit");
     ASSERT_EQ(std::string(init_info.filename), "");
