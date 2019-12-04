@@ -443,7 +443,7 @@ endif()
 include_directories(${SQLITE3_INCLUDE_DIR})
 target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
 
-if(MSVC)
+if(MSVC AND BUILD_LIBPROJ_SHARED)
   target_compile_definitions(${PROJ_CORE_TARGET}
     PRIVATE PROJ_MSVC_DLL_EXPORT=1)
 endif()
