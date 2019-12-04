@@ -431,6 +431,70 @@ static int height_unit (PJ *P, PJ_DIRECTION dir, long n, int dist, double *z) {
 }
 
 
+/************************************************************************/
+/*                        pj_apply_vgridshift()                         */
+/*                                                                      */
+/*      This implementation takes uses the gridlist from a coordinate   */
+/*      system definition.  If the gridlist has not yet been            */
+/*      populated in the coordinate system definition we set it up      */
+/*      now.                                                            */
+/************************************************************************/
+static int pj_apply_vgridshift( PJ *defn,
+                         int inverse,
+                         long point_count, int point_offset,
+                         double *x, double *y, double *z )
+
+{
+    if( defn->vgrids.empty() )
+    {
+        proj_vgrid_init(defn, "geoidgrids");
+    }
+
+    for( int i = 0; i < point_count; i++ )
+    {
+        double value;
+        long io = i * point_offset;
+        PJ_LP   input;
+
+        input.phi = y[io];
+        input.lam = x[io];
+
+        value = proj_vgrid_value(defn, input, 1.0);
+
+        if( inverse )
+            z[io] -= value;
+        else
+            z[io] += value;
+
+        if( value == HUGE_VAL )
+        {
+            std::string gridlist;
+
+            proj_log_debug(defn,
+                "pj_apply_vgridshift(): failed to find a grid shift table for\n"
+                "                       location (%.7fdW,%.7fdN)",
+                x[io] * RAD_TO_DEG,
+                y[io] * RAD_TO_DEG );
+
+            for( const auto& gridset: defn->vgrids )
+            {
+                if( gridlist.empty() )
+                    gridlist += "   tried: ";
+                else
+                    gridlist += ',';
+                gridlist += gridset->name();
+            }
+
+            proj_log_debug(defn, "%s", gridlist.c_str());
+            pj_ctx_set_errno( defn->ctx, PJD_ERR_GRID_AREA );
+
+            return PJD_ERR_GRID_AREA;
+        }
+    }
+
+    return 0;
+}
+
 
 /* -------------------------------------------------------------------- */
 /*           Transform to ellipsoidal heights if needed                 */
@@ -441,10 +505,7 @@ static int geometric_to_orthometric (PJ *P, PJ_DIRECTION dir, long n, int dist, 
         return 0;
     if (z==nullptr)
         return PJD_ERR_GEOCENTRIC;
-    err = pj_apply_vgridshift (P, "sgeoidgrids",
-              &(P->vgridlist_geoid),
-              &(P->vgridlist_geoid_count),
-              dir==PJ_FWD ? 1 : 0, n, dist, x, y, z );
+    err = pj_apply_vgridshift (P, dir==PJ_FWD ? 1 : 0, n, dist, x, y, z );
     if (err)
         return pj_ctx_get_errno(P->ctx);
     return 0;

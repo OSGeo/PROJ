@@ -212,7 +212,10 @@ libproj_la_SOURCES = \
 	proj_json_streaming_writer.hpp \
 	proj_json_streaming_writer.cpp \
 	\
-	tracing.cpp
+	tracing.cpp \
+	\
+	grids.hpp \
+	grids.cpp
 
 
 # The sed hack is to please MSVC

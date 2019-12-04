@@ -65,6 +65,7 @@
 #include <vector>
 
 #include "proj.h"
+#include "grids.hpp"
 
 #ifdef PROJ_API_H
 #error proj_internal.h must be included before proj_api.h
@@ -482,8 +483,7 @@ struct PJconsts {
     int     gridlist_count = 0;
 
     int     has_geoid_vgrids = 0;      /* TODO: Description needed */
-    struct _pj_gi **vgridlist_geoid = nullptr;   /* TODO: Description needed */
-    int     vgridlist_geoid_count = 0;
+    std::vector<std::unique_ptr<NS_PROJ::VerticalShiftGridSet>> vgrids{};
 
     double  from_greenwich = 0.0;       /* prime meridian offset (in radians) */
     double  long_wrap_center = 0.0;     /* 0.0 for -180 to 180, actually in radians*/
@@ -839,12 +839,6 @@ void           nad_free(struct CTABLE *);
 
 /* higher level handling of datum grid shift files */
 
-int pj_apply_vgridshift( PJ *defn, const char *listname,
-                         PJ_GRIDINFO ***gridlist_p,
-                         int *gridlist_count_p,
-                         int inverse,
-                         long point_count, int point_offset,
-                         double *x, double *y, double *z );
 int pj_apply_gridshift_2( PJ *defn, int inverse,
                           long point_count, int point_offset,
                           double *x, double *y, double *z );

@@ -227,7 +227,6 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
 
     /* free grid lists */
     pj_dealloc( P->gridlist );
-    pj_dealloc( P->vgridlist_geoid );
 
     /* We used to call pj_dalloc( P->catalog ), but this will leak */
     /* memory. The safe way to clear catalog and grid is to call */

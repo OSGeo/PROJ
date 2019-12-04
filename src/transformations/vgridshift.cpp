@@ -22,7 +22,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
 
-    if (P->vgridlist_geoid != nullptr) {
+    if (!P->vgrids.empty()) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
         point.xyz.z += proj_vgrid_value(P, point.lp, Q->forward_multiplier);
@@ -37,7 +37,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
 
-    if (P->vgridlist_geoid != nullptr) {
+    if (!P->vgrids.empty()) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
         point.xyz.z -= proj_vgrid_value(P, point.lp, Q->forward_multiplier);

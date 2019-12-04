@@ -1558,6 +1558,45 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
 
     /* in case the grid wasn't found */
     if (gridinfo->filename == nullptr || gridinfo->ct == nullptr) {
+
+        const auto gridSet = NS_PROJ::VerticalShiftGridSet::open(ctx, gridname);
+        if( gridSet )
+        {
+            const auto& grids = gridSet->grids();
+            if( !grids.empty() )
+            {
+                const auto& grid = grids.front();
+                const auto& extent = grid->extentAndRes();
+
+                /* name of grid */
+                strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
+
+                /* full path of grid */
+                pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
+
+                /* grid format */
+                strncpy (grinfo.format, gridSet->format().c_str(), sizeof(grinfo.format) - 1);
+
+                /* grid size */
+                grinfo.n_lon = grid->width();
+                grinfo.n_lat = grid->height();
+
+                /* cell size */
+                grinfo.cs_lon = extent.resLon;
+                grinfo.cs_lat = extent.resLat;
+
+                /* bounds of grid */
+                grinfo.lowerleft.lam  = extent.westLon;
+                grinfo.lowerleft.phi  = extent.southLat;
+                grinfo.upperright.lam = extent.eastLon;
+                grinfo.upperright.phi = extent.northLat;
+
+                pj_gridinfo_free(ctx, gridinfo);
+
+                return grinfo;
+            }
+        }
+
         pj_gridinfo_free(ctx, gridinfo);
         strcpy(grinfo.format, "missing");
         return grinfo;
@@ -1585,8 +1624,8 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
 
     /* bounds of grid */
     grinfo.lowerleft  = gridinfo->ct->ll;
-    grinfo.upperright.lam = grinfo.lowerleft.lam + grinfo.n_lon*grinfo.cs_lon;
-    grinfo.upperright.phi = grinfo.lowerleft.phi + grinfo.n_lat*grinfo.cs_lat;
+    grinfo.upperright.lam = grinfo.lowerleft.lam + (grinfo.n_lon-1)*grinfo.cs_lon;
+    grinfo.upperright.phi = grinfo.lowerleft.phi + (grinfo.n_lat-1)*grinfo.cs_lat;
 
     pj_gridinfo_free(ctx, gridinfo);
 

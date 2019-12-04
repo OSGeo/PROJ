@@ -352,51 +352,6 @@ int pj_gridinfo_load( projCtx_t* ctx, PJ_GRIDINFO *gi )
         return 1;
     }
 
-/* -------------------------------------------------------------------- */
-/*      GTX format.                                                     */
-/* -------------------------------------------------------------------- */
-    else if( strcmp(gi->format,"gtx") == 0 )
-    {
-        int   words = gi->ct->lim.lam * gi->ct->lim.phi;
-        PAFile fid;
-
-        fid = pj_open_lib( ctx, gi->filename, "rb" );
-
-        if( fid == nullptr )
-        {
-            pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-            pj_release_lock();
-            return 0;
-        }
-
-        pj_ctx_fseek( ctx, fid, gi->grid_offset, SEEK_SET );
-
-        ct_tmp.cvs = (FLP *) pj_malloc(words*sizeof(float));
-        if( ct_tmp.cvs == nullptr )
-        {
-            pj_ctx_set_errno( ctx, ENOMEM );
-            pj_release_lock();
-            return 0;
-        }
-
-        if( pj_ctx_fread( ctx, ct_tmp.cvs, sizeof(float), words, fid )
-            != (size_t)words )
-        {
-            pj_dalloc( ct_tmp.cvs );
-            pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-            pj_release_lock();
-            return 0;
-        }
-
-        if( IS_LSB )
-            swap_words( (unsigned char *) ct_tmp.cvs, 4, words );
-
-        pj_ctx_fclose( ctx, fid );
-        gi->ct->cvs = ct_tmp.cvs;
-        pj_release_lock();
-        return 1;
-    }
-
     else
     {
         pj_release_lock();
@@ -737,108 +692,6 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
 }
 
 /************************************************************************/
-/*                       pj_gridinfo_init_gtx()                         */
-/*                                                                      */
-/*      Load a NOAA .gtx vertical datum shift file.                     */
-/************************************************************************/
-
-static int pj_gridinfo_init_gtx( projCtx ctx, PAFile fid, PJ_GRIDINFO *gi )
-
-{
-    unsigned char header[40];
-    struct CTABLE *ct;
-    double      xorigin,yorigin,xstep,ystep;
-    int         rows, columns;
-
-    /* cppcheck-suppress sizeofCalculation */
-    STATIC_ASSERT( sizeof(pj_int32) == 4 );
-    /* cppcheck-suppress sizeofCalculation */
-    STATIC_ASSERT( sizeof(double) == 8 );
-
-/* -------------------------------------------------------------------- */
-/*      Read the header.                                                */
-/* -------------------------------------------------------------------- */
-    if( pj_ctx_fread( ctx, header, sizeof(header), 1, fid ) != 1 )
-    {
-        pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-        return 0;
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Regularize fields of interest and extract.                      */
-/* -------------------------------------------------------------------- */
-    if( IS_LSB )
-    {
-        swap_words( header+0, 8, 4 );
-        swap_words( header+32, 4, 2 );
-    }
-
-    memcpy( &yorigin, header+0, 8 );
-    memcpy( &xorigin, header+8, 8 );
-    memcpy( &ystep, header+16, 8 );
-    memcpy( &xstep, header+24, 8 );
-
-    memcpy( &rows, header+32, 4 );
-    memcpy( &columns, header+36, 4 );
-
-    if( xorigin < -360 || xorigin > 360
-        || yorigin < -90 || yorigin > 90 )
-    {
-        pj_log( ctx, PJ_LOG_ERROR,
-                "gtx file header has invalid extents, corrupt?");
-        pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-        return 0;
-    }
-
-/* -------------------------------------------------------------------- */
-/*      Fill in CTABLE structure.                                       */
-/* -------------------------------------------------------------------- */
-    ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
-    if (!ct) {
-        pj_ctx_set_errno(ctx, ENOMEM);
-        return 0;
-    }
-    strcpy( ct->id, "GTX Vertical Grid Shift File" );
-
-    ct->ll.lam = xorigin;
-    ct->ll.phi = yorigin;
-    ct->del.lam = xstep;
-    ct->del.phi = ystep;
-    ct->lim.lam = columns;
-    ct->lim.phi = rows;
-
-    /* some GTX files come in 0-360 and we shift them back into the
-       expected -180 to 180 range if possible.  This does not solve
-       problems with grids spanning the dateline. */
-    if( ct->ll.lam >= 180.0 )
-        ct->ll.lam -= 360.0;
-
-    if( ct->ll.lam >= 0.0 && ct->ll.lam + ct->del.lam * ct->lim.lam > 180.0 )
-    {
-        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
-                "This GTX spans the dateline!  This will cause problems." );
-    }
-
-    pj_log( ctx, PJ_LOG_DEBUG_MINOR,
-            "GTX %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
-            ct->lim.lam, ct->lim.phi,
-            ct->ll.lam, ct->ll.phi,
-            ct->ll.lam + (columns-1)*xstep, ct->ll.phi + (rows-1)*ystep);
-
-    ct->ll.lam *= DEG_TO_RAD;
-    ct->ll.phi *= DEG_TO_RAD;
-    ct->del.lam *= DEG_TO_RAD;
-    ct->del.phi *= DEG_TO_RAD;
-    ct->cvs = nullptr;
-
-    gi->ct = ct;
-    gi->grid_offset = 40;
-    gi->format = "gtx";
-
-    return 1;
-}
-
-/************************************************************************/
 /*                          pj_gridinfo_init()                          */
 /*                                                                      */
 /*      Open and parse header details from a datum gridshift file       */
@@ -927,13 +780,6 @@ PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
              && strncmp(header + 48, "GS_TYPE", 7) == 0 )
     {
         pj_gridinfo_init_ntv2( ctx, fp, gilist );
-    }
-
-    else if( strlen(gridname) > 4
-             && (strcmp(gridname+strlen(gridname)-3,"gtx") == 0
-                 || strcmp(gridname+strlen(gridname)-3,"GTX") == 0) )
-    {
-        pj_gridinfo_init_gtx( ctx, fp, gilist );
     }
 
     else if( header_size >= 9 && strncmp(header + 0,"CTABLE V2",9) == 0 )

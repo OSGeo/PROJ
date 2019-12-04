@@ -284,6 +284,8 @@ set(SRC_LIBPROJ_CORE
   proj_json_streaming_writer.hpp
   proj_json_streaming_writer.cpp
   tracing.cpp
+  grids.hpp
+  grids.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
