@@ -19,4 +19,4 @@ exert a change in reference frame are called transformations.
    conversions/index
    transformations/index
    pipeline
-
+   operations_computation
