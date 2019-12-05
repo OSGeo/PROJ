@@ -98,6 +98,57 @@ class VerticalShiftGridSet {
     const VerticalShiftGrid *gridAt(double lon, double lat) const;
 };
 
+// ---------------------------------------------------------------------------
+
+class HorizontalShiftGrid {
+  protected:
+    int m_width;
+    int m_height;
+    ExtentAndRes m_extent;
+    std::vector<std::unique_ptr<HorizontalShiftGrid>> m_children{};
+
+  public:
+    HorizontalShiftGrid(int widthIn, int heightIn,
+                        const ExtentAndRes &extentIn);
+    virtual ~HorizontalShiftGrid();
+
+    int width() const { return m_width; }
+    int height() const { return m_height; }
+    const ExtentAndRes &extentAndRes() const { return m_extent; }
+
+    const HorizontalShiftGrid *gridAt(double lon, double lat) const;
+
+    virtual bool isNullGrid() const { return false; }
+
+    // x = 0 is western-most column, y = 0 is southern-most line
+    virtual bool valueAt(int x, int y, float &lonShift,
+                         float &latShift) const = 0;
+};
+
+// ---------------------------------------------------------------------------
+
+class HorizontalShiftGridSet {
+  protected:
+    std::string m_name{};
+    std::string m_format{};
+    std::vector<std::unique_ptr<HorizontalShiftGrid>> m_grids{};
+
+    HorizontalShiftGridSet();
+
+  public:
+    virtual ~HorizontalShiftGridSet();
+
+    static std::unique_ptr<HorizontalShiftGridSet>
+    open(PJ_CONTEXT *ctx, const std::string &filename);
+
+    const std::string &name() const { return m_name; }
+    const std::string &format() const { return m_format; }
+    const std::vector<std::unique_ptr<HorizontalShiftGrid>> &grids() const {
+        return m_grids;
+    }
+    const HorizontalShiftGrid *gridAt(double lon, double lat) const;
+};
+
 NS_PROJ_END
 
 #endif // GRIDS_HPP_INCLUDED

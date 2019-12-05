@@ -479,8 +479,7 @@ struct PJconsts {
 
     int     datum_type = PJD_UNKNOWN;  /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
     double  datum_params[7] = {0,0,0,0,0,0,0}; /* Parameters for 3PARAM and 7PARAM */
-    struct _pj_gi **gridlist = nullptr;     /* TODO: Description needed */
-    int     gridlist_count = 0;
+    std::vector<std::unique_ptr<NS_PROJ::HorizontalShiftGridSet>> hgrids{};
 
     int     has_geoid_vgrids = 0;      /* TODO: Description needed */
     std::vector<std::unique_ptr<NS_PROJ::VerticalShiftGridSet>> vgrids{};
@@ -752,35 +751,6 @@ PJ *pj_projection_specific_setup_##name (PJ *P)
 
 #endif /* def PJ_LIB__ */
 
-
-#define MAX_TAB_ID 80
-typedef struct { float lam, phi; } FLP;
-typedef struct { pj_int32 lam, phi; } ILP;
-
-struct CTABLE {
-    char id[MAX_TAB_ID];    /* ascii info */
-    PJ_LP ll;               /* lower left corner coordinates */
-    PJ_LP del;              /* size of cells */
-    ILP lim;                /* limits of conversion matrix */
-    FLP *cvs;               /* conversion matrix */
-};
-
-typedef struct _pj_gi {
-    char *gridname;     /* identifying name of grid, eg "conus" or ntv2_0.gsb */
-    char *filename;     /* full path to filename */
-
-    const char *format; /* format of this grid, ie "ctable", "ntv1",
-                           "ntv2" or "missing". */
-
-    long   grid_offset;  /* offset in file, for delayed loading */
-    int   must_swap;    /* only for NTv2 */
-
-    struct CTABLE *ct;
-
-    struct _pj_gi *next;
-    struct _pj_gi *child;
-} PJ_GRIDINFO;
-
 /* procedure prototypes */
 double PROJ_DLL dmstor(const char *, char **);
 double dmstor_ctx(projCtx_t *ctx, const char *, char **);
@@ -826,32 +796,6 @@ COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 
 int pj_deriv(PJ_LP, double, const PJ *, struct DERIVS *);
 int pj_factors(PJ_LP, const PJ *, double, struct FACTORS *);
-
-/* nadcon related protos */
-PJ_LP             nad_intr(PJ_LP, struct CTABLE *);
-PJ_LP             nad_cvt(PJ_LP, int, struct CTABLE *);
-struct CTABLE *nad_init(projCtx_t *ctx, char *);
-struct CTABLE *nad_ctable_init( projCtx_t *ctx, struct projFileAPI_t* fid );
-int            nad_ctable_load( projCtx_t *ctx, struct CTABLE *, struct projFileAPI_t* fid );
-struct CTABLE *nad_ctable2_init( projCtx_t *ctx, struct projFileAPI_t* fid );
-int            nad_ctable2_load( projCtx_t *ctx, struct CTABLE *, struct projFileAPI_t* fid );
-void           nad_free(struct CTABLE *);
-
-/* higher level handling of datum grid shift files */
-
-int pj_apply_gridshift_2( PJ *defn, int inverse,
-                          long point_count, int point_offset,
-                          double *x, double *y, double *z );
-int pj_apply_gridshift_3( projCtx_t *ctx,
-                          PJ_GRIDINFO **gridlist, int gridlist_count,
-                          int inverse, long point_count, int point_offset,
-                          double *x, double *y, double *z );
-
-PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx_t *, const char *, int * );
-
-PJ_GRIDINFO *pj_gridinfo_init( projCtx_t *, const char * );
-int          pj_gridinfo_load( projCtx_t *, PJ_GRIDINFO * );
-void         pj_gridinfo_free( projCtx_t *, PJ_GRIDINFO * );
 
 void  *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);

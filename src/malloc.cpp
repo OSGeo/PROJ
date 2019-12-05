@@ -225,9 +225,6 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     pj_dealloc(P->def_spherification);
     pj_dealloc(P->def_ellps);
 
-    /* free grid lists */
-    pj_dealloc( P->gridlist );
-
     /* We used to call pj_dalloc( P->catalog ), but this will leak */
     /* memory. The safe way to clear catalog and grid is to call */
     /* pj_gc_unloadall(pj_get_default_ctx()); and pj_deallocate_grids(); */

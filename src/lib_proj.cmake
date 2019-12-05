@@ -237,8 +237,6 @@ set(SRC_LIBPROJ_CORE
   geocent.cpp
   geocent.h
   geodesic.c
-  gridinfo.cpp
-  gridlist.cpp
   init.cpp
   initcache.cpp
   internal.cpp
@@ -250,9 +248,6 @@ set(SRC_LIBPROJ_CORE
   mlfn.cpp
   msfn.cpp
   mutex.cpp
-  nad_cvt.cpp
-  nad_init.cpp
-  nad_intr.cpp
   open_lib.cpp
   param.cpp
   phi2.cpp

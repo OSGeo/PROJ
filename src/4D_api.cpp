@@ -1553,12 +1553,9 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
 
     /*PJ_CONTEXT *ctx = proj_context_create(); */
     PJ_CONTEXT *ctx = pj_get_default_ctx();
-    PJ_GRIDINFO *gridinfo = pj_gridinfo_init(ctx, gridname);
     memset(&grinfo, 0, sizeof(PJ_GRID_INFO));
 
-    /* in case the grid wasn't found */
-    if (gridinfo->filename == nullptr || gridinfo->ct == nullptr) {
-
+    {
         const auto gridSet = NS_PROJ::VerticalShiftGridSet::open(ctx, gridname);
         if( gridSet )
         {
@@ -1591,44 +1588,49 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
                 grinfo.upperright.lam = extent.eastLon;
                 grinfo.upperright.phi = extent.northLat;
 
-                pj_gridinfo_free(ctx, gridinfo);
+                return grinfo;
+            }
+        }
+    }
+
+    {
+        const auto gridSet = NS_PROJ::HorizontalShiftGridSet::open(ctx, gridname);
+        if( gridSet )
+        {
+            const auto& grids = gridSet->grids();
+            if( !grids.empty() )
+            {
+                const auto& grid = grids.front();
+                const auto& extent = grid->extentAndRes();
+
+                /* name of grid */
+                strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
+
+                /* full path of grid */
+                pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
+
+                /* grid format */
+                strncpy (grinfo.format, gridSet->format().c_str(), sizeof(grinfo.format) - 1);
+
+                /* grid size */
+                grinfo.n_lon = grid->width();
+                grinfo.n_lat = grid->height();
+
+                /* cell size */
+                grinfo.cs_lon = extent.resLon;
+                grinfo.cs_lat = extent.resLat;
+
+                /* bounds of grid */
+                grinfo.lowerleft.lam  = extent.westLon;
+                grinfo.lowerleft.phi  = extent.southLat;
+                grinfo.upperright.lam = extent.eastLon;
+                grinfo.upperright.phi = extent.northLat;
 
                 return grinfo;
             }
         }
-
-        pj_gridinfo_free(ctx, gridinfo);
-        strcpy(grinfo.format, "missing");
-        return grinfo;
     }
-
-    /* The string copies below are automatically null-terminated due to */
-    /* the memset above, so strncpy is safe */
-
-    /* name of grid */
-    strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
-
-    /* full path of grid */
-    pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
-
-    /* grid format */
-    strncpy (grinfo.format, gridinfo->format, sizeof(grinfo.format) - 1);
-
-    /* grid size */
-    grinfo.n_lon = gridinfo->ct->lim.lam;
-    grinfo.n_lat = gridinfo->ct->lim.phi;
-
-    /* cell size */
-    grinfo.cs_lon = gridinfo->ct->del.lam;
-    grinfo.cs_lat = gridinfo->ct->del.phi;
-
-    /* bounds of grid */
-    grinfo.lowerleft  = gridinfo->ct->ll;
-    grinfo.upperright.lam = grinfo.lowerleft.lam + (grinfo.n_lon-1)*grinfo.cs_lon;
-    grinfo.upperright.phi = grinfo.lowerleft.phi + (grinfo.n_lat-1)*grinfo.cs_lat;
-
-    pj_gridinfo_free(ctx, gridinfo);
-
+    strcpy(grinfo.format, "missing");
     return grinfo;
 }
 

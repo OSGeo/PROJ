@@ -867,6 +867,58 @@ int pj_geocentric_from_wgs84( PJ *defn,
     return 0;
 }
 
+
+/************************************************************************/
+/*                        pj_apply_gridshift_2()                        */
+/*                                                                      */
+/*      This implementation uses the gridlist from a coordinate         */
+/*      system definition.  If the gridlist has not yet been            */
+/*      populated in the coordinate system definition we set it up      */
+/*      now.                                                            */
+/************************************************************************/
+static
+int pj_apply_gridshift_2( PJ *defn, int inverse,
+                          long point_count, int point_offset,
+                          double *x, double *y, double * /*z*/ )
+
+{
+    if( defn->hgrids.empty() )
+    {
+        proj_hgrid_init(defn, "nadgrids");
+    }
+
+    for( long i = 0; i < point_count; i++ )
+    {
+        PJ_LP   input;
+
+        long io = i * point_offset;
+        input.phi = y[io];
+        input.lam = x[io];
+
+        auto output = proj_hgrid_apply(defn, input, inverse ? PJ_INV : PJ_FWD);
+
+        if ( output.lam != HUGE_VAL )
+        {
+            y[io] = output.phi;
+            x[io] = output.lam;
+        }
+        else
+        {
+            if( defn->ctx->debug_level >= PJ_LOG_DEBUG_MAJOR )
+            {
+                pj_log( defn->ctx, PJ_LOG_DEBUG_MAJOR,
+                    "pj_apply_gridshift(): failed to find a grid shift table for\n"
+                    "                      location (%.7fdW,%.7fdN)",
+                    x[io] * RAD_TO_DEG,
+                    y[io] * RAD_TO_DEG );
+            }
+        }
+    }
+
+    return 0;
+}
+
+
 /************************************************************************/
 /*                         pj_datum_transform()                         */
 /*                                                                      */
@@ -1106,4 +1158,9 @@ static int adjust_axis( projCtx ctx,
     }
 
     return 0;
+}
+// ---------------------------------------------------------------------------
+
+void pj_deallocate_grids()
+{
 }
