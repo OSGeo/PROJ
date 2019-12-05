@@ -8582,7 +8582,11 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     break;
                 }
             }
-            if (getNumericValue(getParamValue(step, "a")) == 6378137) {
+            if (getNumericValue(getParamValue(step, "a")) == 6378137 &&
+                getAngularValue(getParamValue(step, "lon_0")) == 0.0 &&
+                getAngularValue(getParamValue(step, "lat_0")) == 0.0 &&
+                getAngularValue(getParamValue(step, "x_0")) == 0.0 &&
+                getAngularValue(getParamValue(step, "y_0")) == 0.0) {
                 bWebMercator = true;
             }
         } else if (hasParamValue(step, "lat_ts")) {

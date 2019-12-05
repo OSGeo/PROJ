@@ -8186,9 +8186,10 @@ TEST(io, projparse_merc_variant_B) {
 // ---------------------------------------------------------------------------
 
 TEST(io, projparse_merc_google_mercator) {
-    auto obj = PROJStringParser().createFromPROJString(
+    auto projString =
         "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 "
-        "+k=1 +units=m +nadgrids=@null +type=crs");
+        "+k=1 +units=m +nadgrids=@null +no_defs +type=crs";
+    auto obj = PROJStringParser().createFromPROJString(projString);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     WKTFormatterNNPtr f(WKTFormatter::create());
@@ -8202,6 +8203,36 @@ TEST(io, projparse_merc_google_mercator) {
     EXPECT_TRUE(wkt.find("DATUM[\"World Geodetic System 1984\"") !=
                 std::string::npos)
         << wkt;
+
+    EXPECT_EQ(
+        replaceAll(crs->exportToPROJString(PROJStringFormatter::create().get()),
+                   " +wktext", ""),
+        projString);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_merc_not_quite_google_mercator) {
+    auto projString =
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=10 +x_0=0 +y_0=0 "
+        "+k=1 +units=m +nadgrids=@null +no_defs +type=crs";
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f.get());
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Popular Visualisation Pseudo "
+                         "Mercator\",ID[\"EPSG\",1024]") != std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find("DATUM[\"unknown\",") != std::string::npos) << wkt;
+
+    EXPECT_EQ(
+        replaceAll(crs->exportToPROJString(PROJStringFormatter::create().get()),
+                   " +wktext", ""),
+        projString);
 }
 
 // ---------------------------------------------------------------------------
