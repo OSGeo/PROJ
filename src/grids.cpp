@@ -34,6 +34,11 @@
 #include "proj/internal/internal.hpp"
 #include "proj_internal.h"
 
+#include "tiffio.h"
+
+#include <algorithm>
+#include <cmath>
+
 NS_PROJ_START
 
 using namespace internal;
@@ -64,8 +69,24 @@ static void swap_words(void *dataIn, size_t word_size, size_t word_count)
     }
 }
 
+// ---------------------------------------------------------------------------
+
 bool ExtentAndRes::fullWorldLongitude() const {
     return eastLon - westLon + resLon >= 2 * M_PI - 1e-10;
+}
+
+// ---------------------------------------------------------------------------
+
+bool ExtentAndRes::contains(const ExtentAndRes &other) const {
+    return other.westLon >= westLon && other.eastLon <= eastLon &&
+           other.southLat >= southLat && other.northLat <= northLat;
+}
+
+// ---------------------------------------------------------------------------
+
+bool ExtentAndRes::intersects(const ExtentAndRes &other) const {
+    return other.westLon < eastLon && westLon <= other.westLon &&
+           other.southLat < northLat && southLat <= other.northLat;
 }
 
 // ---------------------------------------------------------------------------
@@ -246,6 +267,926 @@ VerticalShiftGridSet::~VerticalShiftGridSet() = default;
 
 // ---------------------------------------------------------------------------
 
+static bool IsTIFF(size_t header_size, const unsigned char *header) {
+    // Test combinations of signature for ClassicTIFF/BigTIFF little/big endian
+    return header_size >= 4 && (((header[0] == 'I' && header[1] == 'I') ||
+                                 (header[0] == 'M' && header[1] == 'M')) &&
+                                ((header[2] == 0x2A && header[3] == 0) ||
+                                 (header[3] == 0x2A && header[2] == 0) ||
+                                 (header[2] == 0x2B && header[3] == 0) ||
+                                 (header[3] == 0x2B && header[2] == 0)));
+}
+
+// ---------------------------------------------------------------------------
+
+enum class TIFFDataType { Int16, UInt16, Int32, UInt32, Float32, Float64 };
+
+// ---------------------------------------------------------------------------
+
+constexpr uint16 TIFFTAG_GEOPIXELSCALE = 33550;
+constexpr uint16 TIFFTAG_GEOTIEPOINTS = 33922;
+constexpr uint16 TIFFTAG_GEOTRANSMATRIX = 34264;
+constexpr uint16 TIFFTAG_GEOKEYDIRECTORY = 34735;
+constexpr uint16 TIFFTAG_GEODOUBLEPARAMS = 34736;
+constexpr uint16 TIFFTAG_GEOASCIIPARAMS = 34737;
+constexpr uint16 TIFFTAG_GDAL_METADATA = 42112;
+constexpr uint16 TIFFTAG_GDAL_NODATA = 42113;
+
+// ---------------------------------------------------------------------------
+
+class GTiffGrid : public Grid {
+    PJ_CONTEXT *m_ctx; // owned by the belonging GTiffDataset
+    TIFF *m_hTIFF;     // owned by the belonging GTiffDataset
+    TIFFDataType m_dt;
+    uint16 m_samplesPerPixel;
+    uint16 m_planarConfig;
+    bool m_bottomUp;
+    toff_t m_dirOffset;
+    bool m_tiled;
+    uint32 m_blockWidth = 0;
+    uint32 m_blockHeight = 0;
+    mutable int m_lastSample = -1;
+    mutable int m_lastBlockX = -1;
+    mutable int m_lastBlockY = -1;
+    mutable std::vector<unsigned char> m_buffer{};
+    unsigned m_blocksPerRow = 0;
+    unsigned m_blocksPerCol = 0;
+    std::map<int, double> m_mapOffset{};
+    std::map<int, double> m_mapScale{};
+    std::map<std::pair<int, std::string>, std::string> m_metadata{};
+    bool m_hasNodata = false;
+    float m_noData = 0.0f;
+    uint32 m_subfileType = 0;
+
+    GTiffGrid(const GTiffGrid &) = delete;
+    GTiffGrid &operator=(const GTiffGrid &) = delete;
+
+    void getScaleOffset(double &scale, double &offset, uint16 sample) const;
+
+    template <class T>
+    float readValue(uint32 offsetInBlock, uint16 sample) const;
+
+  public:
+    GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, int widthIn, int heightIn,
+              const ExtentAndRes &extentIn, TIFFDataType dtIn,
+              uint16 samplesPerPixelIn, uint16 planarConfig, bool bottomUpIn);
+
+    ~GTiffGrid() override;
+
+    uint16 samplesPerPixel() const { return m_samplesPerPixel; }
+
+    bool valueAt(uint16 sample, int x, int y, float &out) const;
+
+    bool isNodata(float val) const;
+
+    std::string metadataItem(const std::string &key, int sample = -1) const;
+
+    uint32 subfileType() const { return m_subfileType; }
+};
+
+// ---------------------------------------------------------------------------
+
+GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, int widthIn, int heightIn,
+                     const ExtentAndRes &extentIn, TIFFDataType dtIn,
+                     uint16 samplesPerPixelIn, uint16 planarConfig,
+                     bool bottomUpIn)
+    : Grid(widthIn, heightIn, extentIn), m_ctx(ctx), m_hTIFF(hTIFF), m_dt(dtIn),
+      m_samplesPerPixel(samplesPerPixelIn), m_planarConfig(planarConfig),
+      m_bottomUp(bottomUpIn), m_dirOffset(TIFFCurrentDirOffset(hTIFF)),
+      m_tiled(TIFFIsTiled(hTIFF) != 0) {
+
+    if (m_tiled) {
+        TIFFGetField(m_hTIFF, TIFFTAG_TILEWIDTH, &m_blockWidth);
+        TIFFGetField(m_hTIFF, TIFFTAG_TILELENGTH, &m_blockHeight);
+    } else {
+        m_blockWidth = widthIn;
+        TIFFGetField(m_hTIFF, TIFFTAG_ROWSPERSTRIP, &m_blockHeight);
+        if (m_blockHeight > static_cast<unsigned>(m_height))
+            m_blockHeight = m_height;
+    }
+
+    TIFFGetField(m_hTIFF, TIFFTAG_SUBFILETYPE, &m_subfileType);
+
+    m_blocksPerRow = (m_width + m_blockWidth - 1) / m_blockWidth;
+    m_blocksPerCol = (m_height + m_blockHeight - 1) / m_blockHeight;
+
+    const char *text = nullptr;
+    // Poor-man XML parsing of TIFFTAG_GDAL_METADATA tag. Hopefully good
+    // enough for our purposes.
+    if (TIFFGetField(m_hTIFF, TIFFTAG_GDAL_METADATA, &text)) {
+        const char *ptr = text;
+        while (true) {
+            ptr = strstr(ptr, "<Item ");
+            if (ptr == nullptr)
+                break;
+            const char *endTag = strchr(ptr, '>');
+            if (endTag == nullptr)
+                break;
+            const char *endValue = strchr(endTag, '<');
+            if (endValue == nullptr)
+                break;
+
+            std::string tag;
+            tag.append(ptr, endTag - ptr);
+
+            std::string value;
+            value.append(endTag + 1, endValue - (endTag + 1));
+
+            std::string name;
+            auto namePos = tag.find("name=\"");
+            if (namePos == std::string::npos)
+                break;
+            {
+                namePos += strlen("name=\"");
+                const auto endQuote = tag.find('"', namePos);
+                if (endQuote == std::string::npos)
+                    break;
+                name = tag.substr(namePos, endQuote - namePos);
+            }
+
+            const auto samplePos = tag.find("sample=\"");
+            int sample = -1;
+            if (samplePos != std::string::npos) {
+                sample = atoi(tag.c_str() + samplePos + strlen("sample=\""));
+            }
+
+            m_metadata[std::pair<int, std::string>(sample, name)] = value;
+
+            auto rolePos = tag.find("role=\"");
+            if (rolePos != std::string::npos) {
+                rolePos += strlen("role=\"");
+                const auto endQuote = tag.find('"', rolePos);
+                if (endQuote == std::string::npos)
+                    break;
+                const auto role = tag.substr(rolePos, endQuote - rolePos);
+                if (role == "offset") {
+                    if (sample >= 0) {
+                        try {
+                            m_mapOffset[sample] = c_locale_stod(value);
+                        } catch (const std::exception &) {
+                        }
+                    }
+                } else if (role == "scale") {
+                    if (sample >= 0) {
+                        try {
+                            m_mapScale[sample] = c_locale_stod(value);
+                        } catch (const std::exception &) {
+                        }
+                    }
+                }
+            }
+
+            ptr = endValue + 1;
+        }
+    }
+
+    if (TIFFGetField(m_hTIFF, TIFFTAG_GDAL_NODATA, &text)) {
+        try {
+            m_noData = static_cast<float>(c_locale_stod(text));
+            m_hasNodata = true;
+        } catch (const std::exception &) {
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+GTiffGrid::~GTiffGrid() = default;
+
+// ---------------------------------------------------------------------------
+
+void GTiffGrid::getScaleOffset(double &scale, double &offset,
+                               uint16 sample) const {
+    {
+        auto iter = m_mapScale.find(sample);
+        if (iter != m_mapScale.end())
+            scale = iter->second;
+    }
+
+    {
+        auto iter = m_mapOffset.find(sample);
+        if (iter != m_mapOffset.end())
+            offset = iter->second;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+template <class T>
+float GTiffGrid::readValue(uint32 offsetInBlock, uint16 sample) const {
+    const auto ptr = reinterpret_cast<const T *>(m_buffer.data());
+    assert(offsetInBlock < m_buffer.size() / sizeof(T));
+    const auto val = ptr[offsetInBlock];
+    if (!m_hasNodata || static_cast<float>(val) != m_noData) {
+        double scale = 1;
+        double offset = 0;
+        getScaleOffset(scale, offset, sample);
+        return static_cast<float>(val * scale + offset);
+    } else {
+        return static_cast<float>(val);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+bool GTiffGrid::valueAt(uint16 sample, int x, int yFromBottom,
+                        float &out) const {
+    assert(x >= 0 && yFromBottom >= 0 && x < m_width && yFromBottom < m_height);
+    assert(sample < m_samplesPerPixel);
+    if (TIFFCurrentDirOffset(m_hTIFF) != m_dirOffset &&
+        !TIFFSetSubDirectory(m_hTIFF, m_dirOffset)) {
+        return false;
+    }
+    if (m_buffer.empty()) {
+        const auto blockSize = static_cast<size_t>(
+            m_tiled ? TIFFTileSize64(m_hTIFF) : TIFFStripSize64(m_hTIFF));
+        try {
+            m_buffer.resize(blockSize);
+        } catch (const std::exception &e) {
+            pj_log(m_ctx, PJ_LOG_ERROR, "Exception %s", e.what());
+            return false;
+        }
+    }
+
+    const int blockX = x / m_blockWidth;
+
+    // All non-TIFF grids have the first rows in the file being the one
+    // corresponding to the southern-most row. In GeoTIFF, the convention is
+    // *generally* different (when m_bottomUp == false), TIFF being an
+    // image-oriented image. If m_bottomUp == true, then we had GeoTIFF hints
+    // that the first row of the image is the southern-most.
+    const int yTIFF = m_bottomUp ? yFromBottom : m_height - 1 - yFromBottom;
+    const int blockY = yTIFF / m_blockHeight;
+
+    if (m_lastSample != static_cast<int>(sample) || m_lastBlockX != blockX ||
+        m_lastBlockY != blockY) {
+        uint32 blockId = blockY * m_blocksPerRow + blockX;
+        if (m_planarConfig == PLANARCONFIG_SEPARATE) {
+            blockId += sample * m_blocksPerCol * m_blocksPerRow;
+        }
+        if (m_tiled) {
+            if (TIFFReadEncodedTile(m_hTIFF, blockId, m_buffer.data(),
+                                    m_buffer.size()) == -1) {
+                return false;
+            }
+        } else {
+            if (TIFFReadEncodedStrip(m_hTIFF, blockId, m_buffer.data(),
+                                     m_buffer.size()) == -1) {
+                return false;
+            }
+        }
+        m_lastSample = sample;
+        m_lastBlockX = blockX;
+        m_lastBlockY = blockY;
+    }
+    uint32 offsetInBlock =
+        (x % m_blockWidth) + (yTIFF % m_blockHeight) * m_blockWidth;
+    if (m_planarConfig == PLANARCONFIG_CONTIG)
+        offsetInBlock = offsetInBlock * m_samplesPerPixel + sample;
+
+    switch (m_dt) {
+    case TIFFDataType::Int16:
+        out = readValue<short>(offsetInBlock, sample);
+        break;
+
+    case TIFFDataType::UInt16:
+        out = readValue<unsigned short>(offsetInBlock, sample);
+        break;
+
+    case TIFFDataType::Int32:
+        out = readValue<int>(offsetInBlock, sample);
+        break;
+
+    case TIFFDataType::UInt32:
+        out = readValue<unsigned int>(offsetInBlock, sample);
+        break;
+
+    case TIFFDataType::Float32:
+        out = readValue<float>(offsetInBlock, sample);
+        break;
+
+    case TIFFDataType::Float64:
+        out = readValue<double>(offsetInBlock, sample);
+        break;
+    }
+
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+bool GTiffGrid::isNodata(float val) const {
+    return (m_hasNodata && val == m_noData) || std::isnan(val);
+}
+
+// ---------------------------------------------------------------------------
+
+std::string GTiffGrid::metadataItem(const std::string &key, int sample) const {
+    auto iter = m_metadata.find(std::pair<int, std::string>(sample, key));
+    if (iter == m_metadata.end()) {
+        return std::string();
+    }
+    return iter->second;
+}
+
+// ---------------------------------------------------------------------------
+
+class GTiffDataset {
+    PJ_CONTEXT *m_ctx;
+    PAFile m_fp;
+    TIFF *m_hTIFF = nullptr;
+    bool m_hasNextGrid = false;
+    toff_t m_nextDirOffset = 0;
+    std::string m_filename{};
+
+    GTiffDataset(const GTiffDataset &) = delete;
+    GTiffDataset &operator=(const GTiffDataset &) = delete;
+
+    // libtiff I/O routines
+    static tsize_t tiffReadProc(thandle_t fd, tdata_t buf, tsize_t size) {
+        GTiffDataset *self = static_cast<GTiffDataset *>(fd);
+        return pj_ctx_fread(self->m_ctx, buf, 1, size, self->m_fp);
+    }
+
+    static tsize_t tiffWriteProc(thandle_t, tdata_t, tsize_t) {
+        assert(false);
+        return 0;
+    }
+
+    static toff_t tiffSeekProc(thandle_t fd, toff_t off, int whence) {
+        GTiffDataset *self = static_cast<GTiffDataset *>(fd);
+        // FIXME Remove cast to long when pj_ctx_fseek supports unsigned long
+        // long
+        if (pj_ctx_fseek(self->m_ctx, self->m_fp, static_cast<long>(off),
+                         whence) == 0)
+            return static_cast<toff_t>(pj_ctx_ftell(self->m_ctx, self->m_fp));
+        else
+            return static_cast<toff_t>(-1);
+    }
+
+    static int tiffCloseProc(thandle_t) {
+        // done in destructor
+        return 0;
+    }
+
+    static toff_t tiffSizeProc(thandle_t fd) {
+        GTiffDataset *self = static_cast<GTiffDataset *>(fd);
+        const auto old_off = pj_ctx_ftell(self->m_ctx, self->m_fp);
+        pj_ctx_fseek(self->m_ctx, self->m_fp, 0, SEEK_END);
+        const auto file_size =
+            static_cast<toff_t>(pj_ctx_ftell(self->m_ctx, self->m_fp));
+        pj_ctx_fseek(self->m_ctx, self->m_fp, old_off, SEEK_SET);
+        return file_size;
+    }
+
+    static int tiffMapProc(thandle_t, tdata_t *, toff_t *) { return (0); }
+
+    static void tiffUnmapProc(thandle_t, tdata_t, toff_t) {}
+
+  public:
+    GTiffDataset(PJ_CONTEXT *ctx, PAFile fp) : m_ctx(ctx), m_fp(fp) {}
+    virtual ~GTiffDataset();
+
+    bool openTIFF(const std::string &filename);
+
+    std::unique_ptr<GTiffGrid> nextGrid();
+};
+
+// ---------------------------------------------------------------------------
+
+GTiffDataset::~GTiffDataset() {
+    if (m_hTIFF)
+        TIFFClose(m_hTIFF);
+    pj_ctx_fclose(m_ctx, m_fp);
+}
+
+// ---------------------------------------------------------------------------
+class OneTimeTIFFTagInit {
+
+    static TIFFExtendProc ParentExtender;
+
+    // Function called by libtiff when initializing a TIFF directory
+    static void GTiffTagExtender(TIFF *tif) {
+        static const TIFFFieldInfo xtiffFieldInfo[] = {
+            // GeoTIFF tags
+            {TIFFTAG_GEOPIXELSCALE, -1, -1, TIFF_DOUBLE, FIELD_CUSTOM, TRUE,
+             TRUE, const_cast<char *>("GeoPixelScale")},
+            {TIFFTAG_GEOTIEPOINTS, -1, -1, TIFF_DOUBLE, FIELD_CUSTOM, TRUE,
+             TRUE, const_cast<char *>("GeoTiePoints")},
+            {TIFFTAG_GEOTRANSMATRIX, -1, -1, TIFF_DOUBLE, FIELD_CUSTOM, TRUE,
+             TRUE, const_cast<char *>("GeoTransformationMatrix")},
+
+            {TIFFTAG_GEOKEYDIRECTORY, -1, -1, TIFF_SHORT, FIELD_CUSTOM, TRUE,
+             TRUE, const_cast<char *>("GeoKeyDirectory")},
+            {TIFFTAG_GEODOUBLEPARAMS, -1, -1, TIFF_DOUBLE, FIELD_CUSTOM, TRUE,
+             TRUE, const_cast<char *>("GeoDoubleParams")},
+            {TIFFTAG_GEOASCIIPARAMS, -1, -1, TIFF_ASCII, FIELD_CUSTOM, TRUE,
+             FALSE, const_cast<char *>("GeoASCIIParams")},
+
+            // GDAL tags
+            {TIFFTAG_GDAL_METADATA, -1, -1, TIFF_ASCII, FIELD_CUSTOM, TRUE,
+             FALSE, const_cast<char *>("GDALMetadata")},
+            {TIFFTAG_GDAL_NODATA, -1, -1, TIFF_ASCII, FIELD_CUSTOM, TRUE, FALSE,
+             const_cast<char *>("GDALNoDataValue")},
+
+        };
+
+        if (ParentExtender)
+            (*ParentExtender)(tif);
+
+        TIFFMergeFieldInfo(tif, xtiffFieldInfo,
+                           sizeof(xtiffFieldInfo) / sizeof(xtiffFieldInfo[0]));
+    }
+
+  public:
+    OneTimeTIFFTagInit() {
+        assert(ParentExtender == nullptr);
+        // Install our TIFF tag extender
+        ParentExtender = TIFFSetTagExtender(GTiffTagExtender);
+    }
+};
+
+TIFFExtendProc OneTimeTIFFTagInit::ParentExtender = nullptr;
+
+// ---------------------------------------------------------------------------
+
+bool GTiffDataset::openTIFF(const std::string &filename) {
+    static OneTimeTIFFTagInit oneTimeTIFFTagInit;
+    m_hTIFF =
+        TIFFClientOpen(filename.c_str(), "r", static_cast<thandle_t>(this),
+                       GTiffDataset::tiffReadProc, GTiffDataset::tiffWriteProc,
+                       GTiffDataset::tiffSeekProc, GTiffDataset::tiffCloseProc,
+                       GTiffDataset::tiffSizeProc, GTiffDataset::tiffMapProc,
+                       GTiffDataset::tiffUnmapProc);
+
+    m_filename = filename;
+    m_hasNextGrid = true;
+    return m_hTIFF != nullptr;
+}
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
+    if (!m_hasNextGrid)
+        return nullptr;
+    if (m_nextDirOffset) {
+        TIFFSetSubDirectory(m_hTIFF, m_nextDirOffset);
+    }
+
+    uint32 width = 0;
+    uint32 height = 0;
+    TIFFGetField(m_hTIFF, TIFFTAG_IMAGEWIDTH, &width);
+    TIFFGetField(m_hTIFF, TIFFTAG_IMAGELENGTH, &height);
+    if (width == 0 || height == 0 || width > INT_MAX || height > INT_MAX) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Invalid image size");
+        return nullptr;
+    }
+
+    uint16 samplesPerPixel = 0;
+    if (!TIFFGetField(m_hTIFF, TIFFTAG_SAMPLESPERPIXEL, &samplesPerPixel)) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Missing SamplesPerPixel tag");
+        return nullptr;
+    }
+    if (samplesPerPixel == 0) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Invalid SamplesPerPixel value");
+        return nullptr;
+    }
+
+    uint16 bitsPerSample = 0;
+    if (!TIFFGetField(m_hTIFF, TIFFTAG_BITSPERSAMPLE, &bitsPerSample)) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Missing BitsPerSample tag");
+        return nullptr;
+    }
+
+    uint16 planarConfig = 0;
+    if (!TIFFGetField(m_hTIFF, TIFFTAG_PLANARCONFIG, &planarConfig)) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Missing PlanarConfig tag");
+        return nullptr;
+    }
+
+    uint16 sampleFormat = 0;
+    if (!TIFFGetField(m_hTIFF, TIFFTAG_SAMPLEFORMAT, &sampleFormat)) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Missing SampleFormat tag");
+        return nullptr;
+    }
+
+    TIFFDataType dt;
+    if (sampleFormat == SAMPLEFORMAT_INT && bitsPerSample == 16)
+        dt = TIFFDataType::Int16;
+    else if (sampleFormat == SAMPLEFORMAT_UINT && bitsPerSample == 16)
+        dt = TIFFDataType::UInt16;
+    else if (sampleFormat == SAMPLEFORMAT_INT && bitsPerSample == 32)
+        dt = TIFFDataType::Int32;
+    else if (sampleFormat == SAMPLEFORMAT_UINT && bitsPerSample == 32)
+        dt = TIFFDataType::UInt32;
+    else if (sampleFormat == SAMPLEFORMAT_IEEEFP && bitsPerSample == 32)
+        dt = TIFFDataType::Float32;
+    else if (sampleFormat == SAMPLEFORMAT_IEEEFP && bitsPerSample == 64)
+        dt = TIFFDataType::Float64;
+    else {
+        pj_log(
+            m_ctx, PJ_LOG_ERROR,
+            "Unsupported combination of SampleFormat and BitsPerSample values");
+        return nullptr;
+    }
+
+    uint16 photometric = PHOTOMETRIC_MINISBLACK;
+    if (!TIFFGetField(m_hTIFF, TIFFTAG_PHOTOMETRIC, &photometric))
+        photometric = PHOTOMETRIC_MINISBLACK;
+    if (photometric != PHOTOMETRIC_MINISBLACK) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Unsupported Photometric value");
+        return nullptr;
+    }
+
+    uint16 compression = COMPRESSION_NONE;
+    if (!TIFFGetField(m_hTIFF, TIFFTAG_COMPRESSION, &compression))
+        compression = COMPRESSION_NONE;
+
+    if (compression != COMPRESSION_NONE &&
+        !TIFFIsCODECConfigured(compression)) {
+        pj_log(m_ctx, PJ_LOG_ERROR,
+               "Cannot open TIFF file due to missing codec.");
+        return nullptr;
+    }
+    // We really don't want to try dealing with old-JPEG images
+    if (compression == COMPRESSION_OJPEG) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Unsupported compression method.");
+        return nullptr;
+    }
+
+    const auto blockSize = TIFFIsTiled(m_hTIFF) ? TIFFTileSize64(m_hTIFF)
+                                                : TIFFStripSize64(m_hTIFF);
+    if (blockSize == 0 || blockSize > 64 * 1024 * 2014) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Unsupported block size.");
+        return nullptr;
+    }
+
+    unsigned short count = 0;
+    unsigned short *geokeys = nullptr;
+    bool pixelIsArea = false;
+    if (!TIFFGetField(m_hTIFF, TIFFTAG_GEOKEYDIRECTORY, &count, &geokeys)) {
+        pj_log(m_ctx, PJ_LOG_DEBUG_MINOR, "No GeoKeys tag");
+    } else {
+        if (count < 4 || (count % 4) != 0) {
+            pj_log(m_ctx, PJ_LOG_ERROR,
+                   "Wrong number of values in GeoKeys tag");
+            return nullptr;
+        }
+
+        if (geokeys[0] != 1) {
+            pj_log(m_ctx, PJ_LOG_ERROR, "Unsupported GeoTIFF major version");
+            return nullptr;
+        }
+        // We only know that we support GeoTIFF 1.0 and 1.1 at that time
+        if (geokeys[1] != 1 || geokeys[2] > 1) {
+            pj_log(m_ctx, PJ_LOG_DEBUG_MINOR,
+                   "GeoTIFF %d.%d possibly not handled", geokeys[1],
+                   geokeys[2]);
+        }
+
+        for (unsigned int i = 4; i + 3 < count; i += 4) {
+            constexpr unsigned short GTModelTypeGeoKey = 1024;
+            constexpr unsigned short ModelTypeGeographic = 2;
+
+            constexpr unsigned short GTRasterTypeGeoKey = 1025;
+            constexpr unsigned short RasterPixelIsArea = 1;
+            // constexpr unsigned short RasterPixelIsPoint = 2;
+
+            if (geokeys[i] == GTModelTypeGeoKey) {
+                if (geokeys[i + 3] != ModelTypeGeographic) {
+                    pj_log(m_ctx, PJ_LOG_ERROR, "Only GTModelTypeGeoKey = "
+                                                "ModelTypeGeographic is "
+                                                "supported");
+                    return nullptr;
+                }
+            } else if (geokeys[i] == GTRasterTypeGeoKey) {
+                if (geokeys[i + 3] == RasterPixelIsArea) {
+                    pixelIsArea = true;
+                }
+            }
+        }
+    }
+
+    double hRes = 0;
+    double vRes = 0;
+    double westLon = 0;
+    double northLat = 0;
+
+    double *matrix = nullptr;
+    if (TIFFGetField(m_hTIFF, TIFFTAG_GEOTRANSMATRIX, &count, &matrix) &&
+        count == 16) {
+        // If using GDAL to produce a bottom-up georeferencing, it will produce
+        // a GeoTransformationMatrix, since negative values in GeoPixelScale
+        // have historically been implementation bugs.
+        if (matrix[1] != 0 || matrix[4] != 0) {
+            pj_log(m_ctx, PJ_LOG_ERROR, "Rotational terms not supported in "
+                                        "GeoTransformationMatrix tag");
+            return nullptr;
+        }
+
+        westLon = matrix[3];
+        hRes = matrix[0];
+        northLat = matrix[7];
+        vRes = -matrix[5]; // negation to simulate GeoPixelScale convention
+    } else {
+        double *geopixelscale = nullptr;
+        if (TIFFGetField(m_hTIFF, TIFFTAG_GEOPIXELSCALE, &count,
+                         &geopixelscale) != 1) {
+            pj_log(m_ctx, PJ_LOG_ERROR, "No GeoPixelScale tag");
+            return nullptr;
+        }
+        if (count != 3) {
+            pj_log(m_ctx, PJ_LOG_ERROR,
+                   "Wrong number of values in GeoPixelScale tag");
+            return nullptr;
+        }
+        hRes = geopixelscale[0];
+        vRes = geopixelscale[1];
+
+        double *geotiepoints = nullptr;
+        if (TIFFGetField(m_hTIFF, TIFFTAG_GEOTIEPOINTS, &count,
+                         &geotiepoints) != 1) {
+            pj_log(m_ctx, PJ_LOG_ERROR, "No GeoTiePoints tag");
+            return nullptr;
+        }
+        if (count != 6) {
+            pj_log(m_ctx, PJ_LOG_ERROR,
+                   "Wrong number of values in GeoTiePoints tag");
+            return nullptr;
+        }
+
+        westLon = geotiepoints[3] - geotiepoints[0] * hRes;
+        northLat = geotiepoints[4] + geotiepoints[1] * vRes;
+    }
+
+    if (pixelIsArea) {
+        westLon += 0.5 * hRes;
+        northLat -= 0.5 * vRes;
+    }
+
+    ExtentAndRes extent;
+    extent.westLon = westLon * DEG_TO_RAD;
+    extent.northLat = northLat * DEG_TO_RAD;
+    extent.resLon = hRes * DEG_TO_RAD;
+    extent.resLat = fabs(vRes) * DEG_TO_RAD;
+    extent.eastLon = (westLon + hRes * (width - 1)) * DEG_TO_RAD;
+    extent.southLat = (northLat - vRes * (height - 1)) * DEG_TO_RAD;
+
+    if (vRes < 0) {
+        std::swap(extent.northLat, extent.southLat);
+    }
+
+    if (!(fabs(extent.westLon) <= 4 * M_PI &&
+          fabs(extent.eastLon) <= 4 * M_PI &&
+          fabs(extent.northLat) <= M_PI + 1e-5 &&
+          fabs(extent.southLat) <= M_PI + 1e-5 &&
+          extent.westLon < extent.eastLon &&
+          extent.southLat < extent.northLat && extent.resLon > 1e-10 &&
+          extent.resLat > 1e-10)) {
+        pj_log(m_ctx, PJ_LOG_ERROR, "Inconsistent georeferencing for %s",
+               m_filename.c_str());
+        return nullptr;
+    }
+
+    auto ret = std::unique_ptr<GTiffGrid>(
+        new GTiffGrid(m_ctx, m_hTIFF, width, height, extent, dt,
+                      samplesPerPixel, planarConfig, vRes < 0));
+    m_hasNextGrid = TIFFReadDirectory(m_hTIFF) != 0;
+    m_nextDirOffset = TIFFCurrentDirOffset(m_hTIFF);
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+
+class GTiffVGridShiftSet : public VerticalShiftGridSet, public GTiffDataset {
+
+    GTiffVGridShiftSet(PJ_CONTEXT *ctx, PAFile fp) : GTiffDataset(ctx, fp) {}
+
+  public:
+    ~GTiffVGridShiftSet() override;
+
+    static std::unique_ptr<GTiffVGridShiftSet>
+    open(PJ_CONTEXT *ctx, PAFile fp, const std::string &filename);
+};
+
+// ---------------------------------------------------------------------------
+
+template <class GridType, class GenericGridType>
+static void
+insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
+                    const std::string &gridName, const std::string &parentName,
+                    std::vector<std::unique_ptr<GenericGridType>> &topGrids,
+                    std::map<std::string, GridType *> &mapGrids) {
+    const auto &extent = grid->extentAndRes();
+
+    // If we have one or both of grid_name and parent_name, try to use
+    // the names to recreate the hiearchy
+    if (!gridName.empty()) {
+        if (mapGrids.find(gridName) != mapGrids.end()) {
+            pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Several grids called %s found!",
+                   gridName.c_str());
+        }
+        mapGrids[gridName] = grid.get();
+    }
+    bool gridInserted = false;
+    if (!parentName.empty()) {
+        auto iter = mapGrids.find(parentName);
+        if (iter == mapGrids.end()) {
+            pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                   "Grid %s refers to non-existing parent %s. "
+                   "Using bounding-box method.",
+                   gridName.c_str(), parentName.c_str());
+        } else {
+            if (iter->second->extentAndRes().contains(extent)) {
+                iter->second->m_children.emplace_back(std::move(grid));
+                gridInserted = true;
+            } else {
+                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                       "Grid %s refers to parent %s, but its extent is "
+                       "not included in it. Using bounding-box method.",
+                       gridName.c_str(), parentName.c_str());
+            }
+        }
+    } else if (!gridName.empty()) {
+        topGrids.emplace_back(std::move(grid));
+        gridInserted = true;
+    }
+
+    // Fallback to analyzing spatial extents
+    if (!gridInserted) {
+        for (const auto &candidateParent : topGrids) {
+            const auto &candidateParentExtent = candidateParent->extentAndRes();
+            if (candidateParentExtent.contains(extent)) {
+                static_cast<GridType *>(candidateParent.get())
+                    ->insertGrid(ctx, std::move(grid));
+                gridInserted = true;
+                break;
+            } else if (candidateParentExtent.intersects(extent)) {
+                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                       "Partially intersecting grids found!");
+            }
+        }
+        if (!gridInserted) {
+            topGrids.emplace_back(std::move(grid));
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+class GTiffVGrid : public VerticalShiftGrid {
+    friend void insertIntoHierarchy<GTiffVGrid, VerticalShiftGrid>(
+        PJ_CONTEXT *ctx, std::unique_ptr<GTiffVGrid> &&grid,
+        const std::string &gridName, const std::string &parentName,
+        std::vector<std::unique_ptr<VerticalShiftGrid>> &topGrids,
+        std::map<std::string, GTiffVGrid *> &mapGrids);
+
+    std::unique_ptr<GTiffGrid> m_grid;
+    uint16 m_idxSample;
+
+  public:
+    GTiffVGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxSample);
+
+    ~GTiffVGrid() override;
+
+    bool valueAt(int x, int y, float &out) const override {
+        return m_grid->valueAt(m_idxSample, x, y, out);
+    }
+
+    bool isNodata(float val, double /* multiplier */) const override {
+        return m_grid->isNodata(val);
+    }
+
+    void insertGrid(PJ_CONTEXT *ctx, std::unique_ptr<GTiffVGrid> &&subgrid);
+};
+
+// ---------------------------------------------------------------------------
+
+GTiffVGridShiftSet::~GTiffVGridShiftSet() = default;
+
+// ---------------------------------------------------------------------------
+
+GTiffVGrid::GTiffVGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxSample)
+    : VerticalShiftGrid(grid->width(), grid->height(), grid->extentAndRes()),
+      m_grid(std::move(grid)), m_idxSample(idxSample) {}
+
+// ---------------------------------------------------------------------------
+
+GTiffVGrid::~GTiffVGrid() = default;
+
+// ---------------------------------------------------------------------------
+
+void GTiffVGrid::insertGrid(PJ_CONTEXT *ctx,
+                            std::unique_ptr<GTiffVGrid> &&subgrid) {
+    bool gridInserted = false;
+    const auto &extent = subgrid->extentAndRes();
+    for (const auto &candidateParent : m_children) {
+        const auto &candidateParentExtent = candidateParent->extentAndRes();
+        if (candidateParentExtent.contains(extent)) {
+            static_cast<GTiffVGrid *>(candidateParent.get())
+                ->insertGrid(ctx, std::move(subgrid));
+            gridInserted = true;
+            break;
+        } else if (candidateParentExtent.intersects(extent)) {
+            pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                   "Partially intersecting grids found!");
+        }
+    }
+    if (!gridInserted) {
+        m_children.emplace_back(std::move(subgrid));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<GTiffVGridShiftSet>
+GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
+                         const std::string &filename) {
+    auto set =
+        std::unique_ptr<GTiffVGridShiftSet>(new GTiffVGridShiftSet(ctx, fp));
+    set->m_name = filename;
+    set->m_format = "gtiff";
+    if (!set->openTIFF(filename)) {
+        return nullptr;
+    }
+    uint16 idxSample = 0;
+
+    std::map<std::string, GTiffVGrid *> mapGrids;
+    for (int ifd = 0;; ++ifd) {
+        auto grid = set->nextGrid();
+        if (!grid) {
+            if (ifd == 0) {
+                return nullptr;
+            }
+            break;
+        }
+
+        const auto subfileType = grid->subfileType();
+        if (subfileType != 0 && subfileType != FILETYPE_PAGE) {
+            if (ifd == 0) {
+                pj_log(ctx, PJ_LOG_ERROR, "Invalid subfileType");
+                return nullptr;
+            } else {
+                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                       "Ignoring IFD %d as it has a unsupported subfileType",
+                       ifd);
+                continue;
+            }
+        }
+
+        // Identify the index of the geoid_undulation/vertical_offset
+        bool foundDescriptionForAtLeastOneSample = false;
+        bool foundDescriptionForShift = false;
+        for (int i = 0; i < static_cast<int>(grid->samplesPerPixel()); ++i) {
+            const auto desc = grid->metadataItem("DESCRIPTION", i);
+            if (!desc.empty()) {
+                foundDescriptionForAtLeastOneSample = true;
+            }
+            if (desc == "geoid_undulation" || desc == "vertical_offset") {
+                idxSample = static_cast<uint16>(i);
+                foundDescriptionForShift = true;
+            }
+        }
+
+        if (foundDescriptionForAtLeastOneSample) {
+            if (!foundDescriptionForShift) {
+                if (ifd > 0) {
+                    // Assuming that extra IFD without our channel of interest
+                    // can be ignored
+                    // One could imagine to put the accuracy values in separate
+                    // IFD for example
+                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                           "Ignoring IFD %d as it has no "
+                           "geoid_undulation/vertical_offset channel",
+                           ifd);
+                    continue;
+                } else {
+                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                           "IFD 0 has channel descriptions, but no "
+                           "geoid_undulation/vertical_offset channel");
+                    return nullptr;
+                }
+            }
+        }
+
+        if (idxSample >= grid->samplesPerPixel()) {
+            pj_log(ctx, PJ_LOG_ERROR, "Invalid sample index");
+            return nullptr;
+        }
+
+        const std::string gridName = grid->metadataItem("grid_name");
+        const std::string parentName = grid->metadataItem("parent_name");
+
+        auto vgrid =
+            internal::make_unique<GTiffVGrid>(std::move(grid), idxSample);
+
+        insertIntoHierarchy(ctx, std::move(vgrid), gridName, parentName,
+                            set->m_grids, mapGrids);
+    }
+    return set;
+}
+
+// ---------------------------------------------------------------------------
+
 std::unique_ptr<VerticalShiftGridSet>
 VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     if (filename == "null") {
@@ -274,6 +1215,25 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         set->m_name = filename;
         set->m_format = "gtx";
         set->m_grids.push_back(std::unique_ptr<VerticalShiftGrid>(grid));
+        return set;
+    }
+
+    /* -------------------------------------------------------------------- */
+    /*      Load a header, to determine the file type.                      */
+    /* -------------------------------------------------------------------- */
+    unsigned char header[4];
+    size_t header_size;
+    if ((header_size = pj_ctx_fread(ctx, header, 1, sizeof(header), fp)) !=
+        sizeof(header)) {
+        pj_ctx_fclose(ctx, fp);
+        return nullptr;
+    }
+    pj_ctx_fseek(ctx, fp, SEEK_SET, 0);
+
+    if (IsTIFF(header_size, header)) {
+        auto set = GTiffVGridShiftSet::open(ctx, fp, filename);
+        if (!set)
+            pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
     }
 
@@ -782,6 +1742,270 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx, PAFile fp,
 
 // ---------------------------------------------------------------------------
 
+class GTiffHGridShiftSet : public HorizontalShiftGridSet, public GTiffDataset {
+
+    GTiffHGridShiftSet(PJ_CONTEXT *ctx, PAFile fp) : GTiffDataset(ctx, fp) {}
+
+  public:
+    ~GTiffHGridShiftSet() override;
+
+    static std::unique_ptr<GTiffHGridShiftSet>
+    open(PJ_CONTEXT *ctx, PAFile fp, const std::string &filename);
+};
+
+// ---------------------------------------------------------------------------
+
+class GTiffHGrid : public HorizontalShiftGrid {
+    friend void insertIntoHierarchy<GTiffHGrid, HorizontalShiftGrid>(
+        PJ_CONTEXT *ctx, std::unique_ptr<GTiffHGrid> &&grid,
+        const std::string &gridName, const std::string &parentName,
+        std::vector<std::unique_ptr<HorizontalShiftGrid>> &topGrids,
+        std::map<std::string, GTiffHGrid *> &mapGrids);
+
+    std::unique_ptr<GTiffGrid> m_grid;
+    uint16 m_idxLatShift;
+    uint16 m_idxLonShift;
+    double m_convFactorToRadian;
+    bool m_positiveEast;
+
+  public:
+    GTiffHGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxLatShift,
+               uint16 idxLonShift, double convFactorToRadian,
+               bool positiveEast);
+
+    ~GTiffHGrid() override;
+
+    bool valueAt(int x, int y, float &lonShift, float &latShift) const override;
+
+    void insertGrid(PJ_CONTEXT *ctx, std::unique_ptr<GTiffHGrid> &&subgrid);
+};
+
+// ---------------------------------------------------------------------------
+
+GTiffHGridShiftSet::~GTiffHGridShiftSet() = default;
+
+// ---------------------------------------------------------------------------
+
+GTiffHGrid::GTiffHGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxLatShift,
+                       uint16 idxLonShift, double convFactorToRadian,
+                       bool positiveEast)
+    : HorizontalShiftGrid(grid->width(), grid->height(), grid->extentAndRes()),
+      m_grid(std::move(grid)), m_idxLatShift(idxLatShift),
+      m_idxLonShift(idxLonShift), m_convFactorToRadian(convFactorToRadian),
+      m_positiveEast(positiveEast) {}
+
+// ---------------------------------------------------------------------------
+
+GTiffHGrid::~GTiffHGrid() = default;
+
+// ---------------------------------------------------------------------------
+
+bool GTiffHGrid::valueAt(int x, int y, float &lonShift, float &latShift) const {
+    if (!m_grid->valueAt(m_idxLatShift, x, y, latShift) ||
+        !m_grid->valueAt(m_idxLonShift, x, y, lonShift)) {
+        return false;
+    }
+    // From arc-seconds to radians
+    latShift = static_cast<float>(latShift * m_convFactorToRadian);
+    lonShift = static_cast<float>(lonShift * m_convFactorToRadian);
+    if (!m_positiveEast) {
+        lonShift = -lonShift;
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+void GTiffHGrid::insertGrid(PJ_CONTEXT *ctx,
+                            std::unique_ptr<GTiffHGrid> &&subgrid) {
+    bool gridInserted = false;
+    const auto &extent = subgrid->extentAndRes();
+    for (const auto &candidateParent : m_children) {
+        const auto &candidateParentExtent = candidateParent->extentAndRes();
+        if (candidateParentExtent.contains(extent)) {
+            static_cast<GTiffHGrid *>(candidateParent.get())
+                ->insertGrid(ctx, std::move(subgrid));
+            gridInserted = true;
+            break;
+        } else if (candidateParentExtent.intersects(extent)) {
+            pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                   "Partially intersecting grids found!");
+        }
+    }
+    if (!gridInserted) {
+        m_children.emplace_back(std::move(subgrid));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<GTiffHGridShiftSet>
+GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
+                         const std::string &filename) {
+    auto set =
+        std::unique_ptr<GTiffHGridShiftSet>(new GTiffHGridShiftSet(ctx, fp));
+    set->m_name = filename;
+    set->m_format = "gtiff";
+    if (!set->openTIFF(filename)) {
+        return nullptr;
+    }
+
+    // Defaults inspired from NTv2
+    uint16 idxLatShift = 0;
+    uint16 idxLonShift = 1;
+    constexpr double ARC_SECOND_TO_RADIAN = (M_PI / 180.0) / 3600.0;
+    double convFactorToRadian = ARC_SECOND_TO_RADIAN;
+    bool positiveEast = true;
+
+    std::map<std::string, GTiffHGrid *> mapGrids;
+    for (int ifd = 0;; ++ifd) {
+        auto grid = set->nextGrid();
+        if (!grid) {
+            if (ifd == 0) {
+                return nullptr;
+            }
+            break;
+        }
+
+        const auto subfileType = grid->subfileType();
+        if (subfileType != 0 && subfileType != FILETYPE_PAGE) {
+            if (ifd == 0) {
+                pj_log(ctx, PJ_LOG_ERROR, "Invalid subfileType");
+                return nullptr;
+            } else {
+                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                       "Ignoring IFD %d as it has a unsupported subfileType",
+                       ifd);
+                continue;
+            }
+        }
+
+        if (grid->samplesPerPixel() < 2) {
+            if (ifd == 0) {
+                pj_log(ctx, PJ_LOG_ERROR,
+                       "At least 2 samples per pixel needed");
+                return nullptr;
+            } else {
+                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                       "Ignoring IFD %d as it has not at least 2 samples", ifd);
+                continue;
+            }
+        }
+
+        // Identify the index of the latitude and longitude offset channels
+        bool foundDescriptionForAtLeastOneSample = false;
+        bool foundDescriptionForLatOffset = false;
+        bool foundDescriptionForLonOffset = false;
+        for (int i = 0; i < static_cast<int>(grid->samplesPerPixel()); ++i) {
+            const auto desc = grid->metadataItem("DESCRIPTION", i);
+            if (!desc.empty()) {
+                foundDescriptionForAtLeastOneSample = true;
+            }
+            if (desc == "latitude_offset") {
+                idxLatShift = static_cast<uint16>(i);
+                foundDescriptionForLatOffset = true;
+            } else if (desc == "longitude_offset") {
+                idxLonShift = static_cast<uint16>(i);
+                foundDescriptionForLonOffset = true;
+            }
+        }
+
+        if (foundDescriptionForAtLeastOneSample) {
+            if (!foundDescriptionForLonOffset &&
+                !foundDescriptionForLatOffset) {
+                if (ifd > 0) {
+                    // Assuming that extra IFD without
+                    // longitude_offset/latitude_offset can be ignored
+                    // One could imagine to put the accuracy values in separate
+                    // IFD for example
+                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                           "Ignoring IFD %d as it has no "
+                           "longitude_offset/latitude_offset channel",
+                           ifd);
+                    continue;
+                } else {
+                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                           "IFD 0 has channel descriptions, but no "
+                           "longitude_offset/latitude_offset channel");
+                    return nullptr;
+                }
+            }
+        }
+        if (foundDescriptionForLatOffset && !foundDescriptionForLonOffset) {
+            pj_log(ctx, PJ_LOG_ERROR,
+                   "Found latitude_offset channel, but not longitude_offset");
+            return nullptr;
+        } else if (foundDescriptionForLonOffset &&
+                   !foundDescriptionForLatOffset) {
+            pj_log(ctx, PJ_LOG_ERROR,
+                   "Found longitude_offset channel, but not latitude_offset");
+            return nullptr;
+        }
+
+        if (idxLatShift >= grid->samplesPerPixel() ||
+            idxLonShift >= grid->samplesPerPixel()) {
+            pj_log(ctx, PJ_LOG_ERROR, "Invalid sample index");
+            return nullptr;
+        }
+
+        if (foundDescriptionForLonOffset) {
+            const std::string positiveValue =
+                grid->metadataItem("positive_value", idxLonShift);
+            if (!positiveValue.empty()) {
+                if (positiveValue == "west") {
+                    positiveEast = false;
+                } else if (positiveValue == "east") {
+                    positiveEast = true;
+                } else {
+                    pj_log(ctx, PJ_LOG_ERROR,
+                           "Unsupported value %s for 'positive_value'",
+                           positiveValue.c_str());
+                    return nullptr;
+                }
+            }
+        }
+
+        // Identify their unit
+        {
+            const auto unitLatShift =
+                grid->metadataItem("UNITTYPE", idxLatShift);
+            const auto unitLonShift =
+                grid->metadataItem("UNITTYPE", idxLonShift);
+            if (unitLatShift != unitLonShift) {
+                pj_log(ctx, PJ_LOG_ERROR,
+                       "Different unit for longitude and latitude offset");
+                return nullptr;
+            }
+            if (!unitLatShift.empty()) {
+                if (unitLatShift == "arc-second") {
+                    convFactorToRadian = ARC_SECOND_TO_RADIAN;
+                } else if (unitLatShift == "radian") {
+                    convFactorToRadian = 1.0;
+                } else if (unitLatShift == "degree") {
+                    convFactorToRadian = M_PI / 180.0;
+                } else {
+                    pj_log(ctx, PJ_LOG_ERROR, "Unsupported unit %s",
+                           unitLatShift.c_str());
+                    return nullptr;
+                }
+            }
+        }
+
+        const std::string gridName = grid->metadataItem("grid_name");
+        const std::string parentName = grid->metadataItem("parent_name");
+
+        auto hgrid = internal::make_unique<GTiffHGrid>(
+            std::move(grid), idxLatShift, idxLonShift, convFactorToRadian,
+            positiveEast);
+
+        insertIntoHierarchy(ctx, std::move(hgrid), gridName, parentName,
+                            set->m_grids, mapGrids);
+    }
+    return set;
+}
+
+// ---------------------------------------------------------------------------
+
 std::unique_ptr<HorizontalShiftGridSet>
 HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     if (filename == "null") {
@@ -849,6 +2073,12 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
                strncmp(header + 0, "NUM_OREC", 8) == 0 &&
                strncmp(header + 48, "GS_TYPE", 7) == 0) {
         return NTv2GridSet::open(ctx, fp, filename);
+    } else if (IsTIFF(header_size,
+                      reinterpret_cast<const unsigned char *>(header))) {
+        auto set = GTiffHGridShiftSet::open(ctx, fp, filename);
+        if (!set)
+            pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+        return set;
     }
 
     pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Unrecognized horizontal grid format");

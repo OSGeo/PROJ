@@ -27,7 +27,11 @@ echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
 mkdir "dir with \" space"
-cp ${PROJ_LIB}/conus "dir with \" space/myconus"
+if test -f "${PROJ_LIB}/conus"; then
+    cp "${PROJ_LIB}/conus" "dir with \" space/myconus"
+else
+    cp "`dirname $0`/../../data/conus" "dir with \" space/myconus"
+fi
 
 OUT=td_out
 #EXE=../src/cs2cs

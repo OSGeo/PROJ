@@ -45,6 +45,8 @@ struct ExtentAndRes {
     double resLat;   // in radian
 
     bool fullWorldLongitude() const;
+    bool contains(const ExtentAndRes &other) const;
+    bool intersects(const ExtentAndRes &other) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -87,6 +89,7 @@ class VerticalShiftGrid : public Grid {
 // ---------------------------------------------------------------------------
 
 class VerticalShiftGridSet {
+  protected:
     std::string m_name{};
     std::string m_format{};
     std::vector<std::unique_ptr<VerticalShiftGrid>> m_grids{};
