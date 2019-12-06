@@ -1556,6 +1556,35 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
     PJ_CONTEXT *ctx = pj_get_default_ctx();
     memset(&grinfo, 0, sizeof(PJ_GRID_INFO));
 
+    const auto fillGridInfo = [&grinfo, ctx, gridname]
+                        (const NS_PROJ::Grid& grid, const std::string& format)
+    {
+        const auto& extent = grid.extentAndRes();
+
+        /* name of grid */
+        strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
+
+        /* full path of grid */
+        pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
+
+        /* grid format */
+        strncpy (grinfo.format, format.c_str(), sizeof(grinfo.format) - 1);
+
+        /* grid size */
+        grinfo.n_lon = grid.width();
+        grinfo.n_lat = grid.height();
+
+        /* cell size */
+        grinfo.cs_lon = extent.resLon;
+        grinfo.cs_lat = extent.resLat;
+
+        /* bounds of grid */
+        grinfo.lowerleft.lam  = extent.westLon;
+        grinfo.lowerleft.phi  = extent.southLat;
+        grinfo.upperright.lam = extent.eastLon;
+        grinfo.upperright.phi = extent.northLat;
+    };
+
     {
         const auto gridSet = NS_PROJ::VerticalShiftGridSet::open(ctx, gridname);
         if( gridSet )
@@ -1564,31 +1593,7 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
             if( !grids.empty() )
             {
                 const auto& grid = grids.front();
-                const auto& extent = grid->extentAndRes();
-
-                /* name of grid */
-                strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
-
-                /* full path of grid */
-                pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
-
-                /* grid format */
-                strncpy (grinfo.format, gridSet->format().c_str(), sizeof(grinfo.format) - 1);
-
-                /* grid size */
-                grinfo.n_lon = grid->width();
-                grinfo.n_lat = grid->height();
-
-                /* cell size */
-                grinfo.cs_lon = extent.resLon;
-                grinfo.cs_lat = extent.resLat;
-
-                /* bounds of grid */
-                grinfo.lowerleft.lam  = extent.westLon;
-                grinfo.lowerleft.phi  = extent.southLat;
-                grinfo.upperright.lam = extent.eastLon;
-                grinfo.upperright.phi = extent.northLat;
-
+                fillGridInfo(*grid, gridSet->format());
                 return grinfo;
             }
         }
@@ -1602,31 +1607,7 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
             if( !grids.empty() )
             {
                 const auto& grid = grids.front();
-                const auto& extent = grid->extentAndRes();
-
-                /* name of grid */
-                strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
-
-                /* full path of grid */
-                pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
-
-                /* grid format */
-                strncpy (grinfo.format, gridSet->format().c_str(), sizeof(grinfo.format) - 1);
-
-                /* grid size */
-                grinfo.n_lon = grid->width();
-                grinfo.n_lat = grid->height();
-
-                /* cell size */
-                grinfo.cs_lon = extent.resLon;
-                grinfo.cs_lat = extent.resLat;
-
-                /* bounds of grid */
-                grinfo.lowerleft.lam  = extent.westLon;
-                grinfo.lowerleft.phi  = extent.southLat;
-                grinfo.upperright.lam = extent.eastLon;
-                grinfo.upperright.phi = extent.northLat;
-
+                fillGridInfo(*grid, gridSet->format());
                 return grinfo;
             }
         }

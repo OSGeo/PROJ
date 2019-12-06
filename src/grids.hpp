@@ -49,26 +49,36 @@ struct ExtentAndRes {
 
 // ---------------------------------------------------------------------------
 
-class VerticalShiftGrid {
+class Grid {
   protected:
     int m_width;
     int m_height;
     ExtentAndRes m_extent;
-    std::vector<std::unique_ptr<VerticalShiftGrid>> m_children{};
+
+    Grid(int widthIn, int heightIn, const ExtentAndRes &extentIn);
 
   public:
-    VerticalShiftGrid(int widthIn, int heightIn, const ExtentAndRes &extentIn);
-    virtual ~VerticalShiftGrid();
+    virtual ~Grid();
 
     int width() const { return m_width; }
     int height() const { return m_height; }
     const ExtentAndRes &extentAndRes() const { return m_extent; }
 
+    virtual bool isNullGrid() const { return false; }
+};
+
+// ---------------------------------------------------------------------------
+
+class VerticalShiftGrid : public Grid {
+  protected:
+    std::vector<std::unique_ptr<VerticalShiftGrid>> m_children{};
+
+  public:
+    VerticalShiftGrid(int widthIn, int heightIn, const ExtentAndRes &extentIn);
+
     const VerticalShiftGrid *gridAt(double lon, double lat) const;
 
-    virtual bool isNodata(float /*val*/, double /* multiplier */) const {
-        return false;
-    }
+    virtual bool isNodata(float /*val*/, double /* multiplier */) const;
 
     // x = 0 is western-most column, y = 0 is southern-most line
     virtual bool valueAt(int x, int y, float &out) const = 0;
@@ -99,25 +109,16 @@ class VerticalShiftGridSet {
 
 // ---------------------------------------------------------------------------
 
-class HorizontalShiftGrid {
+class HorizontalShiftGrid : public Grid {
   protected:
-    int m_width;
-    int m_height;
-    ExtentAndRes m_extent;
     std::vector<std::unique_ptr<HorizontalShiftGrid>> m_children{};
 
   public:
     HorizontalShiftGrid(int widthIn, int heightIn,
                         const ExtentAndRes &extentIn);
-    virtual ~HorizontalShiftGrid();
-
-    int width() const { return m_width; }
-    int height() const { return m_height; }
-    const ExtentAndRes &extentAndRes() const { return m_extent; }
+    ~HorizontalShiftGrid() override;
 
     const HorizontalShiftGrid *gridAt(double lon, double lat) const;
-
-    virtual bool isNullGrid() const { return false; }
 
     // x = 0 is western-most column, y = 0 is southern-most line
     virtual bool valueAt(int x, int y, float &lonShift,

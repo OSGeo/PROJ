@@ -70,13 +70,24 @@ bool ExtentAndRes::fullWorldLongitude() const {
 
 // ---------------------------------------------------------------------------
 
-VerticalShiftGrid::VerticalShiftGrid(int widthIn, int heightIn,
-                                     const ExtentAndRes &extentIn)
+Grid::Grid(int widthIn, int heightIn, const ExtentAndRes &extentIn)
     : m_width(widthIn), m_height(heightIn), m_extent(extentIn) {}
 
 // ---------------------------------------------------------------------------
 
-VerticalShiftGrid::~VerticalShiftGrid() = default;
+Grid::~Grid() = default;
+
+// ---------------------------------------------------------------------------
+
+VerticalShiftGrid::VerticalShiftGrid(int widthIn, int heightIn,
+                                     const ExtentAndRes &extentIn)
+    : Grid(widthIn, heightIn, extentIn) {}
+
+// ---------------------------------------------------------------------------
+
+bool VerticalShiftGrid::isNodata(float /*val*/, double /* multiplier */) const {
+    return false;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -98,6 +109,7 @@ class NullVerticalShiftGrid : public VerticalShiftGrid {
   public:
     NullVerticalShiftGrid() : VerticalShiftGrid(3, 3, globalExtent()) {}
 
+    bool isNullGrid() const override { return true; }
     bool valueAt(int, int, float &out) const override;
     bool isNodata(float, double) const override { return false; }
 };
@@ -306,7 +318,7 @@ const VerticalShiftGrid *VerticalShiftGridSet::gridAt(double lon,
 
 HorizontalShiftGrid::HorizontalShiftGrid(int widthIn, int heightIn,
                                          const ExtentAndRes &extentIn)
-    : m_width(widthIn), m_height(heightIn), m_extent(extentIn) {}
+    : Grid(widthIn, heightIn, extentIn) {}
 
 // ---------------------------------------------------------------------------
 
