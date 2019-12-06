@@ -31,9 +31,8 @@
 #include <memory>
 #include <vector>
 
+#include "proj.h"
 #include "proj/util.hpp"
-
-typedef struct projCtx_t PJ_CONTEXT;
 
 NS_PROJ_START
 
@@ -148,6 +147,19 @@ class HorizontalShiftGridSet {
     }
     const HorizontalShiftGrid *gridAt(double lon, double lat) const;
 };
+
+// ---------------------------------------------------------------------------
+
+typedef std::vector<std::unique_ptr<HorizontalShiftGridSet>> ListOfHGrids;
+typedef std::vector<std::unique_ptr<VerticalShiftGridSet>> ListOfVGrids;
+
+ListOfVGrids proj_vgrid_init(PJ *P, const char *grids);
+ListOfHGrids proj_hgrid_init(PJ *P, const char *grids);
+double proj_vgrid_value(PJ *P, const ListOfVGrids &, PJ_LP lp,
+                        double vmultiplier);
+PJ_LP proj_hgrid_value(PJ *P, const ListOfHGrids &, PJ_LP lp);
+PJ_LP proj_hgrid_apply(PJ *P, const ListOfHGrids &, PJ_LP lp,
+                       PJ_DIRECTION direction);
 
 NS_PROJ_END
 

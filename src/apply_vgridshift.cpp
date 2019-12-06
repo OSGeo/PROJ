@@ -37,10 +37,11 @@
 #include <math.h>
 #include "proj_internal.h"
 #include "proj/internal/internal.hpp"
+#include "grids.hpp"
 
-using namespace NS_PROJ;
+NS_PROJ_START
 
-static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier) {
+static double read_vgrid_value(const ListOfVGrids& grids, PJ_LP input, double vmultiplier) {
 
     /* do not deal with NaN coordinates */
     /* cppcheck-suppress duplicateExpression */
@@ -50,7 +51,7 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier) {
     }
 
     const VerticalShiftGrid* grid = nullptr;
-    for( const auto& gridset: defn->vgrids )
+    for( const auto& gridset: grids )
     {
         grid = gridset->gridAt(input.lam, input.phi);
         if( grid )
@@ -145,7 +146,7 @@ static double read_vgrid_value( PJ *defn, PJ_LP input, double vmultiplier) {
 }
 
 /**********************************************/
-int proj_vgrid_init(PJ* P, const char *gridkey) {
+ListOfVGrids proj_vgrid_init(PJ* P, const char *gridkey) {
 /**********************************************
 
   Initizalize and populate gridlist.
@@ -161,14 +162,15 @@ int proj_vgrid_init(PJ* P, const char *gridkey) {
 
     std::string key("s");
     key += gridkey;
-    const char* grids = pj_param(P->ctx, P->params, key.c_str()).s;
-    if( grids == nullptr )
-        return 0;
+    const char* gridnames = pj_param(P->ctx, P->params, key.c_str()).s;
+    if( gridnames == nullptr )
+        return {};
 
-    auto listOfGrids = internal::split(std::string(grids), ',');
-    for( const auto& grid: listOfGrids )
+    auto listOfGridNames = internal::split(std::string(gridnames), ',');
+    ListOfVGrids grids;
+    for( const auto& gridnameStr: listOfGridNames )
     {
-        const char* gridname = grid.c_str();
+        const char* gridname = gridnameStr.c_str();
         bool canFail = false;
         if( gridname[0] == '@' )
         {
@@ -181,21 +183,20 @@ int proj_vgrid_init(PJ* P, const char *gridkey) {
             if( !canFail )
             {
                 pj_ctx_set_errno( P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-                P->vgrids.clear();
-                return 0;
+                return {};
             }
         }
         else
         {
-            P->vgrids.emplace_back(std::move(gridSet));
+            grids.emplace_back(std::move(gridSet));
         }
     }
 
-    return static_cast<int>(P->vgrids.size());
+    return grids;
 }
 
 /***********************************************/
-double proj_vgrid_value(PJ *P, PJ_LP lp, double vmultiplier){
+double proj_vgrid_value(PJ *P, const ListOfVGrids& grids, PJ_LP lp, double vmultiplier){
 /***********************************************
 
   Read grid value at position lp in grids loaded
@@ -207,8 +208,10 @@ double proj_vgrid_value(PJ *P, PJ_LP lp, double vmultiplier){
 
     double value;
 
-    value = read_vgrid_value(P, lp, vmultiplier);
+    value = read_vgrid_value(grids, lp, vmultiplier);
     proj_log_trace(P, "proj_vgrid_value: (%f, %f) = %f", lp.lam*RAD_TO_DEG, lp.phi*RAD_TO_DEG, value);
 
     return value;
 }
+
+NS_PROJ_END

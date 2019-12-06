@@ -47,6 +47,7 @@
 #include "proj_internal.h"
 #include <math.h>
 #include "geodesic.h"
+#include "grids.hpp"
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"

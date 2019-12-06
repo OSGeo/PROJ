@@ -65,7 +65,6 @@
 #include <vector>
 
 #include "proj.h"
-#include "grids.hpp"
 
 #ifdef PROJ_API_H
 #error proj_internal.h must be included before proj_api.h
@@ -195,14 +194,6 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 
 PJ_COORD PROJ_DLL pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 PJ_COORD PROJ_DLL pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
-
-
-/* Grid functionality */
-int             proj_vgrid_init(PJ *P, const char *grids);
-int             proj_hgrid_init(PJ *P, const char *grids);
-double          proj_vgrid_value(PJ *P, PJ_LP lp, double vmultiplier);
-PJ_LP           proj_hgrid_value(PJ *P, PJ_LP lp);
-PJ_LP           proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction);
 
 void PROJ_DLL proj_log_error (PJ *P, const char *fmt, ...);
 void proj_log_debug (PJ *P, const char *fmt, ...);
@@ -479,10 +470,10 @@ struct PJconsts {
 
     int     datum_type = PJD_UNKNOWN;  /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
     double  datum_params[7] = {0,0,0,0,0,0,0}; /* Parameters for 3PARAM and 7PARAM */
-    std::vector<std::unique_ptr<NS_PROJ::HorizontalShiftGridSet>> hgrids{};
 
-    int     has_geoid_vgrids = 0;      /* TODO: Description needed */
-    std::vector<std::unique_ptr<NS_PROJ::VerticalShiftGridSet>> vgrids{};
+    int     has_geoid_vgrids = 0;      /* used by legacy transform.cpp */
+    void*   hgrids_legacy = nullptr;   /* used by legacy transform.cpp. Is a pointer to a ListOfHGrids* */ 
+    void*   vgrids_legacy = nullptr;   /* used by legacy transform.cpp. Is a pointer to a ListOfVGrids* */ 
 
     double  from_greenwich = 0.0;       /* prime meridian offset (in radians) */
     double  long_wrap_center = 0.0;     /* 0.0 for -180 to 180, actually in radians*/

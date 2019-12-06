@@ -34,6 +34,9 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "geocent.h"
+#include "grids.hpp"
+
+using namespace NS_PROJ;
 
 static int adjust_axis( projCtx ctx, const char *axis, int denormalize_flag,
                            long point_count, int point_offset,
@@ -445,9 +448,17 @@ static int pj_apply_vgridshift( PJ *defn,
                          double *x, double *y, double *z )
 
 {
-    if( defn->vgrids.empty() )
+    if( defn->vgrids_legacy == nullptr )
     {
-        proj_vgrid_init(defn, "geoidgrids");
+        defn->vgrids_legacy = new ListOfVGrids;
+        auto vgrids = proj_vgrid_init(defn, "geoidgrids");
+        if( vgrids.empty() )
+            return 0;
+        *static_cast<ListOfVGrids*>(defn->vgrids_legacy) = std::move(vgrids);
+    }
+    if( static_cast<ListOfVGrids*>(defn->vgrids_legacy)->empty() )
+    {
+        return 0;
     }
 
     for( int i = 0; i < point_count; i++ )
@@ -459,7 +470,7 @@ static int pj_apply_vgridshift( PJ *defn,
         input.phi = y[io];
         input.lam = x[io];
 
-        value = proj_vgrid_value(defn, input, 1.0);
+        value = proj_vgrid_value(defn, *static_cast<ListOfVGrids*>(defn->vgrids_legacy), input, 1.0);
 
         if( inverse )
             z[io] -= value;
@@ -476,7 +487,7 @@ static int pj_apply_vgridshift( PJ *defn,
                 x[io] * RAD_TO_DEG,
                 y[io] * RAD_TO_DEG );
 
-            for( const auto& gridset: defn->vgrids )
+            for( const auto& gridset: *static_cast<ListOfVGrids*>(defn->vgrids_legacy) )
             {
                 if( gridlist.empty() )
                     gridlist += "   tried: ";
@@ -882,9 +893,17 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
                           double *x, double *y, double * /*z*/ )
 
 {
-    if( defn->hgrids.empty() )
+    if( defn->hgrids_legacy == nullptr )
     {
-        proj_hgrid_init(defn, "nadgrids");
+        defn->hgrids_legacy = new ListOfHGrids;
+        auto hgrids = proj_hgrid_init(defn, "nadgrids");
+        if( hgrids.empty() )
+            return 0;
+        *static_cast<ListOfHGrids*>(defn->hgrids_legacy) = std::move(hgrids);
+    }
+    if( static_cast<ListOfHGrids*>(defn->hgrids_legacy)->empty() )
+    {
+        return 0;
     }
 
     for( long i = 0; i < point_count; i++ )
@@ -895,7 +914,7 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
         input.phi = y[io];
         input.lam = x[io];
 
-        auto output = proj_hgrid_apply(defn, input, inverse ? PJ_INV : PJ_FWD);
+        auto output = proj_hgrid_apply(defn, *static_cast<ListOfHGrids*>(defn->hgrids_legacy), input, inverse ? PJ_INV : PJ_FWD);
 
         if ( output.lam != HUGE_VAL )
         {

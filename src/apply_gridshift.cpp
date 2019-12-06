@@ -39,14 +39,14 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj/internal/internal.hpp"
+#include "grids.hpp"
 
-using namespace NS_PROJ;
+NS_PROJ_START
 
 // ---------------------------------------------------------------------------
 
-static const HorizontalShiftGrid* findGrid(
-    const std::vector<std::unique_ptr<HorizontalShiftGridSet>>& grids,
-    PJ_LP input)
+static const HorizontalShiftGrid* findGrid(const ListOfHGrids& grids,
+                                           PJ_LP input)
 {
     for( const auto& gridset: grids )
     {
@@ -59,11 +59,9 @@ static const HorizontalShiftGrid* findGrid(
 
 // ---------------------------------------------------------------------------
 
-static std::vector<std::unique_ptr<NS_PROJ::HorizontalShiftGridSet>>
-                                        getListOfGridSets(PJ_CONTEXT* ctx,
-                                                          const char* grids)
+static ListOfHGrids getListOfGridSets(PJ_CONTEXT* ctx, const char* grids)
 {
-    std::vector<std::unique_ptr<NS_PROJ::HorizontalShiftGridSet>> list;
+    ListOfHGrids list;
     auto listOfGrids = internal::split(std::string(grids), ',');
     for( const auto& grid: listOfGrids )
     {
@@ -93,7 +91,7 @@ static std::vector<std::unique_ptr<NS_PROJ::HorizontalShiftGridSet>>
 
 
 /**********************************************/
-int proj_hgrid_init(PJ* P, const char *gridkey) {
+ListOfHGrids proj_hgrid_init(PJ* P, const char *gridkey) {
 /**********************************************
 
   Initizalize and populate list of horizontal
@@ -112,10 +110,9 @@ int proj_hgrid_init(PJ* P, const char *gridkey) {
     key += gridkey;
     const char* grids = pj_param(P->ctx, P->params, key.c_str()).s;
     if( grids == nullptr )
-        return 0;
+        return {};
 
-    P->hgrids = getListOfGridSets(P->ctx, grids);
-    return static_cast<int>(P->hgrids.size());
+    return getListOfGridSets(P->ctx, grids);
 }
 
 typedef struct { pj_int32 lam, phi; } ILP;
@@ -267,10 +264,10 @@ PJ_LP nad_cvt(PJ_LP in, int inverse, const HorizontalShiftGrid* grid) {
 /*                                          */
 /*    Return coordinate offset in grid      */
 /********************************************/
-PJ_LP proj_hgrid_value(PJ *P, PJ_LP lp) {
+PJ_LP proj_hgrid_value(PJ *P, const ListOfHGrids& grids, PJ_LP lp) {
     PJ_LP out = proj_coord_error().lp;
 
-    const auto grid = findGrid(P->hgrids, lp);
+    const auto grid = findGrid(grids, lp);
     if( !grid ) {
         pj_ctx_set_errno( P->ctx, PJD_ERR_GRID_AREA );
         return out;
@@ -296,7 +293,7 @@ static
 PJ_LP proj_hgrid_apply_internal(PJ_CONTEXT* ctx,
                        PJ_LP lp,
                        PJ_DIRECTION direction,
-                       const std::vector<std::unique_ptr<HorizontalShiftGridSet>>& grids)
+                       const ListOfHGrids& grids)
 {
     PJ_LP out;
 
@@ -322,9 +319,12 @@ PJ_LP proj_hgrid_apply_internal(PJ_CONTEXT* ctx,
     return out;
 }
 
-PJ_LP proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction) {
-    return proj_hgrid_apply_internal(P->ctx, lp, direction, P->hgrids);
+PJ_LP proj_hgrid_apply(PJ *P, const ListOfHGrids& grids, PJ_LP lp, PJ_DIRECTION direction) {
+    return proj_hgrid_apply_internal(P->ctx, lp, direction, grids);
 }
+
+
+NS_PROJ_END
 
 /************************************************************************/
 /*                         pj_apply_gridshift()                         */
@@ -340,7 +340,7 @@ int pj_apply_gridshift( projCtx ctx, const char *nadgrids, int inverse,
                         double *x, double *y, double * /*z */ )
 
 {
-    auto hgrids = getListOfGridSets(ctx, nadgrids);
+    auto hgrids = NS_PROJ::getListOfGridSets(ctx, nadgrids);
     if( hgrids.empty() )
     {
         pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
