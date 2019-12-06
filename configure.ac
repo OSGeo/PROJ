@@ -20,6 +20,8 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AM_PROG_LIBTOOL
 
+PKG_PROG_PKG_CONFIG
+
 dnl Enable as much warnings as possible
 AX_CFLAGS_WARN_ALL(C_WFLAGS)
 AX_CXXFLAGS_WARN_ALL(CXX_WFLAGS)
@@ -293,6 +295,20 @@ AC_CHECK_PROG(SQLITE3_CHECK,sqlite3,yes)
 if test x"$SQLITE3_CHECK" != x"yes" ; then
     AC_MSG_ERROR([Please install sqlite3 binary.])
 fi
+
+dnl ---------------------------------------------------------------------------
+dnl Check for libtiff
+dnl ---------------------------------------------------------------------------
+
+if test "x$TIFF_CFLAGS$TIFF_LIBS" = "x" ; then
+    if $PKG_CONFIG libtiff; then
+        PKG_CHECK_MODULES([TIFF], [libtiff])
+    else
+        PKG_CHECK_MODULES([TIFF], [libtiff-4])
+    fi
+fi
+AC_SUBST(TIFF_CFLAGS,$TIFF_CFLAGS)
+AC_SUBST(TIFF_LIBS,$TIFF_LIBS)
 
 dnl ---------------------------------------------------------------------------
 dnl Check for external Google Test

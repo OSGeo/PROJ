@@ -134,6 +134,15 @@ IF("${SQLITE3_VERSION}" VERSION_LESS "3.11")
 ENDIF()
 
 ################################################################################
+# Check for libtiff
+################################################################################
+
+find_package(TIFF REQUIRED)
+if(NOT TIFF_FOUND)
+  message(SEND_ERROR "libtiff dependency not found!")
+endif()
+
+################################################################################
 # threading configuration
 ################################################################################
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
