@@ -212,12 +212,12 @@ PJ_LP nad_cvt(PJ_LP in, int inverse, const HorizontalShiftGrid* grid) {
         return t;
 
     if (!inverse) {
-        in.lam -= t.lam;
+        in.lam += t.lam;
         in.phi += t.phi;
         return in;
     }
 
-    t.lam = tb.lam + t.lam;
+    t.lam = tb.lam - t.lam;
     t.phi = tb.phi - t.phi;
 
     do {
@@ -235,8 +235,8 @@ PJ_LP nad_cvt(PJ_LP in, int inverse, const HorizontalShiftGrid* grid) {
         if (del.lam == HUGE_VAL)
             break;
 
-        dif.lam = t.lam - del.lam - tb.lam;
-           dif.phi = t.phi + del.phi - tb.phi;
+        dif.lam = t.lam + del.lam - tb.lam;
+        dif.phi = t.phi + del.phi - tb.phi;
         t.lam -= dif.lam;
         t.phi -= dif.phi;
 

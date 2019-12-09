@@ -469,7 +469,8 @@ bool NTv1Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
     }
     /* convert seconds to radians */
     latShift = static_cast<float>(two_doubles[0] * ((M_PI / 180.0) / 3600.0));
-    lonShift = static_cast<float>(two_doubles[1] * ((M_PI / 180.0) / 3600.0));
+    // west longitude positive convention !
+    lonShift = -static_cast<float>(two_doubles[1] * ((M_PI / 180.0) / 3600.0));
 
     return true;
 }
@@ -572,7 +573,8 @@ bool CTable2Grid::valueAt(int x, int y, float &lonShift,
     }
 
     latShift = two_floats[1];
-    lonShift = two_floats[0];
+    // west longitude positive convention !
+    lonShift = -two_floats[0];
 
     return true;
 }
@@ -642,7 +644,8 @@ bool NTv2Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
     }
     /* convert seconds to radians */
     latShift = static_cast<float>(two_float[0] * ((M_PI / 180.0) / 3600.0));
-    lonShift = static_cast<float>(two_float[1] * ((M_PI / 180.0) / 3600.0));
+    // west longitude positive convention !
+    lonShift = -static_cast<float>(two_float[1] * ((M_PI / 180.0) / 3600.0));
     return true;
 }
 
