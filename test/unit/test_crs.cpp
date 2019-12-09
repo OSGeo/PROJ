@@ -2281,6 +2281,38 @@ TEST(crs, projectedCRS_identify_db) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_identify_wrong_auth_name_case) {
+    auto dbContext = DatabaseContext::create();
+    auto factoryAnonymous = AuthorityFactory::create(dbContext, std::string());
+    auto obj =
+        WKTParser()
+            .attachDatabaseContext(dbContext)
+            .setStrict(false)
+            .createFromWKT(
+                "PROJCS[\"World_Cylindrical_Equal_Area\","
+                "GEOGCS[\"GCS_WGS_1984\","
+                "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\","
+                "6378137.0,298.257223563]],"
+                "PRIMEM[\"Greenwich\",0.0],"
+                "UNIT[\"Degree\",0.0174532925199433]],"
+                "PROJECTION[\"Cylindrical_Equal_Area\"],"
+                "PARAMETER[\"False_Easting\",0.0],"
+                "PARAMETER[\"False_Northing\",0.0],"
+                "PARAMETER[\"Central_Meridian\",0.0],"
+                "PARAMETER[\"Standard_Parallel_1\",0.0],UNIT[\"Meter\",1.0],"
+                "AUTHORITY[\"Esri\",54034]]"); // should be ESRI all caps
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto res = crs->identify(factoryAnonymous);
+    ASSERT_EQ(res.size(), 1U);
+    const auto &ids = res.front().first->identifiers();
+    ASSERT_EQ(ids.size(), 1U);
+    EXPECT_EQ(*(ids.front()->codeSpace()), "ESRI");
+    EXPECT_EQ(ids.front()->code(), "54034");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, mercator_1SP_as_WKT1_ESRI) {
 
     auto obj = PROJStringParser().createFromPROJString(
