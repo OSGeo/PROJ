@@ -8,7 +8,7 @@ PROJ RFC 4: Remote access to grids and GeoTIFF grids
 :Contact: even.rouault@spatialys.com, howard@hobu.co
 :Status: Draft
 :Implementation target: PROJ 7
-:Last Updated: 2019-12-03
+:Last Updated: 2019-12-09
 
 Motivation
 -------------------------------------------------------------------------------
@@ -669,11 +669,13 @@ is an easy way to inspect such grid files:
   for a given location are close to each other.
   On the reading side, PROJ will handle also PlanarConfiguration=Contig.
 
-- Files hosted on the CDN will use Signed Int 16 (
+- Files hosted on the CDN will generally use Float32 (BitsPerSample=32 and SampleFormat=IEEEFP)
+  Fles may be created using Signed Int 16 (
   `BitsPerSample <https://www.awaresystems.be/imaging/tiff/tifftags/bitspersample.html>`_ =16 and
-  `SampleFormat <https://www.awaresystems.be/imaging/tiff/tifftags/sampleformat.html>`_ = INT)
-  or Float32 (BitsPerSample=32 and SampleFormat=IEEEFP). On the reading side,
-  only those two data types will be supported as well.
+  `SampleFormat <https://www.awaresystems.be/imaging/tiff/tifftags/sampleformat.html>`_ = INT) or
+  Unsigned Int 16 (BitsPerSample=16 and SampleFormat=UINT), generally with an
+  associate scale/offset.
+  On the reading side, only those three data types will be supported as well.
 
 - Files hosted on the CDN will have a `PhotometricInterpretation
   <https://www.awaresystems.be/imaging/tiff/tifftags/photometricinterpretation.html>`_ = MinIsBlack.
@@ -699,12 +701,21 @@ is an easy way to inspect such grid files:
    apply for PhotometricInterpretation = MinIsBlack)
 
 - The `ImageDescription <https://www.awaresystems.be/imaging/tiff/tifftags/imagedescription.html>`_
-  tag may be used to convey extra information about the name and provenance of the grid.
+  tag may be used to convey extra information about the name, provenance, version
+  and last updated date of the grid.
   Will be set when possible fo files hosted on the CDN.
   Ignored by PROJ.
 
 - The `Copyright <https://www.awaresystems.be/imaging/tiff/tifftags/copyright.html>`_
   tag may be used to convey extra information about the copyright and license of the grid.
+  Will be set when possible fo files hosted on the CDN.
+  Ignored by PROJ.
+
+- The `DateTime <https://www.awaresystems.be/imaging/tiff/tifftags/datetime.html>`_
+  tag may be used to convey the date at which the file has been created or
+  converted. In case of a file conversion, for example from NTv2, this will be
+  the date at which the conversion has been performed. The ``ImageDescription``
+  tag however will contain the latest of the CREATED or UPDATED fields from the NTv2 file.
   Will be set when possible fo files hosted on the CDN.
   Ignored by PROJ.
 
@@ -714,8 +725,7 @@ is an easy way to inspect such grid files:
 
   If offset and/or scaling is used, the nodata value corresponds to the raw value,
   before applying offset and scaling.
-  Files hosted on the CDN will use GDAL_NODATA = -32768. On the reading side,
-  the value found in this tag, if present, will be honoured (to the extent to
+  The value found in this tag, if present, will be honoured (to the extent to
   which current PROJ code makes use of nodata).
   For floating point data, writers are strongly discouraged to use non-finite values
   (+/- infinity, NaN) of nodata to maximimize interoperability.
