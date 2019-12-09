@@ -827,6 +827,13 @@ is an easy way to inspect such grid files:
     + ``longitude_offset_accuracy``: valid for TYPE=HORIZONTAL_OFFSET. Sample values should be
       the accuracy of corresponding longitude_offset samples. Generally in metre (if converted from NTv2)
 
+  * The sign convention for the values of the ``longitude_offset`` channel
+    should be indicated with an Item named ``positive_value`` whose value
+    can be ``west`` or ``east``. NTv2 products originally use a ``west``
+    convention, but when converting from them to GeoTIFF, the sign of those
+    samples will be inverted so they use a more natural ``east`` convention.
+    If this item is absent, the default value is ``east``.
+
   * The unit of the values stored in the grid must be specified for each
     sample through an Item of name ``UNITTYPE`` and role ``unittype``
     Valid values should be the name of entries from the EPSG ``unitofmeasure``
