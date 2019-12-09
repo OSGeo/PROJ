@@ -842,13 +842,13 @@ is an easy way to inspect such grid files:
 
     For linear units:
 
-    - ``metre`` (default value assumed if absent for vertical shift grid files, and value for files stored on PROJ CDN)
+    - ``metre`` (default value assumed if absent for vertical shift grid files, and value used for files stored on PROJ CDN)
     - ``US survey foot``
 
     For angular units:
 
     - ``degree``
-    - ``arc-second`` (default value assumed if absent for vertical shift grid files, and value for files stored on PROJ CDN)
+    - ``arc-second`` (default value assumed if absent for longitude and latitude offset samples of horizontal shift grid files, and value used for files stored on PROJ CDN)
 
     The longitude and latitude offset samples should use the same unit.
 
@@ -929,7 +929,7 @@ with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtif
 
     $ tiffinfo ntf_r93.tif 
 
-    TIFF Directory at offset 0x32 (50)
+    TIFF Directory at offset 0x4e (78)
     Image Width: 156 Image Length: 111
     Bits/Sample: 32
     Sample Format: IEEE floating point
@@ -939,7 +939,8 @@ with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtif
     Samples/Pixel: 4
     Rows/Strip: 111
     Planar Configuration: separate image planes
-    ImageDescription: NTF (EPSG:4275) to RGF93 (EPSG:4171). Converted from ntf_r93.gsb
+    ImageDescription: NTF (EPSG:4275) to RGF93 (EPSG:4171). Converted from ntf_r93.gsb (version IGN07_01, last updated on 2007-10-31)
+    DateTime: 2019:12:09 00:00:00
     Copyright: Derived from work by IGN France. Open License https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Open_Licence.pdf
     Tag 33550: 0.100000,0.100000,0.000000
     Tag 33922: 0.000000,0.000000,0.000000,-5.500000,52.000000,0.000000
@@ -950,11 +951,12 @@ with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtif
     <Item name="TYPE">HORIZONTAL_OFFSET</Item>
     <Item name="UNITTYPE" sample="0" role="unittype">arc-second</Item>
     <Item name="DESCRIPTION" sample="0" role="description">latitude_offset</Item>
+    <Item name="positive_value" sample="1">east</Item>
     <Item name="UNITTYPE" sample="1" role="unittype">arc-second</Item>
     <Item name="DESCRIPTION" sample="1" role="description">longitude_offset</Item>
-    <Item name="UNITTYPE" sample="2" role="unittype">metre</Item>
+    <Item name="UNITTYPE" sample="2" role="unittype">arc-second</Item>
     <Item name="DESCRIPTION" sample="2" role="description">latitude_offset_accuracy</Item>
-    <Item name="UNITTYPE" sample="3" role="unittype">metre</Item>
+    <Item name="UNITTYPE" sample="3" role="unittype">arc-second</Item>
     <Item name="DESCRIPTION" sample="3" role="description">longitude_offset_accuracy</Item>
     </GDALMetadata>
 
@@ -1061,8 +1063,8 @@ with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtif
       AREA_OR_POINT=Point
       grid_name=FRANCE
       target_crs_epsg_code=4171
-      TIFFTAG_COPYRIGHT=Derived from work by IGN France. Open License https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Open_Licence.pdf
-      TIFFTAG_IMAGEDESCRIPTION=NTF (EPSG:4275) to RGF93 (EPSG:4171). Converted from ntf_r93.gsb
+      TIFFTAG_DATETIME=2019:12:09 00:00:00
+      TIFFTAG_IMAGEDESCRIPTION=NTF (EPSG:4275) to RGF93 (EPSG:4171). Converted from ntf_r93.gsb (version IGN07_01, last updated on 2007-10-31)
       TYPE=HORIZONTAL_OFFSET
     Image Structure Metadata:
       COMPRESSION=DEFLATE
@@ -1079,12 +1081,14 @@ with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtif
     Band 2 Block=156x111 Type=Float32, ColorInterp=Undefined
       Description = longitude_offset
       Unit Type: arc-second
+      Metadata:
+        positive_value=east
     Band 3 Block=156x111 Type=Float32, ColorInterp=Undefined
       Description = latitude_offset_accuracy
-      Unit Type: metre
+      Unit Type: arc-second
     Band 4 Block=156x111 Type=Float32, ColorInterp=Undefined
       Description = longitude_offset_accuracy
-      Unit Type: metre
+      Unit Type: arc-second
 
 Multi-grid storage
 ++++++++++++++++++
