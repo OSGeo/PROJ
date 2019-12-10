@@ -33,7 +33,8 @@ import os
 import requests
 import sys
 
-url = "http://librairies.ign.fr/geoportail/resources/IGNF.xml"
+# url = "http://librairies.ign.fr/geoportail/resources/IGNF.xml"
+url = "https://geodesie.ign.fr/contenu/fichiers/IGNF.v3.1.0.xml"
 
 if len(sys.argv) not in (1, 2) or (len(sys.argv) == 2 and sys.argv[1].startswith('-')):
     print('Usage: build_db_create_ignf.py [path_to_IGNF.xml]')

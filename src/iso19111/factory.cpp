@@ -5609,6 +5609,7 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
         sql += " AND type = ?";
         params.emplace_back(geodetic_crs_type);
     }
+    sql += " ORDER BY auth_name, code";
     auto sqlRes = d->run(sql, params);
     std::list<crs::GeodeticCRSNNPtr> res;
     for (const auto &row : sqlRes) {
