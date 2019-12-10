@@ -231,6 +231,14 @@ static int geographic_to_projected (PJ *P, long n, int dist, double *x, double *
         return 0;
     }
 
+    // Ugly hack. See https://github.com/OSGeo/PROJ/issues/1782
+    if( P->right == PJ_IO_UNITS_WHATEVER && P->descr &&
+        strncmp(P->descr, "General Oblique Transformation",
+                strlen("General Oblique Transformation")) == 0 )
+    {
+        P->right = PJ_IO_UNITS_PROJECTED;
+    }
+
     for( i = 0; i <n; i++ )
     {
         PJ_XY         projected_loc;
@@ -340,6 +348,14 @@ static int projected_to_geographic (PJ *P, long n, int dist, double *x, double *
 
         }
         return 0;
+    }
+
+    // Ugly hack. See https://github.com/OSGeo/PROJ/issues/1782
+    if( P->right == PJ_IO_UNITS_WHATEVER && P->descr &&
+        strncmp(P->descr, "General Oblique Transformation",
+                strlen("General Oblique Transformation")) == 0 )
+    {
+        P->right = PJ_IO_UNITS_PROJECTED;
     }
 
     /* Fallback to the original PROJ.4 API 2d inversion - inv */
