@@ -9324,6 +9324,20 @@ TEST(io, createFromUserInput) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, createFromUserInput_hack_EPSG_102100) {
+    auto dbContext = DatabaseContext::create();
+    auto obj = createFromUserInput("EPSG:102100", dbContext);
+    auto crs = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    const auto &ids = crs->identifiers();
+    ASSERT_EQ(ids.size(), 1U);
+    // we do not lie on the real authority
+    EXPECT_EQ(*ids[0]->codeSpace(), "ESRI");
+    EXPECT_EQ(ids[0]->code(), "102100");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, guessDialect) {
     EXPECT_EQ(WKTParser().guessDialect("LOCAL_CS[\"foo\"]"),
               WKTParser::WKTGuessedDialect::WKT1_GDAL);

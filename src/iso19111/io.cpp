@@ -5673,6 +5673,14 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         try {
             return factory->createCoordinateReferenceSystem(code);
         } catch (...) {
+
+            // Convenience for well-known misused code
+            // See https://github.com/OSGeo/PROJ/issues/1730
+            if (ci_equal(authName, "EPSG") && code == "102100") {
+                factory = AuthorityFactory::create(dbContextNNPtr, "ESRI");
+                return factory->createCoordinateReferenceSystem(code);
+            }
+
             const auto authorities = dbContextNNPtr->getAuthorities();
             for (const auto &authCandidate : authorities) {
                 if (ci_equal(authCandidate, authName)) {
