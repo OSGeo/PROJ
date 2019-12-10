@@ -29,9 +29,11 @@
 #ifndef FROM_PROJ_CPP
 #define FROM_PROJ_CPP
 #endif
+#define LRU11_DO_NOT_DEFINE_OUT_OF_CLASS_METHODS
 
 #include "grids.hpp"
 #include "proj/internal/internal.hpp"
+#include "proj/internal/lru_cache.hpp"
 #include "proj_internal.h"
 
 #include "tiffio.h"
@@ -294,9 +296,67 @@ constexpr uint16 TIFFTAG_GDAL_NODATA = 42113;
 
 // ---------------------------------------------------------------------------
 
+class BlockCache {
+  public:
+    void insert(uint32 ifdIdx, uint32 blockNumber,
+                const std::vector<unsigned char> &data);
+    std::shared_ptr<std::vector<unsigned char>> get(uint32 ifdIdx,
+                                                    uint32 blockNumber);
+
+  private:
+    struct Key {
+        uint32 ifdIdx;
+        uint32 blockNumber;
+
+        Key(uint32 ifdIdxIn, uint32 blockNumberIn)
+            : ifdIdx(ifdIdxIn), blockNumber(blockNumberIn) {}
+        bool operator==(const Key &other) const {
+            return ifdIdx == other.ifdIdx && blockNumber == other.blockNumber;
+        }
+    };
+
+    struct KeyHasher {
+        std::size_t operator()(const Key &k) const {
+            return k.ifdIdx ^ (k.blockNumber << 16) ^ (k.blockNumber >> 16);
+        }
+    };
+
+    static constexpr int NUM_BLOCKS_AT_CROSSING_TILES = 4;
+    static constexpr int MAX_SAMPLE_COUNT = 3;
+    lru11::Cache<
+        Key, std::shared_ptr<std::vector<unsigned char>>, lru11::NullLock,
+        std::unordered_map<
+            Key,
+            typename std::list<lru11::KeyValuePair<
+                Key, std::shared_ptr<std::vector<unsigned char>>>>::iterator,
+            KeyHasher>>
+        cache_{NUM_BLOCKS_AT_CROSSING_TILES * MAX_SAMPLE_COUNT};
+};
+
+// ---------------------------------------------------------------------------
+
+void BlockCache::insert(uint32 ifdIdx, uint32 blockNumber,
+                        const std::vector<unsigned char> &data) {
+    cache_.insert(Key(ifdIdx, blockNumber),
+                  std::make_shared<std::vector<unsigned char>>(data));
+}
+
+// ---------------------------------------------------------------------------
+
+std::shared_ptr<std::vector<unsigned char>>
+BlockCache::get(uint32 ifdIdx, uint32 blockNumber) {
+    std::shared_ptr<std::vector<unsigned char>> ret;
+    cache_.tryGet(Key(ifdIdx, blockNumber), ret);
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+
 class GTiffGrid : public Grid {
-    PJ_CONTEXT *m_ctx; // owned by the belonging GTiffDataset
-    TIFF *m_hTIFF;     // owned by the belonging GTiffDataset
+    PJ_CONTEXT *m_ctx;   // owned by the belonging GTiffDataset
+    TIFF *m_hTIFF;       // owned by the belonging GTiffDataset
+    BlockCache &m_cache; // owned by the belonging GTiffDataset
+    uint32 m_ifdIdx;
     TIFFDataType m_dt;
     uint16 m_samplesPerPixel;
     uint16 m_planarConfig;
@@ -305,9 +365,6 @@ class GTiffGrid : public Grid {
     bool m_tiled;
     uint32 m_blockWidth = 0;
     uint32 m_blockHeight = 0;
-    mutable int m_lastSample = -1;
-    mutable int m_lastBlockX = -1;
-    mutable int m_lastBlockY = -1;
     mutable std::vector<unsigned char> m_buffer{};
     unsigned m_blocksPerRow = 0;
     unsigned m_blocksPerCol = 0;
@@ -324,12 +381,14 @@ class GTiffGrid : public Grid {
     void getScaleOffset(double &scale, double &offset, uint16 sample) const;
 
     template <class T>
-    float readValue(uint32 offsetInBlock, uint16 sample) const;
+    float readValue(const std::vector<unsigned char> &buffer,
+                    uint32 offsetInBlock, uint16 sample) const;
 
   public:
-    GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, int widthIn, int heightIn,
-              const ExtentAndRes &extentIn, TIFFDataType dtIn,
-              uint16 samplesPerPixelIn, uint16 planarConfig, bool bottomUpIn);
+    GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, uint32 ifdIdx,
+              int widthIn, int heightIn, const ExtentAndRes &extentIn,
+              TIFFDataType dtIn, uint16 samplesPerPixelIn, uint16 planarConfig,
+              bool bottomUpIn);
 
     ~GTiffGrid() override;
 
@@ -346,11 +405,13 @@ class GTiffGrid : public Grid {
 
 // ---------------------------------------------------------------------------
 
-GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, int widthIn, int heightIn,
+GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache,
+                     uint32 ifdIdx, int widthIn, int heightIn,
                      const ExtentAndRes &extentIn, TIFFDataType dtIn,
                      uint16 samplesPerPixelIn, uint16 planarConfig,
                      bool bottomUpIn)
-    : Grid(widthIn, heightIn, extentIn), m_ctx(ctx), m_hTIFF(hTIFF), m_dt(dtIn),
+    : Grid(widthIn, heightIn, extentIn), m_ctx(ctx), m_hTIFF(hTIFF),
+      m_cache(cache), m_ifdIdx(ifdIdx), m_dt(dtIn),
       m_samplesPerPixel(samplesPerPixelIn), m_planarConfig(planarConfig),
       m_bottomUp(bottomUpIn), m_dirOffset(TIFFCurrentDirOffset(hTIFF)),
       m_tiled(TIFFIsTiled(hTIFF) != 0) {
@@ -473,9 +534,10 @@ void GTiffGrid::getScaleOffset(double &scale, double &offset,
 // ---------------------------------------------------------------------------
 
 template <class T>
-float GTiffGrid::readValue(uint32 offsetInBlock, uint16 sample) const {
-    const auto ptr = reinterpret_cast<const T *>(m_buffer.data());
-    assert(offsetInBlock < m_buffer.size() / sizeof(T));
+float GTiffGrid::readValue(const std::vector<unsigned char> &buffer,
+                           uint32 offsetInBlock, uint16 sample) const {
+    const auto ptr = reinterpret_cast<const T *>(buffer.data());
+    assert(offsetInBlock < buffer.size() / sizeof(T));
     const auto val = ptr[offsetInBlock];
     if (!m_hasNodata || static_cast<float>(val) != m_noData) {
         double scale = 1;
@@ -493,20 +555,6 @@ bool GTiffGrid::valueAt(uint16 sample, int x, int yFromBottom,
                         float &out) const {
     assert(x >= 0 && yFromBottom >= 0 && x < m_width && yFromBottom < m_height);
     assert(sample < m_samplesPerPixel);
-    if (TIFFCurrentDirOffset(m_hTIFF) != m_dirOffset &&
-        !TIFFSetSubDirectory(m_hTIFF, m_dirOffset)) {
-        return false;
-    }
-    if (m_buffer.empty()) {
-        const auto blockSize = static_cast<size_t>(
-            m_tiled ? TIFFTileSize64(m_hTIFF) : TIFFStripSize64(m_hTIFF));
-        try {
-            m_buffer.resize(blockSize);
-        } catch (const std::exception &e) {
-            pj_log(m_ctx, PJ_LOG_ERROR, "Exception %s", e.what());
-            return false;
-        }
-    }
 
     const int blockX = x / m_blockWidth;
 
@@ -518,12 +566,32 @@ bool GTiffGrid::valueAt(uint16 sample, int x, int yFromBottom,
     const int yTIFF = m_bottomUp ? yFromBottom : m_height - 1 - yFromBottom;
     const int blockY = yTIFF / m_blockHeight;
 
-    if (m_lastSample != static_cast<int>(sample) || m_lastBlockX != blockX ||
-        m_lastBlockY != blockY) {
-        uint32 blockId = blockY * m_blocksPerRow + blockX;
-        if (m_planarConfig == PLANARCONFIG_SEPARATE) {
-            blockId += sample * m_blocksPerCol * m_blocksPerRow;
+    uint32 blockId = blockY * m_blocksPerRow + blockX;
+    if (m_planarConfig == PLANARCONFIG_SEPARATE) {
+        blockId += sample * m_blocksPerCol * m_blocksPerRow;
+    }
+
+    auto cachedBuffer = m_cache.get(m_ifdIdx, blockId);
+    std::vector<unsigned char> *pBuffer = &m_buffer;
+    if (cachedBuffer != nullptr) {
+        // Safe as we don't access the cache before pBuffer is used
+        pBuffer = cachedBuffer.get();
+    } else {
+        if (TIFFCurrentDirOffset(m_hTIFF) != m_dirOffset &&
+            !TIFFSetSubDirectory(m_hTIFF, m_dirOffset)) {
+            return false;
         }
+        if (m_buffer.empty()) {
+            const auto blockSize = static_cast<size_t>(
+                m_tiled ? TIFFTileSize64(m_hTIFF) : TIFFStripSize64(m_hTIFF));
+            try {
+                m_buffer.resize(blockSize);
+            } catch (const std::exception &e) {
+                pj_log(m_ctx, PJ_LOG_ERROR, "Exception %s", e.what());
+                return false;
+            }
+        }
+
         if (m_tiled) {
             if (TIFFReadEncodedTile(m_hTIFF, blockId, m_buffer.data(),
                                     m_buffer.size()) == -1) {
@@ -535,10 +603,15 @@ bool GTiffGrid::valueAt(uint16 sample, int x, int yFromBottom,
                 return false;
             }
         }
-        m_lastSample = sample;
-        m_lastBlockX = blockX;
-        m_lastBlockY = blockY;
+
+        try {
+            m_cache.insert(m_ifdIdx, blockId, m_buffer);
+        } catch (const std::exception &e) {
+            // Should normally not happen
+            pj_log(m_ctx, PJ_LOG_ERROR, "Exception %s", e.what());
+        }
     }
+
     uint32 offsetInBlock =
         (x % m_blockWidth) + (yTIFF % m_blockHeight) * m_blockWidth;
     if (m_planarConfig == PLANARCONFIG_CONTIG)
@@ -546,27 +619,27 @@ bool GTiffGrid::valueAt(uint16 sample, int x, int yFromBottom,
 
     switch (m_dt) {
     case TIFFDataType::Int16:
-        out = readValue<short>(offsetInBlock, sample);
+        out = readValue<short>(*pBuffer, offsetInBlock, sample);
         break;
 
     case TIFFDataType::UInt16:
-        out = readValue<unsigned short>(offsetInBlock, sample);
+        out = readValue<unsigned short>(*pBuffer, offsetInBlock, sample);
         break;
 
     case TIFFDataType::Int32:
-        out = readValue<int>(offsetInBlock, sample);
+        out = readValue<int>(*pBuffer, offsetInBlock, sample);
         break;
 
     case TIFFDataType::UInt32:
-        out = readValue<unsigned int>(offsetInBlock, sample);
+        out = readValue<unsigned int>(*pBuffer, offsetInBlock, sample);
         break;
 
     case TIFFDataType::Float32:
-        out = readValue<float>(offsetInBlock, sample);
+        out = readValue<float>(*pBuffer, offsetInBlock, sample);
         break;
 
     case TIFFDataType::Float64:
-        out = readValue<double>(offsetInBlock, sample);
+        out = readValue<double>(*pBuffer, offsetInBlock, sample);
         break;
     }
 
@@ -596,8 +669,10 @@ class GTiffDataset {
     PAFile m_fp;
     TIFF *m_hTIFF = nullptr;
     bool m_hasNextGrid = false;
+    uint32 m_ifdIdx = 0;
     toff_t m_nextDirOffset = 0;
     std::string m_filename{};
+    BlockCache m_cache{};
 
     GTiffDataset(const GTiffDataset &) = delete;
     GTiffDataset &operator=(const GTiffDataset &) = delete;
@@ -948,8 +1023,9 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
     }
 
     auto ret = std::unique_ptr<GTiffGrid>(
-        new GTiffGrid(m_ctx, m_hTIFF, width, height, extent, dt,
-                      samplesPerPixel, planarConfig, vRes < 0));
+        new GTiffGrid(m_ctx, m_hTIFF, m_cache, m_ifdIdx, width, height, extent,
+                      dt, samplesPerPixel, planarConfig, vRes < 0));
+    m_ifdIdx++;
     m_hasNextGrid = TIFFReadDirectory(m_hTIFF) != 0;
     m_nextDirOffset = TIFFCurrentDirOffset(m_hTIFF);
     return ret;
