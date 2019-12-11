@@ -198,6 +198,7 @@ set(SRC_LIBPROJ_TRANSFORMATIONS
   transformations/horner.cpp
   transformations/molodensky.cpp
   transformations/vgridshift.cpp
+  transformations/xyzgridshift.cpp
 )
 
 set(SRC_LIBPROJ_ISO19111

@@ -183,6 +183,7 @@ libproj_la_SOURCES = \
 	transformations/horner.cpp \
 	transformations/molodensky.cpp \
 	transformations/vgridshift.cpp \
+	transformations/xyzgridshift.cpp \
 	\
 	aasincos.cpp adjlon.cpp \
 	dmstor.cpp auth.cpp \
