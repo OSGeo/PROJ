@@ -767,14 +767,23 @@ is an easy way to inspect such grid files:
     - ``HORIZONTAL_OFFSET``: implies the presence of at least two samples.
       The first sample must contain the latitude offset and the second
       sample must contain the longitude offset.
+      Corresponds to PROJ ``hgridshift`` method.
 
     - ``VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL``: implies the presence of at least one sample.
       The first sample must contain the vertical adjustment. Must be used when
       the source/interpolation CRS is a Geographic CRS and the target CRS a Vertical CRS.
+      Corresponds to PROJ ``vgridshift`` method.
 
     - ``VERTICAL_OFFSET_VERTICAL_TO_VERTICAL``: implies the presence of at least one sample.
       The first sample must contain the vertical adjustment. Must be used when
       the source and target CRS are Vertical CRS.
+      Corresponds to PROJ ``vgridshift`` method.
+
+    - ``GEOCENTRIC_TRANSLATION``: implies the presence of at least 3 samples.
+      The first 3 samples must be respectively the geocentric adjustments along
+      the X, Y and Z axis. Must be used when the source and target CRS are
+      geocentric CRS. The interpolation CRS must be a geographic CRS.
+      Corresponds to PROJ ``xyzgridshift`` method.
 
     For example:
 
@@ -811,6 +820,11 @@ is an easy way to inspect such grid files:
       For a source and target CRS being vertical CRS,
       sample values should be the value to add to an elevation expressed in the
       source CRS to obtain a longitude value expressed in the target CRS.
+
+    + ``x_translation`` / ``y_translation`` / ``z_translation``: valid for
+      TYPE=GEOCENTRIC_TRANSLATION.
+      Sample values should be the value to add to the input geocentric coordinates
+      expressed in the source CRS to geocentric coordinates expressed in the target CRS.
 
     For example:
 
