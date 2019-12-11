@@ -12572,6 +12572,18 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 
     // Start in priority with candidates that have exactly the same name as
     // the sourcCRS and targetCRS. Typically for the case of init=IGNF:XXXX
+
+    // Transformation from IGNF:NTFP to IGNF:RGF93G,
+    // using
+    // NTF geographiques Paris (gr) vers NTF GEOGRAPHIQUES GREENWICH (DMS) +
+    // NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers RGF93 (ETRS89)
+    // that is using ntf_r93.gsb, is horribly dependent
+    // of IGNF:RGF93G being returned before IGNF:RGF93GEO in candidatesDstGeod.
+    // If RGF93GEO is returned before then we go through WGS84 and use
+    // instead a Helmert transformation.
+    // The below logic is thus quite fragile, and attempts at changing it
+    // result in degraded results for other use cases...
+
     for (const auto &candidateSrcGeod : candidatesSrcGeod) {
         if (candidateSrcGeod->nameStr() == sourceCRS->nameStr()) {
             for (const auto &candidateDstGeod : candidatesDstGeod) {
@@ -12625,7 +12637,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 #endif
             createTransformations(candidateSrcGeod, candidateDstGeod,
                                   opsFirst[0], isNullFirst);
-            if (!res.empty() && hasResultSetOnlyResultsWithPROJStep(res)) {
+            if (!res.empty() && !hasResultSetOnlyResultsWithPROJStep(res)) {
                 return;
             }
         }
