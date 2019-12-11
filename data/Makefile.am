@@ -79,6 +79,7 @@ EXTRA_DIST = GL27 nad.lst nad27 nad83 \
 		tests/test_hgrid_extra_ifd_with_other_info.tif \
 		tests/test_hgrid_with_subgrid.tif \
 		tests/test_hgrid_with_subgrid_no_grid_name.tif \
+		tests/subset_of_gr3df97a.tif \
 		null \
 		generate_all_sql_in.cmake sql_filelist.cmake \
 		$(SQL_ORDERED_LIST)
