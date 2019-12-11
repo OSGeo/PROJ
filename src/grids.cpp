@@ -2201,4 +2201,303 @@ const HorizontalShiftGrid *HorizontalShiftGridSet::gridAt(double lon,
     return nullptr;
 }
 
+// ---------------------------------------------------------------------------
+
+class GTiffGenericGridShiftSet : public GenericShiftGridSet,
+                                 public GTiffDataset {
+
+    GTiffGenericGridShiftSet(PJ_CONTEXT *ctx, PAFile fp)
+        : GTiffDataset(ctx, fp) {}
+
+  public:
+    ~GTiffGenericGridShiftSet() override;
+
+    static std::unique_ptr<GTiffGenericGridShiftSet>
+    open(PJ_CONTEXT *ctx, PAFile fp, const std::string &filename);
+};
+
+// ---------------------------------------------------------------------------
+
+class GTiffGenericGrid : public GenericShiftGrid {
+    friend void insertIntoHierarchy<GTiffGenericGrid, GenericShiftGrid>(
+        PJ_CONTEXT *ctx, std::unique_ptr<GTiffGenericGrid> &&grid,
+        const std::string &gridName, const std::string &parentName,
+        std::vector<std::unique_ptr<GenericShiftGrid>> &topGrids,
+        std::map<std::string, GTiffGenericGrid *> &mapGrids);
+
+    std::unique_ptr<GTiffGrid> m_grid;
+
+  public:
+    GTiffGenericGrid(std::unique_ptr<GTiffGrid> &&grid);
+
+    ~GTiffGenericGrid() override;
+
+    bool valueAt(int x, int y, int sample, float &out) const override;
+
+    int samplesPerPixel() const override { return m_grid->samplesPerPixel(); }
+
+    std::string unit(int sample) const override {
+        return m_grid->metadataItem("UNITTYPE", sample);
+    }
+
+    std::string description(int sample) const override {
+        return m_grid->metadataItem("DESCRIPTION", sample);
+    }
+
+    std::string metadataItem(const std::string &key,
+                             int sample = -1) const override {
+        return m_grid->metadataItem(key, sample);
+    }
+
+    void insertGrid(PJ_CONTEXT *ctx,
+                    std::unique_ptr<GTiffGenericGrid> &&subgrid);
+};
+
+// ---------------------------------------------------------------------------
+
+GTiffGenericGridShiftSet::~GTiffGenericGridShiftSet() = default;
+
+// ---------------------------------------------------------------------------
+
+GTiffGenericGrid::GTiffGenericGrid(std::unique_ptr<GTiffGrid> &&grid)
+    : GenericShiftGrid(grid->width(), grid->height(), grid->extentAndRes()),
+      m_grid(std::move(grid)) {}
+
+// ---------------------------------------------------------------------------
+
+GTiffGenericGrid::~GTiffGenericGrid() = default;
+
+// ---------------------------------------------------------------------------
+
+bool GTiffGenericGrid::valueAt(int x, int y, int sample, float &out) const {
+    if (sample < 0 ||
+        static_cast<unsigned>(sample) >= m_grid->samplesPerPixel())
+        return false;
+    return m_grid->valueAt(static_cast<uint16>(sample), x, y, out);
+}
+
+// ---------------------------------------------------------------------------
+
+void GTiffGenericGrid::insertGrid(PJ_CONTEXT *ctx,
+                                  std::unique_ptr<GTiffGenericGrid> &&subgrid) {
+    bool gridInserted = false;
+    const auto &extent = subgrid->extentAndRes();
+    for (const auto &candidateParent : m_children) {
+        const auto &candidateParentExtent = candidateParent->extentAndRes();
+        if (candidateParentExtent.contains(extent)) {
+            static_cast<GTiffGenericGrid *>(candidateParent.get())
+                ->insertGrid(ctx, std::move(subgrid));
+            gridInserted = true;
+            break;
+        } else if (candidateParentExtent.intersects(extent)) {
+            pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                   "Partially intersecting grids found!");
+        }
+    }
+    if (!gridInserted) {
+        m_children.emplace_back(std::move(subgrid));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+class NullGenericShiftGrid : public GenericShiftGrid {
+
+  public:
+    NullGenericShiftGrid() : GenericShiftGrid(3, 3, globalExtent()) {}
+
+    bool isNullGrid() const override { return true; }
+    bool valueAt(int, int, int, float &out) const override;
+
+    int samplesPerPixel() const override { return 0; }
+
+    std::string unit(int) const override { return std::string(); }
+
+    std::string description(int) const override { return std::string(); }
+
+    std::string metadataItem(const std::string &, int) const override {
+        return std::string();
+    }
+};
+
+// ---------------------------------------------------------------------------
+
+bool NullGenericShiftGrid::valueAt(int, int, int, float &out) const {
+    out = 0.0f;
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<GTiffGenericGridShiftSet>
+GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
+                               const std::string &filename) {
+    auto set = std::unique_ptr<GTiffGenericGridShiftSet>(
+        new GTiffGenericGridShiftSet(ctx, fp));
+    set->m_name = filename;
+    set->m_format = "gtiff";
+    if (!set->openTIFF(filename)) {
+        return nullptr;
+    }
+
+    std::map<std::string, GTiffGenericGrid *> mapGrids;
+    for (int ifd = 0;; ++ifd) {
+        auto grid = set->nextGrid();
+        if (!grid) {
+            if (ifd == 0) {
+                return nullptr;
+            }
+            break;
+        }
+
+        const auto subfileType = grid->subfileType();
+        if (subfileType != 0 && subfileType != FILETYPE_PAGE) {
+            if (ifd == 0) {
+                pj_log(ctx, PJ_LOG_ERROR, "Invalid subfileType");
+                return nullptr;
+            } else {
+                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                       "Ignoring IFD %d as it has a unsupported subfileType",
+                       ifd);
+                continue;
+            }
+        }
+
+        const std::string gridName = grid->metadataItem("grid_name");
+        const std::string parentName = grid->metadataItem("parent_name");
+
+        auto hgrid = internal::make_unique<GTiffGenericGrid>(std::move(grid));
+
+        insertIntoHierarchy(ctx, std::move(hgrid), gridName, parentName,
+                            set->m_grids, mapGrids);
+    }
+    return set;
+}
+
+// ---------------------------------------------------------------------------
+
+GenericShiftGrid::GenericShiftGrid(int widthIn, int heightIn,
+                                   const ExtentAndRes &extentIn)
+    : Grid(widthIn, heightIn, extentIn) {}
+
+// ---------------------------------------------------------------------------
+
+GenericShiftGrid::~GenericShiftGrid() = default;
+
+// ---------------------------------------------------------------------------
+
+GenericShiftGridSet::GenericShiftGridSet() = default;
+
+// ---------------------------------------------------------------------------
+
+GenericShiftGridSet::~GenericShiftGridSet() = default;
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<GenericShiftGridSet>
+GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
+    if (filename == "null") {
+        auto set =
+            std::unique_ptr<GenericShiftGridSet>(new GenericShiftGridSet());
+        set->m_name = filename;
+        set->m_format = "null";
+        set->m_grids.push_back(
+            std::unique_ptr<NullGenericShiftGrid>(new NullGenericShiftGrid()));
+        return set;
+    }
+
+    PAFile fp;
+    if (!(fp = pj_open_lib(ctx, filename.c_str(), "rb"))) {
+        ctx->last_errno = 0; /* don't treat as a persistent error */
+        return nullptr;
+    }
+
+    /* -------------------------------------------------------------------- */
+    /*      Load a header, to determine the file type.                      */
+    /* -------------------------------------------------------------------- */
+    unsigned char header[4];
+    size_t header_size;
+    if ((header_size = pj_ctx_fread(ctx, header, 1, sizeof(header), fp)) !=
+        sizeof(header)) {
+        pj_ctx_fclose(ctx, fp);
+        return nullptr;
+    }
+    pj_ctx_fseek(ctx, fp, SEEK_SET, 0);
+
+    if (IsTIFF(header_size, header)) {
+        auto set = GTiffGenericGridShiftSet::open(ctx, fp, filename);
+        if (!set)
+            pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+        return set;
+    }
+
+    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Unrecognized generic grid format");
+    pj_ctx_fclose(ctx, fp);
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+const GenericShiftGrid *GenericShiftGrid::gridAt(double lon, double lat) const {
+    for (const auto &child : m_children) {
+        const auto &extentChild = child->extentAndRes();
+        if ((extentChild.fullWorldLongitude() ||
+             (lon >= extentChild.westLon && lon <= extentChild.eastLon)) &&
+            lat >= extentChild.southLat && lat <= extentChild.northLat) {
+            return child->gridAt(lon, lat);
+        }
+    }
+    return this;
+}
+
+// ---------------------------------------------------------------------------
+
+const GenericShiftGrid *GenericShiftGridSet::gridAt(double lon,
+                                                    double lat) const {
+    for (const auto &grid : m_grids) {
+        if (dynamic_cast<NullGenericShiftGrid *>(grid.get())) {
+            return grid.get();
+        }
+        const auto &extent = grid->extentAndRes();
+        if ((extent.fullWorldLongitude() ||
+             (lon >= extent.westLon && lon <= extent.eastLon)) &&
+            lat >= extent.southLat && lat <= extent.northLat) {
+            return grid->gridAt(lon, lat);
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+ListOfGenericGrids proj_generic_grid_init(PJ *P, const char *gridkey) {
+    std::string key("s");
+    key += gridkey;
+    const char *gridnames = pj_param(P->ctx, P->params, key.c_str()).s;
+    if (gridnames == nullptr)
+        return {};
+
+    auto listOfGridNames = internal::split(std::string(gridnames), ',');
+    ListOfGenericGrids grids;
+    for (const auto &gridnameStr : listOfGridNames) {
+        const char *gridname = gridnameStr.c_str();
+        bool canFail = false;
+        if (gridname[0] == '@') {
+            canFail = true;
+            gridname++;
+        }
+        auto gridSet = GenericShiftGridSet::open(P->ctx, gridname);
+        if (!gridSet) {
+            if (!canFail) {
+                pj_ctx_set_errno(P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+                return {};
+            }
+        } else {
+            grids.emplace_back(std::move(gridSet));
+        }
+    }
+
+    return grids;
+}
+
 NS_PROJ_END
