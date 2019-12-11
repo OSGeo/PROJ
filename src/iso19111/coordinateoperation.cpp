@@ -11301,9 +11301,17 @@ struct FilterResults {
                         setOfSetOfGrids.end()) {
                         continue;
                     }
+
+                    const bool sameNameOrEmptyName =
+                        ((!curExtent && !lastExtent) ||
+                         (curExtent && lastExtent &&
+                          !curExtent->description()->empty() &&
+                          *(curExtent->description()) ==
+                              *(lastExtent->description())));
+
                     // If we have already found a operation without grids for
                     // that extent, no need to add any lower accuracy operation
-                    if (!lastHasGrids) {
+                    if (!lastHasGrids && sameNameOrEmptyName) {
                         continue;
                     }
                     // If we had only operations involving grids, but one
