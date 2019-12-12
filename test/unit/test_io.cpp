@@ -5577,6 +5577,17 @@ TEST(wkt_parse, invalid_GEOCCS) {
                                            "NORTH],AXIS[\"longitude\",EAST]]"),
                  ParsingException);
 
+    // ellipsoidal CS is invalid in a GEOCCS
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOCCS[\"WGS 84\",DATUM[\"World Geodetic System 1984\","
+                     "ELLIPSOID[\"WGS 84\",6378274,298.257223564,"
+                     "LENGTHUNIT[\"metre\",1]]],"
+                     "CS[ellipsoidal,2],AXIS[\"geodetic latitude (Lat)\",north,"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "AXIS[\"geodetic longitude (Lon)\",east,"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]]]"),
+                 ParsingException);
+
     // 3 axis required
     EXPECT_THROW(WKTParser().createFromWKT(
                      "GEOCCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM["

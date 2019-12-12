@@ -2683,7 +2683,9 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     auto cs = buildCS(csNode, node, angularUnit);
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
-        assert(!ci_equal(nodeName, WKTConstants::GEOCCS));
+        if (ci_equal(nodeName, WKTConstants::GEOCCS)) {
+            throw ParsingException("ellipsoidal CS not expected in GEOCCS");
+        }
         try {
             auto crs = GeographicCRS::create(props, datum, datumEnsemble,
                                              NN_NO_CHECK(ellipsoidalCS));
