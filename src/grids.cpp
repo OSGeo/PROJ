@@ -1054,7 +1054,7 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
                     std::map<std::string, GridType *> &mapGrids) {
     const auto &extent = grid->extentAndRes();
 
-    // If we have one or both of grid_name and parent_name, try to use
+    // If we have one or both of grid_name and parent_grid_name, try to use
     // the names to recreate the hiearchy
     if (!gridName.empty()) {
         if (mapGrids.find(gridName) != mapGrids.end()) {
@@ -1250,7 +1250,7 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
         }
 
         const std::string gridName = grid->metadataItem("grid_name");
-        const std::string parentName = grid->metadataItem("parent_name");
+        const std::string parentName = grid->metadataItem("parent_grid_name");
 
         auto vgrid =
             internal::make_unique<GTiffVGrid>(std::move(grid), idxSample);
@@ -2068,7 +2068,7 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
         }
 
         const std::string gridName = grid->metadataItem("grid_name");
-        const std::string parentName = grid->metadataItem("parent_name");
+        const std::string parentName = grid->metadataItem("parent_grid_name");
 
         auto hgrid = internal::make_unique<GTiffHGrid>(
             std::move(grid), idxLatShift, idxLonShift, convFactorToRadian,
@@ -2364,7 +2364,7 @@ GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
         }
 
         const std::string gridName = grid->metadataItem("grid_name");
-        const std::string parentName = grid->metadataItem("parent_name");
+        const std::string parentName = grid->metadataItem("parent_grid_name");
 
         auto hgrid = internal::make_unique<GTiffGenericGrid>(std::move(grid));
 
