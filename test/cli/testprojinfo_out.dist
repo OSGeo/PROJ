@@ -1071,3 +1071,30 @@ unknown id, AGD66 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (
 unknown id, AGD66 to WGS 84 (17) + WGS 84 to WGS 84 (G1762), 3 m, Australia - onshore
 unknown id, Ballpark geographic offset from AGD66 to WGS 84 (G1762), unknown accuracy, World, has ballpark transformation
 
+Testing -s EPSG:31467 -t ETRS89 --spatial-test intersects --grid-check none --bbox 8,48,9,49 --summary. Should include both DHDN to ETRS89 (8) and DHDN to ETRS89 (BWTA2017)
+Candidate operations found: 4
+unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (BWTA2017), 0.89 m, Germany - Baden-Wurtemberg
+unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (8), 0.9 m, Germany - onshore
+unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (3), 1 m, Germany - West Germany S
+unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (2), 3 m, Germany - West Germany all states
+
+Testing -s "GDA94" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects
+Candidate operations found: 1
+-------------------------------------
+Operation n°1:
+
+DERIVED_FROM(EPSG):5656, GDA94 to AHD height (49), 0.03 m, Australia - mainland
+
+PROJ string:
++proj=pipeline +step +inv +proj=vgridshift +grids=AUSGeoid09_V1.01.gtx +multiplier=1
+
+Testing -s "GDA2020" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects
+Candidate operations found: 1
+-------------------------------------
+Operation n°1:
+
+DERIVED_FROM(EPSG):8451, GDA2020 to AHD height (1), 0.03 m, Australia Christmas and Cocos - onshore
+
+PROJ string:
++proj=pipeline +step +inv +proj=vgridshift +grids=AUSGeoid2020_20180201.gtx +multiplier=1
+

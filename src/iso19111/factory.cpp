@@ -1433,9 +1433,17 @@ AuthorityFactory::AuthorityFactory(const DatabaseContextNNPtr &context,
 AuthorityFactoryNNPtr
 AuthorityFactory::create(const DatabaseContextNNPtr &context,
                          const std::string &authorityName) {
-
-    auto factory = AuthorityFactory::nn_make_shared<AuthorityFactory>(
-        context, authorityName);
+    const auto getFactory = [&context, &authorityName]() {
+        for (const auto &knownName : {"EPSG", "ESRI", "PROJ"}) {
+            if (ci_equal(authorityName, knownName)) {
+                return AuthorityFactory::nn_make_shared<AuthorityFactory>(
+                    context, knownName);
+            }
+        }
+        return AuthorityFactory::nn_make_shared<AuthorityFactory>(
+            context, authorityName);
+    };
+    auto factory = getFactory();
     factory->d->setThis(factory);
     return factory;
 }
@@ -5601,6 +5609,7 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
         sql += " AND type = ?";
         params.emplace_back(geodetic_crs_type);
     }
+    sql += " ORDER BY auth_name, code";
     auto sqlRes = d->run(sql, params);
     std::list<crs::GeodeticCRSNNPtr> res;
     for (const auto &row : sqlRes) {

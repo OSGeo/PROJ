@@ -66,7 +66,7 @@ static void* thread_main(void* unused)
     p_WGS84_proj=pj_init_plus_ctx(p_proj_ctxt,"+proj=longlat "
             "+ellps=WGS84 +datum=WGS84");
     p_OSGB36_proj=pj_init_plus_ctx(p_proj_ctxt,
-            "+proj=longlat +ellps=airy +datum=OSGB36 +nadgrids=OSTN02_NTv2.gsb");
+            "+proj=longlat +ellps=airy +datum=OSGB36 +nadgrids=OSTN15_NTv2_OSGBtoETRS.gsb");
 
     while(run)
     {
@@ -81,8 +81,8 @@ static void* thread_main(void* unused)
         y *= RAD_TO_DEG;
         /*printf("%.18f %.18f\n", x, y); */
         assert(proj_ret == 0);
-        assert(fabs(x - -5.198965360936369962) < 1e-15);
-        assert(fabs(y - 49.999396034285531698) < 1e-15);
+        assert(fabs(x - -5.198965207267856492) < 1e-15);
+        assert(fabs(y - 49.999396074140378232) < 1e-15);
     }
 
     pj_free (p_OSGB36_proj);

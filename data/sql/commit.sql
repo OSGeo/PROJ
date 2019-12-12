@@ -30,6 +30,12 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'corrupt definition of authority_list')
         WHERE (SELECT 1 FROM authority_list LIMIT 1) = 0;
 
+    -- test to check that our custom grid transformation overrides are really needed
+    SELECT RAISE(ABORT, 'PROJ grid_transformation defined whereas EPSG has one')
+        WHERE EXISTS (SELECT 1 FROM grid_transformation g1, grid_transformation g2 WHERE
+            lower(g1.grid_name) = lower(g2.grid_name) AND
+            g1.auth_name = 'PROJ' AND g2.auth_name = 'EPSG');
+
     -- check geoid_model table
     SELECT RAISE(ABORT, 'missing GEOID99 in geoid_model')
         WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID99');

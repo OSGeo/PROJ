@@ -143,6 +143,18 @@ echo 'Testing -s "AGD66" -t "WGS 84 (G1762)" --spatial-test intersects --summary
 $EXE -s "AGD66" -t "WGS 84 (G1762)" --spatial-test intersects --summary >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo 'Testing -s EPSG:31467 -t ETRS89 --spatial-test intersects --grid-check none --bbox 8,48,9,49 --summary. Should include both DHDN to ETRS89 (8) and DHDN to ETRS89 (BWTA2017)' >> ${OUT}
+$EXE -s EPSG:31467 -t ETRS89 --spatial-test intersects --grid-check none --bbox 8,48,9,49 --summary >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s "GDA94" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects' >> ${OUT}
+$EXE -s "GDA94" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s "GDA2020" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects' >> ${OUT}
+$EXE -s "GDA2020" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist

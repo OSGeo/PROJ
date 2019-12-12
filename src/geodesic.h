@@ -158,7 +158,7 @@
                       GEODESIC_VERSION_PATCH)
 
 #if !defined(GEOD_DLL)
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && defined(PROJ_MSVC_DLL_EXPORT)
 #define GEOD_DLL __declspec(dllexport)
 #elif defined(__GNUC__)
 #define GEOD_DLL __attribute__ ((visibility("default")))

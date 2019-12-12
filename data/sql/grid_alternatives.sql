@@ -125,6 +125,51 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
+                      VALUES ('BWTA2017.gsb',
+                              'BWTA2017.gsb', -- no change. Just document the package
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NTv2_SN.gsb',
+                              'NTv2_SN.gsb', -- no change. Just document the package
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('AT_GIS_GRID.gsb',
+                              'AT_GIS_GRID.gsb', -- no change. Just document the package
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
                       VALUES ('nzgd2kgrid0005.gsb',
                               'nzgd2kgrid0005.gsb', -- no change. Just document the package
                               'NTv2',
@@ -1028,6 +1073,36 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'NTv2',
                               'hgridshift',
                               0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('AUSGeoid09_GDA94_V1.01_DOV_windows.gsb',  -- source file contains undulation in first band, and deflection in 2nd and 3d band
+                              'AUSGeoid09_V1.01.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('AUSGeoid2020_windows_binary.gsb',  -- source file contains undulation in first band, and deflection in 2nd and 3d band
+                              'AUSGeoid2020_20180201.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 

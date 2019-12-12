@@ -283,6 +283,7 @@ set(SRC_LIBPROJ_CORE
   wkt_parser.cpp
   wkt_parser.hpp
   zpoly1.cpp
+  proj_json_streaming_writer.hpp
   proj_json_streaming_writer.cpp
   tracing.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
@@ -293,7 +294,6 @@ set(HEADERS_LIBPROJ
   proj.h
   proj_experimental.h
   proj_constants.h
-  proj_json_streaming_writer.hpp
   geodesic.h
 )
 
@@ -443,7 +443,7 @@ endif()
 include_directories(${SQLITE3_INCLUDE_DIR})
 target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
 
-if(MSVC)
+if(MSVC AND BUILD_LIBPROJ_SHARED)
   target_compile_definitions(${PROJ_CORE_TARGET}
     PRIVATE PROJ_MSVC_DLL_EXPORT=1)
 endif()

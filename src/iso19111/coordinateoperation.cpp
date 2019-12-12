@@ -11301,9 +11301,17 @@ struct FilterResults {
                         setOfSetOfGrids.end()) {
                         continue;
                     }
+
+                    const bool sameNameOrEmptyName =
+                        ((!curExtent && !lastExtent) ||
+                         (curExtent && lastExtent &&
+                          !curExtent->description()->empty() &&
+                          *(curExtent->description()) ==
+                              *(lastExtent->description())));
+
                     // If we have already found a operation without grids for
                     // that extent, no need to add any lower accuracy operation
-                    if (!lastHasGrids) {
+                    if (!lastHasGrids && sameNameOrEmptyName) {
                         continue;
                     }
                     // If we had only operations involving grids, but one
@@ -11580,11 +11588,13 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
 
             const auto authorities(getCandidateAuthorities(
                 authFactory, srcAuthName, targetAuthName));
+            std::vector<CoordinateOperationNNPtr> res;
             for (const auto &authority : authorities) {
+                const auto authName =
+                    authority == "any" ? std::string() : authority;
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
-                    authFactory->databaseContext(),
-                    authority == "any" ? std::string() : authority);
-                auto res =
+                    authFactory->databaseContext(), authName);
+                auto resTmp =
                     tmpAuthFactory->createFromCoordinateReferenceSystemCodes(
                         srcAuthName, srcCode, targetAuthName, targetCode,
                         context.context->getUsePROJAlternativeGridNames(),
@@ -11593,6 +11603,10 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
                                 DISCARD_OPERATION_IF_MISSING_GRID,
                         context.context->getDiscardSuperseded(), true, false,
                         context.extent1, context.extent2);
+                res.insert(res.end(), resTmp.begin(), resTmp.end());
+                if (authName == "PROJ") {
+                    continue;
+                }
                 if (!res.empty()) {
                     resNonEmptyBeforeFiltering = true;
                     auto resFiltered =
@@ -12566,6 +12580,18 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 
     // Start in priority with candidates that have exactly the same name as
     // the sourcCRS and targetCRS. Typically for the case of init=IGNF:XXXX
+
+    // Transformation from IGNF:NTFP to IGNF:RGF93G,
+    // using
+    // NTF geographiques Paris (gr) vers NTF GEOGRAPHIQUES GREENWICH (DMS) +
+    // NOUVELLE TRIANGULATION DE LA FRANCE (NTF) vers RGF93 (ETRS89)
+    // that is using ntf_r93.gsb, is horribly dependent
+    // of IGNF:RGF93G being returned before IGNF:RGF93GEO in candidatesDstGeod.
+    // If RGF93GEO is returned before then we go through WGS84 and use
+    // instead a Helmert transformation.
+    // The below logic is thus quite fragile, and attempts at changing it
+    // result in degraded results for other use cases...
+
     for (const auto &candidateSrcGeod : candidatesSrcGeod) {
         if (candidateSrcGeod->nameStr() == sourceCRS->nameStr()) {
             for (const auto &candidateDstGeod : candidatesDstGeod) {
@@ -12619,7 +12645,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 #endif
             createTransformations(candidateSrcGeod, candidateDstGeod,
                                   opsFirst[0], isNullFirst);
-            if (!res.empty() && hasResultSetOnlyResultsWithPROJStep(res)) {
+            if (!res.empty() && !hasResultSetOnlyResultsWithPROJStep(res)) {
                 return;
             }
         }
@@ -12917,9 +12943,40 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
     bool sameGeodeticDatum = false;
 
     if (vertSrc || vertDst) {
-        createOperationsFromDatabaseWithVertCRS(sourceCRS, targetCRS, context,
-                                                geogSrc, geogDst, vertSrc,
-                                                vertDst, res);
+        if (res.empty()) {
+            if (geogSrc &&
+                geogSrc->coordinateSystem()->axisList().size() == 2 &&
+                vertDst) {
+                auto dbContext =
+                    context.context->getAuthorityFactory()->databaseContext();
+                auto resTmp = findOpsInRegistryDirect(
+                    sourceCRS->promoteTo3D(std::string(), dbContext), targetCRS,
+                    context, resFindDirectNonEmptyBeforeFiltering);
+                for (auto &op : resTmp) {
+                    auto newOp = op->shallowClone();
+                    setCRSs(newOp.get(), sourceCRS, targetCRS);
+                    res.emplace_back(newOp);
+                }
+            } else if (geogDst &&
+                       geogDst->coordinateSystem()->axisList().size() == 2 &&
+                       vertSrc) {
+                auto dbContext =
+                    context.context->getAuthorityFactory()->databaseContext();
+                auto resTmp = findOpsInRegistryDirect(
+                    sourceCRS, targetCRS->promoteTo3D(std::string(), dbContext),
+                    context, resFindDirectNonEmptyBeforeFiltering);
+                for (auto &op : resTmp) {
+                    auto newOp = op->shallowClone();
+                    setCRSs(newOp.get(), sourceCRS, targetCRS);
+                    res.emplace_back(newOp);
+                }
+            }
+        }
+        if (res.empty()) {
+            createOperationsFromDatabaseWithVertCRS(sourceCRS, targetCRS,
+                                                    context, geogSrc, geogDst,
+                                                    vertSrc, vertDst, res);
+        }
     } else if (geodSrc && geodDst) {
 
         const auto &srcDatum = geodSrc->datum();
@@ -13400,7 +13457,7 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
                 util::IComparable::Criterion::EQUIVALENT)) {
             res.emplace_back(
                 Conversion::createGeographicGeocentric(sourceCRS, targetCRS));
-        } else if (isSrcGeocentric) {
+        } else if (isSrcGeocentric && geogDst) {
             std::string interm_crs_name(geogDst->nameStr());
             interm_crs_name += " (geocentric)";
             auto interm_crs =
@@ -13533,7 +13590,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
             }
         }
         // If the datum are equivalent, this is also fine
-    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog->datum() &&
+    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
                geogDst->datum() &&
                hubSrcGeog->datum()->_isEquivalentTo(
                    geogDst->datum().get(),
@@ -13562,7 +13619,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         // Case of "+proj=latlong +ellps=clrk66
         // +nadgrids=ntv1_can.dat,conus"
         // to "+proj=latlong +datum=NAD83"
-    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog->datum() &&
+    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
                geogDst->datum() &&
                geogCRSOfBaseOfBoundSrc->ellipsoid()->_isEquivalentTo(
                    datum::Ellipsoid::CLARKE_1866.get(),

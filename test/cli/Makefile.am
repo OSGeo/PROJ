@@ -49,7 +49,7 @@ testign-check:
 	fi
 
 testntv2-check:
-	@if [ -f $(PROJ_LIB)/ntv2_0.gsb ] ; then \
+	@if [ -f $(PROJ_LIB)/ntv2_0.gsb -a -f $(PROJ_LIB)/conus -a -f $(PROJ_LIB)/ntv1_can.dat ] ; then \
 	  PROJ_LIB=$(PROJ_LIB) $(TESTNTV2) $(CS2CSEXE) ; \
 	fi
 

@@ -5669,10 +5669,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         DatabaseContextNNPtr dbContextNNPtr(NN_NO_CHECK(dbContext));
         const auto &authName = tokens[0];
         const auto &code = tokens[1];
-        static const std::string epsg_lowercase("epsg");
-        auto factory = AuthorityFactory::create(
-            dbContextNNPtr,
-            authName == epsg_lowercase ? Identifier::EPSG : authName);
+        auto factory = AuthorityFactory::create(dbContextNNPtr, authName);
         try {
             return factory->createCoordinateReferenceSystem(code);
         } catch (...) {
@@ -8582,7 +8579,11 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     break;
                 }
             }
-            if (getNumericValue(getParamValue(step, "a")) == 6378137) {
+            if (getNumericValue(getParamValue(step, "a")) == 6378137 &&
+                getAngularValue(getParamValue(step, "lon_0")) == 0.0 &&
+                getAngularValue(getParamValue(step, "lat_0")) == 0.0 &&
+                getAngularValue(getParamValue(step, "x_0")) == 0.0 &&
+                getAngularValue(getParamValue(step, "y_0")) == 0.0) {
                 bWebMercator = true;
             }
         } else if (hasParamValue(step, "lat_ts")) {
