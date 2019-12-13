@@ -36,7 +36,9 @@
 #include "proj/internal/lru_cache.hpp"
 #include "proj_internal.h"
 
+#ifdef TIFF_ENABLED
 #include "tiffio.h"
+#endif
 
 #include <algorithm>
 #include <cmath>
@@ -278,6 +280,8 @@ static bool IsTIFF(size_t header_size, const unsigned char *header) {
                                  (header[2] == 0x2B && header[3] == 0) ||
                                  (header[3] == 0x2B && header[2] == 0)));
 }
+
+#ifdef TIFF_ENABLED
 
 // ---------------------------------------------------------------------------
 
@@ -1044,6 +1048,8 @@ class GTiffVGridShiftSet : public VerticalShiftGridSet, public GTiffDataset {
     open(PJ_CONTEXT *ctx, PAFile fp, const std::string &filename);
 };
 
+#endif // TIFF_ENABLED
+
 // ---------------------------------------------------------------------------
 
 template <class GridType, class GenericGridType>
@@ -1107,6 +1113,7 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
     }
 }
 
+#ifdef TIFF_ENABLED
 // ---------------------------------------------------------------------------
 
 class GTiffVGrid : public VerticalShiftGrid {
@@ -1260,6 +1267,7 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
     }
     return set;
 }
+#endif // TIFF_ENABLED
 
 // ---------------------------------------------------------------------------
 
@@ -1307,10 +1315,16 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     pj_ctx_fseek(ctx, fp, SEEK_SET, 0);
 
     if (IsTIFF(header_size, header)) {
+#ifdef TIFF_ENABLED
         auto set = GTiffVGridShiftSet::open(ctx, fp, filename);
         if (!set)
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
+#else
+        pj_log(ctx, PJ_LOG_ERROR, "TIFF grid, but TIFF support disabled in this build");
+        pj_ctx_fclose(ctx, fp);
+        return nullptr;
+#endif
     }
 
     pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Unrecognized vertical grid format");
@@ -1816,6 +1830,8 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx, PAFile fp,
     return set;
 }
 
+#ifdef TIFF_ENABLED
+
 // ---------------------------------------------------------------------------
 
 class GTiffHGridShiftSet : public HorizontalShiftGridSet, public GTiffDataset {
@@ -2079,6 +2095,7 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
     }
     return set;
 }
+#endif // TIFF_ENABLED
 
 // ---------------------------------------------------------------------------
 
@@ -2151,10 +2168,16 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         return NTv2GridSet::open(ctx, fp, filename);
     } else if (IsTIFF(header_size,
                       reinterpret_cast<const unsigned char *>(header))) {
+#ifdef TIFF_ENABLED
         auto set = GTiffHGridShiftSet::open(ctx, fp, filename);
         if (!set)
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
+#else
+        pj_log(ctx, PJ_LOG_ERROR, "TIFF grid, but TIFF support disabled in this build");
+        pj_ctx_fclose(ctx, fp);
+        return nullptr;
+#endif
     }
 
     pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Unrecognized horizontal grid format");
@@ -2201,6 +2224,7 @@ const HorizontalShiftGrid *HorizontalShiftGridSet::gridAt(double lon,
     return nullptr;
 }
 
+#ifdef TIFF_ENABLED
 // ---------------------------------------------------------------------------
 
 class GTiffGenericGridShiftSet : public GenericShiftGridSet,
@@ -2298,6 +2322,7 @@ void GTiffGenericGrid::insertGrid(PJ_CONTEXT *ctx,
         m_children.emplace_back(std::move(subgrid));
     }
 }
+#endif // TIFF_ENABLED
 
 // ---------------------------------------------------------------------------
 
@@ -2328,6 +2353,8 @@ bool NullGenericShiftGrid::valueAt(int, int, int, float &out) const {
 }
 
 // ---------------------------------------------------------------------------
+
+#ifdef TIFF_ENABLED
 
 std::unique_ptr<GTiffGenericGridShiftSet>
 GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
@@ -2373,6 +2400,7 @@ GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
     }
     return set;
 }
+#endif // TIFF_ENABLED
 
 // ---------------------------------------------------------------------------
 
@@ -2425,10 +2453,16 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     pj_ctx_fseek(ctx, fp, SEEK_SET, 0);
 
     if (IsTIFF(header_size, header)) {
+#ifdef TIFF_ENABLED
         auto set = GTiffGenericGridShiftSet::open(ctx, fp, filename);
         if (!set)
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
+#else
+        pj_log(ctx, PJ_LOG_ERROR, "TIFF grid, but TIFF support disabled in this build");
+        pj_ctx_fclose(ctx, fp);
+        return nullptr;
+#endif
     }
 
     pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Unrecognized generic grid format");

@@ -137,9 +137,14 @@ ENDIF()
 # Check for libtiff
 ################################################################################
 
-find_package(TIFF REQUIRED)
-if(NOT TIFF_FOUND)
-  message(SEND_ERROR "libtiff dependency not found!")
+option(DISABLE_TIFF_IS_STRONGLY_DISCOURAGED "Disable TIFF support (strongly discouraged !)" OFF)
+mark_as_advanced(DISABLE_TIFF_IS_STRONGLY_DISCOURAGED)
+if(NOT DISABLE_TIFF_IS_STRONGLY_DISCOURAGED)
+  find_package(TIFF REQUIRED)
+  if(NOT TIFF_FOUND)
+    message(SEND_ERROR "libtiff dependency not found!")
+  endif()
+  add_definitions(-DTIFF_ENABLED)
 endif()
 
 ################################################################################

@@ -300,15 +300,25 @@ dnl ---------------------------------------------------------------------------
 dnl Check for libtiff
 dnl ---------------------------------------------------------------------------
 
-if test "x$TIFF_CFLAGS$TIFF_LIBS" = "x" ; then
-    if $PKG_CONFIG libtiff; then
-        PKG_CHECK_MODULES([TIFF], [libtiff])
-    else
-        PKG_CHECK_MODULES([TIFF], [libtiff-4])
+AC_ARG_ENABLE([tiff-is-strongly-discouraged],
+              AS_HELP_STRING([--disable-tiff-is-strongly-discouraged],
+                    [Disable TIFF support. Strongly discouraged !]),
+              [enable_tiff=no],
+              [enable_tiff=yes])
+
+if test "x$enable_tiff" = "xyes" -o "x$enable_tiff" = ""; then
+    if test "x$TIFF_CFLAGS$TIFF_LIBS" = "x" ; then
+        if $PKG_CONFIG libtiff; then
+            PKG_CHECK_MODULES([TIFF], [libtiff])
+        else
+            PKG_CHECK_MODULES([TIFF], [libtiff-4])
+        fi
     fi
+    TIFF_ENABLED_FLAGS=-DTIFF_ENABLED
 fi
 AC_SUBST(TIFF_CFLAGS,$TIFF_CFLAGS)
 AC_SUBST(TIFF_LIBS,$TIFF_LIBS)
+AC_SUBST(TIFF_ENABLED_FLAGS,$TIFF_ENABLED_FLAGS)
 
 dnl ---------------------------------------------------------------------------
 dnl Check for external Google Test

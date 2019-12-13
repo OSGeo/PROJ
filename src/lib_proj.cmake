@@ -436,8 +436,13 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
   target_link_libraries(${PROJ_CORE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-include_directories(${SQLITE3_INCLUDE_DIR} ${TIFF_INCLUDE_DIR})
-target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY} ${TIFF_LIBRARY})
+include_directories(${SQLITE3_INCLUDE_DIR})
+target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
+
+if(NOT DISABLE_TIFF_IS_STRONGLY_DISCOURAGED)
+  include_directories(${TIFF_INCLUDE_DIR})
+  target_link_libraries(${PROJ_CORE_TARGET} ${TIFF_LIBRARY})
+endif()
 
 if(MSVC)
   target_compile_definitions(${PROJ_CORE_TARGET}
