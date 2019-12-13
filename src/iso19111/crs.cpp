@@ -595,12 +595,44 @@ CRSNNPtr CRS::alterId(const std::string &authName,
 
 //! @cond Doxygen_Suppress
 
-static bool isAxisListNorthEast(
+static bool mustAxisOrderBeSwitchedForVisualizationInternal(
     const std::vector<cs::CoordinateSystemAxisNNPtr> &axisList) {
     const auto &dir0 = axisList[0]->direction();
     const auto &dir1 = axisList[1]->direction();
-    return (&dir0 == &cs::AxisDirection::NORTH &&
-            &dir1 == &cs::AxisDirection::EAST);
+    if (&dir0 == &cs::AxisDirection::NORTH &&
+        &dir1 == &cs::AxisDirection::EAST) {
+        return true;
+    }
+
+    // Address EPSG:32661 "WGS 84 / UPS North (N,E)"
+    if (&dir0 == &cs::AxisDirection::SOUTH &&
+        &dir1 == &cs::AxisDirection::SOUTH) {
+        const auto &meridian0 = axisList[0]->meridian();
+        const auto &meridian1 = axisList[1]->meridian();
+        return meridian0 != nullptr && meridian1 != nullptr &&
+               fabs(meridian0->longitude().convertToUnit(
+                        common::UnitOfMeasure::DEGREE) -
+                    180.0) < 1e-10 &&
+               fabs(meridian1->longitude().convertToUnit(
+                        common::UnitOfMeasure::DEGREE) -
+                    90.0) < 1e-10;
+    }
+
+    // Address EPSG:32761 "WGS 84 / UPS South (N,E)"
+    if (&dir0 == &cs::AxisDirection::NORTH &&
+        &dir1 == &cs::AxisDirection::NORTH) {
+        const auto &meridian0 = axisList[0]->meridian();
+        const auto &meridian1 = axisList[1]->meridian();
+        return meridian0 != nullptr && meridian1 != nullptr &&
+               fabs(meridian0->longitude().convertToUnit(
+                        common::UnitOfMeasure::DEGREE) -
+                    0.0) < 1e-10 &&
+               fabs(meridian1->longitude().convertToUnit(
+                        common::UnitOfMeasure::DEGREE) -
+                    90.0) < 1e-10;
+    }
+
+    return false;
 }
 // ---------------------------------------------------------------------------
 
@@ -616,12 +648,14 @@ bool CRS::mustAxisOrderBeSwitchedForVisualization() const {
 
     const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
     if (geogCRS) {
-        return isAxisListNorthEast(geogCRS->coordinateSystem()->axisList());
+        return mustAxisOrderBeSwitchedForVisualizationInternal(
+            geogCRS->coordinateSystem()->axisList());
     }
 
     const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
     if (projCRS) {
-        return isAxisListNorthEast(projCRS->coordinateSystem()->axisList());
+        return mustAxisOrderBeSwitchedForVisualizationInternal(
+            projCRS->coordinateSystem()->axisList());
     }
 
     return false;
@@ -655,7 +689,7 @@ CRSNNPtr CRS::normalizeForVisualization() const {
     const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
     if (geogCRS) {
         const auto &axisList = geogCRS->coordinateSystem()->axisList();
-        if (isAxisListNorthEast(axisList)) {
+        if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
             auto cs = axisList.size() == 2
                           ? cs::EllipsoidalCS::create(util::PropertyMap(),
                                                       axisList[1], axisList[0])
@@ -670,7 +704,7 @@ CRSNNPtr CRS::normalizeForVisualization() const {
     const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
     if (projCRS) {
         const auto &axisList = projCRS->coordinateSystem()->axisList();
-        if (isAxisListNorthEast(axisList)) {
+        if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
             auto cs =
                 axisList.size() == 2
                     ? cs::CartesianCS::create(util::PropertyMap(), axisList[1],
