@@ -363,7 +363,6 @@ PJ PROJ_DLL *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx,
                                             PJ_AREA *area,
                                             const char* const *options);
 PJ PROJ_DLL *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ* obj);
-PJ PROJ_DLL *proj_coordoperation_create_inverse(PJ_CONTEXT *ctx, const PJ *obj);
 void PROJ_DLL proj_assign_context(PJ* pj, PJ_CONTEXT* ctx);
 PJ PROJ_DLL *proj_destroy (PJ *P);
 
@@ -1091,6 +1090,9 @@ int PROJ_DLL proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
                                                     double *out_values,
                                                     int value_count,
                                                     int emit_error_if_incompatible);
+
+PJ PROJ_DLL *proj_coordoperation_create_inverse(PJ_CONTEXT *ctx, const PJ *obj);
+
 
 int PROJ_DLL proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
                                                  const PJ *concatoperation);

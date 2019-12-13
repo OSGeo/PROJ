@@ -7776,6 +7776,7 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
  * @param obj Object of type CoordinateOperation (must not be NULL)
  * @return a new PJ* object to free with proj_destroy() in case of success, or
  * nullptr in case of error
+ * @since 6.3
  */
 PJ *proj_coordoperation_create_inverse(PJ_CONTEXT *ctx, const PJ *obj) {
 

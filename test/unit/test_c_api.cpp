@@ -3499,7 +3499,7 @@ TEST_F(CApi, proj_coordoperation_create_inverse) {
     ObjectKeeper keeper_P(P);
     ASSERT_NE(P, nullptr);
     auto Pinversed = proj_coordoperation_create_inverse(m_ctxt, P);
-    ObjectKeeper keeper_Pnormalized(Pinversed);
+    ObjectKeeper keeper_Pinversed(Pinversed);
     ASSERT_NE(Pinversed, nullptr);
 
     auto projstr = proj_as_proj_string(m_ctxt, Pinversed, PJ_PROJ_5, nullptr);
