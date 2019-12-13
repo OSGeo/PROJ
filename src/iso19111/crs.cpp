@@ -49,6 +49,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -610,12 +611,12 @@ static bool mustAxisOrderBeSwitchedForVisualizationInternal(
         const auto &meridian0 = axisList[0]->meridian();
         const auto &meridian1 = axisList[1]->meridian();
         return meridian0 != nullptr && meridian1 != nullptr &&
-               fabs(meridian0->longitude().convertToUnit(
-                        common::UnitOfMeasure::DEGREE) -
-                    180.0) < 1e-10 &&
-               fabs(meridian1->longitude().convertToUnit(
-                        common::UnitOfMeasure::DEGREE) -
-                    90.0) < 1e-10;
+               std::abs(meridian0->longitude().convertToUnit(
+                            common::UnitOfMeasure::DEGREE) -
+                        180.0) < 1e-10 &&
+               std::abs(meridian1->longitude().convertToUnit(
+                            common::UnitOfMeasure::DEGREE) -
+                        90.0) < 1e-10;
     }
 
     // Address EPSG:32761 "WGS 84 / UPS South (N,E)"
@@ -624,12 +625,12 @@ static bool mustAxisOrderBeSwitchedForVisualizationInternal(
         const auto &meridian0 = axisList[0]->meridian();
         const auto &meridian1 = axisList[1]->meridian();
         return meridian0 != nullptr && meridian1 != nullptr &&
-               fabs(meridian0->longitude().convertToUnit(
-                        common::UnitOfMeasure::DEGREE) -
-                    0.0) < 1e-10 &&
-               fabs(meridian1->longitude().convertToUnit(
-                        common::UnitOfMeasure::DEGREE) -
-                    90.0) < 1e-10;
+               std::abs(meridian0->longitude().convertToUnit(
+                            common::UnitOfMeasure::DEGREE) -
+                        0.0) < 1e-10 &&
+               std::abs(meridian1->longitude().convertToUnit(
+                            common::UnitOfMeasure::DEGREE) -
+                        90.0) < 1e-10;
     }
 
     return false;
