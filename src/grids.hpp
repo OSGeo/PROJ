@@ -53,11 +53,13 @@ struct ExtentAndRes {
 
 class Grid {
   protected:
+    std::string m_name;
     int m_width;
     int m_height;
     ExtentAndRes m_extent;
 
-    Grid(int widthIn, int heightIn, const ExtentAndRes &extentIn);
+    Grid(const std::string &nameIn, int widthIn, int heightIn,
+         const ExtentAndRes &extentIn);
 
   public:
     virtual ~Grid();
@@ -65,6 +67,7 @@ class Grid {
     int width() const { return m_width; }
     int height() const { return m_height; }
     const ExtentAndRes &extentAndRes() const { return m_extent; }
+    const std::string &name() const { return m_name; }
 
     virtual bool isNullGrid() const { return false; }
 };
@@ -76,7 +79,8 @@ class VerticalShiftGrid : public Grid {
     std::vector<std::unique_ptr<VerticalShiftGrid>> m_children{};
 
   public:
-    VerticalShiftGrid(int widthIn, int heightIn, const ExtentAndRes &extentIn);
+    VerticalShiftGrid(const std::string &nameIn, int widthIn, int heightIn,
+                      const ExtentAndRes &extentIn);
 
     const VerticalShiftGrid *gridAt(double lon, double lat) const;
 
@@ -117,7 +121,7 @@ class HorizontalShiftGrid : public Grid {
     std::vector<std::unique_ptr<HorizontalShiftGrid>> m_children{};
 
   public:
-    HorizontalShiftGrid(int widthIn, int heightIn,
+    HorizontalShiftGrid(const std::string &nameIn, int widthIn, int heightIn,
                         const ExtentAndRes &extentIn);
     ~HorizontalShiftGrid() override;
 
@@ -159,7 +163,8 @@ class GenericShiftGrid : public Grid {
     std::vector<std::unique_ptr<GenericShiftGrid>> m_children{};
 
   public:
-    GenericShiftGrid(int widthIn, int heightIn, const ExtentAndRes &extentIn);
+    GenericShiftGrid(const std::string &nameIn, int widthIn, int heightIn,
+                     const ExtentAndRes &extentIn);
 
     ~GenericShiftGrid() override;
 

@@ -95,8 +95,9 @@ bool ExtentAndRes::intersects(const ExtentAndRes &other) const {
 
 // ---------------------------------------------------------------------------
 
-Grid::Grid(int widthIn, int heightIn, const ExtentAndRes &extentIn)
-    : m_width(widthIn), m_height(heightIn), m_extent(extentIn) {}
+Grid::Grid(const std::string &name, int widthIn, int heightIn,
+           const ExtentAndRes &extentIn)
+    : m_name(name), m_width(widthIn), m_height(heightIn), m_extent(extentIn) {}
 
 // ---------------------------------------------------------------------------
 
@@ -104,9 +105,9 @@ Grid::~Grid() = default;
 
 // ---------------------------------------------------------------------------
 
-VerticalShiftGrid::VerticalShiftGrid(int widthIn, int heightIn,
-                                     const ExtentAndRes &extentIn)
-    : Grid(widthIn, heightIn, extentIn) {}
+VerticalShiftGrid::VerticalShiftGrid(const std::string &nameIn, int widthIn,
+                                     int heightIn, const ExtentAndRes &extentIn)
+    : Grid(nameIn, widthIn, heightIn, extentIn) {}
 
 // ---------------------------------------------------------------------------
 
@@ -132,7 +133,7 @@ static ExtentAndRes globalExtent() {
 class NullVerticalShiftGrid : public VerticalShiftGrid {
 
   public:
-    NullVerticalShiftGrid() : VerticalShiftGrid(3, 3, globalExtent()) {}
+    NullVerticalShiftGrid() : VerticalShiftGrid("null", 3, 3, globalExtent()) {}
 
     bool isNullGrid() const override { return true; }
     bool valueAt(int, int, float &out) const override;
@@ -156,17 +157,19 @@ class GTXVerticalShiftGrid : public VerticalShiftGrid {
     GTXVerticalShiftGrid &operator=(const GTXVerticalShiftGrid &) = delete;
 
   public:
-    GTXVerticalShiftGrid(PJ_CONTEXT *ctx, PAFile fp, int widthIn, int heightIn,
+    GTXVerticalShiftGrid(PJ_CONTEXT *ctx, PAFile fp, const std::string &nameIn,
+                         int widthIn, int heightIn,
                          const ExtentAndRes &extentIn)
-        : VerticalShiftGrid(widthIn, heightIn, extentIn), m_ctx(ctx), m_fp(fp) {
-    }
+        : VerticalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
+          m_fp(fp) {}
 
     ~GTXVerticalShiftGrid() override;
 
     bool valueAt(int x, int y, float &out) const override;
     bool isNodata(float val, double multiplier) const override;
 
-    static GTXVerticalShiftGrid *open(PJ_CONTEXT *ctx, PAFile fp);
+    static GTXVerticalShiftGrid *open(PJ_CONTEXT *ctx, PAFile fp,
+                                      const std::string &name);
 };
 
 // ---------------------------------------------------------------------------
@@ -175,7 +178,8 @@ GTXVerticalShiftGrid::~GTXVerticalShiftGrid() { pj_ctx_fclose(m_ctx, m_fp); }
 
 // ---------------------------------------------------------------------------
 
-GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx, PAFile fp) {
+GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx, PAFile fp,
+                                                 const std::string &name) {
     unsigned char header[40];
 
     /* -------------------------------------------------------------------- */
@@ -231,7 +235,7 @@ GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx, PAFile fp) {
     extent.eastLon = (xorigin + xstep * (columns - 1)) * DEG_TO_RAD;
     extent.northLat = (yorigin + ystep * (rows - 1)) * DEG_TO_RAD;
 
-    return new GTXVerticalShiftGrid(ctx, fp, columns, rows, extent);
+    return new GTXVerticalShiftGrid(ctx, fp, name, columns, rows, extent);
 }
 
 // ---------------------------------------------------------------------------
@@ -390,9 +394,9 @@ class GTiffGrid : public Grid {
 
   public:
     GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, uint32 ifdIdx,
-              int widthIn, int heightIn, const ExtentAndRes &extentIn,
-              TIFFDataType dtIn, uint16 samplesPerPixelIn, uint16 planarConfig,
-              bool bottomUpIn);
+              const std::string &nameIn, int widthIn, int heightIn,
+              const ExtentAndRes &extentIn, TIFFDataType dtIn,
+              uint16 samplesPerPixelIn, uint16 planarConfig, bool bottomUpIn);
 
     ~GTiffGrid() override;
 
@@ -410,11 +414,11 @@ class GTiffGrid : public Grid {
 // ---------------------------------------------------------------------------
 
 GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache,
-                     uint32 ifdIdx, int widthIn, int heightIn,
-                     const ExtentAndRes &extentIn, TIFFDataType dtIn,
-                     uint16 samplesPerPixelIn, uint16 planarConfig,
-                     bool bottomUpIn)
-    : Grid(widthIn, heightIn, extentIn), m_ctx(ctx), m_hTIFF(hTIFF),
+                     uint32 ifdIdx, const std::string &nameIn, int widthIn,
+                     int heightIn, const ExtentAndRes &extentIn,
+                     TIFFDataType dtIn, uint16 samplesPerPixelIn,
+                     uint16 planarConfig, bool bottomUpIn)
+    : Grid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx), m_hTIFF(hTIFF),
       m_cache(cache), m_ifdIdx(ifdIdx), m_dt(dtIn),
       m_samplesPerPixel(samplesPerPixelIn), m_planarConfig(planarConfig),
       m_bottomUp(bottomUpIn), m_dirOffset(TIFFCurrentDirOffset(hTIFF)),
@@ -511,6 +515,11 @@ GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache,
             m_hasNodata = true;
         } catch (const std::exception &) {
         }
+    }
+
+    auto oIter = m_metadata.find(std::pair<int, std::string>(-1, "grid_name"));
+    if (oIter != m_metadata.end()) {
+        m_name += ", " + oIter->second;
     }
 }
 
@@ -1026,9 +1035,9 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
         return nullptr;
     }
 
-    auto ret = std::unique_ptr<GTiffGrid>(
-        new GTiffGrid(m_ctx, m_hTIFF, m_cache, m_ifdIdx, width, height, extent,
-                      dt, samplesPerPixel, planarConfig, vRes < 0));
+    auto ret = std::unique_ptr<GTiffGrid>(new GTiffGrid(
+        m_ctx, m_hTIFF, m_cache, m_ifdIdx, m_filename, width, height, extent,
+        dt, samplesPerPixel, planarConfig, vRes < 0));
     m_ifdIdx++;
     m_hasNextGrid = TIFFReadDirectory(m_hTIFF) != 0;
     m_nextDirOffset = TIFFCurrentDirOffset(m_hTIFF);
@@ -1149,7 +1158,8 @@ GTiffVGridShiftSet::~GTiffVGridShiftSet() = default;
 // ---------------------------------------------------------------------------
 
 GTiffVGrid::GTiffVGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxSample)
-    : VerticalShiftGrid(grid->width(), grid->height(), grid->extentAndRes()),
+    : VerticalShiftGrid(grid->name(), grid->width(), grid->height(),
+                        grid->extentAndRes()),
       m_grid(std::move(grid)), m_idxSample(idxSample) {}
 
 // ---------------------------------------------------------------------------
@@ -1289,7 +1299,7 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         return nullptr;
     }
     if (ends_with(filename, "gtx") || ends_with(filename, "GTX")) {
-        auto grid = GTXVerticalShiftGrid::open(ctx, fp);
+        auto grid = GTXVerticalShiftGrid::open(ctx, fp, filename);
         if (!grid) {
             pj_ctx_fclose(ctx, fp);
             return nullptr;
@@ -1321,7 +1331,8 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
 #else
-        pj_log(ctx, PJ_LOG_ERROR, "TIFF grid, but TIFF support disabled in this build");
+        pj_log(ctx, PJ_LOG_ERROR,
+               "TIFF grid, but TIFF support disabled in this build");
         pj_ctx_fclose(ctx, fp);
         return nullptr;
 #endif
@@ -1366,9 +1377,10 @@ const VerticalShiftGrid *VerticalShiftGridSet::gridAt(double lon,
 
 // ---------------------------------------------------------------------------
 
-HorizontalShiftGrid::HorizontalShiftGrid(int widthIn, int heightIn,
+HorizontalShiftGrid::HorizontalShiftGrid(const std::string &nameIn, int widthIn,
+                                         int heightIn,
                                          const ExtentAndRes &extentIn)
-    : Grid(widthIn, heightIn, extentIn) {}
+    : Grid(nameIn, widthIn, heightIn, extentIn) {}
 
 // ---------------------------------------------------------------------------
 
@@ -1387,7 +1399,8 @@ HorizontalShiftGridSet::~HorizontalShiftGridSet() = default;
 class NullHorizontalShiftGrid : public HorizontalShiftGrid {
 
   public:
-    NullHorizontalShiftGrid() : HorizontalShiftGrid(3, 3, globalExtent()) {}
+    NullHorizontalShiftGrid()
+        : HorizontalShiftGrid("null", 3, 3, globalExtent()) {}
 
     bool isNullGrid() const override { return true; }
 
@@ -1421,9 +1434,9 @@ class NTv1Grid : public HorizontalShiftGrid {
     NTv1Grid &operator=(const NTv1Grid &) = delete;
 
   public:
-    NTv1Grid(PJ_CONTEXT *ctx, PAFile fp, int widthIn, int heightIn,
-             const ExtentAndRes &extentIn)
-        : HorizontalShiftGrid(widthIn, heightIn, extentIn), m_ctx(ctx),
+    NTv1Grid(PJ_CONTEXT *ctx, PAFile fp, const std::string &nameIn, int widthIn,
+             int heightIn, const ExtentAndRes &extentIn)
+        : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
           m_fp(fp) {}
 
     ~NTv1Grid() override;
@@ -1496,7 +1509,7 @@ NTv1Grid *NTv1Grid::open(PJ_CONTEXT *ctx, PAFile fp,
     const int rows = static_cast<int>(
         fabs((extent.northLat - extent.southLat) / extent.resLat + 0.5) + 1);
 
-    return new NTv1Grid(ctx, fp, columns, rows, extent);
+    return new NTv1Grid(ctx, fp, filename, columns, rows, extent);
 }
 
 // ---------------------------------------------------------------------------
@@ -1535,9 +1548,9 @@ class CTable2Grid : public HorizontalShiftGrid {
     CTable2Grid &operator=(const CTable2Grid &) = delete;
 
   public:
-    CTable2Grid(PJ_CONTEXT *ctx, PAFile fp, int widthIn, int heightIn,
-                const ExtentAndRes &extentIn)
-        : HorizontalShiftGrid(widthIn, heightIn, extentIn), m_ctx(ctx),
+    CTable2Grid(PJ_CONTEXT *ctx, PAFile fp, const std::string &nameIn,
+                int widthIn, int heightIn, const ExtentAndRes &extentIn)
+        : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
           m_fp(fp) {}
 
     ~CTable2Grid() override;
@@ -1602,7 +1615,7 @@ CTable2Grid *CTable2Grid::open(PJ_CONTEXT *ctx, PAFile fp,
     extent.eastLon = extent.westLon + (width - 1) * extent.resLon;
     extent.northLat = extent.southLat + (height - 1) * extent.resLon;
 
-    return new CTable2Grid(ctx, fp, width, height, extent);
+    return new CTable2Grid(ctx, fp, filename, width, height, extent);
 }
 
 // ---------------------------------------------------------------------------
@@ -1665,8 +1678,9 @@ class NTv2Grid : public HorizontalShiftGrid {
     NTv2Grid(const std::string &nameIn, PJ_CONTEXT *ctx, PAFile fp,
              unsigned long long offsetIn, bool mustSwapIn, int widthIn,
              int heightIn, const ExtentAndRes &extentIn)
-        : HorizontalShiftGrid(widthIn, heightIn, extentIn), m_name(nameIn),
-          m_ctx(ctx), m_fp(fp), m_offset(offsetIn), m_mustSwap(mustSwapIn) {}
+        : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn),
+          m_name(nameIn), m_ctx(ctx), m_fp(fp), m_offset(offsetIn),
+          m_mustSwap(mustSwapIn) {}
 
     bool valueAt(int, int, float &lonShift, float &latShift) const override;
 };
@@ -1811,8 +1825,9 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx, PAFile fp,
         }
 
         auto offset = pj_ctx_ftell(ctx, fp);
-        auto grid = std::unique_ptr<NTv2Grid>(new NTv2Grid(
-            gridName, ctx, fp, offset, must_swap, columns, rows, extent));
+        auto grid = std::unique_ptr<NTv2Grid>(
+            new NTv2Grid(filename + ", " + gridName, ctx, fp, offset, must_swap,
+                         columns, rows, extent));
         std::string parentName;
         parentName.assign(header + 24, 8);
         auto iter = mapGrids.find(parentName);
@@ -1881,7 +1896,8 @@ GTiffHGridShiftSet::~GTiffHGridShiftSet() = default;
 GTiffHGrid::GTiffHGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxLatShift,
                        uint16 idxLonShift, double convFactorToRadian,
                        bool positiveEast)
-    : HorizontalShiftGrid(grid->width(), grid->height(), grid->extentAndRes()),
+    : HorizontalShiftGrid(grid->name(), grid->width(), grid->height(),
+                          grid->extentAndRes()),
       m_grid(std::move(grid)), m_idxLatShift(idxLatShift),
       m_idxLonShift(idxLonShift), m_convFactorToRadian(convFactorToRadian),
       m_positiveEast(positiveEast) {}
@@ -2174,7 +2190,8 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
 #else
-        pj_log(ctx, PJ_LOG_ERROR, "TIFF grid, but TIFF support disabled in this build");
+        pj_log(ctx, PJ_LOG_ERROR,
+               "TIFF grid, but TIFF support disabled in this build");
         pj_ctx_fclose(ctx, fp);
         return nullptr;
 #endif
@@ -2284,7 +2301,8 @@ GTiffGenericGridShiftSet::~GTiffGenericGridShiftSet() = default;
 // ---------------------------------------------------------------------------
 
 GTiffGenericGrid::GTiffGenericGrid(std::unique_ptr<GTiffGrid> &&grid)
-    : GenericShiftGrid(grid->width(), grid->height(), grid->extentAndRes()),
+    : GenericShiftGrid(grid->name(), grid->width(), grid->height(),
+                       grid->extentAndRes()),
       m_grid(std::move(grid)) {}
 
 // ---------------------------------------------------------------------------
@@ -2329,7 +2347,7 @@ void GTiffGenericGrid::insertGrid(PJ_CONTEXT *ctx,
 class NullGenericShiftGrid : public GenericShiftGrid {
 
   public:
-    NullGenericShiftGrid() : GenericShiftGrid(3, 3, globalExtent()) {}
+    NullGenericShiftGrid() : GenericShiftGrid("null", 3, 3, globalExtent()) {}
 
     bool isNullGrid() const override { return true; }
     bool valueAt(int, int, int, float &out) const override;
@@ -2404,9 +2422,9 @@ GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
 
 // ---------------------------------------------------------------------------
 
-GenericShiftGrid::GenericShiftGrid(int widthIn, int heightIn,
-                                   const ExtentAndRes &extentIn)
-    : Grid(widthIn, heightIn, extentIn) {}
+GenericShiftGrid::GenericShiftGrid(const std::string &nameIn, int widthIn,
+                                   int heightIn, const ExtentAndRes &extentIn)
+    : Grid(nameIn, widthIn, heightIn, extentIn) {}
 
 // ---------------------------------------------------------------------------
 
@@ -2459,7 +2477,8 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
 #else
-        pj_log(ctx, PJ_LOG_ERROR, "TIFF grid, but TIFF support disabled in this build");
+        pj_log(ctx, PJ_LOG_ERROR,
+               "TIFF grid, but TIFF support disabled in this build");
         pj_ctx_fclose(ctx, fp);
         return nullptr;
 #endif
