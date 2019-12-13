@@ -36,6 +36,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <limits>
+
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj/internal/internal.hpp"
@@ -191,7 +193,8 @@ static PJ_LP nad_intr(PJ_LP t, const HorizontalShiftGrid* grid) {
 #define TOL 1e-12
 
 static
-PJ_LP nad_cvt(PJ_LP in, int inverse, const HorizontalShiftGrid* grid) {
+PJ_LP nad_cvt(projCtx ctx, PJ_LP in, int inverse, const HorizontalShiftGrid* grid,
+              const ListOfHGrids& grids) {
     PJ_LP t, tb,del, dif;
     int i = MAX_ITERATIONS;
     const double toltol = TOL*TOL;
@@ -201,9 +204,9 @@ PJ_LP nad_cvt(PJ_LP in, int inverse, const HorizontalShiftGrid* grid) {
 
     /* normalize input to ll origin */
     tb = in;
-    const auto& extent = grid->extentAndRes();
-    tb.lam -= extent.westLon;
-    tb.phi -= extent.southLat;
+    const auto* extent = &(grid->extentAndRes());
+    tb.lam -= extent->westLon;
+    tb.phi -= extent->southLat;
 
     tb.lam = adjlon (tb.lam - M_PI) + M_PI;
 
@@ -223,17 +226,31 @@ PJ_LP nad_cvt(PJ_LP in, int inverse, const HorizontalShiftGrid* grid) {
     do {
         del = nad_intr(t, grid);
 
-        /* This case used to return failure, but I have
-           changed it to return the first order approximation
-           of the inverse shift.  This avoids cases where the
-           grid shift *into* this grid came from another grid.
-           While we aren't returning optimally correct results
-           I feel a close result in this case is better than
-           no result.  NFW
-           To demonstrate use -112.5839956 49.4914451 against
-           the NTv2 grid shift file from Canada. */
+        /* We can possibly go outside of the initial guessed grid, so try */
+        /* to fetch a new grid into which iterate... */
         if (del.lam == HUGE_VAL)
-            break;
+        {
+            PJ_LP lp;
+            lp.lam = t.lam + extent->westLon;
+            lp.phi = t.phi + extent->southLat;
+            auto newGrid = findGrid(grids, lp);
+            if( newGrid == nullptr || newGrid == grid || newGrid->isNullGrid() )
+                break;
+            pj_log(ctx, PJ_LOG_DEBUG_MINOR, "Switching from grid %s to grid %s",
+                   grid->name().c_str(),
+                   newGrid->name().c_str());
+            grid = newGrid;
+            extent = &(grid->extentAndRes());
+            t.lam = lp.lam - extent->westLon;
+            t.phi = lp.phi - extent->southLat;
+            tb = in;
+            tb.lam -= extent->westLon;
+            tb.phi -= extent->southLat;
+            tb.lam = adjlon (tb.lam - M_PI) + M_PI;
+            dif.lam = std::numeric_limits<double>::max();
+            dif.phi = std::numeric_limits<double>::max();
+            continue;
+        }
 
         dif.lam = t.lam + del.lam - tb.lam;
         dif.phi = t.phi + del.phi - tb.phi;
@@ -254,8 +271,8 @@ PJ_LP nad_cvt(PJ_LP in, int inverse, const HorizontalShiftGrid* grid) {
     if (del.lam==HUGE_VAL && getenv ("PROJ_DEBUG"))
         fprintf (stderr, "Inverse grid shift iteration failed, presumably at grid edge.\nUsing first approximation.\n");
 
-    in.lam = adjlon (t.lam + extent.westLon);
-    in.phi = t.phi + extent.southLat;
+    in.lam = adjlon (t.lam + extent->westLon);
+    in.phi = t.phi + extent->southLat;
     return in;
 }
 
@@ -311,7 +328,7 @@ PJ_LP proj_hgrid_apply_internal(PJ_CONTEXT* ctx,
     }
 
     int inverse = direction == PJ_FWD ? 0 : 1;
-    out = nad_cvt(lp, inverse, grid);
+    out = nad_cvt(ctx, lp, inverse, grid, grids);
 
     if (out.lam == HUGE_VAL || out.phi == HUGE_VAL)
         pj_ctx_set_errno(ctx, PJD_ERR_GRID_AREA);
