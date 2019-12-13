@@ -7156,6 +7156,12 @@ void PROJStringFormatter::stopInversion() {
     // the current end of steps
     for (auto iter = startIter; iter != d->steps_.end(); ++iter) {
         iter->inverted = !iter->inverted;
+        for (auto &paramValue : iter->paramValues) {
+            if (paramValue.key == "omit_fwd")
+                paramValue.key = "omit_inv";
+            else if (paramValue.key == "omit_inv")
+                paramValue.key = "omit_fwd";
+        }
     }
     // And reverse the order of steps in that range as well.
     std::reverse(startIter, d->steps_.end());

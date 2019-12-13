@@ -6867,6 +6867,30 @@ TEST(io, projstringformatter_optim_hgridshift_vgridshift_hgridshift_inv) {
                   "+step +proj=pop +v_1 +v_2");
     }
 
+    // Test omit_fwd->omit_inv when inversing the pipeline
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->startInversion();
+        fmt->ingestPROJString("+proj=hgridshift +grids=foo +omit_fwd");
+        fmt->stopInversion();
+
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline "
+                  "+step +inv +proj=hgridshift +grids=foo +omit_inv");
+    }
+
+    // Test omit_inv->omit_fwd when inversing the pipeline
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->startInversion();
+        fmt->ingestPROJString("+proj=hgridshift +grids=foo +omit_inv");
+        fmt->stopInversion();
+
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline "
+                  "+step +inv +proj=hgridshift +grids=foo +omit_fwd");
+    }
+
     // Variant with first hgridshift inverted, and second forward
     {
         auto fmt = PROJStringFormatter::create();
