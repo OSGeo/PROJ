@@ -801,6 +801,7 @@ proj_context_use_proj4_init_rules
 proj_convert_conversion_to_other_method
 proj_coord
 proj_coord_error()
+proj_coordoperation_create_inverse
 proj_coordoperation_get_accuracy
 proj_coordoperation_get_grid_used
 proj_coordoperation_get_grid_used_count
