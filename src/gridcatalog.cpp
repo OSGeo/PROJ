@@ -164,7 +164,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
             return PJD_ERR_FAILED_TO_LOAD_GRID;
         }
             
-        output_after = nad_cvt( input, inverse, gi->ct );
+        output_after = nad_cvt( defn->ctx, input, inverse, gi->ct, 0, nullptr );
         if( output_after.lam == HUGE_VAL )
         {
             if( defn->ctx->debug_level >= PJ_LOG_DEBUG_MAJOR )
@@ -213,7 +213,7 @@ int pj_gc_apply_gridshift( PJ *defn, int inverse,
             return PJD_ERR_FAILED_TO_LOAD_GRID;
         }
             
-        output_before = nad_cvt( input, inverse, gi->ct );
+        output_before = nad_cvt( defn->ctx, input, inverse, gi->ct, 0, nullptr );
         if( output_before.lam == HUGE_VAL )
         {
             if( defn->ctx->debug_level >= PJ_LOG_DEBUG_MAJOR )
