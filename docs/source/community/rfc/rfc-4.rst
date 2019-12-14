@@ -670,10 +670,10 @@ is an easy way to inspect such grid files:
   On the reading side, PROJ will handle also PlanarConfiguration=Contig.
 
 - Files hosted on the CDN will generally use Float32 (BitsPerSample=32 and SampleFormat=IEEEFP)
-  Fles may be created using Signed Int 16 (
+  Files may be created using Signed Int 16 (
   `BitsPerSample <https://www.awaresystems.be/imaging/tiff/tifftags/bitspersample.html>`_ =16 and
-  `SampleFormat <https://www.awaresystems.be/imaging/tiff/tifftags/sampleformat.html>`_ = INT) or
-  Unsigned Int 16 (BitsPerSample=16 and SampleFormat=UINT), generally with an
+  `SampleFormat <https://www.awaresystems.be/imaging/tiff/tifftags/sampleformat.html>`_ = INT),
+  Unsigned Int 16 (BitsPerSample=16 and SampleFormat=UINT), Signed Int 32 or Unsigned Int 32 generally with an
   associate scale/offset.
   On the reading side, only those three data types will be supported as well.
 
