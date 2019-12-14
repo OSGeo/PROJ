@@ -1091,6 +1091,9 @@ int PROJ_DLL proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
                                                     int value_count,
                                                     int emit_error_if_incompatible);
 
+PJ PROJ_DLL *proj_coordoperation_create_inverse(PJ_CONTEXT *ctx, const PJ *obj);
+
+
 int PROJ_DLL proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
                                                  const PJ *concatoperation);
 
