@@ -1106,6 +1106,22 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+    SELECT grid_name,
+           'AUSGeoid98.gtx',
+           'GTX',
+           'vgridshift',
+           1,
+           'proj-datumgrid-oceania',
+           NULL, NULL, NULL, NULL FROM grid_transformation WHERE
+                grid_name LIKE '%DAT.htm' AND name LIKE 'GDA94 to AHD height%';
+
 -- Netherlands / RDNAP (non-free grids)
 
 INSERT INTO grid_alternatives(original_grid_name,
