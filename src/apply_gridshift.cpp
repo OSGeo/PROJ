@@ -115,7 +115,7 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
 /*    Determine which grid is the correct given an input coordinate.    */
 /************************************************************************/
 
-static struct CTABLE* find_ctable(projCtx ctx, PJ_LP input, int grid_count, PJ_GRIDINFO **tables) {
+struct CTABLE* find_ctable(projCtx ctx, PJ_LP input, int grid_count, PJ_GRIDINFO **tables) {
     int itable;
 
     /* keep trying till we find a table that works */
@@ -210,7 +210,7 @@ int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **gridlist, int gridlist_coun
         ct = find_ctable(ctx, input, gridlist_count, gridlist);
         if( ct != nullptr )
         {
-            output = nad_cvt( input, inverse, ct );
+            output = nad_cvt( ctx, input, inverse, ct, gridlist_count, gridlist);
 
             if ( output.lam != HUGE_VAL && debug_count++ < 20 )
                 pj_log( ctx, PJ_LOG_DEBUG_MINOR, "pj_apply_gridshift(): used %s", ct->id );
@@ -356,7 +356,7 @@ PJ_LP proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction) {
     }
 
     inverse = direction == PJ_FWD ? 0 : 1;
-    out = nad_cvt(lp, inverse, ct);
+    out = nad_cvt(P->ctx, lp, inverse, ct, P->gridlist_count, P->gridlist);
 
     if (out.lam == HUGE_VAL || out.phi == HUGE_VAL)
         pj_ctx_set_errno(P->ctx, PJD_ERR_GRID_AREA);
