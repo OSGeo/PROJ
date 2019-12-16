@@ -10189,7 +10189,9 @@ bool ConcatenatedOperation::_isEquivalentTo(
     const util::IComparable *other,
     util::IComparable::Criterion criterion) const {
     auto otherCO = dynamic_cast<const ConcatenatedOperation *>(other);
-    if (otherCO == nullptr || !ObjectUsage::_isEquivalentTo(other, criterion)) {
+    if (otherCO == nullptr ||
+        (criterion == util::IComparable::Criterion::STRICT &&
+         !ObjectUsage::_isEquivalentTo(other, criterion))) {
         return false;
     }
     const auto &steps = operations();
