@@ -36,6 +36,9 @@ FOR EACH ROW BEGIN
             lower(g1.grid_name) = lower(g2.grid_name) AND
             g1.auth_name = 'PROJ' AND g2.auth_name = 'EPSG');
 
+    SELECT RAISE(ABORT, 'Arg! there is now a EPSG:102100 object. Hack in createFromUserInput() will no longer work')
+        WHERE EXISTS(SELECT 1 FROM crs_view WHERE auth_name == 'EPSG' AND code = '102100');
+
     -- check geoid_model table
     SELECT RAISE(ABORT, 'missing GEOID99 in geoid_model')
         WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID99');
