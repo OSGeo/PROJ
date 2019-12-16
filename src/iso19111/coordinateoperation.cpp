@@ -1068,11 +1068,11 @@ void OperationMethod::_exportToJSON(
 
 //! @cond Doxygen_Suppress
 bool OperationMethod::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherOM = dynamic_cast<const OperationMethod *>(other);
     if (otherOM == nullptr ||
-        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     // TODO test formula and formulaCitation
@@ -1084,7 +1084,8 @@ bool OperationMethod::_isEquivalentTo(
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
         for (size_t i = 0; i < paramsSize; i++) {
-            if (!params[i]->_isEquivalentTo(otherParams[i].get(), criterion)) {
+            if (!params[i]->_isEquivalentTo(otherParams[i].get(), criterion,
+                                            dbContext)) {
                 return false;
             }
         }
@@ -1094,8 +1095,8 @@ bool OperationMethod::_isEquivalentTo(
             bool found = false;
             for (size_t j = 0; j < paramsSize; j++) {
                 if (candidateIndices[j] &&
-                    params[i]->_isEquivalentTo(otherParams[j].get(),
-                                               criterion)) {
+                    params[i]->_isEquivalentTo(otherParams[j].get(), criterion,
+                                               dbContext)) {
                     candidateIndices[j] = false;
                     found = true;
                     break;
@@ -1341,14 +1342,14 @@ bool OperationParameterValue::convertFromAbridged(
 
 //! @cond Doxygen_Suppress
 bool OperationParameterValue::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherOPV = dynamic_cast<const OperationParameterValue *>(other);
     if (otherOPV == nullptr) {
         return false;
     }
-    if (!d->parameter->_isEquivalentTo(otherOPV->d->parameter.get(),
-                                       criterion)) {
+    if (!d->parameter->_isEquivalentTo(otherOPV->d->parameter.get(), criterion,
+                                       dbContext)) {
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
@@ -1356,7 +1357,7 @@ bool OperationParameterValue::_isEquivalentTo(
             otherOPV->d->parameterValue.get(), criterion);
     }
     if (d->parameterValue->_isEquivalentTo(otherOPV->d->parameterValue.get(),
-                                           criterion)) {
+                                           criterion, dbContext)) {
         return true;
     }
     if (d->parameter->getEPSGCode() ==
@@ -1446,16 +1447,16 @@ OperationParameter::create(const util::PropertyMap &properties) {
 
 //! @cond Doxygen_Suppress
 bool OperationParameter::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherOP = dynamic_cast<const OperationParameter *>(other);
     if (otherOP == nullptr) {
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
-        return IdentifiedObject::_isEquivalentTo(other, criterion);
+        return IdentifiedObject::_isEquivalentTo(other, criterion, dbContext);
     }
-    if (IdentifiedObject::_isEquivalentTo(other, criterion)) {
+    if (IdentifiedObject::_isEquivalentTo(other, criterion, dbContext)) {
         return true;
     }
     auto l_epsgCode = getEPSGCode();
@@ -1759,19 +1760,20 @@ static SingleOperationNNPtr createPROJBased(
 
 //! @cond Doxygen_Suppress
 bool SingleOperation::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
-    return _isEquivalentTo(other, criterion, false);
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
+    return _isEquivalentTo(other, criterion, dbContext, false);
 }
 
 bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
                                       util::IComparable::Criterion criterion,
+                                      const io::DatabaseContextPtr &dbContext,
                                       bool inOtherDirection) const {
 
     auto otherSO = dynamic_cast<const SingleOperation *>(other);
     if (otherSO == nullptr ||
         (criterion == util::IComparable::Criterion::STRICT &&
-         !ObjectUsage::_isEquivalentTo(other, criterion))) {
+         !ObjectUsage::_isEquivalentTo(other, criterion, dbContext))) {
         return false;
     }
 
@@ -1781,7 +1783,8 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
     bool equivalentMethods =
         (criterion == util::IComparable::Criterion::EQUIVALENT &&
          methodEPSGCode != 0 && methodEPSGCode == otherMethodEPSGCode) ||
-        d->method_->_isEquivalentTo(otherSO->d->method_.get(), criterion);
+        d->method_->_isEquivalentTo(otherSO->d->method_.get(), criterion,
+                                    dbContext);
     if (!equivalentMethods &&
         criterion == util::IComparable::Criterion::EQUIVALENT) {
         if ((methodEPSGCode == EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA &&
@@ -1854,7 +1857,7 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
                     EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
                 // Convert from 2SP to 1SP as the other direction has more
                 // degree of liberties.
-                return otherSO->_isEquivalentTo(this, criterion);
+                return otherSO->_isEquivalentTo(this, criterion, dbContext);
             } else if ((methodEPSGCode == EPSG_CODE_METHOD_MERCATOR_VARIANT_A &&
                         otherMethodEPSGCode ==
                             EPSG_CODE_METHOD_MERCATOR_VARIANT_B) ||
@@ -1870,7 +1873,8 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
                     auto eqConv =
                         conv->convertToOtherMethod(otherMethodEPSGCode);
                     if (eqConv) {
-                        return eqConv->_isEquivalentTo(other, criterion);
+                        return eqConv->_isEquivalentTo(other, criterion,
+                                                       dbContext);
                     }
                 }
             }
@@ -1888,7 +1892,8 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
             return false;
         }
         for (size_t i = 0; i < valuesSize; i++) {
-            if (!values[i]->_isEquivalentTo(otherValues[i].get(), criterion)) {
+            if (!values[i]->_isEquivalentTo(otherValues[i].get(), criterion,
+                                            dbContext)) {
                 return false;
             }
         }
@@ -1909,7 +1914,8 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
         bool sameNameDifferentValue = false;
         for (size_t j = 0; j < otherValuesSize; j++) {
             if (candidateIndices[j] &&
-                values[i]->_isEquivalentTo(otherValues[j].get(), criterion)) {
+                values[i]->_isEquivalentTo(otherValues[j].get(), criterion,
+                                           dbContext)) {
                 candidateIndices[j] = false;
                 equivalent = true;
                 break;
@@ -1921,7 +1927,8 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
                     return false;
                 sameNameDifferentValue =
                     opParamvalue->parameter()->_isEquivalentTo(
-                        otherOpParamvalue->parameter().get(), criterion);
+                        otherOpParamvalue->parameter().get(), criterion,
+                        dbContext);
                 if (sameNameDifferentValue) {
                     candidateIndices[j] = false;
                     break;
@@ -1949,13 +1956,13 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
                                 ->parameterValue(
                                     EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL)
                                 .get(),
-                            criterion) &&
+                            criterion, dbContext) &&
                         value_2nd->_isEquivalentTo(
                             otherSO
                                 ->parameterValue(
                                     EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL)
                                 .get(),
-                            criterion);
+                            criterion, dbContext);
                 }
             }
         }
@@ -1987,7 +1994,7 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
     // In the case the arguments don't perfectly match, try the reverse
     // check.
     if (equivalent && foundMissingArgs && !inOtherDirection) {
-        return otherSO->_isEquivalentTo(this, criterion, true);
+        return otherSO->_isEquivalentTo(this, criterion, dbContext, true);
     }
 
     // Equivalent formulations of 2SP can have different parameters
@@ -2002,8 +2009,8 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
             auto otherAs1SP = otherConv->convertToOtherMethod(
                 EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
             if (thisAs1SP && otherAs1SP) {
-                equivalent =
-                    thisAs1SP->_isEquivalentTo(otherAs1SP.get(), criterion);
+                equivalent = thisAs1SP->_isEquivalentTo(otherAs1SP.get(),
+                                                        criterion, dbContext);
             }
         }
     }
@@ -2412,9 +2419,9 @@ void ParameterValue::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-bool ParameterValue::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+bool ParameterValue::_isEquivalentTo(const util::IComparable *other,
+                                     util::IComparable::Criterion criterion,
+                                     const io::DatabaseContextPtr &) const {
     auto otherPV = dynamic_cast<const ParameterValue *>(other);
     if (otherPV == nullptr) {
         return false;
@@ -10186,12 +10193,12 @@ void ConcatenatedOperation::_exportToPROJString(
 
 //! @cond Doxygen_Suppress
 bool ConcatenatedOperation::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherCO = dynamic_cast<const ConcatenatedOperation *>(other);
     if (otherCO == nullptr ||
         (criterion == util::IComparable::Criterion::STRICT &&
-         !ObjectUsage::_isEquivalentTo(other, criterion))) {
+         !ObjectUsage::_isEquivalentTo(other, criterion, dbContext))) {
         return false;
     }
     const auto &steps = operations();
@@ -10200,7 +10207,8 @@ bool ConcatenatedOperation::_isEquivalentTo(
         return false;
     }
     for (size_t i = 0; i < steps.size(); i++) {
-        if (!steps[i]->_isEquivalentTo(otherSteps[i].get(), criterion)) {
+        if (!steps[i]->_isEquivalentTo(otherSteps[i].get(), criterion,
+                                       dbContext)) {
             return false;
         }
     }
@@ -14841,14 +14849,15 @@ void InverseCoordinateOperation::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 bool InverseCoordinateOperation::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherICO = dynamic_cast<const InverseCoordinateOperation *>(other);
     if (otherICO == nullptr ||
-        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        !ObjectUsage::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
-    return inverse()->_isEquivalentTo(otherICO->inverse().get(), criterion);
+    return inverse()->_isEquivalentTo(otherICO->inverse().get(), criterion,
+                                      dbContext);
 }
 
 // ---------------------------------------------------------------------------

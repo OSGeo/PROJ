@@ -901,19 +901,19 @@ void IdentifiedObject::formatRemarks(JSONFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 bool IdentifiedObject::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherIdObj = dynamic_cast<const IdentifiedObject *>(other);
     if (!otherIdObj)
         return false;
-    return _isEquivalentTo(otherIdObj, criterion);
+    return _isEquivalentTo(otherIdObj, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------
 
-bool IdentifiedObject::_isEquivalentTo(const IdentifiedObject *otherIdObj,
-                                       util::IComparable::Criterion criterion)
-    PROJ_PURE_DEFN {
+bool IdentifiedObject::_isEquivalentTo(
+    const IdentifiedObject *otherIdObj, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) PROJ_PURE_DEFN {
     if (criterion == util::IComparable::Criterion::STRICT) {
         if (!ci_equal(nameStr(), otherIdObj->nameStr())) {
             return false;
@@ -922,10 +922,17 @@ bool IdentifiedObject::_isEquivalentTo(const IdentifiedObject *otherIdObj,
     } else {
         if (!metadata::Identifier::isEquivalentName(
                 nameStr().c_str(), otherIdObj->nameStr().c_str())) {
-            return false;
+            return hasEquivalentNameToUsingAlias(otherIdObj, dbContext);
         }
     }
     return true;
+}
+
+// ---------------------------------------------------------------------------
+
+bool IdentifiedObject::hasEquivalentNameToUsingAlias(
+    const IdentifiedObject *, const io::DatabaseContextPtr &) const {
+    return false;
 }
 
 //! @endcond
@@ -1092,8 +1099,8 @@ void ObjectDomain::_exportToJSON(JSONFormatter *formatter) const {
 
 //! @cond Doxygen_Suppress
 bool ObjectDomain::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherDomain = dynamic_cast<const ObjectDomain *>(other);
     if (!otherDomain)
         return false;
@@ -1106,7 +1113,7 @@ bool ObjectDomain::_isEquivalentTo(
         return false;
     return domainOfValidity().get() == nullptr ||
            domainOfValidity()->_isEquivalentTo(
-               otherDomain->domainOfValidity().get(), criterion);
+               otherDomain->domainOfValidity().get(), criterion, dbContext);
 }
 //! @endcond
 
@@ -1249,14 +1256,14 @@ void ObjectUsage::baseExportToJSON(JSONFormatter *formatter) const {
 
 //! @cond Doxygen_Suppress
 bool ObjectUsage::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherObjUsage = dynamic_cast<const ObjectUsage *>(other);
     if (!otherObjUsage)
         return false;
 
     // TODO: incomplete
-    return IdentifiedObject::_isEquivalentTo(other, criterion);
+    return IdentifiedObject::_isEquivalentTo(other, criterion, dbContext);
 }
 //! @endcond
 

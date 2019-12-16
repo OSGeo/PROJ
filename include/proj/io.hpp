@@ -842,6 +842,11 @@ class PROJ_GCC_DLL DatabaseContext {
                              const std::string &tableName,
                              const std::string &source) const;
 
+    PROJ_INTERNAL std::list<std::string>
+    getAliases(const std::string &authName, const std::string &code,
+               const std::string &officialName, const std::string &tableName,
+               const std::string &source) const;
+
     PROJ_INTERNAL bool isKnownName(const std::string &name,
                                    const std::string &tableName) const;
 
