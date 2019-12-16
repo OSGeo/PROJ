@@ -4553,10 +4553,32 @@ std::list<std::pair<CRSNNPtr, int>>
 BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     typedef std::pair<CRSNNPtr, int> Pair;
     std::list<Pair> res;
+    std::list<Pair> resMatchOfTransfToWGS84;
     if (authorityFactory &&
         d->hubCRS_->_isEquivalentTo(GeographicCRS::EPSG_4326.get(),
                                     util::IComparable::Criterion::EQUIVALENT)) {
         auto resTemp = d->baseCRS_->identify(authorityFactory);
+
+        std::string refTransfPROJString;
+        bool refTransfPROJStringValid = false;
+        auto refTransf = d->transformation_->normalizeForVisualization();
+        try {
+            refTransfPROJString = refTransf->exportToPROJString(
+                io::PROJStringFormatter::create().get());
+            refTransfPROJString = replaceAll(
+                refTransfPROJString,
+                " +rx=0 +ry=0 +rz=0 +s=0 +convention=position_vector", "");
+            refTransfPROJStringValid = true;
+        } catch (const std::exception &) {
+        }
+        bool refIsNullTransform = false;
+        if (isTOWGS84Compatible()) {
+            auto params = transformation()->getTOWGS84Parameters();
+            if (params == std::vector<double>{0, 0, 0, 0, 0, 0, 0}) {
+                refIsNullTransform = true;
+            }
+        }
+
         for (const auto &pair : resTemp) {
             const auto &candidateBaseCRS = pair.first;
             auto projCRS =
@@ -4567,54 +4589,46 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             if (geodCRS) {
                 auto context = operation::CoordinateOperationContext::create(
                     authorityFactory, nullptr, 0.0);
+                context->setSpatialCriterion(
+                    operation::CoordinateOperationContext::SpatialCriterion::
+                        PARTIAL_INTERSECTION);
                 auto ops =
                     operation::CoordinateOperationFactory::create()
                         ->createOperations(NN_NO_CHECK(geodCRS),
                                            GeographicCRS::EPSG_4326, context);
-                std::string refTransfPROJString;
-                bool refTransfPROJStringValid = false;
-                try {
-                    refTransfPROJString =
-                        d->transformation_->exportToPROJString(
-                            io::PROJStringFormatter::create().get());
-                    refTransfPROJStringValid = true;
-                    if (refTransfPROJString == "+proj=axisswap +order=2,1") {
-                        refTransfPROJString.clear();
-                    }
-                } catch (const std::exception &) {
-                }
+
                 bool foundOp = false;
                 for (const auto &op : ops) {
+                    auto opNormalized = op->normalizeForVisualization();
                     std::string opTransfPROJString;
                     bool opTransfPROJStringValid = false;
                     if (op->nameStr().find("Ballpark geographic") == 0) {
-                        if (isTOWGS84Compatible()) {
-                            auto params =
-                                transformation()->getTOWGS84Parameters();
-                            if (params ==
-                                std::vector<double>{0, 0, 0, 0, 0, 0, 0}) {
-                                res.emplace_back(create(candidateBaseCRS,
-                                                        d->hubCRS_,
-                                                        transformation()),
-                                                 pair.second);
-                                foundOp = true;
-                                break;
-                            }
+                        if (refIsNullTransform) {
+                            res.emplace_back(create(candidateBaseCRS,
+                                                    d->hubCRS_,
+                                                    transformation()),
+                                             pair.second);
+                            foundOp = true;
+                            break;
                         }
                         continue;
                     }
                     try {
-                        opTransfPROJString = op->exportToPROJString(
+                        opTransfPROJString = opNormalized->exportToPROJString(
                             io::PROJStringFormatter::create().get());
                         opTransfPROJStringValid = true;
+                        opTransfPROJString = replaceAll(
+                            opTransfPROJString, " +rx=0 +ry=0 +rz=0 +s=0 "
+                                                "+convention=position_vector",
+                            "");
                     } catch (const std::exception &) {
                     }
                     if ((refTransfPROJStringValid && opTransfPROJStringValid &&
                          refTransfPROJString == opTransfPROJString) ||
-                        op->_isEquivalentTo(
-                            d->transformation_.get(),
+                        opNormalized->_isEquivalentTo(
+                            refTransf.get(),
                             util::IComparable::Criterion::EQUIVALENT)) {
-                        res.emplace_back(
+                        resMatchOfTransfToWGS84.emplace_back(
                             create(candidateBaseCRS, d->hubCRS_,
                                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<
                                                operation::Transformation>(op))),
@@ -4631,7 +4645,7 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
         }
     }
-    return res;
+    return !resMatchOfTransfToWGS84.empty() ? resMatchOfTransfToWGS84 : res;
 }
 
 // ---------------------------------------------------------------------------

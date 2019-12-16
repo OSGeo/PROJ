@@ -3825,6 +3825,21 @@ TEST(crs, boundCRS_identify_db) {
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
         EXPECT_TRUE(wkt.find("32122") != std::string::npos) << wkt;
     }
+
+    {
+        // Identify from a PROJ string with +towgs84
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=utm +zone=48 +a=6377276.345 +b=6356075.41314024 "
+            "+towgs84=198,881,317,0,0,0,0 +units=m +no_defs +type=crs");
+        auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_EQ(res.size(), 1U);
+        auto boundCRS = dynamic_cast<const BoundCRS *>(res.front().first.get());
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 3148);
+        EXPECT_EQ(res.front().second, 70);
+    }
 }
 
 // ---------------------------------------------------------------------------
