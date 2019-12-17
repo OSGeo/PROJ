@@ -863,8 +863,10 @@ int pj_deriv(PJ_LP, double, const PJ *, struct DERIVS *);
 int pj_factors(PJ_LP, const PJ *, double, struct FACTORS *);
 
 /* nadcon related protos */
+struct CTABLE* find_ctable(projCtx_t *ctx, PJ_LP input, int grid_count, PJ_GRIDINFO **tables);
+
 PJ_LP             nad_intr(PJ_LP, struct CTABLE *);
-PJ_LP             nad_cvt(PJ_LP, int, struct CTABLE *);
+PJ_LP             nad_cvt(projCtx_t *ctx, PJ_LP in, int inverse, struct CTABLE *ct, int grid_count, PJ_GRIDINFO **tables);
 struct CTABLE *nad_init(projCtx_t *ctx, char *);
 struct CTABLE *nad_ctable_init( projCtx_t *ctx, struct projFileAPI_t* fid );
 int            nad_ctable_load( projCtx_t *ctx, struct CTABLE *, struct projFileAPI_t* fid );

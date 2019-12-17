@@ -213,11 +213,13 @@ void Datum::setProperties(
 
 // ---------------------------------------------------------------------------
 
-bool Datum::__isEquivalentTo(const util::IComparable *other,
-                             util::IComparable::Criterion criterion) const {
+//! @cond Doxygen_Suppress
+bool Datum::_isEquivalentTo(const util::IComparable *other,
+                            util::IComparable::Criterion criterion,
+                            const io::DatabaseContextPtr &dbContext) const {
     auto otherDatum = dynamic_cast<const Datum *>(other);
     if (otherDatum == nullptr ||
-        !ObjectUsage::_isEquivalentTo(other, criterion)) {
+        !ObjectUsage::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
@@ -248,12 +250,13 @@ bool Datum::__isEquivalentTo(const util::IComparable *other,
         }
         if (conventionalRS() && otherDatum->conventionalRS() &&
             conventionalRS()->_isEquivalentTo(
-                otherDatum->conventionalRS().get(), criterion)) {
+                otherDatum->conventionalRS().get(), criterion, dbContext)) {
             return false;
         }
     }
     return true;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -450,11 +453,11 @@ void PrimeMeridian::_exportToPROJString(
 
 //! @cond Doxygen_Suppress
 bool PrimeMeridian::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherPM = dynamic_cast<const PrimeMeridian *>(other);
     if (otherPM == nullptr ||
-        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     // In MapInfo, the Paris prime meridian is returned as 2.3372291666667
@@ -984,11 +987,12 @@ EllipsoidNNPtr Ellipsoid::identify() const {
 
 //! @cond Doxygen_Suppress
 bool Ellipsoid::_isEquivalentTo(const util::IComparable *other,
-                                util::IComparable::Criterion criterion) const {
+                                util::IComparable::Criterion criterion,
+                                const io::DatabaseContextPtr &dbContext) const {
     auto otherEllipsoid = dynamic_cast<const Ellipsoid *>(other);
     if (otherEllipsoid == nullptr ||
         (criterion == util::IComparable::Criterion::STRICT &&
-         !IdentifiedObject::_isEquivalentTo(other, criterion))) {
+         !IdentifiedObject::_isEquivalentTo(other, criterion, dbContext))) {
         return false;
     }
 
@@ -1324,17 +1328,60 @@ void GeodeticReferenceFrame::_exportToJSON(
 
 //! @cond Doxygen_Suppress
 bool GeodeticReferenceFrame::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherGRF = dynamic_cast<const GeodeticReferenceFrame *>(other);
-    if (otherGRF == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    if (otherGRF == nullptr ||
+        !Datum::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     return primeMeridian()->_isEquivalentTo(otherGRF->primeMeridian().get(),
-                                            criterion) &&
-           ellipsoid()->_isEquivalentTo(otherGRF->ellipsoid().get(), criterion);
+                                            criterion, dbContext) &&
+           ellipsoid()->_isEquivalentTo(otherGRF->ellipsoid().get(), criterion,
+                                        dbContext);
 }
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+bool GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(
+    const IdentifiedObject *other,
+    const io::DatabaseContextPtr &dbContext) const {
+    if (dbContext) {
+        if (!identifiers().empty()) {
+            const auto &id = identifiers().front();
+            auto aliases =
+                dbContext->getAliases(*(id->codeSpace()), id->code(), nameStr(),
+                                      "geodetic_datum", std::string());
+            const char *otherName = other->nameStr().c_str();
+            for (const auto &alias : aliases) {
+                if (metadata::Identifier::isEquivalentName(otherName,
+                                                           alias.c_str())) {
+                    return true;
+                }
+            }
+            return false;
+        } else if (!other->identifiers().empty()) {
+            auto otherGRF = dynamic_cast<const GeodeticReferenceFrame *>(other);
+            if (otherGRF) {
+                return otherGRF->hasEquivalentNameToUsingAlias(this, dbContext);
+            }
+            return false;
+        }
+
+        auto aliases =
+            dbContext->getAliases(std::string(), std::string(), nameStr(),
+                                  "geodetic_datum", std::string());
+        const char *otherName = other->nameStr().c_str();
+        for (const auto &alias : aliases) {
+            if (metadata::Identifier::isEquivalentName(otherName,
+                                                       alias.c_str())) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1407,11 +1454,11 @@ DynamicGeodeticReferenceFrame::deformationModelName() const {
 
 //! @cond Doxygen_Suppress
 bool DynamicGeodeticReferenceFrame::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherDGRF = dynamic_cast<const DynamicGeodeticReferenceFrame *>(other);
     if (otherDGRF == nullptr ||
-        !GeodeticReferenceFrame::_isEquivalentTo(other, criterion)) {
+        !GeodeticReferenceFrame::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     return frameReferenceEpoch()._isEquivalentTo(
@@ -1842,10 +1889,11 @@ void VerticalReferenceFrame::_exportToJSON(
 
 //! @cond Doxygen_Suppress
 bool VerticalReferenceFrame::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherVRF = dynamic_cast<const VerticalReferenceFrame *>(other);
-    if (otherVRF == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    if (otherVRF == nullptr ||
+        !Datum::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     if ((realizationMethod().has_value() ^
@@ -1932,11 +1980,11 @@ DynamicVerticalReferenceFrame::deformationModelName() const {
 
 //! @cond Doxygen_Suppress
 bool DynamicVerticalReferenceFrame::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherDGRF = dynamic_cast<const DynamicVerticalReferenceFrame *>(other);
     if (otherDGRF == nullptr ||
-        !VerticalReferenceFrame::_isEquivalentTo(other, criterion)) {
+        !VerticalReferenceFrame::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     return frameReferenceEpoch()._isEquivalentTo(
@@ -2131,10 +2179,11 @@ void TemporalDatum::_exportToJSON(
 
 //! @cond Doxygen_Suppress
 bool TemporalDatum::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherTD = dynamic_cast<const TemporalDatum *>(other);
-    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    if (otherTD == nullptr ||
+        !Datum::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     return temporalOrigin().toString() ==
@@ -2223,10 +2272,11 @@ void EngineeringDatum::_exportToJSON(
 
 //! @cond Doxygen_Suppress
 bool EngineeringDatum::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherTD = dynamic_cast<const EngineeringDatum *>(other);
-    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    if (otherTD == nullptr ||
+        !Datum::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     return true;
@@ -2308,10 +2358,11 @@ void ParametricDatum::_exportToJSON(
 
 //! @cond Doxygen_Suppress
 bool ParametricDatum::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherTD = dynamic_cast<const ParametricDatum *>(other);
-    if (otherTD == nullptr || !Datum::_isEquivalentTo(other, criterion)) {
+    if (otherTD == nullptr ||
+        !Datum::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     return true;

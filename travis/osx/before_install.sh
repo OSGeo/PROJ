@@ -8,7 +8,7 @@ brew update
 brew install ccache
 brew install sqlite3
 brew install doxygen
-brew install md5sha1sum
+#brew install md5sha1sum
 brew reinstall python
 brew reinstall wget
 

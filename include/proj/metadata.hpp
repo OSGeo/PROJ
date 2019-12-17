@@ -108,7 +108,8 @@ class PROJ_GCC_DLL GeographicExtent : public util::BaseObject,
     PROJ_INTERNAL bool _isEquivalentTo(
         const util::IComparable *other,
         util::IComparable::Criterion criterion =
-            util::IComparable::Criterion::STRICT) const override = 0;
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override = 0;
     //! @endcond
 
     /** \brief Returns whether this extent contains the other one. */
@@ -162,10 +163,11 @@ class PROJ_GCC_DLL GeographicBoundingBox : public GeographicExtent {
     create(double west, double south, double east, double north);
 
     //! @cond Doxygen_Suppress
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
     PROJ_INTERNAL bool
@@ -214,10 +216,11 @@ class PROJ_GCC_DLL TemporalExtent : public util::BaseObject,
                                                const std::string &stop);
 
     //! @cond Doxygen_Suppress
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
     PROJ_DLL bool contains(const TemporalExtentNNPtr &other) const;
@@ -263,10 +266,11 @@ class PROJ_GCC_DLL VerticalExtent : public util::BaseObject,
            const common::UnitOfMeasureNNPtr &unitIn);
 
     //! @cond Doxygen_Suppress
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
     PROJ_DLL bool contains(const VerticalExtentNNPtr &other) const;
@@ -323,10 +327,11 @@ class PROJ_GCC_DLL Extent : public util::BaseObject, public util::IComparable {
                        util::optional<std::string>());
 
     //! @cond Doxygen_Suppress
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
     PROJ_DLL bool contains(const ExtentNNPtr &other) const;
