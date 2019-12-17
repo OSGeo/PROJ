@@ -337,15 +337,16 @@ class PROJ_GCC_DLL IdentifiedObject : public util::BaseObject,
 
     PROJ_INTERNAL void formatRemarks(io::JSONFormatter *formatter) const;
 
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
 
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const IdentifiedObject *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) PROJ_PURE_DECL;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const IdentifiedObject *other, util::IComparable::Criterion criterion =
+                                           util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) PROJ_PURE_DECL;
     //! @endcond
 
   protected:
@@ -356,6 +357,10 @@ class PROJ_GCC_DLL IdentifiedObject : public util::BaseObject,
 
     void setProperties(const util::PropertyMap
                            &properties); // throw(InvalidValueTypeException)
+
+    virtual bool hasEquivalentNameToUsingAlias(
+        const IdentifiedObject *other,
+        const io::DatabaseContextPtr &dbContext) const;
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
@@ -400,10 +405,11 @@ class PROJ_GCC_DLL ObjectDomain : public util::BaseObject,
     PROJ_INTERNAL void _exportToJSON(
         io::JSONFormatter *formatter) const; // throw(FormattingException)
 
-    bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
   protected:
@@ -446,10 +452,11 @@ class PROJ_GCC_DLL ObjectUsage : public IdentifiedObject {
     PROJ_DLL static const std::string OBJECT_DOMAIN_KEY;
 
     //! @cond Doxygen_Suppress
-    bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
   protected:

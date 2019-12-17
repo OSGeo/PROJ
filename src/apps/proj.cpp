@@ -490,6 +490,14 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
+    // Ugly hack. See https://github.com/OSGeo/PROJ/issues/1782
+    if( Proj->right == PJ_IO_UNITS_WHATEVER && Proj->descr &&
+        strncmp(Proj->descr, "General Oblique Transformation",
+                strlen("General Oblique Transformation")) == 0 )
+    {
+        Proj->right = PJ_IO_UNITS_PROJECTED;
+    }
+
     if (inverse) {
         if (!Proj->inv)
             emess(3,"inverse projection not available");

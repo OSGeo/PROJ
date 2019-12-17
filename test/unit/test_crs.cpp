@@ -57,7 +57,8 @@ namespace {
 struct UnrelatedObject : public IComparable {
     UnrelatedObject() = default;
 
-    bool _isEquivalentTo(const IComparable *, Criterion) const override {
+    bool _isEquivalentTo(const IComparable *, Criterion,
+                         const DatabaseContextPtr &) const override {
         assert(false);
         return false;
     }
@@ -943,6 +944,16 @@ TEST(crs, EPSG_32661_projected_north_pole_north_east) {
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               proj_string);
+
+    auto opNormalized = op->normalizeForVisualization();
+    auto proj_string_normalized =
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step "
+        "+proj=stere +lat_0=90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 "
+        "+ellps=WGS84";
+    EXPECT_EQ(
+        opNormalized->exportToPROJString(PROJStringFormatter::create().get()),
+        proj_string_normalized);
 }
 
 // ---------------------------------------------------------------------------
@@ -964,6 +975,16 @@ TEST(crs, EPSG_5041_projected_north_pole_east_north) {
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               proj_string);
+
+    auto opNormalized = op->normalizeForVisualization();
+    auto proj_string_normalized =
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step "
+        "+proj=stere +lat_0=90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 "
+        "+ellps=WGS84";
+    EXPECT_EQ(
+        opNormalized->exportToPROJString(PROJStringFormatter::create().get()),
+        proj_string_normalized);
 }
 
 // ---------------------------------------------------------------------------
@@ -985,6 +1006,16 @@ TEST(crs, EPSG_32761_projected_south_pole_north_east) {
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               proj_string);
+
+    auto opNormalized = op->normalizeForVisualization();
+    auto proj_string_normalized =
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step "
+        "+proj=stere +lat_0=-90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 "
+        "+ellps=WGS84";
+    EXPECT_EQ(
+        opNormalized->exportToPROJString(PROJStringFormatter::create().get()),
+        proj_string_normalized);
 }
 
 // ---------------------------------------------------------------------------
@@ -1006,6 +1037,16 @@ TEST(crs, EPSG_5042_projected_south_pole_east_north) {
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               proj_string);
+
+    auto opNormalized = op->normalizeForVisualization();
+    auto proj_string_normalized =
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step "
+        "+proj=stere +lat_0=-90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 "
+        "+ellps=WGS84";
+    EXPECT_EQ(
+        opNormalized->exportToPROJString(PROJStringFormatter::create().get()),
+        proj_string_normalized);
 }
 
 // ---------------------------------------------------------------------------
@@ -1510,6 +1551,75 @@ TEST(crs, geodeticcrs_identify_db) {
         EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "EPSG");
         EXPECT_EQ(res.front().first->identifiers()[0]->code(), "4326");
         EXPECT_EQ(res.front().second, 70);
+    }
+
+    {
+        // Identify by code, but datum name is an alias of the official one
+        auto wkt = "GEOGCRS[\"GDA2020\",\n"
+                   "    DATUM[\"GDA2020\",\n"
+                   "        ELLIPSOID[\"GRS_1980\",6378137,298.257222101,\n"
+                   "            LENGTHUNIT[\"metre\",1]]],\n"
+                   "    PRIMEM[\"Greenwich\",0,\n"
+                   "        ANGLEUNIT[\"Degree\",0.0174532925199433]],\n"
+                   "    CS[ellipsoidal,2],\n"
+                   "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+                   "            ORDER[1],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                   "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+                   "            ORDER[2],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                   "    ID[\"EPSG\",7844]]";
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_EQ(res.size(), 1U);
+        ASSERT_TRUE(!res.front().first->identifiers().empty());
+        EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "EPSG");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "7844");
+        EXPECT_EQ(res.front().second, 100);
+
+        EXPECT_TRUE(crs->_isEquivalentTo(res.front().first.get(),
+                                         IComparable::Criterion::EQUIVALENT,
+                                         dbContext));
+        EXPECT_TRUE(res.front().first->_isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT, dbContext));
+    }
+
+    {
+        // Identify by name, but datum name is an alias of the official one
+        auto wkt = "GEOGCRS[\"GDA2020\",\n"
+                   "    DATUM[\"GDA2020\",\n"
+                   "        ELLIPSOID[\"GRS_1980\",6378137,298.257222101,\n"
+                   "            LENGTHUNIT[\"metre\",1]]],\n"
+                   "    PRIMEM[\"Greenwich\",0,\n"
+                   "        ANGLEUNIT[\"Degree\",0.0174532925199433]],\n"
+                   "    CS[ellipsoidal,2],\n"
+                   "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+                   "            ORDER[1],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                   "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+                   "            ORDER[2],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_EQ(res.size(), 1U);
+        ASSERT_TRUE(!res.front().first->identifiers().empty());
+        EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "EPSG");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "7844");
+        EXPECT_EQ(res.front().second, 100);
+
+        EXPECT_TRUE(crs->_isEquivalentTo(res.front().first.get(),
+                                         IComparable::Criterion::EQUIVALENT,
+                                         dbContext));
+        EXPECT_TRUE(res.front().first->_isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT, dbContext));
     }
 }
 
@@ -3784,6 +3894,21 @@ TEST(crs, boundCRS_identify_db) {
         auto wkt = crs->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
         EXPECT_TRUE(wkt.find("32122") != std::string::npos) << wkt;
+    }
+
+    {
+        // Identify from a PROJ string with +towgs84
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=utm +zone=48 +a=6377276.345 +b=6356075.41314024 "
+            "+towgs84=198,881,317,0,0,0,0 +units=m +no_defs +type=crs");
+        auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_EQ(res.size(), 1U);
+        auto boundCRS = dynamic_cast<const BoundCRS *>(res.front().first.get());
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 3148);
+        EXPECT_EQ(res.front().second, 70);
     }
 }
 

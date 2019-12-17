@@ -65,7 +65,8 @@ namespace {
 struct UnrelatedObject : public IComparable {
     UnrelatedObject() = default;
 
-    bool _isEquivalentTo(const IComparable *, Criterion) const override {
+    bool _isEquivalentTo(const IComparable *, Criterion,
+                         const DatabaseContextPtr &) const override {
         assert(false);
         return false;
     }
@@ -4624,6 +4625,33 @@ TEST(operation, geogCRS_to_geogCRS_context_WGS84_G1674_to_WGS84_G1762) {
               "+step +inv +proj=cart +ellps=WGS84 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_context_EPSG_4240_Indian1975_to_EPSG_4326) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4240"), // Indian 1975
+        authFactory->createCoordinateReferenceSystem("4326"), ctxt);
+    ASSERT_EQ(list.size(), 3U);
+
+    // Indian 1975 to WGS 84 (4), 3.0 m, Thailand - onshore
+    EXPECT_EQ(list[0]->getEPSGCode(), 1812);
+
+    // The following is the one we want to see. It has a lesser accuracy than
+    // the above one and the same bbox, but the name of its area of use is
+    // slightly different
+    // Indian 1975 to WGS 84 (2), 5.0 m, Thailand - onshore and Gulf of Thailand
+    EXPECT_EQ(list[1]->getEPSGCode(), 1304);
+
+    // Indian 1975 to WGS 84 (3), 1.0 m, Thailand - Bongkot field
+    EXPECT_EQ(list[2]->getEPSGCode(), 1537);
 }
 
 // ---------------------------------------------------------------------------

@@ -3486,6 +3486,36 @@ TEST_F(CApi, proj_normalize_for_visualization_on_crs) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_coordoperation_create_inverse) {
+
+    auto P = proj_create(
+        m_ctxt, "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+                "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push "
+                "+v_3 +step +proj=cart +ellps=evrst30 +step +proj=helmert "
+                "+x=293 +y=836 +z=318 +rx=0.5 +ry=1.6 +rz=-2.8 +s=2.1 "
+                "+convention=position_vector +step +inv +proj=cart "
+                "+ellps=WGS84 +step +proj=pop +v_3 +step +proj=unitconvert "
+                "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto Pinversed = proj_coordoperation_create_inverse(m_ctxt, P);
+    ObjectKeeper keeper_Pinversed(Pinversed);
+    ASSERT_NE(Pinversed, nullptr);
+
+    auto projstr = proj_as_proj_string(m_ctxt, Pinversed, PJ_PROJ_5, nullptr);
+    ASSERT_NE(projstr, nullptr);
+    EXPECT_EQ(std::string(projstr),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 "
+              "+step +proj=cart +ellps=WGS84 +step +inv +proj=helmert +x=293 "
+              "+y=836 +z=318 +rx=0.5 +ry=1.6 +rz=-2.8 +s=2.1 "
+              "+convention=position_vector +step +inv +proj=cart "
+              "+ellps=evrst30 +step +proj=pop +v_3 +step +proj=unitconvert "
+              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_get_remarks) {
     auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
                                         PJ_CATEGORY_COORDINATE_OPERATION, false,
@@ -4434,4 +4464,35 @@ TEST_F(CApi, proj_create_derived_geographic_crs) {
                                   "+o_lat_p=-2 +lon_0=3 +datum=WGS84 +no_defs "
                                   "+type=crs"));
 }
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_is_equivalent_to_with_ctx) {
+    auto from_epsg = proj_create_from_database(m_ctxt, "EPSG", "7844",
+                                               PJ_CATEGORY_CRS, false, nullptr);
+    ObjectKeeper keeper_from_epsg(from_epsg);
+    ASSERT_NE(from_epsg, nullptr);
+
+    auto wkt = "GEOGCRS[\"GDA2020\",\n"
+               "    DATUM[\"GDA2020\",\n"
+               "        ELLIPSOID[\"GRS_1980\",6378137,298.257222101,\n"
+               "            LENGTHUNIT[\"metre\",1]]],\n"
+               "    PRIMEM[\"Greenwich\",0,\n"
+               "        ANGLEUNIT[\"Degree\",0.0174532925199433]],\n"
+               "    CS[ellipsoidal,2],\n"
+               "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+               "            ORDER[1],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+               "            ORDER[2],\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+    auto from_wkt =
+        proj_create_from_wkt(m_ctxt, wkt, nullptr, nullptr, nullptr);
+    ObjectKeeper keeper_from_wkt(from_wkt);
+    EXPECT_NE(from_wkt, nullptr);
+
+    EXPECT_TRUE(proj_is_equivalent_to_with_ctx(m_ctxt, from_epsg, from_wkt,
+                                               PJ_COMP_EQUIVALENT));
+}
+
 } // namespace

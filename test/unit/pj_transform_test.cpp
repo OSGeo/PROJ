@@ -614,4 +614,38 @@ TEST(proj_api_h, pj_set_finder) {
     pj_set_finder(nullptr);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(pj_transform_test, ob_tran_to_meter_as_dest) {
+    auto src = pj_init_plus(
+        "+ellps=WGS84 +a=57.29577951308232 +proj=eqc +lon_0=0.0 +no_defs");
+    auto dst = pj_init_plus("+ellps=WGS84 +proj=ob_tran +o_proj=latlon "
+                            "+o_lon_p=0.0 +o_lat_p=90.0 +lon_0=360.0 "
+                            "+to_meter=0.0174532925199433 +no_defs");
+    double x = 2 * DEG_TO_RAD;
+    double y = 49 * DEG_TO_RAD;
+    EXPECT_EQ(pj_transform(src, dst, 1, 0, &x, &y, nullptr), 0);
+    EXPECT_NEAR(x, 2 * DEG_TO_RAD, 1e-12) << x / DEG_TO_RAD;
+    EXPECT_NEAR(y, 49 * DEG_TO_RAD, 1e-12) << y / DEG_TO_RAD;
+    pj_free(src);
+    pj_free(dst);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(pj_transform_test, ob_tran_to_meter_as_srouce) {
+    auto src = pj_init_plus("+ellps=WGS84 +proj=ob_tran +o_proj=latlon "
+                            "+o_lon_p=0.0 +o_lat_p=90.0 +lon_0=360.0 "
+                            "+to_meter=0.0174532925199433 +no_defs");
+    auto dst = pj_init_plus(
+        "+ellps=WGS84 +a=57.29577951308232 +proj=eqc +lon_0=0.0 +no_defs");
+    double x = 2 * DEG_TO_RAD;
+    double y = 49 * DEG_TO_RAD;
+    EXPECT_EQ(pj_transform(src, dst, 1, 0, &x, &y, nullptr), 0);
+    EXPECT_NEAR(x, 2 * DEG_TO_RAD, 1e-12) << x / DEG_TO_RAD;
+    EXPECT_NEAR(y, 49 * DEG_TO_RAD, 1e-12) << y / DEG_TO_RAD;
+    pj_free(src);
+    pj_free(dst);
+}
+
 } // namespace

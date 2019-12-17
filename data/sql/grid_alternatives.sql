@@ -10,32 +10,32 @@
 
 INSERT INTO grid_packages VALUES ('proj-datumgrid',
                                   'Package with grids of general interest',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-1.8.zip',
                                   1,
                                   1);
 
 INSERT INTO grid_packages VALUES ('proj-datumgrid-north-america',
                                   'Package with grids of interest for North-America',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-north-america-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-north-america-1.3.zip',
                                   1,
                                   1);
 
 INSERT INTO grid_packages VALUES ('proj-datumgrid-europe',
                                   'Package with grids of interest for Europe',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-europe-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-europe-1.5.zip',
                                   1,
                                   1);
 
 INSERT INTO grid_packages VALUES ('proj-datumgrid-oceania',
                                   'Package with grids of interest for Oceania',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-oceania-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-oceania-1.1.zip',
                                   1,
                                   1);
 
  -- not released yet at the time of writing
 INSERT INTO grid_packages VALUES ('proj-datumgrid-world',
                                   'Package with grids of global extent (too large to be included in proj-datumgrid)',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-world-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip',
                                   1,
                                   1);
 
@@ -1121,6 +1121,22 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+    SELECT grid_name,
+           'AUSGeoid98.gtx',
+           'GTX',
+           'vgridshift',
+           1,
+           'proj-datumgrid-oceania',
+           NULL, NULL, NULL, NULL FROM grid_transformation WHERE
+                grid_name LIKE '%DAT.htm' AND name LIKE 'GDA94 to AHD height%';
+
 -- Netherlands / RDNAP (non-free grids)
 
 INSERT INTO grid_alternatives(original_grid_name,
@@ -1202,6 +1218,23 @@ INSERT INTO grid_alternatives(original_grid_name,
                               url, direct_download, open_license, directory)
                       VALUES ('CHENyx06_ETRS.gsb',
                               'CHENyx06_ETRS.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+-- Spain
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('100800401.gsb',
+                              '100800401.gsb',
                               'NTv2',
                               'hgridshift',
                               0,
@@ -1557,4 +1590,35 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'hgridshift',
                               0,
                               'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+ -- Iceland
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('ISN93_ISN2016.gsb',
+                              'ISN93_ISN2016.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('ISN2004_ISN2016.gsb',
+                              'ISN2004_ISN2016.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);

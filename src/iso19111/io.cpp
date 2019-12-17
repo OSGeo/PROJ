@@ -2683,7 +2683,9 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     auto cs = buildCS(csNode, node, angularUnit);
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
-        assert(!ci_equal(nodeName, WKTConstants::GEOCCS));
+        if (ci_equal(nodeName, WKTConstants::GEOCCS)) {
+            throw ParsingException("ellipsoidal CS not expected in GEOCCS");
+        }
         try {
             auto crs = GeographicCRS::create(props, datum, datumEnsemble,
                                              NN_NO_CHECK(ellipsoidalCS));
@@ -5673,6 +5675,14 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         try {
             return factory->createCoordinateReferenceSystem(code);
         } catch (...) {
+
+            // Convenience for well-known misused code
+            // See https://github.com/OSGeo/PROJ/issues/1730
+            if (ci_equal(authName, "EPSG") && code == "102100") {
+                factory = AuthorityFactory::create(dbContextNNPtr, "ESRI");
+                return factory->createCoordinateReferenceSystem(code);
+            }
+
             const auto authorities = dbContextNNPtr->getAuthorities();
             for (const auto &authCandidate : authorities) {
                 if (ci_equal(authCandidate, authName)) {
@@ -7154,6 +7164,12 @@ void PROJStringFormatter::stopInversion() {
     // the current end of steps
     for (auto iter = startIter; iter != d->steps_.end(); ++iter) {
         iter->inverted = !iter->inverted;
+        for (auto &paramValue : iter->paramValues) {
+            if (paramValue.key == "omit_fwd")
+                paramValue.key = "omit_inv";
+            else if (paramValue.key == "omit_inv")
+                paramValue.key = "omit_fwd";
+        }
     }
     // And reverse the order of steps in that range as well.
     std::reverse(startIter, d->steps_.end());

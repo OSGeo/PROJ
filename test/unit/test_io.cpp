@@ -5577,6 +5577,17 @@ TEST(wkt_parse, invalid_GEOCCS) {
                                            "NORTH],AXIS[\"longitude\",EAST]]"),
                  ParsingException);
 
+    // ellipsoidal CS is invalid in a GEOCCS
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOCCS[\"WGS 84\",DATUM[\"World Geodetic System 1984\","
+                     "ELLIPSOID[\"WGS 84\",6378274,298.257223564,"
+                     "LENGTHUNIT[\"metre\",1]]],"
+                     "CS[ellipsoidal,2],AXIS[\"geodetic latitude (Lat)\",north,"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "AXIS[\"geodetic longitude (Lon)\",east,"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]]]"),
+                 ParsingException);
+
     // 3 axis required
     EXPECT_THROW(WKTParser().createFromWKT(
                      "GEOCCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM["
@@ -6854,6 +6865,30 @@ TEST(io, projstringformatter_optim_hgridshift_vgridshift_hgridshift_inv) {
                   "+step +proj=vgridshift +grids=bar "
                   "+step +inv +proj=hgridshift +grids=foo +omit_fwd "
                   "+step +proj=pop +v_1 +v_2");
+    }
+
+    // Test omit_fwd->omit_inv when inversing the pipeline
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->startInversion();
+        fmt->ingestPROJString("+proj=hgridshift +grids=foo +omit_fwd");
+        fmt->stopInversion();
+
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline "
+                  "+step +inv +proj=hgridshift +grids=foo +omit_inv");
+    }
+
+    // Test omit_inv->omit_fwd when inversing the pipeline
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->startInversion();
+        fmt->ingestPROJString("+proj=hgridshift +grids=foo +omit_inv");
+        fmt->stopInversion();
+
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline "
+                  "+step +inv +proj=hgridshift +grids=foo +omit_fwd");
     }
 
     // Variant with first hgridshift inverted, and second forward
@@ -9320,6 +9355,20 @@ TEST(io, createFromUserInput) {
                  ParsingException);
     EXPECT_NO_THROW(createFromUserInput("WGS84 UTM zone 31N", dbContext));
     EXPECT_NO_THROW(createFromUserInput("ID74", dbContext));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, createFromUserInput_hack_EPSG_102100) {
+    auto dbContext = DatabaseContext::create();
+    auto obj = createFromUserInput("EPSG:102100", dbContext);
+    auto crs = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    const auto &ids = crs->identifiers();
+    ASSERT_EQ(ids.size(), 1U);
+    // we do not lie on the real authority
+    EXPECT_EQ(*ids[0]->codeSpace(), "ESRI");
+    EXPECT_EQ(ids[0]->code(), "102100");
 }
 
 // ---------------------------------------------------------------------------
