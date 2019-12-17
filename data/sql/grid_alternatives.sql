@@ -1591,6 +1591,82 @@ INSERT INTO grid_alternatives(original_grid_name,
                               0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('HT2_0.byn',
+                              'HT2_2010v70.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGG2013i08a.byn',
+                              'CGG2013ai08.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGG2013n83a.byn',
+                              'CGG2013an83.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGG2013i83.byn',
+                              'CGG2013i08.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGG2013n83.byn',
+                              'CGG2013n83.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
  -- Iceland
 
 INSERT INTO grid_alternatives(original_grid_name,
