@@ -284,17 +284,14 @@ start with a BEGIN IMMEDIATE transaction so as to acquire a write lock.
 .. note:: This database should be hosted on a local disk, not a network one.
           Otherwise SQLite3 locking issues are to be expected.
 
-CDN providers
-+++++++++++++
+CDN provider
+++++++++++++
 
-The following CDN providers have offered to store PROJ grids:
+`Amazon Public Datasets <https://aws.amazon.com/opendata/public-datasets/>`_
+has offered to be a storage and CDN provider.
 
-- `Amazon Public Datasets <https://aws.amazon.com/opendata/public-datasets/>`_
-- `Fastly <https://www.fastly.com/>`_ (pending confirmation and more details from the provider)
-
-Regarding AWS Public Dataset Program, an application must be submitted at
-https://application.opendata.aws. The program covers storage and egress
-(bandwidth) of the data. They generally don't allow usage of CloudFront
+The program covers storage and egress (bandwidth) of the data.
+They generally don't allow usage of CloudFront
 (their CDN) as part of the program (we would usually look to have it covered
 by credits), but in this instance, they would be fine to provide it.
 They'd only ask that we keep the CloudFront URL "visible" (as appropriate for
