@@ -118,10 +118,11 @@ class InverseCoordinateOperation : virtual public CoordinateOperation {
     void _exportToPROJString(io::PROJStringFormatter *formatter)
         const override; // throw(FormattingException)
 
-    bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
 
     CoordinateOperationNNPtr inverse() const override;
 
@@ -158,11 +159,13 @@ class InverseConversion : public Conversion, public InverseCoordinateOperation {
         InverseCoordinateOperation::_exportToPROJString(formatter);
     }
 
-    bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override {
-        return InverseCoordinateOperation::_isEquivalentTo(other, criterion);
+    bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override {
+        return InverseCoordinateOperation::_isEquivalentTo(other, criterion,
+                                                           dbContext);
     }
 
     CoordinateOperationNNPtr inverse() const override {
@@ -208,11 +211,13 @@ class InverseTransformation : public Transformation,
         Transformation::_exportToJSON(formatter);
     }
 
-    bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override {
-        return InverseCoordinateOperation::_isEquivalentTo(other, criterion);
+    bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override {
+        return InverseCoordinateOperation::_isEquivalentTo(other, criterion,
+                                                           dbContext);
     }
 
     CoordinateOperationNNPtr inverse() const override {

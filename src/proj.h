@@ -836,6 +836,10 @@ PJ_OBJ_LIST PROJ_DLL *proj_get_non_deprecated(PJ_CONTEXT *ctx,
 int PROJ_DLL proj_is_equivalent_to(const PJ *obj, const PJ *other,
                                        PJ_COMPARISON_CRITERION criterion);
 
+int PROJ_DLL proj_is_equivalent_to_with_ctx(PJ_CONTEXT *ctx,
+                                            const PJ *obj, const PJ *other,
+                                            PJ_COMPARISON_CRITERION criterion);
+
 int PROJ_DLL proj_is_crs(const PJ *obj);
 
 const char PROJ_DLL* proj_get_name(const PJ *obj);

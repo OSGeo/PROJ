@@ -38,6 +38,7 @@ osgeo::proj::common::IdentifiedObject::alias() const
 osgeo::proj::common::IdentifiedObject::aliases() const
 osgeo::proj::common::IdentifiedObject::formatID(osgeo::proj::io::WKTFormatter*) const
 osgeo::proj::common::IdentifiedObject::getEPSGCode() const
+osgeo::proj::common::IdentifiedObject::hasEquivalentNameToUsingAlias(osgeo::proj::common::IdentifiedObject const*, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::common::IdentifiedObject::~IdentifiedObject()
 osgeo::proj::common::IdentifiedObject::IdentifiedObject()
 osgeo::proj::common::IdentifiedObject::IdentifiedObject(osgeo::proj::common::IdentifiedObject const&)
@@ -62,7 +63,7 @@ osgeo::proj::common::Measure::value() const
 osgeo::proj::common::ObjectDomain::create(osgeo::proj::util::optional<std::string> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&)
 osgeo::proj::common::ObjectDomain::domainOfValidity() const
 osgeo::proj::common::ObjectDomain::_exportToWKT(osgeo::proj::io::WKTFormatter*) const
-osgeo::proj::common::ObjectDomain::_isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion) const
+osgeo::proj::common::ObjectDomain::_isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::common::ObjectDomain::~ObjectDomain()
 osgeo::proj::common::ObjectDomain::ObjectDomain(osgeo::proj::common::ObjectDomain const&)
 osgeo::proj::common::ObjectDomain::ObjectDomain(osgeo::proj::util::optional<std::string> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&)
@@ -70,7 +71,7 @@ osgeo::proj::common::ObjectDomain::scope() const
 osgeo::proj::common::ObjectUsage::baseExportToJSON(osgeo::proj::io::JSONFormatter*) const
 osgeo::proj::common::ObjectUsage::baseExportToWKT(osgeo::proj::io::WKTFormatter*) const
 osgeo::proj::common::ObjectUsage::domains() const
-osgeo::proj::common::ObjectUsage::_isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion) const
+osgeo::proj::common::ObjectUsage::_isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::common::ObjectUsage::~ObjectUsage()
 osgeo::proj::common::ObjectUsage::ObjectUsage()
 osgeo::proj::common::ObjectUsage::ObjectUsage(osgeo::proj::common::ObjectUsage const&)
@@ -263,6 +264,7 @@ osgeo::proj::datum::EngineeringDatum::~EngineeringDatum()
 osgeo::proj::datum::GeodeticReferenceFrame::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Ellipsoid> > const&, osgeo::proj::util::optional<std::string> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::PrimeMeridian> > const&)
 osgeo::proj::datum::GeodeticReferenceFrame::ellipsoid() const
 osgeo::proj::datum::GeodeticReferenceFrame::~GeodeticReferenceFrame()
+osgeo::proj::datum::GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(osgeo::proj::common::IdentifiedObject const*, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::datum::GeodeticReferenceFrame::primeMeridian() const
 osgeo::proj::datum::ParametricDatum::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&)
 osgeo::proj::datum::ParametricDatum::~ParametricDatum()
@@ -672,7 +674,7 @@ osgeo::proj::util::Exception::Exception(osgeo::proj::util::Exception const&)
 osgeo::proj::util::Exception::what() const
 osgeo::proj::util::GenericName::~GenericName()
 osgeo::proj::util::IComparable::~IComparable()
-osgeo::proj::util::IComparable::isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion) const
+osgeo::proj::util::IComparable::isEquivalentTo(osgeo::proj::util::IComparable const*, osgeo::proj::util::IComparable::Criterion, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::util::InvalidValueTypeException::~InvalidValueTypeException()
 osgeo::proj::util::InvalidValueTypeException::InvalidValueTypeException(osgeo::proj::util::InvalidValueTypeException const&)
 osgeo::proj::util::LocalName::~LocalName()
@@ -961,6 +963,7 @@ proj_is_crs
 proj_is_deprecated
 proj_is_derived_crs
 proj_is_equivalent_to
+proj_is_equivalent_to_with_ctx
 proj_list_angular_units
 proj_list_destroy
 proj_list_ellps

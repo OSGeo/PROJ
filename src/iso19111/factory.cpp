@@ -262,6 +262,9 @@ struct DatabaseContext::Private {
 
     std::map<std::string, std::vector<std::string>> cacheAllowedAuthorities_{};
 
+    lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
+        CACHE_SIZE};
+
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
                                 const util::BaseObjectPtr &obj);
@@ -1100,7 +1103,7 @@ bool DatabaseContext::isKnownName(const std::string &name,
 
 /** \brief Gets the alias name from an official name.
  *
- * @param officialName Official name.
+ * @param officialName Official name. Mandatory
  * @param tableName Table name/category. Mandatory
  * @param source Source of the alias. Mandatory
  * @return Alias name (or empty if not found).
@@ -1128,6 +1131,63 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
         return std::string();
     }
     return res.front()[0];
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Gets the alias names for an object.
+ *
+ * Either authName + code or officialName must be non empty.
+ *
+ * @param authName Authority.
+ * @param code Code.
+ * @param officialName Official name.
+ * @param tableName Table name/category. Mandatory
+ * @param source Source of the alias. May be empty.
+ * @return Aliases
+ */
+std::list<std::string> DatabaseContext::getAliases(
+    const std::string &authName, const std::string &code,
+    const std::string &officialName, const std::string &tableName,
+    const std::string &source) const {
+
+    std::list<std::string> res;
+    const auto key(authName + code + officialName + tableName + source);
+    if (d->cacheAliasNames_.tryGet(key, res)) {
+        return res;
+    }
+
+    std::string resolvedAuthName(authName);
+    std::string resolvedCode(code);
+    if (authName.empty() || code.empty()) {
+        std::string sql("SELECT auth_name, code FROM \"");
+        sql += replaceAll(tableName, "\"", "\"\"");
+        sql += "\" WHERE name = ?";
+        if (tableName == "geodetic_crs") {
+            sql += " AND type = " GEOG_2D_SINGLE_QUOTED;
+        }
+        auto resSql = d->run(sql, {officialName});
+        if (resSql.empty()) {
+            d->cacheAliasNames_.insert(key, res);
+            return res;
+        }
+        const auto &row = resSql.front();
+        resolvedAuthName = row[0];
+        resolvedCode = row[1];
+    }
+    std::string sql("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
+                    "auth_name = ? AND code = ?");
+    ListOfParams params{tableName, resolvedAuthName, resolvedCode};
+    if (!source.empty()) {
+        sql += " AND source = ?";
+        params.emplace_back(source);
+    }
+    auto resSql = d->run(sql, params);
+    for (const auto &row : resSql) {
+        res.emplace_back(row[0]);
+    }
+    d->cacheAliasNames_.insert(key, res);
+    return res;
 }
 
 // ---------------------------------------------------------------------------

@@ -391,7 +391,7 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
     if (boundCRS) {
         if (boundCRS->hubCRS()->_isEquivalentTo(
                 GeographicCRS::EPSG_4326.get(),
-                util::IComparable::Criterion::EQUIVALENT)) {
+                util::IComparable::Criterion::EQUIVALENT, dbContext)) {
             return NN_NO_CHECK(boundCRS);
         }
     }
@@ -400,16 +400,16 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
     auto geogCRS = extractGeographicCRS();
     auto hubCRS = util::nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326);
     if (geodCRS && !geogCRS) {
-        if (geodCRS->_isEquivalentTo(
-                GeographicCRS::EPSG_4978.get(),
-                util::IComparable::Criterion::EQUIVALENT)) {
+        if (geodCRS->_isEquivalentTo(GeographicCRS::EPSG_4978.get(),
+                                     util::IComparable::Criterion::EQUIVALENT,
+                                     dbContext)) {
             return thisAsCRS;
         }
         hubCRS = util::nn_static_pointer_cast<CRS>(GeodeticCRS::EPSG_4978);
     } else if (!geogCRS ||
                geogCRS->_isEquivalentTo(
                    GeographicCRS::EPSG_4326.get(),
-                   util::IComparable::Criterion::EQUIVALENT)) {
+                   util::IComparable::Criterion::EQUIVALENT, dbContext)) {
         return thisAsCRS;
     } else {
         geodCRS = geogCRS;
@@ -1022,18 +1022,19 @@ const cs::CoordinateSystemNNPtr &SingleCRS::coordinateSystem() PROJ_PURE_DEFN {
 // ---------------------------------------------------------------------------
 
 bool SingleCRS::baseIsEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherSingleCRS = dynamic_cast<const SingleCRS *>(other);
     if (otherSingleCRS == nullptr ||
         (criterion == util::IComparable::Criterion::STRICT &&
-         !ObjectUsage::_isEquivalentTo(other, criterion))) {
+         !ObjectUsage::_isEquivalentTo(other, criterion, dbContext))) {
         return false;
     }
     const auto &thisDatum = d->datum;
     const auto &otherDatum = otherSingleCRS->d->datum;
     if (thisDatum) {
-        if (!thisDatum->_isEquivalentTo(otherDatum.get(), criterion)) {
+        if (!thisDatum->_isEquivalentTo(otherDatum.get(), criterion,
+                                        dbContext)) {
             return false;
         }
     } else {
@@ -1044,7 +1045,8 @@ bool SingleCRS::baseIsEquivalentTo(
 
     // TODO test DatumEnsemble
     return d->coordinateSystem->_isEquivalentTo(
-               otherSingleCRS->d->coordinateSystem.get(), criterion) &&
+               otherSingleCRS->d->coordinateSystem.get(), criterion,
+               dbContext) &&
            getExtensionProj4() == otherSingleCRS->getExtensionProj4();
 }
 
@@ -1579,13 +1581,13 @@ getStandardCriterion(util::IComparable::Criterion criterion) {
 
 //! @cond Doxygen_Suppress
 bool GeodeticCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     const auto standardCriterion = getStandardCriterion(criterion);
     auto otherGeodCRS = dynamic_cast<const GeodeticCRS *>(other);
     // TODO test velocityModel
     return otherGeodCRS != nullptr &&
-           SingleCRS::baseIsEquivalentTo(other, standardCriterion);
+           SingleCRS::baseIsEquivalentTo(other, standardCriterion, dbContext);
 }
 //! @endcond
 
@@ -1686,6 +1688,9 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     std::list<Pair> res;
     const auto &thisName(nameStr());
 
+    io::DatabaseContextPtr dbContext =
+        authorityFactory ? authorityFactory->databaseContext().as_nullable()
+                         : nullptr;
     const bool l_implicitCS = CRS::getPrivate()->implicitCS_;
     const auto crsCriterion =
         l_implicitCS
@@ -1699,7 +1704,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const bool nameEquivalent = metadata::Identifier::isEquivalentName(
             thisName.c_str(), crs->nameStr().c_str());
         const bool nameEqual = thisName == crs->nameStr();
-        const bool isEq = _isEquivalentTo(crs.get(), crsCriterion);
+        const bool isEq = _isEquivalentTo(crs.get(), crsCriterion, dbContext);
         if (nameEquivalent && isEq && (!authorityFactory || nameEqual)) {
             res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
                              nameEqual ? 100 : 90);
@@ -1734,13 +1739,14 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const auto &thisDatum(datum());
 
         auto searchByDatum = [this, &authorityFactory, &res, &thisDatum,
-                              &geodetic_crs_type, crsCriterion]() {
+                              &geodetic_crs_type, crsCriterion, &dbContext]() {
             for (const auto &id : thisDatum->identifiers()) {
                 try {
                     auto tempRes = authorityFactory->createGeodeticCRSFromDatum(
                         *id->codeSpace(), id->code(), geodetic_crs_type);
                     for (const auto &crs : tempRes) {
-                        if (_isEquivalentTo(crs.get(), crsCriterion)) {
+                        if (_isEquivalentTo(crs.get(), crsCriterion,
+                                            dbContext)) {
                             res.emplace_back(crs, 70);
                         }
                     }
@@ -1752,7 +1758,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const auto &thisEllipsoid(ellipsoid());
         auto searchByEllipsoid = [this, &authorityFactory, &res, &thisDatum,
                                   &thisEllipsoid, &geodetic_crs_type,
-                                  l_implicitCS]() {
+                                  l_implicitCS, &dbContext]() {
             const auto ellipsoids =
                 thisEllipsoid->identifiers().empty()
                     ? authorityFactory->createEllipsoidFromExisting(
@@ -1770,15 +1776,17 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                             if (crsDatum &&
                                 crsDatum->ellipsoid()->_isEquivalentTo(
                                     ellps.get(),
-                                    util::IComparable::Criterion::EQUIVALENT) &&
+                                    util::IComparable::Criterion::EQUIVALENT,
+                                    dbContext) &&
                                 crsDatum->primeMeridian()->_isEquivalentTo(
                                     thisDatum->primeMeridian().get(),
-                                    util::IComparable::Criterion::EQUIVALENT) &&
+                                    util::IComparable::Criterion::EQUIVALENT,
+                                    dbContext) &&
                                 (!l_implicitCS ||
                                  coordinateSystem()->_isEquivalentTo(
                                      crs->coordinateSystem().get(),
-                                     util::IComparable::Criterion::
-                                         EQUIVALENT))) {
+                                     util::IComparable::Criterion::EQUIVALENT,
+                                     dbContext))) {
                                 res.emplace_back(crs, 60);
                             }
                         }
@@ -1811,7 +1819,8 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                        authorityFactory->databaseContext(),
                                        *id->codeSpace())
                                        ->createGeodeticCRS(id->code());
-                        bool match = _isEquivalentTo(crs.get(), crsCriterion);
+                        bool match =
+                            _isEquivalentTo(crs.get(), crsCriterion, dbContext);
                         res.emplace_back(crs, match ? 100 : 25);
                         return res;
                     } catch (const std::exception &) {
@@ -1829,7 +1838,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     auto crs = util::nn_dynamic_pointer_cast<GeodeticCRS>(obj);
                     assert(crs);
                     auto crsNN = NN_NO_CHECK(crs);
-                    if (_isEquivalentTo(crs.get(), crsCriterion)) {
+                    if (_isEquivalentTo(crs.get(), crsCriterion, dbContext)) {
                         if (crs->nameStr() == thisName) {
                             res.clear();
                             res.emplace_back(crsNN, 100);
@@ -1859,8 +1868,8 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
         const auto &thisCS(coordinateSystem());
         // Sort results
-        res.sort([&thisName, &thisDatum, &thisCS](const Pair &a,
-                                                  const Pair &b) {
+        res.sort([&thisName, &thisDatum, &thisCS, &dbContext](const Pair &a,
+                                                              const Pair &b) {
             // First consider confidence
             if (a.second > b.second) {
                 return true;
@@ -1884,9 +1893,11 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             const auto &bDatum(b.first->datum());
             if (thisDatum && aDatum && bDatum) {
                 const auto thisEquivADatum(thisDatum->_isEquivalentTo(
-                    aDatum.get(), util::IComparable::Criterion::EQUIVALENT));
+                    aDatum.get(), util::IComparable::Criterion::EQUIVALENT,
+                    dbContext));
                 const auto thisEquivBDatum(thisDatum->_isEquivalentTo(
-                    bDatum.get(), util::IComparable::Criterion::EQUIVALENT));
+                    bDatum.get(), util::IComparable::Criterion::EQUIVALENT,
+                    dbContext));
 
                 if (thisEquivADatum && !thisEquivBDatum) {
                     return true;
@@ -1900,9 +1911,11 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             const auto &aCS(a.first->coordinateSystem());
             const auto &bCS(b.first->coordinateSystem());
             const auto thisEquivACs(thisCS->_isEquivalentTo(
-                aCS.get(), util::IComparable::Criterion::EQUIVALENT));
+                aCS.get(), util::IComparable::Criterion::EQUIVALENT,
+                dbContext));
             const auto thisEquivBCs(thisCS->_isEquivalentTo(
-                bCS.get(), util::IComparable::Criterion::EQUIVALENT));
+                bCS.get(), util::IComparable::Criterion::EQUIVALENT,
+                dbContext));
             if (thisEquivACs && !thisEquivBCs) {
                 return true;
             }
@@ -2119,14 +2132,14 @@ bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
 
 //! @cond Doxygen_Suppress
 bool GeographicCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherGeogCRS = dynamic_cast<const GeographicCRS *>(other);
     if (otherGeogCRS == nullptr) {
         return false;
     }
     const auto standardCriterion = getStandardCriterion(criterion);
-    if (GeodeticCRS::_isEquivalentTo(other, standardCriterion)) {
+    if (GeodeticCRS::_isEquivalentTo(other, standardCriterion, dbContext)) {
         return true;
     }
     if (criterion !=
@@ -2145,7 +2158,7 @@ bool GeographicCRS::_isEquivalentTo(
                            cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH
                        ? cs::EllipsoidalCS::createLatitudeLongitude(unit)
                        : cs::EllipsoidalCS::createLongitudeLatitude(unit))
-            ->GeodeticCRS::_isEquivalentTo(other, standardCriterion);
+            ->GeodeticCRS::_isEquivalentTo(other, standardCriterion, dbContext);
     }
     return false;
 }
@@ -2717,12 +2730,12 @@ VerticalCRS::create(const util::PropertyMap &properties,
 
 //! @cond Doxygen_Suppress
 bool VerticalCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherVertCRS = dynamic_cast<const VerticalCRS *>(other);
     // TODO test geoidModel and velocityModel
     return otherVertCRS != nullptr &&
-           SingleCRS::baseIsEquivalentTo(other, criterion);
+           SingleCRS::baseIsEquivalentTo(other, criterion, dbContext);
 }
 //! @endcond
 
@@ -2757,6 +2770,8 @@ VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     const auto &thisName(nameStr());
 
     if (authorityFactory) {
+        const io::DatabaseContextNNPtr &dbContext =
+            authorityFactory->databaseContext();
 
         const bool unsignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
@@ -2768,12 +2783,11 @@ VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
                     try {
                         auto crs = io::AuthorityFactory::create(
-                                       authorityFactory->databaseContext(),
-                                       *id->codeSpace())
+                                       dbContext, *id->codeSpace())
                                        ->createVerticalCRS(id->code());
                         bool match = _isEquivalentTo(
-                            crs.get(),
-                            util::IComparable::Criterion::EQUIVALENT);
+                            crs.get(), util::IComparable::Criterion::EQUIVALENT,
+                            dbContext);
                         res.emplace_back(crs, match ? 100 : 25);
                         return res;
                     } catch (const std::exception &) {
@@ -2791,8 +2805,8 @@ VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     assert(crs);
                     auto crsNN = NN_NO_CHECK(crs);
                     if (_isEquivalentTo(
-                            crs.get(),
-                            util::IComparable::Criterion::EQUIVALENT)) {
+                            crs.get(), util::IComparable::Criterion::EQUIVALENT,
+                            dbContext)) {
                         if (crs->nameStr() == thisName) {
                             res.clear();
                             res.emplace_back(crsNN, 100);
@@ -2957,19 +2971,20 @@ DerivedCRS::derivingConversionRef() PROJ_PURE_DEFN {
 
 // ---------------------------------------------------------------------------
 
-bool DerivedCRS::_isEquivalentTo(const util::IComparable *other,
-                                 util::IComparable::Criterion criterion) const {
+bool DerivedCRS::_isEquivalentTo(
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherDerivedCRS = dynamic_cast<const DerivedCRS *>(other);
     const auto standardCriterion = getStandardCriterion(criterion);
     if (otherDerivedCRS == nullptr ||
-        !SingleCRS::baseIsEquivalentTo(other, standardCriterion)) {
+        !SingleCRS::baseIsEquivalentTo(other, standardCriterion, dbContext)) {
         return false;
     }
     return d->baseCRS_->_isEquivalentTo(otherDerivedCRS->d->baseCRS_.get(),
-                                        criterion) &&
+                                        criterion, dbContext) &&
            d->derivingConversion_->_isEquivalentTo(
-               otherDerivedCRS->d->derivingConversion_.get(),
-               standardCriterion);
+               otherDerivedCRS->d->derivingConversion_.get(), standardCriterion,
+               dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -3402,11 +3417,11 @@ ProjectedCRS::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 bool ProjectedCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherProjCRS = dynamic_cast<const ProjectedCRS *>(other);
     return otherProjCRS != nullptr &&
-           DerivedCRS::_isEquivalentTo(other, criterion);
+           DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -3580,14 +3595,19 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
     const auto &conv = derivingConversionRef();
     const auto &cs = coordinateSystem();
+    io::DatabaseContextPtr dbContext =
+        authorityFactory ? authorityFactory->databaseContext().as_nullable()
+                         : nullptr;
+
     if (baseRes.size() == 1 && baseRes.front().second >= 70 &&
         conv->isUTM(zone, north) &&
         cs->_isEquivalentTo(
             cs::CartesianCS::createEastingNorthing(common::UnitOfMeasure::METRE)
-                .get())) {
+                .get(),
+            util::IComparable::Criterion::EQUIVALENT, dbContext)) {
         if (baseRes.front().first->_isEquivalentTo(
                 GeographicCRS::EPSG_4326.get(),
-                util::IComparable::Criterion::EQUIVALENT)) {
+                util::IComparable::Criterion::EQUIVALENT, dbContext)) {
             std::string crsName(
                 computeUTMCRSName("WGS 84 / UTM zone ", zone, north));
             res.emplace_back(
@@ -3601,7 +3621,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                    north &&
                    baseRes.front().first->_isEquivalentTo(
                        GeographicCRS::EPSG_4267.get(),
-                       util::IComparable::Criterion::EQUIVALENT)) {
+                       util::IComparable::Criterion::EQUIVALENT, dbContext)) {
             std::string crsName(
                 computeUTMCRSName("NAD27 / UTM zone ", zone, north));
             res.emplace_back(
@@ -3616,7 +3636,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                    north &&
                    baseRes.front().first->_isEquivalentTo(
                        GeographicCRS::EPSG_4269.get(),
-                       util::IComparable::Criterion::EQUIVALENT)) {
+                       util::IComparable::Criterion::EQUIVALENT, dbContext)) {
             std::string crsName(
                 computeUTMCRSName("NAD83 / UTM zone ", zone, north));
             res.emplace_back(
@@ -3648,9 +3668,9 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                        *id->codeSpace())
                                        ->createProjectedCRS(id->code());
                         bool match = _isEquivalentTo(
-                            crs.get(),
-                            util::IComparable::Criterion::
-                                EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS);
+                            crs.get(), util::IComparable::Criterion::
+                                           EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
+                            dbContext);
                         res.emplace_back(crs, match ? 100 : 25);
                         return res;
                     } catch (const std::exception &) {
@@ -3671,9 +3691,9 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                         thisName.c_str(), crs->nameStr().c_str());
                     foundEquivalentName |= eqName;
                     if (_isEquivalentTo(
-                            crs.get(),
-                            util::IComparable::Criterion::
-                                EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS)) {
+                            crs.get(), util::IComparable::Criterion::
+                                           EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
+                            dbContext)) {
                         if (crs->nameStr() == thisName) {
                             res.clear();
                             res.emplace_back(crsNN, 100);
@@ -3685,10 +3705,12 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                l_baseCRS->_isEquivalentTo(
                                    crs->baseCRS().get(),
                                    util::IComparable::Criterion::
-                                       EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS) &&
+                                       EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
+                                   dbContext) &&
                                derivingConversionRef()->_isEquivalentTo(
                                    crs->derivingConversionRef().get(),
-                                   util::IComparable::Criterion::EQUIVALENT) &&
+                                   util::IComparable::Criterion::EQUIVALENT,
+                                   dbContext) &&
                                objects.size() == 1) {
                         res.clear();
                         res.emplace_back(crsNN, 100);
@@ -3755,17 +3777,21 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
                 if (_isEquivalentTo(crs.get(),
                                     util::IComparable::Criterion::
-                                        EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS)) {
+                                        EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
+                                    dbContext)) {
                     res.emplace_back(crs, unsignificantName ? 90 : 70);
                 } else if (ellipsoid->_isEquivalentTo(
                                crs->baseCRS()->ellipsoid().get(),
-                               util::IComparable::Criterion::EQUIVALENT) &&
+                               util::IComparable::Criterion::EQUIVALENT,
+                               dbContext) &&
                            derivingConversionRef()->_isEquivalentTo(
                                crs->derivingConversionRef().get(),
-                               util::IComparable::Criterion::EQUIVALENT)) {
+                               util::IComparable::Criterion::EQUIVALENT,
+                               dbContext)) {
                     if (coordinateSystem()->_isEquivalentTo(
                             crs->coordinateSystem().get(),
-                            util::IComparable::Criterion::EQUIVALENT)) {
+                            util::IComparable::Criterion::EQUIVALENT,
+                            dbContext)) {
                         res.emplace_back(crs, 70);
                     } else {
                         res.emplace_back(crs, 50);
@@ -3995,12 +4021,12 @@ void CompoundCRS::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 bool CompoundCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherCompoundCRS = dynamic_cast<const CompoundCRS *>(other);
     if (otherCompoundCRS == nullptr ||
         (criterion == util::IComparable::Criterion::STRICT &&
-         !ObjectUsage::_isEquivalentTo(other, criterion))) {
+         !ObjectUsage::_isEquivalentTo(other, criterion, dbContext))) {
         return false;
     }
     const auto &components = componentReferenceSystems();
@@ -4009,8 +4035,8 @@ bool CompoundCRS::_isEquivalentTo(
         return false;
     }
     for (size_t i = 0; i < components.size(); i++) {
-        if (!components[i]->_isEquivalentTo(otherComponents[i].get(),
-                                            criterion)) {
+        if (!components[i]->_isEquivalentTo(otherComponents[i].get(), criterion,
+                                            dbContext)) {
             return false;
         }
     }
@@ -4050,6 +4076,8 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     const auto &thisName(nameStr());
 
     if (authorityFactory) {
+        const io::DatabaseContextNNPtr &dbContext =
+            authorityFactory->databaseContext();
 
         const bool unsignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
@@ -4063,12 +4091,11 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 if (hasCodeCompatibleOfAuthorityFactory(id, authorityFactory)) {
                     try {
                         auto crs = io::AuthorityFactory::create(
-                                       authorityFactory->databaseContext(),
-                                       *id->codeSpace())
+                                       dbContext, *id->codeSpace())
                                        ->createCompoundCRS(id->code());
                         bool match = _isEquivalentTo(
-                            crs.get(),
-                            util::IComparable::Criterion::EQUIVALENT);
+                            crs.get(), util::IComparable::Criterion::EQUIVALENT,
+                            dbContext);
                         res.emplace_back(crs, match ? 100 : 25);
                         return res;
                     } catch (const std::exception &) {
@@ -4089,8 +4116,8 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                         thisName.c_str(), crs->nameStr().c_str());
                     foundEquivalentName |= eqName;
                     if (_isEquivalentTo(
-                            crs.get(),
-                            util::IComparable::Criterion::EQUIVALENT)) {
+                            crs.get(), util::IComparable::Criterion::EQUIVALENT,
+                            dbContext)) {
                         if (crs->nameStr() == thisName) {
                             res.clear();
                             res.emplace_back(crsNN, 100);
@@ -4157,7 +4184,8 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 }
 
                 if (_isEquivalentTo(crs.get(),
-                                    util::IComparable::Criterion::EQUIVALENT)) {
+                                    util::IComparable::Criterion::EQUIVALENT,
+                                    dbContext)) {
                     res.emplace_back(crs, unsignificantName ? 90 : 70);
                 } else {
                     res.emplace_back(crs, 25);
@@ -4529,20 +4557,22 @@ void BoundCRS::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 bool BoundCRS::_isEquivalentTo(const util::IComparable *other,
-                               util::IComparable::Criterion criterion) const {
+                               util::IComparable::Criterion criterion,
+                               const io::DatabaseContextPtr &dbContext) const {
     auto otherBoundCRS = dynamic_cast<const BoundCRS *>(other);
     if (otherBoundCRS == nullptr ||
         (criterion == util::IComparable::Criterion::STRICT &&
-         !ObjectUsage::_isEquivalentTo(other, criterion))) {
+         !ObjectUsage::_isEquivalentTo(other, criterion, dbContext))) {
         return false;
     }
     const auto standardCriterion = getStandardCriterion(criterion);
     return d->baseCRS_->_isEquivalentTo(otherBoundCRS->d->baseCRS_.get(),
-                                        criterion) &&
+                                        criterion, dbContext) &&
            d->hubCRS_->_isEquivalentTo(otherBoundCRS->d->hubCRS_.get(),
-                                       criterion) &&
+                                       criterion, dbContext) &&
            d->transformation_->_isEquivalentTo(
-               otherBoundCRS->d->transformation_.get(), standardCriterion);
+               otherBoundCRS->d->transformation_.get(), standardCriterion,
+               dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -4553,10 +4583,14 @@ std::list<std::pair<CRSNNPtr, int>>
 BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     typedef std::pair<CRSNNPtr, int> Pair;
     std::list<Pair> res;
+    if (!authorityFactory)
+        return res;
     std::list<Pair> resMatchOfTransfToWGS84;
-    if (authorityFactory &&
-        d->hubCRS_->_isEquivalentTo(GeographicCRS::EPSG_4326.get(),
-                                    util::IComparable::Criterion::EQUIVALENT)) {
+    const io::DatabaseContextNNPtr &dbContext =
+        authorityFactory->databaseContext();
+    if (d->hubCRS_->_isEquivalentTo(GeographicCRS::EPSG_4326.get(),
+                                    util::IComparable::Criterion::EQUIVALENT,
+                                    dbContext)) {
         auto resTemp = d->baseCRS_->identify(authorityFactory);
 
         std::string refTransfPROJString;
@@ -4627,7 +4661,8 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                          refTransfPROJString == opTransfPROJString) ||
                         opNormalized->_isEquivalentTo(
                             refTransf.get(),
-                            util::IComparable::Criterion::EQUIVALENT)) {
+                            util::IComparable::Criterion::EQUIVALENT,
+                            dbContext)) {
                         resMatchOfTransfToWGS84.emplace_back(
                             create(candidateBaseCRS, d->hubCRS_,
                                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<
@@ -4807,11 +4842,11 @@ void DerivedGeodeticCRS::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 bool DerivedGeodeticCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherDerivedCRS = dynamic_cast<const DerivedGeodeticCRS *>(other);
     return otherDerivedCRS != nullptr &&
-           DerivedCRS::_isEquivalentTo(other, criterion);
+           DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -4957,11 +4992,11 @@ void DerivedGeographicCRS::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 bool DerivedGeographicCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherDerivedCRS = dynamic_cast<const DerivedGeographicCRS *>(other);
     return otherDerivedCRS != nullptr &&
-           DerivedCRS::_isEquivalentTo(other, criterion);
+           DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -5104,11 +5139,11 @@ void DerivedProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 // ---------------------------------------------------------------------------
 
 bool DerivedProjectedCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherDerivedCRS = dynamic_cast<const DerivedProjectedCRS *>(other);
     return otherDerivedCRS != nullptr &&
-           DerivedCRS::_isEquivalentTo(other, criterion);
+           DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -5234,11 +5269,11 @@ void TemporalCRS::_exportToJSON(
 // ---------------------------------------------------------------------------
 
 bool TemporalCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherTemporalCRS = dynamic_cast<const TemporalCRS *>(other);
     return otherTemporalCRS != nullptr &&
-           SingleCRS::baseIsEquivalentTo(other, criterion);
+           SingleCRS::baseIsEquivalentTo(other, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -5372,11 +5407,11 @@ void EngineeringCRS::_exportToJSON(
 // ---------------------------------------------------------------------------
 
 bool EngineeringCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherEngineeringCRS = dynamic_cast<const EngineeringCRS *>(other);
     return otherEngineeringCRS != nullptr &&
-           SingleCRS::baseIsEquivalentTo(other, criterion);
+           SingleCRS::baseIsEquivalentTo(other, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -5504,11 +5539,11 @@ void ParametricCRS::_exportToJSON(
 // ---------------------------------------------------------------------------
 
 bool ParametricCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherParametricCRS = dynamic_cast<const ParametricCRS *>(other);
     return otherParametricCRS != nullptr &&
-           SingleCRS::baseIsEquivalentTo(other, criterion);
+           SingleCRS::baseIsEquivalentTo(other, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -5609,11 +5644,11 @@ void DerivedVerticalCRS::_exportToPROJString(
 // ---------------------------------------------------------------------------
 
 bool DerivedVerticalCRS::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherDerivedCRS = dynamic_cast<const DerivedVerticalCRS *>(other);
     return otherDerivedCRS != nullptr &&
-           DerivedCRS::_isEquivalentTo(other, criterion);
+           DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------
@@ -5730,11 +5765,11 @@ void DerivedCRSTemplate<DerivedCRSTraits>::_exportToWKT(
 
 template <class DerivedCRSTraits>
 bool DerivedCRSTemplate<DerivedCRSTraits>::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherDerivedCRS = dynamic_cast<const DerivedCRSTemplate *>(other);
     return otherDerivedCRS != nullptr &&
-           DerivedCRS::_isEquivalentTo(other, criterion);
+           DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
 }
 
 //! @endcond

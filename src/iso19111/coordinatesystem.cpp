@@ -429,8 +429,8 @@ void CoordinateSystemAxis::_exportToJSON(
 
 //! @cond Doxygen_Suppress
 bool CoordinateSystemAxis::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherCSA = dynamic_cast<const CoordinateSystemAxis *>(other);
     if (otherCSA == nullptr) {
         return false;
@@ -441,7 +441,7 @@ bool CoordinateSystemAxis::_isEquivalentTo(
         return false;
     }
     if (criterion == util::IComparable::Criterion::STRICT) {
-        if (!IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        if (!IdentifiedObject::_isEquivalentTo(other, criterion, dbContext)) {
             return false;
         }
         if (abbreviation() != otherCSA->abbreviation()) {
@@ -599,11 +599,11 @@ void CoordinateSystem::_exportToJSON(
 
 //! @cond Doxygen_Suppress
 bool CoordinateSystem::_isEquivalentTo(
-    const util::IComparable *other,
-    util::IComparable::Criterion criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     auto otherCS = dynamic_cast<const CoordinateSystem *>(other);
     if (otherCS == nullptr ||
-        !IdentifiedObject::_isEquivalentTo(other, criterion)) {
+        !IdentifiedObject::_isEquivalentTo(other, criterion, dbContext)) {
         return false;
     }
     const auto &list = axisList();
@@ -615,7 +615,8 @@ bool CoordinateSystem::_isEquivalentTo(
         return false;
     }
     for (size_t i = 0; i < list.size(); i++) {
-        if (!list[i]->_isEquivalentTo(otherList[i].get(), criterion)) {
+        if (!list[i]->_isEquivalentTo(otherList[i].get(), criterion,
+                                      dbContext)) {
             return false;
         }
     }

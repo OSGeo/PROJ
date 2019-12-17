@@ -57,7 +57,8 @@ namespace {
 struct UnrelatedObject : public IComparable {
     UnrelatedObject() = default;
 
-    bool _isEquivalentTo(const IComparable *, Criterion) const override {
+    bool _isEquivalentTo(const IComparable *, Criterion,
+                         const DatabaseContextPtr &) const override {
         assert(false);
         return false;
     }
@@ -1550,6 +1551,75 @@ TEST(crs, geodeticcrs_identify_db) {
         EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "EPSG");
         EXPECT_EQ(res.front().first->identifiers()[0]->code(), "4326");
         EXPECT_EQ(res.front().second, 70);
+    }
+
+    {
+        // Identify by code, but datum name is an alias of the official one
+        auto wkt = "GEOGCRS[\"GDA2020\",\n"
+                   "    DATUM[\"GDA2020\",\n"
+                   "        ELLIPSOID[\"GRS_1980\",6378137,298.257222101,\n"
+                   "            LENGTHUNIT[\"metre\",1]]],\n"
+                   "    PRIMEM[\"Greenwich\",0,\n"
+                   "        ANGLEUNIT[\"Degree\",0.0174532925199433]],\n"
+                   "    CS[ellipsoidal,2],\n"
+                   "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+                   "            ORDER[1],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                   "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+                   "            ORDER[2],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                   "    ID[\"EPSG\",7844]]";
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_EQ(res.size(), 1U);
+        ASSERT_TRUE(!res.front().first->identifiers().empty());
+        EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "EPSG");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "7844");
+        EXPECT_EQ(res.front().second, 100);
+
+        EXPECT_TRUE(crs->_isEquivalentTo(res.front().first.get(),
+                                         IComparable::Criterion::EQUIVALENT,
+                                         dbContext));
+        EXPECT_TRUE(res.front().first->_isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT, dbContext));
+    }
+
+    {
+        // Identify by name, but datum name is an alias of the official one
+        auto wkt = "GEOGCRS[\"GDA2020\",\n"
+                   "    DATUM[\"GDA2020\",\n"
+                   "        ELLIPSOID[\"GRS_1980\",6378137,298.257222101,\n"
+                   "            LENGTHUNIT[\"metre\",1]]],\n"
+                   "    PRIMEM[\"Greenwich\",0,\n"
+                   "        ANGLEUNIT[\"Degree\",0.0174532925199433]],\n"
+                   "    CS[ellipsoidal,2],\n"
+                   "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+                   "            ORDER[1],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                   "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+                   "            ORDER[2],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_EQ(res.size(), 1U);
+        ASSERT_TRUE(!res.front().first->identifiers().empty());
+        EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "EPSG");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "7844");
+        EXPECT_EQ(res.front().second, 100);
+
+        EXPECT_TRUE(crs->_isEquivalentTo(res.front().first.get(),
+                                         IComparable::Criterion::EQUIVALENT,
+                                         dbContext));
+        EXPECT_TRUE(res.front().first->_isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT, dbContext));
     }
 }
 
