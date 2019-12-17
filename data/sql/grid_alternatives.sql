@@ -1209,6 +1209,23 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
+-- Spain
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('100800401.gsb',
+                              '100800401.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
 -- Portugal
 
 INSERT INTO grid_alternatives(original_grid_name,
