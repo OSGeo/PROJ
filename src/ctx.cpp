@@ -95,7 +95,7 @@ projCtx_t projCtx_t::createDefault()
     projCtx_t ctx;
     ctx.debug_level = PJ_LOG_NONE;
     ctx.logger = pj_stderr_logger;
-    ctx.fileapi = pj_get_default_fileapi();
+    ctx.fileapi_legacy = pj_get_default_fileapi();
 
     if( getenv("PROJ_DEBUG") != nullptr )
     {
@@ -133,7 +133,7 @@ projCtx_t::projCtx_t(const projCtx_t& other)
     debug_level = other.debug_level;
     logger = other.logger;
     logger_app_data = other.logger_app_data;
-    fileapi = other.fileapi;
+    fileapi_legacy = other.fileapi_legacy;
     epsg_file_exists = other.epsg_file_exists;
     set_search_paths(other.search_paths);
     file_finder = other.file_finder;
@@ -268,7 +268,7 @@ void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
 {
     if (nullptr==ctx)
         return;
-    ctx->fileapi = fileapi;
+    ctx->fileapi_legacy = fileapi;
 }
 
 /************************************************************************/
@@ -280,6 +280,6 @@ projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
 {
     if (nullptr==ctx)
         return nullptr;
-    return ctx->fileapi;
+    return ctx->fileapi_legacy;
 }
 

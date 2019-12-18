@@ -214,9 +214,6 @@ size_t pj_trim_argc (char *args);
 char **pj_trim_argv (size_t argc, char *args);
 char  *pj_make_args (size_t argc, char **argv);
 
-/* Lowest level: Minimum support for fileapi */
-void proj_fileapi_set (PJ *P, void *fileapi);
-
 typedef struct { double r, i; } COMPLEX;
 
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
@@ -664,6 +661,7 @@ struct FACTORS {
 /* NOTE: Remember to update src/strerrno.cpp, src/apps/gie.cpp and transient_error in */
 /* src/transform.cpp when adding new value */
 
+// Legacy
 struct projFileAPI_t;
 
 struct projCppContext;
@@ -674,7 +672,7 @@ struct projCtx_t {
     int     debug_level = 0;
     void    (*logger)(void *, int, const char *) = nullptr;
     void    *logger_app_data = nullptr;
-    struct projFileAPI_t *fileapi = nullptr;
+    struct projFileAPI_t *fileapi_legacy = nullptr; // for proj_api.h legacy API
     struct projCppContext* cpp_context = nullptr; /* internal context for C++ code */
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
