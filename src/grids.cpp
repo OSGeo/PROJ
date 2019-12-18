@@ -32,6 +32,7 @@
 #define LRU11_DO_NOT_DEFINE_OUT_OF_CLASS_METHODS
 
 #include "grids.hpp"
+#include "filemanager.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/lru_cache.hpp"
 #include "proj_internal.h"
@@ -151,41 +152,42 @@ bool NullVerticalShiftGrid::valueAt(int, int, float &out) const {
 
 class GTXVerticalShiftGrid : public VerticalShiftGrid {
     PJ_CONTEXT *m_ctx;
-    PAFile m_fp;
+    std::unique_ptr<File> m_fp;
 
     GTXVerticalShiftGrid(const GTXVerticalShiftGrid &) = delete;
     GTXVerticalShiftGrid &operator=(const GTXVerticalShiftGrid &) = delete;
 
   public:
-    GTXVerticalShiftGrid(PJ_CONTEXT *ctx, PAFile fp, const std::string &nameIn,
-                         int widthIn, int heightIn,
-                         const ExtentAndRes &extentIn)
+    explicit GTXVerticalShiftGrid(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp,
+                                  const std::string &nameIn, int widthIn,
+                                  int heightIn, const ExtentAndRes &extentIn)
         : VerticalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
-          m_fp(fp) {}
+          m_fp(std::move(fp)) {}
 
     ~GTXVerticalShiftGrid() override;
 
     bool valueAt(int x, int y, float &out) const override;
     bool isNodata(float val, double multiplier) const override;
 
-    static GTXVerticalShiftGrid *open(PJ_CONTEXT *ctx, PAFile fp,
+    static GTXVerticalShiftGrid *open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                                       const std::string &name);
 };
 
 // ---------------------------------------------------------------------------
 
-GTXVerticalShiftGrid::~GTXVerticalShiftGrid() { pj_ctx_fclose(m_ctx, m_fp); }
+GTXVerticalShiftGrid::~GTXVerticalShiftGrid() = default;
 
 // ---------------------------------------------------------------------------
 
-GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx, PAFile fp,
+GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx,
+                                                 std::unique_ptr<File> fp,
                                                  const std::string &name) {
     unsigned char header[40];
 
     /* -------------------------------------------------------------------- */
     /*      Read the header.                                                */
     /* -------------------------------------------------------------------- */
-    if (pj_ctx_fread(ctx, header, sizeof(header), 1, fp) != 1) {
+    if (fp->read(header, sizeof(header)) != sizeof(header)) {
         pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return nullptr;
     }
@@ -235,7 +237,8 @@ GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx, PAFile fp,
     extent.eastLon = (xorigin + xstep * (columns - 1)) * DEG_TO_RAD;
     extent.northLat = (yorigin + ystep * (rows - 1)) * DEG_TO_RAD;
 
-    return new GTXVerticalShiftGrid(ctx, fp, name, columns, rows, extent);
+    return new GTXVerticalShiftGrid(ctx, std::move(fp), name, columns, rows,
+                                    extent);
 }
 
 // ---------------------------------------------------------------------------
@@ -243,8 +246,8 @@ GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx, PAFile fp,
 bool GTXVerticalShiftGrid::valueAt(int x, int y, float &out) const {
     assert(x >= 0 && y >= 0 && x < m_width && y < m_height);
 
-    pj_ctx_fseek(m_ctx, m_fp, 40 + sizeof(float) * (y * m_width + x), SEEK_SET);
-    if (pj_ctx_fread(m_ctx, &out, sizeof(out), 1, m_fp) != 1) {
+    m_fp->seek(40 + sizeof(float) * (y * m_width + x));
+    if (m_fp->read(&out, sizeof(out)) != sizeof(out)) {
         pj_ctx_set_errno(m_ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return false;
     }
@@ -679,7 +682,7 @@ std::string GTiffGrid::metadataItem(const std::string &key, int sample) const {
 
 class GTiffDataset {
     PJ_CONTEXT *m_ctx;
-    PAFile m_fp;
+    std::unique_ptr<File> m_fp;
     TIFF *m_hTIFF = nullptr;
     bool m_hasNextGrid = false;
     uint32 m_ifdIdx = 0;
@@ -693,7 +696,7 @@ class GTiffDataset {
     // libtiff I/O routines
     static tsize_t tiffReadProc(thandle_t fd, tdata_t buf, tsize_t size) {
         GTiffDataset *self = static_cast<GTiffDataset *>(fd);
-        return pj_ctx_fread(self->m_ctx, buf, 1, size, self->m_fp);
+        return self->m_fp->read(buf, size);
     }
 
     static tsize_t tiffWriteProc(thandle_t, tdata_t, tsize_t) {
@@ -703,11 +706,8 @@ class GTiffDataset {
 
     static toff_t tiffSeekProc(thandle_t fd, toff_t off, int whence) {
         GTiffDataset *self = static_cast<GTiffDataset *>(fd);
-        // FIXME Remove cast to long when pj_ctx_fseek supports unsigned long
-        // long
-        if (pj_ctx_fseek(self->m_ctx, self->m_fp, static_cast<long>(off),
-                         whence) == 0)
-            return static_cast<toff_t>(pj_ctx_ftell(self->m_ctx, self->m_fp));
+        if (self->m_fp->seek(off, whence))
+            return static_cast<toff_t>(self->m_fp->tell());
         else
             return static_cast<toff_t>(-1);
     }
@@ -719,11 +719,10 @@ class GTiffDataset {
 
     static toff_t tiffSizeProc(thandle_t fd) {
         GTiffDataset *self = static_cast<GTiffDataset *>(fd);
-        const auto old_off = pj_ctx_ftell(self->m_ctx, self->m_fp);
-        pj_ctx_fseek(self->m_ctx, self->m_fp, 0, SEEK_END);
-        const auto file_size =
-            static_cast<toff_t>(pj_ctx_ftell(self->m_ctx, self->m_fp));
-        pj_ctx_fseek(self->m_ctx, self->m_fp, old_off, SEEK_SET);
+        const auto old_off = self->m_fp->tell();
+        self->m_fp->seek(0, SEEK_END);
+        const auto file_size = static_cast<toff_t>(self->m_fp->tell());
+        self->m_fp->seek(old_off);
         return file_size;
     }
 
@@ -732,7 +731,8 @@ class GTiffDataset {
     static void tiffUnmapProc(thandle_t, tdata_t, toff_t) {}
 
   public:
-    GTiffDataset(PJ_CONTEXT *ctx, PAFile fp) : m_ctx(ctx), m_fp(fp) {}
+    GTiffDataset(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp)
+        : m_ctx(ctx), m_fp(std::move(fp)) {}
     virtual ~GTiffDataset();
 
     bool openTIFF(const std::string &filename);
@@ -745,7 +745,6 @@ class GTiffDataset {
 GTiffDataset::~GTiffDataset() {
     if (m_hTIFF)
         TIFFClose(m_hTIFF);
-    pj_ctx_fclose(m_ctx, m_fp);
 }
 
 // ---------------------------------------------------------------------------
@@ -1048,13 +1047,15 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
 
 class GTiffVGridShiftSet : public VerticalShiftGridSet, public GTiffDataset {
 
-    GTiffVGridShiftSet(PJ_CONTEXT *ctx, PAFile fp) : GTiffDataset(ctx, fp) {}
+    GTiffVGridShiftSet(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp)
+        : GTiffDataset(ctx, std::move(fp)) {}
 
   public:
     ~GTiffVGridShiftSet() override;
 
     static std::unique_ptr<GTiffVGridShiftSet>
-    open(PJ_CONTEXT *ctx, PAFile fp, const std::string &filename);
+    open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
+         const std::string &filename);
 };
 
 #endif // TIFF_ENABLED
@@ -1192,10 +1193,10 @@ void GTiffVGrid::insertGrid(PJ_CONTEXT *ctx,
 // ---------------------------------------------------------------------------
 
 std::unique_ptr<GTiffVGridShiftSet>
-GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
+GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                          const std::string &filename) {
-    auto set =
-        std::unique_ptr<GTiffVGridShiftSet>(new GTiffVGridShiftSet(ctx, fp));
+    auto set = std::unique_ptr<GTiffVGridShiftSet>(
+        new GTiffVGridShiftSet(ctx, std::move(fp)));
     set->m_name = filename;
     set->m_format = "gtiff";
     if (!set->openTIFF(filename)) {
@@ -1293,15 +1294,14 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         return set;
     }
 
-    PAFile fp;
-    if (!(fp = pj_open_lib(ctx, filename.c_str(), "rb"))) {
+    auto fp = FileManager::open_resource_file(ctx, filename.c_str());
+    if (!fp) {
         ctx->last_errno = 0; /* don't treat as a persistent error */
         return nullptr;
     }
     if (ends_with(filename, "gtx") || ends_with(filename, "GTX")) {
-        auto grid = GTXVerticalShiftGrid::open(ctx, fp, filename);
+        auto grid = GTXVerticalShiftGrid::open(ctx, std::move(fp), filename);
         if (!grid) {
-            pj_ctx_fclose(ctx, fp);
             return nullptr;
         }
         auto set =
@@ -1316,30 +1316,26 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     /*      Load a header, to determine the file type.                      */
     /* -------------------------------------------------------------------- */
     unsigned char header[4];
-    size_t header_size;
-    if ((header_size = pj_ctx_fread(ctx, header, 1, sizeof(header), fp)) !=
-        sizeof(header)) {
-        pj_ctx_fclose(ctx, fp);
+    size_t header_size = fp->read(header, sizeof(header));
+    if (header_size != sizeof(header)) {
         return nullptr;
     }
-    pj_ctx_fseek(ctx, fp, SEEK_SET, 0);
+    fp->seek(0);
 
     if (IsTIFF(header_size, header)) {
 #ifdef TIFF_ENABLED
-        auto set = GTiffVGridShiftSet::open(ctx, fp, filename);
+        auto set = GTiffVGridShiftSet::open(ctx, std::move(fp), filename);
         if (!set)
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
 #else
         pj_log(ctx, PJ_LOG_ERROR,
                "TIFF grid, but TIFF support disabled in this build");
-        pj_ctx_fclose(ctx, fp);
         return nullptr;
 #endif
     }
 
     pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Unrecognized vertical grid format");
-    pj_ctx_fclose(ctx, fp);
     return nullptr;
 }
 
@@ -1428,39 +1424,40 @@ static double to_double(const void *data) {
 
 class NTv1Grid : public HorizontalShiftGrid {
     PJ_CONTEXT *m_ctx;
-    PAFile m_fp;
+    std::unique_ptr<File> m_fp;
 
     NTv1Grid(const NTv1Grid &) = delete;
     NTv1Grid &operator=(const NTv1Grid &) = delete;
 
   public:
-    NTv1Grid(PJ_CONTEXT *ctx, PAFile fp, const std::string &nameIn, int widthIn,
-             int heightIn, const ExtentAndRes &extentIn)
+    explicit NTv1Grid(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp,
+                      const std::string &nameIn, int widthIn, int heightIn,
+                      const ExtentAndRes &extentIn)
         : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
-          m_fp(fp) {}
+          m_fp(std::move(fp)) {}
 
     ~NTv1Grid() override;
 
     bool valueAt(int, int, float &lonShift, float &latShift) const override;
 
-    static NTv1Grid *open(PJ_CONTEXT *ctx, PAFile fp,
+    static NTv1Grid *open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                           const std::string &filename);
 };
 
 // ---------------------------------------------------------------------------
 
-NTv1Grid::~NTv1Grid() { pj_ctx_fclose(m_ctx, m_fp); }
+NTv1Grid::~NTv1Grid() = default;
 
 // ---------------------------------------------------------------------------
 
-NTv1Grid *NTv1Grid::open(PJ_CONTEXT *ctx, PAFile fp,
+NTv1Grid *NTv1Grid::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                          const std::string &filename) {
     unsigned char header[192];
 
     /* -------------------------------------------------------------------- */
     /*      Read the header.                                                */
     /* -------------------------------------------------------------------- */
-    if (pj_ctx_fread(ctx, header, sizeof(header), 1, fp) != 1) {
+    if (fp->read(header, sizeof(header)) != sizeof(header)) {
         pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return nullptr;
     }
@@ -1509,7 +1506,7 @@ NTv1Grid *NTv1Grid::open(PJ_CONTEXT *ctx, PAFile fp,
     const int rows = static_cast<int>(
         fabs((extent.northLat - extent.southLat) / extent.resLat + 0.5) + 1);
 
-    return new NTv1Grid(ctx, fp, filename, columns, rows, extent);
+    return new NTv1Grid(ctx, std::move(fp), filename, columns, rows, extent);
 }
 
 // ---------------------------------------------------------------------------
@@ -1519,11 +1516,9 @@ bool NTv1Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
 
     double two_doubles[2];
     // NTv1 is organized from east to west !
-    pj_ctx_fseek(m_ctx, m_fp,
-                 192 + 2 * sizeof(double) * (y * m_width + m_width - 1 - x),
-                 SEEK_SET);
-    if (pj_ctx_fread(m_ctx, &two_doubles[0], sizeof(two_doubles), 1, m_fp) !=
-        1) {
+    m_fp->seek(192 + 2 * sizeof(double) * (y * m_width + m_width - 1 - x));
+    if (m_fp->read(&two_doubles[0], sizeof(two_doubles)) !=
+        sizeof(two_doubles)) {
         pj_ctx_set_errno(m_ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return false;
     }
@@ -1542,39 +1537,40 @@ bool NTv1Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
 
 class CTable2Grid : public HorizontalShiftGrid {
     PJ_CONTEXT *m_ctx;
-    PAFile m_fp;
+    std::unique_ptr<File> m_fp;
 
     CTable2Grid(const CTable2Grid &) = delete;
     CTable2Grid &operator=(const CTable2Grid &) = delete;
 
   public:
-    CTable2Grid(PJ_CONTEXT *ctx, PAFile fp, const std::string &nameIn,
-                int widthIn, int heightIn, const ExtentAndRes &extentIn)
+    CTable2Grid(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
+                const std::string &nameIn, int widthIn, int heightIn,
+                const ExtentAndRes &extentIn)
         : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
-          m_fp(fp) {}
+          m_fp(std::move(fp)) {}
 
     ~CTable2Grid() override;
 
     bool valueAt(int, int, float &lonShift, float &latShift) const override;
 
-    static CTable2Grid *open(PJ_CONTEXT *ctx, PAFile fp,
+    static CTable2Grid *open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                              const std::string &filename);
 };
 
 // ---------------------------------------------------------------------------
 
-CTable2Grid::~CTable2Grid() { pj_ctx_fclose(m_ctx, m_fp); }
+CTable2Grid::~CTable2Grid() = default;
 
 // ---------------------------------------------------------------------------
 
-CTable2Grid *CTable2Grid::open(PJ_CONTEXT *ctx, PAFile fp,
+CTable2Grid *CTable2Grid::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                                const std::string &filename) {
     unsigned char header[160];
 
     /* -------------------------------------------------------------------- */
     /*      Read the header.                                                */
     /* -------------------------------------------------------------------- */
-    if (pj_ctx_fread(ctx, header, sizeof(header), 1, fp) != 1) {
+    if (fp->read(header, sizeof(header)) != sizeof(header)) {
         pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return nullptr;
     }
@@ -1615,7 +1611,7 @@ CTable2Grid *CTable2Grid::open(PJ_CONTEXT *ctx, PAFile fp,
     extent.eastLon = extent.westLon + (width - 1) * extent.resLon;
     extent.northLat = extent.southLat + (height - 1) * extent.resLon;
 
-    return new CTable2Grid(ctx, fp, filename, width, height, extent);
+    return new CTable2Grid(ctx, std::move(fp), filename, width, height, extent);
 }
 
 // ---------------------------------------------------------------------------
@@ -1625,9 +1621,8 @@ bool CTable2Grid::valueAt(int x, int y, float &lonShift,
     assert(x >= 0 && y >= 0 && x < m_width && y < m_height);
 
     float two_floats[2];
-    pj_ctx_fseek(m_ctx, m_fp, 160 + 2 * sizeof(float) * (y * m_width + x),
-                 SEEK_SET);
-    if (pj_ctx_fread(m_ctx, &two_floats[0], sizeof(two_floats), 1, m_fp) != 1) {
+    m_fp->seek(160 + 2 * sizeof(float) * (y * m_width + x));
+    if (m_fp->read(&two_floats[0], sizeof(two_floats)) != sizeof(two_floats)) {
         pj_ctx_set_errno(m_ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return false;
     }
@@ -1645,18 +1640,18 @@ bool CTable2Grid::valueAt(int x, int y, float &lonShift,
 // ---------------------------------------------------------------------------
 
 class NTv2GridSet : public HorizontalShiftGridSet {
-    PJ_CONTEXT *m_ctx;
-    PAFile m_fp;
+    std::unique_ptr<File> m_fp;
 
     NTv2GridSet(const NTv2GridSet &) = delete;
     NTv2GridSet &operator=(const NTv2GridSet &) = delete;
 
-    NTv2GridSet(PJ_CONTEXT *ctx, PAFile fp) : m_ctx(ctx), m_fp(fp) {}
+    explicit NTv2GridSet(std::unique_ptr<File> &&fp) : m_fp(std::move(fp)) {}
 
   public:
     ~NTv2GridSet() override;
 
-    static std::unique_ptr<NTv2GridSet> open(PJ_CONTEXT *ctx, PAFile fp,
+    static std::unique_ptr<NTv2GridSet> open(PJ_CONTEXT *ctx,
+                                             std::unique_ptr<File> fp,
                                              const std::string &filename);
 };
 
@@ -1667,7 +1662,7 @@ class NTv2Grid : public HorizontalShiftGrid {
 
     std::string m_name;
     PJ_CONTEXT *m_ctx; // owned by the parent NTv2GridSet
-    PAFile m_fp;       // owned by the parent NTv2GridSet
+    File *m_fp;        // owned by the parent NTv2GridSet
     unsigned long long m_offset;
     bool m_mustSwap;
 
@@ -1675,7 +1670,7 @@ class NTv2Grid : public HorizontalShiftGrid {
     NTv2Grid &operator=(const NTv2Grid &) = delete;
 
   public:
-    NTv2Grid(const std::string &nameIn, PJ_CONTEXT *ctx, PAFile fp,
+    NTv2Grid(const std::string &nameIn, PJ_CONTEXT *ctx, File *fp,
              unsigned long long offsetIn, bool mustSwapIn, int widthIn,
              int heightIn, const ExtentAndRes &extentIn)
         : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn),
@@ -1693,13 +1688,11 @@ bool NTv2Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
     float two_float[2];
     // NTv2 is organized from east to west !
     // there are 4 components: lat shift, lon shift, lat error, lon error
-    pj_ctx_fseek(
-        m_ctx, m_fp,
-        // FIXME when fseek support unsigned long long
-        static_cast<long>(m_offset +
-                          4 * sizeof(float) * (y * m_width + m_width - 1 - x)),
-        SEEK_SET);
-    if (pj_ctx_fread(m_ctx, &two_float[0], sizeof(two_float), 1, m_fp) != 1) {
+    m_fp->seek(
+        m_offset +
+        4 * sizeof(float) *
+            (static_cast<unsigned long long>(y) * m_width + m_width - 1 - x));
+    if (m_fp->read(&two_float[0], sizeof(two_float)) != sizeof(two_float)) {
         pj_ctx_set_errno(m_ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return false;
     }
@@ -1715,13 +1708,15 @@ bool NTv2Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
 
 // ---------------------------------------------------------------------------
 
-NTv2GridSet::~NTv2GridSet() { pj_ctx_fclose(m_ctx, m_fp); }
+NTv2GridSet::~NTv2GridSet() = default;
 
 // ---------------------------------------------------------------------------
 
-std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx, PAFile fp,
+std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
+                                               std::unique_ptr<File> fp,
                                                const std::string &filename) {
-    auto set = std::unique_ptr<NTv2GridSet>(new NTv2GridSet(ctx, fp));
+    File *fpRaw = fp.get();
+    auto set = std::unique_ptr<NTv2GridSet>(new NTv2GridSet(std::move(fp)));
     set->m_name = filename;
     set->m_format = "ntv2";
 
@@ -1730,7 +1725,7 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx, PAFile fp,
     /* -------------------------------------------------------------------- */
     /*      Read the header.                                                */
     /* -------------------------------------------------------------------- */
-    if (pj_ctx_fread(ctx, header, sizeof(header), 1, fp) != 1) {
+    if (fpRaw->read(header, sizeof(header)) != sizeof(header)) {
         pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return nullptr;
     }
@@ -1759,7 +1754,7 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx, PAFile fp,
     /* ==================================================================== */
     for (unsigned subfile = 0; subfile < num_subfiles; subfile++) {
         // Read header
-        if (pj_ctx_fread(ctx, header, sizeof(header), 1, fp) != 1) {
+        if (fpRaw->read(header, sizeof(header)) != sizeof(header)) {
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
             return nullptr;
         }
@@ -1824,10 +1819,10 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx, PAFile fp,
             return nullptr;
         }
 
-        auto offset = pj_ctx_ftell(ctx, fp);
+        const auto offset = fpRaw->tell();
         auto grid = std::unique_ptr<NTv2Grid>(
-            new NTv2Grid(filename + ", " + gridName, ctx, fp, offset, must_swap,
-                         columns, rows, extent));
+            new NTv2Grid(filename + ", " + gridName, ctx, fpRaw, offset,
+                         must_swap, columns, rows, extent));
         std::string parentName;
         parentName.assign(header + 24, 8);
         auto iter = mapGrids.find(parentName);
@@ -1840,7 +1835,8 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx, PAFile fp,
         mapGrids[gridName] = gridPtr;
 
         // Skip grid data. 4 components of size float
-        pj_ctx_fseek(ctx, fp, gs_count * 4 * 4, SEEK_CUR);
+        fpRaw->seek(static_cast<unsigned long long>(gs_count) * 4 * 4,
+                    SEEK_CUR);
     }
     return set;
 }
@@ -1851,13 +1847,15 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx, PAFile fp,
 
 class GTiffHGridShiftSet : public HorizontalShiftGridSet, public GTiffDataset {
 
-    GTiffHGridShiftSet(PJ_CONTEXT *ctx, PAFile fp) : GTiffDataset(ctx, fp) {}
+    GTiffHGridShiftSet(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp)
+        : GTiffDataset(ctx, std::move(fp)) {}
 
   public:
     ~GTiffHGridShiftSet() override;
 
     static std::unique_ptr<GTiffHGridShiftSet>
-    open(PJ_CONTEXT *ctx, PAFile fp, const std::string &filename);
+    open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
+         const std::string &filename);
 };
 
 // ---------------------------------------------------------------------------
@@ -1948,10 +1946,10 @@ void GTiffHGrid::insertGrid(PJ_CONTEXT *ctx,
 // ---------------------------------------------------------------------------
 
 std::unique_ptr<GTiffHGridShiftSet>
-GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
+GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                          const std::string &filename) {
-    auto set =
-        std::unique_ptr<GTiffHGridShiftSet>(new GTiffHGridShiftSet(ctx, fp));
+    auto set = std::unique_ptr<GTiffHGridShiftSet>(
+        new GTiffHGridShiftSet(ctx, std::move(fp)));
     set->m_name = filename;
     set->m_format = "gtiff";
     if (!set->openTIFF(filename)) {
@@ -2127,8 +2125,8 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         return set;
     }
 
-    PAFile fp;
-    if (!(fp = pj_open_lib(ctx, filename.c_str(), "rb"))) {
+    auto fp = FileManager::open_resource_file(ctx, filename.c_str());
+    if (!fp) {
         ctx->last_errno = 0; /* don't treat as a persistent error */
         return nullptr;
     }
@@ -2137,17 +2135,15 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     /* -------------------------------------------------------------------- */
     /*      Load a header, to determine the file type.                      */
     /* -------------------------------------------------------------------- */
-    size_t header_size;
-    if ((header_size = pj_ctx_fread(ctx, header, 1, sizeof(header), fp)) !=
-        sizeof(header)) {
+    size_t header_size = fp->read(header, sizeof(header));
+    if (header_size != sizeof(header)) {
         /* some files may be smaller that sizeof(header), eg 160, so */
         ctx->last_errno = 0; /* don't treat as a persistent error */
         pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
                "pj_gridinfo_init: short header read of %d bytes",
                (int)header_size);
     }
-
-    pj_ctx_fseek(ctx, fp, SEEK_SET, 0);
+    fp->seek(0);
 
     /* -------------------------------------------------------------------- */
     /*      Determine file type.                                            */
@@ -2155,9 +2151,8 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     if (header_size >= 144 + 16 && strncmp(header + 0, "HEADER", 6) == 0 &&
         strncmp(header + 96, "W GRID", 6) == 0 &&
         strncmp(header + 144, "TO      NAD83   ", 16) == 0) {
-        auto grid = NTv1Grid::open(ctx, fp, filename);
+        auto grid = NTv1Grid::open(ctx, std::move(fp), filename);
         if (!grid) {
-            pj_ctx_fclose(ctx, fp);
             return nullptr;
         }
         auto set = std::unique_ptr<HorizontalShiftGridSet>(
@@ -2167,9 +2162,8 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         set->m_grids.push_back(std::unique_ptr<HorizontalShiftGrid>(grid));
         return set;
     } else if (header_size >= 9 && strncmp(header + 0, "CTABLE V2", 9) == 0) {
-        auto grid = CTable2Grid::open(ctx, fp, filename);
+        auto grid = CTable2Grid::open(ctx, std::move(fp), filename);
         if (!grid) {
-            pj_ctx_fclose(ctx, fp);
             return nullptr;
         }
         auto set = std::unique_ptr<HorizontalShiftGridSet>(
@@ -2181,24 +2175,22 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     } else if (header_size >= 48 + 7 &&
                strncmp(header + 0, "NUM_OREC", 8) == 0 &&
                strncmp(header + 48, "GS_TYPE", 7) == 0) {
-        return NTv2GridSet::open(ctx, fp, filename);
+        return NTv2GridSet::open(ctx, std::move(fp), filename);
     } else if (IsTIFF(header_size,
                       reinterpret_cast<const unsigned char *>(header))) {
 #ifdef TIFF_ENABLED
-        auto set = GTiffHGridShiftSet::open(ctx, fp, filename);
+        auto set = GTiffHGridShiftSet::open(ctx, std::move(fp), filename);
         if (!set)
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
 #else
         pj_log(ctx, PJ_LOG_ERROR,
                "TIFF grid, but TIFF support disabled in this build");
-        pj_ctx_fclose(ctx, fp);
         return nullptr;
 #endif
     }
 
     pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Unrecognized horizontal grid format");
-    pj_ctx_fclose(ctx, fp);
     return nullptr;
 }
 
@@ -2247,14 +2239,15 @@ const HorizontalShiftGrid *HorizontalShiftGridSet::gridAt(double lon,
 class GTiffGenericGridShiftSet : public GenericShiftGridSet,
                                  public GTiffDataset {
 
-    GTiffGenericGridShiftSet(PJ_CONTEXT *ctx, PAFile fp)
-        : GTiffDataset(ctx, fp) {}
+    GTiffGenericGridShiftSet(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp)
+        : GTiffDataset(ctx, std::move(fp)) {}
 
   public:
     ~GTiffGenericGridShiftSet() override;
 
     static std::unique_ptr<GTiffGenericGridShiftSet>
-    open(PJ_CONTEXT *ctx, PAFile fp, const std::string &filename);
+    open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
+         const std::string &filename);
 };
 
 // ---------------------------------------------------------------------------
@@ -2375,10 +2368,10 @@ bool NullGenericShiftGrid::valueAt(int, int, int, float &out) const {
 #ifdef TIFF_ENABLED
 
 std::unique_ptr<GTiffGenericGridShiftSet>
-GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, PAFile fp,
+GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                                const std::string &filename) {
     auto set = std::unique_ptr<GTiffGenericGridShiftSet>(
-        new GTiffGenericGridShiftSet(ctx, fp));
+        new GTiffGenericGridShiftSet(ctx, std::move(fp)));
     set->m_name = filename;
     set->m_format = "gtiff";
     if (!set->openTIFF(filename)) {
@@ -2452,8 +2445,8 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         return set;
     }
 
-    PAFile fp;
-    if (!(fp = pj_open_lib(ctx, filename.c_str(), "rb"))) {
+    auto fp = FileManager::open_resource_file(ctx, filename.c_str());
+    if (!fp) {
         ctx->last_errno = 0; /* don't treat as a persistent error */
         return nullptr;
     }
@@ -2462,30 +2455,26 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     /*      Load a header, to determine the file type.                      */
     /* -------------------------------------------------------------------- */
     unsigned char header[4];
-    size_t header_size;
-    if ((header_size = pj_ctx_fread(ctx, header, 1, sizeof(header), fp)) !=
-        sizeof(header)) {
-        pj_ctx_fclose(ctx, fp);
+    size_t header_size = fp->read(header, sizeof(header));
+    if (header_size != sizeof(header)) {
         return nullptr;
     }
-    pj_ctx_fseek(ctx, fp, SEEK_SET, 0);
+    fp->seek(0);
 
     if (IsTIFF(header_size, header)) {
 #ifdef TIFF_ENABLED
-        auto set = GTiffGenericGridShiftSet::open(ctx, fp, filename);
+        auto set = GTiffGenericGridShiftSet::open(ctx, std::move(fp), filename);
         if (!set)
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
 #else
         pj_log(ctx, PJ_LOG_ERROR,
                "TIFF grid, but TIFF support disabled in this build");
-        pj_ctx_fclose(ctx, fp);
         return nullptr;
 #endif
     }
 
     pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Unrecognized generic grid format");
-    pj_ctx_fclose(ctx, fp);
     return nullptr;
 }
 
