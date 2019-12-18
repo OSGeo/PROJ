@@ -215,7 +215,9 @@ libproj_la_SOURCES = \
 	tracing.cpp \
 	\
 	grids.hpp \
-	grids.cpp
+	grids.cpp \
+	filemanager.hpp \
+	filemanager.cpp
 
 
 # The sed hack is to please MSVC

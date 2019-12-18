@@ -282,6 +282,8 @@ set(SRC_LIBPROJ_CORE
   tracing.cpp
   grids.hpp
   grids.cpp
+  filemanager.hpp
+  filemanager.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 

@@ -44,6 +44,7 @@
 #include "proj/internal/internal.hpp"
 
 #include "proj_internal.h"
+#include "filemanager.hpp"
 
 static const char * proj_lib_name =
 #ifdef PROJ_LIB
@@ -197,16 +198,17 @@ static const char *get_path_from_win32_projlib(const char *name, std::string& ou
 #endif
 
 /************************************************************************/
-/*                          pj_open_lib_ex()                            */
+/*                      pj_open_lib_internal()                          */
 /************************************************************************/
 
-static PAFile
-pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
-               char* out_full_filename, size_t out_full_filename_size) {
+static void*
+pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
+                     void* (*open_file)(projCtx, const char*, const char*),
+                     char* out_full_filename, size_t out_full_filename_size) {
     try {
         std::string fname;
         const char *sysname = nullptr;
-        PAFile fid = nullptr;
+        void* fid = nullptr;
 #ifdef WIN32
         static const char dir_chars[] = "/\\";
         const char dirSeparator = ';';
@@ -254,7 +256,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                     fname += DIR_CHAR;
                     fname += name;
                     sysname = fname.c_str();
-                    fid = pj_ctx_fopen(ctx, sysname, mode);
+                    fid = open_file(ctx, sysname, mode);
                 } catch( const std::exception& )
                 {
                 }
@@ -270,7 +272,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
                 fname += DIR_CHAR;
                 fname += name;
                 sysname = fname.c_str();
-                fid = pj_ctx_fopen(ctx, sysname, mode);
+                fid = open_file(ctx, sysname, mode);
                 if( fid )
                     break;
             }
@@ -290,7 +292,7 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
         }
 
         assert(sysname); // to make Coverity Scan happy
-        if ( fid != nullptr || (fid = pj_ctx_fopen(ctx, sysname, mode)) != nullptr)
+        if ( fid != nullptr || (fid = open_file(ctx, sysname, mode)) != nullptr)
         {
             if( out_full_filename != nullptr && out_full_filename_size > 0 )
             {
@@ -322,17 +324,53 @@ pj_open_lib_ex(projCtx ctx, const char *name, const char *mode,
 }
 
 /************************************************************************/
+/*                  pj_open_file_with_manager()                         */
+/************************************************************************/
+
+static void* pj_open_file_with_manager(projCtx ctx, const char *name,
+                                       const char * /* mode */)
+{
+    return NS_PROJ::FileManager::open(ctx, name).release();
+}
+
+/************************************************************************/
+/*                 FileManager::open_resource_file()                    */
+/************************************************************************/
+
+std::unique_ptr<NS_PROJ::File> NS_PROJ::FileManager::open_resource_file(
+                                                projCtx ctx, const char *name)
+{
+    return std::unique_ptr<NS_PROJ::File>(
+        reinterpret_cast<NS_PROJ::File*>(
+               pj_open_lib_internal(ctx, name, "rb",
+                                    pj_open_file_with_manager,
+                                    nullptr, 0)));
+}
+
+/************************************************************************/
 /*                            pj_open_lib()                             */
 /************************************************************************/
 
+#ifndef REMOVE_LEGACY_SUPPORT
+
+// Used by following legacy function
+static void* pj_ctx_fopen_adapter(projCtx ctx, const char *name, const char *mode)
+{
+    return pj_ctx_fopen(ctx, name, mode);
+}
+
+// Legacy function
 PAFile
 pj_open_lib(projCtx ctx, const char *name, const char *mode) {
-    return pj_open_lib_ex(ctx, name, mode, nullptr, 0);
+    return (PAFile)pj_open_lib_internal(ctx, name, mode, pj_ctx_fopen_adapter, nullptr, 0);
 }
+
+#endif // REMOVE_LEGACY_SUPPORT
 
 /************************************************************************/
 /*                           pj_find_file()                             */
 /************************************************************************/
+
 
 /** Returns the full filename corresponding to a proj resource file specified
  *  as a short filename.
@@ -348,11 +386,14 @@ pj_open_lib(projCtx ctx, const char *name, const char *mode) {
 int pj_find_file(projCtx ctx, const char *short_filename,
                  char* out_full_filename, size_t out_full_filename_size)
 {
-    PAFile f = pj_open_lib_ex(ctx, short_filename, "rb", out_full_filename,
-                              out_full_filename_size);
+    auto f = reinterpret_cast<NS_PROJ::File*>(
+               pj_open_lib_internal(ctx, short_filename, "rb",
+                                    pj_open_file_with_manager,
+                                    out_full_filename,
+                                    out_full_filename_size));
     if( f != nullptr )
     {
-        pj_ctx_fclose(ctx, f);
+        delete f;
         return 1;
     }
     return 0;

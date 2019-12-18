@@ -34,6 +34,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
+#include "filemanager.hpp"
 
 static PAFile stdio_fopen(projCtx ctx, const char *filename,
                              const char *access);
@@ -212,3 +213,28 @@ char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
     }
     return line;
 }
+
+/************************************************************************/
+/*                         pj_ctx_set_fileapi()                         */
+/************************************************************************/
+
+void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
+
+{
+    if (nullptr==ctx)
+        return;
+    ctx->fileapi_legacy = fileapi;
+}
+
+/************************************************************************/
+/*                         pj_ctx_get_fileapi()                         */
+/************************************************************************/
+
+projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
+
+{
+    if (nullptr==ctx)
+        return nullptr;
+    return ctx->fileapi_legacy;
+}
+

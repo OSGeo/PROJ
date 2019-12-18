@@ -258,28 +258,3 @@ void *pj_ctx_get_app_data( projCtx ctx )
         return nullptr;
     return ctx->logger_app_data;
 }
-
-/************************************************************************/
-/*                         pj_ctx_set_fileapi()                         */
-/************************************************************************/
-
-void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
-
-{
-    if (nullptr==ctx)
-        return;
-    ctx->fileapi_legacy = fileapi;
-}
-
-/************************************************************************/
-/*                         pj_ctx_get_fileapi()                         */
-/************************************************************************/
-
-projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
-
-{
-    if (nullptr==ctx)
-        return nullptr;
-    return ctx->fileapi_legacy;
-}
-
