@@ -29,10 +29,17 @@
 #define FROM_PROJ_CPP
 #endif
 
+#include <algorithm>
+
 #include "filemanager.hpp"
 #include "proj.h"
 #include "proj/internal/internal.hpp"
 #include "proj_internal.h"
+
+#ifdef CURL_ENABLED
+#include <curl/curl.h>
+#include <sqlite3.h> // for sqlite3_snprintf
+#endif
 
 //! @cond Doxygen_Suppress
 
@@ -258,6 +265,152 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename) {
 
 // ---------------------------------------------------------------------------
 
+#ifdef CURL_ENABLED
+
+struct CurlFileHandle {
+    CURL *m_handle = nullptr;
+    std::string m_headers;
+
+    CurlFileHandle(const CurlFileHandle &) = delete;
+    CurlFileHandle &operator=(const CurlFileHandle &) = delete;
+
+    explicit CurlFileHandle(CURL *handle, std::string &&headers)
+        : m_handle(handle), m_headers(std::move(headers)) {}
+    ~CurlFileHandle();
+};
+
+// ---------------------------------------------------------------------------
+
+CurlFileHandle::~CurlFileHandle() { curl_easy_cleanup(m_handle); }
+
+// ---------------------------------------------------------------------------
+
+static size_t pj_curl_write_func(void *buffer, size_t count, size_t nmemb,
+                                 void *req) {
+    const size_t nSize = count * nmemb;
+    auto pStr = static_cast<std::string *>(req);
+    if (pStr->size() + nSize > pStr->capacity()) {
+        // to avoid servers not honouring Range to cause excessive memory
+        // allocation
+        return 0;
+    }
+    pStr->append(static_cast<const char *>(buffer), nSize);
+    return nmemb;
+}
+
+// ---------------------------------------------------------------------------
+
+static PROJ_NETWORK_HANDLE *pj_curl_open(PJ_CONTEXT *, const char *url,
+                                         size_t size_to_read, void *buffer,
+                                         size_t *out_size_read, void *) {
+    CURL *hCurlHandle = curl_easy_init();
+    if (!hCurlHandle)
+        return nullptr;
+    curl_easy_setopt(hCurlHandle, CURLOPT_URL, url);
+
+    if (getenv("PROJ_CURL_VERBOSE"))
+        curl_easy_setopt(hCurlHandle, CURLOPT_VERBOSE, 1);
+
+// CURLOPT_SUPPRESS_CONNECT_HEADERS is defined in curl 7.54.0 or newer.
+#if LIBCURL_VERSION_NUM >= 0x073600
+    curl_easy_setopt(hCurlHandle, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
+#endif
+
+    // Enable following redirections.  Requires libcurl 7.10.1 at least.
+    curl_easy_setopt(hCurlHandle, CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt(hCurlHandle, CURLOPT_MAXREDIRS, 10);
+
+    if (getenv("PROJ_UNSAFE_SSL")) {
+        curl_easy_setopt(hCurlHandle, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(hCurlHandle, CURLOPT_SSL_VERIFYHOST, 0L);
+    }
+
+    char szBuffer[128];
+    sqlite3_snprintf(sizeof(szBuffer), szBuffer, "0-%llu", size_to_read - 1);
+    curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
+
+    std::string headers;
+    headers.reserve(16 * 1024);
+    curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, &headers);
+    curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION, pj_curl_write_func);
+
+    std::string body;
+    body.reserve(size_to_read);
+    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
+    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, pj_curl_write_func);
+
+    curl_easy_perform(hCurlHandle);
+
+    long response_code = 0;
+    curl_easy_getinfo(hCurlHandle, CURLINFO_HTTP_CODE, &response_code);
+
+    curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, nullptr);
+    curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION, nullptr);
+
+    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
+    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
+
+    if (response_code == 0 || response_code >= 300) {
+        curl_easy_cleanup(hCurlHandle);
+        return nullptr;
+    }
+
+    if (!body.empty()) {
+        memcpy(buffer, body.data(), std::min(size_to_read, body.size()));
+    }
+    *out_size_read = std::min(size_to_read, body.size());
+
+    return reinterpret_cast<PROJ_NETWORK_HANDLE *>(
+        new CurlFileHandle(hCurlHandle, std::move(headers)));
+}
+
+// ---------------------------------------------------------------------------
+
+static void pj_curl_close(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *handle,
+                          void * /*user_data*/) {
+    delete reinterpret_cast<CurlFileHandle *>(handle);
+}
+
+// ---------------------------------------------------------------------------
+
+static size_t pj_curl_read_range(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *raw_handle,
+                                 unsigned long long offset, size_t size_to_read,
+                                 void *buffer, void *) {
+    auto handle = reinterpret_cast<CurlFileHandle *>(raw_handle);
+    auto hCurlHandle = handle->m_handle;
+
+    char szBuffer[128];
+    sqlite3_snprintf(sizeof(szBuffer), szBuffer, "%llu-%llu", offset,
+                     offset + size_to_read - 1);
+    curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
+
+    std::string body;
+    body.reserve(size_to_read);
+    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
+    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, pj_curl_write_func);
+
+    curl_easy_perform(hCurlHandle);
+
+    long response_code = 0;
+    curl_easy_getinfo(hCurlHandle, CURLINFO_HTTP_CODE, &response_code);
+
+    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
+    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
+
+    if (response_code == 0 || response_code >= 300) {
+        return 0;
+    }
+
+    if (!body.empty()) {
+        memcpy(buffer, body.data(), std::min(size_to_read, body.size()));
+    }
+    return std::min(size_to_read, body.size());
+}
+
+#else
+
+// ---------------------------------------------------------------------------
+
 static PROJ_NETWORK_HANDLE *
 no_op_network_open(PJ_CONTEXT *ctx, const char * /* url */,
                    size_t,   /* size to read */
@@ -281,12 +434,20 @@ static const char *no_op_network_get_last_error(PJ_CONTEXT *,
     return "Network functionality not available";
 }
 
+#endif
+
 // ---------------------------------------------------------------------------
 
 void FileManager::fillDefaultNetworkInterface(PJ_CONTEXT *ctx) {
+#ifdef CURL_ENABLED
+    ctx->networking.open = pj_curl_open;
+    ctx->networking.close = pj_curl_close;
+    ctx->networking.read_range = pj_curl_read_range;
+#else
     ctx->networking.open = no_op_network_open;
     ctx->networking.close = no_op_network_close;
     ctx->networking.get_last_error = no_op_network_get_last_error;
+#endif
 }
 
 // ---------------------------------------------------------------------------

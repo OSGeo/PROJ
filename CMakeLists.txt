@@ -83,6 +83,9 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
     set(PROJ_CXX_WARN_FLAGS -Wall)
   endif()
 endif()
+
+add_definitions(-DNOMINMAX)
+
 set(PROJ_C_WARN_FLAGS "${PROJ_C_WARN_FLAGS}"
   CACHE STRING "C flags used to compile PROJ targets")
 set(PROJ_CXX_WARN_FLAGS "${PROJ_CXX_WARN_FLAGS}"
