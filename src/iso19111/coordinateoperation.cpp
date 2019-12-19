@@ -8767,7 +8767,8 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
         }
     }
 
-    if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON) {
+    if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON ||
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
@@ -9437,6 +9438,19 @@ void Transformation::_exportToPROJString(
             // https://github.com/OSGeo/proj.4/issues/1071)
             formatter->addParam("grids", fileParameter->valueFile());
             formatter->addParam("multiplier", 0.001);
+            return;
+        }
+    }
+
+    if (methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD) {
+        auto fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
+                           EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            formatter->addStep("vgridshift");
+            formatter->addParam("grids", fileParameter->valueFile());
+            formatter->addParam("multiplier", 1.0);
             return;
         }
     }
