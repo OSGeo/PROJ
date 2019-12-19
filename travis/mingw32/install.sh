@@ -47,7 +47,7 @@ ln -s /usr/$MINGW_ARCH/bin/libsqlite3-0.dll $WINE_SYSDIR
 # autoconf build
 mkdir build_autoconf
 cd build_autoconf
-CC="ccache $MINGW_ARCH-gcc" CXX="ccache $MINGW_ARCH-g++" LD=$MINGW_ARCH-ld ../configure --host=$MINGW_ARCH --prefix=/tmp/proj_autoconf_install
+CC="ccache $MINGW_ARCH-gcc" CXX="ccache $MINGW_ARCH-g++" LD=$MINGW_ARCH-ld ../configure --host=$MINGW_ARCH --prefix=/tmp/proj_autoconf_install --without-curl
 make -j2
 make install
 make dist-all
@@ -63,7 +63,7 @@ cd ..
 # autoconf build with grids
 mkdir build_autoconf_grids
 cd build_autoconf_grids
-CC="ccache $MINGW_ARCH-gcc" CXX="ccache $MINGW_ARCH-g++" LD=$MINGW_ARCH-ld ../configure --host=$MINGW_ARCH --prefix=/tmp/proj_autoconf_install_nad
+CC="ccache $MINGW_ARCH-gcc" CXX="ccache $MINGW_ARCH-g++" LD=$MINGW_ARCH-ld ../configure --host=$MINGW_ARCH --prefix=/tmp/proj_autoconf_install_nad --without-curl
 make -j2
 make install
 find /tmp/proj_autoconf_install_nad

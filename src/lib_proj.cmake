@@ -446,6 +446,11 @@ if(NOT DISABLE_TIFF_IS_STRONGLY_DISCOURAGED)
   target_link_libraries(${PROJ_CORE_TARGET} ${TIFF_LIBRARY})
 endif()
 
+if(CURL_FOUND)
+  include_directories(${CURL_INCLUDE_DIR})
+  target_link_libraries(${PROJ_CORE_TARGET} ${CURL_LIBRARY})
+endif()
+
 if(MSVC)
   target_compile_definitions(${PROJ_CORE_TARGET}
     PRIVATE PROJ_MSVC_DLL_EXPORT=1)

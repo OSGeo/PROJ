@@ -148,6 +148,21 @@ if(NOT DISABLE_TIFF_IS_STRONGLY_DISCOURAGED)
 endif()
 
 ################################################################################
+# Check for curl
+################################################################################
+
+option(ENABLE_CURL "Enable Curl support" ON)
+if(ENABLE_CURL)
+  find_package(CURL REQUIRED)
+  if(CURL_FOUND)
+    boost_report_value(CURL_FOUND)
+  else()
+    message(SEND_ERROR "curl dependency not found!")
+  endif()
+  add_definitions(-DCURL_ENABLED)
+endif()
+
+################################################################################
 # threading configuration
 ################################################################################
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)

@@ -321,6 +321,54 @@ AC_SUBST(TIFF_LIBS,$TIFF_LIBS)
 AC_SUBST(TIFF_ENABLED_FLAGS,$TIFF_ENABLED_FLAGS)
 
 dnl ---------------------------------------------------------------------------
+dnl Check for curl
+dnl ---------------------------------------------------------------------------
+
+FOUND_CURL=no
+CURL_CFLAGS=
+CURL_LIB=
+
+AC_ARG_WITH(curl,
+    [  --with-curl[=ARG]       Enable curl support (ARG=path to curl-config.)],,,)
+
+dnl Clear some cache variables
+unset ac_cv_path_LIBCURL
+
+if test "`basename xx/$with_curl`" = "curl-config" ; then
+  LIBCURL_CONFIG="$with_curl"
+elif test "$with_curl" = "no" ; then
+  LIBCURL_CONFIG=no
+else
+  AC_PATH_PROG(LIBCURL_CONFIG, curl-config, not-found)
+fi
+
+if test "$LIBCURL_CONFIG" = "not-found" ; then
+  AC_MSG_ERROR([curl not found. If wanting to do a build without curl support (and thus without built-in networking capability), explictly disable it with --without-curl])
+elif test "$LIBCURL_CONFIG" != "no" ; then
+
+  CURL_VERNUM=`$LIBCURL_CONFIG --vernum`
+  CURL_VER=`$LIBCURL_CONFIG --version | awk '{print $2}'`
+
+  AC_MSG_RESULT([        found libcurl version $CURL_VER])
+
+  AC_CHECK_LIB(curl,curl_global_init,FOUND_CURL=yes,FOUND_CURL=no,`$LIBCURL_CONFIG --libs`)
+
+  if test "$FOUND_CURL" = "no" ; then
+    AC_MSG_ERROR([curl not found. If wanting to do a build without curl support (and thus without built-in networking capability), explictly disable it with --without-curl])
+  fi
+  CURL_ENABLED_FLAGS=-DCURL_ENABLED
+fi
+
+if test "$FOUND_CURL" = "yes" ; then
+  CURL_CFLAGS=`$LIBCURL_CONFIG --cflags`
+  CURL_LIBS=`$LIBCURL_CONFIG --libs`
+fi
+
+AC_SUBST(CURL_CFLAGS,$CURL_CFLAGS)
+AC_SUBST(CURL_LIBS,$CURL_LIBS)
+AC_SUBST(CURL_ENABLED_FLAGS,$CURL_ENABLED_FLAGS)
+
+dnl ---------------------------------------------------------------------------
 dnl Check for external Google Test
 dnl ---------------------------------------------------------------------------
 

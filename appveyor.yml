@@ -28,6 +28,7 @@ build_script:
   - cd ..
   - vcpkg install sqlite3:"%platform%"-windows
   - vcpkg install tiff:"%platform%"-windows
+  - vcpkg install curl:"%platform%"-windows
   - set SQLITE3_BIN=%APPVEYOR_BUILD_FOLDER%\sqlite3\bin
   - mkdir %SQLITE3_BIN%
   - ps: |
