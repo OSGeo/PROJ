@@ -35,6 +35,8 @@
 
 NS_PROJ_START
 
+//! @cond Doxygen_Suppress
+
 class File;
 
 class FileManager {
@@ -48,6 +50,8 @@ class FileManager {
     // "High-level" interface, honoring PROJ_LIB and the like.
     static std::unique_ptr<File> open_resource_file(PJ_CONTEXT *ctx,
                                                     const char *name);
+
+    static void fillDefaultNetworkInterface(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
@@ -62,6 +66,8 @@ class File {
     virtual bool seek(unsigned long long offset, int whence = SEEK_SET) = 0;
     virtual unsigned long long tell() = 0;
 };
+
+//! @endcond Doxygen_Suppress
 
 NS_PROJ_END
 

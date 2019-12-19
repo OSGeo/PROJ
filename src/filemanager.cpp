@@ -25,10 +25,20 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
+#endif
+
 #include "filemanager.hpp"
+#include "proj.h"
+#include "proj/internal/internal.hpp"
 #include "proj_internal.h"
 
+//! @cond Doxygen_Suppress
+
 NS_PROJ_START
+
+using namespace internal;
 
 // ---------------------------------------------------------------------------
 
@@ -160,6 +170,79 @@ std::unique_ptr<File> FileLegacyAdapter::open(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+class NetworkFile : public File {
+    PJ_CONTEXT *m_ctx;
+    PROJ_NETWORK_HANDLE *m_handle;
+    unsigned long long m_pos = 0;
+
+    NetworkFile(const NetworkFile &) = delete;
+    NetworkFile &operator=(const NetworkFile &) = delete;
+
+  protected:
+    NetworkFile(PJ_CONTEXT *ctx, PROJ_NETWORK_HANDLE *handle)
+        : m_ctx(ctx), m_handle(handle) {}
+
+  public:
+    ~NetworkFile() override;
+
+    size_t read(void *buffer, size_t sizeBytes) override;
+    bool seek(unsigned long long offset, int whence) override;
+    unsigned long long tell() override;
+
+    static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
+};
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
+    std::vector<unsigned char> buffer(16 * 1024);
+    size_t size_read = 0;
+    auto handle = ctx->networking.open(ctx, filename, buffer.size(), &buffer[0],
+                                       &size_read, ctx->networking.user_data);
+    return std::unique_ptr<File>(handle ? new NetworkFile(ctx, handle)
+                                        : nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
+    size_t nRead = m_ctx->networking.read_range(
+        m_ctx, m_handle, m_pos, sizeBytes, buffer, m_ctx->networking.user_data);
+    m_pos += nRead;
+    return nRead;
+}
+
+// ---------------------------------------------------------------------------
+
+bool NetworkFile::seek(unsigned long long offset, int whence) {
+    if (whence == SEEK_SET) {
+        m_pos = offset;
+    } else if (whence == SEEK_CUR) {
+        m_pos += offset;
+    } else {
+        if (offset != 0)
+            return false;
+        const auto filesize = m_ctx->networking.get_file_size(
+            m_ctx, m_handle, m_ctx->networking.user_data);
+        if (filesize == 0)
+            return false;
+        m_pos = filesize;
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+unsigned long long NetworkFile::tell() { return m_pos; }
+
+// ---------------------------------------------------------------------------
+
+NetworkFile::~NetworkFile() {
+    m_ctx->networking.close(m_ctx, m_handle, m_ctx->networking.user_data);
+}
+
+// ---------------------------------------------------------------------------
+
 std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename) {
 #ifndef REMOVE_LEGACY_SUPPORT
     // If the user has specified a legacy fileapi, use it
@@ -167,7 +250,88 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename) {
         return FileLegacyAdapter::open(ctx, filename);
     }
 #endif
+    if (starts_with(filename, "http://") || starts_with(filename, "https://")) {
+        return NetworkFile::open(ctx, filename);
+    }
     return FileStdio::open(ctx, filename);
 }
 
+// ---------------------------------------------------------------------------
+
+static PROJ_NETWORK_HANDLE *
+no_op_network_open(PJ_CONTEXT *ctx, const char * /* url */,
+                   size_t,   /* size to read */
+                   void *,   /* buffer to update with bytes read*/
+                   size_t *, /* output: size actually read */
+                   void * /*user_data*/) {
+    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Network functionality not available");
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+static void no_op_network_close(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *,
+                                void * /*user_data*/) {}
+
+// ---------------------------------------------------------------------------
+
+static const char *no_op_network_get_last_error(PJ_CONTEXT *,
+                                                PROJ_NETWORK_HANDLE *,
+                                                void * /*user_data*/) {
+    return "Network functionality not available";
+}
+
+// ---------------------------------------------------------------------------
+
+void FileManager::fillDefaultNetworkInterface(PJ_CONTEXT *ctx) {
+    ctx->networking.open = no_op_network_open;
+    ctx->networking.close = no_op_network_close;
+    ctx->networking.get_last_error = no_op_network_get_last_error;
+}
+
+// ---------------------------------------------------------------------------
+
 NS_PROJ_END
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** Define a custom set of callbacks for network access.
+ *
+ * All callbacks should be provided (non NULL pointers).
+ *
+ * @param ctx PROJ context, or NULL
+ * @param open_cbk Callback to open a remote file given its URL
+ * @param close_cbk Callback to close a remote file.
+ * @param get_header_value_cbk Callback to get HTTP headers
+ * @param get_file_size_cbk Callback to get the size of the remote file.
+ * @param read_range_cbk Callback to read a range of bytes inside a remote file.
+ * @param get_last_error_cbk Callback to get last error message.
+ * @param user_data Arbitrary pointer provided by the user, and passed to the
+ * above callbacks. May be NULL.
+ * @return TRUE in case of success.
+ */
+int proj_context_set_network_callbacks(
+    PJ_CONTEXT *ctx, proj_network_open_cbk_type open_cbk,
+    proj_network_close_cbk_type close_cbk,
+    proj_network_get_header_value_cbk_type get_header_value_cbk,
+    proj_network_get_file_size_cbk_type get_file_size_cbk,
+    proj_network_read_range_type read_range_cbk,
+    proj_network_get_last_error_type get_last_error_cbk, void *user_data) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    if (!open_cbk || !close_cbk || !get_header_value_cbk ||
+        !get_file_size_cbk || !read_range_cbk || !get_last_error_cbk) {
+        return false;
+    }
+    ctx->networking.open = open_cbk;
+    ctx->networking.close = close_cbk;
+    ctx->networking.get_header_value = get_header_value_cbk;
+    ctx->networking.get_file_size = get_file_size_cbk;
+    ctx->networking.read_range = read_range_cbk;
+    ctx->networking.get_last_error = get_last_error_cbk;
+    ctx->networking.user_data = user_data;
+    return true;
+}

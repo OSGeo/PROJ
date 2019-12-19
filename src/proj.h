@@ -353,6 +353,82 @@ void PROJ_DLL proj_context_set_search_paths(PJ_CONTEXT *ctx, int count_paths, co
 void PROJ_DLL proj_context_use_proj4_init_rules(PJ_CONTEXT *ctx, int enable);
 int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_legacy_code_path);
 
+/*! @endcond */
+
+/** Opaque structure for PROJ. Implementations might cast it to their
+ * structure/class of choice. */
+typedef struct PROJ_NETWORK_HANDLE PROJ_NETWORK_HANDLE;
+
+/** Network access: open callback
+ * 
+ * Should try to read the size_to_read first bytes of the file of URL url,
+ * and write them to buffer. *out_size_read should be updated with the actual
+ * amount of bytes read (== size_to_read if the file is larger than size_to_read).
+ * During this read, the implementation should make sure to store the HTTP
+ * headers from the server response to be able to respond to
+ * proj_network_get_header_value_cbk_type and proj_network_get_file_size_cbk_type
+ * callbacks.
+ *
+ * @return a non-NULL opaque handle in case of success.
+ */
+typedef PROJ_NETWORK_HANDLE* (*proj_network_open_cbk_type)(
+                                                        PJ_CONTEXT* ctx,
+                                                        const char* url,
+                                                        size_t size_to_read,
+                                                        void* buffer,
+                                                        size_t* out_size_read,
+                                                        void* user_data);
+
+/** Network access: close callback */
+typedef void (*proj_network_close_cbk_type)(PJ_CONTEXT* ctx,
+                                            PROJ_NETWORK_HANDLE* handle,
+                                            void* user_data);
+
+/** Network access: get HTTP headers */
+typedef const char* (*proj_network_get_header_value_cbk_type)(
+                                            PJ_CONTEXT* ctx,
+                                            PROJ_NETWORK_HANDLE* handle,
+                                            const char* header_name,
+                                            void* user_data);
+
+/** Network access: get file size */
+typedef unsigned long long (*proj_network_get_file_size_cbk_type)(
+                                            PJ_CONTEXT* ctx,
+                                            PROJ_NETWORK_HANDLE* handle,
+                                            void* user_data);
+
+/** Network access: read range
+ *
+ * Read size_to_read bytes from handle, starting at offset, into
+ * buffer.
+ * @return the number of bytes actually read (0 in case of error)
+ */
+typedef size_t (*proj_network_read_range_type)(
+                                            PJ_CONTEXT* ctx,
+                                            PROJ_NETWORK_HANDLE* handle,
+                                            unsigned long long offset,
+                                            size_t size_to_read,
+                                            void* buffer,
+                                            void* user_data);
+
+/** Network access: get last error message */
+typedef const char* (*proj_network_get_last_error_type)(
+                                            PJ_CONTEXT* ctx,
+                                            PROJ_NETWORK_HANDLE*,
+                                            void* user_data);
+
+int PROJ_DLL proj_context_set_network_callbacks(
+    PJ_CONTEXT* ctx,
+    proj_network_open_cbk_type open_cbk,
+    proj_network_close_cbk_type close_cbk,
+    proj_network_get_header_value_cbk_type get_header_value_cbk,
+    proj_network_get_file_size_cbk_type get_file_size_cbk,
+    proj_network_read_range_type read_range_cbk,
+    proj_network_get_last_error_type get_last_error_cbk,
+    void* user_data);
+
+/*! @cond Doxygen_Suppress */
+
 /* Manage the transformation definition object PJ */
 PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ PROJ_DLL *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);

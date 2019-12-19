@@ -666,6 +666,17 @@ struct projFileAPI_t;
 
 struct projCppContext;
 
+struct projNetworkCallbacksAndData
+{
+    proj_network_open_cbk_type open = nullptr;
+    proj_network_close_cbk_type close = nullptr;
+    proj_network_get_header_value_cbk_type get_header_value = nullptr;
+    proj_network_get_file_size_cbk_type get_file_size = nullptr;
+    proj_network_read_range_type read_range = nullptr;
+    proj_network_get_last_error_type get_last_error = nullptr;
+    void* user_data = nullptr;
+};
+
 /* proj thread context */
 struct projCtx_t {
     int     last_errno = 0;
@@ -683,6 +694,8 @@ struct projCtx_t {
     const char* (*file_finder_legacy) (const char*) = nullptr; // Only for proj_api compat. To remove once it is removed
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
+
+    projNetworkCallbacksAndData networking{};
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
 

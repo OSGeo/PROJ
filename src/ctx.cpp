@@ -33,6 +33,7 @@
 
 #include "proj_experimental.h"
 #include "proj_internal.h"
+#include "filemanager.hpp"
 
 /************************************************************************/
 /*                             pj_get_ctx()                             */
@@ -96,6 +97,7 @@ projCtx_t projCtx_t::createDefault()
     ctx.debug_level = PJ_LOG_NONE;
     ctx.logger = pj_stderr_logger;
     ctx.fileapi_legacy = pj_get_default_fileapi();
+    NS_PROJ::FileManager::fillDefaultNetworkInterface(&ctx);
 
     if( getenv("PROJ_DEBUG") != nullptr )
     {
@@ -139,6 +141,7 @@ projCtx_t::projCtx_t(const projCtx_t& other)
     file_finder = other.file_finder;
     file_finder_legacy = other.file_finder_legacy;
     file_finder_user_data = other.file_finder_user_data;
+    networking = other.networking;
 }
 
 /************************************************************************/

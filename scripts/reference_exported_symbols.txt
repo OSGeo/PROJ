@@ -795,6 +795,7 @@ proj_context_guess_wkt_dialect
 proj_context_set_autoclose_database
 proj_context_set_database_path
 proj_context_set_file_finder
+proj_context_set_network_callbacks
 proj_context_set(PJconsts*, projCtx_t*)
 proj_context_set_search_paths
 proj_context_use_proj4_init_rules

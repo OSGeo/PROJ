@@ -53,6 +53,8 @@ PROJ_LIB;
 nullptr;
 #endif
 
+using namespace NS_PROJ::internal;
+
 /************************************************************************/
 /*                           pj_set_finder()                            */
 /************************************************************************/
@@ -238,7 +240,9 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
         else if (strchr(dir_chars,*name)
                 || (*name == '.' && strchr(dir_chars,name[1])) 
                 || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
-                || (name[0] != '\0' && name[1] == ':' && strchr(dir_chars,name[2])) )
+                || (name[0] != '\0' && name[1] == ':' && strchr(dir_chars,name[2]))
+                || starts_with(name, "http://")
+                || starts_with(name, "https://"))
             sysname = name;
 
         /* or try to use application provided file finder */
