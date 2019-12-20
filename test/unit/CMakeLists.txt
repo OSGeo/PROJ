@@ -147,3 +147,18 @@ target_link_libraries(gie_self_tests
 add_test(NAME gie_self_tests COMMAND gie_self_tests)
 set_property(TEST gie_self_tests
         PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
+
+
+add_executable(test_network
+  main.cpp
+  test_network.cpp)
+if(CURL_FOUND)
+  include_directories(${CURL_INCLUDE_DIR})
+  target_link_libraries(test_network ${CURL_LIBRARY})
+endif()
+target_link_libraries(test_network
+  GTest::gtest
+  ${PROJ_LIBRARIES})
+add_test(NAME test_network COMMAND test_network)
+set_property(TEST test_network
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data;PROJ_SOURCE_DATA=${PROJECT_SOURCE_DIR}/data")

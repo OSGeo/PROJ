@@ -260,10 +260,7 @@ NetworkChunkCache::get(const std::string &url, unsigned long long chunkIdx) {
 
 // ---------------------------------------------------------------------------
 
-void NetworkChunkCache::clear()
-{
-    cache_.clear();
-}
+void NetworkChunkCache::clear() { cache_.clear(); }
 
 // ---------------------------------------------------------------------------
 
@@ -672,10 +669,7 @@ void FileManager::fillDefaultNetworkInterface(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
-void FileManager::clearCache()
-{
-    gNetworkChunkCache.clear();
-}
+void FileManager::clearCache() { gNetworkChunkCache.clear(); }
 
 // ---------------------------------------------------------------------------
 
