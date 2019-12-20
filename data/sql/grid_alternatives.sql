@@ -1500,6 +1500,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NA27NA83.GSB',
+                              'na27na83.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
 -- two grid names in EPSG point to the same file distributed by NRCan
 INSERT INTO grid_alternatives(original_grid_name,
                               proj_grid_name,
@@ -1539,6 +1554,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               package_name,
                               url, direct_download, open_license, directory)
                       VALUES ('CQ77NA83.GSB',
+                              'cq77na83.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGQ77-98.gsb',
                               'CQ77SCRS.GSB',
                               'NTv2',
                               'hgridshift',
