@@ -49,6 +49,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include "grids.hpp"
+#include "filemanager.hpp"
 
 using namespace NS_PROJ;
 
@@ -262,4 +263,5 @@ void proj_cleanup() {
 /*****************************************************************************/
   pj_clear_initcache();
   pj_deallocate_grids();
+  FileManager::clearCache();
 }

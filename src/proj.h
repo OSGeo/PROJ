@@ -361,7 +361,8 @@ typedef struct PROJ_NETWORK_HANDLE PROJ_NETWORK_HANDLE;
 
 /** Network access: open callback
  * 
- * Should try to read the size_to_read first bytes of the file of URL url,
+ * Should try to read the size_to_read first bytes at the specified offset of
+ * the file given by URL url,
  * and write them to buffer. *out_size_read should be updated with the actual
  * amount of bytes read (== size_to_read if the file is larger than size_to_read).
  * During this read, the implementation should make sure to store the HTTP
@@ -372,12 +373,13 @@ typedef struct PROJ_NETWORK_HANDLE PROJ_NETWORK_HANDLE;
  * @return a non-NULL opaque handle in case of success.
  */
 typedef PROJ_NETWORK_HANDLE* (*proj_network_open_cbk_type)(
-                                                        PJ_CONTEXT* ctx,
-                                                        const char* url,
-                                                        size_t size_to_read,
-                                                        void* buffer,
-                                                        size_t* out_size_read,
-                                                        void* user_data);
+                                                      PJ_CONTEXT* ctx,
+                                                      const char* url,
+                                                      unsigned long long offset,
+                                                      size_t size_to_read,
+                                                      void* buffer,
+                                                      size_t* out_size_read,
+                                                      void* user_data);
 
 /** Network access: close callback */
 typedef void (*proj_network_close_cbk_type)(PJ_CONTEXT* ctx,

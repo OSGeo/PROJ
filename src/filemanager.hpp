@@ -52,6 +52,8 @@ class FileManager {
                                                     const char *name);
 
     static void fillDefaultNetworkInterface(PJ_CONTEXT *ctx);
+
+    static void clearCache();
 };
 
 // ---------------------------------------------------------------------------
