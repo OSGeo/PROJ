@@ -140,11 +140,11 @@ elif args.check_filelist:
                 first_line = False
                 continue
             filename, type, unit, source_crs, target_crs, interpolation_crs, _, _, _ = row
-            if type == 'DEFORMATION_MODEL':
+            if type in ('DEFORMATION_MODEL', 'VELOCITY_MODEL'):
                 continue
             assert type in ('HORIZONTAL_OFFSET',
                             'VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL',
-                            'VERTICAL_OFFSET_VERTICAL_TO_VERTICAL')
+                            'VERTICAL_OFFSET_VERTICAL_TO_VERTICAL'), type
             set_filenames_from_csv.add(filename)
 
             assert filename in set_grids, filename
@@ -203,7 +203,7 @@ elif args.check_filelist:
                         e += 360
                     else:
                         w -= 360
-                if filename not in ('c1hpgn.gsb', 'c2hpgn.gsb', 'guhpgn.gsb', 'g2009g01.gtx','g2009s01.gtx','g2012bg0.gtx', ):
+                if filename not in ('c1hpgn.gsb', 'c2hpgn.gsb', 'guhpgn.gsb', 'g2009g01.gtx','g2009s01.gtx','g2012bg0.gtx', 'MAY76V20.gsb', ):
                     assert grid_w < e, (filename, source_crs, grid_w, e)
                     assert grid_e > w, (filename, source_crs, grid_e, w)
                     assert grid_s < n, (filename, source_crs, grid_s, n)
