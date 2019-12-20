@@ -8768,7 +8768,7 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ) {
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);

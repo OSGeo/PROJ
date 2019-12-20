@@ -6540,10 +6540,14 @@ TEST(operation, transformation_VERTCON_to_PROJ_string) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, transformation_NZLVD_to_PROJ_string) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
     auto op = factory->createCoordinateOperation("7860", false);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()), 
-              "+proj=vgridshift +grids=auckland-1946-to-nzvd2016-conversion.csv +multiplier=1");
+    EXPECT_EQ(op->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              "+proj=vgridshift +grids=auckht1946-nzvd2016.gtx +multiplier=1");
 }
 
 // ---------------------------------------------------------------------------
