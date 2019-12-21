@@ -92,6 +92,31 @@ FOR EACH ROW BEGIN
                       (SELECT auth_name || code FROM geodetic_crs
                        WHERE type = 'geographic 3D'));
 
+    -- check that transformations intersect the area of use of their source/target CRS
+    -- EPSG, ESRI and IGNF have cases where this does not hold.
+    SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its source CRS')
+        WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, area va, area ca WHERE
+                      v.deprecated = 0 AND
+                      v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF') AND
+                      v.source_crs_auth_name = c.auth_name AND
+                      v.source_crs_code = c.code AND
+                      v.area_of_use_auth_name = va.auth_name AND
+                      v.area_of_use_code = va.code AND
+                      c.area_of_use_auth_name = ca.auth_name AND
+                      c.area_of_use_code = ca.code AND
+                      NOT (ca.south_lat < va.north_lat AND va.south_lat < ca.north_lat));
+    SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its target CRS')
+        WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, area va, area ca WHERE
+                      v.deprecated = 0 AND
+                      v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF') AND
+                      v.target_crs_auth_name = c.auth_name AND
+                      v.target_crs_code = c.code AND
+                      v.area_of_use_auth_name = va.auth_name AND
+                      v.area_of_use_code = va.code AND
+                      c.area_of_use_auth_name = ca.auth_name AND
+                      c.area_of_use_code = ca.code AND
+                      NOT (ca.south_lat < va.north_lat AND va.south_lat < ca.north_lat));
+
     -- check geoid_model table
     SELECT RAISE(ABORT, 'missing GEOID99 in geoid_model')
         WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID99');
