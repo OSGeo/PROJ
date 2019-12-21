@@ -1744,6 +1744,51 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('Icegeoid_ISN2004.gtx',
+                              'Icegeoid_ISN2004.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('Icegeoid_ISN93.gtx',
+                              'Icegeoid_ISN93.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('Icegeoid_ISN2016.gtx',
+                              'Icegeoid_ISN2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
 -- New Zealand grid shift models.  EPSG names are not for GTX files (at time of writing)
 INSERT INTO grid_alternatives(original_grid_name,
                               proj_grid_name,
