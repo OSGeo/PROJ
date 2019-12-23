@@ -4715,6 +4715,19 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=affine +s33=-0.304800609601219");
     }
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            // NZVD2016 height
+            authFactory->createCoordinateReferenceSystem("7839"),
+            // NZGD2000
+            authFactory->createCoordinateReferenceSystem("4959"), ctxt);
+        ASSERT_EQ(list.size(), 1U);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=vgridshift +grids=nzgeoid2016.gtx +multiplier=1");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -7170,6 +7183,22 @@ TEST(operation, vertCRS_to_vertCRS_context) {
     EXPECT_EQ(list[0]->nameStr(), "NGVD29 height (m) to NAVD88 height (3)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=vgridshift +grids=vertcone.gtx +multiplier=0.001");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, vertCRS_to_vertCRS_New_Zealand_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // NZVD2016 height
+        authFactory->createCoordinateReferenceSystem("7839"),
+        // Auckland 1946 height
+        authFactory->createCoordinateReferenceSystem("5759"), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=vgridshift +grids=auckht1946-nzvd2016.gtx +multiplier=1");
 }
 
 // ---------------------------------------------------------------------------
