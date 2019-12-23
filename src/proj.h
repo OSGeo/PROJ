@@ -421,6 +421,9 @@ int PROJ_DLL proj_context_set_network_callbacks(
     proj_network_get_last_error_type get_last_error_cbk,
     void* user_data);
 
+int PROJ_DLL proj_context_set_enable_network(PJ_CONTEXT* ctx,
+                                             int enabled);
+
 /*! @cond Doxygen_Suppress */
 
 /* Manage the transformation definition object PJ */

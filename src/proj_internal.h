@@ -668,6 +668,8 @@ struct projCppContext;
 
 struct projNetworkCallbacksAndData
 {
+    bool enabled = false;
+    bool enabled_env_variable_checked = false; // whereas we have checked PROJ_NETWORK env variable
     proj_network_open_cbk_type open = nullptr;
     proj_network_close_cbk_type close = nullptr;
     proj_network_get_header_value_cbk_type get_header_value = nullptr;
@@ -823,6 +825,8 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition);
 PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv);
 
 void pj_pipeline_assign_context_to_steps( PJ* P, PJ_CONTEXT* ctx );
+
+bool pj_context_is_network_enabled(PJ_CONTEXT* ctx);
 
 /* classic public API */
 #include "proj_api.h"

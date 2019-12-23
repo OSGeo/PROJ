@@ -63,9 +63,9 @@ class MyMutex {
 
 //! @cond Doxygen_Suppress
 
-NS_PROJ_START
+using namespace NS_PROJ::internal;
 
-using namespace internal;
+NS_PROJ_START
 
 // ---------------------------------------------------------------------------
 
@@ -488,6 +488,14 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename) {
     }
 #endif
     if (starts_with(filename, "http://") || starts_with(filename, "https://")) {
+        if (!pj_context_is_network_enabled(ctx)) {
+            pj_log(
+                ctx, PJ_LOG_ERROR,
+                "Attempt at accessing remote resource not authorized. Either "
+                "set PROJ_NETWORK=ON or "
+                "proj_context_set_enable_network(ctx, TRUE)");
+            return nullptr;
+        }
         return NetworkFile::open(ctx, filename);
     }
     return FileStdio::open(ctx, filename);
@@ -756,3 +764,49 @@ int proj_context_set_network_callbacks(
     ctx->networking.user_data = user_data;
     return true;
 }
+
+// ---------------------------------------------------------------------------
+
+/** Enable or disable network access.
+*
+* @param ctx PROJ context, or NULL
+* @param enable TRUE if network access is allowed.
+* @return TRUE if network access is possible. That is either libcurl is
+*         available, or an alternate interface has been set.
+*/
+int proj_context_set_enable_network(PJ_CONTEXT *ctx, int enable) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    ctx->networking.enabled_env_variable_checked = true;
+    ctx->networking.enabled = enable != FALSE;
+#ifdef CURL_ENABLED
+    return ctx->networking.enabled;
+#else
+    return ctx->networking.enabled &&
+           ctx->networking.open != NS_PROJ::no_op_network_open;
+#endif
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+bool pj_context_is_network_enabled(PJ_CONTEXT *ctx) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    if (ctx->networking.enabled_env_variable_checked) {
+        return ctx->networking.enabled;
+    }
+    const char *enabled = getenv("PROJ_NETWORK");
+    if (enabled && enabled[0] != '\0') {
+        ctx->networking.enabled = ci_equal(enabled, "ON") ||
+                                  ci_equal(enabled, "YES") ||
+                                  ci_equal(enabled, "TRUE");
+    }
+    ctx->networking.enabled_env_variable_checked = true;
+    return ctx->networking.enabled;
+}
+
+//! @endcond

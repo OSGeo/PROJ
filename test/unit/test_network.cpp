@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "proj_internal.h"
 #include <proj.h>
@@ -77,18 +78,54 @@ TEST(networking, initial_check) {
 
 // ---------------------------------------------------------------------------
 
+static void silent_logger(void *, int, const char *) {}
+
+// ---------------------------------------------------------------------------
+
 TEST(networking, basic) {
-    auto P = proj_create(
-        PJ_DEFAULT_CTX,
+    const char *pipeline =
         "+proj=pipeline "
         "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
         "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
-        "+step +proj=unitconvert +xy_in=rad +xy_out=deg ");
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
+
+    // network access disabled by default
+    auto ctx = proj_context_create();
+    proj_log_func(ctx, nullptr, silent_logger);
+    auto P = proj_create(ctx, pipeline);
+    ASSERT_EQ(P, nullptr);
+    proj_context_destroy(ctx);
+
+#ifdef CURL_ENABLED
+    // enable through env variable
+    ctx = proj_context_create();
+    putenv(const_cast<char *>("PROJ_NETWORK=ON"));
+    P = proj_create(ctx, pipeline);
+    if (networkAccessOK) {
+        ASSERT_NE(P, nullptr);
+    }
+    proj_destroy(P);
+    proj_context_destroy(ctx);
+    putenv(const_cast<char *>("PROJ_NETWORK="));
+#endif
+
+    // still disabled
+    ctx = proj_context_create();
+    proj_log_func(ctx, nullptr, silent_logger);
+    P = proj_create(ctx, pipeline);
+    ASSERT_EQ(P, nullptr);
+    proj_context_destroy(ctx);
+
+    // enable through API
+    ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+    P = proj_create(ctx, pipeline);
 #ifdef CURL_ENABLED
     if (networkAccessOK) {
         ASSERT_NE(P, nullptr);
     } else {
         ASSERT_EQ(P, nullptr);
+        proj_context_destroy(ctx);
         return;
     }
     double lon = 2;
@@ -102,16 +139,16 @@ TEST(networking, basic) {
 #else
     ASSERT_EQ(P, nullptr);
 #endif
+    proj_context_destroy(ctx);
 }
 
 // ---------------------------------------------------------------------------
 
 #ifdef CURL_ENABLED
 
-static void silent_logger(void *, int, const char *) {}
-
 TEST(networking, curl_invalid_resource) {
     auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
     proj_log_func(ctx, nullptr, silent_logger);
     auto P = proj_create(
         ctx, "+proj=hgridshift +grids=https://i_do_not.exist/my.tif");
@@ -364,6 +401,7 @@ static const char *get_last_error_cbk(PJ_CONTEXT * /*ctx*/,
 
 TEST(networking, custom) {
     auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
     ExchangeWithCallback exchange;
     ASSERT_TRUE(proj_context_set_network_callbacks(
         ctx, open_cbk, close_cbk, get_header_value_cbk, read_range_cbk,
@@ -499,6 +537,7 @@ TEST(networking, custom) {
 
 TEST(networking, getfilesize) {
     auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
     ExchangeWithCallback exchange;
     ASSERT_TRUE(proj_context_set_network_callbacks(
         ctx, open_cbk, close_cbk, get_header_value_cbk, read_range_cbk,
