@@ -367,8 +367,7 @@ typedef struct PROJ_NETWORK_HANDLE PROJ_NETWORK_HANDLE;
  * amount of bytes read (== size_to_read if the file is larger than size_to_read).
  * During this read, the implementation should make sure to store the HTTP
  * headers from the server response to be able to respond to
- * proj_network_get_header_value_cbk_type and proj_network_get_file_size_cbk_type
- * callbacks.
+ * proj_network_get_header_value_cbk_type callback.
  *
  * @return a non-NULL opaque handle in case of success.
  */
@@ -391,12 +390,6 @@ typedef const char* (*proj_network_get_header_value_cbk_type)(
                                             PJ_CONTEXT* ctx,
                                             PROJ_NETWORK_HANDLE* handle,
                                             const char* header_name,
-                                            void* user_data);
-
-/** Network access: get file size */
-typedef unsigned long long (*proj_network_get_file_size_cbk_type)(
-                                            PJ_CONTEXT* ctx,
-                                            PROJ_NETWORK_HANDLE* handle,
                                             void* user_data);
 
 /** Network access: read range
@@ -424,7 +417,6 @@ int PROJ_DLL proj_context_set_network_callbacks(
     proj_network_open_cbk_type open_cbk,
     proj_network_close_cbk_type close_cbk,
     proj_network_get_header_value_cbk_type get_header_value_cbk,
-    proj_network_get_file_size_cbk_type get_file_size_cbk,
     proj_network_read_range_type read_range_cbk,
     proj_network_get_last_error_type get_last_error_cbk,
     void* user_data);

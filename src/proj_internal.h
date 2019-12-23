@@ -671,7 +671,6 @@ struct projNetworkCallbacksAndData
     proj_network_open_cbk_type open = nullptr;
     proj_network_close_cbk_type close = nullptr;
     proj_network_get_header_value_cbk_type get_header_value = nullptr;
-    proj_network_get_file_size_cbk_type get_file_size = nullptr;
     proj_network_read_range_type read_range = nullptr;
     proj_network_get_last_error_type get_last_error = nullptr;
     void* user_data = nullptr;

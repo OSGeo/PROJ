@@ -148,10 +148,10 @@ struct CloseEvent : public Event {
 
 struct GetHeaderValueEvent : public Event {
     GetHeaderValueEvent() { type = "GetHeaderValueEvent"; }
-};
 
-struct GetFileSizeEvent : public Event {
-    GetFileSizeEvent() { type = "GetFileSizeEvent"; }
+    int file_id = 0;
+    std::string key{};
+    std::string value{};
 };
 
 struct ReadRangeEvent : public Event {
@@ -255,9 +255,9 @@ static void close_cbk(PJ_CONTEXT *ctx, PROJ_NETWORK_HANDLE *handle,
     delete reinterpret_cast<File *>(handle);
 }
 
-static const char *get_header_value_cbk(PJ_CONTEXT * /* ctx */,
-                                        PROJ_NETWORK_HANDLE * /*handle*/,
-                                        const char * /*header_name*/,
+static const char *get_header_value_cbk(PJ_CONTEXT *ctx,
+                                        PROJ_NETWORK_HANDLE *handle,
+                                        const char *header_name,
                                         void *user_data) {
     auto exchange = static_cast<ExchangeWithCallback *>(user_data);
     if (exchange->error)
@@ -276,32 +276,25 @@ static const char *get_header_value_cbk(PJ_CONTEXT * /* ctx */,
         exchange->error = true;
         return nullptr;
     }
-    exchange->nextEvent++;
-    return nullptr;
-}
-
-static unsigned long long get_file_size_cbk(PJ_CONTEXT * /* ctx */,
-                                            PROJ_NETWORK_HANDLE * /*handle*/,
-                                            void *user_data) {
-    auto exchange = static_cast<ExchangeWithCallback *>(user_data);
-    if (exchange->error)
-        return 0;
-    if (exchange->nextEvent >= exchange->events.size()) {
-        fprintf(stderr, "unexpected call to get_file_size()\n");
+    if (getHeaderValueEvent->ctx != ctx) {
+        fprintf(stderr, "get_header_value() called with bad context\n");
         exchange->error = true;
-        return 0;
+        return nullptr;
     }
-    auto getFileSizeEvent = dynamic_cast<GetFileSizeEvent *>(
-        exchange->events[exchange->nextEvent].get());
-    if (!getFileSizeEvent) {
-        fprintf(stderr, "unexpected call to get_file_size(). "
-                        "Was expecting a %s event\n",
-                exchange->events[exchange->nextEvent]->type.c_str());
+    if (getHeaderValueEvent->key != header_name) {
+        fprintf(stderr, "wrong call to get_header_value(%s). Was expecting "
+                        "get_header_value(%s)\n",
+                header_name, getHeaderValueEvent->key.c_str());
         exchange->error = true;
-        return 0;
+        return nullptr;
+    }
+    if (exchange->mapIdToHandle[getHeaderValueEvent->file_id] != handle) {
+        fprintf(stderr, "get_header_value() called with bad handle\n");
+        exchange->error = true;
+        return nullptr;
     }
     exchange->nextEvent++;
-    return 0;
+    return getHeaderValueEvent->value.c_str();
 }
 
 static size_t read_range_cbk(PJ_CONTEXT *ctx, PROJ_NETWORK_HANDLE *handle,
@@ -373,8 +366,8 @@ TEST(networking, custom) {
     auto ctx = proj_context_create();
     ExchangeWithCallback exchange;
     ASSERT_TRUE(proj_context_set_network_callbacks(
-        ctx, open_cbk, close_cbk, get_header_value_cbk, get_file_size_cbk,
-        read_range_cbk, get_last_error_cbk, &exchange));
+        ctx, open_cbk, close_cbk, get_header_value_cbk, read_range_cbk,
+        get_last_error_cbk, &exchange));
 
     {
         std::unique_ptr<OpenEvent> event(new OpenEvent());
@@ -393,6 +386,14 @@ TEST(networking, custom) {
         ASSERT_TRUE(f != nullptr);
         ASSERT_EQ(fread(&event->response[0], 1, 956, f), 956U);
         fclose(f);
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Content-Range";
+        event->value = "dummy"; // dummy value: not used
+        event->file_id = 1;
         exchange.events.emplace_back(std::move(event));
     }
     {
@@ -490,6 +491,70 @@ TEST(networking, custom) {
     proj_destroy(P);
 
     ASSERT_TRUE(exchange.allConsumedAndNoError());
+
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(networking, getfilesize) {
+    auto ctx = proj_context_create();
+    ExchangeWithCallback exchange;
+    ASSERT_TRUE(proj_context_set_network_callbacks(
+        ctx, open_cbk, close_cbk, get_header_value_cbk, read_range_cbk,
+        get_last_error_cbk, &exchange));
+
+    {
+        std::unique_ptr<OpenEvent> event(new OpenEvent());
+        event->ctx = ctx;
+        event->url = "https://foo/getfilesize.tif";
+        event->offset = 0;
+        event->size_to_read = 16384;
+        event->response.resize(16384);
+        event->file_id = 1;
+
+        const char *proj_source_data = getenv("PROJ_SOURCE_DATA");
+        ASSERT_TRUE(proj_source_data != nullptr);
+        std::string filename(proj_source_data);
+        filename += "/tests/test_vgrid_single_strip_truncated.tif";
+        FILE *f = fopen(filename.c_str(), "rb");
+        ASSERT_TRUE(f != nullptr);
+        ASSERT_EQ(fread(&event->response[0], 1, 550, f), 550U);
+        fclose(f);
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Content-Range";
+        event->value = "bytes 0-16383/4153510";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<CloseEvent> event(new CloseEvent());
+        event->ctx = ctx;
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+
+    auto P = proj_create(
+        ctx,
+        "+proj=vgridshift +grids=https://foo/getfilesize.tif +multiplier=1");
+
+    ASSERT_NE(P, nullptr);
+    ASSERT_TRUE(exchange.allConsumedAndNoError());
+
+    proj_destroy(P);
+
+    P = proj_create(
+        ctx,
+        "+proj=vgridshift +grids=https://foo/getfilesize.tif +multiplier=1");
+
+    ASSERT_NE(P, nullptr);
+    ASSERT_TRUE(exchange.allConsumedAndNoError());
+
+    proj_destroy(P);
 
     proj_context_destroy(ctx);
 }

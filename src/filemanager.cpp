@@ -266,6 +266,13 @@ void NetworkChunkCache::clear() { cache_.clear(); }
 
 static NetworkChunkCache gNetworkChunkCache{};
 
+struct FileProperties {
+    unsigned long long size;
+};
+
+static lru11::Cache<std::string, FileProperties, MyMutex>
+    gNetworkFileProperties{};
+
 // ---------------------------------------------------------------------------
 
 class NetworkFile : public File {
@@ -275,6 +282,7 @@ class NetworkFile : public File {
     unsigned long long m_pos = 0;
     size_t m_nBlocksToDownload = 1;
     unsigned long long m_lastDownloadedOffset;
+    unsigned long long m_filesize;
 
     NetworkFile(const NetworkFile &) = delete;
     NetworkFile &operator=(const NetworkFile &) = delete;
@@ -282,9 +290,10 @@ class NetworkFile : public File {
   protected:
     NetworkFile(PJ_CONTEXT *ctx, const std::string &url,
                 PROJ_NETWORK_HANDLE *handle,
-                unsigned long long lastDownloadOffset)
+                unsigned long long lastDownloadOffset,
+                unsigned long long filesize)
         : m_ctx(ctx), m_url(url), m_handle(handle),
-          m_lastDownloadedOffset(lastDownloadOffset) {}
+          m_lastDownloadedOffset(lastDownloadOffset), m_filesize(filesize) {}
 
   public:
     ~NetworkFile() override;
@@ -300,9 +309,14 @@ class NetworkFile : public File {
 
 std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
     if (gNetworkChunkCache.get(filename, 0)) {
-        return std::unique_ptr<File>(
-            new NetworkFile(ctx, filename, nullptr,
-                            std::numeric_limits<unsigned long long>::max()));
+        unsigned long long filesize = 0;
+        FileProperties props;
+        if (gNetworkFileProperties.tryGet(filename, props)) {
+            filesize = props.size;
+        }
+        return std::unique_ptr<File>(new NetworkFile(
+            ctx, filename, nullptr,
+            std::numeric_limits<unsigned long long>::max(), filesize));
     } else {
         std::vector<unsigned char> buffer(DOWNLOAD_CHUNK_SIZE);
         size_t size_read = 0;
@@ -311,8 +325,24 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
                                  &size_read, ctx->networking.user_data);
         buffer.resize(size_read);
         gNetworkChunkCache.insert(filename, 0, std::move(buffer));
+
+        unsigned long long filesize = 0;
+        if (handle) {
+            const char *contentRange = ctx->networking.get_header_value(
+                ctx, handle, "Content-Range", ctx->networking.user_data);
+            if (contentRange) {
+                const char *slash = strchr(contentRange, '/');
+                if (slash) {
+                    filesize = std::stoull(slash + 1);
+                    FileProperties props;
+                    props.size = filesize;
+                    gNetworkFileProperties.insert(filename, props);
+                }
+            }
+        }
+
         return std::unique_ptr<File>(
-            handle ? new NetworkFile(ctx, filename, handle, size_read)
+            handle ? new NetworkFile(ctx, filename, handle, size_read, filesize)
                    : nullptr);
     }
 }
@@ -431,21 +461,7 @@ bool NetworkFile::seek(unsigned long long offset, int whence) {
     } else {
         if (offset != 0)
             return false;
-        if (!m_handle) {
-            size_t nRead = 0;
-            char dummy;
-            m_handle =
-                m_ctx->networking.open(m_ctx, m_url.c_str(), 0, 1, &dummy,
-                                       &nRead, m_ctx->networking.user_data);
-            if (!m_handle) {
-                return false;
-            }
-        }
-        const auto filesize = m_ctx->networking.get_file_size(
-            m_ctx, m_handle, m_ctx->networking.user_data);
-        if (filesize == 0)
-            return false;
-        m_pos = filesize;
+        m_pos = m_filesize;
     }
     return true;
 }
@@ -484,6 +500,7 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename) {
 struct CurlFileHandle {
     CURL *m_handle = nullptr;
     std::string m_headers;
+    std::string m_lastval{};
 
     CurlFileHandle(const CurlFileHandle &) = delete;
     CurlFileHandle &operator=(const CurlFileHandle &) = delete;
@@ -623,6 +640,27 @@ static size_t pj_curl_read_range(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *raw_handle,
     return std::min(size_to_read, body.size());
 }
 
+// ---------------------------------------------------------------------------
+
+static const char *pj_curl_get_header_value(PJ_CONTEXT *,
+                                            PROJ_NETWORK_HANDLE *raw_handle,
+                                            const char *header_name, void *) {
+    auto handle = reinterpret_cast<CurlFileHandle *>(raw_handle);
+    auto pos = ci_find(handle->m_headers, header_name);
+    if (pos == std::string::npos)
+        return nullptr;
+    const char *c_str = handle->m_headers.c_str();
+    if (c_str[pos] == ':')
+        pos++;
+    while (c_str[pos] == ' ')
+        pos++;
+    auto posEnd = pos;
+    while (c_str[posEnd] != '\n' && c_str[posEnd] != '\0')
+        posEnd++;
+    handle->m_lastval = handle->m_headers.substr(pos, posEnd - pos);
+    return handle->m_lastval.c_str();
+}
+
 #else
 
 // ---------------------------------------------------------------------------
@@ -660,6 +698,7 @@ void FileManager::fillDefaultNetworkInterface(PJ_CONTEXT *ctx) {
     ctx->networking.open = pj_curl_open;
     ctx->networking.close = pj_curl_close;
     ctx->networking.read_range = pj_curl_read_range;
+    ctx->networking.get_header_value = pj_curl_get_header_value;
 #else
     ctx->networking.open = no_op_network_open;
     ctx->networking.close = no_op_network_close;
@@ -669,7 +708,10 @@ void FileManager::fillDefaultNetworkInterface(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
-void FileManager::clearCache() { gNetworkChunkCache.clear(); }
+void FileManager::clearCache() {
+    gNetworkChunkCache.clear();
+    gNetworkFileProperties.clear();
+}
 
 // ---------------------------------------------------------------------------
 
@@ -687,7 +729,6 @@ NS_PROJ_END
  * @param open_cbk Callback to open a remote file given its URL
  * @param close_cbk Callback to close a remote file.
  * @param get_header_value_cbk Callback to get HTTP headers
- * @param get_file_size_cbk Callback to get the size of the remote file.
  * @param read_range_cbk Callback to read a range of bytes inside a remote file.
  * @param get_last_error_cbk Callback to get last error message.
  * @param user_data Arbitrary pointer provided by the user, and passed to the
@@ -698,20 +739,18 @@ int proj_context_set_network_callbacks(
     PJ_CONTEXT *ctx, proj_network_open_cbk_type open_cbk,
     proj_network_close_cbk_type close_cbk,
     proj_network_get_header_value_cbk_type get_header_value_cbk,
-    proj_network_get_file_size_cbk_type get_file_size_cbk,
     proj_network_read_range_type read_range_cbk,
     proj_network_get_last_error_type get_last_error_cbk, void *user_data) {
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
     }
-    if (!open_cbk || !close_cbk || !get_header_value_cbk ||
-        !get_file_size_cbk || !read_range_cbk || !get_last_error_cbk) {
+    if (!open_cbk || !close_cbk || !get_header_value_cbk || !read_range_cbk ||
+        !get_last_error_cbk) {
         return false;
     }
     ctx->networking.open = open_cbk;
     ctx->networking.close = close_cbk;
     ctx->networking.get_header_value = get_header_value_cbk;
-    ctx->networking.get_file_size = get_file_size_cbk;
     ctx->networking.read_range = read_range_cbk;
     ctx->networking.get_last_error = get_last_error_cbk;
     ctx->networking.user_data = user_data;
