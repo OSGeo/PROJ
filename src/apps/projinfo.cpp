@@ -87,7 +87,8 @@ static void usage() {
         << "                [--spatial-test contains|intersects]" << std::endl
         << "                [--crs-extent-use none|both|intersection|smallest]"
         << std::endl
-        << "                [--grid-check none|discard_missing|sort] "
+        << "                [--grid-check "
+           "none|discard_missing|sort|known_available] "
            "[--show-superseded]"
         << std::endl
         << "                [--pivot-crs always|if_no_direct_transformation|"
@@ -509,7 +510,7 @@ static void outputObject(
     auto op = dynamic_cast<CoordinateOperation *>(obj.get());
     if (op && dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
         try {
-            auto setGrids = op->gridsNeeded(dbContext);
+            auto setGrids = op->gridsNeeded(dbContext, false);
             bool firstWarning = true;
             for (const auto &grid : setGrids) {
                 if (!grid.available) {
@@ -525,6 +526,7 @@ static void outputObject(
                         if (!grid.url.empty()) {
                             std::cout << " at " << grid.url;
                         }
+                        std::cout << ", or on CDN";
                     } else if (!grid.url.empty()) {
                         std::cout << " Can be obtained at " << grid.url;
                     }
@@ -539,8 +541,9 @@ static void outputObject(
 
 // ---------------------------------------------------------------------------
 
-static void outputOperationSummary(const CoordinateOperationNNPtr &op,
-                                   const DatabaseContextPtr &dbContext) {
+static void outputOperationSummary(
+    const CoordinateOperationNNPtr &op, const DatabaseContextPtr &dbContext,
+    CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse) {
     auto ids = op->identifiers();
     if (!ids.empty()) {
         std::cout << *(ids[0]->codeSpace()) << ":" << ids[0]->code();
@@ -586,10 +589,16 @@ static void outputOperationSummary(const CoordinateOperationNNPtr &op,
 
     if (dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
         try {
-            auto setGrids = op->gridsNeeded(dbContext);
+            auto setGrids = op->gridsNeeded(dbContext, false);
             for (const auto &grid : setGrids) {
                 if (!grid.available) {
                     std::cout << ", at least one grid missing";
+                    if (gridAvailabilityUse ==
+                            CoordinateOperationContext::GridAvailabilityUse::
+                                KNOWN_AVAILABLE &&
+                        !grid.packageName.empty()) {
+                        std::cout << " on the system, but available on CDN";
+                    }
                     break;
                 }
             }
@@ -686,7 +695,7 @@ static void outputOperations(
     }
     if (summary) {
         for (const auto &op : list) {
-            outputOperationSummary(op, dbContext);
+            outputOperationSummary(op, dbContext, gridAvailabilityUse);
         }
     } else {
         bool first = true;
@@ -701,7 +710,7 @@ static void outputOperations(
                          "\xC2\xB0"
                       << (i + 1) << ":" << std::endl
                       << std::endl;
-            outputOperationSummary(op, dbContext);
+            outputOperationSummary(op, dbContext, gridAvailabilityUse);
             std::cout << std::endl;
             outputObject(dbContext, op, allowUseIntermediateCRS, outputOpt);
         }
@@ -734,7 +743,9 @@ int main(int argc, char **argv) {
         CoordinateOperationContext::SourceTargetCRSExtentUse::SMALLEST;
     bool buildBoundCRSToWGS84 = false;
     CoordinateOperationContext::GridAvailabilityUse gridAvailabilityUse =
-        CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
+        pj_context_is_network_enabled(nullptr)
+            ? CoordinateOperationContext::GridAvailabilityUse::KNOWN_AVAILABLE
+            : CoordinateOperationContext::GridAvailabilityUse::USE_FOR_SORTING;
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS =
         CoordinateOperationContext::IntermediateCRSUse::
             IF_NO_DIRECT_TRANSFORMATION;
@@ -947,6 +958,9 @@ int main(int argc, char **argv) {
             } else if (ci_equal(value, "sort")) {
                 gridAvailabilityUse = CoordinateOperationContext::
                     GridAvailabilityUse::USE_FOR_SORTING;
+            } else if (ci_equal(value, "known_available")) {
+                gridAvailabilityUse = CoordinateOperationContext::
+                    GridAvailabilityUse::KNOWN_AVAILABLE;
             } else {
                 std::cerr << "Unrecognized value for option --grid-check: "
                           << value << std::endl;

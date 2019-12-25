@@ -69,7 +69,7 @@ NS_PROJ_START
 
 // ---------------------------------------------------------------------------
 
-File::File() = default;
+File::File(const std::string &name) : name_(name) {}
 
 // ---------------------------------------------------------------------------
 
@@ -85,7 +85,8 @@ class FileStdio : public File {
     FileStdio &operator=(const FileStdio &) = delete;
 
   protected:
-    FileStdio(PJ_CONTEXT *ctx, FILE *fp) : m_ctx(ctx), m_fp(fp) {}
+    FileStdio(const std::string &name, PJ_CONTEXT *ctx, FILE *fp)
+        : File(name), m_ctx(ctx), m_fp(fp) {}
 
   public:
     ~FileStdio() override;
@@ -130,7 +131,8 @@ unsigned long long FileStdio::tell() {
 
 std::unique_ptr<File> FileStdio::open(PJ_CONTEXT *ctx, const char *filename) {
     auto fp = fopen(filename, "rb");
-    return std::unique_ptr<File>(fp ? new FileStdio(ctx, fp) : nullptr);
+    return std::unique_ptr<File>(fp ? new FileStdio(filename, ctx, fp)
+                                    : nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -145,7 +147,8 @@ class FileLegacyAdapter : public File {
     FileLegacyAdapter &operator=(const FileLegacyAdapter &) = delete;
 
   protected:
-    FileLegacyAdapter(PJ_CONTEXT *ctx, PAFile fp) : m_ctx(ctx), m_fp(fp) {}
+    FileLegacyAdapter(const std::string &name, PJ_CONTEXT *ctx, PAFile fp)
+        : File(name), m_ctx(ctx), m_fp(fp) {}
 
   public:
     ~FileLegacyAdapter() override;
@@ -189,7 +192,7 @@ unsigned long long FileLegacyAdapter::tell() {
 std::unique_ptr<File> FileLegacyAdapter::open(PJ_CONTEXT *ctx,
                                               const char *filename) {
     auto fid = pj_ctx_fopen(ctx, filename, "rb");
-    return std::unique_ptr<File>(fid ? new FileLegacyAdapter(ctx, fid)
+    return std::unique_ptr<File>(fid ? new FileLegacyAdapter(filename, ctx, fid)
                                      : nullptr);
 }
 
@@ -292,7 +295,7 @@ class NetworkFile : public File {
                 PROJ_NETWORK_HANDLE *handle,
                 unsigned long long lastDownloadOffset,
                 unsigned long long filesize)
-        : m_ctx(ctx), m_url(url), m_handle(handle),
+        : File(url), m_ctx(ctx), m_url(url), m_handle(handle),
           m_lastDownloadedOffset(lastDownloadOffset), m_filesize(filesize) {}
 
   public:

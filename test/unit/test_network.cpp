@@ -598,4 +598,90 @@ TEST(networking, getfilesize) {
     proj_context_destroy(ctx);
 }
 
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, curl_hgridshift) {
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+
+    // NAD83 to NAD83(HARN) in West-Virginia. Using wvhpgn.tif
+    auto P = proj_create_crs_to_crs(ctx, "EPSG:4269", "EPSG:4152", nullptr);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD c;
+    c.xyz.x = 40;  // lat
+    c.xyz.y = -80; // lon
+    c.xyz.z = 0;
+    c = proj_trans(P, PJ_FWD, c);
+
+    proj_destroy(P);
+    proj_context_destroy(ctx);
+
+    EXPECT_NEAR(c.xyz.x, 39.99999839, 1e-8);
+    EXPECT_NEAR(c.xyz.y, -79.99999807, 1e-8);
+    EXPECT_NEAR(c.xyz.z, 0, 1e-2);
+}
+
+#endif
+
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, curl_vgridshift) {
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+
+    // WGS84 to EGM2008 height. Using egm08_25.tif
+    auto P =
+        proj_create_crs_to_crs(ctx, "EPSG:4326", "EPSG:4326+3855", nullptr);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD c;
+    c.xyz.x = -30; // lat
+    c.xyz.y = 150; // lon
+    c.xyz.z = 0;
+    c = proj_trans(P, PJ_FWD, c);
+
+    proj_destroy(P);
+    proj_context_destroy(ctx);
+
+    EXPECT_NEAR(c.xyz.x, -30, 1e-8);
+    EXPECT_NEAR(c.xyz.y, 150, 1e-8);
+    EXPECT_NEAR(c.xyz.z, -31.89, 1e-2);
+}
+
+#endif
+
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, curl_vgridshift_vertcon) {
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+
+    // NGVD29 to NAVD88 height. Using vertcone.tif
+    auto P = proj_create_crs_to_crs(ctx, "EPSG:4269+7968", "EPSG:4269+5703",
+                                    nullptr);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD c;
+    c.xyz.x = 40;  // lat
+    c.xyz.y = -80; // lon
+    c.xyz.z = 0;
+    c = proj_trans(P, PJ_FWD, c);
+
+    proj_destroy(P);
+    proj_context_destroy(ctx);
+
+    EXPECT_NEAR(c.xyz.x, 40, 1e-8);
+    EXPECT_NEAR(c.xyz.y, -80, 1e-8);
+    EXPECT_NEAR(c.xyz.z, -0.15, 1e-2);
+}
+
+#endif
+
 } // namespace

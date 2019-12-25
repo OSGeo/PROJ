@@ -4789,7 +4789,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
 
     EXPECT_TRUE(nn_dynamic_pointer_cast<ConcatenatedOperation>(list[0]) !=
                 nullptr);
-    auto grids = list[0]->gridsNeeded(DatabaseContext::create());
+    auto grids = list[0]->gridsNeeded(DatabaseContext::create(), false);
     EXPECT_EQ(grids.size(), 1U);
 }
 
@@ -6402,7 +6402,7 @@ TEST(operation, transformation_height_to_PROJ_string) {
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=vgridshift +grids=egm08_25.gtx +multiplier=1");
 
-    auto grids = transf->gridsNeeded(DatabaseContext::create());
+    auto grids = transf->gridsNeeded(DatabaseContext::create(), false);
     ASSERT_EQ(grids.size(), 1U);
     auto gridDesc = *(grids.begin());
     EXPECT_EQ(gridDesc.shortName, "egm08_25.gtx");
@@ -6702,7 +6702,7 @@ TEST(operation, compoundCRS_with_boundGeogCRS_and_boundVerticalCRS_to_geogCRS) {
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
 
-    auto grids = op->gridsNeeded(DatabaseContext::create());
+    auto grids = op->gridsNeeded(DatabaseContext::create(), false);
     EXPECT_EQ(grids.size(), 1U);
 
     auto opInverse = CoordinateOperationFactory::create()->createOperation(
@@ -8128,8 +8128,8 @@ TEST(operation, isPROJInstantiable) {
         auto transformation = Transformation::createGeocentricTranslations(
             PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326,
             1.0, 2.0, 3.0, {});
-        EXPECT_TRUE(
-            transformation->isPROJInstantiable(DatabaseContext::create()));
+        EXPECT_TRUE(transformation->isPROJInstantiable(
+            DatabaseContext::create(), false));
     }
 
     // Missing grid
@@ -8137,8 +8137,8 @@ TEST(operation, isPROJInstantiable) {
         auto transformation = Transformation::createNTv2(
             PropertyMap(), GeographicCRS::EPSG_4807, GeographicCRS::EPSG_4326,
             "foo.gsb", std::vector<PositionalAccuracyNNPtr>());
-        EXPECT_FALSE(
-            transformation->isPROJInstantiable(DatabaseContext::create()));
+        EXPECT_FALSE(transformation->isPROJInstantiable(
+            DatabaseContext::create(), false));
     }
 
     // Unsupported method
@@ -8149,8 +8149,8 @@ TEST(operation, isPROJInstantiable) {
                          PropertyMap(), std::vector<OperationParameterNNPtr>{}),
             std::vector<GeneralParameterValueNNPtr>{},
             std::vector<PositionalAccuracyNNPtr>{});
-        EXPECT_FALSE(
-            transformation->isPROJInstantiable(DatabaseContext::create()));
+        EXPECT_FALSE(transformation->isPROJInstantiable(
+            DatabaseContext::create(), false));
     }
 }
 

@@ -1299,14 +1299,15 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         ctx->last_errno = 0; /* don't treat as a persistent error */
         return nullptr;
     }
-    if (ends_with(filename, "gtx") || ends_with(filename, "GTX")) {
-        auto grid = GTXVerticalShiftGrid::open(ctx, std::move(fp), filename);
+    const auto actualName(fp->name());
+    if (ends_with(actualName, "gtx") || ends_with(actualName, "GTX")) {
+        auto grid = GTXVerticalShiftGrid::open(ctx, std::move(fp), actualName);
         if (!grid) {
             return nullptr;
         }
         auto set =
             std::unique_ptr<VerticalShiftGridSet>(new VerticalShiftGridSet());
-        set->m_name = filename;
+        set->m_name = actualName;
         set->m_format = "gtx";
         set->m_grids.push_back(std::unique_ptr<VerticalShiftGrid>(grid));
         return set;
@@ -1324,7 +1325,7 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 
     if (IsTIFF(header_size, header)) {
 #ifdef TIFF_ENABLED
-        auto set = GTiffVGridShiftSet::open(ctx, std::move(fp), filename);
+        auto set = GTiffVGridShiftSet::open(ctx, std::move(fp), actualName);
         if (!set)
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
@@ -2130,6 +2131,7 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         ctx->last_errno = 0; /* don't treat as a persistent error */
         return nullptr;
     }
+    const auto actualName(fp->name());
 
     char header[160];
     /* -------------------------------------------------------------------- */
@@ -2151,35 +2153,35 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     if (header_size >= 144 + 16 && strncmp(header + 0, "HEADER", 6) == 0 &&
         strncmp(header + 96, "W GRID", 6) == 0 &&
         strncmp(header + 144, "TO      NAD83   ", 16) == 0) {
-        auto grid = NTv1Grid::open(ctx, std::move(fp), filename);
+        auto grid = NTv1Grid::open(ctx, std::move(fp), actualName);
         if (!grid) {
             return nullptr;
         }
         auto set = std::unique_ptr<HorizontalShiftGridSet>(
             new HorizontalShiftGridSet());
-        set->m_name = filename;
+        set->m_name = actualName;
         set->m_format = "ntv1";
         set->m_grids.push_back(std::unique_ptr<HorizontalShiftGrid>(grid));
         return set;
     } else if (header_size >= 9 && strncmp(header + 0, "CTABLE V2", 9) == 0) {
-        auto grid = CTable2Grid::open(ctx, std::move(fp), filename);
+        auto grid = CTable2Grid::open(ctx, std::move(fp), actualName);
         if (!grid) {
             return nullptr;
         }
         auto set = std::unique_ptr<HorizontalShiftGridSet>(
             new HorizontalShiftGridSet());
-        set->m_name = filename;
+        set->m_name = actualName;
         set->m_format = "ctable2";
         set->m_grids.push_back(std::unique_ptr<HorizontalShiftGrid>(grid));
         return set;
     } else if (header_size >= 48 + 7 &&
                strncmp(header + 0, "NUM_OREC", 8) == 0 &&
                strncmp(header + 48, "GS_TYPE", 7) == 0) {
-        return NTv2GridSet::open(ctx, std::move(fp), filename);
+        return NTv2GridSet::open(ctx, std::move(fp), actualName);
     } else if (IsTIFF(header_size,
                       reinterpret_cast<const unsigned char *>(header))) {
 #ifdef TIFF_ENABLED
-        auto set = GTiffHGridShiftSet::open(ctx, std::move(fp), filename);
+        auto set = GTiffHGridShiftSet::open(ctx, std::move(fp), actualName);
         if (!set)
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;
@@ -2450,6 +2452,7 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
         ctx->last_errno = 0; /* don't treat as a persistent error */
         return nullptr;
     }
+    const auto actualName(fp->name());
 
     /* -------------------------------------------------------------------- */
     /*      Load a header, to determine the file type.                      */
@@ -2463,7 +2466,8 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 
     if (IsTIFF(header_size, header)) {
 #ifdef TIFF_ENABLED
-        auto set = GTiffGenericGridShiftSet::open(ctx, std::move(fp), filename);
+        auto set =
+            GTiffGenericGridShiftSet::open(ctx, std::move(fp), actualName);
         if (!set)
             pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return set;

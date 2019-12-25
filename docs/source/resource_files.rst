@@ -40,6 +40,11 @@ The following paths are checked in order:
   PROJ installation is not moved somewhere else.
 - The current directory
 
+When networking capabilities are enabled, either by API with the
+:c:func:`proj_context_set_enable_network` function or when the
+:envvar:`PROJ_NETWORK` environment variable is set to ``ON``, PROJ will
+attempt to use remote grids stored on CDN (Content Delivery Network) storage.
+
 .. _proj-db:
 
 proj.db

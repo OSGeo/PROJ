@@ -203,6 +203,27 @@ static const char *get_path_from_win32_projlib(const char *name, std::string& ou
 /*                      pj_open_lib_internal()                          */
 /************************************************************************/
 
+#ifdef WIN32
+static const char dir_chars[] = "/\\";
+static const char dirSeparator = ';';
+#else
+static const char dir_chars[] = "/";
+static const char dirSeparator = ':';
+#endif
+
+static bool is_tilde_slash(const char* name)
+{
+    return *name == '~' && strchr(dir_chars,name[1]);
+}
+
+static bool is_rel_or_absolute_filename(const char *name)
+{
+    return strchr(dir_chars,*name)
+            || (*name == '.' && strchr(dir_chars,name[1]))
+            || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
+            || (name[0] != '\0' && name[1] == ':' && strchr(dir_chars,name[2]));
+}
+
 static void*
 pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
                      void* (*open_file)(projCtx, const char*, const char*),
@@ -211,13 +232,6 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
         std::string fname;
         const char *sysname = nullptr;
         void* fid = nullptr;
-#ifdef WIN32
-        static const char dir_chars[] = "/\\";
-        const char dirSeparator = ';';
-#else
-        static const char dir_chars[] = "/";
-        const char dirSeparator = ':';
-#endif
 
         if( ctx == nullptr ) {
             ctx = pj_get_default_ctx();
@@ -227,7 +241,7 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
             out_full_filename[0] = '\0';
 
         /* check if ~/name */
-        if (*name == '~' && strchr(dir_chars,name[1]) )
+        if (is_tilde_slash(name))
             if ((sysname = getenv("HOME")) != nullptr) {
                 fname = sysname;
                 fname += DIR_CHAR;
@@ -236,11 +250,8 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
             } else
                 return nullptr;
 
-        /* or fixed path: /name, ./name or ../name */
-        else if (strchr(dir_chars,*name)
-                || (*name == '.' && strchr(dir_chars,name[1])) 
-                || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
-                || (name[0] != '\0' && name[1] == ':' && strchr(dir_chars,name[2]))
+        /* or fixed path: /name, ./name or ../name or http[s]:// */
+        else if (is_rel_or_absolute_filename(name)
                 || starts_with(name, "http://")
                 || starts_with(name, "https://"))
             sysname = name;
@@ -344,11 +355,31 @@ static void* pj_open_file_with_manager(projCtx ctx, const char *name,
 std::unique_ptr<NS_PROJ::File> NS_PROJ::FileManager::open_resource_file(
                                                 projCtx ctx, const char *name)
 {
-    return std::unique_ptr<NS_PROJ::File>(
+    auto file = std::unique_ptr<NS_PROJ::File>(
         reinterpret_cast<NS_PROJ::File*>(
                pj_open_lib_internal(ctx, name, "rb",
                                     pj_open_file_with_manager,
                                     nullptr, 0)));
+    if( file == nullptr &&
+        !is_tilde_slash(name) &&
+        !is_rel_or_absolute_filename(name) &&
+        !starts_with(name, "http://") &&
+        !starts_with(name, "https://") &&
+        pj_context_is_network_enabled(ctx) ) {
+        std::string remote_file("https://cdn.proj.org/");
+        remote_file += name;
+        auto pos = remote_file.rfind('.');
+        if( pos + 4 == remote_file.size() ) {
+            remote_file = remote_file.substr(0, pos) + ".tif";
+            file = open(ctx, remote_file.c_str());
+            if( file ) {
+                pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                        "Using %s", remote_file.c_str() );
+                pj_ctx_set_errno( ctx, 0 );
+            }
+        }
+    }
+    return file;
 }
 
 /************************************************************************/

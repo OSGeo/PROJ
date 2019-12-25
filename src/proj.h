@@ -697,6 +697,12 @@ typedef enum {
     /** Ignore grid availability at all. Results will be presented as if
         * all grids were available. */
     PROJ_GRID_AVAILABILITY_IGNORED,
+
+    /** Results will be presented as if grids known to PROJ (that is
+    * registered in the grid_alternatives table of its database) were
+    * available. Used typically when networking is enabled.
+    */
+    PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE,
 } PROJ_GRID_AVAILABILITY_USE;
 
 /** \brief PROJ string version. */

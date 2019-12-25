@@ -697,6 +697,7 @@ struct projCtx_t {
     void* file_finder_user_data = nullptr;
 
     projNetworkCallbacksAndData networking{};
+    bool defer_grid_opening = false; // set by pj_obj_create()
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
 
@@ -826,7 +827,8 @@ PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv);
 
 void pj_pipeline_assign_context_to_steps( PJ* P, PJ_CONTEXT* ctx );
 
-bool pj_context_is_network_enabled(PJ_CONTEXT* ctx);
+// For use by projinfo
+bool PROJ_DLL pj_context_is_network_enabled(PJ_CONTEXT* ctx);
 
 /* classic public API */
 #include "proj_api.h"

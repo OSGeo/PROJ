@@ -68,6 +68,6 @@ test_network_CXXFLAGS = @CURL_CFLAGS@ @CURL_ENABLED_FLAGS@
 test_network_LDADD = ../../src/libproj.la @GTEST_LIBS@ @CURL_LIBS@
 
 test_network-check: test_network
-	PROJ_SOURCE_DATA=$(PROJ_LIB) ./test_network
+	PROJ_LIB=$(PROJ_LIB) PROJ_SOURCE_DATA=$(PROJ_LIB) ./test_network
 
 check-local: pj_transform_test-check pj_phi2_test-check proj_errno_string_test-check proj_angular_io_test-check proj_context_test-check test_cpp_api-check gie_self_tests-check test_network-check

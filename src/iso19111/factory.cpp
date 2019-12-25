@@ -1018,14 +1018,14 @@ bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
 
 // ---------------------------------------------------------------------------
 
-bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
-                                      std::string &fullFilename,
-                                      std::string &packageName,
-                                      std::string &url, bool &directDownload,
-                                      bool &openLicense,
-                                      bool &gridAvailable) const {
+bool DatabaseContext::lookForGridInfo(
+    const std::string &projFilename, bool considerKnownGridsAsAvailable,
+    std::string &fullFilename, std::string &packageName, std::string &url,
+    bool &directDownload, bool &openLicense, bool &gridAvailable) const {
     Private::GridInfoCache info;
-    if (d->getGridInfoFromCache(projFilename, info)) {
+    const std::string key(projFilename +
+                          (considerKnownGridsAsAvailable ? "true" : "false"));
+    if (d->getGridInfoFromCache(key, info)) {
         fullFilename = info.fullFilename;
         packageName = info.packageName;
         url = info.url;
@@ -1041,16 +1041,20 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
     openLicense = false;
     directDownload = false;
 
-    fullFilename.resize(2048);
-    if (d->pjCtxt() == nullptr) {
-        d->setPjCtxt(pj_get_default_ctx());
+    if (considerKnownGridsAsAvailable) {
+        fullFilename = projFilename;
+    } else {
+        fullFilename.resize(2048);
+        if (d->pjCtxt() == nullptr) {
+            d->setPjCtxt(pj_get_default_ctx());
+        }
+        int errno_before = proj_context_errno(d->pjCtxt());
+        gridAvailable =
+            pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
+                         fullFilename.size() - 1) != 0;
+        proj_context_errno_set(d->pjCtxt(), errno_before);
+        fullFilename.resize(strlen(fullFilename.c_str()));
     }
-    int errno_before = proj_context_errno(d->pjCtxt());
-    gridAvailable =
-        pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
-                     fullFilename.size() - 1) != 0;
-    proj_context_errno_set(d->pjCtxt(), errno_before);
-    fullFilename.resize(strlen(fullFilename.c_str()));
 
     auto res =
         d->run("SELECT "
@@ -1074,6 +1078,10 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
         openLicense = (row[3].empty() ? row[4] : row[3]) == "1";
         directDownload = (row[5].empty() ? row[6] : row[5]) == "1";
 
+        if (considerKnownGridsAsAvailable && !packageName.empty()) {
+            gridAvailable = true;
+        }
+
         info.fullFilename = fullFilename;
         info.packageName = packageName;
         info.url = url;
@@ -1082,7 +1090,7 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
     }
     info.gridAvailable = gridAvailable;
     info.found = ret;
-    d->cache(projFilename, info);
+    d->cache(key, info);
     return ret;
 }
 
@@ -1264,8 +1272,8 @@ struct AuthorityFactory::Private {
         return AuthorityFactory::create(context_, auth_name);
     }
 
-    bool
-    rejectOpDueToMissingGrid(const operation::CoordinateOperationNNPtr &op);
+    bool rejectOpDueToMissingGrid(const operation::CoordinateOperationNNPtr &op,
+                                  bool considerKnownGridsAsAvailable);
 
     UnitOfMeasure createUnitOfMeasure(const std::string &auth_name,
                                       const std::string &code);
@@ -1392,8 +1400,10 @@ util::PropertyMap AuthorityFactory::Private::createProperties(
 // ---------------------------------------------------------------------------
 
 bool AuthorityFactory::Private::rejectOpDueToMissingGrid(
-    const operation::CoordinateOperationNNPtr &op) {
-    for (const auto &gridDesc : op->gridsNeeded(context())) {
+    const operation::CoordinateOperationNNPtr &op,
+    bool considerKnownGridsAsAvailable) {
+    for (const auto &gridDesc :
+         op->gridsNeeded(context(), considerKnownGridsAsAvailable)) {
         if (!gridDesc.available) {
             return true;
         }
@@ -3381,7 +3391,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSCode, const std::string &targetCRSCode) const {
     return createFromCoordinateReferenceSystemCodes(
         d->authority(), sourceCRSCode, d->authority(), targetCRSCode, false,
-        false, false);
+        false, false, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -3410,6 +3420,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  * should be substituted to the official grid names.
  * @param discardIfMissingGrid Whether coordinate operations that reference
  * missing grids should be removed from the result set.
+ * @param considerKnownGridsAsAvailable Whether known grids should be considered
+ * as available (typically when network is enabled).
  * @param discardSuperseded Whether cordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param tryReverseOrder whether to search in the reverse order too (and thus
@@ -3430,8 +3442,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-    bool discardSuperseded, bool tryReverseOrder,
-    bool reportOnlyIntersectingTransformations,
+    bool considerKnownGridsAsAvailable, bool discardSuperseded,
+    bool tryReverseOrder, bool reportOnlyIntersectingTransformations,
     const metadata::ExtentPtr &intersectingExtent1,
     const metadata::ExtentPtr &intersectingExtent2) const {
 
@@ -3442,6 +3454,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     cacheKey += targetCRSCode;
     cacheKey += (usePROJAlternativeGridNames ? '1' : '0');
     cacheKey += (discardIfMissingGrid ? '1' : '0');
+    cacheKey += (considerKnownGridsAsAvailable ? '1' : '0');
     cacheKey += (discardSuperseded ? '1' : '0');
     cacheKey += (tryReverseOrder ? '1' : '0');
     cacheKey += (reportOnlyIntersectingTransformations ? '1' : '0');
@@ -3680,7 +3693,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
                     target_crs_code != targetCRSCode))) {
             op = op->inverse();
         }
-        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
             list.emplace_back(op);
         }
     }
@@ -3745,6 +3759,8 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  * should be substituted to the official grid names.
  * @param discardIfMissingGrid Whether coordinate operations that reference
  * missing grids should be removed from the result set.
+ * @param considerKnownGridsAsAvailable Whether known grids should be considered
+ * as available (typically when network is enabled).
  * @param discardSuperseded Whether cordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param intermediateCRSAuthCodes List of (auth_name, code) of CRS that can be
@@ -3773,7 +3789,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-    bool discardSuperseded,
+    bool considerKnownGridsAsAvailable, bool discardSuperseded,
     const std::vector<std::pair<std::string, std::string>>
         &intermediateCRSAuthCodes,
     ObjectType allowedIntermediateObjectType,
@@ -4221,7 +4237,8 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
     std::vector<operation::CoordinateOperationNNPtr> list;
     for (const auto &op : listTmp) {
-        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
             list.emplace_back(op);
         }
     }
@@ -4239,7 +4256,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     const std::string &sourceCRSCode, const crs::CRSNNPtr &targetCRS,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-    bool discardSuperseded, const std::vector<std::string> &allowedAuthorities,
+    bool considerKnownGridsAsAvailable, bool discardSuperseded,
+    const std::vector<std::string> &allowedAuthorities,
     const metadata::ExtentPtr &intersectingExtent1,
     const metadata::ExtentPtr &intersectingExtent2) const {
 
@@ -4822,7 +4840,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
 
     std::vector<operation::CoordinateOperationNNPtr> list;
     for (const auto &op : listTmp) {
-        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
             list.emplace_back(op);
         }
     }
