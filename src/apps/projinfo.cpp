@@ -423,24 +423,13 @@ static void outputObject(
                     std::cout << "WKT1:GDAL string:" << std::endl;
                 }
 
-                auto crs = nn_dynamic_pointer_cast<CRS>(obj);
-                std::shared_ptr<IWKTExportable> objToExport;
-                if (crs) {
-                    objToExport = nn_dynamic_pointer_cast<IWKTExportable>(
-                        crs->createBoundCRSToWGS84IfPossible(
-                            dbContext, allowUseIntermediateCRS));
-                }
-                if (!objToExport) {
-                    objToExport = wktExportable;
-                }
-
                 auto formatter =
                     WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
                 formatter->setStrict(outputOpt.strict);
-                auto wkt = objToExport->exportToWKT(formatter.get());
+                auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
                 }

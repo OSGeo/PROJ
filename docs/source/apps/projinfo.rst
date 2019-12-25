@@ -77,6 +77,9 @@ The following control parameters can appear in any order:
 
     .. note:: WKT2_2019 was previously called WKT2_2018.
 
+    .. note:: Before PROJ 6.3.0, WKT1:GDAL was implicitly calling --boundcrs-to-wgs84.
+              This is no longer the case.
+
 .. option:: -k crs|operation|ellipsoid
 
     When used to query a single object with a AUTHORITY:CODE, determines the (k)ind of the object
