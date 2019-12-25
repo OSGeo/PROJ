@@ -470,7 +470,7 @@ PJ *CONVERSION(unitconvert,0) {
         const char* normalized_name = nullptr;
         f = get_unit_conversion_factor(name, &xy_in_is_linear, &normalized_name);
         if (f != 0.0) {
-            proj_log_debug(P, "xy_in unit: %s", normalized_name);
+            proj_log_trace(P, "xy_in unit: %s", normalized_name);
         } else {
             f = pj_param (P->ctx, P->params, "dxy_in").f;
             if (f == 0.0 || 1.0 / f == 0.0)
@@ -485,7 +485,7 @@ PJ *CONVERSION(unitconvert,0) {
         const char* normalized_name = nullptr;
         f = get_unit_conversion_factor(name, &xy_out_is_linear, &normalized_name);
         if (f != 0.0) {
-            proj_log_debug(P, "xy_out unit: %s", normalized_name);
+            proj_log_trace(P, "xy_out unit: %s", normalized_name);
         } else {
             f = pj_param (P->ctx, P->params, "dxy_out").f;
             if (f == 0.0 || 1.0 / f == 0.0)
@@ -506,7 +506,7 @@ PJ *CONVERSION(unitconvert,0) {
         const char* normalized_name = nullptr;
         f = get_unit_conversion_factor(name, &z_in_is_linear, &normalized_name);
         if (f != 0.0) {
-            proj_log_debug(P, "z_in unit: %s", normalized_name);
+            proj_log_trace(P, "z_in unit: %s", normalized_name);
         } else {
             f = pj_param (P->ctx, P->params, "dz_in").f;
             if (f == 0.0 || 1.0 / f == 0.0)
@@ -519,7 +519,7 @@ PJ *CONVERSION(unitconvert,0) {
         const char* normalized_name = nullptr;
         f = get_unit_conversion_factor(name, &z_out_is_linear, &normalized_name);
         if (f != 0.0) {
-            proj_log_debug(P, "z_out unit: %s", normalized_name);
+            proj_log_trace(P, "z_out unit: %s", normalized_name);
         } else {
             f = pj_param (P->ctx, P->params, "dz_out").f;
             if (f == 0.0 || 1.0 / f == 0.0)
@@ -540,7 +540,7 @@ PJ *CONVERSION(unitconvert,0) {
         if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID); /* unknown unit conversion id */
 
         Q->t_in_id = i;
-        proj_log_debug(P, "t_in unit: %s", time_units[i].name);
+        proj_log_trace(P, "t_in unit: %s", time_units[i].name);
     }
 
     s = nullptr;
@@ -550,7 +550,7 @@ PJ *CONVERSION(unitconvert,0) {
         if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID); /* unknown unit conversion id */
 
         Q->t_out_id = i;
-        proj_log_debug(P, "t_out unit: %s", time_units[i].name);
+        proj_log_trace(P, "t_out unit: %s", time_units[i].name);
     }
 
     return P;

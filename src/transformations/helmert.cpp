@@ -665,18 +665,18 @@ PJ *TRANSFORMATION(helmert, 0) {
     }
 
     /* Let's help with debugging */
-    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
-        proj_log_debug(P, "Helmert parameters:");
-        proj_log_debug(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
-        proj_log_debug(P, "rx= %8.5f  ry= %8.5f  rz= %8.5f",
+    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
+        proj_log_trace(P, "Helmert parameters:");
+        proj_log_trace(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz.x, Q->xyz.y, Q->xyz.z);
+        proj_log_trace(P, "rx= %8.5f  ry= %8.5f  rz= %8.5f",
                 Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
-        proj_log_debug(P, "s=  %8.5f  exact=%d%s", Q->scale, Q->exact,
+        proj_log_trace(P, "s=  %8.5f  exact=%d%s", Q->scale, Q->exact,
                        Q->no_rotation ? "" :
                        Q->is_position_vector ? "  convention=position_vector" :
                        "  convention=coordinate_frame");
-        proj_log_debug(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f",   Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
-        proj_log_debug(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f",   Q->dopk.o, Q->dopk.p, Q->dopk.k);
-        proj_log_debug(P, "ds= %8.5f  t_epoch=%8.5f", Q->dscale, Q->t_epoch);
+        proj_log_trace(P, "dx= %8.5f  dy= %8.5f  dz= %8.5f",   Q->dxyz.x, Q->dxyz.y, Q->dxyz.z);
+        proj_log_trace(P, "drx=%8.5f  dry=%8.5f  drz=%8.5f",   Q->dopk.o, Q->dopk.p, Q->dopk.k);
+        proj_log_trace(P, "ds= %8.5f  t_epoch=%8.5f", Q->dscale, Q->t_epoch);
     }
 
     if (Q->no_rotation) {
@@ -729,15 +729,15 @@ PJ *TRANSFORMATION(molobadekas, 0) {
 
 
     /* Let's help with debugging */
-    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
-        proj_log_debug(P, "Molodensky-Badekas parameters:");
-        proj_log_debug(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz_0.x, Q->xyz_0.y, Q->xyz_0.z);
-        proj_log_debug(P, "rx= %8.5f  ry= %8.5f  rz= %8.5f",
+    if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_TRACE) {
+        proj_log_trace(P, "Molodensky-Badekas parameters:");
+        proj_log_trace(P, "x=  %8.5f  y=  %8.5f  z=  %8.5f", Q->xyz_0.x, Q->xyz_0.y, Q->xyz_0.z);
+        proj_log_trace(P, "rx= %8.5f  ry= %8.5f  rz= %8.5f",
                 Q->opk.o / ARCSEC_TO_RAD, Q->opk.p / ARCSEC_TO_RAD, Q->opk.k / ARCSEC_TO_RAD);
-        proj_log_debug(P, "s=  %8.5f  exact=%d%s", Q->scale, Q->exact,
+        proj_log_trace(P, "s=  %8.5f  exact=%d%s", Q->scale, Q->exact,
                        Q->is_position_vector ? "  convention=position_vector" :
                        "  convention=coordinate_frame");
-        proj_log_debug(P, "px= %8.5f  py= %8.5f  pz= %8.5f",   Q->refp.x, Q->refp.y, Q->refp.z);
+        proj_log_trace(P, "px= %8.5f  py= %8.5f  pz= %8.5f",   Q->refp.x, Q->refp.y, Q->refp.z);
     }
 
     /* as an optimization, we incorporate the refp in the translation terms */

@@ -253,9 +253,11 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
 
             const auto& alt = P->alternativeCoordinateOperations[iBest];
             if( P->iCurCoordOp != iBest ) {
-                std::string msg("Using coordinate operation ");
-                msg += alt.name;
-                pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
+                if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
+                    std::string msg("Using coordinate operation ");
+                    msg += alt.name;
+                    pj_log(P->ctx, PJ_LOG_DEBUG, msg.c_str());
+                }
                 P->iCurCoordOp = iBest;
             }
             PJ_COORD res = direction == PJ_FWD ?
@@ -263,7 +265,7 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             if( res.xyzt.x != HUGE_VAL ) {
                 return res;
             }
-            pj_log(P->ctx, PJ_LOG_TRACE,
+            pj_log(P->ctx, PJ_LOG_DEBUG,
                    "Did not result in valid result. "
                    "Attempting a retry with another operation.");
             if( iRetry == N_MAX_RETRY ) {
@@ -290,9 +292,11 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             if( coordOperation ) {
                 if( coordOperation->gridsNeeded(dbContext).empty() ) {
                     if( P->iCurCoordOp != i ) {
-                        std::string msg("Using coordinate operation ");
-                        msg += alt.name;
-                        pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
+                        if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
+                            std::string msg("Using coordinate operation ");
+                            msg += alt.name;
+                            pj_log(P->ctx, PJ_LOG_DEBUG, msg.c_str());
+                        }
                         P->iCurCoordOp = i;
                     }
                     if( direction == PJ_FWD ) {
