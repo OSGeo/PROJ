@@ -79,7 +79,7 @@ curl will be an optional build dependency of PROJ, added in autoconf and cmake
 build systems. When curl will be detected to be available, it will be enabled
 by default. But download of grids themselves will not be enabled by default,
 and will require explicit consent of the user, either through the API
-(:c:func:`proj_context_enable_network`) or through the PROJ_NETWORK=ON
+(:c:func:`proj_context_set_enable_network`) or through the PROJ_NETWORK=ON
 environment variable.
 
 Regarding the minimum version of libcurl required, given GDAL experience that
@@ -94,9 +94,9 @@ SSL, proxy, authentication, etc.)
 
 A text configuration file, installed in ${installation_prefix}/share/proj/proj.ini
 (or ${PROJ_LIB}/proj.ini)
-will contain the URL of the CDNs that will be tried. If several are available,
-they will be tried in sequence. The user may also override this setting with the
-:c:func:`proj_context_network_set_url_endpoints` or through the PROJ_NETWORK_ENDPOINTS
+will contain the URL of the CDN that will be used.
+The user may also override this setting with the
+:c:func:`proj_context_set_url_endpoint` or through the PROJ_NETWORK_ENDPOINT
 environment variable.
 
 The rationale for putting proj.ini in that location is
@@ -116,46 +116,99 @@ The preliminary C API for the above is:
     * @return TRUE if network access is possible. That is either libcurl is
     *         available, or an alternate interface has been set.
     */
-    int proj_context_enable_network(PJ_CONTEXT* ctx, int enable);
+    int proj_context_set_enable_network(PJ_CONTEXT* ctx, int enable);
 
-    /** Define URL endpoints to query for remote grids.
+    /** Define URL endpoint to query for remote grids.
     *
-    * This overrides the default endpoints in the PROJ configuration file.
+    * This overrides the default endpoint in the PROJ configuration file or with
+    * the PROJ_NETWORK_ENDPOINT environment variable.
     *
     * @param ctx PROJ context, or NULL
-    * @param urls NUL-terminated array of URL
-    * @return TRUE in case of success.
+    * @param url Endpoint URL. Must NOT be NULL.
     */
-    int proj_context_network_set_url_endpoints(PJ_CONTEXT* ctx,
-                                               const char* const * urls);
+    void proj_context_set_url_endpoint(PJ_CONTEXT* ctx, const char* url);
 
     /** Opaque structure for PROJ. Implementations might cast it to their
      * structure/class of choice. */
     typedef struct PROJ_NETWORK_HANDLE PROJ_NETWORK_HANDLE;
 
+    /** Network access: open callback
+    * 
+    * Should try to read the size_to_read first bytes at the specified offset of
+    * the file given by URL url,
+    * and write them to buffer. *out_size_read should be updated with the actual
+    * amount of bytes read (== size_to_read if the file is larger than size_to_read).
+    * During this read, the implementation should make sure to store the HTTP
+    * headers from the server response to be able to respond to
+    * proj_network_get_header_value_cbk_type callback.
+    *
+    * error_string_max_size should be the maximum size that can be written into
+    * the out_error_string buffer (including terminating nul character).
+    *
+    * @return a non-NULL opaque handle in case of success.
+    */
+    typedef PROJ_NETWORK_HANDLE* (*proj_network_open_cbk_type)(
+                                                        PJ_CONTEXT* ctx,
+                                                        const char* url,
+                                                        unsigned long long offset,
+                                                        size_t size_to_read,
+                                                        void* buffer,
+                                                        size_t* out_size_read,
+                                                        size_t error_string_max_size,
+                                                        char* out_error_string,
+                                                        void* user_data);
+
+    /** Network access: close callback */
+    typedef void (*proj_network_close_cbk_type)(PJ_CONTEXT* ctx,
+                                                PROJ_NETWORK_HANDLE* handle,
+                                                void* user_data);
+
+    /** Network access: get HTTP headers */
+    typedef const char* (*proj_network_get_header_value_cbk_type)(
+                                                PJ_CONTEXT* ctx,
+                                                PROJ_NETWORK_HANDLE* handle,
+                                                const char* header_name,
+                                                void* user_data);
+
+    /** Network access: read range
+    *
+    * Read size_to_read bytes from handle, starting at offset, into
+    * buffer.
+    *
+    * error_string_max_size should be the maximum size that can be written into
+    * the out_error_string buffer (including terminating nul character).
+    *
+    * @return the number of bytes actually read (0 in case of error)
+    */
+    typedef size_t (*proj_network_read_range_type)(
+                                                PJ_CONTEXT* ctx,
+                                                PROJ_NETWORK_HANDLE* handle,
+                                                unsigned long long offset,
+                                                size_t size_to_read,
+                                                void* buffer,
+                                                size_t error_string_max_size,
+                                                char* out_error_string,
+                                                void* user_data);
+
     /** Define a custom set of callbacks for network access.
     *
+    * All callbacks should be provided (non NULL pointers).
+    *
     * @param ctx PROJ context, or NULL
-    * @param open Callback to open a remote file given its URL
-    * @param close Callbak to close a remote file.
-    * @param get_file_size Callback to get the size of the remote file.
-    * @param read_range Callback to read a range of bytes inside a remote file. Returns the number of bytes written into the buffer.
-    * @param user_data Arbitrary pointer provided by the user, and passed to the above callbacks.
+    * @param open_cbk Callback to open a remote file given its URL
+    * @param close_cbk Callback to close a remote file.
+    * @param get_header_value_cbk Callback to get HTTP headers
+    * @param read_range_cbk Callback to read a range of bytes inside a remote file.
+    * @param user_data Arbitrary pointer provided by the user, and passed to the
+    * above callbacks. May be NULL.
     * @return TRUE in case of success.
     */
     int proj_context_set_network_callbacks(
         PJ_CONTEXT* ctx,
-        PROJ_NETWORK_HANDLE* (*open)(const char* /* url */,
-                                     void* /*user_data*/),
-        void (*close)               (PROJ_NETWORK_HANDLE*, 
-                                     void* /*user_data*/),
-        unsigned long long (*get_file_size)(PROJ_NETWORK_HANDLE*,
-                                            void* /*user_data*/),
-        size_t (*read_range)         (PROJ_NETWORK_HANDLE*,
-                                     unsigned long long, /* offset */
-                                     size_t, /* size to read */
-                                     void*, /* buffer to update with bytes read*/
-                                     void* /*user_data*/),
+        proj_network_open_cbk_type open_cbk,
+        proj_network_close_cbk_type close_cbk,
+        proj_network_get_header_value_cbk_type get_header_value_cbk,
+        proj_network_read_range_type read_range_cbk,
         void* user_data);
 
 
@@ -210,9 +263,11 @@ with the ``use`` argument set to a new enumeration value
 
 .. code-block:: c
 
-    /** Results will be presented as if all grids known to PROJ (that is
-      registered in the grid_alternatives table of its database) were available. */
-    PROJ_GRID_AVAILABILITY_ALL_KNOWN_PRESENT
+    /** Results will be presented as if grids known to PROJ (that is
+    * registered in the grid_alternatives table of its database) were
+    * available. Used typically when networking is enabled.
+    */
+    PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE
 
 
 Local on-disk caching of remote grids
