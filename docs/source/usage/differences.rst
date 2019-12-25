@@ -114,3 +114,12 @@ exclusive with :option:`+t_epoch`. :option:`+dt` is used when deformation
 for a set amount of time is needed and :option:`+t_epoch` is used (in
 conjunction with the observation time of the input coordinate) when
 deformation from a specific epoch to the observation time is needed.
+
+Version 6.3.0
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+projinfo
+--------
+
+Before PROJ 6.3.0, WKT1:GDAL was implicitly calling --boundcrs-to-wgs84, to
+add a TOWGS84[] node in some cases. This is no longer the case.
