@@ -54,6 +54,30 @@ A proj installation includes a SQLite database of transformation information
 that must be accessible for the library to work properly.  The library will
 print an error if the database can't be found.
 
+proj.ini
+-------------------------------------------------------------------------------
+
+.. versionadded:: 7.0
+
+proj.ini is a text configuration file, mostly dedicated at setting up network
+related parameters.
+
+Its default content is:
+
+::
+
+    [general]
+    ; Lines starting by ; are commented lines.
+    ;
+
+    ; Network capabilities disabled by default.
+    ; Can be overriden with the PROJ_NETWORK=ON environment variable.
+    ; network = on
+
+    ; Can be overriden with the PROJ_NETWORK_ENDPOINT environment variable.
+    cdn_endpoint = https://cdn.proj.org
+
+
 Transformation grids
 -------------------------------------------------------------------------------
 

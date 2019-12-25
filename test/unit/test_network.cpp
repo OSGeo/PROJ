@@ -684,4 +684,59 @@ TEST(networking, curl_vgridshift_vertcon) {
 
 #endif
 
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, network_endpoint_env_variable) {
+    putenv(const_cast<char *>("PROJ_NETWORK_ENDPOINT=http://0.0.0.0/"));
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+
+    // NAD83 to NAD83(HARN) in West-Virginia. Using wvhpgn.tif
+    auto P = proj_create_crs_to_crs(ctx, "EPSG:4269", "EPSG:4152", nullptr);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD c;
+    c.xyz.x = 40;  // lat
+    c.xyz.y = -80; // lon
+    c.xyz.z = 0;
+    c = proj_trans(P, PJ_FWD, c);
+    putenv(const_cast<char *>("PROJ_NETWORK_ENDPOINT="));
+
+    proj_destroy(P);
+    proj_context_destroy(ctx);
+
+    EXPECT_EQ(c.xyz.x, HUGE_VAL);
+}
+
+#endif
+
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, network_endpoint_api) {
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+    proj_context_set_url_endpoint(ctx, "http://0.0.0.0");
+
+    // NAD83 to NAD83(HARN) in West-Virginia. Using wvhpgn.tif
+    auto P = proj_create_crs_to_crs(ctx, "EPSG:4269", "EPSG:4152", nullptr);
+    ASSERT_NE(P, nullptr);
+
+    PJ_COORD c;
+    c.xyz.x = 40;  // lat
+    c.xyz.y = -80; // lon
+    c.xyz.z = 0;
+    c = proj_trans(P, PJ_FWD, c);
+
+    proj_destroy(P);
+    proj_context_destroy(ctx);
+
+    EXPECT_EQ(c.xyz.x, HUGE_VAL);
+}
+
+#endif
+
 } // namespace

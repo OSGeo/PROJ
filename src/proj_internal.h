@@ -699,6 +699,9 @@ struct projCtx_t {
     projNetworkCallbacksAndData networking{};
     bool defer_grid_opening = false; // set by pj_obj_create()
 
+    bool iniFileLoaded = false;
+    std::string endpoint{};
+
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
 
     projCtx_t() = default;
@@ -829,6 +832,10 @@ void pj_pipeline_assign_context_to_steps( PJ* P, PJ_CONTEXT* ctx );
 
 // For use by projinfo
 bool PROJ_DLL pj_context_is_network_enabled(PJ_CONTEXT* ctx);
+
+std::string pj_context_get_url_endpoint(PJ_CONTEXT* ctx);
+
+void pj_load_ini(PJ_CONTEXT* ctx);
 
 /* classic public API */
 #include "proj_api.h"

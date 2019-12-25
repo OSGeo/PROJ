@@ -772,6 +772,9 @@ int proj_context_set_network_callbacks(
 
 /** Enable or disable network access.
 *
+* This overrides the default endpoint in the PROJ configuration file or with
+* the PROJ_NETWORK environment variable.
+*
 * @param ctx PROJ context, or NULL
 * @param enable TRUE if network access is allowed.
 * @return TRUE if network access is possible. That is either libcurl is
@@ -781,6 +784,8 @@ int proj_context_set_enable_network(PJ_CONTEXT *ctx, int enable) {
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
     }
+    // Load ini file, now so as to override its network settings
+    pj_load_ini(ctx);
     ctx->networking.enabled_env_variable_checked = true;
     ctx->networking.enabled = enable != FALSE;
 #ifdef CURL_ENABLED
@@ -789,6 +794,25 @@ int proj_context_set_enable_network(PJ_CONTEXT *ctx, int enable) {
     return ctx->networking.enabled &&
            ctx->networking.open != NS_PROJ::no_op_network_open;
 #endif
+}
+
+// ---------------------------------------------------------------------------
+
+/** Define the URL endpoint to query for remote grids.
+*
+* This overrides the default endpoint in the PROJ configuration file or with
+* the PROJ_NETWORK_ENDPOINT environment variable.
+*
+* @param ctx PROJ context, or NULL
+* @param url Endpoint URL. Must NOT be NULL.
+*/
+void proj_context_set_url_endpoint(PJ_CONTEXT *ctx, const char *url) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    // Load ini file, now so as to override its network settings
+    pj_load_ini(ctx);
+    ctx->endpoint = url;
 }
 
 // ---------------------------------------------------------------------------
@@ -808,6 +832,7 @@ bool pj_context_is_network_enabled(PJ_CONTEXT *ctx) {
                                   ci_equal(enabled, "YES") ||
                                   ci_equal(enabled, "TRUE");
     }
+    pj_load_ini(ctx);
     ctx->networking.enabled_env_variable_checked = true;
     return ctx->networking.enabled;
 }

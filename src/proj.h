@@ -424,6 +424,8 @@ int PROJ_DLL proj_context_set_network_callbacks(
 int PROJ_DLL proj_context_set_enable_network(PJ_CONTEXT* ctx,
                                              int enabled);
 
+void PROJ_DLL proj_context_set_url_endpoint(PJ_CONTEXT* ctx, const char* url);
+
 /*! @cond Doxygen_Suppress */
 
 /* Manage the transformation definition object PJ */

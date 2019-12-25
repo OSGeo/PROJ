@@ -366,16 +366,21 @@ std::unique_ptr<NS_PROJ::File> NS_PROJ::FileManager::open_resource_file(
         !starts_with(name, "http://") &&
         !starts_with(name, "https://") &&
         pj_context_is_network_enabled(ctx) ) {
-        std::string remote_file("https://cdn.proj.org/");
-        remote_file += name;
-        auto pos = remote_file.rfind('.');
-        if( pos + 4 == remote_file.size() ) {
-            remote_file = remote_file.substr(0, pos) + ".tif";
-            file = open(ctx, remote_file.c_str());
-            if( file ) {
-                pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
-                        "Using %s", remote_file.c_str() );
-                pj_ctx_set_errno( ctx, 0 );
+        std::string remote_file(pj_context_get_url_endpoint(ctx));
+        if( !remote_file.empty() ) {
+            if( remote_file.back() != '/' ) {
+                remote_file += '/';
+            }
+            remote_file += name;
+            auto pos = remote_file.rfind('.');
+            if( pos + 4 == remote_file.size() ) {
+                remote_file = remote_file.substr(0, pos) + ".tif";
+                file = open(ctx, remote_file.c_str());
+                if( file ) {
+                    pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                            "Using %s", remote_file.c_str() );
+                    pj_ctx_set_errno( ctx, 0 );
+                }
             }
         }
     }
@@ -432,4 +437,92 @@ int pj_find_file(projCtx ctx, const char *short_filename,
         return 1;
     }
     return 0;
+}
+
+/************************************************************************/
+/*                    pj_context_get_url_endpoint()                     */
+/************************************************************************/
+
+std::string pj_context_get_url_endpoint(PJ_CONTEXT* ctx)
+{
+    if( !ctx->endpoint.empty() ) {
+        return ctx->endpoint;
+    }
+    pj_load_ini(ctx);
+    return ctx->endpoint;
+}
+
+/************************************************************************/
+/*                              trim()                                  */
+/************************************************************************/
+
+static std::string trim(const std::string& s) {
+    const auto first = s.find_first_not_of(' ');
+    const auto last = s.find_last_not_of(' ');
+    if( first == std::string::npos || last == std::string::npos ) {
+        return std::string();
+    }
+    return s.substr(first, last - first + 1);
+}
+
+/************************************************************************/
+/*                            pj_load_ini()                             */
+/************************************************************************/
+
+void pj_load_ini(projCtx ctx)
+{
+    if( ctx->iniFileLoaded )
+        return;
+
+    const char* endpoint_from_env = getenv("PROJ_NETWORK_ENDPOINT");
+    if( endpoint_from_env && endpoint_from_env[0] != '\0' ) {
+        ctx->endpoint = endpoint_from_env;
+    }
+
+    ctx->iniFileLoaded = true;
+    auto file = std::unique_ptr<NS_PROJ::File>(
+        reinterpret_cast<NS_PROJ::File*>(
+               pj_open_lib_internal(ctx, "proj.ini", "rb",
+                                    pj_open_file_with_manager,
+                                    nullptr, 0)));
+    if( !file )
+        return;
+    file->seek(0, SEEK_END);
+    const auto filesize = file->tell();
+    if( filesize == 0 || filesize > 100 * 1024U )
+        return;
+    file->seek(0, SEEK_SET);
+    std::string content;
+    content.resize(static_cast<size_t>(filesize));
+    const auto nread = file->read(&content[0], content.size());
+    if( nread != content.size() )
+        return;
+    content += '\n';
+    size_t pos = 0;
+    while( pos != std::string::npos ) {
+        const auto eol = content.find_first_of("\r\n", pos);
+        if( eol == std::string::npos ) {
+            break;
+        }
+
+        const auto equal = content.find('=', pos);
+        if( equal < eol )
+        {
+            const auto key = trim(content.substr(pos, equal-pos));
+            const auto value = trim(content.substr(equal + 1,
+                                                    eol - (equal+1)));
+            if( ctx->endpoint.empty() && key == "cdn_endpoint" ) {
+                ctx->endpoint = value;
+            } else if ( key == "network" ) {
+                const char *enabled = getenv("PROJ_NETWORK");
+                if (enabled == nullptr || enabled[0] == '\0') {
+                    ctx->networking.enabled = ci_equal(value, "ON") ||
+                                                ci_equal(value, "YES") ||
+                                                ci_equal(value, "TRUE");
+                }
+            }
+        }
+
+        pos = content.find_first_not_of("\r\n", eol);
+    }
 }

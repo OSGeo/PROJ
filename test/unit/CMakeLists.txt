@@ -160,5 +160,10 @@ target_link_libraries(test_network
   GTest::gtest
   ${PROJ_LIBRARIES})
 add_test(NAME test_network COMMAND test_network)
-set_property(TEST test_network
-        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data;PROJ_SOURCE_DATA=${PROJECT_SOURCE_DIR}/data")
+if(MSVC)
+    set_property(TEST test_network
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data\\;${PROJECT_SOURCE_DIR}/data;PROJ_SOURCE_DATA=${PROJECT_SOURCE_DIR}/data")
+else()
+    set_property(TEST test_network
+        PROPERTY ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data:${PROJECT_SOURCE_DIR}/data;PROJ_SOURCE_DATA=${PROJECT_SOURCE_DIR}/data")
+endif()
