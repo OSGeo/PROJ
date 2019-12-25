@@ -234,7 +234,9 @@ int main(int argc, char **argv) {
     PJ_DIRECTION direction = opt_given (o, "I")? PJ_INV: PJ_FWD;
 
     verbose   = MIN(opt_given (o, "v"), 3); /* log level can't be larger than 3 */
-    proj_log_level (PJ_DEFAULT_CTX, static_cast<PJ_LOG_LEVEL>(verbose));
+    if( verbose > 0 ) {
+        proj_log_level (PJ_DEFAULT_CTX, static_cast<PJ_LOG_LEVEL>(verbose));
+    }
     proj_log_func  (PJ_DEFAULT_CTX, (void *) fout, logger);
 
     if (opt_given (o, "version")) {
