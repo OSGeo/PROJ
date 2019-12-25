@@ -369,6 +369,9 @@ typedef struct PROJ_NETWORK_HANDLE PROJ_NETWORK_HANDLE;
  * headers from the server response to be able to respond to
  * proj_network_get_header_value_cbk_type callback.
  *
+ * error_string_max_size should be the maximum size that can be written into
+ * the out_error_string buffer (including terminating nul character).
+ *
  * @return a non-NULL opaque handle in case of success.
  */
 typedef PROJ_NETWORK_HANDLE* (*proj_network_open_cbk_type)(
@@ -378,6 +381,8 @@ typedef PROJ_NETWORK_HANDLE* (*proj_network_open_cbk_type)(
                                                       size_t size_to_read,
                                                       void* buffer,
                                                       size_t* out_size_read,
+                                                      size_t error_string_max_size,
+                                                      char* out_error_string,
                                                       void* user_data);
 
 /** Network access: close callback */
@@ -396,6 +401,10 @@ typedef const char* (*proj_network_get_header_value_cbk_type)(
  *
  * Read size_to_read bytes from handle, starting at offset, into
  * buffer.
+ *
+ * error_string_max_size should be the maximum size that can be written into
+ * the out_error_string buffer (including terminating nul character).
+ *
  * @return the number of bytes actually read (0 in case of error)
  */
 typedef size_t (*proj_network_read_range_type)(
@@ -404,12 +413,8 @@ typedef size_t (*proj_network_read_range_type)(
                                             unsigned long long offset,
                                             size_t size_to_read,
                                             void* buffer,
-                                            void* user_data);
-
-/** Network access: get last error message */
-typedef const char* (*proj_network_get_last_error_type)(
-                                            PJ_CONTEXT* ctx,
-                                            PROJ_NETWORK_HANDLE*,
+                                            size_t error_string_max_size,
+                                            char* out_error_string,
                                             void* user_data);
 
 int PROJ_DLL proj_context_set_network_callbacks(
@@ -418,7 +423,6 @@ int PROJ_DLL proj_context_set_network_callbacks(
     proj_network_close_cbk_type close_cbk,
     proj_network_get_header_value_cbk_type get_header_value_cbk,
     proj_network_read_range_type read_range_cbk,
-    proj_network_get_last_error_type get_last_error_cbk,
     void* user_data);
 
 int PROJ_DLL proj_context_set_enable_network(PJ_CONTEXT* ctx,

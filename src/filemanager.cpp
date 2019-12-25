@@ -323,11 +323,19 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
     } else {
         std::vector<unsigned char> buffer(DOWNLOAD_CHUNK_SIZE);
         size_t size_read = 0;
-        auto handle =
-            ctx->networking.open(ctx, filename, 0, buffer.size(), &buffer[0],
-                                 &size_read, ctx->networking.user_data);
+        std::string errorBuffer;
+        errorBuffer.resize(1024);
+
+        auto handle = ctx->networking.open(
+            ctx, filename, 0, buffer.size(), &buffer[0], &size_read,
+            errorBuffer.size(), &errorBuffer[0], ctx->networking.user_data);
         buffer.resize(size_read);
         gNetworkChunkCache.insert(filename, 0, std::move(buffer));
+        if (!handle) {
+            errorBuffer.resize(strlen(errorBuffer.data()));
+            pj_log(ctx, PJ_LOG_ERROR, "Cannot open %s: %s", filename,
+                   errorBuffer.c_str());
+        }
 
         unsigned long long filesize = 0;
         if (handle) {
@@ -405,11 +413,14 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
 
             region.resize(m_nBlocksToDownload * DOWNLOAD_CHUNK_SIZE);
             size_t nRead = 0;
+            std::string errorBuffer;
+            errorBuffer.resize(1024);
             if (!m_handle) {
                 m_handle = m_ctx->networking.open(
                     m_ctx, m_url.c_str(), offsetToDownload,
                     m_nBlocksToDownload * DOWNLOAD_CHUNK_SIZE, &region[0],
-                    &nRead, m_ctx->networking.user_data);
+                    &nRead, errorBuffer.size(), &errorBuffer[0],
+                    m_ctx->networking.user_data);
                 if (!m_handle) {
                     return 0;
                 }
@@ -417,9 +428,15 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
                 nRead = m_ctx->networking.read_range(
                     m_ctx, m_handle, offsetToDownload,
                     m_nBlocksToDownload * DOWNLOAD_CHUNK_SIZE, &region[0],
+                    errorBuffer.size(), &errorBuffer[0],
                     m_ctx->networking.user_data);
             }
             if (nRead == 0) {
+                errorBuffer.resize(strlen(errorBuffer.data()));
+                if (!errorBuffer.empty()) {
+                    pj_log(m_ctx, PJ_LOG_ERROR, "Cannot read in %s: %s",
+                           m_url.c_str(), errorBuffer.c_str());
+                }
                 return 0;
             }
             region.resize(nRead);
@@ -542,10 +559,10 @@ static size_t pj_curl_write_func(void *buffer, size_t count, size_t nmemb,
 
 // ---------------------------------------------------------------------------
 
-static PROJ_NETWORK_HANDLE *pj_curl_open(PJ_CONTEXT *, const char *url,
-                                         unsigned long long offset,
-                                         size_t size_to_read, void *buffer,
-                                         size_t *out_size_read, void *) {
+static PROJ_NETWORK_HANDLE *
+pj_curl_open(PJ_CONTEXT *, const char *url, unsigned long long offset,
+             size_t size_to_read, void *buffer, size_t *out_size_read,
+             size_t error_string_max_size, char *out_error_string, void *) {
     CURL *hCurlHandle = curl_easy_init();
     if (!hCurlHandle)
         return nullptr;
@@ -583,6 +600,10 @@ static PROJ_NETWORK_HANDLE *pj_curl_open(PJ_CONTEXT *, const char *url,
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, pj_curl_write_func);
 
+    char szCurlErrBuf[CURL_ERROR_SIZE + 1] = {};
+    szCurlErrBuf[0] = '\0';
+    curl_easy_setopt(hCurlHandle, CURLOPT_ERRORBUFFER, szCurlErrBuf);
+
     curl_easy_perform(hCurlHandle);
 
     long response_code = 0;
@@ -594,9 +615,23 @@ static PROJ_NETWORK_HANDLE *pj_curl_open(PJ_CONTEXT *, const char *url,
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
 
+    curl_easy_setopt(hCurlHandle, CURLOPT_ERRORBUFFER, nullptr);
+
     if (response_code == 0 || response_code >= 300) {
+        if (out_error_string) {
+            if (szCurlErrBuf[0]) {
+                snprintf(out_error_string, error_string_max_size, "%s",
+                         szCurlErrBuf);
+            } else {
+                snprintf(out_error_string, error_string_max_size,
+                         "HTTP error %ld: %s", response_code, body.c_str());
+            }
+        }
         curl_easy_cleanup(hCurlHandle);
         return nullptr;
+    }
+    if (out_error_string && error_string_max_size) {
+        out_error_string[0] = '\0';
     }
 
     if (!body.empty()) {
@@ -619,7 +654,8 @@ static void pj_curl_close(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *handle,
 
 static size_t pj_curl_read_range(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *raw_handle,
                                  unsigned long long offset, size_t size_to_read,
-                                 void *buffer, void *) {
+                                 void *buffer, size_t error_string_max_size,
+                                 char *out_error_string, void *) {
     auto handle = reinterpret_cast<CurlFileHandle *>(raw_handle);
     auto hCurlHandle = handle->m_handle;
 
@@ -633,6 +669,10 @@ static size_t pj_curl_read_range(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *raw_handle,
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, pj_curl_write_func);
 
+    char szCurlErrBuf[CURL_ERROR_SIZE + 1] = {};
+    szCurlErrBuf[0] = '\0';
+    curl_easy_setopt(hCurlHandle, CURLOPT_ERRORBUFFER, szCurlErrBuf);
+
     curl_easy_perform(hCurlHandle);
 
     long response_code = 0;
@@ -641,8 +681,22 @@ static size_t pj_curl_read_range(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *raw_handle,
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
 
+    curl_easy_setopt(hCurlHandle, CURLOPT_ERRORBUFFER, nullptr);
+
     if (response_code == 0 || response_code >= 300) {
+        if (out_error_string) {
+            if (szCurlErrBuf[0]) {
+                snprintf(out_error_string, error_string_max_size, "%s",
+                         szCurlErrBuf);
+            } else {
+                snprintf(out_error_string, error_string_max_size,
+                         "HTTP error %ld: %s", response_code, body.c_str());
+            }
+        }
         return 0;
+    }
+    if (out_error_string && error_string_max_size) {
+        out_error_string[0] = '\0';
     }
 
     if (!body.empty()) {
@@ -682,8 +736,12 @@ no_op_network_open(PJ_CONTEXT *ctx, const char * /* url */,
                    size_t,             /* size to read */
                    void *,             /* buffer to update with bytes read*/
                    size_t *,           /* output: size actually read */
+                   size_t error_string_max_size, char *out_error_string,
                    void * /*user_data*/) {
-    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Network functionality not available");
+    if (out_error_string) {
+        snprintf(out_error_string, error_string_max_size, "%s",
+                 "Network functionality not available");
+    }
     return nullptr;
 }
 
@@ -691,14 +749,6 @@ no_op_network_open(PJ_CONTEXT *ctx, const char * /* url */,
 
 static void no_op_network_close(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *,
                                 void * /*user_data*/) {}
-
-// ---------------------------------------------------------------------------
-
-static const char *no_op_network_get_last_error(PJ_CONTEXT *,
-                                                PROJ_NETWORK_HANDLE *,
-                                                void * /*user_data*/) {
-    return "Network functionality not available";
-}
 
 #endif
 
@@ -713,7 +763,6 @@ void FileManager::fillDefaultNetworkInterface(PJ_CONTEXT *ctx) {
 #else
     ctx->networking.open = no_op_network_open;
     ctx->networking.close = no_op_network_close;
-    ctx->networking.get_last_error = no_op_network_get_last_error;
 #endif
 }
 
@@ -741,7 +790,6 @@ NS_PROJ_END
  * @param close_cbk Callback to close a remote file.
  * @param get_header_value_cbk Callback to get HTTP headers
  * @param read_range_cbk Callback to read a range of bytes inside a remote file.
- * @param get_last_error_cbk Callback to get last error message.
  * @param user_data Arbitrary pointer provided by the user, and passed to the
  * above callbacks. May be NULL.
  * @return TRUE in case of success.
@@ -750,20 +798,17 @@ int proj_context_set_network_callbacks(
     PJ_CONTEXT *ctx, proj_network_open_cbk_type open_cbk,
     proj_network_close_cbk_type close_cbk,
     proj_network_get_header_value_cbk_type get_header_value_cbk,
-    proj_network_read_range_type read_range_cbk,
-    proj_network_get_last_error_type get_last_error_cbk, void *user_data) {
+    proj_network_read_range_type read_range_cbk, void *user_data) {
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
     }
-    if (!open_cbk || !close_cbk || !get_header_value_cbk || !read_range_cbk ||
-        !get_last_error_cbk) {
+    if (!open_cbk || !close_cbk || !get_header_value_cbk || !read_range_cbk) {
         return false;
     }
     ctx->networking.open = open_cbk;
     ctx->networking.close = close_cbk;
     ctx->networking.get_header_value = get_header_value_cbk;
     ctx->networking.read_range = read_range_cbk;
-    ctx->networking.get_last_error = get_last_error_cbk;
     ctx->networking.user_data = user_data;
     return true;
 }
