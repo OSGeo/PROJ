@@ -15,6 +15,7 @@ echo "NPROC=${NPROC}"
 
 # Download grid files
 wget https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
+wget "https://github.com/OSGeo/proj-datumgrid/blob/master/north-america/ntv2_0.gsb?raw=true" -O ntv2_0.gsb
 
 # prepare build files
 ./autogen.sh
@@ -95,7 +96,7 @@ cd ..
 cd ../..
 
 # Install grid files
-(cd data && unzip -o ../proj-datumgrid-1.8.zip)
+(cd data && unzip -o ../proj-datumgrid-1.8.zip && cp ../ntv2_0.gsb . )
 
 # autoconf build with grids
 mkdir build_autoconf_grids
