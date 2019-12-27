@@ -542,17 +542,49 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename) {
 #ifdef CURL_ENABLED
 
 struct CurlFileHandle {
-    CURL *m_handle = nullptr;
-    std::string m_headers;
+    std::string m_url;
+    CURL *m_handle;
+    std::string m_headers{};
     std::string m_lastval{};
+    char m_szCurlErrBuf[CURL_ERROR_SIZE + 1] = {};
 
     CurlFileHandle(const CurlFileHandle &) = delete;
     CurlFileHandle &operator=(const CurlFileHandle &) = delete;
 
-    explicit CurlFileHandle(CURL *handle, std::string &&headers)
-        : m_handle(handle), m_headers(std::move(headers)) {}
+    explicit CurlFileHandle(const char *url, CURL *handle);
     ~CurlFileHandle();
+
+    static PROJ_NETWORK_HANDLE *
+    open(PJ_CONTEXT *, const char *url, unsigned long long offset,
+         size_t size_to_read, void *buffer, size_t *out_size_read,
+         size_t error_string_max_size, char *out_error_string, void *);
 };
+
+// ---------------------------------------------------------------------------
+
+CurlFileHandle::CurlFileHandle(const char *url, CURL *handle)
+    : m_url(url), m_handle(handle) {
+    curl_easy_setopt(handle, CURLOPT_URL, m_url.c_str());
+
+    if (getenv("PROJ_CURL_VERBOSE"))
+        curl_easy_setopt(handle, CURLOPT_VERBOSE, 1);
+
+// CURLOPT_SUPPRESS_CONNECT_HEADERS is defined in curl 7.54.0 or newer.
+#if LIBCURL_VERSION_NUM >= 0x073600
+    curl_easy_setopt(handle, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
+#endif
+
+    // Enable following redirections.  Requires libcurl 7.10.1 at least.
+    curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 10);
+
+    if (getenv("PROJ_UNSAFE_SSL")) {
+        curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, 0L);
+    }
+
+    curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, m_szCurlErrBuf);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -575,31 +607,18 @@ static size_t pj_curl_write_func(void *buffer, size_t count, size_t nmemb,
 
 // ---------------------------------------------------------------------------
 
-static PROJ_NETWORK_HANDLE *
-pj_curl_open(PJ_CONTEXT *, const char *url, unsigned long long offset,
-             size_t size_to_read, void *buffer, size_t *out_size_read,
-             size_t error_string_max_size, char *out_error_string, void *) {
+PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *, const char *url,
+                                          unsigned long long offset,
+                                          size_t size_to_read, void *buffer,
+                                          size_t *out_size_read,
+                                          size_t error_string_max_size,
+                                          char *out_error_string, void *) {
     CURL *hCurlHandle = curl_easy_init();
     if (!hCurlHandle)
         return nullptr;
-    curl_easy_setopt(hCurlHandle, CURLOPT_URL, url);
 
-    if (getenv("PROJ_CURL_VERBOSE"))
-        curl_easy_setopt(hCurlHandle, CURLOPT_VERBOSE, 1);
-
-// CURLOPT_SUPPRESS_CONNECT_HEADERS is defined in curl 7.54.0 or newer.
-#if LIBCURL_VERSION_NUM >= 0x073600
-    curl_easy_setopt(hCurlHandle, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
-#endif
-
-    // Enable following redirections.  Requires libcurl 7.10.1 at least.
-    curl_easy_setopt(hCurlHandle, CURLOPT_FOLLOWLOCATION, 1);
-    curl_easy_setopt(hCurlHandle, CURLOPT_MAXREDIRS, 10);
-
-    if (getenv("PROJ_UNSAFE_SSL")) {
-        curl_easy_setopt(hCurlHandle, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(hCurlHandle, CURLOPT_SSL_VERIFYHOST, 0L);
-    }
+    auto file =
+        std::unique_ptr<CurlFileHandle>(new CurlFileHandle(url, hCurlHandle));
 
     char szBuffer[128];
     sqlite3_snprintf(sizeof(szBuffer), szBuffer, "%llu-%llu", offset,
@@ -616,9 +635,7 @@ pj_curl_open(PJ_CONTEXT *, const char *url, unsigned long long offset,
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, pj_curl_write_func);
 
-    char szCurlErrBuf[CURL_ERROR_SIZE + 1] = {};
-    szCurlErrBuf[0] = '\0';
-    curl_easy_setopt(hCurlHandle, CURLOPT_ERRORBUFFER, szCurlErrBuf);
+    file->m_szCurlErrBuf[0] = '\0';
 
     curl_easy_perform(hCurlHandle);
 
@@ -631,19 +648,16 @@ pj_curl_open(PJ_CONTEXT *, const char *url, unsigned long long offset,
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
 
-    curl_easy_setopt(hCurlHandle, CURLOPT_ERRORBUFFER, nullptr);
-
     if (response_code == 0 || response_code >= 300) {
         if (out_error_string) {
-            if (szCurlErrBuf[0]) {
+            if (file->m_szCurlErrBuf[0]) {
                 snprintf(out_error_string, error_string_max_size, "%s",
-                         szCurlErrBuf);
+                         file->m_szCurlErrBuf);
             } else {
                 snprintf(out_error_string, error_string_max_size,
                          "HTTP error %ld: %s", response_code, body.c_str());
             }
         }
-        curl_easy_cleanup(hCurlHandle);
         return nullptr;
     }
     if (out_error_string && error_string_max_size) {
@@ -655,8 +669,8 @@ pj_curl_open(PJ_CONTEXT *, const char *url, unsigned long long offset,
     }
     *out_size_read = std::min(size_to_read, body.size());
 
-    return reinterpret_cast<PROJ_NETWORK_HANDLE *>(
-        new CurlFileHandle(hCurlHandle, std::move(headers)));
+    file->m_headers = std::move(headers);
+    return reinterpret_cast<PROJ_NETWORK_HANDLE *>(file.release());
 }
 
 // ---------------------------------------------------------------------------
@@ -685,9 +699,7 @@ static size_t pj_curl_read_range(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *raw_handle,
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, pj_curl_write_func);
 
-    char szCurlErrBuf[CURL_ERROR_SIZE + 1] = {};
-    szCurlErrBuf[0] = '\0';
-    curl_easy_setopt(hCurlHandle, CURLOPT_ERRORBUFFER, szCurlErrBuf);
+    handle->m_szCurlErrBuf[0] = '\0';
 
     curl_easy_perform(hCurlHandle);
 
@@ -697,13 +709,11 @@ static size_t pj_curl_read_range(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *raw_handle,
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
 
-    curl_easy_setopt(hCurlHandle, CURLOPT_ERRORBUFFER, nullptr);
-
     if (response_code == 0 || response_code >= 300) {
         if (out_error_string) {
-            if (szCurlErrBuf[0]) {
+            if (handle->m_szCurlErrBuf[0]) {
                 snprintf(out_error_string, error_string_max_size, "%s",
-                         szCurlErrBuf);
+                         handle->m_szCurlErrBuf);
             } else {
                 snprintf(out_error_string, error_string_max_size,
                          "HTTP error %ld: %s", response_code, body.c_str());
@@ -772,7 +782,7 @@ static void no_op_network_close(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *,
 
 void FileManager::fillDefaultNetworkInterface(PJ_CONTEXT *ctx) {
 #ifdef CURL_ENABLED
-    ctx->networking.open = pj_curl_open;
+    ctx->networking.open = CurlFileHandle::open;
     ctx->networking.close = pj_curl_close;
     ctx->networking.read_range = pj_curl_read_range;
     ctx->networking.get_header_value = pj_curl_get_header_value;
