@@ -1071,57 +1071,20 @@ with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtif
     Files: ntf_r93.tif
     Size is 156, 111
     Coordinate System is:
-    BOUNDCRS[
-        SOURCECRS[
-            GEOGCRS["NTF",
-                DATUM["Nouvelle Triangulation Francaise",
-                    ELLIPSOID["Clarke 1880 (IGN)",6378249.2,293.466021293627,
-                        LENGTHUNIT["metre",1]]],
-                PRIMEM["Greenwich",0,
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                CS[ellipsoidal,2],
-                    AXIS["geodetic latitude (Lat)",north,
-                        ORDER[1],
-                        ANGLEUNIT["degree",0.0174532925199433]],
-                    AXIS["geodetic longitude (Lon)",east,
-                        ORDER[2],
-                        ANGLEUNIT["degree",0.0174532925199433]],
-                USAGE[
-                    SCOPE["unknown"],
-                    AREA["France - onshore - mainland and Corsica"],
-                    BBOX[41.31,-4.87,51.14,9.63]],
-                ID["EPSG",4275]]],
-        TARGETCRS[
-            GEOGCRS["WGS 84",
-                DATUM["World Geodetic System 1984",
-                    ELLIPSOID["WGS 84",6378137,298.257223563,
-                        LENGTHUNIT["metre",1]]],
-                PRIMEM["Greenwich",0,
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                CS[ellipsoidal,2],
-                    AXIS["latitude",north,
-                        ORDER[1],
-                        ANGLEUNIT["degree",0.0174532925199433]],
-                    AXIS["longitude",east,
-                        ORDER[2],
-                        ANGLEUNIT["degree",0.0174532925199433]],
-                ID["EPSG",4326]]],
-        ABRIDGEDTRANSFORMATION["NTF to WGS 84 (1)",
-            VERSION["IGN-Fra"],
-            METHOD["Geocentric translations (geog2D domain)",
-                ID["EPSG",9603]],
-            PARAMETER["X-axis translation",-168,
-                ID["EPSG",8605]],
-            PARAMETER["Y-axis translation",-60,
-                ID["EPSG",8606]],
-            PARAMETER["Z-axis translation",320,
-                ID["EPSG",8607]],
-            USAGE[
-                SCOPE["For applications to an accuracy of 2 metres."],
-                AREA["France - onshore - mainland and Corsica"],
-                BBOX[41.31,-4.87,51.14,9.63]],
-            ID["EPSG",1193],
-            REMARK["These same parameter values are used to transform to ETRS89. See NTF to ETRS89 (1) (code 1651)."]]]
+    GEOGCRS["NTF",
+        DATUM["Nouvelle Triangulation Francaise",
+            ELLIPSOID["Clarke 1880 (IGN)",6378249.2,293.466021293627,
+                LENGTHUNIT["metre",1]]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        CS[ellipsoidal,2],
+            AXIS["geodetic latitude (Lat)",north,
+                ORDER[1],
+                ANGLEUNIT["degree",0.0174532925199433]],
+            AXIS["geodetic longitude (Lon)",east,
+                ORDER[2],
+                ANGLEUNIT["degree",0.0174532925199433]],
+        ID["EPSG",4275]]
     Data axis to CRS axis mapping: 2,1
     Origin = (-5.550000000000000,52.049999999999997)
     Pixel Size = (0.100000000000000,-0.100000000000000)
