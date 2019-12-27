@@ -61,9 +61,9 @@ void pj_set_ctx( projPJ pj, projCtx ctx )
     if (pj==nullptr)
         return;
     pj->ctx = ctx;
-    if( pj->is_pipeline )
+    if( pj->reassign_context )
     {
-        pj_pipeline_assign_context_to_steps(pj, ctx);
+        pj->reassign_context(pj, ctx);
     }
     for( const auto &alt: pj->alternativeCoordinateOperations )
     {

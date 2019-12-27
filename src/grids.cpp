@@ -139,6 +139,7 @@ class NullVerticalShiftGrid : public VerticalShiftGrid {
     bool isNullGrid() const override { return true; }
     bool valueAt(int, int, float &out) const override;
     bool isNodata(float, double) const override { return false; }
+    void reassign_context(PJ_CONTEXT *) override {}
 };
 
 // ---------------------------------------------------------------------------
@@ -171,6 +172,11 @@ class GTXVerticalShiftGrid : public VerticalShiftGrid {
 
     static GTXVerticalShiftGrid *open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                                       const std::string &name);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        m_ctx = ctx;
+        m_fp->reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -412,6 +418,8 @@ class GTiffGrid : public Grid {
     std::string metadataItem(const std::string &key, int sample = -1) const;
 
     uint32 subfileType() const { return m_subfileType; }
+
+    void reassign_context(PJ_CONTEXT *ctx) { m_ctx = ctx; }
 };
 
 // ---------------------------------------------------------------------------
@@ -738,6 +746,11 @@ class GTiffDataset {
     bool openTIFF(const std::string &filename);
 
     std::unique_ptr<GTiffGrid> nextGrid();
+
+    void reassign_context(PJ_CONTEXT *ctx) {
+        m_ctx = ctx;
+        m_fp->reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1056,6 +1069,11 @@ class GTiffVGridShiftSet : public VerticalShiftGridSet, public GTiffDataset {
     static std::unique_ptr<GTiffVGridShiftSet>
     open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
          const std::string &filename);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        VerticalShiftGridSet::reassign_context(ctx);
+        GTiffDataset::reassign_context(ctx);
+    }
 };
 
 #endif // TIFF_ENABLED
@@ -1150,6 +1168,10 @@ class GTiffVGrid : public VerticalShiftGrid {
     }
 
     void insertGrid(PJ_CONTEXT *ctx, std::unique_ptr<GTiffVGrid> &&subgrid);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        m_grid->reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1374,6 +1396,14 @@ const VerticalShiftGrid *VerticalShiftGridSet::gridAt(double lon,
 
 // ---------------------------------------------------------------------------
 
+void VerticalShiftGridSet::reassign_context(PJ_CONTEXT *ctx) {
+    for (const auto &grid : m_grids) {
+        grid->reassign_context(ctx);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 HorizontalShiftGrid::HorizontalShiftGrid(const std::string &nameIn, int widthIn,
                                          int heightIn,
                                          const ExtentAndRes &extentIn)
@@ -1402,6 +1432,8 @@ class NullHorizontalShiftGrid : public HorizontalShiftGrid {
     bool isNullGrid() const override { return true; }
 
     bool valueAt(int, int, float &lonShift, float &latShift) const override;
+
+    void reassign_context(PJ_CONTEXT *) override {}
 };
 
 // ---------------------------------------------------------------------------
@@ -1443,6 +1475,11 @@ class NTv1Grid : public HorizontalShiftGrid {
 
     static NTv1Grid *open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                           const std::string &filename);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        m_ctx = ctx;
+        m_fp->reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1556,6 +1593,11 @@ class CTable2Grid : public HorizontalShiftGrid {
 
     static CTable2Grid *open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                              const std::string &filename);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        m_ctx = ctx;
+        m_fp->reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1654,6 +1696,11 @@ class NTv2GridSet : public HorizontalShiftGridSet {
     static std::unique_ptr<NTv2GridSet> open(PJ_CONTEXT *ctx,
                                              std::unique_ptr<File> fp,
                                              const std::string &filename);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        HorizontalShiftGridSet::reassign_context(ctx);
+        m_fp->reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1679,6 +1726,11 @@ class NTv2Grid : public HorizontalShiftGrid {
           m_mustSwap(mustSwapIn) {}
 
     bool valueAt(int, int, float &lonShift, float &latShift) const override;
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        m_ctx = ctx;
+        m_fp->reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1857,6 +1909,11 @@ class GTiffHGridShiftSet : public HorizontalShiftGridSet, public GTiffDataset {
     static std::unique_ptr<GTiffHGridShiftSet>
     open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
          const std::string &filename);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        HorizontalShiftGridSet::reassign_context(ctx);
+        GTiffDataset::reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -1884,6 +1941,10 @@ class GTiffHGrid : public HorizontalShiftGrid {
     bool valueAt(int x, int y, float &lonShift, float &latShift) const override;
 
     void insertGrid(PJ_CONTEXT *ctx, std::unique_ptr<GTiffHGrid> &&subgrid);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        m_grid->reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -2235,6 +2296,14 @@ const HorizontalShiftGrid *HorizontalShiftGridSet::gridAt(double lon,
     return nullptr;
 }
 
+// ---------------------------------------------------------------------------
+
+void HorizontalShiftGridSet::reassign_context(PJ_CONTEXT *ctx) {
+    for (const auto &grid : m_grids) {
+        grid->reassign_context(ctx);
+    }
+}
+
 #ifdef TIFF_ENABLED
 // ---------------------------------------------------------------------------
 
@@ -2250,6 +2319,11 @@ class GTiffGenericGridShiftSet : public GenericShiftGridSet,
     static std::unique_ptr<GTiffGenericGridShiftSet>
     open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
          const std::string &filename);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        GenericShiftGridSet::reassign_context(ctx);
+        GTiffDataset::reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -2287,6 +2361,10 @@ class GTiffGenericGrid : public GenericShiftGrid {
 
     void insertGrid(PJ_CONTEXT *ctx,
                     std::unique_ptr<GTiffGenericGrid> &&subgrid);
+
+    void reassign_context(PJ_CONTEXT *ctx) override {
+        m_grid->reassign_context(ctx);
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -2356,6 +2434,8 @@ class NullGenericShiftGrid : public GenericShiftGrid {
     std::string metadataItem(const std::string &, int) const override {
         return std::string();
     }
+
+    void reassign_context(PJ_CONTEXT *) override {}
 };
 
 // ---------------------------------------------------------------------------
@@ -2512,6 +2592,14 @@ const GenericShiftGrid *GenericShiftGridSet::gridAt(double lon,
         }
     }
     return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+void GenericShiftGridSet::reassign_context(PJ_CONTEXT *ctx) {
+    for (const auto &grid : m_grids) {
+        grid->reassign_context(ctx);
+    }
 }
 
 // ---------------------------------------------------------------------------

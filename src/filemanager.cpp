@@ -94,6 +94,7 @@ class FileStdio : public File {
     size_t read(void *buffer, size_t sizeBytes) override;
     bool seek(unsigned long long offset, int whence = SEEK_SET) override;
     unsigned long long tell() override;
+    void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
 
     static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
 };
@@ -156,6 +157,7 @@ class FileLegacyAdapter : public File {
     size_t read(void *buffer, size_t sizeBytes) override;
     bool seek(unsigned long long offset, int whence = SEEK_SET) override;
     unsigned long long tell() override;
+    void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
 
     static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
 };
@@ -286,6 +288,7 @@ class NetworkFile : public File {
     size_t m_nBlocksToDownload = 1;
     unsigned long long m_lastDownloadedOffset;
     unsigned long long m_filesize;
+    proj_network_close_cbk_type m_closeCbk;
 
     NetworkFile(const NetworkFile &) = delete;
     NetworkFile &operator=(const NetworkFile &) = delete;
@@ -296,7 +299,8 @@ class NetworkFile : public File {
                 unsigned long long lastDownloadOffset,
                 unsigned long long filesize)
         : File(url), m_ctx(ctx), m_url(url), m_handle(handle),
-          m_lastDownloadedOffset(lastDownloadOffset), m_filesize(filesize) {}
+          m_lastDownloadedOffset(lastDownloadOffset), m_filesize(filesize),
+          m_closeCbk(ctx->networking.close) {}
 
   public:
     ~NetworkFile() override;
@@ -304,6 +308,7 @@ class NetworkFile : public File {
     size_t read(void *buffer, size_t sizeBytes) override;
     bool seek(unsigned long long offset, int whence) override;
     unsigned long long tell() override;
+    void reassign_context(PJ_CONTEXT *ctx) override;
 
     static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
 };
@@ -495,6 +500,17 @@ unsigned long long NetworkFile::tell() { return m_pos; }
 NetworkFile::~NetworkFile() {
     if (m_handle) {
         m_ctx->networking.close(m_ctx, m_handle, m_ctx->networking.user_data);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void NetworkFile::reassign_context(PJ_CONTEXT *ctx) {
+    m_ctx = ctx;
+    if (m_closeCbk != m_ctx->networking.close) {
+        pj_log(m_ctx, PJ_LOG_ERROR,
+               "Networking close callback has changed following context "
+               "reassignment ! This is highly suspicious");
     }
 }
 

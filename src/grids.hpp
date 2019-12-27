@@ -88,6 +88,8 @@ class VerticalShiftGrid : public Grid {
 
     // x = 0 is western-most column, y = 0 is southern-most line
     virtual bool valueAt(int x, int y, float &out) const = 0;
+
+    virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
 };
 
 // ---------------------------------------------------------------------------
@@ -112,6 +114,8 @@ class VerticalShiftGridSet {
         return m_grids;
     }
     const VerticalShiftGrid *gridAt(double lon, double lat) const;
+
+    virtual void reassign_context(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
@@ -130,6 +134,8 @@ class HorizontalShiftGrid : public Grid {
     // x = 0 is western-most column, y = 0 is southern-most line
     virtual bool valueAt(int x, int y, float &lonShift,
                          float &latShift) const = 0;
+
+    virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
 };
 
 // ---------------------------------------------------------------------------
@@ -154,6 +160,8 @@ class HorizontalShiftGridSet {
         return m_grids;
     }
     const HorizontalShiftGrid *gridAt(double lon, double lat) const;
+
+    virtual void reassign_context(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
@@ -181,6 +189,8 @@ class GenericShiftGrid : public Grid {
 
     // x = 0 is western-most column, y = 0 is southern-most line
     virtual bool valueAt(int x, int y, int sample, float &out) const = 0;
+
+    virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
 };
 
 // ---------------------------------------------------------------------------
@@ -205,6 +215,8 @@ class GenericShiftGridSet {
         return m_grids;
     }
     const GenericShiftGrid *gridAt(double lon, double lat) const;
+
+    virtual void reassign_context(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------

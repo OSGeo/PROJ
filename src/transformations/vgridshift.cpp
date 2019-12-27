@@ -142,10 +142,20 @@ static PJ *destructor (PJ *P, int errlev) {
     return pj_default_destructor(P, errlev);
 }
 
+static void reassign_context( PJ* P, PJ_CONTEXT* ctx )
+{
+    auto Q = (struct vgridshiftData *) P->opaque;
+    for( auto& grid: Q->grids ) {
+        grid->reassign_context(ctx);
+    }
+}
+
+
 PJ *TRANSFORMATION(vgridshift,0) {
     auto Q = new vgridshiftData;
     P->opaque = (void *) Q;
     P->destructor = destructor;
+    P->reassign_context = reassign_context;
 
    if (!pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, "vgridshift: +grids parameter missing.");

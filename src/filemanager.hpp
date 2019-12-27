@@ -68,6 +68,7 @@ class File {
     virtual size_t read(void *buffer, size_t sizeBytes) = 0;
     virtual bool seek(unsigned long long offset, int whence = SEEK_SET) = 0;
     virtual unsigned long long tell() = 0;
+    virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
 
     const std::string &name() const { return name_; }
 };

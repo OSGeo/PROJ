@@ -749,6 +749,8 @@ TEST(networking, curl_hgridshift) {
     c.xyz.z = 0;
     c = proj_trans(P, PJ_FWD, c);
 
+    proj_assign_context(P, ctx); // (dummy) test context reassignment
+
     proj_destroy(P);
     proj_context_destroy(ctx);
 
@@ -777,6 +779,8 @@ TEST(networking, curl_vgridshift) {
     c.xyz.y = 150; // lon
     c.xyz.z = 0;
     c = proj_trans(P, PJ_FWD, c);
+
+    proj_assign_context(P, ctx); // (dummy) test context reassignment
 
     proj_destroy(P);
     proj_context_destroy(ctx);

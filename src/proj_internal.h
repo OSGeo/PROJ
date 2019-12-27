@@ -343,6 +343,7 @@ struct PJconsts {
     PJ_OPERATOR inv4d = nullptr;
 
     PJ_DESTRUCTOR destructor = nullptr;
+    void   (*reassign_context)(PJ*, projCtx_t *) = nullptr;
 
 
     /*************************************************************************************
@@ -410,7 +411,6 @@ struct PJconsts {
     int  geoc = 0;                  /* Geocentric latitude flag */
     int  is_latlong = 0;            /* proj=latlong ... not really a projection at all */
     int  is_geocent = 0;            /* proj=geocent ... not really a projection at all */
-    int  is_pipeline = 0;           /* 1 if PJ represents a pipeline */
     int  need_ellps = 0;            /* 0 for operations that are purely cartesian */
     int  skip_fwd_prepare = 0;
     int  skip_fwd_finalize = 0;
@@ -826,8 +826,6 @@ std::string pj_double_quote_string_param_if_needed(const std::string& str);
 
 PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition);
 PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv);
-
-void pj_pipeline_assign_context_to_steps( PJ* P, PJ_CONTEXT* ctx );
 
 // For use by projinfo
 bool PROJ_DLL pj_context_is_network_enabled(PJ_CONTEXT* ctx);
