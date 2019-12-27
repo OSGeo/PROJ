@@ -969,6 +969,11 @@ is an easy way to inspect such grid files:
     ``bicubic``.
     Ignored by PROJ currently.
 
+  * The ``area_of_use`` metadata item can be used to indicate plain text information
+    about the area of use of the grid (like "USA - Wisconsin"). In case of multiple
+    subgrids, it should be set only on the first one, but applies to the whole
+    set of grids, not just the first one.
+
   * The ``grid_name`` metadata item should be present if there are
     subgrids for this grid (that is grids whose extent is contained in the extent
     of this grid), or if this is a subgrid.
