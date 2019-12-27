@@ -46,6 +46,7 @@ struct xyzgridshiftData {
     PJ *cart = nullptr;
     bool grid_ref_is_input = true;
     ListOfGenericGrids grids{};
+    bool defer_grid_opening = false;
     double multiplier = 1.0;
 };
 } // anonymous namespace
@@ -68,12 +69,20 @@ static const GenericShiftGrid* findGrid(const ListOfGenericGrids& grids,
 // ---------------------------------------------------------------------------
 
 static bool get_grid_values(PJ* P,
-                            const xyzgridshiftData* Q,
+                            xyzgridshiftData* Q,
                             const PJ_LP& lp,
                             double& dx,
                             double& dy,
                             double& dz)
 {
+    if ( Q->defer_grid_opening ) {
+        Q->defer_grid_opening = false;
+        Q->grids = proj_generic_grid_init(P, "grids");
+        if ( proj_errno(P) ) {
+            return false;
+        }
+    }
+
     auto grid = findGrid(Q->grids, lp);
     if( !grid ) {
         return false;
@@ -169,7 +178,7 @@ static bool get_grid_values(PJ* P,
 // ---------------------------------------------------------------------------
 
 static PJ_COORD iterative_adjustment(PJ* P,
-                                     const xyzgridshiftData* Q,
+                                     xyzgridshiftData* Q,
                                      const PJ_COORD& pointInit,
                                      double factor)
 {
@@ -204,7 +213,7 @@ static PJ_COORD iterative_adjustment(PJ* P,
 // ---------------------------------------------------------------------------
 
 static PJ_COORD direct_adjustment(PJ* P,
-                                  const xyzgridshiftData* Q,
+                                  xyzgridshiftData* Q,
                                   PJ_COORD point,
                                   double factor)
 {
@@ -328,11 +337,16 @@ PJ *TRANSFORMATION(xyzgridshift,0) {
         Q->multiplier = pj_param(P->ctx, P->params, "dmultiplier").f;
     }
 
-    Q->grids = proj_generic_grid_init(P, "grids");
-    /* Was gridlist compiled properly? */
-    if ( proj_errno(P) ) {
-        proj_log_error(P, "xyzgridshift: could not find required grid(s).");
-        return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+    if( P->ctx->defer_grid_opening ) {
+        Q->defer_grid_opening = true;
+    }
+    else {
+        Q->grids = proj_generic_grid_init(P, "grids");
+        /* Was gridlist compiled properly? */
+        if ( proj_errno(P) ) {
+            proj_log_error(P, "xyzgridshift: could not find required grid(s).");
+            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        }
     }
 
     return P;
