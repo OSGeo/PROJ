@@ -61,7 +61,21 @@ class MyMutex {
 #include <sqlite3.h> // for sqlite3_snprintf
 #endif
 
+#if defined(__linux)
+#include <unistd.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#elif defined(__MACH__) && defined(__APPLE__)
+#include <mach-o/dyld.h>
+#elif defined(__FreeBSD__)
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#endif
+
 //! @cond Doxygen_Suppress
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
 
 using namespace NS_PROJ::internal;
 
@@ -546,6 +560,7 @@ struct CurlFileHandle {
     CURL *m_handle;
     std::string m_headers{};
     std::string m_lastval{};
+    std::string m_useragent{};
     char m_szCurlErrBuf[CURL_ERROR_SIZE + 1] = {};
 
     CurlFileHandle(const CurlFileHandle &) = delete;
@@ -559,6 +574,67 @@ struct CurlFileHandle {
          size_t size_to_read, void *buffer, size_t *out_size_read,
          size_t error_string_max_size, char *out_error_string, void *);
 };
+
+// ---------------------------------------------------------------------------
+
+static std::string GetExecutableName() {
+#if defined(__linux)
+    std::string path;
+    path.resize(1024);
+    const auto ret = readlink("/proc/self/exe", &path[0], path.size());
+    if (ret > 0) {
+        path.resize(ret);
+        const auto pos = path.rfind('/');
+        if (pos != std::string::npos) {
+            path = path.substr(pos + 1);
+        }
+        return path;
+    }
+#elif defined(_WIN32)
+    std::string path;
+    path.resize(1024);
+    if (GetModuleFileNameA(nullptr, &path[0],
+                           static_cast<DWORD>(path.size()))) {
+        path.resize(strlen(path.c_str()));
+        const auto pos = path.rfind('\\');
+        if (pos != std::string::npos) {
+            path = path.substr(pos + 1);
+        }
+        return path;
+    }
+#elif defined(__MACH__) && defined(__APPLE__)
+    std::string path;
+    path.resize(1024);
+    uint32_t size = static_cast<uint32_t>(path.size());
+    if (_NSGetExecutablePath(&path[0], &size) == 0) {
+        path.resize(strlen(path.c_str()));
+        const auto pos = path.rfind('/');
+        if (pos != std::string::npos) {
+            path = path.substr(pos + 1);
+        }
+        return path;
+    }
+#elif defined(__FreeBSD__)
+    int mib[4];
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PATHNAME;
+    mib[3] = -1;
+    std::string path;
+    path.resize(1024);
+    size_t size = path.size();
+    if (sysctl(mib, 4, &path[0], &size, nullptr, 0) == 0) {
+        path.resize(strlen(path.c_str()));
+        const auto pos = path.rfind('/');
+        if (pos != std::string::npos) {
+            path = path.substr(pos + 1);
+        }
+        return path;
+    }
+#endif
+
+    return std::string();
+}
 
 // ---------------------------------------------------------------------------
 
@@ -584,6 +660,16 @@ CurlFileHandle::CurlFileHandle(const char *url, CURL *handle)
     }
 
     curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, m_szCurlErrBuf);
+
+    if (getenv("PROJ_NO_USERAGENT") == nullptr) {
+        m_useragent = "PROJ " STR(PROJ_VERSION_MAJOR) "." STR(
+            PROJ_VERSION_MINOR) "." STR(PROJ_VERSION_PATCH);
+        const auto exeName = GetExecutableName();
+        if (!exeName.empty()) {
+            m_useragent = exeName + " using " + m_useragent;
+        }
+        curl_easy_setopt(handle, CURLOPT_USERAGENT, m_useragent.data());
+    }
 }
 
 // ---------------------------------------------------------------------------
