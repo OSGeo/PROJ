@@ -32,6 +32,8 @@
 
  o Database: update to EPSG v9.8.4 (#1725)
 
+ o Build: require SQLite 3.11 (#1721)
+
  o Add support for GEOIDMODEL (#1710)
 
  o Better filtering based on extent and performance improvements (#1709)
