@@ -1522,6 +1522,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
+                      VALUES ('TOR27CSv1.GSB',
+                              'TO27CSv1.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
                       VALUES ('PE7783V2.gsb', -- case difference on extension !
                               'PE7783V2.GSB',
                               'NTv2',
