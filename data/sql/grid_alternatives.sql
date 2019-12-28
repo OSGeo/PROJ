@@ -884,6 +884,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
+                    VALUES ('gg10_smv2.mnt',
+                            'gg10_smv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
                     VALUES ('gg10_ls.txt',
                             'RALS2016.gtx',
                             'GTX',
@@ -945,6 +960,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('gg10_sb.txt',
+                            'gg10_sbv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('gg10_sbv2.mnt',
                             'gg10_sbv2.gtx',
                             'GTX',
                             'vgridshift',
