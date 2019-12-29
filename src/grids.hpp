@@ -132,8 +132,8 @@ class HorizontalShiftGrid : public Grid {
     const HorizontalShiftGrid *gridAt(double lon, double lat) const;
 
     // x = 0 is western-most column, y = 0 is southern-most line
-    virtual bool valueAt(int x, int y, float &lonShift,
-                         float &latShift) const = 0;
+    virtual bool valueAt(int x, int y, bool compensateNTConvention,
+                         float &lonShift, float &latShift) const = 0;
 
     virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
 };

@@ -1431,14 +1431,15 @@ class NullHorizontalShiftGrid : public HorizontalShiftGrid {
 
     bool isNullGrid() const override { return true; }
 
-    bool valueAt(int, int, float &lonShift, float &latShift) const override;
+    bool valueAt(int, int, bool, float &lonShift,
+                 float &latShift) const override;
 
     void reassign_context(PJ_CONTEXT *) override {}
 };
 
 // ---------------------------------------------------------------------------
 
-bool NullHorizontalShiftGrid::valueAt(int, int, float &lonShift,
+bool NullHorizontalShiftGrid::valueAt(int, int, bool, float &lonShift,
                                       float &latShift) const {
     lonShift = 0.0f;
     latShift = 0.0f;
@@ -1471,7 +1472,8 @@ class NTv1Grid : public HorizontalShiftGrid {
 
     ~NTv1Grid() override;
 
-    bool valueAt(int, int, float &lonShift, float &latShift) const override;
+    bool valueAt(int, int, bool, float &lonShift,
+                 float &latShift) const override;
 
     static NTv1Grid *open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                           const std::string &filename);
@@ -1549,7 +1551,8 @@ NTv1Grid *NTv1Grid::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
 
 // ---------------------------------------------------------------------------
 
-bool NTv1Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
+bool NTv1Grid::valueAt(int x, int y, bool compensateNTConvention,
+                       float &lonShift, float &latShift) const {
     assert(x >= 0 && y >= 0 && x < m_width && y < m_height);
 
     double two_doubles[2];
@@ -1566,7 +1569,8 @@ bool NTv1Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
     /* convert seconds to radians */
     latShift = static_cast<float>(two_doubles[0] * ((M_PI / 180.0) / 3600.0));
     // west longitude positive convention !
-    lonShift = -static_cast<float>(two_doubles[1] * ((M_PI / 180.0) / 3600.0));
+    lonShift = (compensateNTConvention ? -1 : 1) *
+               static_cast<float>(two_doubles[1] * ((M_PI / 180.0) / 3600.0));
 
     return true;
 }
@@ -1589,7 +1593,8 @@ class CTable2Grid : public HorizontalShiftGrid {
 
     ~CTable2Grid() override;
 
-    bool valueAt(int, int, float &lonShift, float &latShift) const override;
+    bool valueAt(int, int, bool, float &lonShift,
+                 float &latShift) const override;
 
     static CTable2Grid *open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                              const std::string &filename);
@@ -1659,8 +1664,8 @@ CTable2Grid *CTable2Grid::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
 
 // ---------------------------------------------------------------------------
 
-bool CTable2Grid::valueAt(int x, int y, float &lonShift,
-                          float &latShift) const {
+bool CTable2Grid::valueAt(int x, int y, bool compensateNTConvention,
+                          float &lonShift, float &latShift) const {
     assert(x >= 0 && y >= 0 && x < m_width && y < m_height);
 
     float two_floats[2];
@@ -1675,7 +1680,7 @@ bool CTable2Grid::valueAt(int x, int y, float &lonShift,
 
     latShift = two_floats[1];
     // west longitude positive convention !
-    lonShift = -two_floats[0];
+    lonShift = (compensateNTConvention ? -1 : 1) * two_floats[0];
 
     return true;
 }
@@ -1725,7 +1730,8 @@ class NTv2Grid : public HorizontalShiftGrid {
           m_name(nameIn), m_ctx(ctx), m_fp(fp), m_offset(offsetIn),
           m_mustSwap(mustSwapIn) {}
 
-    bool valueAt(int, int, float &lonShift, float &latShift) const override;
+    bool valueAt(int, int, bool, float &lonShift,
+                 float &latShift) const override;
 
     void reassign_context(PJ_CONTEXT *ctx) override {
         m_ctx = ctx;
@@ -1735,7 +1741,8 @@ class NTv2Grid : public HorizontalShiftGrid {
 
 // ---------------------------------------------------------------------------
 
-bool NTv2Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
+bool NTv2Grid::valueAt(int x, int y, bool compensateNTConvention,
+                       float &lonShift, float &latShift) const {
     assert(x >= 0 && y >= 0 && x < m_width && y < m_height);
 
     float two_float[2];
@@ -1755,7 +1762,8 @@ bool NTv2Grid::valueAt(int x, int y, float &lonShift, float &latShift) const {
     /* convert seconds to radians */
     latShift = static_cast<float>(two_float[0] * ((M_PI / 180.0) / 3600.0));
     // west longitude positive convention !
-    lonShift = -static_cast<float>(two_float[1] * ((M_PI / 180.0) / 3600.0));
+    lonShift = (compensateNTConvention ? -1 : 1) *
+               static_cast<float>(two_float[1] * ((M_PI / 180.0) / 3600.0));
     return true;
 }
 
@@ -1938,7 +1946,8 @@ class GTiffHGrid : public HorizontalShiftGrid {
 
     ~GTiffHGrid() override;
 
-    bool valueAt(int x, int y, float &lonShift, float &latShift) const override;
+    bool valueAt(int x, int y, bool, float &lonShift,
+                 float &latShift) const override;
 
     void insertGrid(PJ_CONTEXT *ctx, std::unique_ptr<GTiffHGrid> &&subgrid);
 
@@ -1968,7 +1977,8 @@ GTiffHGrid::~GTiffHGrid() = default;
 
 // ---------------------------------------------------------------------------
 
-bool GTiffHGrid::valueAt(int x, int y, float &lonShift, float &latShift) const {
+bool GTiffHGrid::valueAt(int x, int y, bool, float &lonShift,
+                         float &latShift) const {
     if (!m_grid->valueAt(m_idxLatShift, x, y, latShift) ||
         !m_grid->valueAt(m_idxLonShift, x, y, lonShift)) {
         return false;

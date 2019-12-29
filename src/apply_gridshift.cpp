@@ -119,7 +119,7 @@ ListOfHGrids proj_hgrid_init(PJ* P, const char *gridkey) {
 
 typedef struct { pj_int32 lam, phi; } ILP;
 
-static PJ_LP nad_intr(PJ_LP t, const HorizontalShiftGrid* grid) {
+static PJ_LP nad_intr(PJ_LP t, const HorizontalShiftGrid* grid, bool compensateNTConvention) {
 	PJ_LP val, frct;
 	ILP indx;
 	int in;
@@ -164,10 +164,10 @@ static PJ_LP nad_intr(PJ_LP t, const HorizontalShiftGrid* grid) {
         float f10Lon = 0, f10Lat = 0;
         float f01Lon = 0, f01Lat = 0;
         float f11Lon = 0, f11Lat = 0;
-	if( !grid->valueAt(indx.lam, indx.phi, f00Lon, f00Lat) ||
-            !grid->valueAt(indx.lam + 1, indx.phi, f10Lon, f10Lat) ||
-            !grid->valueAt(indx.lam, indx.phi + 1, f01Lon, f01Lat) ||
-            !grid->valueAt(indx.lam + 1, indx.phi + 1, f11Lon, f11Lat) )
+	if( !grid->valueAt(indx.lam, indx.phi, compensateNTConvention, f00Lon, f00Lat) ||
+            !grid->valueAt(indx.lam + 1, indx.phi, compensateNTConvention, f10Lon, f10Lat) ||
+            !grid->valueAt(indx.lam, indx.phi + 1, compensateNTConvention, f01Lon, f01Lat) ||
+            !grid->valueAt(indx.lam + 1, indx.phi + 1, compensateNTConvention, f11Lon, f11Lat) )
         {
             return val;
         }
@@ -210,7 +210,7 @@ PJ_LP nad_cvt(projCtx ctx, PJ_LP in, int inverse, const HorizontalShiftGrid* gri
 
     tb.lam = adjlon (tb.lam - M_PI) + M_PI;
 
-    t = nad_intr (tb, grid);
+    t = nad_intr (tb, grid, true);
     if (t.lam == HUGE_VAL)
         return t;
 
@@ -224,7 +224,7 @@ PJ_LP nad_cvt(projCtx ctx, PJ_LP in, int inverse, const HorizontalShiftGrid* gri
     t.phi = tb.phi - t.phi;
 
     do {
-        del = nad_intr(t, grid);
+        del = nad_intr(t, grid, true);
 
         /* We can possibly go outside of the initial guessed grid, so try */
         /* to fetch a new grid into which iterate... */
@@ -297,7 +297,7 @@ PJ_LP proj_hgrid_value(PJ *P, const ListOfHGrids& grids, PJ_LP lp) {
 
     lp.lam = adjlon(lp.lam - M_PI) + M_PI;
 
-    out = nad_intr(lp, grid);
+    out = nad_intr(lp, grid, false);
 
     if (out.lam == HUGE_VAL || out.phi == HUGE_VAL) {
         pj_ctx_set_errno(P->ctx, PJD_ERR_GRID_AREA);
