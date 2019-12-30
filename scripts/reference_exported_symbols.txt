@@ -707,6 +707,7 @@ pj_chomp(char*)
 pj_cleanup_lock
 pj_clear_initcache
 pj_compare_datums
+pj_context_get_grid_cache_filename(projCtx_t*)
 pj_context_is_network_enabled(projCtx_t*)
 pj_ctx_alloc
 pj_ctx_fclose
@@ -954,6 +955,11 @@ proj_get_scope
 proj_get_source_crs
 proj_get_target_crs
 proj_get_type
+proj_grid_cache_clear
+proj_grid_cache_set_enable
+proj_grid_cache_set_filename
+proj_grid_cache_set_max_size
+proj_grid_cache_set_ttl
 proj_grid_get_info_from_database
 proj_grid_info
 proj_identify

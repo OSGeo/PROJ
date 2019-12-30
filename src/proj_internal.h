@@ -677,6 +677,14 @@ struct projNetworkCallbacksAndData
     void* user_data = nullptr;
 };
 
+struct projGridChunkCache
+{
+    bool enabled = true;
+    std::string filename{};
+    long long max_size = 100 * 1024 * 1024;
+    int ttl = 86400; // 1 day
+};
+
 /* proj thread context */
 struct projCtx_t {
     int     last_errno = 0;
@@ -700,6 +708,8 @@ struct projCtx_t {
 
     bool iniFileLoaded = false;
     std::string endpoint{};
+
+    projGridChunkCache gridChunkCache{};
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
 
@@ -833,6 +843,9 @@ bool PROJ_DLL pj_context_is_network_enabled(PJ_CONTEXT* ctx);
 std::string pj_context_get_url_endpoint(PJ_CONTEXT* ctx);
 
 void pj_load_ini(PJ_CONTEXT* ctx);
+
+// For testing purposes
+std::string PROJ_DLL pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx);
 
 /* classic public API */
 #include "proj_api.h"

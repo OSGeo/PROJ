@@ -31,14 +31,18 @@
 #define LRU11_DO_NOT_DEFINE_OUT_OF_CLASS_METHODS
 
 #include <algorithm>
+#include <codecvt>
 #include <functional>
 #include <limits>
+#include <locale>
+#include <string>
 
 #include "filemanager.hpp"
 #include "proj.h"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/lru_cache.hpp"
 #include "proj_internal.h"
+#include "sqlite3.hpp"
 
 #ifdef __MINGW32__
 // mingw32-win32 doesn't implement std::mutex
@@ -61,9 +65,16 @@ class MyMutex {
 #include <sqlite3.h> // for sqlite3_snprintf
 #endif
 
-#if defined(__linux)
+#include <sys/stat.h>
+
+#ifdef _WIN32
+#include <shlobj.h>
+#else
+#include <sys/types.h>
 #include <unistd.h>
-#elif defined(_WIN32)
+#endif
+
+#if defined(_WIN32)
 #include <windows.h>
 #elif defined(__MACH__) && defined(__APPLE__)
 #include <mach-o/dyld.h>
@@ -71,6 +82,8 @@ class MyMutex {
 #include <sys/sysctl.h>
 #include <sys/types.h>
 #endif
+
+#include <time.h>
 
 //! @cond Doxygen_Suppress
 
@@ -80,6 +93,16 @@ class MyMutex {
 using namespace NS_PROJ::internal;
 
 NS_PROJ_START
+
+// ---------------------------------------------------------------------------
+
+static void proj_sleep_ms(int ms) {
+#ifdef _WIN32
+    Sleep(ms);
+#else
+    usleep(ms * 1000);
+#endif
+}
 
 // ---------------------------------------------------------------------------
 
@@ -219,15 +242,29 @@ std::unique_ptr<File> FileLegacyAdapter::open(PJ_CONTEXT *ctx,
 constexpr size_t DOWNLOAD_CHUNK_SIZE = 16 * 1024;
 constexpr int MAX_CHUNKS = 64;
 
+struct FileProperties {
+    unsigned long long size = 0;
+    time_t lastChecked = 0;
+    std::string lastModified{};
+    std::string etag{};
+};
+
 class NetworkChunkCache {
   public:
-    void insert(const std::string &url, unsigned long long chunkIdx,
-                std::vector<unsigned char> &&data);
+    void insert(PJ_CONTEXT *ctx, const std::string &url,
+                unsigned long long chunkIdx, std::vector<unsigned char> &&data);
 
     std::shared_ptr<std::vector<unsigned char>>
-    get(const std::string &url, unsigned long long chunkIdx);
+    get(PJ_CONTEXT *ctx, const std::string &url, unsigned long long chunkIdx);
 
-    void clear();
+    std::shared_ptr<std::vector<unsigned char>> get(PJ_CONTEXT *ctx,
+                                                    const std::string &url,
+                                                    unsigned long long chunkIdx,
+                                                    FileProperties &props);
+
+    void clearMemoryCache();
+
+    static void clearDiskChunkCache(PJ_CONTEXT *ctx);
 
   private:
     struct Key {
@@ -260,37 +297,1033 @@ class NetworkChunkCache {
 
 // ---------------------------------------------------------------------------
 
-void NetworkChunkCache::insert(const std::string &url,
+static NetworkChunkCache gNetworkChunkCache{};
+
+// ---------------------------------------------------------------------------
+
+class NetworkFilePropertiesCache {
+  public:
+    void insert(PJ_CONTEXT *ctx, const std::string &url, FileProperties &props);
+
+    bool tryGet(PJ_CONTEXT *ctx, const std::string &url, FileProperties &props);
+
+    void clearMemoryCache();
+
+  private:
+    lru11::Cache<std::string, FileProperties, MyMutex> cache_{};
+};
+
+// ---------------------------------------------------------------------------
+
+static NetworkFilePropertiesCache gNetworkFileProperties{};
+
+// ---------------------------------------------------------------------------
+
+class DiskChunkCache {
+    PJ_CONTEXT *ctx_ = nullptr;
+    std::string path_{};
+    sqlite3 *hDB_ = nullptr;
+    std::string thisNamePtr_{};
+    std::unique_ptr<SQLite3VFS> vfs_{};
+
+    explicit DiskChunkCache(PJ_CONTEXT *ctx, const std::string &path);
+
+    bool createDBStructure();
+    bool checkConsistency();
+    bool get_links(sqlite3_int64 chunk_id, sqlite3_int64 &link_id,
+                   sqlite3_int64 &prev, sqlite3_int64 &next,
+                   sqlite3_int64 &head, sqlite3_int64 &tail);
+    bool update_links_of_prev_and_next_links(sqlite3_int64 prev,
+                                             sqlite3_int64 next);
+    bool update_linked_chunks(sqlite3_int64 link_id, sqlite3_int64 prev,
+                              sqlite3_int64 next);
+    bool update_linked_chunks_head_tail(sqlite3_int64 head, sqlite3_int64 tail);
+
+    DiskChunkCache(const DiskChunkCache &) = delete;
+    DiskChunkCache &operator=(const DiskChunkCache &) = delete;
+
+  public:
+    static std::unique_ptr<DiskChunkCache> open(PJ_CONTEXT *ctx);
+    ~DiskChunkCache();
+
+    sqlite3 *handle() { return hDB_; }
+    std::unique_ptr<SQLiteStatement> prepare(const char *sql);
+    bool move_to_head(sqlite3_int64 chunk_id);
+    bool move_to_tail(sqlite3_int64 chunk_id);
+    void closeAndUnlink();
+};
+
+// ---------------------------------------------------------------------------
+
+static bool pj_context_get_grid_cache_is_enabled(PJ_CONTEXT *ctx) {
+    pj_load_ini(ctx);
+    return ctx->gridChunkCache.enabled;
+}
+
+// ---------------------------------------------------------------------------
+
+static long long pj_context_get_grid_cache_max_size(PJ_CONTEXT *ctx) {
+    pj_load_ini(ctx);
+    return ctx->gridChunkCache.max_size;
+}
+
+// ---------------------------------------------------------------------------
+
+static int pj_context_get_grid_cache_ttl(PJ_CONTEXT *ctx) {
+    pj_load_ini(ctx);
+    return ctx->gridChunkCache.ttl;
+}
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<DiskChunkCache> DiskChunkCache::open(PJ_CONTEXT *ctx) {
+    if (!pj_context_get_grid_cache_is_enabled(ctx)) {
+        return nullptr;
+    }
+    const auto cachePath = pj_context_get_grid_cache_filename(ctx);
+    if (cachePath.empty()) {
+        return nullptr;
+    }
+
+    auto diskCache =
+        std::unique_ptr<DiskChunkCache>(new DiskChunkCache(ctx, cachePath));
+    if (!diskCache->hDB_)
+        diskCache.reset();
+    return diskCache;
+}
+
+// ---------------------------------------------------------------------------
+
+DiskChunkCache::DiskChunkCache(PJ_CONTEXT *ctx, const std::string &path)
+    : ctx_(ctx), path_(path), vfs_(SQLite3VFS::create(true, false, false)) {
+    if (vfs_ == nullptr) {
+        return;
+    }
+    sqlite3_open_v2(path.c_str(), &hDB_,
+                    SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, vfs_->name());
+    if (!hDB_) {
+        return;
+    }
+    for (int i = 0;; i++) {
+        int ret =
+            sqlite3_exec(hDB_, "BEGIN EXCLUSIVE", nullptr, nullptr, nullptr);
+        if (ret == SQLITE_OK) {
+            break;
+        }
+        if (ret != SQLITE_BUSY) {
+            pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+            sqlite3_close(hDB_);
+            hDB_ = nullptr;
+            return;
+        }
+        const char *max_iters = getenv("PROJ_LOCK_MAX_ITERS");
+        if (i >= (max_iters && max_iters[0] ? atoi(max_iters)
+                                            : 30)) { // A bit more than 1 second
+            pj_log(ctx_, PJ_LOG_ERROR, "Cannot take exclusive lock on %s",
+                   path.c_str());
+            sqlite3_close(hDB_);
+            hDB_ = nullptr;
+            return;
+        }
+        pj_log(ctx, PJ_LOG_TRACE, "Lock taken on cache. Waiting a bit...");
+        // Retry every 5 ms for 50 ms, then every 10 ms for 100 ms, then
+        // every 100 ms
+        proj_sleep_ms(i < 10 ? 5 : i < 20 ? 10 : 100);
+    }
+    char **pasResult = nullptr;
+    int nRows = 0;
+    int nCols = 0;
+    sqlite3_get_table(hDB_,
+                      "SELECT 1 FROM sqlite_master WHERE name = 'properties'",
+                      &pasResult, &nRows, &nCols, nullptr);
+    sqlite3_free_table(pasResult);
+    if (nRows == 0) {
+        if (!createDBStructure()) {
+            sqlite3_close(hDB_);
+            hDB_ = nullptr;
+            return;
+        }
+    }
+
+    if (getenv("PROJ_CHECK_CACHE_CONSISTENCY")) {
+        checkConsistency();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+static const char *cache_db_structure_sql =
+    "CREATE TABLE properties("
+    " url          TEXT PRIMARY KEY NOT NULL,"
+    " lastChecked  TIMESTAMP NOT NULL,"
+    " fileSize     INTEGER NOT NULL,"
+    " lastModified TEXT,"
+    " etag         TEXT"
+    ");"
+    "CREATE TABLE chunk_data("
+    " id        INTEGER PRIMARY KEY AUTOINCREMENT CHECK (id > 0),"
+    " data      BLOB NOT NULL"
+    ");"
+    "CREATE TABLE chunks("
+    " id        INTEGER PRIMARY KEY AUTOINCREMENT CHECK (id > 0),"
+    " url       TEXT NOT NULL,"
+    " offset    INTEGER NOT NULL,"
+    " data_id   INTEGER NOT NULL,"
+    " data_size INTEGER NOT NULL,"
+    " CONSTRAINT fk_chunks_url FOREIGN KEY (url) REFERENCES properties(url),"
+    " CONSTRAINT fk_chunks_data FOREIGN KEY (data_id) REFERENCES chunk_data(id)"
+    ");"
+    "CREATE INDEX idx_chunks ON chunks(url, offset);"
+    "CREATE TABLE linked_chunks("
+    " id        INTEGER PRIMARY KEY AUTOINCREMENT CHECK (id > 0),"
+    " chunk_id  INTEGER NOT NULL,"
+    " prev      INTEGER,"
+    " next      INTEGER,"
+    " CONSTRAINT fk_links_chunkid FOREIGN KEY (chunk_id) REFERENCES chunks(id),"
+    " CONSTRAINT fk_links_prev FOREIGN KEY (prev) REFERENCES linked_chunks(id),"
+    " CONSTRAINT fk_links_next FOREIGN KEY (next) REFERENCES linked_chunks(id)"
+    ");"
+    "CREATE INDEX idx_linked_chunks_chunk_id ON linked_chunks(chunk_id);"
+    "CREATE TABLE linked_chunks_head_tail("
+    "  head       INTEGER,"
+    "  tail       INTEGER,"
+    "  CONSTRAINT lht_head FOREIGN KEY (head) REFERENCES linked_chunks(id),"
+    "  CONSTRAINT lht_tail FOREIGN KEY (tail) REFERENCES linked_chunks(id)"
+    ");"
+    "INSERT INTO linked_chunks_head_tail VALUES (NULL, NULL);";
+
+bool DiskChunkCache::createDBStructure() {
+
+    pj_log(ctx_, PJ_LOG_TRACE, "Creating cache DB structure");
+    if (sqlite3_exec(hDB_, cache_db_structure_sql, nullptr, nullptr, nullptr) !=
+        SQLITE_OK) {
+        pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+        return false;
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+#define INVALIDATED_SQL_LITERAL "'invalidated'"
+
+bool DiskChunkCache::checkConsistency() {
+
+    auto stmt = prepare("SELECT * FROM chunk_data WHERE id NOT IN (SELECT "
+                        "data_id FROM chunks)");
+    if (!stmt) {
+        return false;
+    }
+    if (stmt->execute() != SQLITE_DONE) {
+        fprintf(stderr, "Rows in chunk_data not referenced by chunks.\n");
+        return false;
+    }
+
+    stmt = prepare("SELECT * FROM chunks WHERE id NOT IN (SELECT chunk_id FROM "
+                   "linked_chunks)");
+    if (!stmt) {
+        return false;
+    }
+    if (stmt->execute() != SQLITE_DONE) {
+        fprintf(stderr, "Rows in chunks not referenced by linked_chunks.\n");
+        return false;
+    }
+
+    stmt = prepare("SELECT * FROM chunks WHERE url <> " INVALIDATED_SQL_LITERAL
+                   " AND url "
+                   "NOT IN (SELECT url FROM properties)");
+    if (!stmt) {
+        return false;
+    }
+    if (stmt->execute() != SQLITE_DONE) {
+        fprintf(stderr, "url values in chunks not referenced by properties.\n");
+        return false;
+    }
+
+    stmt = prepare("SELECT head, tail FROM linked_chunks_head_tail");
+    if (!stmt) {
+        return false;
+    }
+    if (stmt->execute() != SQLITE_ROW) {
+        fprintf(stderr, "linked_chunks_head_tail empty.\n");
+        return false;
+    }
+    const auto head = stmt->getInt64();
+    const auto tail = stmt->getInt64();
+    if (stmt->execute() != SQLITE_DONE) {
+        fprintf(stderr, "linked_chunks_head_tail has more than one row.\n");
+        return false;
+    }
+
+    stmt = prepare("SELECT COUNT(*) FROM linked_chunks");
+    if (!stmt) {
+        return false;
+    }
+    if (stmt->execute() != SQLITE_ROW) {
+        fprintf(stderr, "linked_chunks_head_tail empty.\n");
+        return false;
+    }
+    const auto count_linked_chunks = stmt->getInt64();
+
+    if (head) {
+        auto id = head;
+        std::set<sqlite3_int64> visitedIds;
+        stmt = prepare("SELECT next FROM linked_chunks WHERE id = ?");
+        if (!stmt) {
+            return false;
+        }
+        while (true) {
+            visitedIds.insert(id);
+            stmt->reset();
+            stmt->bindInt64(id);
+            if (stmt->execute() != SQLITE_ROW) {
+                fprintf(stderr, "cannot find linked_chunks.id = %d.\n",
+                        static_cast<int>(id));
+                return false;
+            }
+            auto next = stmt->getInt64();
+            if (next == 0) {
+                if (id != tail) {
+                    fprintf(stderr,
+                            "last item when following next is not tail.\n");
+                    return false;
+                }
+                break;
+            }
+            if (visitedIds.find(next) != visitedIds.end()) {
+                fprintf(stderr, "found cycle on linked_chunks.next = %d.\n",
+                        static_cast<int>(next));
+                return false;
+            }
+            id = next;
+        }
+        if (visitedIds.size() != static_cast<size_t>(count_linked_chunks)) {
+            fprintf(stderr,
+                    "ghost items in linked_chunks when following next.\n");
+            return false;
+        }
+    } else if (count_linked_chunks) {
+        fprintf(stderr, "linked_chunks_head_tail.head = NULL but linked_chunks "
+                        "not empty.\n");
+        return false;
+    }
+
+    if (tail) {
+        auto id = tail;
+        std::set<sqlite3_int64> visitedIds;
+        stmt = prepare("SELECT prev FROM linked_chunks WHERE id = ?");
+        if (!stmt) {
+            return false;
+        }
+        while (true) {
+            visitedIds.insert(id);
+            stmt->reset();
+            stmt->bindInt64(id);
+            if (stmt->execute() != SQLITE_ROW) {
+                fprintf(stderr, "cannot find linked_chunks.id = %d.\n",
+                        static_cast<int>(id));
+                return false;
+            }
+            auto prev = stmt->getInt64();
+            if (prev == 0) {
+                if (id != head) {
+                    fprintf(stderr,
+                            "last item when following prev is not head.\n");
+                    return false;
+                }
+                break;
+            }
+            if (visitedIds.find(prev) != visitedIds.end()) {
+                fprintf(stderr, "found cycle on linked_chunks.prev = %d.\n",
+                        static_cast<int>(prev));
+                return false;
+            }
+            id = prev;
+        }
+        if (visitedIds.size() != static_cast<size_t>(count_linked_chunks)) {
+            fprintf(stderr,
+                    "ghost items in linked_chunks when following prev.\n");
+            return false;
+        }
+    } else if (count_linked_chunks) {
+        fprintf(stderr, "linked_chunks_head_tail.tail = NULL but linked_chunks "
+                        "not empty.\n");
+        return false;
+    }
+
+    fprintf(stderr, "check ok\n");
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+DiskChunkCache::~DiskChunkCache() {
+    if (hDB_) {
+        sqlite3_exec(hDB_, "COMMIT", nullptr, nullptr, nullptr);
+        sqlite3_close(hDB_);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void DiskChunkCache::closeAndUnlink() {
+    if (hDB_) {
+        sqlite3_exec(hDB_, "COMMIT", nullptr, nullptr, nullptr);
+        sqlite3_close(hDB_);
+    }
+    if (vfs_) {
+        vfs_->raw()->xDelete(vfs_->raw(), path_.c_str(), 0);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<SQLiteStatement> DiskChunkCache::prepare(const char *sql) {
+    sqlite3_stmt *hStmt = nullptr;
+    sqlite3_prepare_v2(hDB_, sql, -1, &hStmt, nullptr);
+    if (!hStmt) {
+        pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+        return nullptr;
+    }
+    return std::unique_ptr<SQLiteStatement>(new SQLiteStatement(hStmt));
+}
+
+// ---------------------------------------------------------------------------
+
+bool DiskChunkCache::get_links(sqlite3_int64 chunk_id, sqlite3_int64 &link_id,
+                               sqlite3_int64 &prev, sqlite3_int64 &next,
+                               sqlite3_int64 &head, sqlite3_int64 &tail) {
+    auto stmt =
+        prepare("SELECT id, prev, next FROM linked_chunks WHERE chunk_id = ?");
+    if (!stmt)
+        return false;
+    stmt->bindInt64(chunk_id);
+    {
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_ROW) {
+            pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+            return false;
+        }
+    }
+    link_id = stmt->getInt64();
+    prev = stmt->getInt64();
+    next = stmt->getInt64();
+
+    stmt = prepare("SELECT head, tail FROM linked_chunks_head_tail");
+    {
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_ROW) {
+            pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+            return false;
+        }
+    }
+    head = stmt->getInt64();
+    tail = stmt->getInt64();
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+bool DiskChunkCache::update_links_of_prev_and_next_links(sqlite3_int64 prev,
+                                                         sqlite3_int64 next) {
+    if (prev) {
+        auto stmt = prepare("UPDATE linked_chunks SET next = ? WHERE id = ?");
+        if (!stmt)
+            return false;
+        if (next)
+            stmt->bindInt64(next);
+        else
+            stmt->bindNull();
+        stmt->bindInt64(prev);
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_DONE) {
+            pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+            return false;
+        }
+    }
+
+    if (next) {
+        auto stmt = prepare("UPDATE linked_chunks SET prev = ? WHERE id = ?");
+        if (!stmt)
+            return false;
+        if (prev)
+            stmt->bindInt64(prev);
+        else
+            stmt->bindNull();
+        stmt->bindInt64(next);
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_DONE) {
+            pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+            return false;
+        }
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+bool DiskChunkCache::update_linked_chunks(sqlite3_int64 link_id,
+                                          sqlite3_int64 prev,
+                                          sqlite3_int64 next) {
+    auto stmt =
+        prepare("UPDATE linked_chunks SET prev = ?, next = ? WHERE id = ?");
+    if (!stmt)
+        return false;
+    if (prev)
+        stmt->bindInt64(prev);
+    else
+        stmt->bindNull();
+    if (next)
+        stmt->bindInt64(next);
+    else
+        stmt->bindNull();
+    stmt->bindInt64(link_id);
+    const auto ret = stmt->execute();
+    if (ret != SQLITE_DONE) {
+        pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+        return false;
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+bool DiskChunkCache::update_linked_chunks_head_tail(sqlite3_int64 head,
+                                                    sqlite3_int64 tail) {
+    auto stmt =
+        prepare("UPDATE linked_chunks_head_tail SET head = ?, tail = ?");
+    if (!stmt)
+        return false;
+    if (head)
+        stmt->bindInt64(head);
+    else
+        stmt->bindNull(); // shouldn't happen normally
+    if (tail)
+        stmt->bindInt64(tail);
+    else
+        stmt->bindNull(); // shouldn't happen normally
+    const auto ret = stmt->execute();
+    if (ret != SQLITE_DONE) {
+        pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+        return false;
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+bool DiskChunkCache::move_to_head(sqlite3_int64 chunk_id) {
+
+    sqlite3_int64 link_id = 0;
+    sqlite3_int64 prev = 0;
+    sqlite3_int64 next = 0;
+    sqlite3_int64 head = 0;
+    sqlite3_int64 tail = 0;
+    if (!get_links(chunk_id, link_id, prev, next, head, tail)) {
+        return false;
+    }
+
+    if (link_id == head) {
+        return true;
+    }
+
+    if (!update_links_of_prev_and_next_links(prev, next)) {
+        return false;
+    }
+
+    if (head) {
+        auto stmt = prepare("UPDATE linked_chunks SET prev = ? WHERE id = ?");
+        if (!stmt)
+            return false;
+        stmt->bindInt64(link_id);
+        stmt->bindInt64(head);
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_DONE) {
+            pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+            return false;
+        }
+    }
+
+    return update_linked_chunks(link_id, 0, head) &&
+           update_linked_chunks_head_tail(link_id,
+                                          (link_id == tail) ? prev : tail);
+}
+
+// ---------------------------------------------------------------------------
+
+bool DiskChunkCache::move_to_tail(sqlite3_int64 chunk_id) {
+    sqlite3_int64 link_id = 0;
+    sqlite3_int64 prev = 0;
+    sqlite3_int64 next = 0;
+    sqlite3_int64 head = 0;
+    sqlite3_int64 tail = 0;
+    if (!get_links(chunk_id, link_id, prev, next, head, tail)) {
+        return false;
+    }
+
+    if (link_id == tail) {
+        return true;
+    }
+
+    if (!update_links_of_prev_and_next_links(prev, next)) {
+        return false;
+    }
+
+    if (tail) {
+        auto stmt = prepare("UPDATE linked_chunks SET next = ? WHERE id = ?");
+        if (!stmt)
+            return false;
+        stmt->bindInt64(link_id);
+        stmt->bindInt64(tail);
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_DONE) {
+            pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
+            return false;
+        }
+    }
+
+    return update_linked_chunks(link_id, tail, 0) &&
+           update_linked_chunks_head_tail((link_id == head) ? next : head,
+                                          link_id);
+}
+
+// ---------------------------------------------------------------------------
+
+void NetworkChunkCache::insert(PJ_CONTEXT *ctx, const std::string &url,
                                unsigned long long chunkIdx,
                                std::vector<unsigned char> &&data) {
-    cache_.insert(
-        Key(url, chunkIdx),
-        std::make_shared<std::vector<unsigned char>>(std::move(data)));
+    auto dataPtr(std::make_shared<std::vector<unsigned char>>(std::move(data)));
+    cache_.insert(Key(url, chunkIdx), dataPtr);
+
+    auto diskCache = DiskChunkCache::open(ctx);
+    if (!diskCache)
+        return;
+    auto hDB = diskCache->handle();
+
+    // Always insert DOWNLOAD_CHUNK_SIZE bytes to avoid fragmentation
+    std::vector<unsigned char> blob(*dataPtr);
+    assert(blob.size() <= DOWNLOAD_CHUNK_SIZE);
+    blob.resize(DOWNLOAD_CHUNK_SIZE);
+
+    // Check if there is an existing entry for that URL and offset
+    auto stmt = diskCache->prepare(
+        "SELECT id, data_id FROM chunks WHERE url = ? AND offset = ?");
+    if (!stmt)
+        return;
+    stmt->bindText(url.c_str());
+    stmt->bindInt64(chunkIdx * DOWNLOAD_CHUNK_SIZE);
+
+    const auto mainRet = stmt->execute();
+    if (mainRet == SQLITE_ROW) {
+        const auto chunk_id = stmt->getInt64();
+        const auto data_id = stmt->getInt64();
+        stmt =
+            diskCache->prepare("UPDATE chunk_data SET data = ? WHERE id = ?");
+        if (!stmt)
+            return;
+        stmt->bindBlob(blob.data(), blob.size());
+        stmt->bindInt64(data_id);
+        {
+            const auto ret = stmt->execute();
+            if (ret != SQLITE_DONE) {
+                pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+                return;
+            }
+        }
+
+        diskCache->move_to_head(chunk_id);
+
+        return;
+    } else if (mainRet != SQLITE_DONE) {
+        pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+        return;
+    }
+
+    // Lambda to recycle an existing entry that was either invalidated, or
+    // least recently used.
+    const auto reuseExistingEntry = [ctx, &blob, &diskCache, hDB, &url,
+                                     chunkIdx, &dataPtr](
+        std::unique_ptr<SQLiteStatement> &stmtIn) {
+        const auto chunk_id = stmtIn->getInt64();
+        const auto data_id = stmtIn->getInt64();
+        if (data_id <= 0) {
+            pj_log(ctx, PJ_LOG_ERROR, "data_id <= 0");
+            return;
+        }
+
+        auto l_stmt =
+            diskCache->prepare("UPDATE chunk_data SET data = ? WHERE id = ?");
+        if (!l_stmt)
+            return;
+        l_stmt->bindBlob(blob.data(), blob.size());
+        l_stmt->bindInt64(data_id);
+        {
+            const auto ret2 = l_stmt->execute();
+            if (ret2 != SQLITE_DONE) {
+                pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+                return;
+            }
+        }
+
+        l_stmt = diskCache->prepare("UPDATE chunks SET url = ?, "
+                                    "offset = ?, data_size = ?, data_id = ? "
+                                    "WHERE id = ?");
+        if (!l_stmt)
+            return;
+        l_stmt->bindText(url.c_str());
+        l_stmt->bindInt64(chunkIdx * DOWNLOAD_CHUNK_SIZE);
+        l_stmt->bindInt64(dataPtr->size());
+        l_stmt->bindInt64(data_id);
+        l_stmt->bindInt64(chunk_id);
+        {
+            const auto ret2 = l_stmt->execute();
+            if (ret2 != SQLITE_DONE) {
+                pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+                return;
+            }
+        }
+
+        diskCache->move_to_head(chunk_id);
+    };
+
+    // Find if there is an invalidated chunk we can reuse
+    stmt = diskCache->prepare(
+        "SELECT id, data_id FROM chunks "
+        "WHERE id = (SELECT tail FROM linked_chunks_head_tail) AND "
+        "url = " INVALIDATED_SQL_LITERAL);
+    if (!stmt)
+        return;
+    {
+        const auto ret = stmt->execute();
+        if (ret == SQLITE_ROW) {
+            reuseExistingEntry(stmt);
+            return;
+        } else if (ret != SQLITE_DONE) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return;
+        }
+    }
+
+    // Check if we have not reached the max size of the cache
+    stmt = diskCache->prepare("SELECT COUNT(*) FROM chunks");
+    if (!stmt)
+        return;
+    {
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_ROW) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return;
+        }
+    }
+
+    const auto max_size = pj_context_get_grid_cache_max_size(ctx);
+    if (max_size > 0 &&
+        static_cast<long long>(stmt->getInt64() * DOWNLOAD_CHUNK_SIZE) >=
+            max_size) {
+        stmt = diskCache->prepare(
+            "SELECT id, data_id FROM chunks "
+            "WHERE id = (SELECT tail FROM linked_chunks_head_tail)");
+        if (!stmt)
+            return;
+
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_ROW) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return;
+        }
+        reuseExistingEntry(stmt);
+        return;
+    }
+
+    // Otherwise just append a new entry
+    stmt = diskCache->prepare("INSERT INTO chunk_data(data) VALUES (?)");
+    if (!stmt)
+        return;
+    stmt->bindBlob(blob.data(), blob.size());
+    {
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_DONE) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return;
+        }
+    }
+
+    const auto chunk_data_id = sqlite3_last_insert_rowid(hDB);
+
+    stmt = diskCache->prepare("INSERT INTO chunks(url, offset, data_id, "
+                              "data_size) VALUES (?,?,?,?)");
+    if (!stmt)
+        return;
+    stmt->bindText(url.c_str());
+    stmt->bindInt64(chunkIdx * DOWNLOAD_CHUNK_SIZE);
+    stmt->bindInt64(chunk_data_id);
+    stmt->bindInt64(dataPtr->size());
+    {
+        const auto ret = stmt->execute();
+        if (ret != SQLITE_DONE) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return;
+        }
+    }
+
+    const auto chunk_id = sqlite3_last_insert_rowid(hDB);
+
+    stmt = diskCache->prepare(
+        "INSERT INTO linked_chunks(chunk_id, prev, next) VALUES (?,NULL,NULL)");
+    if (!stmt)
+        return;
+    stmt->bindInt64(chunk_id);
+    if (stmt->execute() != SQLITE_DONE) {
+        pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+        return;
+    }
+
+    stmt = diskCache->prepare("SELECT head FROM linked_chunks_head_tail");
+    if (!stmt)
+        return;
+    if (stmt->execute() != SQLITE_ROW) {
+        pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+        return;
+    }
+    if (stmt->getInt64() == 0) {
+        stmt = diskCache->prepare(
+            "UPDATE linked_chunks_head_tail SET head = ?, tail = ?");
+        if (!stmt)
+            return;
+        stmt->bindInt64(chunk_id);
+        stmt->bindInt64(chunk_id);
+        if (stmt->execute() != SQLITE_DONE) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return;
+        }
+    }
+
+    diskCache->move_to_head(chunk_id);
 }
 
 // ---------------------------------------------------------------------------
 
 std::shared_ptr<std::vector<unsigned char>>
-NetworkChunkCache::get(const std::string &url, unsigned long long chunkIdx) {
+NetworkChunkCache::get(PJ_CONTEXT *ctx, const std::string &url,
+                       unsigned long long chunkIdx) {
     std::shared_ptr<std::vector<unsigned char>> ret;
-    cache_.tryGet(Key(url, chunkIdx), ret);
+    if (cache_.tryGet(Key(url, chunkIdx), ret)) {
+        return ret;
+    }
+
+    auto diskCache = DiskChunkCache::open(ctx);
+    if (!diskCache)
+        return ret;
+    auto hDB = diskCache->handle();
+
+    auto stmt = diskCache->prepare(
+        "SELECT chunks.id, chunks.data_size, chunk_data.data FROM chunks "
+        "JOIN chunk_data ON chunks.id = chunk_data.id "
+        "WHERE chunks.url = ? AND chunks.offset = ?");
+    if (!stmt)
+        return ret;
+
+    stmt->bindText(url.c_str());
+    stmt->bindInt64(chunkIdx * DOWNLOAD_CHUNK_SIZE);
+
+    const auto mainRet = stmt->execute();
+    if (mainRet == SQLITE_ROW) {
+        const auto chunk_id = stmt->getInt64();
+        const auto data_size = stmt->getInt64();
+        int blob_size = 0;
+        const void *blob = stmt->getBlob(blob_size);
+        if (blob_size < data_size) {
+            pj_log(ctx, PJ_LOG_ERROR,
+                   "blob_size=%d < data_size for chunk_id=%d", blob_size,
+                   static_cast<int>(chunk_id));
+            return ret;
+        }
+        if (data_size > static_cast<sqlite3_int64>(DOWNLOAD_CHUNK_SIZE)) {
+            pj_log(ctx, PJ_LOG_ERROR, "data_size > DOWNLOAD_CHUNK_SIZE");
+            return ret;
+        }
+        ret.reset(new std::vector<unsigned char>());
+        ret->assign(reinterpret_cast<const unsigned char *>(blob),
+                    reinterpret_cast<const unsigned char *>(blob) +
+                        static_cast<size_t>(data_size));
+        cache_.insert(Key(url, chunkIdx), ret);
+
+        if (!diskCache->move_to_head(chunk_id))
+            return ret;
+    } else if (mainRet != SQLITE_DONE) {
+        pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+    }
+
     return ret;
 }
 
 // ---------------------------------------------------------------------------
 
-void NetworkChunkCache::clear() { cache_.clear(); }
+std::shared_ptr<std::vector<unsigned char>>
+NetworkChunkCache::get(PJ_CONTEXT *ctx, const std::string &url,
+                       unsigned long long chunkIdx, FileProperties &props) {
+    if (!gNetworkFileProperties.tryGet(ctx, url, props)) {
+        return nullptr;
+    }
+
+    return get(ctx, url, chunkIdx);
+}
 
 // ---------------------------------------------------------------------------
 
-static NetworkChunkCache gNetworkChunkCache{};
+void NetworkChunkCache::clearMemoryCache() { cache_.clear(); }
 
-struct FileProperties {
-    unsigned long long size;
-};
+// ---------------------------------------------------------------------------
 
-static lru11::Cache<std::string, FileProperties, MyMutex>
-    gNetworkFileProperties{};
+void NetworkChunkCache::clearDiskChunkCache(PJ_CONTEXT *ctx) {
+    auto diskCache = DiskChunkCache::open(ctx);
+    if (!diskCache)
+        return;
+    diskCache->closeAndUnlink();
+}
+
+// ---------------------------------------------------------------------------
+
+void NetworkFilePropertiesCache::insert(PJ_CONTEXT *ctx, const std::string &url,
+                                        FileProperties &props) {
+    time(&props.lastChecked);
+    cache_.insert(url, props);
+
+    auto diskCache = DiskChunkCache::open(ctx);
+    if (!diskCache)
+        return;
+    auto hDB = diskCache->handle();
+    auto stmt = diskCache->prepare("SELECT fileSize, lastModified, etag "
+                                   "FROM properties WHERE url = ?");
+    if (!stmt)
+        return;
+    stmt->bindText(url.c_str());
+    if (stmt->execute() == SQLITE_ROW) {
+        FileProperties cachedProps;
+        cachedProps.size = stmt->getInt64();
+        const char *lastModified = stmt->getText();
+        cachedProps.lastModified = lastModified ? lastModified : std::string();
+        const char *etag = stmt->getText();
+        cachedProps.etag = etag ? etag : std::string();
+        if (props.size != cachedProps.size ||
+            props.lastModified != cachedProps.lastModified ||
+            props.etag != cachedProps.etag) {
+
+            // If cached properties don't match recent fresh ones, invalidate
+            // cached chunks
+            stmt = diskCache->prepare("SELECT id FROM chunks WHERE url = ?");
+            if (!stmt)
+                return;
+            stmt->bindText(url.c_str());
+            std::vector<sqlite3_int64> ids;
+            while (stmt->execute() == SQLITE_ROW) {
+                ids.emplace_back(stmt->getInt64());
+                stmt->resetResIndex();
+            }
+
+            for (const auto id : ids) {
+                diskCache->move_to_tail(id);
+            }
+
+            stmt = diskCache->prepare(
+                "UPDATE chunks SET url = " INVALIDATED_SQL_LITERAL ", "
+                "offset = -1, data_size = 0 WHERE url = ?");
+            if (!stmt)
+                return;
+            stmt->bindText(url.c_str());
+            if (stmt->execute() != SQLITE_DONE) {
+                pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+                return;
+            }
+        }
+
+        stmt = diskCache->prepare("UPDATE properties SET lastChecked = ?, "
+                                  "fileSize = ?, lastModified = ?, etag = ? "
+                                  "WHERE url = ?");
+        if (!stmt)
+            return;
+        stmt->bindInt64(props.lastChecked);
+        stmt->bindInt64(props.size);
+        if (props.lastModified.empty())
+            stmt->bindNull();
+        else
+            stmt->bindText(props.lastModified.c_str());
+        if (props.etag.empty())
+            stmt->bindNull();
+        else
+            stmt->bindText(props.etag.c_str());
+        stmt->bindText(url.c_str());
+        if (stmt->execute() != SQLITE_DONE) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return;
+        }
+    } else {
+        stmt = diskCache->prepare("INSERT INTO properties (url, lastChecked, "
+                                  "fileSize, lastModified, etag) VALUES "
+                                  "(?,?,?,?,?)");
+        if (!stmt)
+            return;
+        stmt->bindText(url.c_str());
+        stmt->bindInt64(props.lastChecked);
+        stmt->bindInt64(props.size);
+        if (props.lastModified.empty())
+            stmt->bindNull();
+        else
+            stmt->bindText(props.lastModified.c_str());
+        if (props.etag.empty())
+            stmt->bindNull();
+        else
+            stmt->bindText(props.etag.c_str());
+        if (stmt->execute() != SQLITE_DONE) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+bool NetworkFilePropertiesCache::tryGet(PJ_CONTEXT *ctx, const std::string &url,
+                                        FileProperties &props) {
+    if (cache_.tryGet(url, props)) {
+        return true;
+    }
+
+    auto diskCache = DiskChunkCache::open(ctx);
+    if (!diskCache)
+        return false;
+    auto stmt =
+        diskCache->prepare("SELECT lastChecked, fileSize, lastModified, etag "
+                           "FROM properties WHERE url = ?");
+    if (!stmt)
+        return false;
+    stmt->bindText(url.c_str());
+    if (stmt->execute() != SQLITE_ROW) {
+        return false;
+    }
+    props.lastChecked = stmt->getInt64();
+    props.size = stmt->getInt64();
+    const char *lastModified = stmt->getText();
+    props.lastModified = lastModified ? lastModified : std::string();
+    const char *etag = stmt->getText();
+    props.etag = etag ? etag : std::string();
+
+    const auto ttl = pj_context_get_grid_cache_ttl(ctx);
+    if (ttl > 0) {
+        time_t curTime;
+        time(&curTime);
+        if (curTime > props.lastChecked + ttl) {
+            props = FileProperties();
+            return false;
+        }
+    }
+    cache_.insert(url, props);
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+void NetworkFilePropertiesCache::clearMemoryCache() { cache_.clear(); }
 
 // ---------------------------------------------------------------------------
 
@@ -330,15 +1363,11 @@ class NetworkFile : public File {
 // ---------------------------------------------------------------------------
 
 std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
-    if (gNetworkChunkCache.get(filename, 0)) {
-        unsigned long long filesize = 0;
-        FileProperties props;
-        if (gNetworkFileProperties.tryGet(filename, props)) {
-            filesize = props.size;
-        }
+    FileProperties props;
+    if (gNetworkChunkCache.get(ctx, filename, 0, props)) {
         return std::unique_ptr<File>(new NetworkFile(
             ctx, filename, nullptr,
-            std::numeric_limits<unsigned long long>::max(), filesize));
+            std::numeric_limits<unsigned long long>::max(), props.size));
     } else {
         std::vector<unsigned char> buffer(DOWNLOAD_CHUNK_SIZE);
         size_t size_read = 0;
@@ -349,7 +1378,6 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
             ctx, filename, 0, buffer.size(), &buffer[0], &size_read,
             errorBuffer.size(), &errorBuffer[0], ctx->networking.user_data);
         buffer.resize(size_read);
-        gNetworkChunkCache.insert(filename, 0, std::move(buffer));
         if (!handle) {
             errorBuffer.resize(strlen(errorBuffer.data()));
             pj_log(ctx, PJ_LOG_ERROR, "Cannot open %s: %s", filename,
@@ -364,16 +1392,32 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
                 const char *slash = strchr(contentRange, '/');
                 if (slash) {
                     filesize = std::stoull(slash + 1);
-                    FileProperties props;
+
                     props.size = filesize;
-                    gNetworkFileProperties.insert(filename, props);
+
+                    const char *lastModified = ctx->networking.get_header_value(
+                        ctx, handle, "Last-Modified",
+                        ctx->networking.user_data);
+                    if (lastModified)
+                        props.lastModified = lastModified;
+
+                    const char *etag = ctx->networking.get_header_value(
+                        ctx, handle, "ETag", ctx->networking.user_data);
+                    if (etag)
+                        props.etag = etag;
+
+                    gNetworkFileProperties.insert(ctx, filename, props);
                 }
+            }
+            if (filesize != 0) {
+                gNetworkChunkCache.insert(ctx, filename, 0, std::move(buffer));
             }
         }
 
         return std::unique_ptr<File>(
-            handle ? new NetworkFile(ctx, filename, handle, size_read, filesize)
-                   : nullptr);
+            handle != nullptr && filesize != 0
+                ? new NetworkFile(ctx, filename, handle, size_read, filesize)
+                : nullptr);
     }
 }
 
@@ -389,7 +1433,7 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
         const auto chunkIdxToDownload = iterOffset / DOWNLOAD_CHUNK_SIZE;
         const auto offsetToDownload = chunkIdxToDownload * DOWNLOAD_CHUNK_SIZE;
         std::vector<unsigned char> region;
-        auto pChunk = gNetworkChunkCache.get(m_url, chunkIdxToDownload);
+        auto pChunk = gNetworkChunkCache.get(m_ctx, m_url, chunkIdxToDownload);
         if (pChunk != nullptr) {
             region = *pChunk;
         } else {
@@ -420,8 +1464,8 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
             // Note: this might get evicted if concurrent reads are done, but
             // this should not cause bugs. Just missed optimization.
             for (size_t i = 1; i < m_nBlocksToDownload; i++) {
-                if (gNetworkChunkCache.get(m_url, chunkIdxToDownload + i) !=
-                    nullptr) {
+                if (gNetworkChunkCache.get(m_ctx, m_url,
+                                           chunkIdxToDownload + i) != nullptr) {
                     m_nBlocksToDownload = i;
                     break;
                 }
@@ -468,7 +1512,7 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
                     region.data() + i * DOWNLOAD_CHUNK_SIZE,
                     region.data() +
                         std::min((i + 1) * DOWNLOAD_CHUNK_SIZE, region.size()));
-                gNetworkChunkCache.insert(m_url, chunkIdxToDownload + i,
+                gNetworkChunkCache.insert(m_ctx, m_url, chunkIdxToDownload + i,
                                           std::move(chunk));
             }
         }
@@ -826,13 +1870,15 @@ static const char *pj_curl_get_header_value(PJ_CONTEXT *,
     auto pos = ci_find(handle->m_headers, header_name);
     if (pos == std::string::npos)
         return nullptr;
+    pos += strlen(header_name);
     const char *c_str = handle->m_headers.c_str();
     if (c_str[pos] == ':')
         pos++;
     while (c_str[pos] == ' ')
         pos++;
     auto posEnd = pos;
-    while (c_str[posEnd] != '\n' && c_str[posEnd] != '\0')
+    while (c_str[posEnd] != '\r' && c_str[posEnd] != '\n' &&
+           c_str[posEnd] != '\0')
         posEnd++;
     handle->m_lastval = handle->m_headers.substr(pos, posEnd - pos);
     return handle->m_lastval.c_str();
@@ -843,7 +1889,7 @@ static const char *pj_curl_get_header_value(PJ_CONTEXT *,
 // ---------------------------------------------------------------------------
 
 static PROJ_NETWORK_HANDLE *
-no_op_network_open(PJ_CONTEXT *ctx, const char * /* url */,
+no_op_network_open(PJ_CONTEXT *, const char * /* url */,
                    unsigned long long, /* offset */
                    size_t,             /* size to read */
                    void *,             /* buffer to update with bytes read*/
@@ -880,9 +1926,9 @@ void FileManager::fillDefaultNetworkInterface(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
-void FileManager::clearCache() {
-    gNetworkChunkCache.clear();
-    gNetworkFileProperties.clear();
+void FileManager::clearMemoryCache() {
+    gNetworkChunkCache.clearMemoryCache();
+    gNetworkFileProperties.clearMemoryCache();
 }
 
 // ---------------------------------------------------------------------------
@@ -974,6 +2020,99 @@ void proj_context_set_url_endpoint(PJ_CONTEXT *ctx, const char *url) {
 
 // ---------------------------------------------------------------------------
 
+/** Enable or disable the local cache of grid chunks
+*
+* This overrides the setting in the PROJ configuration file.
+*
+* @param ctx PROJ context, or NULL
+* @param enabled TRUE if the cache is enabled.
+*/
+void proj_grid_cache_set_enable(PJ_CONTEXT *ctx, int enabled) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    // Load ini file, now so as to override its settings
+    pj_load_ini(ctx);
+    ctx->gridChunkCache.enabled = enabled != FALSE;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Override, for the considered context, the path and file of the local
+* cache of grid chunks.
+*
+* @param ctx PROJ context, or NULL
+* @param fullname Full name to the cache (encoded in UTF-8). If set to NULL,
+*                 caching will be disabled.
+*/
+void proj_grid_cache_set_filename(PJ_CONTEXT *ctx, const char *fullname) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    // Load ini file, now so as to override its settings
+    pj_load_ini(ctx);
+    ctx->gridChunkCache.filename = fullname ? fullname : std::string();
+}
+
+// ---------------------------------------------------------------------------
+
+/** Override, for the considered context, the maximum size of the local
+* cache of grid chunks.
+*
+* @param ctx PROJ context, or NULL
+* @param max_size_MB Maximum size, in mega-bytes (1024*1024 bytes), or
+*                    negative value to set unlimited size.
+*/
+void proj_grid_cache_set_max_size(PJ_CONTEXT *ctx, int max_size_MB) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    // Load ini file, now so as to override its settings
+    pj_load_ini(ctx);
+    ctx->gridChunkCache.max_size =
+        max_size_MB < 0 ? -1
+                        : static_cast<long long>(max_size_MB) * 1024 * 1024;
+    if (max_size_MB == 0) {
+        // For debug purposes only
+        const char *env_var = getenv("PROJ_GRID_CACHE_MAX_SIZE_BYTES");
+        if (env_var && env_var[0] != '\0') {
+            ctx->gridChunkCache.max_size = atoi(env_var);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** Override, for the considered context, the time-to-live delay for
+* re-checking if the cached properties of files are still up-to-date.
+*
+* @param ctx PROJ context, or NULL
+* @param ttl_seconds Delay in seconds. Use negative value for no expiration.
+*/
+void proj_grid_cache_set_ttl(PJ_CONTEXT *ctx, int ttl_seconds) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    // Load ini file, now so as to override its settings
+    pj_load_ini(ctx);
+    ctx->gridChunkCache.ttl = ttl_seconds;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Clear the local cache of grid chunks.
+*
+* @param ctx PROJ context, or NULL
+*/
+void proj_grid_cache_clear(PJ_CONTEXT *ctx) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    NS_PROJ::gNetworkChunkCache.clearDiskChunkCache(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 bool pj_context_is_network_enabled(PJ_CONTEXT *ctx) {
@@ -992,6 +2131,100 @@ bool pj_context_is_network_enabled(PJ_CONTEXT *ctx) {
     pj_load_ini(ctx);
     ctx->networking.enabled_env_variable_checked = true;
     return ctx->networking.enabled;
+}
+
+// ---------------------------------------------------------------------------
+
+#ifdef _WIN32
+
+static std::wstring UTF8ToWString(const std::string &str) {
+    using convert_typeX = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_typeX, wchar_t> converterX;
+
+    return converterX.from_bytes(str);
+}
+
+// ---------------------------------------------------------------------------
+
+static std::string WStringToUTF8(const std::wstring &wstr) {
+    using convert_typeX = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_typeX, wchar_t> converterX;
+
+    return converterX.to_bytes(wstr);
+}
+#endif
+
+// ---------------------------------------------------------------------------
+
+static void CreateDirectory(const std::string &path) {
+#ifdef _WIN32
+    struct __stat64 buf;
+    const auto wpath = UTF8ToWString(path);
+    if (_wstat64(wpath.c_str(), &buf) == 0)
+        return;
+    auto pos = path.find_last_of("/\\");
+    if (pos == 0 || pos == std::string::npos)
+        return;
+    CreateDirectory(path.substr(0, pos));
+    _wmkdir(wpath.c_str());
+#else
+    struct stat buf;
+    if (stat(path.c_str(), &buf) == 0)
+        return;
+    auto pos = path.find_last_of("/\\");
+    if (pos == 0 || pos == std::string::npos)
+        return;
+    CreateDirectory(path.substr(0, pos));
+    mkdir(path.c_str(), 0755);
+#endif
+}
+
+// ---------------------------------------------------------------------------
+
+std::string pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx) {
+    pj_load_ini(ctx);
+    if (!ctx->gridChunkCache.filename.empty()) {
+        return ctx->gridChunkCache.filename;
+    }
+    std::string path;
+#ifdef _WIN32
+    std::wstring wPath;
+    wPath.resize(MAX_PATH);
+    if (SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, &wPath[0]) ==
+        S_OK) {
+        wPath.resize(wcslen(wPath.data()));
+        path = WStringToUTF8(wPath);
+    } else {
+        const char *local_app_data = getenv("LOCALAPPDATA");
+        if (!local_app_data) {
+            local_app_data = getenv("TEMP");
+            if (!local_app_data) {
+                local_app_data = "c:/users";
+            }
+        }
+        path = local_app_data;
+    }
+#else
+    const char *xdg_data_home = getenv("XDG_DATA_HOME");
+    if (xdg_data_home != nullptr) {
+        path = xdg_data_home;
+    } else {
+        const char *home = getenv("HOME");
+        if (home) {
+#if defined(__MACH__) && defined(__APPLE__)
+            path = std::string(home) + "/Library/Logs";
+#else
+            path = std::string(home) + "/.local/share";
+#endif
+        } else {
+            path = "/tmp";
+        }
+    }
+#endif
+    path += "/proj";
+    CreateDirectory(path);
+    ctx->gridChunkCache.filename = path + "/cache.db";
+    return ctx->gridChunkCache.filename;
 }
 
 //! @endcond

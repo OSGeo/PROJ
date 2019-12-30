@@ -158,7 +158,8 @@ if(CURL_FOUND)
 endif()
 target_link_libraries(test_network
   GTest::gtest
-  ${PROJ_LIBRARIES})
+  ${PROJ_LIBRARIES}
+  ${SQLITE3_LIBRARY})
 add_test(NAME test_network COMMAND test_network)
 if(MSVC)
     set_property(TEST test_network

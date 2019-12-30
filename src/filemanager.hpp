@@ -53,7 +53,7 @@ class FileManager {
 
     static void fillDefaultNetworkInterface(PJ_CONTEXT *ctx);
 
-    static void clearCache();
+    static void clearMemoryCache();
 };
 
 // ---------------------------------------------------------------------------

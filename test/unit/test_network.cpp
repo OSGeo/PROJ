@@ -35,6 +35,9 @@
 #include "proj_internal.h"
 #include <proj.h>
 
+#include <sqlite3.h>
+#include <time.h>
+
 #ifdef CURL_ENABLED
 #include <curl/curl.h>
 #endif
@@ -91,6 +94,7 @@ TEST(networking, basic) {
 
     // network access disabled by default
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_log_func(ctx, nullptr, silent_logger);
     auto P = proj_create(ctx, pipeline);
     ASSERT_EQ(P, nullptr);
@@ -99,6 +103,7 @@ TEST(networking, basic) {
 #ifdef CURL_ENABLED
     // enable through env variable
     ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     putenv(const_cast<char *>("PROJ_NETWORK=ON"));
     P = proj_create(ctx, pipeline);
     if (networkAccessOK) {
@@ -111,6 +116,7 @@ TEST(networking, basic) {
 
     // still disabled
     ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_log_func(ctx, nullptr, silent_logger);
     P = proj_create(ctx, pipeline);
     ASSERT_EQ(P, nullptr);
@@ -118,6 +124,7 @@ TEST(networking, basic) {
 
     // enable through API
     ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
     P = proj_create(ctx, pipeline);
 #ifdef CURL_ENABLED
@@ -148,6 +155,7 @@ TEST(networking, basic) {
 
 TEST(networking, curl_invalid_resource) {
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
     proj_log_func(ctx, nullptr, silent_logger);
     auto P = proj_create(
@@ -388,6 +396,7 @@ static size_t read_range_cbk(PJ_CONTEXT *ctx, PROJ_NETWORK_HANDLE *handle,
 
 TEST(networking, custom) {
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
     ExchangeWithCallback exchange;
     ASSERT_TRUE(proj_context_set_network_callbacks(ctx, open_cbk, close_cbk,
@@ -417,7 +426,23 @@ TEST(networking, custom) {
         std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
         event->ctx = ctx;
         event->key = "Content-Range";
-        event->value = "dummy"; // dummy value: not used
+        event->value = "bytes=0-16383/10000000";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
         event->file_id = 1;
         exchange.events.emplace_back(std::move(event));
     }
@@ -524,6 +549,7 @@ TEST(networking, custom) {
 
 TEST(networking, getfilesize) {
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
     ExchangeWithCallback exchange;
     ASSERT_TRUE(proj_context_set_network_callbacks(ctx, open_cbk, close_cbk,
@@ -554,6 +580,22 @@ TEST(networking, getfilesize) {
         event->ctx = ctx;
         event->key = "Content-Range";
         event->value = "bytes 0-16383/4153510";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
         event->file_id = 1;
         exchange.events.emplace_back(std::move(event));
     }
@@ -589,6 +631,7 @@ TEST(networking, getfilesize) {
 
 TEST(networking, simul_open_error) {
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_log_func(ctx, nullptr, silent_logger);
     proj_context_set_enable_network(ctx, true);
     ExchangeWithCallback exchange;
@@ -622,6 +665,7 @@ TEST(networking, simul_open_error) {
 
 TEST(networking, simul_read_range_error) {
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
     ExchangeWithCallback exchange;
     ASSERT_TRUE(proj_context_set_network_callbacks(ctx, open_cbk, close_cbk,
@@ -651,7 +695,23 @@ TEST(networking, simul_read_range_error) {
         std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
         event->ctx = ctx;
         event->key = "Content-Range";
-        event->value = "dummy"; // dummy value: not used
+        event->value = "bytes=0-16383/10000000";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
         event->file_id = 1;
         exchange.events.emplace_back(std::move(event));
     }
@@ -737,6 +797,7 @@ TEST(networking, simul_read_range_error) {
 
 TEST(networking, curl_hgridshift) {
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
 
     // NAD83 to NAD83(HARN) in West-Virginia. Using wvhpgn.tif
@@ -767,6 +828,7 @@ TEST(networking, curl_hgridshift) {
 
 TEST(networking, curl_vgridshift) {
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
 
     // WGS84 to EGM2008 height. Using egm08_25.tif
@@ -798,6 +860,7 @@ TEST(networking, curl_vgridshift) {
 
 TEST(networking, curl_vgridshift_vertcon) {
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
 
     // NGVD29 to NAVD88 height. Using vertcone.tif
@@ -828,6 +891,7 @@ TEST(networking, curl_vgridshift_vertcon) {
 TEST(networking, network_endpoint_env_variable) {
     putenv(const_cast<char *>("PROJ_NETWORK_ENDPOINT=http://0.0.0.0/"));
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
 
     // NAD83 to NAD83(HARN) in West-Virginia. Using wvhpgn.tif
@@ -855,6 +919,7 @@ TEST(networking, network_endpoint_env_variable) {
 
 TEST(networking, network_endpoint_api) {
     auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
     proj_context_set_url_endpoint(ctx, "http://0.0.0.0");
 
@@ -874,6 +939,372 @@ TEST(networking, network_endpoint_api) {
     EXPECT_EQ(c.xyz.x, HUGE_VAL);
 }
 
+#endif
+
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+static PROJ_NETWORK_HANDLE *dummy_open_cbk(PJ_CONTEXT *, const char *,
+                                           unsigned long long, size_t, void *,
+                                           size_t *, size_t, char *, void *) {
+    assert(false);
+    return nullptr;
+}
+
+static void dummy_close_cbk(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *, void *) {
+    assert(false);
+}
+
+static const char *dummy_get_header_value_cbk(PJ_CONTEXT *,
+                                              PROJ_NETWORK_HANDLE *,
+                                              const char *, void *) {
+    assert(false);
+    return nullptr;
+}
+
+static size_t dummy_read_range_cbk(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *,
+                                   unsigned long long, size_t, void *, size_t,
+                                   char *, void *) {
+    assert(false);
+    return 0;
+}
+
+TEST(networking, cache_basic) {
+    if (!networkAccessOK) {
+        return;
+    }
+
+    proj_cleanup();
+
+    const char *pipeline =
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
+
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+
+    auto P = proj_create(ctx, pipeline);
+    ASSERT_NE(P, nullptr);
+    proj_destroy(P);
+
+    EXPECT_TRUE(!pj_context_get_grid_cache_filename(ctx).empty());
+
+    sqlite3 *hDB = nullptr;
+    sqlite3_open_v2(pj_context_get_grid_cache_filename(ctx).c_str(), &hDB,
+                    SQLITE_OPEN_READONLY, nullptr);
+    ASSERT_NE(hDB, nullptr);
+    sqlite3_stmt *hStmt = nullptr;
+    sqlite3_prepare_v2(hDB, "SELECT url, offset FROM chunks WHERE id = ("
+                            "SELECT chunk_id FROM linked_chunks WHERE id = ("
+                            "SELECT head FROM linked_chunks_head_tail))",
+                       -1, &hStmt, nullptr);
+    ASSERT_NE(hStmt, nullptr);
+    ASSERT_EQ(sqlite3_step(hStmt), SQLITE_ROW);
+    const char *url =
+        reinterpret_cast<const char *>(sqlite3_column_text(hStmt, 0));
+    ASSERT_NE(url, nullptr);
+    ASSERT_EQ(std::string(url), "https://cdn.proj.org/ntf_r93.tif");
+    ASSERT_EQ(sqlite3_column_int64(hStmt, 1), 0);
+    sqlite3_finalize(hStmt);
+    sqlite3_close(hDB);
+
+    proj_cleanup();
+
+    // Check that a second access doesn't trigger any network activity
+    ASSERT_TRUE(proj_context_set_network_callbacks(
+        ctx, dummy_open_cbk, dummy_close_cbk, dummy_get_header_value_cbk,
+        dummy_read_range_cbk, nullptr));
+    P = proj_create(ctx, pipeline);
+    ASSERT_NE(P, nullptr);
+    proj_destroy(P);
+
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(networking, proj_grid_cache_clear) {
+    if (!networkAccessOK) {
+        return;
+    }
+    const char *pipeline =
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
+
+    proj_cleanup();
+
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+    proj_grid_cache_set_filename(ctx, "tmp_proj_db_cache.db");
+    EXPECT_EQ(pj_context_get_grid_cache_filename(ctx),
+              std::string("tmp_proj_db_cache.db"));
+
+    proj_grid_cache_clear(ctx);
+
+    auto P = proj_create(ctx, pipeline);
+    ASSERT_NE(P, nullptr);
+    proj_destroy(P);
+
+    // Check that the file exists
+    {
+        sqlite3 *hDB = nullptr;
+        ASSERT_EQ(
+            sqlite3_open_v2(pj_context_get_grid_cache_filename(ctx).c_str(),
+                            &hDB, SQLITE_OPEN_READONLY, nullptr),
+            SQLITE_OK);
+        sqlite3_close(hDB);
+    }
+
+    proj_grid_cache_clear(ctx);
+
+    // Check that the file no longer exists
+    {
+        sqlite3 *hDB = nullptr;
+        ASSERT_NE(
+            sqlite3_open_v2(pj_context_get_grid_cache_filename(ctx).c_str(),
+                            &hDB, SQLITE_OPEN_READONLY, nullptr),
+            SQLITE_OK);
+        sqlite3_close(hDB);
+    }
+
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(networking, cache_saturation) {
+    if (!networkAccessOK) {
+        return;
+    }
+    const char *pipeline =
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
+
+    proj_cleanup();
+
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+    proj_grid_cache_set_filename(ctx, "tmp_proj_db_cache.db");
+
+    proj_grid_cache_clear(ctx);
+
+    // Limit to two chunks
+    putenv(const_cast<char *>("PROJ_GRID_CACHE_MAX_SIZE_BYTES=32768"));
+    proj_grid_cache_set_max_size(ctx, 0);
+    putenv(const_cast<char *>("PROJ_GRID_CACHE_MAX_SIZE_BYTES="));
+
+    auto P = proj_create(ctx, pipeline);
+    ASSERT_NE(P, nullptr);
+
+    double lon = 2;
+    double lat = 49;
+    proj_trans_generic(P, PJ_FWD, &lon, sizeof(double), 1, &lat, sizeof(double),
+                       1, nullptr, 0, 0, nullptr, 0, 0);
+    EXPECT_NEAR(lon, 1.9992776848, 1e-10);
+    EXPECT_NEAR(lat, 48.9999322600, 1e-10);
+
+    proj_destroy(P);
+
+    sqlite3 *hDB = nullptr;
+    sqlite3_open_v2(pj_context_get_grid_cache_filename(ctx).c_str(), &hDB,
+                    SQLITE_OPEN_READONLY, nullptr);
+    ASSERT_NE(hDB, nullptr);
+
+    sqlite3_stmt *hStmt = nullptr;
+    sqlite3_prepare_v2(hDB, "SELECT COUNT(*) FROM chunk_data UNION ALL "
+                            "SELECT COUNT(*) FROM chunks UNION ALL "
+                            "SELECT COUNT(*) FROM linked_chunks",
+                       -1, &hStmt, nullptr);
+    ASSERT_NE(hStmt, nullptr);
+    ASSERT_EQ(sqlite3_step(hStmt), SQLITE_ROW);
+    ASSERT_EQ(sqlite3_column_int64(hStmt, 0), 2);
+    ASSERT_EQ(sqlite3_step(hStmt), SQLITE_ROW);
+    ASSERT_EQ(sqlite3_column_int64(hStmt, 0), 2);
+    ASSERT_EQ(sqlite3_step(hStmt), SQLITE_ROW);
+    ASSERT_EQ(sqlite3_column_int64(hStmt, 0), 2);
+    sqlite3_finalize(hStmt);
+    sqlite3_close(hDB);
+
+    proj_grid_cache_clear(ctx);
+
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(networking, cache_ttl) {
+    if (!networkAccessOK) {
+        return;
+    }
+    const char *pipeline =
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
+
+    proj_cleanup();
+
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+    proj_grid_cache_set_filename(ctx, "tmp_proj_db_cache.db");
+
+    proj_grid_cache_clear(ctx);
+
+    auto P = proj_create(ctx, pipeline);
+    ASSERT_NE(P, nullptr);
+
+    double lon = 2;
+    double lat = 49;
+    proj_trans_generic(P, PJ_FWD, &lon, sizeof(double), 1, &lat, sizeof(double),
+                       1, nullptr, 0, 0, nullptr, 0, 0);
+    EXPECT_NEAR(lon, 1.9992776848, 1e-10);
+    EXPECT_NEAR(lat, 48.9999322600, 1e-10);
+
+    proj_destroy(P);
+
+    sqlite3 *hDB = nullptr;
+    sqlite3_open_v2(pj_context_get_grid_cache_filename(ctx).c_str(), &hDB,
+                    SQLITE_OPEN_READWRITE, nullptr);
+    ASSERT_NE(hDB, nullptr);
+
+    // Force lastChecked to the Epoch so that data is expired.
+    sqlite3_stmt *hStmt = nullptr;
+    sqlite3_prepare_v2(hDB, "UPDATE properties SET lastChecked = 0, "
+                            "lastModified = 'foo', etag = 'bar'",
+                       -1, &hStmt, nullptr);
+    ASSERT_NE(hStmt, nullptr);
+    ASSERT_EQ(sqlite3_step(hStmt), SQLITE_DONE);
+    sqlite3_finalize(hStmt);
+
+    // Put junk in already cached data to check that we will refresh it.
+    hStmt = nullptr;
+    sqlite3_prepare_v2(hDB, "UPDATE chunk_data SET data = zeroblob(16384)", -1,
+                       &hStmt, nullptr);
+    ASSERT_NE(hStmt, nullptr);
+    ASSERT_EQ(sqlite3_step(hStmt), SQLITE_DONE);
+    sqlite3_finalize(hStmt);
+    sqlite3_close(hDB);
+
+    proj_cleanup();
+
+    // Set a never expire ttl
+    proj_grid_cache_set_ttl(ctx, -1);
+
+    // We'll get junk data, hence the pipeline initialization fails
+    proj_log_func(ctx, nullptr, silent_logger);
+    P = proj_create(ctx, pipeline);
+    ASSERT_EQ(P, nullptr);
+    proj_destroy(P);
+
+    proj_cleanup();
+
+    // Set a normal ttl
+    proj_grid_cache_set_ttl(ctx, 86400);
+
+    // Pipeline creation succeeds
+    P = proj_create(ctx, pipeline);
+    ASSERT_NE(P, nullptr);
+    proj_destroy(P);
+
+    hDB = nullptr;
+    sqlite3_open_v2(pj_context_get_grid_cache_filename(ctx).c_str(), &hDB,
+                    SQLITE_OPEN_READWRITE, nullptr);
+    ASSERT_NE(hDB, nullptr);
+    hStmt = nullptr;
+    sqlite3_prepare_v2(hDB,
+                       "SELECT lastChecked, lastModified, etag FROM properties",
+                       -1, &hStmt, nullptr);
+    ASSERT_NE(hStmt, nullptr);
+    ASSERT_EQ(sqlite3_step(hStmt), SQLITE_ROW);
+    ASSERT_NE(sqlite3_column_int64(hStmt, 0), 0);
+    ASSERT_NE(sqlite3_column_text(hStmt, 1), nullptr);
+    ASSERT_NE(std::string(reinterpret_cast<const char *>(
+                  sqlite3_column_text(hStmt, 1))),
+              "foo");
+    ASSERT_NE(sqlite3_column_text(hStmt, 2), nullptr);
+    ASSERT_NE(std::string(reinterpret_cast<const char *>(
+                  sqlite3_column_text(hStmt, 2))),
+              "bar");
+    sqlite3_finalize(hStmt);
+    sqlite3_close(hDB);
+
+    proj_grid_cache_clear(ctx);
+
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(networking, cache_lock) {
+    if (!networkAccessOK) {
+        return;
+    }
+    const char *pipeline =
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
+
+    proj_cleanup();
+
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+    proj_grid_cache_set_filename(ctx, "tmp_proj_db_cache.db");
+
+    proj_grid_cache_clear(ctx);
+
+    auto P = proj_create(ctx, pipeline);
+    ASSERT_NE(P, nullptr);
+
+    double lon = 2;
+    double lat = 49;
+    proj_trans_generic(P, PJ_FWD, &lon, sizeof(double), 1, &lat, sizeof(double),
+                       1, nullptr, 0, 0, nullptr, 0, 0);
+    EXPECT_NEAR(lon, 1.9992776848, 1e-10);
+    EXPECT_NEAR(lat, 48.9999322600, 1e-10);
+
+    proj_destroy(P);
+
+    // Take a lock
+    sqlite3 *hDB = nullptr;
+    sqlite3_open_v2(pj_context_get_grid_cache_filename(ctx).c_str(), &hDB,
+                    SQLITE_OPEN_READWRITE, nullptr);
+    ASSERT_NE(hDB, nullptr);
+    sqlite3_stmt *hStmt = nullptr;
+    sqlite3_prepare_v2(hDB, "BEGIN EXCLUSIVE", -1, &hStmt, nullptr);
+    ASSERT_NE(hStmt, nullptr);
+    ASSERT_EQ(sqlite3_step(hStmt), SQLITE_DONE);
+    sqlite3_finalize(hStmt);
+
+    proj_cleanup();
+
+    time_t start;
+    time(&start);
+    // 2 lock attempts, so we must sleep for each at least 0.5 ms
+    putenv(const_cast<char *>("PROJ_LOCK_MAX_ITERS=25"));
+    P = proj_create(ctx, pipeline);
+    putenv(const_cast<char *>("PROJ_LOCK_MAX_ITERS="));
+    ASSERT_NE(P, nullptr);
+    proj_destroy(P);
+
+    // Check that we have spend more than 1 sec
+    time_t end;
+    time(&end);
+    ASSERT_GE(end - start, 1U);
+
+    sqlite3_close(hDB);
+
+    proj_grid_cache_clear(ctx);
+
+    proj_context_destroy(ctx);
+}
 #endif
 
 } // namespace

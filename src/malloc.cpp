@@ -263,5 +263,5 @@ void proj_cleanup() {
 /*****************************************************************************/
   pj_clear_initcache();
   pj_deallocate_grids();
-  FileManager::clearCache();
+  FileManager::clearMemoryCache();
 }

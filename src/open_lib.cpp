@@ -520,6 +520,16 @@ void pj_load_ini(projCtx ctx)
                                                 ci_equal(value, "YES") ||
                                                 ci_equal(value, "TRUE");
                 }
+            } else if ( key == "cache_enabled" ) {
+                ctx->gridChunkCache.enabled = ci_equal(value, "ON") ||
+                                              ci_equal(value, "YES") ||
+                                              ci_equal(value, "TRUE");
+            } else if ( key == "cache_size_MB" ) {
+                const int val = atoi(value.c_str());
+                ctx->gridChunkCache.max_size = val > 0 ?
+                    static_cast<long long>(val) * 1024 * 1024 : -1;
+            } else if ( key == "cache_ttl_sec" ) {
+                ctx->gridChunkCache.ttl = atoi(value.c_str());
             }
         }
 
