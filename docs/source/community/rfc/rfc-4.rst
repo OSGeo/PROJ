@@ -287,33 +287,40 @@ cache is still up-to-date.
 
 .. code-block:: c
 
+    /** Enable or disable the local cache of grid chunks
+    *
+    * This overrides the setting in the PROJ configuration file.
+    *
+    * @param ctx PROJ context, or NULL
+    * @param enabled TRUE if the cache is enabled.
+    */
+    void proj_grid_cache_set_enable(PJ_CONTEXT *ctx, int enabled);
+
     /** Override, for the considered context, the path and file of the local
     * cache of grid chunks.
     *
     * @param ctx PROJ context, or NULL
     * @param fullname Full name to the cache (encoded in UTF-8). If set to NULL,
     *                 caching will be disabled.
-    * @return TRUE in case of success.
     */
-    int proj_grid_cache_set_filename(PJ_CONTEXT* ctx, const char* fullname);
+    void proj_grid_cache_set_filename(PJ_CONTEXT* ctx, const char* fullname);
 
     /** Override, for the considered context, the maximum size of the local
     * cache of grid chunks.
     *
     * @param ctx PROJ context, or NULL
-    * @param max_size_MB Maximum size, in mega-bytes (1024*1024 bytes)
-    * @return TRUE in case of success.
+    * @param max_size_MB Maximum size, in mega-bytes (1024*1024 bytes), or
+    *                    negative value to set unlimited size.
     */
-    int proj_grid_cache_set_max_size(PJ_CONTEXT* ctx, int max_size_MB);
+    void proj_grid_cache_set_max_size(PJ_CONTEXT* ctx, int max_size_MB);
 
     /** Override, for the considered context, the time-to-live delay for
     * re-checking if the cached properties of files are still up-to-date.
     *
     * @param ctx PROJ context, or NULL
     * @param ttl_seconds Delay in seconds. Use negative value for no expiration.
-    * @return TRUE in case of success.
     */
-    int proj_grid_cache_set_ttl(PJ_CONTEXT* ctx, int ttl_seconds);
+    void proj_grid_cache_set_ttl(PJ_CONTEXT* ctx, int ttl_seconds);
 
     /** Clear the local cache of grid chunks.
      *
