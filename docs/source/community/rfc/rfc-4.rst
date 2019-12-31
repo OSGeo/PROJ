@@ -276,52 +276,113 @@ Local on-disk caching of remote grids
 As many workflows will tend to use the same grids over and over, a local
 on-disk caching of remote grids will be added. The cache will be a single
 SQLite3 database, in a user-writable directory shared by all applications using
-PROJ. Its total size will be configurable, with a default maximum size of 100 MB
-in proj.ini
+PROJ.
+
+Its total size will be configurable, with a default maximum size of 100 MB
+in proj.ini. The cache will also keep the timestamp of the last time it checked
+various global properties of the file (its size, Last-Modified and ETag headers).
+A time-to-live parameter, with a default of 1 day in proj.ini, will be used to
+determine whether the CDN should be hit to verify if the information in the
+cache is still up-to-date.
 
 .. code-block:: c
 
     /** Override, for the considered context, the path and file of the local
-    * cache of grids.
+    * cache of grid chunks.
     *
     * @param ctx PROJ context, or NULL
-    * @param fullname Full name to the cache. If set to NULL, caching will be
-    *                 disabled.
+    * @param fullname Full name to the cache (encoded in UTF-8). If set to NULL,
+    *                 caching will be disabled.
     * @return TRUE in case of success.
     */
-    int proj_context_set_grid_cache_filename(PJ_CONTEXT* ctx, 
-                                             const char* fullname);
+    int proj_grid_cache_set_filename(PJ_CONTEXT* ctx, const char* fullname);
 
     /** Override, for the considered context, the maximum size of the local
-    * cache of grids.
+    * cache of grid chunks.
     *
     * @param ctx PROJ context, or NULL
     * @param max_size_MB Maximum size, in mega-bytes (1024*1024 bytes)
     * @return TRUE in case of success.
     */
-    int proj_context_set_grid_cache_max_size(PJ_CONTEXT* ctx, int max_size_MB);
+    int proj_grid_cache_set_max_size(PJ_CONTEXT* ctx, int max_size_MB);
+
+    /** Override, for the considered context, the time-to-live delay for
+    * re-checking if the cached properties of files are still up-to-date.
+    *
+    * @param ctx PROJ context, or NULL
+    * @param ttl_seconds Delay in seconds. Use negative value for no expiration.
+    * @return TRUE in case of success.
+    */
+    int proj_grid_cache_set_ttl(PJ_CONTEXT* ctx, int ttl_seconds);
+
+    /** Clear the local cache of grid chunks.
+     *
+     * @param ctx PROJ context, or NULL.
+     */
+    void proj_grid_cache_clear(PJ_CONTEXT* ctx);
 
 The planned database structure is:
 
 .. code-block:: sql
 
+    -- General properties on a file
+    CREATE TABLE properties(
+     url          TEXT PRIMARY KEY NOT NULL,
+     lastChecked  TIMESTAMP NOT NULL,
+     fileSize     INTEGER NOT NULL,
+     lastModified TEXT,
+     etag         TEXT
+    );
+
+    -- Store chunks of data. To avoid any potential fragmentation of the
+    -- cache, the data BLOB is always set to the maximum chunk size of 16 KB
+    -- (right padded with 0-byte)
+    -- The actual size is stored in chunks.data_size
+    CREATE TABLE chunk_data(
+     id        INTEGER PRIMARY KEY AUTOINCREMENT CHECK (id > 0),
+     data      BLOB NOT NULL
+    );
+
+    -- Record chunks of data by (url, offset)
     CREATE TABLE chunks(
-        id        INTEGER PRIMARY KEY AUTOINCREMENT,
-        filename  TEXT NOT NULL,
-        offset    INTEGER NOT NULL,
-        data      BLOB NOT NULL
+     id        INTEGER PRIMARY KEY AUTOINCREMENT CHECK (id > 0),
+     url       TEXT NOT NULL,
+     offset    INTEGER NOT NULL,
+     data_id   INTEGER NOT NULL,
+     data_size INTEGER NOT NULL,
+     CONSTRAINT fk_chunks_url FOREIGN KEY (url) REFERENCES properties(url),
+     CONSTRAINT fk_chunks_data FOREIGN KEY (data_id) REFERENCES chunk_data(id)
     );
+    CREATE INDEX idx_chunks ON chunks(url, offset);
 
-    CREATE INDEX idx_chunks ON chunks USING (filename, offset);
-
-    CREATE TABLE recently_used(
-        age        INTEGER UNIQUE, -- 0 is last accessed
-        chunk_id   INTEGER UNIQUE NOT NULL,
-        CONSTRAINT fk_recently_used_to_chunk FOREIGN KEY (chunk_id) REFERENCES chunks(id)
+    -- Doubly linked list of chunks. The next link is to go to the least-recently
+    -- used entries.
+    CREATE TABLE linked_chunks(
+     id        INTEGER PRIMARY KEY AUTOINCREMENT CHECK (id > 0),
+     chunk_id  INTEGER NOT NULL,
+     prev      INTEGER,
+     next      INTEGER,
+     CONSTRAINT fk_links_chunkid FOREIGN KEY (chunk_id) REFERENCES chunks(id),
+     CONSTRAINT fk_links_prev FOREIGN KEY (prev) REFERENCES linked_chunks(id),
+     CONSTRAINT fk_links_next FOREIGN KEY (next) REFERENCES linked_chunks(id)
     );
+    CREATE INDEX idx_linked_chunks_chunk_id ON linked_chunks(chunk_id);
+
+    -- Head and tail pointers of the linked_chunks. The head pointer is for
+    -- the most-recently used chunk.
+    -- There should be just one row in this table.
+    CREATE TABLE linked_chunks_head_tail(
+      head       INTEGER,
+      tail       INTEGER,
+      CONSTRAINT lht_head FOREIGN KEY (head) REFERENCES linked_chunks(id),
+      CONSTRAINT lht_tail FOREIGN KEY (tail) REFERENCES linked_chunks(id)
+    );
+    INSERT INTO linked_chunks_head_tail VALUES (NULL, NULL);
 
 The chunks table will store 16 KB chunks (or less for terminating chunks).
-The recently_used table will act as a least recently used list of chunk ids.
+The linked_chunks and linked_chunks_head_tail table swill act as a doubly linked
+list of chunks, with the least recently used ones at the end of the list, which
+will be evicted when the cache saturates.
 
 The directory used to locate this database will be ${XDG_DATA_HOME}/proj
 (per https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
