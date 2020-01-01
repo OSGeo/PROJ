@@ -1373,8 +1373,11 @@ Documentation
 Testing
 -------------------------------------------------------------------------------
 
-The Python SimpleHTTPServer module will be used for unit tests to run a local
-HTTP server.
+Number of GeoTIFF formulations (tiled vs untiled, PlanarConfiguration Separate vs
+Contig, data types, scale+offset vs not, etc.) will be tested.
+
+For testing of network capabilities, a mix of real hits to the CDN and use of
+the alternate pluggable network interface to test edge cases will be used.
 
 Discussion points
 -------------------------------------------------------------------------------
