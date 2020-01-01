@@ -228,7 +228,7 @@ version numbers in the files.
   - src/proj.h:           Update PROJ_VERSION_MAJOR, PROJ_VERSION_MINOR and
                           PROJ_VERSION_PATCH.
   - src/proj_api.h:       Update PJ_VERSION.
-  - src/pj_release.c:     Update date to the scheduled release date.
+  - src/release.cpp:      Update date to the scheduled release date.
   - CMakelists.txt:       Update proj_version()
   - doc/source/conf.py:   Update version number
 
