@@ -905,6 +905,11 @@ is an easy way to inspect such grid files:
       geocentric CRS. The interpolation CRS must be a geographic CRS.
       Corresponds to PROJ ``xyzgridshift`` method.
 
+    - ``VELOCITY``: implies the presence of at least 3 samples.
+      The first 3 samples must be respectively the velocities along
+      the E(ast), N(orth), U(p) axis in the local topocentric coordinate system.
+      Corresponds to PROJ ``deformation`` method.
+
     For example:
 
     .. code-block:: xml
@@ -946,6 +951,11 @@ is an easy way to inspect such grid files:
       Sample values should be the value to add to the input geocentric coordinates
       expressed in the source CRS to geocentric coordinates expressed in the target CRS.
 
+    + ``east_velocity`` / ``north_velocity`` / ``up_velocity``: valid for
+      TYPE=VELOCITY.
+      Sample values should be the velocity in a linear/time unit in a ENU local
+      topocentric coordinate system.
+
     For example:
 
     .. code-block:: xml
@@ -984,13 +994,13 @@ is an easy way to inspect such grid files:
     - ``degree``
     - ``arc-second`` (default value assumed if absent for longitude and latitude offset samples of horizontal shift grid files, and value used for files stored on PROJ CDN)
 
+    For velocity units:
+
+    - ``millimetres per year``
+
     The longitude and latitude offset samples should use the same unit.
-
-    For future use case that involve time-derivative quantities, the following
-    units may be used:
-
-    - ``metres per year``
-    - ``arc-seconds per year``
+    The geocentric translation samples should use the same unit.
+    The velocity samples should use the same unit.
 
     Example:
 
