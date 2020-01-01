@@ -8,7 +8,7 @@ PROJ RFC 4: Remote access to grids and GeoTIFF grids
 :Contact: even.rouault@spatialys.com, howard@hobu.co
 :Status: Draft
 :Implementation target: PROJ 7
-:Last Updated: 2019-12-09
+:Last Updated: 2020-01-01
 
 Motivation
 -------------------------------------------------------------------------------
