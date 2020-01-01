@@ -131,8 +131,8 @@ static bool get_grid_values(PJ* P,
         }
     }
     const auto unit = grid->unit(sampleE);
-    if( !unit.empty() && unit != "mm/year" ) {
-        proj_log_error(P, "deformation: Only unit=mm/year currently handled");
+    if( !unit.empty() && unit != "millimetres per year" ) {
+        proj_log_error(P, "deformation: Only unit=millimetres per year currently handled");
         return false;
     }
 
