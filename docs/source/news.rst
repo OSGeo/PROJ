@@ -3,6 +3,78 @@
 News
 ###############################################################################
 
+6.3.0 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*January 1st 2020*
+
+Updates
+-------
+
+* Database: tune accuracy of Canadian NTv1 file w.r.t NTv2 (`#1812 <https://github.com/OSGeo/PROJ/issues/1812>`_)
+
+* Modify verbosity level of some debug/trace messages (`#1811 <https://github.com/OSGeo/PROJ/issues/1811>`_)
+
+* :program:`projinfo`: no longer call createBoundCRSToWGS84IfPossible() for WKT1:GDAL
+  (`#1810 <https://github.com/OSGeo/PROJ/issues/1810>`_)
+
+* :c:func:`proj_trans`: add retry logic to select other transformation if the best one
+  fails. (`#1809 <https://github.com/OSGeo/PROJ/issues/1809>`_)
+
+* :c:func:`BoundCRS::identify()`: improvements to discard CRS that aren't relevant
+  (`#1802 <https://github.com/OSGeo/PROJ/issues/1802>`_)
+
+* Database: update to IGNF v3.1.0 (`#1785 <https://github.com/OSGeo/PROJ/issues/1785>`_)
+
+* Build: Only export symbols if building DLL (`#1773 <https://github.com/OSGeo/PROJ/issues/1773>`_)
+
+* Database: update ESRI entries with ArcGIS Desktop version 10.8.0 database
+  (`#1762 <https://github.com/OSGeo/PROJ/issues/1762>`_)
+
+* :c:func:`createOperations()`: chain operations whose middle CRSs are not identical but
+  have the same datum (`#1734 <https://github.com/OSGeo/PROJ/issues/1734>`_)
+
+* import/export PROJJSON: support a interpolation_crs key to geoid_model
+  (`#1732 <https://github.com/OSGeo/PROJ/issues/1732>`_)
+
+* Database: update to EPSG v9.8.4 (`#1725 <https://github.com/OSGeo/PROJ/issues/1725>`_)
+
+* Build: require SQLite 3.11 (`#1721 <https://github.com/OSGeo/PROJ/issues/1721>`_)
+
+* Add support for GEOIDMODEL (`#1710 <https://github.com/OSGeo/PROJ/issues/1710>`_)
+
+* Better filtering based on extent and performance improvements (`#1709 <https://github.com/OSGeo/PROJ/issues/1709>`_)
+
+Bug fixes
+---------
+
+* Horizontal grid shift: fix issue on iterative inverse computation when
+  switching between (sub)grids (`#1797 <https://github.com/OSGeo/PROJ/issues/1797>`_)
+
+* :c:func:`createOperations()`: make filtering out of 'uninteresting' operations less
+  aggressive (`#1788 <https://github.com/OSGeo/PROJ/issues/1788>`_)
+
+* Make EPSG:102100 resolve to ESRI:102100 (`#1786 <https://github.com/OSGeo/PROJ/issues/1786>`_)
+
+* ``ob_tran``: restore traditional handling of ``+to_meter`` with :c:func:`pj_transform()` and
+  :program:`proj` utility (`#1783 <https://github.com/OSGeo/PROJ/issues/1783>`_)
+
+* CRS identification: use case insensitive comparison for authority name
+  (`#1780 <https://github.com/OSGeo/PROJ/issues/1780>`_)
+
+* :c:func:`normalizeForVisualization()` and other methods applying on a ProjectedCRS: do
+  not mess the derivingConversion object of the original object (`#1746 <https://github.com/OSGeo/PROJ/issues/1746>`_)
+
+* :c:func:`createOperations()`: fix transformation computation from/to a CRS with
+  ``+geoidgrids`` and ``+vunits`` != m (`#1731 <https://github.com/OSGeo/PROJ/issues/1731>`_)
+
+* Fix :c:func:`proj_assign_context()`/:c:func:`pj_set_ctx()` with pipelines and alternative coord
+  operations (`#1726 <https://github.com/OSGeo/PROJ/issues/1726>`_)
+
+* Database: add an auxiliary concatenated_operation_step table to allow
+  arbitrary number of steps (`#1696 <https://github.com/OSGeo/PROJ/issues/1696>`_)
+
+* Fix errors running gie-based tests in Debug mode on Windo (`#1688 <https://github.com/OSGeo/PROJ/issues/1688>`_)
+
 6.2.1 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *November 1st 2019*
