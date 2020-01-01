@@ -30,6 +30,8 @@
 #endif
 #define LRU11_DO_NOT_DEFINE_OUT_OF_CLASS_METHODS
 
+#include <stdlib.h>
+
 #include <algorithm>
 #include <codecvt>
 #include <functional>
@@ -1737,7 +1739,30 @@ static size_t pj_curl_write_func(void *buffer, size_t count, size_t nmemb,
 
 // ---------------------------------------------------------------------------
 
-PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *, const char *url,
+static double GetNewRetryDelay(int response_code, double dfOldDelay,
+                               const char *pszErrBuf,
+                               const char *pszCurlError) {
+    if (response_code == 429 || response_code == 500 ||
+        (response_code >= 502 && response_code <= 504) ||
+        // S3 sends some client timeout errors as 400 Client Error
+        (response_code == 400 && pszErrBuf &&
+         strstr(pszErrBuf, "RequestTimeout")) ||
+        (pszCurlError && strstr(pszCurlError, "Connection timed out"))) {
+        // Use an exponential backoff factor of 2 plus some random jitter
+        // We don't care about cryptographic quality randomness, hence:
+        // coverity[dont_call]
+        return dfOldDelay * (2 + rand() * 0.5 / RAND_MAX);
+    } else {
+        return 0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+constexpr double MIN_RETRY_DELAY_MS = 500;
+constexpr double MAX_RETRY_DELAY_MS = 60000;
+
+PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
                                           unsigned long long offset,
                                           size_t size_to_read, void *buffer,
                                           size_t *out_size_read,
@@ -1750,46 +1775,70 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *, const char *url,
     auto file =
         std::unique_ptr<CurlFileHandle>(new CurlFileHandle(url, hCurlHandle));
 
+    double oldDelay = MIN_RETRY_DELAY_MS;
+    std::string headers;
+    std::string body;
+
     char szBuffer[128];
     sqlite3_snprintf(sizeof(szBuffer), szBuffer, "%llu-%llu", offset,
                      offset + size_to_read - 1);
-    curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
 
-    std::string headers;
-    headers.reserve(16 * 1024);
-    curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, &headers);
-    curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION, pj_curl_write_func);
+    while (true) {
+        curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
 
-    std::string body;
-    body.reserve(size_to_read);
-    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
-    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, pj_curl_write_func);
+        headers.clear();
+        headers.reserve(16 * 1024);
+        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, &headers);
+        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION,
+                         pj_curl_write_func);
 
-    file->m_szCurlErrBuf[0] = '\0';
+        body.clear();
+        body.reserve(size_to_read);
+        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
+        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION,
+                         pj_curl_write_func);
 
-    curl_easy_perform(hCurlHandle);
+        file->m_szCurlErrBuf[0] = '\0';
 
-    long response_code = 0;
-    curl_easy_getinfo(hCurlHandle, CURLINFO_HTTP_CODE, &response_code);
+        curl_easy_perform(hCurlHandle);
 
-    curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, nullptr);
-    curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION, nullptr);
+        long response_code = 0;
+        curl_easy_getinfo(hCurlHandle, CURLINFO_HTTP_CODE, &response_code);
 
-    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
-    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
+        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, nullptr);
+        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION, nullptr);
 
-    if (response_code == 0 || response_code >= 300) {
-        if (out_error_string) {
-            if (file->m_szCurlErrBuf[0]) {
-                snprintf(out_error_string, error_string_max_size, "%s",
-                         file->m_szCurlErrBuf);
+        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
+        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
+
+        if (response_code == 0 || response_code >= 300) {
+            const double delay =
+                GetNewRetryDelay(static_cast<int>(response_code), oldDelay,
+                                 body.c_str(), file->m_szCurlErrBuf);
+            if (delay != 0 && delay < MAX_RETRY_DELAY_MS) {
+                pj_log(ctx, PJ_LOG_TRACE,
+                       "Got a HTTP %ld error. Retrying in %d ms", response_code,
+                       static_cast<int>(delay));
+                proj_sleep_ms(static_cast<int>(delay));
+                oldDelay = delay;
             } else {
-                snprintf(out_error_string, error_string_max_size,
-                         "HTTP error %ld: %s", response_code, body.c_str());
+                if (out_error_string) {
+                    if (file->m_szCurlErrBuf[0]) {
+                        snprintf(out_error_string, error_string_max_size, "%s",
+                                 file->m_szCurlErrBuf);
+                    } else {
+                        snprintf(out_error_string, error_string_max_size,
+                                 "HTTP error %ld: %s", response_code,
+                                 body.c_str());
+                    }
+                }
+                return nullptr;
             }
+        } else {
+            break;
         }
-        return nullptr;
     }
+
     if (out_error_string && error_string_max_size) {
         out_error_string[0] = '\0';
     }
@@ -1812,44 +1861,66 @@ static void pj_curl_close(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *handle,
 
 // ---------------------------------------------------------------------------
 
-static size_t pj_curl_read_range(PJ_CONTEXT *, PROJ_NETWORK_HANDLE *raw_handle,
+static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
+                                 PROJ_NETWORK_HANDLE *raw_handle,
                                  unsigned long long offset, size_t size_to_read,
                                  void *buffer, size_t error_string_max_size,
                                  char *out_error_string, void *) {
     auto handle = reinterpret_cast<CurlFileHandle *>(raw_handle);
     auto hCurlHandle = handle->m_handle;
 
+    double oldDelay = MIN_RETRY_DELAY_MS;
+    std::string body;
+
     char szBuffer[128];
     sqlite3_snprintf(sizeof(szBuffer), szBuffer, "%llu-%llu", offset,
                      offset + size_to_read - 1);
-    curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
 
-    std::string body;
-    body.reserve(size_to_read);
-    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
-    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, pj_curl_write_func);
+    while (true) {
+        curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
 
-    handle->m_szCurlErrBuf[0] = '\0';
+        body.clear();
+        body.reserve(size_to_read);
+        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
+        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION,
+                         pj_curl_write_func);
 
-    curl_easy_perform(hCurlHandle);
+        handle->m_szCurlErrBuf[0] = '\0';
 
-    long response_code = 0;
-    curl_easy_getinfo(hCurlHandle, CURLINFO_HTTP_CODE, &response_code);
+        curl_easy_perform(hCurlHandle);
 
-    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
-    curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
+        long response_code = 0;
+        curl_easy_getinfo(hCurlHandle, CURLINFO_HTTP_CODE, &response_code);
 
-    if (response_code == 0 || response_code >= 300) {
-        if (out_error_string) {
-            if (handle->m_szCurlErrBuf[0]) {
-                snprintf(out_error_string, error_string_max_size, "%s",
-                         handle->m_szCurlErrBuf);
+        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
+        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
+
+        if (response_code == 0 || response_code >= 300) {
+            const double delay =
+                GetNewRetryDelay(static_cast<int>(response_code), oldDelay,
+                                 body.c_str(), handle->m_szCurlErrBuf);
+            if (delay != 0 && delay < MAX_RETRY_DELAY_MS) {
+                pj_log(ctx, PJ_LOG_TRACE,
+                       "Got a HTTP %ld error. Retrying in %d ms", response_code,
+                       static_cast<int>(delay));
+                proj_sleep_ms(static_cast<int>(delay));
+                oldDelay = delay;
             } else {
-                snprintf(out_error_string, error_string_max_size,
-                         "HTTP error %ld: %s", response_code, body.c_str());
+                if (out_error_string) {
+                    if (handle->m_szCurlErrBuf[0]) {
+                        snprintf(out_error_string, error_string_max_size, "%s",
+                                 handle->m_szCurlErrBuf);
+                    } else {
+                        snprintf(out_error_string, error_string_max_size,
+                                 "HTTP error %ld: %s", response_code,
+                                 body.c_str());
+                    }
+                }
+                return 0;
             }
+        } else {
+            break;
         }
-        return 0;
     }
     if (out_error_string && error_string_max_size) {
         out_error_string[0] = '\0';
