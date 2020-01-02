@@ -5,7 +5,7 @@ Computation of coordinate operations between two CRS
 ================================================================================
 
 :Author: Even Rouault
-:Last Updated: 2019-11-28
+:Last Updated: 2020-01-02
 
 Introduction
 ------------
@@ -41,8 +41,8 @@ geographic CRS:
     DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - NAD27, at least one grid missing
     DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, USA - CONUS including EEZ
     DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, USA - Alaska including EEZ
+    DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec, at least one grid missing
     EPSG:1462, NAD27 to NAD83 (5), 1.0 m, Canada - Quebec, at least one grid missing
-    EPSG:1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec, at least one grid missing
     EPSG:9111, NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan, at least one grid missing
     unknown id, Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, World, has ballpark transformation
     EPSG:8555, NAD27 to NAD83 (7), 0.15 m, USA - CONUS and GoM, at least one grid missing
@@ -236,7 +236,7 @@ are equivalent for most purposes.
 
 .. code-block:: shell
 
-    $ projinfo projinfo -s EPSG:7042 -t EPSG:4936
+    $ projinfo -s EPSG:7042 -t EPSG:4936
 
     Candidate operations found: 1
     -------------------------------------
@@ -304,12 +304,12 @@ the source and target CRS, and inverting the resulting operation(s):
     $ projinfo -s NAD83 -t NAD27 --spatial-test intersects --summary
 
     Candidate operations found: 10
-    INVERSE(DERIVED_FROM(EPSG)):1312, Inverse of NAD27 to NAD83 (3), 1.0 m, Canada
+    INVERSE(DERIVED_FROM(EPSG)):1312, Inverse of NAD27 to NAD83 (3), 2.0 m, Canada
+    INVERSE(DERIVED_FROM(EPSG)):1313, Inverse of NAD27 to NAD83 (4), 1.5 m, Canada - NAD27
     INVERSE(DERIVED_FROM(EPSG)):1241, Inverse of NAD27 to NAD83 (1), 0.15 m, USA - CONUS including EEZ
     INVERSE(DERIVED_FROM(EPSG)):1243, Inverse of NAD27 to NAD83 (2), 0.5 m, USA - Alaska including EEZ
-    INVERSE(DERIVED_FROM(EPSG)):1313, Inverse of NAD27 to NAD83 (4), 1.5 m, Canada - NAD27, at least one grid missing
-    INVERSE(EPSG):1462, Inverse of NAD27 to NAD83 (5), 1.0 m, Canada - Quebec, at least one grid missing
-    INVERSE(EPSG):1573, Inverse of NAD27 to NAD83 (6), 1.5 m, Canada - Quebec, at least one grid missing
+    INVERSE(DERIVED_FROM(EPSG)):1573, Inverse of NAD27 to NAD83 (6), 1.5 m, Canada - Quebec, at least one grid missing
+    INVERSE(EPSG):1462, Inverse of NAD27 to NAD83 (5), 2.0 m, Canada - Quebec, at least one grid missing
     INVERSE(EPSG):9111, Inverse of NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan, at least one grid missing
     unknown id, Ballpark geographic offset from NAD83 to NAD27, unknown accuracy, World, has ballpark transformation
     INVERSE(EPSG):8555, Inverse of NAD27 to NAD83 (7), 0.15 m, USA - CONUS and GoM, at least one grid missing
