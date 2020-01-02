@@ -11949,7 +11949,6 @@ TEST(json_export, coordinate_system_id) {
     ASSERT_TRUE(crs != nullptr);
     auto cs = crs->coordinateSystem();
     ASSERT_TRUE(cs != nullptr);
-    EXPECT_EQ(
-        cs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
-        json);
+    EXPECT_EQ(cs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
 }
