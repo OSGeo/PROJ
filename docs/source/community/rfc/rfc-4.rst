@@ -8,7 +8,7 @@ PROJ RFC 4: Remote access to grids and GeoTIFF grids
 :Contact: even.rouault@spatialys.com, howard@hobu.co
 :Status: Draft
 :Implementation target: PROJ 7
-:Last Updated: 2020-01-01
+:Last Updated: 2020-01-02
 
 Motivation
 -------------------------------------------------------------------------------
@@ -76,11 +76,13 @@ Network access to grids
 -------------------------------------------------------------------------------
 
 curl will be an optional build dependency of PROJ, added in autoconf and cmake
-build systems. When curl will be detected to be available, it will be enabled
-by default. But download of grids themselves will not be enabled by default,
-and will require explicit consent of the user, either through the API
-(:c:func:`proj_context_set_enable_network`) or through the PROJ_NETWORK=ON
-environment variable.
+build systems. It can be disabled at build time, but this must be
+an explicit setting of configure/cmake as the resulting builds have less functionality.
+When curl is enabled at build time, download of grids themselves will not be
+enabled by default at runtime. It will require explicit consent of the user, either
+through the API
+(:c:func:`proj_context_set_enable_network`) through the PROJ_NETWORK=ON
+environment variable, or the ``network = on`` setting of proj.ini.
 
 Regarding the minimum version of libcurl required, given GDAL experience that
 can build with rather ancient libcurl for similar functionality, we can aim for
@@ -1304,13 +1306,12 @@ Tooling
 A script will be deveoped to accept a list of individual grids to combine
 together into a single file.
 
-A ntv2_to_gtiff.py convenience script will be created in the samples script
-directory of GDAL to convert NTv2 grids, including their subgrids, to the above
+A ntv2_to_gtiff.py convenience script will be created to convert NTv2 grids,
+including their subgrids, to the above
 described GeoTIFF layout.
 
-A validate_proj_gtiff_grid.py script will be created in the samples script
-directory of GDAL to check that a file meets the above described requirements
-and recommendations.
+A validation Python script will be created to check that a file meets the above
+described requirements and recommendations.
 
 Build requirements
 ++++++++++++++++++
@@ -1319,6 +1320,9 @@ The minimum libtiff version will be 4.0 (RHEL 7 ships with libtiff 4.0.3).
 To be able to read grids stored on the CDN, libtiff will need to build against
 zlib to have DEFLATE and LZW suport, which is met by all known binary distributions
 of libtiff.
+
+The libtiff dependency can be disabled at build time, but this must be
+an explicit setting of configure/cmake as the resulting builds have less functionality.
 
 Dropping grid catalog functionality
 -------------------------------------------------------------------------------
@@ -1379,16 +1383,13 @@ Contig, data types, scale+offset vs not, etc.) will be tested.
 For testing of network capabilities, a mix of real hits to the CDN and use of
 the alternate pluggable network interface to test edge cases will be used.
 
-Discussion points
+Proposed implementation
 -------------------------------------------------------------------------------
 
-- Should libtiff be a required or optional dependency of PROJ ?
+A proposed implementation is available at https://github.com/OSGeo/PROJ/pull/1817
 
-  The advantage of making it required is that proj-datumgrid could only ship TIFF
-  grids. If we don't make it a requirement, we will have to manage .gtx / .gsb
-  for the .zip / .tar.gz delivered in the proj-datumgrid-XXXXX packages, and
-  a .tif version hosted on the CDN.
-
+Tooling scripts are currently available at https://github.com/rouault/sample_proj_gtiff_grids/
+(will be ultimately stored in PROJ repository)
 
 Adoption status
 -------------------------------------------------------------------------------
