@@ -581,11 +581,13 @@ void CoordinateSystem::_exportToJSON(
     writer.Add(getWKT2Type(true));
 
     writer.AddObjKey("axis");
-    auto axisContext(writer.MakeArrayContext(false));
-    const auto &l_axisList = axisList();
-    for (auto &axis : l_axisList) {
-        formatter->setOmitTypeInImmediateChild();
-        axis->_exportToJSON(formatter);
+    {
+        auto axisContext(writer.MakeArrayContext(false));
+        const auto &l_axisList = axisList();
+        for (auto &axis : l_axisList) {
+            formatter->setOmitTypeInImmediateChild();
+            axis->_exportToJSON(formatter);
+        }
     }
 
     if (formatter->outputId()) {

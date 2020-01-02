@@ -11915,3 +11915,41 @@ TEST(json_import, multiple_ids) {
     EXPECT_EQ(ellps->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(json_export, coordinate_system_id) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"CoordinateSystem\",\n"
+                "  \"subtype\": \"ellipsoidal\",\n"
+                "  \"axis\": [\n"
+                "    {\n"
+                "      \"name\": \"Geodetic latitude\",\n"
+                "      \"abbreviation\": \"Lat\",\n"
+                "      \"direction\": \"north\",\n"
+                "      \"unit\": \"degree\"\n"
+                "    },\n"
+                "    {\n"
+                "      \"name\": \"Geodetic longitude\",\n"
+                "      \"abbreviation\": \"Lon\",\n"
+                "      \"direction\": \"east\",\n"
+                "      \"unit\": \"degree\"\n"
+                "    }\n"
+                "  ],\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": 6422\n"
+                "  }\n"
+                "}";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = createFromUserInput("EPSG:4326", dbContext);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto cs = crs->coordinateSystem();
+    ASSERT_TRUE(cs != nullptr);
+    EXPECT_EQ(
+        cs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+        json);
+}
