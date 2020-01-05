@@ -20,7 +20,7 @@ EXTRA_DIST = \
 	5201.gie \
 	5208.gie
 
-PROJ_LIB ?= ../../data
+PROJ_LIB ?= ../../data/for_tests
 
 5101.1: 5101.1-jhs.gie
 	PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
