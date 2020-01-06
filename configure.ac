@@ -191,60 +191,6 @@ AC_CHECK_FUNC(localeconv, [AC_DEFINE(HAVE_LOCALECONV,1,[Define to 1 if you have 
 AC_CHECK_FUNCS([strerror])
 
 dnl ---------------------------------------------------------------------------
-dnl Check for JNI support.
-dnl ---------------------------------------------------------------------------
-
-JNI_INCLUDE=
-export JNI_INCLUDE
-
-AC_ARG_WITH(jni,
-            [AS_HELP_STRING([--with-jni=dir],
-                            [Include Java/JNI support, add optional include dir])
-            ],,)
-
-if test "$with_jni" = "yes" ; then
-
-  AC_DEFINE(JNI_ENABLED,1,[Enabled for Java/JNI Support])
-
-  AC_MSG_CHECKING(whether to enable Java/JNI support)
-
-  AC_MSG_RESULT([enabled])
-
-elif test "$with_jni" != "no" -a "$with_jni" != "" ; then
-
-  AC_MSG_CHECKING(whether to enable Java/JNI support)
-
-  if test \! -r "$with_jni/jni.h" ; then
-    AC_MSG_ERROR(Did not find $with_jni/jni.h)
-  fi
-
-  AC_DEFINE(JNI_ENABLED,1,[Enabled for Java/JNI Support])
-
-  AC_MSG_RESULT([enabled])
-
-  JNI_INCLUDE="-I$with_jni"
-
-elif test "$with_jni" = "" ; then
-  AC_CHECK_HEADERS(jni.h)
-
-  AC_MSG_CHECKING(whether to enable Java/JNI support)
-
-  if test "$ac_cv_header_jni_h" = "no" ; then
-    AC_MSG_RESULT([disabled])
-  else
-    AC_MSG_RESULT([enabled])
-    AC_DEFINE(JNI_ENABLED,1,[Enabled for Java/JNI Support])
-  fi
-
-else
-  AC_MSG_CHECKING(whether to enable Java/JNI support)
-
-  AC_MSG_RESULT([disabled])
-fi
-
-AC_SUBST(JNI_INCLUDE,$JNI_INCLUDE)
-
-dnl ---------------------------------------------------------------------------
 dnl Provide a mechanism to disable real mutex support (if lacking win32 or
 dnl posix mutexes for instance).
 dnl ---------------------------------------------------------------------------
@@ -321,8 +267,7 @@ dnl ---------------------------------------------------------------------------
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile include/proj/internal/Makefile
                  include/proj/internal/nlohmann/Makefile
                  test/Makefile test/cli/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
-                 man/Makefile man/man1/Makefile man/man3/Makefile data/Makefile
-                 jniwrap/Makefile jniwrap/org.osgeo.proj/Makefile jniwrap/org.osgeo.proj/org/Makefile jniwrap/org.osgeo.proj/org/proj4/Makefile])
+                 man/Makefile man/man1/Makefile man/man3/Makefile data/Makefile])
 if ! test "x$with_external_gtest" = "xyes" ; then
     AC_CONFIG_FILES([test/googletest/Makefile test/googletest/include/Makefile
                      test/googletest/include/gtest/Makefile
