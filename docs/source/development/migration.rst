@@ -181,6 +181,14 @@ will be used (that is trying to find as much as possible the most direct
 transformation between the source and target datum), whereas PROJ 4 or PROJ 5
 used an "early-binding" approach consisting in always going to EPSG:4326 / WGS 84.
 
+
+Feedback from downstream projects on the PROJ 6 migration
+###############################################################################
+
+* `PROJ 6 adoption by Spatialite <https://www.gaia-gis.it/fossil/libspatialite/wiki?name=PROJ.6>`_
+
+* `On GDA2020, PROJ 6 and QGIS: Lessons learnt and recommendations for handling GDA2020 within geospatial software development <https://www.icsm.gov.au/sites/default/files/North%20Road%20Handling%20GDA2020%20within%20Geospatial%20Software%20Development.pdf>`_
+
 ================================================================================
 Version 4 to 5 API Migration
 ================================================================================
