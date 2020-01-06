@@ -2749,7 +2749,9 @@ TEST(factory, createObjectsFromName) {
         auto res = factoryEPSG->createObjectsFromName(
             "WGS84", {AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS}, true);
         EXPECT_EQ(res.size(),
-                  8U); // EPSG:4326 and EPSG:4030 and the 6 WGS84 realizations
+                  9U); // EPSG:4326 and EPSG:4030 and the 6 WGS84 realizations
+                       // and EPSG:7881 'Tritan St. Helena'' whose alias is
+                       // 'WGS 84 Tritan St. Helena'
         if (!res.empty()) {
             EXPECT_EQ(res.front()->getEPSGCode(), 4326);
         }
