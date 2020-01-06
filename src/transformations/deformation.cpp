@@ -226,8 +226,8 @@ static PJ_XYZ get_grid_shift(PJ* P, const PJ_XYZ& cartesian) {
     }
     else
     {
-        shift.lp    = proj_hgrid_value(P, Q->hgrids, geodetic.lp);
-        shift.enu.u = proj_vgrid_value(P, Q->vgrids, geodetic.lp, 1.0);
+        shift.lp    = pj_hgrid_value(P, Q->hgrids, geodetic.lp);
+        shift.enu.u = pj_vgrid_value(P, Q->vgrids, geodetic.lp, 1.0);
 
         if (proj_errno(P) == PJD_ERR_GRID_AREA)
             proj_log_debug(P, "deformation: coordinate (%.3f, %.3f) outside deformation model",
@@ -425,7 +425,7 @@ PJ *TRANSFORMATION(deformation,1) {
 
     if( has_grids )
     {
-        Q->grids = proj_generic_grid_init(P, "grids");
+        Q->grids = pj_generic_grid_init(P, "grids");
         /* Was gridlist compiled properly? */
         if ( proj_errno(P) ) {
             proj_log_error(P, "deformation: could not find required grid(s).");
@@ -434,13 +434,13 @@ PJ *TRANSFORMATION(deformation,1) {
     }
     else
     {
-        Q->hgrids = proj_hgrid_init(P, "xy_grids");
+        Q->hgrids = pj_hgrid_init(P, "xy_grids");
         if (proj_errno(P)) {
             proj_log_error(P, "deformation: could not find requested xy_grid(s).");
             return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
         }
 
-        Q->vgrids = proj_vgrid_init(P, "z_grids");
+        Q->vgrids = pj_vgrid_init(P, "z_grids");
         if (proj_errno(P)) {
             proj_log_error(P, "deformation: could not find requested z_grid(s).");
             return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);

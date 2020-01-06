@@ -77,7 +77,7 @@ static bool get_grid_values(PJ* P,
 {
     if ( Q->defer_grid_opening ) {
         Q->defer_grid_opening = false;
-        Q->grids = proj_generic_grid_init(P, "grids");
+        Q->grids = pj_generic_grid_init(P, "grids");
         if ( proj_errno(P) ) {
             return false;
         }
@@ -341,7 +341,7 @@ PJ *TRANSFORMATION(xyzgridshift,0) {
         Q->defer_grid_opening = true;
     }
     else {
-        Q->grids = proj_generic_grid_init(P, "grids");
+        Q->grids = pj_generic_grid_init(P, "grids");
         /* Was gridlist compiled properly? */
         if ( proj_errno(P) ) {
             proj_log_error(P, "xyzgridshift: could not find required grid(s).");

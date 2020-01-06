@@ -220,8 +220,6 @@ set(SRC_LIBPROJ_CORE
   4D_api.cpp
   aasincos.cpp
   adjlon.cpp
-  apply_gridshift.cpp
-  apply_vgridshift.cpp
   auth.cpp
   ctx.cpp
   datum_set.cpp

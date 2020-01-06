@@ -451,7 +451,7 @@ static int pj_apply_vgridshift( PJ *defn,
     if( defn->vgrids_legacy == nullptr )
     {
         defn->vgrids_legacy = new ListOfVGrids;
-        auto vgrids = proj_vgrid_init(defn, "geoidgrids");
+        auto vgrids = pj_vgrid_init(defn, "geoidgrids");
         if( vgrids.empty() )
             return 0;
         *static_cast<ListOfVGrids*>(defn->vgrids_legacy) = std::move(vgrids);
@@ -470,7 +470,7 @@ static int pj_apply_vgridshift( PJ *defn,
         input.phi = y[io];
         input.lam = x[io];
 
-        value = proj_vgrid_value(defn, *static_cast<ListOfVGrids*>(defn->vgrids_legacy), input, 1.0);
+        value = pj_vgrid_value(defn, *static_cast<ListOfVGrids*>(defn->vgrids_legacy), input, 1.0);
 
         if( inverse )
             z[io] -= value;
@@ -896,7 +896,7 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
     if( defn->hgrids_legacy == nullptr )
     {
         defn->hgrids_legacy = new ListOfHGrids;
-        auto hgrids = proj_hgrid_init(defn, "nadgrids");
+        auto hgrids = pj_hgrid_init(defn, "nadgrids");
         if( hgrids.empty() )
             return 0;
         *static_cast<ListOfHGrids*>(defn->hgrids_legacy) = std::move(hgrids);
@@ -914,7 +914,7 @@ int pj_apply_gridshift_2( PJ *defn, int inverse,
         input.phi = y[io];
         input.lam = x[io];
 
-        auto output = proj_hgrid_apply(defn, *static_cast<ListOfHGrids*>(defn->hgrids_legacy), input, inverse ? PJ_INV : PJ_FWD);
+        auto output = pj_hgrid_apply(defn->ctx, *static_cast<ListOfHGrids*>(defn->hgrids_legacy), input, inverse ? PJ_INV : PJ_FWD);
 
         if ( output.lam != HUGE_VAL )
         {
