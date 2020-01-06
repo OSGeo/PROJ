@@ -2051,12 +2051,27 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             auto res = authFactory->createObjectsFromName(
                 name, {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
                 true, 1);
-            bool foundDatumName = false;
             if (!res.empty()) {
+                bool foundDatumName = false;
                 const auto &refDatum = res.front();
                 if (metadata::Identifier::isEquivalentName(
                         name.c_str(), refDatum->nameStr().c_str())) {
                     foundDatumName = true;
+                } else if (refDatum->identifiers().size() == 1) {
+                    const auto &id = refDatum->identifiers()[0];
+                    const auto aliases =
+                        authFactory->databaseContext()->getAliases(
+                            *id->codeSpace(), id->code(), refDatum->nameStr(),
+                            "geodetic_datum", std::string());
+                    for (const auto &alias : aliases) {
+                        if (metadata::Identifier::isEquivalentName(
+                                name.c_str(), alias.c_str())) {
+                            foundDatumName = true;
+                            break;
+                        }
+                    }
+                }
+                if (foundDatumName) {
                     properties.set(IdentifiedObject::NAME_KEY,
                                    refDatum->nameStr());
                     if (!properties.get(Identifier::CODESPACE_KEY) &&
@@ -2083,23 +2098,10 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                             NN_NO_CHECK(dbContext_), *id->codeSpace());
                         auto dbDatum =
                             authFactory2->createGeodeticDatum(id->code());
-                        foundDatumName = true;
                         properties.set(IdentifiedObject::NAME_KEY,
                                        dbDatum->nameStr());
                     } catch (const std::exception &) {
                     }
-                }
-            }
-
-            if (!foundDatumName) {
-                std::string outTableName;
-                std::string authNameFromAlias;
-                std::string codeFromAlias;
-                auto officialName = authFactory->getOfficialNameFromAlias(
-                    name, "geodetic_datum", std::string(), true, outTableName,
-                    authNameFromAlias, codeFromAlias);
-                if (!officialName.empty()) {
-                    properties.set(IdentifiedObject::NAME_KEY, officialName);
                 }
             }
         }

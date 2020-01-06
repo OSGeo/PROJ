@@ -1668,7 +1668,7 @@ TEST_F(CApi, proj_create_from_name) {
                                          false, 0, nullptr);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
-        EXPECT_EQ(proj_list_get_count(res), 4);
+        EXPECT_EQ(proj_list_get_count(res), 5);
     }
     {
         auto res = proj_create_from_name(m_ctxt, "xx", "WGS 84", nullptr, 0,

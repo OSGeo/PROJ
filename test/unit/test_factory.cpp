@@ -2733,8 +2733,8 @@ TEST(factory, createObjectsFromName) {
 
     EXPECT_EQ(factory->createObjectsFromName("").size(), 0U);
 
-    // ellipsoid + 3 geodeticCRS
-    EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, false).size(), 4U);
+    // ellipsoid + datum + 3 geodeticCRS
+    EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, false).size(), 5U);
 
     EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, true, 10).size(),
               10U);

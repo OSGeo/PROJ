@@ -493,18 +493,14 @@ TEST(wkt_parse, wkt1_geographic_old_datum_name_from_EPSG_code) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt1_geographic_old_datum_name_witout_EPSG_code) {
+TEST(wkt_parse, wkt1_geographic_old_datum_name_without_EPSG_code) {
     auto wkt =
         "GEOGCS[\"S-JTSK (Ferro)\",\n"
         "    "
         "DATUM[\"System_Jednotne_Trigonometricke_Site_Katastralni_Ferro\",\n"
-        "        SPHEROID[\"Bessel 1841\",6377397.155,299.1528128,\n"
-        "            AUTHORITY[\"EPSG\",\"7004\"]]],\n"
-        "    PRIMEM[\"Ferro\",-17.66666666666667,\n"
-        "       AUTHORITY[\"EPSG\",\"8909\"]],\n"
-        "    UNIT[\"degree\",0.0174532925199433,\n"
-        "        AUTHORITY[\"EPSG\",\"9122\"]],\n"
-        "    AUTHORITY[\"EPSG\",\"4818\"]]";
+        "        SPHEROID[\"Bessel 1841\",6377397.155,299.1528128]],\n"
+        "    PRIMEM[\"Ferro\",-17.66666666666667],\n"
+        "    UNIT[\"degree\",0.0174532925199433]]";
     auto obj = WKTParser()
                    .attachDatabaseContext(DatabaseContext::create())
                    .createFromWKT(wkt);
