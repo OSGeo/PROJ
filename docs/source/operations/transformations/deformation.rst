@@ -92,7 +92,7 @@ Parameters
 
 .. option:: +xy_grids=<list>
 
-    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
+    Comma-separated list of grids to load. If a grid is prefixed by an ``@`` the
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 

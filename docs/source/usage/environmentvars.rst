@@ -71,6 +71,6 @@ done by setting the variable with no content::
     .. versionadded:: 7.0.0
 
     Define the endpoint of the CDN storage. Normally defined through the proj.ini
-    configuration file locale in PROJ_LIB.
+    configuration file locale in :envvar:`PROJ_LIB`.
     Alternatively, the :c:func:`proj_context_set_url_endpoint` function can
     be used.

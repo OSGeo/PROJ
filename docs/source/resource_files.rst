@@ -77,6 +77,12 @@ Its default content is:
     ; Can be overriden with the PROJ_NETWORK_ENDPOINT environment variable.
     cdn_endpoint = https://cdn.proj.org
 
+    cache_enabled = on
+
+    cache_size_MB = 100
+
+    cache_ttl_sec = 86400
+
 
 Transformation grids
 -------------------------------------------------------------------------------

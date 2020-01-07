@@ -26,11 +26,11 @@ France geocentric interpolation).
 
 The translation in the grids are added to the input coordinates in the forward direction,
 and subtracted in the reverse direction.
-By default (if grid_ref=input_crs), in the forward direction, the input coordinates
+By default (if ``grid_ref=input_crs``), in the forward direction, the input coordinates
 are converted to their geographic equivalent to directly read and interpolate from
 the grid. In the reverse direction, an iterative method is used to be able to find
 the grid locations to read.
-If grid_ref=output_crs is used, then the reverse strategy is applied: iterative
+If ``grid_ref=output_crs`` is used, then the reverse strategy is applied: iterative
 method in the forward direction, and direct read in the reverse direction.
 
 Example
@@ -62,7 +62,7 @@ Required
 
 .. option:: +grids=<list>
 
-    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
+    Comma-separated list of grids to load. If a grid is prefixed by an ``@`` the
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
