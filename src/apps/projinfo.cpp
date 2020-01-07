@@ -686,9 +686,7 @@ static void outputOperations(
             }
             first = false;
             std::cout << "-------------------------------------" << std::endl;
-            std::cout << "Operation n"
-                         "\xC2\xB0"
-                      << (i + 1) << ":" << std::endl
+            std::cout << "Operation No. " << (i + 1) << ":" << std::endl
                       << std::endl;
             outputOperationSummary(op, dbContext);
             std::cout << std::endl;
