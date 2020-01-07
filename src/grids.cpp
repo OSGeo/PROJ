@@ -3289,10 +3289,10 @@ bool pj_bilinear_interpolation_three_samples(const GenericShiftGrid *grid,
     int ix2 = std::min(ix + 1, grid->width() - 1);
     int iy2 = std::min(iy + 1, grid->height() - 1);
 
-    float dx1, dy1, dz1;
-    float dx2, dy2, dz2;
-    float dx3, dy3, dz3;
-    float dx4, dy4, dz4;
+    float dx1 = 0.0f, dy1 = 0.0f, dz1 = 0.0f;
+    float dx2 = 0.0f, dy2 = 0.0f, dz2 = 0.0f;
+    float dx3 = 0.0f, dy3 = 0.0f, dz3 = 0.0f;
+    float dx4 = 0.0f, dy4 = 0.0f, dz4 = 0.0f;
     bool error = (!grid->valueAt(ix, iy, idx1, dx1) ||
                   !grid->valueAt(ix, iy, idx2, dy1) ||
                   !grid->valueAt(ix, iy, idx3, dz1) ||
