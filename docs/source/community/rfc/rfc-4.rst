@@ -176,6 +176,9 @@ The preliminary C API for the above is:
     *
     * Read size_to_read bytes from handle, starting at offset, into
     * buffer.
+    * During this read, the implementation should make sure to store the HTTP
+    * headers from the server response to be able to respond to
+    * proj_network_get_header_value_cbk_type callback.
     *
     * error_string_max_size should be the maximum size that can be written into
     * the out_error_string buffer (including terminating nul character).
