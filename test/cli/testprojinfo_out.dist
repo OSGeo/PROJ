@@ -1096,3 +1096,38 @@ DERIVED_FROM(EPSG):8451, GDA2020 to AHD height (1), 0.03 m, Australia Christmas 
 PROJ string:
 +proj=pipeline +step +inv +proj=vgridshift +grids=AUSGeoid2020_20180201.gtx +multiplier=1
 
+Testing -k ellipsoid WGS84
+PROJ string:
++ellps=WGS84
+
+WKT2:2019 string:
+ELLIPSOID["WGS 84",6378137,298.257223563,
+    LENGTHUNIT["metre",1],
+    ID["EPSG",7030]]
+
+Testing -k ellipsoid EPSG:7030
+PROJ string:
++ellps=WGS84
+
+WKT2:2019 string:
+ELLIPSOID["WGS 84",6378137,298.257223563,
+    LENGTHUNIT["metre",1],
+    ID["EPSG",7030]]
+
+Testing -k datum WGS84
+WKT2:2019 string:
+DATUM["World Geodetic System 1984",
+    ELLIPSOID["WGS 84",6378137,298.257223563,
+        LENGTHUNIT["metre",1]],
+    ID["EPSG",6326]]
+
+Testing -k datum EPSG:6326
+WKT2:2019 string:
+DATUM["World Geodetic System 1984",
+    ELLIPSOID["WGS 84",6378137,298.257223563,
+        LENGTHUNIT["metre",1]],
+    ID["EPSG",6326]]
+
+Testing -k operation EPSG:8457 -o PROJ -q
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 +step +proj=cart +ellps=bessel +step +proj=helmert +x=674.374 +y=15.056 +z=405.346 +step +inv +proj=cart +ellps=WGS84 +step +proj=pop +v_3 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
+

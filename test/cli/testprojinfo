@@ -155,6 +155,26 @@ echo 'Testing -s "GDA2020" -t "AHD height" --grid-check none -o PROJ --spatial-t
 $EXE -s "GDA2020" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo 'Testing -k ellipsoid WGS84' >> ${OUT}
+$EXE -k ellipsoid WGS84 >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -k ellipsoid EPSG:7030' >> ${OUT}
+$EXE -k ellipsoid EPSG:7030 >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -k datum WGS84' >> ${OUT}
+$EXE -k datum WGS84 >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -k datum EPSG:6326' >> ${OUT}
+$EXE -k datum EPSG:6326 >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -k operation EPSG:8457 -o PROJ -q' >> ${OUT}
+$EXE -k operation EPSG:8457 -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
