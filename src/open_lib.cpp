@@ -381,6 +381,23 @@ std::unique_ptr<NS_PROJ::File> NS_PROJ::FileManager::open_resource_file(
                             "Using %s", remote_file.c_str() );
                     pj_ctx_set_errno( ctx, 0 );
                 }
+            } else {
+                // For example for resource files like 'alaska'
+                auto remote_file_tif = remote_file + ".tif";
+                file = open(ctx, remote_file_tif.c_str());
+                if( file ) {
+                    pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                            "Using %s", remote_file_tif.c_str() );
+                    pj_ctx_set_errno( ctx, 0 );
+                } else {
+                    // Init files
+                    file = open(ctx, remote_file.c_str());
+                    if( file ) {
+                        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                                "Using %s", remote_file.c_str() );
+                        pj_ctx_set_errno( ctx, 0 );
+                    }
+                }
             }
         }
     }
