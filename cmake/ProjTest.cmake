@@ -27,7 +27,7 @@ function(proj_add_test_script_sh SH_NAME BIN_USE)
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${${BIN_USE}}
       )
     set_tests_properties( ${testname}
-        PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
+        PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data/for_tests")
     endif()
 
   endif()
@@ -44,7 +44,7 @@ function(proj_add_gie_test TESTNAME TESTCASE)
       ${TESTFILE}
     )
     set_tests_properties( ${TESTNAME}
-        PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
+        PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data/for_tests")
 
 
 endfunction()

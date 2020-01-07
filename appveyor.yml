@@ -41,6 +41,9 @@ build_script:
   - if "%platform%" == "x86" SET BUILD_LIBPROJ_SHARED=OFF
   - echo "%VS_FULL%"
 #
+  - cd %APPVEYOR_BUILD_FOLDER%\data
+  - curl -O https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
+  - 7z e -aoa -y proj-datumgrid-1.8.zip
   - set PROJ_BUILD=%APPVEYOR_BUILD_FOLDER%\build
   - mkdir %PROJ_BUILD%
   - cd %PROJ_BUILD%
@@ -51,9 +54,6 @@ build_script:
 test_script:
   - echo test_script
   - set PROJ_LIB=%PROJ_DIR%\share\proj
-  - cd %PROJ_LIB%
-  - curl -O https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
-  - 7z e -aoa -y proj-datumgrid-1.8.zip
   - cd %PROJ_BUILD%
   - ctest -V -C Release
   - set PATH=%PATH%;%PROJ_DIR%\bin

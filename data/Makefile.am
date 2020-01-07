@@ -96,12 +96,39 @@ proj.db: $(DATAPATH)/sql/*.sql
 	fi
 
 # For out-of-tree builds, link all file of the source data dir to the generated data
+# Also link select resource files in a for_tests subdirectory so that we are not
+# influenced by the presence of other grids
 check-local:
 	@if [ ! -f GL27 ]; then \
 		for x in $(DATAPATH)/*; do \
 			ln -sf $$x .; \
 		done \
-	fi
+	fi; \
+	rm -rf for_tests; \
+	mkdir for_tests; \
+	for x in $(DATAPATH)/null \
+		 $(DATAPATH)/GL27 \
+		 $(DATAPATH)/nad27 \
+		 $(DATAPATH)/nad83 \
+		 $(DATAPATH)/ntv1_can.dat \
+		 $(DATAPATH)/MD \
+		 $(DATAPATH)/ntf_r93.gsb \
+		 $(DATAPATH)/egm96_15.gtx \
+		 $(DATAPATH)/ntv2_0.gsb \
+		 $(DATAPATH)/conus \
+		 $(DATAPATH)/alaska \
+		 $(DATAPATH)/nzgd2kgrid0005.gsb \
+		 $(DATAPATH)/ITRF2000 \
+		 $(DATAPATH)/BETA2007.gsb; \
+	do \
+		if test -f "$$x" ; then \
+			ln -sf "../$$x" for_tests; \
+		else \
+			echo "WARNING: grid $$x missing: some tests will be skipped"; \
+		fi \
+	done; \
+	ln -sf ../proj.db for_tests
 
 clean-local:
 	$(RM) proj.db
+	$(RM) -rf for_tests

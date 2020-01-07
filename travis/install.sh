@@ -107,6 +107,10 @@ make check
 (cd src && make multistresstest && make test228)
 PROJ_LIB=../data src/multistresstest
 make install
+
+# Test make clean target
+make clean
+
 find /tmp/proj_autoconf_install_grids
 cd ..
 

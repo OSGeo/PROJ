@@ -1,5 +1,5 @@
 # Executables paths passed to test scripts
-PROJ_LIB ?= ../../data
+PROJ_LIB = ../../data/for_tests
 THIS_DIR = $(top_srcdir)/test/cli
 EXEPATH = ../../src
 PROJEXE = $(EXEPATH)/proj

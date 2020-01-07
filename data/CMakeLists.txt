@@ -44,6 +44,7 @@ add_custom_command(
   OUTPUT ${PROJ_DB}
   COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJ_DB}
   COMMAND ${EXE_SQLITE3} -init ${ALL_SQL_IN} ${PROJ_DB} .quit
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROJ_DB} ${CMAKE_CURRENT_BINARY_DIR}/for_tests
   # note: we didn't port yet the foreign_key_check done in Makefile.am
   DEPENDS generate_all_sql_in ${ALL_SQL_IN}
   COMMENT "Generating proj.db"
@@ -57,6 +58,33 @@ if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
     configure_file(${FILE} ${FILE} COPYONLY)
   endforeach()
 endif()
+
+# Copy select resource files in a for_tests subdirectory so that we are not
+# influenced by the presence of other grids
+# Note: this is done at configure/cmake time, not build time.
+# So if you install new grids in the source data/ subdirectory, run cmake again
+set(DATA_FOR_TESTS
+    null
+    GL27
+    nad27
+    nad83
+    ntv1_can.dat
+    MD
+    ntf_r93.gsb
+    egm96_15.gtx
+    ntv2_0.gsb
+    conus
+    alaska
+    nzgd2kgrid0005.gsb
+    ITRF2000
+    BETA2007.gsb)
+
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/for_tests)
+foreach(FILE ${DATA_FOR_TESTS})
+    if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE})
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${FILE} ${CMAKE_CURRENT_BINARY_DIR}/for_tests/${FILE} COPYONLY)
+    endif()
+endforeach()
 
 #
 #install
