@@ -473,7 +473,30 @@ TEST(networking, custom) {
         }
         exchange.events.emplace_back(std::move(event));
     }
-
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Content-Range";
+        event->value = "bytes=0-16383/10000000";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
     {
         double lon = 2 / 180. * M_PI;
         double lat = 49 / 180. * M_PI;
@@ -498,6 +521,30 @@ TEST(networking, custom) {
         for (size_t i = 0; i < 278528 / sizeof(float); i++) {
             memcpy(&event->response[i * sizeof(float)], &f, sizeof(float));
         }
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Content-Range";
+        event->value = "bytes=0-16383/10000000";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
+        event->file_id = 2;
         exchange.events.emplace_back(std::move(event));
     }
 
@@ -743,6 +790,30 @@ TEST(networking, simul_read_range_error) {
         }
         exchange.events.emplace_back(std::move(event));
     }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Content-Range";
+        event->value = "bytes=0-16383/10000000";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
 
     {
         double lon = 2 / 180. * M_PI;
@@ -782,6 +853,188 @@ TEST(networking, simul_read_range_error) {
         std::unique_ptr<CloseEvent> event(new CloseEvent());
         event->ctx = ctx;
         event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    proj_destroy(P);
+
+    ASSERT_TRUE(exchange.allConsumedAndNoError());
+
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(networking, simul_file_change_while_opened) {
+    auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
+    proj_context_set_enable_network(ctx, true);
+    ExchangeWithCallback exchange;
+    ASSERT_TRUE(proj_context_set_network_callbacks(ctx, open_cbk, close_cbk,
+                                                   get_header_value_cbk,
+                                                   read_range_cbk, &exchange));
+
+    {
+        std::unique_ptr<OpenEvent> event(new OpenEvent());
+        event->ctx = ctx;
+        event->url = "https://foo/file_change_while_opened.tif";
+        event->offset = 0;
+        event->size_to_read = 16384;
+        event->response.resize(16384);
+        event->file_id = 1;
+
+        const char *proj_source_data = getenv("PROJ_SOURCE_DATA");
+        ASSERT_TRUE(proj_source_data != nullptr);
+        std::string filename(proj_source_data);
+        filename += "/tests/egm96_15_uncompressed_truncated.tif";
+        FILE *f = fopen(filename.c_str(), "rb");
+        ASSERT_TRUE(f != nullptr);
+        ASSERT_EQ(fread(&event->response[0], 1, 956, f), 956U);
+        fclose(f);
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Content-Range";
+        event->value = "bytes=0-16383/10000000";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<CloseEvent> event(new CloseEvent());
+        event->ctx = ctx;
+        event->file_id = 1;
+        exchange.events.emplace_back(std::move(event));
+    }
+
+    auto P = proj_create(ctx, "+proj=vgridshift "
+                              "+grids=https://foo/file_change_while_opened.tif "
+                              "+multiplier=1");
+
+    ASSERT_NE(P, nullptr);
+    ASSERT_TRUE(exchange.allConsumedAndNoError());
+
+    {
+        std::unique_ptr<OpenEvent> event(new OpenEvent());
+        event->ctx = ctx;
+        event->url = "https://foo/file_change_while_opened.tif";
+        event->offset = 524288;
+        event->size_to_read = 278528;
+        event->response.resize(278528);
+        event->file_id = 2;
+        float f = 1.25;
+        for (size_t i = 0; i < 278528 / sizeof(float); i++) {
+            memcpy(&event->response[i * sizeof(float)], &f, sizeof(float));
+        }
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Content-Range";
+        event->value = "bytes=0-16383/10000000";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date CHANGED!!!!";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<CloseEvent> event(new CloseEvent());
+        event->ctx = ctx;
+        event->file_id = 2;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<OpenEvent> event(new OpenEvent());
+        event->ctx = ctx;
+        event->url = "https://foo/file_change_while_opened.tif";
+        event->offset = 0;
+        event->size_to_read = 16384;
+        event->response.resize(16384);
+        event->file_id = 3;
+
+        const char *proj_source_data = getenv("PROJ_SOURCE_DATA");
+        ASSERT_TRUE(proj_source_data != nullptr);
+        std::string filename(proj_source_data);
+        filename += "/tests/egm96_15_uncompressed_truncated.tif";
+        FILE *f = fopen(filename.c_str(), "rb");
+        ASSERT_TRUE(f != nullptr);
+        ASSERT_EQ(fread(&event->response[0], 1, 956, f), 956U);
+        fclose(f);
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Content-Range";
+        event->value = "bytes=0-16383/10000000";
+        event->file_id = 3;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "Last-Modified";
+        event->value = "some_date CHANGED!!!!";
+        event->file_id = 3;
+        exchange.events.emplace_back(std::move(event));
+    }
+    {
+        std::unique_ptr<GetHeaderValueEvent> event(new GetHeaderValueEvent());
+        event->ctx = ctx;
+        event->key = "ETag";
+        event->value = "some_etag";
+        event->file_id = 3;
+        exchange.events.emplace_back(std::move(event));
+    }
+
+    {
+        double lon = 2 / 180. * M_PI;
+        double lat = 49 / 180. * M_PI;
+        double z = 0;
+        ASSERT_EQ(proj_trans_generic(P, PJ_FWD, &lon, sizeof(double), 1, &lat,
+                                     sizeof(double), 1, &z, sizeof(double), 1,
+                                     nullptr, 0, 0),
+                  1U);
+        EXPECT_EQ(z, 1.25);
+    }
+
+    ASSERT_TRUE(exchange.allConsumedAndNoError());
+
+    {
+        std::unique_ptr<CloseEvent> event(new CloseEvent());
+        event->ctx = ctx;
+        event->file_id = 3;
         exchange.events.emplace_back(std::move(event));
     }
     proj_destroy(P);

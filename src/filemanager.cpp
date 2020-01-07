@@ -135,6 +135,9 @@ class FileStdio : public File {
     unsigned long long tell() override;
     void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
 
+    // We may lie, but the real use case is only for network files
+    bool hasChanged() const override { return false; }
+
     static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
 };
 
@@ -197,6 +200,9 @@ class FileLegacyAdapter : public File {
     bool seek(unsigned long long offset, int whence = SEEK_SET) override;
     unsigned long long tell() override;
     void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
+
+    // We may lie, but the real use case is only for network files
+    bool hasChanged() const override { return false; }
 
     static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
 };
@@ -1337,19 +1343,24 @@ class NetworkFile : public File {
     unsigned long long m_pos = 0;
     size_t m_nBlocksToDownload = 1;
     unsigned long long m_lastDownloadedOffset;
-    unsigned long long m_filesize;
+    FileProperties m_props;
     proj_network_close_cbk_type m_closeCbk;
+    bool m_hasChanged = false;
 
     NetworkFile(const NetworkFile &) = delete;
     NetworkFile &operator=(const NetworkFile &) = delete;
+
+    static bool get_props_from_headers(PJ_CONTEXT *ctx,
+                                       PROJ_NETWORK_HANDLE *handle,
+                                       FileProperties &props);
 
   protected:
     NetworkFile(PJ_CONTEXT *ctx, const std::string &url,
                 PROJ_NETWORK_HANDLE *handle,
                 unsigned long long lastDownloadOffset,
-                unsigned long long filesize)
+                const FileProperties &props)
         : File(url), m_ctx(ctx), m_url(url), m_handle(handle),
-          m_lastDownloadedOffset(lastDownloadOffset), m_filesize(filesize),
+          m_lastDownloadedOffset(lastDownloadOffset), m_props(props),
           m_closeCbk(ctx->networking.close) {}
 
   public:
@@ -1359,9 +1370,38 @@ class NetworkFile : public File {
     bool seek(unsigned long long offset, int whence) override;
     unsigned long long tell() override;
     void reassign_context(PJ_CONTEXT *ctx) override;
+    bool hasChanged() const override { return m_hasChanged; }
 
     static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
 };
+
+// ---------------------------------------------------------------------------
+
+bool NetworkFile::get_props_from_headers(PJ_CONTEXT *ctx,
+                                         PROJ_NETWORK_HANDLE *handle,
+                                         FileProperties &props) {
+    const char *contentRange = ctx->networking.get_header_value(
+        ctx, handle, "Content-Range", ctx->networking.user_data);
+    if (contentRange) {
+        const char *slash = strchr(contentRange, '/');
+        if (slash) {
+            props.size = std::stoull(slash + 1);
+
+            const char *lastModified = ctx->networking.get_header_value(
+                ctx, handle, "Last-Modified", ctx->networking.user_data);
+            if (lastModified)
+                props.lastModified = lastModified;
+
+            const char *etag = ctx->networking.get_header_value(
+                ctx, handle, "ETag", ctx->networking.user_data);
+            if (etag)
+                props.etag = etag;
+
+            return true;
+        }
+    }
+    return false;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1370,7 +1410,7 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
     if (gNetworkChunkCache.get(ctx, filename, 0, props)) {
         return std::unique_ptr<File>(new NetworkFile(
             ctx, filename, nullptr,
-            std::numeric_limits<unsigned long long>::max(), props.size));
+            std::numeric_limits<unsigned long long>::max(), props));
     } else {
         std::vector<unsigned char> buffer(DOWNLOAD_CHUNK_SIZE);
         size_t size_read = 0;
@@ -1387,40 +1427,18 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
                    errorBuffer.c_str());
         }
 
-        unsigned long long filesize = 0;
+        bool ok = false;
         if (handle) {
-            const char *contentRange = ctx->networking.get_header_value(
-                ctx, handle, "Content-Range", ctx->networking.user_data);
-            if (contentRange) {
-                const char *slash = strchr(contentRange, '/');
-                if (slash) {
-                    filesize = std::stoull(slash + 1);
-
-                    props.size = filesize;
-
-                    const char *lastModified = ctx->networking.get_header_value(
-                        ctx, handle, "Last-Modified",
-                        ctx->networking.user_data);
-                    if (lastModified)
-                        props.lastModified = lastModified;
-
-                    const char *etag = ctx->networking.get_header_value(
-                        ctx, handle, "ETag", ctx->networking.user_data);
-                    if (etag)
-                        props.etag = etag;
-
-                    gNetworkFileProperties.insert(ctx, filename, props);
-                }
-            }
-            if (filesize != 0) {
+            if (get_props_from_headers(ctx, handle, props)) {
+                ok = true;
+                gNetworkFileProperties.insert(ctx, filename, props);
                 gNetworkChunkCache.insert(ctx, filename, 0, std::move(buffer));
             }
         }
 
         return std::unique_ptr<File>(
-            handle != nullptr && filesize != 0
-                ? new NetworkFile(ctx, filename, handle, size_read, filesize)
-                : nullptr);
+            ok ? new NetworkFile(ctx, filename, handle, size_read, props)
+               : nullptr);
     }
 }
 
@@ -1505,6 +1523,20 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
                 }
                 return 0;
             }
+
+            if (!m_hasChanged) {
+                FileProperties props;
+                if (get_props_from_headers(m_ctx, m_handle, props)) {
+                    if (props.size != m_props.size ||
+                        props.lastModified != m_props.lastModified ||
+                        props.etag != m_props.etag) {
+                        gNetworkFileProperties.insert(m_ctx, m_url, props);
+                        gNetworkChunkCache.clearMemoryCache();
+                        m_hasChanged = true;
+                    }
+                }
+            }
+
             region.resize(nRead);
             m_lastDownloadedOffset = offsetToDownload + nRead;
 
@@ -1547,7 +1579,7 @@ bool NetworkFile::seek(unsigned long long offset, int whence) {
     } else {
         if (offset != 0)
             return false;
-        m_pos = m_filesize;
+        m_pos = m_props.size;
     }
     return true;
 }
@@ -1871,6 +1903,7 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
     auto hCurlHandle = handle->m_handle;
 
     double oldDelay = MIN_RETRY_DELAY_MS;
+    std::string headers;
     std::string body;
 
     char szBuffer[128];
@@ -1879,6 +1912,12 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
 
     while (true) {
         curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
+
+        headers.clear();
+        headers.reserve(16 * 1024);
+        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, &headers);
+        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION,
+                         pj_curl_write_func);
 
         body.clear();
         body.reserve(size_to_read);
@@ -1930,6 +1969,8 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
     if (!body.empty()) {
         memcpy(buffer, body.data(), std::min(size_to_read, body.size()));
     }
+    handle->m_headers = std::move(headers);
+
     return std::min(size_to_read, body.size());
 }
 

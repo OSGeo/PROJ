@@ -55,13 +55,16 @@ struct xyzgridshiftData {
 // ---------------------------------------------------------------------------
 
 static const GenericShiftGrid* findGrid(const ListOfGenericGrids& grids,
-                                        const PJ_LP& input)
+                                        const PJ_LP& input,
+                                        GenericShiftGridSet *&gridSetOut)
 {
     for( const auto& gridset: grids )
     {
         auto grid = gridset->gridAt(input.lam, input.phi);
-        if( grid )
+        if( grid ) {
+            gridSetOut = gridset.get();
             return grid;
+        }
     }
     return nullptr;
 }
@@ -83,7 +86,8 @@ static bool get_grid_values(PJ* P,
         }
     }
 
-    auto grid = findGrid(Q->grids, lp);
+    GenericShiftGridSet* gridset = nullptr;
+    auto grid = findGrid(Q->grids, lp, gridset);
     if( !grid ) {
         return false;
     }
@@ -127,30 +131,28 @@ static bool get_grid_values(PJ* P,
     int iy2 = std::min(iy + 1, grid->height() - 1);
 
     float dx1, dy1, dz1;
-    if( !grid->valueAt(ix, iy, sampleX, dx1) ||
-        !grid->valueAt(ix, iy, sampleY, dy1) ||
-        !grid->valueAt(ix, iy, sampleZ, dz1) ) {
-        return false;
-    }
-
     float dx2, dy2, dz2;
-    if( !grid->valueAt(ix2, iy, sampleX, dx2) ||
-        !grid->valueAt(ix2, iy, sampleY, dy2) ||
-        !grid->valueAt(ix2, iy, sampleZ, dz2) ) {
-        return false;
-    }
-
     float dx3, dy3, dz3;
-    if( !grid->valueAt(ix, iy2, sampleX, dx3) ||
-        !grid->valueAt(ix, iy2, sampleY, dy3) ||
-        !grid->valueAt(ix, iy2, sampleZ, dz3) ) {
-        return false;
-    }
-
     float dx4, dy4, dz4;
-    if( !grid->valueAt(ix2, iy2, sampleX, dx4) ||
+    bool error =( !grid->valueAt(ix, iy, sampleX, dx1) ||
+        !grid->valueAt(ix, iy, sampleY, dy1) ||
+        !grid->valueAt(ix, iy, sampleZ, dz1) ||
+        !grid->valueAt(ix2, iy, sampleX, dx2) ||
+        !grid->valueAt(ix2, iy, sampleY, dy2) ||
+        !grid->valueAt(ix2, iy, sampleZ, dz2) ||
+        !grid->valueAt(ix, iy2, sampleX, dx3) ||
+        !grid->valueAt(ix, iy2, sampleY, dy3) ||
+        !grid->valueAt(ix, iy2, sampleZ, dz3) ||
+        !grid->valueAt(ix2, iy2, sampleX, dx4) ||
         !grid->valueAt(ix2, iy2, sampleY, dy4) ||
-        !grid->valueAt(ix2, iy2, sampleZ, dz4) ) {
+        !grid->valueAt(ix2, iy2, sampleZ, dz4) );
+    if( grid->hasChanged() ) {
+        if( gridset->reopen(P->ctx) ) {
+            return get_grid_values( P, Q, lp, dx, dy, dz);
+        }
+        error = true;
+    }
+    if( error ) {
         return false;
     }
 

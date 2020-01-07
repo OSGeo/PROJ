@@ -70,6 +70,7 @@ class Grid {
     const std::string &name() const { return m_name; }
 
     virtual bool isNullGrid() const { return false; }
+    virtual bool hasChanged() const = 0;
 };
 
 // ---------------------------------------------------------------------------
@@ -116,6 +117,7 @@ class VerticalShiftGridSet {
     const VerticalShiftGrid *gridAt(double lon, double lat) const;
 
     virtual void reassign_context(PJ_CONTEXT *ctx);
+    virtual bool reopen(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
@@ -162,6 +164,7 @@ class HorizontalShiftGridSet {
     const HorizontalShiftGrid *gridAt(double lon, double lat) const;
 
     virtual void reassign_context(PJ_CONTEXT *ctx);
+    virtual bool reopen(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
@@ -217,6 +220,7 @@ class GenericShiftGridSet {
     const GenericShiftGrid *gridAt(double lon, double lat) const;
 
     virtual void reassign_context(PJ_CONTEXT *ctx);
+    virtual bool reopen(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
