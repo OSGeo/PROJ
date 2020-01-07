@@ -239,6 +239,15 @@ double pj_vgrid_value(PJ *P, const ListOfVGrids &, PJ_LP lp,
 PJ_LP pj_hgrid_apply(PJ_CONTEXT *ctx, const ListOfHGrids &grids, PJ_LP lp,
                      PJ_DIRECTION direction);
 
+const GenericShiftGrid *pj_find_generic_grid(const ListOfGenericGrids &grids,
+                                             const PJ_LP &input,
+                                             GenericShiftGridSet *&gridSetOut);
+bool pj_bilinear_interpolation_three_samples(const GenericShiftGrid *grid,
+                                             const PJ_LP &lp, int idx1,
+                                             int idx2, int idx3, double &v1,
+                                             double &v2, double &v3,
+                                             bool &must_retry);
+
 NS_PROJ_END
 
 #endif // GRIDS_HPP_INCLUDED

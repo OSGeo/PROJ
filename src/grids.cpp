@@ -2770,7 +2770,7 @@ ListOfGenericGrids pj_generic_grid_init(PJ *P, const char *gridkey) {
 // ---------------------------------------------------------------------------
 
 static const HorizontalShiftGrid *
-findGrid(const ListOfHGrids &grids, const PJ_LP& input,
+findGrid(const ListOfHGrids &grids, const PJ_LP &input,
          HorizontalShiftGridSet *&gridSetOut) {
     for (const auto &gridset : grids) {
         auto grid = gridset->gridAt(input.lam, input.phi);
@@ -3085,7 +3085,7 @@ PJ_LP pj_hgrid_value(PJ *P, const ListOfHGrids &grids, PJ_LP lp) {
 // ---------------------------------------------------------------------------
 
 static double read_vgrid_value(PJ_CONTEXT *ctx, const ListOfVGrids &grids,
-                               const PJ_LP& input, const double vmultiplier) {
+                               const PJ_LP &input, const double vmultiplier) {
 
     /* do not deal with NaN coordinates */
     /* cppcheck-suppress duplicateExpression */
@@ -3255,6 +3255,80 @@ double pj_vgrid_value(PJ *P, const ListOfVGrids &grids, PJ_LP lp,
                    lp.phi * RAD_TO_DEG, value);
 
     return value;
+}
+
+// ---------------------------------------------------------------------------
+
+const GenericShiftGrid *pj_find_generic_grid(const ListOfGenericGrids &grids,
+                                             const PJ_LP &input,
+                                             GenericShiftGridSet *&gridSetOut) {
+    for (const auto &gridset : grids) {
+        auto grid = gridset->gridAt(input.lam, input.phi);
+        if (grid) {
+            gridSetOut = gridset.get();
+            return grid;
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+bool pj_bilinear_interpolation_three_samples(const GenericShiftGrid *grid,
+                                             const PJ_LP &lp, int idx1,
+                                             int idx2, int idx3, double &v1,
+                                             double &v2, double &v3,
+                                             bool &must_retry) {
+    must_retry = false;
+
+    const auto &extent = grid->extentAndRes();
+    double grid_x = (lp.lam - extent.westLon) / extent.resLon;
+    double grid_y = (lp.phi - extent.southLat) / extent.resLat;
+    int ix = static_cast<int>(grid_x);
+    int iy = static_cast<int>(grid_y);
+    int ix2 = std::min(ix + 1, grid->width() - 1);
+    int iy2 = std::min(iy + 1, grid->height() - 1);
+
+    float dx1, dy1, dz1;
+    float dx2, dy2, dz2;
+    float dx3, dy3, dz3;
+    float dx4, dy4, dz4;
+    bool error = (!grid->valueAt(ix, iy, idx1, dx1) ||
+                  !grid->valueAt(ix, iy, idx2, dy1) ||
+                  !grid->valueAt(ix, iy, idx3, dz1) ||
+                  !grid->valueAt(ix2, iy, idx1, dx2) ||
+                  !grid->valueAt(ix2, iy, idx2, dy2) ||
+                  !grid->valueAt(ix2, iy, idx3, dz2) ||
+                  !grid->valueAt(ix, iy2, idx1, dx3) ||
+                  !grid->valueAt(ix, iy2, idx2, dy3) ||
+                  !grid->valueAt(ix, iy2, idx3, dz3) ||
+                  !grid->valueAt(ix2, iy2, idx1, dx4) ||
+                  !grid->valueAt(ix2, iy2, idx2, dy4) ||
+                  !grid->valueAt(ix2, iy2, idx3, dz4));
+    if (grid->hasChanged()) {
+        must_retry = true;
+        return false;
+    }
+    if (error) {
+        return false;
+    }
+
+    double frct_lam = grid_x - ix;
+    double frct_phi = grid_y - iy;
+    double m10 = frct_lam;
+    double m11 = m10;
+    double m01 = 1. - frct_lam;
+    double m00 = m01;
+    m11 *= frct_phi;
+    m01 *= frct_phi;
+    frct_phi = 1. - frct_phi;
+    m00 *= frct_phi;
+    m10 *= frct_phi;
+
+    v1 = m00 * dx1 + m10 * dx2 + m01 * dx3 + m11 * dx4;
+    v2 = m00 * dy1 + m10 * dy2 + m01 * dy3 + m11 * dy4;
+    v3 = m00 * dz1 + m10 * dz2 + m01 * dz3 + m11 * dz4;
+    return true;
 }
 
 NS_PROJ_END
