@@ -21,7 +21,7 @@ translation values from a grid. The grid is referenced against either the
 2D geographic CRS corresponding to the input (or sometimes output) CRS.
 
 This method is described (in French) in :cite:`NTF_88`
-and as EPSG operation methode code 9655 in :cite:`IOGP2018` (§2.4.4.1.1
+and as EPSG operation method code 9655 in :cite:`IOGP2018` (§2.4.4.1.1
 France geocentric interpolation).
 
 The translation in the grids are added to the input coordinates in the forward direction,
