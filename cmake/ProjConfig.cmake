@@ -14,7 +14,6 @@ include(CheckFunctionExists)
 # check needed include file
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(inttypes.h HAVE_INTTYPES_H)
-check_include_files(jni.h HAVE_JNI_H)
 check_include_files(memory.h HAVE_MEMORY_H)
 check_include_files(stdint.h HAVE_STDINT_H)
 check_include_files(stdlib.h HAVE_STDLIB_H)
