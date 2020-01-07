@@ -672,6 +672,7 @@ void DiskChunkCache::closeAndUnlink() {
     if (hDB_) {
         sqlite3_exec(hDB_, "COMMIT", nullptr, nullptr, nullptr);
         sqlite3_close(hDB_);
+        hDB_ = nullptr;
     }
     if (vfs_) {
         vfs_->raw()->xDelete(vfs_->raw(), path_.c_str(), 0);
