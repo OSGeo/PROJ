@@ -1840,6 +1840,11 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
         pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return nullptr;
     }
+    if (memcmp(header + 56, "SECONDS", 7) != 0) {
+        pj_log(ctx, PJ_LOG_ERROR, "Only GS_TYPE=SECONDS is supported");
+        pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+        return nullptr;
+    }
 
     const bool must_swap = (header[8] == 11) ? !IS_LSB : IS_LSB;
     if (must_swap) {
