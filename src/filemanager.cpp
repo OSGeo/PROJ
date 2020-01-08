@@ -2294,48 +2294,61 @@ static void CreateDirectory(const std::string &path) {
 
 // ---------------------------------------------------------------------------
 
+std::string pj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
+                                                   bool create) {
+    if (ctx->user_writable_directory.empty()) {
+        std::string path;
+#ifdef _WIN32
+        std::wstring wPath;
+        wPath.resize(MAX_PATH);
+        if (SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0,
+                             &wPath[0]) == S_OK) {
+            wPath.resize(wcslen(wPath.data()));
+            path = WStringToUTF8(wPath);
+        } else {
+            const char *local_app_data = getenv("LOCALAPPDATA");
+            if (!local_app_data) {
+                local_app_data = getenv("TEMP");
+                if (!local_app_data) {
+                    local_app_data = "c:/users";
+                }
+            }
+            path = local_app_data;
+        }
+#else
+        const char *xdg_data_home = getenv("XDG_DATA_HOME");
+        if (xdg_data_home != nullptr) {
+            path = xdg_data_home;
+        } else {
+            const char *home = getenv("HOME");
+            if (home) {
+#if defined(__MACH__) && defined(__APPLE__)
+                path = std::string(home) + "/Library/Logs";
+#else
+                path = std::string(home) + "/.local/share";
+#endif
+            } else {
+                path = "/tmp";
+            }
+        }
+#endif
+        path += "/proj";
+        ctx->user_writable_directory = path;
+    }
+    if (create) {
+        CreateDirectory(ctx->user_writable_directory);
+    }
+    return ctx->user_writable_directory;
+}
+
+// ---------------------------------------------------------------------------
+
 std::string pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx) {
     pj_load_ini(ctx);
     if (!ctx->gridChunkCache.filename.empty()) {
         return ctx->gridChunkCache.filename;
     }
-    std::string path;
-#ifdef _WIN32
-    std::wstring wPath;
-    wPath.resize(MAX_PATH);
-    if (SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, &wPath[0]) ==
-        S_OK) {
-        wPath.resize(wcslen(wPath.data()));
-        path = WStringToUTF8(wPath);
-    } else {
-        const char *local_app_data = getenv("LOCALAPPDATA");
-        if (!local_app_data) {
-            local_app_data = getenv("TEMP");
-            if (!local_app_data) {
-                local_app_data = "c:/users";
-            }
-        }
-        path = local_app_data;
-    }
-#else
-    const char *xdg_data_home = getenv("XDG_DATA_HOME");
-    if (xdg_data_home != nullptr) {
-        path = xdg_data_home;
-    } else {
-        const char *home = getenv("HOME");
-        if (home) {
-#if defined(__MACH__) && defined(__APPLE__)
-            path = std::string(home) + "/Library/Logs";
-#else
-            path = std::string(home) + "/.local/share";
-#endif
-        } else {
-            path = "/tmp";
-        }
-    }
-#endif
-    path += "/proj";
-    CreateDirectory(path);
+    const std::string path(pj_context_get_user_writable_directory(ctx, true));
     ctx->gridChunkCache.filename = path + "/cache.db";
     return ctx->gridChunkCache.filename;
 }

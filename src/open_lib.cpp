@@ -224,6 +224,16 @@ static bool is_rel_or_absolute_filename(const char *name)
             || (name[0] != '\0' && name[1] == ':' && strchr(dir_chars,name[2]));
 }
 
+static bool ignoreUserWritableDirectory()
+{
+    // Env var mostly for testing purposes and being independent from
+    // an existing installation
+    const char* envVarIgnoreUserWritableDirectory =
+        getenv("PROJ_IGNORE_USER_WRITABLE_DIRECTORY");
+    return envVarIgnoreUserWritableDirectory != nullptr &&
+           envVarIgnoreUserWritableDirectory[0] != '\0';
+}
+
 static void*
 pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
                      void* (*open_file)(projCtx, const char*, const char*),
@@ -279,6 +289,17 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
                     break;
             }
         }
+
+        else if( !ignoreUserWritableDirectory() &&
+                 (fid = open_file(ctx,
+                    (pj_context_get_user_writable_directory(ctx, false) +
+                     DIR_CHAR + name).c_str(), mode)) != nullptr ) {
+            fname = pj_context_get_user_writable_directory(ctx, false);
+            fname += DIR_CHAR;
+            fname += name;
+            sysname = fname.c_str();
+        }
+
         /* if is environment PROJ_LIB defined */
         else if ((sysname = getenv("PROJ_LIB")) != nullptr) {
             auto paths = NS_PROJ::internal::split(std::string(sysname), dirSeparator);

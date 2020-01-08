@@ -33,9 +33,9 @@
 #include "proj.h"
 #include "proj/util.hpp"
 
-NS_PROJ_START
-
 //! @cond Doxygen_Suppress
+
+NS_PROJ_START
 
 class File;
 
@@ -74,8 +74,8 @@ class File {
     const std::string &name() const { return name_; }
 };
 
-//! @endcond Doxygen_Suppress
-
 NS_PROJ_END
+
+//! @endcond Doxygen_Suppress
 
 #endif // FILEMANAGER_HPP_INCLUDED

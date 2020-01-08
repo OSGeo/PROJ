@@ -23,21 +23,34 @@ The following paths are checked in order:
 
 - For transformation grids that have an explict relative or absolute path,
   the directory specified in the grid filename.
+
 - Path resolved by the callback function set with
   the :c:func:`proj_context_set_file_finder`. If it is set, the next tests
   will not be run.
+
 - Path(s) set with the :c:func:`proj_context_set_search_paths`. If set, the
   next tests will not be run.
+
+- The PROJ user writable directory, which is :
+
+    * on Windows, ${LOCALAPPDATA}/proj
+    * on MacOSX, ${HOME}/Library/Logs/proj
+    * on other platforms (Linux), ${XDG_DATA_HOME}/proj if :envvar:`XDG_DATA_HOME`
+      is defined. Else ${HOME}/.local/share/proj
+
 - Path(s) set with by the environment variable :envvar:`PROJ_LIB`.
   On Linux/MacOSX/Unix, use ``:`` to separate paths. On Windows, ``;``
+
 - On Windows, the *..\\share\\proj\\* and its contents are found automatically
   at run-time if the installation respects the build structure. That is, the
   binaries and proj.dll are installed under *..\\bin\\*, and resource files
   are in *..\\share\\proj\\*.
+
 - A path built into PROJ as its resource installation directory (whose value is
   $(pkgdatadir)), for builds using the Makefile build system. Note, however,
   that since this is a hard-wired path setting, it only works if the whole
   PROJ installation is not moved somewhere else.
+
 - The current directory
 
 When networking capabilities are enabled, either by API with the

@@ -48,6 +48,7 @@
 #include <math.h>
 #include "geodesic.h"
 #include "grids.hpp"
+#include "filemanager.hpp"
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
@@ -1450,6 +1451,16 @@ PJ_INFO proj_info (void) {
     /* build search path string */
     auto ctx = pj_get_default_ctx();
     if (!ctx || ctx->search_paths.empty()) {
+        // Env var mostly for testing purposes and being independent from
+        // an existing installation
+        const char* ignoreUserWritableDirectory =
+            getenv("PROJ_IGNORE_USER_WRITABLE_DIRECTORY");
+        if( ignoreUserWritableDirectory == nullptr ||
+            ignoreUserWritableDirectory[0] == '\0'  ) {
+            buf = path_append(buf,
+                            pj_context_get_user_writable_directory(ctx, false).c_str(),
+                            &buf_size);
+        }
         const char *envPROJ_LIB = getenv("PROJ_LIB");
         buf = path_append(buf, envPROJ_LIB, &buf_size);
 #ifdef PROJ_LIB
