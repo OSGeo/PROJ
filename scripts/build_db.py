@@ -561,6 +561,33 @@ def fill_alias(proj_db_cursor):
             else:
                 print('Cannot find datum %s in geodetic_datum or vertical_datum' % (code))
 
+    proj_db_cursor.execute("SELECT object_code, alias FROM epsg.epsg_alias WHERE object_table_name = 'epsg_coordinatereferencesystem'")
+    for row in proj_db_cursor.fetchall():
+        code, alt_name = row
+        if int(code) > 60000000:
+            continue
+        proj_db_cursor.execute('SELECT 1 FROM geodetic_crs WHERE code = ?', (code,))
+        if proj_db_cursor.fetchone() is not None:
+            proj_db_cursor.execute("INSERT INTO alias_name VALUES ('geodetic_crs','EPSG',?,?,'EPSG')", (code, alt_name))
+            continue
+
+        proj_db_cursor.execute('SELECT 1 FROM projected_crs WHERE code = ?', (code,))
+        if proj_db_cursor.fetchone() is not None:
+            proj_db_cursor.execute("INSERT INTO alias_name VALUES ('projected_crs','EPSG',?,?,'EPSG')", (code, alt_name))
+            continue
+
+        proj_db_cursor.execute('SELECT 1 FROM vertical_crs WHERE code = ?', (code,))
+        if proj_db_cursor.fetchone() is not None:
+            proj_db_cursor.execute("INSERT INTO alias_name VALUES ('vertical_crs','EPSG',?,?,'EPSG')", (code, alt_name))
+            continue
+
+        proj_db_cursor.execute('SELECT 1 FROM compound_crs WHERE code = ?', (code,))
+        if proj_db_cursor.fetchone() is not None:
+            proj_db_cursor.execute("INSERT INTO alias_name VALUES ('compound_crs','EPSG',?,?,'EPSG')", (code, alt_name))
+            continue
+
+        print('Cannot find CRS %s in geodetic_crs, projected_crs, vertical_crs or compound_crs' % (code))
+
 
 def find_table(proj_db_cursor, code):
     for table_name in ('helmert_transformation', 'grid_transformation', 'concatenated_operation', 'geodetic_crs', 'projected_crs', 'vertical_crs', 'compound_crs'):

@@ -16,7 +16,7 @@ Synopsis
 ********
 
     | **projinfo**
-    |    [-o formats] [-k crs|operation|ellipsoid] [--summary] [-q]
+    |    [-o formats] [-k crs|operation|datum|ellipsoid] [--summary] [-q]
     |    [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]
     |    [--spatial-test contains|intersects]
     |    [--crs-extent-use none|both|intersection|smallest]
@@ -80,7 +80,7 @@ The following control parameters can appear in any order:
     .. note:: Before PROJ 6.3.0, WKT1:GDAL was implicitly calling --boundcrs-to-wgs84.
               This is no longer the case.
 
-.. option:: -k crs|operation|ellipsoid
+.. option:: -k crs|operation|datum|ellipsoid
 
     When used to query a single object with a AUTHORITY:CODE, determines the (k)ind of the object
     in case there are CRS, coordinate operations or ellipsoids with the same CODE.

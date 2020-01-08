@@ -2760,16 +2760,19 @@ static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
                 if (metadata::Identifier::isEquivalentName(
                         datumName.c_str(), refDatum->nameStr().c_str())) {
                     datumName = refDatum->nameStr();
-                }
-            } else {
-                std::string outTableName;
-                std::string authNameFromAlias;
-                std::string codeFromAlias;
-                auto officialName = authFactory->getOfficialNameFromAlias(
-                    datumName, "geodetic_datum", std::string(), true,
-                    outTableName, authNameFromAlias, codeFromAlias);
-                if (!officialName.empty()) {
-                    datumName = officialName;
+                } else if (refDatum->identifiers().size() == 1) {
+                    const auto &id = refDatum->identifiers()[0];
+                    const auto aliases =
+                        authFactory->databaseContext()->getAliases(
+                            *id->codeSpace(), id->code(), refDatum->nameStr(),
+                            "geodetic_datum", std::string());
+                    for (const auto &alias : aliases) {
+                        if (metadata::Identifier::isEquivalentName(
+                                datumName.c_str(), alias.c_str())) {
+                            datumName = refDatum->nameStr();
+                            break;
+                        }
+                    }
                 }
             }
         }

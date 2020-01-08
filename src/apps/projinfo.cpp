@@ -78,7 +78,7 @@ struct OutputOptions {
 
 static void usage() {
     std::cerr
-        << "usage: projinfo [-o formats] [-k crs|operation|ellipsoid] "
+        << "usage: projinfo [-o formats] [-k crs|operation|datum|ellipsoid] "
            "[--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
@@ -184,6 +184,9 @@ static BaseObjectNNPtr buildObject(
         } else if (kind == "ellipsoid" && tokens.size() == 2) {
             auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
+        } else if (kind == "datum" && tokens.size() == 2) {
+            auto urn = "urn:ogc:def:datum:" + tokens[0] + "::" + tokens[1];
+            obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
             // Convenience to be able to use C escaped strings...
             if (l_user_string.size() > 2 && l_user_string[0] == '"' &&
@@ -205,6 +208,59 @@ static BaseObjectNNPtr buildObject(
                         }
                     }
                 }
+            } else if (dbContext && !kind.empty() && kind != "crs" &&
+                       l_user_string.find(':') == std::string::npos) {
+                std::vector<AuthorityFactory::ObjectType> allowedTypes;
+                if (kind == "operation")
+                    allowedTypes.push_back(
+                        AuthorityFactory::ObjectType::COORDINATE_OPERATION);
+                else if (kind == "ellipsoid")
+                    allowedTypes.push_back(
+                        AuthorityFactory::ObjectType::ELLIPSOID);
+                else if (kind == "datum")
+                    allowedTypes.push_back(AuthorityFactory::ObjectType::DATUM);
+                constexpr size_t limitResultCount = 10;
+                auto factory = AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                        std::string());
+                for (int pass = 0; pass <= 1; ++pass) {
+                    const bool approximateMatch = (pass == 1);
+                    auto res = factory->createObjectsFromName(
+                        l_user_string, allowedTypes, approximateMatch,
+                        limitResultCount);
+                    if (res.size() == 1) {
+                        obj = res.front().as_nullable();
+                    } else {
+                        for (const auto &l_obj : res) {
+                            if (Identifier::isEquivalentName(
+                                    l_obj->nameStr().c_str(),
+                                    l_user_string.c_str())) {
+                                obj = l_obj.as_nullable();
+                                break;
+                            }
+                        }
+                        if (obj) {
+                            break;
+                        }
+                    }
+                    if (res.size() > 1) {
+                        std::string msg("several objects matching this name: ");
+                        bool first = true;
+                        for (const auto &l_obj : res) {
+                            if (msg.size() > 200) {
+                                msg += ", ...";
+                                break;
+                            }
+                            if (!first) {
+                                msg += ", ";
+                            }
+                            first = false;
+                            msg += l_obj->nameStr();
+                        }
+                        std::cerr << context << ": " << msg << std::endl;
+                        std::exit(1);
+                    }
+                }
+
             } else {
                 obj =
                     createFromUserInput(l_user_string, dbContext).as_nullable();
@@ -861,6 +917,8 @@ int main(int argc, char **argv) {
                 objectKind = "operation";
             } else if (ci_equal(kind, "ellipsoid")) {
                 objectKind = "ellipsoid";
+            } else if (ci_equal(kind, "datum")) {
+                objectKind = "datum";
             } else {
                 std::cerr << "Unrecognized value for option -k: " << kind
                           << std::endl;

@@ -2733,8 +2733,8 @@ TEST(factory, createObjectsFromName) {
 
     EXPECT_EQ(factory->createObjectsFromName("").size(), 0U);
 
-    // ellipsoid + 3 geodeticCRS
-    EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, false).size(), 4U);
+    // ellipsoid + datum + 3 geodeticCRS
+    EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, false).size(), 5U);
 
     EXPECT_EQ(factory->createObjectsFromName("WGS 84", {}, true, 10).size(),
               10U);
@@ -2749,7 +2749,9 @@ TEST(factory, createObjectsFromName) {
         auto res = factoryEPSG->createObjectsFromName(
             "WGS84", {AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS}, true);
         EXPECT_EQ(res.size(),
-                  8U); // EPSG:4326 and EPSG:4030 and the 6 WGS84 realizations
+                  9U); // EPSG:4326 and EPSG:4030 and the 6 WGS84 realizations
+                       // and EPSG:7881 'Tritan St. Helena'' whose alias is
+                       // 'WGS 84 Tritan St. Helena'
         if (!res.empty()) {
             EXPECT_EQ(res.front()->getEPSGCode(), 4326);
         }
