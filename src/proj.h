@@ -443,6 +443,15 @@ void PROJ_DLL proj_grid_cache_set_ttl(PJ_CONTEXT* ctx, int ttl_seconds);
 
 void PROJ_DLL proj_grid_cache_clear(PJ_CONTEXT* ctx);
 
+int PROJ_DLL proj_is_download_needed(PJ_CONTEXT* ctx,
+                                     const char* url_or_filename,
+                                     int ignore_ttl_setting);
+int PROJ_DLL proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
+                                int ignore_ttl_setting,
+                                int (*progress_cbk)(PJ_CONTEXT *, double pct,
+                                                    void *user_data),
+                                void *user_data);
+
 /*! @cond Doxygen_Suppress */
 
 /* Manage the transformation definition object PJ */

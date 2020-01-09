@@ -931,6 +931,7 @@ proj_cs_get_axis_info
 proj_cs_get_type
 proj_destroy
 proj_dmstor
+proj_download_file
 proj_ellipsoid_get_parameters
 proj_errno
 proj_errno_reset
@@ -970,6 +971,7 @@ proj_int_list_destroy
 proj_is_crs
 proj_is_deprecated
 proj_is_derived_crs
+proj_is_download_needed
 proj_is_equivalent_to
 proj_list_angular_units
 proj_list_destroy

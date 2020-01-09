@@ -362,7 +362,8 @@ TEST(gie, info_functions) {
         ASSERT_NE(std::string(info.searchpath), std::string());
     }
 
-    ASSERT_TRUE(std::string(info.searchpath).find("/proj") != std::string::npos);
+    ASSERT_TRUE(std::string(info.searchpath).find("/proj") !=
+                std::string::npos);
 
     /* proj_pj_info() */
     {

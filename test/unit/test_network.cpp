@@ -38,6 +38,12 @@
 #include <sqlite3.h>
 #include <time.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #ifdef CURL_ENABLED
 #include <curl/curl.h>
 #endif
@@ -1558,6 +1564,131 @@ TEST(networking, cache_lock) {
 
     proj_context_destroy(ctx);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(networking, download_whole_files) {
+    if (!networkAccessOK) {
+        return;
+    }
+
+    proj_cleanup();
+    unlink("proj_test_tmp/cache.db");
+    unlink("proj_test_tmp/ntf_r93.tif");
+    rmdir("proj_test_tmp");
+
+    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY="));
+    putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY=./proj_test_tmp"));
+    putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE=30000"));
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+
+    ASSERT_TRUE(proj_is_download_needed(ctx, "ntf_r93.gsb", false));
+
+    ASSERT_TRUE(
+        proj_download_file(ctx, "ntf_r93.gsb", false, nullptr, nullptr));
+
+    FILE *f = fopen("proj_test_tmp/ntf_r93.tif", "rb");
+    ASSERT_NE(f, nullptr);
+    fseek(f, 0, SEEK_END);
+    ASSERT_EQ(ftell(f), 93581);
+    fclose(f);
+
+    ASSERT_FALSE(proj_is_download_needed(ctx, "ntf_r93.gsb", false));
+
+    {
+        sqlite3 *hDB = nullptr;
+        sqlite3_open_v2("proj_test_tmp/cache.db", &hDB, SQLITE_OPEN_READWRITE,
+                        nullptr);
+        ASSERT_NE(hDB, nullptr);
+        // Force lastChecked to the Epoch so that data is expired.
+        sqlite3_stmt *hStmt = nullptr;
+        sqlite3_prepare_v2(
+            hDB, "UPDATE downloaded_file_properties SET lastChecked = 0", -1,
+            &hStmt, nullptr);
+        ASSERT_NE(hStmt, nullptr);
+        ASSERT_EQ(sqlite3_step(hStmt), SQLITE_DONE);
+        sqlite3_finalize(hStmt);
+        sqlite3_close(hDB);
+    }
+
+    // If we ignore TTL settings, then no network access will be done
+    ASSERT_FALSE(proj_is_download_needed(ctx, "ntf_r93.gsb", true));
+
+    {
+        sqlite3 *hDB = nullptr;
+        sqlite3_open_v2("proj_test_tmp/cache.db", &hDB, SQLITE_OPEN_READWRITE,
+                        nullptr);
+        ASSERT_NE(hDB, nullptr);
+        // Check that the lastChecked timestamp is still 0
+        sqlite3_stmt *hStmt = nullptr;
+        sqlite3_prepare_v2(hDB,
+                           "SELECT lastChecked FROM downloaded_file_properties",
+                           -1, &hStmt, nullptr);
+        ASSERT_NE(hStmt, nullptr);
+        ASSERT_EQ(sqlite3_step(hStmt), SQLITE_ROW);
+        ASSERT_EQ(sqlite3_column_int64(hStmt, 0), 0);
+        sqlite3_finalize(hStmt);
+        sqlite3_close(hDB);
+    }
+
+    // Should recheck from the CDN, update last_checked and do nothing
+    ASSERT_FALSE(proj_is_download_needed(ctx, "ntf_r93.gsb", false));
+
+    {
+        sqlite3 *hDB = nullptr;
+        sqlite3_open_v2("proj_test_tmp/cache.db", &hDB, SQLITE_OPEN_READWRITE,
+                        nullptr);
+        ASSERT_NE(hDB, nullptr);
+        sqlite3_stmt *hStmt = nullptr;
+        // Check that the lastChecked timestamp has been updated
+        sqlite3_prepare_v2(hDB,
+                           "SELECT lastChecked FROM downloaded_file_properties",
+                           -1, &hStmt, nullptr);
+        ASSERT_NE(hStmt, nullptr);
+        ASSERT_EQ(sqlite3_step(hStmt), SQLITE_ROW);
+        ASSERT_NE(sqlite3_column_int64(hStmt, 0), 0);
+        sqlite3_finalize(hStmt);
+        hStmt = nullptr;
+
+        // Now invalid lastModified. This should trigger a new download
+        sqlite3_prepare_v2(
+            hDB, "UPDATE downloaded_file_properties SET lastChecked = 0, "
+                 "lastModified = 'foo'",
+            -1, &hStmt, nullptr);
+        ASSERT_NE(hStmt, nullptr);
+        ASSERT_EQ(sqlite3_step(hStmt), SQLITE_DONE);
+        sqlite3_finalize(hStmt);
+        sqlite3_close(hDB);
+    }
+
+    ASSERT_TRUE(proj_is_download_needed(ctx, "ntf_r93.gsb", false));
+
+    // Redo download with a progress callback this time.
+    unlink("proj_test_tmp/ntf_r93.tif");
+
+    const auto cbk = [](PJ_CONTEXT *l_ctx, double pct, void *user_data) -> int {
+        auto vect = static_cast<std::vector<std::pair<PJ_CONTEXT *, double>> *>(
+            user_data);
+        vect->push_back(std::pair<PJ_CONTEXT *, double>(l_ctx, pct));
+        return true;
+    };
+
+    std::vector<std::pair<PJ_CONTEXT *, double>> vectPct;
+    ASSERT_TRUE(proj_download_file(ctx, "ntf_r93.gsb", false, cbk, &vectPct));
+    ASSERT_EQ(vectPct.size(), 3U);
+    ASSERT_EQ(vectPct.back().first, ctx);
+    ASSERT_EQ(vectPct.back().second, 1.0);
+
+    proj_context_destroy(ctx);
+    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES"));
+    putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY="));
+    putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE="));
+    unlink("proj_test_tmp/cache.db");
+    unlink("proj_test_tmp/ntf_r93.tif");
+    rmdir("proj_test_tmp");
+}
+
 #endif
 
 } // namespace
