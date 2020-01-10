@@ -25,7 +25,7 @@ http://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports
 
 #### Environment Information
  - PROJ version (`proj`)
- - Operation System Information (`python -c "import platform; print(platform.platform())"`)
+ - Operation System Information
 
 #### Installation method
  - conda, apt-get, from source, etc...
