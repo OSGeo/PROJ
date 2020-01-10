@@ -1201,7 +1201,8 @@ void GeodeticReferenceFrame::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    formatter->startNode(io::WKTConstants::DATUM, !identifiers().empty());
+    const auto &ids = identifiers();
+    formatter->startNode(io::WKTConstants::DATUM, !ids.empty());
     auto l_name = nameStr();
     if (l_name.empty()) {
         l_name = "unnamed";
@@ -1236,10 +1237,35 @@ void GeodeticReferenceFrame::_exportToWKT(
                     }
                 }
             }
-            // Replace spaces by underscore, except if it is a special MapInfo
-            // datum name
-        } else if (!starts_with(l_name, "MIF ")) {
-            l_name = io::WKTFormatter::morphNameToESRI(l_name);
+        } else {
+            // Replace spaces by underscore for datum names coming from EPSG
+            // so as to emulate GDAL < 3 importFromEPSG()
+            if (ids.size() == 1 && *(ids.front()->codeSpace()) == "EPSG") {
+                l_name = io::WKTFormatter::morphNameToESRI(l_name);
+            } else if (ids.empty()) {
+                const auto &dbContext = formatter->databaseContext();
+                if (dbContext) {
+                    auto factory = io::AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext), std::string());
+                    // We use anonymous autority and approximate matching, so
+                    // as to trigger the caching done in createObjectsFromName()
+                    // in that case.
+                    auto matches = factory->createObjectsFromName(
+                        l_name, {io::AuthorityFactory::ObjectType::
+                                     GEODETIC_REFERENCE_FRAME},
+                        true, 2);
+                    if (matches.size() == 1) {
+                        const auto &match = matches.front();
+                        const auto &matchId = match->identifiers();
+                        if (matchId.size() == 1 &&
+                            *(matchId.front()->codeSpace()) == "EPSG" &&
+                            metadata::Identifier::isEquivalentName(
+                                l_name.c_str(), match->nameStr().c_str())) {
+                            l_name = io::WKTFormatter::morphNameToESRI(l_name);
+                        }
+                    }
+                }
+            }
             if (l_name == "World_Geodetic_System_1984") {
                 l_name = "WGS_1984";
             }
