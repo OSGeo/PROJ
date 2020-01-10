@@ -2,4 +2,5 @@
 
  - [ ] Closes #xxxx
  - [ ] Tests added
- - [ ] Fully documented, including `NEWS`, `docs/source/news.rst` for all changes and `docs/source/*.rst` for new API
+ - [ ] Added clear title that can be used to generate release notes
+ - [ ] Fully documented, including updating `docs/source/*.rst` for new API
