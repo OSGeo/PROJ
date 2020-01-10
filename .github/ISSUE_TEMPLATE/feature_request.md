@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-labels: proposal
+labels: feature request
 ---
 
 <!-- Describe the feature you'd like. -->
