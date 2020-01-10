@@ -190,7 +190,7 @@ libproj_la_SOURCES = \
 	deriv.cpp ell_set.cpp ellps.cpp errno.cpp \
 	factors.cpp fwd.cpp init.cpp inv.cpp \
 	list.cpp malloc.cpp mlfn.cpp msfn.cpp proj_mdist.cpp \
-	open_lib.cpp param.cpp phi2.cpp pr_list.cpp \
+	param.cpp phi2.cpp pr_list.cpp \
 	qsfn.cpp strerrno.cpp \
 	tsfn.cpp units.cpp ctx.cpp log.cpp zpoly1.cpp rtodms.cpp \
 	release.cpp gauss.cpp \

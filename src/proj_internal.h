@@ -696,6 +696,7 @@ struct projCtx_t {
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
 
+    std::string env_var_proj_lib{}; // content of PROJ_LIB environment variable. Use Filemanager::getProjLibEnvVar() to access
     std::vector<std::string> search_paths{};
     const char **c_compat_paths = nullptr; // same, but for projinfo usage
 

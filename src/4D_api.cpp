@@ -1461,10 +1461,10 @@ PJ_INFO proj_info (void) {
                             pj_context_get_user_writable_directory(ctx, false).c_str(),
                             &buf_size);
         }
-        const char *envPROJ_LIB = getenv("PROJ_LIB");
-        buf = path_append(buf, envPROJ_LIB, &buf_size);
+        const std::string envPROJ_LIB = NS_PROJ::FileManager::getProjLibEnvVar(ctx);
+        buf = path_append(buf, envPROJ_LIB.empty() ? nullptr : envPROJ_LIB.c_str(), &buf_size);
 #ifdef PROJ_LIB
-        if (envPROJ_LIB == nullptr) {
+        if (envPROJ_LIB.empty()) {
             buf = path_append(buf, PROJ_LIB, &buf_size);
         }
 #endif
@@ -1770,3 +1770,4 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
 
     return factors;
 }
+
