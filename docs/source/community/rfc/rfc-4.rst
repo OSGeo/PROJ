@@ -6,9 +6,9 @@ PROJ RFC 4: Remote access to grids and GeoTIFF grids
 
 :Author: Even Rouault, Howard Butler
 :Contact: even.rouault@spatialys.com, howard@hobu.co
-:Status: Draft
+:Status: Adopted
 :Implementation target: PROJ 7
-:Last Updated: 2020-01-02
+:Last Updated: 2020-01-10
 
 Motivation
 -------------------------------------------------------------------------------
@@ -1397,4 +1397,10 @@ Tooling scripts are currently available at https://github.com/rouault/sample_pro
 Adoption status
 -------------------------------------------------------------------------------
 
-TBD
+The RFC was adopted on 2020-01-10 with +1's from the following PSC members
+
+* Kristian Evers
+* Even Rouault
+* Thomas Knudsen
+* Howard Butler
+* Kurt Schwehr
