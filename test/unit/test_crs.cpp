@@ -756,7 +756,9 @@ TEST(crs, EPSG_27561_projected_with_geodetic_in_grad_as_PROJ_string_and_WKT1) {
         nn_crs->DerivedCRS::isEquivalentTo(createUnrelatedObject().get()));
 
     auto wkt1 = crs->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL,
+                             DatabaseContext::create())
+            .get());
     EXPECT_EQ(
         wkt1,
         "PROJCS[\"NTF (Paris) / Lambert Nord France\",\n"
@@ -857,7 +859,9 @@ TEST(crs, EPSG_2222_projected_unit_foot_as_PROJ_string_and_WKT1) {
               "+x_0=213360 +y_0=0 +datum=NAD83 +units=ft +no_defs +type=crs");
 
     auto wkt1 = crs->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL,
+                             DatabaseContext::create())
+            .get());
     EXPECT_EQ(wkt1,
               "PROJCS[\"NAD83 / Arizona East (ft)\",\n"
               "    GEOGCS[\"NAD83\",\n"
@@ -904,11 +908,13 @@ TEST(crs, projected_with_parameter_unit_different_than_cs_unit_as_WKT1) {
     ASSERT_TRUE(crs != nullptr);
 
     auto wkt1 = crs->exportToWKT(
-        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL,
+                             DatabaseContext::create())
+            .get());
     EXPECT_EQ(wkt1,
               "PROJCS[\"unknown\",\n"
               "    GEOGCS[\"unknown\",\n"
-              "        DATUM[\"Unknown_based_on_GRS80_ellipsoid\",\n"
+              "        DATUM[\"Unknown based on GRS80 ellipsoid\",\n"
               "            SPHEROID[\"GRS 1980\",6378137,298.257222101]],\n"
               "        PRIMEM[\"Greenwich\",0],\n"
               "        UNIT[\"degree\",0.0174532925199433,\n"
