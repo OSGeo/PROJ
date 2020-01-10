@@ -7,7 +7,7 @@ labels: bug
 <!-- Please search existing issues to avoid creating duplicates. -->
 
 
-#### Code Sample, a copy-pastable example if possible
+#### Example of problem
 Demonstrate the problem you have found, either by using PROJ tools like `cs2cs`, `cct` or `projinfo` **or** add a code snippet that highlights the problem using the PROJ C/C++ API.
 A "Minimal, Complete and Verifiable Example" will make it much easier for maintainers to help you:
 http://matthewrocklin.com/blog/work/2018/02/28/minimal-bug-reports
