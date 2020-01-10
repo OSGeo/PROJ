@@ -730,6 +730,10 @@ CRSNNPtr CRS::normalizeForVisualization() const {
  * The candidate CRSs are either hard-coded, or looked in the database when
  * authorityFactory is not null.
  *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
+ *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match. The list is sorted by decreasing
  * confidence.
@@ -1647,6 +1651,10 @@ static bool hasCodeCompatibleOfAuthorityFactory(
  *
  * The candidate CRSs are either hard-coded, or looked in the database when
  * authorityFactory is not null.
+ *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
  *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match:
@@ -2746,6 +2754,10 @@ bool VerticalCRS::_isEquivalentTo(
  * The candidate CRSs are looked in the database when
  * authorityFactory is not null.
  *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
+ *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match.
  * 100% means that the name of the reference entry
@@ -3529,6 +3541,10 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
  * The candidate CRSs are either hard-coded, or looked in the database when
  * authorityFactory is not null.
  *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
+ *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match. The list is sorted by decreasing
  * confidence.
@@ -4049,6 +4065,10 @@ bool CompoundCRS::_isEquivalentTo(
  *
  * The candidate CRSs are looked in the database when
  * authorityFactory is not null.
+ *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
  *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match. The list is sorted by decreasing
