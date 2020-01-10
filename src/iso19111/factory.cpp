@@ -5751,7 +5751,9 @@ static std::string buildSqlLookForAuthNameCode(
 
     std::set<std::string> authorities;
     for (const auto &crs : list) {
-        const auto &ids = crs.first->identifiers();
+        auto boundCRS = dynamic_cast<crs::BoundCRS *>(crs.first.get());
+        const auto &ids = boundCRS ? boundCRS->baseCRS()->identifiers()
+                                   : crs.first->identifiers();
         if (!ids.empty()) {
             authorities.insert(*(ids[0]->codeSpace()));
         }
@@ -5770,7 +5772,9 @@ static std::string buildSqlLookForAuthNameCode(
         params.emplace_back(auth_name);
         bool firstGeodCRSForAuth = true;
         for (const auto &crs : list) {
-            const auto &ids = crs.first->identifiers();
+            auto boundCRS = dynamic_cast<crs::BoundCRS *>(crs.first.get());
+            const auto &ids = boundCRS ? boundCRS->baseCRS()->identifiers()
+                                       : crs.first->identifiers();
             if (!ids.empty() && *(ids[0]->codeSpace()) == auth_name) {
                 if (!firstGeodCRSForAuth) {
                     sql += ',';
