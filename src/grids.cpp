@@ -2360,12 +2360,14 @@ bool HorizontalShiftGridSet::reopen(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
+#define REL_TOLERANCE_HGRIDSHIFT 1e-5
+
 const HorizontalShiftGrid *HorizontalShiftGrid::gridAt(double lon,
                                                        double lat) const {
     for (const auto &child : m_children) {
         const auto &extentChild = child->extentAndRes();
-        const double epsilon =
-            (extentChild.resLon + extentChild.resLat) / 10000.0;
+        const double epsilon = (extentChild.resLon + extentChild.resLat) *
+                               REL_TOLERANCE_HGRIDSHIFT;
         if ((extentChild.fullWorldLongitude() ||
              (lon + epsilon >= extentChild.westLon &&
               lon - epsilon <= extentChild.eastLon)) &&
@@ -2385,7 +2387,8 @@ const HorizontalShiftGrid *HorizontalShiftGridSet::gridAt(double lon,
             return grid.get();
         }
         const auto &extent = grid->extentAndRes();
-        const double epsilon = (extent.resLon + extent.resLat) / 10000.0;
+        const double epsilon =
+            (extent.resLon + extent.resLat) * REL_TOLERANCE_HGRIDSHIFT;
         if ((extent.fullWorldLongitude() ||
              (lon + epsilon >= extent.westLon &&
               lon - epsilon <= extent.eastLon)) &&
@@ -2857,26 +2860,26 @@ static PJ_LP pj_hgrid_interpolate(PJ_LP t, const HorizontalShiftGrid *grid,
     frct.phi = t.phi - indx.phi;
     val.lam = val.phi = HUGE_VAL;
     if (indx.lam < 0) {
-        if (indx.lam == -1 && frct.lam > 0.99999999999) {
+        if (indx.lam == -1 && frct.lam > 1 - 10 * REL_TOLERANCE_HGRIDSHIFT) {
             ++indx.lam;
             frct.lam = 0.;
         } else
             return val;
     } else if ((in = indx.lam + 1) >= grid->width()) {
-        if (in == grid->width() && frct.lam < 1e-11) {
+        if (in == grid->width() && frct.lam < 10 * REL_TOLERANCE_HGRIDSHIFT) {
             --indx.lam;
             frct.lam = 1.;
         } else
             return val;
     }
     if (indx.phi < 0) {
-        if (indx.phi == -1 && frct.phi > 0.99999999999) {
+        if (indx.phi == -1 && frct.phi > 1 - 10 * REL_TOLERANCE_HGRIDSHIFT) {
             ++indx.phi;
             frct.phi = 0.;
         } else
             return val;
     } else if ((in = indx.phi + 1) >= grid->height()) {
-        if (in == grid->height() && frct.phi < 1e-11) {
+        if (in == grid->height() && frct.phi < 10 * REL_TOLERANCE_HGRIDSHIFT) {
             --indx.phi;
             frct.phi = 1.;
         } else
@@ -2937,8 +2940,6 @@ static PJ_LP pj_hgrid_apply_internal(projCtx ctx, PJ_LP in,
     tb.lam -= extent->westLon;
     tb.phi -= extent->southLat;
 
-    tb.lam = adjlon(tb.lam - M_PI) + M_PI;
-
     t = pj_hgrid_interpolate(tb, grid, true);
     if (grid->hasChanged()) {
         shouldRetry = gridset->reopen(ctx);
@@ -2981,7 +2982,6 @@ static PJ_LP pj_hgrid_apply_internal(projCtx ctx, PJ_LP in,
             tb = in;
             tb.lam -= extent->westLon;
             tb.phi -= extent->southLat;
-            tb.lam = adjlon(tb.lam - M_PI) + M_PI;
             dif.lam = std::numeric_limits<double>::max();
             dif.phi = std::numeric_limits<double>::max();
             continue;
