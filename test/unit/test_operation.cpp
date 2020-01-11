@@ -5617,6 +5617,69 @@ TEST(operation, projCRS_no_id_to_geogCRS_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, projCRS_3D_to_geogCRS_3D_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto wkt = "PROJCRS[\"NAD83(HARN) / Oregon GIC Lambert (ft)\",\n"
+               "    BASEGEOGCRS[\"NAD83(HARN)\",\n"
+               "        DATUM[\"NAD83 (High Accuracy Reference Network)\",\n"
+               "            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+               "                LENGTHUNIT[\"metre\",1]]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+               "        ID[\"EPSG\",4957]],\n"
+               "    CONVERSION[\"unnamed\",\n"
+               "        METHOD[\"Lambert Conic Conformal (2SP)\",\n"
+               "            ID[\"EPSG\",9802]],\n"
+               "        PARAMETER[\"Latitude of false origin\",41.75,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8821]],\n"
+               "        PARAMETER[\"Longitude of false origin\",-120.5,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8822]],\n"
+               "        PARAMETER[\"Latitude of 1st standard parallel\",43,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8823]],\n"
+               "        PARAMETER[\"Latitude of 2nd standard parallel\",45.5,\n"
+               "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8824]],\n"
+               "        PARAMETER[\"Easting at false origin\",1312335.958,\n"
+               "            LENGTHUNIT[\"foot\",0.3048],\n"
+               "            ID[\"EPSG\",8826]],\n"
+               "        PARAMETER[\"Northing at false origin\",0,\n"
+               "            LENGTHUNIT[\"foot\",0.3048],\n"
+               "            ID[\"EPSG\",8827]]],\n"
+               "    CS[Cartesian,3],\n"
+               "        AXIS[\"easting\",east,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"foot\",0.3048]],\n"
+               "        AXIS[\"northing\",north,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"foot\",0.3048]],\n"
+               "        AXIS[\"ellipsoidal height (h)\",up,\n"
+               "            ORDER[3],\n"
+               "            LENGTHUNIT[\"foot\",0.3048]]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto src = NN_CHECK_ASSERT(nn_dynamic_pointer_cast<CRS>(obj));
+    auto dst = authFactory->createCoordinateReferenceSystem(
+        "4957"); // NAD83(HARN) (3D)
+    auto list =
+        CoordinateOperationFactory::create()->createOperations(src, dst, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              // Check that z ft->m conversion is done (and just once)
+              "+step +proj=unitconvert +xy_in=ft +z_in=ft +xy_out=m +z_out=m "
+              "+step +inv +proj=lcc +lat_0=41.75 +lon_0=-120.5 +lat_1=43 "
+              "+lat_2=45.5 +x_0=399999.9999984 +y_0=0 +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
+// ---------------------------------------------------------------------------
+
 TEST(operation, projCRS_3D_to_projCRS_2D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");

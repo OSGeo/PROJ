@@ -3456,23 +3456,33 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                                              bool axisSpecFound) const {
     const auto &axisList = d->coordinateSystem()->axisList();
     const auto &unit = axisList[0]->unit();
+    const auto *zUnit = axisList.size() == 3 ? &(axisList[2]->unit()) : nullptr;
     if (!unit._isEquivalentTo(common::UnitOfMeasure::METRE,
-                              util::IComparable::Criterion::EQUIVALENT)) {
+                              util::IComparable::Criterion::EQUIVALENT) ||
+        (zUnit &&
+         !zUnit->_isEquivalentTo(common::UnitOfMeasure::METRE,
+                                 util::IComparable::Criterion::EQUIVALENT))) {
         auto projUnit = unit.exportToPROJString();
         const double toSI = unit.conversionToSI();
         if (!formatter->getCRSExport()) {
             formatter->addStep("unitconvert");
             formatter->addParam("xy_in", "m");
-            if (!formatter->omitZUnitConversion())
+            if (zUnit)
                 formatter->addParam("z_in", "m");
+
             if (projUnit.empty()) {
                 formatter->addParam("xy_out", toSI);
-                if (!formatter->omitZUnitConversion())
-                    formatter->addParam("z_out", toSI);
             } else {
                 formatter->addParam("xy_out", projUnit);
-                if (!formatter->omitZUnitConversion())
-                    formatter->addParam("z_out", projUnit);
+            }
+            if (zUnit) {
+                auto projZUnit = zUnit->exportToPROJString();
+                const double zToSI = zUnit->conversionToSI();
+                if (projZUnit.empty()) {
+                    formatter->addParam("z_out", zToSI);
+                } else {
+                    formatter->addParam("z_out", projZUnit);
+                }
             }
         } else {
             if (projUnit.empty()) {
