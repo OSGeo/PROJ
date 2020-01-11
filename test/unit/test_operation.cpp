@@ -3258,7 +3258,9 @@ TEST(operation, webmerc_import_from_WKT2_EPSG_3785_deprecated) {
 
     EXPECT_EQ(
         crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL,
+                                 DatabaseContext::create())
+                .get()),
         "PROJCS[\"Popular Visualisation CRS / Mercator\",\n"
         "    GEOGCS[\"Popular Visualisation CRS\",\n"
         "        DATUM[\"Popular_Visualisation_Datum\",\n"
