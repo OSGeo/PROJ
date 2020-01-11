@@ -3493,6 +3493,17 @@ TEST(crs, compoundCRS_identify_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 8769);
         EXPECT_EQ(res.front().second, 70);
     }
+    {
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=tmerc +lat_0=0 +lon_0=72.05 +k=1 +x_0=3500000 "
+            "+y_0=-5811057.63 +ellps=krass "
+            "+towgs84=23.57,-140.95,-79.8,0,-0.35,-0.79,-0.22 "
+            "+geoidgrids=egm08_25.gtx +units=m +no_defs +type=crs");
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        // Just check we don't get an exception
+        crs->identify(factory);
+    }
 }
 
 // ---------------------------------------------------------------------------
