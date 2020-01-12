@@ -234,13 +234,9 @@ set(SRC_LIBPROJ_CORE
   fileapi.cpp
   fwd.cpp
   gauss.cpp
-  gc_reader.cpp
   geocent.cpp
   geocent.h
   geodesic.c
-  gridcatalog.cpp
-  gridinfo.cpp
-  gridlist.cpp
   init.cpp
   initcache.cpp
   internal.cpp
@@ -252,9 +248,6 @@ set(SRC_LIBPROJ_CORE
   mlfn.cpp
   msfn.cpp
   mutex.cpp
-  nad_cvt.cpp
-  nad_init.cpp
-  nad_intr.cpp
   open_lib.cpp
   param.cpp
   phi2.cpp
@@ -286,6 +279,8 @@ set(SRC_LIBPROJ_CORE
   proj_json_streaming_writer.hpp
   proj_json_streaming_writer.cpp
   tracing.cpp
+  grids.hpp
+  grids.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 

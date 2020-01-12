@@ -56,17 +56,22 @@ grid-values in units of mm/year in ENU-space.
 #include "proj.h"
 #include "proj_internal.h"
 #include <math.h>
+#include "grids.hpp"
 
 PROJ_HEAD(deformation, "Kinematic grid shift");
 
 #define TOL 1e-8
 #define MAX_ITERATIONS 10
 
+using namespace NS_PROJ;
+
 namespace { // anonymous namespace
-struct pj_opaque {
-    double dt;
-    double t_epoch;
-    PJ *cart;
+struct deformationData {
+    double dt = 0;
+    double t_epoch = 0;
+    PJ *cart = nullptr;
+    ListOfHGrids hgrids{};
+    ListOfVGrids vgrids{};
 };
 } // anonymous namespace
 
@@ -85,13 +90,14 @@ static PJ_XYZ get_grid_shift(PJ* P, const PJ_XYZ& cartesian) {
     PJ_COORD geodetic, shift, temp;
     double sp, cp, sl, cl;
     int previous_errno = proj_errno_reset(P);
+    auto Q = static_cast<deformationData*>(P->opaque);
 
     /* cartesian to geodetic */
-    geodetic.lpz = pj_inv3d(cartesian, static_cast<struct pj_opaque*>(P->opaque)->cart);
+    geodetic.lpz = pj_inv3d(cartesian, Q->cart);
 
     /* look up correction values in grids */
-    shift.lp    = proj_hgrid_value(P, geodetic.lp);
-    shift.enu.u = proj_vgrid_value(P, geodetic.lp, 1.0);
+    shift.lp    = proj_hgrid_value(P, Q->hgrids, geodetic.lp);
+    shift.enu.u = proj_vgrid_value(P, Q->vgrids, geodetic.lp, 1.0);
 
     if (proj_errno(P) == PJD_ERR_GRID_AREA)
         proj_log_debug(P, "deformation: coordinate (%.3f, %.3f) outside deformation model",
@@ -163,7 +169,7 @@ static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
 }
 
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct deformationData *Q = (struct deformationData *) P->opaque;
     PJ_COORD out, in;
     PJ_XYZ shift;
     in.lpz = lpz;
@@ -186,7 +192,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
 
 static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct deformationData *Q = (struct deformationData *) P->opaque;
     double dt;
     PJ_XYZ shift;
     PJ_COORD out = in;
@@ -209,7 +215,7 @@ static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
 
 
 static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct deformationData *Q = (struct deformationData *) P->opaque;
     PJ_COORD out;
     out.xyz = in;
 
@@ -225,7 +231,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
 }
 
 static PJ_COORD reverse_4d(PJ_COORD in, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct deformationData *Q = (struct deformationData *) P->opaque;
     PJ_COORD out = in;
     double dt;
 
@@ -244,11 +250,14 @@ static PJ *destructor(PJ *P, int errlev) {
     if (nullptr==P)
         return nullptr;
 
-    if (nullptr==P->opaque)
-        return pj_default_destructor (P, errlev);
-
-    if (static_cast<struct pj_opaque*>(P->opaque)->cart)
-        static_cast<struct pj_opaque*>(P->opaque)->cart->destructor (static_cast<struct pj_opaque*>(P->opaque)->cart, errlev);
+    auto Q = static_cast<struct deformationData*>(P->opaque);
+    if( Q )
+    {
+        if (Q->cart)
+            Q->cart->destructor (Q->cart, errlev);
+        delete Q;
+    }
+    P->opaque = nullptr;
 
     return pj_default_destructor(P, errlev);
 }
@@ -257,10 +266,9 @@ static PJ *destructor(PJ *P, int errlev) {
 PJ *TRANSFORMATION(deformation,1) {
     int has_xy_grids = 0;
     int has_z_grids  = 0;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return destructor(P, ENOMEM);
+    auto Q = new deformationData;
     P->opaque = (void *) Q;
+    P->destructor = destructor;
 
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
@@ -279,13 +287,13 @@ PJ *TRANSFORMATION(deformation,1) {
         return destructor(P, PJD_ERR_NO_ARGS );
     }
 
-    proj_hgrid_init(P, "xy_grids");
+    Q->hgrids = proj_hgrid_init(P, "xy_grids");
     if (proj_errno(P)) {
         proj_log_error(P, "deformation: could not find requested xy_grid(s).");
         return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
     }
 
-    proj_vgrid_init(P, "z_grids");
+    Q->vgrids = proj_vgrid_init(P, "z_grids");
     if (proj_errno(P)) {
         proj_log_error(P, "deformation: could not find requested z_grid(s).");
         return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
@@ -325,7 +333,6 @@ PJ *TRANSFORMATION(deformation,1) {
 
     P->left  = PJ_IO_UNITS_CARTESIAN;
     P->right = PJ_IO_UNITS_CARTESIAN;
-    P->destructor = destructor;
 
     return P;
 }

@@ -28,7 +28,9 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#define PJ_LIB__
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
+#endif
 
 #include <math.h>
 #include <stdio.h>
@@ -36,235 +38,60 @@
 
 #include "proj.h"
 #include "proj_internal.h"
+#include "proj/internal/internal.hpp"
+#include "grids.hpp"
 
-/************************************************************************/
-/*                         pj_apply_gridshift()                         */
-/*                                                                      */
-/*      This is the externally callable interface - part of the         */
-/*      public API - though it is not used internally any more and I    */
-/*      doubt it is used by any other applications.  But we preserve    */
-/*      it to honour our public api.                                    */
-/************************************************************************/
+NS_PROJ_START
 
-int pj_apply_gridshift( projCtx ctx, const char *nadgrids, int inverse,
-                        long point_count, int point_offset,
-                        double *x, double *y, double *z )
+// ---------------------------------------------------------------------------
 
+static const HorizontalShiftGrid* findGrid(const ListOfHGrids& grids,
+                                           PJ_LP input)
 {
-    PJ_GRIDINFO **gridlist;
-    int           grid_count;
-    int           ret;
-
-    gridlist = pj_gridlist_from_nadgrids( ctx, nadgrids, &grid_count );
-
-    if( gridlist == nullptr || grid_count == 0 )
+    for( const auto& gridset: grids )
     {
-        pj_dalloc( gridlist );
-        return ctx->last_errno;
+        auto grid = gridset->gridAt(input.lam, input.phi);
+        if( grid )
+            return grid;
     }
-
-    ret = pj_apply_gridshift_3( ctx, gridlist, grid_count, inverse,
-                                point_count, point_offset, x, y, z );
-
-    /*
-    ** Note this frees the array of grid list pointers, but not the grids
-    ** which is as intended.  The grids themselves live on.
-    */
-    pj_dalloc( gridlist );
-
-    return ret;
-}
-
-/************************************************************************/
-/*                        pj_apply_gridshift_2()                        */
-/*                                                                      */
-/*      This implementation uses the gridlist from a coordinate         */
-/*      system definition.  If the gridlist has not yet been            */
-/*      populated in the coordinate system definition we set it up      */
-/*      now.                                                            */
-/************************************************************************/
-
-int pj_apply_gridshift_2( PJ *defn, int inverse,
-                          long point_count, int point_offset,
-                          double *x, double *y, double *z )
-
-{
-    if( defn->catalog_name != nullptr )
-        return pj_gc_apply_gridshift( defn, inverse, point_count, point_offset,
-                                      x, y, z );
-
-    if( defn->gridlist == nullptr )
-    {
-        defn->gridlist =
-            pj_gridlist_from_nadgrids( pj_get_ctx( defn ),
-                                       pj_param(defn->ctx, defn->params,"snadgrids").s,
-                                       &(defn->gridlist_count) );
-
-        if( defn->gridlist == nullptr || defn->gridlist_count == 0 )
-            return defn->ctx->last_errno;
-    }
-
-    return pj_apply_gridshift_3( pj_get_ctx( defn ),
-                                 defn->gridlist, defn->gridlist_count, inverse,
-                                 point_count, point_offset, x, y, z );
-}
-
-/************************************************************************/
-/*                             find_ctable()                            */
-/*                                                                      */
-/*    Determine which grid is the correct given an input coordinate.    */
-/************************************************************************/
-
-static struct CTABLE* find_ctable(projCtx ctx, PJ_LP input, int grid_count, PJ_GRIDINFO **tables) {
-    int itable;
-
-    /* keep trying till we find a table that works */
-    for( itable = 0; itable < grid_count; itable++ )
-    {
-
-        PJ_GRIDINFO *gi = tables[itable];
-        struct CTABLE *ct = gi->ct;
-        double epsilon = (fabs(ct->del.phi)+fabs(ct->del.lam))/10000.0;
-        /* skip tables that don't match our point at all.  */
-        if ( ct->ll.phi - epsilon > input.phi
-                || ct->ll.lam - epsilon > input.lam
-                || (ct->ll.phi + (ct->lim.phi-1) * ct->del.phi + epsilon < input.phi)
-                || (ct->ll.lam + (ct->lim.lam-1) * ct->del.lam + epsilon < input.lam) ) {
-            continue;
-        }
-
-        /* If we have child nodes, check to see if any of them apply. */
-        while( gi->child )
-        {
-            PJ_GRIDINFO *child;
-
-            for( child = gi->child; child != nullptr; child = child->next )
-            {
-                struct CTABLE *ct1 = child->ct;
-                epsilon = (fabs(ct1->del.phi)+fabs(ct1->del.lam))/10000.0;
-
-                if( ct1->ll.phi - epsilon > input.phi
-                    || ct1->ll.lam - epsilon > input.lam
-                    || (ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi + epsilon < input.phi)
-                    || (ct1->ll.lam+(ct1->lim.lam-1)*ct1->del.lam + epsilon < input.lam) ) {
-                    continue;
-                }
-                break;
-            }
-
-            /* If we didn't find a child then nothing more to do */
-            if( child == nullptr ) break;
-
-            /* Otherwise use the child, first checking it's children */
-            gi = child;
-            ct = child->ct;
-        }
-        /* load the grid shift info if we don't have it. */
-        if( ct->cvs == nullptr) {
-            if (!pj_gridinfo_load( ctx, gi ) ) {
-                pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-                return nullptr;
-            }
-        }
-        /* if we get this far we have found a suitable grid */
-        return ct;
-    }
-
     return nullptr;
 }
 
-/************************************************************************/
-/*                        pj_apply_gridshift_3()                        */
-/*                                                                      */
-/*      This is the real workhorse, given a gridlist.                   */
-/************************************************************************/
+// ---------------------------------------------------------------------------
 
-int pj_apply_gridshift_3( projCtx ctx, PJ_GRIDINFO **gridlist, int gridlist_count,
-                          int inverse, long point_count, int point_offset,
-                          double *x, double *y, double *z )
+static ListOfHGrids getListOfGridSets(PJ_CONTEXT* ctx, const char* grids)
 {
-    int  i;
-    struct CTABLE *ct;
-    static int debug_count = 0;
-    (void) z;
-
-    if( gridlist== nullptr || gridlist_count == 0 )
+    ListOfHGrids list;
+    auto listOfGrids = internal::split(std::string(grids), ',');
+    for( const auto& grid: listOfGrids )
     {
-        pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
-        return PJD_ERR_FAILED_TO_LOAD_GRID;
-    }
-
-    ctx->last_errno = 0;
-
-    for( i = 0; i < point_count; i++ )
-    {
-        long io = i * point_offset;
-        PJ_LP   input, output;
-        int  itable;
-
-        input.phi = y[io];
-        input.lam = x[io];
-        output.phi = HUGE_VAL;
-        output.lam = HUGE_VAL;
-
-        ct = find_ctable(ctx, input, gridlist_count, gridlist);
-        if( ct != nullptr )
+        const char* gridname = grid.c_str();
+        bool canFail = false;
+        if( gridname[0] == '@' )
         {
-            output = nad_cvt( input, inverse, ct );
-
-            if ( output.lam != HUGE_VAL && debug_count++ < 20 )
-                pj_log( ctx, PJ_LOG_DEBUG_MINOR, "pj_apply_gridshift(): used %s", ct->id );
+            canFail = true;
+            gridname ++;
         }
-
-        if ( output.lam == HUGE_VAL )
+        auto gridSet = HorizontalShiftGridSet::open(ctx, gridname);
+        if( !gridSet )
         {
-            if( ctx->debug_level >= PJ_LOG_DEBUG_MAJOR )
+            if( !canFail )
             {
-                pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
-                    "pj_apply_gridshift(): failed to find a grid shift table for\n"
-                    "                      location (%.7fdW,%.7fdN)",
-                    x[io] * RAD_TO_DEG,
-                    y[io] * RAD_TO_DEG );
-                for( itable = 0; itable < gridlist_count; itable++ )
-                {
-                    PJ_GRIDINFO *gi = gridlist[itable];
-                    if( itable == 0 )
-                        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, "   tried: %s", gi->gridname );
-                    else
-                        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, ",%s", gi->gridname );
-                }
+                pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+                return {};
             }
-
-            /*
-             * We don't actually have any machinery currently to set the
-             * following macro, so this is mostly kept here to make it clear
-             * how we ought to operate if we wanted to make it super clear
-             * that an error has occurred when points are outside our available
-             * datum shift areas.  But if this is on, we will find that "low
-             * value" points on the fringes of some datasets will completely
-             * fail causing lots of problems when it is more or less ok to
-             * just not apply a datum shift.  So rather than deal with
-             * that we just fallback to no shift. (see also bug #45).
-             */
-#ifdef ERR_GRID_AREA_TRANSIENT_SEVERE
-            y[io] = HUGE_VAL;
-            x[io] = HUGE_VAL;
-#else
-            /* leave x/y unshifted. */
-#endif
         }
         else
         {
-            y[io] = output.phi;
-            x[io] = output.lam;
+            list.emplace_back(std::move(gridSet));
         }
     }
-
-    return 0;
+    return list;
 }
 
+
 /**********************************************/
-int proj_hgrid_init(PJ* P, const char *grids) {
+ListOfHGrids proj_hgrid_init(PJ* P, const char *gridkey) {
 /**********************************************
 
   Initizalize and populate list of horizontal
@@ -279,29 +106,157 @@ int proj_hgrid_init(PJ* P, const char *grids) {
 
 ***********************************************/
 
-    /* prepend "s" to the "grids" string to allow usage with pj_param */
-    char *sgrids = (char *) pj_malloc( (strlen(grids)+1+1) *sizeof(char) );
-    sprintf(sgrids, "%s%s", "s", grids);
+    std::string key("s");
+    key += gridkey;
+    const char* grids = pj_param(P->ctx, P->params, key.c_str()).s;
+    if( grids == nullptr )
+        return {};
 
-    if (P->gridlist == nullptr) {
-        P->gridlist = pj_gridlist_from_nadgrids(
-            P->ctx,
-            pj_param(P->ctx, P->params, sgrids).s,
-            &(P->gridlist_count)
-        );
+    return getListOfGridSets(P->ctx, grids);
+}
 
-        if( P->gridlist == nullptr || P->gridlist_count == 0 ) {
-            pj_dealloc(sgrids);
-            return 0;
+typedef struct { pj_int32 lam, phi; } ILP;
+
+static PJ_LP nad_intr(PJ_LP t, const HorizontalShiftGrid* grid) {
+	PJ_LP val, frct;
+	ILP indx;
+	int in;
+
+        const auto& extent = grid->extentAndRes();
+	t.lam /= extent.resLon;
+	indx.lam = isnan(t.lam) ? 0 : (pj_int32)lround(floor(t.lam));
+	t.phi /= extent.resLat;
+	indx.phi = isnan(t.phi) ? 0 : (pj_int32)lround(floor(t.phi));
+
+	frct.lam = t.lam - indx.lam;
+	frct.phi = t.phi - indx.phi;
+	val.lam = val.phi = HUGE_VAL;
+	if (indx.lam < 0) {
+		if (indx.lam == -1 && frct.lam > 0.99999999999) {
+			++indx.lam;
+			frct.lam = 0.;
+		} else
+			return val;
+	} else if ((in = indx.lam + 1) >= grid->width()) {
+		if (in == grid->width() && frct.lam < 1e-11) {
+			--indx.lam;
+			frct.lam = 1.;
+		} else
+			return val;
+	}
+	if (indx.phi < 0) {
+		if (indx.phi == -1 && frct.phi > 0.99999999999) {
+			++indx.phi;
+			frct.phi = 0.;
+		} else
+			return val;
+	} else if ((in = indx.phi + 1) >= grid->height()) {
+		if (in == grid->height() && frct.phi < 1e-11) {
+			--indx.phi;
+			frct.phi = 1.;
+		} else
+			return val;
+	}
+	
+	float f00Lon = 0, f00Lat = 0;
+        float f10Lon = 0, f10Lat = 0;
+        float f01Lon = 0, f01Lat = 0;
+        float f11Lon = 0, f11Lat = 0;
+	if( !grid->valueAt(indx.lam, indx.phi, f00Lon, f00Lat) ||
+            !grid->valueAt(indx.lam + 1, indx.phi, f10Lon, f10Lat) ||
+            !grid->valueAt(indx.lam, indx.phi + 1, f01Lon, f01Lat) ||
+            !grid->valueAt(indx.lam + 1, indx.phi + 1, f11Lon, f11Lat) )
+        {
+            return val;
         }
+
+        double m10 = frct.lam;
+	double m11 = m10;
+        double m01 = 1. - frct.lam;
+	double m00 = m01;
+	m11 *= frct.phi;
+	m01 *= frct.phi;
+	frct.phi = 1. - frct.phi;
+	m00 *= frct.phi;
+	m10 *= frct.phi;
+	val.lam = m00 * f00Lon + m10 * f10Lon +
+			  m01 * f01Lon + m11 * f11Lon;
+	val.phi = m00 * f00Lat + m10 * f10Lat +
+			  m01 * f01Lat + m11 * f11Lat;
+	return val;
+}
+
+
+#define MAX_ITERATIONS 10
+#define TOL 1e-12
+
+static
+PJ_LP nad_cvt(PJ_LP in, int inverse, const HorizontalShiftGrid* grid) {
+    PJ_LP t, tb,del, dif;
+    int i = MAX_ITERATIONS;
+    const double toltol = TOL*TOL;
+
+    if (in.lam == HUGE_VAL)
+        return in;
+
+    /* normalize input to ll origin */
+    tb = in;
+    const auto& extent = grid->extentAndRes();
+    tb.lam -= extent.westLon;
+    tb.phi -= extent.southLat;
+
+    tb.lam = adjlon (tb.lam - M_PI) + M_PI;
+
+    t = nad_intr (tb, grid);
+    if (t.lam == HUGE_VAL)
+        return t;
+
+    if (!inverse) {
+        in.lam -= t.lam;
+        in.phi += t.phi;
+        return in;
     }
 
-    if (P->gridlist_count == 0) {
-        proj_errno_set(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+    t.lam = tb.lam + t.lam;
+    t.phi = tb.phi - t.phi;
+
+    do {
+        del = nad_intr(t, grid);
+
+        /* This case used to return failure, but I have
+           changed it to return the first order approximation
+           of the inverse shift.  This avoids cases where the
+           grid shift *into* this grid came from another grid.
+           While we aren't returning optimally correct results
+           I feel a close result in this case is better than
+           no result.  NFW
+           To demonstrate use -112.5839956 49.4914451 against
+           the NTv2 grid shift file from Canada. */
+        if (del.lam == HUGE_VAL)
+            break;
+
+        dif.lam = t.lam - del.lam - tb.lam;
+           dif.phi = t.phi + del.phi - tb.phi;
+        t.lam -= dif.lam;
+        t.phi -= dif.phi;
+
+    } while (--i && (dif.lam*dif.lam + dif.phi*dif.phi > toltol)); /* prob. slightly faster than hypot() */
+
+    if (i==0) {
+        /* If we had access to a context, this should go through pj_log, and we should set ctx->errno */
+        if (getenv ("PROJ_DEBUG"))
+            fprintf( stderr, "Inverse grid shift iterator failed to converge.\n" );
+        t.lam = t.phi = HUGE_VAL;
+        return t;
     }
 
-    pj_dealloc(sgrids);
-    return P->gridlist_count;
+    /* and again: pj_log and ctx->errno */
+    if (del.lam==HUGE_VAL && getenv ("PROJ_DEBUG"))
+        fprintf (stderr, "Inverse grid shift iteration failed, presumably at grid edge.\nUsing first approximation.\n");
+
+    in.lam = adjlon (t.lam + extent.westLon);
+    in.phi = t.phi + extent.southLat;
+    return in;
 }
 
 /********************************************/
@@ -309,23 +264,23 @@ int proj_hgrid_init(PJ* P, const char *grids) {
 /*                                          */
 /*    Return coordinate offset in grid      */
 /********************************************/
-PJ_LP proj_hgrid_value(PJ *P, PJ_LP lp) {
-    struct CTABLE *ct;
+PJ_LP proj_hgrid_value(PJ *P, const ListOfHGrids& grids, PJ_LP lp) {
     PJ_LP out = proj_coord_error().lp;
 
-    ct = find_ctable(P->ctx, lp, P->gridlist_count, P->gridlist);
-    if (ct == nullptr) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_GRID_AREA);
+    const auto grid = findGrid(grids, lp);
+    if( !grid ) {
+        pj_ctx_set_errno( P->ctx, PJD_ERR_GRID_AREA );
         return out;
     }
 
     /* normalize input to ll origin */
-    lp.lam -= ct->ll.lam;
-    lp.phi -= ct->ll.phi;
+    const auto& extent = grid->extentAndRes();
+    lp.lam -= extent.westLon;
+    lp.phi -= extent.southLat;
 
     lp.lam = adjlon(lp.lam - M_PI) + M_PI;
 
-    out = nad_intr(lp, ct);
+    out = nad_intr(lp, grid);
 
     if (out.lam == HUGE_VAL || out.phi == HUGE_VAL) {
         pj_ctx_set_errno(P->ctx, PJD_ERR_GRID_AREA);
@@ -334,33 +289,92 @@ PJ_LP proj_hgrid_value(PJ *P, PJ_LP lp) {
     return out;
 }
 
-PJ_LP proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction) {
-    struct CTABLE *ct;
-    int inverse;
+static
+PJ_LP proj_hgrid_apply_internal(PJ_CONTEXT* ctx,
+                       PJ_LP lp,
+                       PJ_DIRECTION direction,
+                       const ListOfHGrids& grids)
+{
     PJ_LP out;
 
-    out.lam = HUGE_VAL; out.phi = HUGE_VAL;
+    out.lam = HUGE_VAL;
+    out.phi = HUGE_VAL;
 
-    ct = find_ctable(P->ctx, lp, P->gridlist_count, P->gridlist);
-
-    if (ct == nullptr || ct->cvs == nullptr) {
-        if( P->gridlist_count == 1 &&
-            strcmp(P->gridlist[0]->gridname, "null") == 0) {
-          // TODO: remove this particular case that is put there just to be
-          // able to handle longitudes outside of -180,180
-          out = lp;
-        } else {
-          pj_ctx_set_errno( P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
-        }
+    const auto grid = findGrid(grids, lp);
+    if( !grid ) {
+        pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
         return out;
     }
+    if( grid->isNullGrid() )
+    {
+        return lp;
+    }
 
-    inverse = direction == PJ_FWD ? 0 : 1;
-    out = nad_cvt(lp, inverse, ct);
+    int inverse = direction == PJ_FWD ? 0 : 1;
+    out = nad_cvt(lp, inverse, grid);
 
     if (out.lam == HUGE_VAL || out.phi == HUGE_VAL)
-        pj_ctx_set_errno(P->ctx, PJD_ERR_GRID_AREA);
+        pj_ctx_set_errno(ctx, PJD_ERR_GRID_AREA);
 
     return out;
+}
 
+PJ_LP proj_hgrid_apply(PJ *P, const ListOfHGrids& grids, PJ_LP lp, PJ_DIRECTION direction) {
+    return proj_hgrid_apply_internal(P->ctx, lp, direction, grids);
+}
+
+
+NS_PROJ_END
+
+/************************************************************************/
+/*                         pj_apply_gridshift()                         */
+/*                                                                      */
+/*      This is the externally callable interface - part of the         */
+/*      public API - though it is not used internally any more and I    */
+/*      doubt it is used by any other applications.  But we preserve    */
+/*      it to honour our public api.                                    */
+/************************************************************************/
+
+int pj_apply_gridshift( projCtx ctx, const char *nadgrids, int inverse,
+                        long point_count, int point_offset,
+                        double *x, double *y, double * /*z */ )
+
+{
+    auto hgrids = NS_PROJ::getListOfGridSets(ctx, nadgrids);
+    if( hgrids.empty() )
+    {
+        pj_ctx_set_errno( ctx, PJD_ERR_FAILED_TO_LOAD_GRID );
+        return 1;
+    }
+
+
+    for( long i = 0; i < point_count; i++ )
+    {
+        PJ_LP   input;
+
+        long io = i * point_offset;
+        input.phi = y[io];
+        input.lam = x[io];
+
+        auto output = proj_hgrid_apply_internal(ctx, input, inverse ? PJ_INV : PJ_FWD, hgrids);
+
+        if ( output.lam != HUGE_VAL )
+        {
+            y[io] = output.phi;
+            x[io] = output.lam;
+        }
+        else
+        {
+            if( ctx->debug_level >= PJ_LOG_DEBUG_MAJOR )
+            {
+                pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
+                    "pj_apply_gridshift(): failed to find a grid shift table for\n"
+                    "                      location (%.7fdW,%.7fdN)",
+                    x[io] * RAD_TO_DEG,
+                    y[io] * RAD_TO_DEG );
+            }
+        }
+    }
+
+    return 0;
 }

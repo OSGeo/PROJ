@@ -195,10 +195,8 @@ libproj_la_SOURCES = \
 	release.cpp gauss.cpp \
 	fileapi.cpp \
 	\
-	gc_reader.cpp gridcatalog.cpp \
-	nad_cvt.cpp nad_init.cpp nad_intr.cpp \
 	apply_gridshift.cpp datums.cpp datum_set.cpp transform.cpp \
-	geocent.cpp geocent.h utils.cpp gridinfo.cpp gridlist.cpp \
+	geocent.cpp geocent.h utils.cpp \
 	jniproj.cpp mutex.cpp initcache.cpp apply_vgridshift.cpp geodesic.c \
 	strtod.cpp \
 	\
@@ -213,7 +211,10 @@ libproj_la_SOURCES = \
 	proj_json_streaming_writer.hpp \
 	proj_json_streaming_writer.cpp \
 	\
-	tracing.cpp
+	tracing.cpp \
+	\
+	grids.hpp \
+	grids.cpp
 
 
 # The sed hack is to please MSVC

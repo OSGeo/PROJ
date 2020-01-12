@@ -646,12 +646,6 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
     PIN->long_wrap_center = 0.0;
     strcpy( PIN->axis, "enu" );
 
-    PIN->gridlist = nullptr;
-    PIN->gridlist_count = 0;
-
-    PIN->vgridlist_geoid = nullptr;
-    PIN->vgridlist_geoid_count = 0;
-
     /* Set datum parameters. Similarly to +init parameters we want to expand    */
     /* +datum parameters as late as possible when dealing with pipelines.       */
     /* otherwise only the first occurrence of +datum will be expanded and that */
