@@ -91,10 +91,6 @@ The following control parameters can appear in any order:
 
     List of all distance units that can be selected with the *+units* parameter.
 
-.. option:: -ld
-
-    List of datums that can be selected with the *+datum* parameter.
-
 .. option:: -r
 
     This options reverses the order of the expected input from
