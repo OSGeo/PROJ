@@ -834,6 +834,92 @@ FileLegacyAdapter::open(PJ_CONTEXT *ctx, const char *filename, FileAccess) {
 
 // ---------------------------------------------------------------------------
 
+class FileApiAdapter : public File {
+    PJ_CONTEXT *m_ctx;
+    PROJ_FILE_HANDLE *m_fp;
+
+    FileApiAdapter(const FileApiAdapter &) = delete;
+    FileApiAdapter &operator=(const FileApiAdapter &) = delete;
+
+  protected:
+    FileApiAdapter(const std::string &name, PJ_CONTEXT *ctx,
+                   PROJ_FILE_HANDLE *fp)
+        : File(name), m_ctx(ctx), m_fp(fp) {}
+
+  public:
+    ~FileApiAdapter() override;
+
+    size_t read(void *buffer, size_t sizeBytes) override;
+    size_t write(const void *, size_t) override;
+    bool seek(unsigned long long offset, int whence = SEEK_SET) override;
+    unsigned long long tell() override;
+    void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
+
+    // We may lie, but the real use case is only for network files
+    bool hasChanged() const override { return false; }
+
+    static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename,
+                                      FileAccess access);
+};
+
+// ---------------------------------------------------------------------------
+
+FileApiAdapter::~FileApiAdapter() {
+    m_ctx->fileApi.close_cbk(m_ctx, m_fp, m_ctx->fileApi.user_data);
+}
+
+// ---------------------------------------------------------------------------
+
+size_t FileApiAdapter::read(void *buffer, size_t sizeBytes) {
+    return m_ctx->fileApi.read_cbk(m_ctx, m_fp, buffer, sizeBytes,
+                                   m_ctx->fileApi.user_data);
+}
+
+// ---------------------------------------------------------------------------
+
+size_t FileApiAdapter::write(const void *buffer, size_t sizeBytes) {
+    return m_ctx->fileApi.write_cbk(m_ctx, m_fp, buffer, sizeBytes,
+                                    m_ctx->fileApi.user_data);
+}
+
+// ---------------------------------------------------------------------------
+
+bool FileApiAdapter::seek(unsigned long long offset, int whence) {
+    return m_ctx->fileApi.seek_cbk(m_ctx, m_fp, static_cast<long long>(offset),
+                                   whence, m_ctx->fileApi.user_data) != 0;
+}
+
+// ---------------------------------------------------------------------------
+
+unsigned long long FileApiAdapter::tell() {
+    return m_ctx->fileApi.tell_cbk(m_ctx, m_fp, m_ctx->fileApi.user_data);
+}
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<File> FileApiAdapter::open(PJ_CONTEXT *ctx,
+                                           const char *filename,
+                                           FileAccess eAccess) {
+    PROJ_OPEN_ACCESS eCAccess = PROJ_OPEN_ACCESS_READ_ONLY;
+    switch (eAccess) {
+    case FileAccess::READ_ONLY:
+        // Initialized above
+        break;
+    case FileAccess::READ_UPDATE:
+        eCAccess = PROJ_OPEN_ACCESS_READ_UPDATE;
+        break;
+    case FileAccess::CREATE:
+        eCAccess = PROJ_OPEN_ACCESS_CREATE;
+        break;
+    }
+    auto fp =
+        ctx->fileApi.open_cbk(ctx, filename, eCAccess, ctx->fileApi.user_data);
+    return std::unique_ptr<File>(fp ? new FileApiAdapter(filename, ctx, fp)
+                                    : nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 constexpr size_t DOWNLOAD_CHUNK_SIZE = 16 * 1024;
 constexpr int MAX_CHUNKS = 64;
 
@@ -990,12 +1076,20 @@ std::unique_ptr<DiskChunkCache> DiskChunkCache::open(PJ_CONTEXT *ctx) {
 // ---------------------------------------------------------------------------
 
 DiskChunkCache::DiskChunkCache(PJ_CONTEXT *ctx, const std::string &path)
-    : ctx_(ctx), path_(path), vfs_(SQLite3VFS::create(true, false, false)) {
-    if (vfs_ == nullptr) {
-        return;
+    : ctx_(ctx), path_(path) {
+    std::string vfsName;
+    if (ctx->custom_sqlite3_vfs_name.empty()) {
+        vfs_ = SQLite3VFS::create(true, false, false);
+        if (vfs_ == nullptr) {
+            return;
+        }
+        vfsName = vfs_->name();
+    } else {
+        vfsName = ctx->custom_sqlite3_vfs_name;
     }
     sqlite3_open_v2(path.c_str(), &hDB_,
-                    SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, vfs_->name());
+                    SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+                    vfsName.c_str());
     if (!hDB_) {
         return;
     }
@@ -2206,12 +2300,6 @@ void NetworkFile::reassign_context(PJ_CONTEXT *ctx) {
 
 std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename,
                                         FileAccess access) {
-#ifndef REMOVE_LEGACY_SUPPORT
-    // If the user has specified a legacy fileapi, use it
-    if (ctx->fileapi_legacy != pj_get_default_fileapi()) {
-        return FileLegacyAdapter::open(ctx, filename, access);
-    }
-#endif
     if (starts_with(filename, "http://") || starts_with(filename, "https://")) {
         if (!pj_context_is_network_enabled(ctx)) {
             pj_log(
@@ -2223,6 +2311,15 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename,
         }
         return NetworkFile::open(ctx, filename);
     }
+#ifndef REMOVE_LEGACY_SUPPORT
+    // If the user has specified a legacy fileapi, use it
+    if (ctx->fileapi_legacy != pj_get_default_fileapi()) {
+        return FileLegacyAdapter::open(ctx, filename, access);
+    }
+#endif
+    if (ctx->fileApi.open_cbk != nullptr) {
+        return FileApiAdapter::open(ctx, filename, access);
+    }
 #ifdef _WIN32
     return FileWin32::open(ctx, filename, access);
 #else
@@ -2233,6 +2330,11 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename,
 // ---------------------------------------------------------------------------
 
 bool FileManager::exists(PJ_CONTEXT *ctx, const char *filename) {
+    if (ctx->fileApi.exists_cbk) {
+        return ctx->fileApi.exists_cbk(ctx, filename, ctx->fileApi.user_data) !=
+               0;
+    }
+
 #ifdef _WIN32
     struct __stat64 buf;
     try {
@@ -2251,6 +2353,11 @@ bool FileManager::exists(PJ_CONTEXT *ctx, const char *filename) {
 // ---------------------------------------------------------------------------
 
 bool FileManager::mkdir(PJ_CONTEXT *ctx, const char *filename) {
+    if (ctx->fileApi.mkdir_cbk) {
+        return ctx->fileApi.mkdir_cbk(ctx, filename, ctx->fileApi.user_data) !=
+               0;
+    }
+
 #ifdef _WIN32
     try {
         return _wmkdir(UTF8ToWString(filename).c_str()) == 0;
@@ -2267,6 +2374,11 @@ bool FileManager::mkdir(PJ_CONTEXT *ctx, const char *filename) {
 // ---------------------------------------------------------------------------
 
 bool FileManager::unlink(PJ_CONTEXT *ctx, const char *filename) {
+    if (ctx->fileApi.unlink_cbk) {
+        return ctx->fileApi.unlink_cbk(ctx, filename, ctx->fileApi.user_data) !=
+               0;
+    }
+
 #ifdef _WIN32
     try {
         return _wunlink(UTF8ToWString(filename).c_str()) == 0;
@@ -2284,6 +2396,11 @@ bool FileManager::unlink(PJ_CONTEXT *ctx, const char *filename) {
 
 bool FileManager::rename(PJ_CONTEXT *ctx, const char *oldPath,
                          const char *newPath) {
+    if (ctx->fileApi.rename_cbk) {
+        return ctx->fileApi.rename_cbk(ctx, oldPath, newPath,
+                                       ctx->fileApi.user_data) != 0;
+    }
+
 #ifdef _WIN32
     try {
         return _wrename(UTF8ToWString(oldPath).c_str(),
@@ -2747,6 +2864,75 @@ void FileManager::clearMemoryCache() {
 NS_PROJ_END
 
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** Set a file API
+ *
+ * All callbacks should be provided (non NULL pointers). If read-only usage
+ * is intended, then the callbacks might have a dummy implementation.
+ *
+ * \note Those callbacks will not be used for SQLite3 database access. If
+ * custom I/O is desired for that, then proj_context_set_sqlite3_vfs_name()
+ * should be used.
+ *
+ * @param ctx PROJ context, or NULL
+ * @param fileapi Pointer to file API structure (content will be copied).
+ * @param user_data Arbitrary pointer provided by the user, and passed to the
+ * above callbacks. May be NULL.
+ * @return TRUE in case of success.
+ */
+int proj_context_set_fileapi(PJ_CONTEXT *ctx, const PROJ_FILE_API *fileapi,
+                             void *user_data) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    if (!fileapi) {
+        return false;
+    }
+    if (fileapi->version != 1) {
+        return false;
+    }
+    if (!fileapi->open_cbk || !fileapi->close_cbk || !fileapi->read_cbk ||
+        !fileapi->write_cbk || !fileapi->seek_cbk || !fileapi->tell_cbk ||
+        !fileapi->exists_cbk || !fileapi->mkdir_cbk || !fileapi->unlink_cbk ||
+        !fileapi->rename_cbk) {
+        return false;
+    }
+    ctx->fileApi.open_cbk = fileapi->open_cbk;
+    ctx->fileApi.close_cbk = fileapi->close_cbk;
+    ctx->fileApi.read_cbk = fileapi->read_cbk;
+    ctx->fileApi.write_cbk = fileapi->write_cbk;
+    ctx->fileApi.seek_cbk = fileapi->seek_cbk;
+    ctx->fileApi.tell_cbk = fileapi->tell_cbk;
+    ctx->fileApi.exists_cbk = fileapi->exists_cbk;
+    ctx->fileApi.mkdir_cbk = fileapi->mkdir_cbk;
+    ctx->fileApi.unlink_cbk = fileapi->unlink_cbk;
+    ctx->fileApi.rename_cbk = fileapi->rename_cbk;
+    ctx->fileApi.user_data = user_data;
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Set the name of a custom SQLite3 VFS.
+ *
+ * This should be a valid SQLite3 VFS name, such as the one passed to the
+ * sqlite3_vfs_register(). See https://www.sqlite.org/vfs.html
+ *
+ * It will be used to read proj.db or create&access the cache.db file in the
+ * PROJ user writable directory.
+ *
+ * @param ctx PROJ context, or NULL
+ * @param name SQLite3 VFS name. If NULL is passed, default implementation by
+ * SQLite will be used.
+ */
+void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    ctx->custom_sqlite3_vfs_name = name ? name : std::string();
+}
 
 // ---------------------------------------------------------------------------
 
