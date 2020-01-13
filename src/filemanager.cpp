@@ -3294,9 +3294,39 @@ static void *pj_open_file_with_manager(projCtx ctx, const char *name,
 
 std::unique_ptr<NS_PROJ::File>
 NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
+
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+
     auto file = std::unique_ptr<NS_PROJ::File>(
         reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
             ctx, name, "rb", pj_open_file_with_manager, nullptr, 0)));
+
+    // Retry with a .tif extension if the file name doesn't end with .tif
+    if (file == nullptr && !is_tilde_slash(name) &&
+        !is_rel_or_absolute_filename(name) && !starts_with(name, "http://") &&
+        !starts_with(name, "https://") && strcmp(name, "proj.db") != 0 &&
+        strstr(name, ".tif") == nullptr) {
+        std::string filename(name);
+        auto pos = filename.rfind('.');
+        if (pos + 4 == filename.size()) {
+            filename = filename.substr(0, pos) + ".tif";
+            file.reset(reinterpret_cast<NS_PROJ::File *>(
+                pj_open_lib_internal(ctx, filename.c_str(), "rb",
+                                     pj_open_file_with_manager, nullptr, 0)));
+        } else {
+            // For example for resource files like 'alaska'
+            filename += ".tif";
+            file.reset(reinterpret_cast<NS_PROJ::File *>(
+                pj_open_lib_internal(ctx, filename.c_str(), "rb",
+                                     pj_open_file_with_manager, nullptr, 0)));
+        }
+        if (file) {
+            pj_ctx_set_errno(ctx, 0);
+        }
+    }
+
     if (file == nullptr && !is_tilde_slash(name) &&
         !is_rel_or_absolute_filename(name) && !starts_with(name, "http://") &&
         !starts_with(name, "https://") && pj_context_is_network_enabled(ctx)) {
