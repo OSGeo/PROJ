@@ -164,7 +164,8 @@ static double decimalyear_to_mjd(double decimalyear) {
     double fractional_year;
     double mjd;
 
-    if( decimalyear < -10000 || decimalyear > 10000 )
+    // Written this way to deal with NaN input
+    if( !(decimalyear >= -10000 && decimalyear <= 10000) )
         return 0;
 
     year = lround(floor(decimalyear));
