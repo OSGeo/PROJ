@@ -277,6 +277,20 @@ accept     -80.5041667       44.5458333        0
 expect     -80.50401615833   44.5458827236     0
 -------------------------------------------------------------------------------
 
+# Check a nested grid of a nested grid only based on spatial extent analysis
+-------------------------------------------------------------------------------
+operation   +proj=hgridshift +grids=tests/test_hgrid_with_two_level_of_subgrids_no_grid_name.tif
+-------------------------------------------------------------------------------
+accept      -45.0              22.5
+accept      -44.9983333334     22.5013888889
+
+# Check a nested grid of a nested grid only based on spatial extent analysis
+-------------------------------------------------------------------------------
+operation   +proj=vgridshift +grids=tests/test_hgrid_with_two_level_of_subgrids_no_grid_name.tif +multiplier=1
+-------------------------------------------------------------------------------
+accept      -45.0              22.5             0
+accept      -45.0              22.5             5
+
 -------------------------------------------------------------------------------
 operation   +proj=hgridshift +grids=tests/test_vgrid.tif
 -------------------------------------------------------------------------------

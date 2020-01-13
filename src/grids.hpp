@@ -51,7 +51,7 @@ struct ExtentAndRes {
 
 // ---------------------------------------------------------------------------
 
-class Grid {
+class PROJ_GCC_DLL Grid {
   protected:
     std::string m_name;
     int m_width;
@@ -62,40 +62,42 @@ class Grid {
          const ExtentAndRes &extentIn);
 
   public:
-    virtual ~Grid();
+    PROJ_FOR_TEST virtual ~Grid();
 
-    int width() const { return m_width; }
-    int height() const { return m_height; }
-    const ExtentAndRes &extentAndRes() const { return m_extent; }
-    const std::string &name() const { return m_name; }
+    PROJ_FOR_TEST int width() const { return m_width; }
+    PROJ_FOR_TEST int height() const { return m_height; }
+    PROJ_FOR_TEST const ExtentAndRes &extentAndRes() const { return m_extent; }
+    PROJ_FOR_TEST const std::string &name() const { return m_name; }
 
-    virtual bool isNullGrid() const { return false; }
-    virtual bool hasChanged() const = 0;
+    PROJ_FOR_TEST virtual bool isNullGrid() const { return false; }
+    PROJ_FOR_TEST virtual bool hasChanged() const = 0;
 };
 
 // ---------------------------------------------------------------------------
 
-class VerticalShiftGrid : public Grid {
+class PROJ_GCC_DLL VerticalShiftGrid : public Grid {
   protected:
     std::vector<std::unique_ptr<VerticalShiftGrid>> m_children{};
 
   public:
-    VerticalShiftGrid(const std::string &nameIn, int widthIn, int heightIn,
-                      const ExtentAndRes &extentIn);
+    PROJ_FOR_TEST VerticalShiftGrid(const std::string &nameIn, int widthIn,
+                                    int heightIn, const ExtentAndRes &extentIn);
+    PROJ_FOR_TEST ~VerticalShiftGrid() override;
 
-    const VerticalShiftGrid *gridAt(double lon, double lat) const;
+    PROJ_FOR_TEST const VerticalShiftGrid *gridAt(double lon, double lat) const;
 
-    virtual bool isNodata(float /*val*/, double /* multiplier */) const;
+    PROJ_FOR_TEST virtual bool isNodata(float /*val*/,
+                                        double /* multiplier */) const = 0;
 
     // x = 0 is western-most column, y = 0 is southern-most line
-    virtual bool valueAt(int x, int y, float &out) const = 0;
+    PROJ_FOR_TEST virtual bool valueAt(int x, int y, float &out) const = 0;
 
-    virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
+    PROJ_FOR_TEST virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
 };
 
 // ---------------------------------------------------------------------------
 
-class VerticalShiftGridSet {
+class PROJ_GCC_DLL VerticalShiftGridSet {
   protected:
     std::string m_name{};
     std::string m_format{};
@@ -104,45 +106,50 @@ class VerticalShiftGridSet {
     VerticalShiftGridSet();
 
   public:
-    virtual ~VerticalShiftGridSet();
+    PROJ_FOR_TEST virtual ~VerticalShiftGridSet();
 
-    static std::unique_ptr<VerticalShiftGridSet>
+    PROJ_FOR_TEST static std::unique_ptr<VerticalShiftGridSet>
     open(PJ_CONTEXT *ctx, const std::string &filename);
 
-    const std::string &name() const { return m_name; }
-    const std::string &format() const { return m_format; }
-    const std::vector<std::unique_ptr<VerticalShiftGrid>> &grids() const {
+    PROJ_FOR_TEST const std::string &name() const { return m_name; }
+    PROJ_FOR_TEST const std::string &format() const { return m_format; }
+    PROJ_FOR_TEST const std::vector<std::unique_ptr<VerticalShiftGrid>> &
+    grids() const {
         return m_grids;
     }
-    const VerticalShiftGrid *gridAt(double lon, double lat) const;
+    PROJ_FOR_TEST const VerticalShiftGrid *gridAt(double lon, double lat) const;
 
-    virtual void reassign_context(PJ_CONTEXT *ctx);
-    virtual bool reopen(PJ_CONTEXT *ctx);
+    PROJ_FOR_TEST virtual void reassign_context(PJ_CONTEXT *ctx);
+    PROJ_FOR_TEST virtual bool reopen(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
 
-class HorizontalShiftGrid : public Grid {
+class PROJ_GCC_DLL HorizontalShiftGrid : public Grid {
   protected:
     std::vector<std::unique_ptr<HorizontalShiftGrid>> m_children{};
 
   public:
-    HorizontalShiftGrid(const std::string &nameIn, int widthIn, int heightIn,
-                        const ExtentAndRes &extentIn);
-    ~HorizontalShiftGrid() override;
+    PROJ_FOR_TEST HorizontalShiftGrid(const std::string &nameIn, int widthIn,
+                                      int heightIn,
+                                      const ExtentAndRes &extentIn);
+    PROJ_FOR_TEST ~HorizontalShiftGrid() override;
 
-    const HorizontalShiftGrid *gridAt(double lon, double lat) const;
+    PROJ_FOR_TEST const HorizontalShiftGrid *gridAt(double lon,
+                                                    double lat) const;
 
     // x = 0 is western-most column, y = 0 is southern-most line
-    virtual bool valueAt(int x, int y, bool compensateNTConvention,
-                         float &lonShift, float &latShift) const = 0;
+    PROJ_FOR_TEST virtual bool valueAt(int x, int y,
+                                       bool compensateNTConvention,
+                                       float &lonShift,
+                                       float &latShift) const = 0;
 
-    virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
+    PROJ_FOR_TEST virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
 };
 
 // ---------------------------------------------------------------------------
 
-class HorizontalShiftGridSet {
+class PROJ_GCC_DLL HorizontalShiftGridSet {
   protected:
     std::string m_name{};
     std::string m_format{};
@@ -151,54 +158,57 @@ class HorizontalShiftGridSet {
     HorizontalShiftGridSet();
 
   public:
-    virtual ~HorizontalShiftGridSet();
+    PROJ_FOR_TEST virtual ~HorizontalShiftGridSet();
 
-    static std::unique_ptr<HorizontalShiftGridSet>
+    PROJ_FOR_TEST static std::unique_ptr<HorizontalShiftGridSet>
     open(PJ_CONTEXT *ctx, const std::string &filename);
 
-    const std::string &name() const { return m_name; }
-    const std::string &format() const { return m_format; }
-    const std::vector<std::unique_ptr<HorizontalShiftGrid>> &grids() const {
+    PROJ_FOR_TEST const std::string &name() const { return m_name; }
+    PROJ_FOR_TEST const std::string &format() const { return m_format; }
+    PROJ_FOR_TEST const std::vector<std::unique_ptr<HorizontalShiftGrid>> &
+    grids() const {
         return m_grids;
     }
-    const HorizontalShiftGrid *gridAt(double lon, double lat) const;
+    PROJ_FOR_TEST const HorizontalShiftGrid *gridAt(double lon,
+                                                    double lat) const;
 
-    virtual void reassign_context(PJ_CONTEXT *ctx);
-    virtual bool reopen(PJ_CONTEXT *ctx);
+    PROJ_FOR_TEST virtual void reassign_context(PJ_CONTEXT *ctx);
+    PROJ_FOR_TEST virtual bool reopen(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
 
-class GenericShiftGrid : public Grid {
+class PROJ_GCC_DLL GenericShiftGrid : public Grid {
   protected:
     std::vector<std::unique_ptr<GenericShiftGrid>> m_children{};
 
   public:
-    GenericShiftGrid(const std::string &nameIn, int widthIn, int heightIn,
-                     const ExtentAndRes &extentIn);
+    PROJ_FOR_TEST GenericShiftGrid(const std::string &nameIn, int widthIn,
+                                   int heightIn, const ExtentAndRes &extentIn);
 
-    ~GenericShiftGrid() override;
+    PROJ_FOR_TEST ~GenericShiftGrid() override;
 
-    const GenericShiftGrid *gridAt(double lon, double lat) const;
+    PROJ_FOR_TEST const GenericShiftGrid *gridAt(double lon, double lat) const;
 
-    virtual std::string unit(int sample) const = 0;
+    PROJ_FOR_TEST virtual std::string unit(int sample) const = 0;
 
-    virtual std::string description(int sample) const = 0;
+    PROJ_FOR_TEST virtual std::string description(int sample) const = 0;
 
-    virtual std::string metadataItem(const std::string &key,
-                                     int sample = -1) const = 0;
+    PROJ_FOR_TEST virtual std::string metadataItem(const std::string &key,
+                                                   int sample = -1) const = 0;
 
-    virtual int samplesPerPixel() const = 0;
+    PROJ_FOR_TEST virtual int samplesPerPixel() const = 0;
 
     // x = 0 is western-most column, y = 0 is southern-most line
-    virtual bool valueAt(int x, int y, int sample, float &out) const = 0;
+    PROJ_FOR_TEST virtual bool valueAt(int x, int y, int sample,
+                                       float &out) const = 0;
 
-    virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
+    PROJ_FOR_TEST virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
 };
 
 // ---------------------------------------------------------------------------
 
-class GenericShiftGridSet {
+class PROJ_GCC_DLL GenericShiftGridSet {
   protected:
     std::string m_name{};
     std::string m_format{};
@@ -207,20 +217,21 @@ class GenericShiftGridSet {
     GenericShiftGridSet();
 
   public:
-    virtual ~GenericShiftGridSet();
+    PROJ_FOR_TEST virtual ~GenericShiftGridSet();
 
-    static std::unique_ptr<GenericShiftGridSet>
+    PROJ_FOR_TEST static std::unique_ptr<GenericShiftGridSet>
     open(PJ_CONTEXT *ctx, const std::string &filename);
 
-    const std::string &name() const { return m_name; }
-    const std::string &format() const { return m_format; }
-    const std::vector<std::unique_ptr<GenericShiftGrid>> &grids() const {
+    PROJ_FOR_TEST const std::string &name() const { return m_name; }
+    PROJ_FOR_TEST const std::string &format() const { return m_format; }
+    PROJ_FOR_TEST const std::vector<std::unique_ptr<GenericShiftGrid>> &
+    grids() const {
         return m_grids;
     }
-    const GenericShiftGrid *gridAt(double lon, double lat) const;
+    PROJ_FOR_TEST const GenericShiftGrid *gridAt(double lon, double lat) const;
 
-    virtual void reassign_context(PJ_CONTEXT *ctx);
-    virtual bool reopen(PJ_CONTEXT *ctx);
+    PROJ_FOR_TEST virtual void reassign_context(PJ_CONTEXT *ctx);
+    PROJ_FOR_TEST virtual bool reopen(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------

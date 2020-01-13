@@ -53,6 +53,7 @@ make install
 make dist-all
 find /tmp/proj_autoconf_install
 (cd test; make -j2)
+cp -r ../data/tests /tmp/proj_autoconf_install/share/proj
 test/unit/test_cpp_api.exe
 cd ..
 # Now with grids

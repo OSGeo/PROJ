@@ -112,9 +112,7 @@ VerticalShiftGrid::VerticalShiftGrid(const std::string &nameIn, int widthIn,
 
 // ---------------------------------------------------------------------------
 
-bool VerticalShiftGrid::isNodata(float /*val*/, double /* multiplier */) const {
-    return false;
-}
+VerticalShiftGrid::~VerticalShiftGrid() = default;
 
 // ---------------------------------------------------------------------------
 

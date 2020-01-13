@@ -279,6 +279,26 @@ osgeo::proj::datum::TemporalDatum::temporalOrigin() const
 osgeo::proj::datum::VerticalReferenceFrame::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&, osgeo::proj::util::optional<osgeo::proj::datum::RealizationMethod> const&)
 osgeo::proj::datum::VerticalReferenceFrame::realizationMethod() const
 osgeo::proj::datum::VerticalReferenceFrame::~VerticalReferenceFrame()
+osgeo::proj::GenericShiftGrid::~GenericShiftGrid()
+osgeo::proj::GenericShiftGrid::GenericShiftGrid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
+osgeo::proj::GenericShiftGrid::gridAt(double, double) const
+osgeo::proj::GenericShiftGridSet::~GenericShiftGridSet()
+osgeo::proj::GenericShiftGridSet::GenericShiftGridSet()
+osgeo::proj::GenericShiftGridSet::gridAt(double, double) const
+osgeo::proj::GenericShiftGridSet::open(projCtx_t*, std::string const&)
+osgeo::proj::GenericShiftGridSet::reassign_context(projCtx_t*)
+osgeo::proj::GenericShiftGridSet::reopen(projCtx_t*)
+osgeo::proj::Grid::~Grid()
+osgeo::proj::Grid::Grid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
+osgeo::proj::HorizontalShiftGrid::gridAt(double, double) const
+osgeo::proj::HorizontalShiftGrid::~HorizontalShiftGrid()
+osgeo::proj::HorizontalShiftGrid::HorizontalShiftGrid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
+osgeo::proj::HorizontalShiftGridSet::gridAt(double, double) const
+osgeo::proj::HorizontalShiftGridSet::~HorizontalShiftGridSet()
+osgeo::proj::HorizontalShiftGridSet::HorizontalShiftGridSet()
+osgeo::proj::HorizontalShiftGridSet::open(projCtx_t*, std::string const&)
+osgeo::proj::HorizontalShiftGridSet::reassign_context(projCtx_t*)
+osgeo::proj::HorizontalShiftGridSet::reopen(projCtx_t*)
 osgeo::proj::internal::ci_equal(std::string const&, char const*)
 osgeo::proj::internal::ci_equal(std::string const&, std::string const&)
 osgeo::proj::internal::ci_find(std::string const&, char const*)
@@ -696,6 +716,15 @@ osgeo::proj::util::PropertyMap::set(std::string const&, std::string const&)
 osgeo::proj::util::PropertyMap::set(std::string const&, std::vector<std::string, std::allocator<std::string> > const&)
 osgeo::proj::util::UnsupportedOperationException::~UnsupportedOperationException()
 osgeo::proj::util::UnsupportedOperationException::UnsupportedOperationException(osgeo::proj::util::UnsupportedOperationException const&)
+osgeo::proj::VerticalShiftGrid::gridAt(double, double) const
+osgeo::proj::VerticalShiftGridSet::gridAt(double, double) const
+osgeo::proj::VerticalShiftGridSet::open(projCtx_t*, std::string const&)
+osgeo::proj::VerticalShiftGridSet::reassign_context(projCtx_t*)
+osgeo::proj::VerticalShiftGridSet::reopen(projCtx_t*)
+osgeo::proj::VerticalShiftGridSet::~VerticalShiftGridSet()
+osgeo::proj::VerticalShiftGridSet::VerticalShiftGridSet()
+osgeo::proj::VerticalShiftGrid::~VerticalShiftGrid()
+osgeo::proj::VerticalShiftGrid::VerticalShiftGrid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
 pj_acquire_lock
 pj_add_type_crs_if_needed(std::string const&)
 pj_apply_gridshift
