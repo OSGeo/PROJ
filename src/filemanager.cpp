@@ -2881,6 +2881,7 @@ NS_PROJ_END
  * @param user_data Arbitrary pointer provided by the user, and passed to the
  * above callbacks. May be NULL.
  * @return TRUE in case of success.
+ * @since 7.0
  */
 int proj_context_set_fileapi(PJ_CONTEXT *ctx, const PROJ_FILE_API *fileapi,
                              void *user_data) {
@@ -2926,6 +2927,7 @@ int proj_context_set_fileapi(PJ_CONTEXT *ctx, const PROJ_FILE_API *fileapi,
  * @param ctx PROJ context, or NULL
  * @param name SQLite3 VFS name. If NULL is passed, default implementation by
  * SQLite will be used.
+ * @since 7.0
  */
 void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
     if (ctx == nullptr) {
@@ -2948,6 +2950,7 @@ void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
  * @param user_data Arbitrary pointer provided by the user, and passed to the
  * above callbacks. May be NULL.
  * @return TRUE in case of success.
+ * @since 7.0
  */
 int proj_context_set_network_callbacks(
     PJ_CONTEXT *ctx, proj_network_open_cbk_type open_cbk,
@@ -2979,6 +2982,7 @@ int proj_context_set_network_callbacks(
 * @param enable TRUE if network access is allowed.
 * @return TRUE if network access is possible. That is either libcurl is
 *         available, or an alternate interface has been set.
+* @since 7.0
 */
 int proj_context_set_enable_network(PJ_CONTEXT *ctx, int enable) {
     if (ctx == nullptr) {
@@ -3005,6 +3009,7 @@ int proj_context_set_enable_network(PJ_CONTEXT *ctx, int enable) {
 *
 * @param ctx PROJ context, or NULL
 * @param url Endpoint URL. Must NOT be NULL.
+* @since 7.0
 */
 void proj_context_set_url_endpoint(PJ_CONTEXT *ctx, const char *url) {
     if (ctx == nullptr) {
@@ -3023,6 +3028,7 @@ void proj_context_set_url_endpoint(PJ_CONTEXT *ctx, const char *url) {
 *
 * @param ctx PROJ context, or NULL
 * @param enabled TRUE if the cache is enabled.
+* @since 7.0
 */
 void proj_grid_cache_set_enable(PJ_CONTEXT *ctx, int enabled) {
     if (ctx == nullptr) {
@@ -3041,6 +3047,7 @@ void proj_grid_cache_set_enable(PJ_CONTEXT *ctx, int enabled) {
 * @param ctx PROJ context, or NULL
 * @param fullname Full name to the cache (encoded in UTF-8). If set to NULL,
 *                 caching will be disabled.
+* @since 7.0
 */
 void proj_grid_cache_set_filename(PJ_CONTEXT *ctx, const char *fullname) {
     if (ctx == nullptr) {
@@ -3059,6 +3066,7 @@ void proj_grid_cache_set_filename(PJ_CONTEXT *ctx, const char *fullname) {
 * @param ctx PROJ context, or NULL
 * @param max_size_MB Maximum size, in mega-bytes (1024*1024 bytes), or
 *                    negative value to set unlimited size.
+* @since 7.0
 */
 void proj_grid_cache_set_max_size(PJ_CONTEXT *ctx, int max_size_MB) {
     if (ctx == nullptr) {
@@ -3085,6 +3093,7 @@ void proj_grid_cache_set_max_size(PJ_CONTEXT *ctx, int max_size_MB) {
 *
 * @param ctx PROJ context, or NULL
 * @param ttl_seconds Delay in seconds. Use negative value for no expiration.
+* @since 7.0
 */
 void proj_grid_cache_set_ttl(PJ_CONTEXT *ctx, int ttl_seconds) {
     if (ctx == nullptr) {
@@ -3100,6 +3109,7 @@ void proj_grid_cache_set_ttl(PJ_CONTEXT *ctx, int ttl_seconds) {
 /** Clear the local cache of grid chunks.
 *
 * @param ctx PROJ context, or NULL
+* @since 7.0
 */
 void proj_grid_cache_clear(PJ_CONTEXT *ctx) {
     if (ctx == nullptr) {

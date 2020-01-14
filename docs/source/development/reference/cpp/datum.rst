@@ -4,5 +4,5 @@ datum namespace
 ---------------
 
 .. doxygennamespace:: osgeo::proj::datum
-   :project: cpp_stuff
+   :project: doxygen_api
    :members:

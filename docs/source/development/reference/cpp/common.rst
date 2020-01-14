@@ -4,5 +4,5 @@ common namespace
 ----------------
 
 .. doxygennamespace:: osgeo::proj::common
-   :project: cpp_stuff
+   :project: doxygen_api
    :members:

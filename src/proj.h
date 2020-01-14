@@ -360,7 +360,7 @@ int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_leg
 typedef struct PROJ_FILE_HANDLE PROJ_FILE_HANDLE;
 
 /** Open access / mode */
-typedef enum
+typedef enum PROJ_OPEN_ACCESS
 {
     /** Read-only access. Equivalent to "rb" */
     PROJ_OPEN_ACCESS_READ_ONLY,
