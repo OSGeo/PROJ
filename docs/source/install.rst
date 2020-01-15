@@ -141,6 +141,8 @@ Build requirements
 - C99 compiler
 - C++11 compiler
 - SQLite3 >= 3.11 (headers, library and executable)
+- libtiff >= 4.0 (headers and library)
+- optional (but recommended): curl >= 7.29.0
 - GNU make for autotools build or CMake >= 3.5
 
 Autotools
@@ -231,3 +233,126 @@ Tests are run with::
 
 The test suite requires that the proj-datumgrid package is installed
 in :envvar:`PROJ_LIB`.
+
+
+Building on Windows with vcpkg and Visual Studio 2017 or 2019
+--------------------------------------------------------------------------------
+
+This method is the preferred one to generate Debug and Release builds.
+
+Install git
++++++++++++
+
+Install `git <https://git-scm.com/download/win>`_
+
+Install Vcpkg
++++++++++++++
+
+Assuming there is a c:\\dev directory
+
+::
+
+    cd c:\dev
+    git clone https://github.com/Microsoft/vcpkg.git
+
+    cd vcpkg
+    .\bootstrap-vcpkg.bat
+
+Install PROJ dependencies
++++++++++++++++++++++++++
+
+::
+
+    vcpkg.exe install sqlite3[core,tool]:x86-windows tiff:x86-windows curl:x86-windows
+    vcpkg.exe install sqlite3[core,tool]:x64-windows tiff:x64-windows curl:x64-windows
+
+.. note:: The tiff and curl dependencies are only needed since PROJ 7.0
+
+Checkout PROJ sources
++++++++++++++++++++++
+
+::
+
+    cd c:\dev
+    git clone https://github.com/OSGeo/PROJ.git
+
+Build PROJ
+++++++++++
+
+::
+
+    cd c:\dev\PROJ
+    mkdir build_vs2019
+    cd build_vs2019
+    cmake -DCMAKE_TOOLCHAIN_FILE=C:\dev\vcpkg\scripts\buildsystems\vcpkg.cmake ..
+    cmake --build . --config Debug -j 8
+
+
+Run PROJ tests
+++++++++++++++
+
+::
+
+    cd c:\dev\PROJ\build_vs2019
+    ctest -V --build-config Debug
+
+
+Building on Windows with Conda dependencies and Visual Studio 2017 or 2019
+--------------------------------------------------------------------------------
+
+Variant of the above method but using Conda for SQLite3, TIFF and CURL dependencies.
+It is less appropriate for Debug builds of PROJ than the method based on vcpkg.
+
+Install git
++++++++++++
+
+Install `git <https://git-scm.com/download/win>`_
+
+Install miniconda
++++++++++++++++++
+
+Install `miniconda <https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe>`_
+
+Install PROJ dependencies
++++++++++++++++++++++++++
+
+Start a Conda enabled console and assuming there is a c:\\dev directory
+
+::
+
+    cd c:\dev
+    conda create --name proj
+    conda activate proj
+    conda install sqlite libtiff curl cmake
+
+.. note:: The libtiff and curl dependencies are only needed since PROJ 7.0
+
+Checkout PROJ sources
++++++++++++++++++++++
+
+::
+
+    cd c:\dev
+    git clone https://github.com/OSGeo/PROJ.git
+
+Build PROJ
+++++++++++
+
+From a Conda enabled console
+
+::
+
+    conda activate proj
+    cd c:\dev\PROJ
+    call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+    cmake -S . -B _build.vs2019 -DCMAKE_LIBRARY_PATH:FILEPATH="%CONDA_PREFIX%/Library/lib" -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_PREFIX%/Library/include"
+    cmake --build _build.vs2019 --config Release -j 8
+
+Run PROJ tests
+++++++++++++++
+
+::
+
+    cd c:\dev\PROJ
+    cd _build.vs2019
+    ctest -V --build-config Release
