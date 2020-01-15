@@ -83,6 +83,9 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
     set(PROJ_CXX_WARN_FLAGS -Wall)
   endif()
 endif()
+
+add_definitions(-DNOMINMAX)
+
 set(PROJ_C_WARN_FLAGS "${PROJ_C_WARN_FLAGS}"
   CACHE STRING "C flags used to compile PROJ targets")
 set(PROJ_CXX_WARN_FLAGS "${PROJ_CXX_WARN_FLAGS}"
@@ -132,6 +135,35 @@ endif()
 IF("${SQLITE3_VERSION}" VERSION_LESS "3.11")
   message(SEND_ERROR "sqlite3 >= 3.11 required!")
 ENDIF()
+
+################################################################################
+# Check for libtiff
+################################################################################
+
+option(DISABLE_TIFF_IS_STRONGLY_DISCOURAGED "Disable TIFF support (strongly discouraged !)" OFF)
+mark_as_advanced(DISABLE_TIFF_IS_STRONGLY_DISCOURAGED)
+if(NOT DISABLE_TIFF_IS_STRONGLY_DISCOURAGED)
+  find_package(TIFF REQUIRED)
+  if(NOT TIFF_FOUND)
+    message(SEND_ERROR "libtiff dependency not found!")
+  endif()
+  add_definitions(-DTIFF_ENABLED)
+endif()
+
+################################################################################
+# Check for curl
+################################################################################
+
+option(ENABLE_CURL "Enable Curl support" ON)
+if(ENABLE_CURL)
+  find_package(CURL REQUIRED)
+  if(CURL_FOUND)
+    boost_report_value(CURL_FOUND)
+  else()
+    message(SEND_ERROR "curl dependency not found!")
+  endif()
+  add_definitions(-DCURL_ENABLED)
+endif()
 
 ################################################################################
 # threading configuration

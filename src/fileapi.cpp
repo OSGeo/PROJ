@@ -34,6 +34,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
+#include "filemanager.hpp"
 
 static PAFile stdio_fopen(projCtx ctx, const char *filename,
                              const char *access);
@@ -141,7 +142,7 @@ static void stdio_fclose(PAFile file)
 
 PAFile pj_ctx_fopen(projCtx ctx, const char *filename, const char *access)
 {
-    return ctx->fileapi->FOpen(ctx, filename, access);
+    return ctx->fileapi_legacy->FOpen(ctx, filename, access);
 }
 
 /************************************************************************/
@@ -149,7 +150,7 @@ PAFile pj_ctx_fopen(projCtx ctx, const char *filename, const char *access)
 /************************************************************************/
 size_t pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile file)
 {
-    return ctx->fileapi->FRead(buffer, size, nmemb, file);
+    return ctx->fileapi_legacy->FRead(buffer, size, nmemb, file);
 }
 
 /************************************************************************/
@@ -157,7 +158,7 @@ size_t pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile
 /************************************************************************/
 int    pj_ctx_fseek(projCtx ctx, PAFile file, long offset, int whence)
 {
-    return ctx->fileapi->FSeek(file, offset, whence);
+    return ctx->fileapi_legacy->FSeek(file, offset, whence);
 }
 
 /************************************************************************/
@@ -165,7 +166,7 @@ int    pj_ctx_fseek(projCtx ctx, PAFile file, long offset, int whence)
 /************************************************************************/
 long   pj_ctx_ftell(projCtx ctx, PAFile file)
 {
-    return ctx->fileapi->FTell(file);
+    return ctx->fileapi_legacy->FTell(file);
 }
 
 /************************************************************************/
@@ -173,7 +174,7 @@ long   pj_ctx_ftell(projCtx ctx, PAFile file)
 /************************************************************************/
 void   pj_ctx_fclose(projCtx ctx, PAFile file)
 {
-    ctx->fileapi->FClose(file);
+    ctx->fileapi_legacy->FClose(file);
 }
 
 /************************************************************************/
@@ -212,3 +213,28 @@ char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
     }
     return line;
 }
+
+/************************************************************************/
+/*                         pj_ctx_set_fileapi()                         */
+/************************************************************************/
+
+void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
+
+{
+    if (nullptr==ctx)
+        return;
+    ctx->fileapi_legacy = fileapi;
+}
+
+/************************************************************************/
+/*                         pj_ctx_get_fileapi()                         */
+/************************************************************************/
+
+projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
+
+{
+    if (nullptr==ctx)
+        return nullptr;
+    return ctx->fileapi_legacy;
+}
+

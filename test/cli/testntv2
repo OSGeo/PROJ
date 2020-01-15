@@ -52,6 +52,14 @@ $EXE +proj=latlong +ellps=clrk66 +nadgrids=ntv2_0.gsb,ntv1_can.dat,conus \
 111d00'00.000"W 46d00'00.000"N 0.0
 111d00'00.000"W 47d30'00.000"N 0.0
 EOF
+
+echo "##############################################################" >> ${OUT}
+echo Switching between NTv2 subgrids >> ${OUT}
+# Initial guess is in ALraymnd, going to parent CAwest afterwards
+$EXE +proj=latlong +datum=NAD83 +to +proj=latlong +ellps=clrk66 +nadgrids=ntv2_0.gsb -E -d 8 >>${OUT} <<EOF
+-112.5839956 49.4914451 0
+EOF
+
 #
 ##############################################################################
 # Done! 

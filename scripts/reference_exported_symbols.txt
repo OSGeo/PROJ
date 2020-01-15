@@ -299,8 +299,8 @@ osgeo::proj::io::AuthorityFactory::create(dropbox::oxygen::nn<std::shared_ptr<os
 osgeo::proj::io::AuthorityFactory::createEllipsoid(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createExtent(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&) const
-osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, bool, bool, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
-osgeo::proj::io::AuthorityFactory::createFromCRSCodesWithIntermediates(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, std::vector<std::pair<std::string, std::string>, std::allocator<std::pair<std::string, std::string> > > const&, osgeo::proj::io::AuthorityFactory::ObjectType, std::vector<std::string, std::allocator<std::string> > const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
+osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, bool, bool, bool, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
+osgeo::proj::io::AuthorityFactory::createFromCRSCodesWithIntermediates(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, bool, std::vector<std::pair<std::string, std::string>, std::allocator<std::pair<std::string, std::string> > > const&, osgeo::proj::io::AuthorityFactory::ObjectType, std::vector<std::string, std::allocator<std::string> > const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
 osgeo::proj::io::AuthorityFactory::createGeodeticCRS(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createGeodeticDatum(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createGeographicCRS(std::string const&) const
@@ -330,7 +330,7 @@ osgeo::proj::io::DatabaseContext::getDatabaseStructure() const
 osgeo::proj::io::DatabaseContext::getMetadata(char const*) const
 osgeo::proj::io::DatabaseContext::getPath() const
 osgeo::proj::io::DatabaseContext::getSqliteHandle() const
-osgeo::proj::io::DatabaseContext::lookForGridInfo(std::string const&, std::string&, std::string&, std::string&, bool&, bool&, bool&) const
+osgeo::proj::io::DatabaseContext::lookForGridInfo(std::string const&, bool, std::string&, std::string&, std::string&, bool&, bool&, bool&) const
 osgeo::proj::io::FactoryException::~FactoryException()
 osgeo::proj::io::FactoryException::FactoryException(char const*)
 osgeo::proj::io::FactoryException::FactoryException(osgeo::proj::io::FactoryException const&)
@@ -465,7 +465,7 @@ osgeo::proj::metadata::VerticalExtent::~VerticalExtent()
 osgeo::proj::operation::ConcatenatedOperation::~ConcatenatedOperation()
 osgeo::proj::operation::ConcatenatedOperation::createComputeMetadata(std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> > > > const&, bool)
 osgeo::proj::operation::ConcatenatedOperation::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
-osgeo::proj::operation::ConcatenatedOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::operation::ConcatenatedOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool) const
 osgeo::proj::operation::ConcatenatedOperation::inverse() const
 osgeo::proj::operation::ConcatenatedOperation::operations() const
 osgeo::proj::operation::Conversion::~Conversion()
@@ -575,7 +575,7 @@ osgeo::proj::operation::CoordinateOperationFactory::createOperation(dropbox::oxy
 osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
 osgeo::proj::operation::CoordinateOperation::hasBallparkTransformation() const
 osgeo::proj::operation::CoordinateOperation::interpolationCRS() const
-osgeo::proj::operation::CoordinateOperation::isPROJInstantiable(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::operation::CoordinateOperation::isPROJInstantiable(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool) const
 osgeo::proj::operation::CoordinateOperation::normalizeForVisualization() const
 osgeo::proj::operation::CoordinateOperation::operationVersion() const
 osgeo::proj::operation::CoordinateOperation::shallowClone() const
@@ -621,7 +621,7 @@ osgeo::proj::operation::ParameterValue::value() const
 osgeo::proj::operation::ParameterValue::valueFile() const
 osgeo::proj::operation::PointMotionOperation::~PointMotionOperation()
 osgeo::proj::operation::SingleOperation::createPROJBased(osgeo::proj::util::PropertyMap const&, std::string const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
-osgeo::proj::operation::SingleOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::operation::SingleOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool) const
 osgeo::proj::operation::SingleOperation::method() const
 osgeo::proj::operation::SingleOperation::parameterValue(int) const
 osgeo::proj::operation::SingleOperation::parameterValueMeasure(int) const
@@ -707,6 +707,7 @@ pj_chomp(char*)
 pj_cleanup_lock
 pj_clear_initcache
 pj_compare_datums
+pj_context_is_network_enabled(projCtx_t*)
 pj_ctx_alloc
 pj_ctx_fclose
 pj_ctx_fgets
@@ -794,9 +795,12 @@ proj_context_get_use_proj4_init_rules
 proj_context_guess_wkt_dialect
 proj_context_set_autoclose_database
 proj_context_set_database_path
+proj_context_set_enable_network
 proj_context_set_file_finder
+proj_context_set_network_callbacks
 proj_context_set(PJconsts*, projCtx_t*)
 proj_context_set_search_paths
+proj_context_set_url_endpoint
 proj_context_use_proj4_init_rules
 proj_convert_conversion_to_other_method
 proj_coord

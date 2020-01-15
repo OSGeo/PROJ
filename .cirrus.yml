@@ -16,7 +16,7 @@ task:
     folder: $HOME/.ccache
 
   pkginstall_script:
-    - pkg install -y autoconf automake libtool pkgconf sqlite3 wget unzip ccache gmake
+    - pkg install -y autoconf automake libtool pkgconf sqlite3 tiff wget unzip ccache gmake
   download_grid_script:
     - wget https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
     - (cd data && unzip -o ../proj-datumgrid-1.8.zip)

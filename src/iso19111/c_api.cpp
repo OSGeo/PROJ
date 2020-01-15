@@ -177,7 +177,11 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
             auto formatter = PROJStringFormatter::create(
                 PROJStringFormatter::Convention::PROJ_5, dbContext);
             auto projString = coordop->exportToPROJString(formatter.get());
+            if (pj_context_is_network_enabled(ctx)) {
+                ctx->defer_grid_opening = true;
+            }
             auto pj = pj_create_internal(ctx, projString.c_str());
+            ctx->defer_grid_opening = false;
             if (pj) {
                 pj->iso_obj = objIn;
                 if (ctx->cpp_context) {
@@ -766,7 +770,7 @@ int PROJ_DLL proj_grid_get_info_from_database(
         bool open_license;
         bool available;
         if (!db_context->lookForGridInfo(
-                grid_name, ctx->cpp_context->lastGridFullName_,
+                grid_name, false, ctx->cpp_context->lastGridFullName_,
                 ctx->cpp_context->lastGridPackageName_,
                 ctx->cpp_context->lastGridUrl_, direct_download, open_license,
                 available)) {
@@ -6571,7 +6575,10 @@ int proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
     }
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        auto ret = op->isPROJInstantiable(dbContext) ? 1 : 0;
+        auto ret = op->isPROJInstantiable(dbContext,
+                                          pj_context_is_network_enabled(ctx))
+                       ? 1
+                       : 0;
         if (ctx->cpp_context) {
             ctx->cpp_context->autoCloseDbIfNeeded();
         }
@@ -6883,7 +6890,8 @@ int proj_coordoperation_get_grid_used_count(PJ_CONTEXT *ctx,
     try {
         if (!coordoperation->gridsNeededAsked) {
             coordoperation->gridsNeededAsked = true;
-            const auto gridsNeeded = co->gridsNeeded(dbContext);
+            const auto gridsNeeded =
+                co->gridsNeeded(dbContext, pj_context_is_network_enabled(ctx));
             for (const auto &gridDesc : gridsNeeded) {
                 coordoperation->gridsNeeded.emplace_back(gridDesc);
             }
@@ -7219,6 +7227,12 @@ void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
             factory_ctx->operationContext->setGridAvailabilityUse(
                 CoordinateOperationContext::GridAvailabilityUse::
                     IGNORE_GRID_AVAILABILITY);
+            break;
+
+        case PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE:
+            factory_ctx->operationContext->setGridAvailabilityUse(
+                CoordinateOperationContext::GridAvailabilityUse::
+                    KNOWN_AVAILABLE);
             break;
         }
     } catch (const std::exception &e) {

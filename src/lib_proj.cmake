@@ -198,6 +198,7 @@ set(SRC_LIBPROJ_TRANSFORMATIONS
   transformations/horner.cpp
   transformations/molodensky.cpp
   transformations/vgridshift.cpp
+  transformations/xyzgridshift.cpp
 )
 
 set(SRC_LIBPROJ_ISO19111
@@ -281,6 +282,8 @@ set(SRC_LIBPROJ_CORE
   tracing.cpp
   grids.hpp
   grids.cpp
+  filemanager.hpp
+  filemanager.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
@@ -437,6 +440,16 @@ endif()
 
 include_directories(${SQLITE3_INCLUDE_DIR})
 target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
+
+if(NOT DISABLE_TIFF_IS_STRONGLY_DISCOURAGED)
+  include_directories(${TIFF_INCLUDE_DIR})
+  target_link_libraries(${PROJ_CORE_TARGET} ${TIFF_LIBRARY})
+endif()
+
+if(CURL_FOUND)
+  include_directories(${CURL_INCLUDE_DIR})
+  target_link_libraries(${PROJ_CORE_TARGET} ${CURL_LIBRARY})
+endif()
 
 if(MSVC)
   target_compile_definitions(${PROJ_CORE_TARGET}

@@ -26,8 +26,13 @@ function(proj_add_test_script_sh SH_NAME BIN_USE)
         COMMAND ${PROJECT_SOURCE_DIR}/test/cli/${SH_NAME}
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${${BIN_USE}}
       )
-    set_tests_properties( ${testname}
-        PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
+      if(MSVC)
+          set_tests_properties( ${testname}
+              PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data\\;${PROJECT_SOURCE_DIR}/data")
+      else()
+          set_tests_properties( ${testname}
+              PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data:${PROJECT_SOURCE_DIR}/data")
+      endif()
     endif()
 
   endif()
@@ -43,8 +48,14 @@ function(proj_add_gie_test TESTNAME TESTCASE)
       COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GIE_BIN}
       ${TESTFILE}
     )
-    set_tests_properties( ${TESTNAME}
-        PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data")
+
+    if(MSVC)
+        set_tests_properties( ${TESTNAME}
+            PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data\\;${PROJECT_SOURCE_DIR}/data")
+    else()
+        set_tests_properties( ${TESTNAME}
+            PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data:${PROJECT_SOURCE_DIR}/data")
+    endif()
 
 
 endfunction()

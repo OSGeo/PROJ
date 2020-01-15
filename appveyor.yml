@@ -27,9 +27,10 @@ build_script:
   - set PATH=%CD%;%PATH%
   - cd ..
   - vcpkg install sqlite3:"%platform%"-windows
+  - vcpkg install tiff:"%platform%"-windows
+  - vcpkg install curl:"%platform%"-windows
   - set SQLITE3_BIN=%APPVEYOR_BUILD_FOLDER%\sqlite3\bin
   - mkdir %SQLITE3_BIN%
-  - copy c:\projects\proj\vcpkg\installed\"%platform%"-windows\bin\sqlite3.dll %SQLITE3_BIN%
   - ps: |
         appveyor DownloadFile https://sqlite.org/2018/sqlite-tools-win32-x86-3250100.zip
         7z x sqlite-tools-win32-x86-3250100.zip
@@ -47,6 +48,8 @@ build_script:
   - set PROJ_DIR=%APPVEYOR_BUILD_FOLDER%\proj_dir
   - cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_LIBPROJ_SHARED="%BUILD_LIBPROJ_SHARED%" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=C:/projects/proj/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
   - cmake --build . --config Release --target install
+  - copy c:\projects\proj\vcpkg\installed\"%platform%"-windows\bin\*.dll %PROJ_DIR%\bin
+  - dir %PROJ_DIR%\bin
 
 test_script:
   - echo test_script

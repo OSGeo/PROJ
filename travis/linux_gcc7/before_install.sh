@@ -8,7 +8,8 @@ set -e
 sudo apt-get install -qq \
         lcov \
         doxygen graphviz \
-        sqlite3 libsqlite3-dev
+        sqlite3 libsqlite3-dev \
+        libtiff-dev libcurl4-openssl-dev
 
 #scripts/cppcheck.sh
 #scripts/doxygen.sh

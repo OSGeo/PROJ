@@ -353,6 +353,85 @@ void PROJ_DLL proj_context_set_search_paths(PJ_CONTEXT *ctx, int count_paths, co
 void PROJ_DLL proj_context_use_proj4_init_rules(PJ_CONTEXT *ctx, int enable);
 int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_legacy_code_path);
 
+/*! @endcond */
+
+/** Opaque structure for PROJ. Implementations might cast it to their
+ * structure/class of choice. */
+typedef struct PROJ_NETWORK_HANDLE PROJ_NETWORK_HANDLE;
+
+/** Network access: open callback
+ * 
+ * Should try to read the size_to_read first bytes at the specified offset of
+ * the file given by URL url,
+ * and write them to buffer. *out_size_read should be updated with the actual
+ * amount of bytes read (== size_to_read if the file is larger than size_to_read).
+ * During this read, the implementation should make sure to store the HTTP
+ * headers from the server response to be able to respond to
+ * proj_network_get_header_value_cbk_type callback.
+ *
+ * error_string_max_size should be the maximum size that can be written into
+ * the out_error_string buffer (including terminating nul character).
+ *
+ * @return a non-NULL opaque handle in case of success.
+ */
+typedef PROJ_NETWORK_HANDLE* (*proj_network_open_cbk_type)(
+                                                      PJ_CONTEXT* ctx,
+                                                      const char* url,
+                                                      unsigned long long offset,
+                                                      size_t size_to_read,
+                                                      void* buffer,
+                                                      size_t* out_size_read,
+                                                      size_t error_string_max_size,
+                                                      char* out_error_string,
+                                                      void* user_data);
+
+/** Network access: close callback */
+typedef void (*proj_network_close_cbk_type)(PJ_CONTEXT* ctx,
+                                            PROJ_NETWORK_HANDLE* handle,
+                                            void* user_data);
+
+/** Network access: get HTTP headers */
+typedef const char* (*proj_network_get_header_value_cbk_type)(
+                                            PJ_CONTEXT* ctx,
+                                            PROJ_NETWORK_HANDLE* handle,
+                                            const char* header_name,
+                                            void* user_data);
+
+/** Network access: read range
+ *
+ * Read size_to_read bytes from handle, starting at offset, into
+ * buffer.
+ *
+ * error_string_max_size should be the maximum size that can be written into
+ * the out_error_string buffer (including terminating nul character).
+ *
+ * @return the number of bytes actually read (0 in case of error)
+ */
+typedef size_t (*proj_network_read_range_type)(
+                                            PJ_CONTEXT* ctx,
+                                            PROJ_NETWORK_HANDLE* handle,
+                                            unsigned long long offset,
+                                            size_t size_to_read,
+                                            void* buffer,
+                                            size_t error_string_max_size,
+                                            char* out_error_string,
+                                            void* user_data);
+
+int PROJ_DLL proj_context_set_network_callbacks(
+    PJ_CONTEXT* ctx,
+    proj_network_open_cbk_type open_cbk,
+    proj_network_close_cbk_type close_cbk,
+    proj_network_get_header_value_cbk_type get_header_value_cbk,
+    proj_network_read_range_type read_range_cbk,
+    void* user_data);
+
+int PROJ_DLL proj_context_set_enable_network(PJ_CONTEXT* ctx,
+                                             int enabled);
+
+void PROJ_DLL proj_context_set_url_endpoint(PJ_CONTEXT* ctx, const char* url);
+
+/*! @cond Doxygen_Suppress */
+
 /* Manage the transformation definition object PJ */
 PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ PROJ_DLL *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
@@ -624,6 +703,12 @@ typedef enum {
     /** Ignore grid availability at all. Results will be presented as if
         * all grids were available. */
     PROJ_GRID_AVAILABILITY_IGNORED,
+
+    /** Results will be presented as if grids known to PROJ (that is
+    * registered in the grid_alternatives table of its database) were
+    * available. Used typically when networking is enabled.
+    */
+    PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE,
 } PROJ_GRID_AVAILABILITY_USE;
 
 /** \brief PROJ string version. */

@@ -214,9 +214,6 @@ size_t pj_trim_argc (char *args);
 char **pj_trim_argv (size_t argc, char *args);
 char  *pj_make_args (size_t argc, char **argv);
 
-/* Lowest level: Minimum support for fileapi */
-void proj_fileapi_set (PJ *P, void *fileapi);
-
 typedef struct { double r, i; } COMPLEX;
 
 /* Forward declarations and typedefs for stuff needed inside the PJ object */
@@ -346,6 +343,7 @@ struct PJconsts {
     PJ_OPERATOR inv4d = nullptr;
 
     PJ_DESTRUCTOR destructor = nullptr;
+    void   (*reassign_context)(PJ*, projCtx_t *) = nullptr;
 
 
     /*************************************************************************************
@@ -413,7 +411,6 @@ struct PJconsts {
     int  geoc = 0;                  /* Geocentric latitude flag */
     int  is_latlong = 0;            /* proj=latlong ... not really a projection at all */
     int  is_geocent = 0;            /* proj=geocent ... not really a projection at all */
-    int  is_pipeline = 0;           /* 1 if PJ represents a pipeline */
     int  need_ellps = 0;            /* 0 for operations that are purely cartesian */
     int  skip_fwd_prepare = 0;
     int  skip_fwd_finalize = 0;
@@ -664,9 +661,21 @@ struct FACTORS {
 /* NOTE: Remember to update src/strerrno.cpp, src/apps/gie.cpp and transient_error in */
 /* src/transform.cpp when adding new value */
 
+// Legacy
 struct projFileAPI_t;
 
 struct projCppContext;
+
+struct projNetworkCallbacksAndData
+{
+    bool enabled = false;
+    bool enabled_env_variable_checked = false; // whereas we have checked PROJ_NETWORK env variable
+    proj_network_open_cbk_type open = nullptr;
+    proj_network_close_cbk_type close = nullptr;
+    proj_network_get_header_value_cbk_type get_header_value = nullptr;
+    proj_network_read_range_type read_range = nullptr;
+    void* user_data = nullptr;
+};
 
 /* proj thread context */
 struct projCtx_t {
@@ -674,7 +683,7 @@ struct projCtx_t {
     int     debug_level = 0;
     void    (*logger)(void *, int, const char *) = nullptr;
     void    *logger_app_data = nullptr;
-    struct projFileAPI_t *fileapi = nullptr;
+    struct projFileAPI_t *fileapi_legacy = nullptr; // for proj_api.h legacy API
     struct projCppContext* cpp_context = nullptr; /* internal context for C++ code */
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
@@ -685,6 +694,12 @@ struct projCtx_t {
     const char* (*file_finder_legacy) (const char*) = nullptr; // Only for proj_api compat. To remove once it is removed
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
+
+    projNetworkCallbacksAndData networking{};
+    bool defer_grid_opening = false; // set by pj_obj_create()
+
+    bool iniFileLoaded = false;
+    std::string endpoint{};
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
 
@@ -812,7 +827,12 @@ std::string pj_double_quote_string_param_if_needed(const std::string& str);
 PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition);
 PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv);
 
-void pj_pipeline_assign_context_to_steps( PJ* P, PJ_CONTEXT* ctx );
+// For use by projinfo
+bool PROJ_DLL pj_context_is_network_enabled(PJ_CONTEXT* ctx);
+
+std::string pj_context_get_url_endpoint(PJ_CONTEXT* ctx);
+
+void pj_load_ini(PJ_CONTEXT* ctx);
 
 /* classic public API */
 #include "proj_api.h"

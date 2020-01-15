@@ -34,7 +34,7 @@ echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
 OUT=proj_out27
-INIT_FILE=${PROJ_LIB}/nad27
+INIT_FILE=nad27
 #
 echo "doing tests into file ${OUT}, please wait"
 #
