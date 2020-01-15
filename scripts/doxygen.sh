@@ -38,7 +38,7 @@ rm -rf docs/build/xml/
 # Ugly hack to workaround a bug of Doxygen 1.8.17 that erroneously detect proj_network_get_header_value_cbk_type/ as a variable
 sed "s/const char\* (\*proj_network_get_header_value_cbk_type/CONST_CHAR\* (\*proj_network_get_header_value_cbk_type/" < src/proj.h > docs/build/tmp_breathe/proj.h
 
-(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src/iso19111 include/proj docs/build/tmp_breathe/proj.h src/filemanager.cpp docs/build/tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > docs/build/tmp_breathe/docs_log.txt 2>&1
+(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src/iso19111 include/proj docs/build/tmp_breathe/proj.h src/filemanager.cpp src/networkfilemanager.cpp docs/build/tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > docs/build/tmp_breathe/docs_log.txt 2>&1
 if grep -i warning docs/build/tmp_breathe/docs_log.txt; then
     echo "Doxygen warnings found" && cat docs/build/tmp_breathe/docs_log.txt && /bin/false;
 else

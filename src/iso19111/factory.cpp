@@ -45,7 +45,7 @@
 #include "proj/internal/lru_cache.hpp"
 #include "proj/internal/tracing.hpp"
 
-#include "sqlite3.hpp"
+#include "sqlite3_utils.hpp"
 
 #include <cmath>
 #include <cstdlib>

@@ -30,7 +30,7 @@
 #pragma GCC diagnostic ignored "-Weffc++"
 #endif
 
-#include "sqlite3.hpp"
+#include "sqlite3_utils.hpp"
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
