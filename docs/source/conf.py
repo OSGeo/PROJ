@@ -42,6 +42,9 @@ extensions = [
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
+# BibTeX configuration
+bibtex_bibfiles = ['references.bib']
+
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 # source_suffix = ['.rst', '.md']
@@ -78,7 +81,7 @@ release = version
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+# language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -170,6 +173,10 @@ html_logo = '../images/logo.png'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+htm_css_files = [
+    'theme_overrides.css',  # override wide tables in RTD theme
+]
+
 html_context = {
     'display_github': True,
     'theme_vcs_pageview_mode': 'edit',
@@ -177,9 +184,6 @@ html_context = {
     'github_repo': 'PROJ',
     # TODO: edit when switching active branch
     'github_version': '/6.2/docs/source/',
-    'css_files': [
-        '_static/theme_overrides.css',  # override wide tables in RTD theme
-    ],
 }
 
 # Add any extra paths that contain custom files (such as robots.txt or
@@ -252,6 +256,8 @@ preamble = r"""
 \ifdefined\DeclareUnicodeCharacter
   \DeclareUnicodeCharacter{2032}{$'$}% prime
 \fi
+
+\usepackage[notbib]{tocbibind}
 """
 
 latex_elements = {
@@ -263,7 +269,8 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 'preamble': preamble,
-'inputenc':'\\usepackage[utf8]{inputenc}'
+'inputenc': r'\usepackage[utf8]{inputenc}',
+'makeindex': r'\usepackage[columns=1]{idxlayout}\makeindex',
 
 # Latex figure (float) alignment
 #'figure_align': 'htbp',
