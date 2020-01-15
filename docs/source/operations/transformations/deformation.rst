@@ -99,6 +99,8 @@ Parameters
     Grids for the horizontal component of a deformation model is expected to be
     in CTable2 format.
 
+    .. note:: :option:`+xy_grids` is mutually exclusive with :option:`+grids`
+
 .. option:: +z_grids=<list>
 
     Comma-separated list of grids to load. If a grid is prefixed by an `@` the
@@ -107,6 +109,8 @@ Parameters
 
     Grids for the vertical component of a deformation model is expected to be
     in either GTX format.
+
+    .. note:: :option:`+z_grids` is mutually exclusive with :option:`+grids`
 
 .. option:: +grids=<list>
 
