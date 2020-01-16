@@ -65,7 +65,7 @@ include_proj_h_from_c_SOURCES = include_proj_h_from_c.c
 
 test_network_SOURCES = test_network.cpp main.cpp
 test_network_CXXFLAGS = @CURL_CFLAGS@ @CURL_ENABLED_FLAGS@
-test_network_LDADD = ../../src/libproj.la @GTEST_LIBS@ @CURL_LIBS@
+test_network_LDADD = ../../src/libproj.la @GTEST_LIBS@ @SQLITE3_LIBS@ @CURL_LIBS@
 
 test_network-check: test_network
 	PROJ_LIB=$(PROJ_LIB) PROJ_SOURCE_DATA=$(PROJ_LIB) ./test_network

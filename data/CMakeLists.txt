@@ -2,6 +2,10 @@
 # files containing dictionary of useful projection
 #
 
+set(CONFIG_FILES
+  proj.ini
+)
+
 set(PROJ_DICTIONARY
   null
   world
@@ -53,7 +57,7 @@ add_custom_command(
 add_custom_target(generate_proj_db ALL DEPENDS ${PROJ_DB})
 
 if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
-  foreach(FILE ${PROJ_DICTIONARY} ${GRIDSHIFT_FILES})
+  foreach(FILE ${CONFIG_FILES} ${PROJ_DICTIONARY} ${GRIDSHIFT_FILES})
     configure_file(${FILE} ${FILE} COPYONLY)
   endforeach()
 endif()
@@ -62,6 +66,7 @@ endif()
 #install
 #
 set(ALL_DATA_FILE
+  ${CONFIG_FILES}
   ${PROJ_DICTIONARY}
   ${GRIDSHIFT_FILES}
   ${PROJ_DB}

@@ -430,6 +430,16 @@ int PROJ_DLL proj_context_set_enable_network(PJ_CONTEXT* ctx,
 
 void PROJ_DLL proj_context_set_url_endpoint(PJ_CONTEXT* ctx, const char* url);
 
+void PROJ_DLL proj_grid_cache_set_enable(PJ_CONTEXT* ctx, int enabled);
+
+void PROJ_DLL proj_grid_cache_set_filename(PJ_CONTEXT* ctx, const char* fullname);
+
+void PROJ_DLL proj_grid_cache_set_max_size(PJ_CONTEXT* ctx, int max_size_MB);
+
+void PROJ_DLL proj_grid_cache_set_ttl(PJ_CONTEXT* ctx, int ttl_seconds);
+
+void PROJ_DLL proj_grid_cache_clear(PJ_CONTEXT* ctx);
+
 /*! @cond Doxygen_Suppress */
 
 /* Manage the transformation definition object PJ */

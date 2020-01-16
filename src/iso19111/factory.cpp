@@ -45,6 +45,8 @@
 #include "proj/internal/lru_cache.hpp"
 #include "proj/internal/tracing.hpp"
 
+#include "sqlite3.hpp"
+
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -275,9 +277,7 @@ struct DatabaseContext::Private {
     void registerFunctions();
 
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    std::string thisNamePtr_{};
-    sqlite3_vfs *vfs_{};
-    bool createCustomVFS();
+    std::unique_ptr<SQLite3VFS> vfs_{};
 #endif
 
     Private(const Private &) = delete;
@@ -294,13 +294,6 @@ DatabaseContext::Private::~Private() {
     assert(recLevel_ == 0);
 
     closeDB();
-
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    if (vfs_) {
-        sqlite3_vfs_unregister(vfs_);
-        delete vfs_;
-    }
-#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -496,101 +489,6 @@ void DatabaseContext::Private::cache(const std::string &code,
 
 // ---------------------------------------------------------------------------
 
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-
-typedef int (*ClosePtr)(sqlite3_file *);
-
-static int VFSClose(sqlite3_file *file) {
-    sqlite3_vfs *defaultVFS = sqlite3_vfs_find(nullptr);
-    assert(defaultVFS);
-    ClosePtr defaultClosePtr;
-    std::memcpy(&defaultClosePtr,
-                reinterpret_cast<char *>(file) + defaultVFS->szOsFile,
-                sizeof(ClosePtr));
-    void *methods = const_cast<sqlite3_io_methods *>(file->pMethods);
-    int ret = defaultClosePtr(file);
-    std::free(methods);
-    return ret;
-}
-
-// No-lock implementation
-static int VSFLock(sqlite3_file *, int) { return SQLITE_OK; }
-
-static int VSFUnlock(sqlite3_file *, int) { return SQLITE_OK; }
-
-static int VFSOpen(sqlite3_vfs *vfs, const char *name, sqlite3_file *file,
-                   int flags, int *outFlags) {
-    sqlite3_vfs *defaultVFS = static_cast<sqlite3_vfs *>(vfs->pAppData);
-    int ret = defaultVFS->xOpen(defaultVFS, name, file, flags, outFlags);
-    if (ret == SQLITE_OK) {
-        ClosePtr defaultClosePtr = file->pMethods->xClose;
-        assert(defaultClosePtr);
-        sqlite3_io_methods *methods = static_cast<sqlite3_io_methods *>(
-            std::malloc(sizeof(sqlite3_io_methods)));
-        if (!methods) {
-            file->pMethods->xClose(file);
-            return SQLITE_NOMEM;
-        }
-        memcpy(methods, file->pMethods, sizeof(sqlite3_io_methods));
-        methods->xClose = VFSClose;
-        methods->xLock = VSFLock;
-        methods->xUnlock = VSFUnlock;
-        file->pMethods = methods;
-        // Save original xClose pointer at end of file structure
-        std::memcpy(reinterpret_cast<char *>(file) + defaultVFS->szOsFile,
-                    &defaultClosePtr, sizeof(ClosePtr));
-    }
-    return ret;
-}
-
-static int VFSAccess(sqlite3_vfs *vfs, const char *zName, int flags,
-                     int *pResOut) {
-    sqlite3_vfs *defaultVFS = static_cast<sqlite3_vfs *>(vfs->pAppData);
-    // Do not bother stat'ing for journal or wal files
-    if (std::strstr(zName, "-journal") || std::strstr(zName, "-wal")) {
-        *pResOut = false;
-        return SQLITE_OK;
-    }
-    return defaultVFS->xAccess(defaultVFS, zName, flags, pResOut);
-}
-
-// ---------------------------------------------------------------------------
-
-bool DatabaseContext::Private::createCustomVFS() {
-
-    sqlite3_vfs *defaultVFS = sqlite3_vfs_find(nullptr);
-    assert(defaultVFS);
-
-    std::ostringstream buffer;
-    buffer << this;
-    thisNamePtr_ = buffer.str();
-
-    vfs_ = new sqlite3_vfs();
-    vfs_->iVersion = 1;
-    vfs_->szOsFile = defaultVFS->szOsFile + sizeof(ClosePtr);
-    vfs_->mxPathname = defaultVFS->mxPathname;
-    vfs_->zName = thisNamePtr_.c_str();
-    vfs_->pAppData = defaultVFS;
-    vfs_->xOpen = VFSOpen;
-    vfs_->xDelete = defaultVFS->xDelete;
-    vfs_->xAccess = VFSAccess;
-    vfs_->xFullPathname = defaultVFS->xFullPathname;
-    vfs_->xDlOpen = defaultVFS->xDlOpen;
-    vfs_->xDlError = defaultVFS->xDlError;
-    vfs_->xDlSym = defaultVFS->xDlSym;
-    vfs_->xDlClose = defaultVFS->xDlClose;
-    vfs_->xRandomness = defaultVFS->xRandomness;
-    vfs_->xSleep = defaultVFS->xSleep;
-    vfs_->xCurrentTime = defaultVFS->xCurrentTime;
-    vfs_->xGetLastError = defaultVFS->xGetLastError;
-    vfs_->xCurrentTimeInt64 = defaultVFS->xCurrentTimeInt64;
-    return sqlite3_vfs_register(vfs_, false) == SQLITE_OK;
-}
-
-#endif // ENABLE_CUSTOM_LOCKLESS_VFS
-
-// ---------------------------------------------------------------------------
-
 void DatabaseContext::Private::open(const std::string &databasePath,
                                     PJ_CONTEXT *ctx) {
     setPjCtxt(ctx ? ctx : pj_get_default_ctx());
@@ -605,21 +503,23 @@ void DatabaseContext::Private::open(const std::string &databasePath,
         }
     }
 
-    if (
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-        !createCustomVFS() ||
-#endif
+    vfs_ = SQLite3VFS::create(false, true, true);
+    if (vfs_ == nullptr ||
         sqlite3_open_v2(path.c_str(), &sqlite_handle_,
                         SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX,
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-                        thisNamePtr_.c_str()
-#else
-                        nullptr
-#endif
-                            ) != SQLITE_OK ||
+                        vfs_->name()) != SQLITE_OK ||
         !sqlite_handle_) {
         throw FactoryException("Open of " + path + " failed");
     }
+#else
+    if (sqlite3_open_v2(path.c_str(), &sqlite_handle_,
+                        SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX,
+                        nullptr) != SQLITE_OK ||
+        !sqlite_handle_) {
+        throw FactoryException("Open of " + path + " failed");
+    }
+#endif
 
     databasePath_ = path;
     registerFunctions();

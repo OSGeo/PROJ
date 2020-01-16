@@ -284,6 +284,8 @@ set(SRC_LIBPROJ_CORE
   grids.cpp
   filemanager.hpp
   filemanager.cpp
+  sqlite3.hpp
+  sqlite3.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 

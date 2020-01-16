@@ -217,7 +217,9 @@ libproj_la_SOURCES = \
 	grids.hpp \
 	grids.cpp \
 	filemanager.hpp \
-	filemanager.cpp
+	filemanager.cpp \
+	sqlite3.hpp \
+	sqlite3.cpp
 
 
 # The sed hack is to please MSVC
