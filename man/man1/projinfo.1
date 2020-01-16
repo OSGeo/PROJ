@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJINFO" "1" "Aug 26, 2019" "6.2.0" "PROJ"
+.TH "PROJINFO" "1" "Dec 28, 2019" "6.3.0" "PROJ"
 .SH NAME
 projinfo \- Geodetic object and coordinate operation queries
 .
@@ -44,7 +44,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [\-\-pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
 [\-\-boundcrs\-to\-wgs84]
 [\-\-main\-db\-path path] [\-\-aux\-db\-path path]*
-[\-\-identify]
+[\-\-identify] [\-\-3d]
 [\-\-c\-ify] [\-\-single\-line]
 {object_definition} | {object_reference} | (\-s {srs_def} \-t {srs_def})
 
@@ -99,9 +99,24 @@ The following control parameters can appear in any order:
 .TP
 .B \-o formats
 formats is a comma separated combination of:
-\fBall\fP, \fBdefault\fP, \fBPROJ\fP, \fBWKT_ALL\fP, \fBWKT2_2015\fP, \fBWKT2_2018\fP, \fBWKT1_GDAL\fP, \fBWKT1_ESRI\fP, \fBPROJJSON\fP\&.
+\fBall\fP, \fBdefault\fP, \fBPROJ\fP, \fBWKT_ALL\fP, \fBWKT2:2015\fP, \fBWKT2:2019\fP, \fBWKT1:GDAL\fP, \fBWKT1:ESRI\fP, \fBPROJJSON\fP\&.
 .sp
 Except \fBall\fP and \fBdefault\fP, other formats can be preceded by \fB\-\fP to disable them.
+.sp
+\fBNOTE:\fP
+.INDENT 7.0
+.INDENT 3.5
+WKT2_2019 was previously called WKT2_2018.
+.UNINDENT
+.UNINDENT
+.sp
+\fBNOTE:\fP
+.INDENT 7.0
+.INDENT 3.5
+Before PROJ 6.3.0, WKT1:GDAL was implicitly calling \-\-boundcrs\-to\-wgs84.
+This is no longer the case.
+.UNINDENT
+.UNINDENT
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -302,6 +317,19 @@ with a likelihood of 70% to EPSG:32631
 .UNINDENT
 .INDENT 0.0
 .TP
+.B \-\-3d
+New in version 6.3.
+
+.sp
+"Promote" the CRS(s) to their 3D version. In the context of researching
+available coordinate transformations, explicitly specifying this option is
+not necessary, because when one of the source or target CRS has a vertical
+component but not the other one, the one that has no vertical component is
+automatically promoted to a 3D version, where its vertical axis is the
+ellipsoidal height in metres, using the ellipsoid of the base geodetic CRS.
+.UNINDENT
+.INDENT 0.0
+.TP
 .B \-\-c\-ify
 For developers only. Modify the string output of the utility so that it
 is easy to put those strings in C/C++ code
@@ -337,7 +365,7 @@ Output:
 PROJ.4 string:
 +proj=longlat +datum=WGS84 +no_defs +type=crs
 
-WKT2_2018 string:
+WKT2:2019 string:
 GEOGCRS["WGS 84",
     DATUM["World Geodetic System 1984",
         ELLIPSOID["WGS 84",6378137,298.257223563,
@@ -389,7 +417,7 @@ PROJ string:
 +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=conus \e
 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
-WKT2_2018 string:
+WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (1)",
     SOURCECRS[
         GEOGCRS["NAD27",

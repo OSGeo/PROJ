@@ -152,8 +152,8 @@ extern "C" {
 #endif
 
 /* The version numbers should be updated with every release! **/
-#define PROJ_VERSION_MAJOR 6
-#define PROJ_VERSION_MINOR 3
+#define PROJ_VERSION_MAJOR 7
+#define PROJ_VERSION_MINOR 0
 #define PROJ_VERSION_PATCH 0
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
@@ -1002,6 +1002,10 @@ PJ_OBJ_LIST PROJ_DLL *proj_get_non_deprecated(PJ_CONTEXT *ctx,
 int PROJ_DLL proj_is_equivalent_to(const PJ *obj, const PJ *other,
                                        PJ_COMPARISON_CRITERION criterion);
 
+int PROJ_DLL proj_is_equivalent_to_with_ctx(PJ_CONTEXT *ctx,
+                                            const PJ *obj, const PJ *other,
+                                            PJ_COMPARISON_CRITERION criterion);
+
 int PROJ_DLL proj_is_crs(const PJ *obj);
 
 const char PROJ_DLL* proj_get_name(const PJ *obj);
@@ -1256,6 +1260,9 @@ int PROJ_DLL proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
                                                     double *out_values,
                                                     int value_count,
                                                     int emit_error_if_incompatible);
+
+PJ PROJ_DLL *proj_coordoperation_create_inverse(PJ_CONTEXT *ctx, const PJ *obj);
+
 
 int PROJ_DLL proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
                                                  const PJ *concatoperation);

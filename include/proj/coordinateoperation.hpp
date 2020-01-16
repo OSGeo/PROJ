@@ -212,7 +212,8 @@ class PROJ_GCC_DLL GeneralOperationParameter : public common::IdentifiedObject {
     PROJ_INTERNAL bool _isEquivalentTo(
         const util::IComparable *other,
         util::IComparable::Criterion criterion =
-            util::IComparable::Criterion::STRICT) const override = 0;
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override = 0;
     //! @endcond
 
   protected:
@@ -253,10 +254,11 @@ class PROJ_GCC_DLL OperationParameter final : public GeneralOperationParameter {
     //! @endcond
 
     //! @cond Doxygen_Suppress
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
     // non-standard
@@ -309,7 +311,8 @@ class PROJ_GCC_DLL GeneralParameterValue : public util::BaseObject,
     PROJ_INTERNAL bool _isEquivalentTo(
         const util::IComparable *other,
         util::IComparable::Criterion criterion =
-            util::IComparable::Criterion::STRICT) const override = 0;
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override = 0;
     //! @endcond
 
   protected:
@@ -392,10 +395,11 @@ class PROJ_GCC_DLL ParameterValue final : public util::BaseObject,
     PROJ_DLL bool booleanValue() PROJ_PURE_DECL;
 
     //! @cond Doxygen_Suppress
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
   protected:
@@ -452,10 +456,11 @@ class PROJ_GCC_DLL OperationParameterValue final
     PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(FormattingException)
 
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
   protected:
@@ -521,10 +526,11 @@ class PROJ_GCC_DLL OperationMethod : public common::IdentifiedObject,
     PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(FormattingException)
 
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
   protected:
@@ -618,10 +624,11 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
     PROJ_INTERNAL double parameterValueNumericAsSI(int epsg_code) const
         noexcept;
 
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
     //! @endcond
 
   protected:
@@ -640,6 +647,7 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
 
     PROJ_INTERNAL bool _isEquivalentTo(const util::IComparable *other,
                                        util::IComparable::Criterion criterion,
+                                       const io::DatabaseContextPtr &dbContext,
                                        bool inOtherDirection) const;
 
   private:
@@ -1685,10 +1693,11 @@ class PROJ_GCC_DLL ConcatenatedOperation final : public CoordinateOperation {
         _exportToWKT(io::WKTFormatter *formatter)
             const override; // throw(io::FormattingException)
 
-    PROJ_INTERNAL bool
-    _isEquivalentTo(const util::IComparable *other,
-                    util::IComparable::Criterion criterion =
-                        util::IComparable::Criterion::STRICT) const override;
+    PROJ_INTERNAL bool _isEquivalentTo(
+        const util::IComparable *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
+        const io::DatabaseContextPtr &dbContext = nullptr) const override;
 
     PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(FormattingException)

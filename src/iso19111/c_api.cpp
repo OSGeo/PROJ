@@ -1146,15 +1146,9 @@ PJ_OBJ_LIST *proj_get_non_deprecated(PJ_CONTEXT *ctx, const PJ *obj) {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return whether two objects are equivalent.
- *
- * @param obj Object (must not be NULL)
- * @param other Other object (must not be NULL)
- * @param criterion Comparison criterion
- * @return TRUE if they are equivalent
- */
-int proj_is_equivalent_to(const PJ *obj, const PJ *other,
-                          PJ_COMPARISON_CRITERION criterion) {
+static int proj_is_equivalent_to_internal(PJ_CONTEXT *ctx, const PJ *obj,
+                                          const PJ *other,
+                                          PJ_COMPARISON_CRITERION criterion) {
     assert(obj);
     assert(other);
     if (!obj->iso_obj) {
@@ -1176,7 +1170,50 @@ int proj_is_equivalent_to(const PJ *obj, const PJ *other,
         return IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS;
     })(criterion);
 
-    return obj->iso_obj->isEquivalentTo(other->iso_obj.get(), cppCriterion);
+    int res = obj->iso_obj->isEquivalentTo(
+        other->iso_obj.get(), cppCriterion,
+        ctx ? getDBcontextNoException(ctx, "proj_is_equivalent_to_with_ctx")
+            : nullptr);
+    if (ctx && ctx->cpp_context) {
+        ctx->cpp_context->autoCloseDbIfNeeded();
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether two objects are equivalent.
+ *
+ * Use proj_is_equivalent_to_with_ctx() to be able to use database information.
+ *
+ * @param obj Object (must not be NULL)
+ * @param other Other object (must not be NULL)
+ * @param criterion Comparison criterion
+ * @return TRUE if they are equivalent
+ */
+int proj_is_equivalent_to(const PJ *obj, const PJ *other,
+                          PJ_COMPARISON_CRITERION criterion) {
+    return proj_is_equivalent_to_internal(nullptr, obj, other, criterion);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether two objects are equivalent
+ *
+ * Possibly using database to check for name aliases.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param obj Object (must not be NULL)
+ * @param other Other object (must not be NULL)
+ * @param criterion Comparison criterion
+ * @return TRUE if they are equivalent
+ * @since 6.3
+ */
+int proj_is_equivalent_to_with_ctx(PJ_CONTEXT *ctx, const PJ *obj,
+                                   const PJ *other,
+                                   PJ_COMPARISON_CRITERION criterion) {
+    SANITIZE_CTX(ctx);
+    return proj_is_equivalent_to_internal(ctx, obj, other, criterion);
 }
 
 // ---------------------------------------------------------------------------
@@ -2159,6 +2196,10 @@ PJ *proj_get_target_crs(PJ_CONTEXT *ctx, const PJ *obj) {
  * The candidate CRSs are either hard-coded, or looked in the database when
  * it is available.
  *
+ * Note that the implementation uses a set of heuristics to have a good
+ * compromise of successful identifications over execution time. It might miss
+ * legitimate matches in some circumstances.
+ *
  * The method returns a list of matching reference CRS, and the percentage
  * (0-100) of confidence in the match. The list is sorted by decreasing
  * confidence.
@@ -2727,16 +2768,19 @@ static GeodeticReferenceFrameNNPtr createGeodeticReferenceFrame(
                 if (metadata::Identifier::isEquivalentName(
                         datumName.c_str(), refDatum->nameStr().c_str())) {
                     datumName = refDatum->nameStr();
-                }
-            } else {
-                std::string outTableName;
-                std::string authNameFromAlias;
-                std::string codeFromAlias;
-                auto officialName = authFactory->getOfficialNameFromAlias(
-                    datumName, "geodetic_datum", std::string(), true,
-                    outTableName, authNameFromAlias, codeFromAlias);
-                if (!officialName.empty()) {
-                    datumName = officialName;
+                } else if (refDatum->identifiers().size() == 1) {
+                    const auto &id = refDatum->identifiers()[0];
+                    const auto aliases =
+                        authFactory->databaseContext()->getAliases(
+                            *id->codeSpace(), id->code(), refDatum->nameStr(),
+                            "geodetic_datum", std::string());
+                    for (const auto &alias : aliases) {
+                        if (metadata::Identifier::isEquivalentName(
+                                datumName.c_str(), alias.c_str())) {
+                            datumName = refDatum->nameStr();
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -7775,6 +7819,34 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
     }
     try {
         return pj_obj_create(ctx, co->normalizeForVisualization());
+    } catch (const std::exception &e) {
+        proj_log_debug(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a PJ* coordinate operation object which represents the
+ * inverse operation of the specified coordinate operation.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param obj Object of type CoordinateOperation (must not be NULL)
+ * @return a new PJ* object to free with proj_destroy() in case of success, or
+ * nullptr in case of error
+ * @since 6.3
+ */
+PJ *proj_coordoperation_create_inverse(PJ_CONTEXT *ctx, const PJ *obj) {
+
+    SANITIZE_CTX(ctx);
+    auto co = dynamic_cast<const CoordinateOperation *>(obj->iso_obj.get());
+    if (!co) {
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a CoordinateOperation");
+        return nullptr;
+    }
+    try {
+        return pj_obj_create(ctx, co->inverse());
     } catch (const std::exception &e) {
         proj_log_debug(ctx, __FUNCTION__, e.what());
         return nullptr;

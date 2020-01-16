@@ -71,6 +71,20 @@ $EXE +proj=latlong +datum=NAD83 +to +proj=latlong +ellps=clrk66 +nadgrids=ntv2_0
 -115.49166667 51.07499990 0
 EOF
 
+echo "##############################################################" >> ${OUT}
+echo Attempt first with ntv2_0.gsb and then conus >> ${OUT}
+$EXE +proj=longlat +datum=NAD27 +to +proj=longlat +datum=WGS84 -E -d 8 >>${OUT} <<EOF
+-111.5 45.26
+EOF
+
+echo "##############################################################" >> ${OUT}
+echo "NAD27 -> NAD83: 1st through ntv2, 2nd through conus" >> ${OUT}
+#
+$EXE NAD27 NAD83 -E >>${OUT} <<EOF
+55d00'00.000"N 111d00'00.000"W 0.0
+39d00'00.000"N 111d00'00.000"W 0.0
+EOF
+
 #
 ##############################################################################
 # Done! 

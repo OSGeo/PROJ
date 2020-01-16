@@ -71,6 +71,7 @@ pj_err_list[] = {
     "inconsistent unit type between input and output",                 /* -59 */
     "arguments are mutually exclusive",                                /* -60 */
     "generic error of unknown origin",                                 /* -61 */
+    "network error",                                                   /* -62 */
 
     /* When adding error messages, remember to update ID defines in
        projects.h, and transient_error array in pj_transform                  */

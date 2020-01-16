@@ -195,62 +195,93 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
         direction = opposite_direction(direction);
 
     if( !P->alternativeCoordinateOperations.empty() ) {
-        // Do a first pass and select the operations that match the area of use
-        // and has the best accuracy.
-        int iBest = -1;
-        double bestAccuracy = std::numeric_limits<double>::max();
-        int i = 0;
-        for( const auto &alt: P->alternativeCoordinateOperations ) {
-            bool spatialCriterionOK = false;
-            if( direction == PJ_FWD ) {
-                if( coord.xyzt.x >= alt.minxSrc &&
-                    coord.xyzt.y >= alt.minySrc &&
-                    coord.xyzt.x <= alt.maxxSrc &&
-                    coord.xyzt.y <= alt.maxySrc) {
-                    spatialCriterionOK = true;
+        constexpr int N_MAX_RETRY = 2;
+        int iExcluded[N_MAX_RETRY] = {-1, -1};
+
+        const int nOperations = static_cast<int>(
+            P->alternativeCoordinateOperations.size());
+
+        // We may need several attempts. For example the point at
+        // lon=-111.5 lat=45.26 falls into the bounding box of the Canadian
+        // ntv2_0.gsb grid, except that it is not in any of the subgrids, being
+        // in the US. We thus need another retry that will select the conus
+        // grid.
+        for( int iRetry = 0; iRetry <= N_MAX_RETRY; iRetry++ )
+        {
+            // Do a first pass and select the operations that match the area of use
+            // and has the best accuracy.
+            int iBest = -1;
+            double bestAccuracy = std::numeric_limits<double>::max();
+            for( int i = 0; i < nOperations; i++ ) {
+                if( i == iExcluded[0] || i == iExcluded[1] ) {
+                    continue;
                 }
-            } else {
-                if( coord.xyzt.x >= alt.minxDst &&
-                    coord.xyzt.y >= alt.minyDst &&
-                    coord.xyzt.x <= alt.maxxDst &&
-                    coord.xyzt.y <= alt.maxyDst ) {
-                    spatialCriterionOK = true;
+                const auto &alt = P->alternativeCoordinateOperations[i];
+                bool spatialCriterionOK = false;
+                if( direction == PJ_FWD ) {
+                    if( coord.xyzt.x >= alt.minxSrc &&
+                        coord.xyzt.y >= alt.minySrc &&
+                        coord.xyzt.x <= alt.maxxSrc &&
+                        coord.xyzt.y <= alt.maxySrc) {
+                        spatialCriterionOK = true;
+                    }
+                } else {
+                    if( coord.xyzt.x >= alt.minxDst &&
+                        coord.xyzt.y >= alt.minyDst &&
+                        coord.xyzt.x <= alt.maxxDst &&
+                        coord.xyzt.y <= alt.maxyDst ) {
+                        spatialCriterionOK = true;
+                    }
+                }
+
+                if( spatialCriterionOK ) {
+                    // The offshore test is for the "Test bug 245 (use +datum=carthage)"
+                    // of testvarious. The long=10 lat=34 point belongs both to the
+                    // onshore and offshore Tunisia area of uses, but is slightly
+                    // onshore. So in a general way, prefer a onshore area to a
+                    // offshore one.
+                    if( iBest < 0 ||
+                        (alt.accuracy >= 0 && alt.accuracy < bestAccuracy &&
+                        !alt.isOffshore) ) {
+                        iBest = i;
+                        bestAccuracy = alt.accuracy;
+                    }
                 }
             }
 
-            if( spatialCriterionOK ) {
-                // The offshore test is for the "Test bug 245 (use +datum=carthage)"
-                // of testvarious. The long=10 lat=34 point belongs both to the
-                // onshore and offshore Tunisia area of uses, but is slightly
-                // onshore. So in a general way, prefer a onshore area to a
-                // offshore one.
-                if( iBest < 0 ||
-                    (alt.accuracy >= 0 && alt.accuracy < bestAccuracy &&
-                    !alt.isOffshore) ) {
-                    iBest = i;
-                    bestAccuracy = alt.accuracy;
-                }
+            if( iBest < 0 ) {
+                break;
             }
 
-            i ++;
-        }
-
-        if( iBest >= 0 ) {
             const auto& alt = P->alternativeCoordinateOperations[iBest];
             if( P->iCurCoordOp != iBest ) {
-                std::string msg("Using coordinate operation ");
-                msg += alt.name;
-                pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
+                if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
+                    std::string msg("Using coordinate operation ");
+                    msg += alt.name;
+                    pj_log(P->ctx, PJ_LOG_DEBUG, msg.c_str());
+                }
                 P->iCurCoordOp = iBest;
             }
-            return direction == PJ_FWD ?
+            PJ_COORD res = direction == PJ_FWD ?
                         pj_fwd4d( coord, alt.pj ) : pj_inv4d( coord, alt.pj );
+            if( proj_errno(alt.pj) == PJD_ERR_NETWORK_ERROR ) {
+                return proj_coord_error ();
+            }
+            if( res.xyzt.x != HUGE_VAL ) {
+                return res;
+            }
+            pj_log(P->ctx, PJ_LOG_DEBUG,
+                   "Did not result in valid result. "
+                   "Attempting a retry with another operation.");
+            if( iRetry == N_MAX_RETRY ) {
+                break;
+            }
+            iExcluded[iRetry] = iBest;
         }
 
         // In case we did not find an operation whose area of use is compatible
         // with the input coordinate, then goes through again the list, and
         // use the first operation that does not require grids.
-        i = 0;
         NS_PROJ::io::DatabaseContextPtr dbContext;
         try
         {
@@ -259,15 +290,18 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             }
         }
         catch( const std::exception& ) {}
-        for( const auto &alt: P->alternativeCoordinateOperations ) {
+        for( int i = 0; i < nOperations; i++ ) {
+            const auto &alt = P->alternativeCoordinateOperations[i];
             auto coordOperation = dynamic_cast<
             NS_PROJ::operation::CoordinateOperation*>(alt.pj->iso_obj.get());
             if( coordOperation ) {
                 if( coordOperation->gridsNeeded(dbContext, true).empty() ) {
                     if( P->iCurCoordOp != i ) {
-                        std::string msg("Using coordinate operation ");
-                        msg += alt.name;
-                        pj_log(P->ctx, PJ_LOG_TRACE, msg.c_str());
+                        if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
+                            std::string msg("Using coordinate operation ");
+                            msg += alt.name;
+                            pj_log(P->ctx, PJ_LOG_DEBUG, msg.c_str());
+                        }
                         P->iCurCoordOp = i;
                     }
                     if( direction == PJ_FWD ) {
@@ -278,7 +312,6 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
                     }
                 }
             }
-            i++;
         }
 
         proj_errno_set (P, EINVAL);

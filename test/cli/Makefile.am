@@ -1,5 +1,5 @@
 # Executables paths passed to test scripts
-PROJ_LIB ?= ../../data
+PROJ_LIB = ../../data/for_tests
 THIS_DIR = $(top_srcdir)/test/cli
 EXEPATH = ../../src
 PROJEXE = $(EXEPATH)/proj
@@ -10,6 +10,7 @@ CCTEXE = $(EXEPATH)/cct
 # PROJ.4 test scripts
 TEST27 = $(THIS_DIR)/test27
 TEST83 = $(THIS_DIR)/test83
+TESTPROJ = $(THIS_DIR)/testproj
 TESTNTV2 = $(THIS_DIR)/testntv2
 TESTVARIOUS = $(THIS_DIR)/testvarious
 TESTFLAKY = $(THIS_DIR)/testflaky
@@ -24,6 +25,7 @@ EXTRA_DIST = pj_out27.dist pj_out83.dist td_out.dist \
 		testIGNF proj_outIGNF.dist \
 		testprojinfo testprojinfo_out.dist \
 		testcct testcct_out.dist \
+		testproj testproj_out.dist \
 		CMakeLists.txt
 
 testprojinfo-check:
@@ -34,6 +36,9 @@ test27-check:
 
 test83-check:
 	$(TEST83) $(PROJEXE)
+
+testproj-check:
+	$(TESTPROJ) $(PROJEXE)
 
 testvarious-check:
 	PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(TESTVARIOUS) $(CS2CSEXE)
@@ -56,4 +61,4 @@ testntv2-check:
 testcct-check:
 	PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(TESTCCT) $(CCTEXE)
 
-check-local: testprojinfo-check test27-check test83-check testvarious-check testdatumfile-check testign-check testntv2-check testcct-check
+check-local: testprojinfo-check test27-check test83-check testproj-check testvarious-check testdatumfile-check testign-check testntv2-check testcct-check

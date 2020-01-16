@@ -170,6 +170,9 @@ static PJ_COORD pipeline_forward_4d (PJ_COORD point, PJ *P) {
         if( !step.omit_fwd )
         {
             point = proj_trans (step.pj, PJ_FWD, point);
+            if( point.xyzt.x == HUGE_VAL ) {
+                break;
+            }
         }
     }
 
@@ -186,6 +189,9 @@ static PJ_COORD pipeline_reverse_4d (PJ_COORD point, PJ *P) {
         if( !step.omit_inv )
         {
             point = proj_trans (step.pj, PJ_INV, point);
+            if( point.xyzt.x == HUGE_VAL ) {
+                break;
+            }
         }
     }
 
@@ -204,6 +210,9 @@ static PJ_XYZ pipeline_forward_3d (PJ_LPZ lpz, PJ *P) {
         if( !step.omit_fwd )
         {
             point = pj_approx_3D_trans (step.pj, PJ_FWD, point);
+            if( point.xyzt.x == HUGE_VAL ) {
+                break;
+            }
         }
     }
 
@@ -222,6 +231,9 @@ static PJ_LPZ pipeline_reverse_3d (PJ_XYZ xyz, PJ *P) {
         if( !step.omit_inv )
         {
             point = proj_trans (step.pj, PJ_INV, point);
+            if( point.xyzt.x == HUGE_VAL ) {
+                break;
+            }
         }
     }
 
@@ -240,6 +252,9 @@ static PJ_XY pipeline_forward (PJ_LP lp, PJ *P) {
         if( !step.omit_fwd )
         {
             point = pj_approx_2D_trans (step.pj, PJ_FWD, point);
+            if( point.xyzt.x == HUGE_VAL ) {
+                break;
+            }
         }
     }
 
@@ -258,6 +273,9 @@ static PJ_LP pipeline_reverse (PJ_XY xy, PJ *P) {
         if( !step.omit_inv )
         {
             point = pj_approx_2D_trans (step.pj, PJ_INV, point);
+            if( point.xyzt.x == HUGE_VAL ) {
+                break;
+            }
         }
     }
 
