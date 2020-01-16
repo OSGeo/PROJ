@@ -72,6 +72,9 @@ is rotating. The possible values are x or y, y being the default. Thus, the
 scanning geometry of the Meteosat series satellite should take sweep as y, and
 GOES should take sweep as x.
 
+The resulting position is different because
+`rotation in three dimensions is not commutative <https://math.stackexchange.com/q/2016937/31408>`_.
+
 Parameters
 ################################################################################
 
