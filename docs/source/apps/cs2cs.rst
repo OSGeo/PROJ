@@ -180,6 +180,8 @@ If the :envvar:`PROJ_NETWORK` environment variable is set to ``ON``,
 :program:`cs2cs` will attempt to use remote grids stored on CDN (Content
 Delivery Network) storage, when they are not available locally.
 
+More details are available in the :ref:`network` section.
+
 Examples
 ********
 
