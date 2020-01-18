@@ -1156,7 +1156,7 @@ std::string pj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
             const char *home = getenv("HOME");
             if (home) {
 #if defined(__MACH__) && defined(__APPLE__)
-                path = std::string(home) + "/Library/Logs";
+                path = std::string(home) + "/Library/Application Support";
 #else
                 path = std::string(home) + "/.local/share";
 #endif
