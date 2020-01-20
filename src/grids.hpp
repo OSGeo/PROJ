@@ -70,6 +70,7 @@ class Grid {
     const std::string &name() const { return m_name; }
 
     virtual bool isNullGrid() const { return false; }
+    virtual bool hasChanged() const = 0;
 };
 
 // ---------------------------------------------------------------------------
@@ -116,6 +117,7 @@ class VerticalShiftGridSet {
     const VerticalShiftGrid *gridAt(double lon, double lat) const;
 
     virtual void reassign_context(PJ_CONTEXT *ctx);
+    virtual bool reopen(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
@@ -162,6 +164,7 @@ class HorizontalShiftGridSet {
     const HorizontalShiftGrid *gridAt(double lon, double lat) const;
 
     virtual void reassign_context(PJ_CONTEXT *ctx);
+    virtual bool reopen(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
@@ -217,6 +220,7 @@ class GenericShiftGridSet {
     const GenericShiftGrid *gridAt(double lon, double lat) const;
 
     virtual void reassign_context(PJ_CONTEXT *ctx);
+    virtual bool reopen(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
@@ -225,15 +229,24 @@ typedef std::vector<std::unique_ptr<HorizontalShiftGridSet>> ListOfHGrids;
 typedef std::vector<std::unique_ptr<VerticalShiftGridSet>> ListOfVGrids;
 typedef std::vector<std::unique_ptr<GenericShiftGridSet>> ListOfGenericGrids;
 
-ListOfVGrids proj_vgrid_init(PJ *P, const char *grids);
-ListOfHGrids proj_hgrid_init(PJ *P, const char *grids);
-ListOfGenericGrids proj_generic_grid_init(PJ *P, const char *grids);
+ListOfVGrids pj_vgrid_init(PJ *P, const char *grids);
+ListOfHGrids pj_hgrid_init(PJ *P, const char *grids);
+ListOfGenericGrids pj_generic_grid_init(PJ *P, const char *grids);
 
-double proj_vgrid_value(PJ *P, const ListOfVGrids &, PJ_LP lp,
-                        double vmultiplier);
-PJ_LP proj_hgrid_value(PJ *P, const ListOfHGrids &, PJ_LP lp);
-PJ_LP proj_hgrid_apply(PJ *P, const ListOfHGrids &, PJ_LP lp,
-                       PJ_DIRECTION direction);
+PJ_LP pj_hgrid_value(PJ *P, const ListOfHGrids &grids, PJ_LP lp);
+double pj_vgrid_value(PJ *P, const ListOfVGrids &, PJ_LP lp,
+                      double vmultiplier);
+PJ_LP pj_hgrid_apply(PJ_CONTEXT *ctx, const ListOfHGrids &grids, PJ_LP lp,
+                     PJ_DIRECTION direction);
+
+const GenericShiftGrid *pj_find_generic_grid(const ListOfGenericGrids &grids,
+                                             const PJ_LP &input,
+                                             GenericShiftGridSet *&gridSetOut);
+bool pj_bilinear_interpolation_three_samples(const GenericShiftGrid *grid,
+                                             const PJ_LP &lp, int idx1,
+                                             int idx2, int idx3, double &v1,
+                                             double &v2, double &v3,
+                                             bool &must_retry);
 
 NS_PROJ_END
 

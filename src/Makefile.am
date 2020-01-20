@@ -196,9 +196,9 @@ libproj_la_SOURCES = \
 	release.cpp gauss.cpp \
 	fileapi.cpp \
 	\
-	apply_gridshift.cpp datums.cpp datum_set.cpp transform.cpp \
+	datums.cpp datum_set.cpp transform.cpp \
 	geocent.cpp geocent.h utils.cpp \
-	jniproj.cpp mutex.cpp initcache.cpp apply_vgridshift.cpp geodesic.c \
+	jniproj.cpp mutex.cpp initcache.cpp geodesic.c \
 	strtod.cpp \
 	\
 	4D_api.cpp pipeline.cpp \

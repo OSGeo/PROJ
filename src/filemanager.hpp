@@ -33,9 +33,9 @@
 #include "proj.h"
 #include "proj/util.hpp"
 
-NS_PROJ_START
-
 //! @cond Doxygen_Suppress
+
+NS_PROJ_START
 
 class File;
 
@@ -69,12 +69,13 @@ class File {
     virtual bool seek(unsigned long long offset, int whence = SEEK_SET) = 0;
     virtual unsigned long long tell() = 0;
     virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
+    virtual bool hasChanged() const = 0;
 
     const std::string &name() const { return name_; }
 };
 
-//! @endcond Doxygen_Suppress
-
 NS_PROJ_END
+
+//! @endcond Doxygen_Suppress
 
 #endif // FILEMANAGER_HPP_INCLUDED

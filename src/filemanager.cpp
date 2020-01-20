@@ -135,6 +135,9 @@ class FileStdio : public File {
     unsigned long long tell() override;
     void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
 
+    // We may lie, but the real use case is only for network files
+    bool hasChanged() const override { return false; }
+
     static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
 };
 
@@ -197,6 +200,9 @@ class FileLegacyAdapter : public File {
     bool seek(unsigned long long offset, int whence = SEEK_SET) override;
     unsigned long long tell() override;
     void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
+
+    // We may lie, but the real use case is only for network files
+    bool hasChanged() const override { return false; }
 
     static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
 };
@@ -462,6 +468,13 @@ static const char *cache_db_structure_sql =
     " lastModified TEXT,"
     " etag         TEXT"
     ");"
+    "CREATE TABLE downloaded_file_properties("
+    " url          TEXT PRIMARY KEY NOT NULL,"
+    " lastChecked  TIMESTAMP NOT NULL,"
+    " fileSize     INTEGER NOT NULL,"
+    " lastModified TEXT,"
+    " etag         TEXT"
+    ");"
     "CREATE TABLE chunk_data("
     " id        INTEGER PRIMARY KEY AUTOINCREMENT CHECK (id > 0),"
     " data      BLOB NOT NULL"
@@ -672,6 +685,7 @@ void DiskChunkCache::closeAndUnlink() {
     if (hDB_) {
         sqlite3_exec(hDB_, "COMMIT", nullptr, nullptr, nullptr);
         sqlite3_close(hDB_);
+        hDB_ = nullptr;
     }
     if (vfs_) {
         vfs_->raw()->xDelete(vfs_->raw(), path_.c_str(), 0);
@@ -1336,8 +1350,9 @@ class NetworkFile : public File {
     unsigned long long m_pos = 0;
     size_t m_nBlocksToDownload = 1;
     unsigned long long m_lastDownloadedOffset;
-    unsigned long long m_filesize;
+    FileProperties m_props;
     proj_network_close_cbk_type m_closeCbk;
+    bool m_hasChanged = false;
 
     NetworkFile(const NetworkFile &) = delete;
     NetworkFile &operator=(const NetworkFile &) = delete;
@@ -1346,9 +1361,9 @@ class NetworkFile : public File {
     NetworkFile(PJ_CONTEXT *ctx, const std::string &url,
                 PROJ_NETWORK_HANDLE *handle,
                 unsigned long long lastDownloadOffset,
-                unsigned long long filesize)
+                const FileProperties &props)
         : File(url), m_ctx(ctx), m_url(url), m_handle(handle),
-          m_lastDownloadedOffset(lastDownloadOffset), m_filesize(filesize),
+          m_lastDownloadedOffset(lastDownloadOffset), m_props(props),
           m_closeCbk(ctx->networking.close) {}
 
   public:
@@ -1358,9 +1373,42 @@ class NetworkFile : public File {
     bool seek(unsigned long long offset, int whence) override;
     unsigned long long tell() override;
     void reassign_context(PJ_CONTEXT *ctx) override;
+    bool hasChanged() const override { return m_hasChanged; }
 
     static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
+
+    static bool get_props_from_headers(PJ_CONTEXT *ctx,
+                                       PROJ_NETWORK_HANDLE *handle,
+                                       FileProperties &props);
 };
+
+// ---------------------------------------------------------------------------
+
+bool NetworkFile::get_props_from_headers(PJ_CONTEXT *ctx,
+                                         PROJ_NETWORK_HANDLE *handle,
+                                         FileProperties &props) {
+    const char *contentRange = ctx->networking.get_header_value(
+        ctx, handle, "Content-Range", ctx->networking.user_data);
+    if (contentRange) {
+        const char *slash = strchr(contentRange, '/');
+        if (slash) {
+            props.size = std::stoull(slash + 1);
+
+            const char *lastModified = ctx->networking.get_header_value(
+                ctx, handle, "Last-Modified", ctx->networking.user_data);
+            if (lastModified)
+                props.lastModified = lastModified;
+
+            const char *etag = ctx->networking.get_header_value(
+                ctx, handle, "ETag", ctx->networking.user_data);
+            if (etag)
+                props.etag = etag;
+
+            return true;
+        }
+    }
+    return false;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1369,7 +1417,7 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
     if (gNetworkChunkCache.get(ctx, filename, 0, props)) {
         return std::unique_ptr<File>(new NetworkFile(
             ctx, filename, nullptr,
-            std::numeric_limits<unsigned long long>::max(), props.size));
+            std::numeric_limits<unsigned long long>::max(), props));
     } else {
         std::vector<unsigned char> buffer(DOWNLOAD_CHUNK_SIZE);
         size_t size_read = 0;
@@ -1386,40 +1434,18 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
                    errorBuffer.c_str());
         }
 
-        unsigned long long filesize = 0;
+        bool ok = false;
         if (handle) {
-            const char *contentRange = ctx->networking.get_header_value(
-                ctx, handle, "Content-Range", ctx->networking.user_data);
-            if (contentRange) {
-                const char *slash = strchr(contentRange, '/');
-                if (slash) {
-                    filesize = std::stoull(slash + 1);
-
-                    props.size = filesize;
-
-                    const char *lastModified = ctx->networking.get_header_value(
-                        ctx, handle, "Last-Modified",
-                        ctx->networking.user_data);
-                    if (lastModified)
-                        props.lastModified = lastModified;
-
-                    const char *etag = ctx->networking.get_header_value(
-                        ctx, handle, "ETag", ctx->networking.user_data);
-                    if (etag)
-                        props.etag = etag;
-
-                    gNetworkFileProperties.insert(ctx, filename, props);
-                }
-            }
-            if (filesize != 0) {
+            if (get_props_from_headers(ctx, handle, props)) {
+                ok = true;
+                gNetworkFileProperties.insert(ctx, filename, props);
                 gNetworkChunkCache.insert(ctx, filename, 0, std::move(buffer));
             }
         }
 
         return std::unique_ptr<File>(
-            handle != nullptr && filesize != 0
-                ? new NetworkFile(ctx, filename, handle, size_read, filesize)
-                : nullptr);
+            ok ? new NetworkFile(ctx, filename, handle, size_read, props)
+               : nullptr);
     }
 }
 
@@ -1504,6 +1530,20 @@ size_t NetworkFile::read(void *buffer, size_t sizeBytes) {
                 }
                 return 0;
             }
+
+            if (!m_hasChanged) {
+                FileProperties props;
+                if (get_props_from_headers(m_ctx, m_handle, props)) {
+                    if (props.size != m_props.size ||
+                        props.lastModified != m_props.lastModified ||
+                        props.etag != m_props.etag) {
+                        gNetworkFileProperties.insert(m_ctx, m_url, props);
+                        gNetworkChunkCache.clearMemoryCache();
+                        m_hasChanged = true;
+                    }
+                }
+            }
+
             region.resize(nRead);
             m_lastDownloadedOffset = offsetToDownload + nRead;
 
@@ -1546,7 +1586,7 @@ bool NetworkFile::seek(unsigned long long offset, int whence) {
     } else {
         if (offset != 0)
             return false;
-        m_pos = m_filesize;
+        m_pos = m_props.size;
     }
     return true;
 }
@@ -1870,6 +1910,7 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
     auto hCurlHandle = handle->m_handle;
 
     double oldDelay = MIN_RETRY_DELAY_MS;
+    std::string headers;
     std::string body;
 
     char szBuffer[128];
@@ -1878,6 +1919,12 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
 
     while (true) {
         curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
+
+        headers.clear();
+        headers.reserve(16 * 1024);
+        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, &headers);
+        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION,
+                         pj_curl_write_func);
 
         body.clear();
         body.reserve(size_to_read);
@@ -1929,6 +1976,8 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
     if (!body.empty()) {
         memcpy(buffer, body.data(), std::min(size_to_read, body.size()));
     }
+    handle->m_headers = std::move(headers);
+
     return std::min(size_to_read, body.size());
 }
 
@@ -2252,50 +2301,468 @@ static void CreateDirectory(const std::string &path) {
 
 // ---------------------------------------------------------------------------
 
+std::string pj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
+                                                   bool create) {
+    if (ctx->user_writable_directory.empty()) {
+        // For testing purposes only
+        const char *env_var_PROJ_USER_WRITABLE_DIRECTORY =
+            getenv("PROJ_USER_WRITABLE_DIRECTORY");
+        if (env_var_PROJ_USER_WRITABLE_DIRECTORY &&
+            env_var_PROJ_USER_WRITABLE_DIRECTORY[0] != '\0') {
+            ctx->user_writable_directory = env_var_PROJ_USER_WRITABLE_DIRECTORY;
+        }
+    }
+    if (ctx->user_writable_directory.empty()) {
+        std::string path;
+#ifdef _WIN32
+        std::wstring wPath;
+        wPath.resize(MAX_PATH);
+        if (SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0,
+                             &wPath[0]) == S_OK) {
+            wPath.resize(wcslen(wPath.data()));
+            path = WStringToUTF8(wPath);
+        } else {
+            const char *local_app_data = getenv("LOCALAPPDATA");
+            if (!local_app_data) {
+                local_app_data = getenv("TEMP");
+                if (!local_app_data) {
+                    local_app_data = "c:/users";
+                }
+            }
+            path = local_app_data;
+        }
+#else
+        const char *xdg_data_home = getenv("XDG_DATA_HOME");
+        if (xdg_data_home != nullptr) {
+            path = xdg_data_home;
+        } else {
+            const char *home = getenv("HOME");
+            if (home) {
+#if defined(__MACH__) && defined(__APPLE__)
+                path = std::string(home) + "/Library/Logs";
+#else
+                path = std::string(home) + "/.local/share";
+#endif
+            } else {
+                path = "/tmp";
+            }
+        }
+#endif
+        path += "/proj";
+        ctx->user_writable_directory = path;
+    }
+    if (create) {
+        CreateDirectory(ctx->user_writable_directory);
+    }
+    return ctx->user_writable_directory;
+}
+
+// ---------------------------------------------------------------------------
+
 std::string pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx) {
     pj_load_ini(ctx);
     if (!ctx->gridChunkCache.filename.empty()) {
         return ctx->gridChunkCache.filename;
     }
-    std::string path;
-#ifdef _WIN32
-    std::wstring wPath;
-    wPath.resize(MAX_PATH);
-    if (SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, &wPath[0]) ==
-        S_OK) {
-        wPath.resize(wcslen(wPath.data()));
-        path = WStringToUTF8(wPath);
-    } else {
-        const char *local_app_data = getenv("LOCALAPPDATA");
-        if (!local_app_data) {
-            local_app_data = getenv("TEMP");
-            if (!local_app_data) {
-                local_app_data = "c:/users";
-            }
-        }
-        path = local_app_data;
-    }
-#else
-    const char *xdg_data_home = getenv("XDG_DATA_HOME");
-    if (xdg_data_home != nullptr) {
-        path = xdg_data_home;
-    } else {
-        const char *home = getenv("HOME");
-        if (home) {
-#if defined(__MACH__) && defined(__APPLE__)
-            path = std::string(home) + "/Library/Logs";
-#else
-            path = std::string(home) + "/.local/share";
-#endif
-        } else {
-            path = "/tmp";
-        }
-    }
-#endif
-    path += "/proj";
-    CreateDirectory(path);
+    const std::string path(pj_context_get_user_writable_directory(ctx, true));
     ctx->gridChunkCache.filename = path + "/cache.db";
     return ctx->gridChunkCache.filename;
 }
 
+// ---------------------------------------------------------------------------
+
+#ifdef WIN32
+static const char dir_chars[] = "/\\";
+#else
+static const char dir_chars[] = "/";
+#endif
+
+static bool is_tilde_slash(const char *name) {
+    return *name == '~' && strchr(dir_chars, name[1]);
+}
+
+static bool is_rel_or_absolute_filename(const char *name) {
+    return strchr(dir_chars, *name) ||
+           (*name == '.' && strchr(dir_chars, name[1])) ||
+           (!strncmp(name, "..", 2) && strchr(dir_chars, name[2])) ||
+           (name[0] != '\0' && name[1] == ':' && strchr(dir_chars, name[2]));
+}
+
+static std::string build_url(PJ_CONTEXT *ctx, const char *name) {
+    if (!is_tilde_slash(name) && !is_rel_or_absolute_filename(name) &&
+        !starts_with(name, "http://") && !starts_with(name, "https://")) {
+        std::string remote_file(pj_context_get_url_endpoint(ctx));
+        if (!remote_file.empty()) {
+            if (remote_file.back() != '/') {
+                remote_file += '/';
+            }
+            remote_file += name;
+            auto pos = remote_file.rfind('.');
+            if (pos + 4 == remote_file.size()) {
+                remote_file = remote_file.substr(0, pos) + ".tif";
+            } else {
+                // For example for resource files like 'alaska'
+                remote_file += ".tif";
+            }
+        }
+        return remote_file;
+    }
+    return name;
+}
+
 //! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** Return if a file must be downloaded or is already available in the
+ * PROJ user-writable directory.
+ *
+ * The file will be determinted to have to be downloaded if it does not exist
+ * yet in the user-writable directory, or if it is determined that a more recent
+ * version exists. To determine if a more recent version exists, PROJ will
+ * use the "downloaded_file_properties" table of its grid cache database.
+ * Consequently files manually placed in the user-writable
+ * directory without using this function would be considered as
+ * non-existing/obsolete and would be unconditionnaly downloaded again.
+ *
+ * This function can only be used if networking is enabled, and either
+ * the default curl network API or a custom one have been installed.
+ *
+ * @param ctx PROJ context, or NULL
+ * @param url_or_filename URL or filename (without directory component)
+ * @param ignore_ttl_setting If set to FALSE, PROJ will only check the
+ *                           recentness of an already downloaded file, if
+ *                           the delay between the last time it has been
+ *                           verified and the current time exceeds the TTL
+ *                           setting. This can save network accesses.
+ *                           If set to TRUE, PROJ will unconditionnally
+ *                           check from the server the recentness of the file.
+ * @return TRUE if the file must be downloaded with proj_download_file()
+ * @since 7.0
+ */
+
+int proj_is_download_needed(PJ_CONTEXT *ctx, const char *url_or_filename,
+                            int ignore_ttl_setting) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    if (!pj_context_is_network_enabled(ctx)) {
+        pj_log(ctx, PJ_LOG_ERROR, "Networking capabilities are not enabled");
+        return false;
+    }
+
+    const auto url(build_url(ctx, url_or_filename));
+    const char *filename = strrchr(url.c_str(), '/');
+    if (filename == nullptr)
+        return false;
+    const auto localFilename(
+        pj_context_get_user_writable_directory(ctx, false) + filename);
+
+    auto f = NS_PROJ::FileManager::open(ctx, localFilename.c_str());
+    if (!f) {
+        return true;
+    }
+    f.reset();
+
+    auto diskCache = NS_PROJ::DiskChunkCache::open(ctx);
+    if (!diskCache)
+        return false;
+    auto stmt =
+        diskCache->prepare("SELECT lastChecked, fileSize, lastModified, etag "
+                           "FROM downloaded_file_properties WHERE url = ?");
+    if (!stmt)
+        return true;
+    stmt->bindText(url.c_str());
+    if (stmt->execute() != SQLITE_ROW) {
+        return true;
+    }
+
+    NS_PROJ::FileProperties cachedProps;
+    cachedProps.lastChecked = stmt->getInt64();
+    cachedProps.size = stmt->getInt64();
+    const char *lastModified = stmt->getText();
+    cachedProps.lastModified = lastModified ? lastModified : std::string();
+    const char *etag = stmt->getText();
+    cachedProps.etag = etag ? etag : std::string();
+
+    if (!ignore_ttl_setting) {
+        const auto ttl = NS_PROJ::pj_context_get_grid_cache_ttl(ctx);
+        if (ttl > 0) {
+            time_t curTime;
+            time(&curTime);
+            if (curTime > cachedProps.lastChecked + ttl) {
+
+                unsigned char dummy;
+                size_t size_read = 0;
+                std::string errorBuffer;
+                errorBuffer.resize(1024);
+                auto handle = ctx->networking.open(
+                    ctx, url.c_str(), 0, 1, &dummy, &size_read,
+                    errorBuffer.size(), &errorBuffer[0],
+                    ctx->networking.user_data);
+                if (!handle) {
+                    errorBuffer.resize(strlen(errorBuffer.data()));
+                    pj_log(ctx, PJ_LOG_ERROR, "Cannot open %s: %s", url.c_str(),
+                           errorBuffer.c_str());
+                    return false;
+                }
+                NS_PROJ::FileProperties props;
+                if (!NS_PROJ::NetworkFile::get_props_from_headers(ctx, handle,
+                                                                  props)) {
+                    ctx->networking.close(ctx, handle,
+                                          ctx->networking.user_data);
+                    return false;
+                }
+                ctx->networking.close(ctx, handle, ctx->networking.user_data);
+
+                if (props.size != cachedProps.size ||
+                    props.lastModified != cachedProps.lastModified ||
+                    props.etag != cachedProps.etag) {
+                    return true;
+                }
+
+                stmt = diskCache->prepare(
+                    "UPDATE downloaded_file_properties SET lastChecked = ? "
+                    "WHERE url = ?");
+                if (!stmt)
+                    return false;
+                stmt->bindInt64(curTime);
+                stmt->bindText(url.c_str());
+                if (stmt->execute() != SQLITE_DONE) {
+                    auto hDB = diskCache->handle();
+                    pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+                    return false;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Download a file in the PROJ user-writable directory.
+ *
+ * The file will only be downloaded if it does not exist yet in the
+ * user-writable directory, or if it is determined that a more recent
+ * version exists. To determine if a more recent version exists, PROJ will
+ * use the "downloaded_file_properties" table of its grid cache database.
+ * Consequently files manually placed in the user-writable
+ * directory without using this function would be considered as
+ * non-existing/obsolete and would be unconditionnaly downloaded again.
+ *
+ * This function can only be used if networking is enabled, and either
+ * the default curl network API or a custom one have been installed.
+ *
+ * @param ctx PROJ context, or NULL
+ * @param url_or_filename URL or filename (without directory component)
+ * @param ignore_ttl_setting If set to FALSE, PROJ will only check the
+ *                           recentness of an already downloaded file, if
+ *                           the delay between the last time it has been
+ *                           verified and the current time exceeds the TTL
+ *                           setting. This can save network accesses.
+ *                           If set to TRUE, PROJ will unconditionnally
+ *                           check from the server the recentness of the file.
+ * @param progress_cbk Progress callback, or NULL.
+ *                     The passed percentage is in the [0, 1] range.
+ *                     The progress callback must return TRUE
+ *                     if download must be continued.
+ * @param user_data User data to provide to the progress callback, or NULL
+ * @return TRUE if the download was successful (or not needed)
+ * @since 7.0
+ */
+
+int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
+                       int ignore_ttl_setting,
+                       int (*progress_cbk)(PJ_CONTEXT *, double pct,
+                                           void *user_data),
+                       void *user_data) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    if (!pj_context_is_network_enabled(ctx)) {
+        pj_log(ctx, PJ_LOG_ERROR, "Networking capabilities are not enabled");
+        return false;
+    }
+    if (!proj_is_download_needed(ctx, url_or_filename, ignore_ttl_setting)) {
+        return true;
+    }
+
+    const auto url(build_url(ctx, url_or_filename));
+    const char *filename = strrchr(url.c_str(), '/');
+    if (filename == nullptr)
+        return false;
+    const auto localFilename(pj_context_get_user_writable_directory(ctx, true) +
+                             filename);
+
+#ifdef _WIN32
+    const int nPID = GetCurrentProcessId();
+#else
+    const int nPID = getpid();
+#endif
+    char szUniqueSuffix[128];
+    snprintf(szUniqueSuffix, sizeof(szUniqueSuffix), "%d_%p", nPID, &url);
+    const auto localFilenameTmp(localFilename + szUniqueSuffix);
+    FILE *f = fopen(localFilenameTmp.c_str(), "wb");
+    if (!f) {
+        pj_log(ctx, PJ_LOG_ERROR, "Cannot create %s", localFilenameTmp.c_str());
+        return false;
+    }
+
+    constexpr size_t FULL_FILE_CHUNK_SIZE = 1024 * 1024;
+    std::vector<unsigned char> buffer(FULL_FILE_CHUNK_SIZE);
+    // For testing purposes only
+    const char *env_var_PROJ_FULL_FILE_CHUNK_SIZE =
+        getenv("PROJ_FULL_FILE_CHUNK_SIZE");
+    if (env_var_PROJ_FULL_FILE_CHUNK_SIZE &&
+        env_var_PROJ_FULL_FILE_CHUNK_SIZE[0] != '\0') {
+        buffer.resize(atoi(env_var_PROJ_FULL_FILE_CHUNK_SIZE));
+    }
+    size_t size_read = 0;
+    std::string errorBuffer;
+    errorBuffer.resize(1024);
+    auto handle = ctx->networking.open(
+        ctx, url.c_str(), 0, buffer.size(), &buffer[0], &size_read,
+        errorBuffer.size(), &errorBuffer[0], ctx->networking.user_data);
+    if (!handle) {
+        errorBuffer.resize(strlen(errorBuffer.data()));
+        pj_log(ctx, PJ_LOG_ERROR, "Cannot open %s: %s", url.c_str(),
+               errorBuffer.c_str());
+        fclose(f);
+        unlink(localFilenameTmp.c_str());
+        return false;
+    }
+
+    time_t curTime;
+    time(&curTime);
+    NS_PROJ::FileProperties props;
+    if (!NS_PROJ::NetworkFile::get_props_from_headers(ctx, handle, props)) {
+        ctx->networking.close(ctx, handle, ctx->networking.user_data);
+        fclose(f);
+        unlink(localFilenameTmp.c_str());
+        return false;
+    }
+
+    if (size_read <
+        std::min(static_cast<unsigned long long>(buffer.size()), props.size)) {
+        pj_log(ctx, PJ_LOG_ERROR, "Did not get as many bytes as expected");
+        ctx->networking.close(ctx, handle, ctx->networking.user_data);
+        fclose(f);
+        unlink(localFilenameTmp.c_str());
+        return false;
+    }
+    if (fwrite(buffer.data(), size_read, 1, f) != 1) {
+        pj_log(ctx, PJ_LOG_ERROR, "Write error");
+        ctx->networking.close(ctx, handle, ctx->networking.user_data);
+        fclose(f);
+        unlink(localFilenameTmp.c_str());
+        return false;
+    }
+
+    unsigned long long totalDownloaded = size_read;
+    while (totalDownloaded < props.size) {
+        if (totalDownloaded + buffer.size() > props.size) {
+            buffer.resize(static_cast<size_t>(props.size - totalDownloaded));
+        }
+        errorBuffer.resize(1024);
+        size_read = ctx->networking.read_range(
+            ctx, handle, totalDownloaded, buffer.size(), &buffer[0],
+            errorBuffer.size(), &errorBuffer[0], ctx->networking.user_data);
+
+        if (size_read < buffer.size()) {
+            pj_log(ctx, PJ_LOG_ERROR, "Did not get as many bytes as expected");
+            ctx->networking.close(ctx, handle, ctx->networking.user_data);
+            fclose(f);
+            unlink(localFilenameTmp.c_str());
+            return false;
+        }
+        if (fwrite(buffer.data(), size_read, 1, f) != 1) {
+            pj_log(ctx, PJ_LOG_ERROR, "Write error");
+            ctx->networking.close(ctx, handle, ctx->networking.user_data);
+            fclose(f);
+            unlink(localFilenameTmp.c_str());
+            return false;
+        }
+
+        totalDownloaded += size_read;
+        if (progress_cbk &&
+            !progress_cbk(ctx, double(totalDownloaded) / props.size,
+                          user_data)) {
+            ctx->networking.close(ctx, handle, ctx->networking.user_data);
+            fclose(f);
+            unlink(localFilenameTmp.c_str());
+            return false;
+        }
+    }
+
+    ctx->networking.close(ctx, handle, ctx->networking.user_data);
+    fclose(f);
+
+    unlink(localFilename.c_str());
+    if (rename(localFilenameTmp.c_str(), localFilename.c_str()) != 0) {
+        pj_log(ctx, PJ_LOG_ERROR, "Cannot rename %s to %s",
+               localFilenameTmp.c_str(), localFilename.c_str());
+        return false;
+    }
+
+    auto diskCache = NS_PROJ::DiskChunkCache::open(ctx);
+    if (!diskCache)
+        return false;
+    auto stmt =
+        diskCache->prepare("SELECT lastChecked, fileSize, lastModified, etag "
+                           "FROM downloaded_file_properties WHERE url = ?");
+    if (!stmt)
+        return false;
+    stmt->bindText(url.c_str());
+
+    props.lastChecked = curTime;
+    auto hDB = diskCache->handle();
+
+    if (stmt->execute() == SQLITE_ROW) {
+        stmt = diskCache->prepare(
+            "UPDATE downloaded_file_properties SET lastChecked = ?, "
+            "fileSize = ?, lastModified = ?, etag = ? "
+            "WHERE url = ?");
+        if (!stmt)
+            return false;
+        stmt->bindInt64(props.lastChecked);
+        stmt->bindInt64(props.size);
+        if (props.lastModified.empty())
+            stmt->bindNull();
+        else
+            stmt->bindText(props.lastModified.c_str());
+        if (props.etag.empty())
+            stmt->bindNull();
+        else
+            stmt->bindText(props.etag.c_str());
+        stmt->bindText(url.c_str());
+        if (stmt->execute() != SQLITE_DONE) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return false;
+        }
+    } else {
+        stmt = diskCache->prepare(
+            "INSERT INTO downloaded_file_properties (url, lastChecked, "
+            "fileSize, lastModified, etag) VALUES "
+            "(?,?,?,?,?)");
+        if (!stmt)
+            return false;
+        stmt->bindText(url.c_str());
+        stmt->bindInt64(props.lastChecked);
+        stmt->bindInt64(props.size);
+        if (props.lastModified.empty())
+            stmt->bindNull();
+        else
+            stmt->bindText(props.lastModified.c_str());
+        if (props.etag.empty())
+            stmt->bindNull();
+        else
+            stmt->bindText(props.etag.c_str());
+        if (stmt->execute() != SQLITE_DONE) {
+            pj_log(ctx, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB));
+            return false;
+        }
+    }
+    return true;
+}

@@ -6,6 +6,10 @@ Test GeoTIFF grids
 
 <gie>
 
+# Those first tests using +proj=vgridshift only test the capability of reading
+# correctly a value from various formulations of GeoTIFF file, hence only the
+# forward path is tested (reverse path is tested in other files)
+
 -------------------------------------------------------------------------------
 operation   +proj=vgridshift +grids=tests/test_vgrid_pixelispoint.tif +multiplier=1
 -------------------------------------------------------------------------------

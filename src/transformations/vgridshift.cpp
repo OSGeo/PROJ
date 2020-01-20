@@ -56,7 +56,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
     if ( Q->defer_grid_opening ) {
         Q->defer_grid_opening = false;
-        Q->grids = proj_vgrid_init(P, "grids");
+        Q->grids = pj_vgrid_init(P, "grids");
         deal_with_vertcon_gtx_hack(P);
         if ( proj_errno(P) ) {
             return proj_coord_error().xyz;
@@ -66,7 +66,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     if (!Q->grids.empty()) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.xyz.z += proj_vgrid_value(P, Q->grids, point.lp, Q->forward_multiplier);
+        point.xyz.z += pj_vgrid_value(P, Q->grids, point.lp, Q->forward_multiplier);
     }
 
     return point.xyz;
@@ -80,7 +80,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 
     if ( Q->defer_grid_opening ) {
         Q->defer_grid_opening = false;
-        Q->grids = proj_vgrid_init(P, "grids");
+        Q->grids = pj_vgrid_init(P, "grids");
         deal_with_vertcon_gtx_hack(P);
         if ( proj_errno(P) ) {
             return proj_coord_error().lpz;
@@ -90,7 +90,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     if (!Q->grids.empty()) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.xyz.z -= proj_vgrid_value(P, Q->grids, point.lp, Q->forward_multiplier);
+        point.xyz.z -= pj_vgrid_value(P, Q->grids, point.lp, Q->forward_multiplier);
     }
 
     return point.lpz;
@@ -193,7 +193,7 @@ PJ *TRANSFORMATION(vgridshift,0) {
     }
     else {
         /* Build gridlist. P->vgridlist_geoid can be empty if +grids only ask for optional grids. */
-        Q->grids = proj_vgrid_init(P, "grids");
+        Q->grids = pj_vgrid_init(P, "grids");
 
         /* Was gridlist compiled properly? */
         if ( proj_errno(P) ) {

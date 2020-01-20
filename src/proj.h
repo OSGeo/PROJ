@@ -401,6 +401,9 @@ typedef const char* (*proj_network_get_header_value_cbk_type)(
  *
  * Read size_to_read bytes from handle, starting at offset, into
  * buffer.
+ * During this read, the implementation should make sure to store the HTTP
+ * headers from the server response to be able to respond to
+ * proj_network_get_header_value_cbk_type callback.
  *
  * error_string_max_size should be the maximum size that can be written into
  * the out_error_string buffer (including terminating nul character).
@@ -439,6 +442,15 @@ void PROJ_DLL proj_grid_cache_set_max_size(PJ_CONTEXT* ctx, int max_size_MB);
 void PROJ_DLL proj_grid_cache_set_ttl(PJ_CONTEXT* ctx, int ttl_seconds);
 
 void PROJ_DLL proj_grid_cache_clear(PJ_CONTEXT* ctx);
+
+int PROJ_DLL proj_is_download_needed(PJ_CONTEXT* ctx,
+                                     const char* url_or_filename,
+                                     int ignore_ttl_setting);
+int PROJ_DLL proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
+                                int ignore_ttl_setting,
+                                int (*progress_cbk)(PJ_CONTEXT *, double pct,
+                                                    void *user_data),
+                                void *user_data);
 
 /*! @cond Doxygen_Suppress */
 

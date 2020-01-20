@@ -140,6 +140,7 @@ class NullVerticalShiftGrid : public VerticalShiftGrid {
     bool valueAt(int, int, float &out) const override;
     bool isNodata(float, double) const override { return false; }
     void reassign_context(PJ_CONTEXT *) override {}
+    bool hasChanged() const override { return false; }
 };
 
 // ---------------------------------------------------------------------------
@@ -177,6 +178,8 @@ class GTXVerticalShiftGrid : public VerticalShiftGrid {
         m_ctx = ctx;
         m_fp->reassign_context(ctx);
     }
+
+    bool hasChanged() const override { return m_fp->hasChanged(); }
 };
 
 // ---------------------------------------------------------------------------
@@ -373,6 +376,7 @@ class GTiffGrid : public Grid {
     PJ_CONTEXT *m_ctx;   // owned by the belonging GTiffDataset
     TIFF *m_hTIFF;       // owned by the belonging GTiffDataset
     BlockCache &m_cache; // owned by the belonging GTiffDataset
+    File *m_fp;          // owned by the belonging GTiffDataset
     uint32 m_ifdIdx;
     TIFFDataType m_dt;
     uint16 m_samplesPerPixel;
@@ -402,9 +406,9 @@ class GTiffGrid : public Grid {
                     uint32 offsetInBlock, uint16 sample) const;
 
   public:
-    GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, uint32 ifdIdx,
-              const std::string &nameIn, int widthIn, int heightIn,
-              const ExtentAndRes &extentIn, TIFFDataType dtIn,
+    GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
+              uint32 ifdIdx, const std::string &nameIn, int widthIn,
+              int heightIn, const ExtentAndRes &extentIn, TIFFDataType dtIn,
               uint16 samplesPerPixelIn, uint16 planarConfig, bool bottomUpIn);
 
     ~GTiffGrid() override;
@@ -420,17 +424,19 @@ class GTiffGrid : public Grid {
     uint32 subfileType() const { return m_subfileType; }
 
     void reassign_context(PJ_CONTEXT *ctx) { m_ctx = ctx; }
+
+    bool hasChanged() const override { return m_fp->hasChanged(); }
 };
 
 // ---------------------------------------------------------------------------
 
-GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache,
+GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
                      uint32 ifdIdx, const std::string &nameIn, int widthIn,
                      int heightIn, const ExtentAndRes &extentIn,
                      TIFFDataType dtIn, uint16 samplesPerPixelIn,
                      uint16 planarConfig, bool bottomUpIn)
     : Grid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx), m_hTIFF(hTIFF),
-      m_cache(cache), m_ifdIdx(ifdIdx), m_dt(dtIn),
+      m_cache(cache), m_fp(fp), m_ifdIdx(ifdIdx), m_dt(dtIn),
       m_samplesPerPixel(samplesPerPixelIn), m_planarConfig(planarConfig),
       m_bottomUp(bottomUpIn), m_dirOffset(TIFFCurrentDirOffset(hTIFF)),
       m_tiled(TIFFIsTiled(hTIFF) != 0) {
@@ -1048,8 +1054,8 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
     }
 
     auto ret = std::unique_ptr<GTiffGrid>(new GTiffGrid(
-        m_ctx, m_hTIFF, m_cache, m_ifdIdx, m_filename, width, height, extent,
-        dt, samplesPerPixel, planarConfig, vRes < 0));
+        m_ctx, m_hTIFF, m_cache, m_fp.get(), m_ifdIdx, m_filename, width,
+        height, extent, dt, samplesPerPixel, planarConfig, vRes < 0));
     m_ifdIdx++;
     m_hasNextGrid = TIFFReadDirectory(m_hTIFF) != 0;
     m_nextDirOffset = TIFFCurrentDirOffset(m_hTIFF);
@@ -1058,10 +1064,12 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
 
 // ---------------------------------------------------------------------------
 
-class GTiffVGridShiftSet : public VerticalShiftGridSet, public GTiffDataset {
+class GTiffVGridShiftSet : public VerticalShiftGridSet {
+
+    std::unique_ptr<GTiffDataset> m_GTiffDataset;
 
     GTiffVGridShiftSet(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp)
-        : GTiffDataset(ctx, std::move(fp)) {}
+        : m_GTiffDataset(new GTiffDataset(ctx, std::move(fp))) {}
 
   public:
     ~GTiffVGridShiftSet() override;
@@ -1072,7 +1080,26 @@ class GTiffVGridShiftSet : public VerticalShiftGridSet, public GTiffDataset {
 
     void reassign_context(PJ_CONTEXT *ctx) override {
         VerticalShiftGridSet::reassign_context(ctx);
-        GTiffDataset::reassign_context(ctx);
+        if (m_GTiffDataset) {
+            m_GTiffDataset->reassign_context(ctx);
+        }
+    }
+
+    bool reopen(PJ_CONTEXT *ctx) override {
+        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+               m_name.c_str());
+        m_grids.clear();
+        m_GTiffDataset.reset();
+        auto fp = FileManager::open_resource_file(ctx, m_name.c_str());
+        if (!fp) {
+            return false;
+        }
+        auto newGS = open(ctx, std::move(fp), m_name);
+        if (newGS) {
+            m_grids = std::move(newGS->m_grids);
+            m_GTiffDataset = std::move(newGS->m_GTiffDataset);
+        }
+        return !m_grids.empty();
     }
 };
 
@@ -1172,6 +1199,8 @@ class GTiffVGrid : public VerticalShiftGrid {
     void reassign_context(PJ_CONTEXT *ctx) override {
         m_grid->reassign_context(ctx);
     }
+
+    bool hasChanged() const override { return m_grid->hasChanged(); }
 };
 
 // ---------------------------------------------------------------------------
@@ -1221,14 +1250,14 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         new GTiffVGridShiftSet(ctx, std::move(fp)));
     set->m_name = filename;
     set->m_format = "gtiff";
-    if (!set->openTIFF(filename)) {
+    if (!set->m_GTiffDataset->openTIFF(filename)) {
         return nullptr;
     }
     uint16 idxSample = 0;
 
     std::map<std::string, GTiffVGrid *> mapGrids;
     for (int ifd = 0;; ++ifd) {
-        auto grid = set->nextGrid();
+        auto grid = set->m_GTiffDataset->nextGrid();
         if (!grid) {
             if (ifd == 0) {
                 return nullptr;
@@ -1364,6 +1393,19 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 
 // ---------------------------------------------------------------------------
 
+bool VerticalShiftGridSet::reopen(PJ_CONTEXT *ctx) {
+    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+           m_name.c_str());
+    auto newGS = open(ctx, m_name);
+    m_grids.clear();
+    if (newGS) {
+        m_grids = std::move(newGS->m_grids);
+    }
+    return !m_grids.empty();
+}
+
+// ---------------------------------------------------------------------------
+
 const VerticalShiftGrid *VerticalShiftGrid::gridAt(double lon,
                                                    double lat) const {
     for (const auto &child : m_children) {
@@ -1435,6 +1477,8 @@ class NullHorizontalShiftGrid : public HorizontalShiftGrid {
                  float &latShift) const override;
 
     void reassign_context(PJ_CONTEXT *) override {}
+
+    bool hasChanged() const override { return false; }
 };
 
 // ---------------------------------------------------------------------------
@@ -1482,6 +1526,8 @@ class NTv1Grid : public HorizontalShiftGrid {
         m_ctx = ctx;
         m_fp->reassign_context(ctx);
     }
+
+    bool hasChanged() const override { return m_fp->hasChanged(); }
 };
 
 // ---------------------------------------------------------------------------
@@ -1603,6 +1649,8 @@ class CTable2Grid : public HorizontalShiftGrid {
         m_ctx = ctx;
         m_fp->reassign_context(ctx);
     }
+
+    bool hasChanged() const override { return m_fp->hasChanged(); }
 };
 
 // ---------------------------------------------------------------------------
@@ -1737,6 +1785,8 @@ class NTv2Grid : public HorizontalShiftGrid {
         m_ctx = ctx;
         m_fp->reassign_context(ctx);
     }
+
+    bool hasChanged() const override { return m_fp->hasChanged(); }
 };
 
 // ---------------------------------------------------------------------------
@@ -1787,6 +1837,11 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
     /*      Read the header.                                                */
     /* -------------------------------------------------------------------- */
     if (fpRaw->read(header, sizeof(header)) != sizeof(header)) {
+        pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+        return nullptr;
+    }
+    if (memcmp(header + 56, "SECONDS", 7) != 0) {
+        pj_log(ctx, PJ_LOG_ERROR, "Only GS_TYPE=SECONDS is supported");
         pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return nullptr;
     }
@@ -1906,10 +1961,12 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
-class GTiffHGridShiftSet : public HorizontalShiftGridSet, public GTiffDataset {
+class GTiffHGridShiftSet : public HorizontalShiftGridSet {
+
+    std::unique_ptr<GTiffDataset> m_GTiffDataset;
 
     GTiffHGridShiftSet(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp)
-        : GTiffDataset(ctx, std::move(fp)) {}
+        : m_GTiffDataset(new GTiffDataset(ctx, std::move(fp))) {}
 
   public:
     ~GTiffHGridShiftSet() override;
@@ -1920,7 +1977,26 @@ class GTiffHGridShiftSet : public HorizontalShiftGridSet, public GTiffDataset {
 
     void reassign_context(PJ_CONTEXT *ctx) override {
         HorizontalShiftGridSet::reassign_context(ctx);
-        GTiffDataset::reassign_context(ctx);
+        if (m_GTiffDataset) {
+            m_GTiffDataset->reassign_context(ctx);
+        }
+    }
+
+    bool reopen(PJ_CONTEXT *ctx) override {
+        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+               m_name.c_str());
+        m_grids.clear();
+        m_GTiffDataset.reset();
+        auto fp = FileManager::open_resource_file(ctx, m_name.c_str());
+        if (!fp) {
+            return false;
+        }
+        auto newGS = open(ctx, std::move(fp), m_name);
+        if (newGS) {
+            m_grids = std::move(newGS->m_grids);
+            m_GTiffDataset = std::move(newGS->m_GTiffDataset);
+        }
+        return !m_grids.empty();
     }
 };
 
@@ -1954,6 +2030,8 @@ class GTiffHGrid : public HorizontalShiftGrid {
     void reassign_context(PJ_CONTEXT *ctx) override {
         m_grid->reassign_context(ctx);
     }
+
+    bool hasChanged() const override { return m_grid->hasChanged(); }
 };
 
 // ---------------------------------------------------------------------------
@@ -2024,7 +2102,7 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         new GTiffHGridShiftSet(ctx, std::move(fp)));
     set->m_name = filename;
     set->m_format = "gtiff";
-    if (!set->openTIFF(filename)) {
+    if (!set->m_GTiffDataset->openTIFF(filename)) {
         return nullptr;
     }
 
@@ -2037,7 +2115,7 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
 
     std::map<std::string, GTiffHGrid *> mapGrids;
     for (int ifd = 0;; ++ifd) {
-        auto grid = set->nextGrid();
+        auto grid = set->m_GTiffDataset->nextGrid();
         if (!grid) {
             if (ifd == 0) {
                 return nullptr;
@@ -2269,6 +2347,19 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 
 // ---------------------------------------------------------------------------
 
+bool HorizontalShiftGridSet::reopen(PJ_CONTEXT *ctx) {
+    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+           m_name.c_str());
+    auto newGS = open(ctx, m_name);
+    m_grids.clear();
+    if (newGS) {
+        m_grids = std::move(newGS->m_grids);
+    }
+    return !m_grids.empty();
+}
+
+// ---------------------------------------------------------------------------
+
 const HorizontalShiftGrid *HorizontalShiftGrid::gridAt(double lon,
                                                        double lat) const {
     for (const auto &child : m_children) {
@@ -2317,11 +2408,12 @@ void HorizontalShiftGridSet::reassign_context(PJ_CONTEXT *ctx) {
 #ifdef TIFF_ENABLED
 // ---------------------------------------------------------------------------
 
-class GTiffGenericGridShiftSet : public GenericShiftGridSet,
-                                 public GTiffDataset {
+class GTiffGenericGridShiftSet : public GenericShiftGridSet {
+
+    std::unique_ptr<GTiffDataset> m_GTiffDataset;
 
     GTiffGenericGridShiftSet(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp)
-        : GTiffDataset(ctx, std::move(fp)) {}
+        : m_GTiffDataset(new GTiffDataset(ctx, std::move(fp))) {}
 
   public:
     ~GTiffGenericGridShiftSet() override;
@@ -2332,7 +2424,26 @@ class GTiffGenericGridShiftSet : public GenericShiftGridSet,
 
     void reassign_context(PJ_CONTEXT *ctx) override {
         GenericShiftGridSet::reassign_context(ctx);
-        GTiffDataset::reassign_context(ctx);
+        if (m_GTiffDataset) {
+            m_GTiffDataset->reassign_context(ctx);
+        }
+    }
+
+    bool reopen(PJ_CONTEXT *ctx) override {
+        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+               m_name.c_str());
+        m_grids.clear();
+        m_GTiffDataset.reset();
+        auto fp = FileManager::open_resource_file(ctx, m_name.c_str());
+        if (!fp) {
+            return false;
+        }
+        auto newGS = open(ctx, std::move(fp), m_name);
+        if (newGS) {
+            m_grids = std::move(newGS->m_grids);
+            m_GTiffDataset = std::move(newGS->m_GTiffDataset);
+        }
+        return !m_grids.empty();
     }
 };
 
@@ -2375,6 +2486,8 @@ class GTiffGenericGrid : public GenericShiftGrid {
     void reassign_context(PJ_CONTEXT *ctx) override {
         m_grid->reassign_context(ctx);
     }
+
+    bool hasChanged() const override { return m_grid->hasChanged(); }
 };
 
 // ---------------------------------------------------------------------------
@@ -2446,6 +2559,8 @@ class NullGenericShiftGrid : public GenericShiftGrid {
     }
 
     void reassign_context(PJ_CONTEXT *) override {}
+
+    bool hasChanged() const override { return false; }
 };
 
 // ---------------------------------------------------------------------------
@@ -2466,13 +2581,13 @@ GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         new GTiffGenericGridShiftSet(ctx, std::move(fp)));
     set->m_name = filename;
     set->m_format = "gtiff";
-    if (!set->openTIFF(filename)) {
+    if (!set->m_GTiffDataset->openTIFF(filename)) {
         return nullptr;
     }
 
     std::map<std::string, GTiffGenericGrid *> mapGrids;
     for (int ifd = 0;; ++ifd) {
-        auto grid = set->nextGrid();
+        auto grid = set->m_GTiffDataset->nextGrid();
         if (!grid) {
             if (ifd == 0) {
                 return nullptr;
@@ -2574,6 +2689,19 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 
 // ---------------------------------------------------------------------------
 
+bool GenericShiftGridSet::reopen(PJ_CONTEXT *ctx) {
+    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+           m_name.c_str());
+    auto newGS = open(ctx, m_name);
+    m_grids.clear();
+    if (newGS) {
+        m_grids = std::move(newGS->m_grids);
+    }
+    return !m_grids.empty();
+}
+
+// ---------------------------------------------------------------------------
+
 const GenericShiftGrid *GenericShiftGrid::gridAt(double lon, double lat) const {
     for (const auto &child : m_children) {
         const auto &extentChild = child->extentAndRes();
@@ -2614,7 +2742,7 @@ void GenericShiftGridSet::reassign_context(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
-ListOfGenericGrids proj_generic_grid_init(PJ *P, const char *gridkey) {
+ListOfGenericGrids pj_generic_grid_init(PJ *P, const char *gridkey) {
     std::string key("s");
     key += gridkey;
     const char *gridnames = pj_param(P->ctx, P->params, key.c_str()).s;
@@ -2644,4 +2772,615 @@ ListOfGenericGrids proj_generic_grid_init(PJ *P, const char *gridkey) {
     return grids;
 }
 
+// ---------------------------------------------------------------------------
+
+static const HorizontalShiftGrid *
+findGrid(const ListOfHGrids &grids, const PJ_LP &input,
+         HorizontalShiftGridSet *&gridSetOut) {
+    for (const auto &gridset : grids) {
+        auto grid = gridset->gridAt(input.lam, input.phi);
+        if (grid) {
+            gridSetOut = gridset.get();
+            return grid;
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+static ListOfHGrids getListOfGridSets(PJ_CONTEXT *ctx, const char *grids) {
+    ListOfHGrids list;
+    auto listOfGrids = internal::split(std::string(grids), ',');
+    for (const auto &grid : listOfGrids) {
+        const char *gridname = grid.c_str();
+        bool canFail = false;
+        if (gridname[0] == '@') {
+            canFail = true;
+            gridname++;
+        }
+        auto gridSet = HorizontalShiftGridSet::open(ctx, gridname);
+        if (!gridSet) {
+            if (!canFail) {
+                pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+                return {};
+            }
+        } else {
+            list.emplace_back(std::move(gridSet));
+        }
+    }
+    return list;
+}
+
+/**********************************************/
+ListOfHGrids pj_hgrid_init(PJ *P, const char *gridkey) {
+    /**********************************************
+
+      Initizalize and populate list of horizontal
+      grids.
+
+        Takes a PJ-object and the plus-parameter
+        name that is used in the proj-string to
+        specify the grids to load, e.g. "+grids".
+        The + should be left out here.
+
+        Returns the number of loaded grids.
+
+    ***********************************************/
+
+    std::string key("s");
+    key += gridkey;
+    const char *grids = pj_param(P->ctx, P->params, key.c_str()).s;
+    if (grids == nullptr)
+        return {};
+
+    return getListOfGridSets(P->ctx, grids);
+}
+
+// ---------------------------------------------------------------------------
+
+typedef struct { pj_int32 lam, phi; } ILP;
+
+static PJ_LP pj_hgrid_interpolate(PJ_LP t, const HorizontalShiftGrid *grid,
+                                  bool compensateNTConvention) {
+    PJ_LP val, frct;
+    ILP indx;
+    int in;
+
+    const auto &extent = grid->extentAndRes();
+    t.lam /= extent.resLon;
+    indx.lam = std::isnan(t.lam) ? 0 : (pj_int32)lround(floor(t.lam));
+    t.phi /= extent.resLat;
+    indx.phi = std::isnan(t.phi) ? 0 : (pj_int32)lround(floor(t.phi));
+
+    frct.lam = t.lam - indx.lam;
+    frct.phi = t.phi - indx.phi;
+    val.lam = val.phi = HUGE_VAL;
+    if (indx.lam < 0) {
+        if (indx.lam == -1 && frct.lam > 0.99999999999) {
+            ++indx.lam;
+            frct.lam = 0.;
+        } else
+            return val;
+    } else if ((in = indx.lam + 1) >= grid->width()) {
+        if (in == grid->width() && frct.lam < 1e-11) {
+            --indx.lam;
+            frct.lam = 1.;
+        } else
+            return val;
+    }
+    if (indx.phi < 0) {
+        if (indx.phi == -1 && frct.phi > 0.99999999999) {
+            ++indx.phi;
+            frct.phi = 0.;
+        } else
+            return val;
+    } else if ((in = indx.phi + 1) >= grid->height()) {
+        if (in == grid->height() && frct.phi < 1e-11) {
+            --indx.phi;
+            frct.phi = 1.;
+        } else
+            return val;
+    }
+
+    float f00Lon = 0, f00Lat = 0;
+    float f10Lon = 0, f10Lat = 0;
+    float f01Lon = 0, f01Lat = 0;
+    float f11Lon = 0, f11Lat = 0;
+    if (!grid->valueAt(indx.lam, indx.phi, compensateNTConvention, f00Lon,
+                       f00Lat) ||
+        !grid->valueAt(indx.lam + 1, indx.phi, compensateNTConvention, f10Lon,
+                       f10Lat) ||
+        !grid->valueAt(indx.lam, indx.phi + 1, compensateNTConvention, f01Lon,
+                       f01Lat) ||
+        !grid->valueAt(indx.lam + 1, indx.phi + 1, compensateNTConvention,
+                       f11Lon, f11Lat)) {
+        return val;
+    }
+
+    double m10 = frct.lam;
+    double m11 = m10;
+    double m01 = 1. - frct.lam;
+    double m00 = m01;
+    m11 *= frct.phi;
+    m01 *= frct.phi;
+    frct.phi = 1. - frct.phi;
+    m00 *= frct.phi;
+    m10 *= frct.phi;
+    val.lam = m00 * f00Lon + m10 * f10Lon + m01 * f01Lon + m11 * f11Lon;
+    val.phi = m00 * f00Lat + m10 * f10Lat + m01 * f01Lat + m11 * f11Lat;
+    return val;
+}
+
+// ---------------------------------------------------------------------------
+
+#define MAX_ITERATIONS 10
+#define TOL 1e-12
+
+static PJ_LP pj_hgrid_apply_internal(projCtx ctx, PJ_LP in,
+                                     PJ_DIRECTION direction,
+                                     const HorizontalShiftGrid *grid,
+                                     HorizontalShiftGridSet *gridset,
+                                     const ListOfHGrids &grids,
+                                     bool &shouldRetry) {
+    PJ_LP t, tb, del, dif;
+    int i = MAX_ITERATIONS;
+    const double toltol = TOL * TOL;
+
+    shouldRetry = false;
+    if (in.lam == HUGE_VAL)
+        return in;
+
+    /* normalize input to ll origin */
+    tb = in;
+    const auto *extent = &(grid->extentAndRes());
+    tb.lam -= extent->westLon;
+    tb.phi -= extent->southLat;
+
+    tb.lam = adjlon(tb.lam - M_PI) + M_PI;
+
+    t = pj_hgrid_interpolate(tb, grid, true);
+    if (grid->hasChanged()) {
+        shouldRetry = gridset->reopen(ctx);
+        return t;
+    }
+    if (t.lam == HUGE_VAL)
+        return t;
+
+    if (direction == PJ_FWD) {
+        in.lam += t.lam;
+        in.phi += t.phi;
+        return in;
+    }
+
+    t.lam = tb.lam - t.lam;
+    t.phi = tb.phi - t.phi;
+
+    do {
+        del = pj_hgrid_interpolate(t, grid, true);
+        if (grid->hasChanged()) {
+            shouldRetry = gridset->reopen(ctx);
+            return t;
+        }
+
+        /* We can possibly go outside of the initial guessed grid, so try */
+        /* to fetch a new grid into which iterate... */
+        if (del.lam == HUGE_VAL) {
+            PJ_LP lp;
+            lp.lam = t.lam + extent->westLon;
+            lp.phi = t.phi + extent->southLat;
+            auto newGrid = findGrid(grids, lp, gridset);
+            if (newGrid == nullptr || newGrid == grid || newGrid->isNullGrid())
+                break;
+            pj_log(ctx, PJ_LOG_DEBUG_MINOR, "Switching from grid %s to grid %s",
+                   grid->name().c_str(), newGrid->name().c_str());
+            grid = newGrid;
+            extent = &(grid->extentAndRes());
+            t.lam = lp.lam - extent->westLon;
+            t.phi = lp.phi - extent->southLat;
+            tb = in;
+            tb.lam -= extent->westLon;
+            tb.phi -= extent->southLat;
+            tb.lam = adjlon(tb.lam - M_PI) + M_PI;
+            dif.lam = std::numeric_limits<double>::max();
+            dif.phi = std::numeric_limits<double>::max();
+            continue;
+        }
+
+        dif.lam = t.lam + del.lam - tb.lam;
+        dif.phi = t.phi + del.phi - tb.phi;
+        t.lam -= dif.lam;
+        t.phi -= dif.phi;
+
+    } while (--i && (dif.lam * dif.lam + dif.phi * dif.phi >
+                     toltol)); /* prob. slightly faster than hypot() */
+
+    if (i == 0) {
+        /* If we had access to a context, this should go through pj_log, and we
+         * should set ctx->errno */
+        if (getenv("PROJ_DEBUG"))
+            fprintf(stderr,
+                    "Inverse grid shift iterator failed to converge.\n");
+        t.lam = t.phi = HUGE_VAL;
+        return t;
+    }
+
+    /* and again: pj_log and ctx->errno */
+    if (del.lam == HUGE_VAL && getenv("PROJ_DEBUG"))
+        fprintf(stderr, "Inverse grid shift iteration failed, presumably at "
+                        "grid edge.\nUsing first approximation.\n");
+
+    in.lam = adjlon(t.lam + extent->westLon);
+    in.phi = t.phi + extent->southLat;
+    return in;
+}
+
+// ---------------------------------------------------------------------------
+
+PJ_LP pj_hgrid_apply(PJ_CONTEXT *ctx, const ListOfHGrids &grids, PJ_LP lp,
+                     PJ_DIRECTION direction) {
+    PJ_LP out;
+
+    out.lam = HUGE_VAL;
+    out.phi = HUGE_VAL;
+
+    while (true) {
+        HorizontalShiftGridSet *gridset = nullptr;
+        const auto grid = findGrid(grids, lp, gridset);
+        if (!grid) {
+            pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+            return out;
+        }
+        if (grid->isNullGrid()) {
+            return lp;
+        }
+
+        bool shouldRetry = false;
+        out = pj_hgrid_apply_internal(ctx, lp, direction, grid, gridset, grids,
+                                      shouldRetry);
+        if (!shouldRetry) {
+            break;
+        }
+    }
+
+    if (out.lam == HUGE_VAL || out.phi == HUGE_VAL)
+        pj_ctx_set_errno(ctx, PJD_ERR_GRID_AREA);
+
+    return out;
+}
+
+/********************************************/
+/*           proj_hgrid_value()             */
+/*                                          */
+/*    Return coordinate offset in grid      */
+/********************************************/
+PJ_LP pj_hgrid_value(PJ *P, const ListOfHGrids &grids, PJ_LP lp) {
+    PJ_LP out = proj_coord_error().lp;
+
+    HorizontalShiftGridSet *gridset = nullptr;
+    const auto grid = findGrid(grids, lp, gridset);
+    if (!grid) {
+        pj_ctx_set_errno(P->ctx, PJD_ERR_GRID_AREA);
+        return out;
+    }
+
+    /* normalize input to ll origin */
+    const auto &extent = grid->extentAndRes();
+    lp.lam -= extent.westLon;
+    lp.phi -= extent.southLat;
+
+    lp.lam = adjlon(lp.lam - M_PI) + M_PI;
+
+    out = pj_hgrid_interpolate(lp, grid, false);
+    if (grid->hasChanged()) {
+        if (gridset->reopen(P->ctx)) {
+            return pj_hgrid_value(P, grids, lp);
+        }
+        out.lam = HUGE_VAL;
+        out.phi = HUGE_VAL;
+    }
+
+    if (out.lam == HUGE_VAL || out.phi == HUGE_VAL) {
+        pj_ctx_set_errno(P->ctx, PJD_ERR_GRID_AREA);
+    }
+
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+
+static double read_vgrid_value(PJ_CONTEXT *ctx, const ListOfVGrids &grids,
+                               const PJ_LP &input, const double vmultiplier) {
+
+    /* do not deal with NaN coordinates */
+    /* cppcheck-suppress duplicateExpression */
+    if (std::isnan(input.phi) || std::isnan(input.lam)) {
+        return HUGE_VAL;
+    }
+
+    VerticalShiftGridSet *curGridset = nullptr;
+    const VerticalShiftGrid *grid = nullptr;
+    for (const auto &gridset : grids) {
+        grid = gridset->gridAt(input.lam, input.phi);
+        if (grid) {
+            curGridset = gridset.get();
+            break;
+        }
+    }
+    if (!grid) {
+        return HUGE_VAL;
+    }
+
+    const auto &extent = grid->extentAndRes();
+
+    /* Interpolation a location within the grid */
+    double grid_x = (input.lam - extent.westLon) / extent.resLon;
+    if (extent.fullWorldLongitude()) {
+        // The first fmod goes to ]-lim, lim[ range
+        // So we add lim again to be in ]0, 2*lim[ and fmod again
+        grid_x =
+            fmod(fmod(grid_x + grid->width(), grid->width()) + grid->width(),
+                 grid->width());
+    }
+    double grid_y = (input.phi - extent.southLat) / extent.resLat;
+    int grid_ix = static_cast<int>(lround(floor(grid_x)));
+    assert(grid_ix >= 0 && grid_ix < grid->width());
+    int grid_iy = static_cast<int>(lround(floor(grid_y)));
+    assert(grid_iy >= 0 && grid_iy < grid->height());
+    grid_x -= grid_ix;
+    grid_y -= grid_iy;
+
+    int grid_ix2 = grid_ix + 1;
+    if (grid_ix2 >= grid->width()) {
+        if (extent.fullWorldLongitude()) {
+            grid_ix2 = 0;
+        } else {
+            grid_ix2 = grid->width() - 1;
+        }
+    }
+    int grid_iy2 = grid_iy + 1;
+    if (grid_iy2 >= grid->height())
+        grid_iy2 = grid->height() - 1;
+
+    float value_a = 0;
+    float value_b = 0;
+    float value_c = 0;
+    float value_d = 0;
+    bool error = (!grid->valueAt(grid_ix, grid_iy, value_a) ||
+                  !grid->valueAt(grid_ix2, grid_iy, value_b) ||
+                  !grid->valueAt(grid_ix, grid_iy2, value_c) ||
+                  !grid->valueAt(grid_ix2, grid_iy2, value_d));
+    if (grid->hasChanged()) {
+        if (curGridset->reopen(ctx)) {
+            return read_vgrid_value(ctx, grids, input, vmultiplier);
+        }
+        error = true;
+    }
+
+    if (error) {
+        return HUGE_VAL;
+    }
+
+    double total_weight = 0.0;
+    int n_weights = 0;
+    double value = 0.0f;
+
+    if (!grid->isNodata(value_a, vmultiplier)) {
+        double weight = (1.0 - grid_x) * (1.0 - grid_y);
+        value += value_a * weight;
+        total_weight += weight;
+        n_weights++;
+    }
+    if (!grid->isNodata(value_b, vmultiplier)) {
+        double weight = (grid_x) * (1.0 - grid_y);
+        value += value_b * weight;
+        total_weight += weight;
+        n_weights++;
+    }
+    if (!grid->isNodata(value_c, vmultiplier)) {
+        double weight = (1.0 - grid_x) * (grid_y);
+        value += value_c * weight;
+        total_weight += weight;
+        n_weights++;
+    }
+    if (!grid->isNodata(value_d, vmultiplier)) {
+        double weight = (grid_x) * (grid_y);
+        value += value_d * weight;
+        total_weight += weight;
+        n_weights++;
+    }
+    if (n_weights == 0)
+        value = HUGE_VAL;
+    else if (n_weights != 4)
+        value /= total_weight;
+
+    return value * vmultiplier;
+}
+
+/**********************************************/
+ListOfVGrids pj_vgrid_init(PJ *P, const char *gridkey) {
+    /**********************************************
+
+      Initizalize and populate gridlist.
+
+        Takes a PJ-object and the plus-parameter
+        name that is used in the proj-string to
+        specify the grids to load, e.g. "+grids".
+        The + should be left out here.
+
+        Returns the number of loaded grids.
+
+    ***********************************************/
+
+    std::string key("s");
+    key += gridkey;
+    const char *gridnames = pj_param(P->ctx, P->params, key.c_str()).s;
+    if (gridnames == nullptr)
+        return {};
+
+    auto listOfGridNames = internal::split(std::string(gridnames), ',');
+    ListOfVGrids grids;
+    for (const auto &gridnameStr : listOfGridNames) {
+        const char *gridname = gridnameStr.c_str();
+        bool canFail = false;
+        if (gridname[0] == '@') {
+            canFail = true;
+            gridname++;
+        }
+        auto gridSet = VerticalShiftGridSet::open(P->ctx, gridname);
+        if (!gridSet) {
+            if (!canFail) {
+                pj_ctx_set_errno(P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+                return {};
+            }
+        } else {
+            grids.emplace_back(std::move(gridSet));
+        }
+    }
+
+    return grids;
+}
+
+/***********************************************/
+double pj_vgrid_value(PJ *P, const ListOfVGrids &grids, PJ_LP lp,
+                      double vmultiplier) {
+    /***********************************************
+
+      Read grid value at position lp in grids loaded
+      with proj_grid_init.
+
+      Returns the grid value of the given coordinate.
+
+    ************************************************/
+
+    double value;
+
+    value = read_vgrid_value(P->ctx, grids, lp, vmultiplier);
+    proj_log_trace(P, "proj_vgrid_value: (%f, %f) = %f", lp.lam * RAD_TO_DEG,
+                   lp.phi * RAD_TO_DEG, value);
+
+    return value;
+}
+
+// ---------------------------------------------------------------------------
+
+const GenericShiftGrid *pj_find_generic_grid(const ListOfGenericGrids &grids,
+                                             const PJ_LP &input,
+                                             GenericShiftGridSet *&gridSetOut) {
+    for (const auto &gridset : grids) {
+        auto grid = gridset->gridAt(input.lam, input.phi);
+        if (grid) {
+            gridSetOut = gridset.get();
+            return grid;
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+bool pj_bilinear_interpolation_three_samples(const GenericShiftGrid *grid,
+                                             const PJ_LP &lp, int idx1,
+                                             int idx2, int idx3, double &v1,
+                                             double &v2, double &v3,
+                                             bool &must_retry) {
+    must_retry = false;
+
+    const auto &extent = grid->extentAndRes();
+    double grid_x = (lp.lam - extent.westLon) / extent.resLon;
+    double grid_y = (lp.phi - extent.southLat) / extent.resLat;
+    int ix = static_cast<int>(grid_x);
+    int iy = static_cast<int>(grid_y);
+    int ix2 = std::min(ix + 1, grid->width() - 1);
+    int iy2 = std::min(iy + 1, grid->height() - 1);
+
+    float dx1 = 0.0f, dy1 = 0.0f, dz1 = 0.0f;
+    float dx2 = 0.0f, dy2 = 0.0f, dz2 = 0.0f;
+    float dx3 = 0.0f, dy3 = 0.0f, dz3 = 0.0f;
+    float dx4 = 0.0f, dy4 = 0.0f, dz4 = 0.0f;
+    bool error = (!grid->valueAt(ix, iy, idx1, dx1) ||
+                  !grid->valueAt(ix, iy, idx2, dy1) ||
+                  !grid->valueAt(ix, iy, idx3, dz1) ||
+                  !grid->valueAt(ix2, iy, idx1, dx2) ||
+                  !grid->valueAt(ix2, iy, idx2, dy2) ||
+                  !grid->valueAt(ix2, iy, idx3, dz2) ||
+                  !grid->valueAt(ix, iy2, idx1, dx3) ||
+                  !grid->valueAt(ix, iy2, idx2, dy3) ||
+                  !grid->valueAt(ix, iy2, idx3, dz3) ||
+                  !grid->valueAt(ix2, iy2, idx1, dx4) ||
+                  !grid->valueAt(ix2, iy2, idx2, dy4) ||
+                  !grid->valueAt(ix2, iy2, idx3, dz4));
+    if (grid->hasChanged()) {
+        must_retry = true;
+        return false;
+    }
+    if (error) {
+        return false;
+    }
+
+    double frct_lam = grid_x - ix;
+    double frct_phi = grid_y - iy;
+    double m10 = frct_lam;
+    double m11 = m10;
+    double m01 = 1. - frct_lam;
+    double m00 = m01;
+    m11 *= frct_phi;
+    m01 *= frct_phi;
+    frct_phi = 1. - frct_phi;
+    m00 *= frct_phi;
+    m10 *= frct_phi;
+
+    v1 = m00 * dx1 + m10 * dx2 + m01 * dx3 + m11 * dx4;
+    v2 = m00 * dy1 + m10 * dy2 + m01 * dy3 + m11 * dy4;
+    v3 = m00 * dz1 + m10 * dz2 + m01 * dz3 + m11 * dz4;
+    return true;
+}
+
 NS_PROJ_END
+
+/************************************************************************/
+/*                         pj_apply_gridshift()                         */
+/*                                                                      */
+/*      This is the externally callable interface - part of the         */
+/*      public API - though it is not used internally any more and I    */
+/*      doubt it is used by any other applications.  But we preserve    */
+/*      it to honour our public api.                                    */
+/************************************************************************/
+
+int pj_apply_gridshift(projCtx ctx, const char *nadgrids, int inverse,
+                       long point_count, int point_offset, double *x, double *y,
+                       double * /*z */)
+
+{
+    auto hgrids = NS_PROJ::getListOfGridSets(ctx, nadgrids);
+    if (hgrids.empty()) {
+        pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+        return 1;
+    }
+
+    for (long i = 0; i < point_count; i++) {
+        PJ_LP input;
+
+        long io = i * point_offset;
+        input.phi = y[io];
+        input.lam = x[io];
+
+        auto output =
+            pj_hgrid_apply(ctx, hgrids, input, inverse ? PJ_INV : PJ_FWD);
+
+        if (output.lam != HUGE_VAL) {
+            y[io] = output.phi;
+            x[io] = output.lam;
+        } else {
+            if (ctx->debug_level >= PJ_LOG_DEBUG_MAJOR) {
+                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                       "pj_apply_gridshift(): failed to find a grid shift "
+                       "table for\n"
+                       "                      location (%.7fdW,%.7fdN)",
+                       x[io] * RAD_TO_DEG, y[io] * RAD_TO_DEG);
+            }
+        }
+    }
+
+    return 0;
+}

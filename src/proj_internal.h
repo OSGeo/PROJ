@@ -709,6 +709,7 @@ struct projCtx_t {
     bool iniFileLoaded = false;
     std::string endpoint{};
 
+    std::string user_writable_directory{};
     projGridChunkCache gridChunkCache{};
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
@@ -844,8 +845,9 @@ std::string pj_context_get_url_endpoint(PJ_CONTEXT* ctx);
 
 void pj_load_ini(PJ_CONTEXT* ctx);
 
-// For testing purposes
+// Exported for testing purposes only
 std::string PROJ_DLL pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx);
+std::string PROJ_DLL pj_context_get_user_writable_directory(PJ_CONTEXT *ctx, bool create);
 
 /* classic public API */
 #include "proj_api.h"

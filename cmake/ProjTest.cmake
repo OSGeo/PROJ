@@ -28,10 +28,10 @@ function(proj_add_test_script_sh SH_NAME BIN_USE)
       )
       if(MSVC)
           set_tests_properties( ${testname}
-              PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data\\;${PROJECT_SOURCE_DIR}/data")
+              PROPERTIES ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data\\;${PROJECT_SOURCE_DIR}/data")
       else()
           set_tests_properties( ${testname}
-              PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data:${PROJECT_SOURCE_DIR}/data")
+              PROPERTIES ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data:${PROJECT_SOURCE_DIR}/data")
       endif()
     endif()
 
@@ -51,10 +51,10 @@ function(proj_add_gie_test TESTNAME TESTCASE)
 
     if(MSVC)
         set_tests_properties( ${TESTNAME}
-            PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data\\;${PROJECT_SOURCE_DIR}/data")
+            PROPERTIES ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data\\;${PROJECT_SOURCE_DIR}/data")
     else()
         set_tests_properties( ${TESTNAME}
-            PROPERTIES ENVIRONMENT "PROJ_LIB=${PROJECT_BINARY_DIR}/data:${PROJECT_SOURCE_DIR}/data")
+            PROPERTIES ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data:${PROJECT_SOURCE_DIR}/data")
     endif()
 
 

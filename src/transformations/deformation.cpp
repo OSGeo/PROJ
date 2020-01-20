@@ -80,20 +80,6 @@ struct deformationData {
 
 // ---------------------------------------------------------------------------
 
-static const GenericShiftGrid* findGrid(const ListOfGenericGrids& grids,
-                                        const PJ_LP& input)
-{
-    for( const auto& gridset: grids )
-    {
-        auto grid = gridset->gridAt(input.lam, input.phi);
-        if( grid )
-            return grid;
-    }
-    return nullptr;
-}
-
-// ---------------------------------------------------------------------------
-
 static bool get_grid_values(PJ* P,
                             deformationData* Q,
                             const PJ_LP& lp,
@@ -101,7 +87,8 @@ static bool get_grid_values(PJ* P,
                             double& vy,
                             double& vz)
 {
-    auto grid = findGrid(Q->grids, lp);
+    GenericShiftGridSet* gridset = nullptr;
+    auto grid = pj_find_generic_grid(Q->grids, lp, gridset);
     if( !grid ) {
         return false;
     }
@@ -136,57 +123,20 @@ static bool get_grid_values(PJ* P,
         return false;
     }
 
-    const auto& extent = grid->extentAndRes();
-    double grid_x = (lp.lam - extent.westLon) / extent.resLon;
-    double grid_y = (lp.phi - extent.southLat) / extent.resLat;
-    int ix = static_cast<int>(grid_x);
-    int iy = static_cast<int>(grid_y);
-    int ix2 = std::min(ix + 1, grid->width() - 1);
-    int iy2 = std::min(iy + 1, grid->height() - 1);
-
-    float dx1, dy1, dz1;
-    if( !grid->valueAt(ix, iy, sampleE, dx1) ||
-        !grid->valueAt(ix, iy, sampleN, dy1) ||
-        !grid->valueAt(ix, iy, sampleU, dz1) ) {
+    bool must_retry = false;
+    if( !pj_bilinear_interpolation_three_samples(grid, lp,
+                                                 sampleE, sampleN, sampleU,
+                                                 vx, vy, vz,
+                                                 must_retry) )
+    {
+        if( must_retry )
+            return get_grid_values( P, Q, lp, vx, vy, vz);
         return false;
     }
-
-    float dx2, dy2, dz2;
-    if( !grid->valueAt(ix2, iy, sampleE, dx2) ||
-        !grid->valueAt(ix2, iy, sampleN, dy2) ||
-        !grid->valueAt(ix2, iy, sampleU, dz2) ) {
-        return false;
-    }
-
-    float dx3, dy3, dz3;
-    if( !grid->valueAt(ix, iy2, sampleE, dx3) ||
-        !grid->valueAt(ix, iy2, sampleN, dy3) ||
-        !grid->valueAt(ix, iy2, sampleU, dz3) ) {
-        return false;
-    }
-
-    float dx4, dy4, dz4;
-    if( !grid->valueAt(ix2, iy2, sampleE, dx4) ||
-        !grid->valueAt(ix2, iy2, sampleN, dy4) ||
-        !grid->valueAt(ix2, iy2, sampleU, dz4) ) {
-        return false;
-    }
-
-    double frct_lam = grid_x - ix;
-    double frct_phi = grid_y - iy;
-    double m10 = frct_lam;
-    double m11 = m10;
-    double m01 = 1. - frct_lam;
-    double m00 = m01;
-    m11 *= frct_phi;
-    m01 *= frct_phi;
-    frct_phi = 1. - frct_phi;
-    m00 *= frct_phi;
-    m10 *= frct_phi;
     // divide by 1000 to get m/year
-    vx = (m00 * dx1 + m10 * dx2 + m01 * dx3 + m11 * dx4) / 1000;
-    vy = (m00 * dy1 + m10 * dy2 + m01 * dy3 + m11 * dy4) / 1000;
-    vz = (m00 * dz1 + m10 * dz2 + m01 * dz3 + m11 * dz4) / 1000;
+    vx /= 1000;
+    vy /= 1000;
+    vz /= 1000;
     return true;
 }
 
@@ -226,8 +176,8 @@ static PJ_XYZ get_grid_shift(PJ* P, const PJ_XYZ& cartesian) {
     }
     else
     {
-        shift.lp    = proj_hgrid_value(P, Q->hgrids, geodetic.lp);
-        shift.enu.u = proj_vgrid_value(P, Q->vgrids, geodetic.lp, 1.0);
+        shift.lp    = pj_hgrid_value(P, Q->hgrids, geodetic.lp);
+        shift.enu.u = pj_vgrid_value(P, Q->vgrids, geodetic.lp, 1.0);
 
         if (proj_errno(P) == PJD_ERR_GRID_AREA)
             proj_log_debug(P, "deformation: coordinate (%.3f, %.3f) outside deformation model",
@@ -425,7 +375,7 @@ PJ *TRANSFORMATION(deformation,1) {
 
     if( has_grids )
     {
-        Q->grids = proj_generic_grid_init(P, "grids");
+        Q->grids = pj_generic_grid_init(P, "grids");
         /* Was gridlist compiled properly? */
         if ( proj_errno(P) ) {
             proj_log_error(P, "deformation: could not find required grid(s).");
@@ -434,13 +384,13 @@ PJ *TRANSFORMATION(deformation,1) {
     }
     else
     {
-        Q->hgrids = proj_hgrid_init(P, "xy_grids");
+        Q->hgrids = pj_hgrid_init(P, "xy_grids");
         if (proj_errno(P)) {
             proj_log_error(P, "deformation: could not find requested xy_grid(s).");
             return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
         }
 
-        Q->vgrids = proj_vgrid_init(P, "z_grids");
+        Q->vgrids = pj_vgrid_init(P, "z_grids");
         if (proj_errno(P)) {
             proj_log_error(P, "deformation: could not find requested z_grid(s).");
             return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);

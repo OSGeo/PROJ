@@ -51,21 +51,6 @@ struct xyzgridshiftData {
 };
 } // anonymous namespace
 
-
-// ---------------------------------------------------------------------------
-
-static const GenericShiftGrid* findGrid(const ListOfGenericGrids& grids,
-                                        const PJ_LP& input)
-{
-    for( const auto& gridset: grids )
-    {
-        auto grid = gridset->gridAt(input.lam, input.phi);
-        if( grid )
-            return grid;
-    }
-    return nullptr;
-}
-
 // ---------------------------------------------------------------------------
 
 static bool get_grid_values(PJ* P,
@@ -77,13 +62,14 @@ static bool get_grid_values(PJ* P,
 {
     if ( Q->defer_grid_opening ) {
         Q->defer_grid_opening = false;
-        Q->grids = proj_generic_grid_init(P, "grids");
+        Q->grids = pj_generic_grid_init(P, "grids");
         if ( proj_errno(P) ) {
             return false;
         }
     }
 
-    auto grid = findGrid(Q->grids, lp);
+    GenericShiftGridSet* gridset = nullptr;
+    auto grid = pj_find_generic_grid(Q->grids, lp, gridset);
     if( !grid ) {
         return false;
     }
@@ -118,56 +104,20 @@ static bool get_grid_values(PJ* P,
         return false;
     }
 
-    const auto& extent = grid->extentAndRes();
-    double grid_x = (lp.lam - extent.westLon) / extent.resLon;
-    double grid_y = (lp.phi - extent.southLat) / extent.resLat;
-    int ix = static_cast<int>(grid_x);
-    int iy = static_cast<int>(grid_y);
-    int ix2 = std::min(ix + 1, grid->width() - 1);
-    int iy2 = std::min(iy + 1, grid->height() - 1);
-
-    float dx1, dy1, dz1;
-    if( !grid->valueAt(ix, iy, sampleX, dx1) ||
-        !grid->valueAt(ix, iy, sampleY, dy1) ||
-        !grid->valueAt(ix, iy, sampleZ, dz1) ) {
+    bool must_retry = false;
+    if( !pj_bilinear_interpolation_three_samples(grid, lp,
+                                                 sampleX, sampleY, sampleZ,
+                                                 dx, dy, dz,
+                                                 must_retry) )
+    {
+        if( must_retry )
+            return get_grid_values( P, Q, lp, dx, dy, dz);
         return false;
     }
 
-    float dx2, dy2, dz2;
-    if( !grid->valueAt(ix2, iy, sampleX, dx2) ||
-        !grid->valueAt(ix2, iy, sampleY, dy2) ||
-        !grid->valueAt(ix2, iy, sampleZ, dz2) ) {
-        return false;
-    }
-
-    float dx3, dy3, dz3;
-    if( !grid->valueAt(ix, iy2, sampleX, dx3) ||
-        !grid->valueAt(ix, iy2, sampleY, dy3) ||
-        !grid->valueAt(ix, iy2, sampleZ, dz3) ) {
-        return false;
-    }
-
-    float dx4, dy4, dz4;
-    if( !grid->valueAt(ix2, iy2, sampleX, dx4) ||
-        !grid->valueAt(ix2, iy2, sampleY, dy4) ||
-        !grid->valueAt(ix2, iy2, sampleZ, dz4) ) {
-        return false;
-    }
-
-    double frct_lam = grid_x - ix;
-    double frct_phi = grid_y - iy;
-    double m10 = frct_lam;
-    double m11 = m10;
-    double m01 = 1. - frct_lam;
-    double m00 = m01;
-    m11 *= frct_phi;
-    m01 *= frct_phi;
-    frct_phi = 1. - frct_phi;
-    m00 *= frct_phi;
-    m10 *= frct_phi;
-    dx = (m00 * dx1 + m10 * dx2 + m01 * dx3 + m11 * dx4) * Q->multiplier;
-    dy = (m00 * dy1 + m10 * dy2 + m01 * dy3 + m11 * dy4) * Q->multiplier;
-    dz = (m00 * dz1 + m10 * dz2 + m01 * dz3 + m11 * dz4) * Q->multiplier;
+    dx *= Q->multiplier;
+    dy *= Q->multiplier;
+    dz *= Q->multiplier;
     return true;
 }
 
@@ -341,7 +291,7 @@ PJ *TRANSFORMATION(xyzgridshift,0) {
         Q->defer_grid_opening = true;
     }
     else {
-        Q->grids = proj_generic_grid_init(P, "grids");
+        Q->grids = pj_generic_grid_init(P, "grids");
         /* Was gridlist compiled properly? */
         if ( proj_errno(P) ) {
             proj_log_error(P, "xyzgridshift: could not find required grid(s).");
