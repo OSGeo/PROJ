@@ -348,9 +348,9 @@ TEST(gie, info_functions) {
 
     /* proj_info()                                                            */
     /* this one is difficult to test, since the output changes with the setup */
-    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY="));
+    putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY="));
     info = proj_info();
-    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES"));
+    putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"));
 
     if (info.version[0] != '\0') {
         char tmpstr[64];

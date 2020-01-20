@@ -23,7 +23,7 @@ pj_transform_test_SOURCES = pj_transform_test.cpp main.cpp
 pj_transform_test_LDADD = ../../src/libproj.la @GTEST_LIBS@
 
 pj_transform_test-check: pj_transform_test
-	PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) ./pj_transform_test
+	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) ./pj_transform_test
 
 pj_phi2_test_SOURCES = pj_phi2_test.cpp main.cpp
 pj_phi2_test_LDADD = ../../src/libproj.la @GTEST_LIBS@
@@ -47,19 +47,19 @@ proj_context_test_SOURCES = proj_context_test.cpp main.cpp
 proj_context_test_LDADD = ../../src/libproj.la @GTEST_LIBS@
 
 proj_context_test-check: proj_context_test
-	PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES ./proj_context_test
+	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES ./proj_context_test
 
 test_cpp_api_SOURCES = test_util.cpp test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp test_operation.cpp test_datum.cpp test_factory.cpp test_c_api.cpp test_grids.cpp main.cpp
 test_cpp_api_LDADD = ../../src/libproj.la @GTEST_LIBS@ @SQLITE3_LIBS@
 
 test_cpp_api-check: test_cpp_api
-	PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) ./test_cpp_api
+	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) ./test_cpp_api
 
 gie_self_tests_SOURCES = gie_self_tests.cpp main.cpp
 gie_self_tests_LDADD = ../../src/libproj.la @GTEST_LIBS@ @SQLITE3_LIBS@
 
 gie_self_tests-check: gie_self_tests
-	PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) ./gie_self_tests
+	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) ./gie_self_tests
 
 include_proj_h_from_c_SOURCES = include_proj_h_from_c.c
 
@@ -68,6 +68,6 @@ test_network_CXXFLAGS = @CURL_CFLAGS@ @CURL_ENABLED_FLAGS@
 test_network_LDADD = ../../src/libproj.la @GTEST_LIBS@ @SQLITE3_LIBS@ @CURL_LIBS@
 
 test_network-check: test_network
-	PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) PROJ_SOURCE_DATA=$(PROJ_LIB) ./test_network
+	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) PROJ_SOURCE_DATA=$(PROJ_LIB) ./test_network
 
 check-local: pj_transform_test-check pj_phi2_test-check proj_errno_string_test-check proj_angular_io_test-check proj_context_test-check test_cpp_api-check gie_self_tests-check test_network-check

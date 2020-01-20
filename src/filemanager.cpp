@@ -1258,13 +1258,11 @@ static const char *proj_lib_name =
     nullptr;
 #endif
 
-static bool ignoreUserWritableDirectory() {
+static bool dontReadUserWritableDirectory() {
     // Env var mostly for testing purposes and being independent from
     // an existing installation
-    const char *envVarIgnoreUserWritableDirectory =
-        getenv("PROJ_IGNORE_USER_WRITABLE_DIRECTORY");
-    return envVarIgnoreUserWritableDirectory != nullptr &&
-           envVarIgnoreUserWritableDirectory[0] != '\0';
+    const char *envVar = getenv("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY");
+    return envVar != nullptr && envVar[0] != '\0';
 }
 
 static void *
@@ -1336,7 +1334,7 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
             }
         }
 
-        else if (!ignoreUserWritableDirectory() &&
+        else if (!dontReadUserWritableDirectory() &&
                  (fid = open_file(
                       ctx, (pj_context_get_user_writable_directory(ctx, false) +
                             DIR_CHAR + name)

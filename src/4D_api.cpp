@@ -1487,7 +1487,7 @@ PJ_INFO proj_info (void) {
         // Env var mostly for testing purposes and being independent from
         // an existing installation
         const char* ignoreUserWritableDirectory =
-            getenv("PROJ_IGNORE_USER_WRITABLE_DIRECTORY");
+            getenv("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY");
         if( ignoreUserWritableDirectory == nullptr ||
             ignoreUserWritableDirectory[0] == '\0'  ) {
             buf = path_append(buf,
