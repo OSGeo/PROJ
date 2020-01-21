@@ -170,7 +170,8 @@ TEST(proj_context, read_grid_from_user_writable_directory) {
         putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY="));
         auto P = proj_create(ctx, "+init=temp_proj_dic3:MY_PIPELINE");
         EXPECT_NE(P, nullptr);
-        putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"));
+        putenv(
+            const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"));
         proj_destroy(P);
     }
     proj_context_destroy(ctx);
