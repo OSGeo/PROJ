@@ -3728,6 +3728,15 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                         res.emplace_back(crsNN, eqName ? 90 : 70);
                     } else if (crs->nameStr() == thisName &&
                                CRS::getPrivate()->implicitCS_ &&
+                               coordinateSystem()
+                                   ->axisList()[0]
+                                   ->unit()
+                                   ._isEquivalentTo(
+                                       crs->coordinateSystem()
+                                           ->axisList()[0]
+                                           ->unit(),
+                                       util::IComparable::Criterion::
+                                           EQUIVALENT) &&
                                l_baseCRS->_isEquivalentTo(
                                    crs->baseCRS().get(),
                                    util::IComparable::Criterion::
