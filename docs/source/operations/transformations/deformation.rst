@@ -93,7 +93,7 @@ Parameters
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
-    Grids for the horizontla component of a deformation model is expected to be
+    Grids for the horizontal component of a deformation model is expected to be
     in CTable2 format.
 
 .. option:: +z_grids=<list>
