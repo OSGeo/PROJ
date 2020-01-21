@@ -34,7 +34,7 @@ build_script:
         appveyor DownloadFile https://sqlite.org/2018/sqlite-tools-win32-x86-3250100.zip
         7z x sqlite-tools-win32-x86-3250100.zip
   - copy "%APPVEYOR_BUILD_FOLDER%"\sqlite-tools-win32-x86-3250100\sqlite3.exe %SQLITE3_BIN%
-  - set PATH=%PATH%;%SQLITE3_BIN%
+  - set PATH=%SQLITE3_BIN%;%PATH%
   - if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
   - if "%platform%" == "x64" SET BUILD_LIBPROJ_SHARED=ON
   - if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
@@ -56,7 +56,7 @@ test_script:
   - set PROJ_LIB=%PROJ_DIR%\share\proj
   - cd %PROJ_BUILD%
   - ctest -V -C Release
-  - set PATH=%PATH%;%PROJ_DIR%\bin
+  - set PATH=%PROJ_DIR%\bin;%PATH%
   - proj
 
 deploy: off
