@@ -103,6 +103,9 @@ Required
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
+    If a grid is specified with a path that contains spaces, the value should
+    be quoted.  e.g. `+grids="/my path/has/spaces.gtx"`
+
     Grids are expected to be in GTX format.
 
 Optional
