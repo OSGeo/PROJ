@@ -93,7 +93,10 @@ Parameters
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
-    Grids for the horizontla component of a deformation model is expected to be
+    If a grid is specified with a path that contains spaces, the value should
+    be quoted.  e.g. `+xy_grids="/my path/has/spaces.ct2"`
+
+    Grids for the horizontal component of a deformation model are expected to be
     in CTable2 format.
 
 .. option:: +z_grids=<list>
@@ -102,8 +105,11 @@ Parameters
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
-    Grids for the vertical component of a deformation model is expected to be
-    in either GTX format.
+    If a grid is specified with a path that contains spaces, the value should
+    be quoted.  e.g. `+z_grids="/my path/has/spaces.gtx"`
+
+    Grids for the vertical component of a deformation model are expected to be
+    in GTX format.
 
 .. option:: +t_epoch=<value>
 

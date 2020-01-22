@@ -104,6 +104,9 @@ Required
     Comma-separated list of grids to load. If a grid is prefixed by an `@` the
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
+    
+    If a grid is specified with a path that contains spaces, the value should
+    be quoted.  e.g. `+grids="/my path/has/spaces.gsb"`
 
     Grids are expected to be in CTable2, NTv1 or NTv2 format.
 
