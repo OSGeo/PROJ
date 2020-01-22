@@ -4,5 +4,5 @@ operation namespace
 -------------------
 
 .. doxygennamespace:: osgeo::proj::operation
-   :project: cpp_stuff
+   :project: doxygen_api
    :members:

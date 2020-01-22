@@ -6,24 +6,38 @@
 #include <time.h>
 
 #include "proj_internal.h"
+#include "grids.hpp"
 
 PROJ_HEAD(hgridshift, "Horizontal grid shift");
 
+using namespace NS_PROJ;
+
 namespace { // anonymous namespace
-struct pj_opaque_hgridshift {
-    double t_final;
-    double t_epoch;
+struct hgridshiftData {
+    double t_final = 0;
+    double t_epoch = 0;
+    ListOfHGrids grids{};
+    bool defer_grid_opening = false;
 };
 } // anonymous namespace
 
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
+    auto Q = static_cast<hgridshiftData*>(P->opaque);
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
 
-    if (P->gridlist != nullptr) {
+    if ( Q->defer_grid_opening ) {
+        Q->defer_grid_opening = false;
+        Q->grids = pj_hgrid_init(P, "grids");
+        if ( proj_errno(P) ) {
+            return proj_coord_error().xyz;
+        }
+    }
+
+    if (!Q->grids.empty()) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.lp = proj_hgrid_apply(P, point.lp, PJ_FWD);
+        point.lp = pj_hgrid_apply(P->ctx, Q->grids, point.lp, PJ_FWD);
     }
 
     return point.xyz;
@@ -31,20 +45,29 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
 
 static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
+    auto Q = static_cast<hgridshiftData*>(P->opaque);
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
 
-    if (P->gridlist != nullptr) {
+    if ( Q->defer_grid_opening ) {
+        Q->defer_grid_opening = false;
+        Q->grids = pj_hgrid_init(P, "grids");
+        if ( proj_errno(P) ) {
+            return proj_coord_error().lpz;
+        }
+    }
+
+    if (!Q->grids.empty()) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.lp = proj_hgrid_apply(P, point.lp, PJ_INV);
+        point.lp = pj_hgrid_apply(P->ctx, Q->grids, point.lp, PJ_INV);
     }
 
     return point.lpz;
 }
 
 static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
-    struct pj_opaque_hgridshift *Q = (struct pj_opaque_hgridshift *) P->opaque;
+    struct hgridshiftData *Q = (struct hgridshiftData *) P->opaque;
     PJ_COORD point = obs;
 
     /* If transformation is not time restricted, we always call it */
@@ -62,7 +85,7 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
 }
 
 static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
-    struct pj_opaque_hgridshift *Q = (struct pj_opaque_hgridshift *) P->opaque;
+    struct hgridshiftData *Q = (struct hgridshiftData *) P->opaque;
     PJ_COORD point = obs;
 
     /* If transformation is not time restricted, we always call it */
@@ -78,12 +101,29 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     return point;
 }
 
+static PJ *destructor (PJ *P, int errlev) {
+    if (nullptr==P)
+        return nullptr;
+
+    delete static_cast<struct hgridshiftData*>(P->opaque);
+    P->opaque = nullptr;
+
+    return pj_default_destructor(P, errlev);
+}
+
+static void reassign_context( PJ* P, PJ_CONTEXT* ctx )
+{
+    auto Q = (struct hgridshiftData *) P->opaque;
+    for( auto& grid: Q->grids ) {
+        grid->reassign_context(ctx);
+    }
+}
 
 PJ *TRANSFORMATION(hgridshift,0) {
-    struct pj_opaque_hgridshift *Q = static_cast<struct pj_opaque_hgridshift*>(pj_calloc (1, sizeof (struct pj_opaque_hgridshift)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+    auto Q = new hgridshiftData;
     P->opaque = (void *) Q;
+    P->destructor = destructor;
+    P->reassign_context = reassign_context;
 
     P->fwd4d  = forward_4d;
     P->inv4d  = reverse_4d;
@@ -97,12 +137,12 @@ PJ *TRANSFORMATION(hgridshift,0) {
 
     if (0==pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, "hgridshift: +grids parameter missing.");
-        return pj_default_destructor (P, PJD_ERR_NO_ARGS);
+        return destructor (P, PJD_ERR_NO_ARGS);
     }
 
-   /* TODO: Refactor into shared function that can be used  */
-   /*       by both vgridshift and hgridshift               */
-   if (pj_param(P->ctx, P->params, "tt_final").i) {
+    /* TODO: Refactor into shared function that can be used  */
+    /*       by both vgridshift and hgridshift               */
+    if (pj_param(P->ctx, P->params, "tt_final").i) {
         Q->t_final = pj_param (P->ctx, P->params, "dt_final").f;
         if (Q->t_final == 0) {
             /* a number wasn't passed to +t_final, let's see if it was "now" */
@@ -117,16 +157,21 @@ PJ *TRANSFORMATION(hgridshift,0) {
         }
     }
 
-   if (pj_param(P->ctx, P->params, "tt_epoch").i)
+    if (pj_param(P->ctx, P->params, "tt_epoch").i)
         Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
 
 
-    proj_hgrid_init(P, "grids");
-    /* Was gridlist compiled properly? */
-    if ( proj_errno(P) ) {
-        proj_log_error(P, "hgridshift: could not find required grid(s).");
-        return pj_default_destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+    if( P->ctx->defer_grid_opening ) {
+        Q->defer_grid_opening = true;
     }
+    else {
+        Q->grids = pj_hgrid_init(P, "grids");
+        /* Was gridlist compiled properly? */
+        if ( proj_errno(P) ) {
+            proj_log_error(P, "hgridshift: could not find required grid(s).");
+            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        }
+     }
 
     return P;
 }

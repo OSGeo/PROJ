@@ -47,6 +47,8 @@
 #include "proj_internal.h"
 #include <math.h>
 #include "geodesic.h"
+#include "grids.hpp"
+#include "filemanager.hpp"
 
 #include "proj/common.hpp"
 #include "proj/coordinateoperation.hpp"
@@ -262,6 +264,9 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             }
             PJ_COORD res = direction == PJ_FWD ?
                         pj_fwd4d( coord, alt.pj ) : pj_inv4d( coord, alt.pj );
+            if( proj_errno(alt.pj) == PJD_ERR_NETWORK_ERROR ) {
+                return proj_coord_error ();
+            }
             if( res.xyzt.x != HUGE_VAL ) {
                 return res;
             }
@@ -290,7 +295,7 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             auto coordOperation = dynamic_cast<
             NS_PROJ::operation::CoordinateOperation*>(alt.pj->iso_obj.get());
             if( coordOperation ) {
-                if( coordOperation->gridsNeeded(dbContext).empty() ) {
+                if( coordOperation->gridsNeeded(dbContext, true).empty() ) {
                     if( P->iCurCoordOp != i ) {
                         if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
                             std::string msg("Using coordinate operation ");
@@ -1146,7 +1151,10 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     proj_operation_factory_context_set_spatial_criterion(
         ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
     proj_operation_factory_context_set_grid_availability_use(
-        ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+        ctx, operation_ctx,
+        pj_context_is_network_enabled(ctx) ?
+            PROJ_GRID_AVAILABILITY_KNOWN_AVAILABLE:
+            PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
 
     auto op_list = proj_create_operations(ctx, source_crs, target_crs, operation_ctx);
 
@@ -1476,10 +1484,20 @@ PJ_INFO proj_info (void) {
     /* build search path string */
     auto ctx = pj_get_default_ctx();
     if (!ctx || ctx->search_paths.empty()) {
-        const char *envPROJ_LIB = getenv("PROJ_LIB");
-        buf = path_append(buf, envPROJ_LIB, &buf_size);
+        // Env var mostly for testing purposes and being independent from
+        // an existing installation
+        const char* ignoreUserWritableDirectory =
+            getenv("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY");
+        if( ignoreUserWritableDirectory == nullptr ||
+            ignoreUserWritableDirectory[0] == '\0'  ) {
+            buf = path_append(buf,
+                            pj_context_get_user_writable_directory(ctx, false).c_str(),
+                            &buf_size);
+        }
+        const std::string envPROJ_LIB = NS_PROJ::FileManager::getProjLibEnvVar(ctx);
+        buf = path_append(buf, envPROJ_LIB.empty() ? nullptr : envPROJ_LIB.c_str(), &buf_size);
 #ifdef PROJ_LIB
-        if (envPROJ_LIB == nullptr) {
+        if (envPROJ_LIB.empty()) {
             buf = path_append(buf, PROJ_LIB, &buf_size);
         }
 #endif
@@ -1583,43 +1601,65 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
 
     /*PJ_CONTEXT *ctx = proj_context_create(); */
     PJ_CONTEXT *ctx = pj_get_default_ctx();
-    PJ_GRIDINFO *gridinfo = pj_gridinfo_init(ctx, gridname);
     memset(&grinfo, 0, sizeof(PJ_GRID_INFO));
 
-    /* in case the grid wasn't found */
-    if (gridinfo->filename == nullptr || gridinfo->ct == nullptr) {
-        pj_gridinfo_free(ctx, gridinfo);
-        strcpy(grinfo.format, "missing");
-        return grinfo;
+    const auto fillGridInfo = [&grinfo, ctx, gridname]
+                        (const NS_PROJ::Grid& grid, const std::string& format)
+    {
+        const auto& extent = grid.extentAndRes();
+
+        /* name of grid */
+        strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
+
+        /* full path of grid */
+        pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
+
+        /* grid format */
+        strncpy (grinfo.format, format.c_str(), sizeof(grinfo.format) - 1);
+
+        /* grid size */
+        grinfo.n_lon = grid.width();
+        grinfo.n_lat = grid.height();
+
+        /* cell size */
+        grinfo.cs_lon = extent.resLon;
+        grinfo.cs_lat = extent.resLat;
+
+        /* bounds of grid */
+        grinfo.lowerleft.lam  = extent.westLon;
+        grinfo.lowerleft.phi  = extent.southLat;
+        grinfo.upperright.lam = extent.eastLon;
+        grinfo.upperright.phi = extent.northLat;
+    };
+
+    {
+        const auto gridSet = NS_PROJ::VerticalShiftGridSet::open(ctx, gridname);
+        if( gridSet )
+        {
+            const auto& grids = gridSet->grids();
+            if( !grids.empty() )
+            {
+                const auto& grid = grids.front();
+                fillGridInfo(*grid, gridSet->format());
+                return grinfo;
+            }
+        }
     }
 
-    /* The string copies below are automatically null-terminated due to */
-    /* the memset above, so strncpy is safe */
-
-    /* name of grid */
-    strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
-
-    /* full path of grid */
-    pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
-
-    /* grid format */
-    strncpy (grinfo.format, gridinfo->format, sizeof(grinfo.format) - 1);
-
-    /* grid size */
-    grinfo.n_lon = gridinfo->ct->lim.lam;
-    grinfo.n_lat = gridinfo->ct->lim.phi;
-
-    /* cell size */
-    grinfo.cs_lon = gridinfo->ct->del.lam;
-    grinfo.cs_lat = gridinfo->ct->del.phi;
-
-    /* bounds of grid */
-    grinfo.lowerleft  = gridinfo->ct->ll;
-    grinfo.upperright.lam = grinfo.lowerleft.lam + grinfo.n_lon*grinfo.cs_lon;
-    grinfo.upperright.phi = grinfo.lowerleft.phi + grinfo.n_lat*grinfo.cs_lat;
-
-    pj_gridinfo_free(ctx, gridinfo);
-
+    {
+        const auto gridSet = NS_PROJ::HorizontalShiftGridSet::open(ctx, gridname);
+        if( gridSet )
+        {
+            const auto& grids = gridSet->grids();
+            if( !grids.empty() )
+            {
+                const auto& grid = grids.front();
+                fillGridInfo(*grid, gridSet->format());
+                return grinfo;
+            }
+        }
+    }
+    strcpy(grinfo.format, "missing");
     return grinfo;
 }
 
@@ -1763,3 +1803,4 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
 
     return factors;
 }
+

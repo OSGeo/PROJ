@@ -4467,6 +4467,27 @@ TEST_F(CApi, proj_create_derived_geographic_crs) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_context_set_sqlite3_vfs_name) {
+
+    PJ_CONTEXT *ctx = proj_context_create();
+    proj_log_func(ctx, nullptr, [](void *, int, const char *) -> void {});
+
+    // Set a dummy VFS and check it is taken into account
+    // (failure to open proj.db)
+    proj_context_set_sqlite3_vfs_name(ctx, "dummy_vfs_name");
+    ASSERT_EQ(proj_create(ctx, "EPSG:4326"), nullptr);
+
+    // Restore default VFS
+    proj_context_set_sqlite3_vfs_name(ctx, nullptr);
+    PJ *crs_4326 = proj_create(ctx, "EPSG:4326");
+    ASSERT_NE(crs_4326, nullptr);
+    proj_destroy(crs_4326);
+
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_is_equivalent_to_with_ctx) {
     auto from_epsg = proj_create_from_database(m_ctxt, "EPSG", "7844",
                                                PJ_CATEGORY_CRS, false, nullptr);

@@ -6,26 +6,67 @@
 #include <time.h>
 
 #include "proj_internal.h"
+#include "grids.hpp"
 
 PROJ_HEAD(vgridshift, "Vertical grid shift");
 
+using namespace NS_PROJ;
+
 namespace { // anonymous namespace
-struct pj_opaque_vgridshift {
-    double t_final;
-    double t_epoch;
-    double forward_multiplier;
+struct vgridshiftData {
+    double t_final = 0;
+    double t_epoch = 0;
+    double forward_multiplier = 0;
+    ListOfVGrids grids{};
+    bool defer_grid_opening = false;
 };
 } // anonymous namespace
 
+static void deal_with_vertcon_gtx_hack(PJ *P)
+{
+    struct vgridshiftData *Q = (struct vgridshiftData *) P->opaque;
+    // The .gtx VERTCON files stored millimetres, but the .tif files
+    // are in metres.
+    if( Q->forward_multiplier != 0.001 ) {
+        return;
+    }
+    const char* gridname = pj_param(P->ctx, P->params, "sgrids").s;
+    if( !gridname ) {
+        return;
+    }
+    if( strcmp(gridname, "vertconw.gtx") != 0 &&
+        strcmp(gridname, "vertconc.gtx") != 0 &&
+        strcmp(gridname, "vertcone.gtx") != 0 ) {
+        return;
+    }
+    if( Q->grids.empty() ) {
+        return;
+    }
+    const auto& grids = Q->grids[0]->grids();
+    if( !grids.empty() &&
+        grids[0]->name().find(".tif") != std::string::npos ) {
+        Q->forward_multiplier = 1.0;
+    }
+}
+
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
+    struct vgridshiftData *Q = (struct vgridshiftData *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
     point.lpz = lpz;
 
-    if (P->vgridlist_geoid != nullptr) {
+    if ( Q->defer_grid_opening ) {
+        Q->defer_grid_opening = false;
+        Q->grids = pj_vgrid_init(P, "grids");
+        deal_with_vertcon_gtx_hack(P);
+        if ( proj_errno(P) ) {
+            return proj_coord_error().xyz;
+        }
+    }
+
+    if (!Q->grids.empty()) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.xyz.z += proj_vgrid_value(P, point.lp, Q->forward_multiplier);
+        point.xyz.z += pj_vgrid_value(P, Q->grids, point.lp, Q->forward_multiplier);
     }
 
     return point.xyz;
@@ -33,14 +74,23 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
 
 static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
-    struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
+    struct vgridshiftData *Q = (struct vgridshiftData *) P->opaque;
     PJ_COORD point = {{0,0,0,0}};
     point.xyz = xyz;
 
-    if (P->vgridlist_geoid != nullptr) {
+    if ( Q->defer_grid_opening ) {
+        Q->defer_grid_opening = false;
+        Q->grids = pj_vgrid_init(P, "grids");
+        deal_with_vertcon_gtx_hack(P);
+        if ( proj_errno(P) ) {
+            return proj_coord_error().lpz;
+        }
+    }
+
+    if (!Q->grids.empty()) {
         /* Only try the gridshift if at least one grid is loaded,
          * otherwise just pass the coordinate through unchanged. */
-        point.xyz.z -= proj_vgrid_value(P, point.lp, Q->forward_multiplier);
+        point.xyz.z -= pj_vgrid_value(P, Q->grids, point.lp, Q->forward_multiplier);
     }
 
     return point.lpz;
@@ -48,7 +98,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 
 
 static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
-    struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
+    struct vgridshiftData *Q = (struct vgridshiftData *) P->opaque;
     PJ_COORD point = obs;
 
     /* If transformation is not time restricted, we always call it */
@@ -66,7 +116,7 @@ static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
 }
 
 static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
-    struct pj_opaque_vgridshift *Q = (struct pj_opaque_vgridshift *) P->opaque;
+    struct vgridshiftData *Q = (struct vgridshiftData *) P->opaque;
     PJ_COORD point = obs;
 
     /* If transformation is not time restricted, we always call it */
@@ -82,16 +132,34 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
     return point;
 }
 
+static PJ *destructor (PJ *P, int errlev) {
+    if (nullptr==P)
+        return nullptr;
+
+    delete static_cast<struct vgridshiftData*>(P->opaque);
+    P->opaque = nullptr;
+
+    return pj_default_destructor(P, errlev);
+}
+
+static void reassign_context( PJ* P, PJ_CONTEXT* ctx )
+{
+    auto Q = (struct vgridshiftData *) P->opaque;
+    for( auto& grid: Q->grids ) {
+        grid->reassign_context(ctx);
+    }
+}
+
 
 PJ *TRANSFORMATION(vgridshift,0) {
-    struct pj_opaque_vgridshift *Q = static_cast<struct pj_opaque_vgridshift*>(pj_calloc (1, sizeof (struct pj_opaque_vgridshift)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+    auto Q = new vgridshiftData;
     P->opaque = (void *) Q;
+    P->destructor = destructor;
+    P->reassign_context = reassign_context;
 
    if (!pj_param(P->ctx, P->params, "tgrids").i) {
         proj_log_error(P, "vgridshift: +grids parameter missing.");
-        return pj_default_destructor(P, PJD_ERR_NO_ARGS);
+        return destructor(P, PJD_ERR_NO_ARGS);
     }
 
    /* TODO: Refactor into shared function that can be used  */
@@ -120,13 +188,18 @@ PJ *TRANSFORMATION(vgridshift,0) {
         Q->forward_multiplier = pj_param(P->ctx, P->params, "dmultiplier").f;
     }
 
-    /* Build gridlist. P->vgridlist_geoid can be empty if +grids only ask for optional grids. */
-    proj_vgrid_init(P, "grids");
+    if( P->ctx->defer_grid_opening ) {
+        Q->defer_grid_opening = true;
+    }
+    else {
+        /* Build gridlist. P->vgridlist_geoid can be empty if +grids only ask for optional grids. */
+        Q->grids = pj_vgrid_init(P, "grids");
 
-    /* Was gridlist compiled properly? */
-    if ( proj_errno(P) ) {
-        proj_log_error(P, "vgridshift: could not find required grid(s).");
-        return pj_default_destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        /* Was gridlist compiled properly? */
+        if ( proj_errno(P) ) {
+            proj_log_error(P, "vgridshift: could not find required grid(s).");
+            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        }
     }
 
     P->fwd4d = forward_4d;

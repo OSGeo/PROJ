@@ -4,5 +4,5 @@ cs namespace
 ------------
 
 .. doxygennamespace:: osgeo::proj::cs
-   :project: cpp_stuff
+   :project: doxygen_api
    :members:

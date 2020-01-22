@@ -40,7 +40,20 @@
 
 namespace {
 
-static std::string createTempDict(std::string &dirname) {
+static bool createTmpFile(const std::string &filename) {
+    FILE *f = fopen(filename.c_str(), "wt");
+    if (!f)
+        return false;
+    fprintf(
+        f,
+        "<MY_PIPELINE> +proj=pipeline +step +proj=utm +zone=31 +ellps=GRS80\n");
+    fclose(f);
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
+static std::string createTempDict(std::string &dirname, const char *filename) {
     const char *temp_dir = getenv("TEMP");
     if (!temp_dir) {
         temp_dir = getenv("TMP");
@@ -58,16 +71,9 @@ static std::string createTempDict(std::string &dirname) {
     std::string tmpFilename;
     tmpFilename = temp_dir;
     tmpFilename += DIR_CHAR;
-    tmpFilename += "temp_proj_dic";
+    tmpFilename += filename;
 
-    FILE *f = fopen(tmpFilename.c_str(), "wt");
-    if (!f)
-        return std::string();
-    fprintf(
-        f,
-        "<MY_PIPELINE> +proj=pipeline +step +proj=utm +zone=31 +ellps=GRS80\n");
-    fclose(f);
-    return tmpFilename;
+    return createTmpFile(tmpFilename) ? tmpFilename : std::string();
 }
 
 // ---------------------------------------------------------------------------
@@ -85,7 +91,7 @@ static int MyUnlink(const std::string &filename) {
 TEST(proj_context, proj_context_set_file_finder) {
 
     std::string dirname;
-    auto filename = createTempDict(dirname);
+    auto filename = createTempDict(dirname, "temp_proj_dic1");
     if (filename.empty())
         return;
 
@@ -111,7 +117,7 @@ TEST(proj_context, proj_context_set_file_finder) {
     finderData.dirname = dirname;
     proj_context_set_file_finder(ctx, finder, &finderData);
 
-    auto P = proj_create(ctx, "+init=temp_proj_dic:MY_PIPELINE");
+    auto P = proj_create(ctx, "+init=temp_proj_dic1:MY_PIPELINE");
     EXPECT_NE(P, nullptr);
     proj_destroy(P);
 
@@ -125,7 +131,7 @@ TEST(proj_context, proj_context_set_file_finder) {
 TEST(proj_context, proj_context_set_search_paths) {
 
     std::string dirname;
-    auto filename = createTempDict(dirname);
+    auto filename = createTempDict(dirname, "temp_proj_dic2");
     if (filename.empty())
         return;
 
@@ -134,12 +140,41 @@ TEST(proj_context, proj_context_set_search_paths) {
     const char *path = dirname.c_str();
     proj_context_set_search_paths(ctx, 1, &path);
 
-    auto P = proj_create(ctx, "+init=temp_proj_dic:MY_PIPELINE");
+    auto P = proj_create(ctx, "+init=temp_proj_dic2:MY_PIPELINE");
     EXPECT_NE(P, nullptr);
     proj_destroy(P);
 
     proj_context_destroy(ctx);
 
+    MyUnlink(filename);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(proj_context, read_grid_from_user_writable_directory) {
+
+    auto ctx = proj_context_create();
+    auto path = pj_context_get_user_writable_directory(ctx, true);
+    EXPECT_TRUE(!path.empty());
+    auto filename = path + DIR_CHAR + "temp_proj_dic3";
+    EXPECT_TRUE(createTmpFile(filename));
+    {
+        // Check that with PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES (set by
+        // calling script), we cannot find the file
+        auto P = proj_create(ctx, "+init=temp_proj_dic3:MY_PIPELINE");
+        EXPECT_EQ(P, nullptr);
+        proj_destroy(P);
+    }
+    {
+        // Cancel the effect of PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY
+        putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY="));
+        auto P = proj_create(ctx, "+init=temp_proj_dic3:MY_PIPELINE");
+        EXPECT_NE(P, nullptr);
+        putenv(
+            const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"));
+        proj_destroy(P);
+    }
+    proj_context_destroy(ctx);
     MyUnlink(filename);
 }
 

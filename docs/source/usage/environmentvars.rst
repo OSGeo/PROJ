@@ -56,3 +56,21 @@ done by setting the variable with no content::
     Set the debug level of PROJ. The default debug level is zero, which results
     in no debug output when using PROJ. A number from 1-3, whit 3 being the most
     verbose setting.
+
+.. envvar:: PROJ_NETWORK
+
+    .. versionadded:: 7.0.0
+
+    If set to ON, enable the capability to use remote grids stored on CDN
+    (Content Delivery Network) storage, when grids are not available locally.
+    Alternatively, the :c:func:`proj_context_set_enable_network` function can
+    be used.
+
+.. envvar:: PROJ_NETWORK_ENDPOINT
+
+    .. versionadded:: 7.0.0
+
+    Define the endpoint of the CDN storage. Normally defined through the proj.ini
+    configuration file locale in :envvar:`PROJ_LIB`.
+    Alternatively, the :c:func:`proj_context_set_url_endpoint` function can
+    be used.

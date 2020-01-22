@@ -697,6 +697,54 @@ Various
     :returns: :c:type:`int` 1 if output units is expected in radians, otherwise 0
 
 
+Setting custom I/O functions
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 7.0.0
+
+.. doxygenfunction:: proj_context_set_fileapi
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_context_set_sqlite3_vfs_name
+   :project: doxygen_api
+
+
+Network related functionality
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 7.0.0
+
+.. doxygenfunction:: proj_context_set_network_callbacks
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_context_set_enable_network
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_context_set_url_endpoint
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_grid_cache_set_enable
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_grid_cache_set_filename
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_grid_cache_set_max_size
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_grid_cache_set_ttl
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_grid_cache_clear
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_is_download_needed
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_download_file
+   :project: doxygen_api
+
+
 Cleanup
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -727,6 +775,6 @@ which are not of type CRS (can be tested with :c:func:`proj_is_crs`),
 will return an error when used with functions of this section.
 
 .. doxygengroup:: iso19111_functions
-   :project: cpp_stuff
+   :project: doxygen_api
    :content-only:
 

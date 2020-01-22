@@ -56,19 +56,89 @@ grid-values in units of mm/year in ENU-space.
 #include "proj.h"
 #include "proj_internal.h"
 #include <math.h>
+#include "grids.hpp"
+
+#include <algorithm>
 
 PROJ_HEAD(deformation, "Kinematic grid shift");
 
 #define TOL 1e-8
 #define MAX_ITERATIONS 10
 
+using namespace NS_PROJ;
+
 namespace { // anonymous namespace
-struct pj_opaque {
-    double dt;
-    double t_epoch;
-    PJ *cart;
+struct deformationData {
+    double dt = 0;
+    double t_epoch = 0;
+    PJ *cart = nullptr;
+    ListOfGenericGrids grids{};
+    ListOfHGrids hgrids{};
+    ListOfVGrids vgrids{};
 };
 } // anonymous namespace
+
+// ---------------------------------------------------------------------------
+
+static bool get_grid_values(PJ* P,
+                            deformationData* Q,
+                            const PJ_LP& lp,
+                            double& vx,
+                            double& vy,
+                            double& vz)
+{
+    GenericShiftGridSet* gridset = nullptr;
+    auto grid = pj_find_generic_grid(Q->grids, lp, gridset);
+    if( !grid ) {
+        return false;
+    }
+    if( grid->isNullGrid() ) {
+        vx = 0;
+        vy = 0;
+        vz = 0;
+        return true;
+    }
+    const auto samplesPerPixel = grid->samplesPerPixel();
+    if( samplesPerPixel < 3 ) {
+        proj_log_error(P, "deformation: grid has not enough samples");
+        return false;
+    }
+    int sampleE = 0;
+    int sampleN = 1;
+    int sampleU = 2;
+    for( int i = 0; i < samplesPerPixel; i++ )
+    {
+        const auto desc = grid->description(i);
+        if( desc == "east_velocity") {
+            sampleE = i;
+        } else if( desc == "north_velocity") {
+            sampleN = i;
+        } else if( desc == "up_velocity") {
+            sampleU = i;
+        }
+    }
+    const auto unit = grid->unit(sampleE);
+    if( !unit.empty() && unit != "millimetres per year" ) {
+        proj_log_error(P, "deformation: Only unit=millimetres per year currently handled");
+        return false;
+    }
+
+    bool must_retry = false;
+    if( !pj_bilinear_interpolation_three_samples(grid, lp,
+                                                 sampleE, sampleN, sampleU,
+                                                 vx, vy, vz,
+                                                 must_retry) )
+    {
+        if( must_retry )
+            return get_grid_values( P, Q, lp, vx, vy, vz);
+        return false;
+    }
+    // divide by 1000 to get m/year
+    vx /= 1000;
+    vy /= 1000;
+    vz /= 1000;
+    return true;
+}
 
 /********************************************************************************/
 static PJ_XYZ get_grid_shift(PJ* P, const PJ_XYZ& cartesian) {
@@ -85,22 +155,39 @@ static PJ_XYZ get_grid_shift(PJ* P, const PJ_XYZ& cartesian) {
     PJ_COORD geodetic, shift, temp;
     double sp, cp, sl, cl;
     int previous_errno = proj_errno_reset(P);
+    auto Q = static_cast<deformationData*>(P->opaque);
 
     /* cartesian to geodetic */
-    geodetic.lpz = pj_inv3d(cartesian, static_cast<struct pj_opaque*>(P->opaque)->cart);
+    geodetic.lpz = pj_inv3d(cartesian, Q->cart);
 
     /* look up correction values in grids */
-    shift.lp    = proj_hgrid_value(P, geodetic.lp);
-    shift.enu.u = proj_vgrid_value(P, geodetic.lp, 1.0);
+    if( !Q->grids.empty() )
+    {
+        double vx = 0;
+        double vy = 0;
+        double vz = 0;
+        if( !get_grid_values(P, Q, geodetic.lp, vx, vy, vz) )
+        {
+            return proj_coord_error().xyz;
+        }
+        shift.xyz.x = vx;
+        shift.xyz.y = vy;
+        shift.xyz.z = vz;
+    }
+    else
+    {
+        shift.lp    = pj_hgrid_value(P, Q->hgrids, geodetic.lp);
+        shift.enu.u = pj_vgrid_value(P, Q->vgrids, geodetic.lp, 1.0);
 
-    if (proj_errno(P) == PJD_ERR_GRID_AREA)
-        proj_log_debug(P, "deformation: coordinate (%.3f, %.3f) outside deformation model",
-                       proj_todeg(geodetic.lpz.lam), proj_todeg(geodetic.lpz.phi));
+        if (proj_errno(P) == PJD_ERR_GRID_AREA)
+            proj_log_debug(P, "deformation: coordinate (%.3f, %.3f) outside deformation model",
+                        proj_todeg(geodetic.lpz.lam), proj_todeg(geodetic.lpz.phi));
 
-    /* grid values are stored as mm/yr, we need m/yr */
-    shift.xyz.x /= 1000;
-    shift.xyz.y /= 1000;
-    shift.xyz.z /= 1000;
+        /* grid values are stored as mm/yr, we need m/yr */
+        shift.xyz.x /= 1000;
+        shift.xyz.y /= 1000;
+        shift.xyz.z /= 1000;
+    }
 
     /* pre-calc cosines and sines */
     sp = sin(geodetic.lpz.phi);
@@ -130,6 +217,9 @@ static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
     int i = MAX_ITERATIONS;
 
     delta = get_grid_shift(P, input);
+    if (delta.x == HUGE_VAL) {
+        return delta;
+    }
 
     /* Store the origial z shift for later application */
     z0 = delta.z;
@@ -163,7 +253,7 @@ static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
 }
 
 static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct deformationData *Q = (struct deformationData *) P->opaque;
     PJ_COORD out, in;
     PJ_XYZ shift;
     in.lpz = lpz;
@@ -176,6 +266,9 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     }
 
     shift = get_grid_shift(P, in.xyz);
+    if (shift.x == HUGE_VAL) {
+        return shift;
+    }
 
     out.xyz.x += Q->dt * shift.x;
     out.xyz.y += Q->dt * shift.y;
@@ -186,7 +279,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
 
 static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct deformationData *Q = (struct deformationData *) P->opaque;
     double dt;
     PJ_XYZ shift;
     PJ_COORD out = in;
@@ -209,7 +302,7 @@ static PJ_COORD forward_4d(PJ_COORD in, PJ *P) {
 
 
 static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct deformationData *Q = (struct deformationData *) P->opaque;
     PJ_COORD out;
     out.xyz = in;
 
@@ -225,7 +318,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
 }
 
 static PJ_COORD reverse_4d(PJ_COORD in, PJ *P) {
-    struct pj_opaque *Q = (struct pj_opaque *) P->opaque;
+    struct deformationData *Q = (struct deformationData *) P->opaque;
     PJ_COORD out = in;
     double dt;
 
@@ -244,23 +337,23 @@ static PJ *destructor(PJ *P, int errlev) {
     if (nullptr==P)
         return nullptr;
 
-    if (nullptr==P->opaque)
-        return pj_default_destructor (P, errlev);
-
-    if (static_cast<struct pj_opaque*>(P->opaque)->cart)
-        static_cast<struct pj_opaque*>(P->opaque)->cart->destructor (static_cast<struct pj_opaque*>(P->opaque)->cart, errlev);
+    auto Q = static_cast<struct deformationData*>(P->opaque);
+    if( Q )
+    {
+        if (Q->cart)
+            Q->cart->destructor (Q->cart, errlev);
+        delete Q;
+    }
+    P->opaque = nullptr;
 
     return pj_default_destructor(P, errlev);
 }
 
 
 PJ *TRANSFORMATION(deformation,1) {
-    int has_xy_grids = 0;
-    int has_z_grids  = 0;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return destructor(P, ENOMEM);
+    auto Q = new deformationData;
     P->opaque = (void *) Q;
+    P->destructor = destructor;
 
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
@@ -270,25 +363,38 @@ PJ *TRANSFORMATION(deformation,1) {
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def (P, Q->cart);
 
-    has_xy_grids = pj_param(P->ctx, P->params, "txy_grids").i;
-    has_z_grids  = pj_param(P->ctx, P->params, "tz_grids").i;
+    int has_xy_grids = pj_param(P->ctx, P->params, "txy_grids").i;
+    int has_z_grids  = pj_param(P->ctx, P->params, "tz_grids").i;
+    int has_grids  = pj_param(P->ctx, P->params, "tgrids").i;
 
     /* Build gridlists. Both horizontal and vertical grids are mandatory. */
-    if (!has_xy_grids || !has_z_grids) {
-        proj_log_error(P, "deformation: Both +xy_grids and +z_grids should be specified.");
+    if ( !has_grids && (!has_xy_grids || !has_z_grids)) {
+        proj_log_error(P, "deformation: Either +grids or (+xy_grids and +z_grids) should be specified.");
         return destructor(P, PJD_ERR_NO_ARGS );
     }
 
-    proj_hgrid_init(P, "xy_grids");
-    if (proj_errno(P)) {
-        proj_log_error(P, "deformation: could not find requested xy_grid(s).");
-        return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+    if( has_grids )
+    {
+        Q->grids = pj_generic_grid_init(P, "grids");
+        /* Was gridlist compiled properly? */
+        if ( proj_errno(P) ) {
+            proj_log_error(P, "deformation: could not find required grid(s).");
+            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        }
     }
+    else
+    {
+        Q->hgrids = pj_hgrid_init(P, "xy_grids");
+        if (proj_errno(P)) {
+            proj_log_error(P, "deformation: could not find requested xy_grid(s).");
+            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        }
 
-    proj_vgrid_init(P, "z_grids");
-    if (proj_errno(P)) {
-        proj_log_error(P, "deformation: could not find requested z_grid(s).");
-        return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        Q->vgrids = pj_vgrid_init(P, "z_grids");
+        if (proj_errno(P)) {
+            proj_log_error(P, "deformation: could not find requested z_grid(s).");
+            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        }
     }
 
     Q->dt = HUGE_VAL;
@@ -325,7 +431,6 @@ PJ *TRANSFORMATION(deformation,1) {
 
     P->left  = PJ_IO_UNITS_CARTESIAN;
     P->right = PJ_IO_UNITS_CARTESIAN;
-    P->destructor = destructor;
 
     return P;
 }

@@ -4,5 +4,5 @@ util namespace
 --------------
 
 .. doxygennamespace:: osgeo::proj::util
-   :project: cpp_stuff
+   :project: doxygen_api
    :members:

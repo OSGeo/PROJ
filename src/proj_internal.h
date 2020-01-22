@@ -195,14 +195,6 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 PJ_COORD PROJ_DLL pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 PJ_COORD PROJ_DLL pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 
-
-/* Grid functionality */
-int             proj_vgrid_init(PJ *P, const char *grids);
-int             proj_hgrid_init(PJ *P, const char *grids);
-double          proj_vgrid_value(PJ *P, PJ_LP lp, double vmultiplier);
-PJ_LP           proj_hgrid_value(PJ *P, PJ_LP lp);
-PJ_LP           proj_hgrid_apply(PJ *P, PJ_LP lp, PJ_DIRECTION direction);
-
 void PROJ_DLL proj_log_error (PJ *P, const char *fmt, ...);
 void proj_log_debug (PJ *P, const char *fmt, ...);
 void proj_log_trace (PJ *P, const char *fmt, ...);
@@ -221,9 +213,6 @@ char  PROJ_DLL *pj_shrink (char *c);
 size_t pj_trim_argc (char *args);
 char **pj_trim_argv (size_t argc, char *args);
 char  *pj_make_args (size_t argc, char **argv);
-
-/* Lowest level: Minimum support for fileapi */
-void proj_fileapi_set (PJ *P, void *fileapi);
 
 typedef struct { double r, i; } COMPLEX;
 
@@ -354,6 +343,7 @@ struct PJconsts {
     PJ_OPERATOR inv4d = nullptr;
 
     PJ_DESTRUCTOR destructor = nullptr;
+    void   (*reassign_context)(PJ*, projCtx_t *) = nullptr;
 
 
     /*************************************************************************************
@@ -421,7 +411,6 @@ struct PJconsts {
     int  geoc = 0;                  /* Geocentric latitude flag */
     int  is_latlong = 0;            /* proj=latlong ... not really a projection at all */
     int  is_geocent = 0;            /* proj=geocent ... not really a projection at all */
-    int  is_pipeline = 0;           /* 1 if PJ represents a pipeline */
     int  need_ellps = 0;            /* 0 for operations that are purely cartesian */
     int  skip_fwd_prepare = 0;
     int  skip_fwd_finalize = 0;
@@ -478,31 +467,15 @@ struct PJconsts {
 
     int     datum_type = PJD_UNKNOWN;  /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
     double  datum_params[7] = {0,0,0,0,0,0,0}; /* Parameters for 3PARAM and 7PARAM */
-    struct _pj_gi **gridlist = nullptr;     /* TODO: Description needed */
-    int     gridlist_count = 0;
 
-    int     has_geoid_vgrids = 0;      /* TODO: Description needed */
-    struct _pj_gi **vgridlist_geoid = nullptr;   /* TODO: Description needed */
-    int     vgridlist_geoid_count = 0;
+    int     has_geoid_vgrids = 0;      /* used by legacy transform.cpp */
+    void*   hgrids_legacy = nullptr;   /* used by legacy transform.cpp. Is a pointer to a ListOfHGrids* */ 
+    void*   vgrids_legacy = nullptr;   /* used by legacy transform.cpp. Is a pointer to a ListOfVGrids* */ 
 
     double  from_greenwich = 0.0;       /* prime meridian offset (in radians) */
     double  long_wrap_center = 0.0;     /* 0.0 for -180 to 180, actually in radians*/
     int     is_long_wrap_set = 0;
     char    axis[4] = {0,0,0,0};        /* Axis order, pj_transform/pj_adjust_axis */
-
-    /* New Datum Shift Grid Catalogs */
-    char   *catalog_name = nullptr;
-    struct _PJ_GridCatalog *catalog = nullptr;
-
-    double  datum_date = 0.0;           /* TODO: Description needed */
-
-    struct _pj_gi *last_before_grid = nullptr;    /* TODO: Description needed */
-    PJ_Region     last_before_region = {0,0,0,0}; /* TODO: Description needed */
-    double        last_before_date = 0.0;         /* TODO: Description needed */
-
-    struct _pj_gi *last_after_grid = nullptr;     /* TODO: Description needed */
-    PJ_Region     last_after_region = {0,0,0,0};  /* TODO: Description needed */
-    double        last_after_date = 0.0;          /* TODO: Description needed */
 
     /*************************************************************************************
      ISO-19111 interface
@@ -685,12 +658,50 @@ struct FACTORS {
 #define PJD_ERR_INCONSISTENT_UNIT       -59
 #define PJD_ERR_MUTUALLY_EXCLUSIVE_ARGS -60
 #define PJD_ERR_GENERIC_ERROR           -61
+#define PJD_ERR_NETWORK_ERROR           -62
 /* NOTE: Remember to update src/strerrno.cpp, src/apps/gie.cpp and transient_error in */
 /* src/transform.cpp when adding new value */
 
+// Legacy
 struct projFileAPI_t;
 
 struct projCppContext;
+
+struct projNetworkCallbacksAndData
+{
+    bool enabled = false;
+    bool enabled_env_variable_checked = false; // whereas we have checked PROJ_NETWORK env variable
+    proj_network_open_cbk_type open = nullptr;
+    proj_network_close_cbk_type close = nullptr;
+    proj_network_get_header_value_cbk_type get_header_value = nullptr;
+    proj_network_read_range_type read_range = nullptr;
+    void* user_data = nullptr;
+};
+
+struct projGridChunkCache
+{
+    bool enabled = true;
+    std::string filename{};
+    long long max_size = 300 * 1024 * 1024;
+    int ttl = 86400; // 1 day
+};
+
+struct projFileApiCallbackAndData
+{
+    PROJ_FILE_HANDLE* (*open_cbk)(PJ_CONTEXT *ctx, const char *filename, PROJ_OPEN_ACCESS access, void* user_data) = nullptr;
+    size_t           (*read_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, void* buffer, size_t size, void* user_data) = nullptr;
+    size_t           (*write_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, const void* buffer, size_t size, void* user_data) = nullptr;
+    int              (*seek_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, long long offset, int whence, void* user_data) = nullptr;
+    unsigned long long (*tell_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, void* user_data) = nullptr;
+    void             (*close_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, void* user_data) = nullptr;
+
+    int (*exists_cbk)(PJ_CONTEXT *ctx, const char *filename, void* user_data) = nullptr;
+    int (*mkdir_cbk)(PJ_CONTEXT *ctx, const char *filename, void* user_data) = nullptr;
+    int (*unlink_cbk)(PJ_CONTEXT *ctx, const char *filename, void* user_data) = nullptr;
+    int (*rename_cbk)(PJ_CONTEXT *ctx, const char *oldPath, const char *newPath, void* user_data) = nullptr;
+
+    void*            user_data = nullptr;
+};
 
 /* proj thread context */
 struct projCtx_t {
@@ -698,17 +709,30 @@ struct projCtx_t {
     int     debug_level = 0;
     void    (*logger)(void *, int, const char *) = nullptr;
     void    *logger_app_data = nullptr;
-    struct projFileAPI_t *fileapi = nullptr;
+    struct projFileAPI_t *fileapi_legacy = nullptr; // for proj_api.h legacy API
     struct projCppContext* cpp_context = nullptr; /* internal context for C++ code */
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
 
+    std::string env_var_proj_lib{}; // content of PROJ_LIB environment variable. Use Filemanager::getProjLibEnvVar() to access
     std::vector<std::string> search_paths{};
     const char **c_compat_paths = nullptr; // same, but for projinfo usage
 
     const char* (*file_finder_legacy) (const char*) = nullptr; // Only for proj_api compat. To remove once it is removed
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
+
+    projNetworkCallbacksAndData networking{};
+    bool defer_grid_opening = false; // set by pj_obj_create()
+
+    projFileApiCallbackAndData fileApi{};
+    std::string custom_sqlite3_vfs_name{};
+
+    bool iniFileLoaded = false;
+    std::string endpoint{};
+
+    std::string user_writable_directory{};
+    projGridChunkCache gridChunkCache{};
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
 
@@ -766,56 +790,6 @@ PJ *pj_projection_specific_setup_##name (PJ *P)
 
 #endif /* def PJ_LIB__ */
 
-
-#define MAX_TAB_ID 80
-typedef struct { float lam, phi; } FLP;
-typedef struct { pj_int32 lam, phi; } ILP;
-
-struct CTABLE {
-    char id[MAX_TAB_ID];    /* ascii info */
-    PJ_LP ll;               /* lower left corner coordinates */
-    PJ_LP del;              /* size of cells */
-    ILP lim;                /* limits of conversion matrix */
-    FLP *cvs;               /* conversion matrix */
-};
-
-typedef struct _pj_gi {
-    char *gridname;     /* identifying name of grid, eg "conus" or ntv2_0.gsb */
-    char *filename;     /* full path to filename */
-
-    const char *format; /* format of this grid, ie "ctable", "ntv1",
-                           "ntv2" or "missing". */
-
-    long   grid_offset;  /* offset in file, for delayed loading */
-    int   must_swap;    /* only for NTv2 */
-
-    struct CTABLE *ct;
-
-    struct _pj_gi *next;
-    struct _pj_gi *child;
-} PJ_GRIDINFO;
-
-typedef struct {
-    PJ_Region region;
-    int  priority;      /* higher used before lower */
-    double date;        /* year.fraction */
-    char *definition;   /* usually the gridname */
-
-    PJ_GRIDINFO  *gridinfo;
-    int available;      /* 0=unknown, 1=true, -1=false */
-} PJ_GridCatalogEntry;
-
-typedef struct _PJ_GridCatalog {
-    char *catalog_name;
-
-    PJ_Region region;   /* maximum extent of catalog data */
-
-    int entry_count;
-    PJ_GridCatalogEntry *entries;
-
-    struct _PJ_GridCatalog *next;
-} PJ_GridCatalog;
-
 /* procedure prototypes */
 double PROJ_DLL dmstor(const char *, char **);
 double dmstor_ctx(projCtx_t *ctx, const char *, char **);
@@ -862,52 +836,6 @@ COMPLEX pj_zpolyd1(COMPLEX, const COMPLEX *, int, COMPLEX *);
 int pj_deriv(PJ_LP, double, const PJ *, struct DERIVS *);
 int pj_factors(PJ_LP, const PJ *, double, struct FACTORS *);
 
-/* nadcon related protos */
-struct CTABLE* find_ctable(projCtx_t *ctx, PJ_LP input, int grid_count, PJ_GRIDINFO **tables);
-
-PJ_LP             nad_intr(PJ_LP, struct CTABLE *);
-PJ_LP             nad_cvt(projCtx_t *ctx, PJ_LP in, int inverse, struct CTABLE *ct, int grid_count, PJ_GRIDINFO **tables);
-struct CTABLE *nad_init(projCtx_t *ctx, char *);
-struct CTABLE *nad_ctable_init( projCtx_t *ctx, struct projFileAPI_t* fid );
-int            nad_ctable_load( projCtx_t *ctx, struct CTABLE *, struct projFileAPI_t* fid );
-struct CTABLE *nad_ctable2_init( projCtx_t *ctx, struct projFileAPI_t* fid );
-int            nad_ctable2_load( projCtx_t *ctx, struct CTABLE *, struct projFileAPI_t* fid );
-void           nad_free(struct CTABLE *);
-
-/* higher level handling of datum grid shift files */
-
-int pj_apply_vgridshift( PJ *defn, const char *listname,
-                         PJ_GRIDINFO ***gridlist_p,
-                         int *gridlist_count_p,
-                         int inverse,
-                         long point_count, int point_offset,
-                         double *x, double *y, double *z );
-int pj_apply_gridshift_2( PJ *defn, int inverse,
-                          long point_count, int point_offset,
-                          double *x, double *y, double *z );
-int pj_apply_gridshift_3( projCtx_t *ctx,
-                          PJ_GRIDINFO **gridlist, int gridlist_count,
-                          int inverse, long point_count, int point_offset,
-                          double *x, double *y, double *z );
-
-PJ_GRIDINFO **pj_gridlist_from_nadgrids( projCtx_t *, const char *, int * );
-
-PJ_GRIDINFO *pj_gridinfo_init( projCtx_t *, const char * );
-int          pj_gridinfo_load( projCtx_t *, PJ_GRIDINFO * );
-void         pj_gridinfo_free( projCtx_t *, PJ_GRIDINFO * );
-
-PJ_GridCatalog *pj_gc_findcatalog( projCtx_t *, const char * );
-PJ_GridCatalog *pj_gc_readcatalog( projCtx_t *, const char * );
-void pj_gc_unloadall( projCtx_t *);
-int pj_gc_apply_gridshift( PJ *defn, int inverse,
-                           long point_count, int point_offset,
-                           double *x, double *y, double *z );
-int pj_gc_apply_gridshift( PJ *defn, int inverse,
-                           long point_count, int point_offset,
-                           double *x, double *y, double *z );
-
-double pj_gc_parsedate( projCtx_t *, const char * );
-
 void  *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
 double proj_inv_mdist(projCtx_t *ctx, double, const void *);
@@ -932,7 +860,16 @@ std::string pj_double_quote_string_param_if_needed(const std::string& str);
 PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition);
 PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv);
 
-void pj_pipeline_assign_context_to_steps( PJ* P, PJ_CONTEXT* ctx );
+// For use by projinfo
+bool PROJ_DLL pj_context_is_network_enabled(PJ_CONTEXT* ctx);
+
+std::string pj_context_get_url_endpoint(PJ_CONTEXT* ctx);
+
+void pj_load_ini(PJ_CONTEXT* ctx);
+
+// Exported for testing purposes only
+std::string PROJ_DLL pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx);
+std::string PROJ_DLL pj_context_get_user_writable_directory(PJ_CONTEXT *ctx, bool create);
 
 /* classic public API */
 #include "proj_api.h"

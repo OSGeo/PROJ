@@ -4,5 +4,5 @@ io namespace
 ------------
 
 .. doxygennamespace:: osgeo::proj::io
-   :project: cpp_stuff
+   :project: doxygen_api
    :members:

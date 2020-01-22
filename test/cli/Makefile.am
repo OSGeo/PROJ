@@ -29,7 +29,7 @@ EXTRA_DIST = pj_out27.dist pj_out83.dist td_out.dist \
 		CMakeLists.txt
 
 testprojinfo-check:
-	PROJ_LIB=$(PROJ_LIB) $(TESTPROJINFO) $(PROJINFOEXE)
+	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(TESTPROJINFO) $(PROJINFOEXE)
 
 test27-check:
 	$(TEST27) $(PROJEXE)
@@ -41,24 +41,24 @@ testproj-check:
 	$(TESTPROJ) $(PROJEXE)
 
 testvarious-check:
-	PROJ_LIB=$(PROJ_LIB) $(TESTVARIOUS) $(CS2CSEXE)
+	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(TESTVARIOUS) $(CS2CSEXE)
 
 testdatumfile-check:
 	@if [ -f $(PROJ_LIB)/conus -a -f $(PROJ_LIB)/ntv1_can.dat -a -f $(PROJ_LIB)/MD -a -f $(PROJ_LIB)/ntf_r93.gsb -a -f $(PROJ_LIB)/egm96_15.gtx ]; then \
-	  PROJ_LIB=$(PROJ_LIB) $(TESTDATUMFILE) $(CS2CSEXE) ; \
+	  PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(TESTDATUMFILE) $(CS2CSEXE) ; \
 	fi
 
 testign-check:
 	@if [ -f $(PROJ_LIB)/ntf_r93.gsb ] ; then \
-	  PROJ_LIB=$(PROJ_LIB) $(TESTIGN) $(CS2CSEXE) ; \
+	  PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(TESTIGN) $(CS2CSEXE) ; \
 	fi
 
 testntv2-check:
 	@if [ -f $(PROJ_LIB)/ntv2_0.gsb -a -f $(PROJ_LIB)/conus -a -f $(PROJ_LIB)/ntv1_can.dat ] ; then \
-	  PROJ_LIB=$(PROJ_LIB) $(TESTNTV2) $(CS2CSEXE) ; \
+	  PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(TESTNTV2) $(CS2CSEXE) ; \
 	fi
 
 testcct-check:
-	PROJ_LIB=$(PROJ_LIB) $(TESTCCT) $(CCTEXE)
+	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(TESTCCT) $(CCTEXE)
 
 check-local: testprojinfo-check test27-check test83-check testproj-check testvarious-check testdatumfile-check testign-check testntv2-check testcct-check

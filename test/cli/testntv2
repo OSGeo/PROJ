@@ -61,11 +61,22 @@ $EXE +proj=latlong +datum=NAD83 +to +proj=latlong +ellps=clrk66 +nadgrids=ntv2_0
 EOF
 
 echo "##############################################################" >> ${OUT}
+echo "Interpolating very close (and sometimes a bit outside) to the edges a NTv2 subgrid (#209)" >> ${OUT}
+$EXE +proj=latlong +datum=NAD83 +to +proj=latlong +ellps=clrk66 +nadgrids=ntv2_0.gsb -E -d 8 >>${OUT} <<EOF
+-115.58333333 51.25000000 0
+-115.58333333 51.25000010 0
+-115.58333334 51.25000000 0
+-115.49166667 51.07500000 0
+-115.49166668 51.07500000 0
+-115.49166667 51.07499990 0
+EOF
+
+echo "##############################################################" >> ${OUT}
 echo Attempt first with ntv2_0.gsb and then conus >> ${OUT}
 $EXE +proj=longlat +datum=NAD27 +to +proj=longlat +datum=WGS84 -E -d 8 >>${OUT} <<EOF
 -111.5 45.26
 EOF
-#
+
 echo "##############################################################" >> ${OUT}
 echo "NAD27 -> NAD83: 1st through ntv2, 2nd through conus" >> ${OUT}
 #

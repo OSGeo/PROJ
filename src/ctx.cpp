@@ -33,6 +33,7 @@
 
 #include "proj_experimental.h"
 #include "proj_internal.h"
+#include "filemanager.hpp"
 
 /************************************************************************/
 /*                             pj_get_ctx()                             */
@@ -60,9 +61,9 @@ void pj_set_ctx( projPJ pj, projCtx ctx )
     if (pj==nullptr)
         return;
     pj->ctx = ctx;
-    if( pj->is_pipeline )
+    if( pj->reassign_context )
     {
-        pj_pipeline_assign_context_to_steps(pj, ctx);
+        pj->reassign_context(pj, ctx);
     }
     for( const auto &alt: pj->alternativeCoordinateOperations )
     {
@@ -95,7 +96,8 @@ projCtx_t projCtx_t::createDefault()
     projCtx_t ctx;
     ctx.debug_level = PJ_LOG_NONE;
     ctx.logger = pj_stderr_logger;
-    ctx.fileapi = pj_get_default_fileapi();
+    ctx.fileapi_legacy = pj_get_default_fileapi();
+    NS_PROJ::FileManager::fillDefaultNetworkInterface(&ctx);
 
     if( getenv("PROJ_DEBUG") != nullptr )
     {
@@ -133,12 +135,13 @@ projCtx_t::projCtx_t(const projCtx_t& other)
     debug_level = other.debug_level;
     logger = other.logger;
     logger_app_data = other.logger_app_data;
-    fileapi = other.fileapi;
+    fileapi_legacy = other.fileapi_legacy;
     epsg_file_exists = other.epsg_file_exists;
     set_search_paths(other.search_paths);
     file_finder = other.file_finder;
     file_finder_legacy = other.file_finder_legacy;
     file_finder_user_data = other.file_finder_user_data;
+    networking = other.networking;
 }
 
 /************************************************************************/
@@ -258,28 +261,3 @@ void *pj_ctx_get_app_data( projCtx ctx )
         return nullptr;
     return ctx->logger_app_data;
 }
-
-/************************************************************************/
-/*                         pj_ctx_set_fileapi()                         */
-/************************************************************************/
-
-void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
-
-{
-    if (nullptr==ctx)
-        return;
-    ctx->fileapi = fileapi;
-}
-
-/************************************************************************/
-/*                         pj_ctx_get_fileapi()                         */
-/************************************************************************/
-
-projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
-
-{
-    if (nullptr==ctx)
-        return nullptr;
-    return ctx->fileapi;
-}
-

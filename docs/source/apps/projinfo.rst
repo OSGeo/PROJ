@@ -20,7 +20,7 @@ Synopsis
     |    [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]
     |    [--spatial-test contains|intersects]
     |    [--crs-extent-use none|both|intersection|smallest]
-    |    [--grid-check none|discard_missing|sort] [--show-superseded]
+    |    [--grid-check none|discard_missing|sort|known_available] [--show-superseded]
     |    [--pivot-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
     |    [--boundcrs-to-wgs84]
     |    [--main-db-path path] [--aux-db-path path]*
@@ -151,12 +151,13 @@ The following control parameters can appear in any order:
 
     .. note:: only used for coordinate operation computation
 
-.. option:: --grid-check none|discard_missing|sort
+.. option:: --grid-check none|discard_missing|sort|known_available
 
     Specify how the presence or absence of a horizontal or vertical shift grid
     required for a coordinate operation affects the results returned when
     researching coordinate operations between 2 CRS.
-    The default strategy is ``sort``: in that case, all candidate
+    The default strategy is ``sort`` (if :envvar:`PROJ_NETWORK` is not defined).
+    In that case, all candidate
     operations are returned, but the actual availability of the grids is used
     to determine the sorting order. That is, if a coordinate operation involves
     using a grid that is not available in the PROJ resource directories
@@ -166,6 +167,9 @@ The following control parameters can appear in any order:
     this returns the results as if all the grids where available.
     The ``discard_missing`` strategy discards results that involve grids not
     present in the PROJ resource directories.
+    The ``known_available`` strategy discards results that involve grids not
+    present in the PROJ resource directories and that are not known of the CDN.
+    This is the default strategy is :envvar:`PROJ_NETWORK` is set to ``ON``.
 
     .. note:: only used for coordinate operation computation
 

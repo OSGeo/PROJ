@@ -91,6 +91,17 @@ cartesian coordinates) and
 *Coordinate Transformations*, which are coordinate operations where
 input and output datums differ (e.g. change of reference frame).
 
+Use of remote grids
+*******************
+
+.. versionadded:: 7.0.0
+
+If the :envvar:`PROJ_NETWORK` environment variable is set to ``ON``,
+:program:`cct` will attempt to use remote grids stored on CDN (Content
+Delivery Network) storage, when they are not available locally.
+
+More details are available in the :ref:`network` section.
+
 Examples
 ********
 

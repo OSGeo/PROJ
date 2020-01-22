@@ -12,6 +12,35 @@ The input coordinate is located at lon=60, lam=-160 - somewhere in Alaska.
 <gie>
 
 -------------------------------------------------------------------------------
+Test with an extract of nkgrf03vel_realigned with ctable2+gtx
+-------------------------------------------------------------------------------
+operation    +proj=pipeline
+             +step +proj=cart +ellps=GRS80
+             +step +proj=deformation
+             +xy_grids=tests/nkgrf03vel_realigned_xy_extract.ct2
+             +z_grids=tests/nkgrf03vel_realigned_z_extract.gtx +ellps=GRS80 +dt=1
+             +step +proj=cart +ellps=GRS80 +inv
+-------------------------------------------------------------------------------
+tolerance   0.05 mm
+accept      21.5            63                   0
+expect      21.5000000049   62.9999999937        0.0083
+roundtrip   5
+
+-------------------------------------------------------------------------------
+Test with an extract of nkgrf03vel_realigned with GeoTIFF
+-------------------------------------------------------------------------------
+operation    +proj=pipeline
+             +step +proj=cart +ellps=GRS80
+             +step +proj=deformation
+             +grids=tests/nkgrf03vel_realigned_extract.tif +ellps=GRS80 +dt=1
+             +step +proj=cart +ellps=GRS80 +inv
+-------------------------------------------------------------------------------
+tolerance   0.05 mm
+accept      21.5            63                   0
+expect      21.5000000049   62.9999999937        0.0083
+roundtrip   5
+
+-------------------------------------------------------------------------------
 Test the +dt parameter
 -------------------------------------------------------------------------------
 operation   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx

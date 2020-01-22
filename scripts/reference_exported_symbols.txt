@@ -281,6 +281,26 @@ osgeo::proj::datum::TemporalDatum::temporalOrigin() const
 osgeo::proj::datum::VerticalReferenceFrame::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::util::optional<std::string> const&, osgeo::proj::util::optional<osgeo::proj::datum::RealizationMethod> const&)
 osgeo::proj::datum::VerticalReferenceFrame::realizationMethod() const
 osgeo::proj::datum::VerticalReferenceFrame::~VerticalReferenceFrame()
+osgeo::proj::GenericShiftGrid::~GenericShiftGrid()
+osgeo::proj::GenericShiftGrid::GenericShiftGrid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
+osgeo::proj::GenericShiftGrid::gridAt(double, double) const
+osgeo::proj::GenericShiftGridSet::~GenericShiftGridSet()
+osgeo::proj::GenericShiftGridSet::GenericShiftGridSet()
+osgeo::proj::GenericShiftGridSet::gridAt(double, double) const
+osgeo::proj::GenericShiftGridSet::open(projCtx_t*, std::string const&)
+osgeo::proj::GenericShiftGridSet::reassign_context(projCtx_t*)
+osgeo::proj::GenericShiftGridSet::reopen(projCtx_t*)
+osgeo::proj::Grid::~Grid()
+osgeo::proj::Grid::Grid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
+osgeo::proj::HorizontalShiftGrid::gridAt(double, double) const
+osgeo::proj::HorizontalShiftGrid::~HorizontalShiftGrid()
+osgeo::proj::HorizontalShiftGrid::HorizontalShiftGrid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
+osgeo::proj::HorizontalShiftGridSet::gridAt(double, double) const
+osgeo::proj::HorizontalShiftGridSet::~HorizontalShiftGridSet()
+osgeo::proj::HorizontalShiftGridSet::HorizontalShiftGridSet()
+osgeo::proj::HorizontalShiftGridSet::open(projCtx_t*, std::string const&)
+osgeo::proj::HorizontalShiftGridSet::reassign_context(projCtx_t*)
+osgeo::proj::HorizontalShiftGridSet::reopen(projCtx_t*)
 osgeo::proj::internal::ci_equal(std::string const&, char const*)
 osgeo::proj::internal::ci_equal(std::string const&, std::string const&)
 osgeo::proj::internal::ci_find(std::string const&, char const*)
@@ -301,8 +321,8 @@ osgeo::proj::io::AuthorityFactory::create(dropbox::oxygen::nn<std::shared_ptr<os
 osgeo::proj::io::AuthorityFactory::createEllipsoid(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createExtent(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&) const
-osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, bool, bool, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
-osgeo::proj::io::AuthorityFactory::createFromCRSCodesWithIntermediates(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, std::vector<std::pair<std::string, std::string>, std::allocator<std::pair<std::string, std::string> > > const&, osgeo::proj::io::AuthorityFactory::ObjectType, std::vector<std::string, std::allocator<std::string> > const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
+osgeo::proj::io::AuthorityFactory::createFromCoordinateReferenceSystemCodes(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, bool, bool, bool, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
+osgeo::proj::io::AuthorityFactory::createFromCRSCodesWithIntermediates(std::string const&, std::string const&, std::string const&, std::string const&, bool, bool, bool, bool, std::vector<std::pair<std::string, std::string>, std::allocator<std::pair<std::string, std::string> > > const&, osgeo::proj::io::AuthorityFactory::ObjectType, std::vector<std::string, std::allocator<std::string> > const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&) const
 osgeo::proj::io::AuthorityFactory::createGeodeticCRS(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createGeodeticDatum(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createGeographicCRS(std::string const&) const
@@ -332,7 +352,7 @@ osgeo::proj::io::DatabaseContext::getDatabaseStructure() const
 osgeo::proj::io::DatabaseContext::getMetadata(char const*) const
 osgeo::proj::io::DatabaseContext::getPath() const
 osgeo::proj::io::DatabaseContext::getSqliteHandle() const
-osgeo::proj::io::DatabaseContext::lookForGridInfo(std::string const&, std::string&, std::string&, std::string&, bool&, bool&, bool&) const
+osgeo::proj::io::DatabaseContext::lookForGridInfo(std::string const&, bool, std::string&, std::string&, std::string&, bool&, bool&, bool&) const
 osgeo::proj::io::FactoryException::~FactoryException()
 osgeo::proj::io::FactoryException::FactoryException(char const*)
 osgeo::proj::io::FactoryException::FactoryException(osgeo::proj::io::FactoryException const&)
@@ -467,7 +487,7 @@ osgeo::proj::metadata::VerticalExtent::~VerticalExtent()
 osgeo::proj::operation::ConcatenatedOperation::~ConcatenatedOperation()
 osgeo::proj::operation::ConcatenatedOperation::createComputeMetadata(std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> > > > const&, bool)
 osgeo::proj::operation::ConcatenatedOperation::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::CoordinateOperation> > > > const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
-osgeo::proj::operation::ConcatenatedOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::operation::ConcatenatedOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool) const
 osgeo::proj::operation::ConcatenatedOperation::inverse() const
 osgeo::proj::operation::ConcatenatedOperation::operations() const
 osgeo::proj::operation::Conversion::~Conversion()
@@ -577,7 +597,7 @@ osgeo::proj::operation::CoordinateOperationFactory::createOperation(dropbox::oxy
 osgeo::proj::operation::CoordinateOperationFactory::createOperations(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::operation::CoordinateOperationContext, std::default_delete<osgeo::proj::operation::CoordinateOperationContext> > > const&) const
 osgeo::proj::operation::CoordinateOperation::hasBallparkTransformation() const
 osgeo::proj::operation::CoordinateOperation::interpolationCRS() const
-osgeo::proj::operation::CoordinateOperation::isPROJInstantiable(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::operation::CoordinateOperation::isPROJInstantiable(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool) const
 osgeo::proj::operation::CoordinateOperation::normalizeForVisualization() const
 osgeo::proj::operation::CoordinateOperation::operationVersion() const
 osgeo::proj::operation::CoordinateOperation::shallowClone() const
@@ -623,7 +643,7 @@ osgeo::proj::operation::ParameterValue::value() const
 osgeo::proj::operation::ParameterValue::valueFile() const
 osgeo::proj::operation::PointMotionOperation::~PointMotionOperation()
 osgeo::proj::operation::SingleOperation::createPROJBased(osgeo::proj::util::PropertyMap const&, std::string const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, std::shared_ptr<osgeo::proj::crs::CRS> const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
-osgeo::proj::operation::SingleOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
+osgeo::proj::operation::SingleOperation::gridsNeeded(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool) const
 osgeo::proj::operation::SingleOperation::method() const
 osgeo::proj::operation::SingleOperation::parameterValue(int) const
 osgeo::proj::operation::SingleOperation::parameterValueMeasure(int) const
@@ -698,6 +718,15 @@ osgeo::proj::util::PropertyMap::set(std::string const&, std::string const&)
 osgeo::proj::util::PropertyMap::set(std::string const&, std::vector<std::string, std::allocator<std::string> > const&)
 osgeo::proj::util::UnsupportedOperationException::~UnsupportedOperationException()
 osgeo::proj::util::UnsupportedOperationException::UnsupportedOperationException(osgeo::proj::util::UnsupportedOperationException const&)
+osgeo::proj::VerticalShiftGrid::gridAt(double, double) const
+osgeo::proj::VerticalShiftGridSet::gridAt(double, double) const
+osgeo::proj::VerticalShiftGridSet::open(projCtx_t*, std::string const&)
+osgeo::proj::VerticalShiftGridSet::reassign_context(projCtx_t*)
+osgeo::proj::VerticalShiftGridSet::reopen(projCtx_t*)
+osgeo::proj::VerticalShiftGridSet::~VerticalShiftGridSet()
+osgeo::proj::VerticalShiftGridSet::VerticalShiftGridSet()
+osgeo::proj::VerticalShiftGrid::~VerticalShiftGrid()
+osgeo::proj::VerticalShiftGrid::VerticalShiftGrid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
 pj_acquire_lock
 pj_add_type_crs_if_needed(std::string const&)
 pj_apply_gridshift
@@ -709,6 +738,9 @@ pj_chomp(char*)
 pj_cleanup_lock
 pj_clear_initcache
 pj_compare_datums
+pj_context_get_grid_cache_filename(projCtx_t*)
+pj_context_get_user_writable_directory(projCtx_t*, bool)
+pj_context_is_network_enabled(projCtx_t*)
 pj_ctx_alloc
 pj_ctx_fclose
 pj_ctx_fgets
@@ -796,9 +828,14 @@ proj_context_get_use_proj4_init_rules
 proj_context_guess_wkt_dialect
 proj_context_set_autoclose_database
 proj_context_set_database_path
+proj_context_set_enable_network
+proj_context_set_fileapi
 proj_context_set_file_finder
+proj_context_set_network_callbacks
 proj_context_set(PJconsts*, projCtx_t*)
 proj_context_set_search_paths
+proj_context_set_sqlite3_vfs_name
+proj_context_set_url_endpoint
 proj_context_use_proj4_init_rules
 proj_convert_conversion_to_other_method
 proj_coord
@@ -928,6 +965,7 @@ proj_cs_get_axis_info
 proj_cs_get_type
 proj_destroy
 proj_dmstor
+proj_download_file
 proj_ellipsoid_get_parameters
 proj_errno
 proj_errno_reset
@@ -953,6 +991,11 @@ proj_get_scope
 proj_get_source_crs
 proj_get_target_crs
 proj_get_type
+proj_grid_cache_clear
+proj_grid_cache_set_enable
+proj_grid_cache_set_filename
+proj_grid_cache_set_max_size
+proj_grid_cache_set_ttl
 proj_grid_get_info_from_database
 proj_grid_info
 proj_identify
@@ -962,6 +1005,7 @@ proj_int_list_destroy
 proj_is_crs
 proj_is_deprecated
 proj_is_derived_crs
+proj_is_download_needed
 proj_is_equivalent_to
 proj_is_equivalent_to_with_ctx
 proj_list_angular_units

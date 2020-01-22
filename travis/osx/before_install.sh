@@ -6,7 +6,8 @@ export PATH=$HOME/Library/Python/3.7/bin:$PATH
 
 brew update
 brew install ccache
-brew install sqlite3
+#brew upgrade sqlite3
+#brew upgrade libtiff
 brew install doxygen
 #brew install md5sha1sum
 #brew reinstall python

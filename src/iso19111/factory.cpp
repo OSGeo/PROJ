@@ -45,6 +45,8 @@
 #include "proj/internal/lru_cache.hpp"
 #include "proj/internal/tracing.hpp"
 
+#include "sqlite3_utils.hpp"
+
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -278,9 +280,7 @@ struct DatabaseContext::Private {
     void registerFunctions();
 
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    std::string thisNamePtr_{};
-    sqlite3_vfs *vfs_{};
-    bool createCustomVFS();
+    std::unique_ptr<SQLite3VFS> vfs_{};
 #endif
 
     Private(const Private &) = delete;
@@ -297,13 +297,6 @@ DatabaseContext::Private::~Private() {
     assert(recLevel_ == 0);
 
     closeDB();
-
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    if (vfs_) {
-        sqlite3_vfs_unregister(vfs_);
-        delete vfs_;
-    }
-#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -499,104 +492,12 @@ void DatabaseContext::Private::cache(const std::string &code,
 
 // ---------------------------------------------------------------------------
 
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-
-typedef int (*ClosePtr)(sqlite3_file *);
-
-static int VFSClose(sqlite3_file *file) {
-    sqlite3_vfs *defaultVFS = sqlite3_vfs_find(nullptr);
-    assert(defaultVFS);
-    ClosePtr defaultClosePtr;
-    std::memcpy(&defaultClosePtr,
-                reinterpret_cast<char *>(file) + defaultVFS->szOsFile,
-                sizeof(ClosePtr));
-    void *methods = const_cast<sqlite3_io_methods *>(file->pMethods);
-    int ret = defaultClosePtr(file);
-    std::free(methods);
-    return ret;
-}
-
-// No-lock implementation
-static int VSFLock(sqlite3_file *, int) { return SQLITE_OK; }
-
-static int VSFUnlock(sqlite3_file *, int) { return SQLITE_OK; }
-
-static int VFSOpen(sqlite3_vfs *vfs, const char *name, sqlite3_file *file,
-                   int flags, int *outFlags) {
-    sqlite3_vfs *defaultVFS = static_cast<sqlite3_vfs *>(vfs->pAppData);
-    int ret = defaultVFS->xOpen(defaultVFS, name, file, flags, outFlags);
-    if (ret == SQLITE_OK) {
-        ClosePtr defaultClosePtr = file->pMethods->xClose;
-        assert(defaultClosePtr);
-        sqlite3_io_methods *methods = static_cast<sqlite3_io_methods *>(
-            std::malloc(sizeof(sqlite3_io_methods)));
-        if (!methods) {
-            file->pMethods->xClose(file);
-            return SQLITE_NOMEM;
-        }
-        memcpy(methods, file->pMethods, sizeof(sqlite3_io_methods));
-        methods->xClose = VFSClose;
-        methods->xLock = VSFLock;
-        methods->xUnlock = VSFUnlock;
-        file->pMethods = methods;
-        // Save original xClose pointer at end of file structure
-        std::memcpy(reinterpret_cast<char *>(file) + defaultVFS->szOsFile,
-                    &defaultClosePtr, sizeof(ClosePtr));
-    }
-    return ret;
-}
-
-static int VFSAccess(sqlite3_vfs *vfs, const char *zName, int flags,
-                     int *pResOut) {
-    sqlite3_vfs *defaultVFS = static_cast<sqlite3_vfs *>(vfs->pAppData);
-    // Do not bother stat'ing for journal or wal files
-    if (std::strstr(zName, "-journal") || std::strstr(zName, "-wal")) {
-        *pResOut = false;
-        return SQLITE_OK;
-    }
-    return defaultVFS->xAccess(defaultVFS, zName, flags, pResOut);
-}
-
-// ---------------------------------------------------------------------------
-
-bool DatabaseContext::Private::createCustomVFS() {
-
-    sqlite3_vfs *defaultVFS = sqlite3_vfs_find(nullptr);
-    assert(defaultVFS);
-
-    std::ostringstream buffer;
-    buffer << this;
-    thisNamePtr_ = buffer.str();
-
-    vfs_ = new sqlite3_vfs();
-    vfs_->iVersion = 1;
-    vfs_->szOsFile = defaultVFS->szOsFile + sizeof(ClosePtr);
-    vfs_->mxPathname = defaultVFS->mxPathname;
-    vfs_->zName = thisNamePtr_.c_str();
-    vfs_->pAppData = defaultVFS;
-    vfs_->xOpen = VFSOpen;
-    vfs_->xDelete = defaultVFS->xDelete;
-    vfs_->xAccess = VFSAccess;
-    vfs_->xFullPathname = defaultVFS->xFullPathname;
-    vfs_->xDlOpen = defaultVFS->xDlOpen;
-    vfs_->xDlError = defaultVFS->xDlError;
-    vfs_->xDlSym = defaultVFS->xDlSym;
-    vfs_->xDlClose = defaultVFS->xDlClose;
-    vfs_->xRandomness = defaultVFS->xRandomness;
-    vfs_->xSleep = defaultVFS->xSleep;
-    vfs_->xCurrentTime = defaultVFS->xCurrentTime;
-    vfs_->xGetLastError = defaultVFS->xGetLastError;
-    vfs_->xCurrentTimeInt64 = defaultVFS->xCurrentTimeInt64;
-    return sqlite3_vfs_register(vfs_, false) == SQLITE_OK;
-}
-
-#endif // ENABLE_CUSTOM_LOCKLESS_VFS
-
-// ---------------------------------------------------------------------------
-
 void DatabaseContext::Private::open(const std::string &databasePath,
                                     PJ_CONTEXT *ctx) {
-    setPjCtxt(ctx ? ctx : pj_get_default_ctx());
+    if (!ctx) {
+        ctx = pj_get_default_ctx();
+    }
+    setPjCtxt(ctx);
     std::string path(databasePath);
     if (path.empty()) {
         path.resize(2048);
@@ -608,18 +509,23 @@ void DatabaseContext::Private::open(const std::string &databasePath,
         }
     }
 
-    if (
+    std::string vfsName;
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-        !createCustomVFS() ||
+    if (ctx->custom_sqlite3_vfs_name.empty()) {
+        vfs_ = SQLite3VFS::create(false, true, true);
+        if (vfs_ == nullptr) {
+            throw FactoryException("Open of " + path + " failed");
+        }
+        vfsName = vfs_->name();
+    } else
 #endif
-        sqlite3_open_v2(path.c_str(), &sqlite_handle_,
+    {
+        vfsName = ctx->custom_sqlite3_vfs_name;
+    }
+    if (sqlite3_open_v2(path.c_str(), &sqlite_handle_,
                         SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX,
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-                        thisNamePtr_.c_str()
-#else
-                        nullptr
-#endif
-                            ) != SQLITE_OK ||
+                        vfsName.empty() ? nullptr : vfsName.c_str()) !=
+            SQLITE_OK ||
         !sqlite_handle_) {
         throw FactoryException("Open of " + path + " failed");
     }
@@ -1021,14 +927,14 @@ bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
 
 // ---------------------------------------------------------------------------
 
-bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
-                                      std::string &fullFilename,
-                                      std::string &packageName,
-                                      std::string &url, bool &directDownload,
-                                      bool &openLicense,
-                                      bool &gridAvailable) const {
+bool DatabaseContext::lookForGridInfo(
+    const std::string &projFilename, bool considerKnownGridsAsAvailable,
+    std::string &fullFilename, std::string &packageName, std::string &url,
+    bool &directDownload, bool &openLicense, bool &gridAvailable) const {
     Private::GridInfoCache info;
-    if (d->getGridInfoFromCache(projFilename, info)) {
+    const std::string key(projFilename +
+                          (considerKnownGridsAsAvailable ? "true" : "false"));
+    if (d->getGridInfoFromCache(key, info)) {
         fullFilename = info.fullFilename;
         packageName = info.packageName;
         url = info.url;
@@ -1044,16 +950,20 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
     openLicense = false;
     directDownload = false;
 
-    fullFilename.resize(2048);
-    if (d->pjCtxt() == nullptr) {
-        d->setPjCtxt(pj_get_default_ctx());
+    if (considerKnownGridsAsAvailable) {
+        fullFilename = projFilename;
+    } else {
+        fullFilename.resize(2048);
+        if (d->pjCtxt() == nullptr) {
+            d->setPjCtxt(pj_get_default_ctx());
+        }
+        int errno_before = proj_context_errno(d->pjCtxt());
+        gridAvailable =
+            pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
+                         fullFilename.size() - 1) != 0;
+        proj_context_errno_set(d->pjCtxt(), errno_before);
+        fullFilename.resize(strlen(fullFilename.c_str()));
     }
-    int errno_before = proj_context_errno(d->pjCtxt());
-    gridAvailable =
-        pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
-                     fullFilename.size() - 1) != 0;
-    proj_context_errno_set(d->pjCtxt(), errno_before);
-    fullFilename.resize(strlen(fullFilename.c_str()));
 
     auto res =
         d->run("SELECT "
@@ -1077,6 +987,10 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
         openLicense = (row[3].empty() ? row[4] : row[3]) == "1";
         directDownload = (row[5].empty() ? row[6] : row[5]) == "1";
 
+        if (considerKnownGridsAsAvailable && !packageName.empty()) {
+            gridAvailable = true;
+        }
+
         info.fullFilename = fullFilename;
         info.packageName = packageName;
         info.url = url;
@@ -1085,7 +999,7 @@ bool DatabaseContext::lookForGridInfo(const std::string &projFilename,
     }
     info.gridAvailable = gridAvailable;
     info.found = ret;
-    d->cache(projFilename, info);
+    d->cache(key, info);
     return ret;
 }
 
@@ -1324,8 +1238,8 @@ struct AuthorityFactory::Private {
         return AuthorityFactory::create(context_, auth_name);
     }
 
-    bool
-    rejectOpDueToMissingGrid(const operation::CoordinateOperationNNPtr &op);
+    bool rejectOpDueToMissingGrid(const operation::CoordinateOperationNNPtr &op,
+                                  bool considerKnownGridsAsAvailable);
 
     UnitOfMeasure createUnitOfMeasure(const std::string &auth_name,
                                       const std::string &code);
@@ -1452,8 +1366,10 @@ util::PropertyMap AuthorityFactory::Private::createProperties(
 // ---------------------------------------------------------------------------
 
 bool AuthorityFactory::Private::rejectOpDueToMissingGrid(
-    const operation::CoordinateOperationNNPtr &op) {
-    for (const auto &gridDesc : op->gridsNeeded(context())) {
+    const operation::CoordinateOperationNNPtr &op,
+    bool considerKnownGridsAsAvailable) {
+    for (const auto &gridDesc :
+         op->gridsNeeded(context(), considerKnownGridsAsAvailable)) {
         if (!gridDesc.available) {
             return true;
         }
@@ -3449,7 +3365,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSCode, const std::string &targetCRSCode) const {
     return createFromCoordinateReferenceSystemCodes(
         d->authority(), sourceCRSCode, d->authority(), targetCRSCode, false,
-        false, false);
+        false, false, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -3478,6 +3394,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  * should be substituted to the official grid names.
  * @param discardIfMissingGrid Whether coordinate operations that reference
  * missing grids should be removed from the result set.
+ * @param considerKnownGridsAsAvailable Whether known grids should be considered
+ * as available (typically when network is enabled).
  * @param discardSuperseded Whether cordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param tryReverseOrder whether to search in the reverse order too (and thus
@@ -3498,8 +3416,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-    bool discardSuperseded, bool tryReverseOrder,
-    bool reportOnlyIntersectingTransformations,
+    bool considerKnownGridsAsAvailable, bool discardSuperseded,
+    bool tryReverseOrder, bool reportOnlyIntersectingTransformations,
     const metadata::ExtentPtr &intersectingExtent1,
     const metadata::ExtentPtr &intersectingExtent2) const {
 
@@ -3510,6 +3428,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     cacheKey += targetCRSCode;
     cacheKey += (usePROJAlternativeGridNames ? '1' : '0');
     cacheKey += (discardIfMissingGrid ? '1' : '0');
+    cacheKey += (considerKnownGridsAsAvailable ? '1' : '0');
     cacheKey += (discardSuperseded ? '1' : '0');
     cacheKey += (tryReverseOrder ? '1' : '0');
     cacheKey += (reportOnlyIntersectingTransformations ? '1' : '0');
@@ -3748,7 +3667,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
                     target_crs_code != targetCRSCode))) {
             op = op->inverse();
         }
-        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
             list.emplace_back(op);
         }
     }
@@ -3813,6 +3733,8 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  * should be substituted to the official grid names.
  * @param discardIfMissingGrid Whether coordinate operations that reference
  * missing grids should be removed from the result set.
+ * @param considerKnownGridsAsAvailable Whether known grids should be considered
+ * as available (typically when network is enabled).
  * @param discardSuperseded Whether cordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param intermediateCRSAuthCodes List of (auth_name, code) of CRS that can be
@@ -3841,7 +3763,7 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-    bool discardSuperseded,
+    bool considerKnownGridsAsAvailable, bool discardSuperseded,
     const std::vector<std::pair<std::string, std::string>>
         &intermediateCRSAuthCodes,
     ObjectType allowedIntermediateObjectType,
@@ -4289,7 +4211,8 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
     std::vector<operation::CoordinateOperationNNPtr> list;
     for (const auto &op : listTmp) {
-        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
             list.emplace_back(op);
         }
     }
@@ -4307,7 +4230,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     const std::string &sourceCRSCode, const crs::CRSNNPtr &targetCRS,
     const std::string &targetCRSAuthName, const std::string &targetCRSCode,
     bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-    bool discardSuperseded, const std::vector<std::string> &allowedAuthorities,
+    bool considerKnownGridsAsAvailable, bool discardSuperseded,
+    const std::vector<std::string> &allowedAuthorities,
     const metadata::ExtentPtr &intersectingExtent1,
     const metadata::ExtentPtr &intersectingExtent2) const {
 
@@ -4890,7 +4814,8 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
 
     std::vector<operation::CoordinateOperationNNPtr> list;
     for (const auto &op : listTmp) {
-        if (!discardIfMissingGrid || !d->rejectOpDueToMissingGrid(op)) {
+        if (!discardIfMissingGrid ||
+            !d->rejectOpDueToMissingGrid(op, considerKnownGridsAsAvailable)) {
             list.emplace_back(op);
         }
     }

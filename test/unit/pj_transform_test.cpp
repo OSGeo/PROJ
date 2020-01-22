@@ -616,6 +616,22 @@ TEST(proj_api_h, pj_set_finder) {
 
 // ---------------------------------------------------------------------------
 
+TEST(proj_api_h, default_fileapi) {
+    auto ctx = pj_ctx_alloc();
+    auto fid = pj_open_lib(ctx, "proj.db", "rb");
+    ASSERT_NE(fid, nullptr);
+    char header[6];
+    ASSERT_EQ(pj_ctx_fread(ctx, header, 1, 6, fid), 6U);
+    ASSERT_TRUE(memcmp(header, "SQLite", 6) == 0);
+    ASSERT_EQ(pj_ctx_ftell(ctx, fid), 6);
+    ASSERT_EQ(pj_ctx_fseek(ctx, fid, 0, SEEK_SET), 0);
+    ASSERT_EQ(pj_ctx_ftell(ctx, fid), 0);
+    pj_ctx_fclose(ctx, fid);
+    pj_ctx_free(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(pj_transform_test, ob_tran_to_meter_as_dest) {
     auto src = pj_init_plus(
         "+ellps=WGS84 +a=57.29577951308232 +proj=eqc +lon_0=0.0 +no_defs");
@@ -632,6 +648,79 @@ TEST(pj_transform_test, ob_tran_to_meter_as_dest) {
 }
 
 // ---------------------------------------------------------------------------
+
+struct Spy {
+    bool gotInMyFOpen = false;
+    bool gotInMyFRead = false;
+    bool gotInMyFSeek = false;
+    bool gotInMyFTell = false;
+    bool gotInMyFClose = false;
+};
+
+struct MyFile {
+    FILE *fp;
+    Spy *spy;
+};
+
+static PAFile myFOpen(projCtx ctx, const char *filename, const char *access) {
+    FILE *fp = fopen(filename, access);
+    if (!fp)
+        return nullptr;
+    MyFile *myF = new MyFile;
+    myF->spy = (Spy *)pj_ctx_get_app_data(ctx);
+    myF->spy->gotInMyFOpen = true;
+    myF->fp = fp;
+    return reinterpret_cast<PAFile>(myF);
+}
+
+static size_t myFRead(void *buffer, size_t size, size_t nmemb, PAFile file) {
+    MyFile *myF = reinterpret_cast<MyFile *>(file);
+    myF->spy->gotInMyFRead = true;
+    return fread(buffer, size, nmemb, myF->fp);
+}
+
+static int myFSeek(PAFile file, long offset, int whence) {
+    MyFile *myF = reinterpret_cast<MyFile *>(file);
+    myF->spy->gotInMyFSeek = true;
+    return fseek(myF->fp, offset, whence);
+}
+
+static long myFTell(PAFile file) {
+    MyFile *myF = reinterpret_cast<MyFile *>(file);
+    myF->spy->gotInMyFTell = true;
+    return ftell(myF->fp);
+}
+
+static void myFClose(PAFile file) {
+    MyFile *myF = reinterpret_cast<MyFile *>(file);
+    myF->spy->gotInMyFClose = true;
+    fclose(myF->fp);
+    delete myF;
+}
+
+TEST(proj_api_h, custom_fileapi) {
+    auto ctx = pj_ctx_alloc();
+    Spy spy;
+    pj_ctx_set_app_data(ctx, &spy);
+    projFileAPI myAPI = {myFOpen, myFRead, myFSeek, myFTell, myFClose};
+    pj_ctx_set_fileapi(ctx, &myAPI);
+    EXPECT_EQ(pj_ctx_get_fileapi(ctx), &myAPI);
+    auto fid = pj_open_lib(ctx, "proj.db", "rb");
+    ASSERT_NE(fid, nullptr);
+    char header[6];
+    ASSERT_EQ(pj_ctx_fread(ctx, header, 1, 6, fid), 6U);
+    ASSERT_TRUE(memcmp(header, "SQLite", 6) == 0);
+    ASSERT_EQ(pj_ctx_ftell(ctx, fid), 6);
+    ASSERT_EQ(pj_ctx_fseek(ctx, fid, 0, SEEK_SET), 0);
+    ASSERT_EQ(pj_ctx_ftell(ctx, fid), 0);
+    pj_ctx_fclose(ctx, fid);
+    pj_ctx_free(ctx);
+    EXPECT_TRUE(spy.gotInMyFOpen);
+    EXPECT_TRUE(spy.gotInMyFRead);
+    EXPECT_TRUE(spy.gotInMyFSeek);
+    EXPECT_TRUE(spy.gotInMyFTell);
+    EXPECT_TRUE(spy.gotInMyFClose);
+}
 
 TEST(pj_transform_test, ob_tran_to_meter_as_srouce) {
     auto src = pj_init_plus("+ellps=WGS84 +proj=ob_tran +o_proj=latlon "

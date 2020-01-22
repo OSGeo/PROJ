@@ -7,7 +7,7 @@ TESTS = geodtest
 check_PROGRAMS = geodtest
 
 AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
-		-DMUTEX_@MUTEX_SETTING@ -I$(top_srcdir)/include @SQLITE3_CFLAGS@
+		-DMUTEX_@MUTEX_SETTING@ -I$(top_srcdir)/include @SQLITE3_CFLAGS@ @TIFF_CFLAGS@ @TIFF_ENABLED_FLAGS@ @CURL_CFLAGS@ @CURL_ENABLED_FLAGS@
 AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@
 
 include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesic.h \
@@ -43,7 +43,7 @@ geodtest_LDADD = libproj.la
 lib_LTLIBRARIES = libproj.la
 
 libproj_la_LDFLAGS = -no-undefined -version-info 18:0:3
-libproj_la_LIBADD = @SQLITE3_LIBS@
+libproj_la_LIBADD = @SQLITE3_LIBS@ @TIFF_LIBS@ @CURL_LIBS@
 
 libproj_la_SOURCES = \
 	pj_list.h proj_internal.h \
@@ -183,23 +183,22 @@ libproj_la_SOURCES = \
 	transformations/horner.cpp \
 	transformations/molodensky.cpp \
 	transformations/vgridshift.cpp \
+	transformations/xyzgridshift.cpp \
 	\
 	aasincos.cpp adjlon.cpp \
 	dmstor.cpp auth.cpp \
 	deriv.cpp ell_set.cpp ellps.cpp errno.cpp \
 	factors.cpp fwd.cpp init.cpp inv.cpp \
 	list.cpp malloc.cpp mlfn.cpp msfn.cpp proj_mdist.cpp \
-	open_lib.cpp param.cpp phi2.cpp pr_list.cpp \
+	param.cpp phi2.cpp pr_list.cpp \
 	qsfn.cpp strerrno.cpp \
 	tsfn.cpp units.cpp ctx.cpp log.cpp zpoly1.cpp rtodms.cpp \
 	release.cpp gauss.cpp \
 	fileapi.cpp \
 	\
-	gc_reader.cpp gridcatalog.cpp \
-	nad_cvt.cpp nad_init.cpp nad_intr.cpp \
-	apply_gridshift.cpp datums.cpp datum_set.cpp transform.cpp \
-	geocent.cpp geocent.h utils.cpp gridinfo.cpp gridlist.cpp \
-	mutex.cpp initcache.cpp apply_vgridshift.cpp geodesic.c \
+	datums.cpp datum_set.cpp transform.cpp \
+	geocent.cpp geocent.h utils.cpp \
+	mutex.cpp initcache.cpp geodesic.c \
 	strtod.cpp \
 	\
 	4D_api.cpp pipeline.cpp \
@@ -213,7 +212,15 @@ libproj_la_SOURCES = \
 	proj_json_streaming_writer.hpp \
 	proj_json_streaming_writer.cpp \
 	\
-	tracing.cpp
+	tracing.cpp \
+	\
+	grids.hpp \
+	grids.cpp \
+	filemanager.hpp \
+	filemanager.cpp \
+	networkfilemanager.cpp \
+	sqlite3_utils.hpp \
+	sqlite3_utils.cpp
 
 
 # The sed hack is to please MSVC

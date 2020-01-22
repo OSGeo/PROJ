@@ -14,6 +14,8 @@ In addition to the bundled init-files the PROJ project also distributes a number
 of packages containing transformation grids and additional init-files not included
 in the main PROJ package.
 
+.. _resource_file_paths:
+
 Where are PROJ resource files looked for ?
 -------------------------------------------------------------------------------
 
@@ -23,22 +25,42 @@ The following paths are checked in order:
 
 - For transformation grids that have an explict relative or absolute path,
   the directory specified in the grid filename.
+
 - Path resolved by the callback function set with
   the :c:func:`proj_context_set_file_finder`. If it is set, the next tests
   will not be run.
+
 - Path(s) set with the :c:func:`proj_context_set_search_paths`. If set, the
   next tests will not be run.
+
+.. _user_writable_directory:
+
+- The PROJ user writable directory, which is :
+
+    * on Windows, ${LOCALAPPDATA}/proj
+    * on MacOSX, ${HOME}/Library/Application Support/proj
+    * on other platforms (Linux), ${XDG_DATA_HOME}/proj if :envvar:`XDG_DATA_HOME`
+      is defined. Else ${HOME}/.local/share/proj
+
 - Path(s) set with by the environment variable :envvar:`PROJ_LIB`.
   On Linux/MacOSX/Unix, use ``:`` to separate paths. On Windows, ``;``
+
 - On Windows, the *..\\share\\proj\\* and its contents are found automatically
   at run-time if the installation respects the build structure. That is, the
   binaries and proj.dll are installed under *..\\bin\\*, and resource files
   are in *..\\share\\proj\\*.
+
 - A path built into PROJ as its resource installation directory (whose value is
   $(pkgdatadir)), for builds using the Makefile build system. Note, however,
   that since this is a hard-wired path setting, it only works if the whole
   PROJ installation is not moved somewhere else.
+
 - The current directory
+
+When networking capabilities are enabled, either by API with the
+:c:func:`proj_context_set_enable_network` function or when the
+:envvar:`PROJ_NETWORK` environment variable is set to ``ON``, PROJ will
+attempt to use remote grids stored on CDN (Content Delivery Network) storage.
 
 .. _proj-db:
 
@@ -48,6 +70,38 @@ proj.db
 A proj installation includes a SQLite database of transformation information
 that must be accessible for the library to work properly.  The library will
 print an error if the database can't be found.
+
+.. _proj-ini:
+
+proj.ini
+-------------------------------------------------------------------------------
+
+.. versionadded:: 7.0
+
+proj.ini is a text configuration file, mostly dedicated at setting up network
+related parameters.
+
+Its default content is:
+
+::
+
+    [general]
+    ; Lines starting by ; are commented lines.
+    ;
+
+    ; Network capabilities disabled by default.
+    ; Can be overriden with the PROJ_NETWORK=ON environment variable.
+    ; network = on
+
+    ; Can be overriden with the PROJ_NETWORK_ENDPOINT environment variable.
+    cdn_endpoint = https://cdn.proj.org
+
+    cache_enabled = on
+
+    cache_size_MB = 300
+
+    cache_ttl_sec = 86400
+
 
 Transformation grids
 -------------------------------------------------------------------------------

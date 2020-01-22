@@ -35,6 +35,9 @@ GTX format. Both grids are expected to contain grid-values in units of
 mm/year. GDAL both reads and writes both file formats. Using GDAL for
 construction of new grids is recommended.
 
+Starting with PROJ 7.0, use of a GeoTIFF format is recommended to store both
+the horizontal and vertical velocities.
+
 Example
 -------------------------------------------------------------------------------
 
@@ -89,12 +92,14 @@ Parameters
 
 .. option:: +xy_grids=<list>
 
-    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
+    Comma-separated list of grids to load. If a grid is prefixed by an ``@`` the
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
-    Grids for the horizontla component of a deformation model is expected to be
+    Grids for the horizontal component of a deformation model is expected to be
     in CTable2 format.
+
+    .. note:: :option:`+xy_grids` is mutually exclusive with :option:`+grids`
 
 .. option:: +z_grids=<list>
 
@@ -104,6 +109,36 @@ Parameters
 
     Grids for the vertical component of a deformation model is expected to be
     in either GTX format.
+
+    .. note:: :option:`+z_grids` is mutually exclusive with :option:`+grids`
+
+.. option:: +grids=<list>
+
+    .. versionadded:: 7.0.0
+
+    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
+    grid is considered optional and PROJ will the not complain if the grid is
+    not available.
+
+    Grids should be in GeoTIFF format with the first 3 components being
+    respectively the easting, northing and up velocities in mm/year.
+    Setting the Description and Unit Type GDAL band metadata items is strongly
+    recommended, so that gdalinfo reports:
+
+    ::
+
+        Band 1 Block=... Type=Float32, ColorInterp=Gray
+            Description = east_velocity
+            Unit Type: mm/year
+        Band 2 Block=... Type=Float32, ColorInterp=Undefined
+            Description = north_velocity
+            Unit Type: mm/year
+        Band 3 Block=... Type=Float32, ColorInterp=Undefined
+            Description = up_velocity
+            Unit Type: mm/year
+
+    .. note:: :option:`+grids` is mutually exclusive with :option:`+xy_grids`
+              and :option:`+z_grids`
 
 .. option:: +t_epoch=<value>
 

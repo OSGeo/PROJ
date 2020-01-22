@@ -198,6 +198,7 @@ set(SRC_LIBPROJ_TRANSFORMATIONS
   transformations/horner.cpp
   transformations/molodensky.cpp
   transformations/vgridshift.cpp
+  transformations/xyzgridshift.cpp
 )
 
 set(SRC_LIBPROJ_ISO19111
@@ -219,8 +220,6 @@ set(SRC_LIBPROJ_CORE
   4D_api.cpp
   aasincos.cpp
   adjlon.cpp
-  apply_gridshift.cpp
-  apply_vgridshift.cpp
   auth.cpp
   ctx.cpp
   datum_set.cpp
@@ -234,13 +233,9 @@ set(SRC_LIBPROJ_CORE
   fileapi.cpp
   fwd.cpp
   gauss.cpp
-  gc_reader.cpp
   geocent.cpp
   geocent.h
   geodesic.c
-  gridcatalog.cpp
-  gridinfo.cpp
-  gridlist.cpp
   init.cpp
   initcache.cpp
   internal.cpp
@@ -251,10 +246,6 @@ set(SRC_LIBPROJ_CORE
   mlfn.cpp
   msfn.cpp
   mutex.cpp
-  nad_cvt.cpp
-  nad_init.cpp
-  nad_intr.cpp
-  open_lib.cpp
   param.cpp
   phi2.cpp
   pipeline.cpp
@@ -285,6 +276,13 @@ set(SRC_LIBPROJ_CORE
   proj_json_streaming_writer.hpp
   proj_json_streaming_writer.cpp
   tracing.cpp
+  grids.hpp
+  grids.cpp
+  filemanager.hpp
+  filemanager.cpp
+  networkfilemanager.cpp
+  sqlite3_utils.hpp
+  sqlite3_utils.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
@@ -347,6 +345,10 @@ target_compile_options(${PROJ_CORE_TARGET}
   PRIVATE $<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>
   PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
 )
+
+if(MSVC OR MINGW)
+    target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DNOMINMAX)
+endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to stop the
 # compiler from ignoring parentheses in expressions like (a + b) + c and from
@@ -419,8 +421,18 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
   target_link_libraries(${PROJ_CORE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-include_directories(${SQLITE3_INCLUDE_DIR})
+target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${SQLITE3_INCLUDE_DIR})
 target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
+
+if(NOT DISABLE_TIFF)
+  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${TIFF_INCLUDE_DIR})
+  target_link_libraries(${PROJ_CORE_TARGET} ${TIFF_LIBRARY})
+endif()
+
+if(CURL_FOUND)
+  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${CURL_INCLUDE_DIR})
+  target_link_libraries(${PROJ_CORE_TARGET} ${CURL_LIBRARY})
+endif()
 
 if(MSVC AND BUILD_LIBPROJ_SHARED)
   target_compile_definitions(${PROJ_CORE_TARGET}

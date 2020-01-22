@@ -832,6 +832,7 @@ class PROJ_GCC_DLL DatabaseContext {
                                               bool &inverse) const;
 
     PROJ_DLL bool lookForGridInfo(const std::string &projFilename,
+                                  bool considerKnownGridsAsAvailable,
                                   std::string &fullFilename,
                                   std::string &packageName, std::string &url,
                                   bool &directDownload, bool &openLicense,
@@ -1055,7 +1056,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
         const std::string &targetCRSAuthName, const std::string &targetCRSCode,
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-        bool discardSuperseded, bool tryReverseOrder = false,
+        bool considerKnownGridsAsAvailable, bool discardSuperseded,
+        bool tryReverseOrder = false,
         bool reportOnlyIntersectingTransformations = false,
         const metadata::ExtentPtr &intersectingExtent1 = nullptr,
         const metadata::ExtentPtr &intersectingExtent2 = nullptr) const;
@@ -1065,7 +1067,7 @@ class PROJ_GCC_DLL AuthorityFactory {
         const std::string &sourceCRSAuthName, const std::string &sourceCRSCode,
         const std::string &targetCRSAuthName, const std::string &targetCRSCode,
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-        bool discardSuperseded,
+        bool considerKnownGridsAsAvailable, bool discardSuperseded,
         const std::vector<std::pair<std::string, std::string>>
             &intermediateCRSAuthCodes,
         ObjectType allowedIntermediateObjectType = ObjectType::CRS,
@@ -1131,7 +1133,7 @@ class PROJ_GCC_DLL AuthorityFactory {
         const std::string &sourceCRSCode, const crs::CRSNNPtr &targetCRS,
         const std::string &targetCRSAuthName, const std::string &targetCRSCode,
         bool usePROJAlternativeGridNames, bool discardIfMissingGrid,
-        bool discardSuperseded,
+        bool considerKnownGridsAsAvailable, bool discardSuperseded,
         const std::vector<std::string> &allowedAuthorities,
         const metadata::ExtentPtr &intersectingExtent1,
         const metadata::ExtentPtr &intersectingExtent2) const;

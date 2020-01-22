@@ -1617,34 +1617,34 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                 DatabaseContext::create(m_ctxt), "OTHER");
             auto res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
-                false, {});
+                false, false, {});
             EXPECT_EQ(res.size(), 1U);
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
 
             res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
-                false, {std::make_pair(std::string("NS_PIVOT"),
-                                       std::string("PIVOT"))});
+                false, false, {std::make_pair(std::string("NS_PIVOT"),
+                                              std::string("PIVOT"))});
             EXPECT_EQ(res.size(), 1U);
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
 
             res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
-                false, {std::make_pair(std::string("NS_PIVOT"),
-                                       std::string("NOT_EXISTING"))});
+                false, false, {std::make_pair(std::string("NS_PIVOT"),
+                                              std::string("NOT_EXISTING"))});
             EXPECT_EQ(res.size(), 0U);
 
             res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
-                false,
+                false, false,
                 {std::make_pair(std::string("BAD_NS"), std::string("PIVOT"))});
             EXPECT_EQ(res.size(), 0U);
 
             res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_TARGET", "TARGET", "NS_SOURCE", "SOURCE", false, false,
-                false, {});
+                false, false, {});
             EXPECT_EQ(res.size(), 1U);
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
@@ -1654,7 +1654,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                 DatabaseContext::create(m_ctxt), std::string());
             auto res = factory->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
-                false, {});
+                false, false, {});
             EXPECT_EQ(res.size(), 1U);
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
@@ -1833,7 +1833,7 @@ TEST(factory, AuthorityFactory_createFromCoordinateReferenceSystemCodes) {
     {
         // Test removal of superseded transform
         auto list = factory->createFromCoordinateReferenceSystemCodes(
-            "EPSG", "4179", "EPSG", "4258", false, false, true);
+            "EPSG", "4179", "EPSG", "4258", false, false, false, true);
         ASSERT_EQ(list.size(), 2U);
         // Romania has a larger area than Poland (given our approx formula)
         EXPECT_EQ(list[0]->getEPSGCode(), 15994); // Romania - 3m
@@ -1851,12 +1851,12 @@ TEST(
 
     {
         auto res = factory->createFromCoordinateReferenceSystemCodes(
-            "EPSG", "4326", "EPSG", "32631", false, false, false);
+            "EPSG", "4326", "EPSG", "32631", false, false, false, false);
         ASSERT_EQ(res.size(), 1U);
     }
     {
         auto res = factory->createFromCoordinateReferenceSystemCodes(
-            "EPSG", "4209", "EPSG", "4326", false, false, false);
+            "EPSG", "4209", "EPSG", "4326", false, false, false, false);
         EXPECT_TRUE(!res.empty());
         for (const auto &conv : res) {
             EXPECT_TRUE(conv->sourceCRS()->getEPSGCode() == 4209);
@@ -1889,7 +1889,8 @@ TEST_F(FactoryWithTmpDatabase,
         DatabaseContext::create(m_ctxt), std::string());
     {
         auto res = factoryGeneral->createFromCoordinateReferenceSystemCodes(
-            "OTHER", "OTHER_4326", "OTHER", "OTHER_32631", false, false, false);
+            "OTHER", "OTHER_4326", "OTHER", "OTHER_32631", false, false, false,
+            false);
         ASSERT_EQ(res.size(), 1U);
     }
 
@@ -1897,7 +1898,8 @@ TEST_F(FactoryWithTmpDatabase,
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "EPSG");
     {
         auto res = factoryEPSG->createFromCoordinateReferenceSystemCodes(
-            "OTHER", "OTHER_4326", "OTHER", "OTHER_32631", false, false, false);
+            "OTHER", "OTHER_4326", "OTHER", "OTHER_32631", false, false, false,
+            false);
         ASSERT_EQ(res.size(), 1U);
     }
 
@@ -1919,17 +1921,17 @@ TEST_F(FactoryWithTmpDatabase,
         << last_error();
     {
         auto res = factoryGeneral->createFromCoordinateReferenceSystemCodes(
-            "EPSG", "4326", "OTHER", "OTHER_4326", false, false, false);
+            "EPSG", "4326", "OTHER", "OTHER_4326", false, false, false, false);
         ASSERT_EQ(res.size(), 1U);
     }
     {
         auto res = factoryEPSG->createFromCoordinateReferenceSystemCodes(
-            "EPSG", "4326", "OTHER", "OTHER_4326", false, false, false);
+            "EPSG", "4326", "OTHER", "OTHER_4326", false, false, false, false);
         ASSERT_EQ(res.size(), 0U);
     }
     {
         auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
-            "EPSG", "4326", "OTHER", "OTHER_4326", false, false, false);
+            "EPSG", "4326", "OTHER", "OTHER_4326", false, false, false, false);
         ASSERT_EQ(res.size(), 1U);
     }
 }
@@ -1982,7 +1984,7 @@ TEST_F(FactoryWithTmpDatabase,
     auto factoryOTHER =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
     auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
-        "EPSG", "4326", "EPSG", "4326", false, false, false);
+        "EPSG", "4326", "EPSG", "4326", false, false, false, false);
     ASSERT_EQ(res.size(), 3U);
     EXPECT_EQ(*(res[0]->name()->description()), "TRANSFORMATION_1M");
     EXPECT_EQ(*(res[1]->name()->description()), "TRANSFORMATION_10M");
@@ -2001,7 +2003,7 @@ TEST_F(
     auto factory = AuthorityFactory::create(DatabaseContext::create(m_ctxt),
                                             std::string());
     auto res = factory->createFromCRSCodesWithIntermediates(
-        "EPSG", "4326", "EPSG", "4326", false, false, false, {});
+        "EPSG", "4326", "EPSG", "4326", false, false, false, false, {});
     EXPECT_EQ(res.size(), 0U);
 }
 
@@ -2085,7 +2087,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
     auto factoryOTHER =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
     auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
-        "EPSG", "4326", "EPSG", "4326", false, false, false);
+        "EPSG", "4326", "EPSG", "4326", false, false, false, false);
     ASSERT_EQ(res.size(), 1U);
     EXPECT_EQ(res[0]->nameStr(), "My PROJ string based op");
     EXPECT_EQ(res[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -2146,7 +2148,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
     auto factoryOTHER =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
     auto res = factoryOTHER->createFromCoordinateReferenceSystemCodes(
-        "EPSG", "4326", "EPSG", "4326", false, false, false);
+        "EPSG", "4326", "EPSG", "4326", false, false, false, false);
     ASSERT_EQ(res.size(), 1U);
     EXPECT_EQ(res[0]->nameStr(), "My WKT string based op");
     EXPECT_EQ(res[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -2180,9 +2182,10 @@ TEST_F(FactoryWithTmpDatabase,
 
     auto factoryOTHER =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
-    EXPECT_THROW(factoryOTHER->createFromCoordinateReferenceSystemCodes(
-                     "EPSG", "4326", "EPSG", "4326", false, false, false),
-                 FactoryException);
+    EXPECT_THROW(
+        factoryOTHER->createFromCoordinateReferenceSystemCodes(
+            "EPSG", "4326", "EPSG", "4326", false, false, false, false),
+        FactoryException);
 }
 
 // ---------------------------------------------------------------------------
@@ -2207,9 +2210,10 @@ TEST_F(FactoryWithTmpDatabase,
 
     auto factoryOTHER =
         AuthorityFactory::create(DatabaseContext::create(m_ctxt), "OTHER");
-    EXPECT_THROW(factoryOTHER->createFromCoordinateReferenceSystemCodes(
-                     "EPSG", "4326", "EPSG", "4326", false, false, false),
-                 FactoryException);
+    EXPECT_THROW(
+        factoryOTHER->createFromCoordinateReferenceSystemCodes(
+            "EPSG", "4326", "EPSG", "4326", false, false, false, false),
+        FactoryException);
 }
 
 // ---------------------------------------------------------------------------
@@ -2262,7 +2266,7 @@ TEST_F(FactoryWithTmpDatabase, lookForGridInfo) {
     bool openLicense = false;
     bool gridAvailable = false;
     EXPECT_TRUE(DatabaseContext::create(m_ctxt)->lookForGridInfo(
-        "PROJ_fake_grid", fullFilename, packageName, url, directDownload,
+        "PROJ_fake_grid", false, fullFilename, packageName, url, directDownload,
         openLicense, gridAvailable));
     EXPECT_TRUE(fullFilename.empty());
     EXPECT_TRUE(packageName.empty());
