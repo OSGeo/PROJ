@@ -80,6 +80,10 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1224','Taiwan Vertical Datum 2001',N
 INSERT INTO "vertical_datum" VALUES('EPSG','1226','Datum Altimetrico de Costa Rica 1952',NULL,NULL,'EPSG','3232','1952-01-01',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1250','IGN 2008 LD',NULL,NULL,'EPSG','2893','2008-01-01',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1256','Canadian Geodetic Vertical Datum of 2013 (CGG2013a)',NULL,NULL,'EPSG','1061','2015-12-05',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1260','Sistema de Referencia Vertical Nacional 2016',NULL,NULL,'EPSG','4573','2013-01-01',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1261','European Vertical Reference Frame 2000 Austria',NULL,NULL,'EPSG','1037',NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1262','South Africa Land Levelling Datum',NULL,NULL,'EPSG','3309','2010-05-11',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1269','Kingdom of Saudi Arabia Vertical Reference Frame Jeddah 2014',NULL,NULL,'EPSG','3303','2014-10-01',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,'EPSG','1262',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,NULL,'EPSG','2792',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5102','National Geodetic Vertical Datum 1929',NULL,NULL,'EPSG','1323','1929-01-01',0);
