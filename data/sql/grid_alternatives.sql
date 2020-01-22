@@ -2030,6 +2030,26 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
+-- WARNING: this builds the new entries from the above deprecated ones
+-- A check has been added in commit.sql to verify that a mapping from
+-- auckht1946-nzvd2016.gtx exists in this table, due to the below insert
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                       SELECT proj_grid_name,
+                              proj_grid_name, 'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL
+                       FROM grid_alternatives
+                       WHERE proj_grid_name LIKE '%-nzvd2016.gtx';
+
+-- Superseded
 INSERT INTO grid_alternatives(original_grid_name,
                               proj_grid_name,
                               proj_grid_format,
@@ -2052,6 +2072,22 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
+                      VALUES ('nzgeoid2016.gtx',
+                              'nzgeoid2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+-- Superseded
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
                       VALUES ('nzgeoid09.sid',
                               'nzgeoid2009.gtx',
                               'GTX',
@@ -2060,4 +2096,17 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
-
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('nzgeoid2009.gtx',
+                              'nzgeoid2009.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);

@@ -65,8 +65,7 @@ CREATE TABLE area(
     east_lon FLOAT CHECK (east_lon BETWEEN -180 AND 180),
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_area PRIMARY KEY (auth_name, code),
-    CONSTRAINT check_area_lat CHECK (south_lat <= north_lat),
-    CONSTRAINT check_area_lon CHECK (west_lon <= east_lon OR (east_lon + 360 - west_lon <= 200))
+    CONSTRAINT check_area_lat CHECK (south_lat <= north_lat)
 );
 
 CREATE TABLE prime_meridian(
@@ -1106,7 +1105,6 @@ CREATE TABLE grid_alternatives(
     CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift')),
     CONSTRAINT check_grid_alternatives_not_hgridshift CHECK (NOT(proj_method != 'hgridshift' AND proj_grid_format IN ('CTable2', 'NTv1', 'NTv2'))),
     CONSTRAINT check_grid_alternatives_not_vgridshift CHECK (NOT(proj_method != 'vgridshift' AND proj_grid_format IN ('GTX'))),
-    CONSTRAINT check_grid_alternatives_original_grid_name CHECK (NOT(original_grid_name = proj_grid_name AND inverse_direction != 0)),
     CONSTRAINT check_grid_alternatives_package_name_url CHECK (NOT(package_name IS NOT NULL AND url IS NOT NULL)),
     CONSTRAINT check_grid_alternatives_direct_download_url CHECK (NOT(direct_download IS NULL AND url IS NOT NULL)),
     CONSTRAINT check_grid_alternatives_open_license_url CHECK (NOT(open_license IS NULL AND url IS NOT NULL))

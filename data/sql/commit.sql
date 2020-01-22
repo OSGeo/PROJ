@@ -132,6 +132,11 @@ FOR EACH ROW BEGIN
         WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID12B');
     SELECT RAISE(ABORT, 'missing GEOID18 in geoid_model')
         WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID18');
+
+    -- check presence of NZ height shift grids
+    SELECT RAISE(ABORT, 'missing NZ height shift grids')
+        WHERE NOT EXISTS(SELECT 1 FROM grid_alternatives WHERE original_grid_name = 'auckht1946-nzvd2016.gtx');
+
 END;
 INSERT INTO dummy DEFAULT VALUES;
 DROP TRIGGER final_checks;

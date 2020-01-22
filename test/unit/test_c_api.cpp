@@ -3333,9 +3333,11 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         ASSERT_NE(list, nullptr);
         EXPECT_GT(result_count, 1);
         for (int i = 0; i < result_count; i++) {
-            EXPECT_LE(list[i]->west_lon_degree, params->west_lon_degree);
+            if (list[i]->west_lon_degree < list[i]->east_lon_degree) {
+                EXPECT_LE(list[i]->west_lon_degree, params->west_lon_degree);
+                EXPECT_GE(list[i]->east_lon_degree, params->east_lon_degree);
+            }
             EXPECT_LE(list[i]->south_lat_degree, params->south_lat_degree);
-            EXPECT_GE(list[i]->east_lon_degree, params->east_lon_degree);
             EXPECT_GE(list[i]->north_lat_degree, params->north_lat_degree);
         }
         proj_get_crs_list_parameters_destroy(params);
@@ -3360,9 +3362,11 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         ASSERT_NE(list, nullptr);
         EXPECT_GT(result_count, 1);
         for (int i = 0; i < result_count; i++) {
-            EXPECT_LE(list[i]->west_lon_degree, params->east_lon_degree);
+            if (list[i]->west_lon_degree < list[i]->east_lon_degree) {
+                EXPECT_LE(list[i]->west_lon_degree, params->west_lon_degree);
+                EXPECT_GE(list[i]->east_lon_degree, params->east_lon_degree);
+            }
             EXPECT_LE(list[i]->south_lat_degree, params->north_lat_degree);
-            EXPECT_GE(list[i]->east_lon_degree, params->west_lon_degree);
             EXPECT_GE(list[i]->north_lat_degree, params->south_lat_degree);
         }
         proj_get_crs_list_parameters_destroy(params);

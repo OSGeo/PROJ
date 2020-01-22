@@ -511,10 +511,14 @@
 /* ------------------------------------------------------------------------ */
 
 #define EPSG_CODE_METHOD_VERTCON 9658
-#define EPSG_NAME_METHOD_VERTCON "VERTCON"
+#define EPSG_NAME_METHOD_VERTCON_OLDNAME "VERTCON"
+#define EPSG_NAME_METHOD_VERTCON "Vertical Offset by Grid Interpolation (VERTCON)"
 
 #define EPSG_CODE_METHOD_VERTICALGRID_NZLVD 1071
 #define EPSG_NAME_METHOD_VERTICALGRID_NZLVD "Vertical Offset by Grid Interpolation (NZLVD)"
+
+#define EPSG_CODE_METHOD_VERTICALGRID_GTX 1084
+#define EPSG_NAME_METHOD_VERTICALGRID_GTX "Vertical Offset by Grid Interpolation (gtx)"
 
 #define EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE "Vertical offset file"
 #define EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE 8732
