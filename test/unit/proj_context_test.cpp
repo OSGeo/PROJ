@@ -159,18 +159,19 @@ TEST(proj_context, read_grid_from_user_writable_directory) {
     auto filename = path + DIR_CHAR + "temp_proj_dic3";
     EXPECT_TRUE(createTmpFile(filename));
     {
-        // Check that with PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES (set by
+        // Check that with PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES (set by
         // calling script), we cannot find the file
         auto P = proj_create(ctx, "+init=temp_proj_dic3:MY_PIPELINE");
         EXPECT_EQ(P, nullptr);
         proj_destroy(P);
     }
     {
-        // Cancel the effect of PROJ_IGNORE_USER_WRITABLE_DIRECTORY
-        putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY="));
+        // Cancel the effect of PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY
+        putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY="));
         auto P = proj_create(ctx, "+init=temp_proj_dic3:MY_PIPELINE");
         EXPECT_NE(P, nullptr);
-        putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES"));
+        putenv(
+            const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"));
         proj_destroy(P);
     }
     proj_context_destroy(ctx);

@@ -14,6 +14,8 @@ In addition to the bundled init-files the PROJ project also distributes a number
 of packages containing transformation grids and additional init-files not included
 in the main PROJ package.
 
+.. _resource_file_paths:
+
 Where are PROJ resource files looked for ?
 -------------------------------------------------------------------------------
 
@@ -31,10 +33,12 @@ The following paths are checked in order:
 - Path(s) set with the :c:func:`proj_context_set_search_paths`. If set, the
   next tests will not be run.
 
+.. _user_writable_directory:
+
 - The PROJ user writable directory, which is :
 
     * on Windows, ${LOCALAPPDATA}/proj
-    * on MacOSX, ${HOME}/Library/Logs/proj
+    * on MacOSX, ${HOME}/Library/Application Support/proj
     * on other platforms (Linux), ${XDG_DATA_HOME}/proj if :envvar:`XDG_DATA_HOME`
       is defined. Else ${HOME}/.local/share/proj
 

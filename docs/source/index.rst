@@ -17,6 +17,7 @@ PROJ
    resource_files
    geodesic
    development/index
+   specifications/index
    community/index
    faq
    glossary

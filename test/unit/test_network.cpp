@@ -1577,7 +1577,7 @@ TEST(networking, download_whole_files) {
     unlink("proj_test_tmp/dvr90.tif");
     rmdir("proj_test_tmp");
 
-    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY="));
+    putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY="));
     putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY=./proj_test_tmp"));
     putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE=100000"));
     auto ctx = proj_context_create();
@@ -1699,7 +1699,7 @@ TEST(networking, download_whole_files) {
     ASSERT_EQ(vectPct.back().second, 1.0);
 
     proj_context_destroy(ctx);
-    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES"));
+    putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"));
     putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY="));
     putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE="));
     unlink("proj_test_tmp/cache.db");
@@ -1719,7 +1719,7 @@ TEST(networking, file_api) {
     unlink("proj_test_tmp/dvr90.tif");
     rmdir("proj_test_tmp");
 
-    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY="));
+    putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY="));
     putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY=./proj_test_tmp"));
     putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE=30000"));
     auto ctx = proj_context_create();
@@ -1843,7 +1843,7 @@ TEST(networking, file_api) {
     ASSERT_TRUE(userData.in_seek);
 
     proj_context_destroy(ctx);
-    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES"));
+    putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES"));
     putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY="));
     putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE="));
     unlink("proj_test_tmp/cache.db");

@@ -682,7 +682,7 @@ struct projGridChunkCache
 {
     bool enabled = true;
     std::string filename{};
-    long long max_size = 100 * 1024 * 1024;
+    long long max_size = 300 * 1024 * 1024;
     int ttl = 86400; // 1 day
 };
 

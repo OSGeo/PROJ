@@ -1837,17 +1837,20 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
         pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return nullptr;
     }
-    if (memcmp(header + 56, "SECONDS", 7) != 0) {
+
+    constexpr int OFFSET_GS_TYPE = 56;
+    if (memcmp(header + OFFSET_GS_TYPE, "SECONDS", 7) != 0) {
         pj_log(ctx, PJ_LOG_ERROR, "Only GS_TYPE=SECONDS is supported");
         pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
         return nullptr;
     }
 
     const bool must_swap = (header[8] == 11) ? !IS_LSB : IS_LSB;
+    constexpr int OFFSET_NUM_SUBFILES = 8 + 32;
     if (must_swap) {
         // swap_words( header+8, 4, 1 );
         // swap_words( header+8+16, 4, 1 );
-        swap_words(header + 8 + 32, 4, 1);
+        swap_words(header + OFFSET_NUM_SUBFILES, 4, 1);
         // swap_words( header+8+7*16, 8, 1 );
         // swap_words( header+8+8*16, 8, 1 );
         // swap_words( header+8+9*16, 8, 1 );
@@ -1858,7 +1861,7 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
     /*      Get the subfile count out ... all we really use for now.        */
     /* -------------------------------------------------------------------- */
     unsigned int num_subfiles;
-    memcpy(&num_subfiles, header + 8 + 32, 4);
+    memcpy(&num_subfiles, header + OFFSET_NUM_SUBFILES, 4);
 
     std::map<std::string, NTv2Grid *> mapGrids;
 
@@ -1878,25 +1881,31 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
         }
 
         // Byte swap interesting fields if needed.
+        constexpr int OFFSET_GS_COUNT = 8 + 16 * 10;
+        constexpr int OFFSET_SOUTH_LAT = 8 + 16 * 4;
         if (must_swap) {
-            swap_words(header + 8 + 16 * 4, sizeof(double), 6);
-            swap_words(header + 8 + 16 * 10, sizeof(int), 1);
+            // 6 double values: southLat, northLat, eastLon, westLon, resLat,
+            // resLon
+            swap_words(header + OFFSET_SOUTH_LAT, sizeof(double), 6);
+            swap_words(header + OFFSET_GS_COUNT, sizeof(int), 1);
         }
 
         std::string gridName;
         gridName.append(header + 8, 8);
 
         ExtentAndRes extent;
-        extent.westLon =
-            -to_double(header + 7 * 16 + 8) * DEG_TO_RAD / 3600.0; /* W_LONG */
-        extent.southLat =
-            to_double(header + 4 * 16 + 8) * DEG_TO_RAD / 3600.0; /* S_LAT */
-        extent.eastLon =
-            -to_double(header + 6 * 16 + 8) * DEG_TO_RAD / 3600.0; /* E_LONG */
-        extent.northLat =
-            to_double(header + 5 * 16 + 8) * DEG_TO_RAD / 3600.0; /* N_LAT */
-        extent.resLon = to_double(header + 9 * 16 + 8) * DEG_TO_RAD / 3600.0;
-        extent.resLat = to_double(header + 8 * 16 + 8) * DEG_TO_RAD / 3600.0;
+        extent.southLat = to_double(header + OFFSET_SOUTH_LAT) * DEG_TO_RAD /
+                          3600.0; /* S_LAT */
+        extent.northLat = to_double(header + OFFSET_SOUTH_LAT + 16) *
+                          DEG_TO_RAD / 3600.0; /* N_LAT */
+        extent.eastLon = -to_double(header + OFFSET_SOUTH_LAT + 16 * 2) *
+                         DEG_TO_RAD / 3600.0; /* E_LONG */
+        extent.westLon = -to_double(header + OFFSET_SOUTH_LAT + 16 * 3) *
+                         DEG_TO_RAD / 3600.0; /* W_LONG */
+        extent.resLat =
+            to_double(header + OFFSET_SOUTH_LAT + 16 * 4) * DEG_TO_RAD / 3600.0;
+        extent.resLon =
+            to_double(header + OFFSET_SOUTH_LAT + 16 * 5) * DEG_TO_RAD / 3600.0;
 
         if (!(fabs(extent.westLon) <= 4 * M_PI &&
               fabs(extent.eastLon) <= 4 * M_PI &&
@@ -1923,7 +1932,7 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
                extent.northLat * RAD_TO_DEG);
 
         unsigned int gs_count;
-        memcpy(&gs_count, header + 8 + 16 * 10, 4);
+        memcpy(&gs_count, header + OFFSET_GS_COUNT, 4);
         if (gs_count / columns != static_cast<unsigned>(rows)) {
             pj_log(ctx, PJ_LOG_ERROR,
                    "GS_COUNT(%u) does not match expected cells (%dx%d)",
@@ -2845,6 +2854,7 @@ ListOfHGrids pj_hgrid_init(PJ *P, const char *gridkey) {
 
 typedef struct { pj_int32 lam, phi; } ILP;
 
+// Apply bilinear interpolation for horizontal shift grids
 static PJ_LP pj_hgrid_interpolate(PJ_LP t, const HorizontalShiftGrid *grid,
                                   bool compensateNTConvention) {
     PJ_LP val, frct;
@@ -3283,6 +3293,8 @@ const GenericShiftGrid *pj_find_generic_grid(const ListOfGenericGrids &grids,
 
 // ---------------------------------------------------------------------------
 
+// Used by +proj=deformation and +proj=xyzgridshift to do bilinear interpolation
+// on 3 sample values per node.
 bool pj_bilinear_interpolation_three_samples(const GenericShiftGrid *grid,
                                              const PJ_LP &lp, int idx1,
                                              int idx2, int idx3, double &v1,
