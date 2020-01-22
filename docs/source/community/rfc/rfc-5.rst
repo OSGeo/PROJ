@@ -47,6 +47,13 @@ Summary of work planned by this RFC and related decisions
   split the monolothic package in smaller ones, based on criterion related to
   the country.
 
+  The agency name is the one you can see from the directory names at
+  https://github.com/OSGeo/proj-datumgrid-geotiff/.
+  ``${agency_name}`` itself is structure like ``${two_letter_country_code_of_agency_nationality}_${some_abbreviation}``
+  (with the exception of eur_nkg, for the Nordic Geodetic Commission which
+  isn't affiliated to a single country but to some european countries, and
+  follows the general scheme)
+
 - https://github.com/OSGeo/proj-datumgrid and related packages will only be
   maintained during the remaining lifetime of PROJ 6.x. After that, the
   repository will no longer receive any update and will be put in archiving
@@ -66,6 +73,10 @@ Summary of work planned by this RFC and related decisions
   ``grid_alternatives`` table will be done to retrieve the potential new name
   (GeoTIFF file), and if there's such match, a new look-up in the file system
   will be done with the name of this GeoTIFF file.
+
+- The ``package_name`` column of grid_alternatives will no longer be filled.
+  And ``url`` will be filled with the direct URL to the grid in the CDN, for
+  example: https://cdn.proj.org/fr_ign_ntf_r93.tif
 
 - The Python scripts to convert grids (NTv2, GTX) to GeoTIFF currently available at
   https://github.com/rouault/sample_proj_gtiff_grids/ will be moved to a
