@@ -3,13 +3,8 @@
 #
 
 function(proj_test_set_properties TESTNAME)
-    if(MSVC)
-        set_tests_properties( ${TESTNAME}
-            PROPERTIES ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data\\;${PROJECT_SOURCE_DIR}/data")
-    else()
-        set_tests_properties( ${TESTNAME}
-            PROPERTIES ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data:${PROJECT_SOURCE_DIR}/data")
-    endif()
+    set_tests_properties( ${TESTNAME}
+        PROPERTIES ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data/for_tests")
 endfunction()
 
 function(proj_add_test_script_sh SH_NAME BIN_USE)
@@ -36,6 +31,7 @@ function(proj_add_test_script_sh SH_NAME BIN_USE)
         COMMAND ${PROJECT_SOURCE_DIR}/test/cli/${SH_NAME}
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${${BIN_USE}}
       )
+
       proj_test_set_properties(${testname})
     endif()
 
@@ -52,7 +48,6 @@ function(proj_add_gie_test TESTNAME TESTCASE)
       COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GIE_BIN}
       ${TESTFILE}
     )
-
     proj_test_set_properties(${TESTNAME})
 
 endfunction()

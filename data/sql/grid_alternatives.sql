@@ -10,32 +10,32 @@
 
 INSERT INTO grid_packages VALUES ('proj-datumgrid',
                                   'Package with grids of general interest',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-1.8.zip',
                                   1,
                                   1);
 
 INSERT INTO grid_packages VALUES ('proj-datumgrid-north-america',
                                   'Package with grids of interest for North-America',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-north-america-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-north-america-1.3.zip',
                                   1,
                                   1);
 
 INSERT INTO grid_packages VALUES ('proj-datumgrid-europe',
                                   'Package with grids of interest for Europe',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-europe-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-europe-1.5.zip',
                                   1,
                                   1);
 
 INSERT INTO grid_packages VALUES ('proj-datumgrid-oceania',
                                   'Package with grids of interest for Oceania',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-oceania-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-oceania-1.1.zip',
                                   1,
                                   1);
 
  -- not released yet at the time of writing
 INSERT INTO grid_packages VALUES ('proj-datumgrid-world',
                                   'Package with grids of global extent (too large to be included in proj-datumgrid)',
-                                  'https://download.osgeo.org/proj/proj-datumgrid-world-latest.zip',
+                                  'https://download.osgeo.org/proj/proj-datumgrid-world-1.0.zip',
                                   1,
                                   1);
 
@@ -110,6 +110,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
+                      VALUES ('May76v20.gsb',
+                              'MAY76V20.gsb', -- just a case change
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
                       VALUES ('BETA2007.gsb',
                               'BETA2007.gsb', -- no change. Just document the package
                               'NTv2',
@@ -127,6 +142,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               url, direct_download, open_license, directory)
                       VALUES ('BWTA2017.gsb',
                               'BWTA2017.gsb', -- no change. Just document the package
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('SeTa2016.gsb',
+                              'SeTa2016.gsb', -- no change. Just document the package
                               'NTv2',
                               'hgridshift',
                               0,
@@ -854,6 +884,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
+                    VALUES ('gg10_smv2.mnt',
+                            'gg10_smv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
                     VALUES ('gg10_ls.txt',
                             'RALS2016.gtx',
                             'GTX',
@@ -915,6 +960,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('gg10_sb.txt',
+                            'gg10_sbv2.gtx',
+                            'GTX',
+                            'vgridshift',
+                            1,
+                            'proj-datumgrid-europe',
+                            NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                            proj_grid_name,
+                            proj_grid_format,
+                            proj_method,
+                            inverse_direction,
+                            package_name,
+                            url, direct_download, open_license, directory)
+                    VALUES ('gg10_sbv2.mnt',
                             'gg10_sbv2.gtx',
                             'GTX',
                             'vgridshift',
@@ -1106,6 +1166,22 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+    SELECT grid_name,
+           'AUSGeoid98.gtx',
+           'GTX',
+           'vgridshift',
+           1,
+           'proj-datumgrid-oceania',
+           NULL, NULL, NULL, NULL FROM grid_transformation WHERE
+                grid_name LIKE '%DAT.htm' AND name LIKE 'GDA94 to AHD height%';
+
 -- Netherlands / RDNAP (non-free grids)
 
 INSERT INTO grid_alternatives(original_grid_name,
@@ -1187,6 +1263,23 @@ INSERT INTO grid_alternatives(original_grid_name,
                               url, direct_download, open_license, directory)
                       VALUES ('CHENyx06_ETRS.gsb',
                               'CHENyx06_ETRS.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+-- Spain
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('100800401.gsb',
+                              '100800401.gsb',
                               'NTv2',
                               'hgridshift',
                               0,
@@ -1429,8 +1522,38 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
+                      VALUES ('TOR27CSv1.GSB',
+                              'TO27CSv1.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
                       VALUES ('PE7783V2.gsb', -- case difference on extension !
                               'PE7783V2.GSB',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('NA27NA83.GSB',
+                              'na27na83.gsb',
                               'NTv2',
                               'hgridshift',
                               0,
@@ -1476,6 +1599,21 @@ INSERT INTO grid_alternatives(original_grid_name,
                               package_name,
                               url, direct_download, open_license, directory)
                       VALUES ('CQ77NA83.GSB',
+                              'cq77na83.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGQ77-98.gsb',
                               'CQ77SCRS.GSB',
                               'NTv2',
                               'hgridshift',
@@ -1543,3 +1681,383 @@ INSERT INTO grid_alternatives(original_grid_name,
                               0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('HT2_0.byn',
+                              'HT2_2010v70.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGG2013i08a.byn',
+                              'CGG2013ai08.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGG2013n83a.byn',
+                              'CGG2013an83.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGG2013i83.byn',
+                              'CGG2013i08.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('CGG2013n83.byn',
+                              'CGG2013n83.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-north-america',
+                              NULL, NULL, NULL, NULL);
+
+ -- Iceland
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('ISN93_ISN2016.gsb',
+                              'ISN93_ISN2016.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('ISN2004_ISN2016.gsb',
+                              'ISN2004_ISN2016.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('Icegeoid_ISN2004.gtx',
+                              'Icegeoid_ISN2004.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('Icegeoid_ISN93.gtx',
+                              'Icegeoid_ISN93.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('Icegeoid_ISN2016.gtx',
+                              'Icegeoid_ISN2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+-- New Zealand grid shift models.  EPSG names are not for GTX files (at time of writing)
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('auckland-1946-to-nzvd2016-conversion.csv',
+                              'auckht1946-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('bluff-1955-to-nzvd2016-conversion.csv',
+                              'blufht1955-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('dunedin-1958-to-nzvd2016-conversion.csv',
+                              'duneht1958-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('dunedin-bluff-1960-to-nzvd2016-conversion.csv',
+                              'dublht1960-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('gisborne-1926-to-nzvd2016-conversion.csv',
+                              'gisbht1926-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('lyttelton-1937-to-nzvd2016-conversion.csv',
+                              'lyttht1937-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('moturiki-1953-to-nzvd2016-conversion.csv',
+                              'motuht1953-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('napier-1962-to-nzvd2016-conversion.csv',
+                              'napiht1962-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('nelson-1955-to-nzvd2016-conversion.csv',
+                              'nelsht1955-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('onetreepoint-1964-to-nzvd2016-conversion.csv',
+                              'ontpht1964-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('stewartisland-1977-to-nzvd2016-conversion.csv',
+                              'stisht1977-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('taranaki-1970-to-nzvd2016-conversion.csv',
+                              'taraht1970-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('wellington-1953-to-nzvd2016-conversion.csv',
+                              'wellht1953-nzvd2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('New_Zealand_Quasigeoid_2016.csv',
+                              'nzgeoid2016.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('nzgeoid09.sid',
+                              'nzgeoid2009.gtx',
+                              'GTX',
+                              'vgridshift',
+                              1,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
+
+

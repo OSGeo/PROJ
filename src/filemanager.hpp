@@ -90,7 +90,8 @@ class File {
 
 // ---------------------------------------------------------------------------
 
-std::unique_ptr<File> pj_network_file_open(PJ_CONTEXT* ctx, const char* filename);
+std::unique_ptr<File> pj_network_file_open(PJ_CONTEXT *ctx,
+                                           const char *filename);
 
 NS_PROJ_END
 

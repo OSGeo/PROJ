@@ -1345,7 +1345,6 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 
     auto fp = FileManager::open_resource_file(ctx, filename.c_str());
     if (!fp) {
-        ctx->last_errno = 0; /* don't treat as a persistent error */
         return nullptr;
     }
     const auto actualName(fp->name());
@@ -2275,7 +2274,6 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 
     auto fp = FileManager::open_resource_file(ctx, filename.c_str());
     if (!fp) {
-        ctx->last_errno = 0; /* don't treat as a persistent error */
         return nullptr;
     }
     const auto actualName(fp->name());
@@ -2655,7 +2653,6 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 
     auto fp = FileManager::open_resource_file(ctx, filename.c_str());
     if (!fp) {
-        ctx->last_errno = 0; /* don't treat as a persistent error */
         return nullptr;
     }
     const auto actualName(fp->name());
@@ -2762,9 +2759,12 @@ ListOfGenericGrids pj_generic_grid_init(PJ *P, const char *gridkey) {
         auto gridSet = GenericShiftGridSet::open(P->ctx, gridname);
         if (!gridSet) {
             if (!canFail) {
-                pj_ctx_set_errno(P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+                if (proj_context_errno(P->ctx) != PJD_ERR_NETWORK_ERROR) {
+                    pj_ctx_set_errno(P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+                }
                 return {};
             }
+            pj_ctx_set_errno(P->ctx, 0); // don't treat as a persistent error
         } else {
             grids.emplace_back(std::move(gridSet));
         }
@@ -2803,9 +2803,12 @@ static ListOfHGrids getListOfGridSets(PJ_CONTEXT *ctx, const char *grids) {
         auto gridSet = HorizontalShiftGridSet::open(ctx, gridname);
         if (!gridSet) {
             if (!canFail) {
-                pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+                if (proj_context_errno(ctx) != PJD_ERR_NETWORK_ERROR) {
+                    pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+                }
                 return {};
             }
+            pj_ctx_set_errno(ctx, 0); // don't treat as a persistent error
         } else {
             list.emplace_back(std::move(gridSet));
         }
@@ -3228,9 +3231,12 @@ ListOfVGrids pj_vgrid_init(PJ *P, const char *gridkey) {
         auto gridSet = VerticalShiftGridSet::open(P->ctx, gridname);
         if (!gridSet) {
             if (!canFail) {
-                pj_ctx_set_errno(P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+                if (proj_context_errno(P->ctx) != PJD_ERR_NETWORK_ERROR) {
+                    pj_ctx_set_errno(P->ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+                }
                 return {};
             }
+            pj_ctx_set_errno(P->ctx, 0); // don't treat as a persistent error
         } else {
             grids.emplace_back(std::move(gridSet));
         }

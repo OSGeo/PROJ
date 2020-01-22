@@ -18,7 +18,7 @@ Where are PROJ resource files looked for ?
 -------------------------------------------------------------------------------
 
 PROJ will attempt to locate its resource files - database, transformation grids
-or init-files - from several dictionaries.
+or init-files - from several directories.
 The following paths are checked in order:
 
 - For transformation grids that have an explict relative or absolute path,

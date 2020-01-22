@@ -2051,12 +2051,27 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             auto res = authFactory->createObjectsFromName(
                 name, {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
                 true, 1);
-            bool foundDatumName = false;
             if (!res.empty()) {
+                bool foundDatumName = false;
                 const auto &refDatum = res.front();
                 if (metadata::Identifier::isEquivalentName(
                         name.c_str(), refDatum->nameStr().c_str())) {
                     foundDatumName = true;
+                } else if (refDatum->identifiers().size() == 1) {
+                    const auto &id = refDatum->identifiers()[0];
+                    const auto aliases =
+                        authFactory->databaseContext()->getAliases(
+                            *id->codeSpace(), id->code(), refDatum->nameStr(),
+                            "geodetic_datum", std::string());
+                    for (const auto &alias : aliases) {
+                        if (metadata::Identifier::isEquivalentName(
+                                name.c_str(), alias.c_str())) {
+                            foundDatumName = true;
+                            break;
+                        }
+                    }
+                }
+                if (foundDatumName) {
                     properties.set(IdentifiedObject::NAME_KEY,
                                    refDatum->nameStr());
                     if (!properties.get(Identifier::CODESPACE_KEY) &&
@@ -2083,23 +2098,10 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                             NN_NO_CHECK(dbContext_), *id->codeSpace());
                         auto dbDatum =
                             authFactory2->createGeodeticDatum(id->code());
-                        foundDatumName = true;
                         properties.set(IdentifiedObject::NAME_KEY,
                                        dbDatum->nameStr());
                     } catch (const std::exception &) {
                     }
-                }
-            }
-
-            if (!foundDatumName) {
-                std::string outTableName;
-                std::string authNameFromAlias;
-                std::string codeFromAlias;
-                auto officialName = authFactory->getOfficialNameFromAlias(
-                    name, "geodetic_datum", std::string(), true, outTableName,
-                    authNameFromAlias, codeFromAlias);
-                if (!officialName.empty()) {
-                    properties.set(IdentifiedObject::NAME_KEY, officialName);
                 }
             }
         }
@@ -2683,7 +2685,9 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
     auto cs = buildCS(csNode, node, angularUnit);
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
-        assert(!ci_equal(nodeName, WKTConstants::GEOCCS));
+        if (ci_equal(nodeName, WKTConstants::GEOCCS)) {
+            throw ParsingException("ellipsoidal CS not expected in GEOCCS");
+        }
         try {
             auto crs = GeographicCRS::create(props, datum, datumEnsemble,
                                              NN_NO_CHECK(ellipsoidalCS));
@@ -5669,13 +5673,18 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         DatabaseContextNNPtr dbContextNNPtr(NN_NO_CHECK(dbContext));
         const auto &authName = tokens[0];
         const auto &code = tokens[1];
-        static const std::string epsg_lowercase("epsg");
-        auto factory = AuthorityFactory::create(
-            dbContextNNPtr,
-            authName == epsg_lowercase ? Identifier::EPSG : authName);
+        auto factory = AuthorityFactory::create(dbContextNNPtr, authName);
         try {
             return factory->createCoordinateReferenceSystem(code);
         } catch (...) {
+
+            // Convenience for well-known misused code
+            // See https://github.com/OSGeo/PROJ/issues/1730
+            if (ci_equal(authName, "EPSG") && code == "102100") {
+                factory = AuthorityFactory::create(dbContextNNPtr, "ESRI");
+                return factory->createCoordinateReferenceSystem(code);
+            }
+
             const auto authorities = dbContextNNPtr->getAuthorities();
             for (const auto &authCandidate : authorities) {
                 if (ci_equal(authCandidate, authName)) {
@@ -7157,6 +7166,12 @@ void PROJStringFormatter::stopInversion() {
     // the current end of steps
     for (auto iter = startIter; iter != d->steps_.end(); ++iter) {
         iter->inverted = !iter->inverted;
+        for (auto &paramValue : iter->paramValues) {
+            if (paramValue.key == "omit_fwd")
+                paramValue.key = "omit_inv";
+            else if (paramValue.key == "omit_inv")
+                paramValue.key = "omit_fwd";
+        }
     }
     // And reverse the order of steps in that range as well.
     std::reverse(startIter, d->steps_.end());

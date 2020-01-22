@@ -116,9 +116,9 @@ int pj_ellipsoid (PJ *P) {
     if (0 != ellps_spherification (P))
         return 4;
 
-    proj_log_debug (P, "pj_ellipsoid - final: a=%.3f f=1/%7.3f, errno=%d",
+    proj_log_trace (P, "pj_ellipsoid - final: a=%.3f f=1/%7.3f, errno=%d",
                         P->a,  P->f!=0? 1/P->f: 0,  proj_errno (P));
-    proj_log_debug (P, "pj_ellipsoid - final: %s %s %s %s",
+    proj_log_trace (P, "pj_ellipsoid - final: %s %s %s %s",
                         P->def_size?           P->def_size: empty,
                         P->def_shape?          P->def_shape: empty,
                         P->def_spherification? P->def_spherification: empty,

@@ -493,18 +493,14 @@ TEST(wkt_parse, wkt1_geographic_old_datum_name_from_EPSG_code) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, wkt1_geographic_old_datum_name_witout_EPSG_code) {
+TEST(wkt_parse, wkt1_geographic_old_datum_name_without_EPSG_code) {
     auto wkt =
         "GEOGCS[\"S-JTSK (Ferro)\",\n"
         "    "
         "DATUM[\"System_Jednotne_Trigonometricke_Site_Katastralni_Ferro\",\n"
-        "        SPHEROID[\"Bessel 1841\",6377397.155,299.1528128,\n"
-        "            AUTHORITY[\"EPSG\",\"7004\"]]],\n"
-        "    PRIMEM[\"Ferro\",-17.66666666666667,\n"
-        "       AUTHORITY[\"EPSG\",\"8909\"]],\n"
-        "    UNIT[\"degree\",0.0174532925199433,\n"
-        "        AUTHORITY[\"EPSG\",\"9122\"]],\n"
-        "    AUTHORITY[\"EPSG\",\"4818\"]]";
+        "        SPHEROID[\"Bessel 1841\",6377397.155,299.1528128]],\n"
+        "    PRIMEM[\"Ferro\",-17.66666666666667],\n"
+        "    UNIT[\"degree\",0.0174532925199433]]";
     auto obj = WKTParser()
                    .attachDatabaseContext(DatabaseContext::create())
                    .createFromWKT(wkt);
@@ -5577,6 +5573,17 @@ TEST(wkt_parse, invalid_GEOCCS) {
                                            "NORTH],AXIS[\"longitude\",EAST]]"),
                  ParsingException);
 
+    // ellipsoidal CS is invalid in a GEOCCS
+    EXPECT_THROW(WKTParser().createFromWKT(
+                     "GEOCCS[\"WGS 84\",DATUM[\"World Geodetic System 1984\","
+                     "ELLIPSOID[\"WGS 84\",6378274,298.257223564,"
+                     "LENGTHUNIT[\"metre\",1]]],"
+                     "CS[ellipsoidal,2],AXIS[\"geodetic latitude (Lat)\",north,"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]],"
+                     "AXIS[\"geodetic longitude (Lon)\",east,"
+                     "ANGLEUNIT[\"degree\",0.0174532925199433]]]"),
+                 ParsingException);
+
     // 3 axis required
     EXPECT_THROW(WKTParser().createFromWKT(
                      "GEOCCS[\"x\",DATUM[\"x\",SPHEROID[\"x\",1,0.5]],PRIMEM["
@@ -6854,6 +6861,30 @@ TEST(io, projstringformatter_optim_hgridshift_vgridshift_hgridshift_inv) {
                   "+step +proj=vgridshift +grids=bar "
                   "+step +inv +proj=hgridshift +grids=foo +omit_fwd "
                   "+step +proj=pop +v_1 +v_2");
+    }
+
+    // Test omit_fwd->omit_inv when inversing the pipeline
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->startInversion();
+        fmt->ingestPROJString("+proj=hgridshift +grids=foo +omit_fwd");
+        fmt->stopInversion();
+
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline "
+                  "+step +inv +proj=hgridshift +grids=foo +omit_inv");
+    }
+
+    // Test omit_inv->omit_fwd when inversing the pipeline
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->startInversion();
+        fmt->ingestPROJString("+proj=hgridshift +grids=foo +omit_inv");
+        fmt->stopInversion();
+
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline "
+                  "+step +inv +proj=hgridshift +grids=foo +omit_fwd");
     }
 
     // Variant with first hgridshift inverted, and second forward
@@ -9320,6 +9351,20 @@ TEST(io, createFromUserInput) {
                  ParsingException);
     EXPECT_NO_THROW(createFromUserInput("WGS84 UTM zone 31N", dbContext));
     EXPECT_NO_THROW(createFromUserInput("ID74", dbContext));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, createFromUserInput_hack_EPSG_102100) {
+    auto dbContext = DatabaseContext::create();
+    auto obj = createFromUserInput("EPSG:102100", dbContext);
+    auto crs = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    const auto &ids = crs->identifiers();
+    ASSERT_EQ(ids.size(), 1U);
+    // we do not lie on the real authority
+    EXPECT_EQ(*ids[0]->codeSpace(), "ESRI");
+    EXPECT_EQ(ids[0]->code(), "102100");
 }
 
 // ---------------------------------------------------------------------------
@@ -11864,5 +11909,42 @@ TEST(json_import, multiple_ids) {
     auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
     ASSERT_TRUE(ellps != nullptr);
     EXPECT_EQ(ellps->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_export, coordinate_system_id) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"CoordinateSystem\",\n"
+                "  \"subtype\": \"ellipsoidal\",\n"
+                "  \"axis\": [\n"
+                "    {\n"
+                "      \"name\": \"Geodetic latitude\",\n"
+                "      \"abbreviation\": \"Lat\",\n"
+                "      \"direction\": \"north\",\n"
+                "      \"unit\": \"degree\"\n"
+                "    },\n"
+                "    {\n"
+                "      \"name\": \"Geodetic longitude\",\n"
+                "      \"abbreviation\": \"Lon\",\n"
+                "      \"direction\": \"east\",\n"
+                "      \"unit\": \"degree\"\n"
+                "    }\n"
+                "  ],\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": 6422\n"
+                "  }\n"
+                "}";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = createFromUserInput("EPSG:4326", dbContext);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto cs = crs->coordinateSystem();
+    ASSERT_TRUE(cs != nullptr);
+    EXPECT_EQ(cs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
 }

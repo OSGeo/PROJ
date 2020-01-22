@@ -26,6 +26,17 @@ UPDATE grid_transformation SET interpolation_crs_auth_name = 'EPSG',
                                interpolation_crs_code = '4289'
                            WHERE auth_name = 'EPSG' AND code = '7001';
 
+-- EPSG:1312 'NAD27 to NAD83 (3)' / NTv1_0.gsb has a accuracy of 1m whereas
+-- EPSG:1313 'NAD27 to NAD83 (4)' / NTv2_0.gsb has a accuracy of 1.5m
+-- so we will never select automatically NTv2_0.gsb. Worse the advertize
+-- accuracy of the NTv1 method
+
+UPDATE grid_transformation SET accuracy = 2.0 WHERE auth_name = 'EPSG' AND code = '1312';
+
+-- Same for EPSG:1462 vs EPSG:1573
+
+UPDATE grid_transformation SET accuracy = 2.0 WHERE auth_name = 'EPSG' AND code = '1462';
+
 -- Define the allowed authorities, and their precedence, when researching a
 -- coordinate operation
 
@@ -90,3 +101,16 @@ INSERT INTO "geoid_model" SELECT 'GEOID12A', auth_name, code FROM grid_transform
 INSERT INTO "geoid_model" SELECT 'GEOID12B', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE 'g2012b%' AND deprecated = 0;
 
 INSERT INTO "geoid_model" SELECT 'GEOID18', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE 'g2018%' AND deprecated = 0;
+
+---- PROJ historic +datum aliases -----
+
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6326','WGS84','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6121','GGRS87','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6269','NAD83','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6267','NAD27','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6314','potsdam','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6223','carthage','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6312','hermannskogel','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6299','ire65','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6272','nzgd49','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6277','OSGB36','PROJ');

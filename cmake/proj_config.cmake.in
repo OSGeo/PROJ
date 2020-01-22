@@ -4,9 +4,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #cmakedefine HAVE_INTTYPES_H 1
 
-/* Define to 1 if you have the <jni.h> header file. */
-#cmakedefine HAVE_JNI_H 1
-
 /* Define to 1 if you have the `m' library (-lm). */
 #cmakedefine HAVE_LIBM 1
 
@@ -39,9 +36,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine HAVE_UNISTD_H 1
-
-/* Enabled for Java/JNI Support */
-#cmakedefine JNI_ENABLED 1
 
 /* Name of package */
 #cmakedefine PACKAGE "${PACKAGE}"

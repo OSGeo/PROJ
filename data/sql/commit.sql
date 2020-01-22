@@ -36,6 +36,87 @@ FOR EACH ROW BEGIN
             lower(g1.grid_name) = lower(g2.grid_name) AND
             g1.auth_name = 'PROJ' AND g2.auth_name = 'EPSG');
 
+    SELECT RAISE(ABORT, 'Arg! there is now a EPSG:102100 object. Hack in createFromUserInput() will no longer work')
+        WHERE EXISTS(SELECT 1 FROM crs_view WHERE auth_name = 'EPSG' AND code = '102100');
+
+    -- check coordinate_operation_view "foreign keys"
+    SELECT RAISE(ABORT, 'One coordinate_operation has a broken source_crs link')
+        WHERE EXISTS (SELECT * FROM coordinate_operation_view cov WHERE
+                      cov.source_crs_auth_name || cov.source_crs_code NOT IN
+                      (SELECT auth_name || code FROM crs_view));
+    SELECT RAISE(ABORT, 'One coordinate_operation has a broken target_crs link')
+        WHERE EXISTS (SELECT * FROM coordinate_operation_view cov WHERE
+                      cov.target_crs_auth_name || cov.target_crs_code NOT IN
+                      (SELECT auth_name || code FROM crs_view));
+
+    -- check that grids with NTv2 method are properly registered
+    SELECT RAISE(ABORT, 'One grid_transformation with NTv2 has not its source_crs in geodetic_crs table with type = ''geographic 2D''')
+        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
+                      g.method_name = 'NTv2' AND
+                      g.source_crs_auth_name || g.source_crs_code NOT IN
+                      (SELECT auth_name || code FROM geodetic_crs
+                       WHERE type = 'geographic 2D'));
+    SELECT RAISE(ABORT, 'One grid_transformation with NTv2 has not its target_crs in geodetic_crs table with type = ''geographic 2D''')
+        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
+                      g.method_name = 'NTv2' AND
+                      g.target_crs_auth_name || g.target_crs_code NOT IN
+                      (SELECT auth_name || code FROM geodetic_crs
+                       WHERE type = 'geographic 2D'));
+
+    -- check that grids with HEIGHT_TO_GEOGRAPHIC3D method are properly registered
+    SELECT RAISE(ABORT, 'One grid_transformation with HEIGHT_TO_GEOGRAPHIC3D has not its source_crs in vertical_crs table')
+        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
+                      g.method_code = 'HEIGHT_TO_GEOGRAPHIC3D' AND
+                      g.source_crs_auth_name || g.source_crs_code NOT IN
+                      (SELECT auth_name || code FROM vertical_crs));
+    SELECT RAISE(ABORT, 'One grid_transformation with HEIGHT_TO_GEOGRAPHIC3D has not its target_crs in geodetic_crs table with type = ''geographic 3D''')
+        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
+                      g.method_code = 'HEIGHT_TO_GEOGRAPHIC3D' AND
+                      g.target_crs_auth_name || g.target_crs_code NOT IN
+                      (SELECT auth_name || code FROM geodetic_crs
+                       WHERE type = 'geographic 3D'));
+
+    -- check that grids with Geographic3D to GravityRelatedHeight method are properly registered
+    SELECT RAISE(ABORT, 'One grid_transformation with Geographic3D to GravityRelatedHeight has not its target_crs in vertical_crs table')
+        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
+                      g.deprecated = 0 AND
+                      g.method_name LIKE 'Geographic3D to GravityRelatedHeight%' AND
+                      g.target_crs_auth_name || g.target_crs_code NOT IN
+                      (SELECT auth_name || code FROM vertical_crs));
+    SELECT RAISE(ABORT, 'One grid_transformation with Geographic3D to GravityRelatedHeight has not its source_crs in geodetic_crs table with type = ''geographic 3D''')
+        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
+                      g.deprecated = 0 AND
+                      g.method_name LIKE 'Geographic3D to GravityRelatedHeight%' AND
+                      NOT (g.auth_name = 'EPSG' AND g.code IN (7648, 7649, 7650)) AND -- those are wrongly registered as they use a geocentric CRS. Reported to EPSG
+                      g.source_crs_auth_name || g.source_crs_code NOT IN
+                      (SELECT auth_name || code FROM geodetic_crs
+                       WHERE type = 'geographic 3D'));
+
+    -- check that transformations intersect the area of use of their source/target CRS
+    -- EPSG, ESRI and IGNF have cases where this does not hold.
+    SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its source CRS')
+        WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, area va, area ca WHERE
+                      v.deprecated = 0 AND
+                      v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF') AND
+                      v.source_crs_auth_name = c.auth_name AND
+                      v.source_crs_code = c.code AND
+                      v.area_of_use_auth_name = va.auth_name AND
+                      v.area_of_use_code = va.code AND
+                      c.area_of_use_auth_name = ca.auth_name AND
+                      c.area_of_use_code = ca.code AND
+                      NOT (ca.south_lat < va.north_lat AND va.south_lat < ca.north_lat));
+    SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its target CRS')
+        WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, area va, area ca WHERE
+                      v.deprecated = 0 AND
+                      v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF') AND
+                      v.target_crs_auth_name = c.auth_name AND
+                      v.target_crs_code = c.code AND
+                      v.area_of_use_auth_name = va.auth_name AND
+                      v.area_of_use_code = va.code AND
+                      c.area_of_use_auth_name = ca.auth_name AND
+                      c.area_of_use_code = ca.code AND
+                      NOT (ca.south_lat < va.north_lat AND va.south_lat < ca.north_lat));
+
     -- check geoid_model table
     SELECT RAISE(ABORT, 'missing GEOID99 in geoid_model')
         WHERE NOT EXISTS(SELECT 1 FROM geoid_model WHERE name = 'GEOID99');

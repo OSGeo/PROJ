@@ -687,11 +687,13 @@ IComparable::~IComparable() = default;
 /** \brief Returns whether an object is equivalent to another one.
  * @param other other object to compare to
  * @param criterion comparaison criterion.
+ * @param dbContext Database context, or nullptr.
  * @return true if objects are equivalent.
  */
-bool IComparable::isEquivalentTo(const IComparable *other,
-                                 Criterion criterion) const {
-    return _isEquivalentTo(other, criterion);
+bool IComparable::isEquivalentTo(
+    const IComparable *other, Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
+    return _isEquivalentTo(other, criterion, dbContext);
 }
 
 // ---------------------------------------------------------------------------

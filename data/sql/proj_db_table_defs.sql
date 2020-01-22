@@ -43,14 +43,13 @@ CREATE TABLE ellipsoid (
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_ellipsoid PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_ellipsoid_celestial_body FOREIGN KEY (celestial_body_auth_name, celestial_body_code) REFERENCES celestial_body(auth_name, code),
-    CONSTRAINT fk_ellipsoid_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code)
+    CONSTRAINT fk_ellipsoid_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT check_ellipsoid_inv_flattening_semi_minor_mutually_exclusive CHECK ((inv_flattening IS NULL AND semi_minor_axis IS NOT NULL) OR (inv_flattening IS NOT NULL AND semi_minor_axis IS NULL))
 );
 
 CREATE TRIGGER ellipsoid_insert_trigger
 BEFORE INSERT ON ellipsoid
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on ellipsoid violates constraint: inv_flattening (exclusive) or semi_minor_axis should be defined')
-        WHERE (NEW.inv_flattening IS NULL AND NEW.semi_minor_axis IS NULL) OR (NEW.inv_flattening IS NOT NULL AND NEW.semi_minor_axis IS NOT NULL);
     SELECT RAISE(ABORT, 'insert on ellipsoid violates constraint: uom should be of type ''length''')
         WHERE (SELECT type FROM unit_of_measure WHERE auth_name = NEW.uom_auth_name AND code = NEW.uom_code) != 'length';
 END;
@@ -65,17 +64,10 @@ CREATE TABLE area(
     west_lon FLOAT CHECK (west_lon BETWEEN -180 AND 180),
     east_lon FLOAT CHECK (east_lon BETWEEN -180 AND 180),
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
-    CONSTRAINT pk_area PRIMARY KEY (auth_name, code)
+    CONSTRAINT pk_area PRIMARY KEY (auth_name, code),
+    CONSTRAINT check_area_lat CHECK (south_lat <= north_lat),
+    CONSTRAINT check_area_lon CHECK (west_lon <= east_lon OR (east_lon + 360 - west_lon <= 200))
 );
-
-CREATE TRIGGER area_insert_trigger
-BEFORE INSERT ON area
-FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on area violates constraint: south_lat <= north_lat')
-        WHERE NEW.south_lat > NEW.north_lat;
-    SELECT RAISE(ABORT, 'insert on area violates constraint: west_lon <= east_lon OR (east_lon + 360 - west_lon <= 200)')
-        WHERE NOT(NEW.west_lon <= NEW.east_lon OR (NEW.east_lon + 360 - NEW.west_lon <= 200));
-END;
 
 CREATE TABLE prime_meridian(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -153,19 +145,11 @@ CREATE TABLE coordinate_system(
     code TEXT NOT NULL CHECK (length(code) >= 1),
     type TEXT NOT NULL CHECK (type IN ('Cartesian', 'vertical', 'ellipsoidal', 'spherical')),
     dimension SMALLINT NOT NULL CHECK (dimension BETWEEN 1 AND 3),
-    CONSTRAINT pk_coordinate_system PRIMARY KEY (auth_name, code)
+    CONSTRAINT pk_coordinate_system PRIMARY KEY (auth_name, code),
+    CONSTRAINT check_cs_vertical CHECK (type != 'vertical' OR dimension = 1),
+    CONSTRAINT check_cs_cartesian CHECK (type != 'Cartesian' OR dimension IN (2,3)),
+    CONSTRAINT check_cs_ellipsoidal CHECK (type != 'ellipsoidal' OR dimension IN (2,3))
 );
-
-CREATE TRIGGER coordinate_system_insert_trigger
-BEFORE INSERT ON coordinate_system
-FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on coordinate_system violates constraint: dimension must be equal to 1 for type = ''vertical''')
-        WHERE NEW.type = 'vertical' AND NEW.dimension != 1;
-    SELECT RAISE(ABORT, 'insert on coordinate_system violates constraint: dimension must be equal to 2 or 3 for type = ''Cartesian''')
-        WHERE NEW.type = 'Cartesian' AND NEW.dimension NOT IN (2, 3);
-    SELECT RAISE(ABORT, 'insert on coordinate_system violates constraint: dimension must be equal to 2 or 3 for type = ''ellipsoidal''')
-        WHERE NEW.type = 'ellipsoidal' AND NEW.dimension NOT IN (2, 3);
-END;
 
 CREATE TABLE axis(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -208,7 +192,12 @@ CREATE TABLE geodetic_crs(
     CONSTRAINT pk_geodetic_crs PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_geodetic_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES geodetic_datum(auth_name, code),
-    CONSTRAINT fk_geodetic_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
+    CONSTRAINT fk_geodetic_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
+    CONSTRAINT check_geodetic_crs_cs CHECK (NOT ((coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL) AND text_definition IS NULL)),
+    CONSTRAINT check_geodetic_crs_cs_bis CHECK (NOT ((NOT(coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL)) AND text_definition IS NOT NULL)),
+    CONSTRAINT check_geodetic_crs_datum CHECK (NOT ((datum_auth_name IS NULL OR datum_code IS NULL) AND text_definition IS NULL)),
+    CONSTRAINT check_geodetic_crs_datum_bis CHECK (NOT ((NOT(datum_auth_name IS NULL OR datum_code IS NULL)) AND text_definition IS NOT NULL)),
+    CONSTRAINT check_geodetic_crs_area CHECK (NOT ((area_of_use_auth_name IS NULL OR area_of_use_code IS NULL) AND text_definition IS NULL))
 );
 
 CREATE TRIGGER geodetic_crs_insert_trigger
@@ -218,23 +207,8 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: (auth_name, code) must not already exist in crs_view')
         WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
 
-    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: coordinate_system must be defined when text_definition is NULL')
-        WHERE (NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL) AND NEW.text_definition IS NULL;
-
-    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must be defined when text_definition is NULL')
-        WHERE (NEW.datum_auth_name IS NULL OR NEW.datum_code IS NULL) AND NEW.text_definition IS NULL;
-
-    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: coordinate_system must NOT be defined when text_definition is NOT NULL')
-        WHERE (NOT(NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL)) AND NEW.text_definition IS NOT NULL;
-
-    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must NOT be defined when text_definition is NOT NULL')
-        WHERE (NOT(NEW.datum_auth_name IS NULL OR NEW.datum_code IS NULL)) AND NEW.text_definition IS NOT NULL;
-
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must not be deprecated when geodetic_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM geodetic_datum datum WHERE datum.auth_name = NEW.datum_auth_name AND datum.code = NEW.datum_code AND datum.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
-
-    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: area_of_use must be defined when text_definition is NULL')
-        WHERE (NEW.area_of_use_auth_name IS NULL OR NEW.area_of_use_code IS NULL) AND NEW.text_definition IS NULL;
 
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: area_of_use must not be deprecated when geodetic_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
@@ -692,7 +666,12 @@ CREATE TABLE projected_crs(
     CONSTRAINT fk_projected_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_projected_crs_geodetic_crs FOREIGN KEY (geodetic_crs_auth_name, geodetic_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT fk_projected_crs_conversion FOREIGN KEY (conversion_auth_name, conversion_code) REFERENCES conversion_table(auth_name, code),
-    CONSTRAINT fk_projected_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
+    CONSTRAINT fk_projected_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
+    CONSTRAINT check_projected_crs_cs CHECK (NOT((coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL) AND text_definition IS NULL)),
+    CONSTRAINT check_projected_crs_cs_bis CHECK (NOT((NOT(coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL)) AND text_definition IS NOT NULL)),
+    CONSTRAINT check_projected_crs_geodetic_crs CHECK (NOT((geodetic_crs_auth_name IS NULL OR geodetic_crs_code IS NULL) AND text_definition IS NULL)),
+    CONSTRAINT check_projected_crs_conversion CHECK (NOT((NOT(conversion_auth_name IS NULL OR conversion_code IS NULL)) AND text_definition IS NOT NULL)),
+    CONSTRAINT check_projected_crs_area CHECK (NOT((area_of_use_auth_name IS NULL OR area_of_use_code IS NULL) AND text_definition IS NULL))
 );
 
 CREATE TRIGGER projected_crs_insert_trigger
@@ -701,12 +680,6 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: (auth_name, code) must not already exist in crs_view')
         WHERE EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.auth_name AND crs_view.code = NEW.code);
-
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system must be defined when text_definition is NULL')
-        WHERE (NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL) AND NEW.text_definition IS NULL;
-
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must be defined when text_definition is NULL')
-        WHERE (NEW.geodetic_crs_auth_name IS NULL OR NEW.geodetic_crs_code IS NULL) AND NEW.text_definition IS NULL;
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must not be deprecated when projected_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM geodetic_crs WHERE geodetic_crs.auth_name = NEW.geodetic_crs_auth_name AND geodetic_crs.code = NEW.geodetic_crs_code AND geodetic_crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI' AND NEW.geodetic_crs_auth_name != 'ESRI');
@@ -717,17 +690,8 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must not be deprecated when projected_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM conversion WHERE conversion.auth_name = NEW.conversion_auth_name AND conversion.code = NEW.conversion_code AND conversion.deprecated != 0) AND NEW.deprecated = 0;
 
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system must NOT be defined when text_definition is NOT NULL')
-        WHERE (NOT(NEW.coordinate_system_auth_name IS NULL OR NEW.coordinate_system_code IS NULL)) AND NEW.text_definition IS NOT NULL;
-
     --SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must NOT be defined when text_definition is NOT NULL')
     --    WHERE (NOT(NEW.geodetic_crs_auth_name IS NULL OR NEW.geodetic_crs_code IS NULL)) AND NEW.text_definition IS NOT NULL;
-
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: conversion must NOT be defined when text_definition is NULL')
-        WHERE (NOT(NEW.conversion_auth_name IS NULL OR NEW.conversion_code IS NULL)) AND NEW.text_definition IS NOT NULL;
-
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: area_of_use must be defined when text_definition is NULL')
-        WHERE (NEW.area_of_use_auth_name IS NULL OR NEW.area_of_use_code IS NULL) AND NEW.text_definition IS NULL;
 
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: area_of_use must not be deprecated when projected_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
@@ -1137,30 +1101,22 @@ CREATE TABLE grid_alternatives(
     open_license BOOLEAN CHECK (open_license IN (0, 1)),
     directory TEXT,                                 -- optional directory where the file might be located
 
-    CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name)
+    CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name),
+    CONSTRAINT check_grid_alternatives_grid_fromat CHECK (proj_grid_format IN ('CTable2', 'NTv1', 'NTv2', 'GTX')),
+    CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift')),
+    CONSTRAINT check_grid_alternatives_not_hgridshift CHECK (NOT(proj_method != 'hgridshift' AND proj_grid_format IN ('CTable2', 'NTv1', 'NTv2'))),
+    CONSTRAINT check_grid_alternatives_not_vgridshift CHECK (NOT(proj_method != 'vgridshift' AND proj_grid_format IN ('GTX'))),
+    CONSTRAINT check_grid_alternatives_original_grid_name CHECK (NOT(original_grid_name = proj_grid_name AND inverse_direction != 0)),
+    CONSTRAINT check_grid_alternatives_package_name_url CHECK (NOT(package_name IS NOT NULL AND url IS NOT NULL)),
+    CONSTRAINT check_grid_alternatives_direct_download_url CHECK (NOT(direct_download IS NULL AND url IS NOT NULL)),
+    CONSTRAINT check_grid_alternatives_open_license_url CHECK (NOT(open_license IS NULL AND url IS NOT NULL))
 );
 
 CREATE TRIGGER grid_alternatives_insert_trigger
 BEFORE INSERT ON grid_alternatives
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_grid_format must be one of ''CTable2'', ''NTv1'', ''NTv2'', ''GTX''')
-        WHERE NEW.proj_grid_format NOT IN ('CTable2', 'NTv1', 'NTv2', 'GTX');
-    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_method must be one of ''hgridshift'', ''vgridshift''')
-        WHERE NEW.proj_method NOT IN ('hgridshift', 'vgridshift');
-    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_method must be ''hgridshift'' when proj_grid_format is ''CTable2'', ''NTv1'', ''NTv2''')
-        WHERE NEW.proj_method != 'hgridshift' AND NEW.proj_grid_format IN ('CTable2', 'NTv1', 'NTv2');
-    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: proj_method must be ''vridshift'' when proj_grid_format is ''GTX''')
-        WHERE NEW.proj_method != 'vgridshift' AND NEW.proj_grid_format IN ('GTX');
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: original_grid_name must be referenced in grid_transformation.grid_name')
         WHERE NEW.original_grid_name NOT IN ('null') AND NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
-    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: NEW.inverse_direction must be 0 when original_grid_name = proj_grid_name')
-        WHERE NEW.original_grid_name = NEW.proj_grid_name AND NEW.inverse_direction != 0;
-    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: package_name must be NULL when url is not NULL')
-        WHERE NEW.package_name IS NOT NULL AND NEW.url IS NOT NULL;
-    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: direct_download must be set when url is not NULL')
-        WHERE NEW.direct_download IS NULL AND NEW.url IS NOT NULL;
-    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: open_license must be set when url is not NULL')
-        WHERE NEW.open_license IS NULL AND NEW.url IS NOT NULL;
 END;
 
 CREATE TABLE other_transformation(
@@ -1253,7 +1209,8 @@ CREATE TABLE other_transformation(
     CONSTRAINT fk_other_transformation_param4_uom FOREIGN KEY (param4_uom_auth_name, param4_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_other_transformation_param5_uom FOREIGN KEY (param5_uom_auth_name, param5_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_other_transformation_param6_uom FOREIGN KEY (param6_uom_auth_name, param6_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_other_transformation_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code)
+    CONSTRAINT fk_other_transformation_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT check_other_transformation_method CHECK (NOT (method_auth_name = 'PROJ' AND method_code NOT IN ('PROJString', 'WKT')))
 );
 
 CREATE TRIGGER other_transformation_insert_trigger
@@ -1267,9 +1224,6 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: target_crs(auth_name, code) not found')
         WHERE NOT EXISTS (SELECT 1 FROM crs_view WHERE crs_view.auth_name = NEW.target_crs_auth_name AND crs_view.code = NEW.target_crs_code);
-
-    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: method_code should be in (PROJString, WKT) when method_auth_name = PROJ')
-        WHERE NEW.method_auth_name = 'PROJ' AND NEW.method_code NOT IN ('PROJString', 'WKT');
 
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: source_crs must not be deprecated when other_transformation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
@@ -1360,7 +1314,7 @@ CREATE TABLE geoid_model(
     operation_auth_name TEXT NOT NULL,
     operation_code TEXT NOT NULL,
     CONSTRAINT pk_geoid_model PRIMARY KEY (name, operation_auth_name, operation_code)
-    -- CONSTRATINT fk_geoid_model_operation FOREIGN KEY (operation_auth_name, operation_code) REFERENCES coordinate_operation(auth_name, code)
+    -- CONSTRAINT fk_geoid_model_operation FOREIGN KEY (operation_auth_name, operation_code) REFERENCES coordinate_operation(auth_name, code)
 );
 
 CREATE TRIGGER geoid_model_insert_trigger

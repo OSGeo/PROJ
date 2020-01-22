@@ -34,7 +34,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "proj_internal.h" // For pj_gc_unloadall()
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+#include "proj.h"
 #include "proj_api.h"
 
 /* Standalone build:
@@ -105,10 +106,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
     {
         free(buf_dup);
         pj_free(pj_src);
-#ifndef OMIT_DEALLOCATION
-        pj_gc_unloadall(pj_get_default_ctx());
-        pj_deallocate_grids();
-#endif
+        proj_cleanup();
         return 0;
     }
     double x = 0, y = 0, z = 9;
@@ -135,10 +133,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
         free(buf_dup);
         pj_free(pj_src);
         pj_free(pj_dst);
-#ifndef OMIT_DEALLOCATION
-        pj_gc_unloadall(pj_get_default_ctx());
-        pj_deallocate_grids();
-#endif
+        proj_cleanup();
         return 0;
     }
 #ifdef STANDALONE
@@ -161,10 +156,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
     free(buf_dup);
     pj_free(pj_src);
     pj_free(pj_dst);
-#ifndef OMIT_DEALLOCATION
-    pj_gc_unloadall(pj_get_default_ctx());
-    pj_deallocate_grids();
-#endif
+    proj_cleanup();
     return 0;
 }
 

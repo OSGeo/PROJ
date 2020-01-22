@@ -15,6 +15,7 @@ echo "NPROC=${NPROC}"
 
 # Download grid files
 wget https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
+wget "https://github.com/OSGeo/proj-datumgrid/blob/master/north-america/ntv2_0.gsb?raw=true" -O ntv2_0.gsb
 
 # prepare build files
 ./autogen.sh
@@ -37,11 +38,7 @@ CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"
 # autoconf build from generated tarball
 mkdir build_autoconf
 cd build_autoconf
-if [ -f $JAVA_HOME/include/jni.h ]; then
-    CXXFLAGS="-I$JAVA_HOME/include -I$JAVA_HOME/include/linux $CXXFLAGS" ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all --with-jni
-else
-    ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
-fi
+../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 
 make -j${NPROC}
 
@@ -95,7 +92,7 @@ cd ..
 cd ../..
 
 # Install grid files
-(cd data && unzip -o ../proj-datumgrid-1.8.zip)
+(cd data && unzip -o ../proj-datumgrid-1.8.zip && cp ../ntv2_0.gsb . )
 
 # autoconf build with grids
 mkdir build_autoconf_grids
@@ -106,6 +103,10 @@ make check
 (cd src && make multistresstest && make test228)
 PROJ_LIB=../data src/multistresstest
 make install
+
+# Test make clean target
+make clean
+
 find /tmp/proj_autoconf_install_grids
 cd ..
 

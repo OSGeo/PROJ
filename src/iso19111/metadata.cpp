@@ -237,7 +237,8 @@ GeographicBoundingBoxNNPtr GeographicBoundingBox::create(double west,
 
 //! @cond Doxygen_Suppress
 bool GeographicBoundingBox::_isEquivalentTo(
-    const util::IComparable *other, util::IComparable::Criterion) const {
+    const util::IComparable *other, util::IComparable::Criterion,
+    const io::DatabaseContextPtr &) const {
     auto otherExtent = dynamic_cast<const GeographicBoundingBox *>(other);
     if (!otherExtent)
         return false;
@@ -502,7 +503,8 @@ VerticalExtent::create(double minimumIn, double maximumIn,
 
 //! @cond Doxygen_Suppress
 bool VerticalExtent::_isEquivalentTo(const util::IComparable *other,
-                                     util::IComparable::Criterion) const {
+                                     util::IComparable::Criterion,
+                                     const io::DatabaseContextPtr &) const {
     auto otherExtent = dynamic_cast<const VerticalExtent *>(other);
     if (!otherExtent)
         return false;
@@ -587,7 +589,8 @@ TemporalExtentNNPtr TemporalExtent::create(const std::string &start,
 
 //! @cond Doxygen_Suppress
 bool TemporalExtent::_isEquivalentTo(const util::IComparable *other,
-                                     util::IComparable::Criterion) const {
+                                     util::IComparable::Criterion,
+                                     const io::DatabaseContextPtr &) const {
     auto otherExtent = dynamic_cast<const TemporalExtent *>(other);
     if (!otherExtent)
         return false;
@@ -734,7 +737,8 @@ Extent::createFromBBOX(double west, double south, double east, double north,
 
 //! @cond Doxygen_Suppress
 bool Extent::_isEquivalentTo(const util::IComparable *other,
-                             util::IComparable::Criterion criterion) const {
+                             util::IComparable::Criterion criterion,
+                             const io::DatabaseContextPtr &dbContext) const {
     auto otherExtent = dynamic_cast<const Extent *>(other);
     bool ret =
         (otherExtent &&
@@ -749,15 +753,18 @@ bool Extent::_isEquivalentTo(const util::IComparable *other,
     if (ret) {
         for (size_t i = 0; ret && i < d->geographicElements_.size(); ++i) {
             ret = d->geographicElements_[i]->_isEquivalentTo(
-                otherExtent->d->geographicElements_[i].get(), criterion);
+                otherExtent->d->geographicElements_[i].get(), criterion,
+                dbContext);
         }
         for (size_t i = 0; ret && i < d->verticalElements_.size(); ++i) {
             ret = d->verticalElements_[i]->_isEquivalentTo(
-                otherExtent->d->verticalElements_[i].get(), criterion);
+                otherExtent->d->verticalElements_[i].get(), criterion,
+                dbContext);
         }
         for (size_t i = 0; ret && i < d->temporalElements_.size(); ++i) {
             ret = d->temporalElements_[i]->_isEquivalentTo(
-                otherExtent->d->temporalElements_[i].get(), criterion);
+                otherExtent->d->temporalElements_[i].get(), criterion,
+                dbContext);
         }
     }
     return ret;

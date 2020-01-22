@@ -264,6 +264,9 @@ struct DatabaseContext::Private {
 
     std::map<std::string, std::vector<std::string>> cacheAllowedAuthorities_{};
 
+    lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
+        CACHE_SIZE};
+
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
                                 const util::BaseObjectPtr &obj);
@@ -1014,7 +1017,7 @@ bool DatabaseContext::isKnownName(const std::string &name,
 
 /** \brief Gets the alias name from an official name.
  *
- * @param officialName Official name.
+ * @param officialName Official name. Mandatory
  * @param tableName Table name/category. Mandatory
  * @param source Source of the alias. Mandatory
  * @return Alias name (or empty if not found).
@@ -1042,6 +1045,63 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
         return std::string();
     }
     return res.front()[0];
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Gets the alias names for an object.
+ *
+ * Either authName + code or officialName must be non empty.
+ *
+ * @param authName Authority.
+ * @param code Code.
+ * @param officialName Official name.
+ * @param tableName Table name/category. Mandatory
+ * @param source Source of the alias. May be empty.
+ * @return Aliases
+ */
+std::list<std::string> DatabaseContext::getAliases(
+    const std::string &authName, const std::string &code,
+    const std::string &officialName, const std::string &tableName,
+    const std::string &source) const {
+
+    std::list<std::string> res;
+    const auto key(authName + code + officialName + tableName + source);
+    if (d->cacheAliasNames_.tryGet(key, res)) {
+        return res;
+    }
+
+    std::string resolvedAuthName(authName);
+    std::string resolvedCode(code);
+    if (authName.empty() || code.empty()) {
+        std::string sql("SELECT auth_name, code FROM \"");
+        sql += replaceAll(tableName, "\"", "\"\"");
+        sql += "\" WHERE name = ?";
+        if (tableName == "geodetic_crs") {
+            sql += " AND type = " GEOG_2D_SINGLE_QUOTED;
+        }
+        auto resSql = d->run(sql, {officialName});
+        if (resSql.empty()) {
+            d->cacheAliasNames_.insert(key, res);
+            return res;
+        }
+        const auto &row = resSql.front();
+        resolvedAuthName = row[0];
+        resolvedCode = row[1];
+    }
+    std::string sql("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
+                    "auth_name = ? AND code = ?");
+    ListOfParams params{tableName, resolvedAuthName, resolvedCode};
+    if (!source.empty()) {
+        sql += " AND source = ?";
+        params.emplace_back(source);
+    }
+    auto resSql = d->run(sql, params);
+    for (const auto &row : resSql) {
+        res.emplace_back(row[0]);
+    }
+    d->cacheAliasNames_.insert(key, res);
+    return res;
 }
 
 // ---------------------------------------------------------------------------
@@ -1349,9 +1409,17 @@ AuthorityFactory::AuthorityFactory(const DatabaseContextNNPtr &context,
 AuthorityFactoryNNPtr
 AuthorityFactory::create(const DatabaseContextNNPtr &context,
                          const std::string &authorityName) {
-
-    auto factory = AuthorityFactory::nn_make_shared<AuthorityFactory>(
-        context, authorityName);
+    const auto getFactory = [&context, &authorityName]() {
+        for (const auto &knownName : {"EPSG", "ESRI", "PROJ"}) {
+            if (ci_equal(authorityName, knownName)) {
+                return AuthorityFactory::nn_make_shared<AuthorityFactory>(
+                    context, knownName);
+            }
+        }
+        return AuthorityFactory::nn_make_shared<AuthorityFactory>(
+            context, authorityName);
+    };
+    auto factory = getFactory();
     factory->d->setThis(factory);
     return factory;
 }
@@ -5105,13 +5173,12 @@ static void addToListString(std::string &out, const char *in) {
     out += in;
 }
 
-static void addToListStringWithOR(std::string &out, const char *in) {
+static void addToListStringWithOR(std::string &out, const std::string &in) {
     if (!out.empty()) {
         out += " OR ";
     }
     out += in;
 }
-
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -5148,6 +5215,7 @@ AuthorityFactory::createObjectsFromName(
     }
 
     std::string sql(
+        "SELECT table_name, auth_name, code, name, deprecated FROM ("
         "SELECT table_name, auth_name, code, name, deprecated FROM object_view "
         "WHERE ");
     if (deprecated) {
@@ -5163,108 +5231,141 @@ AuthorityFactory::createObjectsFromName(
         params.emplace_back(d->authority());
     }
 
-    if (allowedObjectTypes.empty()) {
-        sql += "table_name IN ("
-               "'prime_meridian','ellipsoid','geodetic_datum',"
-               "'vertical_datum','geodetic_crs','projected_crs',"
-               "'vertical_crs','compound_crs','conversion',"
-               "'helmert_transformation','grid_transformation',"
-               "'other_transformation','concatenated_operation'"
-               ")";
-    } else {
-        std::string tableNameList;
-        std::string otherConditions;
-        for (const auto type : allowedObjectTypes) {
-            switch (type) {
-            case ObjectType::PRIME_MERIDIAN:
-                addToListString(tableNameList, "'prime_meridian'");
-                break;
-            case ObjectType::ELLIPSOID:
-                addToListString(tableNameList, "'ellipsoid'");
-                break;
-            case ObjectType::DATUM:
-                addToListString(tableNameList,
-                                "'geodetic_datum','vertical_datum'");
-                break;
-            case ObjectType::GEODETIC_REFERENCE_FRAME:
-                addToListString(tableNameList, "'geodetic_datum'");
-                break;
-            case ObjectType::VERTICAL_REFERENCE_FRAME:
-                addToListString(tableNameList, "'vertical_datum'");
-                break;
-            case ObjectType::CRS:
-                addToListString(tableNameList, "'geodetic_crs','projected_crs',"
-                                               "'vertical_crs','compound_crs'");
-                break;
-            case ObjectType::GEODETIC_CRS:
-                addToListString(tableNameList, "'geodetic_crs'");
-                break;
-            case ObjectType::GEOCENTRIC_CRS:
-                addToListStringWithOR(otherConditions,
-                                      "(table_name = " GEOCENTRIC_SINGLE_QUOTED
-                                      " AND "
-                                      "type = " GEOCENTRIC_SINGLE_QUOTED ")");
-                break;
-            case ObjectType::GEOGRAPHIC_CRS:
-                addToListStringWithOR(otherConditions,
-                                      "(table_name = 'geodetic_crs' AND "
-                                      "type IN (" GEOG_2D_SINGLE_QUOTED
-                                      "," GEOG_3D_SINGLE_QUOTED "))");
-                break;
-            case ObjectType::GEOGRAPHIC_2D_CRS:
-                addToListStringWithOR(otherConditions,
-                                      "(table_name = 'geodetic_crs' AND "
-                                      "type = " GEOG_2D_SINGLE_QUOTED ")");
-                break;
-            case ObjectType::GEOGRAPHIC_3D_CRS:
-                addToListStringWithOR(otherConditions,
-                                      "(table_name = 'geodetic_crs' AND "
-                                      "type = " GEOG_3D_SINGLE_QUOTED ")");
-                break;
-            case ObjectType::PROJECTED_CRS:
-                addToListString(tableNameList, "'projected_crs'");
-                break;
-            case ObjectType::VERTICAL_CRS:
-                addToListString(tableNameList, "'vertical_crs'");
-                break;
-            case ObjectType::COMPOUND_CRS:
-                addToListString(tableNameList, "'compound_crs'");
-                break;
-            case ObjectType::COORDINATE_OPERATION:
-                addToListString(tableNameList,
-                                "'conversion','helmert_transformation',"
-                                "'grid_transformation','other_transformation',"
-                                "'concatenated_operation'");
-                break;
-            case ObjectType::CONVERSION:
-                addToListString(tableNameList, "'conversion'");
-                break;
-            case ObjectType::TRANSFORMATION:
-                addToListString(tableNameList,
-                                "'helmert_transformation',"
-                                "'grid_transformation','other_transformation'");
-                break;
-            case ObjectType::CONCATENATED_OPERATION:
-                addToListString(tableNameList, "'concatenated_operation'");
-                break;
+    const auto getTableNameConstraint = [&allowedObjectTypes](
+        const std::string &colName) {
+        if (allowedObjectTypes.empty()) {
+            return colName + " IN ("
+                             "'prime_meridian','ellipsoid','geodetic_datum',"
+                             "'vertical_datum','geodetic_crs','projected_crs',"
+                             "'vertical_crs','compound_crs','conversion',"
+                             "'helmert_transformation','grid_transformation',"
+                             "'other_transformation','concatenated_operation'"
+                             ")";
+        } else {
+            std::string tableNameList;
+            std::string otherConditions;
+            for (const auto type : allowedObjectTypes) {
+                switch (type) {
+                case ObjectType::PRIME_MERIDIAN:
+                    addToListString(tableNameList, "'prime_meridian'");
+                    break;
+                case ObjectType::ELLIPSOID:
+                    addToListString(tableNameList, "'ellipsoid'");
+                    break;
+                case ObjectType::DATUM:
+                    addToListString(tableNameList,
+                                    "'geodetic_datum','vertical_datum'");
+                    break;
+                case ObjectType::GEODETIC_REFERENCE_FRAME:
+                    addToListString(tableNameList, "'geodetic_datum'");
+                    break;
+                case ObjectType::VERTICAL_REFERENCE_FRAME:
+                    addToListString(tableNameList, "'vertical_datum'");
+                    break;
+                case ObjectType::CRS:
+                    addToListString(tableNameList,
+                                    "'geodetic_crs','projected_crs',"
+                                    "'vertical_crs','compound_crs'");
+                    break;
+                case ObjectType::GEODETIC_CRS:
+                    addToListString(tableNameList, "'geodetic_crs'");
+                    break;
+                case ObjectType::GEOCENTRIC_CRS:
+                    addToListStringWithOR(
+                        otherConditions,
+                        "(" + colName + " = " GEOCENTRIC_SINGLE_QUOTED " AND "
+                                        "type = " GEOCENTRIC_SINGLE_QUOTED ")");
+                    break;
+                case ObjectType::GEOGRAPHIC_CRS:
+                    addToListStringWithOR(otherConditions,
+                                          "(" + colName +
+                                              " = 'geodetic_crs' AND "
+                                              "type IN (" GEOG_2D_SINGLE_QUOTED
+                                              "," GEOG_3D_SINGLE_QUOTED "))");
+                    break;
+                case ObjectType::GEOGRAPHIC_2D_CRS:
+                    addToListStringWithOR(
+                        otherConditions,
+                        "(" + colName + " = 'geodetic_crs' AND "
+                                        "type = " GEOG_2D_SINGLE_QUOTED ")");
+                    break;
+                case ObjectType::GEOGRAPHIC_3D_CRS:
+                    addToListStringWithOR(
+                        otherConditions,
+                        "(" + colName + " = 'geodetic_crs' AND "
+                                        "type = " GEOG_3D_SINGLE_QUOTED ")");
+                    break;
+                case ObjectType::PROJECTED_CRS:
+                    addToListString(tableNameList, "'projected_crs'");
+                    break;
+                case ObjectType::VERTICAL_CRS:
+                    addToListString(tableNameList, "'vertical_crs'");
+                    break;
+                case ObjectType::COMPOUND_CRS:
+                    addToListString(tableNameList, "'compound_crs'");
+                    break;
+                case ObjectType::COORDINATE_OPERATION:
+                    addToListString(
+                        tableNameList,
+                        "'conversion','helmert_transformation',"
+                        "'grid_transformation','other_transformation',"
+                        "'concatenated_operation'");
+                    break;
+                case ObjectType::CONVERSION:
+                    addToListString(tableNameList, "'conversion'");
+                    break;
+                case ObjectType::TRANSFORMATION:
+                    addToListString(
+                        tableNameList,
+                        "'helmert_transformation',"
+                        "'grid_transformation','other_transformation'");
+                    break;
+                case ObjectType::CONCATENATED_OPERATION:
+                    addToListString(tableNameList, "'concatenated_operation'");
+                    break;
+                }
             }
-        }
-        if (!tableNameList.empty()) {
-            sql += "((table_name IN (";
-            sql += tableNameList;
-            sql += "))";
-            if (!otherConditions.empty()) {
-                sql += " OR ";
-                sql += otherConditions;
+            std::string l_sql;
+            if (!tableNameList.empty()) {
+                l_sql = "((" + colName + " IN (";
+                l_sql += tableNameList;
+                l_sql += "))";
+                if (!otherConditions.empty()) {
+                    l_sql += " OR ";
+                    l_sql += otherConditions;
+                }
+                l_sql += ')';
+            } else if (!otherConditions.empty()) {
+                l_sql = "(";
+                l_sql += otherConditions;
+                l_sql += ')';
             }
-            sql += ')';
-        } else if (!otherConditions.empty()) {
-            sql += "(";
-            sql += otherConditions;
-            sql += ')';
+            return l_sql;
         }
+    };
+
+    sql += getTableNameConstraint("table_name");
+
+    sql += " UNION SELECT ov.table_name AS table_name, "
+           "ov.auth_name AS auth_name, "
+           "ov.code AS code, a.alt_name AS name, "
+           "ov.deprecated AS deprecated FROM object_view ov "
+           "JOIN alias_name a ON ov.table_name = a.table_name AND "
+           "ov.auth_name = a.auth_name AND ov.code = a.code WHERE ";
+    if (deprecated) {
+        sql += "ov.deprecated = 1 AND ";
     }
-    sql += " ORDER BY deprecated, length(name), name";
+    if (!approximateMatch) {
+        sql += "a.alt_name LIKE ? AND ";
+        params.push_back(searchedNameWithoutDeprecated);
+    }
+    if (d->hasAuthorityRestriction()) {
+        sql += "ov.auth_name = ? AND ";
+        params.emplace_back(d->authority());
+    }
+    sql += getTableNameConstraint("ov.table_name");
+
+    sql += ") ORDER BY deprecated, length(name), name";
     if (limitResultCount > 0 &&
         limitResultCount <
             static_cast<size_t>(std::numeric_limits<int>::max()) &&
@@ -5274,6 +5375,7 @@ AuthorityFactory::createObjectsFromName(
     }
 
     std::list<common::IdentifiedObjectNNPtr> res;
+    std::set<std::pair<std::string, std::string>> setIdentified;
 
     // Querying geodetic datum is a super hot path when importing from WKT1
     // so cache results.
@@ -5301,6 +5403,12 @@ AuthorityFactory::createObjectsFromName(
             for (const auto &row : listOfRow) {
                 const auto &auth_name = row[1];
                 const auto &code = row[2];
+                const auto key =
+                    std::pair<std::string, std::string>(auth_name, code);
+                if (setIdentified.find(key) != setIdentified.end()) {
+                    continue;
+                }
+                setIdentified.insert(key);
                 auto factory = d->createFactory(auth_name);
                 res.emplace_back(factory->createGeodeticDatum(code));
                 if (limitResultCount > 0 && res.size() == limitResultCount) {
@@ -5326,6 +5434,12 @@ AuthorityFactory::createObjectsFromName(
 
                     const auto &auth_name = row[1];
                     const auto &code = row[2];
+                    const auto key =
+                        std::pair<std::string, std::string>(auth_name, code);
+                    if (setIdentified.find(key) != setIdentified.end()) {
+                        continue;
+                    }
+                    setIdentified.insert(key);
                     auto factory = d->createFactory(auth_name);
                     res.emplace_back(factory->createGeodeticDatum(code));
                     if (limitResultCount > 0 &&
@@ -5361,6 +5475,12 @@ AuthorityFactory::createObjectsFromName(
             const auto &table_name = row[0];
             const auto &auth_name = row[1];
             const auto &code = row[2];
+            const auto key =
+                std::pair<std::string, std::string>(auth_name, code);
+            if (setIdentified.find(key) != setIdentified.end()) {
+                continue;
+            }
+            setIdentified.insert(key);
             const auto &deprecatedStr = row[4];
             if (isFirst) {
                 firstIsDeprecated = deprecatedStr == "1";
@@ -5526,6 +5646,7 @@ std::list<crs::GeodeticCRSNNPtr> AuthorityFactory::createGeodeticCRSFromDatum(
         sql += " AND type = ?";
         params.emplace_back(geodetic_crs_type);
     }
+    sql += " ORDER BY auth_name, code";
     auto sqlRes = d->run(sql, params);
     std::list<crs::GeodeticCRSNNPtr> res;
     for (const auto &row : sqlRes) {
@@ -5607,7 +5728,9 @@ static std::string buildSqlLookForAuthNameCode(
 
     std::set<std::string> authorities;
     for (const auto &crs : list) {
-        const auto &ids = crs.first->identifiers();
+        auto boundCRS = dynamic_cast<crs::BoundCRS *>(crs.first.get());
+        const auto &ids = boundCRS ? boundCRS->baseCRS()->identifiers()
+                                   : crs.first->identifiers();
         if (!ids.empty()) {
             authorities.insert(*(ids[0]->codeSpace()));
         }
@@ -5626,7 +5749,9 @@ static std::string buildSqlLookForAuthNameCode(
         params.emplace_back(auth_name);
         bool firstGeodCRSForAuth = true;
         for (const auto &crs : list) {
-            const auto &ids = crs.first->identifiers();
+            auto boundCRS = dynamic_cast<crs::BoundCRS *>(crs.first.get());
+            const auto &ids = boundCRS ? boundCRS->baseCRS()->identifiers()
+                                       : crs.first->identifiers();
             if (!ids.empty() && *(ids[0]->codeSpace()) == auth_name) {
                 if (!firstGeodCRSForAuth) {
                     sql += ',';

@@ -12,7 +12,7 @@ EXTRA_DIST = 4D-API_cs2cs-style.gie \
 	DHDN_ETRS89.gie \
 	geotiff_grids.gie
 
-PROJ_LIB ?= ../../data
+PROJ_LIB ?= ../../data/for_tests
 
 4D-API-cs2cs-style: 4D-API_cs2cs-style.gie
 	PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
