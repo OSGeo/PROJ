@@ -4434,4 +4434,26 @@ TEST_F(CApi, proj_create_derived_geographic_crs) {
                                   "+o_lat_p=-2 +lon_0=3 +datum=WGS84 +no_defs "
                                   "+type=crs"));
 }
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_set_sqlite3_vfs_name) {
+
+    PJ_CONTEXT *ctx = proj_context_create();
+    proj_log_func(ctx, nullptr, [](void *, int, const char *) -> void {});
+
+    // Set a dummy VFS and check it is taken into account
+    // (failure to open proj.db)
+    proj_context_set_sqlite3_vfs_name(ctx, "dummy_vfs_name");
+    ASSERT_EQ(proj_create(ctx, "EPSG:4326"), nullptr);
+
+    // Restore default VFS
+    proj_context_set_sqlite3_vfs_name(ctx, nullptr);
+    PJ *crs_4326 = proj_create(ctx, "EPSG:4326");
+    ASSERT_NE(crs_4326, nullptr);
+    proj_destroy(crs_4326);
+
+    proj_context_destroy(ctx);
+}
+
 } // namespace

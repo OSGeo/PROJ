@@ -49,7 +49,7 @@ proj_context_test_LDADD = ../../src/libproj.la @GTEST_LIBS@
 proj_context_test-check: proj_context_test
 	PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES ./proj_context_test
 
-test_cpp_api_SOURCES = test_util.cpp test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp test_operation.cpp test_datum.cpp test_factory.cpp test_c_api.cpp main.cpp
+test_cpp_api_SOURCES = test_util.cpp test_common.cpp test_crs.cpp test_metadata.cpp test_io.cpp test_operation.cpp test_datum.cpp test_factory.cpp test_c_api.cpp test_grids.cpp main.cpp
 test_cpp_api_LDADD = ../../src/libproj.la @GTEST_LIBS@ @SQLITE3_LIBS@
 
 test_cpp_api-check: test_cpp_api

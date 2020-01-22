@@ -114,3 +114,9 @@ exclusive with :option:`+t_epoch`. :option:`+dt` is used when deformation
 for a set amount of time is needed and :option:`+t_epoch` is used (in
 conjunction with the observation time of the input coordinate) when
 deformation from a specific epoch to the observation time is needed.
+
+Version 7.0.0
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The value of all path, filenames passed to PROJ through function calls, PROJ
+strings or environment variables should be encoded in UTF-8.

@@ -45,7 +45,7 @@
 #include "proj/internal/lru_cache.hpp"
 #include "proj/internal/tracing.hpp"
 
-#include "sqlite3.hpp"
+#include "sqlite3_utils.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -491,7 +491,10 @@ void DatabaseContext::Private::cache(const std::string &code,
 
 void DatabaseContext::Private::open(const std::string &databasePath,
                                     PJ_CONTEXT *ctx) {
-    setPjCtxt(ctx ? ctx : pj_get_default_ctx());
+    if (!ctx) {
+        ctx = pj_get_default_ctx();
+    }
+    setPjCtxt(ctx);
     std::string path(databasePath);
     if (path.empty()) {
         path.resize(2048);
@@ -503,23 +506,26 @@ void DatabaseContext::Private::open(const std::string &databasePath,
         }
     }
 
+    std::string vfsName;
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    vfs_ = SQLite3VFS::create(false, true, true);
-    if (vfs_ == nullptr ||
-        sqlite3_open_v2(path.c_str(), &sqlite_handle_,
-                        SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX,
-                        vfs_->name()) != SQLITE_OK ||
-        !sqlite_handle_) {
-        throw FactoryException("Open of " + path + " failed");
+    if (ctx->custom_sqlite3_vfs_name.empty()) {
+        vfs_ = SQLite3VFS::create(false, true, true);
+        if (vfs_ == nullptr) {
+            throw FactoryException("Open of " + path + " failed");
+        }
+        vfsName = vfs_->name();
+    } else
+#endif
+    {
+        vfsName = ctx->custom_sqlite3_vfs_name;
     }
-#else
     if (sqlite3_open_v2(path.c_str(), &sqlite_handle_,
                         SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX,
-                        nullptr) != SQLITE_OK ||
+                        vfsName.empty() ? nullptr : vfsName.c_str()) !=
+            SQLITE_OK ||
         !sqlite_handle_) {
         throw FactoryException("Open of " + path + " failed");
     }
-#endif
 
     databasePath_ = path;
     registerFunctions();

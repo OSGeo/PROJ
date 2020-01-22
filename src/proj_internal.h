@@ -685,6 +685,23 @@ struct projGridChunkCache
     int ttl = 86400; // 1 day
 };
 
+struct projFileApiCallbackAndData
+{
+    PROJ_FILE_HANDLE* (*open_cbk)(PJ_CONTEXT *ctx, const char *filename, PROJ_OPEN_ACCESS access, void* user_data) = nullptr;
+    size_t           (*read_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, void* buffer, size_t size, void* user_data) = nullptr;
+    size_t           (*write_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, const void* buffer, size_t size, void* user_data) = nullptr;
+    int              (*seek_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, long long offset, int whence, void* user_data) = nullptr;
+    unsigned long long (*tell_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, void* user_data) = nullptr;
+    void             (*close_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, void* user_data) = nullptr;
+
+    int (*exists_cbk)(PJ_CONTEXT *ctx, const char *filename, void* user_data) = nullptr;
+    int (*mkdir_cbk)(PJ_CONTEXT *ctx, const char *filename, void* user_data) = nullptr;
+    int (*unlink_cbk)(PJ_CONTEXT *ctx, const char *filename, void* user_data) = nullptr;
+    int (*rename_cbk)(PJ_CONTEXT *ctx, const char *oldPath, const char *newPath, void* user_data) = nullptr;
+
+    void*            user_data = nullptr;
+};
+
 /* proj thread context */
 struct projCtx_t {
     int     last_errno = 0;
@@ -696,6 +713,7 @@ struct projCtx_t {
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
 
+    std::string env_var_proj_lib{}; // content of PROJ_LIB environment variable. Use Filemanager::getProjLibEnvVar() to access
     std::vector<std::string> search_paths{};
     const char **c_compat_paths = nullptr; // same, but for projinfo usage
 
@@ -705,6 +723,9 @@ struct projCtx_t {
 
     projNetworkCallbacksAndData networking{};
     bool defer_grid_opening = false; // set by pj_obj_create()
+
+    projFileApiCallbackAndData fileApi{};
+    std::string custom_sqlite3_vfs_name{};
 
     bool iniFileLoaded = false;
     std::string endpoint{};

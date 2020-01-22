@@ -168,8 +168,17 @@ AC_SUBST(C_WFLAGS,$C_WFLAGS)
 AC_SUBST(CXX_WFLAGS,$CXX_WFLAGS)
 AC_SUBST(NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG,$NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG)
 
-CFLAGS="${CFLAGS} -fvisibility=hidden -DNOMINMAX"
-CXXFLAGS="${CXXFLAGS} -fvisibility=hidden -DNOMINMAX"
+CFLAGS="${CFLAGS} -fvisibility=hidden"
+CXXFLAGS="${CXXFLAGS} -fvisibility=hidden"
+
+case "${host_os}" in
+    cygwin* | mingw32* | pw32* | beos* | darwin*)
+        CFLAGS="${CFLAGS} -DNOMINMAX"
+        CXXFLAGS="${CXXFLAGS} -DNOMINMAX"
+        ;;
+    *)
+        ;;
+esac
 
 dnl Checks for libraries.
 save_CFLAGS="$CFLAGS"

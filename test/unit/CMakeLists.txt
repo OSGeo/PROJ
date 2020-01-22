@@ -128,14 +128,20 @@ add_executable(proj_test_cpp_api
   test_operation.cpp
   test_datum.cpp
   test_factory.cpp
-  test_c_api.cpp)
+  test_c_api.cpp
+  test_grids.cpp)
 target_link_libraries(proj_test_cpp_api
   GTest::gtest
   ${PROJ_LIBRARIES}
   ${SQLITE3_LIBRARY})
 add_test(NAME proj_test_cpp_api COMMAND proj_test_cpp_api)
-set_property(TEST proj_test_cpp_api
-        PROPERTY ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data")
+if(MSVC)
+    set_property(TEST proj_test_cpp_api
+            PROPERTY ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data\\;${PROJECT_SOURCE_DIR}/data")
+else()
+    set_property(TEST proj_test_cpp_api
+            PROPERTY ENVIRONMENT "PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data:${PROJECT_SOURCE_DIR}/data")
+endif()
 
 
 add_executable(gie_self_tests

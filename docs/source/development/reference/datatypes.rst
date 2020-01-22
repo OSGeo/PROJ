@@ -797,11 +797,48 @@ Logging
     .. versionadded:: 5.1.0
 
 
+Setting custom I/O functions
+-------------------------------------------------------------------------------
+
+.. versionadded:: 7.0.0
+
+.. doxygenstruct:: PROJ_FILE_API
+   :project: doxygen_api
+   :members:
+
+.. doxygentypedef:: PROJ_FILE_HANDLE
+   :project: doxygen_api
+
+.. doxygenenum:: PROJ_OPEN_ACCESS
+   :project: doxygen_api
+
+
+Network related functionality
+-------------------------------------------------------------------------------
+
+.. versionadded:: 7.0.0
+
+.. doxygentypedef:: PROJ_NETWORK_HANDLE
+   :project: doxygen_api
+
+.. doxygentypedef:: proj_network_open_cbk_type
+   :project: doxygen_api
+
+.. doxygentypedef:: proj_network_close_cbk_type
+   :project: doxygen_api
+
+.. doxygentypedef:: proj_network_get_header_value_cbk_type
+   :project: doxygen_api
+
+.. doxygentypedef:: proj_network_read_range_type
+   :project: doxygen_api
+
+
 C API for ISO-19111 functionality
 -------------------------------------------------------------------------------
 
 .. doxygengroup:: iso19111_types
-   :project: cpp_stuff
+   :project: doxygen_api
    :content-only:
 
 

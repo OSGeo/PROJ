@@ -355,7 +355,66 @@ int PROJ_DLL proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_leg
 
 /*! @endcond */
 
-/** Opaque structure for PROJ. Implementations might cast it to their
+/** Opaque structure for PROJ for a file handle. Implementations might cast it to their
+ * structure/class of choice. */
+typedef struct PROJ_FILE_HANDLE PROJ_FILE_HANDLE;
+
+/** Open access / mode */
+typedef enum PROJ_OPEN_ACCESS
+{
+    /** Read-only access. Equivalent to "rb" */
+    PROJ_OPEN_ACCESS_READ_ONLY,
+
+    /** Read-update access. File should be created if not existing. Equivalent to "r+b" */
+    PROJ_OPEN_ACCESS_READ_UPDATE,
+
+    /** Create access. File should be truncated to 0-byte if already existing. Equivalent to "w+b" */
+    PROJ_OPEN_ACCESS_CREATE
+} PROJ_OPEN_ACCESS;
+
+/** File API callbacks */
+typedef struct PROJ_FILE_API
+{
+    /** Version of this structure. Should be set to 1 currently. */
+    int version;
+
+    /** Open file. Return NULL if error */
+    PROJ_FILE_HANDLE* (*open_cbk)(PJ_CONTEXT *ctx, const char *filename, PROJ_OPEN_ACCESS access, void* user_data);
+
+    /** Read sizeBytes into buffer from current position and return number of bytes read */
+    size_t            (*read_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, void* buffer, size_t sizeBytes, void* user_data);
+
+    /** Write sizeBytes into buffer from current position and return number of bytes written */
+    size_t            (*write_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, const void* buffer, size_t sizeBytes, void* user_data);
+
+    /** Seek to offset using whence=SEEK_SET/SEEK_CUR/SEEK_END. Return TRUE in case of success */
+    int               (*seek_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, long long offset, int whence, void* user_data);
+
+    /** Return current file position */
+    unsigned long long (*tell_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, void* user_data);
+
+    /** Close file */
+    void              (*close_cbk)(PJ_CONTEXT *ctx, PROJ_FILE_HANDLE*, void* user_data);
+
+    /** Return TRUE if a file exists */
+    int (*exists_cbk)(PJ_CONTEXT *ctx, const char *filename, void* user_data);
+
+    /** Return TRUE if directory exists or could be created  */
+    int (*mkdir_cbk)(PJ_CONTEXT *ctx, const char *filename, void* user_data);
+
+    /** Return TRUE if file could be removed  */
+    int (*unlink_cbk)(PJ_CONTEXT *ctx, const char *filename, void* user_data);
+
+    /** Return TRUE if file could be renamed  */
+    int (*rename_cbk)(PJ_CONTEXT *ctx, const char *oldPath, const char *newPath, void* user_data);
+} PROJ_FILE_API;
+
+int PROJ_DLL proj_context_set_fileapi(
+    PJ_CONTEXT* ctx, const PROJ_FILE_API* fileapi, void* user_data);
+
+void PROJ_DLL proj_context_set_sqlite3_vfs_name(PJ_CONTEXT* ctx, const char* name);
+
+/** Opaque structure for PROJ for a network handle. Implementations might cast it to their
  * structure/class of choice. */
 typedef struct PROJ_NETWORK_HANDLE PROJ_NETWORK_HANDLE;
 

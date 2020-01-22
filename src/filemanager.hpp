@@ -39,13 +39,26 @@ NS_PROJ_START
 
 class File;
 
+enum class FileAccess {
+    READ_ONLY,   // "rb"
+    READ_UPDATE, // "r+b"
+    CREATE,      // "w+b"
+};
+
 class FileManager {
   private:
     FileManager() = delete;
 
   public:
     // "Low-level" interface.
-    static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename);
+    static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename,
+                                      FileAccess access);
+    static bool exists(PJ_CONTEXT *ctx, const char *filename);
+    static bool mkdir(PJ_CONTEXT *ctx, const char *filename);
+    static bool unlink(PJ_CONTEXT *ctx, const char *filename);
+    static bool rename(PJ_CONTEXT *ctx, const char *oldPath,
+                       const char *newPath);
+    static std::string getProjLibEnvVar(PJ_CONTEXT *ctx);
 
     // "High-level" interface, honoring PROJ_LIB and the like.
     static std::unique_ptr<File> open_resource_file(PJ_CONTEXT *ctx,
@@ -66,6 +79,7 @@ class File {
   public:
     virtual ~File();
     virtual size_t read(void *buffer, size_t sizeBytes) = 0;
+    virtual size_t write(const void *buffer, size_t sizeBytes) = 0;
     virtual bool seek(unsigned long long offset, int whence = SEEK_SET) = 0;
     virtual unsigned long long tell() = 0;
     virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
@@ -73,6 +87,10 @@ class File {
 
     const std::string &name() const { return name_; }
 };
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<File> pj_network_file_open(PJ_CONTEXT* ctx, const char* filename);
 
 NS_PROJ_END
 

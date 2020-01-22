@@ -67,6 +67,8 @@ A proj installation includes a SQLite database of transformation information
 that must be accessible for the library to work properly.  The library will
 print an error if the database can't be found.
 
+.. _proj-ini:
+
 proj.ini
 -------------------------------------------------------------------------------
 
@@ -92,7 +94,7 @@ Its default content is:
 
     cache_enabled = on
 
-    cache_size_MB = 100
+    cache_size_MB = 300
 
     cache_ttl_sec = 86400
 

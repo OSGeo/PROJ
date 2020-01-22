@@ -60,6 +60,17 @@ $EXE +proj=latlong +datum=NAD83 +to +proj=latlong +ellps=clrk66 +nadgrids=ntv2_0
 -112.5839956 49.4914451 0
 EOF
 
+echo "##############################################################" >> ${OUT}
+echo "Interpolating very close (and sometimes a bit outside) to the edges a NTv2 subgrid (#209)" >> ${OUT}
+$EXE +proj=latlong +datum=NAD83 +to +proj=latlong +ellps=clrk66 +nadgrids=ntv2_0.gsb -E -d 8 >>${OUT} <<EOF
+-115.58333333 51.25000000 0
+-115.58333333 51.25000010 0
+-115.58333334 51.25000000 0
+-115.49166667 51.07500000 0
+-115.49166668 51.07500000 0
+-115.49166667 51.07499990 0
+EOF
+
 #
 ##############################################################################
 # Done! 

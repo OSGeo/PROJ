@@ -247,7 +247,6 @@ set(SRC_LIBPROJ_CORE
   mlfn.cpp
   msfn.cpp
   mutex.cpp
-  open_lib.cpp
   param.cpp
   phi2.cpp
   pipeline.cpp
@@ -282,8 +281,9 @@ set(SRC_LIBPROJ_CORE
   grids.cpp
   filemanager.hpp
   filemanager.cpp
-  sqlite3.hpp
-  sqlite3.cpp
+  networkfilemanager.cpp
+  sqlite3_utils.hpp
+  sqlite3_utils.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/proj_config.h
 )
 
@@ -367,6 +367,10 @@ target_compile_options(${PROJ_CORE_TARGET}
   PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
 )
 
+if(MSVC OR MINGW)
+    target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DNOMINMAX)
+endif()
+
 # Tell Intel compiler to do arithmetic accurately.  This is needed to stop the
 # compiler from ignoring parentheses in expressions like (a + b) + c and from
 # simplifying 0.0 + x to x (which is wrong if x = -0.0).
@@ -438,16 +442,16 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
   target_link_libraries(${PROJ_CORE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-include_directories(${SQLITE3_INCLUDE_DIR})
+target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${SQLITE3_INCLUDE_DIR})
 target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
 
-if(NOT DISABLE_TIFF_IS_STRONGLY_DISCOURAGED)
-  include_directories(${TIFF_INCLUDE_DIR})
+if(NOT DISABLE_TIFF)
+  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${TIFF_INCLUDE_DIR})
   target_link_libraries(${PROJ_CORE_TARGET} ${TIFF_LIBRARY})
 endif()
 
 if(CURL_FOUND)
-  include_directories(${CURL_INCLUDE_DIR})
+  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${CURL_INCLUDE_DIR})
   target_link_libraries(${PROJ_CORE_TARGET} ${CURL_LIBRARY})
 endif()
 

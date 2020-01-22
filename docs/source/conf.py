@@ -376,7 +376,7 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 breathe_projects = {
-    "cpp_stuff":"../build/xml/",
+    "doxygen_api":"../build/xml/",
 }
 
 import redirects

@@ -1574,27 +1574,45 @@ TEST(networking, download_whole_files) {
 
     proj_cleanup();
     unlink("proj_test_tmp/cache.db");
-    unlink("proj_test_tmp/ntf_r93.tif");
+    unlink("proj_test_tmp/dvr90.tif");
     rmdir("proj_test_tmp");
 
     putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY="));
     putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY=./proj_test_tmp"));
-    putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE=30000"));
+    putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE=100000"));
     auto ctx = proj_context_create();
     proj_context_set_enable_network(ctx, true);
 
-    ASSERT_TRUE(proj_is_download_needed(ctx, "ntf_r93.gsb", false));
+    ASSERT_TRUE(proj_is_download_needed(ctx, "dvr90.gtx", false));
 
-    ASSERT_TRUE(
-        proj_download_file(ctx, "ntf_r93.gsb", false, nullptr, nullptr));
+    ASSERT_TRUE(proj_download_file(ctx, "dvr90.gtx", false, nullptr, nullptr));
 
-    FILE *f = fopen("proj_test_tmp/ntf_r93.tif", "rb");
+    FILE *f = fopen("proj_test_tmp/dvr90.tif", "rb");
     ASSERT_NE(f, nullptr);
-    fseek(f, 0, SEEK_END);
-    ASSERT_EQ(ftell(f), 93581);
     fclose(f);
 
-    ASSERT_FALSE(proj_is_download_needed(ctx, "ntf_r93.gsb", false));
+    proj_context_set_enable_network(ctx, false);
+
+    const char *pipeline =
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=vgridshift +grids=dvr90.gtx +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
+
+    auto P = proj_create(ctx, pipeline);
+    ASSERT_NE(P, nullptr);
+
+    double lon = 12;
+    double lat = 56;
+    double z = 0;
+    proj_trans_generic(P, PJ_FWD, &lon, sizeof(double), 1, &lat, sizeof(double),
+                       1, &z, sizeof(double), 1, nullptr, 0, 0);
+    EXPECT_NEAR(z, 36.5909996032715, 1e-10);
+    proj_destroy(P);
+
+    proj_context_set_enable_network(ctx, true);
+
+    ASSERT_FALSE(proj_is_download_needed(ctx, "dvr90.gtx", false));
 
     {
         sqlite3 *hDB = nullptr;
@@ -1613,7 +1631,7 @@ TEST(networking, download_whole_files) {
     }
 
     // If we ignore TTL settings, then no network access will be done
-    ASSERT_FALSE(proj_is_download_needed(ctx, "ntf_r93.gsb", true));
+    ASSERT_FALSE(proj_is_download_needed(ctx, "dvr90.gtx", true));
 
     {
         sqlite3 *hDB = nullptr;
@@ -1633,7 +1651,7 @@ TEST(networking, download_whole_files) {
     }
 
     // Should recheck from the CDN, update last_checked and do nothing
-    ASSERT_FALSE(proj_is_download_needed(ctx, "ntf_r93.gsb", false));
+    ASSERT_FALSE(proj_is_download_needed(ctx, "dvr90.gtx", false));
 
     {
         sqlite3 *hDB = nullptr;
@@ -1662,10 +1680,10 @@ TEST(networking, download_whole_files) {
         sqlite3_close(hDB);
     }
 
-    ASSERT_TRUE(proj_is_download_needed(ctx, "ntf_r93.gsb", false));
+    ASSERT_TRUE(proj_is_download_needed(ctx, "dvr90.gtx", false));
 
     // Redo download with a progress callback this time.
-    unlink("proj_test_tmp/ntf_r93.tif");
+    unlink("proj_test_tmp/dvr90.tif");
 
     const auto cbk = [](PJ_CONTEXT *l_ctx, double pct, void *user_data) -> int {
         auto vect = static_cast<std::vector<std::pair<PJ_CONTEXT *, double>> *>(
@@ -1675,7 +1693,7 @@ TEST(networking, download_whole_files) {
     };
 
     std::vector<std::pair<PJ_CONTEXT *, double>> vectPct;
-    ASSERT_TRUE(proj_download_file(ctx, "ntf_r93.gsb", false, cbk, &vectPct));
+    ASSERT_TRUE(proj_download_file(ctx, "dvr90.gtx", false, cbk, &vectPct));
     ASSERT_EQ(vectPct.size(), 3U);
     ASSERT_EQ(vectPct.back().first, ctx);
     ASSERT_EQ(vectPct.back().second, 1.0);
@@ -1685,7 +1703,151 @@ TEST(networking, download_whole_files) {
     putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY="));
     putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE="));
     unlink("proj_test_tmp/cache.db");
-    unlink("proj_test_tmp/ntf_r93.tif");
+    unlink("proj_test_tmp/dvr90.tif");
+    rmdir("proj_test_tmp");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(networking, file_api) {
+    if (!networkAccessOK) {
+        return;
+    }
+
+    proj_cleanup();
+    unlink("proj_test_tmp/cache.db");
+    unlink("proj_test_tmp/dvr90.tif");
+    rmdir("proj_test_tmp");
+
+    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY="));
+    putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY=./proj_test_tmp"));
+    putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE=30000"));
+    auto ctx = proj_context_create();
+    proj_context_set_enable_network(ctx, true);
+
+    struct UserData {
+        bool in_open = false;
+        bool in_read = false;
+        bool in_write = false;
+        bool in_seek = false;
+        bool in_tell = false;
+        bool in_close = false;
+        bool in_exists = false;
+        bool in_mkdir = false;
+        bool in_unlink = false;
+        bool in_rename = false;
+    };
+
+    struct PROJ_FILE_API api;
+    api.version = 1;
+    api.open_cbk = [](PJ_CONTEXT *, const char *filename,
+                      PROJ_OPEN_ACCESS access,
+                      void *user_data) -> PROJ_FILE_HANDLE * {
+        static_cast<UserData *>(user_data)->in_open = true;
+        return reinterpret_cast<PROJ_FILE_HANDLE *>(fopen(
+            filename,
+            access == PROJ_OPEN_ACCESS_READ_ONLY
+                ? "rb"
+                : access == PROJ_OPEN_ACCESS_READ_UPDATE ? "r+b" : "w+b"));
+    };
+    api.read_cbk = [](PJ_CONTEXT *, PROJ_FILE_HANDLE *handle, void *buffer,
+                      size_t sizeBytes, void *user_data) -> size_t {
+        static_cast<UserData *>(user_data)->in_read = true;
+        return fread(buffer, 1, sizeBytes, reinterpret_cast<FILE *>(handle));
+    };
+    api.write_cbk = [](PJ_CONTEXT *, PROJ_FILE_HANDLE *handle,
+                       const void *buffer, size_t sizeBytes,
+                       void *user_data) -> size_t {
+        static_cast<UserData *>(user_data)->in_write = true;
+        return fwrite(buffer, 1, sizeBytes, reinterpret_cast<FILE *>(handle));
+    };
+    api.seek_cbk = [](PJ_CONTEXT *, PROJ_FILE_HANDLE *handle, long long offset,
+                      int whence, void *user_data) -> int {
+        static_cast<UserData *>(user_data)->in_seek = true;
+        return fseek(reinterpret_cast<FILE *>(handle),
+                     static_cast<long>(offset), whence) == 0;
+    };
+    api.tell_cbk = [](PJ_CONTEXT *, PROJ_FILE_HANDLE *handle,
+                      void *user_data) -> unsigned long long {
+        static_cast<UserData *>(user_data)->in_tell = true;
+        return ftell(reinterpret_cast<FILE *>(handle));
+    };
+    api.close_cbk = [](PJ_CONTEXT *, PROJ_FILE_HANDLE *handle,
+                       void *user_data) -> void {
+        static_cast<UserData *>(user_data)->in_close = true;
+        fclose(reinterpret_cast<FILE *>(handle));
+    };
+    api.exists_cbk = [](PJ_CONTEXT *, const char *filename,
+                        void *user_data) -> int {
+        static_cast<UserData *>(user_data)->in_exists = true;
+        struct stat buf;
+        return stat(filename, &buf) == 0;
+    };
+    api.mkdir_cbk = [](PJ_CONTEXT *, const char *filename,
+                       void *user_data) -> int {
+        static_cast<UserData *>(user_data)->in_mkdir = true;
+#ifdef _WIN32
+        return mkdir(filename) == 0;
+#else
+        return mkdir(filename, 0755) == 0;
+#endif
+    };
+    api.unlink_cbk = [](PJ_CONTEXT *, const char *filename,
+                        void *user_data) -> int {
+        static_cast<UserData *>(user_data)->in_unlink = true;
+        return unlink(filename) == 0;
+    };
+    api.rename_cbk = [](PJ_CONTEXT *, const char *oldPath, const char *newPath,
+                        void *user_data) -> int {
+        static_cast<UserData *>(user_data)->in_rename = true;
+        return rename(oldPath, newPath) == 0;
+    };
+
+    UserData userData;
+    ASSERT_TRUE(proj_context_set_fileapi(ctx, &api, &userData));
+
+    ASSERT_TRUE(proj_is_download_needed(ctx, "dvr90.gtx", false));
+
+    ASSERT_TRUE(proj_download_file(ctx, "dvr90.gtx", false, nullptr, nullptr));
+
+    ASSERT_TRUE(userData.in_open);
+    ASSERT_FALSE(userData.in_read);
+    ASSERT_TRUE(userData.in_write);
+    ASSERT_TRUE(userData.in_close);
+    ASSERT_TRUE(userData.in_exists);
+    ASSERT_TRUE(userData.in_mkdir);
+    ASSERT_TRUE(userData.in_unlink);
+    ASSERT_TRUE(userData.in_rename);
+
+    proj_context_set_enable_network(ctx, false);
+
+    const char *pipeline =
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=vgridshift +grids=dvr90.gtx +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
+
+    auto P = proj_create(ctx, pipeline);
+    ASSERT_NE(P, nullptr);
+
+    double lon = 12;
+    double lat = 56;
+    double z = 0;
+    proj_trans_generic(P, PJ_FWD, &lon, sizeof(double), 1, &lat, sizeof(double),
+                       1, &z, sizeof(double), 1, nullptr, 0, 0);
+    EXPECT_NEAR(z, 36.5909996032715, 1e-10);
+
+    proj_destroy(P);
+
+    ASSERT_TRUE(userData.in_read);
+    ASSERT_TRUE(userData.in_seek);
+
+    proj_context_destroy(ctx);
+    putenv(const_cast<char *>("PROJ_IGNORE_USER_WRITABLE_DIRECTORY=YES"));
+    putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY="));
+    putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE="));
+    unlink("proj_test_tmp/cache.db");
+    unlink("proj_test_tmp/dvr90.tif");
     rmdir("proj_test_tmp");
 }
 
