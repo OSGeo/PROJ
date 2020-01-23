@@ -2581,7 +2581,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
                 pj_add_type_crs_if_needed(text_definition), d->context());
             auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(obj.get());
             if (projCRS) {
-                const auto &conv = projCRS->derivingConversionRef();
+                const auto conv = projCRS->derivingConversion();
                 auto newConv =
                     (conv->nameStr() == "unnamed")
                         ? operation::Conversion::create(
@@ -2602,10 +2602,9 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
                     boundCRS->baseCRS().get());
                 if (projCRS) {
                     auto newBoundCRS = crs::BoundCRS::create(
-                        crs::ProjectedCRS::create(
-                            props, projCRS->baseCRS(),
-                            projCRS->derivingConversionRef(),
-                            projCRS->coordinateSystem()),
+                        crs::ProjectedCRS::create(props, projCRS->baseCRS(),
+                                                  projCRS->derivingConversion(),
+                                                  projCRS->coordinateSystem()),
                         boundCRS->hubCRS(), boundCRS->transformation());
                     return NN_NO_CHECK(
                         util::nn_dynamic_pointer_cast<crs::ProjectedCRS>(
