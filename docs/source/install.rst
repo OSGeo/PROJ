@@ -167,6 +167,12 @@ If another path prefix is required, then execute::
 In either case, the directory of the prefix path must exist and be writable by
 the installer.
 
+If you are building from the git repository you have to first run::
+
+    ./autogen.sh
+
+which will generate a configure script that can be used as described above.
+
 Before proceeding with the installation we need to add the datum grids. Unzip
 the contents of the *proj-datumgrid* package into ``data/``::
 
