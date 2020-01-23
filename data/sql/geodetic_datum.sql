@@ -28,7 +28,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1057','Turkish National Reference Fr
 INSERT INTO "geodetic_datum" VALUES('EPSG','1058','Bhutan National Geodetic Datum',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1048','2003-11-14',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1060','Islands Net 2004',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1120','2004-08-07',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1061','International Terrestrial Reference Frame 2008',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1262','2005-01-01',0);
-INSERT INTO "geodetic_datum" VALUES('EPSG','1062','Posiciones Geodesicas Argentinas 2007',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1033','2006-08-07',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1062','Posiciones Geodesicas Argentinas 2007',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1033','2006-08-19',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1063','Marco Geodesico Nacional de Bolivia',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1049','2010-03-14',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1064','SIRGAS-Chile realization 1 epoch 2002',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1066','2002-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1065','Costa Rica 2005',NULL,NULL,'EPSG','7030','EPSG','8901','EPSG','1074','2005-10-30',0);
@@ -148,6 +148,10 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1251','Kosovo Reference System 2001'
 INSERT INTO "geodetic_datum" VALUES('EPSG','1252','SIRGAS-Chile realization 3 epoch 2013.00',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1066','2013-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1253','SIRGAS-Chile realization 4 epoch 2016.00',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1066','2016-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1254','SIRGAS-Chile',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1066',NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1257','Tapi Aike',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','4569','1945-01-01',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1258','Ministerio de Marina Norte',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','2357',NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1259','Ministerio de Marina Sur',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','2357',NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1268','Kingdom of Saudi Arabia Geodetic Reference Frame 2017',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1206','2017-12-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,NULL,'EPSG','7001','EPSG','8901','EPSG','1263',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,NULL,'EPSG','7002','EPSG','8901','EPSG','1263',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6003','Not specified (based on Australian National Spheroid)',NULL,NULL,'EPSG','7003','EPSG','8901','EPSG','1263',NULL,0);
@@ -231,8 +235,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','6156','System of the Unified Trigono
 INSERT INTO "geodetic_datum" VALUES('EPSG','6157','Mount Dillon',NULL,NULL,'EPSG','7007','EPSG','8901','EPSG','1322',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6158','Naparima 1955',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','3143','1955-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6159','European Libyan Datum 1979',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','1143','1979-01-01',0);
-INSERT INTO "geodetic_datum" VALUES('EPSG','6160','Chos Malal 1914',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','1292','1914-01-01',0);
-INSERT INTO "geodetic_datum" VALUES('EPSG','6161','Pampa del Castillo',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','1265',NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','6160','Chos Malal 1914',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','4562','1914-01-01',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','6161','Pampa del Castillo',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','4563',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6162','Korean Datum 1985',NULL,NULL,'EPSG','7004','EPSG','8901','EPSG','3266','1985-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6163','Yemen National Geodetic Network 1996',NULL,NULL,'EPSG','7030','EPSG','8901','EPSG','1257','1996-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6164','South Yemen',NULL,NULL,'EPSG','7024','EPSG','8901','EPSG','1340',NULL,0);
@@ -347,7 +351,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','6276','NSWC 9Z-2',NULL,NULL,'EPSG','
 INSERT INTO "geodetic_datum" VALUES('EPSG','6277','OSGB 1936',NULL,NULL,'EPSG','7001','EPSG','8901','EPSG','4390','1936-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6278','OSGB 1970 (SN)',NULL,NULL,'EPSG','7001','EPSG','8901','EPSG','1264','1970-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6279','OS (SN) 1980',NULL,NULL,'EPSG','7001','EPSG','8901','EPSG','1354','1980-01-01',0);
-INSERT INTO "geodetic_datum" VALUES('EPSG','6280','Padang 1884',NULL,NULL,'EPSG','7004','EPSG','8901','EPSG','1355','1884-01-01',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','6280','Padang 1884',NULL,NULL,'EPSG','7004','EPSG','8901','EPSG','1355','1884-01-01',1);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6281','Palestine 1923',NULL,NULL,'EPSG','7010','EPSG','8901','EPSG','1356','1923-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6282','Congo 1960 Pointe Noire',NULL,NULL,'EPSG','7011','EPSG','8901','EPSG','1072','1960-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6283','Geocentric Datum of Australia 1994',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','4177','1994-01-01',0);
@@ -558,7 +562,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','6804','Makassar (Jakarta)',NULL,NULL
 INSERT INTO "geodetic_datum" VALUES('EPSG','6805','Militar-Geographische Institut (Ferro)',NULL,NULL,'EPSG','7004','EPSG','8909','EPSG','1321','1901-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6806','Monte Mario (Rome)',NULL,NULL,'EPSG','7022','EPSG','8906','EPSG','3343',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6807','Nouvelle Triangulation Francaise (Paris)',NULL,NULL,'EPSG','7011','EPSG','8903','EPSG','3694','1895-01-01',0);
-INSERT INTO "geodetic_datum" VALUES('EPSG','6808','Padang 1884 (Jakarta)',NULL,NULL,'EPSG','7004','EPSG','8908','EPSG','1355','1884-01-01',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','6808','Padang 1884 (Jakarta)',NULL,NULL,'EPSG','7004','EPSG','8908','EPSG','1355','1884-01-01',1);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6809','Reseau National Belge 1950 (Brussels)',NULL,NULL,'EPSG','7022','EPSG','8910','EPSG','1347','1950-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6810','Tananarive 1925 (Paris)',NULL,NULL,'EPSG','7022','EPSG','8903','EPSG','3273','1925-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6811','Voirol 1875 (Paris)',NULL,NULL,'EPSG','7011','EPSG','8903','EPSG','1365','1875-01-01',0);

@@ -940,7 +940,7 @@ TEST(
         "        BBOX[-22.37,166.35,-22.19,166.54]],\n"
         "    ID[\"EPSG\",1295],\n"
         "    REMARK[\"Emulation using NTv2 method of tfm NEA74 Noumea to "
-        "RGNC91-93 (3) (code 15943). Note reversal of sign of parameter values "
+        "RGNC91-93 (3) (code 9328). Note reversal of sign of parameter values "
         "in grid file.\"]]";
     EXPECT_EQ(
         op->exportToWKT(

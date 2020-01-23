@@ -18,9 +18,9 @@ INSERT INTO "axis" VALUES('EPSG','1102','Westing','X','west','EPSG','1031',2,'EP
 INSERT INTO "axis" VALUES('EPSG','1110','Plant East','x','east','EPSG','1032',1,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','1111','Plant North','y','north','EPSG','1032',2,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','1112','Gravity-related height','z','up','EPSG','1032',3,'EPSG','9001');
-INSERT INTO "axis" VALUES('EPSG','1428','Bin grid I','I','J-axis plus 90°','EPSG','1033',1,'EPSG','1024');
+INSERT INTO "axis" VALUES('EPSG','1428','Bin grid I','I','J-axis plus 90 degrees','EPSG','1033',1,'EPSG','1024');
 INSERT INTO "axis" VALUES('EPSG','1429','Bin grid J','J','See associated operation','EPSG','1033',2,'EPSG','1024');
-INSERT INTO "axis" VALUES('EPSG','1431','Bin grid I','I','J-axis minus 90°','EPSG','1034',1,'EPSG','1024');
+INSERT INTO "axis" VALUES('EPSG','1431','Bin grid I','I','J-axis minus 90 degrees','EPSG','1034',1,'EPSG','1024');
 INSERT INTO "axis" VALUES('EPSG','1432','Bin grid J','J','See associated operation','EPSG','1034',2,'EPSG','1024');
 INSERT INTO "axis" VALUES('EPSG','1466','Easting','X','South along 180°E','EPSG','1035',1,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','1467','Northing','Y','South along 90°W','EPSG','1035',2,'EPSG','9001');

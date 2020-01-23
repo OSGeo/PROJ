@@ -1293,6 +1293,8 @@ static const MethodMapping otherMethodMappings[] = {
 
     {EPSG_NAME_METHOD_VERTCON, EPSG_CODE_METHOD_VERTCON, nullptr, nullptr,
      nullptr, paramsVERTCON},
+    {EPSG_NAME_METHOD_VERTCON_OLDNAME, EPSG_CODE_METHOD_VERTCON, nullptr,
+     nullptr, nullptr, paramsVERTCON},
 };
 
 // end of anonymous namespace

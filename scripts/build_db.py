@@ -395,8 +395,12 @@ def fill_grid_transformation(proj_db_cursor):
             grid2_param_code = param_code[1]
             grid2_param_name = param_name[1]
             grid2_value = param_value[1]
-        elif method_code == 1071: # Vertical Offset by Grid Interpolation (NZLVD) 
-            assert param_code[1] == 1048, param_code[1]
+        # 1071: Vertical Offset by Grid Interpolation (NZLVD)
+        # 1080: Vertical Offset by Grid Interpolation (BEV AT)
+        # 1081: Geographic3D to GravityRelatedHeight (BEV AT)
+        # 1084: Vertical Offset by Grid Interpolation (gtx)
+        elif method_code in (1071, 1080, 1081, 1084) and n_params == 2:
+            assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
         else:
