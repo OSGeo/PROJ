@@ -8492,6 +8492,7 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
         "1060", // Geographic3D to GravityRelatedHeight (CGG2013)
         "1072", // Geographic3D to GravityRelatedHeight (OSGM15-Ire)
         "1073", // Geographic3D to GravityRelatedHeight (IGN2009)
+        "1081", // Geographic3D to GravityRelatedHeight (BEV AT)
         "9661", // Geographic3D to GravityRelatedHeight (EGM)
         "9662", // Geographic3D to GravityRelatedHeight (Ausgeoid98)
         "9663", // Geographic3D to GravityRelatedHeight (OSGM-GB)
@@ -8644,7 +8645,10 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
                                                 inverseDirection)) {
 
         if (horizontalGridName == projFilename) {
-            assert(!inverseDirection);
+            if (inverseDirection) {
+                throw util::UnsupportedOperationException(
+                    "Inverse direction for " + projFilename + " not supported");
+            }
             return self;
         }
 
@@ -8701,33 +8705,6 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
         }
     }
 
-    const auto &heightFilename = getHeightToGeographic3DFilename();
-    if (!heightFilename.empty() && !projFilename.empty()) {
-        if (databaseContext->lookForGridAlternative(
-                heightFilename, projFilename, projGridFormat,
-                inverseDirection)) {
-
-            if (heightFilename == projFilename) {
-                assert(!inverseDirection);
-                return self;
-            }
-
-            if (inverseDirection) {
-                return createGravityRelatedHeightToGeographic3D(
-                           createPropertiesForInverse(self.as_nullable().get(),
-                                                      true, false),
-                           targetCRS(), sourceCRS(), interpolationCRS(),
-                           projFilename, coordinateOperationAccuracies())
-                    ->inverseAsTransformation();
-            } else {
-                return createGravityRelatedHeightToGeographic3D(
-                    createSimilarPropertiesTransformation(self), sourceCRS(),
-                    targetCRS(), interpolationCRS(), projFilename,
-                    coordinateOperationAccuracies());
-            }
-        }
-    }
-
     if (isGeographic3DToGravityRelatedHeight(method(), false)) {
         const auto &fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME,
@@ -8738,14 +8715,20 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
             if (databaseContext->lookForGridAlternative(
                     filename, projFilename, projGridFormat, inverseDirection)) {
 
+                if (inverseDirection) {
+                    throw util::UnsupportedOperationException(
+                        "Inverse direction for "
+                        "Geographic3DToGravityRelatedHeight not supported");
+                }
+
                 if (filename == projFilename) {
-                    assert(!inverseDirection);
                     return self;
                 }
 
                 auto parameters = std::vector<OperationParameterNNPtr>{
                     createOpParamNameEPSGCode(
                         EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME)};
+#ifdef disabled_for_now
                 if (inverseDirection) {
                     return create(createPropertiesForInverse(
                                       self.as_nullable().get(), true, false),
@@ -8755,7 +8738,9 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
                                                   projFilename)},
                                   coordinateOperationAccuracies())
                         ->inverseAsTransformation();
-                } else {
+                } else
+#endif
+                {
                     return create(
                         createSimilarPropertiesTransformation(self),
                         sourceCRS(), targetCRS(), nullptr,
@@ -8768,7 +8753,8 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD) {
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
@@ -8780,7 +8766,11 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
                     filename, projFilename, projGridFormat, inverseDirection)) {
 
                 if (filename == projFilename) {
-                    assert(!inverseDirection);
+                    if (inverseDirection) {
+                        throw util::UnsupportedOperationException(
+                            "Inverse direction for " + projFilename +
+                            " not supported");
+                    }
                     return self;
                 }
 
@@ -9402,17 +9392,8 @@ void Transformation::_exportToPROJString(
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             auto filename = fileParameter->valueFile();
             bool doInversion = isMethodInverseOf;
-            if (!identifiers().empty() &&
-                *identifiers().front()->codeSpace() ==
-                    metadata::Identifier::EPSG &&
-                method()->nameStr() ==
-                    "Geographic3D to GravityRelatedHeight (US .gtx)" &&
-                ends_with(filename, ".gtx")) {
-                // gtx files, from straight EPSG definition, must be applied in
-                // reverse order for "Geographic3D to GravityRelatedHeight"
-                // method
-                doInversion = !doInversion;
-            }
+            // The EPSG Geog3DToHeight is the reverse convention of PROJ !
+            doInversion = !doInversion;
             if (doInversion) {
                 formatter->startInversion();
             }
@@ -9442,7 +9423,8 @@ void Transformation::_exportToPROJString(
         }
     }
 
-    if (methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD) {
+    if (methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);

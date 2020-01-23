@@ -282,8 +282,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('WW15MGH.GRD',
                               'egm96_15.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid',
                               NULL, NULL, NULL, NULL);
 
@@ -297,8 +297,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree.gz',
                               'egm08_25.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-world',
                               NULL, NULL, NULL, NULL);
 
@@ -314,8 +314,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('gr2000g.gri',
                               'gvr2000.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -329,8 +329,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('ggeoid16.gri',
                               'gvr2016.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -346,8 +346,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('dvr90.gtx',
                               'dvr90.gtx', -- no change. Just document the package
                               'GTX',
-                              'vgridshift',
-                              0,         -- do not reverse here as grid_transformation_custom does reference from VerticalCRS height to Geographic height
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
@@ -362,8 +362,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('dnn.gtx',
                               'dnn.gtx', -- no change. Just document the package
                               'GTX',
-                              'vgridshift',
-                              0,         -- do not reverse here as grid_transformation_custom does reference from VerticalCRS height to Geographic height
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
@@ -379,8 +379,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('fvr09.gtx',
                               'fvr09.gtx', -- no change. Just document the package
                               'GTX',
-                              'vgridshift',
-                              0,         -- do not reverse here as grid_transformation_custom does reference from VerticalCRS height to Geographic height
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
@@ -396,8 +396,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('SWEN17_RH2000.gtx',
                               'SWEN17_RH2000.gtx', -- no change. Just document the package
                               'GTX',
-                              'vgridshift',
-                              0,         -- do not reverse here as grid_transformation_custom does reference from VerticalCRS height to Geographic height
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
@@ -413,8 +413,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('OSGM15_Malin.gri',
                               'OSGM15_Malin.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
@@ -430,8 +430,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('OSGM15_Belfast.gri',
                               'OSGM15_Belfast.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
@@ -440,28 +440,28 @@ INSERT INTO grid_alternatives(original_grid_name,
 ----------------------------
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g1999u01.bin', 'g1999u01.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g1999u01.bin', 'g1999u01.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g1999u02.bin', 'g1999u02.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g1999u02.bin', 'g1999u02.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g1999u03.bin', 'g1999u03.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g1999u03.bin', 'g1999u03.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g1999u04.bin', 'g1999u04.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g1999u04.bin', 'g1999u04.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g1999u05.bin', 'g1999u05.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g1999u05.bin', 'g1999u05.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g1999u06.bin', 'g1999u06.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g1999u06.bin', 'g1999u06.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g1999u07.bin', 'g1999u07.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g1999u07.bin', 'g1999u07.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g1999u08.bin', 'g1999u08.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g1999u08.bin', 'g1999u08.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 -- Not mapped:
 -- g1999a01.gtx to g1999a04.gtx : Alaska
@@ -473,7 +473,7 @@ INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_form
 ----------------------------
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('geoid03_conus.bin', 'geoid03_conus.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('geoid03_conus.bin', 'geoid03_conus.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 -- Not mapped:
 -- g2003a01.gtx to g2003a04.gtx : Alaska
@@ -485,26 +485,26 @@ INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_form
 ----------------------------
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('geoid06_ak.bin', 'geoid06_ak.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('geoid06_ak.bin', 'geoid06_ak.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 ----------------------------
 -- US GEOID09 height models
 ----------------------------
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('geoid09_ak.bin', 'geoid09_ak.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('geoid09_ak.bin', 'geoid09_ak.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('geoid09_conus.bin', 'geoid09_conus.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('geoid09_conus.bin', 'geoid09_conus.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g2009g01.bin', 'g2009g01.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g2009g01.bin', 'g2009g01.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g2009s01.bin', 'g2009s01.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g2009s01.bin', 'g2009s01.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g2009p01.bin', 'g2009p01.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g2009p01.bin', 'g2009p01.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 -- Not mapped:
 -- g2009h01.gtx : Hawaii
@@ -524,8 +524,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('g2012bu0.bin',
                               'g2012bu0.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -540,8 +540,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('g2012ba0.bin',
                               'g2012ba0.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -556,8 +556,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('g2012bp0.bin',
                               'g2012bp0.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -572,8 +572,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('g2012bg0.bin',
                               'g2012bg0.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -588,8 +588,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('g2012bs0.bin',
                               'g2012bs0.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -598,10 +598,10 @@ INSERT INTO grid_alternatives(original_grid_name,
 ----------------------------
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g2018u0.bin', 'g2018u0.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g2018u0.bin', 'g2018u0.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name, proj_grid_name, proj_grid_format, proj_method, inverse_direction, package_name, url, direct_download, open_license, directory)
-    VALUES ('g2018p0.bin', 'g2018p0.gtx', 'GTX', 'vgridshift', 1, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
+    VALUES ('g2018p0.bin', 'g2018p0.gtx', 'GTX', 'geoid_like', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);
 
 ----------------------------
 -- French vertical grids
@@ -617,8 +617,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('RAF09.mnt',
                               'RAF09.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
@@ -632,8 +632,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('RAF18.tac',
                               'RAF18.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
@@ -647,8 +647,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('RAC09.mnt',
                               'RAC09.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
 
@@ -662,8 +662,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('ggm00.txt',
                             'ggm00v2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -677,8 +677,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('ggg00.txt',
                             'ggg00v2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -692,8 +692,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('ggg00_mg.txt',
                             'ggg00_mgv2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -707,8 +707,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('ggg00_sm.txt',
                             'ggg00_smv2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -722,8 +722,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('ggg00_ls.txt',
                             'ggg00_lsv2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -737,8 +737,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('ggg00_ld.txt',
                             'RALDW842016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -752,8 +752,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('RALDW842016.mnt',
                             'RALDW842016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -767,8 +767,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('ggg00_sb.txt',
                             'ggg00_sbv2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -782,8 +782,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('gg10_mart.txt',
                             'RAMART2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -797,8 +797,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('RAMART2016.mnt',
                             'RAMART2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -812,8 +812,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('gg10_gtbt.txt',
                             'RAGTBT2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -827,8 +827,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('RAGTBT2016.mnt',
                             'RAGTBT2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -842,8 +842,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('gg10_mg.txt',
                             'RAMG2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -857,8 +857,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('RAMG2016.mnt',
                             'RAMG2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -872,8 +872,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('gg10_sm.txt',
                             'gg10_smv2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -887,8 +887,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('gg10_smv2.mnt',
                             'gg10_smv2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -902,8 +902,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('gg10_ls.txt',
                             'RALS2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -917,8 +917,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('RALS2016.mnt',
                             'RALS2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -932,8 +932,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('gg10_ld.txt',
                             'RALD2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -947,8 +947,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('RALD2016.mnt',
                             'RALD2016.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -962,8 +962,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('gg10_sb.txt',
                             'gg10_sbv2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -977,8 +977,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('gg10_sbv2.mnt',
                             'gg10_sbv2.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -992,8 +992,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('ggguy00.txt',
                             'ggguy15.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -1007,8 +1007,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('ggr99.txt',
                             'RAR07_bl.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -1022,8 +1022,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('GGSPM06v1.mnt',
                             'ggspm06v1.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -1037,8 +1037,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                     VALUES ('RASPM2018.mnt',
                             'RASPM2018.gtx',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);
 
@@ -1146,8 +1146,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('AUSGeoid09_GDA94_V1.01_DOV_windows.gsb',  -- source file contains undulation in first band, and deflection in 2nd and 3d band
                               'AUSGeoid09_V1.01.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
@@ -1161,8 +1161,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('AUSGeoid2020_windows_binary.gsb',  -- source file contains undulation in first band, and deflection in 2nd and 3d band
                               'AUSGeoid2020_20180201.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
@@ -1176,8 +1176,8 @@ INSERT INTO grid_alternatives(original_grid_name,
     SELECT grid_name,
            'AUSGeoid98.gtx',
            'GTX',
-           'vgridshift',
-           1,
+           'geoid_like',
+           0,
            'proj-datumgrid-oceania',
            NULL, NULL, NULL, NULL FROM grid_transformation WHERE
                 grid_name LIKE '%DAT.htm' AND name LIKE 'GDA94 to AHD height%';
@@ -1194,7 +1194,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('naptrans2008.gtx',
                               'naptrans2008.gtx',
                               'GTX',
-                              'vgridshift',
+                              'geoid_like',
                               0,
                               NULL, -- package name
                               'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/naptrans2008.gtx',
@@ -1692,8 +1692,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('HT2_0.byn',
                               'HT2_2010v70.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -1707,8 +1707,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('CGG2013i08a.byn',
                               'CGG2013ai08.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -1722,8 +1722,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('CGG2013n83a.byn',
                               'CGG2013an83.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -1737,8 +1737,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('CGG2013i83.byn',
                               'CGG2013i08.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -1752,8 +1752,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('CGG2013n83.byn',
                               'CGG2013n83.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-north-america',
                               NULL, NULL, NULL, NULL);
 
@@ -1799,7 +1799,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('Icegeoid_ISN2004.gtx',
                               'Icegeoid_ISN2004.gtx',
                               'GTX',
-                              'vgridshift',
+                              'geoid_like',
                               0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
@@ -1814,7 +1814,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('Icegeoid_ISN93.gtx',
                               'Icegeoid_ISN93.gtx',
                               'GTX',
-                              'vgridshift',
+                              'geoid_like',
                               0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
@@ -1829,7 +1829,7 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('Icegeoid_ISN2016.gtx',
                               'Icegeoid_ISN2016.gtx',
                               'GTX',
-                              'vgridshift',
+                              'geoid_like',
                               0,
                               'proj-datumgrid-europe',
                               NULL, NULL, NULL, NULL);
@@ -2030,6 +2030,26 @@ INSERT INTO grid_alternatives(original_grid_name,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
+-- WARNING: this builds the new entries from the above deprecated ones
+-- A check has been added in commit.sql to verify that a mapping from
+-- auckht1946-nzvd2016.gtx exists in this table, due to the below insert
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                       SELECT proj_grid_name,
+                              proj_grid_name, 'GTX',
+                              'vgridshift',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL
+                       FROM grid_alternatives
+                       WHERE proj_grid_name LIKE '%-nzvd2016.gtx';
+
+-- Superseded
 INSERT INTO grid_alternatives(original_grid_name,
                               proj_grid_name,
                               proj_grid_format,
@@ -2040,8 +2060,8 @@ INSERT INTO grid_alternatives(original_grid_name,
                       VALUES ('New_Zealand_Quasigeoid_2016.csv',
                               'nzgeoid2016.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
@@ -2052,12 +2072,41 @@ INSERT INTO grid_alternatives(original_grid_name,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
-                      VALUES ('nzgeoid09.sid',
-                              'nzgeoid2009.gtx',
+                      VALUES ('nzgeoid2016.gtx',
+                              'nzgeoid2016.gtx',
                               'GTX',
-                              'vgridshift',
-                              1,
+                              'geoid_like',
+                              0,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
 
+-- Superseded
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('nzgeoid09.sid',
+                              'nzgeoid2009.gtx',
+                              'GTX',
+                              'geoid_like',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
 
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('nzgeoid2009.gtx',
+                              'nzgeoid2009.gtx',
+                              'GTX',
+                              'geoid_like',
+                              0,
+                              'proj-datumgrid-oceania',
+                              NULL, NULL, NULL, NULL);
