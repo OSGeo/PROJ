@@ -234,6 +234,10 @@ Tests are run with::
 The test suite requires that the proj-datumgrid package is installed
 in :envvar:`PROJ_LIB`.
 
+If tests are not required, PROJ can be built without the test suite using the following configuration::
+
+    cmake -DBUILD_TESTING=OFF ..
+
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
 --------------------------------------------------------------------------------

@@ -212,13 +212,6 @@ if(MSVC OR CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_DEBUG_POSTFIX _d)
 endif()
 
-option(PROJ_TESTS "Enable build of collection of PROJ tests" ON)
-boost_report_value(PROJ_TESTS)
-if(PROJ_TESTS)
-  enable_testing()
-endif()
-include(ProjTest)
-
 # Put the libraries and binaries that get built into directories at the
 # top of the build tree rather than in hard-to-find leaf
 # directories. This simplifies manual testing and the use of the build
@@ -246,6 +239,22 @@ set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}"
   CACHE PATH "The directory to install cmake config files into.")
 
 ################################################################################
+# Tests
+################################################################################
+include(CTest)
+
+# Support older option, to be removed by PROJ 8.0
+if(DEFINED PROJ_TESTS)
+  message(DEPRECATION "PROJ_TESTS has been replaced with BUILD_TESTING")
+  set(BUILD_TESTING ${PROJ_TESTS})
+endif()
+
+boost_report_value(BUILD_TESTING)
+if(BUILD_TESTING)
+  include(ProjTest)
+endif()
+
+################################################################################
 # Build configured components
 ################################################################################
 include_directories(${PROJ4_SOURCE_DIR}/src)
@@ -256,6 +265,6 @@ add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(man)
 add_subdirectory(cmake)
-if(PROJ_TESTS)
+if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
