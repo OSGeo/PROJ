@@ -3574,7 +3574,7 @@ PJ *proj_crs_create_projected_3D_crs_from_2D(PJ_CONTEXT *ctx,
                         crs_name ? crs_name
                                  : cpp_projected_2D_crs->nameStr().c_str()),
                     NN_NO_CHECK(cpp_geog_3D_CRS),
-                    cpp_projected_2D_crs->derivingConversionRef(), newCS));
+                    cpp_projected_2D_crs->derivingConversion(), newCS));
         } catch (const std::exception &e) {
             proj_log_error(ctx, __FUNCTION__, e.what());
             if (ctx->cpp_context) {

@@ -9059,7 +9059,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     auto projCRS = dynamic_cast<ProjectedCRS *>(crs);
                     if (projCRS) {
                         // Override with easting northing order
-                        const auto &conv = projCRS->derivingConversionRef();
+                        const auto conv = projCRS->derivingConversion();
                         if (conv->method()->getEPSGCode() !=
                             EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED) {
                             return ProjectedCRS::create(
