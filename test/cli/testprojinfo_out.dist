@@ -978,7 +978,7 @@ Operation No. 2:
 INVERSE(EPSG):10000, Inverse of RGF93 to NGF IGN69 height (1), 0.5 m, France - mainland onshore
 
 PROJ string:
-+proj=pipeline +step +inv +proj=vgridshift +grids=ggf97a.txt +multiplier=1
++proj=vgridshift +grids=ggf97a.txt +multiplier=1
 
 Testing EPSG:32631 --3d
 PROJ.4 string:
