@@ -1096,8 +1096,8 @@ for grid in setVerticalGrids:
                     VALUES ('%s',    -- as referenced by the IGNF registry
                             '%s',
                             'GTX',
-                            'vgridshift',
-                            1,
+                            'geoid_like',
+                            0,
                             'proj-datumgrid-europe',
                             NULL, NULL, NULL, NULL);""" % (original_grid_name, proj_grid_name))
 

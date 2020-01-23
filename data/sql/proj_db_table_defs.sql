@@ -1092,7 +1092,7 @@ CREATE TABLE grid_alternatives(
     original_grid_name TEXT NOT NULL PRIMARY KEY,   -- original grid name (e.g. Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree.gz). For LOS/LAS format, the .las files
     proj_grid_name TEXT NOT NULL,                   -- PROJ grid name (e.g egm08_25.gtx)
     proj_grid_format TEXT NOT NULL,                 -- one of 'CTable2', 'NTv1', 'NTv2', 'GTX'
-    proj_method TEXT NOT NULL,                      -- hgridshift or vgridshift
+    proj_method TEXT NOT NULL,                      -- hgridshift, vgridshift or geoid_like
     inverse_direction BOOLEAN NOT NULL CHECK (inverse_direction IN (0, 1)), -- whether the PROJ grid direction is reversed w.r.t to the authority one (TRUE in that case)
     package_name TEXT,                              -- package name that contains the file
     url TEXT,                                       -- optional URL where to download the PROJ grid
@@ -1102,9 +1102,10 @@ CREATE TABLE grid_alternatives(
 
     CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name),
     CONSTRAINT check_grid_alternatives_grid_fromat CHECK (proj_grid_format IN ('CTable2', 'NTv1', 'NTv2', 'GTX')),
-    CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift')),
+    CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift', 'geoid_like')),
     CONSTRAINT check_grid_alternatives_not_hgridshift CHECK (NOT(proj_method != 'hgridshift' AND proj_grid_format IN ('CTable2', 'NTv1', 'NTv2'))),
-    CONSTRAINT check_grid_alternatives_not_vgridshift CHECK (NOT(proj_method != 'vgridshift' AND proj_grid_format IN ('GTX'))),
+    CONSTRAINT check_grid_alternatives_not_vgridshift CHECK (NOT(proj_method = 'hgridshift' AND proj_grid_format IN ('GTX'))),
+    CONSTRAINT check_grid_alternatives_inverse_direction CHECK (NOT(proj_method = 'geoid_like' AND inverse_direction = 1)),
     CONSTRAINT check_grid_alternatives_package_name_url CHECK (NOT(package_name IS NOT NULL AND url IS NOT NULL)),
     CONSTRAINT check_grid_alternatives_direct_download_url CHECK (NOT(direct_download IS NULL AND url IS NOT NULL)),
     CONSTRAINT check_grid_alternatives_open_license_url CHECK (NOT(open_license IS NULL AND url IS NOT NULL))
