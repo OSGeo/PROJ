@@ -36,7 +36,7 @@
 
 #define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #include "proj.h"
-#include "proj_api.h"
+#include "proj_internal.h"
 
 /* Standalone build:
 g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -fvisibility=hidden -DSTANDALONE ../../src/.libs/libproj.a -lpthread -lsqlite3 -I../../src -I../../include

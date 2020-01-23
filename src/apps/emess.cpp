@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "proj_api.h"
+#include "proj_internal.h"
 #include "proj_config.h"
 #define EMESS_ROUTINE
 #include "emess.h"

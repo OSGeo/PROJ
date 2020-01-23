@@ -287,7 +287,6 @@ set(SRC_LIBPROJ_CORE
 )
 
 set(HEADERS_LIBPROJ
-  proj_api.h
   proj.h
   proj_experimental.h
   proj_constants.h

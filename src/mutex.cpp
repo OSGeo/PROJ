@@ -34,11 +34,6 @@
 #ifndef _WIN32
 #include "proj_config.h"
 #include "proj_internal.h"
-#else
-#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#endif
-#include "proj_api.h"
 #endif
 
 /* on win32 we always use win32 mutexes, even if pthreads are available */
