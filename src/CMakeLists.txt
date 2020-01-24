@@ -51,7 +51,9 @@ endif()
 
 if(BUILD_GEOD)
   include(bin_geod.cmake)
-  include(bin_geodtest.cmake)
+  if(BUILD_TESTING)
+    include(bin_geodtest.cmake)
+  endif()
   set(BIN_TARGETS ${BIN_TARGETS} geod)
 endif()
 
