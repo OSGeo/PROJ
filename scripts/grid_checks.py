@@ -136,10 +136,10 @@ elif args.check_filelist:
         first_line = True
         for row in reader:
             if first_line:
-                assert row == ['filename', 'type', 'unit', 'source_crs', 'target_crs', 'interpolation_crs', 'agency_name', 'source', 'licence']
+                assert row == ['filename', 'type', 'area', 'unit', 'source_crs', 'target_crs', 'interpolation_crs', 'agency_name', 'source', 'licence']
                 first_line = False
                 continue
-            filename, type, unit, source_crs, target_crs, interpolation_crs, _, _, _ = row
+            filename, type, _, unit, source_crs, target_crs, interpolation_crs, _, _, _ = row
             if type in ('DEFORMATION_MODEL', 'VELOCITY_MODEL'):
                 continue
             assert type in ('HORIZONTAL_OFFSET',
