@@ -3,23 +3,24 @@
 task:
   name: FreeBSD
   freebsd_instance:
+    cpu: 4
     matrix:
-      image: freebsd-12-0-release-amd64
+      image: freebsd-12-1-release-amd64
 #      image: freebsd-11-2-release-amd64
 #      image: freebsd-10-4-release-amd64
 
   env:
     CIRRUS_CLONE_DEPTH: 1
-    MAKE_FLAGS: -j 2
+    MAKE_FLAGS: -j 4
 
   cache:
     folder: $HOME/.ccache
 
   pkginstall_script:
-    - pkg install -y autoconf automake libtool pkgconf sqlite3 tiff wget unzip ccache gmake
+    - pkg install -y autoconf automake libtool pkgconf sqlite3 tiff ccache gmake
   download_grid_script:
-    - wget https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
-    - (cd data && unzip -o ../proj-datumgrid-1.8.zip)
+    - fetch https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
+    - (cd data && tar xvf ../proj-datumgrid-1.8.zip)
   configure_script:
     - ./autogen.sh
     - CC="ccache cc" CXX="ccache c++" ./configure --disable-static
