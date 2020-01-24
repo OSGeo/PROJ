@@ -1220,6 +1220,39 @@ INSERT INTO grid_alternatives(original_grid_name,
                               0, -- non-freely licensed. See https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/master/debian/copyright
                               NULL);
 
+-- Netherlands / RDNAP 2018
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('nlgeo2018.gtx',
+                              'nlgeo2018.gtx',
+                              'GTX',
+                              'geoid_like',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('rdtrans2018.gsb',
+                              'rdtrans2018.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              'proj-datumgrid-europe',
+                              NULL, NULL, NULL, NULL);
+
+
 -- Belgium
 
 INSERT INTO grid_alternatives(original_grid_name,
