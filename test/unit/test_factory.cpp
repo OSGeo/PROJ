@@ -2869,6 +2869,16 @@ TEST(factory, createObjectsFromName) {
         factory->createObjectsFromName("i_dont_exist", {type}, false, 1);
     }
     factory->createObjectsFromName("i_dont_exist", types, false, 1);
+
+    {
+        auto res = factoryEPSG->createObjectsFromName(
+            "ETRS89", {AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS}, false,
+            1);
+        EXPECT_EQ(res.size(), 1U);
+        if (!res.empty()) {
+            EXPECT_EQ(res.front()->getEPSGCode(), 4258);
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
