@@ -3526,7 +3526,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
                 propertiesParameter.set(Identifier::CODESPACE_KEY,
                                         Identifier::EPSG);
-            } else if (paramMapping) {
+            } else if (mapping && paramMapping) {
                 for (size_t idx = 0; mapping->params[idx] != nullptr; ++idx) {
                     if (mapping->params[idx] == paramMapping) {
                         foundParameters[idx] = true;
