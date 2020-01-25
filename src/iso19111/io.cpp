@@ -8734,22 +8734,43 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
             } else if (param->unit_type == UnitOfMeasure::Type::SCALE) {
                 value = 1;
-            } else {
-                // For omerc, if gamma is missing, the default value is
-                // alpha
-                if (step.name == "omerc" && proj_name == "gamma") {
-                    paramValue = &getParamValue(step, "alpha");
-                    if (!paramValue->empty()) {
-                        value = getAngularValue(*paramValue);
+            }
+            // For omerc, if gamma is missing, the default value is
+            // alpha
+            else if (step.name == "omerc" && proj_name == "gamma") {
+                paramValue = &getParamValue(step, "alpha");
+                if (!paramValue->empty()) {
+                    value = getAngularValue(*paramValue);
+                }
+            } else if (step.name == "krovak") {
+                if (param->epsg_code ==
+                    EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
+                    value = 30.28813975277777776;
+                } else if (
+                    param->epsg_code ==
+                    EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL) {
+                    value = 78.5;
+                }
+            } else if (step.name == "cea" && proj_name == "lat_ts") {
+                paramValue = &getParamValueK(step);
+                if (!paramValue->empty()) {
+                    bool hasError = false;
+                    const double k = getNumericValue(*paramValue, &hasError);
+                    if (hasError) {
+                        throw ParsingException("invalid value for k/k_0");
                     }
-                } else if (step.name == "krovak") {
-                    if (param->epsg_code ==
-                        EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
-                        value = 30.28813975277777776;
-                    } else if (
-                        param->epsg_code ==
-                        EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL) {
-                        value = 78.5;
+                    if (k >= 0 && k <= 1) {
+                        const double es =
+                            geogCRS->ellipsoid()->squaredEccentricity();
+                        if (es < 0) {
+                            throw ParsingException("Invalid flattening");
+                        }
+                        value =
+                            Angle(acos(k * sqrt((1 - es) / (1 - k * k * es))),
+                                  UnitOfMeasure::RADIAN)
+                                .convertToUnit(UnitOfMeasure::DEGREE);
+                    } else {
+                        throw ParsingException("k/k_0 should be in [0,1]");
                     }
                 }
             }
