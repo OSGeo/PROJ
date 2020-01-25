@@ -6238,7 +6238,7 @@ void Conversion::_exportToPROJString(
                 if (!param->proj_name) {
                     continue;
                 }
-                const auto value =
+                const auto &value =
                     parameterValueMeasure(param->wkt2_name, param->epsg_code);
                 double valueConverted = 0;
                 if (value == nullMeasure) {
