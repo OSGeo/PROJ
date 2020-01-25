@@ -48,25 +48,23 @@ static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
     Convert a string (presumably originating from get_init_string) to a paralist.
 ***************************************************************************************/
     const char *c = definition;
-    paralist *first = nullptr, *next = nullptr;
+    paralist *first = nullptr, *last = nullptr;
 
     while (*c) {
         /* Keep a handle to the start of the list, so we have something to return */
-        if (nullptr==first)
-            first = next = pj_mkparam_ws (c, &c);
-        else
-            next = next->next = pj_mkparam_ws (c, &c);
-        if (nullptr==next) {
+        auto param = pj_mkparam_ws (c, &c);
+        if (nullptr==param) {
             pj_dealloc_params (ctx, first, ENOMEM);
             return nullptr;
         }
+        if (nullptr==last) {
+            first = param;
+        }
+        else {
+            last->next = param;
+        }
+        last = param;
     }
-
-    if( next == nullptr )
-        return nullptr;
-
-    /* Terminate list and return */
-    next->next = nullptr;
     return first;
 }
 
