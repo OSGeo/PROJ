@@ -1568,12 +1568,14 @@ def import_geogtran():
                     all_sql.append(sql)
 
                     if filename in ('c1hpgn', 'c2hpgn'):
-                        sql = """INSERT INTO grid_alternatives VALUES ('%s', '%s', 'NTv2', 'hgridshift', 0, 'proj-datumgrid-north-america', NULL, NULL, NULL, NULL);""" % (
-                            filename, filename + '.gsb')
+                        tiff_filename = 'us_noaa_' + filename + '.tif'
+                        sql = """INSERT INTO grid_alternatives VALUES ('%s', '%s', '%s', 'GTiff', 'hgridshift', 0, NULL, '%s', 1, 1, NULL);""" % (
+                            filename, tiff_filename, filename + '.gsb', 'https://cdn.proj.org/' + tiff_filename)
                         all_sql.append(sql)
                     elif filename == 'wohpgn':
-                        sql = """INSERT INTO grid_alternatives VALUES ('%s', '%s', 'CTable2', 'hgridshift', 0, 'proj-datumgrid', NULL, NULL, NULL, NULL);""" % (
-                            filename, 'WO')
+                        tiff_filename = 'us_noaa_' + filename + '.tif'
+                        sql = """INSERT INTO grid_alternatives VALUES ('%s', '%s', '%s', 'GTiff', 'hgridshift', , NULL, '%s', 1, 1, NULL);""" % (
+                            filename, tiff_filename, 'WO', 'https://cdn.proj.org/' + tiff_filename)
                         all_sql.append(sql)
                     elif filename == 'prvi':
                         continue

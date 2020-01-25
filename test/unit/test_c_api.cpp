@@ -1298,12 +1298,10 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
     ASSERT_NE(fullName, nullptr);
     ASSERT_NE(packageName, nullptr);
     ASSERT_NE(url, nullptr);
-    EXPECT_EQ(shortName, std::string("ntv1_can.dat"));
+    EXPECT_EQ(shortName, std::string("ca_nrc_ntv1_can.tif"));
     // EXPECT_EQ(fullName, std::string(""));
-    EXPECT_EQ(packageName, std::string("proj-datumgrid"));
-    EXPECT_TRUE(std::string(url).find(
-                    "https://download.osgeo.org/proj/proj-datumgrid-") == 0)
-        << std::string(url);
+    EXPECT_EQ(packageName, std::string(""));
+    EXPECT_EQ(std::string(url), "https://cdn.proj.org/ca_nrc_ntv1_can.tif");
     EXPECT_EQ(directDownload, 1);
     EXPECT_EQ(openLicense, 1);
 }
@@ -3105,8 +3103,8 @@ TEST_F(CApi, proj_grid_get_info_from_database) {
     }
     {
         EXPECT_TRUE(proj_grid_get_info_from_database(
-            m_ctxt, "GDA94_GDA2020_conformal.gsb", nullptr, nullptr, nullptr,
-            nullptr, nullptr, nullptr));
+            m_ctxt, "au_icsm_GDA94_GDA2020_conformal.tif", nullptr, nullptr,
+            nullptr, nullptr, nullptr, nullptr));
     }
     {
         const char *name = nullptr;
@@ -3116,8 +3114,8 @@ TEST_F(CApi, proj_grid_get_info_from_database) {
         int open_license = 0;
         int available = 0;
         EXPECT_TRUE(proj_grid_get_info_from_database(
-            m_ctxt, "GDA94_GDA2020_conformal.gsb", &name, &package_name, &url,
-            &direct_download, &open_license, &available));
+            m_ctxt, "au_icsm_GDA94_GDA2020_conformal.tif", &name, &package_name,
+            &url, &direct_download, &open_license, &available));
         ASSERT_NE(name, nullptr);
         ASSERT_NE(package_name, nullptr);
         ASSERT_NE(url, nullptr);

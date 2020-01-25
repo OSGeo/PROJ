@@ -2673,425 +2673,485 @@ INSERT INTO "compound_crs" VALUES('IGNF','WGS84UTM32.IGN78C','WGS84 UTM NORD FUS
 
 INSERT INTO grid_alternatives(original_grid_name,
                               proj_grid_name,
+                              old_proj_grid_name,
                               proj_grid_format,
                               proj_method,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
                       VALUES ('ntf_r93.gsb',    -- as referenced by the IGNF registry
+                              'fr_ign_ntf_r93.tif',
                               'ntf_r93.gsb',
-                              'NTv2',
+                              'GTiff',
                               'hgridshift',
                               0,
-                              'proj-datumgrid',
-                              NULL, NULL, NULL, NULL);
+                              NULL,
+                              'https://cdn.proj.org/fr_ign_ntf_r93.tif', 1, 1, NULL);
 
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Huahine.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Huahine.tif',
                             'ggpf02-Huahine.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Huahine.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00v2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggg00v2.tif',
                             'ggg00v2.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggg00v2.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Tahiti.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf10-Tahiti.tif',
                             'ggpf10-Tahiti.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf10-Tahiti.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Raiatea.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Raiatea.tif',
                             'ggpf02-Raiatea.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Raiatea.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_sbv2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggg00_sbv2.tif',
                             'ggg00_sbv2.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggg00_sbv2.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_smv2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_gg10_smv2.tif',
                             'gg10_smv2.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_gg10_smv2.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMG2016.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RAMG2016.tif',
                             'RAMG2016.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RAMG2016.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggker08v2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggker08v2.tif',
                             'ggker08v2.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggker08v2.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggspm06v1.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggspm06v1.tif',
                             'ggspm06v1.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggspm06v1.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/gg10_sbv2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_gg10_sbv2.tif',
                             'gg10_sbv2.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_gg10_sbv2.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggguy15.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggguy15.tif',
                             'ggguy15.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggguy15.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/metropole/RAF09.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RAF09.tif',
                             'RAF09.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RAF09.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf08-Fakarava.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf08-Fakarava.tif',
                             'ggpf08-Fakarava.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf08-Fakarava.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm00v2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggm00v2.tif',
                             'ggm00v2.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggm00v2.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf10-Moorea.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf10-Moorea.tif',
                             'ggpf10-Moorea.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf10-Moorea.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Maupiti.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Maupiti.tif',
                             'ggpf02-Maupiti.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Maupiti.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_lsv2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggg00_lsv2.tif',
                             'ggg00_lsv2.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggg00_lsv2.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm04v1.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggm04v1.tif',
                             'ggm04v1.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggm04v1.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_smv2.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggg00_smv2.tif',
                             'ggg00_smv2.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggg00_smv2.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALD2016.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RALD2016.tif',
                             'RALD2016.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RALD2016.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAR07_bl.gra',    -- as referenced by the IGNF registry
+                            'fr_ign_RAR07_bl.tif',
                             'RAR07_bl.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RAR07_bl.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALS2016.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RALS2016.tif',
                             'RALS2016.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RALS2016.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RALDW842016.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RALDW842016.tif',
                             'RALDW842016.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RALDW842016.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Tahaa.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Tahaa.tif',
                             'ggpf02-Tahaa.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Tahaa.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAGTBT2016.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RAGTBT2016.tif',
                             'RAGTBT2016.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RAGTBT2016.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/metropole/RAC09.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RAC09.tif',
                             'RAC09.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RAC09.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/RAMART2016.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RAMART2016.tif',
                             'RAMART2016.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RAMART2016.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('https://geodesie.ign.fr/contenu/fichiers/documentation/grilles/metropole/RAF18.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_RAF18.tif',
                             'RAF18.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_RAF18.tif', 1, 1, NULL);
 INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
                             package_name,
                             url, direct_download, open_license, directory)
                     VALUES ('http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggpf02-Bora.mnt',    -- as referenced by the IGNF registry
+                            'fr_ign_ggpf02-Bora.tif',
                             'ggpf02-Bora.gtx',
-                            'GTX',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);
+                            NULL,
+                            'https://cdn.proj.org/fr_ign_ggpf02-Bora.tif', 1, 1, NULL);
 
 --- Null transformations between RRAF and WGS84 adapted from EPSG
 

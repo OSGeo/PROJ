@@ -40,6 +40,8 @@
 #include "filemanager.hpp"
 #include "proj.h"
 #include "proj/internal/internal.hpp"
+#include "proj/internal/io_internal.hpp"
+#include "proj/io.hpp"
 #include "proj_internal.h"
 
 #include <sys/stat.h>
@@ -1411,6 +1413,20 @@ static void *pj_open_file_with_manager(projCtx ctx, const char *name,
         .release();
 }
 
+// ---------------------------------------------------------------------------
+
+static NS_PROJ::io::DatabaseContextPtr getDBcontext(PJ_CONTEXT *ctx) {
+    try {
+        if (ctx->cpp_context == nullptr) {
+            ctx->cpp_context = new projCppContext(ctx);
+        }
+        return ctx->cpp_context->getDatabaseContext().as_nullable();
+    } catch (const std::exception &e) {
+        pj_log(ctx, PJ_LOG_DEBUG, "%s", e.what());
+        return nullptr;
+    }
+}
+
 /************************************************************************/
 /*                 FileManager::open_resource_file()                    */
 /************************************************************************/
@@ -1426,27 +1442,54 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
         reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
             ctx, name, "rb", pj_open_file_with_manager, nullptr, 0)));
 
-    // Retry with a .tif extension if the file name doesn't end with .tif
+    // Retry with the new proj grid name if the file name doesn't end with .tif
     if (file == nullptr && !is_tilde_slash(name) &&
         !is_rel_or_absolute_filename(name) && !starts_with(name, "http://") &&
         !starts_with(name, "https://") && strcmp(name, "proj.db") != 0 &&
         strstr(name, ".tif") == nullptr) {
-        std::string filename(name);
-        auto pos = filename.rfind('.');
-        if (pos + 4 == filename.size()) {
-            filename = filename.substr(0, pos) + ".tif";
-            file.reset(reinterpret_cast<NS_PROJ::File *>(
-                pj_open_lib_internal(ctx, filename.c_str(), "rb",
-                                     pj_open_file_with_manager, nullptr, 0)));
-        } else {
-            // For example for resource files like 'alaska'
-            filename += ".tif";
-            file.reset(reinterpret_cast<NS_PROJ::File *>(
-                pj_open_lib_internal(ctx, filename.c_str(), "rb",
-                                     pj_open_file_with_manager, nullptr, 0)));
+
+        auto dbContext = getDBcontext(ctx);
+        if (dbContext) {
+            try {
+                auto filename = dbContext->getProjGridName(name);
+                if (!filename.empty()) {
+                    file.reset(reinterpret_cast<NS_PROJ::File *>(
+                        pj_open_lib_internal(ctx, filename.c_str(), "rb",
+                                             pj_open_file_with_manager, nullptr,
+                                             0)));
+                    if (file) {
+                        pj_ctx_set_errno(ctx, 0);
+                    }
+                }
+            } catch (const std::exception &e) {
+                pj_log(ctx, PJ_LOG_DEBUG, "%s", e.what());
+                return nullptr;
+            }
         }
-        if (file) {
-            pj_ctx_set_errno(ctx, 0);
+    }
+    // Retry with the old proj grid name if the file name ends with .tif
+    else if (file == nullptr && !is_tilde_slash(name) &&
+             !is_rel_or_absolute_filename(name) &&
+             !starts_with(name, "http://") && !starts_with(name, "https://") &&
+             strstr(name, ".tif") != nullptr) {
+
+        auto dbContext = getDBcontext(ctx);
+        if (dbContext) {
+            try {
+                auto filename = dbContext->getOldProjGridName(name);
+                if (!filename.empty()) {
+                    file.reset(reinterpret_cast<NS_PROJ::File *>(
+                        pj_open_lib_internal(ctx, filename.c_str(), "rb",
+                                             pj_open_file_with_manager, nullptr,
+                                             0)));
+                    if (file) {
+                        pj_ctx_set_errno(ctx, 0);
+                    }
+                }
+            } catch (const std::exception &e) {
+                pj_log(ctx, PJ_LOG_DEBUG, "%s", e.what());
+                return nullptr;
+            }
         }
     }
 
@@ -1459,35 +1502,12 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
                 remote_file += '/';
             }
             remote_file += name;
-            auto pos = remote_file.rfind('.');
-            if (pos + 4 == remote_file.size()) {
-                remote_file = remote_file.substr(0, pos) + ".tif";
-                file = open(ctx, remote_file.c_str(),
-                            NS_PROJ::FileAccess::READ_ONLY);
-                if (file) {
-                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Using %s",
-                           remote_file.c_str());
-                    pj_ctx_set_errno(ctx, 0);
-                }
-            } else {
-                // For example for resource files like 'alaska'
-                auto remote_file_tif = remote_file + ".tif";
-                file = open(ctx, remote_file_tif.c_str(),
-                            NS_PROJ::FileAccess::READ_ONLY);
-                if (file) {
-                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Using %s",
-                           remote_file_tif.c_str());
-                    pj_ctx_set_errno(ctx, 0);
-                } else {
-                    // Init files
-                    file = open(ctx, remote_file.c_str(),
-                                NS_PROJ::FileAccess::READ_ONLY);
-                    if (file) {
-                        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Using %s",
-                               remote_file.c_str());
-                        pj_ctx_set_errno(ctx, 0);
-                    }
-                }
+            file =
+                open(ctx, remote_file.c_str(), NS_PROJ::FileAccess::READ_ONLY);
+            if (file) {
+                pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Using %s",
+                       remote_file.c_str());
+                pj_ctx_set_errno(ctx, 0);
             }
         }
     }
@@ -1522,7 +1542,8 @@ PAFile pj_open_lib(projCtx ctx, const char *name, const char *mode) {
  *  as a short filename.
  *
  * @param ctx context.
- * @param short_filename short filename (e.g. egm96_15.gtx). Must not be NULL.
+ * @param short_filename short filename (e.g. us_nga_egm96_15.tif).
+ *                       Must not be NULL.
  * @param out_full_filename output buffer, of size out_full_filename_size, that
  *                          will receive the full filename on success.
  *                          Will be zero-terminated.
@@ -1531,14 +1552,33 @@ PAFile pj_open_lib(projCtx ctx, const char *name, const char *mode) {
  */
 int pj_find_file(projCtx ctx, const char *short_filename,
                  char *out_full_filename, size_t out_full_filename_size) {
-    auto f = reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
-        ctx, short_filename, "rb", pj_open_file_with_manager, out_full_filename,
-        out_full_filename_size));
-    if (f != nullptr) {
-        delete f;
-        return 1;
+    auto file = std::unique_ptr<NS_PROJ::File>(
+        reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
+            ctx, short_filename, "rb", pj_open_file_with_manager,
+            out_full_filename, out_full_filename_size)));
+
+    // Retry with the old proj grid name if the file name ends with .tif
+    if (file == nullptr && strstr(short_filename, ".tif") != nullptr) {
+
+        auto dbContext = getDBcontext(ctx);
+        if (dbContext) {
+            try {
+                auto filename = dbContext->getOldProjGridName(short_filename);
+                if (!filename.empty()) {
+                    file.reset(reinterpret_cast<NS_PROJ::File *>(
+                        pj_open_lib_internal(ctx, filename.c_str(), "rb",
+                                             pj_open_file_with_manager,
+                                             out_full_filename,
+                                             out_full_filename_size)));
+                }
+            } catch (const std::exception &e) {
+                pj_log(ctx, PJ_LOG_DEBUG, "%s", e.what());
+                return false;
+            }
+        }
     }
-    return 0;
+
+    return file != nullptr;
 }
 
 /************************************************************************/

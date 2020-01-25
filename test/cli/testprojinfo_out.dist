@@ -287,7 +287,7 @@ Operation No. 1:
 DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ntv1_can.dat +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ca_nrc_ntv1_can.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (3)",
@@ -321,9 +321,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (3)",
                     ORDER[2],
                     ANGLEUNIT["degree",0.0174532925199433]],
             ID["EPSG",4269]]],
-    METHOD["NTv1",
-        ID["EPSG",9614]],
-    PARAMETERFILE["Latitude and longitude difference file","ntv1_can.dat"],
+    METHOD["HORIZONTAL_SHIFT_GTIFF"],
+    PARAMETERFILE["Latitude and longitude difference file","ca_nrc_ntv1_can.tif"],
     OPERATIONACCURACY[2.0],
     USAGE[
         SCOPE["Historic record only - now superseded - see remarks."],
@@ -337,7 +336,7 @@ Operation No. 2:
 DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - NAD27
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ntv2_0.gsb +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ca_nrc_ntv2_0.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (4)",
@@ -371,9 +370,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (4)",
                     ORDER[2],
                     ANGLEUNIT["degree",0.0174532925199433]],
             ID["EPSG",4269]]],
-    METHOD["NTv2",
-        ID["EPSG",9615]],
-    PARAMETERFILE["Latitude and longitude difference file","ntv2_0.gsb"],
+    METHOD["HORIZONTAL_SHIFT_GTIFF"],
+    PARAMETERFILE["Latitude and longitude difference file","ca_nrc_ntv2_0.tif"],
     OPERATIONACCURACY[1.5],
     USAGE[
         SCOPE["Accuracy 1-2 metres."],
@@ -387,7 +385,7 @@ Operation No. 3:
 DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, USA - CONUS including EEZ
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=conus +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=us_noaa_conus.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (1)",
@@ -421,8 +419,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (1)",
                     ORDER[2],
                     ANGLEUNIT["degree",0.0174532925199433]],
             ID["EPSG",4269]]],
-    METHOD["CTABLE2"],
-    PARAMETERFILE["Latitude and longitude difference file","conus"],
+    METHOD["HORIZONTAL_SHIFT_GTIFF"],
+    PARAMETERFILE["Latitude and longitude difference file","us_noaa_conus.tif"],
     OPERATIONACCURACY[0.15],
     USAGE[
         SCOPE["Accuracy at 67% confidence level is 0.15m onshore, 5m nearshore and undetermined farther offshore."],
@@ -436,7 +434,7 @@ Operation No. 4:
 DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, USA - Alaska including EEZ
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=alaska +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=us_noaa_alaska.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (2)",
@@ -470,8 +468,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (2)",
                     ORDER[2],
                     ANGLEUNIT["degree",0.0174532925199433]],
             ID["EPSG",4269]]],
-    METHOD["CTABLE2"],
-    PARAMETERFILE["Latitude and longitude difference file","alaska"],
+    METHOD["HORIZONTAL_SHIFT_GTIFF"],
+    PARAMETERFILE["Latitude and longitude difference file","us_noaa_alaska.tif"],
     OPERATIONACCURACY[0.5],
     USAGE[
         SCOPE["Accuracy at 67% confidence level is 0.5m onshore, 5m nearshore and undetermined farther offshore."],
@@ -485,7 +483,7 @@ Operation No. 5:
 DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=na27na83.gsb +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ca_que_mern_na27na83.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (6)",
@@ -519,9 +517,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (6)",
                     ORDER[2],
                     ANGLEUNIT["degree",0.0174532925199433]],
             ID["EPSG",4269]]],
-    METHOD["NTv2",
-        ID["EPSG",9615]],
-    PARAMETERFILE["Latitude and longitude difference file","na27na83.gsb"],
+    METHOD["HORIZONTAL_SHIFT_GTIFF"],
+    PARAMETERFILE["Latitude and longitude difference file","ca_que_mern_na27na83.tif"],
     OPERATIONACCURACY[1.5],
     USAGE[
         SCOPE["Accuracy 1-2 metres."],
@@ -952,7 +949,7 @@ Operation No. 1:
 unknown id, Inverse of NAD83(2011) to NAVD88 height (3), 0.015 m, USA - CONUS - onshore
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=g2018u0.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 -------------------------------------
 Operation No. 2:
@@ -960,7 +957,7 @@ Operation No. 2:
 unknown id, Inverse of NAD83(2011) to NAVD88 height (2), 0.02 m, USA - Alaska
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=g2012ba0.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=us_noaa_g2012ba0.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing NGF IGN69 height to RGF93: projinfo -s EPSG:5720 -t EPSG:4965 -o PROJ
 Candidate operations found: 2
@@ -970,7 +967,7 @@ Operation No. 1:
 INVERSE(DERIVED_FROM(EPSG)):8885, Inverse of RGF93 to NGF IGN69 height (3), 0.01 m, France - mainland onshore
 
 PROJ string:
-+proj=vgridshift +grids=RAF18.gtx +multiplier=1
++proj=vgridshift +grids=fr_ign_RAF18.tif +multiplier=1
 
 -------------------------------------
 Operation No. 2:
@@ -1084,7 +1081,7 @@ Operation No. 1:
 DERIVED_FROM(EPSG):5656, GDA94 to AHD height (49), 0.03 m, Australia - mainland
 
 PROJ string:
-+proj=pipeline +step +inv +proj=vgridshift +grids=AUSGeoid09_V1.01.gtx +multiplier=1
++proj=pipeline +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid09_V1.01.tif +multiplier=1
 
 Testing -s "GDA2020" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects
 Candidate operations found: 1
@@ -1094,7 +1091,7 @@ Operation No. 1:
 DERIVED_FROM(EPSG):8451, GDA2020 to AHD height (1), 0.03 m, Australia Christmas and Cocos - onshore
 
 PROJ string:
-+proj=pipeline +step +inv +proj=vgridshift +grids=AUSGeoid2020_20180201.gtx +multiplier=1
++proj=pipeline +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid2020_20180201.tif +multiplier=1
 
 Testing -k ellipsoid WGS84
 PROJ string:

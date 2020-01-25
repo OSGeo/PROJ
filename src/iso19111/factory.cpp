@@ -987,7 +987,8 @@ bool DatabaseContext::lookForGridInfo(
         openLicense = (row[3].empty() ? row[4] : row[3]) == "1";
         directDownload = (row[5].empty() ? row[6] : row[5]) == "1";
 
-        if (considerKnownGridsAsAvailable && !packageName.empty()) {
+        if (considerKnownGridsAsAvailable &&
+            (!packageName.empty() || (!url.empty() && openLicense))) {
             gridAvailable = true;
         }
 
@@ -1011,6 +1012,30 @@ bool DatabaseContext::isKnownName(const std::string &name,
     sql += replaceAll(tableName, "\"", "\"\"");
     sql += "\" WHERE name = ? LIMIT 1";
     return !d->run(sql, {name}).empty();
+}
+// ---------------------------------------------------------------------------
+
+std::string
+DatabaseContext::getProjGridName(const std::string &oldProjGridName) {
+    auto res = d->run("SELECT proj_grid_name FROM grid_alternatives WHERE "
+                      "old_proj_grid_name = ?",
+                      {oldProjGridName});
+    if (res.empty()) {
+        return std::string();
+    }
+    return res.front()[0];
+}
+
+// ---------------------------------------------------------------------------
+
+std::string DatabaseContext::getOldProjGridName(const std::string &gridName) {
+    auto res = d->run("SELECT old_proj_grid_name FROM grid_alternatives WHERE "
+                      "proj_grid_name = ?",
+                      {gridName});
+    if (res.empty()) {
+        return std::string();
+    }
+    return res.front()[0];
 }
 
 // ---------------------------------------------------------------------------

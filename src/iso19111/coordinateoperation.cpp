@@ -8448,6 +8448,29 @@ static const std::string &_getCTABLE2Filename(const Transformation *op,
 
 //! @cond Doxygen_Suppress
 static const std::string &
+_getHorizontalShiftGTIFFFilename(const Transformation *op, bool allowInverse) {
+    const auto &l_method = op->method();
+    const auto &methodName = l_method->nameStr();
+    if (ci_equal(methodName, PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF) ||
+        (allowInverse &&
+         ci_equal(methodName,
+                  INVERSE_OF + PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF))) {
+        const auto &fileParameter = op->parameterValue(
+            EPSG_NAME_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE,
+            EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            return fileParameter->valueFile();
+        }
+    }
+    return nullString;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+static const std::string &
 _getHeightToGeographic3DFilename(const Transformation *op, bool allowInverse) {
 
     const auto &methodName = op->method()->nameStr();
@@ -8658,7 +8681,30 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
         const auto &l_sourceCRS = sourceCRS();
         const auto &l_targetCRS = targetCRS();
         const auto &l_accuracies = coordinateOperationAccuracies();
-        if (projGridFormat == "NTv1") {
+        if (projGridFormat == "GTiff") {
+            auto parameters =
+                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
+                    EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE)};
+            auto methodProperties = util::PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY,
+                PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF);
+            auto values = std::vector<ParameterValueNNPtr>{
+                ParameterValue::createFilename(projFilename)};
+            if (inverseDirection) {
+                return create(createPropertiesForInverse(
+                                  self.as_nullable().get(), true, false),
+                              l_targetCRS, l_sourceCRS, nullptr,
+                              methodProperties, parameters, values,
+                              l_accuracies)
+                    ->inverseAsTransformation();
+
+            } else {
+                return create(createSimilarPropertiesTransformation(self),
+                              l_sourceCRS, l_targetCRS, nullptr,
+                              methodProperties, parameters, values,
+                              l_accuracies);
+            }
+        } else if (projGridFormat == "NTv1") {
             if (inverseDirection) {
                 return createNTv1(createPropertiesForInverse(
                                       self.as_nullable().get(), true, false),
@@ -9336,10 +9382,14 @@ void Transformation::_exportToPROJString(
     const auto &NTv1Filename = _getNTv1Filename(this, true);
     const auto &NTv2Filename = _getNTv2Filename(this, true);
     const auto &CTABLE2Filename = _getCTABLE2Filename(this, true);
+    const auto &HorizontalShiftGTIFFFilename =
+        _getHorizontalShiftGTIFFFilename(this, true);
     const auto &hGridShiftFilename =
-        !NTv1Filename.empty() ? NTv1Filename : !NTv2Filename.empty()
-                                                   ? NTv2Filename
-                                                   : CTABLE2Filename;
+        !HorizontalShiftGTIFFFilename.empty()
+            ? HorizontalShiftGTIFFFilename
+            : !NTv1Filename.empty() ? NTv1Filename : !NTv2Filename.empty()
+                                                         ? NTv2Filename
+                                                         : CTABLE2Filename;
     if (!hGridShiftFilename.empty()) {
         auto sourceCRSGeog =
             dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
@@ -9417,11 +9467,15 @@ void Transformation::_exportToPROJString(
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             formatter->addStep("vgridshift");
-            // The vertcon grids go from NGVD 29 to NAVD 88, with units
-            // in millimeter (see
-            // https://github.com/OSGeo/proj.4/issues/1071)
             formatter->addParam("grids", fileParameter->valueFile());
-            formatter->addParam("multiplier", 0.001);
+            if (fileParameter->valueFile().find(".tif") != std::string::npos) {
+                formatter->addParam("multiplier", 1.0);
+            } else {
+                // The vertcon grids go from NGVD 29 to NAVD 88, with units
+                // in millimeter (see
+                // https://github.com/OSGeo/proj.4/issues/1071), for gtx files
+                formatter->addParam("multiplier", 0.001);
+            }
             return;
         }
     }
@@ -11155,7 +11209,9 @@ struct FilterResults {
                         !gridDesc.available) {
                         gridsAvailable = false;
                     }
-                    if (gridDesc.packageName.empty() && !gridDesc.available) {
+                    if (gridDesc.packageName.empty() &&
+                        !(!gridDesc.url.empty() && gridDesc.openLicense) &&
+                        !gridDesc.available) {
                         gridsKnown = false;
                     }
                 }
