@@ -39,9 +39,6 @@ install(FILES
 # Make information about the cmake targets (the library and the tools)
 # available.
 install(EXPORT targets
-  FILE ${PROJECT_NAME_LOWER}-targets.cmake
-  DESTINATION "${CMAKECONFIGDIR}")
-install(EXPORT targets
   NAMESPACE ${PROJECT_NAME}::
-  FILE ${PROJECT_NAME_LOWER}-namespace-targets.cmake
+  FILE ${PROJECT_NAME_LOWER}-targets.cmake
   DESTINATION "${CMAKECONFIGDIR}")
