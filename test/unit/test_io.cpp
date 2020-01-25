@@ -7968,6 +7968,24 @@ TEST(io, projparse_cea_ellipsoidal) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_cea_ellipsoidal_with_k_0) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=cea +ellps=GRS80 +k_0=0.99 +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f.get());
+    auto wkt = f->toString();
+    EXPECT_TRUE(
+        wkt.find("PARAMETER[\"Latitude of 1st standard parallel\",8.1365") !=
+        std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_geos_sweep_x) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=geos +sweep=x +h=1 +type=crs");
