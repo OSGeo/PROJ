@@ -1403,13 +1403,28 @@ bool VerticalShiftGridSet::reopen(PJ_CONTEXT *ctx) {
 
 // ---------------------------------------------------------------------------
 
+static bool isPointInExtent(double lon, double lat, const ExtentAndRes &extent,
+                            double eps = 0) {
+    if (!(lat + eps >= extent.southLat && lat - eps <= extent.northLat))
+        return false;
+    if (extent.fullWorldLongitude())
+        return true;
+    if (lon + eps < extent.westLon)
+        lon += 2 * M_PI;
+    else if (lon - eps > extent.eastLon)
+        lon -= 2 * M_PI;
+    if (!(lon + eps >= extent.westLon && lon - eps <= extent.eastLon))
+        return false;
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+
 const VerticalShiftGrid *VerticalShiftGrid::gridAt(double lon,
                                                    double lat) const {
     for (const auto &child : m_children) {
         const auto &extentChild = child->extentAndRes();
-        if ((extentChild.fullWorldLongitude() ||
-             (lon >= extentChild.westLon && lon <= extentChild.eastLon)) &&
-            lat >= extentChild.southLat && lat <= extentChild.northLat) {
+        if (isPointInExtent(lon, lat, extentChild)) {
             return child->gridAt(lon, lat);
         }
     }
@@ -1424,9 +1439,7 @@ const VerticalShiftGrid *VerticalShiftGridSet::gridAt(double lon,
             return grid.get();
         }
         const auto &extent = grid->extentAndRes();
-        if ((extent.fullWorldLongitude() ||
-             (lon >= extent.westLon && lon <= extent.eastLon)) &&
-            lat >= extent.southLat && lat <= extent.northLat) {
+        if (isPointInExtent(lon, lat, extent)) {
             return grid->gridAt(lon, lat);
         }
     }
@@ -2373,11 +2386,7 @@ const HorizontalShiftGrid *HorizontalShiftGrid::gridAt(double lon,
         const auto &extentChild = child->extentAndRes();
         const double epsilon = (extentChild.resLon + extentChild.resLat) *
                                REL_TOLERANCE_HGRIDSHIFT;
-        if ((extentChild.fullWorldLongitude() ||
-             (lon + epsilon >= extentChild.westLon &&
-              lon - epsilon <= extentChild.eastLon)) &&
-            lat + epsilon >= extentChild.southLat &&
-            lat - epsilon <= extentChild.northLat) {
+        if (isPointInExtent(lon, lat, extentChild, epsilon)) {
             return child->gridAt(lon, lat);
         }
     }
@@ -2394,11 +2403,7 @@ const HorizontalShiftGrid *HorizontalShiftGridSet::gridAt(double lon,
         const auto &extent = grid->extentAndRes();
         const double epsilon =
             (extent.resLon + extent.resLat) * REL_TOLERANCE_HGRIDSHIFT;
-        if ((extent.fullWorldLongitude() ||
-             (lon + epsilon >= extent.westLon &&
-              lon - epsilon <= extent.eastLon)) &&
-            lat + epsilon >= extent.southLat &&
-            lat - epsilon <= extent.northLat) {
+        if (isPointInExtent(lon, lat, extent, epsilon)) {
             return grid->gridAt(lon, lat);
         }
     }
@@ -2712,9 +2717,7 @@ bool GenericShiftGridSet::reopen(PJ_CONTEXT *ctx) {
 const GenericShiftGrid *GenericShiftGrid::gridAt(double lon, double lat) const {
     for (const auto &child : m_children) {
         const auto &extentChild = child->extentAndRes();
-        if ((extentChild.fullWorldLongitude() ||
-             (lon >= extentChild.westLon && lon <= extentChild.eastLon)) &&
-            lat >= extentChild.southLat && lat <= extentChild.northLat) {
+        if (isPointInExtent(lon, lat, extentChild)) {
             return child->gridAt(lon, lat);
         }
     }
@@ -2730,9 +2733,7 @@ const GenericShiftGrid *GenericShiftGridSet::gridAt(double lon,
             return grid.get();
         }
         const auto &extent = grid->extentAndRes();
-        if ((extent.fullWorldLongitude() ||
-             (lon >= extent.westLon && lon <= extent.eastLon)) &&
-            lat >= extent.southLat && lat <= extent.northLat) {
+        if (isPointInExtent(lon, lat, extent)) {
             return grid->gridAt(lon, lat);
         }
     }
@@ -2948,7 +2949,13 @@ static PJ_LP pj_hgrid_apply_internal(projCtx ctx, PJ_LP in,
     /* normalize input to ll origin */
     tb = in;
     const auto *extent = &(grid->extentAndRes());
+    const double epsilon =
+        (extent->resLon + extent->resLat) * REL_TOLERANCE_HGRIDSHIFT;
     tb.lam -= extent->westLon;
+    if (tb.lam + epsilon < 0)
+        tb.lam += 2 * M_PI;
+    else if (tb.lam - epsilon > extent->eastLon - extent->westLon)
+        tb.lam -= 2 * M_PI;
     tb.phi -= extent->southLat;
 
     t = pj_hgrid_interpolate(tb, grid, true);
@@ -2992,6 +2999,10 @@ static PJ_LP pj_hgrid_apply_internal(projCtx ctx, PJ_LP in,
             t.phi = lp.phi - extent->southLat;
             tb = in;
             tb.lam -= extent->westLon;
+            if (tb.lam + epsilon < 0)
+                tb.lam += 2 * M_PI;
+            else if (tb.lam - epsilon > extent->eastLon - extent->westLon)
+                tb.lam -= 2 * M_PI;
             tb.phi -= extent->southLat;
             dif.lam = std::numeric_limits<double>::max();
             dif.phi = std::numeric_limits<double>::max();
@@ -3077,10 +3088,14 @@ PJ_LP pj_hgrid_value(PJ *P, const ListOfHGrids &grids, PJ_LP lp) {
 
     /* normalize input to ll origin */
     const auto &extent = grid->extentAndRes();
+    const double epsilon =
+        (extent.resLon + extent.resLat) * REL_TOLERANCE_HGRIDSHIFT;
     lp.lam -= extent.westLon;
+    if (lp.lam + epsilon < 0)
+        lp.lam += 2 * M_PI;
+    else if (lp.lam - epsilon > extent.eastLon - extent.westLon)
+        lp.lam -= 2 * M_PI;
     lp.phi -= extent.southLat;
-
-    lp.lam = adjlon(lp.lam - M_PI) + M_PI;
 
     out = pj_hgrid_interpolate(lp, grid, false);
     if (grid->hasChanged()) {
@@ -3119,23 +3134,43 @@ static double read_vgrid_value(PJ_CONTEXT *ctx, const ListOfVGrids &grids,
         }
     }
     if (!grid) {
+        pj_ctx_set_errno(ctx, PJD_ERR_GRID_AREA);
         return HUGE_VAL;
     }
 
     const auto &extent = grid->extentAndRes();
 
-    /* Interpolation a location within the grid */
+    /* Interpolation of a location within the grid */
     double grid_x = (input.lam - extent.westLon) / extent.resLon;
-    if (extent.fullWorldLongitude()) {
-        // The first fmod goes to ]-lim, lim[ range
-        // So we add lim again to be in ]0, 2*lim[ and fmod again
-        grid_x =
-            fmod(fmod(grid_x + grid->width(), grid->width()) + grid->width(),
-                 grid->width());
+    if (input.lam < extent.westLon) {
+        if (extent.fullWorldLongitude()) {
+            // The first fmod goes to ]-lim, lim[ range
+            // So we add lim again to be in ]0, 2*lim[ and fmod again
+            grid_x = fmod(fmod(grid_x + grid->width(), grid->width()) +
+                              grid->width(),
+                          grid->width());
+        } else {
+            grid_x = (input.lam + 2 * M_PI - extent.westLon) / extent.resLon;
+        }
+    } else if (input.lam > extent.eastLon) {
+        if (extent.fullWorldLongitude()) {
+            // The first fmod goes to ]-lim, lim[ range
+            // So we add lim again to be in ]0, 2*lim[ and fmod again
+            grid_x = fmod(fmod(grid_x + grid->width(), grid->width()) +
+                              grid->width(),
+                          grid->width());
+        } else {
+            grid_x = (input.lam - 2 * M_PI - extent.westLon) / extent.resLon;
+        }
     }
     double grid_y = (input.phi - extent.southLat) / extent.resLat;
     int grid_ix = static_cast<int>(lround(floor(grid_x)));
-    assert(grid_ix >= 0 && grid_ix < grid->width());
+    if (!(grid_ix >= 0 && grid_ix < grid->width())) {
+        // in the unlikely case we end up here...
+        pj_log(ctx, PJ_LOG_ERROR, "grid_ix not in grid");
+        pj_ctx_set_errno(ctx, PJD_ERR_GRID_AREA);
+        return HUGE_VAL;
+    }
     int grid_iy = static_cast<int>(lround(floor(grid_y)));
     assert(grid_iy >= 0 && grid_iy < grid->height());
     grid_x -= grid_ix;
@@ -3304,6 +3339,11 @@ bool pj_bilinear_interpolation_three_samples(const GenericShiftGrid *grid,
 
     const auto &extent = grid->extentAndRes();
     double grid_x = (lp.lam - extent.westLon) / extent.resLon;
+    if (lp.lam < extent.westLon) {
+        grid_x = (lp.lam + 2 * M_PI - extent.westLon) / extent.resLon;
+    } else if (lp.lam > extent.eastLon) {
+        grid_x = (lp.lam - 2 * M_PI - extent.westLon) / extent.resLon;
+    }
     double grid_y = (lp.phi - extent.southLat) / extent.resLat;
     int ix = static_cast<int>(grid_x);
     int iy = static_cast<int>(grid_y);
