@@ -39,6 +39,7 @@
 #include "geodesic.h"
 #include "proj.h"
 #include "proj_internal.h"
+#include "filemanager.hpp"
 #include <math.h>
 
 
@@ -83,18 +84,10 @@ static char *get_init_string (PJ_CONTEXT *ctx, const char *name) {
     char *fname, *section;
     const char *key;
     char *buffer = nullptr;
-    char *line = nullptr;
-    PAFile fid;
     size_t n;
-
-
-    line = static_cast<char*>(pj_malloc (MAX_LINE_LENGTH + 1));
-    if (nullptr==line)
-        return nullptr;
 
     fname = static_cast<char*>(pj_malloc (MAX_PATH_FILENAME+ID_TAG_MAX+3));
     if (nullptr==fname) {
-        pj_dealloc (line);
         return nullptr;
     }
 
@@ -106,7 +99,6 @@ static char *get_init_string (PJ_CONTEXT *ctx, const char *name) {
         key += 5;
     if (MAX_PATH_FILENAME + ID_TAG_MAX + 2 < strlen (key)) {
         pj_dealloc (fname);
-        pj_dealloc (line);
         return nullptr;
     }
     memmove (fname, key, strlen (key) + 1);
@@ -116,7 +108,6 @@ static char *get_init_string (PJ_CONTEXT *ctx, const char *name) {
     if (nullptr==section) {
         proj_context_errno_set (ctx, PJD_ERR_NO_COLON_IN_INIT_STRING);
         pj_dealloc (fname);
-        pj_dealloc (line);
         return nullptr;
     }
     *section = 0;
@@ -126,36 +117,36 @@ static char *get_init_string (PJ_CONTEXT *ctx, const char *name) {
             "get_init_string: searching for section [%s] in init file [%s]",
             section, fname);
 
-    fid = pj_open_lib (ctx, fname, "rt");
-    if (nullptr==fid) {
+    auto file = NS_PROJ::FileManager::open_resource_file(ctx, fname);
+    if (nullptr==file) {
         pj_dealloc (fname);
-        pj_dealloc (line);
         proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
         return nullptr;
     }
 
     /* Search for section in init file */
+    std::string line;
     for (;;) {
 
+        bool eofReached = false;
+        bool maxLenReached = false;
+        line = file->read_line(MAX_LINE_LENGTH, maxLenReached, eofReached);
         /* End of file? */
-        if (nullptr==pj_ctx_fgets (ctx, line, MAX_LINE_LENGTH, fid)) {
-            pj_dealloc (buffer);
+        if (maxLenReached || eofReached) {
             pj_dealloc (fname);
-            pj_dealloc (line);
-            pj_ctx_fclose (ctx, fid);
             proj_context_errno_set (ctx, PJD_ERR_NO_OPTION_IN_INIT_FILE);
             return nullptr;
         }
 
         /* At start of right section? */
-        pj_chomp (line);
+        pj_chomp (&line[0]);
         if ('<'!=line[0])
             continue;
-        if (strlen (line) < n + 2)
+        if (strlen (line.c_str()) < n + 2)
             continue;
         if (line[n + 1] != '>')
             continue;
-        if (0==strncmp (line + 1, section, n))
+        if (0==strncmp (line.data() + 1, section, n))
             break;
     }
 
@@ -163,13 +154,11 @@ static char *get_init_string (PJ_CONTEXT *ctx, const char *name) {
     buffer = static_cast<char*>(pj_malloc (current_buffer_size));
     if (nullptr==buffer) {
         pj_dealloc (fname);
-        pj_dealloc (line);
-        pj_ctx_fclose (ctx, fid);
         return nullptr;
     }
 
     /* Skip the "<section>" indicator, and copy the rest of the line over */
-    strcpy (buffer, line + strlen (section) + 2);
+    strcpy (buffer, line.data() + strlen (section) + 2);
 
     /* Copy the remaining lines of the section to buffer */
     for (;;) {
@@ -183,15 +172,18 @@ static char *get_init_string (PJ_CONTEXT *ctx, const char *name) {
             break;
         }
 
+        bool eofReached = false;
+        bool maxLenReached = false;
+        line = file->read_line(MAX_LINE_LENGTH, maxLenReached, eofReached);
         /* End of file? - done! */
-        if (nullptr==pj_ctx_fgets (ctx, line, MAX_LINE_LENGTH, fid))
+        if (maxLenReached || eofReached)
             break;
 
         /* Otherwise, handle the line. It MAY be the start of the next section, */
         /* but that will be handled at the start of next trip through the loop  */
         buffer_length = strlen (buffer);
-        pj_chomp (line);   /* Remove '#' style comments */
-        next_length = strlen (line) + buffer_length + 2;
+        pj_chomp (&line[0]);   /* Remove '#' style comments */
+        next_length = strlen (line.data()) + buffer_length + 2;
         if (next_length > current_buffer_size) {
             char *b = static_cast<char*>(pj_malloc (2 * current_buffer_size));
             if (nullptr==b) {
@@ -205,12 +197,10 @@ static char *get_init_string (PJ_CONTEXT *ctx, const char *name) {
             buffer = b;
         }
         buffer[buffer_length] = ' ';
-        strcpy (buffer + buffer_length + 1, line);
+        strcpy (buffer + buffer_length + 1, line.data());
     }
 
-    pj_ctx_fclose (ctx, fid);
     pj_dealloc (fname);
-    pj_dealloc (line);
     if (nullptr==buffer)
         return nullptr;
     pj_shrink (buffer);

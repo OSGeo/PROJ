@@ -70,6 +70,62 @@ File::File(const std::string &name) : name_(name) {}
 
 File::~File() = default;
 
+// ---------------------------------------------------------------------------
+
+std::string File::read_line(size_t maxLen, bool &maxLenReached,
+                            bool &eofReached) {
+    constexpr size_t MAX_MAXLEN = 1024 * 1024;
+    maxLen = std::min(maxLen, MAX_MAXLEN);
+    while (true) {
+        // Consume existing lines in buffer
+        size_t pos = readLineBuffer_.find_first_of("\r\n");
+        if (pos != std::string::npos) {
+            if (pos > maxLen) {
+                std::string ret(readLineBuffer_.substr(0, maxLen));
+                readLineBuffer_ = readLineBuffer_.substr(maxLen);
+                maxLenReached = true;
+                eofReached = false;
+                return ret;
+            }
+            std::string ret(readLineBuffer_.substr(0, pos));
+            if (readLineBuffer_[pos] == '\r' &&
+                readLineBuffer_[pos + 1] == '\n') {
+                pos += 1;
+            }
+            readLineBuffer_ = readLineBuffer_.substr(pos + 1);
+            maxLenReached = false;
+            eofReached = false;
+            return ret;
+        }
+
+        const size_t prevSize = readLineBuffer_.size();
+        if (maxLen <= prevSize) {
+            std::string ret(readLineBuffer_.substr(0, maxLen));
+            readLineBuffer_ = readLineBuffer_.substr(maxLen);
+            maxLenReached = true;
+            eofReached = false;
+            return ret;
+        }
+
+        if (eofReadLine_) {
+            std::string ret = readLineBuffer_;
+            readLineBuffer_.clear();
+            maxLenReached = false;
+            eofReached = ret.empty();
+            return ret;
+        }
+
+        readLineBuffer_.resize(maxLen);
+        const size_t nRead =
+            read(&readLineBuffer_[prevSize], maxLen - prevSize);
+        if (nRead < maxLen - prevSize)
+            eofReadLine_ = true;
+        readLineBuffer_.resize(prevSize + nRead);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 #ifdef _WIN32
 
 /* The bulk of utf8towc()/utf8fromwc() is derived from the utf.c module from

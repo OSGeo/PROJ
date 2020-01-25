@@ -74,6 +74,8 @@ class FileManager {
 class File {
   protected:
     std::string name_;
+    std::string readLineBuffer_{};
+    bool eofReadLine_ = false;
     explicit File(const std::string &name);
 
   public:
@@ -84,6 +86,7 @@ class File {
     virtual unsigned long long tell() = 0;
     virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
     virtual bool hasChanged() const = 0;
+    std::string read_line(size_t maxLen, bool &maxLenReached, bool &eofReached);
 
     const std::string &name() const { return name_; }
 };
