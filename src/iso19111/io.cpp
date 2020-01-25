@@ -4542,7 +4542,7 @@ class JSONParser {
     static Measure getMeasure(const json &j);
 
     IdentifierNNPtr buildId(const json &j, bool removeInverseOf);
-    ObjectDomainPtr buildObjectDomain(const json &j);
+    static ObjectDomainPtr buildObjectDomain(const json &j);
     PropertyMap buildProperties(const json &j, bool removeInverseOf = false);
 
     GeographicCRSNNPtr buildGeographicCRS(const json &j);
