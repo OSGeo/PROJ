@@ -92,4 +92,5 @@ notifications:
   irc:
     channels:
       - "irc.freenode.org#gdal"
+      - "irc.freenode.org#proj"
     use_notice: true
