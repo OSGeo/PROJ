@@ -254,8 +254,8 @@ dnl ---------------------------------------------------------------------------
 dnl Check for libtiff
 dnl ---------------------------------------------------------------------------
 
-AC_ARG_ENABLE([tiff-is-strongly-discouraged],
-              AS_HELP_STRING([--disable-tiff-is-strongly-discouraged],
+AC_ARG_ENABLE([tiff],
+              AS_HELP_STRING([--disable-tiff],
                     [Disable TIFF support. Strongly discouraged !]),
               [enable_tiff=no],
               [enable_tiff=yes])
@@ -283,7 +283,7 @@ CURL_CFLAGS=
 CURL_LIB=
 
 AC_ARG_WITH(curl,
-    [  --with-curl[=ARG]       Enable curl support (ARG=path to curl-config.)],,,)
+    [  --with-curl[=ARG]         Enable curl support (ARG=path to curl-config.)],,,)
 
 dnl Clear some cache variables
 unset ac_cv_path_LIBCURL
