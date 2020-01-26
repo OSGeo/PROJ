@@ -3526,7 +3526,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
                 propertiesParameter.set(Identifier::CODESPACE_KEY,
                                         Identifier::EPSG);
-            } else if (paramMapping) {
+            } else if (mapping && paramMapping) {
                 for (size_t idx = 0; mapping->params[idx] != nullptr; ++idx) {
                     if (mapping->params[idx] == paramMapping) {
                         foundParameters[idx] = true;
@@ -4542,7 +4542,7 @@ class JSONParser {
     static Measure getMeasure(const json &j);
 
     IdentifierNNPtr buildId(const json &j, bool removeInverseOf);
-    ObjectDomainPtr buildObjectDomain(const json &j);
+    static ObjectDomainPtr buildObjectDomain(const json &j);
     PropertyMap buildProperties(const json &j, bool removeInverseOf = false);
 
     GeographicCRSNNPtr buildGeographicCRS(const json &j);
