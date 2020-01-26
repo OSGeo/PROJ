@@ -34,7 +34,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "proj_internal.h" // For pj_gc_unloadall()
 #include "proj.h"
 
 /* Standalone build:
@@ -47,7 +46,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len);
 int LLVMFuzzerInitialize(int* /*argc*/, char*** argv)
 {
     const char* argv0 = (*argv)[0];
-    char* path = pj_strdup(argv0);
+    char* path = strdup(argv0);
     char* lastslash = strrchr(path, '/');
     if( lastslash )
     {
@@ -96,8 +95,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
         proj_create_crs_to_crs(nullptr, first_line, second_line, nullptr));
 
     free(buf_dup);
-    pj_gc_unloadall(pj_get_default_ctx());
-    pj_deallocate_grids();
+    proj_cleanup();
     return 0;
 }
 
