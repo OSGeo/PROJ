@@ -1484,23 +1484,10 @@ PJ_INFO proj_info (void) {
     /* build search path string */
     auto ctx = pj_get_default_ctx();
     if (!ctx || ctx->search_paths.empty()) {
-        // Env var mostly for testing purposes and being independent from
-        // an existing installation
-        const char* ignoreUserWritableDirectory =
-            getenv("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY");
-        if( ignoreUserWritableDirectory == nullptr ||
-            ignoreUserWritableDirectory[0] == '\0'  ) {
-            buf = path_append(buf,
-                            pj_context_get_user_writable_directory(ctx, false).c_str(),
-                            &buf_size);
+        const auto searchpaths = pj_get_default_searchpaths(ctx);
+        for( const auto& path: searchpaths ) {
+            buf = path_append(buf, path.c_str(), &buf_size);
         }
-        const std::string envPROJ_LIB = NS_PROJ::FileManager::getProjLibEnvVar(ctx);
-        buf = path_append(buf, envPROJ_LIB.empty() ? nullptr : envPROJ_LIB.c_str(), &buf_size);
-#ifdef PROJ_LIB
-        if (envPROJ_LIB.empty()) {
-            buf = path_append(buf, PROJ_LIB, &buf_size);
-        }
-#endif
     } else {
         for (const auto &path : ctx->search_paths) {
             buf = path_append(buf, path.c_str(), &buf_size);

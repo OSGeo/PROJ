@@ -26,7 +26,7 @@ Synopsis
     |    [--main-db-path path] [--aux-db-path path]*
     |    [--identify] [--3d]
     |    [--c-ify] [--single-line]
-    |    {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
+    |    --searchpaths | {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
     |
 
     where {object_definition} or {srs_def} is
@@ -247,6 +247,14 @@ The following control parameters can appear in any order:
 
     Output WKT or PROJJSON strings on a single line, instead of multiple intended lines by
     default.
+
+.. option:: --searchpaths
+
+    .. versionadded:: 7.0
+
+    Output the directories into which PROJ resources will be looked for
+    (if not using C API such as :cpp:func:`proj_context_set_search_paths`
+    that will override them.
 
 Examples
 ********

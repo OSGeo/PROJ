@@ -98,7 +98,8 @@ static void usage() {
         << std::endl
         << "                [--identify] [--3d]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
-        << "                {object_definition} | (-s {srs_def} -t {srs_def})"
+        << "                --searchpaths | {object_definition} | (-s "
+           "{srs_def} -t {srs_def})"
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
@@ -1057,6 +1058,17 @@ int main(int argc, char **argv) {
             outputOpt.strict = false;
         } else if (ci_equal(arg, "--3d")) {
             promoteTo3D = true;
+        } else if (ci_equal(arg, "--searchpaths")) {
+#ifdef _WIN32
+            constexpr char delim = ';';
+#else
+            constexpr char delim = ':';
+#endif
+            const auto paths = split(proj_info().searchpath, delim);
+            for (const auto &path : paths) {
+                std::cout << path << std::endl;
+            }
+            std::exit(0);
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {

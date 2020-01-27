@@ -175,6 +175,14 @@ echo 'Testing -k operation EPSG:8457 -o PROJ -q' >> ${OUT}
 $EXE -k operation EPSG:8457 -o PROJ -q >>${OUT} 2>&1
 echo "" >>${OUT}
 
+# Testing --searchpaths
+if ! $EXE --searchpaths > testprojinfo_out_searchpaths.txt; then
+    echo "--searchpaths failed"
+    exit 100
+fi
+# Hard to test content of testprojinfo_out_searchpaths.txt
+rm testprojinfo_out_searchpaths.txt
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
