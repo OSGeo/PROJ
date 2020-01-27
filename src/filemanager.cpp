@@ -1595,6 +1595,9 @@ int pj_find_file(projCtx ctx, const char *short_filename,
 /************************************************************************/
 
 std::string pj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
     if (!ctx->endpoint.empty()) {
         return ctx->endpoint;
     }
