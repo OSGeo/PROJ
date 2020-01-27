@@ -28,6 +28,11 @@ Go (Golang)
 `go-proj <https://github.com/everystreet/go-proj>`_:
 Go bindings and idiomatic wrapper for PROJ
 
+Julia
+=====
+`Proj4.jl <https://github.com/JuliaGeo/Proj4.jl>`_"
+Low-level bindings and a Julian API over PROJ.
+
 TCL
 ========
 `proj4tcl <http://wiki.tcl.tk/41270>`_:
