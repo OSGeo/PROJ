@@ -1196,9 +1196,8 @@ static bool is_rel_or_absolute_filename(const char *name) {
 // ---------------------------------------------------------------------------
 
 #ifdef _WIN32
-static const char *get_path_from_win32_projlib(PJ_CONTEXT *ctx,
-                                               const char *name,
-                                               std::string &out) {
+
+static std::string pj_get_win32_projlib() {
     /* Check if proj.db lieves in a share/proj dir parallel to bin/proj.dll */
     /* Based in
      * https://stackoverflow.com/questions/9112893/how-to-get-path-to-executable-in-c-running-on-windows
@@ -1214,10 +1213,10 @@ static const char *get_path_from_win32_projlib(PJ_CONTEXT *ctx,
         DWORD last_error = GetLastError();
 
         if (result == 0) {
-            return nullptr;
+            return std::string();
         } else if (result == path_size - 1) {
             if (ERROR_INSUFFICIENT_BUFFER != last_error) {
-                return nullptr;
+                return std::string();
             }
             path_size = path_size * 2;
         } else {
@@ -1227,18 +1226,33 @@ static const char *get_path_from_win32_projlib(PJ_CONTEXT *ctx,
     // Now remove the program's name. It was (example)
     // "C:\programs\gmt6\bin\gdal_translate.exe"
     wout.resize(wcslen(wout.c_str()));
-    out = NS_PROJ::WStringToUTF8(wout);
+    std::string out = NS_PROJ::WStringToUTF8(wout);
     size_t k = out.size();
     while (k > 0 && out[--k] != '\\') {
     }
     out.resize(k);
 
-    out += "/../share/proj/";
+    out += "/../share/proj";
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+
+static const char *get_path_from_win32_projlib(PJ_CONTEXT *ctx,
+                                               const char *name,
+                                               std::string &out) {
+
+    out = pj_get_win32_projlib();
+    if (out.empty()) {
+        return nullptr;
+    }
+    out += '/';
     out += name;
 
     return NS_PROJ::FileManager::exists(ctx, out.c_str()) ? out.c_str()
                                                           : nullptr;
 }
+
 #endif
 
 /************************************************************************/
@@ -1402,6 +1416,41 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
 }
 
 /************************************************************************/
+/*                  pj_get_default_searchpaths()                        */
+/************************************************************************/
+
+std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
+    std::vector<std::string> ret;
+
+    // Env var mostly for testing purposes and being independent from
+    // an existing installation
+    const char *ignoreUserWritableDirectory =
+        getenv("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY");
+    if (ignoreUserWritableDirectory == nullptr ||
+        ignoreUserWritableDirectory[0] == '\0') {
+        ret.push_back(pj_context_get_user_writable_directory(ctx, false));
+    }
+    const std::string envPROJ_LIB = NS_PROJ::FileManager::getProjLibEnvVar(ctx);
+    if (!envPROJ_LIB.empty()) {
+        ret.push_back(envPROJ_LIB);
+    }
+#ifdef _WIN32
+    if (envPROJ_LIB.empty()) {
+        const std::string win32Dir = pj_get_win32_projlib();
+        if (!win32Dir.empty()) {
+            ret.push_back(win32Dir);
+        }
+    }
+#endif
+#ifdef PROJ_LIB
+    if (envPROJ_LIB.empty()) {
+        ret.push_back(PROJ_LIB);
+    }
+#endif
+    return ret;
+}
+
+/************************************************************************/
 /*                  pj_open_file_with_manager()                         */
 /************************************************************************/
 
@@ -1546,6 +1595,9 @@ int pj_find_file(projCtx ctx, const char *short_filename,
 /************************************************************************/
 
 std::string pj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
     if (!ctx->endpoint.empty()) {
         return ctx->endpoint;
     }

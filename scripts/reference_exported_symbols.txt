@@ -739,6 +739,7 @@ pj_cleanup_lock
 pj_clear_initcache
 pj_compare_datums
 pj_context_get_grid_cache_filename(projCtx_t*)
+pj_context_get_url_endpoint(projCtx_t*)
 pj_context_get_user_writable_directory(projCtx_t*, bool)
 pj_context_is_network_enabled(projCtx_t*)
 pj_ctx_alloc

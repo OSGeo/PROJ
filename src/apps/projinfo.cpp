@@ -98,8 +98,9 @@ static void usage() {
         << std::endl
         << "                [--identify] [--3d]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
-        << "                {object_definition} | (-s {srs_def} -t {srs_def})"
-        << std::endl;
+        << "                --searchpaths | --remote-data | "
+           "{object_definition} |"
+        << "                (-s {srs_def} -t {srs_def})" << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
                  "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
@@ -1057,6 +1058,34 @@ int main(int argc, char **argv) {
             outputOpt.strict = false;
         } else if (ci_equal(arg, "--3d")) {
             promoteTo3D = true;
+        } else if (ci_equal(arg, "--searchpaths")) {
+#ifdef _WIN32
+            constexpr char delim = ';';
+#else
+            constexpr char delim = ':';
+#endif
+            const auto paths = split(proj_info().searchpath, delim);
+            for (const auto &path : paths) {
+                std::cout << path << std::endl;
+            }
+            std::exit(0);
+        } else if (ci_equal(arg, "--remote-data")) {
+#ifdef CURL_ENABLED
+            if (pj_context_is_network_enabled(nullptr)) {
+                std::cout << "Status: enabled" << std::endl;
+                std::cout << "URL: " << pj_context_get_url_endpoint(nullptr)
+                          << std::endl;
+            } else {
+                std::cout << "Status: disabled" << std::endl;
+                std::cout << "Reason: not enabled in proj.ini or "
+                             "PROJ_NETWORK=ON not specified"
+                          << std::endl;
+            }
+#else
+            std::cout << "Status: disabled" << std::endl;
+            std::cout << "Reason: build without Curl support" << std::endl;
+#endif
+            std::exit(0);
         } else if (arg == "-?" || arg == "--help") {
             usage();
         } else if (arg[0] == '-') {

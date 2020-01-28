@@ -29,6 +29,8 @@
 #define FILEMANAGER_HPP_INCLUDED
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "proj.h"
 #include "proj/util.hpp"
@@ -92,8 +94,9 @@ class File {
 
 std::unique_ptr<File> pj_network_file_open(PJ_CONTEXT *ctx,
                                            const char *filename);
-
 NS_PROJ_END
+
+std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx);
 
 //! @endcond Doxygen_Suppress
 

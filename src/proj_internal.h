@@ -863,7 +863,8 @@ PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv);
 // For use by projinfo
 bool PROJ_DLL pj_context_is_network_enabled(PJ_CONTEXT* ctx);
 
-std::string pj_context_get_url_endpoint(PJ_CONTEXT* ctx);
+// For use by projinfo
+std::string PROJ_DLL pj_context_get_url_endpoint(PJ_CONTEXT* ctx);
 
 void pj_load_ini(PJ_CONTEXT* ctx);
 
