@@ -6,9 +6,9 @@ PROJ RFC 5: Adopt GeoTIFF-based grids for grids delivered with PROJ
 
 :Author: Even Rouault
 :Contact: even.rouault@spatialys.com
-:Status: Proposed
+:Status: Adopted
 :Implementation target: PROJ 7
-:Last Updated: 2020-01-22
+:Last Updated: 2020-01-28
 
 Motivation
 -------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ This RFC is a continuation of :ref:`rfc4`. With RFC4, PROJ can, upon request
 of the user, download grids from a CDN in a progressive way. There is also API,
 such as :cpp:func:`proj_download_file` to be able to download a GeoTIFF grid in
 the user writable directory. The content of the CDN at https://cdn.proj.org
-is https://github.com/OSGeo/proj-datumgrid-geotiff , which has the same content
+is https://github.com/OSGeo/PROJ-data , which has the same content
 as https://github.com/OSGeo/proj-datumgrid converted in GeoTIFF files. In the
 current state, we could have a somewhat inconsistency between users relying on
 the proj-datumgrid, proj-datumgrid-[world,northamerica,oceania,europe] packages
@@ -30,7 +30,7 @@ based on the GeoTIFF grids.
 Summary of work planned by this RFC and related decisions
 -------------------------------------------------------------------------------
 
-- https://github.com/OSGeo/proj-datumgrid-geotiff/ will be used, starting with
+- https://github.com/OSGeo/PROJ-data/ will be used, starting with
   PROJ 7.0, to create "static" grid packages.
 
 - For now, a single package of, mostly GeoTIFF grids (a few text files for
@@ -48,7 +48,7 @@ Summary of work planned by this RFC and related decisions
   the country.
 
   The agency name is the one you can see from the directory names at
-  https://github.com/OSGeo/proj-datumgrid-geotiff/.
+  https://github.com/OSGeo/PROJ-data/.
   ``${agency_name}`` itself is structure like ``${two_letter_country_code_of_agency_nationality}_${some_abbreviation}``
   (with the exception of eur_nkg, for the Nordic Geodetic Commission which
   isn't affiliated to a single country but to some european countries, and
@@ -80,7 +80,7 @@ Summary of work planned by this RFC and related decisions
 
 - The Python scripts to convert grids (NTv2, GTX) to GeoTIFF currently available at
   https://github.com/rouault/sample_proj_gtiff_grids/ will be moved to a
-  grid_tools/ subdirectories of https://github.com/OSGeo/proj-datumgrid-geotiff/
+  grid_tools/ subdirectories of https://github.com/OSGeo/PROJ-data/
   Documentation for those utilities will be added to PROJ documentation.
 
 - Obviously, all the above assumes PROJ builds to have libtiff enabled.
@@ -120,9 +120,16 @@ Mechanism to auto-promote existing NTv2/GTX names to TIFF ones will be exercised
 Proposed implementation
 -------------------------------------------------------------------------------
 
-Not yet available
+https://github.com/OSGeo/PROJ/pull/1891 and https://github.com/OSGeo/PROJ-data/pull/5
 
 Adoption status
 -------------------------------------------------------------------------------
 
-TBD
+The RFC was adopted on 2020-01-28 with +1's from the following PSC members
+
+* Kristian Evers
+* Even Rouault
+* Thomas Knudsen
+* Howard Butler
+* Kurt Schwehr
+
