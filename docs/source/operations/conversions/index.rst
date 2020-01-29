@@ -18,4 +18,5 @@ conversions.
    noop
    pop
    push
+   set
    unitconvert

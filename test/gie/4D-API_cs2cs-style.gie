@@ -536,4 +536,22 @@ in the creation of a PJ object.
 operation   this is a bogus CRS meant to trigger a generic error in proj_create()
 expect      failure   errno generic error
 
+-------------------------------------------------------------------------------
+Test proj=set
+-------------------------------------------------------------------------------
+
+operation   +proj=set
+accept      1 2 3 4
+expect      1 2 3 4
+roundtrip   1
+
+operation   +proj=set +v_1=10 +v_2=20 +v_3=30 +v_4=40
+accept      1 2 3 4
+expect      10 20 30 40
+
+operation   +proj=set +v_1=10 +v_2=20 +v_3=30 +v_4=40
+direction   inverse
+accept      1 2 3 4
+expect      10 20 30 40
+
 </gie>
