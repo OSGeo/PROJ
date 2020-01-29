@@ -1090,26 +1090,29 @@ END;
 -- Table that contain alternative names for original grid names coming from the authority
 CREATE TABLE grid_alternatives(
     original_grid_name TEXT NOT NULL PRIMARY KEY,   -- original grid name (e.g. Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree.gz). For LOS/LAS format, the .las files
-    proj_grid_name TEXT NOT NULL,                   -- PROJ grid name (e.g egm08_25.gtx)
-    proj_grid_format TEXT NOT NULL,                 -- one of 'CTable2', 'NTv1', 'NTv2', 'GTX'
+    proj_grid_name TEXT NOT NULL,                   -- PROJ >= 7 grid name (e.g us_nga_egm08_25.tif)
+    old_proj_grid_name TEXT,                        -- PROJ < 7 grid name (e.g egm08_25.gtx)
+    proj_grid_format TEXT NOT NULL,                 -- 'GTiff', 'GTX', 'NTv2'
     proj_method TEXT NOT NULL,                      -- hgridshift, vgridshift or geoid_like
     inverse_direction BOOLEAN NOT NULL CHECK (inverse_direction IN (0, 1)), -- whether the PROJ grid direction is reversed w.r.t to the authority one (TRUE in that case)
-    package_name TEXT,                              -- package name that contains the file
+    package_name TEXT,                              -- no longer used. Must be NULL
     url TEXT,                                       -- optional URL where to download the PROJ grid
     direct_download BOOLEAN CHECK (direct_download IN (0, 1)), -- whether the URL can be used directly (if 0, authentication etc might be needed)
     open_license BOOLEAN CHECK (open_license IN (0, 1)),
     directory TEXT,                                 -- optional directory where the file might be located
 
     CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name),
-    CONSTRAINT check_grid_alternatives_grid_fromat CHECK (proj_grid_format IN ('CTable2', 'NTv1', 'NTv2', 'GTX')),
+    CONSTRAINT check_grid_alternatives_grid_fromat CHECK (proj_grid_format IN ('GTiff', 'GTX', 'NTv2')),
     CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift', 'geoid_like')),
-    CONSTRAINT check_grid_alternatives_not_hgridshift CHECK (NOT(proj_method != 'hgridshift' AND proj_grid_format IN ('CTable2', 'NTv1', 'NTv2'))),
-    CONSTRAINT check_grid_alternatives_not_vgridshift CHECK (NOT(proj_method = 'hgridshift' AND proj_grid_format IN ('GTX'))),
     CONSTRAINT check_grid_alternatives_inverse_direction CHECK (NOT(proj_method = 'geoid_like' AND inverse_direction = 1)),
-    CONSTRAINT check_grid_alternatives_package_name_url CHECK (NOT(package_name IS NOT NULL AND url IS NOT NULL)),
+    CONSTRAINT check_grid_alternatives_package_name CHECK (package_name IS NULL),
     CONSTRAINT check_grid_alternatives_direct_download_url CHECK (NOT(direct_download IS NULL AND url IS NOT NULL)),
-    CONSTRAINT check_grid_alternatives_open_license_url CHECK (NOT(open_license IS NULL AND url IS NOT NULL))
+    CONSTRAINT check_grid_alternatives_open_license_url CHECK (NOT(open_license IS NULL AND url IS NOT NULL)),
+    CONSTRAINT check_grid_alternatives_constraint_cdn CHECK (NOT(url LIKE 'https://cdn.proj.org/%' AND (direct_download = 0 OR open_license = 0 OR url != 'https://cdn.proj.org/' || proj_grid_name)))
 );
+
+CREATE INDEX idx_grid_alternatives_proj_grid_name ON grid_alternatives(proj_grid_name);
+CREATE INDEX idx_grid_alternatives_old_proj_grid_name ON grid_alternatives(old_proj_grid_name);
 
 CREATE TRIGGER grid_alternatives_insert_trigger
 BEFORE INSERT ON grid_alternatives

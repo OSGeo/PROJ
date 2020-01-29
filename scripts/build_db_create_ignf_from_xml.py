@@ -1067,27 +1067,31 @@ all_sql.append("""--- Grid alternatives""")
 all_sql.append('')
 all_sql.append("""INSERT INTO grid_alternatives(original_grid_name,
                               proj_grid_name,
+                              old_proj_grid_name,
                               proj_grid_format,
                               proj_method,
                               inverse_direction,
                               package_name,
                               url, direct_download, open_license, directory)
                       VALUES ('ntf_r93.gsb',    -- as referenced by the IGNF registry
+                              'fr_ign_ntf_r93.tif',
                               'ntf_r93.gsb',
-                              'NTv2',
+                              'GTiff',
                               'hgridshift',
                               0,
-                              'proj-datumgrid',
-                              NULL, NULL, NULL, NULL);
+                              NULL,
+                              'https://cdn.proj.org/fr_ign_ntf_r93.tif', 1, 1, NULL);
 """)
 
 for grid in setVerticalGrids:
 
     original_grid_name = grid
-    proj_grid_name = grid[grid.rfind('/')+1:].replace('.txt', '.gtx').replace('.mnt', '.gtx').replace('.gra', '.gtx')
+    old_proj_grid_name = grid[grid.rfind('/')+1:].replace('.txt', '.gtx').replace('.mnt', '.gtx').replace('.gra', '.gtx')
+    gtiff_grid_name = 'fr_ign_' + old_proj_grid_name[0:-4] + '.tif'
 
     all_sql.append("""INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
+                            old_proj_grid_name,
                             proj_grid_format,
                             proj_method,
                             inverse_direction,
@@ -1095,11 +1099,12 @@ for grid in setVerticalGrids:
                             url, direct_download, open_license, directory)
                     VALUES ('%s',    -- as referenced by the IGNF registry
                             '%s',
-                            'GTX',
+                            '%s',
+                            'GTiff',
                             'geoid_like',
                             0,
-                            'proj-datumgrid-europe',
-                            NULL, NULL, NULL, NULL);""" % (original_grid_name, proj_grid_name))
+                            NULL,
+                            '%s', 1, 1, NULL);""" % (original_grid_name, gtiff_grid_name, old_proj_grid_name, 'https://cdn.proj.org/' + gtiff_grid_name))
 
 
 all_sql.append('')

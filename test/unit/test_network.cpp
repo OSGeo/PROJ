@@ -65,7 +65,7 @@ TEST(networking, initial_check) {
     if (!hCurlHandle)
         return;
     curl_easy_setopt(hCurlHandle, CURLOPT_URL,
-                     "https://cdn.proj.org/ntf_r93.tif");
+                     "https://cdn.proj.org/fr_ign_ntf_r93.tif");
 
     curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, "0-1");
     curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, noop_curl_write_func);
@@ -95,7 +95,7 @@ TEST(networking, basic) {
     const char *pipeline =
         "+proj=pipeline "
         "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/fr_ign_ntf_r93.tif "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
     // network access disabled by default
@@ -1055,6 +1055,10 @@ TEST(networking, simul_file_change_while_opened) {
 #ifdef CURL_ENABLED
 
 TEST(networking, curl_hgridshift) {
+    if (!networkAccessOK) {
+        return;
+    }
+
     auto ctx = proj_context_create();
     proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
@@ -1086,6 +1090,10 @@ TEST(networking, curl_hgridshift) {
 #ifdef CURL_ENABLED
 
 TEST(networking, curl_vgridshift) {
+    if (!networkAccessOK) {
+        return;
+    }
+
     auto ctx = proj_context_create();
     proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
@@ -1118,6 +1126,10 @@ TEST(networking, curl_vgridshift) {
 #ifdef CURL_ENABLED
 
 TEST(networking, curl_vgridshift_vertcon) {
+    if (!networkAccessOK) {
+        return;
+    }
+
     auto ctx = proj_context_create();
     proj_grid_cache_set_enable(ctx, false);
     proj_context_set_enable_network(ctx, true);
@@ -1239,7 +1251,7 @@ TEST(networking, cache_basic) {
     const char *pipeline =
         "+proj=pipeline "
         "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/fr_ign_ntf_r93.tif "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
     auto ctx = proj_context_create();
@@ -1265,7 +1277,7 @@ TEST(networking, cache_basic) {
     const char *url =
         reinterpret_cast<const char *>(sqlite3_column_text(hStmt, 0));
     ASSERT_NE(url, nullptr);
-    ASSERT_EQ(std::string(url), "https://cdn.proj.org/ntf_r93.tif");
+    ASSERT_EQ(std::string(url), "https://cdn.proj.org/fr_ign_ntf_r93.tif");
     ASSERT_EQ(sqlite3_column_int64(hStmt, 1), 0);
     sqlite3_finalize(hStmt);
     sqlite3_close(hDB);
@@ -1292,7 +1304,7 @@ TEST(networking, proj_grid_cache_clear) {
     const char *pipeline =
         "+proj=pipeline "
         "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/fr_ign_ntf_r93.tif "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
     proj_cleanup();
@@ -1343,7 +1355,7 @@ TEST(networking, cache_saturation) {
     const char *pipeline =
         "+proj=pipeline "
         "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/fr_ign_ntf_r93.tif "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
     proj_cleanup();
@@ -1405,7 +1417,7 @@ TEST(networking, cache_ttl) {
     const char *pipeline =
         "+proj=pipeline "
         "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/fr_ign_ntf_r93.tif "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
     proj_cleanup();
@@ -1508,7 +1520,7 @@ TEST(networking, cache_lock) {
     const char *pipeline =
         "+proj=pipeline "
         "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=hgridshift +grids=https://cdn.proj.org/ntf_r93.tif "
+        "+step +proj=hgridshift +grids=https://cdn.proj.org/fr_ign_ntf_r93.tif "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
     proj_cleanup();
@@ -1574,7 +1586,7 @@ TEST(networking, download_whole_files) {
 
     proj_cleanup();
     unlink("proj_test_tmp/cache.db");
-    unlink("proj_test_tmp/dvr90.tif");
+    unlink("proj_test_tmp/dk_sdfe_dvr90.tif");
     rmdir("proj_test_tmp");
 
     putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY="));
@@ -1583,11 +1595,12 @@ TEST(networking, download_whole_files) {
     auto ctx = proj_context_create();
     proj_context_set_enable_network(ctx, true);
 
-    ASSERT_TRUE(proj_is_download_needed(ctx, "dvr90.gtx", false));
+    ASSERT_TRUE(proj_is_download_needed(ctx, "dk_sdfe_dvr90.tif", false));
 
-    ASSERT_TRUE(proj_download_file(ctx, "dvr90.gtx", false, nullptr, nullptr));
+    ASSERT_TRUE(
+        proj_download_file(ctx, "dk_sdfe_dvr90.tif", false, nullptr, nullptr));
 
-    FILE *f = fopen("proj_test_tmp/dvr90.tif", "rb");
+    FILE *f = fopen("proj_test_tmp/dk_sdfe_dvr90.tif", "rb");
     ASSERT_NE(f, nullptr);
     fclose(f);
 
@@ -1596,7 +1609,7 @@ TEST(networking, download_whole_files) {
     const char *pipeline =
         "+proj=pipeline "
         "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=vgridshift +grids=dvr90.gtx +multiplier=1 "
+        "+step +proj=vgridshift +grids=dk_sdfe_dvr90.tif +multiplier=1 "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
     auto P = proj_create(ctx, pipeline);
@@ -1612,7 +1625,7 @@ TEST(networking, download_whole_files) {
 
     proj_context_set_enable_network(ctx, true);
 
-    ASSERT_FALSE(proj_is_download_needed(ctx, "dvr90.gtx", false));
+    ASSERT_FALSE(proj_is_download_needed(ctx, "dk_sdfe_dvr90.tif", false));
 
     {
         sqlite3 *hDB = nullptr;
@@ -1631,7 +1644,7 @@ TEST(networking, download_whole_files) {
     }
 
     // If we ignore TTL settings, then no network access will be done
-    ASSERT_FALSE(proj_is_download_needed(ctx, "dvr90.gtx", true));
+    ASSERT_FALSE(proj_is_download_needed(ctx, "dk_sdfe_dvr90.tif", true));
 
     {
         sqlite3 *hDB = nullptr;
@@ -1651,7 +1664,7 @@ TEST(networking, download_whole_files) {
     }
 
     // Should recheck from the CDN, update last_checked and do nothing
-    ASSERT_FALSE(proj_is_download_needed(ctx, "dvr90.gtx", false));
+    ASSERT_FALSE(proj_is_download_needed(ctx, "dk_sdfe_dvr90.tif", false));
 
     {
         sqlite3 *hDB = nullptr;
@@ -1680,10 +1693,10 @@ TEST(networking, download_whole_files) {
         sqlite3_close(hDB);
     }
 
-    ASSERT_TRUE(proj_is_download_needed(ctx, "dvr90.gtx", false));
+    ASSERT_TRUE(proj_is_download_needed(ctx, "dk_sdfe_dvr90.tif", false));
 
     // Redo download with a progress callback this time.
-    unlink("proj_test_tmp/dvr90.tif");
+    unlink("proj_test_tmp/dk_sdfe_dvr90.tif");
 
     const auto cbk = [](PJ_CONTEXT *l_ctx, double pct, void *user_data) -> int {
         auto vect = static_cast<std::vector<std::pair<PJ_CONTEXT *, double>> *>(
@@ -1693,7 +1706,8 @@ TEST(networking, download_whole_files) {
     };
 
     std::vector<std::pair<PJ_CONTEXT *, double>> vectPct;
-    ASSERT_TRUE(proj_download_file(ctx, "dvr90.gtx", false, cbk, &vectPct));
+    ASSERT_TRUE(
+        proj_download_file(ctx, "dk_sdfe_dvr90.tif", false, cbk, &vectPct));
     ASSERT_EQ(vectPct.size(), 3U);
     ASSERT_EQ(vectPct.back().first, ctx);
     ASSERT_EQ(vectPct.back().second, 1.0);
@@ -1703,7 +1717,7 @@ TEST(networking, download_whole_files) {
     putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY="));
     putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE="));
     unlink("proj_test_tmp/cache.db");
-    unlink("proj_test_tmp/dvr90.tif");
+    unlink("proj_test_tmp/dk_sdfe_dvr90.tif");
     rmdir("proj_test_tmp");
 }
 
@@ -1716,7 +1730,7 @@ TEST(networking, file_api) {
 
     proj_cleanup();
     unlink("proj_test_tmp/cache.db");
-    unlink("proj_test_tmp/dvr90.tif");
+    unlink("proj_test_tmp/dk_sdfe_dvr90.tif");
     rmdir("proj_test_tmp");
 
     putenv(const_cast<char *>("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY="));
@@ -1806,9 +1820,10 @@ TEST(networking, file_api) {
     UserData userData;
     ASSERT_TRUE(proj_context_set_fileapi(ctx, &api, &userData));
 
-    ASSERT_TRUE(proj_is_download_needed(ctx, "dvr90.gtx", false));
+    ASSERT_TRUE(proj_is_download_needed(ctx, "dk_sdfe_dvr90.tif", false));
 
-    ASSERT_TRUE(proj_download_file(ctx, "dvr90.gtx", false, nullptr, nullptr));
+    ASSERT_TRUE(
+        proj_download_file(ctx, "dk_sdfe_dvr90.tif", false, nullptr, nullptr));
 
     ASSERT_TRUE(userData.in_open);
     ASSERT_FALSE(userData.in_read);
@@ -1824,7 +1839,7 @@ TEST(networking, file_api) {
     const char *pipeline =
         "+proj=pipeline "
         "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +proj=vgridshift +grids=dvr90.gtx +multiplier=1 "
+        "+step +proj=vgridshift +grids=dk_sdfe_dvr90.tif +multiplier=1 "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg";
 
     auto P = proj_create(ctx, pipeline);
@@ -1847,7 +1862,7 @@ TEST(networking, file_api) {
     putenv(const_cast<char *>("PROJ_USER_WRITABLE_DIRECTORY="));
     putenv(const_cast<char *>("PROJ_FULL_FILE_CHUNK_SIZE="));
     unlink("proj_test_tmp/cache.db");
-    unlink("proj_test_tmp/dvr90.tif");
+    unlink("proj_test_tmp/dk_sdfe_dvr90.tif");
     rmdir("proj_test_tmp");
 }
 

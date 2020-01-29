@@ -1,5 +1,26 @@
 -- This file is hand generated.
 
+-- grid_alternatives entries created from existing ones
+
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              old_proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+    SELECT grid_name,
+           'au_ga_AUSGeoid98.tif',
+           'AUSGeoid98.gtx',
+           'GTiff',
+           'geoid_like',
+           0,
+           NULL,
+           'https://cdn.proj.org/au_ga_AUSGeoid98.tif', 1, 1, NULL FROM grid_transformation WHERE
+                grid_name LIKE '%DAT.htm' AND name LIKE 'GDA94 to AHD height%';
+
+
 INSERT INTO "geodetic_crs" VALUES('OGC','CRS84','WGS 84 (CRS84)',NULL,NULL,'geographic 2D','EPSG','6424','EPSG','6326','EPSG','1262',NULL,0);
 
 INSERT INTO "other_transformation" VALUES('PROJ','CRS84_TO_EPSG_4326','OGC:CRS84 to WGS 84',NULL,NULL,'EPSG','9843','Axis Order Reversal (2D)','OGC','CRS84','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);

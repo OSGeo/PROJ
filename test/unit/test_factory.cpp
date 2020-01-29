@@ -2245,6 +2245,7 @@ TEST_F(FactoryWithTmpDatabase, lookForGridInfo) {
 
     ASSERT_TRUE(execute("INSERT INTO grid_alternatives(original_grid_name,"
                         "proj_grid_name, "
+                        "old_proj_grid_name, "
                         "proj_grid_format, "
                         "proj_method, "
                         "inverse_direction, "
@@ -2252,7 +2253,8 @@ TEST_F(FactoryWithTmpDatabase, lookForGridInfo) {
                         "url, direct_download, open_license, directory) "
                         "VALUES ('null', "
                         "'PROJ_fake_grid', "
-                        "'CTable2', "
+                        "'old_PROJ_fake_grid', "
+                        "'NTv2', "
                         "'hgridshift', "
                         "0, "
                         "NULL, "

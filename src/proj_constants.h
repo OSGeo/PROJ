@@ -508,6 +508,8 @@
 
 #define PROJ_WKT2_NAME_METHOD_CTABLE2 "CTABLE2"
 
+#define PROJ_WKT2_NAME_METHOD_HORIZONTAL_SHIFT_GTIFF "HORIZONTAL_SHIFT_GTIFF"
+
 /* ------------------------------------------------------------------------ */
 
 #define EPSG_CODE_METHOD_VERTCON 9658

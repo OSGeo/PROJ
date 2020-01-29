@@ -34,7 +34,7 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/esri.sql \
 		sql/ignf.sql \
 		sql/grid_alternatives.sql \
-		sql/grid_alternatives_generated.sql \
+		sql/grid_alternatives_generated_noaa.sql \
 		sql/customizations.sql \
 		sql/commit.sql
 

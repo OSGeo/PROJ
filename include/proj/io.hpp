@@ -839,6 +839,11 @@ class PROJ_GCC_DLL DatabaseContext {
                                   bool &gridAvailable) const;
 
     PROJ_INTERNAL std::string
+    getProjGridName(const std::string &oldProjGridName);
+
+    PROJ_INTERNAL std::string getOldProjGridName(const std::string &gridName);
+
+    PROJ_INTERNAL std::string
     getAliasFromOfficialName(const std::string &officialName,
                              const std::string &tableName,
                              const std::string &source) const;
