@@ -4826,7 +4826,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
         authFactory->createCoordinateReferenceSystem("4807"), // NTF(Paris)
         authFactory->createCoordinateReferenceSystem("4171"), // RGF93
         ctxt);
-    ASSERT_EQ(list.size(), 3U);
+    ASSERT_EQ(list.size(), 5U);
     EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to RGF93 (2)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -4834,6 +4834,21 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
               "+proj=longlat +ellps=clrk80ign +pm=paris +step +proj=hgridshift "
               "+grids=fr_ign_ntf_r93.tif +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
+
+    EXPECT_EQ(list[1]->nameStr(), "NTF (Paris) to NTF (1) + NTF to RGF93 (1)");
+    EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=grad +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=clrk80ign +pm=paris "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=clrk80ign "
+              "+step +proj=xyzgridshift +grids=fr_ign_gr3df97a.tif "
+              "+grid_ref=output_crs +ellps=GRS80 "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 
     EXPECT_TRUE(nn_dynamic_pointer_cast<ConcatenatedOperation>(list[0]) !=
                 nullptr);

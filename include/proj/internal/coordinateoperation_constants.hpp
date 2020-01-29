@@ -860,6 +860,7 @@ static const struct MethodNameCode {
     METHOD_NAME_CODE(GEOGRAPHIC3D_OFFSETS), METHOD_NAME_CODE(VERTICAL_OFFSET),
     METHOD_NAME_CODE(NTV2), METHOD_NAME_CODE(NTV1), METHOD_NAME_CODE(NADCON),
     METHOD_NAME_CODE(VERTCON),
+    METHOD_NAME_CODE(GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN),
 };
 
 #define PARAM_NAME_CODE(method)                                                \
@@ -920,6 +921,7 @@ static const struct ParamNameCode {
     PARAM_NAME_CODE(ORDINATE_1_EVAL_POINT),
     PARAM_NAME_CODE(ORDINATE_2_EVAL_POINT),
     PARAM_NAME_CODE(ORDINATE_3_EVAL_POINT),
+    PARAM_NAME_CODE(GEOCENTRIC_TRANSLATION_FILE),
 };
 
 static const ParamMapping paramUnitConversionScalar = {
@@ -1129,6 +1131,15 @@ static const ParamMapping paramLatitudeLongitudeDifferenceFile = {
 static const ParamMapping *const paramsNTV2[] = {
     &paramLatitudeLongitudeDifferenceFile, nullptr};
 
+static const ParamMapping paramGeocentricTranslationFile = {
+    EPSG_NAME_PARAMETER_GEOCENTRIC_TRANSLATION_FILE,
+    EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE, nullptr,
+    common::UnitOfMeasure::Type::NONE, nullptr};
+
+static const ParamMapping
+    *const paramsGeocentricTranslationGridInterpolationIGN[] = {
+        &paramGeocentricTranslationFile, nullptr};
+
 static const ParamMapping paramLatitudeDifferenceFile = {
     EPSG_NAME_PARAMETER_LATITUDE_DIFFERENCE_FILE,
     EPSG_CODE_PARAMETER_LATITUDE_DIFFERENCE_FILE, nullptr,
@@ -1287,6 +1298,10 @@ static const MethodMapping otherMethodMappings[] = {
 
     {EPSG_NAME_METHOD_NTV1, EPSG_CODE_METHOD_NTV1, nullptr, nullptr, nullptr,
      paramsNTV2},
+
+    {EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN,
+     EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN, nullptr,
+     nullptr, nullptr, paramsGeocentricTranslationGridInterpolationIGN},
 
     {EPSG_NAME_METHOD_NADCON, EPSG_CODE_METHOD_NADCON, nullptr, nullptr,
      nullptr, paramsNADCON},

@@ -9,6 +9,7 @@ INSERT INTO grid_alternatives(original_grid_name,
 VALUES
 -- the PROJ grid is the reverse way of the EPSG one
 ('rgf93_ntf.gsb','fr_ign_ntf_r93.tif','ntf_r93.gsb','GTiff','hgridshift',1,NULL,'https://cdn.proj.org/fr_ign_ntf_r93.tif',1,1,NULL),
+('gr3df97a.txt','fr_ign_gr3df97a.tif',NULL,'GTiff','geocentricoffset',0,NULL,'https://cdn.proj.org/fr_ign_gr3df97a.tif',1,1,NULL),
 ('NTv1_0.gsb','ca_nrc_ntv1_can.tif','ntv1_can.dat','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_ntv1_can.tif',1,1,NULL),
 -- just a case change
 ('NTv2_0.gsb','ca_nrc_ntv2_0.tif','ntv2_0.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_ntv2_0.tif',1,1,NULL),
