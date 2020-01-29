@@ -123,6 +123,8 @@ VALUES
 -- Netherlands / RDNAP 2018
 ('nlgeo2018.gtx','nl_nsgi_nlgeo2018.tif','nlgeo2018.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nl_nsgi_nlgeo2018.tif',1,1,NULL),
 ('rdtrans2018.gsb','nl_nsgi_rdtrans2018.tif','rdtrans2018.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/nl_nsgi_rdtrans2018.tif',1,1,NULL),
+('NOT-YET-IN-GRID-TRANSFORMATION-naptrans2018.gtx','nl_nsgi_naptrans2018.tif','naptrans2018.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nl_nsgi_naptrans2018.tif',1,1,NULL),
+('NOT-YET-IN-GRID-TRANSFORMATION-rdcorr2018.gsb','nl_nsgi_rdcorr2018.tif','rdcorr2018.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/nl_nsgi_rdcorr2018.tif',1,1,NULL),
 -- Belgium
 ('bd72lb72_etrs89lb08.gsb','be_ign_bd72lb72_etrs89lb08.tif','bd72lb72_etrs89lb08.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/be_ign_bd72lb72_etrs89lb08.tif',1,1,NULL),
 -- Switzerland

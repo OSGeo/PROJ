@@ -1118,7 +1118,7 @@ CREATE TRIGGER grid_alternatives_insert_trigger
 BEFORE INSERT ON grid_alternatives
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: original_grid_name must be referenced in grid_transformation.grid_name')
-        WHERE NEW.original_grid_name NOT IN ('null') AND NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
+        WHERE NEW.original_grid_name NOT LIKE 'NOT-YET-IN-GRID-TRANSFORMATION-%' AND NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
 END;
 
 CREATE TABLE other_transformation(

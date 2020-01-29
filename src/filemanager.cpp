@@ -1548,6 +1548,7 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
             ctx, name, "rb", pj_open_file_with_manager, nullptr, 0)));
 
     // Retry with the new proj grid name if the file name doesn't end with .tif
+    std::string tmpString; // keep it in this upper scope !
     if (file == nullptr && !is_tilde_slash(name) &&
         !is_rel_or_absolute_filename(name) && !starts_with(name, "http://") &&
         !starts_with(name, "https://") && strcmp(name, "proj.db") != 0 &&
@@ -1564,6 +1565,11 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
                                              0)));
                     if (file) {
                         pj_ctx_set_errno(ctx, 0);
+                    } else {
+                        // For final network access attempt, use the new
+                        // name.
+                        tmpString = filename;
+                        name = tmpString.c_str();
                     }
                 }
             } catch (const std::exception &e) {
