@@ -24,10 +24,8 @@ if [ "$LIB_FUZZING_ENGINE" = "" ]; then
     export LIB_FUZZING_ENGINE=-lFuzzingEngine
 fi
 
-I386_PACKAGES="zlib1g-dev:i386 libssl-dev:i386 libsqlite3-dev:i386 \
-              libtiff5-dev:i386"
-X64_PACKAGES="zlib1g-dev libssl-dev libsqlite3-dev \
-              libtiff5-dev"
+I386_PACKAGES="zlib1g-dev:i386 libssl-dev:i386 libsqlite3-dev:i386"
+X64_PACKAGES="zlib1g-dev libssl-dev libsqlite3-dev"
 
 if [ "$ARCHITECTURE" = "i386" ]; then
     apt-get install -y $I386_PACKAGES
@@ -44,12 +42,20 @@ make -j$(nproc) -s
 make install
 cd ..
 
+# build libtiff.a
+cd libtiff
 ./autogen.sh
-SQLITE3_CFLAGS=-I/usr/include SQLITE3_LIBS=-lsqlite3 TIFF_CFLAGS=-I/usr/include TIFF_LIBS=-ltiff ./configure --disable-shared --with-curl=$SRC/install/bin/curl-config
+./configure --disable-shared --prefix=$SRC/install
+make -j$(nproc)
+make install
+cd ..
+
+./autogen.sh
+SQLITE3_CFLAGS=-I/usr/include SQLITE3_LIBS=-lsqlite3 TIFF_CFLAGS=-I$SRC/install/include TIFF_LIBS="-L$SRC/install/lib -ltiff" ./configure --disable-shared --with-curl=$SRC/install/bin/curl-config
 make clean -s
 make -j$(nproc) -s
 
-EXTRA_LIBS="-lpthread -lsqlite3 -ltiff -Wl,-Bstatic -L$SRC/install/lib -lcurl -lssl -lcrypto -lz -Wl,-Bdynamic"
+EXTRA_LIBS="-lpthread -lsqlite3 -Wl,-Bstatic -L$SRC/install/lib -ltiff -lcurl -lssl -lcrypto -lz -Wl,-Bdynamic"
 
 build_fuzzer()
 {
