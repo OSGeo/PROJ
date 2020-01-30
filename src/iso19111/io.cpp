@@ -2963,8 +2963,24 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
     } else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
         starts_with(methodName,  "PROJ-based operation method:")) {
         auto projString = methodName.substr(strlen("PROJ-based operation method: "));
-        if (starts_with(projString, "+proj=")) {
-            projString += geodeticCRS->datum()->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
+        bool ellips_parameters_exist = (
+            projString.find("+a=") != std::string::npos
+            || projString.find("+ellps=") != std::string::npos
+        );
+        // TODO: skip this if ellipsoid parameters do not exist
+        // and ellipsoid is not passed in (need to find non nullable method)
+        // and the projection needs them to be properly defined
+        if (starts_with(projString, "+proj=")
+         && !(projString.find("+proj=merc ") != std::string::npos
+              && projString.find("+nadgrids=") != std::string::npos) // ignores nadgrids
+         && (projString.find("+proj=tmerc ") == std::string::npos) // needs axis order
+         && (projString.find("+proj=krovak ") == std::string::npos) // needs axis order
+         ) 
+         {
+            if (!ellips_parameters_exist)
+            {
+                projString += " " + geodeticCRS->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
+            }
             if (projString.find(" +type=crs") == std::string::npos) {
                 projString += " +type=crs";
             }
@@ -5243,8 +5259,24 @@ ConversionNNPtr JSONParser::buildConversion(const json &j, const GeodeticCRSNNPt
     else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
         starts_with(methodName,  "PROJ-based operation method:")) {
         auto projString = methodName.substr(strlen("PROJ-based operation method: "));
-        if (starts_with(projString, "+proj=")) {
-            projString += geodeticCRS->datum()->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
+        bool ellips_parameters_exist = (
+            projString.find("+a=") != std::string::npos
+            || projString.find("+ellps=") != std::string::npos
+        );
+        // TODO: skip this if ellipsoid parameters do not exist
+        // and ellipsoid is not passed in (need to find non nullable method)
+        // and the projection needs them to be properly defined
+        if (starts_with(projString, "+proj=")
+         && !(projString.find("+proj=merc ") != std::string::npos
+              && projString.find("+nadgrids=") != std::string::npos) // ignores nadgrids
+         && (projString.find("+proj=tmerc ") == std::string::npos) // needs axis order
+         && (projString.find("+proj=krovak ") == std::string::npos) // needs axis order
+         ) 
+         {
+            if (!ellips_parameters_exist)
+            {
+                projString += " " + geodeticCRS->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
+            }
             if (projString.find(" +type=crs") == std::string::npos) {
                 projString += " +type=crs";
             }
