@@ -2964,6 +2964,7 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
         starts_with(methodName,  "PROJ-based operation method:")) {
         auto projString = methodName.substr(strlen("PROJ-based operation method: "));
         if (starts_with(projString, "+proj=")) {
+            projString += geodeticCRS->datum()->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
             if (projString.find(" +type=crs") == std::string::npos) {
                 projString += " +type=crs";
             }
@@ -5243,6 +5244,7 @@ ConversionNNPtr JSONParser::buildConversion(const json &j, const GeodeticCRSNNPt
         starts_with(methodName,  "PROJ-based operation method:")) {
         auto projString = methodName.substr(strlen("PROJ-based operation method: "));
         if (starts_with(projString, "+proj=")) {
+            projString += geodeticCRS->datum()->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
             if (projString.find(" +type=crs") == std::string::npos) {
                 projString += " +type=crs";
             }
