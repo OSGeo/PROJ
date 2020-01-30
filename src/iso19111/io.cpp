@@ -1290,7 +1290,8 @@ struct WKTParser::Private {
 
     ConversionNNPtr buildConversion(const WKTNodeNNPtr &node,
                                     const UnitOfMeasure &defaultLinearUnit,
-                                    const UnitOfMeasure &defaultAngularUnit);
+                                    const UnitOfMeasure &defaultAngularUnit,
+                                    const GeodeticCRSNNPtr &geodeticCRS);
 
     static bool hasWebMercPROJ4String(const WKTNodeNNPtr &projCRSNode,
                                       const WKTNodeNNPtr &projectionNode);
@@ -2785,7 +2786,8 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
         ThrowMissing(WKTConstants::DERIVINGCONVERSION);
     }
     auto derivingConversion = buildConversion(
-        derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE);
+        derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE,
+        baseGeodCRS);
 
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode)) {
@@ -2928,7 +2930,8 @@ void WKTParser::Private::consumeParameters(
 ConversionNNPtr
 WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
                                     const UnitOfMeasure &defaultLinearUnit,
-                                    const UnitOfMeasure &defaultAngularUnit) {
+                                    const UnitOfMeasure &defaultAngularUnit,
+                                    const GeodeticCRSNNPtr &geodeticCRS) {
     auto &methodNode = node->GP()->lookForChild(WKTConstants::METHOD,
                                                 WKTConstants::PROJECTION);
     if (isNull(methodNode)) {
@@ -2957,6 +2960,25 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
         return NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(
             Conversion::create(invConvProps, invMethodProps, parameters, values)
                 ->inverse()));
+    } else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
+        starts_with(methodName,  "PROJ-based operation method:")) {
+        auto projString = methodName.substr(strlen("PROJ-based operation method: "));
+        if (starts_with(projString, "+proj=")) {
+            if (projString.find(" +type=crs") == std::string::npos) {
+                projString += " +type=crs";
+            }
+            try {
+                auto projObj =
+                    PROJStringParser().createFromPROJString(projString);
+                auto projObjCrs =
+                    nn_dynamic_pointer_cast<ProjectedCRS>(projObj);
+                if (projObjCrs) {
+                    return projObjCrs->derivingConversion();
+                }
+            } catch (const io::ParsingException &) {
+            }
+        }
+
     }
     return Conversion::create(convProps, methodProps, parameters, values);
 }
@@ -3675,7 +3697,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
 
     auto conversion =
         !isNull(conversionNode)
-            ? buildConversion(conversionNode, linearUnit, angularUnit)
+            ? buildConversion(conversionNode, linearUnit, angularUnit, baseGeodCRS)
             : buildProjection(node, projectionNode, linearUnit, angularUnit);
 
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
@@ -4006,7 +4028,8 @@ WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
         ThrowMissing(WKTConstants::DERIVINGCONVERSION);
     }
     auto derivingConversion = buildConversion(
-        derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE);
+        derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE,
+        crs::GeodeticCRS::EPSG_4978);
 
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode)) {
@@ -4159,7 +4182,7 @@ WKTParser::Private::buildDerivedTemporalCRS(const WKTNodeNNPtr &node) {
     return DerivedTemporalCRS::create(
         buildProperties(node), buildTemporalCRS(baseCRSNode),
         buildConversion(derivingConversionNode, UnitOfMeasure::NONE,
-                        UnitOfMeasure::NONE),
+                        UnitOfMeasure::NONE, crs::GeodeticCRS::EPSG_4978),
         buildTemporalCS(node));
 }
 
@@ -4217,7 +4240,8 @@ WKTParser::Private::buildDerivedEngineeringCRS(const WKTNodeNNPtr &node) {
         ThrowNotEnoughChildren(WKTConstants::DERIVINGCONVERSION);
     }
     auto derivingConversion = buildConversion(
-        derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE);
+        derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE,
+        crs::GeodeticCRS::EPSG_4978);
 
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode)) {
@@ -4280,7 +4304,7 @@ WKTParser::Private::buildDerivedParametricCRS(const WKTNodeNNPtr &node) {
     return DerivedParametricCRS::create(
         buildProperties(node), buildParametricCRS(baseParamCRSNode),
         buildConversion(derivingConversionNode, UnitOfMeasure::NONE,
-                        UnitOfMeasure::NONE),
+                        UnitOfMeasure::NONE, crs::GeodeticCRS::EPSG_4978),
         buildParametricCS(node));
 }
 
@@ -4305,7 +4329,8 @@ WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
     auto angularUnit =
         baseProjCRS->baseCRS()->coordinateSystem()->axisList()[0]->unit();
 
-    auto conversion = buildConversion(conversionNode, linearUnit, angularUnit);
+    auto conversion = buildConversion(
+        conversionNode, linearUnit, angularUnit, baseProjCRS->baseCRS());
 
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode) && !ci_equal(nodeP->value(), WKTConstants::PROJCS)) {
@@ -4498,8 +4523,8 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
     if (ci_equal(name, WKTConstants::CONVERSION)) {
         auto conv =
-            buildConversion(node, UnitOfMeasure::METRE, UnitOfMeasure::DEGREE);
-
+            buildConversion(
+                node, UnitOfMeasure::METRE, UnitOfMeasure::DEGREE, GeodeticCRS::EPSG_4978);
         if (starts_with(conv->method()->nameStr(),
                         "PROJ-based operation method: ")) {
             auto projString = conv->method()->nameStr().substr(
@@ -4548,7 +4573,7 @@ class JSONParser {
     GeographicCRSNNPtr buildGeographicCRS(const json &j);
     GeodeticCRSNNPtr buildGeodeticCRS(const json &j);
     ProjectedCRSNNPtr buildProjectedCRS(const json &j);
-    ConversionNNPtr buildConversion(const json &j);
+    ConversionNNPtr buildConversion(const json &j, const GeodeticCRSNNPtr &geodeticCRS);
     DatumEnsembleNNPtr buildDatumEnsemble(const json &j);
     GeodeticReferenceFrameNNPtr buildGeodeticReferenceFrame(const json &j);
     VerticalReferenceFrameNNPtr buildVerticalReferenceFrame(const json &j);
@@ -4617,7 +4642,7 @@ class JSONParser {
         if (!csCast) {
             throw ParsingException("coordinate_system not of expected type");
         }
-        auto conv = buildConversion(getObject(j, "conversion"));
+        auto conv = buildConversion(getObject(j, "conversion"), crs::GeodeticCRS::EPSG_4978);
         return TargetCRS::create(buildProperties(j), NN_NO_CHECK(baseCRS), conv,
                                  NN_NO_CHECK(csCast));
     }
@@ -4946,7 +4971,7 @@ BaseObjectNNPtr JSONParser::create(const json &j)
             throw ParsingException("base_crs not of expected type");
         }
         auto cs = buildCS(getObject(j, "coordinate_system"));
-        auto conv = buildConversion(getObject(j, "conversion"));
+        auto conv = buildConversion(getObject(j, "conversion"), crs::GeodeticCRS::EPSG_4978);
         auto csCartesian = util::nn_dynamic_pointer_cast<CartesianCS>(cs);
         if (csCartesian)
             return DerivedGeodeticCRS::create(buildProperties(j),
@@ -5013,7 +5038,7 @@ BaseObjectNNPtr JSONParser::create(const json &j)
         return buildCS(j);
     }
     if (type == "Conversion") {
-        return buildConversion(j);
+        return buildConversion(j, crs::GeodeticCRS::EPSG_4978);
     }
     if (type == "Transformation") {
         return buildTransformation(j);
@@ -5100,7 +5125,7 @@ ProjectedCRSNNPtr JSONParser::buildProjectedCRS(const json &j) {
     if (!cartesianCS) {
         throw ParsingException("expected a Cartesian CS");
     }
-    auto conv = buildConversion(getObject(j, "conversion"));
+    auto conv = buildConversion(getObject(j, "conversion"), baseCRS);
     return ProjectedCRS::create(buildProperties(j), baseCRS, conv,
                                 NN_NO_CHECK(cartesianCS));
 }
@@ -5180,7 +5205,7 @@ CompoundCRSNNPtr JSONParser::buildCompoundCRS(const json &j) {
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr JSONParser::buildConversion(const json &j) {
+ConversionNNPtr JSONParser::buildConversion(const json &j, const GeodeticCRSNNPtr &geodeticCRS) {
     auto methodJ = getObject(j, "method");
     auto convProps = buildProperties(j);
     auto methodProps = buildProperties(methodJ);
@@ -5213,6 +5238,26 @@ ConversionNNPtr JSONParser::buildConversion(const json &j) {
         return NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(
             Conversion::create(invConvProps, invMethodProps, parameters, values)
                 ->inverse()));
+    }
+    else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
+        starts_with(methodName,  "PROJ-based operation method:")) {
+        auto projString = methodName.substr(strlen("PROJ-based operation method: "));
+        if (starts_with(projString, "+proj=")) {
+            if (projString.find(" +type=crs") == std::string::npos) {
+                projString += " +type=crs";
+            }
+            try {
+                auto projObj =
+                    PROJStringParser().createFromPROJString(projString);
+                auto projObjCrs =
+                    nn_dynamic_pointer_cast<ProjectedCRS>(projObj);
+                if (projObjCrs) {
+                    return projObjCrs->derivingConversion();
+                }
+            } catch (const io::ParsingException &) {
+            }
+        }
+
     }
     return Conversion::create(convProps, methodProps, parameters, values);
 }
