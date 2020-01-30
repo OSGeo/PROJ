@@ -7,7 +7,6 @@ set(CONFIG_FILES
 )
 
 set(PROJ_DICTIONARY
-  null
   world
   other.extra
   nad27
@@ -68,7 +67,6 @@ endif()
 # Note: this is done at configure/cmake time, not build time.
 # So if you install new grids in the source data/ subdirectory, run cmake again
 set(DATA_FOR_TESTS
-    null
     GL27
     nad27
     nad83

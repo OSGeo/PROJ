@@ -1,7 +1,7 @@
 DATAPATH = $(top_srcdir)/data
 
 pkgdata_DATA = proj.ini GL27 nad.lst nad27 nad83 world other.extra \
-		CH null \
+		CH \
 		ITRF2000 ITRF2008 ITRF2014 proj.db \
 		projjson.schema.json
 
@@ -87,14 +87,13 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		tests/nkgrf03vel_realigned_z_extract.gtx \
 		tests/test_hgrid_with_two_level_of_subgrids_no_grid_name.tif \
 		tests/us_noaa_geoid06_ak_subset_at_antimeridian.tif \
-		null \
 		generate_all_sql_in.cmake sql_filelist.cmake \
 		$(SQL_ORDERED_LIST)
 
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
 	@for gridfile in $(DATAPATH)/*.gsb $(DATAPATH)/*.gtx $(DATAPATH)/ntv1_can.dat dummy \
-	                 $(DATAPATH)/alaska $(DATAPATH)/conus $(DATAPATH)/hawaii $(DATAPATH)/null \
+	                 $(DATAPATH)/alaska $(DATAPATH)/conus $(DATAPATH)/hawaii \
 	                 $(DATAPATH)/prvi $(DATAPATH)/stgeorge $(DATAPATH)/stlrnc $(DATAPATH)/stpaul \
 	                 $(DATAPATH)/FL $(DATAPATH)/MD $(DATAPATH)/TN $(DATAPATH)/WI $(DATAPATH)/WO; do \
 	  if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \
@@ -150,8 +149,7 @@ check-local:
 	fi; \
 	rm -rf for_tests; \
 	mkdir for_tests; \
-	for x in $(DATAPATH)/null \
-		 $(DATAPATH)/GL27 \
+	for x in $(DATAPATH)/GL27 \
 		 $(DATAPATH)/nad27 \
 		 $(DATAPATH)/nad83 \
 		 $(DATAPATH)/ntv1_can.dat \

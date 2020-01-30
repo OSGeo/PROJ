@@ -384,9 +384,10 @@ TEST(gie, info_functions) {
     proj_destroy(P);
 
     /* proj_grid_info() */
-    grid_info = proj_grid_info("null");
+    grid_info = proj_grid_info("tests/test_hgrid.tif");
     ASSERT_NE(std::string(grid_info.filename), "");
-    ASSERT_EQ(std::string(grid_info.gridname), "null");
+    ASSERT_EQ(std::string(grid_info.gridname), "tests/test_hgrid.tif");
+    ASSERT_EQ(std::string(grid_info.format), "gtiff");
 
     grid_info = proj_grid_info("nonexistinggrid");
     ASSERT_EQ(std::string(grid_info.filename), "");
