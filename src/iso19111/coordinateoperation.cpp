@@ -8471,6 +8471,33 @@ _getHorizontalShiftGTIFFFilename(const Transformation *op, bool allowInverse) {
 
 //! @cond Doxygen_Suppress
 static const std::string &
+_getGeocentricTranslationFilename(const Transformation *op, bool allowInverse) {
+
+    const auto &l_method = op->method();
+    const auto &methodName = l_method->nameStr();
+    if (l_method->getEPSGCode() ==
+            EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN ||
+        (allowInverse &&
+         ci_equal(
+             methodName,
+             INVERSE_OF +
+                 EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN))) {
+        const auto &fileParameter =
+            op->parameterValue(EPSG_NAME_PARAMETER_GEOCENTRIC_TRANSLATION_FILE,
+                               EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            return fileParameter->valueFile();
+        }
+    }
+    return nullString;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+static const std::string &
 _getHeightToGeographic3DFilename(const Transformation *op, bool allowInverse) {
 
     const auto &methodName = op->method()->nameStr();
@@ -8798,6 +8825,34 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
                         coordinateOperationAccuracies());
                 }
             }
+        }
+    }
+
+    const auto &geocentricTranslationFilename =
+        _getGeocentricTranslationFilename(this, false);
+    if (!geocentricTranslationFilename.empty()) {
+        if (databaseContext->lookForGridAlternative(
+                geocentricTranslationFilename, projFilename, projGridFormat,
+                inverseDirection)) {
+
+            if (inverseDirection) {
+                throw util::UnsupportedOperationException(
+                    "Inverse direction for "
+                    "GeocentricTranslation not supported");
+            }
+
+            if (geocentricTranslationFilename == projFilename) {
+                return self;
+            }
+
+            auto parameters =
+                std::vector<OperationParameterNNPtr>{createOpParamNameEPSGCode(
+                    EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE)};
+            return create(createSimilarPropertiesTransformation(self),
+                          sourceCRS(), targetCRS(), interpolationCRS(),
+                          createSimilarPropertiesMethod(method()), parameters,
+                          {ParameterValue::createFilename(projFilename)},
+                          coordinateOperationAccuracies());
         }
     }
 
@@ -9414,6 +9469,80 @@ void Transformation::_exportToPROJString(
         }
         formatter->addStep("hgridshift");
         formatter->addParam("grids", hGridShiftFilename);
+        if (isMethodInverseOf) {
+            formatter->stopInversion();
+        }
+
+        targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+
+        return;
+    }
+
+    const auto &geocentricTranslationFilename =
+        _getGeocentricTranslationFilename(this, true);
+    if (!geocentricTranslationFilename.empty()) {
+        auto sourceCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
+        if (!sourceCRSGeog) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to GeographicCRS"));
+        }
+
+        auto targetCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
+        if (!targetCRSGeog) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to GeographicCRS"));
+        }
+
+        const auto &interpCRS = interpolationCRS();
+        if (!interpCRS) {
+            throw io::FormattingException(
+                "InterpolationCRS required "
+                "for"
+                " " EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN);
+        }
+        const bool interpIsSrc = interpCRS->_isEquivalentTo(
+            sourceCRS().get(), util::IComparable::Criterion::EQUIVALENT);
+        const bool interpIsTarget = interpCRS->_isEquivalentTo(
+            targetCRS().get(), util::IComparable::Criterion::EQUIVALENT);
+        if (!interpIsSrc && !interpIsTarget) {
+            throw io::FormattingException(
+                "For"
+                " " EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN
+                ", interpolation CRS should be the source or target CRS");
+        }
+
+        formatter->startInversion();
+        sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        formatter->stopInversion();
+
+        if (isMethodInverseOf) {
+            formatter->startInversion();
+        }
+
+        formatter->addStep("push");
+        formatter->addParam("v_3");
+
+        formatter->addStep("cart");
+        sourceCRSGeog->ellipsoid()->_exportToPROJString(formatter);
+
+        formatter->addStep("xyzgridshift");
+        formatter->addParam("grids", geocentricTranslationFilename);
+        formatter->addParam("grid_ref",
+                            interpIsTarget ? "output_crs" : "input_crs");
+        (interpIsTarget ? targetCRSGeog : sourceCRSGeog)
+            ->ellipsoid()
+            ->_exportToPROJString(formatter);
+
+        formatter->startInversion();
+        formatter->addStep("cart");
+        targetCRSGeog->ellipsoid()->_exportToPROJString(formatter);
+        formatter->stopInversion();
+
+        formatter->addStep("pop");
+        formatter->addParam("v_3");
+
         if (isMethodInverseOf) {
             formatter->stopInversion();
         }

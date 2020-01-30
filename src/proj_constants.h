@@ -501,6 +501,14 @@
     "Geoid (height correction) model file"
 #define EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME 8666
 
+#define EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN \
+    "Geocentric translation by Grid Interpolation (IGN)"
+#define EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN 1087
+
+#define EPSG_CODE_PARAMETER_GEOCENTRIC_TRANSLATION_FILE 8727
+#define EPSG_NAME_PARAMETER_GEOCENTRIC_TRANSLATION_FILE \
+    "Geocentric translation file"
+
 /* ------------------------------------------------------------------------ */
 
 #define PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D \
