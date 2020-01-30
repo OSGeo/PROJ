@@ -135,3 +135,12 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6312','hermannskogel','
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6299','ire65','PROJ');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6272','nzgd49','PROJ');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6277','OSGB36','PROJ');
+
+---- NTF_PARIS_TO_RGF93_GEOCENTRIC_TRANSLATION -----
+
+-- This is a copy of EPSG:7810 (NTF (Paris) to RGF93 (1)) which uses the deprecated EPSG:1053 operation as the second step.
+-- We replace it by the non-deprecated EPSG:9327
+-- Issue raised to EPSG
+INSERT INTO "concatenated_operation" VALUES('PROJ','NTF_PARIS_TO_RGF93_GEOCENTRIC_TRANSLATION','NTF (Paris) to RGF93 (1)','See transformation code 7811 for an alternative which uses the NTv2 method as an emulation of the geocentric interpolation in the second step.','Approximation to better than 1m of transformation of coordinates referenced to NTF (Paris) to RGF93.','EPSG','4807','EPSG','4171','EPSG','3694',NULL,'',0);
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NTF_PARIS_TO_RGF93_GEOCENTRIC_TRANSLATION',1,'EPSG','1763');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NTF_PARIS_TO_RGF93_GEOCENTRIC_TRANSLATION',2,'EPSG','9327');
