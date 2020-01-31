@@ -39,10 +39,20 @@ NS_PROJ_START
 
 //! @cond Doxygen_Suppress
 
-class SQLite3VFS {
-    sqlite3_vfs *vfs_ = nullptr;
+// ---------------------------------------------------------------------------
 
-    explicit SQLite3VFS(sqlite3_vfs *vfs);
+struct pj_sqlite3_vfs : public sqlite3_vfs {
+    std::string namePtr{};
+    bool fakeSync = false;
+    bool fakeLock = false;
+};
+
+// ---------------------------------------------------------------------------
+
+class SQLite3VFS {
+    pj_sqlite3_vfs *vfs_ = nullptr;
+
+    explicit SQLite3VFS(pj_sqlite3_vfs *vfs);
 
     SQLite3VFS(const SQLite3VFS &) = delete;
     SQLite3VFS &operator=(const SQLite3VFS &) = delete;
