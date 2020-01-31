@@ -2979,8 +2979,8 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
                     PROJStringParser().createFromPROJString(projString);
                 auto projObjCrs =
                     nn_dynamic_pointer_cast<ProjectedCRS>(projObj);
-                if (projObjCrs) {
-                    return projObjCrs->derivingConversion();
+                if (projObjCrs && projObjCrs->getExtensionProj4().empty()) {
+                    return projObjCrs->derivingConversion()->shallowCloneNoCRS();
                 }
             } catch (const io::ParsingException &) {
             }
@@ -5265,8 +5265,8 @@ ConversionNNPtr JSONParser::buildConversion(const json &j, const GeodeticCRSPtr 
                     PROJStringParser().createFromPROJString(projString);
                 auto projObjCrs =
                     nn_dynamic_pointer_cast<ProjectedCRS>(projObj);
-                if (projObjCrs) {
-                    return projObjCrs->derivingConversion();
+                if (projObjCrs && projObjCrs->getExtensionProj4().empty()) {
+                    return projObjCrs->derivingConversion()->shallowCloneNoCRS();
                 }
             } catch (const io::ParsingException &) {
             }
@@ -9471,8 +9471,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     if (conversionStructure) {
                         auto projObjCrs =
                             nn_dynamic_pointer_cast<ProjectedCRS>(obj);
-                        if (projObjCrs) {
-                            return projObjCrs->derivingConversion();
+                        if (projObjCrs && projObjCrs->getExtensionProj4().empty()) {
+                            return projObjCrs->derivingConversion()->shallowCloneNoCRS();
                         }
                     }
                     else {

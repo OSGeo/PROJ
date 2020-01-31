@@ -2502,6 +2502,15 @@ CoordinateOperationNNPtr Conversion::_shallowClone() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+ConversionNNPtr Conversion::shallowCloneNoCRS() const {
+    auto conv = Conversion::nn_make_shared<Conversion>(*this);
+    conv->assignSelf(conv);
+    return conv;
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 ConversionNNPtr
 Conversion::alterParametersLinearUnit(const common::UnitOfMeasure &unit,
                                       bool convertToNewUnit) const {
