@@ -2967,7 +2967,8 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
         {
             if (geodeticCRS
                 && projString.find("+a=") == std::string::npos
-                && projString.find("+ellps=") == std::string::npos)
+                && projString.find("+ellps=") == std::string::npos
+                && projString.find("+R=") == std::string::npos)
             {
                 projString += " " + geodeticCRS->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
             }
@@ -5253,7 +5254,8 @@ ConversionNNPtr JSONParser::buildConversion(const json &j, const GeodeticCRSPtr 
         {
             if (geodeticCRS
                 && projString.find("+a=") == std::string::npos
-                && projString.find("+ellps=") == std::string::npos)
+                && projString.find("+ellps=") == std::string::npos
+                && projString.find("+R=") == std::string::npos)
             {
                 projString += " " + geodeticCRS->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
             }
