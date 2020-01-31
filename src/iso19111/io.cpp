@@ -9239,6 +9239,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     int iSecondUnitConvert = -1;
     int iFirstAxisSwap = -1;
     int iSecondAxisSwap = -1;
+    bool conversionStructure = false;
     bool unexpectedStructure = d->steps_.empty();
     for (int i = 0; i < static_cast<int>(d->steps_.size()); i++) {
         const auto &stepName = d->steps_[i].name;
@@ -9286,7 +9287,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         if ((d->steps_.size() == 1 &&
              d->getParamValue(d->steps_[0], "type") != "crs") ||
             (d->steps_.size() > 1 && d->getGlobalParamValue("type") != "crs")) {
-            unexpectedStructure = true;
+            unexpectedStructure = false;
+            conversionStructure = true;
         }
     }
 
@@ -9425,7 +9427,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     }
 
     if (!unexpectedStructure) {
-        if (iFirstGeogStep == 0 && !d->steps_[iFirstGeogStep].inverted &&
+        if (!conversionStructure && iFirstGeogStep == 0 &&
+            !d->steps_[iFirstGeogStep].inverted &&
             iSecondGeogStep < 0 && iProjStep < 0 &&
             (iFirstUnitConvert < 0 || iSecondUnitConvert < 0) &&
             (iFirstAxisSwap < 0 || iSecondAxisSwap < 0)) {
@@ -9465,7 +9468,16 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                         iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
                                                         : iFirstAxisSwap));
                 if (iter == 1) {
-                    return nn_static_pointer_cast<BaseObject>(obj);
+                    if (conversionStructure) {
+                        auto projObjCrs =
+                            nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+                        if (projObjCrs) {
+                            return projObjCrs->derivingConversion();
+                        }
+                    }
+                    else {
+                        return nn_static_pointer_cast<BaseObject>(obj);
+                    }
                 }
             }
         }
