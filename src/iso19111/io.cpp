@@ -1291,7 +1291,7 @@ struct WKTParser::Private {
     ConversionNNPtr buildConversion(const WKTNodeNNPtr &node,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit,
-                                    const GeodeticCRSNNPtr &geodeticCRS);
+                                    const GeodeticCRSPtr &geodeticCRS);
 
     static bool hasWebMercPROJ4String(const WKTNodeNNPtr &projCRSNode,
                                       const WKTNodeNNPtr &projectionNode);
@@ -2931,7 +2931,7 @@ ConversionNNPtr
 WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit,
-                                    const GeodeticCRSNNPtr &geodeticCRS) {
+                                    const GeodeticCRSPtr &geodeticCRS) {
     auto &methodNode = node->GP()->lookForChild(WKTConstants::METHOD,
                                                 WKTConstants::PROJECTION);
     if (isNull(methodNode)) {
@@ -2963,21 +2963,11 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
     } else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
         starts_with(methodName,  "PROJ-based operation method:")) {
         auto projString = methodName.substr(strlen("PROJ-based operation method: "));
-        bool ellips_parameters_exist = (
-            projString.find("+a=") != std::string::npos
-            || projString.find("+ellps=") != std::string::npos
-        );
-        // TODO: skip this if ellipsoid parameters do not exist
-        // and ellipsoid is not passed in (need to find non nullable method)
-        // and the projection needs them to be properly defined
-        if (starts_with(projString, "+proj=")
-         && !(projString.find("+proj=merc ") != std::string::npos
-              && projString.find("+nadgrids=") != std::string::npos) // ignores nadgrids
-         && (projString.find("+proj=tmerc ") == std::string::npos) // needs axis order
-         && (projString.find("+proj=krovak ") == std::string::npos) // needs axis order
-         ) 
-         {
-            if (!ellips_parameters_exist)
+        if (starts_with(projString, "+proj=")) 
+        {
+            if (geodeticCRS
+                && projString.find("+a=") == std::string::npos
+                && projString.find("+ellps=") == std::string::npos)
             {
                 projString += " " + geodeticCRS->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
             }
@@ -4258,7 +4248,7 @@ WKTParser::Private::buildDerivedEngineeringCRS(const WKTNodeNNPtr &node) {
     }
     auto derivingConversion = buildConversion(
         derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE,
-        crs::GeodeticCRS::EPSG_4978);
+        nullptr);
 
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode)) {
@@ -4321,7 +4311,7 @@ WKTParser::Private::buildDerivedParametricCRS(const WKTNodeNNPtr &node) {
     return DerivedParametricCRS::create(
         buildProperties(node), buildParametricCRS(baseParamCRSNode),
         buildConversion(derivingConversionNode, UnitOfMeasure::NONE,
-                        UnitOfMeasure::NONE, crs::GeodeticCRS::EPSG_4978),
+                        UnitOfMeasure::NONE, nullptr),
         buildParametricCS(node));
 }
 
@@ -4541,7 +4531,7 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
     if (ci_equal(name, WKTConstants::CONVERSION)) {
         auto conv =
             buildConversion(
-                node, UnitOfMeasure::METRE, UnitOfMeasure::DEGREE, GeodeticCRS::EPSG_4978);
+                node, UnitOfMeasure::METRE, UnitOfMeasure::DEGREE, nullptr);
         if (starts_with(conv->method()->nameStr(),
                         "PROJ-based operation method: ")) {
             auto projString = conv->method()->nameStr().substr(
@@ -4590,7 +4580,7 @@ class JSONParser {
     GeographicCRSNNPtr buildGeographicCRS(const json &j);
     GeodeticCRSNNPtr buildGeodeticCRS(const json &j);
     ProjectedCRSNNPtr buildProjectedCRS(const json &j);
-    ConversionNNPtr buildConversion(const json &j, const GeodeticCRSNNPtr &geodeticCRS);
+    ConversionNNPtr buildConversion(const json &j, const GeodeticCRSPtr &geodeticCRS);
     DatumEnsembleNNPtr buildDatumEnsemble(const json &j);
     GeodeticReferenceFrameNNPtr buildGeodeticReferenceFrame(const json &j);
     VerticalReferenceFrameNNPtr buildVerticalReferenceFrame(const json &j);
@@ -4659,7 +4649,7 @@ class JSONParser {
         if (!csCast) {
             throw ParsingException("coordinate_system not of expected type");
         }
-        auto conv = buildConversion(getObject(j, "conversion"), crs::GeodeticCRS::EPSG_4978);
+        auto conv = buildConversion(getObject(j, "conversion"), nullptr);
         return TargetCRS::create(buildProperties(j), NN_NO_CHECK(baseCRS), conv,
                                  NN_NO_CHECK(csCast));
     }
@@ -4988,7 +4978,7 @@ BaseObjectNNPtr JSONParser::create(const json &j)
             throw ParsingException("base_crs not of expected type");
         }
         auto cs = buildCS(getObject(j, "coordinate_system"));
-        auto conv = buildConversion(getObject(j, "conversion"), crs::GeodeticCRS::EPSG_4978);
+        auto conv = buildConversion(getObject(j, "conversion"), nullptr);
         auto csCartesian = util::nn_dynamic_pointer_cast<CartesianCS>(cs);
         if (csCartesian)
             return DerivedGeodeticCRS::create(buildProperties(j),
@@ -5055,7 +5045,7 @@ BaseObjectNNPtr JSONParser::create(const json &j)
         return buildCS(j);
     }
     if (type == "Conversion") {
-        return buildConversion(j, crs::GeodeticCRS::EPSG_4978);
+        return buildConversion(j, nullptr);
     }
     if (type == "Transformation") {
         return buildTransformation(j);
@@ -5142,7 +5132,7 @@ ProjectedCRSNNPtr JSONParser::buildProjectedCRS(const json &j) {
     if (!cartesianCS) {
         throw ParsingException("expected a Cartesian CS");
     }
-    auto conv = buildConversion(getObject(j, "conversion"), baseCRS);
+    auto conv = buildConversion(getObject(j, "conversion"), baseCRS->extractGeodeticCRS());
     return ProjectedCRS::create(buildProperties(j), baseCRS, conv,
                                 NN_NO_CHECK(cartesianCS));
 }
@@ -5222,7 +5212,7 @@ CompoundCRSNNPtr JSONParser::buildCompoundCRS(const json &j) {
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr JSONParser::buildConversion(const json &j, const GeodeticCRSNNPtr &geodeticCRS) {
+ConversionNNPtr JSONParser::buildConversion(const json &j, const GeodeticCRSPtr &geodeticCRS) {
     auto methodJ = getObject(j, "method");
     auto convProps = buildProperties(j);
     auto methodProps = buildProperties(methodJ);
@@ -5259,21 +5249,11 @@ ConversionNNPtr JSONParser::buildConversion(const json &j, const GeodeticCRSNNPt
     else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
         starts_with(methodName,  "PROJ-based operation method:")) {
         auto projString = methodName.substr(strlen("PROJ-based operation method: "));
-        bool ellips_parameters_exist = (
-            projString.find("+a=") != std::string::npos
-            || projString.find("+ellps=") != std::string::npos
-        );
-        // TODO: skip this if ellipsoid parameters do not exist
-        // and ellipsoid is not passed in (need to find non nullable method)
-        // and the projection needs them to be properly defined
-        if (starts_with(projString, "+proj=")
-         && !(projString.find("+proj=merc ") != std::string::npos
-              && projString.find("+nadgrids=") != std::string::npos) // ignores nadgrids
-         && (projString.find("+proj=tmerc ") == std::string::npos) // needs axis order
-         && (projString.find("+proj=krovak ") == std::string::npos) // needs axis order
-         ) 
-         {
-            if (!ellips_parameters_exist)
+        if (starts_with(projString, "+proj=")) 
+        {
+            if (geodeticCRS
+                && projString.find("+a=") == std::string::npos
+                && projString.find("+ellps=") == std::string::npos)
             {
                 projString += " " + geodeticCRS->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
             }
