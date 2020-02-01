@@ -2991,7 +2991,8 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
         return NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(
             Conversion::create(invConvProps, invMethodProps, parameters, values)
                 ->inverse()));
-    } else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
+    }
+    else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
         starts_with(methodName,  "PROJ-based operation method:")) {
         auto projString = methodName.substr(strlen("PROJ-based operation method: "));
         auto conversion = buildConversionFromPROJString(projString, geodeticCRS);
@@ -9434,31 +9435,37 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             const bool ignoreVUnits = true;
             // First run is dry run to mark all recognized/unrecognized tokens
             for (int iter = 0; iter < 2; iter++) {
-                auto obj = d->buildBoundOrCompoundCRSIfNeeded(
-                    iProjStep,
-                    d->buildProjectedCRS(
+                try {
+                    auto obj = d->buildBoundOrCompoundCRSIfNeeded(
                         iProjStep,
-                        d->buildGeographicCRS(
-                            iFirstGeogStep, iFirstUnitConvert < iFirstGeogStep
-                                                ? iFirstUnitConvert
-                                                : -1,
-                            iFirstAxisSwap < iFirstGeogStep ? iFirstAxisSwap
-                                                            : -1,
-                            ignoreVUnits, true),
-                        iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
-                                                           : iFirstUnitConvert,
-                        iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
-                                                        : iFirstAxisSwap));
-                if (iter == 1) {
-                    if (conversionStructure) {
-                        auto projObjCrs =
-                            nn_dynamic_pointer_cast<ProjectedCRS>(obj);
-                        if (projObjCrs && projObjCrs->getExtensionProj4().empty()) {
-                            return projObjCrs->derivingConversion()->shallowCloneNoCRS();
+                        d->buildProjectedCRS(
+                            iProjStep,
+                            d->buildGeographicCRS(
+                                iFirstGeogStep, iFirstUnitConvert < iFirstGeogStep
+                                                    ? iFirstUnitConvert
+                                                    : -1,
+                                iFirstAxisSwap < iFirstGeogStep ? iFirstAxisSwap
+                                                                : -1,
+                                ignoreVUnits, true),
+                            iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
+                                                            : iFirstUnitConvert,
+                            iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
+                                                            : iFirstAxisSwap));
+                    if (iter == 1) {
+                        if (conversionStructure) {
+                            auto projObjCrs =
+                                nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+                            if (projObjCrs && projObjCrs->getExtensionProj4().empty()) {
+                                return projObjCrs->derivingConversion()->shallowCloneNoCRS();
+                            }
+                        }
+                        else {
+                            return nn_static_pointer_cast<BaseObject>(obj);
                         }
                     }
-                    else {
-                        return nn_static_pointer_cast<BaseObject>(obj);
+                } catch (const io::ParsingException &) {
+                    if (!conversionStructure) {
+                        throw;
                     }
                 }
             }
