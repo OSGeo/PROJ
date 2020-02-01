@@ -4037,7 +4037,7 @@ WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
     }
     auto derivingConversion = buildConversion(
         derivingConversionNode, UnitOfMeasure::NONE, UnitOfMeasure::NONE,
-        crs::GeodeticCRS::EPSG_4978);
+        nullptr);
 
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     if (isNull(csNode)) {
@@ -4190,7 +4190,7 @@ WKTParser::Private::buildDerivedTemporalCRS(const WKTNodeNNPtr &node) {
     return DerivedTemporalCRS::create(
         buildProperties(node), buildTemporalCRS(baseCRSNode),
         buildConversion(derivingConversionNode, UnitOfMeasure::NONE,
-                        UnitOfMeasure::NONE, crs::GeodeticCRS::EPSG_4978),
+                        UnitOfMeasure::NONE, nullptr),
         buildTemporalCS(node));
 }
 
