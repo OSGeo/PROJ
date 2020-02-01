@@ -2926,6 +2926,37 @@ void WKTParser::Private::consumeParameters(
 }
 
 // ---------------------------------------------------------------------------
+static ConversionPtr buildConversionFromPROJString(
+    std::string projString,
+    const GeodeticCRSPtr &geodeticCRS) {
+    if (!starts_with(projString, "+proj=") && !starts_with(projString, "proj=")) {
+        return nullptr;
+    }
+    if (geodeticCRS
+        && projString.find("+a=") == std::string::npos
+        && projString.find("+ellps=") == std::string::npos
+        && projString.find("+R=") == std::string::npos)
+    {
+        projString += " " + geodeticCRS->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
+    }
+    if (projString.find(" +type=crs") == std::string::npos) {
+        projString += " +type=crs";
+    }
+    try {
+        auto projObj =
+            PROJStringParser().createFromPROJString(projString);
+        auto projObjCrs =
+            nn_dynamic_pointer_cast<ProjectedCRS>(projObj);
+        if (projObjCrs && projObjCrs->getExtensionProj4().empty()) {
+            return projObjCrs->derivingConversion()->shallowCloneNoCRS();
+        }
+    } catch (const io::ParsingException &) {
+    }
+    return nullptr;
+}
+
+
+// ---------------------------------------------------------------------------
 
 ConversionNNPtr
 WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
@@ -2963,30 +2994,10 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
     } else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
         starts_with(methodName,  "PROJ-based operation method:")) {
         auto projString = methodName.substr(strlen("PROJ-based operation method: "));
-        if (starts_with(projString, "+proj=")) 
-        {
-            if (geodeticCRS
-                && projString.find("+a=") == std::string::npos
-                && projString.find("+ellps=") == std::string::npos
-                && projString.find("+R=") == std::string::npos)
-            {
-                projString += " " + geodeticCRS->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
-            }
-            if (projString.find(" +type=crs") == std::string::npos) {
-                projString += " +type=crs";
-            }
-            try {
-                auto projObj =
-                    PROJStringParser().createFromPROJString(projString);
-                auto projObjCrs =
-                    nn_dynamic_pointer_cast<ProjectedCRS>(projObj);
-                if (projObjCrs && projObjCrs->getExtensionProj4().empty()) {
-                    return projObjCrs->derivingConversion()->shallowCloneNoCRS();
-                }
-            } catch (const io::ParsingException &) {
-            }
+        auto conversion = buildConversionFromPROJString(projString, geodeticCRS);
+        if (conversion) {
+            return NN_CHECK_ASSERT(conversion);
         }
-
     }
     return Conversion::create(convProps, methodProps, parameters, values);
 }
@@ -3464,20 +3475,9 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     } else if (extensionChildren.size() == 2 &&
                ci_equal(stripQuotes(extensionChildren[0]), "PROJ4")) {
         std::string projString = stripQuotes(extensionChildren[1]);
-        if (starts_with(projString, "+proj=")) {
-            if (projString.find(" +type=crs") == std::string::npos) {
-                projString += " +type=crs";
-            }
-            try {
-                auto projObj =
-                    PROJStringParser().createFromPROJString(projString);
-                auto projObjCrs =
-                    nn_dynamic_pointer_cast<ProjectedCRS>(projObj);
-                if (projObjCrs) {
-                    return projObjCrs->derivingConversion();
-                }
-            } catch (const io::ParsingException &) {
-            }
+        auto conversion = buildConversionFromPROJString(projString, nullptr);
+        if (conversion) {
+            return NN_CHECK_ASSERT(conversion);
         }
     }
 
@@ -5250,30 +5250,10 @@ ConversionNNPtr JSONParser::buildConversion(const json &j, const GeodeticCRSPtr 
     else if (methodProps.getStringValue(IdentifiedObject::NAME_KEY, methodName) &&
         starts_with(methodName,  "PROJ-based operation method:")) {
         auto projString = methodName.substr(strlen("PROJ-based operation method: "));
-        if (starts_with(projString, "+proj=")) 
-        {
-            if (geodeticCRS
-                && projString.find("+a=") == std::string::npos
-                && projString.find("+ellps=") == std::string::npos
-                && projString.find("+R=") == std::string::npos)
-            {
-                projString += " " + geodeticCRS->ellipsoid()->exportToPROJString(PROJStringFormatter::create().get());
-            }
-            if (projString.find(" +type=crs") == std::string::npos) {
-                projString += " +type=crs";
-            }
-            try {
-                auto projObj =
-                    PROJStringParser().createFromPROJString(projString);
-                auto projObjCrs =
-                    nn_dynamic_pointer_cast<ProjectedCRS>(projObj);
-                if (projObjCrs && projObjCrs->getExtensionProj4().empty()) {
-                    return projObjCrs->derivingConversion()->shallowCloneNoCRS();
-                }
-            } catch (const io::ParsingException &) {
-            }
+        auto conversion = buildConversionFromPROJString(projString, geodeticCRS);
+        if (conversion) {
+            return NN_CHECK_ASSERT(conversion);
         }
-
     }
     return Conversion::create(convProps, methodProps, parameters, values);
 }
