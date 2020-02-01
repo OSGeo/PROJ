@@ -55,7 +55,7 @@ SQLITE3_CFLAGS=-I/usr/include SQLITE3_LIBS=-lsqlite3 TIFF_CFLAGS=-I$SRC/install/
 make clean -s
 make -j$(nproc) -s
 
-EXTRA_LIBS="-lpthread -lsqlite3 -Wl,-Bstatic -L$SRC/install/lib -ltiff -lcurl -lssl -lcrypto -lz -Wl,-Bdynamic"
+EXTRA_LIBS="-lpthread -Wl,-Bstatic -lsqlite3 -L$SRC/install/lib -ltiff -lcurl -lssl -lcrypto -lz -Wl,-Bdynamic"
 
 build_fuzzer()
 {
