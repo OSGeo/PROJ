@@ -1953,13 +1953,6 @@ static std::string build_url(PJ_CONTEXT *ctx, const char *name) {
                 remote_file += '/';
             }
             remote_file += name;
-            auto pos = remote_file.rfind('.');
-            if (pos + 4 == remote_file.size()) {
-                remote_file = remote_file.substr(0, pos) + ".tif";
-            } else {
-                // For example for resource files like 'alaska'
-                remote_file += ".tif";
-            }
         }
         return remote_file;
     }
