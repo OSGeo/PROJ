@@ -44,7 +44,7 @@ NS_PROJ_START
 
 // ---------------------------------------------------------------------------
 
-SQLite3VFS::SQLite3VFS(sqlite3_vfs *vfs) : vfs_(vfs) {}
+SQLite3VFS::SQLite3VFS(pj_sqlite3_vfs *vfs) : vfs_(vfs) {}
 
 // ---------------------------------------------------------------------------
 
@@ -57,17 +57,7 @@ SQLite3VFS::~SQLite3VFS() {
 
 // ---------------------------------------------------------------------------
 
-struct pj_sqlite3_vfs : public sqlite3_vfs {
-    std::string namePtr{};
-    bool fakeSync = false;
-    bool fakeLock = false;
-};
-
-// ---------------------------------------------------------------------------
-
-const char *SQLite3VFS::name() const {
-    return static_cast<pj_sqlite3_vfs *>(vfs_)->namePtr.c_str();
-}
+const char *SQLite3VFS::name() const { return vfs_->namePtr.c_str(); }
 
 // ---------------------------------------------------------------------------
 
