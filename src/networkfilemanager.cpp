@@ -2377,8 +2377,7 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
         return false;
     }
 
-    if (size_read <
-        std::min(static_cast<unsigned long long>(buffer.size()), props.size)) {
+    if (size_read == 0) {
         pj_log(ctx, PJ_LOG_ERROR, "Did not get as many bytes as expected");
         ctx->networking.close(ctx, handle, ctx->networking.user_data);
         f.reset();
