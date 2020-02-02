@@ -24,3 +24,4 @@ operations.
    gie
    proj
    projinfo
+   projsync

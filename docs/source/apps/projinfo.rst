@@ -416,7 +416,7 @@ Output:
     See also
     ********
 
-    **cs2cs(1)**, **cct(1)**, **geod(1)**, **gie(1)**, **proj(1)**
+    **cs2cs(1)**, **cct(1)**, **geod(1)**, **gie(1)**, **proj(1)**, **projsync(1)**
 
     Bugs
     ****

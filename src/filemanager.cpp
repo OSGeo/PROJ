@@ -1178,6 +1178,8 @@ static void CreateDirectoryRecursively(PJ_CONTEXT *ctx,
 
 std::string pj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
                                                    bool create) {
+    if (!ctx)
+        ctx = pj_get_default_ctx();
     if (ctx->user_writable_directory.empty()) {
         // For testing purposes only
         const char *env_var_PROJ_USER_WRITABLE_DIRECTORY =
@@ -1230,6 +1232,15 @@ std::string pj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
         CreateDirectoryRecursively(ctx, ctx->user_writable_directory);
     }
     return ctx->user_writable_directory;
+}
+
+// ---------------------------------------------------------------------------
+
+void pj_context_set_user_writable_directory(PJ_CONTEXT *ctx,
+                                            const std::string &path) {
+    if (!ctx)
+        ctx = pj_get_default_ctx();
+    ctx->user_writable_directory = path;
 }
 
 // ---------------------------------------------------------------------------

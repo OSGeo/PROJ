@@ -1,0 +1,194 @@
+:
+# Test projsync
+
+TEST_CLI_DIR=`dirname $0`
+EXE=$1
+
+usage()
+{
+    echo "Usage: ${0} <path to 'projsync' program>" 
+    echo
+    exit 1
+}
+
+if test -z "${EXE}"; then
+    EXE=../../src/projsync
+fi
+
+if test ! -x ${EXE}; then
+    echo "*** ERROR: Can not find '${EXE}' program!"
+    exit 1
+fi
+
+echo "============================================"
+echo "Running ${0} using ${EXE}:"
+echo "============================================"
+
+if ! curl -s https://cdn.proj.org/files.geojson >/dev/null 2>/dev/null; then
+    if ! wget https://cdn.proj.org/files.geojson -O /dev/null 2>/dev/null; then
+        echo "Cannot download https://cdn.proj.org/files.geojson. Skipping test"
+        exit 0
+    fi
+fi
+
+TMP_OUT=test_projsync_out.txt
+
+rm -rf tmp_user_writable_directory
+mkdir -p tmp_user_writable_directory
+
+echo "Testing $EXE --list-files --target-dir tmp_user_writable_directory"
+if ! $EXE --list-files --target-dir tmp_user_writable_directory > ${TMP_OUT}; then
+    echo "--list-files failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "at_bev_README.txt,,at_bev" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+export PROJ_USER_WRITABLE_DIRECTORY=tmp_user_writable_directory
+
+if test ! -f ${PROJ_USER_WRITABLE_DIRECTORY}/cache.db; then
+    echo "*** ERROR: Can not find ${PROJ_USER_WRITABLE_DIRECTORY}/cache.db!"
+    exit 100
+fi
+if test ! -f ${PROJ_USER_WRITABLE_DIRECTORY}/files.geojson; then
+    echo "*** ERROR: Can not find ${PROJ_USER_WRITABLE_DIRECTORY}/files.geojson!"
+    exit 100
+fi
+
+echo "Testing $EXE --all"
+if ! $EXE --all --dry-run > ${TMP_OUT}; then
+    echo "--all failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "Would download https://cdn.proj.org/at_bev_README.txt" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+
+echo "Testing $EXE --source-id fr_ign"
+if ! $EXE --source-id fr_ign --dry-run > ${TMP_OUT}; then
+    echo "--source-id fr_ign failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "fr_ign_README.txt" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+
+echo "Testing $EXE --source-id non_existing"
+if $EXE --source-id non_existing >${TMP_OUT} 2>&1 ; then
+    echo "--source-id non_existing failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "Warning: 'non_existing' is a unknown value for --source-id" >/dev/null || (cat ${TMP_OUT}; exit 100)
+cat ${TMP_OUT} | grep "fr_ign" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+
+echo "Testing $EXE --area-of-use France"
+if ! $EXE --area-of-use France --dry-run > ${TMP_OUT}; then
+    echo "--area-of-use France failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "fr_ign_ntf_r93.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+
+echo "Testing $EXE --area-of-use non_existing"
+if $EXE --area-of-use non_existing >${TMP_OUT} 2>&1 ; then
+    echo "--area-of-use non_existing failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "Warning: 'non_existing' is a unknown value for --area-of-use." >/dev/null || (cat ${TMP_OUT}; exit 100)
+cat ${TMP_OUT} | grep "Australia" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+
+echo "Testing $EXE --file ntf_r93"
+if ! $EXE --file ntf_r93 > ${TMP_OUT}; then
+    echo "--file ntf_r93 failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "Downloading https://cdn.proj.org/fr_ign_ntf_r93.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+if test ! -f ${PROJ_USER_WRITABLE_DIRECTORY}/fr_ign_ntf_r93.tif; then
+    echo "*** ERROR: Can not find ${PROJ_USER_WRITABLE_DIRECTORY}/fr_ign_ntf_r93.tif!"
+    exit 100
+fi
+
+echo "Testing $EXE --file ntf_r93 a second time"
+if ! $EXE --file ntf_r93 > ${TMP_OUT}; then
+    echo "--file ntf_r93 failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "https://cdn.proj.org/fr_ign_ntf_r93.tif already downloaded" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+rm -f ${PROJ_USER_WRITABLE_DIRECTORY}/fr_ign_ntf_r93.tif
+
+
+echo "Testing $EXE --file non_existing"
+if $EXE --file non_existing >${TMP_OUT} 2>&1 ; then
+    echo "--file non_existing failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "Warning: 'non_existing' is a unknown value for --file." >/dev/null || (cat ${TMP_OUT}; exit 100)
+cat ${TMP_OUT} | grep "fr_ign_ntf_r93.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+
+echo "Testing $EXE --bbox 2,49,3,50"
+if ! $EXE --bbox 2,49,3,50 --dry-run > ${TMP_OUT}; then
+    echo "--bbox 2,49,3,50 failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "fr_ign_ntf_r93.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+cat ${TMP_OUT} | grep "us_nga_egm96_15.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+
+echo "Testing $EXE --bbox 2,49,3,50 --exclude-world-coverage"
+if ! $EXE --bbox 2,49,3,50 --exclude-world-coverage --dry-run > ${TMP_OUT}; then
+    echo "--bbox 2,49,3,50 --exclude-world-coverage failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "fr_ign_ntf_r93.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+if cat ${TMP_OUT} | grep "us_nga_egm96_15.tif" >/dev/null; then
+    cat ${TMP_OUT}
+    exit 100
+fi
+
+
+echo "Testing $EXE --bbox 170,-90,-170,90"
+if ! $EXE --bbox 170,-90,-170,90 --dry-run > ${TMP_OUT}; then
+    echo "--bbox 170,-90,-170,90 failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "nz_linz_nzgeoid2009.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+cat ${TMP_OUT} | grep "us_noaa_alaska.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+
+echo "Testing $EXE --bbox 170,-90,190,90"
+if ! $EXE --bbox 170,-90,190,90 --dry-run > ${TMP_OUT}; then
+    echo "--bbox 170,-90,190,90 failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "nz_linz_nzgeoid2009.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+cat ${TMP_OUT} | grep "us_noaa_alaska.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+
+echo "Testing $EXE --bbox -190,-90,-170,90"
+if ! $EXE --bbox -190,-90,-170,90 --dry-run > ${TMP_OUT}; then
+    echo "--bbox -190,-90,-170,90 failed"
+    cat ${TMP_OUT}
+    exit 100
+fi
+cat ${TMP_OUT} | grep "nz_linz_nzgeoid2009.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+cat ${TMP_OUT} | grep "us_noaa_alaska.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
+rm -rf ${PROJ_USER_WRITABLE_DIRECTORY}
+rm ${TMP_OUT}
+
+exit 0

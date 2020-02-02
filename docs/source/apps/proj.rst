@@ -214,7 +214,7 @@ data will appear as three lines of::
     See also
     ********
 
-    **cs2cs(1)**, **cct(1)**, **geod(1)**, **gie(1)**, **projinfo(1)**
+    **cs2cs(1)**, **cct(1)**, **geod(1)**, **gie(1)**, **projinfo(1)**, **projsync(1)**
 
     Bugs
     ****

@@ -346,6 +346,13 @@ man_pages = [
         ['Even Rouault'],
         1
     ),
+    (
+        'apps/projsync',
+        'projsync',
+        u'Downloading tool of resource files',
+        ['Even Rouault'],
+        1
+    ),
 ]
 
 # If true, show URL addresses after external links.

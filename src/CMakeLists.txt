@@ -15,6 +15,8 @@ option(BUILD_PROJ
   "Build proj (cartographic projection tool)" ON)
 option(BUILD_PROJINFO
   "Build projinfo (SRS and coordinate operation metadata/query tool)" ON)
+option(BUILD_PROJSYNC
+  "Build projsync (synchronize transformation support data)" ON)
 
 if(NOT MSVC)
 
@@ -71,6 +73,15 @@ if(BUILD_GIE)
   include(bin_gie.cmake)
   set(BIN_TARGETS ${BIN_TARGETS} gie)
 endif()
+
+if(BUILD_PROJSYNC)
+  if(NOT ENABLE_CURL)
+    message(SEND_ERROR "projsync requires Curl")
+  endif()
+  include(bin_projsync.cmake)
+  set(BIN_TARGETS ${BIN_TARGETS} bin_projsync)
+endif()
+
 
 if(MSVC OR CMAKE_CONFIGURATION_TYPES)
   if(BIN_TARGETS)

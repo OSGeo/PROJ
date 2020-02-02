@@ -193,7 +193,7 @@ class DiskChunkCache {
     std::unique_ptr<SQLite3VFS> vfs_{};
 
     explicit DiskChunkCache(PJ_CONTEXT *ctx, const std::string &path);
- 
+
     bool initialize();
     void commitAndClose();
 
@@ -552,7 +552,8 @@ bool DiskChunkCache::checkConsistency() {
 
 void DiskChunkCache::commitAndClose() {
     if (hDB_) {
-        if( sqlite3_exec(hDB_, "COMMIT", nullptr, nullptr, nullptr) != SQLITE_OK ) {
+        if (sqlite3_exec(hDB_, "COMMIT", nullptr, nullptr, nullptr) !=
+            SQLITE_OK) {
             pj_log(ctx_, PJ_LOG_ERROR, "%s", sqlite3_errmsg(hDB_));
         }
         sqlite3_close(hDB_);
@@ -562,9 +563,7 @@ void DiskChunkCache::commitAndClose() {
 
 // ---------------------------------------------------------------------------
 
-DiskChunkCache::~DiskChunkCache() {
-    commitAndClose();
-}
+DiskChunkCache::~DiskChunkCache() { commitAndClose(); }
 
 // ---------------------------------------------------------------------------
 
@@ -1336,7 +1335,8 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
 
 // ---------------------------------------------------------------------------
 
-std::unique_ptr<File> pj_network_file_open(PJ_CONTEXT* ctx, const char* filename) {
+std::unique_ptr<File> pj_network_file_open(PJ_CONTEXT *ctx,
+                                           const char *filename) {
     return NetworkFile::open(ctx, filename);
 }
 

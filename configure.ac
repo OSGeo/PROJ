@@ -321,6 +321,7 @@ fi
 AC_SUBST(CURL_CFLAGS,$CURL_CFLAGS)
 AC_SUBST(CURL_LIBS,$CURL_LIBS)
 AC_SUBST(CURL_ENABLED_FLAGS,$CURL_ENABLED_FLAGS)
+AM_CONDITIONAL(HAVE_CURL, [test "x$FOUND_CURL" = "xyes"])
 
 dnl ---------------------------------------------------------------------------
 dnl Check for external Google Test
