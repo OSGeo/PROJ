@@ -190,7 +190,7 @@ Hence, in honour of *cct* (the geodesist) this is :program:`cct` (the program).
     See also
     ********
 
-    **proj(1)**, **cs2cs(1)**, **geod(1)**, **gie(1)**, **projinfo(1)**
+    **proj(1)**, **cs2cs(1)**, **geod(1)**, **gie(1)**, **projinfo(1)**, **projsync(1)**
 
     Bugs
     ****

@@ -53,8 +53,8 @@ class FileManager {
 
   public:
     // "Low-level" interface.
-    static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename,
-                                      FileAccess access);
+    static PROJ_DLL std::unique_ptr<File>
+    open(PJ_CONTEXT *ctx, const char *filename, FileAccess access);
     static bool exists(PJ_CONTEXT *ctx, const char *filename);
     static bool mkdir(PJ_CONTEXT *ctx, const char *filename);
     static bool unlink(PJ_CONTEXT *ctx, const char *filename);
@@ -81,14 +81,15 @@ class File {
     explicit File(const std::string &name);
 
   public:
-    virtual ~File();
+    virtual PROJ_DLL ~File();
     virtual size_t read(void *buffer, size_t sizeBytes) = 0;
     virtual size_t write(const void *buffer, size_t sizeBytes) = 0;
     virtual bool seek(unsigned long long offset, int whence = SEEK_SET) = 0;
     virtual unsigned long long tell() = 0;
     virtual void reassign_context(PJ_CONTEXT *ctx) = 0;
     virtual bool hasChanged() const = 0;
-    std::string read_line(size_t maxLen, bool &maxLenReached, bool &eofReached);
+    std::string PROJ_DLL read_line(size_t maxLen, bool &maxLenReached,
+                                   bool &eofReached);
 
     const std::string &name() const { return name_; }
 };
@@ -99,7 +100,8 @@ std::unique_ptr<File> pj_network_file_open(PJ_CONTEXT *ctx,
                                            const char *filename);
 NS_PROJ_END
 
-std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx);
+// Exported for projsync
+std::vector<std::string> PROJ_DLL pj_get_default_searchpaths(PJ_CONTEXT *ctx);
 
 //! @endcond Doxygen_Suppress
 

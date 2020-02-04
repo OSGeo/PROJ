@@ -366,7 +366,7 @@ So in honour, and hopefully also in the spirit, of Gerald Ian Evenden
     See also
     ********
 
-    **proj(1)**, **cs2cs(1)**, **cct(1)**, **geod(1)**
+    **proj(1)**, **cs2cs(1)**, **cct(1)**, **geod(1)**, **projinfo(1)**, **projsync(1)**
 
     Bugs
     ****

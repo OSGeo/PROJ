@@ -76,6 +76,11 @@ capability to download whole grids in the
 :ref:`PROJ user writable directory <user_writable_directory>` by using the
 :cpp:func:`proj_is_download_needed` and :cpp:func:`proj_download_file` functions.
 
+Download utility
+----------------
+
+:ref:`projsync` is a tool for downloading resource files.
+
 
 Mirroring
 ---------

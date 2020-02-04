@@ -200,7 +200,7 @@ Further reading
     See also
     ********
 
-    **proj(1)**, **cs2cs(1)**, **cct(1)**, **geod(1)**, **gie(1)**
+    **proj(1)**, **cs2cs(1)**, **cct(1)**, **gie(1)**, **projinfo(1)**, **projsync(1)**
 
     Bugs
     ****
