@@ -98,17 +98,17 @@ function(proj_target_output_name TARGET_NAME OUTPUT_NAME)
     message(SEND_ERROR "Error, the variable TARGET_NAME is not defined!")
   endif()
 
-  if(NOT DEFINED ${PROJECT_INTERN_NAME}_VERSION)
+  if(NOT DEFINED ${PROJECT_NAME}_VERSION)
     message(SEND_ERROR
-      "Error, the variable ${${PROJECT_INTERN_NAME}_VERSION} is not defined!")
+      "Error, the variable ${${PROJECT_NAME}_VERSION} is not defined!")
   endif()
 
   # On Windows, ABI version is specified using binary file name suffix.
   # On Unix, suffix is empty and SOVERSION is used instead.
   if(WIN32)
-    string(LENGTH "${${PROJECT_INTERN_NAME}_ABI_VERSION}" abilen)
+    string(LENGTH "${${PROJECT_NAME}_ABI_VERSION}" abilen)
     if(abilen GREATER 0)
-      set(SUFFIX "_${${PROJECT_INTERN_NAME}_ABI_VERSION}")
+      set(SUFFIX "_${${PROJECT_NAME}_ABI_VERSION}")
     endif()
   endif()
 
