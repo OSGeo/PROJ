@@ -143,7 +143,7 @@ Build requirements
 - SQLite3 >= 3.11 (headers, library and executable)
 - libtiff >= 4.0 (headers and library)
 - optional (but recommended): curl >= 7.29.0
-- GNU make for autotools build or CMake >= 3.5
+- GNU make for autotools build or CMake >= 3.9
 
 Autotools
 --------------------------------------------------------------------------------

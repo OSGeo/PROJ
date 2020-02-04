@@ -376,10 +376,8 @@ if(ENABLE_LTO)
   endif()
 endif()
 
-if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
-  target_include_directories(${PROJ_CORE_TARGET} INTERFACE
-    $<INSTALL_INTERFACE:${INCLUDEDIR}>)
-endif()
+target_include_directories(${PROJ_CORE_TARGET} INTERFACE
+  $<INSTALL_INTERFACE:${INCLUDEDIR}>)
 
 if(WIN32)
   set_target_properties(${PROJ_CORE_TARGET}

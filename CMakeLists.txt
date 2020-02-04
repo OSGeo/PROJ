@@ -9,15 +9,14 @@
 ################################################################################
 # General settings
 ################################################################################
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 
 # For historic reasons, the CMake PROJECT-NAME is PROJ4
 project(PROJ4 LANGUAGES C CXX)
 set(PROJECT_INTERN_NAME PROJ)
 
-if(NOT CMAKE_VERSION VERSION_LESS 3.1)
-  cmake_policy(SET CMP0054 NEW)
-endif()
+# Only interpret if() arguments as variables or keywords when unquoted
+cmake_policy(SET CMP0054 NEW)
 
 # Set C++ version
 # Make CMAKE_CXX_STANDARD available as cache option overridable by user
