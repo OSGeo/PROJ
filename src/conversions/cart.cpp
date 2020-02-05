@@ -165,8 +165,9 @@ static PJ_LPZ geodetic (PJ_XYZ cart,  PJ *P) {
     if( fabs(lpz.phi) > M_HALFPI ) {
         // this happen on non-sphere ellipsoid when x,y,z is very close to 0
         // there is no single solution to the cart->geodetic conversion in
-        // that case, so arbitrarily pickup phi = 0.
-        lpz.phi = 0;
+        // that case, clamp to -90/90 deg and avoid a discontinuous boundary
+        // near the poles
+        lpz.phi = copysign(M_HALFPI, lpz.phi);
     }
     lpz.lam  =  atan2 (cart.y, cart.x);
     N        =  normal_radius_of_curvature (P->a, P->es, lpz.phi);
