@@ -851,7 +851,7 @@ expect      180 0 0
 
 # Center of Earth !
 accept      0 0 0
-expect      0 0 -6378137
+expect      0 90 -6356752.314140356
 
 
 </gie>
