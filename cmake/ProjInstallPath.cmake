@@ -30,7 +30,7 @@ if(UNIX)
   set(DEFAULT_DATA_SUBDIR ${CMAKE_INSTALL_DATAROOTDIR}/proj)
   set(DEFAULT_INCLUDE_SUBDIR ${CMAKE_INSTALL_INCLUDEDIR})
   set(DEFAULT_DOC_SUBDIR ${CMAKE_INSTALL_DOCDIR})
-  set(DEFAULT_CMAKE_SUBDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME_LOWER})
+  set(DEFAULT_CMAKE_SUBDIR ${CMAKE_INSTALL_LIBDIR}/cmake)
 else()
   # Common locations for Unix and Mac OS X
   set(DEFAULT_BIN_SUBDIR bin)
@@ -39,7 +39,7 @@ else()
   set(DEFAULT_DOC_SUBDIR doc/proj)
   set(DEFAULT_INCLUDE_SUBDIR include)
   set(DEFAULT_DOC_SUBDIR share/doc/proj)
-  set(DEFAULT_CMAKE_SUBDIR lib/cmake/${PROJECT_NAME_LOWER})
+  set(DEFAULT_CMAKE_SUBDIR lib/cmake)
 endif()
 
 # Locations are changeable by user to customize layout of PROJ installation
@@ -55,7 +55,7 @@ set(PROJ_DATA_SUBDIR ${DEFAULT_DATA_SUBDIR} CACHE STRING
 set(PROJ_DOC_SUBDIR ${DEFAULT_DOC_SUBDIR} CACHE STRING
   "Subdirectory where doc will be installed")
 set(PROJ_CMAKE_SUBDIR ${DEFAULT_CMAKE_SUBDIR} CACHE STRING
-  "Subdirectory where cmake proj-config file will be installed")
+  "Parent of subdirectory where cmake proj-config file will be installed")
 
 # Mark *DIR variables as advanced and dedicated to use by power-users only.
 mark_as_advanced(

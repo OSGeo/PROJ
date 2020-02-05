@@ -27,27 +27,27 @@ macro(proj_version)
     ${ARGN})
 
   # Set version components
-  set(${PROJECT_INTERN_NAME}_VERSION_MAJOR ${THIS_VERSION_MAJOR})
-  set(${PROJECT_INTERN_NAME}_VERSION_MINOR ${THIS_VERSION_MINOR})
-  set(${PROJECT_INTERN_NAME}_VERSION_PATCH ${THIS_VERSION_PATCH})
+  set(${PROJECT_NAME}_VERSION_MAJOR ${THIS_VERSION_MAJOR})
+  set(${PROJECT_NAME}_VERSION_MINOR ${THIS_VERSION_MINOR})
+  set(${PROJECT_NAME}_VERSION_PATCH ${THIS_VERSION_PATCH})
 
   # Set VERSION string
-  set(${PROJECT_INTERN_NAME}_VERSION
-    "${${PROJECT_INTERN_NAME}_VERSION_MAJOR}.\
-${${PROJECT_INTERN_NAME}_VERSION_MINOR}.\
-${${PROJECT_INTERN_NAME}_VERSION_PATCH}")
+  set(${PROJECT_NAME}_VERSION
+    "${${PROJECT_NAME}_VERSION_MAJOR}.\
+${${PROJECT_NAME}_VERSION_MINOR}.\
+${${PROJECT_NAME}_VERSION_PATCH}")
 
   # Set ABI version string used to name binary output
   # On Windows, ABI version is specified using binary file name suffix.
   if(WIN32)
-    set(${PROJECT_INTERN_NAME}_ABI_VERSION
-      "${${PROJECT_INTERN_NAME}_VERSION_MAJOR}_\
-${${PROJECT_INTERN_NAME}_VERSION_MINOR}")
+    set(${PROJECT_NAME}_ABI_VERSION
+      "${${PROJECT_NAME}_VERSION_MAJOR}_\
+${${PROJECT_NAME}_VERSION_MINOR}")
   endif()
 
   message(STATUS "")
-  boost_report_value(${PROJECT_INTERN_NAME}_VERSION)
+  boost_report_value(${PROJECT_NAME}_VERSION)
   if(WIN32)
-    boost_report_value(${PROJECT_INTERN_NAME}_ABI_VERSION)
+    boost_report_value(${PROJECT_NAME}_ABI_VERSION)
   endif()
 endmacro()
