@@ -23,12 +23,13 @@ See the NEWS file for changes between versions.
 
 The following command line utilities are included in the PROJ package:
 
-- `proj`: for cartographic projection of geodetic coordinates
+- `proj`: for cartographic projection of geodetic coordinates.
 - `cs2cs`: for transformation from one CRS to another CRS.
 - `geod`: for geodesic (great circle) computations.
 - `cct`: for generic Coordinate Conversions and Transformations.
 - `gie`: the Geospatial Integrity Investigation Environment.
-- `projinfo`: for geodetic object and coordinate operation queries
+- `projinfo`: for geodetic object and coordinate operation queries.
+- `projsync`: for synchronizing PROJ datum and transformation support data.
 
 > More information on the utilities can be found on the [PROJ website](https://proj.org/apps).
 
