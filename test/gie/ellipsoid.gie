@@ -44,7 +44,7 @@ tolerance 10 nm
 accept    1 2
 expect    111319.4907932736  221194.0771604237
 
-accept    12 55s
+accept    12 55
 expect    1335833.8895192828  7326837.7148738774
 -------------------------------------------------------------------------------
 
@@ -117,7 +117,9 @@ expect    1338073.2696101593  7374207.4801437631
 -------------------------------------------------------------------------------
 
 operation proj=merc a=1E77 R_lat_a=90 b=1
-expect    failure errno invalid_eccentricity
+#  errno invalid_eccentricity on x86_64
+#  errno pjd_err_ref_rad_larger_than_90 on i386
+expect    failure
 
 -------------------------------------------------------------------------------
 This one from testvarious failed at first version of the pull request
