@@ -5197,6 +5197,18 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
             dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
         EXPECT_EQ(bound, crs);
     }
+    {
+        // GDA2020 geocentric
+        auto crs = factory->createCoordinateReferenceSystem("7842");
+        const auto time_before =
+            ::testing::UnitTest::GetInstance()->elapsed_time();
+        crs->createBoundCRSToWGS84IfPossible(
+            dbContext, CoordinateOperationContext::IntermediateCRSUse::
+                           IF_NO_DIRECT_TRANSFORMATION);
+        const auto time_after =
+            ::testing::UnitTest::GetInstance()->elapsed_time();
+        EXPECT_LE(time_after - time_before, 500);
+    }
 }
 
 // ---------------------------------------------------------------------------

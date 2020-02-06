@@ -1367,6 +1367,8 @@ CREATE TABLE supersession(
     source TEXT
 );
 
+CREATE INDEX idx_supersession ON supersession(superseded_table_name, superseded_auth_name, superseded_code);
+
 CREATE TRIGGER supersession_insert_trigger
 BEFORE INSERT ON supersession
 FOR EACH ROW BEGIN
