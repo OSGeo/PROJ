@@ -85,7 +85,7 @@ paralist *pj_mkparam_ws (const char *str, const char **next_str) {
     newitem = (paralist *) pj_calloc (1, sizeof(paralist) + len + 1);
     if (nullptr==newitem)
         return nullptr;
-    memmove(newitem->param, str, len);
+    memcpy(newitem->param, str, len);
     unquote_string(newitem->param);
 
     newitem->used = 0;
