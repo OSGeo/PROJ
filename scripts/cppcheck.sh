@@ -43,6 +43,10 @@ grep -v "unmatchedSuppression" ${LOG_FILE} \
     | grep -v "passedByValue,Function parameter 'xyz' should be passed by const reference" \
     | grep -v "passedByValue,Function parameter 'in' should be passed by const reference" \
     | grep -v "knownConditionTrueFalse,Condition '!allowEmptyIntersection' is always false" \
+    | grep -v -e "unitconvert.*unreadVariable,Variable 'point.*' is assigned a value that is never used" \
+    | grep -v -e "helmert.*unreadVariable,Variable 'point.*' is assigned a value that is never used" \
+    | grep -v -e "molodensky.*unreadVariable,Variable 'point.*' is assigned a value that is never used" \
+    | grep -v -e "vgridshift.*unreadVariable,Variable 'point.*' is assigned a value that is never used" \
     > ${LOG_FILE}.tmp
 mv ${LOG_FILE}.tmp ${LOG_FILE}
 

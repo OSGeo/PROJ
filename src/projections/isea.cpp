@@ -733,7 +733,7 @@ static int isea_dddi_ap3odd(struct isea_dgg *g, int quadz, struct isea_pt *pt,
             quadz += 5;
             d = 0;
         }
-    } else if (quadz >= 6) {
+    } else /* if (quadz >= 6) */ {
         if (i == 0 && d == maxcoord) {
             /* south pole */
             quadz = 11;
@@ -812,7 +812,7 @@ static int isea_dddi(struct isea_dgg *g, int quadz, struct isea_pt *pt,
             h.y = -h.z;
             h.x = 0;
         }
-    } else if (quadz >= 6) {
+    } else /* if (quadz >= 6) */ {
         if (h.z == 0 && h.x == sidelength) {
             /* south pole */
             quadz = 11;
