@@ -398,9 +398,9 @@ is an easy way to inspect such grid files:
 Example
 +++++++
 
-https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntf_r93.tif has
+https://github.com/OSGeo/PROJ-data/blob/master/fr_ign/fr_ign_ntf_r93.tif has
 been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/ntf_r93.gsb
-with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtiff.py
+with https://github.com/OSGeo/PROJ-data/blob/master/grid_tools/ntv2_to_gtiff.py
 
 ::
 
@@ -609,9 +609,9 @@ will be followed by:
 Examples of multi-grid dataset
 ++++++++++++++++++++++++++++++
 
-https://github.com/rouault/sample_proj_gtiff_grids/blob/master/GDA94_GDA2020_conformal.tif has
+https://github.com/OSGeo/PROJ-data/blob/master/au_icsm/au_icsm_GDA94_GDA2020_conformal.tif has
 been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/oceania/GDA94_GDA2020_conformal.gsb
-with https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_to_gtiff.py
+with https://github.com/OSGeo/PROJ-data/blob/master/grid_tools/ntv2_to_gtiff.py
 
 It contains 5 subgrids. All essential metadata to list the subgrids and their
 georeferencing is contained within the first 3 KB of the file.
@@ -619,7 +619,7 @@ georeferencing is contained within the first 3 KB of the file.
 The file size is 4.8 MB using DEFLATE compression and floating-point predictor.
 To be compared with the 83 MB of the original .gsb file.
 
-https://github.com/rouault/sample_proj_gtiff_grids/blob/master/ntv2_0.tif  has
+https://github.com/OSGeo/PROJ-data/blob/master/ca_nrc/ca_nrc_ntv2_0.tif has
 been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/north-america/ntv2_0.gsb
 
 It contains 114 subgrids. All essential metadata to list the subgrids and their
