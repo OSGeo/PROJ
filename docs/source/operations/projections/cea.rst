@@ -29,3 +29,9 @@ Parameters
 .. include:: ../options/x_0.rst
 
 .. include:: ../options/y_0.rst
+
+.. note::
+
+    ``lat_ts`` and ``k_0`` are mutually exclusive. If ``lat_ts``
+    is specified, it is equivalent to setting ``k_0`` to
+    :math:`\frac{\cos \phi_{ts}}{\sqrt{1 - e^2 \sin^2 \phi_{ts}}}`

@@ -1321,6 +1321,7 @@ TEST(crs, geodeticcrs_identify_no_db) {
 TEST(crs, geodeticcrs_identify_db) {
     auto dbContext = DatabaseContext::create();
     auto factory = AuthorityFactory::create(dbContext, "EPSG");
+
     {
         // No match
         auto res =
@@ -1626,6 +1627,26 @@ TEST(crs, geodeticcrs_identify_db) {
                                          dbContext));
         EXPECT_TRUE(res.front().first->_isEquivalentTo(
             crs.get(), IComparable::Criterion::EQUIVALENT, dbContext));
+    }
+
+    {
+        // Identify "a" ESRI WKT representation of GDA2020. See #1911
+        auto wkt = "GEOGCS[\"GDA2020\",DATUM[\"D_GDA2020\","
+                   "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+                   "PRIMEM[\"Greenwich\",0.0],"
+                   "UNIT[\"Degree\",0.017453292519943295]]";
+        auto obj =
+            WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_EQ(res.size(), 1U);
+        ASSERT_TRUE(!res.front().first->identifiers().empty());
+        EXPECT_EQ(*res.front().first->identifiers()[0]->codeSpace(), "EPSG");
+        EXPECT_EQ(res.front().first->identifiers()[0]->code(), "7844");
+        EXPECT_EQ(res.front().second, 100);
     }
 }
 
@@ -5196,6 +5217,18 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
         auto bound = crs->createBoundCRSToWGS84IfPossible(
             dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
         EXPECT_EQ(bound, crs);
+    }
+    {
+        // GDA2020 geocentric
+        auto crs = factory->createCoordinateReferenceSystem("7842");
+        const auto time_before =
+            ::testing::UnitTest::GetInstance()->elapsed_time();
+        crs->createBoundCRSToWGS84IfPossible(
+            dbContext, CoordinateOperationContext::IntermediateCRSUse::
+                           IF_NO_DIRECT_TRANSFORMATION);
+        const auto time_after =
+            ::testing::UnitTest::GetInstance()->elapsed_time();
+        EXPECT_LE(time_after - time_before, 500);
     }
 }
 
