@@ -1997,65 +1997,20 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
 
     // do that before buildEllipsoid() so that esriStyle_ can be set
     auto name = stripQuotes(nodeP->children()[0]);
-    if (name == "WGS_1984") {
-        properties.set(IdentifiedObject::NAME_KEY,
-                       GeodeticReferenceFrame::EPSG_6326->nameStr());
-    } else if (starts_with(name, "D_")) {
-        esriStyle_ = true;
-        const char *tableNameForAlias = nullptr;
-        std::string authNameFromAlias;
-        std::string codeFromAlias;
-        if (name == "D_WGS_1984") {
-            name = "World Geodetic System 1984";
-            authNameFromAlias = Identifier::EPSG;
-            codeFromAlias = "6326";
-        } else {
-            tableNameForAlias = "geodetic_datum";
-        }
 
-        if (dbContext_ && tableNameForAlias) {
-            std::string outTableName;
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                        std::string());
-            auto officialName = authFactory->getOfficialNameFromAlias(
-                name, tableNameForAlias, "ESRI", false, outTableName,
-                authNameFromAlias, codeFromAlias);
-            if (!officialName.empty()) {
-                if (primeMeridian->nameStr() !=
-                    PrimeMeridian::GREENWICH->nameStr()) {
-                    auto nameWithPM =
-                        officialName + " (" + primeMeridian->nameStr() + ")";
-                    if (dbContext_->isKnownName(nameWithPM, "geodetic_datum")) {
-                        officialName = nameWithPM;
-                    }
-                }
-                name = officialName;
-            }
-        }
-
-        properties.set(IdentifiedObject::NAME_KEY, name);
-        if (!authNameFromAlias.empty()) {
-            auto identifiers = ArrayOfBaseObject::create();
-            identifiers->add(Identifier::create(
-                codeFromAlias,
-                PropertyMap()
-                    .set(Identifier::CODESPACE_KEY, authNameFromAlias)
-                    .set(Identifier::AUTHORITY_KEY, authNameFromAlias)));
-            properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
-        }
-    } else if (name.find('_') != std::string::npos) {
-        // Likely coming from WKT1
+    const auto identifyFromName = [&](const std::string &l_name) {
         if (dbContext_) {
             auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
                                                         std::string());
             auto res = authFactory->createObjectsFromName(
-                name, {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
-                true, 1);
+                l_name,
+                {AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, true,
+                1);
             if (!res.empty()) {
                 bool foundDatumName = false;
                 const auto &refDatum = res.front();
                 if (metadata::Identifier::isEquivalentName(
-                        name.c_str(), refDatum->nameStr().c_str())) {
+                        l_name.c_str(), refDatum->nameStr().c_str())) {
                     foundDatumName = true;
                 } else if (refDatum->identifiers().size() == 1) {
                     const auto &id = refDatum->identifiers()[0];
@@ -2065,7 +2020,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                             "geodetic_datum", std::string());
                     for (const auto &alias : aliases) {
                         if (metadata::Identifier::isEquivalentName(
-                                name.c_str(), alias.c_str())) {
+                                l_name.c_str(), alias.c_str())) {
                             foundDatumName = true;
                             break;
                         }
@@ -2087,6 +2042,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                         properties.set(IdentifiedObject::IDENTIFIERS_KEY,
                                        identifiers);
                     }
+                    return true;
                 }
             } else {
                 // Get official name from database if AUTHORITY is present
@@ -2100,11 +2056,74 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                             authFactory2->createGeodeticDatum(id->code());
                         properties.set(IdentifiedObject::NAME_KEY,
                                        dbDatum->nameStr());
+                        return true;
                     } catch (const std::exception &) {
                     }
                 }
             }
         }
+        return false;
+    };
+
+    if (name == "WGS_1984") {
+        properties.set(IdentifiedObject::NAME_KEY,
+                       GeodeticReferenceFrame::EPSG_6326->nameStr());
+    } else if (starts_with(name, "D_")) {
+        esriStyle_ = true;
+        const char *tableNameForAlias = nullptr;
+        std::string authNameFromAlias;
+        std::string codeFromAlias;
+        if (name == "D_WGS_1984") {
+            name = "World Geodetic System 1984";
+            authNameFromAlias = Identifier::EPSG;
+            codeFromAlias = "6326";
+        } else {
+            tableNameForAlias = "geodetic_datum";
+        }
+
+        bool setNameAndId = true;
+        if (dbContext_ && tableNameForAlias) {
+            std::string outTableName;
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto officialName = authFactory->getOfficialNameFromAlias(
+                name, tableNameForAlias, "ESRI", false, outTableName,
+                authNameFromAlias, codeFromAlias);
+            if (officialName.empty()) {
+                // For the case of "D_GDA2020" where there is no D_GDA2020 ESRI
+                // alias, so just try without the D_ prefix.
+                const auto nameWithoutDPrefix = name.substr(2);
+                if (identifyFromName(nameWithoutDPrefix)) {
+                    setNameAndId = false; // already done in identifyFromName()
+                }
+            } else {
+                if (primeMeridian->nameStr() !=
+                    PrimeMeridian::GREENWICH->nameStr()) {
+                    auto nameWithPM =
+                        officialName + " (" + primeMeridian->nameStr() + ")";
+                    if (dbContext_->isKnownName(nameWithPM, "geodetic_datum")) {
+                        officialName = nameWithPM;
+                    }
+                }
+                name = officialName;
+            }
+        }
+
+        if (setNameAndId) {
+            properties.set(IdentifiedObject::NAME_KEY, name);
+            if (!authNameFromAlias.empty()) {
+                auto identifiers = ArrayOfBaseObject::create();
+                identifiers->add(Identifier::create(
+                    codeFromAlias,
+                    PropertyMap()
+                        .set(Identifier::CODESPACE_KEY, authNameFromAlias)
+                        .set(Identifier::AUTHORITY_KEY, authNameFromAlias)));
+                properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
+            }
+        }
+    } else if (name.find('_') != std::string::npos) {
+        // Likely coming from WKT1
+        identifyFromName(name);
     }
 
     auto ellipsoid = buildEllipsoid(ellipsoidNode);
