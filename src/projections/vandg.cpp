@@ -39,6 +39,14 @@ static PJ_XY vandg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         g2 = g * g;
         p2 = g * (2. / p2 - 1.);
         p2 = p2 * p2;
+        {
+            // Force floating-point computations done on 80 bit on
+            // i386 to go back to 64 bit. This is to avoid the test failures
+            // of https://github.com/OSGeo/PROJ/issues/1906#issuecomment-583168348
+            // The choice of p2 is completely arbitrary.
+            volatile double p2_tmp = p2;
+            p2 = p2_tmp;
+        }
         xy.x = g - p2; g = p2 + al2;
         xy.x = M_PI * (al * xy.x + sqrt(al2 * xy.x * xy.x - g * (g2 - p2))) / g;
         if (lp.lam < 0.) xy.x = -xy.x;
@@ -81,7 +89,7 @@ static PJ_LP vandg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     m = 2. * sqrt(-THIRD * al);
     d = C2_27 * c2 * c2 * c2 + (c0 * c0 - THIRD * c2 * c1) / c3;
     const double al_mul_m = al * m;
-    if( al_mul_m == 0 ) {
+    if( fabs(al_mul_m) < 1e-16 ) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return proj_coord_error().lp;
     }
