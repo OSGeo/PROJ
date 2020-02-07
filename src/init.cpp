@@ -239,7 +239,7 @@ Expand key from buffer or (if not in buffer) from init file
         char initname[5];
         int exists;
 
-        memcpy(initname, xkey, 4);
+        strncpy(initname, xkey, 4);
         initname[4] = 0;
 
         if( strncmp(xkey, "epsg:", 5) == 0 ) {
