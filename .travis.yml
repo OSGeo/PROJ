@@ -29,11 +29,11 @@ matrix:
       services:
         - docker
       env:
-        - BUILD_NAME=linux_gcc7
-        - DETAILS="linux, gcc7, i386"
+        - BUILD_NAME=linux_gcc8
+        - DETAILS="linux, gcc8, i386"
         - ARCH=i386
-        - CC=gcc-7
-        - CXX=g++-7
+        - CC=gcc-8
+        - CXX=g++-8
         - CXXFLAGS='-g -O2 -m32 -D_GLIBCXX_ASSERTIONS'
         - CFLAGS='-g -O2 -m32'
         - TIFF_CFLAGS=-I/usr/include/i386-linux-gnu
@@ -45,7 +45,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-7-multilib
+            - g++-8-multilib
             - make
             - autoconf
             - automake
