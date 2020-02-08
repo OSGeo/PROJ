@@ -115,10 +115,10 @@ cd ..
 # There's an issue with the clang on Travis + coverage + cpp code
 if [ "$BUILD_NAME" != "linux_clang" ]; then
     # autoconf build with grids and coverage
-    if [ $TRAVIS_OS_NAME == "osx" ]; then
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
         CFLAGS="--coverage" CXXFLAGS="--coverage" ./configure;
     else
-        CFLAGS="$CFLAGS --coverage" CXXFLAGS="$CXXCFLAGS --coverage" LDFLAGS="$LDFLAGS -lgcov" ./configure;
+        CFLAGS="$CFLAGS --coverage" CXXFLAGS="$CXXFLAGS --coverage" LDFLAGS="$LDFLAGS -lgcov" ./configure;
     fi
 else
     ./configure
