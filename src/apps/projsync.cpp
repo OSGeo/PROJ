@@ -137,7 +137,12 @@ int main(int argc, char *argv[]) {
         } else if (arg == "--user-writable-directory") {
             // do nothing
         } else if (arg == "--system-directory") {
-            targetDir = PROJ_LIB;
+            targetDir = pj_get_relative_share_proj(ctx);
+#ifdef PROJ_LIB
+            if (targetDir.empty()) {
+                targetDir = PROJ_LIB;
+            }
+#endif
         } else if (arg == "--target-dir" && i + 1 < argc) {
             i++;
             targetDir = argv[i];

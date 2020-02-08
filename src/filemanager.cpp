@@ -46,9 +46,15 @@
 
 #include <sys/stat.h>
 
+#include "proj_config.h"
+
 #ifdef _WIN32
 #include <shlobj.h>
+#include <windows.h>
 #else
+#ifdef HAVE_LIBDL
+#include <dlfcn.h>
+#endif
 #include <sys/types.h>
 #include <unistd.h>
 #endif
@@ -1264,13 +1270,15 @@ static bool is_rel_or_absolute_filename(const char *name) {
 
 // ---------------------------------------------------------------------------
 
+static std::string pj_get_relative_share_proj_internal_no_check() {
+#if defined(_WIN32) || defined(HAVE_LIBDL)
 #ifdef _WIN32
-
-static std::string pj_get_win32_projlib() {
-    /* Check if proj.db lieves in a share/proj dir parallel to bin/proj.dll */
-    /* Based in
-     * https://stackoverflow.com/questions/9112893/how-to-get-path-to-executable-in-c-running-on-windows
-     */
+    HMODULE hm = NULL;
+    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                              GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                          (LPCSTR)&pj_get_relative_share_proj, &hm) == 0) {
+        return std::string();
+    }
 
     DWORD path_size = 1024;
 
@@ -1278,7 +1286,7 @@ static std::string pj_get_win32_projlib() {
     for (;;) {
         wout.clear();
         wout.resize(path_size);
-        DWORD result = GetModuleFileNameW(nullptr, &wout[0], path_size - 1);
+        DWORD result = GetModuleFileNameW(hm, &wout[0], path_size - 1);
         DWORD last_error = GetLastError();
 
         if (result == 0) {
@@ -1292,26 +1300,79 @@ static std::string pj_get_win32_projlib() {
             break;
         }
     }
-    // Now remove the program's name. It was (example)
-    // "C:\programs\gmt6\bin\gdal_translate.exe"
     wout.resize(wcslen(wout.c_str()));
     std::string out = NS_PROJ::WStringToUTF8(wout);
-    size_t k = out.size();
-    while (k > 0 && out[--k] != '\\') {
+    constexpr char dir_sep = '\\';
+#else
+    Dl_info info;
+    if (!dladdr((const void *)pj_get_relative_share_proj, &info)) {
+        return std::string();
     }
-    out.resize(k);
-
-    out += "/../share/proj";
+    std::string out(info.dli_fname);
+    constexpr char dir_sep = '/';
+    // "optimization" for cmake builds where RUNPATH is set to ${prefix}/lib
+    out = replaceAll(out, "/bin/../", "/");
+#ifdef __linux
+    // If we get a filename without any path, this is most likely a static
+    // binary. Resolve the executable name
+    if (out.find(dir_sep) == std::string::npos) {
+        constexpr size_t BUFFER_SIZE = 1024;
+        std::vector<char> path(BUFFER_SIZE + 1);
+        ssize_t nResultLen = readlink("/proc/self/exe", &path[0], BUFFER_SIZE);
+        if (nResultLen >= 0 && static_cast<size_t>(nResultLen) < BUFFER_SIZE) {
+            out.assign(path.data(), static_cast<size_t>(nResultLen));
+        }
+    }
+#endif
+    if (starts_with(out, "./"))
+        out = out.substr(2);
+#endif
+    auto pos = out.find_last_of(dir_sep);
+    if (pos == std::string::npos) {
+        // The initial path was something like libproj.so"
+        out = "../share/proj";
+        return out;
+    }
+    out.resize(pos);
+    pos = out.find_last_of(dir_sep);
+    if (pos == std::string::npos) {
+        // The initial path was something like bin/libproj.so"
+        out = "share/proj";
+        return out;
+    }
+    out.resize(pos);
+    // The initial path was something like foo/bin/libproj.so"
+    out += "/share/proj";
     return out;
+#else
+    return std::string();
+#endif
+}
+
+static std::string
+pj_get_relative_share_proj_internal_check_exists(PJ_CONTEXT *ctx) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    std::string path(pj_get_relative_share_proj_internal_no_check());
+    if (!path.empty() && NS_PROJ::FileManager::exists(ctx, path.c_str())) {
+        return path;
+    }
+    return std::string();
+}
+
+std::string pj_get_relative_share_proj(PJ_CONTEXT *ctx) {
+    static std::string path(
+        pj_get_relative_share_proj_internal_check_exists(ctx));
+    return path;
 }
 
 // ---------------------------------------------------------------------------
 
-static const char *get_path_from_win32_projlib(PJ_CONTEXT *ctx,
-                                               const char *name,
-                                               std::string &out) {
-
-    out = pj_get_win32_projlib();
+static const char *get_path_from_relative_share_proj(PJ_CONTEXT *ctx,
+                                                     const char *name,
+                                                     std::string &out) {
+    out = pj_get_relative_share_proj(ctx);
     if (out.empty()) {
         return nullptr;
     }
@@ -1321,8 +1382,6 @@ static const char *get_path_from_win32_projlib(PJ_CONTEXT *ctx,
     return NS_PROJ::FileManager::exists(ctx, out.c_str()) ? out.c_str()
                                                           : nullptr;
 }
-
-#endif
 
 /************************************************************************/
 /*                      pj_open_lib_internal()                          */
@@ -1442,11 +1501,9 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
                 if (fid)
                     break;
             }
-#ifdef _WIN32
             /* check if it lives in a ../share/proj dir of the proj dll */
-        } else if ((sysname = get_path_from_win32_projlib(ctx, name, fname)) !=
-                   nullptr) {
-#endif
+        } else if ((sysname = get_path_from_relative_share_proj(
+                        ctx, name, fname)) != nullptr) {
             /* or hardcoded path */
         } else if ((sysname = proj_lib_name) != nullptr) {
             fname = sysname;
@@ -1503,14 +1560,12 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
     if (!envPROJ_LIB.empty()) {
         ret.push_back(envPROJ_LIB);
     }
-#ifdef _WIN32
     if (envPROJ_LIB.empty()) {
-        const std::string win32Dir = pj_get_win32_projlib();
-        if (!win32Dir.empty()) {
-            ret.push_back(win32Dir);
+        const std::string relativeSharedProj = pj_get_relative_share_proj(ctx);
+        if (!relativeSharedProj.empty()) {
+            ret.push_back(relativeSharedProj);
         }
     }
-#endif
 #ifdef PROJ_LIB
     if (envPROJ_LIB.empty()) {
         ret.push_back(PROJ_LIB);

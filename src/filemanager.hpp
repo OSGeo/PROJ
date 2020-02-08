@@ -55,7 +55,7 @@ class FileManager {
     // "Low-level" interface.
     static PROJ_DLL std::unique_ptr<File>
     open(PJ_CONTEXT *ctx, const char *filename, FileAccess access);
-    static bool exists(PJ_CONTEXT *ctx, const char *filename);
+    static PROJ_DLL bool exists(PJ_CONTEXT *ctx, const char *filename);
     static bool mkdir(PJ_CONTEXT *ctx, const char *filename);
     static bool unlink(PJ_CONTEXT *ctx, const char *filename);
     static bool rename(PJ_CONTEXT *ctx, const char *oldPath,

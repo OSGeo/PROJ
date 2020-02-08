@@ -82,6 +82,14 @@ if [ "$SKIP_BUILDS_WITHOUT_GRID" != "yes" ]; then
 
     cd ..
 
+    if [ $TRAVIS_OS_NAME != "osx" ]; then
+        # Check that we can retrieve the resource directory in a relative way after renaming the installation prefix
+        mkdir /tmp/proj_autoconf_install_from_dist_all_renamed
+        mv /tmp/proj_autoconf_install_from_dist_all /tmp/proj_autoconf_install_from_dist_all_renamed/subdir
+        LD_LIBRARY_PATH=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory || /bin/true
+        LD_LIBRARY_PATH=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null | grep "Downloading from https://cdn.proj.org into /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/share/proj"
+    fi
+
     # cmake build from generated tarball
     mkdir build_cmake
     cd build_cmake
@@ -91,6 +99,14 @@ if [ "$SKIP_BUILDS_WITHOUT_GRID" != "yes" ]; then
     ctest
     find /tmp/proj_cmake_install
     cd ..
+
+    if [ $TRAVIS_OS_NAME != "osx" ]; then
+        # Check that we can retrieve the resource directory in a relative way after renaming the installation prefix
+        mkdir /tmp/proj_cmake_install_renamed
+        mv /tmp/proj_cmake_install /tmp/proj_cmake_install_renamed/subdir
+        /tmp/proj_cmake_install_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory || /bin/true
+        /tmp/proj_cmake_install_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null | grep "Downloading from https://cdn.proj.org into /tmp/proj_cmake_install_renamed/subdir/share/proj"
+    fi
 
     # return to root
     cd ../..

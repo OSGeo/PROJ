@@ -282,6 +282,7 @@ osgeo::proj::datum::VerticalReferenceFrame::create(osgeo::proj::util::PropertyMa
 osgeo::proj::datum::VerticalReferenceFrame::realizationMethod() const
 osgeo::proj::datum::VerticalReferenceFrame::~VerticalReferenceFrame()
 osgeo::proj::File::~File()
+osgeo::proj::FileManager::exists(projCtx_t*, char const*)
 osgeo::proj::FileManager::open(projCtx_t*, char const*, osgeo::proj::FileAccess)
 osgeo::proj::File::read_line(unsigned long, bool&, bool&)
 osgeo::proj::GenericShiftGrid::~GenericShiftGrid()
@@ -780,6 +781,7 @@ pj_get_default_ctx
 pj_get_default_fileapi
 pj_get_default_searchpaths(projCtx_t*)
 pj_get_errno_ref
+pj_get_relative_share_proj(projCtx_t*)
 pj_get_release
 pj_get_spheroid_defn
 pj_has_inverse
