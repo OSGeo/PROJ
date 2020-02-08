@@ -44,7 +44,8 @@ static PJ_XY laea_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
 
     if (Q->mode == OBLIQ || Q->mode == EQUIT) {
         sinb = q / Q->qp;
-        cosb = sqrt(1. - sinb * sinb);
+        const double cosb2 = 1. - sinb * sinb;
+        cosb = cosb2 > 0 ? sqrt(cosb2) : 0;
     }
 
     switch (Q->mode) {
