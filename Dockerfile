@@ -5,19 +5,19 @@ FROM ubuntu:18.04 as builder
 
 MAINTAINER Howard Butler <howard@hobu.co>
 
-ARG PROJ_VERSION=master
 ARG DESTDIR="/build"
 
 # Setup build env
 RUN apt-get update -y \
     && apt-get install -y --fix-missing --no-install-recommends \
             software-properties-common build-essential ca-certificates \
-            git make cmake wget unzip libtool automake \
+            make cmake wget unzip libtool automake \
             zlib1g-dev libsqlite3-dev pkg-config sqlite3 libcurl4-gnutls-dev \
             libtiff5-dev
 
-RUN git clone --depth 1 --single-branch https://github.com/OSGeo/PROJ.git \
-    && cd PROJ \
+COPY . /PROJ
+
+RUN cd /PROJ \
     && ./autogen.sh \
     && ./configure --prefix=/usr \
     && make -j$(nproc) \
