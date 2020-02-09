@@ -3137,6 +3137,9 @@ static double read_vgrid_value(PJ_CONTEXT *ctx, const ListOfVGrids &grids,
         pj_ctx_set_errno(ctx, PJD_ERR_GRID_AREA);
         return HUGE_VAL;
     }
+    if (grid->isNullGrid()) {
+        return 0;
+    }
 
     const auto &extent = grid->extentAndRes();
 
@@ -3336,6 +3339,12 @@ bool pj_bilinear_interpolation_three_samples(const GenericShiftGrid *grid,
                                              double &v2, double &v3,
                                              bool &must_retry) {
     must_retry = false;
+    if (grid->isNullGrid()) {
+        v1 = 0.0;
+        v2 = 0.0;
+        v3 = 0.0;
+        return true;
+    }
 
     const auto &extent = grid->extentAndRes();
     double grid_x = (lp.lam - extent.westLon) / extent.resLon;
