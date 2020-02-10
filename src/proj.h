@@ -154,7 +154,7 @@ extern "C" {
 /* The version numbers should be updated with every release! **/
 #define PROJ_VERSION_MAJOR 6
 #define PROJ_VERSION_MINOR 3
-#define PROJ_VERSION_PATCH 0
+#define PROJ_VERSION_PATCH 1
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
 

@@ -42,7 +42,7 @@ geodtest_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 18:0:3
+libproj_la_LDFLAGS = -no-undefined -version-info 18:1:3
 libproj_la_LIBADD = @SQLITE3_LIBS@
 
 libproj_la_SOURCES = \
