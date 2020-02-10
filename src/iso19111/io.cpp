@@ -8783,7 +8783,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     if (k >= 0 && k <= 1) {
                         const double es =
                             geogCRS->ellipsoid()->squaredEccentricity();
-                        if (es < 0) {
+                        if (es < 0 || es == 1) {
                             throw ParsingException("Invalid flattening");
                         }
                         value =
