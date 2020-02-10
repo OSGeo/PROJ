@@ -30,6 +30,9 @@ list. The PROJ PSC guidelines describes the rules for passing a motion.
 1.1 Update ABI version numbers:
 -------------------------------------------------------------------------------
 
+In case of a un-planned maintenance release, make sure that version numbers are
+propertly updated: see 3.1
+
 Determine the ABI version number. It consists of "current:revision:age". Follow
 the steps below to determine the next ABI version number:
 
