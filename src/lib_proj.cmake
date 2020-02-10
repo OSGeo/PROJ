@@ -1,8 +1,8 @@
+message(STATUS "Configuring proj library:")
+
 ##############################################
 ### SWITCH BETWEEN STATIC OR SHARED LIBRARY###
 ##############################################
-colormsg(_HIBLUE_ "Configuring proj library:")
-message(STATUS "")
 
 # default config, shared on unix and static on Windows
 if(UNIX)
@@ -64,7 +64,7 @@ if(ENABLE_LTO)
     set(ENABLE_LTO_METHOD "property")
   endif()
 endif()
-boost_report_value(ENABLE_LTO)
+print_variable(ENABLE_LTO)
 
 
 ##############################################
@@ -456,7 +456,7 @@ endif()
 ##############################################
 # Core configuration summary
 ##############################################
-boost_report_value(PROJ_CORE_TARGET)
-boost_report_value(PROJ_CORE_TARGET_OUTPUT_NAME)
-boost_report_value(PROJ_LIBRARY_TYPE)
-boost_report_value(PROJ_LIBRARIES)
+print_variable(PROJ_CORE_TARGET)
+print_variable(PROJ_CORE_TARGET_OUTPUT_NAME)
+print_variable(PROJ_LIBRARY_TYPE)
+print_variable(PROJ_LIBRARIES)

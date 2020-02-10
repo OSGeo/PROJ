@@ -94,8 +94,7 @@ set(CMAKE_MODULE_PATH ${PROJ_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 include(ProjUtilities)
 
-message(STATUS "")
-colormsg(_HIBLUE_ "Configuring PROJ:")
+message(STATUS "Configuring PROJ:")
 
 ################################################################################
 #PROJ version information
@@ -141,9 +140,7 @@ if(DISABLE_TIFF)
   message(WARNING "TIFF support has been disabled and will result in the inability to read some grids")
 else()
   find_package(TIFF REQUIRED)
-  if(TIFF_FOUND)
-    boost_report_value(TIFF_FOUND)
-  else()
+  if(NOT TIFF_FOUND)
     message(SEND_ERROR "libtiff dependency not found!")
   endif()
   add_definitions(-DTIFF_ENABLED)
@@ -156,9 +153,7 @@ endif()
 option(ENABLE_CURL "Enable Curl support" ON)
 if(ENABLE_CURL)
   find_package(CURL REQUIRED)
-  if(CURL_FOUND)
-    boost_report_value(CURL_FOUND)
-  else()
+  if(NOT CURL_FOUND)
     message(SEND_ERROR "curl dependency not found!")
   endif()
   add_definitions(-DCURL_ENABLED)
@@ -212,7 +207,7 @@ endif()
 # Put the libraries and binaries that get built into directories at the
 # top of the build tree rather than in hard-to-find leaf
 # directories. This simplifies manual testing and the use of the build
-# tree rather than installed Boost libraries.
+# tree rather than installed PROJ libraries.
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
@@ -246,9 +241,10 @@ if(DEFINED PROJ_TESTS)
   set(BUILD_TESTING ${PROJ_TESTS})
 endif()
 
-boost_report_value(BUILD_TESTING)
 if(BUILD_TESTING)
   include(ProjTest)
+else()
+  message(STATUS "Testing disabled")
 endif()
 
 ################################################################################
@@ -256,7 +252,6 @@ endif()
 ################################################################################
 include_directories(${PROJ_SOURCE_DIR}/src)
 
-message(STATUS "")
 add_subdirectory(data)
 add_subdirectory(include)
 add_subdirectory(src)
