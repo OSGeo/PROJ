@@ -199,6 +199,7 @@ AC_SEARCH_LIBS([sqrt], [m])
 
 AC_CHECK_FUNC(localeconv, [AC_DEFINE(HAVE_LOCALECONV,1,[Define to 1 if you have localeconv])])
 AC_CHECK_FUNCS([strerror])
+AC_CHECK_LIB(dl,dladdr,,,)
 
 dnl ---------------------------------------------------------------------------
 dnl Provide a mechanism to disable real mutex support (if lacking win32 or

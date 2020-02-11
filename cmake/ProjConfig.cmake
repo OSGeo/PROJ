@@ -25,9 +25,11 @@ check_include_files("stdlib.h;stdarg.h;string.h;float.h" STDC_HEADERS)
 
 check_function_exists(localeconv HAVE_LOCALECONV)
 check_function_exists(strerror HAVE_STRERROR)
-
-# check libm need on unix
-check_library_exists(m ceil "" HAVE_LIBM)
+if(NOT WIN32)
+    check_library_exists(dl dladdr "" HAVE_LIBDL)
+    # check libm need on unix
+    check_library_exists(m ceil "" HAVE_LIBM)
+endif()
 
 set(PACKAGE "proj")
 set(PACKAGE_BUGREPORT "https://github.com/OSGeo/PROJ/issues")
