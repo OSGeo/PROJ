@@ -29,17 +29,24 @@ matrix:
       services:
         - docker
       env:
-        - BUILD_NAME=linux_gcc7
-        - DETAILS="linux, gcc7"
-        - CC=gcc-7
-        - CXX=g++-7
-        - CXXFLAGS='-g -D_GLIBCXX_ASSERTIONS'
+        - BUILD_NAME=linux_gcc8
+        - DETAILS="linux, gcc8, i386"
+        - ARCH=i386
+        - CC=gcc-8
+        - CXX=g++-8
+        - CXXFLAGS='-g -O2 -m32 -D_GLIBCXX_ASSERTIONS'
+        - CFLAGS='-g -O2 -m32'
+        - TIFF_CFLAGS=-I/usr/include/i386-linux-gnu
+        - TIFF_LIBS="-L/usr/lib/i386-linux-gnu -ltiff"
+        - SQLITE3_CFLAGS=-I/usr/include/i386-linux-gnu
+        - SQLITE3_LIBS="-L/usr/lib/i386-linux-gnu -lsqlite3"
+        - SKIP_BUILDS_WITHOUT_GRID=yes
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-7
+            - g++-8-multilib
             - make
             - autoconf
             - automake

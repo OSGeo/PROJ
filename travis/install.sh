@@ -21,75 +21,80 @@ wget "https://github.com/OSGeo/proj-datumgrid/blob/master/north-america/ntv2_0.g
 ./autogen.sh
 TOP_DIR=$PWD
 
-# autoconf build
-mkdir build_autoconf
-cd build_autoconf
-../configure
-make dist-all
-# Check consistency of generated tarball
-TAR_FILENAME=`ls *.tar.gz`
-TAR_DIRECTORY=`basename $TAR_FILENAME .tar.gz`
-tar xvzf $TAR_FILENAME
-cd $TAR_DIRECTORY
+if [ "$SKIP_BUILDS_WITHOUT_GRID" != "yes" ]; then
 
-# There's a nasty #define CS in a Solaris system header. Avoid being caught about that again
-CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"
+    # autoconf build
+    mkdir build_autoconf
+    cd build_autoconf
+    ../configure
+    make dist-all
+    # Check consistency of generated tarball
+    TAR_FILENAME=`ls *.tar.gz`
+    TAR_DIRECTORY=`basename $TAR_FILENAME .tar.gz`
+    tar xvzf $TAR_FILENAME
+    cd $TAR_DIRECTORY
 
-# autoconf build from generated tarball
-mkdir build_autoconf
-cd build_autoconf
-../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
+    # There's a nasty #define CS in a Solaris system header. Avoid being caught about that again
+    CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"
 
-make -j${NPROC}
+    # autoconf build from generated tarball
+    mkdir build_autoconf
+    cd build_autoconf
+    ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 
-if [ "$(uname)" == "Linux" -a -f src/.libs/libproj.so ]; then
-    echo "Checking exported symbols..."
-    ${TOP_DIR}/scripts/dump_exported_symbols.sh src/.libs/libproj.so > /tmp/got_symbols.txt
-    diff -u ${TOP_DIR}/scripts/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
+    make -j${NPROC}
+
+    if [ "$(uname)" == "Linux" -a -f src/.libs/libproj.so ]; then
+    if objdump -TC "$1" | grep "elf64-x86-64">/dev/null; then
+        echo "Checking exported symbols..."
+        ${TOP_DIR}/scripts/dump_exported_symbols.sh src/.libs/libproj.so > /tmp/got_symbols.txt
+        diff -u ${TOP_DIR}/scripts/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
+    fi
+    fi
+
+    make check
+    make install
+    find /tmp/proj_autoconf_install_from_dist_all
+
+    /tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:32631 -o PROJJSON -q > out.json
+    cat out.json
+    echo "Validating JSON"
+    jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
+
+    /tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:4326+3855 -o PROJJSON -q > out.json
+    cat out.json
+    echo "Validating JSON"
+    jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
+
+    /tmp/proj_autoconf_install_from_dist_all/bin/projinfo "+proj=longlat +ellps=GRS80 +nadgrids=@foo +type=crs" -o PROJJSON -q > out.json
+    cat out.json
+    echo "Validating JSON"
+    jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
+    /tmp/proj_autoconf_install_from_dist_all/bin/projinfo @out.json -o PROJJSON -q > out2.json
+    diff -u out.json out2.json
+
+    /tmp/proj_autoconf_install_from_dist_all/bin/projinfo -s EPSG:3111 -t GDA2020 -o PROJJSON -o PROJJSON -q > out.json
+    cat out.json
+    echo "Validating JSON"
+    jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
+    /tmp/proj_autoconf_install_from_dist_all/bin/projinfo @out.json -o PROJJSON -q > out2.json
+    diff -u out.json out2.json
+
+    cd ..
+
+    # cmake build from generated tarball
+    mkdir build_cmake
+    cd build_cmake
+    cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
+    VERBOSE=1 make -j${NPROC}
+    make install
+    ctest
+    find /tmp/proj_cmake_install
+    cd ..
+
+    # return to root
+    cd ../..
 fi
-
-make check
-make install
-find /tmp/proj_autoconf_install_from_dist_all
-
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:32631 -o PROJJSON -q > out.json
-cat out.json
-echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
-
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:4326+3855 -o PROJJSON -q > out.json
-cat out.json
-echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
-
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo "+proj=longlat +ellps=GRS80 +nadgrids=@foo +type=crs" -o PROJJSON -q > out.json
-cat out.json
-echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo @out.json -o PROJJSON -q > out2.json
-diff -u out.json out2.json
-
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo -s EPSG:3111 -t GDA2020 -o PROJJSON -o PROJJSON -q > out.json
-cat out.json
-echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo @out.json -o PROJJSON -q > out2.json
-diff -u out.json out2.json
-
-cd ..
-
-# cmake build from generated tarball
-mkdir build_cmake
-cd build_cmake
-cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
-VERBOSE=1 make -j${NPROC}
-make install
-ctest
-find /tmp/proj_cmake_install
-cd ..
-
-# return to root
-cd ../..
 
 # Install grid files
 (cd data && unzip -o ../proj-datumgrid-1.8.zip && cp ../ntv2_0.gsb . )
@@ -110,28 +115,31 @@ make clean
 find /tmp/proj_autoconf_install_grids
 cd ..
 
-# There's an issue with the clang on Travis + coverage + cpp code
-if [ "$BUILD_NAME" != "linux_clang" ]; then
-    # autoconf build with grids and coverage
-    if [ $TRAVIS_OS_NAME == "osx" ]; then
-        CFLAGS="--coverage" CXXFLAGS="--coverage" ./configure;
+if [ "$SKIP_BUILDS_WITHOUT_GRID" != "yes" ]; then
+
+    # There's an issue with the clang on Travis + coverage + cpp code
+    if [ "$BUILD_NAME" != "linux_clang" ]; then
+        # autoconf build with grids and coverage
+        if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+            CFLAGS="--coverage" CXXFLAGS="--coverage" ./configure;
+        else
+            CFLAGS="$CFLAGS --coverage" CXXFLAGS="$CXXFLAGS --coverage" LDFLAGS="$LDFLAGS -lgcov" ./configure;
+        fi
     else
-        CFLAGS="$CFLAGS --coverage" CXXFLAGS="$CXXCFLAGS --coverage" LDFLAGS="$LDFLAGS -lgcov" ./configure;
+        ./configure
     fi
-else
-    ./configure
-fi
-make -j${NPROC}
-make check
+    make -j${NPROC}
+    make check
 
-# Rerun tests without grids not included in proj-datumgrid
-rm -v data/egm96_15.gtx
-make check
+    # Rerun tests without grids not included in proj-datumgrid
+    rm -v data/egm96_15.gtx
+    make check
 
-if [ "$BUILD_NAME" != "linux_clang" ]; then
-    mv src/.libs/*.gc* src
-    mv src/conversions/.libs/*.gc* src/conversions
-    mv src/iso19111/.libs/*.gc* src/iso19111
-    mv src/projections/.libs/*.gc* src/projections
-    mv src/transformations/.libs/*.gc* src/transformations
+    if [ "$BUILD_NAME" != "linux_clang" ]; then
+        mv src/.libs/*.gc* src
+        mv src/conversions/.libs/*.gc* src/conversions
+        mv src/iso19111/.libs/*.gc* src/iso19111
+        mv src/projections/.libs/*.gc* src/projections
+        mv src/transformations/.libs/*.gc* src/transformations
+    fi
 fi
