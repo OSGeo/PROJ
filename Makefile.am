@@ -12,6 +12,7 @@ ACLOCAL_AMFLAGS =	-I m4
 check-local:
 	cd test; $(MAKE) check
 
+all-local: README
 
 README: README.md
 	fgrep -v "[![" $< > $@
