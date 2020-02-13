@@ -3,6 +3,63 @@
 News
 ###############################################################################
 
+6.3.1 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*February 11th 2020*
+
+Updates
+-------
+
+* Update the EPSG database to version 9.8.6
+
+* Database: add mapping for gg10_smv2.mnt and gg10_sbv2.mnt French grids
+
+* Database: add mapping for TOR27CSv1.GSB
+
+Bug fixes
+---------
+
+* Fix wrong use of derivingConversionRef() that caused issues with use of
+  +init=epsg:XXXX by GDAL (affecting R spatial libraries) or in MapServer
+
+* fix exporting CoordinateSystem to PROJ JSON with ID
+
+* projinfo: use No. abbreviation instead of UTF-8 character
+  (`#1828 <https://github.com/OSGeo/PROJ/issues/1828>`_)
+
+* CompoundCRS::identify(): avoid exception when horiz/vertical part is a
+  BoundCRS
+
+* createOperations(): fix dealing with projected 3D CRS whose Z units != metre
+
+* WKT1_GDAL export: limit datum name massaging to names matching EPSG
+  (`#1835 <https://github.com/OSGeo/PROJ/issues/1835>`_)
+
+* unitconvert with mjd time format: avoid potential integer overflow
+  (ossfuzz 20072)
+
+* ProjectedCRS::identify(): fix wrong identification of some ESRI WKT linked
+  to units
+
+* Database: add a geoid_like value for proj_method column of grid_alternatives,
+  fix related entries and simplify/robustify logic to deal with EPSG
+  'Geographic3D to GravityRelatedHeight' methods
+
+* Fix ingestion of +proj=cea with +k_0 (`#1881 <https://github.com/OSGeo/PROJ/issues/1881>`_)
+
+* Fix performance issue, affecting PROJ.4 string generation of EPSG:7842
+  (`#1913 <https://github.com/OSGeo/PROJ/issues/1913>`_)
+
+* Fix identification of ESRI-style datum names starting with D\_ but without
+  alias (`#1911 <https://github.com/OSGeo/PROJ/issues/1911>`_)
+
+* cart: Avoid discontinuity at poles in the inverse case
+  (`#1906 <https://github.com/OSGeo/PROJ/issues/1906>`_)
+
+* Various updates to make regression test suite pass with gcc on i386
+  (`#1906 <https://github.com/OSGeo/PROJ/issues/1906>`_)
+
+
 6.3.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *January 1st 2020*
