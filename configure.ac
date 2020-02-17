@@ -351,7 +351,7 @@ dnl ---------------------------------------------------------------------------
 AC_CONFIG_FILES([Makefile cmake/Makefile src/Makefile include/Makefile include/proj/Makefile include/proj/internal/Makefile
                  include/proj/internal/nlohmann/Makefile
                  test/Makefile test/cli/Makefile test/gie/Makefile test/gigs/Makefile test/unit/Makefile
-                 man/Makefile man/man1/Makefile man/man3/Makefile data/Makefile])
+                 man/Makefile man/man1/Makefile data/Makefile])
 if ! test "x$with_external_gtest" = "xyes" ; then
     AC_CONFIG_FILES([test/googletest/Makefile test/googletest/include/Makefile
                      test/googletest/include/gtest/Makefile
