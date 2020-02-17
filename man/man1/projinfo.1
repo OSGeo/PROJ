@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJINFO" "1" "Dec 28, 2019" "6.3.0" "PROJ"
+.TH "PROJINFO" "1" "Feb 17, 2020" "7.0.0" "PROJ"
 .SH NAME
 projinfo \- Geodetic object and coordinate operation queries
 .
@@ -36,17 +36,18 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .nf
 \fBprojinfo\fP
 .in +2
-[\-o formats] [\-k crs|operation|ellipsoid] [\-\-summary] [\-q]
-[[\-\-area name_or_code] | [\-\-bbox west_long,south_lat,east_long,north_lat]]
-[\-\-spatial\-test contains|intersects]
-[\-\-crs\-extent\-use none|both|intersection|smallest]
-[\-\-grid\-check none|discard_missing|sort] [\-\-show\-superseded]
-[\-\-pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
-[\-\-boundcrs\-to\-wgs84]
-[\-\-main\-db\-path path] [\-\-aux\-db\-path path]*
-[\-\-identify] [\-\-3d]
-[\-\-c\-ify] [\-\-single\-line]
-{object_definition} | {object_reference} | (\-s {srs_def} \-t {srs_def})
+[\-o formats] [\-k crs|operation|datum|ellipsoid] [–summary] [\-q]
+[[–area name_or_code] | [–bbox west_long,south_lat,east_long,north_lat]]
+[–spatial\-test contains|intersects]
+[–crs\-extent\-use none|both|intersection|smallest]
+[–grid\-check none|discard_missing|sort|known_available] [–show\-superseded]
+[–pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
+[–boundcrs\-to\-wgs84]
+[–main\-db\-path path] [–aux\-db\-path path]*
+[–identify] [–3d]
+[–c\-ify] [–single\-line]
+–searchpaths | –remote\-data | {object_definition} |
+{object_reference} | (\-s {srs_def} \-t {srs_def})
 
 .in -2
 .fi
@@ -59,25 +60,25 @@ a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
-"urn:ogc:def:coordinateOperation:EPSG::1671"),
+an object code (like “EPSG:4326”, “urn:ogc:def:crs:EPSG::4326”,
+“urn:ogc:def:coordinateOperation:EPSG::1671”),
 .IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
-(e.g "\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP" or custom abbreviated
-syntax "EPSG:2393+5717"),
+(e.g “\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP” or custom abbreviated
+syntax “EPSG:2393+5717”),
 .IP \(bu 2
 a OGC URN combining references for references for projected or derived CRSs
-e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
-"\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP"
+e.g. for Projected 3D CRS “UTM zone 31N / WGS 84 (3D)”:
+“\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP”
 (\fIadded in 6.2\fP)
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
+(e.g. “\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP”)
 .IP \(bu 2
 a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.1/projjson.schema.json\fP (\fIadded in 6.2\fP)
 .UNINDENT
 .sp
-{object_reference} is a filename preceded by the \(aq@\(aq character.  The
+{object_reference} is a filename preceded by the ‘@’ character.  The
 file referenced by the {object_reference} must contain a valid
 {object_definition}.
 .UNINDENT
@@ -113,14 +114,14 @@ WKT2_2019 was previously called WKT2_2018.
 \fBNOTE:\fP
 .INDENT 7.0
 .INDENT 3.5
-Before PROJ 6.3.0, WKT1:GDAL was implicitly calling \-\-boundcrs\-to\-wgs84.
+Before PROJ 6.3.0, WKT1:GDAL was implicitly calling –boundcrs\-to\-wgs84.
 This is no longer the case.
 .UNINDENT
 .UNINDENT
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-k crs|operation|ellipsoid
+.B \-k crs|operation|datum|ellipsoid
 When used to query a single object with a AUTHORITY:CODE, determines the (k)ind of the object
 in case there are CRS, coordinate operations or ellipsoids with the same CODE.
 The default is crs.
@@ -152,7 +153,7 @@ potentially compatible of being piped in other utilities.
 .B \-\-area name_or_code
 Specify an area of interest to restrict the results when researching
 coordinate operations between 2 CRS. The area of interest can be specified either
-as a name (e.g "Denmark \- onshore") or a AUTHORITY:CODE (EPSG:3237)
+as a name (e.g “Denmark \- onshore”) or a AUTHORITY:CODE (EPSG:3237)
 This option is exclusive of \fI\%\-\-bbox\fP\&.
 .sp
 \fBNOTE:\fP
@@ -223,11 +224,12 @@ only used for coordinate operation computation
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-\-grid\-check none|discard_missing|sort
+.B \-\-grid\-check none|discard_missing|sort|known_available
 Specify how the presence or absence of a horizontal or vertical shift grid
 required for a coordinate operation affects the results returned when
 researching coordinate operations between 2 CRS.
-The default strategy is \fBsort\fP: in that case, all candidate
+The default strategy is \fBsort\fP (if \fBPROJ_NETWORK\fP is not defined).
+In that case, all candidate
 operations are returned, but the actual availability of the grids is used
 to determine the sorting order. That is, if a coordinate operation involves
 using a grid that is not available in the PROJ resource directories
@@ -237,6 +239,9 @@ The \fBnone\fP strategy completely disables the checks of presence of grids and
 this returns the results as if all the grids where available.
 The \fBdiscard_missing\fP strategy discards results that involve grids not
 present in the PROJ resource directories.
+The \fBknown_available\fP strategy discards results that involve grids not
+present in the PROJ resource directories and that are not known of the CDN.
+This is the default strategy is \fBPROJ_NETWORK\fP is set to \fBON\fP\&.
 .sp
 \fBNOTE:\fP
 .INDENT 7.0
@@ -321,7 +326,7 @@ with a likelihood of 70% to EPSG:32631
 New in version 6.3.
 
 .sp
-"Promote" the CRS(s) to their 3D version. In the context of researching
+“Promote” the CRS(s) to their 3D version. In the context of researching
 available coordinate transformations, explicitly specifying this option is
 not necessary, because when one of the source or target CRS has a vertical
 component but not the other one, the one that has no vertical component is
@@ -339,6 +344,25 @@ is easy to put those strings in C/C++ code
 .B \-\-single\-line
 Output WKT or PROJJSON strings on a single line, instead of multiple intended lines by
 default.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-searchpaths
+New in version 7.0.
+
+.sp
+Output the directories into which PROJ resources will be looked for
+(if not using C API such as \fBproj_context_set_search_paths()\fP
+that will override them.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-remote\-data
+New in version 7.0.
+
+.sp
+Display information regarding if network is enabled, and the
+related URL.
 .UNINDENT
 .SH EXAMPLES
 .INDENT 0.0
@@ -527,7 +551,7 @@ Output:
 .UNINDENT
 .SH SEE ALSO
 .sp
-\fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBproj(1)\fP
+\fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBproj(1)\fP, \fBprojsync(1)\fP
 .SH BUGS
 .sp
 A list of know bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
@@ -538,6 +562,6 @@ where new bug reports can be submitted to.
 .SH AUTHOR
 Even Rouault
 .SH COPYRIGHT
-1983-2019
+1983-2020
 .\" Generated by docutils manpage writer.
 .

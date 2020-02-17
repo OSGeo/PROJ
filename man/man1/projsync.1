@@ -1,0 +1,206 @@
+.\" Man page generated from reStructuredText.
+.
+.TH "PROJSYNC" "1" "Feb 17, 2020" "7.0.0" "PROJ"
+.SH NAME
+projsync \- Downloading tool of resource files
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.SH SYNOPSIS
+.INDENT 0.0
+.INDENT 3.5
+.nf
+\fBprojsync\fP
+.in +2
+[–endpoint URL]
+[–local\-geojson\-file FILENAME]
+([–user\-writable\-directory] | [–system\-directory] | [–target\-dir DIRNAME])
+[–bbox west_long,south_lat,east_long,north_lat]
+[–spatial\-test contains|intersects]
+[–source\-id ID] [–area\-of\-use NAME]
+[–file NAME]
+[–all] [–exclude\-world\-coverage]
+[–quiet] [–dry\-run] [–list\-files]
+.in -2
+.fi
+.sp
+.UNINDENT
+.UNINDENT
+.SH DESCRIPTION
+.sp
+\fBprojsync\fP is a program that downloads remote resource files
+into a local directory. This is an alternative to downloading a proj\-data\-X.Y.Z
+archive file, or using the on\-demand networking capabilities of PROJ.
+.sp
+The following control parameters can appear in any order:
+.INDENT 0.0
+.TP
+.B \-\-endpoint URL
+Defines the URL where to download the master \fBfiles.geojson\fP file and then
+the resource files. Defaults to the value set in proj\-ini
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-local\-geojson\-file FILENAME
+Defines the filename for the master GeoJSON files that references resources.
+Defaults to ${endpoint}/files.geojson
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-user\-writable\-directory
+Specifies that resource files must be downloaded in the
+user writable directory\&. This is the default.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-system\-directory
+Specifies that resource files must be downloaded in the
+${installation_prefix}/share/proj directory. The user launching projsync
+should make sure it has writing rights in that directory.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-target\-dir DIRNAME
+Directory into which resource files must be downloaded.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-bbox west_long,south_lat,east_long,north_lat
+Specify an area of interest to restrict the resources to download.
+The area of interest is specified as a
+bounding box with geographic coordinates, expressed in degrees in a
+unspecified geographic CRS.
+\fIwest_long\fP and \fIeast_long\fP should be in the [\-180,180] range, and
+\fIsouth_lat\fP and \fInorth_lat\fP in the [\-90,90]. \fIwest_long\fP is generally lower than
+\fIeast_long\fP, except in the case where the area of interest crosses the antimeridian.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-spatial\-test contains|intersects
+Specify how the extent of the resource files
+are compared to the area of use specified explicitly with \fI\%\-\-bbox\fP\&.
+By default, any resource files whose extent intersects the value specified
+by \fI\%\-\-bbox\fP will be selected.
+If using the \fBcontains\fP strategy, only resource files whose extent is
+contained in the value specified by \fI\%\-\-bbox\fP will be selected.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-source\-id ID
+Restrict resource files to be downloaded to those whose source_id property
+contains the ID value. Specifying \fB?\fP as ID will list all possible values.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-area\-of\-use NAME
+Restrict resource files to be downloaded to those whose area_of_use property
+contains the NAME value. Specifying \fB?\fP as NAME will list all possible values.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-file NAME
+Restrict resource files to be downloaded to those whose name property
+contains the NAME value. Specifying \fB?\fP as NAME will list all possible values.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-all
+Ask to download all files.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-exclude\-world\-coverage
+Exclude files which have world coverage.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-q / \-\-quiet
+Quiet mode
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-dry\-run
+Simulate the behaviour of the tool without downloading resource files.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-list\-files
+List file names, with the source_id and area_of_use properties.
+.UNINDENT
+.sp
+At least one of  \fI\%\-\-list\-files\fP,  \fI\%\-\-file\fP,  \fI\%\-\-source\-id\fP,
+\fI\%\-\-area\-of\-use\fP,  \fI\%\-\-bbox\fP or  \fI\%\-\-all\fP must be specified.
+.sp
+Options \fI\%\-\-file\fP,  \fI\%\-\-source\-id\fP, \fI\%\-\-area\-of\-use\fP and
+\fI\%\-\-bbox\fP are combined with a AND logic.
+.SH EXAMPLES
+.INDENT 0.0
+.IP 1. 3
+Download all resource files
+.UNINDENT
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+projsync \-\-all
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.IP 2. 3
+Download resource files covering specified point and attributing to an agency
+.UNINDENT
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+projsync \-\-source\-id fr_ign \-\-bbox 2,49,2,49
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.SH SEE ALSO
+.sp
+\fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBproj(1)\fP, \fBprojinfo(1)\fP
+.SH BUGS
+.sp
+A list of know bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
+where new bug reports can be submitted to.
+Bugs specific to resource files should be submitted to
+\fI\%https://github.com/OSGeo/PROJ\-data/issues\fP
+.SH HOME PAGE
+.sp
+\fI\%https://proj.org/\fP
+.SH AUTHOR
+Even Rouault
+.SH COPYRIGHT
+1983-2020
+.\" Generated by docutils manpage writer.
+.
