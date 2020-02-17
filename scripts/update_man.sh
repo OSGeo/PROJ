@@ -9,4 +9,5 @@ git add man/man1/cct.1
 git add man/man1/geod.1
 git add man/man1/gie.1
 git add man/man1/projinfo.1
+git add man/man1/projsync.1
 git commit -m "Update man-pages from Sphinx-docs"
