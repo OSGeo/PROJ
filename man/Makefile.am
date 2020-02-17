@@ -1,3 +1,3 @@
-SUBDIRS = man1 man3
+SUBDIRS = man1
 
 EXTRA_DIST = CMakeLists.txt

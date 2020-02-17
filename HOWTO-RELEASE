@@ -60,12 +60,9 @@ Update the following files with the new ABI version number:
 1.2 Update man pages
 -------------------------------------------------------------------------------
 
-Man pages are (mostly) automatically generated from the Sphinx docs. The pages
-in man/man3/ was manually updated in 1.1. Here we update the pages in
-man/man1/. Follow these steps:
+Man pages are (mostly) automatically generated from the Sphinx docs. Follow
+these steps:
 
-    - Update version number and date in `man/man3/pj_init.3` and
-      `man/man3/geodesic.3`
     - Temporarily update version in `docs/source/conf.py`
     - run `scripts/update_man.sh`
     - Revert version number in `docs/source/conf.py`
