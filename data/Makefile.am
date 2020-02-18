@@ -93,7 +93,7 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
 	@for gridfile in $(DATAPATH)/*.gsb $(DATAPATH)/*.gtx $(DATAPATH)/ntv1_can.dat dummy \
-	                 $(DATAPATH)/alaska $(DATAPATH)/conus $(DATAPATH)/hawaii \
+	                 $(DATAPATH)/alaska $(DATAPATH)/conus $(DATAPATH)/hawaii $(DATAPATH)/null \
 	                 $(DATAPATH)/prvi $(DATAPATH)/stgeorge $(DATAPATH)/stlrnc $(DATAPATH)/stpaul \
 	                 $(DATAPATH)/FL $(DATAPATH)/MD $(DATAPATH)/TN $(DATAPATH)/WI $(DATAPATH)/WO; do \
 	  if test "$$gridfile" != "dummy" -a -f "$$gridfile" ; then \

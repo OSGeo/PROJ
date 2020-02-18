@@ -7,6 +7,7 @@ set(CONFIG_FILES
 )
 
 set(PROJ_DICTIONARY
+  null
   world
   other.extra
   nad27
