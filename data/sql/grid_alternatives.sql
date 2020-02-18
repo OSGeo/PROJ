@@ -2110,3 +2110,19 @@ INSERT INTO grid_alternatives(original_grid_name,
                               0,
                               'proj-datumgrid-oceania',
                               NULL, NULL, NULL, NULL);
+
+-- Slovakia
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+                      VALUES ('Slovakia_JTSK03_to_JTSK.LAS',
+                              'Slovakia_JTSK03_to_JTSK.gsb',
+                              'NTv2',
+                              'hgridshift',
+                              0,
+                              NULL,
+                              NULL, NULL, NULL, NULL);
