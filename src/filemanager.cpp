@@ -1220,7 +1220,7 @@ std::string pj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
             path = xdg_data_home;
         } else {
             const char *home = getenv("HOME");
-            if (home) {
+            if (home && access(home, W_OK) == 0) {
 #if defined(__MACH__) && defined(__APPLE__)
                 path = std::string(home) + "/Library/Application Support";
 #else
