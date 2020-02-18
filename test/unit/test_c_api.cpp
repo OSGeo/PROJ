@@ -3107,18 +3107,23 @@ TEST_F(CApi, proj_grid_get_info_from_database) {
             nullptr, nullptr, nullptr, nullptr));
     }
     {
-        const char *name = nullptr;
+        const char *full_name = nullptr;
         const char *package_name = nullptr;
         const char *url = nullptr;
         int direct_download = 0;
         int open_license = 0;
         int available = 0;
         EXPECT_TRUE(proj_grid_get_info_from_database(
-            m_ctxt, "au_icsm_GDA94_GDA2020_conformal.tif", &name, &package_name,
-            &url, &direct_download, &open_license, &available));
-        ASSERT_NE(name, nullptr);
+            m_ctxt, "au_icsm_GDA94_GDA2020_conformal.tif", &full_name,
+            &package_name, &url, &direct_download, &open_license, &available));
+        ASSERT_NE(full_name, nullptr);
+        // empty string expected as the file is not in test data
+        EXPECT_TRUE(full_name[0] == 0);
         ASSERT_NE(package_name, nullptr);
+        EXPECT_TRUE(package_name[0] == 0); // empty string expected
         ASSERT_NE(url, nullptr);
+        EXPECT_EQ(std::string(url),
+                  "https://cdn.proj.org/au_icsm_GDA94_GDA2020_conformal.tif");
         EXPECT_EQ(direct_download, 1);
         EXPECT_EQ(open_license, 1);
     }
