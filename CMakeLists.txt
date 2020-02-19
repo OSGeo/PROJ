@@ -127,26 +127,31 @@ if(NOT SQLITE3_FOUND)
   message(SEND_ERROR "sqlite3 dependency not found!")
 endif()
 
-# Would build and run with older versons, but with horrible performance
+# Would build and run with older versions, but with horrible performance
 # See https://github.com/OSGeo/PROJ/issues/1718
-IF("${SQLITE3_VERSION}" VERSION_LESS "3.11")
+if("${SQLITE3_VERSION}" VERSION_LESS "3.11")
   message(SEND_ERROR "sqlite3 >= 3.11 required!")
-ENDIF()
+endif()
 
 ################################################################################
 # Check for libtiff
 ################################################################################
 
-option(DISABLE_TIFF "Disable TIFF support" OFF)
-mark_as_advanced(DISABLE_TIFF)
-if(DISABLE_TIFF)
-  message(WARNING "TIFF support has been disabled and will result in the inability to read some grids")
-else()
+option(ENABLE_TIFF "Enable TIFF support to read some grids" ON)
+mark_as_advanced(ENABLE_TIFF)
+set(TIFF_ENABLED FALSE)
+if(ENABLE_TIFF)
   find_package(TIFF REQUIRED)
-  if(NOT TIFF_FOUND)
-    message(SEND_ERROR "libtiff dependency not found!")
+  if(TIFF_FOUND)
+    set(TIFF_ENABLED TRUE)
+  else()
+    message(SEND_ERROR
+      "libtiff dependency not found! Use ENABLE_TIFF=OFF to force it off")
   endif()
-  add_definitions(-DTIFF_ENABLED)
+else()
+  message(WARNING
+    "TIFF support is not enabled and will result in the inability to read "
+    "some grids")
 endif()
 
 ################################################################################
@@ -154,12 +159,14 @@ endif()
 ################################################################################
 
 option(ENABLE_CURL "Enable Curl support" ON)
+set(CURL_ENABLED FALSE)
 if(ENABLE_CURL)
   find_package(CURL REQUIRED)
-  if(NOT CURL_FOUND)
+  if(CURL_FOUND)
+    set(CURL_ENABLED TRUE)
+  else()
     message(SEND_ERROR "curl dependency not found!")
   endif()
-  add_definitions(-DCURL_ENABLED)
 endif()
 
 ################################################################################
