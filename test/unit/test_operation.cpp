@@ -2090,6 +2090,8 @@ TEST(operation, createEquidistantCylindrical) {
         "PARAMETER[\"central_meridian\",2],\n"
         "PARAMETER[\"false_easting\",3],\n"
         "PARAMETER[\"false_northing\",4]");
+
+    EXPECT_TRUE(conv->validateParameters().empty());
 }
 
 // ---------------------------------------------------------------------------
@@ -2127,6 +2129,8 @@ TEST(operation, createEquidistantCylindricalSpherical) {
         "PARAMETER[\"central_meridian\",2],\n"
         "PARAMETER[\"false_easting\",3],\n"
         "PARAMETER[\"false_northing\",4]");
+
+    EXPECT_TRUE(conv->validateParameters().empty());
 }
 
 // ---------------------------------------------------------------------------
