@@ -2112,6 +2112,12 @@ INSERT INTO grid_alternatives(original_grid_name,
                               NULL, NULL, NULL, NULL);
 
 -- Slovakia
+--
+-- The definition of EPSG:8364 (JTSK03 to JTSK) uses NADCON method which is not supported by PROJ.
+-- UGKK (Slovak Geodetic and Cartographic Institute) provides also NTv2 grid file in addition
+-- to NADCON .las/.los files, so we define the NTv2 file here as an alternative.
+-- The file is available at https://www.geoportal.sk/files/gz/slovakia_jtsk03_to_jtsk_ntv2.zip
+-- but it does not have a confirmed license yet, so it is not available in proj-datumgrid-europe for now
 INSERT INTO grid_alternatives(original_grid_name,
                               proj_grid_name,
                               proj_grid_format,
