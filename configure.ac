@@ -362,4 +362,7 @@ fi
 
 AC_CONFIG_FILES([proj.pc])
 
+dnl Ignore WARNING:  'proj.pc.in' seems to ignore the --datarootdir setting
+AC_DEFUN([AC_DATAROOTDIR_CHECKED])
+
 AC_OUTPUT
