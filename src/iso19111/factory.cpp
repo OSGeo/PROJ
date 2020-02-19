@@ -977,8 +977,8 @@ bool DatabaseContext::lookForGridInfo(
                "FROM grid_alternatives "
                "LEFT JOIN grid_packages ON "
                "grid_alternatives.package_name = grid_packages.package_name "
-               "WHERE proj_grid_name = ?",
-               {projFilename});
+               "WHERE proj_grid_name = ? OR old_proj_grid_name = ?",
+               {projFilename, projFilename});
     bool ret = !res.empty();
     if (ret) {
         const auto &row = res.front();
