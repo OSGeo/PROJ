@@ -2129,6 +2129,14 @@ std::list<std::string> SingleOperation::validateParameters() const {
         }
 
         if (!opv) {
+            if ((methodEPSGCode == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL ||
+                 methodEPSGCode ==
+                     EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL) &&
+                paramMapping == &paramLatitudeNatOrigin) {
+                // extension of EPSG used by GDAL/PROJ, so we should not
+                // warn on its absence.
+                continue;
+            }
             std::string msg("Cannot find expected parameter ");
             msg += paramMapping->wkt2_name;
             res.emplace_back(msg);
