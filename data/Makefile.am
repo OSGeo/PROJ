@@ -87,6 +87,8 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		tests/nkgrf03vel_realigned_z_extract.gtx \
 		tests/test_hgrid_with_two_level_of_subgrids_no_grid_name.tif \
 		tests/us_noaa_geoid06_ak_subset_at_antimeridian.tif \
+		tests/test_hgrid_little_endian.gsb \
+		tests/test_hgrid_big_endian.gsb \
 		generate_all_sql_in.cmake sql_filelist.cmake \
 		$(SQL_ORDERED_LIST)
 
