@@ -4,8 +4,8 @@ libdir=@libdir@
 includedir=@includedir@
 datadir=@datadir@/@PACKAGE@
 
-Name: proj
-Description: Cartographic Projections Library.
+Name: PROJ
+Description: Coordinate transformation software library
 Requires:
 Version: @VERSION@
 Libs: -L${libdir} -lproj
