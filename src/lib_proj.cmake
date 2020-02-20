@@ -35,36 +35,20 @@ elseif(USE_THREAD AND NOT Threads_FOUND)
     "required by USE_THREAD option")
 endif()
 
-option(ENABLE_LTO
-  "Build library with LTO/IPO optimization (if available)." OFF)
-if(ENABLE_LTO)
-  # Determine ENABLE_LTO_METHOD to either "flag" or "property"
-  if(CMAKE_C_COMPILER_ID STREQUAL "Intel"
-      AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(ENABLE_LTO_METHOD "property")
-  elseif(CMAKE_VERSION VERSION_LESS 3.9)
-    # Maual checks required
-    if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-      include(CheckCXXSourceCompiles)
-      set(CMAKE_REQUIRED_FLAGS "-Wl,-flto")
-      check_cxx_source_compiles("int main(){ return 0; }"
-        COMPILER_SUPPORTS_FLTO_FLAG)
-    else()
-      include(CheckCXXCompilerFlag)
-      check_cxx_compiler_flag("-flto" COMPILER_SUPPORTS_FLTO_FLAG)
-    endif()
-    set(ENABLE_LTO_METHOD "flag")
-    if(NOT COMPILER_SUPPORTS_FLTO_FLAG)
-      set(ENABLE_LTO OFF)
-    endif()
-  else()  # CMake v3.9
-    cmake_policy(SET CMP0069 NEW)
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT ENABLE_LTO)
-    set(ENABLE_LTO_METHOD "property")
-  endif()
+# Support older option, to be removed by PROJ 8.0
+if(DEFINED ENABLE_LTO)
+  message(DEPRECATION "ENABLE_LTO has been replaced with ENABLE_IPO")
+  set(ENABLE_IPO ${ENABLE_LTO})
 endif()
-print_variable(ENABLE_LTO)
+
+option(ENABLE_IPO
+  "Build library with interprocedural optimization (if available)." OFF)
+if(ENABLE_IPO)
+  cmake_policy(SET CMP0069 NEW)
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT ENABLE_IPO)
+endif()
+print_variable(ENABLE_IPO)
 
 
 ##############################################
@@ -366,14 +350,9 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
     PROPERTIES COMPILE_FLAGS ${FP_PRECISE})
 endif()
 
-if(ENABLE_LTO)
-  if(ENABLE_LTO_METHOD STREQUAL "property")
-    set_property(TARGET ${PROJ_CORE_TARGET}
-      PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-  elseif(ENABLE_LTO_METHOD STREQUAL "flag")
-    # pre-CMake 3.9 workaround
-    target_compile_options(${PROJ_CORE_TARGET} PRIVATE -flto)
-  endif()
+if(ENABLE_IPO)
+  set_property(TARGET ${PROJ_CORE_TARGET}
+    PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
 target_include_directories(${PROJ_CORE_TARGET} INTERFACE
