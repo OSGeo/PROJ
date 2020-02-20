@@ -697,6 +697,12 @@ static const MethodMapping projectionMethodMappings[] = {
     {PROJ_WKT2_NAME_METHOD_MOLLWEIDE, 0, "Mollweide", "moll", nullptr,
      paramsLonNatOrigin},
 
+    {PROJ_WKT2_NAME_METHOD_NATURAL_EARTH, 0, "Natural_Earth", "natearth",
+     nullptr, paramsLonNatOrigin},
+
+    {PROJ_WKT2_NAME_METHOD_NATURAL_EARTH_II, 0, "Natural_Earth_II", "natearth2",
+     nullptr, paramsLonNatOrigin},
+
     {EPSG_NAME_METHOD_NZMG, EPSG_CODE_METHOD_NZMG, "New_Zealand_Map_Grid",
      "nzmg", nullptr, paramsNatOrigin},
 
