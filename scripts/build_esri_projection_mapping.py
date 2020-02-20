@@ -593,9 +593,19 @@ config_str = """
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
-# Natural_Earth: not handled
+- Natural_Earth:
+    WKT2_name: PROJ_WKT2_NAME_METHOD_NATURAL_EARTH
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
-# Natural_Earth_II: not handled
+- Natural_Earth_II:
+    WKT2_name: PROJ_WKT2_NAME_METHOD_NATURAL_EARTH_II
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
 - Patterson:
     WKT2_name: PROJ_WKT2_NAME_METHOD_PATTERSON

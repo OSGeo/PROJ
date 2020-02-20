@@ -747,6 +747,24 @@ static const ESRIParamMapping paramsESRI_Wagner_VII[] = {
      EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, 0.0},
     {nullptr, nullptr, 0, 0.0}};
 
+static const ESRIParamMapping paramsESRI_Natural_Earth[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, 0.0},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, 0.0},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, 0.0},
+    {nullptr, nullptr, 0, 0.0}};
+
+static const ESRIParamMapping paramsESRI_Natural_Earth_II[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, 0.0},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, 0.0},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, 0.0},
+    {nullptr, nullptr, 0, 0.0}};
+
 static const ESRIParamMapping paramsESRI_Patterson[] = {
     {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
      EPSG_CODE_PARAMETER_FALSE_EASTING, 0.0},
@@ -905,6 +923,10 @@ static const ESRIMethodMapping esriMappings[] = {
     {"Wagner_IV", PROJ_WKT2_NAME_METHOD_WAGNER_IV, 0, paramsESRI_Wagner_IV},
     {"Wagner_V", PROJ_WKT2_NAME_METHOD_WAGNER_V, 0, paramsESRI_Wagner_V},
     {"Wagner_VII", PROJ_WKT2_NAME_METHOD_WAGNER_VII, 0, paramsESRI_Wagner_VII},
+    {"Natural_Earth", PROJ_WKT2_NAME_METHOD_NATURAL_EARTH, 0,
+     paramsESRI_Natural_Earth},
+    {"Natural_Earth_II", PROJ_WKT2_NAME_METHOD_NATURAL_EARTH_II, 0,
+     paramsESRI_Natural_Earth_II},
     {"Patterson", PROJ_WKT2_NAME_METHOD_PATTERSON, 0, paramsESRI_Patterson},
     {"Geostationary_Satellite",
      PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y, 0,
