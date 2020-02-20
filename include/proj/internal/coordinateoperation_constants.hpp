@@ -709,6 +709,9 @@ static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_ORTHOGRAPHIC, EPSG_CODE_METHOD_ORTHOGRAPHIC,
      "Orthographic", "ortho", nullptr, paramsNatOrigin},
 
+    {PROJ_WKT2_NAME_METHOD_PATTERSON, 0, "Patterson", "patterson", nullptr,
+     paramsLonNatOrigin},
+
     {EPSG_NAME_METHOD_AMERICAN_POLYCONIC, EPSG_CODE_METHOD_AMERICAN_POLYCONIC,
      "Polyconic", "poly", nullptr, paramsNatOrigin},
 
