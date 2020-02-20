@@ -597,7 +597,12 @@ config_str = """
 
 # Natural_Earth_II: not handled
 
-# Patterson: not handled
+- Patterson:
+    WKT2_name: PROJ_WKT2_NAME_METHOD_PATTERSON
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
 # Compact_Miller: not handled
 
