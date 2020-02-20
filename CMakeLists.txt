@@ -11,7 +11,10 @@
 ################################################################################
 cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 
-project(PROJ LANGUAGES C CXX)
+project(PROJ
+  DESCRIPTION "PROJ coordinate transformation software library"
+  LANGUAGES C CXX
+)
 
 # Only interpret if() arguments as variables or keywords when unquoted
 cmake_policy(SET CMP0054 NEW)
