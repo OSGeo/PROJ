@@ -459,9 +459,19 @@ config_str = """
         - Longitude_Of_Center: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
         - Latitude_Of_Center: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
 
-# Times: not handled, but present in PROJ
+- Times:
+    WKT2_name: PROJ_WKT2_NAME_METHOD_TIMES
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
-# Vertical_Near_Side_Perspective: not handled, but present in PROJ
+- Vertical_Near_Side_Perspective:
+    WKT2_name: PROJ_WKT2_NAME_METHOD_VERTICAL_NEAR_SIDE_PERSPECTIVE
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
 - Stereographic_North_Pole:
     WKT2_name: EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B
@@ -614,7 +624,12 @@ config_str = """
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
-# Compact_Miller: not handled
+- Compact_Miller:
+    WKT2_name: PROJ_WKT2_NAME_METHOD_COMPACT_MILLER
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
 # Transverse_Mercator_NGA_2014: not handled
 
