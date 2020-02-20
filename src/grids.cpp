@@ -1899,7 +1899,10 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
         if (must_swap) {
             // 6 double values: southLat, northLat, eastLon, westLon, resLat,
             // resLon
-            swap_words(header + OFFSET_SOUTH_LAT, sizeof(double), 6);
+            for (int i = 0; i < 6; i++) {
+                swap_words(header + OFFSET_SOUTH_LAT + 16 * i, sizeof(double),
+                           1);
+            }
             swap_words(header + OFFSET_GS_COUNT, sizeof(int), 1);
         }
 
