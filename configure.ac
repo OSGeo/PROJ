@@ -238,7 +238,7 @@ dnl ---------------------------------------------------------------------------
 
 if test "x$SQLITE3_CFLAGS$SQLITE3_LIBS" = "x" ; then
 
-    dnl Would build and run with older versons, but with horrible performance
+    dnl Would build and run with older versions, but with horrible performance
     dnl See https://github.com/OSGeo/PROJ/issues/1718
 
     PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.11])
@@ -256,12 +256,10 @@ dnl Check for libtiff
 dnl ---------------------------------------------------------------------------
 
 AC_ARG_ENABLE([tiff],
-              AS_HELP_STRING([--disable-tiff],
-                    [Disable TIFF support. Strongly discouraged !]),
-              [enable_tiff=no],
-              [enable_tiff=yes])
+              AS_HELP_STRING([--enable-tiff],
+                    [Enable TIFF support; strongly encouraged to read some grids [default=yes]]))
 
-if test "x$enable_tiff" = "xyes" -o "x$enable_tiff" = ""; then
+if test "x$enable_tiff" != "xno" -o "x$enable_tiff" = ""; then
     if test "x$TIFF_CFLAGS$TIFF_LIBS" = "x" ; then
         if $PKG_CONFIG libtiff; then
             PKG_CHECK_MODULES([TIFF], [libtiff])
