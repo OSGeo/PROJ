@@ -50,6 +50,27 @@
 
 namespace {
 
+static const int byte_order_test = 1;
+#define IS_LSB                                                                 \
+    (1 == (reinterpret_cast<const unsigned char *>(&byte_order_test))[0])
+
+static void swap_words(void *dataIn, size_t word_size, size_t word_count)
+
+{
+    unsigned char *data = static_cast<unsigned char *>(dataIn);
+    for (size_t word = 0; word < word_count; word++) {
+        for (size_t i = 0; i < word_size / 2; i++) {
+            unsigned char t;
+
+            t = data[i];
+            data[i] = data[word_size - i - 1];
+            data[word_size - i - 1] = t;
+        }
+
+        data += word_size;
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 #ifdef CURL_ENABLED
@@ -474,6 +495,9 @@ TEST(networking, custom) {
         event->response.resize(278528);
         event->file_id = 2;
         float f = 1.25;
+        if (!IS_LSB) {
+            swap_words(&f, sizeof(f), 1);
+        }
         for (size_t i = 0; i < 278528 / sizeof(float); i++) {
             memcpy(&event->response[i * sizeof(float)], &f, sizeof(float));
         }
@@ -524,6 +548,9 @@ TEST(networking, custom) {
         event->response.resize(278528);
         event->file_id = 2;
         float f = 2.25;
+        if (!IS_LSB) {
+            swap_words(&f, sizeof(f), 1);
+        }
         for (size_t i = 0; i < 278528 / sizeof(float); i++) {
             memcpy(&event->response[i * sizeof(float)], &f, sizeof(float));
         }
@@ -791,6 +818,9 @@ TEST(networking, simul_read_range_error) {
         event->response.resize(278528);
         event->file_id = 2;
         float f = 1.25;
+        if (!IS_LSB) {
+            swap_words(&f, sizeof(f), 1);
+        }
         for (size_t i = 0; i < 278528 / sizeof(float); i++) {
             memcpy(&event->response[i * sizeof(float)], &f, sizeof(float));
         }
@@ -945,6 +975,9 @@ TEST(networking, simul_file_change_while_opened) {
         event->response.resize(278528);
         event->file_id = 2;
         float f = 1.25;
+        if (!IS_LSB) {
+            swap_words(&f, sizeof(f), 1);
+        }
         for (size_t i = 0; i < 278528 / sizeof(float); i++) {
             memcpy(&event->response[i * sizeof(float)], &f, sizeof(float));
         }
