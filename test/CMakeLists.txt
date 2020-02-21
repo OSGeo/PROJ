@@ -51,7 +51,6 @@ proj_add_gie_test("GIGS-5208" "gigs/5208.gie")
 #SET(TEST_MAIN_SRC test_main.cpp)
 #set(TEST_MAIN_LIBRARIES test_main)
 #add_library( ${TEST_MAIN_LIBRARIES}
-#                    ${PROJ_LIBRARY_TYPE}
 #                    ${TEST_MAIN_SRC}
 #                    ${CATCH2_INCLUDE}  )
 
