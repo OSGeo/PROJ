@@ -51,7 +51,7 @@ endif()  # USE_EXTERNAL_GTEST
 # Build PROJ unit tests
 #
 
-if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC" AND BUILD_LIBPROJ_SHARED)
+if(MSVC AND BUILD_SHARED_LIBS)
   add_definitions(-DPROJ_MSVC_DLL_IMPORT=1)
 endif()
 
@@ -104,7 +104,7 @@ add_test(NAME proj_context_test COMMAND proj_context_test)
 set_property(TEST proj_context_test
         PROPERTY ENVIRONMENT "PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES;PROJ_LIB=${PROJECT_BINARY_DIR}/data/for_tests")
 
-if(MSVC AND BUILD_LIBPROJ_SHARED)
+if(MSVC AND BUILD_SHARED_LIBS)
   # ph_phi2_test not compatible of a .dll build
 else()
   add_executable(pj_phi2_test
