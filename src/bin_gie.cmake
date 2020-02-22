@@ -14,6 +14,6 @@ target_compile_options(gie PRIVATE ${PROJ_CXX_WARN_FLAGS})
 install(TARGETS gie
   RUNTIME DESTINATION ${BINDIR})
 
-if(MSVC AND BUILD_LIBPROJ_SHARED)
+if(MSVC AND BUILD_SHARED_LIBS)
   target_compile_definitions(gie PRIVATE PROJ_MSVC_DLL_IMPORT=1)
 endif()
