@@ -4,21 +4,20 @@ message(STATUS "Configuring proj library:")
 ### SWITCH BETWEEN STATIC OR SHARED LIBRARY###
 ##############################################
 
-# default config, shared on unix and static on Windows
-if(UNIX)
-  set(BUILD_LIBPROJ_SHARED_DEFAULT ON)
-endif()
-if(WIN32)
-  set(BUILD_LIBPROJ_SHARED_DEFAULT OFF)
-endif()
-option(BUILD_LIBPROJ_SHARED
-  "Build libproj library shared." ${BUILD_LIBPROJ_SHARED_DEFAULT})
-if(BUILD_LIBPROJ_SHARED)
-  set(PROJ_LIBRARY_TYPE SHARED)
-else()
-  set(PROJ_LIBRARY_TYPE STATIC)
+# Support older option, to be removed by PROJ 8.0
+if(DEFINED BUILD_LIBPROJ_SHARED)
+  message(DEPRECATION
+    "BUILD_LIBPROJ_SHARED has been replaced with BUILD_SHARED_LIBS")
+  set(BUILD_SHARED_LIBS ${BUILD_LIBPROJ_SHARED})
 endif()
 
+# default config is shared, except static on Windows
+set(BUILD_SHARED_LIBS_DEFAULT ON)
+if(WIN32)
+  set(BUILD_SHARED_LIBS_DEFAULT OFF)
+endif()
+option(BUILD_SHARED_LIBS
+  "Build PROJ library shared." ${BUILD_SHARED_LIBS_DEFAULT})
 
 option(USE_THREAD "Build libproj with thread/mutex support " ON)
 if(NOT USE_THREAD)
@@ -321,7 +320,6 @@ proj_target_output_name(${PROJ_CORE_TARGET} PROJ_CORE_TARGET_OUTPUT_NAME)
 
 add_library(
   ${PROJ_CORE_TARGET}
-  ${PROJ_LIBRARY_TYPE}
   ${ALL_LIBPROJ_SOURCES}
   ${ALL_LIBPROJ_HEADERS}
   ${PROJ_RESOURCES}
@@ -418,7 +416,7 @@ if(CURL_ENABLED)
   target_link_libraries(${PROJ_CORE_TARGET} ${CURL_LIBRARY})
 endif()
 
-if(MSVC AND BUILD_LIBPROJ_SHARED)
+if(MSVC AND BUILD_SHARED_LIBS)
   target_compile_definitions(${PROJ_CORE_TARGET}
     PRIVATE PROJ_MSVC_DLL_EXPORT=1)
 endif()
@@ -443,5 +441,5 @@ endif()
 ##############################################
 print_variable(PROJ_CORE_TARGET)
 print_variable(PROJ_CORE_TARGET_OUTPUT_NAME)
-print_variable(PROJ_LIBRARY_TYPE)
+print_variable(BUILD_SHARED_LIBS)
 print_variable(PROJ_LIBRARIES)
