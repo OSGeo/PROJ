@@ -720,6 +720,9 @@ Network related functionality
 .. doxygenfunction:: proj_context_set_enable_network
    :project: doxygen_api
 
+.. doxygenfunction:: proj_context_is_network_enabled
+   :project: doxygen_api
+
 .. doxygenfunction:: proj_context_set_url_endpoint
    :project: doxygen_api
 

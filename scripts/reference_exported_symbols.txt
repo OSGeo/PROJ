@@ -745,7 +745,6 @@ pj_compare_datums
 pj_context_get_grid_cache_filename(projCtx_t*)
 pj_context_get_url_endpoint(projCtx_t*)
 pj_context_get_user_writable_directory(projCtx_t*, bool)
-pj_context_is_network_enabled(projCtx_t*)
 pj_context_set_user_writable_directory(projCtx_t*, std::string const&)
 pj_ctx_alloc
 pj_ctx_fclose
@@ -834,6 +833,7 @@ proj_context_get_database_metadata
 proj_context_get_database_path
 proj_context_get_use_proj4_init_rules
 proj_context_guess_wkt_dialect
+proj_context_is_network_enabled
 proj_context_set_autoclose_database
 proj_context_set_database_path
 proj_context_set_enable_network
