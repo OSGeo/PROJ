@@ -153,8 +153,9 @@ set_property(TEST gie_self_tests
 add_executable(test_network
   main.cpp
   test_network.cpp)
-if(CURL_FOUND)
+if(CURL_ENABLED)
   include_directories(${CURL_INCLUDE_DIR})
+  target_compile_definitions(test_network PRIVATE -DCURL_ENABLED)
   target_link_libraries(test_network ${CURL_LIBRARY})
 endif()
 target_link_libraries(test_network
