@@ -467,11 +467,13 @@ config_str = """
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
 - Vertical_Near_Side_Perspective:
-    WKT2_name: PROJ_WKT2_NAME_METHOD_VERTICAL_NEAR_SIDE_PERSPECTIVE
+    WKT2_name: EPSG_NAME_METHOD_VERTICAL_PERSPECTIVE
     Params:
         - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
-        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Longitude_Of_Center: EPSG_NAME_PARAMETER_LONGITUDE_TOPOGRAPHIC_ORIGIN
+        - Latitude_Of_Center: EPSG_NAME_PARAMETER_LATITUDE_TOPOGRAPHIC_ORIGIN
+        - Height: EPSG_NAME_PARAMETER_VIEWPOINT_HEIGHT
 
 - Stereographic_North_Pole:
     WKT2_name: EPSG_NAME_METHOD_POLAR_STEREOGRAPHIC_VARIANT_B
@@ -787,8 +789,7 @@ print('};')
 print("""
 // ---------------------------------------------------------------------------
 
-// end of anonymous namespace
-}
+} // namespace {
 
 //! @endcond
 
