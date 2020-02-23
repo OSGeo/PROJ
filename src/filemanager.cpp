@@ -944,7 +944,7 @@ std::unique_ptr<File> FileApiAdapter::open(PJ_CONTEXT *ctx,
 std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename,
                                         FileAccess access) {
     if (starts_with(filename, "http://") || starts_with(filename, "https://")) {
-        if (!pj_context_is_network_enabled(ctx)) {
+        if (!proj_context_is_network_enabled(ctx)) {
             pj_log(
                 ctx, PJ_LOG_ERROR,
                 "Attempt at accessing remote resource not authorized. Either "
@@ -1672,7 +1672,8 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
 
     if (file == nullptr && !is_tilde_slash(name) &&
         !is_rel_or_absolute_filename(name) && !starts_with(name, "http://") &&
-        !starts_with(name, "https://") && pj_context_is_network_enabled(ctx)) {
+        !starts_with(name, "https://") &&
+        proj_context_is_network_enabled(ctx)) {
         std::string remote_file(pj_context_get_url_endpoint(ctx));
         if (!remote_file.empty()) {
             if (remote_file.back() != '/') {
