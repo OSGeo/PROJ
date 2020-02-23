@@ -176,6 +176,14 @@ VALUES
 ('Icegeoid_ISN2016.gtx','is_lmi_Icegeoid_ISN2016.tif','Icegeoid_ISN2016.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/is_lmi_Icegeoid_ISN2016.tif',1,1,NULL),
 -- New Zealand grid shift models.
 ('auckland-1946-to-nzvd2016-conversion.csv','nz_linz_auckht1946-nzvd2016.tif','auckht1946-nzvd2016.gtx','GTiff','vgridshift',0,NULL,'https://cdn.proj.org/nz_linz_auckht1946-nzvd2016.tif',1,1,NULL),
+-- Slovakia
+--
+-- The definition of EPSG:8364 (JTSK03 to JTSK) uses NADCON method which is not supported by PROJ.
+-- UGKK (Slovak Geodetic and Cartographic Institute) provides also NTv2 grid file in addition
+-- to NADCON .las/.los files, so we define the NTv2 file here as an alternative.
+-- The file is available online but it does not have a confirmed open license yet,
+-- so it is not available in proj-datumgrid-europe for now
+('Slovakia_JTSK03_to_JTSK.LAS', 'Slovakia_JTSK03_to_JTSK.gsb', 'Slovakia_JTSK03_to_JTSK.gsb', 'NTv2', 'hgridshift', 0, NULL, 'https://www.geoportal.sk/files/gz/slovakia_jtsk03_to_jtsk_ntv2.zip', 0, 0, NULL),
 -- Superseded entries
 ('bluff-1955-to-nzvd2016-conversion.csv','nz_linz_blufht1955-nzvd2016.tif','blufht1955-nzvd2016.gtx','GTiff','vgridshift',0,NULL,'https://cdn.proj.org/nz_linz_blufht1955-nzvd2016.tif',1,1,NULL),
 ('dunedin-1958-to-nzvd2016-conversion.csv','nz_linz_duneht1958-nzvd2016.tif','duneht1958-nzvd2016.gtx','GTiff','vgridshift',0,NULL,'https://cdn.proj.org/nz_linz_duneht1958-nzvd2016.tif',1,1,NULL),
