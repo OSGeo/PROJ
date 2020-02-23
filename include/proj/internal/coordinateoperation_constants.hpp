@@ -131,6 +131,10 @@ static const ParamMapping paramLatitude2ndStdParallel = {
     EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL, WKT1_STANDARD_PARALLEL_2,
     common::UnitOfMeasure::Type::ANGULAR, lat_2};
 
+static const ParamMapping paramHeight = {
+    EPSG_NAME_PARAMETER_VIEWPOINT_HEIGHT, EPSG_CODE_PARAMETER_VIEWPOINT_HEIGHT,
+    "height", common::UnitOfMeasure::Type::LINEAR, h};
+
 static const ParamMapping *const paramsNatOriginScale[] = {
     &paramLatitudeNatOrigin, &paramLongitudeNatOrigin, &paramScaleFactor,
     &paramFalseEasting,      &paramFalseNorthing,      nullptr};
@@ -405,6 +409,10 @@ static const ParamMapping *const paramsMerc1SP[] = {
 static const ParamMapping *const paramsMerc2SP[] = {
     &paramLat1stParallelLatTs, &paramLongitudeNatOrigin, &paramFalseEasting,
     &paramFalseNorthing, nullptr};
+
+static const ParamMapping *const paramsNearSidePerspective[] = {
+    &paramHeight,       &paramLongitudeNatOrigin, &paramLatitudeNatOrigin,
+    &paramFalseEasting, &paramFalseNorthing,      nullptr};
 
 static const ParamMapping *const paramsObliqueStereo[] = {
     &paramLatitudeNatOrigin, &paramLongitudeNatOrigin, &paramScaleFactorK,

@@ -626,12 +626,16 @@ static const ESRIParamMapping paramsESRI_Times[] = {
     {nullptr, nullptr, 0, 0.0}};
 
 static const ESRIParamMapping paramsESRI_Vertical_Near_Side_Perspective[] = {
+    {"Height", EPSG_NAME_PARAMETER_VIEWPOINT_HEIGHT,
+     EPSG_CODE_PARAMETER_VIEWPOINT_HEIGHT, 0.0},
     {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
      EPSG_CODE_PARAMETER_FALSE_EASTING, 0.0},
     {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
      EPSG_CODE_PARAMETER_FALSE_NORTHING, 0.0},
     {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
      EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, 0.0},
+    {"Latitude_Of_Center", EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE,
+     EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE, 0.0},
     {nullptr, nullptr, 0, 0.0}};
 
 static const ESRIParamMapping paramsESRI_Stereographic_North_Pole[] = {
