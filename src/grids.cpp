@@ -3053,7 +3053,7 @@ PJ_LP pj_hgrid_apply(PJ_CONTEXT *ctx, const ListOfHGrids &grids, PJ_LP lp,
         HorizontalShiftGridSet *gridset = nullptr;
         const auto grid = findGrid(grids, lp, gridset);
         if (!grid) {
-            pj_ctx_set_errno(ctx, PJD_ERR_FAILED_TO_LOAD_GRID);
+            pj_ctx_set_errno(ctx, PJD_ERR_GRID_AREA);
             return out;
         }
         if (grid->isNullGrid()) {
