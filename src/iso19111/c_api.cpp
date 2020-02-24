@@ -177,7 +177,7 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
             auto formatter = PROJStringFormatter::create(
                 PROJStringFormatter::Convention::PROJ_5, dbContext);
             auto projString = coordop->exportToPROJString(formatter.get());
-            if (pj_context_is_network_enabled(ctx)) {
+            if (proj_context_is_network_enabled(ctx)) {
                 ctx->defer_grid_opening = true;
             }
             auto pj = pj_create_internal(ctx, projString.c_str());
@@ -6619,8 +6619,8 @@ int proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
     }
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
-        auto ret = op->isPROJInstantiable(dbContext,
-                                          pj_context_is_network_enabled(ctx))
+        auto ret = op->isPROJInstantiable(
+                       dbContext, proj_context_is_network_enabled(ctx) != false)
                        ? 1
                        : 0;
         if (ctx->cpp_context) {
@@ -6934,8 +6934,8 @@ int proj_coordoperation_get_grid_used_count(PJ_CONTEXT *ctx,
     try {
         if (!coordoperation->gridsNeededAsked) {
             coordoperation->gridsNeededAsked = true;
-            const auto gridsNeeded =
-                co->gridsNeeded(dbContext, pj_context_is_network_enabled(ctx));
+            const auto gridsNeeded = co->gridsNeeded(
+                dbContext, proj_context_is_network_enabled(ctx) != false);
             for (const auto &gridDesc : gridsNeeded) {
                 coordoperation->gridsNeeded.emplace_back(gridDesc);
             }
