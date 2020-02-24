@@ -513,7 +513,7 @@ static const ParamMapping paramViewpointHeight = {
 static const ParamMapping *const paramsVerticalPerspective[] = {
     &paramLatTopoOrigin,
     &paramLonTopoOrigin,
-    &paramHeightTopoOrigin,
+    &paramHeightTopoOrigin, // unsupported by PROJ right now
     &paramViewpointHeight,
     &paramFalseEasting,  // PROJ addition
     &paramFalseNorthing, // PROJ addition
@@ -746,9 +746,6 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {PROJ_WKT2_NAME_METHOD_VAN_DER_GRINTEN, 0, "VanDerGrinten", "vandg", "R_A",
      paramsLonNatOrigin},
-
-    {PROJ_WKT2_NAME_METHOD_VERTICAL_NEAR_SIDE_PERSPECTIVE, 0,
-     "Vertical_Near_Side_Perspective", "nsper", nullptr, paramsLonNatOrigin},
 
     {PROJ_WKT2_NAME_METHOD_WAGNER_I, 0, "Wagner_I", "wag1", nullptr,
      paramsLonNatOrigin},
