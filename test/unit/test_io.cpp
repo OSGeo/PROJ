@@ -5011,6 +5011,21 @@ static const struct {
          {"False northing", 2},
      }},
 
+    {"Vertical_Near_Side_Perspective",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Longitude_Of_Center", 3},
+      {"Latitude_Of_Center", 4},
+      {"Height", 5}},
+     "Vertical Perspective",
+     {
+         {"Latitude of topocentric origin", 4},
+         {"Longitude of topocentric origin", 3},
+         {"Viewpoint height", 5},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
     {
         "Unknown_Method",
         {{"False_Easting", 1},
