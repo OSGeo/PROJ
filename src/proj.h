@@ -490,6 +490,8 @@ int PROJ_DLL proj_context_set_network_callbacks(
 int PROJ_DLL proj_context_set_enable_network(PJ_CONTEXT* ctx,
                                              int enabled);
 
+int PROJ_DLL proj_context_is_network_enabled(PJ_CONTEXT* ctx);
+
 void PROJ_DLL proj_context_set_url_endpoint(PJ_CONTEXT* ctx, const char* url);
 
 void PROJ_DLL proj_grid_cache_set_enable(PJ_CONTEXT* ctx, int enabled);

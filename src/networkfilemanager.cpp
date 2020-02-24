@@ -2023,6 +2023,32 @@ int proj_context_set_enable_network(PJ_CONTEXT *ctx, int enable) {
 #endif
 }
 
+// ---------------------------------------------------------------------------
+
+/** Return if network access is enabled.
+*
+* @param ctx PROJ context, or NULL
+* @return TRUE if network access has been enabled
+* @since 7.0
+*/
+int proj_context_is_network_enabled(PJ_CONTEXT *ctx) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    if (ctx->networking.enabled_env_variable_checked) {
+        return ctx->networking.enabled;
+    }
+    const char *enabled = getenv("PROJ_NETWORK");
+    if (enabled && enabled[0] != '\0') {
+        ctx->networking.enabled = ci_equal(enabled, "ON") ||
+                                  ci_equal(enabled, "YES") ||
+                                  ci_equal(enabled, "TRUE");
+    }
+    pj_load_ini(ctx);
+    ctx->networking.enabled_env_variable_checked = true;
+    return ctx->networking.enabled;
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -2177,7 +2203,7 @@ int proj_is_download_needed(PJ_CONTEXT *ctx, const char *url_or_filename,
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
     }
-    if (!pj_context_is_network_enabled(ctx)) {
+    if (!proj_context_is_network_enabled(ctx)) {
         pj_log(ctx, PJ_LOG_ERROR, "Networking capabilities are not enabled");
         return false;
     }
@@ -2313,7 +2339,7 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
     }
-    if (!pj_context_is_network_enabled(ctx)) {
+    if (!proj_context_is_network_enabled(ctx)) {
         pj_log(ctx, PJ_LOG_ERROR, "Networking capabilities are not enabled");
         return false;
     }
@@ -2502,24 +2528,6 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-
-bool pj_context_is_network_enabled(PJ_CONTEXT *ctx) {
-    if (ctx == nullptr) {
-        ctx = pj_get_default_ctx();
-    }
-    if (ctx->networking.enabled_env_variable_checked) {
-        return ctx->networking.enabled;
-    }
-    const char *enabled = getenv("PROJ_NETWORK");
-    if (enabled && enabled[0] != '\0') {
-        ctx->networking.enabled = ci_equal(enabled, "ON") ||
-                                  ci_equal(enabled, "YES") ||
-                                  ci_equal(enabled, "TRUE");
-    }
-    pj_load_ini(ctx);
-    ctx->networking.enabled_env_variable_checked = true;
-    return ctx->networking.enabled;
-}
 
 // ---------------------------------------------------------------------------
 
