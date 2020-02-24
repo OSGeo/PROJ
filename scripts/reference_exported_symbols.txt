@@ -156,6 +156,8 @@ osgeo::proj::crs::GeographicCRS::create(osgeo::proj::util::PropertyMap const&, s
 osgeo::proj::crs::GeographicCRS::demoteTo2D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::GeographicCRS::~GeographicCRS()
 osgeo::proj::crs::GeographicCRS::is2DPartOf3D(dropbox::oxygen::nn<osgeo::proj::crs::GeographicCRS const*>) const
+osgeo::proj::crs::InvalidCompoundCRSException::~InvalidCompoundCRSException()
+osgeo::proj::crs::InvalidCompoundCRSException::InvalidCompoundCRSException(osgeo::proj::crs::InvalidCompoundCRSException const&)
 osgeo::proj::crs::ParametricCRS::coordinateSystem() const
 osgeo::proj::crs::ParametricCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::ParametricDatum> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::ParametricCS> > const&)
 osgeo::proj::crs::ParametricCRS::datum() const
