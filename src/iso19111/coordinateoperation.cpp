@@ -585,6 +585,7 @@ struct CoordinateOperation::Private {
     util::optional<common::DataEpoch> sourceCoordinateEpoch_{};
     util::optional<common::DataEpoch> targetCoordinateEpoch_{};
     bool hasBallparkTransformation_ = false;
+    bool use3DHelmert_ = false;
 
     // do not set this for a ProjectedCRS.definingConversion
     struct CRSStrongRef {
@@ -9057,16 +9058,16 @@ void Transformation::_exportToPROJString(
         double z =
             parameterValueNumericAsSI(EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION);
 
-        bool addPushPopV3 =
-            (methodEPSGCode ==
-                 EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-             methodEPSGCode ==
-                 EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
-             methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
-             methodEPSGCode ==
-                 EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
-             methodEPSGCode ==
-                 EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D);
+        auto sourceCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
+        auto targetCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
+        const bool addPushPopV3 =
+            !CoordinateOperation::getPrivate()->use3DHelmert_ &&
+            ((sourceCRSGeog &&
+              sourceCRSGeog->coordinateSystem()->axisList().size() == 2) ||
+             (targetCRSGeog &&
+              targetCRSGeog->coordinateSystem()->axisList().size() == 2));
 
         setupPROJGeodeticSourceCRS(formatter, sourceCRS(), addPushPopV3,
                                    "Helmert");
@@ -12722,6 +12723,10 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     const auto candidatesDstGeod(findCandidateGeodCRSForDatum(
         authFactory, geodDst, geodDst->datum().get()));
 
+    const bool sourceAndTargetAre3D =
+        geodSrc->coordinateSystem()->axisList().size() == 3 &&
+        geodDst->coordinateSystem()->axisList().size() == 3;
+
     auto createTransformations = [&](const crs::CRSNNPtr &candidateSrcGeod,
                                      const crs::CRSNNPtr &candidateDstGeod,
                                      const CoordinateOperationNNPtr &opFirst,
@@ -12749,8 +12754,9 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
             const bool isNullThird =
                 isNullTransformation(opsThird[0]->nameStr());
             CoordinateOperationNNPtr opSecondCloned(
-                (isNullFirst || isNullThird) ? opSecond->shallowClone()
-                                             : opSecond);
+                (isNullFirst || isNullThird || sourceAndTargetAre3D)
+                    ? opSecond->shallowClone()
+                    : opSecond);
             CoordinateOperation *invCOForward = nullptr;
             if (isNullFirst || isNullThird) {
                 if (opSecondCloned->identifiers().size() == 1 &&
@@ -12776,6 +12782,15 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                             invCOForward->setProperties(map);
                         }
                     }
+                }
+            }
+            if (sourceAndTargetAre3D) {
+                opSecondCloned->getPrivate()->use3DHelmert_ = true;
+                auto invCO = dynamic_cast<InverseCoordinateOperation *>(
+                    opSecondCloned.get());
+                if (invCO) {
+                    invCOForward = invCO->forwardOperation().get();
+                    invCOForward->getPrivate()->use3DHelmert_ = true;
                 }
             }
             if (isNullFirst) {
