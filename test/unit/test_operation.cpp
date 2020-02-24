@@ -4666,6 +4666,85 @@ TEST(operation, geogCRS_to_geogCRS_context_EPSG_4240_Indian1975_to_EPSG_4326) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_helmert_geog3D_crs) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4939"), // GDA94 3D
+        authFactory->createCoordinateReferenceSystem("7843"), // GDA2020 3D
+        ctxt);
+    ASSERT_EQ(list.size(), 1U);
+
+    // Check there is no push / pop of v_3
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=helmert +x=0.06155 +y=-0.01087 +z=-0.04019 "
+              "+rx=-0.0394924 +ry=-0.0327221 +rz=-0.0328979 +s=-0.009994 "
+              "+convention=coordinate_frame "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_context_helmert_geocentric_3D) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // GDA94 geocentric
+        authFactory->createCoordinateReferenceSystem("4348"),
+        // GDA2020 geocentric
+        authFactory->createCoordinateReferenceSystem("7842"), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+
+    // Check there is no push / pop of v_3
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=helmert +x=0.06155 +y=-0.01087 +z=-0.04019 "
+              "+rx=-0.0394924 +ry=-0.0327221 +rz=-0.0328979 +s=-0.009994 "
+              "+convention=coordinate_frame");
+    EXPECT_EQ(list[0]->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=helmert +x=0.06155 +y=-0.01087 +z=-0.04019 "
+              "+rx=-0.0394924 +ry=-0.0327221 +rz=-0.0328979 +s=-0.009994 "
+              "+convention=coordinate_frame");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_to_geogCRS_context_helmert_geog3D_to_geocentirc) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // GDA94 3D
+        authFactory->createCoordinateReferenceSystem("4939"),
+        // GDA2020 geocentric
+        authFactory->createCoordinateReferenceSystem("7842"), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+
+    // Check there is no push / pop of v_3
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=helmert +x=0.06155 +y=-0.01087 +z=-0.04019 "
+              "+rx=-0.0394924 +ry=-0.0327221 +rz=-0.0328979 +s=-0.009994 "
+              "+convention=coordinate_frame");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, vertCRS_to_geogCRS_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
@@ -5784,7 +5863,8 @@ TEST(operation, geogCRS_3D_to_projCRS_with_2D_geocentric_translation) {
               "+proj=pipeline "
               "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
-              "+step +proj=push +v_3 " // this is what we check
+              "+step +proj=push +v_3 " // this is what we check. Due to the
+                                       // target system being 2D only
               "+step +proj=cart +ellps=WGS84 "
               "+step +proj=helmert +x=104 +y=-167 +z=38 "
               "+step +inv +proj=cart +ellps=intl "
