@@ -1142,16 +1142,32 @@ TEST(operation, transformation_inverse) {
 
 // ---------------------------------------------------------------------------
 
+static VerticalCRSNNPtr createVerticalCRS() {
+    PropertyMap propertiesVDatum;
+    propertiesVDatum.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 5101)
+        .set(IdentifiedObject::NAME_KEY, "Ordnance Datum Newlyn");
+    auto vdatum = VerticalReferenceFrame::create(propertiesVDatum);
+    PropertyMap propertiesCRS;
+    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
+        .set(Identifier::CODE_KEY, 5701)
+        .set(IdentifiedObject::NAME_KEY, "ODN height");
+    return VerticalCRS::create(
+        propertiesCRS, vdatum,
+        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, transformation_createTOWGS84) {
 
     EXPECT_THROW(Transformation::createTOWGS84(GeographicCRS::EPSG_4326,
                                                std::vector<double>()),
                  InvalidOperation);
 
-    auto crsIn = CompoundCRS::create(PropertyMap(), std::vector<CRSNNPtr>{});
-    EXPECT_THROW(
-        Transformation::createTOWGS84(crsIn, std::vector<double>(7, 0)),
-        InvalidOperation);
+    EXPECT_THROW(Transformation::createTOWGS84(createVerticalCRS(),
+                                               std::vector<double>(7, 0)),
+                 InvalidOperation);
 }
 
 // ---------------------------------------------------------------------------
@@ -6479,23 +6495,6 @@ TEST(operation, WGS84_G1762_to_compoundCRS_with_bound_vertCRS) {
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +inv +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
-}
-
-// ---------------------------------------------------------------------------
-
-static VerticalCRSNNPtr createVerticalCRS() {
-    PropertyMap propertiesVDatum;
-    propertiesVDatum.set(Identifier::CODESPACE_KEY, "EPSG")
-        .set(Identifier::CODE_KEY, 5101)
-        .set(IdentifiedObject::NAME_KEY, "Ordnance Datum Newlyn");
-    auto vdatum = VerticalReferenceFrame::create(propertiesVDatum);
-    PropertyMap propertiesCRS;
-    propertiesCRS.set(Identifier::CODESPACE_KEY, "EPSG")
-        .set(Identifier::CODE_KEY, 5701)
-        .set(IdentifiedObject::NAME_KEY, "ODN height");
-    return VerticalCRS::create(
-        propertiesCRS, vdatum,
-        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
 }
 
 // ---------------------------------------------------------------------------

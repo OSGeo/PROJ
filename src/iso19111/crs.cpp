@@ -3915,6 +3915,28 @@ ProjectedCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+InvalidCompoundCRSException::InvalidCompoundCRSException(const char *message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidCompoundCRSException::InvalidCompoundCRSException(
+    const std::string &message)
+    : Exception(message) {}
+
+// ---------------------------------------------------------------------------
+
+InvalidCompoundCRSException::~InvalidCompoundCRSException() = default;
+
+// ---------------------------------------------------------------------------
+
+InvalidCompoundCRSException::InvalidCompoundCRSException(
+    const InvalidCompoundCRSException &) = default;
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct CompoundCRS::Private {
     std::vector<CRSNNPtr> components_{};
 };
@@ -3965,9 +3987,67 @@ CompoundCRS::componentReferenceSystems() PROJ_PURE_DEFN {
  * At minimum the name should be defined.
  * @param components the component CRS of the CompoundCRS.
  * @return new CompoundCRS.
+ * @throw InvalidCompoundCRSException
  */
 CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
                                      const std::vector<CRSNNPtr> &components) {
+
+    if (components.size() < 2) {
+        throw InvalidCompoundCRSException(
+            "compound CRS should have at least 2 components");
+    }
+
+    auto comp0 = components[0].get();
+    auto comp0Bound = dynamic_cast<const BoundCRS *>(comp0);
+    if (comp0Bound) {
+        comp0 = comp0Bound->baseCRS().get();
+    }
+    auto comp0Geog = dynamic_cast<const GeographicCRS *>(comp0);
+    auto comp0Proj = dynamic_cast<const ProjectedCRS *>(comp0);
+    auto comp0Eng = dynamic_cast<const EngineeringCRS *>(comp0);
+
+    auto comp1 = components[1].get();
+    auto comp1Bound = dynamic_cast<const BoundCRS *>(comp1);
+    if (comp1Bound) {
+        comp1 = comp1Bound->baseCRS().get();
+    }
+    auto comp1Vert = dynamic_cast<const VerticalCRS *>(comp1);
+    auto comp1Eng = dynamic_cast<const EngineeringCRS *>(comp1);
+    // Loose validation based on
+    // http://docs.opengeospatial.org/as/18-005r4/18-005r4.html#34
+    bool ok = false;
+    if ((comp0Geog && comp0Geog->coordinateSystem()->axisList().size() == 2 &&
+         (comp1Vert ||
+          (comp1Eng &&
+           comp1Eng->coordinateSystem()->axisList().size() == 1))) ||
+        (comp0Proj && comp0Proj->coordinateSystem()->axisList().size() == 2 &&
+         (comp1Vert ||
+          (comp1Eng &&
+           comp1Eng->coordinateSystem()->axisList().size() == 1))) ||
+        (comp0Eng && comp0Eng->coordinateSystem()->axisList().size() <= 2 &&
+         comp1Vert)) {
+        // Spatial compound coordinate reference system
+        ok = true;
+    } else {
+        bool isComp0Spatial = comp0Geog || comp0Proj || comp0Eng ||
+                              dynamic_cast<const GeodeticCRS *>(comp0) ||
+                              dynamic_cast<const VerticalCRS *>(comp0);
+        if (isComp0Spatial && dynamic_cast<const TemporalCRS *>(comp1)) {
+            // Spatio-temporal compound coordinate reference system
+            ok = true;
+        } else if (isComp0Spatial &&
+                   dynamic_cast<const ParametricCRS *>(comp1)) {
+            // Spatio-parametric compound coordinate reference system
+            ok = true;
+        }
+    }
+    if (!ok) {
+        throw InvalidCompoundCRSException(
+            "components of the compound CRS do not belong to one of the "
+            "allowed combinations of "
+            "http://docs.opengeospatial.org/as/18-005r4/18-005r4.html#34");
+    }
+
     auto compoundCRS(CompoundCRS::nn_make_shared<CompoundCRS>(components));
     compoundCRS->assignSelf(compoundCRS);
     compoundCRS->setProperties(properties);
