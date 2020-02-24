@@ -2659,7 +2659,7 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
         return NN_NO_CHECK(crs);
     }
     auto res = d->runWithCodeParam(
-        "SELECT type FROM crs_view WHERE auth_name = ? AND code = ?", code);
+        "SELECT type FROM crs_view WHERE code = ?", code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("crs not found", d->authority(),
                                            code);
