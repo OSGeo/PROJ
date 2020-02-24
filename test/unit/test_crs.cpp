@@ -3331,6 +3331,46 @@ static CompoundCRSNNPtr createCompoundCRS() {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, compoundCRS_valid) {
+    // geographic 2D + vertical
+    CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326, createVerticalCRS()});
+
+    // projected 2D + vertical
+    CompoundCRS::create(
+        PropertyMap(),
+        std::vector<CRSNNPtr>{createProjected(), createVerticalCRS()});
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, compoundCRS_invalid) {
+    EXPECT_THROW(CompoundCRS::create(PropertyMap(), {}),
+                 InvalidCompoundCRSException);
+
+    // Only one component
+    EXPECT_THROW(CompoundCRS::create(PropertyMap(),
+                                     std::vector<CRSNNPtr>{createProjected()}),
+                 InvalidCompoundCRSException);
+
+    // Two geographic
+    EXPECT_THROW(
+        CompoundCRS::create(PropertyMap(),
+                            std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326,
+                                                  GeographicCRS::EPSG_4326}),
+        InvalidCompoundCRSException);
+
+    // geographic 3D + vertical
+    EXPECT_THROW(
+        CompoundCRS::create(PropertyMap(),
+                            std::vector<CRSNNPtr>{GeographicCRS::EPSG_4979,
+                                                  createVerticalCRS()}),
+        InvalidCompoundCRSException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, compoundCRS_as_WKT2) {
     auto crs = createCompoundCRS();
     auto expected =
@@ -3385,18 +3425,10 @@ TEST(crs, compoundCRS_isEquivalentTo) {
     EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
     EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
-    auto compoundCRSOfProjCRS =
-        CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
-                            std::vector<CRSNNPtr>{createProjected()});
-    auto emptyCompoundCRS =
-        CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
-                            std::vector<CRSNNPtr>{});
-    EXPECT_FALSE(compoundCRSOfProjCRS->isEquivalentTo(emptyCompoundCRS.get()));
-    auto compoundCRSOfGeogCRS =
-        CompoundCRS::create(PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
-                            std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326});
-    EXPECT_FALSE(
-        compoundCRSOfProjCRS->isEquivalentTo(compoundCRSOfGeogCRS.get()));
+    auto otherCompoundCRS = CompoundCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, ""),
+        std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326, createVerticalCRS()});
+    EXPECT_FALSE(crs->isEquivalentTo(otherCompoundCRS.get()));
 }
 
 // ---------------------------------------------------------------------------
@@ -4154,11 +4186,11 @@ TEST(crs, extractGeographicCRS) {
               GeographicCRS::EPSG_4326);
     EXPECT_EQ(createProjected()->extractGeographicCRS(),
               GeographicCRS::EPSG_4326);
-    EXPECT_EQ(
-        CompoundCRS::create(PropertyMap(),
-                            std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326})
-            ->extractGeographicCRS(),
-        GeographicCRS::EPSG_4326);
+    EXPECT_EQ(CompoundCRS::create(
+                  PropertyMap(), std::vector<CRSNNPtr>{GeographicCRS::EPSG_4326,
+                                                       createVerticalCRS()})
+                  ->extractGeographicCRS(),
+              GeographicCRS::EPSG_4326);
 }
 
 // ---------------------------------------------------------------------------

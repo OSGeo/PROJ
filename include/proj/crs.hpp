@@ -834,6 +834,22 @@ class PROJ_GCC_DLL ParametricCRS : virtual public SingleCRS {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Exception thrown when attempting to create an invalid compound CRS
+ */
+class PROJ_GCC_DLL InvalidCompoundCRSException : public util::Exception {
+  public:
+    //! @cond Doxygen_Suppress
+    PROJ_INTERNAL explicit InvalidCompoundCRSException(const char *message);
+    PROJ_INTERNAL explicit InvalidCompoundCRSException(
+        const std::string &message);
+    PROJ_DLL
+    InvalidCompoundCRSException(const InvalidCompoundCRSException &other);
+    PROJ_DLL ~InvalidCompoundCRSException() override;
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
 class CompoundCRS;
 /** Shared pointer of CompoundCRS */
 using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
@@ -873,7 +889,8 @@ class PROJ_GCC_DLL CompoundCRS final : public CRS,
 
     PROJ_DLL static CompoundCRSNNPtr
     create(const util::PropertyMap &properties,
-           const std::vector<CRSNNPtr> &components);
+           const std::vector<CRSNNPtr>
+               &components); // throw InvalidCompoundCRSException
 
   protected:
     // relaxed: standard say SingleCRSNNPtr
