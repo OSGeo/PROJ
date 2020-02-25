@@ -11489,11 +11489,30 @@ applyInverse(const std::vector<CoordinateOperationNNPtr> &list) {
 void CoordinateOperationFactory::Private::buildCRSIds(
     const crs::CRSNNPtr &crs, Private::Context &context,
     std::list<std::pair<std::string, std::string>> &ids) {
+    const auto &authFactory = context.context->getAuthorityFactory();
+    assert(authFactory);
     for (const auto &id : crs->identifiers()) {
         const auto &authName = *(id->codeSpace());
         const auto &code = id->code();
         if (!authName.empty()) {
-            ids.emplace_back(authName, code);
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(), authName);
+            try {
+                // Consistency check for the ID attached to the object.
+                // See https://github.com/OSGeo/PROJ/issues/1982 where EPSG:4656
+                // is attached to a GeographicCRS whereas it is a ProjectedCRS
+                if (tmpAuthFactory->createCoordinateReferenceSystem(code)
+                        ->_isEquivalentTo(
+                            crs.get(),
+                            util::IComparable::Criterion::
+                                EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS)) {
+                    ids.emplace_back(authName, code);
+                } else {
+                    // TODO? log this inconsistency
+                }
+            } catch (const std::exception &) {
+                // TODO? log this inconsistency
+            }
         }
     }
     if (ids.empty()) {
@@ -11521,8 +11540,6 @@ void CoordinateOperationFactory::Private::buildCRSIds(
                 return;
             }
 
-            const auto &authFactory = context.context->getAuthorityFactory();
-            assert(authFactory);
             const auto &authFactoryName = authFactory->getAuthority();
             try {
                 const auto tmpAuthFactory = io::AuthorityFactory::create(
