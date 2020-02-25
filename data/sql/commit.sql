@@ -137,10 +137,6 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'missing au_ga_AUSGeoid98.tif')
         WHERE NOT EXISTS(SELECT 1 FROM grid_alternatives WHERE proj_grid_name = 'au_ga_AUSGeoid98.tif');
 
-    -- detect if PROJ:NTF_PARIS_TO_RGF93_GEOCENTRIC_TRANSLATION can be removed
-    SELECT RAISE(ABORT, 'PROJ:NTF_PARIS_TO_RGF93_GEOCENTRIC_TRANSLATION can probably be removed')
-        WHERE EXISTS(SELECT 1 FROM concatenated_operation_step WHERE operation_auth_name = 'EPSG' AND step_number = 2 AND step_auth_name = 'EPSG' AND step_code = '9327');
-
 END;
 INSERT INTO dummy DEFAULT VALUES;
 DROP TRIGGER final_checks;

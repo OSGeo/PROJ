@@ -611,7 +611,7 @@ INSERT INTO "area" VALUES('EPSG','1631','Europe - 18°W to 12°W and ED50 by cou
 INSERT INTO "area" VALUES('EPSG','1632','Europe - 12°W to 6°W and ED50 by country','Europe - between 12°W and 6°W - Faroe Islands - onshore; Spain - mainland onshore; Ireland offshore.',36.13,62.41,-12.0,-6.0,0);
 INSERT INTO "area" VALUES('EPSG','1633','Europe - 6°W to 0°W and ED50 by country','Europe - between 6°W and 0°W - Channel Islands (Jersey, Guernsey); France offshore; Gibraltar; Ireland offshore; Norway including Svalbard - offshore; Spain - onshore; United Kingdom - UKCS offshore.',35.26,80.53,-6.0,0.0,0);
 INSERT INTO "area" VALUES('EPSG','1634','Europe - 0°E to 6°E and ED50 by country','Europe - between 0°E and 6°E - Andorra; Denmark (North Sea); Germany offshore; Netherlands offshore; Norway including Svalbard - onshore and offshore; Spain - onshore (mainland and Balearic Islands); United Kingdom (UKCS) offshore.',38.56,82.41,0.0,6.01,0);
-INSERT INTO "area" VALUES('EPSG','1635','Europe - 6°E to 12°E and ED50 by country','Europe - between 6°E and 12°E - Denmark - onshore and offshore; France - offshore; Germany offshore; Italy - onshore and offshore; Netherlands offshore; Norway including Svalbard - onshore and offshore.',36.53,83.92,5.99,12.0,0);
+INSERT INTO "area" VALUES('EPSG','1635','Europe - 6°E to 12°E and ED50 by country','Europe - between 6°E and 12°E - Denmark - onshore and offshore; France - offshore; Germany offshore; Italy - onshore and offshore; Netherlands offshore; Norway including Svalbard - onshore and offshore.',36.53,83.92,5.99,12.01,0);
 INSERT INTO "area" VALUES('EPSG','1636','Europe - 12°E to 18°E and ED50 by country','Europe - between 12°E and 18°E onshore and offshore - Denmark (including Bornholm); Italy including San Marino and Vatican City State; Malta; Norway including Svalbard.',34.49,84.0,12.0,18.0,0);
 INSERT INTO "area" VALUES('EPSG','1637','Europe - 18°E to 24°E and ED50 by country','Europe - between 18°E and 24°E - Greece - offshore; Italy - onshore and offshore; Norway including Svalbard - onshore and offshore.',33.59,84.0,18.0,24.0,0);
 INSERT INTO "area" VALUES('EPSG','1638','Europe - 24°E to 30°E and ED50 by country','Europe - between 24°E and 30°E - Greece - offshore; Norway including Svalbard - onshore and offshore; Turkey - onshore and offshore. Egypt - Western Desert.',25.71,84.01,24.0,30.0,0);
@@ -709,7 +709,7 @@ INSERT INTO "area" VALUES('EPSG','1729','Algeria - 31°30''N to 34°39''N','Alge
 INSERT INTO "area" VALUES('EPSG','1730','North America - NAVD88','North America: Canada - Alberta; British Columbia (BC); Manitoba; New Brunswick (NB); Newfoundland and Labrador; Northwest Territories (NWT); Nova Scotia (NS); Nunavut; Ontario; Prince Edward Island (PEI); Quebec; Saskatchewan; Yukon. United States (USA) - Alabama; Alaska; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming.',25.0,58.0,-168.0,-52.0,1);
 INSERT INTO "area" VALUES('EPSG','1731','France - mainland north of 48.15°N','France mainland onshore north of 53.5 grads North (48°09''N).',48.14,51.14,-4.87,8.23,0);
 INSERT INTO "area" VALUES('EPSG','1732','France - mainland 45.45°N to 48.15°N','France mainland onshore between 50.5 grads and 53.5 grads North (45°27''N to 48°09''N).',45.44,48.15,-4.8,7.63,0);
-INSERT INTO "area" VALUES('EPSG','1733','France - mainland south of 45.45°N','France - mainland onshore south of 50.5 grads North (45°27''N).',42.33,45.45,-1.79,7.71,0);
+INSERT INTO "area" VALUES('EPSG','1733','France - mainland south of 45.45°N','France - mainland onshore south of 50.5 grads North (45°27''N).',42.33,45.46,-1.79,7.71,0);
 INSERT INTO "area" VALUES('EPSG','1734','France - mainland 45.45°N to 48.15°N. Also all mainland.','France mainland onshore between 50.5 grads and 53.5 grads North (45°27''N to 48°09''N). Also used over all onshore mainland France.',42.33,51.14,-4.87,8.23,0);
 INSERT INTO "area" VALUES('EPSG','1735','Algeria - west of 6°W','Algeria - west of 6°W (of Greenwich).',25.73,29.85,-8.67,-6.0,0);
 INSERT INTO "area" VALUES('EPSG','1736','Algeria - 6°W to 0°W onshore','Algeria - onshore between 6°W and 0°W (of Greenwich).',21.82,35.96,-6.0,0.0,0);
@@ -1508,8 +1508,8 @@ INSERT INTO "area" VALUES('EPSG','2528','USA - Texas - SPCS83 - S','United State
 INSERT INTO "area" VALUES('EPSG','2529','USA - Louisiana - SPCS83 - S','United States (USA) - Louisiana - counties of Acadia; Allen; Ascension; Assumption; Beauregard; Calcasieu; Cameron; East Baton Rouge; East Feliciana; Evangeline; Iberia; Iberville; Jefferson; Jefferson Davis; Lafayette; LaFourche; Livingston; Orleans; Plaquemines; Pointe Coupee; St Bernard; St Charles; St Helena; St James; St John the Baptist; St Landry; St Martin; St Mary; St Tammany; Tangipahoa; Terrebonne; Vermilion; Washington; West Baton Rouge; West Feliciana.',28.85,31.07,-93.94,-88.75,0);
 INSERT INTO "area" VALUES('EPSG','2530','UK - Northern Ireland - onshore','United Kingdom (UK) - Northern Ireland (Ulster) - onshore.',53.96,55.36,-8.18,-5.34,0);
 INSERT INTO "area" VALUES('EPSG','2531','Denmark - onshore Jutland and Funen','Denmark - Jutland and Funen - onshore.',54.67,57.8,8.0,11.29,0);
-INSERT INTO "area" VALUES('EPSG','2532','Denmark - onshore Zealand and Lolland','Denmark - Zealand and Lolland (onshore).',54.51,56.18,10.79,12.69,0);
-INSERT INTO "area" VALUES('EPSG','2533','Denmark - onshore Bornholm','Denmark - Bornholm onshore.',54.94,55.36,14.59,15.24,0);
+INSERT INTO "area" VALUES('EPSG','2532','Denmark - onshore Zealand and Lolland','Denmark - Zealand and Lolland (onshore).',54.51,56.79,10.79,12.69,0);
+INSERT INTO "area" VALUES('EPSG','2533','Denmark - onshore Bornholm','Denmark - Bornholm (including Ertholmene) onshore.',54.94,55.38,14.59,15.25,0);
 INSERT INTO "area" VALUES('EPSG','2534','World - N hemisphere - 3-degree CM 027°E','Between 25°30''E and 28°30''E, northern hemisphere.',0.0,84.0,25.5,28.5,0);
 INSERT INTO "area" VALUES('EPSG','2535','World - N hemisphere - 3-degree CM 030°E','Between 28°30''E and 31°30''E, northern hemisphere.',0.0,84.0,28.5,31.5,0);
 INSERT INTO "area" VALUES('EPSG','2536','World - N hemisphere - 3-degree CM 033°E','Between 31°30''E and 34°30''E, northern hemisphere.',0.0,84.0,31.5,34.5,0);
@@ -2213,7 +2213,7 @@ INSERT INTO "area" VALUES('EPSG','3233','Cote d''Ivoire (Ivory Coast) - onshore'
 INSERT INTO "area" VALUES('EPSG','3234','Croatia - onshore','Croatia - onshore.',42.34,46.54,13.43,19.43,0);
 INSERT INTO "area" VALUES('EPSG','3235','Cuba - onshore','Cuba - onshore.',19.77,23.25,-85.01,-74.07,0);
 INSERT INTO "area" VALUES('EPSG','3236','Cyprus - onshore','Cyprus - onshore.',34.59,35.74,32.2,34.65,0);
-INSERT INTO "area" VALUES('EPSG','3237','Denmark - onshore','Denmark - onshore.',54.51,57.8,8.0,15.24,0);
+INSERT INTO "area" VALUES('EPSG','3237','Denmark - onshore','Denmark - onshore.',54.51,57.8,8.0,15.25,0);
 INSERT INTO "area" VALUES('EPSG','3238','Djibouti - onshore','Djibouti - onshore.',10.94,12.72,41.75,43.48,0);
 INSERT INTO "area" VALUES('EPSG','3239','Dominica - onshore','Dominica - onshore.',15.14,15.69,-61.55,-61.2,0);
 INSERT INTO "area" VALUES('EPSG','3240','Dominican Republic - onshore','Dominican Republic - onshore.',17.55,19.99,-72.01,-68.27,0);
@@ -2448,7 +2448,7 @@ INSERT INTO "area" VALUES('EPSG','3468','North America - Great Lakes basin and S
 INSERT INTO "area" VALUES('EPSG','3469','China - offshore - Yellow Sea','China - offshore - Huang Hai (Yellow Sea).',31.23,37.4,119.23,125.06,0);
 INSERT INTO "area" VALUES('EPSG','3470','China - offshore - Pearl River basin','China - offshore South China Sea - Pearl River basin.',18.31,22.89,110.13,116.76,0);
 INSERT INTO "area" VALUES('EPSG','3471','Denmark - onshore west of 12°E','Denmark - onshore west of 12°E - Zealand, Jutland, Fuen and Lolland.',54.51,57.8,8.0,12.0,0);
-INSERT INTO "area" VALUES('EPSG','3472','Denmark - onshore east of 12°E','Denmark - onshore east of 12°E - Zealand and Falster, Bornholm.',54.51,56.18,12.0,15.24,0);
+INSERT INTO "area" VALUES('EPSG','3472','Denmark - onshore east of 12°E','Denmark - onshore east of 12°E - Zealand and Falster, Bornholm.',54.51,56.18,12.0,15.25,0);
 INSERT INTO "area" VALUES('EPSG','3473','World - south of 40°S','Southern hemisphere - south of 40°S including Antarctica.',-90.0,-40.0,-180.0,180.0,1);
 INSERT INTO "area" VALUES('EPSG','3474','World - south of 0°N','Southern hemisphere.',-90.0,0.0,-180.0,180.0,0);
 INSERT INTO "area" VALUES('EPSG','3475','World - north of 0°N','Northern hemisphere.',0.0,90.0,-180.0,180.0,0);
@@ -2522,8 +2522,8 @@ INSERT INTO "area" VALUES('EPSG','3542','Canada - Alberta - 115.5°W to 112.5°W
 INSERT INTO "area" VALUES('EPSG','3543','Canada - Alberta - east of 112.5°W','Canada - Alberta - east of 112°30''W.',48.99,60.0,-112.5,-109.98,0);
 INSERT INTO "area" VALUES('EPSG','3544','World - 85°S to 85°N','World between 85.06°S and 85.06°N.',-85.06,85.06,-180.0,180.0,0);
 INSERT INTO "area" VALUES('EPSG','3545','France - mainland south of 43°N and Corsica','France onshore - mainland south of 43°N and Corsica.',41.31,43.07,-1.06,9.63,0);
-INSERT INTO "area" VALUES('EPSG','3546','France - mainland south of 44°N','France - mainland onshore south of 44°N.',42.33,44.0,-1.79,7.65,0);
-INSERT INTO "area" VALUES('EPSG','3547','France - mainland - 43°N to 45°N','France - mainland onshore between 43°N and 45°N.',43.0,45.0,-1.79,7.71,0);
+INSERT INTO "area" VALUES('EPSG','3546','France - mainland south of 44°N','France - mainland onshore south of 44°N.',42.33,44.01,-1.79,7.65,0);
+INSERT INTO "area" VALUES('EPSG','3547','France - mainland - 43°N to 45°N','France - mainland onshore between 43°N and 45°N.',42.92,45.0,-1.79,7.71,0);
 INSERT INTO "area" VALUES('EPSG','3548','France - mainland - 44°N to 46°N','France - mainland onshore between 44°N and 46°N.',44.0,46.0,-1.46,7.71,0);
 INSERT INTO "area" VALUES('EPSG','3549','France - mainland - 45°N to 47°N','France - mainland onshore between 45°N and 47°N.',45.0,47.0,-2.21,7.16,0);
 INSERT INTO "area" VALUES('EPSG','3550','France - mainland - 46°N to 48°N','France - mainland onshore between 46°N and 48°N.',46.0,48.0,-4.77,7.63,0);
@@ -3549,3 +3549,5 @@ INSERT INTO "area" VALUES('EPSG','4570','Argentina - south Santa Cruz west of 70
 INSERT INTO "area" VALUES('EPSG','4571','Argentina - south Santa Cruz east of 70.5°W','Argentina - Santa Cruz province south of approximately 50°20''S and east of 70°30''W.',-52.43,-50.33,-70.5,-68.3,0);
 INSERT INTO "area" VALUES('EPSG','4572','Argentina - 44°S to 47.5°S','Argentina - Chubut province south of approximately 44°S and Santa Cruz province north of approximately 47°30''S - Golfo San Jorge basin onshore and offshore.',-47.5,-43.99,-72.36,-63.24,0);
 INSERT INTO "area" VALUES('EPSG','4573','Argentina - onshore','Argentina - onshore.',-55.11,-21.78,-73.59,-53.65,0);
+INSERT INTO "area" VALUES('EPSG','4575','Denmark - onshore Jutland, Funen, Zealand and Lolland','Denmark - onshore Jutland, Funen, Zealand and Lolland.',54.51,57.8,8.0,12.69,0);
+INSERT INTO "area" VALUES('EPSG','4580','Germany - Baden-Wurttemberg','Germany - Baden-Wurttemberg.',47.54,49.8,7.51,10.5,0);
