@@ -3185,7 +3185,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
             if (iter != mapParamNameToValue.end()) {
                 if (param->wkt2_name == nullptr) {
                     try {
-                        if (param->fixed_value == io::asDouble(iter->second)) {
+                        if (io::asDouble(param->fixed_value) ==
+                            io::asDouble(iter->second)) {
                             matchCount++;
                         }
                     } catch (const std::exception &) {
@@ -3193,6 +3194,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
                 } else {
                     matchCount++;
                 }
+            } else if (param->is_fixed_value) {
+                mapParamNameToValue[param->esri_name] = param->fixed_value;
             }
         }
         if (matchCount > bestMatchCount) {

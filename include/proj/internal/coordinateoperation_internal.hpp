@@ -76,7 +76,8 @@ struct ESRIParamMapping {
     const char *esri_name;
     const char *wkt2_name;
     int epsg_code;
-    float fixed_value;
+    const char *fixed_value;
+    bool is_fixed_value;
 };
 
 struct ESRIMethodMapping {
