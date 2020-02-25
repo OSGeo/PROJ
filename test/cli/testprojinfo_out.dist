@@ -811,6 +811,7 @@ Several candidates area of use matching provided name :
   EPSG:3472 : Denmark - onshore east of 12°E
   EPSG:3631 : Denmark - onshore Jutland west of 10°E
   EPSG:3632 : Denmark - onshore Jutland east of 9°E and Funen
+  EPSG:4575 : Denmark - onshore Jutland, Funen, Zealand and Lolland
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area no_match --summary
 No area of use matching provided name
@@ -1068,7 +1069,7 @@ unknown id, Ballpark geographic offset from AGD66 to WGS 84 (G1762), unknown acc
 
 Testing -s EPSG:31467 -t ETRS89 --spatial-test intersects --grid-check none --bbox 8,48,9,49 --summary. Should include both DHDN to ETRS89 (8) and DHDN to ETRS89 (BWTA2017)
 Candidate operations found: 4
-unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (BWTA2017), 0.89 m, Germany - Baden-Wurtemberg
+unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (9), 0.1 m, Germany - Baden-Wurttemberg
 unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (8), 0.9 m, Germany - onshore
 unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (3), 1 m, Germany - West Germany S
 unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (2), 3 m, Germany - West Germany all states
