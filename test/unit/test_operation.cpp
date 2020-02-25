@@ -4761,6 +4761,28 @@ TEST(operation, geogCRS_to_geogCRS_context_helmert_geog3D_to_geocentirc) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_invalid_EPSG_ID) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+    // EPSG:4656 is incorrect. Should be EPSG:8997
+    auto obj = WKTParser().createFromWKT(
+        "GEOGCS[\"ITRF2000\","
+        "DATUM[\"International_Terrestrial_Reference_Frame_2000\","
+        "SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+        "AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6656\"]],"
+        "PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.0174532925199433],"
+        "AUTHORITY[\"EPSG\",\"4656\"]]");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(crs), GeographicCRS::EPSG_4326, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, vertCRS_to_geogCRS_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
