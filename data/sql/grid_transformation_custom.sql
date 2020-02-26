@@ -50,12 +50,6 @@ INSERT INTO "grid_transformation" VALUES(
     'EPSG','8666','Geoid (height correction) model file','SWEN17_RH2000.gtx',
     NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
------ Hopefully temporary entry for BWTA2017.gsb grid -----
-
-INSERT INTO "area" VALUES('PROJ','BWTA2017','Germany - Baden-Wurtemberg','Germany - Baden-Wurtemberg',47.5,49.83,7.49,10.51,0);
--- Advertize a 0.8 accuracy slightly better than the 0.9 of BETA2007 for sort purposes
-INSERT INTO "grid_transformation" VALUES('PROJ','BWTA2017','DHDN to ETRS89 (BWTA2017)','DHDN to ETRS89 for Baden-Wurtemberg for ALKIS 2017. Using official BWTA2017 grid but this transformation entry has been created temporarily by PROJ. Accuracy indication not to be considered as authoritative','For applications requiring an accuracy of better than 1 metre.','EPSG','9615','NTv2','EPSG','4314','EPSG','4258','PROJ','BWTA2017',0.89,'EPSG','8656','Latitude and longitude difference file','BWTA2017.gsb',NULL,NULL,NULL,NULL,NULL,NULL,'-',0);
-
 ----- Hopefully temporary entry for SeTa2016.gsb grid -----
 
 INSERT INTO "area" VALUES('PROJ','SETA2016','Germany - Saarland','Germany - Saarland',49.10,49.64,6.345,7.45,0);
