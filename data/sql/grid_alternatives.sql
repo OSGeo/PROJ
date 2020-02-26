@@ -20,6 +20,10 @@ VALUES
 ('SeTa2016.gsb','de_lgvl_saarland_SeTa2016.tif','SeTa2016.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/de_lgvl_saarland_SeTa2016.tif',1,1,NULL),
 ('NTv2_SN.gsb','de_geosn_NTv2_SN.tif','NTv2_SN.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/de_geosn_NTv2_SN.tif',1,1,NULL),
 ('AT_GIS_GRID.gsb','at_bev_AT_GIS_GRID.tif','AT_GIS_GRID.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/at_bev_AT_GIS_GRID.tif',1,1,NULL),
+('GV_HoehenGrid_V1.csv','at_bev_GV_Hoehengrid_V1.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/at_bev_GV_Hoehengrid_V1.tif',1,1,NULL),
+('GEOID_GRS80_Oesterreich.csv','at_bev_GEOID_GRS80_Oesterreich.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/at_bev_GEOID_GRS80_Oesterreich.tif',1,1,NULL),
+('GEOID_BESSEL_Oesterreich.csv','at_bev_GEOID_BESSEL_Oesterreich.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/at_bev_GEOID_BESSEL_Oesterreich.tif',1,1,NULL),
+('GV_Hoehengrid_plus_Geoid_V3.csv','at_bev_GV_Hoehengrid_plus_Geoid_V2.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/at_bev_GV_Hoehengrid_plus_Geoid_V2.tif',1,1,NULL),
 ('nzgd2kgrid0005.gsb','nz_linz_nzgd2kgrid0005.tif','nzgd2kgrid0005.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2kgrid0005.tif',1,1,NULL),
 ('OSTN15_NTv2_OSGBtoETRS.gsb','uk_os_OSTN15_NTv2_OSGBtoETRS.tif','OSTN15_NTv2_OSGBtoETRS.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/uk_os_OSTN15_NTv2_OSGBtoETRS.tif',1,1,NULL),
 -- Continental USA VERTCON: NGVD (19)29 height to NAVD (19)88 height

@@ -536,6 +536,9 @@
 #define EPSG_CODE_METHOD_VERTICALGRID_NZLVD 1071
 #define EPSG_NAME_METHOD_VERTICALGRID_NZLVD "Vertical Offset by Grid Interpolation (NZLVD)"
 
+#define EPSG_CODE_METHOD_VERTICALGRID_BEV_AT 1080
+#define EPSG_NAME_METHOD_VERTICALGRID_BEV_AT "Vertical Offset by Grid Interpolation (BEV AT)"
+
 #define EPSG_CODE_METHOD_VERTICALGRID_GTX 1084
 #define EPSG_NAME_METHOD_VERTICALGRID_GTX "Vertical Offset by Grid Interpolation (gtx)"
 

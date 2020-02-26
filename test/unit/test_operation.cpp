@@ -6755,6 +6755,21 @@ TEST(operation, transformation_NZLVD_to_PROJ_string) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, transformation_BEV_AT_to_PROJ_string) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto op = factory->createCoordinateOperation("9275", false);
+    EXPECT_EQ(op->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              "+proj=vgridshift +grids=at_bev_GV_Hoehengrid_V1.tif "
+              "+multiplier=1");
+}
+
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, transformation_longitude_rotation_to_PROJ_string) {
 
     auto src = GeographicCRS::create(
