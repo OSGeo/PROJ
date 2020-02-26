@@ -54,25 +54,6 @@ make dist-all
 find /tmp/proj_autoconf_install
 (cd test; make -j2)
 cp -r ../data/tests /tmp/proj_autoconf_install/share/proj
+cp ../data/tests/egm96_15_downsampled.gtx /tmp/proj_autoconf_install/share/proj/egm96_15.gtx
+cp ../data/tests/ntv2_0_downsampled.gsb /tmp/proj_autoconf_install/share/proj/ntv2_0.gsb
 test/unit/test_cpp_api.exe
-cd ..
-# Now with grids
-wget https://download.osgeo.org/proj/proj-datumgrid-1.5.zip
-cd data
-unzip -o ../proj-datumgrid-1.5.zip
-cd ..
-# autoconf build with grids
-mkdir build_autoconf_grids
-cd build_autoconf_grids
-CC="ccache $MINGW_ARCH-gcc" CXX="ccache $MINGW_ARCH-g++" LD=$MINGW_ARCH-ld ../configure --host=$MINGW_ARCH --prefix=/tmp/proj_autoconf_install_nad --without-curl
-make -j2
-make install
-find /tmp/proj_autoconf_install_nad
-#make check
-cd src
-make multistresstest.exe
-make test228.exe
-cd ..
-PROJ_LIB=../data src/multistresstest.exe -num_iterations 100000
-cd ..
-

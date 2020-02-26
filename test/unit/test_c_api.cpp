@@ -4144,10 +4144,7 @@ TEST_F(CApi, proj_create_crs_to_crs_with_only_ballpark_transformations) {
     coord = proj_trans(Pnormalized, PJ_FWD, coord);
     EXPECT_NEAR(coord.xyzt.x, 3.0, 1e-9);
     EXPECT_NEAR(coord.xyzt.y, 40.65085651660555, 1e-9);
-    if (coord.xyzt.z != 0) {
-        // z will depend if the egm96_15.gtx grid is there or not
-        EXPECT_NEAR(coord.xyzt.z, 47.04784081844435, 1e-3);
-    }
+    EXPECT_NEAR(coord.xyzt.z, 47.72600023608570, 1e-3);
 }
 
 // ---------------------------------------------------------------------------
@@ -4155,10 +4152,6 @@ TEST_F(CApi, proj_create_crs_to_crs_with_only_ballpark_transformations) {
 TEST_F(
     CApi,
     proj_create_crs_to_crs_from_custom_compound_crs_with_NAD83_2011_and_geoidgrid_ref_against_WGS84_to_WGS84_G1762) {
-
-    if (strcmp(proj_grid_info("egm96_15.gtx").format, "missing") == 0) {
-        return; // use GTEST_SKIP() if we upgrade gtest
-    }
 
     PJ *P;
 
@@ -4214,7 +4207,7 @@ TEST_F(
 
     EXPECT_NEAR(outcoord.xyzt.x, 35.09499307271, 1e-9);
     EXPECT_NEAR(outcoord.xyzt.y, -118.64014868921, 1e-9);
-    EXPECT_NEAR(outcoord.xyzt.z, 118.059, 1e-3);
+    EXPECT_NEAR(outcoord.xyzt.z, 117.655, 1e-3);
 }
 
 // ---------------------------------------------------------------------------
@@ -4222,10 +4215,6 @@ TEST_F(
 TEST_F(
     CApi,
     proj_create_crs_to_crs_from_custom_compound_crs_with_NAD83_2011_and_geoidgrid_ref_against_NAD83_2011_to_WGS84_G1762) {
-
-    if (strcmp(proj_grid_info("egm96_15.gtx").format, "missing") == 0) {
-        return; // use GTEST_SKIP() if we upgrade gtest
-    }
 
     PJ *P;
 
@@ -4278,7 +4267,7 @@ TEST_F(
 
     EXPECT_NEAR(outcoord.xyzt.x, 35.000003665064803, 1e-9);
     EXPECT_NEAR(outcoord.xyzt.y, -118.00001414221214, 1e-9);
-    EXPECT_NEAR(outcoord.xyzt.z, -32.5823, 1e-3);
+    EXPECT_NEAR(outcoord.xyzt.z, -32.8110, 1e-3);
 }
 
 // ---------------------------------------------------------------------------
