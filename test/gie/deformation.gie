@@ -49,7 +49,7 @@ operation   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx
 tolerance   0.1 mm
 ignore      pjd_err_failed_to_load_grid
 accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457
-expect      -3004295.7025       -1093474.2106       5500477.3444
+expect      -3004295.7000       -1093474.2097       5500477.3397
 roundtrip   5
 
 # Test that errors are reported for coordinates outside the grid.
@@ -70,7 +70,7 @@ tolerance   0.1 mm
 direction   inverse
 ignore      pjd_err_failed_to_load_grid
 accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
-expect      -3004295.7025       -1093474.2106       5500477.3444       2000.0
+expect      -3004295.7000       -1093474.2097       5500477.3397       2000.0
 roundtrip   5
 
 -------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ tolerance   0.1 mm
 ignore      pjd_err_failed_to_load_grid
 
 accept      12 56  0.0        2000.0
-expect      12 56 -36.5966    2000.0
+expect      12 56 -36.9960    2000.0
 roundtrip   100
 
 accept      12 56  0.0        2011.0
@@ -112,7 +112,7 @@ expect      12 56  0.0        2019.0
 roundtrip   100
 
 accept      12 56  0.0
-expect      12 56 -36.5966
+expect      12 56 -36.9960
 roundtrip   100
 
 
@@ -123,7 +123,7 @@ tolerance   0.1 mm
 ignore      pjd_err_failed_to_load_grid
 
 accept      12 56  0.0        2000.0
-expect      12 56 -36.5966    2000.0
+expect      12 56 -36.9960    2000.0
 roundtrip   100
 
 accept      12 56  0.0        2011.0

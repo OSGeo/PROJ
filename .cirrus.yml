@@ -18,9 +18,6 @@ task:
 
   pkginstall_script:
     - pkg install -y autoconf automake libtool pkgconf sqlite3 tiff ccache gmake
-  download_grid_script:
-    - fetch https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
-    - (cd data && tar xvf ../proj-datumgrid-1.8.zip)
   configure_script:
     - ./autogen.sh
     - CC="ccache cc" CXX="ccache c++" ./configure --disable-static

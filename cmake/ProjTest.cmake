@@ -11,24 +11,12 @@ function(proj_add_test_script_sh SH_NAME BIN_USE)
   if(UNIX)
     get_filename_component(testname ${SH_NAME} NAME_WE)
 
-    set(TEST_OK 1)
-    if(ARGV2)
-      set(TEST_OK 0)
-      set(GRID_FULLNAME ${PROJECT_SOURCE_DIR}/data/${ARGV2})
-      if(EXISTS ${GRID_FULLNAME})
-        set(TEST_OK 1)
-      endif()
-    endif()
-
-    if(${TEST_OK})
-      add_test(NAME "${testname}"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data
-        COMMAND bash ${PROJECT_SOURCE_DIR}/test/cli/${SH_NAME}
-        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${${BIN_USE}}
-      )
-
-      proj_test_set_properties(${testname})
-    endif()
+    add_test(NAME "${testname}"
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data
+      COMMAND bash ${PROJECT_SOURCE_DIR}/test/cli/${SH_NAME}
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${${BIN_USE}}
+    )
+    proj_test_set_properties(${testname})
 
   endif()
 endfunction()
