@@ -109,6 +109,8 @@
     "Equidistant Cylindrical (Spherical)"
 #define EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL 1029
 
+#define PROJ_WKT2_NAME_METHOD_FLAT_POLAR_QUARTIC "Flat Polar Quartic"
+
 #define PROJ_WKT2_NAME_METHOD_GALL_STEREOGRAPHIC "Gall Stereographic"
 
 #define PROJ_WKT2_NAME_METHOD_GOODE_HOMOLOSINE "Goode Homolosine"

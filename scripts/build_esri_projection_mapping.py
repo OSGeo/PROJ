@@ -442,7 +442,12 @@ config_str = """
 
 # Hammer_Aitoff: not handled
 
-# Flat_Polar_Quartic: not handled
+- Flat_Polar_Quartic:
+    WKT2_name: PROJ_WKT2_NAME_METHOD_FLAT_POLAR_QUARTIC
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
 - Craster_Parabolic:
     WKT2_name: "Craster Parabolic"
