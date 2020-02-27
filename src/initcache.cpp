@@ -54,10 +54,10 @@ paralist *pj_clone_paralist( const paralist *list)
       newitem->next = nullptr;
       strcpy( newitem->param, list->param );
 
-      if( list_copy == nullptr )
-	list_copy = newitem;
-      else
+      if( next_copy )
 	next_copy->next = newitem;
+      else
+	list_copy = newitem;
 
       next_copy = newitem;
     }

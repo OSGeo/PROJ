@@ -6620,7 +6620,7 @@ int proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
         auto ret = op->isPROJInstantiable(
-                       dbContext, proj_context_is_network_enabled(ctx) != false)
+                       dbContext, proj_context_is_network_enabled(ctx) != FALSE)
                        ? 1
                        : 0;
         if (ctx->cpp_context) {
@@ -6935,7 +6935,7 @@ int proj_coordoperation_get_grid_used_count(PJ_CONTEXT *ctx,
         if (!coordoperation->gridsNeededAsked) {
             coordoperation->gridsNeededAsked = true;
             const auto gridsNeeded = co->gridsNeeded(
-                dbContext, proj_context_is_network_enabled(ctx) != false);
+                dbContext, proj_context_is_network_enabled(ctx) != FALSE);
             for (const auto &gridDesc : gridsNeeded) {
                 coordoperation->gridsNeeded.emplace_back(gridDesc);
             }

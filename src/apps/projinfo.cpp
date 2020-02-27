@@ -329,9 +329,6 @@ static void outputObject(
     if (projStringExportable) {
         if (outputOpt.PROJ5) {
             try {
-                if (alreadyOutputed) {
-                    std::cout << std::endl;
-                }
                 auto crs = nn_dynamic_pointer_cast<CRS>(obj);
                 if (!outputOpt.quiet) {
                     if (crs) {

@@ -116,15 +116,18 @@ static PJ_LP poly_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
         lp.phi = xy.y;
         B = xy.x * xy.x + xy.y * xy.y;
         i = N_ITER;
-        do {
+        while(true) {
             tp = tan(lp.phi);
             lp.phi -= (dphi = (xy.y * (lp.phi * tp + 1.) - lp.phi -
                 .5 * ( lp.phi * lp.phi + B) * tp) /
                 ((lp.phi - xy.y) / tp - 1.));
-        } while (fabs(dphi) > CONV && --i);
-        if (! i) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-            return lp;
+            if( !(fabs(dphi) > CONV) )
+                break;
+            --i;
+            if( i == 0 ) {
+                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                return lp;
+            }
         }
         lp.lam = asin(xy.x * tan(lp.phi)) / sin(lp.phi);
     }

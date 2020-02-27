@@ -107,6 +107,7 @@ PJ_COORD proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b) {
         c.v, c.v+1, c.v+2
     );
 
+    // cppcheck-suppress uninitvar
     return c;
 }
 

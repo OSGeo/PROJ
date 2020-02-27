@@ -62,8 +62,11 @@ static double phi1_(double qs, double Te, double Tone_es) {
            sinpi / com + .5 / Te * log ((1. - con) /
            (1. + con)));
         Phi += dphi;
-    } while (fabs(dphi) > TOL && --i);
-    return( i ? Phi : HUGE_VAL );
+        if( !(fabs(dphi) > TOL) )
+          return Phi;
+        --i;
+    } while (i >= 0);
+    return HUGE_VAL;
 }
 
 

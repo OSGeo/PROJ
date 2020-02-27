@@ -263,7 +263,7 @@ double proj_strtod(const char *str, char **endptr) {
         if ('+'==*p)
             sign = +1;
         if (0==sign) {
-            if (!isdigit(*p) && *p!='_') {
+            if (!(isdigit(*p) || *p=='_')) {
                 if (endptr)
                     *endptr = p;
                 return HUGE_VAL;
