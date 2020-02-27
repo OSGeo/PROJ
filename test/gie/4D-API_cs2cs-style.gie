@@ -55,17 +55,16 @@ expect     16.8210462130   55.1705688946       29.0317
 
 
 -------------------------------------------------------------------------------
-operation  proj=latlong nadgrids=nzgd2kgrid0005.gsb  ellps=GRS80
+operation  proj=latlong nadgrids=ntf_r93.gsb  ellps=GRS80
 -------------------------------------------------------------------------------
-This functionality is also tested in DHDN_ETRS89.gie
+This functionality is also tested in more_builtins.gie
 -------------------------------------------------------------------------------
 tolerance 1 mm
-ignore    pjd_err_failed_to_load_grid
-accept    173                 -45
-expect    172.999892181021551 -45.001620431954613
+accept    2.25                 46.5
+expect    2.250704350387       46.500051597273
 direction inverse
-accept    172.999892181021551 -45.001620431954613
-expect    173                 -45
+accept    2.250704350387       46.500051597273
+expect    2.25                 46.5
 -------------------------------------------------------------------------------
 
 
@@ -74,24 +73,22 @@ expect    173                 -45
 operation  proj=latlong geoidgrids=egm96_15.gtx  ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 15 cm      # lax tolerance due to widespread bad egm96 file
-ignore    pjd_err_failed_to_load_grid
 
 accept    12.5 55.5   0
-expect    12.5 55.5 -36.0213
+expect    12.5 55.5 -36.3941
 
 direction inverse
 
-accept    12.5 55.5 -36.0213
+accept    12.5 55.5 -36.3941
 expect    12.5 55.5  0
 -------------------------------------------------------------------------------
 operation  proj=merc geoidgrids=egm96_15.gtx  ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
-ignore    pjd_err_failed_to_load_grid
 accept    12.5 55.5 0
-expect    1391493.63492   7424275.19462  -36.0213
+expect    1391493.63492   7424275.19462  -36.3941
 direction inverse
-accept    1391493.63492   7424275.19462  -36.0213
+accept    1391493.63492   7424275.19462  -36.3941
 expect    12.5 55.5 0
 -------------------------------------------------------------------------------
 
@@ -107,32 +104,29 @@ with "unusual" axis orders
 operation  proj=latlong geoidgrids=egm96_15.gtx  axis=neu ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 15 cm      # lax tolerance due to widely distributed, bad egm96 file
-ignore    pjd_err_failed_to_load_grid
 # Broken test. FIXME
 #accept    12.5 55.5  0
-#expect    55.5 12.5 -36.0213
+#expect    55.5 12.5 -36.3941
 #direction inverse
-#accept    55.5 12.5 -36.0213
+#accept    55.5 12.5 -36.3941
 #expect    12.5 55.5  0
 -------------------------------------------------------------------------------
 operation  proj=latlong geoidgrids=egm96_15.gtx  axis=dne ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 15 cm      # lax tolerance due to widely distributed, bad egm96 file
-ignore    pjd_err_failed_to_load_grid
 # accept    12.5 55.5  0
-# expect    36.0213 55.5 12.5
+# expect    36.3941 55.5 12.5
 # direction inverse
-# accept    36.0213 55.5 12.5
+# accept    36.3941 55.5 12.5
 # expect    12.5 55.5  0
 -------------------------------------------------------------------------------
 operation  proj=merc geoidgrids=egm96_15.gtx  ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 0.1 mm
-ignore    pjd_err_failed_to_load_grid
 accept    12.5 55.5 0
-expect    1391493.63492   7424275.19462  -36.0213
+expect    1391493.63492   7424275.19462  -36.3941
 direction inverse
-accept    1391493.63492   7424275.19462  -36.0213
+accept    1391493.63492   7424275.19462  -36.3941
 expect    12.5 55.5 0
 -------------------------------------------------------------------------------
 
@@ -143,22 +137,20 @@ Some more complex axis swapping.
 operation  proj=latlong geoidgrids=egm96_15.gtx  axis=nue ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 15 cm      # lax tolerance due to widely distributed, bad egm96 file
-ignore    pjd_err_failed_to_load_grid
 # Broken test. FIXME
 #accept    12.5 55.5 0
-#expect    55.5 -36.0213 12.5
+#expect    55.5 -36.3941 12.5
 # direction inverse
-# accept    55.5 -36.0213 12.5
+# accept    55.5 -36.3941 12.5
 # expect    12.5 55.5 0
 -------------------------------------------------------------------------------
 operation  proj=merc geoidgrids=egm96_15.gtx axis=sue ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 15 cm
-ignore    pjd_err_failed_to_load_grid
 accept    12.5 55.5 0
-expect    -7424275.1946 -36.0213  1391493.6349 0.0000
+expect    -7424275.1946 -36.3941  1391493.6349 0.0000
 # direction inverse
-# accept    -7424275.1946 -36.0213  1391493.6349 0.0000
+# accept    -7424275.1946 -36.3941  1391493.6349 0.0000
 # expect    12.5 55.5 0
 -------------------------------------------------------------------------------
 

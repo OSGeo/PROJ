@@ -6,7 +6,6 @@ operation proj=latlong datum=potsdam ellps=bessel
 DE_DHDN (BeTA, 2007) to ETRS89 using NTv2 grid. epsg:15948
 -------------------------------------------------------------------------------
 
-require_grid BETA2007.gsb
 tolerance 1 mm
 accept       7.482506019176  53.498461143331  # ETRS89_Lat-Lon
 expect       7.483333333333  53.500000000000  # DE_DHDN_Lat-Lon

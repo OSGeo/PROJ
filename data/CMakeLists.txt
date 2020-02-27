@@ -70,29 +70,33 @@ set(DATA_FOR_TESTS
     GL27
     nad27
     nad83
-    ntv1_can.dat
-    MD
-    ntf_r93.gsb
-    egm96_15.gtx
-    ntv2_0.gsb
-    conus
-    alaska
-    nzgd2kgrid0005.gsb
-    ITRF2000
-    BETA2007.gsb)
-file(GLOB DATA_TESTS tests/*)
+    ITRF2000)
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/for_tests)
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/for_tests/tests)
+
 foreach(FILE ${DATA_FOR_TESTS} ${CONFIG_FILES})
-    if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE})
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${FILE} ${CMAKE_CURRENT_BINARY_DIR}/for_tests/${FILE} COPYONLY)
-    endif()
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${FILE} ${CMAKE_CURRENT_BINARY_DIR}/for_tests/${FILE} COPYONLY)
 endforeach()
+
+file(GLOB DATA_TESTS tests/*)
 foreach(FILE ${DATA_TESTS})
     get_filename_component(FILENAME ${FILE} NAME)
     configure_file(${FILE} ${CMAKE_CURRENT_BINARY_DIR}/for_tests/tests/${FILENAME} COPYONLY)
 endforeach()
+
+set(DATA_FOR_TESTS_FROM_TESTS_SUBDIR
+    alaska
+    BETA2007.gsb
+    conus
+    MD
+    ntf_r93.gsb
+    ntv1_can.dat)
+foreach(FILE ${DATA_FOR_TESTS_FROM_TESTS_SUBDIR})
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/${FILE} ${CMAKE_CURRENT_BINARY_DIR}/for_tests/${FILE} COPYONLY)
+endforeach()
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/egm96_15_downsampled.gtx ${CMAKE_CURRENT_BINARY_DIR}/for_tests/egm96_15.gtx COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/ntv2_0_downsampled.gsb ${CMAKE_CURRENT_BINARY_DIR}/for_tests/ntv2_0.gsb COPYONLY)
 
 #
 #install

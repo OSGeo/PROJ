@@ -40,7 +40,6 @@ matrix:
         - TIFF_LIBS="-L/usr/lib/i386-linux-gnu -ltiff"
         - SQLITE3_CFLAGS=-I/usr/include/i386-linux-gnu
         - SQLITE3_LIBS="-L/usr/lib/i386-linux-gnu -lsqlite3"
-        - SKIP_BUILDS_WITHOUT_GRID=yes
       addons:
         apt:
           sources:
