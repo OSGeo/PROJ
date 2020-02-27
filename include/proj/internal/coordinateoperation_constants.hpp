@@ -628,6 +628,9 @@ static const MethodMapping projectionMethodMappings[] = {
      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL, "Equirectangular",
      "eqc", nullptr, paramsEqc},
 
+    {PROJ_WKT2_NAME_METHOD_FLAT_POLAR_QUARTIC, 0, "Flat_Polar_Quartic",
+     "mbtfpq", nullptr, paramsLonNatOrigin},
+
     {PROJ_WKT2_NAME_METHOD_GALL_STEREOGRAPHIC, 0, "Gall_Stereographic", "gall",
      nullptr, paramsLonNatOrigin},
 
