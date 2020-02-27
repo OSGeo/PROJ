@@ -1053,20 +1053,39 @@ static PJ* create_operation_to_geog_crs(PJ_CONTEXT* ctx, const PJ* crs) {
         ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx, PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
+    auto target_crs_2D = proj_crs_demote_to_2D(ctx, nullptr, crs);
     auto op_list_to_geodetic = proj_create_operations(
-        ctx, geodetic_crs, crs, operation_ctx);
+        ctx, geodetic_crs, target_crs_2D, operation_ctx);
+    proj_destroy(target_crs_2D);
     proj_operation_factory_context_destroy(operation_ctx);
     proj_destroy(geodetic_crs);
 
-    if( op_list_to_geodetic == nullptr ||
-        proj_list_get_count(op_list_to_geodetic) == 0 )
+    const int nOpCount = op_list_to_geodetic == nullptr  ? 0 :
+                         proj_list_get_count(op_list_to_geodetic);
+    if( nOpCount == 0 )
     {
         proj_context_log_debug(ctx, "Cannot compute transformation from geographic CRS to CRS");
         proj_list_destroy(op_list_to_geodetic);
         return nullptr;
     }
-    auto opGeogToCrs = proj_list_get(ctx, op_list_to_geodetic, 0);
-    assert(opGeogToCrs);
+    PJ* opGeogToCrs = nullptr;
+    // Use in priority operations *without* grids
+    for(int i = 0; i < nOpCount; i++ )
+    {
+        auto op = proj_list_get(ctx, op_list_to_geodetic, i);
+        assert(op);
+        if( proj_coordoperation_get_grid_used_count(ctx, op) == 0 )
+        {
+            opGeogToCrs = op;
+            break;
+        }
+        proj_destroy(op);
+    }
+    if( opGeogToCrs == nullptr )
+    {
+        opGeogToCrs = proj_list_get(ctx, op_list_to_geodetic, 0);
+        assert(opGeogToCrs);
+    }
     proj_list_destroy(op_list_to_geodetic);
     return opGeogToCrs;
 }
