@@ -135,6 +135,9 @@ static int VFSCustomAccess(sqlite3_vfs *vfs, const char *zName, int flags,
 
 std::unique_ptr<SQLite3VFS> SQLite3VFS::create(bool fakeSync, bool fakeLock,
                                                bool skipStatJournalAndWAL) {
+    // Call to sqlite3_initialize() is normally not needed, except for
+    // people building SQLite3 with -DSQLITE_OMIT_AUTOINIT
+    sqlite3_initialize();
     sqlite3_vfs *defaultVFS = sqlite3_vfs_find(nullptr);
     assert(defaultVFS);
 
