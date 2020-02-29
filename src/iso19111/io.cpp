@@ -4057,6 +4057,52 @@ WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+static CRSNNPtr
+createBoundCRSSourceTransformationCRS(const crs::CRSPtr &sourceCRS,
+                                      const crs::CRSPtr &targetCRS) {
+    CRSPtr sourceTransformationCRS;
+    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
+        GeographicCRSPtr sourceGeographicCRS =
+            sourceCRS->extractGeographicCRS();
+        sourceTransformationCRS = sourceGeographicCRS;
+        if (sourceGeographicCRS) {
+            if (sourceGeographicCRS->datum() != nullptr &&
+                sourceGeographicCRS->primeMeridian()
+                        ->longitude()
+                        .getSIValue() != 0.0) {
+                sourceTransformationCRS =
+                    GeographicCRS::create(
+                        util::PropertyMap().set(
+                            common::IdentifiedObject::NAME_KEY,
+                            sourceGeographicCRS->nameStr() +
+                                " (with Greenwich prime meridian)"),
+                        datum::GeodeticReferenceFrame::create(
+                            util::PropertyMap().set(
+                                common::IdentifiedObject::NAME_KEY,
+                                sourceGeographicCRS->datum()->nameStr() +
+                                    " (with Greenwich prime meridian)"),
+                            sourceGeographicCRS->datum()->ellipsoid(),
+                            util::optional<std::string>(),
+                            datum::PrimeMeridian::GREENWICH),
+                        sourceGeographicCRS->coordinateSystem())
+                        .as_nullable();
+            }
+        } else {
+            sourceTransformationCRS =
+                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS);
+            if (!sourceTransformationCRS) {
+                throw ParsingException(
+                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
+            }
+        }
+    } else {
+        sourceTransformationCRS = sourceCRS;
+    }
+    return NN_NO_CHECK(sourceTransformationCRS);
+}
+
+// ---------------------------------------------------------------------------
+
 BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
     auto &abridgedNode =
@@ -4100,23 +4146,10 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
     consumeParameters(abridgedNode, true, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
-    CRSPtr sourceTransformationCRS;
-    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
-        sourceTransformationCRS = sourceCRS->extractGeographicCRS();
-        if (!sourceTransformationCRS) {
-            sourceTransformationCRS =
-                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS);
-            if (!sourceTransformationCRS) {
-                throw ParsingException(
-                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
-            }
-        }
-    } else {
-        sourceTransformationCRS = sourceCRS;
-    }
-
+    const auto sourceTransformationCRS(
+        createBoundCRSSourceTransformationCRS(sourceCRS, targetCRS));
     auto transformation = Transformation::create(
-        buildProperties(abridgedNode), NN_NO_CHECK(sourceTransformationCRS),
+        buildProperties(abridgedNode), sourceTransformationCRS,
         NN_NO_CHECK(targetCRS), nullptr, buildProperties(methodNode),
         parameters, values, std::vector<PositionalAccuracyNNPtr>());
 
@@ -5262,24 +5295,11 @@ BoundCRSNNPtr JSONParser::buildBoundCRS(const json &j) {
         values.emplace_back(ParameterValue::create(getMeasure(param)));
     }
 
-    CRSPtr sourceTransformationCRS;
-    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
-        sourceTransformationCRS = sourceCRS->extractGeographicCRS();
-        if (!sourceTransformationCRS) {
-            sourceTransformationCRS =
-                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS.as_nullable());
-            if (!sourceTransformationCRS) {
-                throw ParsingException(
-                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
-            }
-        }
-    } else {
-        sourceTransformationCRS = sourceCRS;
-    }
-
+    const auto sourceTransformationCRS(
+        createBoundCRSSourceTransformationCRS(sourceCRS, targetCRS));
     auto transformation = Transformation::create(
-        buildProperties(transformationJ), NN_NO_CHECK(sourceTransformationCRS),
-        targetCRS, nullptr, buildProperties(methodJ), parameters, values,
+        buildProperties(transformationJ), sourceTransformationCRS, targetCRS,
+        nullptr, buildProperties(methodJ), parameters, values,
         std::vector<PositionalAccuracyNNPtr>());
 
     return BoundCRS::create(sourceCRS, targetCRS, transformation);
