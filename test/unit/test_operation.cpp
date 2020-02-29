@@ -6566,6 +6566,64 @@ TEST(operation, ETRS89_3D_to_proj_string_with_geoidgrids_nadgrids) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, nadgrids_with_pm) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=tmerc +lat_0=39.66666666666666 +lon_0=1 +k=1 +x_0=200000 "
+        "+y_0=300000 +ellps=intl +nadgrids=foo.gsb +pm=lisbon "
+        "+units=m +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto dst = authFactory->createCoordinateReferenceSystem("4326");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=tmerc +lat_0=39.6666666666667 +lon_0=1 "
+              "+k=1 +x_0=200000 +y_0=300000 +ellps=intl +pm=lisbon "
+              // Check that there is no extra +step +proj=longlat +pm=lisbon
+              "+step +proj=hgridshift +grids=foo.gsb "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+
+    // ETRS89
+    dst = authFactory->createCoordinateReferenceSystem("4258");
+    list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=tmerc +lat_0=39.6666666666667 +lon_0=1 "
+              "+k=1 +x_0=200000 +y_0=300000 +ellps=intl +pm=lisbon "
+              // Check that there is no extra +step +proj=longlat +pm=lisbon
+              "+step +proj=hgridshift +grids=foo.gsb "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+
+    // From WKT BOUNDCRS
+    auto formatter = WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
+    auto src_wkt = src->exportToWKT(formatter.get());
+    auto objFromWkt = WKTParser().createFromWKT(src_wkt);
+    auto crsFromWkt = nn_dynamic_pointer_cast<BoundCRS>(objFromWkt);
+    ASSERT_TRUE(crsFromWkt);
+    list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(crsFromWkt), dst, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=tmerc +lat_0=39.6666666666667 +lon_0=1 "
+              "+k=1 +x_0=200000 +y_0=300000 +ellps=intl +pm=lisbon "
+              // Check that there is no extra +step +proj=longlat +pm=lisbon
+              "+step +proj=hgridshift +grids=foo.gsb "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, WGS84_G1762_to_compoundCRS_with_bound_vertCRS) {
     auto authFactoryEPSG =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
