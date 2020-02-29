@@ -4525,9 +4525,27 @@ BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
  */
 BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
                                            const std::string &filename) {
-    const CRSPtr sourceGeographicCRS = baseCRSIn->extractGeographicCRS();
+    const auto sourceGeographicCRS = baseCRSIn->extractGeographicCRS();
     auto transformationSourceCRS =
-        sourceGeographicCRS ? sourceGeographicCRS : baseCRSIn.as_nullable();
+        sourceGeographicCRS
+            ? NN_NO_CHECK(std::static_pointer_cast<CRS>(sourceGeographicCRS))
+            : baseCRSIn;
+    if (sourceGeographicCRS != nullptr &&
+        sourceGeographicCRS->datum() != nullptr &&
+        sourceGeographicCRS->primeMeridian()->longitude().getSIValue() != 0.0) {
+        transformationSourceCRS = GeographicCRS::create(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    sourceGeographicCRS->nameStr() +
+                                        " (with Greenwich prime meridian)"),
+            datum::GeodeticReferenceFrame::create(
+                util::PropertyMap().set(
+                    common::IdentifiedObject::NAME_KEY,
+                    sourceGeographicCRS->datum()->nameStr() +
+                        " (with Greenwich prime meridian)"),
+                sourceGeographicCRS->datum()->ellipsoid(),
+                util::optional<std::string>(), datum::PrimeMeridian::GREENWICH),
+            sourceGeographicCRS->coordinateSystem());
+    }
     std::string transformationName = transformationSourceCRS->nameStr();
     transformationName += " to WGS84";
 
@@ -4536,8 +4554,8 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
         operation::Transformation::createNTv2(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                     transformationName),
-            NN_NO_CHECK(transformationSourceCRS), GeographicCRS::EPSG_4326,
-            filename, std::vector<metadata::PositionalAccuracyNNPtr>()));
+            transformationSourceCRS, GeographicCRS::EPSG_4326, filename,
+            std::vector<metadata::PositionalAccuracyNNPtr>()));
 }
 
 // ---------------------------------------------------------------------------
