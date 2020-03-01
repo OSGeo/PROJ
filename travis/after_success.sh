@@ -23,3 +23,4 @@ if test "$TRAVIS_SECURE_ENV_VARS" = "true" -a "$TRAVIS_BRANCH" = "7.0"; then
     #     ./travis/deploy_html_coverage.sh
     # fi
 fi
+
