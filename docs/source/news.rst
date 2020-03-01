@@ -3,6 +3,119 @@
 News
 ###############################################################################
 
+7.0.0 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*March 1st 2020*
+
+The major feature in PROJ 7 is significantly improved handling of gridded
+models. This was implemented in :ref:`RFC4`.
+The main features of the RFC4 work is that PROJ now implements a new grid format,
+Geodetic TIFF grids, for exchaning gridded transformation models. In addition
+to the new grid format, PROJ can now also access grids online using a data
+store in the cloud.
+
+The grids that was previously available via the proj-datumgrid packages are now
+available in two places:
+
+  1. As a single combined data archive including all available resource files
+  2. From the cloud via https://cdn.proj.org
+
+In Addition, provided with PROJ is a utility called :program:`projsync` that can be used
+download grids from the data store in the cloud.
+
+The use of the new grid format and the data from the cloud requires that
+PROJ is build against ``libtiff`` and ``libcurl``. Both are optional dependencies
+to PROJ but it is highly encouraged that the software is build against both.
+
+
+.. warning::
+
+    PROJ 7 will be last major release version that includes the ``proj_api.h``
+    header. The functionality in ``proj_api.h`` is deprecated and only supported in
+    maintenance mode. It is inferior to the functionality provided by functions
+    in the ``proj.h`` header and all projects still relying on ``proj_api.h`` are encouraged
+    to migrate to the new API in ``proj.h``. See :ref:`API_migration`.
+    for more info on how to migrate from the old to the new API.
+
+
+Updates
+-------
+
+* Added new file access API to ``proj.h`` (`#866 <https://github.com/OSGeo/PROJ/issues/866>`_)
+
+* Updated the name of the most recent version of the WKT2 standard from
+  WKT2_2018 to WKT2_2019 to reflect the proper name of the standard (`#1585 <https://github.com/OSGeo/PROJ/issues/1585>`_)
+
+* Improvements in transformations from/to WGS 84 (Gxxxx) realizations and
+  vertical <--> geog transormations (`#1608 <https://github.com/OSGeo/PROJ/issues/1608>`_)
+
+* Update to version 1.50 of the geodesic library (`#1629 <https://github.com/OSGeo/PROJ/issues/1629>`_)
+
+* Promote :c:func:`proj_assign_context` to ``proj.h`` from ``proj_experimental.h`` (`#1630 <https://github.com/OSGeo/PROJ/issues/1630>`_)
+
+* Add rotation support to the HEALPix projection (`#1638 <https://github.com/OSGeo/PROJ/issues/1638>`_)
+
+* Add C function :c:func:`proj_crs_create_bound_vertical_crs` (`#1689 <https://github.com/OSGeo/PROJ/issues/1689>`_)
+
+* Use Win32 Unicode APIs and expect all strings to be UTF-8 (`#1765 <https://github.com/OSGeo/PROJ/issues/1765>`_)
+
+* Improved name aliases lookup (`#1827 <https://github.com/OSGeo/PROJ/issues/1827>`_)
+
+* CMake: Employ better use of CTest with the ``BUILD_TESTING`` option (`#1870 <https://github.com/OSGeo/PROJ/issues/1870>`_)
+
+* Grid correction: fix handling grids spanning antimeridian (`#1882 <https://github.com/OSGeo/PROJ/issues/1882>`_)
+
+* Remove legacy CMake target name ``proj`` (`#1883 <https://github.com/OSGeo/PROJ/issues/1883>`_)
+
+* :program:`projinfo` add ``--searchpaths`` switch (`#1892 <https://github.com/OSGeo/PROJ/issues/1892>`_)
+
+* Add :ref:`+proj=set operation<set>` to set component(s) of a coordinate to a fixed
+  value (`#1896 <https://github.com/OSGeo/PROJ/issues/1896>`_)
+
+* Add EPSG records for 'Geocentric translation by Grid Interpolation (IGN)'
+  (``gr3df97a.txt``) and map them to new :ref:`+proj=xyzgridshift<xyzgridshift>` (`#1897 <https://github.com/OSGeo/PROJ/issues/1897>`_)
+
+* Remove ``null`` grid file as it is now a special hardcoded case in grid
+  code (`#1898 <https://github.com/OSGeo/PROJ/issues/1898>`_)
+
+* Add :program:`projsync` utility (`#1903 <https://github.com/OSGeo/PROJ/issues/1903>`_)
+
+* Make ``PROJ`` the CMake project name (`#1910 <https://github.com/OSGeo/PROJ/issues/1910>`_)
+
+* Use relative directory to locate PROJ resource files (`#1921 <https://github.com/OSGeo/PROJ/issues/1921>`_)
+
+
+Bug fixes
+---------
+
+* Horizontal grid shift: fix failures on points slightly outside a
+  subgrid (`#209 <https://github.com/OSGeo/PROJ/issues/209>`_)
+
+* Fix ASAN issue with SQLite3VFS class (`#1902 <https://github.com/OSGeo/PROJ/issues/1902>`_)
+
+* tests: force use of bash for ``proj_add_test_script_sh`` (`#1905 <https://github.com/OSGeo/PROJ/issues/1905>`_)
+
+
+Breaking changes
+----------------
+
+* Reject NTV2 files where ``GS_TYPE != SECONDS`` (`#1294 <https://github.com/OSGeo/PROJ/issues/1294>`_)
+
+* On Windows the name of the library is now fixed to ``proj.lib`` instead
+  of encoding the version number in the library name (`#1581 <https://github.com/OSGeo/PROJ/issues/1581>`_)
+
+* Require C99 compiler (`#1624 <https://github.com/OSGeo/PROJ/issues/1624>`_)
+
+* Remove deprecated JNI bindings (`#1825 <https://github.com/OSGeo/PROJ/issues/1825>`_)
+
+* Remove -ld option from :program:`proj` and :program:`cs2cs` (`#1844 <https://github.com/OSGeo/PROJ/issues/1844>`_)
+
+* Increase CMake minimum version from 3.5 to 3.9 (`#1907 <https://github.com/OSGeo/PROJ/issues/1907>`_)
+
+
+
+
+
 6.3.1 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *February 11th 2020*
