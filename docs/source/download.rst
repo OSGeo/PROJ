@@ -14,7 +14,7 @@ Current Release
 --------------------------------------------------------------------------------
 
 * **2020-03-01** `proj-7.0.0.tar.gz`_ (`md5`_)
-* **2020-03-01** `proj-data-1.0.0.tar.gz`_
+* **2020-03-01** `proj-data-1.0.tar.gz`_
 * **2018-09-15** `proj-datumgrid-1.8.zip`_
 * **2020-03-01** `proj-datumgrid-europe-1.6.zip`_
 * **2020-03-01** `proj-datumgrid-north-america-1.4.zip`_
@@ -79,7 +79,7 @@ Past Releases
 .. _`proj-4.9.1.tar.gz`: https://download.osgeo.org/proj/proj-4.9.1.tar.gz
 .. _`proj-4.9.2.tar.gz`: https://download.osgeo.org/proj/proj-4.9.2.tar.gz
 .. _`proj-4.9.3.tar.gz`: https://download.osgeo.org/proj/proj-4.9.3.tar.gz
-.. _`proj-data-1.0.0.tar.gz`: https://download.osgeo.org/proj/proj-data-1.0.0.tar.gz
+.. _`proj-data-1.0.tar.gz`: https://download.osgeo.org/proj/proj-data-1.0.tar.gz
 .. _`proj-datumgrid-1.6.zip`: https://download.osgeo.org/proj/proj-datumgrid-1.6.zip
 .. _`proj-datumgrid-1.7.zip`: https://download.osgeo.org/proj/proj-datumgrid-1.7.zip
 .. _`proj-datumgrid-1.8.zip`: https://download.osgeo.org/proj/proj-datumgrid-1.8.zip
