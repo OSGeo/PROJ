@@ -34,7 +34,7 @@ jobs:
             -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_PREFIX%/Library/include" ^
             -DCMAKE_C_FLAGS="/WX" \
             -DCMAKE_CXX_FLAGS="/WX" \
-            -DBUILD_SHARED_LIBS="ON"
+            -DBUILD_SHARED_LIBS="ON" \
             ..
       displayName: 'CMake'
     - script: |

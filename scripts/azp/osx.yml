@@ -29,7 +29,7 @@ jobs:
       conda config --set always_yes True --set show_channel_urls True
       conda config --add channels conda-forge
       conda config --set channel_priority strict
-      conda install --yes --quiet --name proj  curl cmake ninja libtiff sqlite conda-build ninja  conda-forge-ci-setup=2 -y
+      conda install --yes --quiet --name proj curl cmake ninja libtiff sqlite conda-build ninja  conda-forge-ci-setup=2 -y
     displayName: Install PROJ dependencies
   - script: |
       source activate proj
@@ -48,7 +48,7 @@ jobs:
         -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
         -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
         -DSQLITE3_INCLUDE_DIR:FILEPATH="$CONDA_PREFIX/include" \
-        -DSQLITE3_LIBRARY:FILEPATH="$CONDA_PREFIX/lib/libsqlite3.dylib \
+        -DSQLITE3_LIBRARY:FILEPATH="$CONDA_PREFIX/lib/libsqlite3.dylib" \
         ..
     displayName: 'CMake'
   - script: |
