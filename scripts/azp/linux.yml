@@ -1,27 +1,46 @@
 # -*- mode: yaml -*-
 
 jobs:
-- job: linux_gcc
+- job: linux
+  variables:
+    - name: BUILD_TYPE
+      value: Release
   pool:
     vmImage: ubuntu-16.04
   strategy:
     matrix:
-      GCC:
+      GCC 8:
         CXX: g++-8
         CC: gcc-8
+        PACKAGES: g++-8
+      GCC 7:
+        CXX: g++-7
+        CC: gcc-7
+        PACKAGES: g++-7
   steps:
+    - script: |
+      set -e
+      uname -a
+      sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
+      if test -n "${LLVM_REPO}" ; then
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo -E apt-add-repository "deb http://apt.llvm.org/xenial/ ${LLVM_REPO} main"
+      fi
+      sudo -E apt-get update
+      sudo -E apt-get -yq --no-install-suggests --no-install-recommends install ninja-build cmake ${PACKAGES}
+    displayName: 'Install'
   - script: |
       mkdir build
       cd build
       cmake .. \
         -G Ninja \
-        -DCMAKE_BUILD_TYPE=Debug \
-    displayName: 'CMake'
+        -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+    displayName: 'Configure'
   - script: |
       cd build
-      ninja
+      cmake --build . --config $BUILD_TYPE
     displayName: 'Build'
   - script: |
       cd build
-      ctest -V
+      ctest -V --output-on-failure -C $BUILD_TYPE
     displayName: 'Test'
