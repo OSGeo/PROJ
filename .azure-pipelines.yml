@@ -1,0 +1,2 @@
+jobs:
+  - template: ./scripts/azp/linux.yml
