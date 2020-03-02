@@ -1,0 +1,62 @@
+# -*- mode: yaml -*-
+
+jobs:
+- job: osx
+  pool:
+    vmImage: macOS-10.14
+  steps:
+  - script: |
+      echo "Removing homebrew from Azure to avoid conflicts."
+      curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall > ~/uninstall_homebrew
+      chmod +x ~/uninstall_homebrew
+      ~/uninstall_homebrew -fq
+      rm ~/uninstall_homebrew
+    displayName: Remove homebrew
+  - bash: |
+      echo "##vso[task.prependpath]$CONDA/bin"
+      sudo chown -R $USER $CONDA
+    displayName: Add conda to PATH
+
+  - script: |
+      ECHO ON
+      source activate base
+      conda create --yes --quiet --name proj
+    displayName: Create conda environment
+
+  - script: |
+      ECHO ON
+      source activate proj
+      conda config --set always_yes True --set show_channel_urls True
+      conda config --add channels conda-forge
+      conda config --set channel_priority strict
+      conda install --yes --quiet --name proj curl cmake ninja libtiff sqlite conda-build ninja  conda-forge-ci-setup=2 -y
+    displayName: Install PROJ dependencies
+  - script: |
+      source activate proj
+      export CI=azure
+      source run_conda_forge_build_setup
+    env: {
+      OSX_FORCE_SDK_DOWNLOAD: "1"
+    }
+    displayName: Configure OSX SDK
+  - script: |
+      source activate proj
+      echo "current directory:" `pwd`
+      mkdir build
+      cd build
+      cmake   -G Ninja  \
+        -DCMAKE_LIBRARY_PATH:FILEPATH="$CONDA_PREFIX/lib" \
+        -DCMAKE_INCLUDE_PATH:FILEPATH="$CONDA_PREFIX/include" \
+        ..
+    displayName: 'CMake'
+  - script: |
+      cd build
+      source activate proj
+      ninja
+    displayName: 'Build'
+  - script: |
+      cd build
+      source activate proj
+      ctest -V
+
+

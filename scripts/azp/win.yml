@@ -32,6 +32,8 @@ jobs:
         cmake -G "Ninja" ^
             -DCMAKE_LIBRARY_PATH:FILEPATH="%CONDA_PREFIX%/Library/lib" ^
             -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_PREFIX%/Library/include" ^
+            -DCMAKE_C_FLAGS="/WX" \
+            -DCMAKE_CXX_FLAGS="/WX"
             ..
       displayName: 'CMake'
     - script: |
