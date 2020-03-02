@@ -27,7 +27,7 @@ jobs:
         sudo -E apt-add-repository "deb http://apt.llvm.org/xenial/ ${LLVM_REPO} main"
       fi
       sudo -E apt-get update
-      sudo -E apt-get -yq --no-install-suggests --no-install-recommends install ninja-build cmake ${PACKAGES}
+      sudo -E apt-get -yq --no-install-suggests --no-install-recommends install libcurl4-openssl-dev libsqlite3-dev sqlite3 libtiff-dev ninja-build cmake ${PACKAGES}
     displayName: 'Install'
   - script: |
       mkdir build
