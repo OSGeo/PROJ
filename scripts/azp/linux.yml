@@ -6,15 +6,15 @@ jobs:
     vmImage: ubuntu-16.04
   timeoutInMinutes: 60
   variables:
-      ARCH:i386
-      CC:gcc-8
-      CXX:g++-8
-      CXXFLAGS:'-g -O2 -m32 -D_GLIBCXX_ASSERTIONS'
-      CFLAGS:'-g -O2 -m32'
-      TIFF_CFLAGS:-I/usr/include/i386-linux-gnu
-      TIFF_LIBS:"-L/usr/lib/i386-linux-gnu -ltiff"
-      SQLITE3_CFLAGS:-I/usr/include/i386-linux-gnu
-      SQLITE3_LIBS:"-L/usr/lib/i386-linux-gnu -lsqlite3"
+    ARCH:i386
+    CC:gcc-8
+    CXX:g++-8
+    CXXFLAGS:'-g -O2 -m32 -D_GLIBCXX_ASSERTIONS'
+    CFLAGS:'-g -O2 -m32'
+    TIFF_CFLAGS:-I/usr/include/i386-linux-gnu
+    TIFF_LIBS:"-L/usr/lib/i386-linux-gnu -ltiff"
+    SQLITE3_CFLAGS:-I/usr/include/i386-linux-gnu
+    SQLITE3_LIBS:"-L/usr/lib/i386-linux-gnu -lsqlite3"
   steps:
   - script: |
       mkdir build
