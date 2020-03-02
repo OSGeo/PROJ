@@ -1,0 +1,52 @@
+
+jobs:
+- job: win
+
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+    - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+      displayName: Add conda to PATH
+
+    - script: |
+        ECHO ON
+        call conda create --yes --quiet --name proj
+      displayName: Create conda environment
+
+    - script: |
+        ECHO ON
+        call activate proj
+        call conda config --set always_yes True --set show_channel_urls True
+        call conda install --yes --quiet --name proj -c conda-forge conda-build ninja -y
+        call conda install -c conda-forge proj --only-deps -y
+      displayName: Install PROJ dependencies
+    - script: |
+        ECHO ON
+        call activate proj
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+        echo %PATH%
+        set CC=cl.exe
+        set CXX=cl.exe
+        mkdir build
+        pushd build
+        cmake -G "Ninja" ^
+            -DCMAKE_LIBRARY_PATH:FILEPATH="%CONDA_PREFIX%/Library/lib" ^
+            -DCMAKE_INCLUDE_PATH:FILEPATH="%CONDA_PREFIX%/Library/include" ^
+            ..
+      displayName: 'CMake'
+    - script: |
+        call activate proj
+        pushd build
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+        set CC=cl.exe
+        set CXX=cl.exe
+        ninja -v
+      displayName: 'Build'
+    - script: |
+        ECHO ON
+        call activate proj
+        pushd build
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
+        ctest -VV --output-on-failure
+      displayName: 'Test'
+

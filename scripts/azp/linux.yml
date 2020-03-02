@@ -17,6 +17,11 @@ jobs:
         CXX: g++-7
         CC: gcc-7
         PACKAGES: g++-7
+      Clang 8:
+        CXX: clang++-8
+        CC: clang-8
+        PACKAGES: clang-8
+        LLVM_REPO: llvm-toolchain-xenial-8
   steps:
   - script: |
       set -e
