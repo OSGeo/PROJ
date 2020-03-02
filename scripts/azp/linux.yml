@@ -18,7 +18,7 @@ jobs:
         CC: gcc-7
         PACKAGES: g++-7
   steps:
-    - script: |
+  - script: |
       set -e
       uname -a
       sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
