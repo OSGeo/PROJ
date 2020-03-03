@@ -95,6 +95,14 @@ TEST(factory, AuthorityFactory_createUnitOfMeasure_linear) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createUnitOfMeasure_linear_us_survey_foot) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto uom = factory->createUnitOfMeasure("9003");
+    EXPECT_EQ(uom->conversionToSI(), 12. / 39.37);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createUnitOfMeasure_angular) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto uom = factory->createUnitOfMeasure("9102");
