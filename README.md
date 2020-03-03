@@ -51,26 +51,27 @@ number, and "z" indicates the patch number of the release.
 
 In addition to the PROJ software package, distributions of datum
 conversion grid files and PROJ parameter files are also available.
-The grid package is distributed under the name `proj-datumgrid-x.y.zip`,
+The grid package is distributed under the name `proj-data-x.y.zip`,
 where "x" is the major release version and "y" is the minor release
-version numbers. Similarly regional packages are distributed. The
-regional packages contain resources that are not essential to the
-functionality of PROJ but still of value to users in the region
-specific to the package. All grids that were in proj-datumgrids-1.6
-remain in proj-datumgrids-1.7; the regional datumgrid files contain
-grids for datums not previously supported (prior to PROJ 5.0.0).
+version numbers. The resource packages can be downloaded from the
+[PROJ website](https://proj.org/download.html).
 
-The resource packages can be downloaded from the [PROJ website](https://proj.org/download.html).
-
-More info on the contents of the various resource packages can be
+More info on the contents of the proj-data package can be
 found at the
-[proj-datumgrid GitHub repository](https://github.com/OSGeo/proj-datumgrid).
+[PROJ-data GitHub repository](https://github.com/OSGeo/PROJ-data).
 
 The resource file packages should be extracted to `PROJ_LIB`
 where PROJ will find them after installation. The default location of
 `PROJ_LIB` on UNIX-based systems is `/usr/local/share/proj` but it may
 be changed to a different directory. On Windows you have to define
 `PROJ_LIB` yourself.
+
+As an alternative to installing the data package on the local system,
+the resource files can be retrieved on-the-fly from the
+[PROJ CDN](https://cdn.proj.org/). A [network-enabled](https://proj.org/usage/network.html) PROJ build, will
+automatically fetch resource files that are not present locally from the
+CDN.
+
 
 ## Citing PROJ in publications
 
