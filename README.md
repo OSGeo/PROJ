@@ -69,7 +69,7 @@ be changed to a different directory. On Windows you have to define
 As an alternative to installing the data package on the local system,
 the resource files can be retrieved on-the-fly from the
 [PROJ CDN](https://cdn.proj.org/). A network-enabled PROJ build will
-automaticall try to fetch resource files that are not present locally from the
+automatically fetch resource files that are not present locally from the
 CDN.
 
 
