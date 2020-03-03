@@ -237,6 +237,10 @@ See ``./configure --help`` for all options, here are a few key options:
     TIFF support is enabled by default to read some grids, but this can
     be disabled, if required.
 
+.. option:: --with-curl=ARG
+
+    Enable CURL support (``ARG=path`` to ``curl-config``).
+
 .. option:: --without-mutex
 
     Disable real mutex locks (lacking pthreads).
@@ -311,7 +315,9 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
    .. note::
        A default build is not optimized without specifying
-       ``-DCMAKE_BUILD_TYPE=Release`` (or similar).
+       ``-DCMAKE_BUILD_TYPE=Release`` (or similar) during configuration,
+       or by specifying ``--config Release`` with CMake
+       multi-configuration build tools (see example below).
 
 .. option:: CMAKE_C_COMPILER
 
@@ -339,9 +345,18 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
     Enable CURL support, default ON.
 
+.. option:: CURL_INCLUDE_DIR
+
+    Path to an include directory with the ``curl`` directory.
+
+.. option:: CURL_LIBRARY
+
+    Path to a shared or static library file, such as ``curl.dll``,
+    ``libcurl.so``, or other name.
+
 .. option:: ENABLE_IPO=OFF
 
-    Build library with compiler's `interprocedural optimization
+    Build library using the compiler's `interprocedural optimization
     <https://en.wikipedia.org/wiki/Interprocedural_optimization>`_
     (IPO), if available, default OFF.
 
@@ -354,7 +369,7 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
 .. option:: SQLITE3_INCLUDE_DIR
 
-    Path to a directory with ``sqlite3.h``.
+    Path to an include directory with the ``sqlite3.h`` header file.
 
 .. option:: SQLITE3_LIBRARY
 
