@@ -50,6 +50,7 @@
 #include <cstring>
 #include <iomanip>
 #include <limits>
+#include <locale>
 #include <map>
 #include <memory>
 #include <sstream> // std::ostringstream
@@ -136,7 +137,8 @@ struct DatabaseContext::Private {
     void setPjCtxt(PJ_CONTEXT *ctxt) { pjCtxt_ = ctxt; }
 
     SQLResultSet run(const std::string &sql,
-                     const ListOfParams &parameters = ListOfParams());
+                     const ListOfParams &parameters = ListOfParams(),
+                     bool useMaxFloatPrecision = false);
 
     std::vector<std::string> getDatabaseStructure();
 
@@ -827,7 +829,8 @@ void DatabaseContext::Private::registerFunctions() {
 // ---------------------------------------------------------------------------
 
 SQLResultSet DatabaseContext::Private::run(const std::string &sql,
-                                           const ListOfParams &parameters) {
+                                           const ListOfParams &parameters,
+                                           bool useMaxFloatPrecision) {
 
     sqlite3_stmt *stmt = nullptr;
     auto iter = mapSqlToStatement_.find(sql);
@@ -885,10 +888,20 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
         if (ret == SQLITE_ROW) {
             SQLRow row(column_count);
             for (int i = 0; i < column_count; i++) {
-                const char *txt = reinterpret_cast<const char *>(
-                    sqlite3_column_text(stmt, i));
-                if (txt) {
-                    row[i] = txt;
+                if (useMaxFloatPrecision &&
+                    sqlite3_column_type(stmt, i) == SQLITE_FLOAT) {
+                    // sqlite3_column_text() does not use maximum precision
+                    std::ostringstream buffer;
+                    buffer.imbue(std::locale::classic());
+                    buffer << std::setprecision(18);
+                    buffer << sqlite3_column_double(stmt, i);
+                    row[i] = buffer.str();
+                } else {
+                    const char *txt = reinterpret_cast<const char *>(
+                        sqlite3_column_text(stmt, i));
+                    if (txt) {
+                        row[i] = txt;
+                    }
                 }
             }
             result.emplace_back(std::move(row));
@@ -1705,10 +1718,10 @@ AuthorityFactory::createUnitOfMeasure(const std::string &code) const {
             return NN_NO_CHECK(uom);
         }
     }
-    auto res = d->runWithCodeParam(
+    auto res = d->context()->d->run(
         "SELECT name, conv_factor, type, deprecated FROM unit_of_measure WHERE "
         "auth_name = ? AND code = ?",
-        code);
+        {d->authority(), code}, true);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("unit of measure not found",
                                            d->authority(), code);
