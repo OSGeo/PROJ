@@ -308,10 +308,6 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
     Build :ref:`gie`, default ON.
 
-.. option:: BUILD_GMOCK=ON
-
-    Build the googlemock subproject, default ON.
-
 .. option:: BUILD_PROJ=ON
 
     Build :ref:`proj`, default ON.
@@ -327,29 +323,33 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 .. option:: BUILD_SHARED_LIBS
 
     Build PROJ library shared. Default for Windows is OFF, building only
-    a static library. Default for all others is ON.
+    a static library. Default for all others is ON. See also the CMake
+    documentation for `BUILD_SHARED_LIBS
+    <https://cmake.org/cmake/help/v3.9/variable/BUILD_SHARED_LIBS.html>`_.
 
     .. versionchanged:: 7.0
         Renamed from ``BUILD_LIBPROJ_SHARED``
 
 .. option:: BUILD_TESTING=ON
 
-    Build the testing tree. Default is ON, but can be turned OFF if tests
-    are not required.
+    CTest option to build the testing tree, which also downloads and installs
+    Googletest. Default is ON, but can be turned OFF if tests are not required.
 
     .. versionchanged:: 7.0
         Renamed from ``PROJ_TESTS``
 
 .. option:: CMAKE_BUILD_TYPE
 
-   Choose the type of build, options are: None (default), Debug, Release,
-   RelWithDebInfo, or MinSizeRel.
+    Choose the type of build, options are: None (default), Debug, Release,
+    RelWithDebInfo, or MinSizeRel. See also the CMake documentation for
+    `CMAKE_BUILD_TYPE
+    <https://cmake.org/cmake/help/v3.9/variable/CMAKE_BUILD_TYPE.html>`_.
 
-   .. note::
-       A default build is not optimized without specifying
-       ``-DCMAKE_BUILD_TYPE=Release`` (or similar) during configuration,
-       or by specifying ``--config Release`` with CMake
-       multi-configuration build tools (see example below).
+    .. note::
+        A default build is not optimized without specifying
+        ``-DCMAKE_BUILD_TYPE=Release`` (or similar) during configuration,
+        or by specifying ``--config Release`` with CMake
+        multi-configuration build tools (see example below).
 
 .. option:: CMAKE_C_COMPILER
 
@@ -357,7 +357,8 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
 .. option:: CMAKE_C_FLAGS
 
-    Flags used by the C compiler during all build types.
+    Flags used by the C compiler during all build types. This is
+    initialized by the :envvar:`CFLAGS` environment variable.
 
 .. option:: CMAKE_CXX_COMPILER
 
@@ -365,7 +366,8 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
 .. option:: CMAKE_CXX_FLAGS
 
-    Flags used by the C++ compiler during all build types.
+    Flags used by the C++ compiler during all build types. This is
+    initialized by the :envvar:`CXXFLAGS` environment variable.
 
 .. option:: CMAKE_INSTALL_PREFIX
 
