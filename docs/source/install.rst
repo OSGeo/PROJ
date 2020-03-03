@@ -200,8 +200,8 @@ The test suite requires that the proj-datumgrid package is installed in
 :envvar:`PROJ_LIB`.
 
 
-Autotoos configure options
-++++++++++++++++++++++++++
+Autotools configure options
++++++++++++++++++++++++++++
 
 Most POSIX systems may not require any options to ``./configure`` if all
 PROJ requirements are met, installed into common directories, and a
@@ -234,8 +234,8 @@ See ``./configure --help`` for all options, here are a few key options:
 
 .. option:: --disable-tiff
 
-    TIFF support is enabled by default to read some grids, but this can
-    be disabled, if required.
+    TIFF support is enabled by default to use PROJ-data resource files,
+    but this can be disabled, if required.
 
 .. option:: --with-curl=ARG
 
@@ -292,6 +292,38 @@ CMake configure options
 Options to configure a CMake are provided using ``-D<var>=<value>``.
 All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
+.. option:: BUILD_CCT=ON
+
+    Build :ref:`cct`, default ON.
+
+.. option:: BUILD_CS2CS=ON
+
+    Build :ref:`cs2cs`, default ON.
+
+.. option:: BUILD_GEOD=ON
+
+    Build :ref:`geod`, default ON.
+
+.. option:: BUILD_GIE=ON
+
+    Build :ref:`gie`, default ON.
+
+.. option:: BUILD_GMOCK=ON
+
+    Build the googlemock subproject, default ON.
+
+.. option:: BUILD_PROJ=ON
+
+    Build :ref:`proj`, default ON.
+
+.. option:: BUILD_PROJINFO=ON
+
+    Build :ref:`projinfo`, default ON.
+
+.. option:: BUILD_PROJSYNC=ON
+
+    Build :ref:`projsync`, default ON.
+
 .. option:: BUILD_SHARED_LIBS
 
     Build PROJ library shared. Default for Windows is OFF, building only
@@ -337,22 +369,9 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
 .. option:: CMAKE_INSTALL_PREFIX
 
-    Default for Windows is based on the environment variably
+    Default for Windows is based on the environment variable
     :envvar:`OSGEO4W_ROOT` (if set), otherwise is ``c:/OSGeo4W``.
     Default for Unix-like is ``/usr/local/``.
-
-.. option:: ENABLE_CURL=ON
-
-    Enable CURL support, default ON.
-
-.. option:: CURL_INCLUDE_DIR
-
-    Path to an include directory with the ``curl`` directory.
-
-.. option:: CURL_LIBRARY
-
-    Path to a shared or static library file, such as ``curl.dll``,
-    ``libcurl.so``, or other name.
 
 .. option:: ENABLE_IPO=OFF
 
@@ -375,6 +394,35 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
     Path to a shared or static library file, such as ``sqlite3.dll``,
     ``libsqlite3.so``, ``sqlite3.lib`` or other name.
+
+.. option:: ENABLE_CURL=ON
+
+    Enable CURL support, default ON.
+
+.. option:: CURL_INCLUDE_DIR
+
+    Path to an include directory with the ``curl`` directory.
+
+.. option:: CURL_LIBRARY
+
+    Path to a shared or static library file, such as ``libcurl.dll``,
+    ``libcurl.so``, ``libcurl.lib``, or other name.
+
+.. option:: ENABLE_TIFF=ON
+
+    Enable TIFF support to use PROJ-data resource files, default ON.
+
+.. option:: TIFF_INCLUDE_DIR
+
+    Path to an include directory with the ``tiff.h`` header file.
+
+.. option:: TIFF_LIBRARY_RELEASE
+
+    Path to a shared or static library file, such as ``tiff.dll``,
+    ``libtiff.so``, ``tiff.lib``, or other name. A similar variable
+    ``TIFF_LIBRARY_DEBUG`` can also be specified to a similar library for
+    building Debug releases.
+
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
 --------------------------------------------------------------------------------
