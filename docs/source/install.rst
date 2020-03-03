@@ -200,6 +200,47 @@ The test suite requires that the proj-datumgrid package is installed in
 :envvar:`PROJ_LIB`.
 
 
+Autotoos configure options
+++++++++++++++++++++++++++
+
+Most POSIX systems may not require any options to ``./configure`` if all
+PROJ requirements are met, installed into common directories, and a
+"default" behaviour is desired.
+
+Some influential environment variables are used by ``./configure``,
+with no expected defaults:
+
+.. envvar:: CC
+
+    C compiler command.
+
+.. envvar:: CFLAGS
+
+    C compiler flags.
+
+.. envvar:: CXX
+
+    C++ compiler command.
+
+.. envvar:: CXXFLAGS
+
+    C++ compiler flags
+
+See ``./configure --help`` for all options, here are a few key options:
+
+.. option:: --enable-lto
+
+    Enable compiler's Link Time Optimization, default disabled.
+
+.. option:: --disable-tiff
+
+    TIFF support is enabled by default to read some grids, but this can
+    be disabled, if required.
+
+.. option:: --without-mutex
+
+    Disable real mutex locks (lacking pthreads).
+
 CMake
 --------------------------------------------------------------------------------
 
@@ -240,10 +281,85 @@ Tests are run with::
 The test suite requires that the proj-datumgrid package is installed
 in :envvar:`PROJ_LIB`.
 
-If tests are not required, PROJ can be built without the test suite using the following configuration::
 
-    cmake -DBUILD_TESTING=OFF ..
+CMake configure options
++++++++++++++++++++++++
 
+Options to configure a CMake are provided using ``-D<var>=<value>``.
+All cached entries can be viewed using ``cmake -LAH`` from a build directory.
+
+.. option:: BUILD_SHARED_LIBS
+
+    Build PROJ library shared. Default for Windows is OFF, building only
+    a static library. Default for all others is ON.
+
+    .. versionchanged:: 7.0
+        Renamed from ``BUILD_LIBPROJ_SHARED``
+
+.. option:: BUILD_TESTING=ON
+
+    Build the testing tree. Default is ON, but can be turned OFF if tests
+    are not required.
+
+    .. versionchanged:: 7.0
+        Renamed from ``PROJ_TESTS``
+
+.. option:: CMAKE_BUILD_TYPE
+
+   Choose the type of build, options are: None (default), Debug, Release,
+   RelWithDebInfo, or MinSizeRel.
+
+   .. note::
+       A default build is not optimized without specifying
+       ``-DCMAKE_BUILD_TYPE=Release`` (or similar).
+
+.. option:: CMAKE_C_COMPILER
+
+    C compiler. Ignored for some generators, such as Visual Studio.
+
+.. option:: CMAKE_C_FLAGS
+
+    Flags used by the C compiler during all build types.
+
+.. option:: CMAKE_CXX_COMPILER
+
+    C++ compiler. Ignored for some generators, such as Visual Studio.
+
+.. option:: CMAKE_CXX_FLAGS
+
+    Flags used by the C++ compiler during all build types.
+
+.. option:: CMAKE_INSTALL_PREFIX
+
+    Default for Windows is based on the environment variably
+    :envvar:`OSGEO4W_ROOT` (if set), otherwise is ``c:/OSGeo4W``.
+    Default for Unix-like is ``/usr/local/``.
+
+.. option:: ENABLE_CURL=ON
+
+    Enable CURL support, default ON.
+
+.. option:: ENABLE_IPO=OFF
+
+    Build library with compiler's `interprocedural optimization
+    <https://en.wikipedia.org/wiki/Interprocedural_optimization>`_
+    (IPO), if available, default OFF.
+
+    .. versionchanged:: 7.0
+        Renamed from ``ENABLE_LTO``.
+
+.. option:: EXE_SQLITE3
+
+    Path to an ``sqlite3`` or ``sqlite3.exe`` executable.
+
+.. option:: SQLITE3_INCLUDE_DIR
+
+    Path to a directory with ``sqlite3.h``.
+
+.. option:: SQLITE3_LIBRARY
+
+    Path to a shared or static library file, such as ``sqlite3.dll``,
+    ``libsqlite3.so``, ``sqlite3.lib`` or other name.
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
 --------------------------------------------------------------------------------
