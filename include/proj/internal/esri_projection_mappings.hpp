@@ -848,6 +848,42 @@ static const ESRIParamMapping paramsESRI_Mercator_Auxiliary_Sphere[] = {
     {"Auxiliary_Sphere_Type", nullptr, 0, "0.0", false},
     {nullptr, nullptr, 0, "0.0", false}};
 
+static const ESRIParamMapping paramsESRI_Mercator_Variant_A[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Scale_Factor", EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
+static const ESRIParamMapping paramsESRI_Mercator_Variant_C[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Standard_Parallel_1", EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL,
+     EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL, "0.0", false},
+    {"Latitude_Of_Origin", nullptr, 0, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
+static const ESRIParamMapping paramsESRI_Transverse_Cylindrical_Equal_Area[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Scale_Factor", EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, "0.0", false},
+    {"Latitude_Of_Origin", EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
 static const ESRIMethodMapping esriMappings[] = {
     {"Plate_Carree", EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL,
      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL, paramsESRI_Plate_Carree},
@@ -997,6 +1033,12 @@ static const ESRIMethodMapping esriMappings[] = {
      EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR,
      EPSG_CODE_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR,
      paramsESRI_Mercator_Auxiliary_Sphere},
+    {"Mercator_Variant_A", EPSG_NAME_METHOD_MERCATOR_VARIANT_A,
+     EPSG_CODE_METHOD_MERCATOR_VARIANT_A, paramsESRI_Mercator_Variant_A},
+    {"Mercator_Variant_C", EPSG_NAME_METHOD_MERCATOR_VARIANT_B,
+     EPSG_CODE_METHOD_MERCATOR_VARIANT_B, paramsESRI_Mercator_Variant_C},
+    {"Transverse_Cylindrical_Equal_Area", "Transverse Cylindrical Equal Area",
+     0, paramsESRI_Transverse_Cylindrical_Equal_Area},
 };
 
 // ---------------------------------------------------------------------------

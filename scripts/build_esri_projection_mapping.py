@@ -632,19 +632,42 @@ config_str = """
         - Standard_Parallel_1: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
         - Auxiliary_Sphere_Type: 0.0
 
+- Mercator_Variant_A:
+    WKT2_name: EPSG_NAME_METHOD_MERCATOR_VARIANT_A
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Scale_Factor: EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
+
+- Mercator_Variant_C:
+    WKT2_name: EPSG_NAME_METHOD_MERCATOR_VARIANT_B
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Standard_Parallel_1: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
+        - Latitude_Of_Origin: 0
+
+- Transverse_Cylindrical_Equal_Area:
+    WKT2_name: Transverse Cylindrical Equal Area
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Scale_Factor: EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
+        - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
+
 # Missing/unclear mappings
 
 # Hammer_Aitoff: possibly hammer?
 # Hammer_Ellipsoidal: possibly hammer?
-# Eckert_Greifendorff: eck_greif mentioned in various places, but not in master proj?
+# Eckert_Greifendorff: +proj=hammer +W=0.25 +m=1
 
 # Missing mappings
 
 # Transverse_Mercator_NGA_2014: utm
-# Transverse_Cylindrical_Equal_Area: tcea
 # Polar_Stereographic_Variant_A: ups
-# Mercator_Variant_A: merc
-# Mercator_Variant_C: merc
 
 # The following methods are not currently possible in PROJ:
 

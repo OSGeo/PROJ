@@ -796,6 +796,9 @@ static const MethodMapping projectionMethodMappings[] = {
     {"Quartic Authalic", 0, "Quartic_Authalic", "qua_aut", nullptr,
      paramsLonNatOrigin},
 
+    {"Transverse Cylindrical Equal Area", 0,
+     "Transverse_Cylindrical_Equal_Area", "tcea", nullptr, paramsObliqueStereo},
+
     {EPSG_NAME_METHOD_EQUAL_EARTH, EPSG_CODE_METHOD_EQUAL_EARTH, nullptr,
      "eqearth", nullptr, paramsLonNatOrigin},
 
