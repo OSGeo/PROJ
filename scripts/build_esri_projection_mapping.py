@@ -450,8 +450,6 @@ config_str = """
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
-# Hammer_Aitoff: not handled
-
 - Flat_Polar_Quartic:
     WKT2_name: PROJ_WKT2_NAME_METHOD_FLAT_POLAR_QUARTIC
     Params:
@@ -510,8 +508,6 @@ config_str = """
     Cond:
         - EPSG_NAME_PARAMETER_LATITUDE_STD_PARALLEL < 0
 
-# Fuller: not handled
-
 - Rectified_Skew_Orthomorphic_Natural_Origin:
     WKT2_name: EPSG_NAME_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A
     Params:
@@ -535,22 +531,12 @@ config_str = """
         - Latitude_Of_Center: EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE
         - XY_Plane_Rotation: EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID
 
-# Cube: not handled
-
-# Transverse_Mercator_Complex: not handled
-
-# Robinson_ARC_INFO: not handled
-
-# Local: not handled
-
 - Goode_Homolosine:
     WKT2_name: "Goode Homolosine"
     Params:
         - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
-
-# Berghaus_Star: not handled
 
 - Equidistant_Cylindrical_Ellipsoidal:
     WKT2_name: EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL
@@ -559,8 +545,6 @@ config_str = """
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
         - Standard_Parallel_1: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
-
-# Ney_Modified_Conic: not handled
 
 - Laborde_Oblique_Mercator:
     WKT2_name: EPSG_NAME_METHOD_LABORDE_OBLIQUE_MERCATOR
@@ -572,8 +556,6 @@ config_str = """
         - Longitude_Of_Center: EPSG_NAME_PARAMETER_LONGITUDE_PROJECTION_CENTRE
         - Latitude_Of_Center: EPSG_NAME_PARAMETER_LATITUDE_PROJECTION_CENTRE
 
-# IGAC_Plano_Cartesiano: not handled
-
 - Gnomonic_Ellipsoidal:
     WKT2_name: PROJ_WKT2_NAME_METHOD_GNOMONIC
     Params:
@@ -581,22 +563,6 @@ config_str = """
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Longitude_Of_Center: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
         - Latitude_Of_Center: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
-
-# Polar_Stereographic_Variant_A: not handled, no example in .csv
-
-# Polar_Stereographic_Variant_B: not handled, no example in .csv
-
-# Polar_Stereographic_Variant_C: not handled
-
-# Mercator_Variant_A: not handled, no example in .csv
-
-# Mercator_Variant_C: not handled, no example in .csv
-
-# Hammer_Ellipsoidal: not handled
-
-# Quartic_Authalic_Ellipsoidal: not handled, no example in .csv
-
-# Eckert_Greifendorff: not handled
 
 - Wagner_IV:
     WKT2_name: PROJ_WKT2_NAME_METHOD_WAGNER_IV
@@ -648,12 +614,6 @@ config_str = """
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
-# Transverse_Mercator_NGA_2014: not handled
-
-# Transverse_Cylindrical_Equal_Area: not handled
-
-# Aspect_Adaptive_Cylindrical: not handled
-
 - Geostationary_Satellite:
     WKT2_name: PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_Y
     Params:
@@ -662,8 +622,6 @@ config_str = """
         - Longitude_Of_Center: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
         - Height: "Satellite Height"
         - Option: 0.0
-
-# Equidistant_Cylindrical_Auxiliary_Sphere: not handled
 
 - Mercator_Auxiliary_Sphere:
     WKT2_name: EPSG_NAME_METHOD_POPULAR_VISUALISATION_PSEUDO_MERCATOR
@@ -674,23 +632,44 @@ config_str = """
         - Standard_Parallel_1: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
         - Auxiliary_Sphere_Type: 0.0
 
-# Mollweide_Auxiliary_Sphere: not handled
+# Missing/unclear mappings
 
-# Eckert_VI_Auxiliary_Sphere: not handled
+# Hammer_Aitoff: possibly hammer?
+# Hammer_Ellipsoidal: possibly hammer?
+# Eckert_Greifendorff: eck_greif mentioned in various places, but not in master proj?
 
-# Eckert_IV_Auxiliary_Sphere: not handled
+# Missing mappings
 
-# Stereographic_Auxiliary_Sphere: not handled
+# Transverse_Mercator_NGA_2014: utm
+# Transverse_Cylindrical_Equal_Area: tcea
+# Polar_Stereographic_Variant_A: ups
+# Mercator_Variant_A: merc
+# Mercator_Variant_C: merc
 
-# Van_der_Grinten_I_Auxiliary_Sphere: not handled
+# The following methods are not currently possible in PROJ:
 
-# Azimuthal_Equidistant_Auxiliary_Sphere: not handled
-
-# Lambert_Azimuthal_Equal_Area_Auxiliary_Sphere: not handled
-
-# Orthographic_Auxiliary_Sphere: not handled
-
-# Gnomonic_Auxiliary_Sphere: not handled
+# Ney_Modified_Conic
+# IGAC_Plano_Cartesiano
+# Fuller
+# Berghaus_Star
+# Cube
+# Transverse_Mercator_Complex
+# Robinson_ARC_INFO
+# Local
+# Equidistant_Cylindrical_Auxiliary_Sphere
+# Aspect_Adaptive_Cylindrical
+# Mollweide_Auxiliary_Sphere
+# Eckert_VI_Auxiliary_Sphere
+# Eckert_IV_Auxiliary_Sphere
+# Stereographic_Auxiliary_Sphere
+# Van_der_Grinten_I_Auxiliary_Sphere
+# Azimuthal_Equidistant_Auxiliary_Sphere
+# Lambert_Azimuthal_Equal_Area_Auxiliary_Sphere
+# Orthographic_Auxiliary_Sphere
+# Gnomonic_Auxiliary_Sphere
+# Polar_Stereographic_Variant_B
+# Polar_Stereographic_Variant_C
+# Quartic_Authalic_Ellipsoidal
 
 """
 
