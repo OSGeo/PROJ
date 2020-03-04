@@ -200,6 +200,51 @@ The test suite requires that the proj-datumgrid package is installed in
 :envvar:`PROJ_LIB`.
 
 
+Autotools configure options
++++++++++++++++++++++++++++
+
+Most POSIX systems may not require any options to ``./configure`` if all
+PROJ requirements are met, installed into common directories, and a
+"default" behaviour is desired.
+
+Some influential environment variables are used by ``./configure``,
+with no expected defaults:
+
+.. envvar:: CC
+
+    C compiler command.
+
+.. envvar:: CFLAGS
+
+    C compiler flags.
+
+.. envvar:: CXX
+
+    C++ compiler command.
+
+.. envvar:: CXXFLAGS
+
+    C++ compiler flags
+
+See ``./configure --help`` for all options, here are a few key options:
+
+.. option:: --enable-lto
+
+    Enable compiler's Link Time Optimization, default disabled.
+
+.. option:: --disable-tiff
+
+    TIFF support is enabled by default to use PROJ-data resource files,
+    but this can be disabled, if required.
+
+.. option:: --with-curl=ARG
+
+    Enable CURL support (``ARG=path`` to ``curl-config``).
+
+.. option:: --without-mutex
+
+    Disable real mutex locks (lacking pthreads).
+
 CMake
 --------------------------------------------------------------------------------
 
@@ -240,9 +285,145 @@ Tests are run with::
 The test suite requires that the proj-datumgrid package is installed
 in :envvar:`PROJ_LIB`.
 
-If tests are not required, PROJ can be built without the test suite using the following configuration::
 
-    cmake -DBUILD_TESTING=OFF ..
+CMake configure options
++++++++++++++++++++++++
+
+Options to configure a CMake are provided using ``-D<var>=<value>``.
+All cached entries can be viewed using ``cmake -LAH`` from a build directory.
+
+.. option:: BUILD_CCT=ON
+
+    Build :ref:`cct`, default ON.
+
+.. option:: BUILD_CS2CS=ON
+
+    Build :ref:`cs2cs`, default ON.
+
+.. option:: BUILD_GEOD=ON
+
+    Build :ref:`geod`, default ON.
+
+.. option:: BUILD_GIE=ON
+
+    Build :ref:`gie`, default ON.
+
+.. option:: BUILD_PROJ=ON
+
+    Build :ref:`proj`, default ON.
+
+.. option:: BUILD_PROJINFO=ON
+
+    Build :ref:`projinfo`, default ON.
+
+.. option:: BUILD_PROJSYNC=ON
+
+    Build :ref:`projsync`, default ON.
+
+.. option:: BUILD_SHARED_LIBS
+
+    Build PROJ library shared. Default for Windows is OFF, building only
+    a static library. Default for all others is ON. See also the CMake
+    documentation for `BUILD_SHARED_LIBS
+    <https://cmake.org/cmake/help/v3.9/variable/BUILD_SHARED_LIBS.html>`_.
+
+    .. versionchanged:: 7.0
+        Renamed from ``BUILD_LIBPROJ_SHARED``
+
+.. option:: BUILD_TESTING=ON
+
+    CTest option to build the testing tree, which also downloads and installs
+    Googletest. Default is ON, but can be turned OFF if tests are not required.
+
+    .. versionchanged:: 7.0
+        Renamed from ``PROJ_TESTS``
+
+.. option:: CMAKE_BUILD_TYPE
+
+    Choose the type of build, options are: None (default), Debug, Release,
+    RelWithDebInfo, or MinSizeRel. See also the CMake documentation for
+    `CMAKE_BUILD_TYPE
+    <https://cmake.org/cmake/help/v3.9/variable/CMAKE_BUILD_TYPE.html>`_.
+
+    .. note::
+        A default build is not optimized without specifying
+        ``-DCMAKE_BUILD_TYPE=Release`` (or similar) during configuration,
+        or by specifying ``--config Release`` with CMake
+        multi-configuration build tools (see example below).
+
+.. option:: CMAKE_C_COMPILER
+
+    C compiler. Ignored for some generators, such as Visual Studio.
+
+.. option:: CMAKE_C_FLAGS
+
+    Flags used by the C compiler during all build types. This is
+    initialized by the :envvar:`CFLAGS` environment variable.
+
+.. option:: CMAKE_CXX_COMPILER
+
+    C++ compiler. Ignored for some generators, such as Visual Studio.
+
+.. option:: CMAKE_CXX_FLAGS
+
+    Flags used by the C++ compiler during all build types. This is
+    initialized by the :envvar:`CXXFLAGS` environment variable.
+
+.. option:: CMAKE_INSTALL_PREFIX
+
+    Default for Windows is based on the environment variable
+    :envvar:`OSGEO4W_ROOT` (if set), otherwise is ``c:/OSGeo4W``.
+    Default for Unix-like is ``/usr/local/``.
+
+.. option:: ENABLE_IPO=OFF
+
+    Build library using the compiler's `interprocedural optimization
+    <https://en.wikipedia.org/wiki/Interprocedural_optimization>`_
+    (IPO), if available, default OFF.
+
+    .. versionchanged:: 7.0
+        Renamed from ``ENABLE_LTO``.
+
+.. option:: EXE_SQLITE3
+
+    Path to an ``sqlite3`` or ``sqlite3.exe`` executable.
+
+.. option:: SQLITE3_INCLUDE_DIR
+
+    Path to an include directory with the ``sqlite3.h`` header file.
+
+.. option:: SQLITE3_LIBRARY
+
+    Path to a shared or static library file, such as ``sqlite3.dll``,
+    ``libsqlite3.so``, ``sqlite3.lib`` or other name.
+
+.. option:: ENABLE_CURL=ON
+
+    Enable CURL support, default ON.
+
+.. option:: CURL_INCLUDE_DIR
+
+    Path to an include directory with the ``curl`` directory.
+
+.. option:: CURL_LIBRARY
+
+    Path to a shared or static library file, such as ``libcurl.dll``,
+    ``libcurl.so``, ``libcurl.lib``, or other name.
+
+.. option:: ENABLE_TIFF=ON
+
+    Enable TIFF support to use PROJ-data resource files, default ON.
+
+.. option:: TIFF_INCLUDE_DIR
+
+    Path to an include directory with the ``tiff.h`` header file.
+
+.. option:: TIFF_LIBRARY_RELEASE
+
+    Path to a shared or static library file, such as ``tiff.dll``,
+    ``libtiff.so``, ``tiff.lib``, or other name. A similar variable
+    ``TIFF_LIBRARY_DEBUG`` can also be specified to a similar library for
+    building Debug releases.
 
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
