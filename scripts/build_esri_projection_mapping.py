@@ -662,7 +662,7 @@ config_str = """
 
 # Hammer_Aitoff: possibly hammer?
 # Hammer_Ellipsoidal: possibly hammer?
-# Eckert_Greifendorff: +proj=hammer +W=0.25 +m=1
+# Eckert_Greifendorff: +proj=hammer +W=0.25 +M=1
 
 # Missing mappings
 
