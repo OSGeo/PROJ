@@ -4360,6 +4360,70 @@ static const struct {
          {"False northing", 2},
      }},
 
+    {"Patterson",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Patterson",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Natural_Earth",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Natural Earth",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Natural_Earth_II",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Natural Earth II",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Compact_Miller",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Compact Miller",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Times",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Times",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Flat_Polar_Quartic",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Flat Polar Quartic",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Behrmann",
+     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
+     "Lambert Cylindrical Equal Area (Spherical)",
+     {
+         {"Latitude of 1st standard parallel", 30},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
     {"Winkel_I",
      {
          {"False_Easting", 1},
