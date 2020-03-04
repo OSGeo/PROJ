@@ -666,8 +666,8 @@ config_str = """
 
 # Missing mappings
 
-# Transverse_Mercator_NGA_2014: utm
-# Polar_Stereographic_Variant_A: ups
+# Transverse_Mercator_NGA_2014: utm -- tricky mapping from Central_Meridian to zone
+# Polar_Stereographic_Variant_A: ups -- tricky mapping from Latitude_Of_Origin to "+south" when required
 
 # The following methods are not currently possible in PROJ:
 
