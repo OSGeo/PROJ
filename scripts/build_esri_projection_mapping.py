@@ -159,7 +159,17 @@ config_str = """
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
-# Behrmann: not handled
+- Behrmann:
+    WKT2_name: EPSG_NAME_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian:
+            Name: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+            Default: 0.0
+        - Standard_Parallel_1:
+            Name: EPSG_NAME_PARAMETER_LATITUDE_1ST_STD_PARALLEL
+            Default: 30.0
 
 - Winkel_I:
     WKT2_name: "Winkel I"
@@ -701,14 +711,20 @@ def generate_mapping(WKT2_name, esri_proj_name, Params, suffix=''):
     for param in Params:
         for param_name in param:
             param_value = param[param_name]
+
+            default_value = None
+            if isinstance(param_value, dict):
+                default_value = param_value.get('Default', None)
+                param_value = param_value['Name']
+
             if isinstance(param_value, str):
                 if param_value.startswith('EPSG_'):
-                    print('  { "%s", %s, %s, 0.0 },' % (param_name, param_value, param_value.replace('_NAME_', '_CODE_')))
+                    print('  { "%s", %s, %s, "%.1f", %s },' % (param_name, param_value, param_value.replace('_NAME_', '_CODE_'), default_value or 0.0, "true" if default_value is not None else "false"))
                 else:
-                    print('  { "%s", "%s", 0, 0.0 },' % (param_name, param_value))
+                    print('  { "%s", "%s", 0, "%.1f", %s },' % (param_name, param_value, default_value or 0.0, "true" if default_value is not None else "false"))
             else:
-                print('  { "%s", nullptr, 0, %.1f },' % (param_name, param_value))
-    print('  { nullptr, nullptr, 0, 0.0 }')
+                print('  { "%s", nullptr, 0, "%.1f", false },' % (param_name, param_value))
+    print('  { nullptr, nullptr, 0, "0.0", false }')
     print('};')
 
 
