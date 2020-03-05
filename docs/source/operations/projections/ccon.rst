@@ -120,7 +120,7 @@ For ATPOL to WGS84 test, run the following script:
 ::
 
    #!/bin/bash
-   cat << EOF | src/cs2cs -v -f "%E" +proj=ccon +lat_1=52 +lat_0=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000 +to +proj=longlat +datum=WGS84 +no_defs
+   cat << EOF | src/cs2cs -v -f "%E" +proj=ccon +lat_1=52 +lat_0=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000 +to +proj=longlat
    0 0
    0 700000
    700000 0
@@ -142,7 +142,7 @@ Analogous script can be run for reverse test:
 
 ::
 
-   cat << EOF  | src/cs2cs -v -f "%E" +proj=longlat +datum=WGS84 +no_defs +to +proj=ccon +lat_1=52 +lat_0=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000
+   cat << EOF  | src/cs2cs -v -f "%E" +proj=longlat +to +proj=ccon +lat_1=52 +lat_0=52 +lon_0=19 +axis=esu +a=6390000 +x_0=330000 +y_0=-350000
    24 55
    15 49
    24 49
