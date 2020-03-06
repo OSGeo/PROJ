@@ -663,11 +663,15 @@ config_str = """
 # Hammer_Aitoff: possibly hammer?
 # Hammer_Ellipsoidal: possibly hammer?
 # Eckert_Greifendorff: +proj=hammer +W=0.25 +M=1
+# Tobler_Cylindrical_I: likely tobmerc, but parameters TBD
+# Tobler_Cylindrical_II: likely tobmerc, but parameters TBD
 
 # Missing mappings
 
 # Transverse_Mercator_NGA_2014: utm -- tricky mapping from Central_Meridian to zone
 # Polar_Stereographic_Variant_A: ups -- tricky mapping from Latitude_Of_Origin to "+south" when required
+# Transverse Mercator: alias for Transverse_Mercator, as seen in ESRI:102470 - ESRI:102489
+
 
 # The following methods are not currently possible in PROJ:
 
@@ -693,6 +697,8 @@ config_str = """
 # Polar_Stereographic_Variant_B
 # Polar_Stereographic_Variant_C
 # Quartic_Authalic_Ellipsoidal
+# Adams_Square_II
+# Peirce_Quincuncial
 
 """
 
