@@ -31,8 +31,9 @@ static PJ_XY eqdc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
 
     Q->rho = Q->c - (Q->ellips ? pj_mlfn(lp.phi, sin(lp.phi),
         cos(lp.phi), Q->en) : lp.phi);
-    xy.x = Q->rho * sin( lp.lam *= Q->n );
-    xy.y = Q->rho0 - Q->rho * cos(lp.lam);
+    const double lam_mul_n = lp.lam * Q->n;
+    xy.x = Q->rho * sin(lam_mul_n);
+    xy.y = Q->rho0 - Q->rho * cos(lam_mul_n);
 
     return xy;
 }
@@ -93,10 +94,12 @@ PJ *PROJECTION(eqdc) {
     if (!(Q->en = pj_enfn(P->es)))
         return destructor(P, ENOMEM);
 
-    Q->n = sinphi = sin(Q->phi1);
+    sinphi = sin(Q->phi1);
+    Q->n = sinphi;
     cosphi = cos(Q->phi1);
     secant = fabs(Q->phi1 - Q->phi2) >= EPS10;
-    if( (Q->ellips = (P->es > 0.)) ) {
+    Q->ellips = (P->es > 0.);
+    if( Q->ellips ) {
         double ml1, m1;
 
         m1 = pj_msfn(sinphi, cosphi, P->es);

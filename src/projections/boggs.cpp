@@ -14,25 +14,25 @@ PROJ_HEAD(boggs, "Boggs Eumorphic") "\n\tPCyl, no inv, Sph";
 
 static PJ_XY boggs_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
-	double theta, th1, c;
-	int i;
-	(void) P;
+    double theta, th1, c;
+    int i;
+    (void) P;
 
-	theta = lp.phi;
-	if (fabs(fabs(lp.phi) - M_HALFPI) < EPS)
-		xy.x = 0.;
-	else {
-		c = sin(theta) * M_PI;
-		for (i = NITER; i; --i) {
-			theta -= th1 = (theta + sin(theta) - c) /
-				(1. + cos(theta));
-			if (fabs(th1) < EPS) break;
-		}
-		theta *= 0.5;
-		xy.x = FXC * lp.lam / (1. / cos(lp.phi) + FXC2 / cos(theta));
-	}
-	xy.y = FYC * (lp.phi + M_SQRT2 * sin(theta));
-	return (xy);
+    theta = lp.phi;
+    if (fabs(fabs(lp.phi) - M_HALFPI) < EPS)
+        xy.x = 0.;
+    else {
+        c = sin(theta) * M_PI;
+        for (i = NITER; i; --i) {
+            th1 = (theta + sin(theta) - c) / (1. + cos(theta));
+            theta -= th1;
+            if (fabs(th1) < EPS) break;
+        }
+        theta *= 0.5;
+        xy.x = FXC * lp.lam / (1. / cos(lp.phi) + FXC2 / cos(theta));
+    }
+    xy.y = FYC * (lp.phi + M_SQRT2 * sin(theta));
+    return (xy);
 }
 
 

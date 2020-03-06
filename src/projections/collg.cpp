@@ -14,7 +14,8 @@ PROJ_HEAD(collg, "Collignon") "\n\tPCyl, Sph";
 static PJ_XY collg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     (void) P;
-    if ((xy.y = 1. - sin(lp.phi)) <= 0.)
+    xy.y = 1. - sin(lp.phi);
+    if (xy.y <= 0.)
         xy.y = 0.;
     else
         xy.y = sqrt(xy.y);
@@ -27,7 +28,8 @@ static PJ_XY collg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
 static PJ_LP collg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     lp.phi = xy.y / FYC - 1.;
-    if (fabs(lp.phi = 1. - lp.phi * lp.phi) < 1.)
+    lp.phi = 1. - lp.phi * lp.phi;
+    if (fabs(lp.phi) < 1.)
         lp.phi = asin(lp.phi);
     else if (fabs(lp.phi) > ONEEPS) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -36,7 +38,8 @@ static PJ_LP collg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;
     }
 
-    if ((lp.lam = 1. - sin(lp.phi)) <= 0.)
+    lp.lam = 1. - sin(lp.phi);
+    if (lp.lam <= 0.)
         lp.lam = 0.;
     else
         lp.lam = xy.x / (FXC * sqrt(lp.lam));

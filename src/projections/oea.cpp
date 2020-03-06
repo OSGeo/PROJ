@@ -19,15 +19,14 @@ struct pj_opaque {
 static PJ_XY oea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double Az, M, N, cp, sp, cl, shz;
 
-    cp = cos(lp.phi);
-    sp = sin(lp.phi);
-    cl = cos(lp.lam);
-    Az = aatan2(cp * sin(lp.lam), Q->cp0 * sp - Q->sp0 * cp * cl) + Q->theta;
-    shz = sin(0.5 * aacos(P->ctx, Q->sp0 * sp + Q->cp0 * cp * cl));
-    M = aasin(P->ctx, shz * sin(Az));
-    N = aasin(P->ctx, shz * cos(Az) * cos(M) / cos(M * Q->two_r_m));
+    const double cp = cos(lp.phi);
+    const double sp = sin(lp.phi);
+    const double cl = cos(lp.lam);
+    const double Az = aatan2(cp * sin(lp.lam), Q->cp0 * sp - Q->sp0 * cp * cl) + Q->theta;
+    const double shz = sin(0.5 * aacos(P->ctx, Q->sp0 * sp + Q->cp0 * cp * cl));
+    const double M = aasin(P->ctx, shz * sin(Az));
+    const double N = aasin(P->ctx, shz * cos(Az) * cos(M) / cos(M * Q->two_r_m));
     xy.y = Q->n * sin(N * Q->two_r_n);
     xy.x = Q->m * sin(M * Q->two_r_m) * cos(N) / cos(N * Q->two_r_n);
 
@@ -38,16 +37,16 @@ static PJ_XY oea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward 
 static PJ_LP oea_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double N, M, xp, yp, z, Az, cz, sz, cAz;
 
-    N = Q->hn * aasin(P->ctx,xy.y * Q->rn);
-    M = Q->hm * aasin(P->ctx,xy.x * Q->rm * cos(N * Q->two_r_n) / cos(N));
-    xp = 2. * sin(M);
-    yp = 2. * sin(N) * cos(M * Q->two_r_m) / cos(M);
-    cAz = cos(Az = aatan2(xp, yp) - Q->theta);
-    z = 2. * aasin(P->ctx, 0.5 * hypot(xp, yp));
-    sz = sin(z);
-    cz = cos(z);
+    const double N = Q->hn * aasin(P->ctx,xy.y * Q->rn);
+    const double M = Q->hm * aasin(P->ctx,xy.x * Q->rm * cos(N * Q->two_r_n) / cos(N));
+    const double xp = 2. * sin(M);
+    const double yp = 2. * sin(N) * cos(M * Q->two_r_m) / cos(M);
+    const double Az = aatan2(xp, yp) - Q->theta;
+    const double cAz = cos(Az);
+    const double z = 2. * aasin(P->ctx, 0.5 * hypot(xp, yp));
+    const double sz = sin(z);
+    const double cz = cos(z);
     lp.phi = aasin(P->ctx, Q->sp0 * cz + Q->cp0 * sz * cAz);
     lp.lam = aatan2(sz * sin(Az),
         Q->cp0 * cz - Q->sp0 * sz * cAz);

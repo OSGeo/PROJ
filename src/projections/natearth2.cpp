@@ -51,7 +51,7 @@ static PJ_XY natearth2_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, fo
 
 static PJ_LP natearth2_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
-    double yc, tol, y2, y4, y6, f, fder;
+    double yc, y2, y4, y6, f, fder;
     int i;
     (void) P;
 
@@ -69,7 +69,8 @@ static PJ_LP natearth2_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, in
         y4 = y2 * y2;
         f = (yc * (B0 + y4 * y4 * (B1 + B2 * y2 + B3 * y4))) - xy.y;
         fder = C0 + y4 * y4 * (C1 + C2 * y2 + C3 * y4);
-        yc -= tol = f / fder;
+        const double tol = f / fder;
+        yc -= tol;
         if (fabs(tol) < EPS) {
             break;
         }

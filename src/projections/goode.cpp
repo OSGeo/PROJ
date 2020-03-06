@@ -69,12 +69,16 @@ PJ *PROJECTION(goode) {
     P->destructor = destructor;
 
     P->es = 0.;
-    if (!(Q->sinu = pj_sinu(nullptr)) || !(Q->moll = pj_moll(nullptr)))
+    Q->sinu = pj_sinu(nullptr);
+    Q->moll = pj_moll(nullptr);
+    if (Q->sinu == nullptr || Q->moll == nullptr)
         return destructor (P, ENOMEM);
     Q->sinu->es = 0.;
     Q->sinu->ctx = P->ctx;
     Q->moll->ctx = P->ctx;
-    if (!(Q->sinu = pj_sinu(Q->sinu)) || !(Q->moll = pj_moll(Q->moll)))
+    Q->sinu = pj_sinu(Q->sinu);
+    Q->moll = pj_moll(Q->moll);
+    if (Q->sinu == nullptr || Q->moll == nullptr)
         return destructor (P, ENOMEM);
 
     P->fwd = goode_s_forward;
