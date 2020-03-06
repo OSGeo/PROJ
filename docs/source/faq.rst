@@ -173,7 +173,7 @@ Note that if you're using conda, activating an environment sets
 :envvar:`PROJ_LIB` to a resource directory located in that environment.
 
 
-What happend to PROJ.4?
+What happened to PROJ.4?
 --------------------------------------------------------------------------------
 
 The first incarnation of PROJ saw the light of day in 1983. Back then it

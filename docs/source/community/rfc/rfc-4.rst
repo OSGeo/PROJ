@@ -103,7 +103,7 @@ environment variable.
 
 The rationale for putting proj.ini in that location is
 that it is a well-known place by PROJ users, with the existing PROJ_LIB mechanics
-for systems like Windows where hardcoded paths at runtime aren't generaly usable.
+for systems like Windows where hardcoded paths at runtime aren't generally usable.
 
 C API
 +++++
@@ -492,7 +492,7 @@ Limitations of current formats
 ++++++++++++++++++++++++++++++
 
 Several formats exist depending on the ad-hoc needs and ideas of the original
-data producer. It would be apropriate to converge on a common format able to
+data producer. It would be appropriate to converge on a common format able to
 address the different use cases.
 
 - Not tiled. Tiling is a nice to have propery for cloud-friendly access to
@@ -538,7 +538,7 @@ Strong points:
   geospatial field to store multi-resolution/pyramid rasters. So it can be
   used with sub-grids as in the NTv2 format.
 
-* Extensive experience with the TIFF format, and its appropriatness for network
+* Extensive experience with the TIFF format, and its appropriateness for network
   access, in particular through the `Cloud Optimized GeoTIFF initiative <https://www.cogeo.org/>`_
   whose layout can make use of sub-grids efficient from a network access
   perspective, because grid headers can be put at the beginning of the file, and

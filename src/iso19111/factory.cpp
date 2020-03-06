@@ -4333,7 +4333,7 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         "a2.south_lat, a2.west_lon, a2.north_lat, a2.east_lon) = 1 ";
 
 #if 0
-    // While those additonal constraints are correct, they are found to
+    // While those additional constraints are correct, they are found to
     // kill performance. So enforce them as post-processing
 
     if (!allowedAuthorities.empty()) {

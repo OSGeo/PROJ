@@ -1247,7 +1247,7 @@ void GeodeticReferenceFrame::_exportToWKT(
                 if (dbContext) {
                     auto factory = io::AuthorityFactory::create(
                         NN_NO_CHECK(dbContext), std::string());
-                    // We use anonymous autority and approximate matching, so
+                    // We use anonymous authority and approximate matching, so
                     // as to trigger the caching done in createObjectsFromName()
                     // in that case.
                     auto matches = factory->createObjectsFromName(

@@ -9895,7 +9895,7 @@ TEST(operation,
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<Transformation>(obj);
     ASSERT_TRUE(crs != nullptr);
-    // Test that even if the .gtx file is unkown, we export in the correct
+    // Test that even if the .gtx file is unknown, we export in the correct
     // direction
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +inv +proj=vgridshift +grids=foo.gtx "
