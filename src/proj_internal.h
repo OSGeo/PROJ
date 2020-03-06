@@ -759,7 +759,7 @@ C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[];
 #ifdef PJ_LIB__
 #define PROJ_HEAD(name, desc) static const char des_##name [] = desc
 
-#define OPERATION(name, NEED_ELPJ_LPS)                          \
+#define OPERATION(name, NEED_ELLPS)                          \
                                                              \
 pj_projection_specific_setup_##name (PJ *P);                 \
 C_NAMESPACE PJ *pj_##name (PJ *P);                           \
@@ -773,7 +773,7 @@ C_NAMESPACE PJ *pj_##name (PJ *P) {                          \
     if (nullptr==P)                                          \
         return nullptr;                                      \
     P->descr = des_##name;                                   \
-    P->need_ellps = NEED_ELPJ_LPS;                              \
+    P->need_ellps = NEED_ELLPS;                              \
     P->left  = PJ_IO_UNITS_RADIANS;                          \
     P->right = PJ_IO_UNITS_CLASSIC;                          \
     return P;                                                \
