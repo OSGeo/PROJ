@@ -13,16 +13,16 @@ PROJ_HEAD(nell, "Nell") "\n\tPCyl, Sph";
 
 static PJ_XY nell_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
-    double k, V;
     int i;
     (void) P;
 
-    k = 2. * sin(lp.phi);
-    V = lp.phi * lp.phi;
-    lp.phi *= 1.00371 + V * (-0.0935382 + V * -0.011412);
+    const double k = 2. * sin(lp.phi);
+    const double phi_pow_2 = lp.phi * lp.phi;
+    lp.phi *= 1.00371 + phi_pow_2 * (-0.0935382 + phi_pow_2 * -0.011412);
     for (i = MAX_ITER; i ; --i) {
-        lp.phi -= V = (lp.phi + sin(lp.phi) - k) /
-            (1. + cos(lp.phi));
+        const double V = (lp.phi + sin(lp.phi) - k) /
+                            (1. + cos(lp.phi));
+        lp.phi -= V;
         if (fabs(V) < LOOP_TOL)
             break;
     }

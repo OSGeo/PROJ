@@ -101,8 +101,7 @@ static PJ_XY robin_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
 
 static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
-    long i;
-    double t, t1;
+    double t;
     struct COEFS T;
     int iters;
 
@@ -119,7 +118,7 @@ static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         }
     } else { /* general problem */
         /* in Y space, reduce to table interval */
-        i = isnan(lp.phi) ? -1 : lround(floor(lp.phi * NODES));
+        long i = isnan(lp.phi) ? -1 : lround(floor(lp.phi * NODES));
         if( i < 0 || i >= NODES ) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return lp;
@@ -133,7 +132,8 @@ static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         /* first guess, linear interp */
         t = 5. * (lp.phi - T.c0)/(Y[i+1].c0 - T.c0);
         for (iters = MAX_ITER; iters ; --iters) { /* Newton-Raphson */
-            t -= t1 = (V(T,t) - lp.phi) / DV(T,t);
+            const double t1 = (V(T,t) - lp.phi) / DV(T,t);
+            t -= t1;
             if (fabs(t1) < EPS)
                 break;
         }

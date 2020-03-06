@@ -34,7 +34,8 @@ static PJ_XY rpoly_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         xy.y = - P->phi0;
     } else {
         xy.y = 1. / tan(lp.phi);
-        xy.x = sin(fa = 2. * atan(fa * sin(lp.phi))) * xy.y;
+        fa = 2. * atan(fa * sin(lp.phi));
+        xy.x = sin(fa) * xy.y;
         xy.y = lp.phi - P->phi0 + (1. - cos(fa)) * xy.y;
     }
     return xy;
@@ -48,7 +49,9 @@ PJ *PROJECTION(rpoly) {
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
-    if ((Q->mode = (Q->phi1 = fabs(pj_param(P->ctx, P->params, "rlat_ts").f)) > EPS)) {
+    Q->phi1 = fabs(pj_param(P->ctx, P->params, "rlat_ts").f);
+    Q->mode = Q->phi1 > EPS;
+    if (Q->mode) {
         Q->fxb = 0.5 * sin(Q->phi1);
         Q->fxa = 0.5 / Q->fxb;
     }

@@ -27,8 +27,10 @@ static PJ_XY labrd_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
     V2 = .5 * P->e * Q->A * log ((1. + t)/(1. - t));
     ps = 2. * (atan(exp(V1 - V2 + Q->C)) - M_FORTPI);
     I1 = ps - Q->p0s;
-    cosps = cos(ps);    cosps2 = cosps * cosps;
-    sinps = sin(ps);    sinps2 = sinps * sinps;
+    cosps = cos(ps);
+    cosps2 = cosps * cosps;
+    sinps = sin(ps);
+    sinps2 = sinps * sinps;
     I4 = Q->A * cosps;
     I2 = .5 * Q->A * I4 * sinps;
     I3 = I2 * Q->A * Q->A * (5. * cosps2 - sinps2) / 12.;
@@ -125,7 +127,8 @@ PJ *PROJECTION(labrd) {
           - Q->A * log( tan(M_FORTPI + .5 * P->phi0))
           + log( tan(M_FORTPI + .5 * Q->p0s));
     t = Az + Az;
-    Q->Ca = (1. - cos(t)) * ( Q->Cb = 1. / (12. * Q->kRg * Q->kRg) );
+    Q->Cb = 1. / (12. * Q->kRg * Q->kRg);
+    Q->Ca = (1. - cos(t)) * Q->Cb;
     Q->Cb *= sin(t);
     Q->Cc = 3. * (Q->Ca * Q->Ca - Q->Cb * Q->Cb);
     Q->Cd = 6. * Q->Ca * Q->Cb;

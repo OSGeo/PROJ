@@ -67,7 +67,9 @@ static PJ_XY aitoff_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double c, d;
 
-    if((d = acos(cos(lp.phi) * cos(c = 0.5 * lp.lam))) != 0.0) {/* basic Aitoff */
+    c = 0.5 * lp.lam;
+    d = acos(cos(lp.phi) * cos(c));
+    if(d != 0.0) {/* basic Aitoff */
         xy.x = 2. * d * cos(lp.phi) * sin(c) * (xy.y = 1. / sin(d));
         xy.y *= d * sin(lp.phi);
     } else
@@ -113,8 +115,10 @@ static PJ_LP aitoff_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
     do {
         iter = 0;
         do {
-            sl = sin(lp.lam * 0.5); cl = cos(lp.lam * 0.5);
-            sp = sin(lp.phi); cp = cos(lp.phi);
+            sl = sin(lp.lam * 0.5);
+            cl = cos(lp.lam * 0.5);
+            sp = sin(lp.phi);
+            cp = cos(lp.phi);
             D = cp * cl;
             C = 1. - D * D;
             const double denom = pow(C, 1.5);
@@ -137,11 +141,14 @@ static PJ_LP aitoff_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
                 f2p = 0.5 * (f2p + 1.);
                 f2l *= 0.5;
             }
-            f1 -= xy.x; f2 -= xy.y;
-            dl = (f2 * f1p - f1 * f2p) / (dp = f1p * f2l - f2p * f1l);
+            f1 -= xy.x;
+            f2 -= xy.y;
+            dp = f1p * f2l - f2p * f1l;
+            dl = (f2 * f1p - f1 * f2p) / dp;
             dp = (f1 * f2l - f2 * f1l) / dp;
             dl = fmod(dl, M_PI); /* set to interval [-M_PI, M_PI] */
-            lp.phi -= dp;   lp.lam -= dl;
+            lp.phi -= dp;
+            lp.lam -= dl;
         } while ((fabs(dp) > EPSILON || fabs(dl) > EPSILON) && (iter++ < MAXITER));
         if (lp.phi > M_PI_2) lp.phi -= 2.*(lp.phi-M_PI_2); /* correct if symmetrical solution for Aitoff */
         if (lp.phi < -M_PI_2) lp.phi -= 2.*(lp.phi+M_PI_2); /* correct if symmetrical solution for Aitoff */
@@ -149,7 +156,8 @@ static PJ_LP aitoff_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
 
         /* calculate x,y coordinates with solution obtained */
         if((D = acos(cos(lp.phi) * cos(C = 0.5 * lp.lam))) != 0.0) {/* Aitoff */
-            x = 2. * D * cos(lp.phi) * sin(C) * (y = 1. / sin(D));
+            y = 1. / sin(D);
+            x = 2. * D * cos(lp.phi) * sin(C) * y;
             y *= D * sin(lp.phi);
         } else
             x = y = 0.;

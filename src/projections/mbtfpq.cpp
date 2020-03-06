@@ -20,14 +20,13 @@ PROJ_HEAD(mbtfpq, "McBryde-Thomas Flat-Polar Quartic") "\n\tCyl, Sph";
 
 static PJ_XY mbtfpq_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
-    double th1, c;
-    int i;
     (void) P;
 
-    c = C * sin(lp.phi);
-    for (i = NITER; i; --i) {
-        lp.phi -= th1 = (sin(.5*lp.phi) + sin(lp.phi) - c) /
-            (.5*cos(.5*lp.phi)  + cos(lp.phi));
+    const double c = C * sin(lp.phi);
+    for (int i = NITER; i; --i) {
+        const double th1 = (sin(.5*lp.phi) + sin(lp.phi) - c) /
+                            (.5*cos(.5*lp.phi)  + cos(lp.phi));
+        lp.phi -= th1;
         if (fabs(th1) < EPS) break;
     }
     xy.x = FXC * lp.lam * (1.0 + 2. * cos(lp.phi)/cos(0.5 * lp.phi));
@@ -46,10 +45,18 @@ static PJ_LP mbtfpq_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return lp;
         }
-        else if (lp.phi < 0.) { t = -1.; lp.phi = -M_PI; }
-        else { t = 1.; lp.phi = M_PI; }
-    } else
-        lp.phi = 2. * asin(t = lp.phi);
+        else if (lp.phi < 0.) {
+            t = -1.;
+            lp.phi = -M_PI;
+        }
+        else {
+            t = 1.;
+            lp.phi = M_PI;
+        }
+    } else {
+        t = lp.phi;
+        lp.phi = 2. * asin(lp.phi);
+    }
     lp.lam = RXC * xy.x / (1. + 2. * cos(lp.phi)/cos(0.5 * lp.phi));
     lp.phi = RC * (t + sin(lp.phi));
     if (fabs(lp.phi) > 1.)
