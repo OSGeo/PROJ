@@ -2463,17 +2463,56 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 return CartesianCS::createEastingNorthing(unit);
             }
         } else if (ci_equal(parentNodeName, WKTConstants::VERT_CS) ||
+                   ci_equal(parentNodeName, WKTConstants::VERTCS) ||
                    ci_equal(parentNodeName, WKTConstants::BASEVERTCRS)) {
             csTypeCStr = "vertical";
+
+            bool downDirection = false;
+            if (ci_equal(parentNodeName, WKTConstants::VERTCS)) // ESRI
+            {
+                for (const auto &childNode : parentNode->GP()->children()) {
+                    const auto &childNodeChildren = childNode->GP()->children();
+                    if (childNodeChildren.size() == 2 &&
+                        ci_equal(childNode->GP()->value(),
+                                 WKTConstants::PARAMETER) &&
+                        childNodeChildren[0]->GP()->value() ==
+                            "\"Direction\"") {
+                        const auto &paramValue =
+                            childNodeChildren[1]->GP()->value();
+                        try {
+                            double val = asDouble(childNodeChildren[1]);
+                            if (val == 1.0) {
+                                // ok
+                            } else if (val == -1.0) {
+                                downDirection = true;
+                            }
+                        } catch (const std::exception &) {
+                            throw ParsingException(
+                                concat("unhandled parameter value type : ",
+                                       paramValue));
+                        }
+                    }
+                }
+            }
+
             if (axisCount == 0) {
                 auto unit =
                     buildUnitInSubNode(parentNode, UnitOfMeasure::Type::LINEAR);
                 if (unit == UnitOfMeasure::NONE) {
-                    if (ci_equal(parentNodeName, WKTConstants::VERT_CS)) {
+                    if (ci_equal(parentNodeName, WKTConstants::VERT_CS) ||
+                        ci_equal(parentNodeName, WKTConstants::VERTCS)) {
                         ThrowParsingExceptionMissingUNIT();
                     } else {
                         unit = UnitOfMeasure::METRE;
                     }
+                }
+                if (downDirection) {
+                    return VerticalCS::create(
+                        util::PropertyMap(),
+                        CoordinateSystemAxis::create(
+                            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                    "depth"),
+                            "D", AxisDirection::DOWN, unit));
                 }
                 return VerticalCS::createGravityRelatedHeight(unit);
             }
@@ -3890,6 +3929,7 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
     const auto &nodeValue = nodeP->value();
     if (isNull(csNode) && !ci_equal(nodeValue, WKTConstants::VERT_CS) &&
+        !ci_equal(nodeValue, WKTConstants::VERTCS) &&
         !ci_equal(nodeValue, WKTConstants::BASEVERTCRS)) {
         ThrowMissing(WKTConstants::CS_);
     }
@@ -3905,7 +3945,8 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     // following conventions from
     // https://pubs.usgs.gov/tm/11b4/pdf/tm11-B4.pdf
     // page 9
-    if (ci_equal(nodeValue, WKTConstants::VERT_CS)) {
+    if (ci_equal(nodeValue, WKTConstants::VERT_CS) ||
+        ci_equal(nodeValue, WKTConstants::VERTCS)) {
         std::string name;
         if (props.getStringValue(IdentifiedObject::NAME_KEY, name)) {
             std::string geoidName;
@@ -4404,6 +4445,7 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     }
 
     if (ci_equal(name, WKTConstants::VERT_CS) ||
+        ci_equal(name, WKTConstants::VERTCS) ||
         ci_equal(name, WKTConstants::VERTCRS) ||
         ci_equal(name, WKTConstants::VERTICALCRS)) {
         if (!isNull(nodeP->lookForChild(WKTConstants::BASEVERTCRS))) {
@@ -6165,6 +6207,9 @@ WKTParser::attachDatabaseContext(const DatabaseContextPtr &dbContext) {
  */
 WKTParser::WKTGuessedDialect
 WKTParser::guessDialect(const std::string &wkt) noexcept {
+    if (ci_starts_with(wkt, WKTConstants::VERTCS)) {
+        return WKTGuessedDialect::WKT1_ESRI;
+    }
     const std::string *const wkt1_keywords[] = {
         &WKTConstants::GEOCCS, &WKTConstants::GEOGCS,  &WKTConstants::COMPD_CS,
         &WKTConstants::PROJCS, &WKTConstants::VERT_CS, &WKTConstants::LOCAL_CS};

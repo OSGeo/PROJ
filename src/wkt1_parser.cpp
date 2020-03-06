@@ -81,7 +81,12 @@ static const osr_cs_wkt_tokens tokens[] = {
 
     PAIR(PROJCS),         PAIR(PROJECTION), PAIR(GEOGCS),     PAIR(DATUM),
     PAIR(SPHEROID),       PAIR(PRIMEM),     PAIR(UNIT),       PAIR(GEOCCS),
-    PAIR(AUTHORITY),      PAIR(VERT_CS),    PAIR(VERT_DATUM), PAIR(COMPD_CS),
+    PAIR(AUTHORITY),
+    PAIR(VERT_CS),
+    PAIR(VERTCS),
+    PAIR(VERT_DATUM),
+    PAIR(VDATUM),
+    PAIR(COMPD_CS),
     PAIR(AXIS),           PAIR(TOWGS84),    PAIR(FITTED_CS),  PAIR(LOCAL_CS),
     PAIR(LOCAL_DATUM),
 

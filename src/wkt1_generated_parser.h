@@ -60,18 +60,20 @@ extern int pj_wkt1_debug;
     T_GEOCCS = 269,
     T_AUTHORITY = 270,
     T_VERT_CS = 271,
-    T_VERT_DATUM = 272,
-    T_COMPD_CS = 273,
-    T_AXIS = 274,
-    T_TOWGS84 = 275,
-    T_FITTED_CS = 276,
-    T_LOCAL_CS = 277,
-    T_LOCAL_DATUM = 278,
-    T_PARAMETER = 279,
-    T_EXTENSION = 280,
-    T_STRING = 281,
-    T_NUMBER = 282,
-    T_IDENTIFIER = 283
+    T_VERTCS = 272,
+    T_VERT_DATUM = 273,
+    T_VDATUM = 274,
+    T_COMPD_CS = 275,
+    T_AXIS = 276,
+    T_TOWGS84 = 277,
+    T_FITTED_CS = 278,
+    T_LOCAL_CS = 279,
+    T_LOCAL_DATUM = 280,
+    T_PARAMETER = 281,
+    T_EXTENSION = 282,
+    T_STRING = 283,
+    T_NUMBER = 284,
+    T_IDENTIFIER = 285
   };
 #endif
 
