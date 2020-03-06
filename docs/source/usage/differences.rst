@@ -132,13 +132,13 @@ proj
 --------
 
 Removed ``-ld`` option from application, since it promoted use of deprecated
-paramters like ``+towgs`` and ``+datum``.
+parameters like ``+towgs`` and ``+datum``.
 
 cs2cs
 --------
 
 Removed ``-ld`` option from application, since it promoted use of deprecated
-paramters like ``+towgs`` and ``+datum``.
+parameters like ``+towgs`` and ``+datum``.
 
 UTF-8 adoption
 --------------

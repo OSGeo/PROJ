@@ -37,7 +37,7 @@ is an easy way to inspect such grid files:
 - Files hosted on the CDN will use a Geographic 2D CRS for the GeoTIFF GeoKeys.
   That CRS is intended to be the interpolation CRS as defined in
   `OGC Abstract Specification Topic 2 <http://docs.opengeospatial.org/as/18-005r4/18-005r4.html>`_,
-  that is the CRS to which grid values are refered to.
+  that is the CRS to which grid values are referred to.
 
   Given that they will nominally be related to the EPSG dataset, the `GeodeticCRSGeoKey
   <http://docs.opengeospatial.org/is/19-008r4/19-008r4.html#_requirements_class_geodeticcrsgeokey>`_
@@ -137,7 +137,7 @@ is an easy way to inspect such grid files:
 
     * SamplesPerPixel = 1 for vertical shift grids.
 
-   In the future, different values of SamplesPerPixel may be used to accomodate
+   In the future, different values of SamplesPerPixel may be used to accommodate
    for other needs. For example for deformation models, SamplesPerPixel = 3 to combine
    horizontal and vertical adjustments.
    And even for the current identified needs of horizontal or vertical shifts,
