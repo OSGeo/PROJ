@@ -62,6 +62,7 @@ class WKTConstants {
     static const std::string PROJECTION;
     static const std::string PARAMETER; // WKT2 too
     static const std::string VERT_CS;
+    static const std::string VERTCS; // WKT1 ESRI
     static const std::string VERT_DATUM;
     static const std::string COMPD_CS;
     static const std::string TOWGS84;     // WKT1 only
@@ -95,7 +96,7 @@ class WKTConstants {
     static const std::string CITATION;
     static const std::string URI;
     static const std::string VERTCRS;
-    static const std::string VDATUM;
+    static const std::string VDATUM; // WKT2 and WKT1 ESRI
     static const std::string COMPOUNDCRS;
     static const std::string PARAMETERFILE;
     static const std::string COORDINATEOPERATION;

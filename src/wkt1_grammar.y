@@ -53,7 +53,11 @@
 %token T_GEOCCS                 "GEOCCS"
 %token T_AUTHORITY              "AUTHORITY"
 %token T_VERT_CS                "VERT_CS"
+// ESRI variation
+%token T_VERTCS                 "VERTCS"
 %token T_VERT_DATUM             "VERT_DATUM"
+// ESRI variation
+%token T_VDATUM                 "VDATUM"
 %token T_COMPD_CS               "COMPD_CS"
 %token T_AXIS                   "AXIS"
 %token T_TOWGS84                "TOWGS84"
@@ -213,6 +217,7 @@ authority:
 
 vert_cs:
     T_VERT_CS begin_node_name ',' vert_datum ',' linear_unit opt_axis_authority end_node
+    | T_VERTCS begin_node_name ',' vdatum ',' opt_parameter_list_linear_unit end_node
 
 opt_axis_authority:
     | ',' axis opt_authority
@@ -220,6 +225,9 @@ opt_axis_authority:
 
 vert_datum:
     T_VERT_DATUM begin_node_name ',' datum_type opt_extension_authority end_node
+
+vdatum:
+    T_VDATUM begin_node_name end_node
 
 opt_extension_authority:
     | ',' extension opt_authority

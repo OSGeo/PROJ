@@ -2548,12 +2548,29 @@ const cs::VerticalCSNNPtr VerticalCRS::coordinateSystem() const {
 void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     formatter->startNode(isWKT2 ? io::WKTConstants::VERTCRS
-                                : io::WKTConstants::VERT_CS,
+                                : formatter->useESRIDialect()
+                                      ? io::WKTConstants::VERTCS
+                                      : io::WKTConstants::VERT_CS,
                          !identifiers().empty());
     formatter->addQuotedString(nameStr());
     exportDatumOrDatumEnsembleToWkt(formatter);
     const auto &cs = SingleCRS::getPrivate()->coordinateSystem;
     const auto &axisList = cs->axisList();
+
+    if (formatter->useESRIDialect()) {
+        // Seems to be a constant value...
+        formatter->startNode(io::WKTConstants::PARAMETER, false);
+        formatter->addQuotedString("Vertical_Shift");
+        formatter->add(0.0);
+        formatter->endNode();
+
+        formatter->startNode(io::WKTConstants::PARAMETER, false);
+        formatter->addQuotedString("Direction");
+        formatter->add(
+            axisList[0]->direction() == cs::AxisDirection::UP ? 1.0 : -1.0);
+        formatter->endNode();
+    }
+
     if (!isWKT2) {
         axisList[0]->unit()._exportToWKT(formatter);
     }
