@@ -128,7 +128,8 @@ PJ *PROJECTION(lcc) {
             }
             Q->n /= denom;
         }
-        Q->c = (Q->rho0 = m1 * pow(ml1, -Q->n) / Q->n);
+        Q->rho0 = m1 * pow(ml1, -Q->n) / Q->n;
+        Q->c = Q->rho0;
         Q->rho0 *= (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) ? 0. :
             pow(pj_tsfn(P->phi0, sin(P->phi0), P->e), Q->n);
     } else {

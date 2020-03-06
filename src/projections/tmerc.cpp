@@ -152,21 +152,21 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
 static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(P->opaque);
-    double n, con, cosphi, d, ds, sinphi, t;
 
     lp.phi = pj_inv_mlfn(P->ctx, Q->ml0 + xy.y / P->k0, P->es, Q->en);
     if (fabs(lp.phi) >= M_HALFPI) {
         lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
         lp.lam = 0.;
     } else {
-        sinphi = sin(lp.phi);
-        cosphi = cos(lp.phi);
-        t = fabs (cosphi) > 1e-10 ? sinphi/cosphi : 0.;
-        n = Q->esp * cosphi * cosphi;
-        d = xy.x * sqrt (con = 1. - P->es * sinphi * sinphi) / P->k0;
+        const double sinphi = sin(lp.phi);
+        const double cosphi = cos(lp.phi);
+        double t = fabs (cosphi) > 1e-10 ? sinphi/cosphi : 0.;
+        const double n = Q->esp * cosphi * cosphi;
+        double con = 1. - P->es * sinphi * sinphi;
+        const double d = xy.x * sqrt (con) / P->k0;
         con *= t;
         t *= t;
-        ds = d * d;
+        const double ds = d * d;
         lp.phi -= (con * ds / (1.-P->es)) * FC2 * (1. -
             ds * FC4 * (5. + t * (3. - 9. *  n) + n * (1. - 4 * n) -
             ds * FC6 * (61. + t * (90. - 252. * n +

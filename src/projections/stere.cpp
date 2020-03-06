@@ -44,13 +44,14 @@ static double ssfn_ (double phit, double sinphi, double eccen) {
 static PJ_XY stere_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double coslam, sinlam, sinX = 0.0, cosX = 0.0, X, A = 0.0, sinphi;
+    double coslam, sinlam, sinX = 0.0, cosX = 0.0, A = 0.0, sinphi;
 
     coslam = cos (lp.lam);
     sinlam = sin (lp.lam);
     sinphi = sin (lp.phi);
     if (Q->mode == OBLIQ || Q->mode == EQUIT) {
-        sinX = sin (X = 2. * atan(ssfn_(lp.phi, sinphi, P->e)) - M_HALFPI);
+        const double X = 2. * atan(ssfn_(lp.phi, sinphi, P->e)) - M_HALFPI;
+        sinX = sin (X);
         cosX = cos (X);
     }
 
@@ -116,7 +117,8 @@ oblcon:
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return xy;
         }
-        xy.x = (xy.y = Q->akm1 / xy.y) * cosphi * sinlam;
+        xy.y = Q->akm1 / xy.y;
+        xy.x = xy.y * cosphi * sinlam;
         xy.y *= (Q->mode == EQUIT) ? sinphi :
            cosph0 * sinphi - sinph0 * cosphi * coslam;
         break;
@@ -129,7 +131,8 @@ oblcon:
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return xy;
         }
-        xy.x = sinlam * ( xy.y = Q->akm1 * tan (M_FORTPI + .5 * lp.phi) );
+        xy.y = Q->akm1 * tan (M_FORTPI + .5 * lp.phi);
+        xy.x = sinlam * xy.y;
         xy.y *= coslam;
         break;
     }
@@ -147,11 +150,12 @@ static PJ_LP stere_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
     switch (Q->mode) {
     case OBLIQ:
     case EQUIT:
-        cosphi = cos ( tp = 2. * atan2 (rho * Q->cosX1 , Q->akm1) );
+        tp = 2. * atan2 (rho * Q->cosX1 , Q->akm1);
+        cosphi = cos (tp);
         sinphi = sin (tp);
-                if ( rho == 0.0 )
+        if ( rho == 0.0 )
             phi_l = asin (cosphi * Q->sinX1);
-                else
+        else
             phi_l = asin (cosphi * Q->sinX1 + (xy.y * sinphi * Q->cosX1 / rho));
 
         tp = tan (.5 * (M_HALFPI + phi_l));
@@ -164,7 +168,8 @@ static PJ_LP stere_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
         xy.y = -xy.y;
         /*-fallthrough*/
     case S_POLE:
-        phi_l = M_HALFPI - 2. * atan (tp = - rho / Q->akm1);
+        tp = - rho / Q->akm1;
+        phi_l = M_HALFPI - 2. * atan (tp);
         halfpi = -M_HALFPI;
         halfe = -.5 * P->e;
         break;
@@ -190,9 +195,11 @@ static PJ_LP stere_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
 static PJ_LP stere_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double  c, rh, sinc, cosc;
+    double  c, sinc, cosc;
 
-    sinc = sin (c = 2. * atan ((rh = hypot (xy.x, xy.y)) / Q->akm1));
+    const double rh = hypot (xy.x, xy.y);
+    c = 2. * atan (rh / Q->akm1);
+    sinc = sin (c);
     cosc = cos (c);
     lp.lam = 0.;
 
@@ -210,7 +217,8 @@ static PJ_LP stere_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
             lp.phi = P->phi0;
         else
             lp.phi = asin (cosc * sinph0 + xy.y * sinc * cosph0 / rh);
-        if ((c = cosc - sinph0 * sin (lp.phi)) != 0. || xy.x != 0.)
+        c = cosc - sinph0 * sin (lp.phi);
+        if (c != 0. || xy.x != 0.)
             lp.lam = atan2 (xy.x * sinc * cosph0, c * rh);
         break;
     case N_POLE:
@@ -248,8 +256,8 @@ static PJ *setup(PJ *P) {                   /* general initialization */
                 Q->akm1 = 2. * P->k0 /
                    sqrt (pow (1+P->e,1+P->e) * pow (1-P->e,1-P->e));
             else {
-                Q->akm1 = cos (Q->phits) /
-                   pj_tsfn (Q->phits, t = sin (Q->phits), P->e);
+                t = sin (Q->phits);
+                Q->akm1 = cos (Q->phits) / pj_tsfn (Q->phits, t, P->e);
                 t *= P->e;
                 Q->akm1 /= sqrt(1. - t * t);
             }

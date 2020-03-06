@@ -32,7 +32,8 @@ static PJ_XY vandg4_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
         dt = sqrt(dt * dt - 4.);
         if ((fabs(lp.lam) - M_HALFPI) < 0.) dt = -dt;
         dt2 = dt * dt;
-        x1 = bt + ct; x1 *= x1;
+        x1 = bt + ct;
+        x1 *= x1;
         t = bt + 3.*ct;
         ft = x1 * (bt2 + ct2 * dt2 - 1.) + (1.-bt2) * (
             bt2 * (t * t + 4. * ct2) +

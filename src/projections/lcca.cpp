@@ -88,8 +88,9 @@ static PJ_XY lcca_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
     S = pj_mlfn(lp.phi, sin(lp.phi), cos(lp.phi), Q->en) - Q->M0;
     dr = fS(S, Q->C);
     r = Q->r0 - dr;
-    xy.x = P->k0 * (r * sin( lp.lam *= Q->l ) );
-    xy.y = P->k0 * (Q->r0 - r * cos(lp.lam) );
+    const double lam_mul_l = lp.lam * Q->l;
+    xy.x = P->k0 * (r * sin(lam_mul_l));
+    xy.y = P->k0 * (Q->r0 - r * cos(lam_mul_l) );
     return xy;
 }
 
