@@ -56,13 +56,34 @@ struct pj_opaque_exact {
 /* Constant for "exact" transverse mercator */
 #define PROJ_ETMERC_ORDER 6
 
+// Determine if we should try to provide optimized versions for the Fused Multiply Addition
+// Intel instruction set. We use GCC 6 __attribute__((target_clones("fma","default")))
+// mechanism for that, where the compiler builds a default version, and one that
+// uses FMA. And at runtimes it figures out automatically which version can be used
+// by the current CPU. This allows to create general purpose binaries.
+#if defined(__GNUC__) && __GNUC__ >= 6 && defined(__x86_64__) && !defined(__FMA__)
+#define BUILD_FMA_OPTIMIZED_VERSION
+#endif
+
 /*****************************************************************************/
 //
 //                  Approximate Transverse Mercator functions
 //
 /*****************************************************************************/
 
-static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P) {
+
+inline static double inline_pj_mlfn(double phi, double sphi, double cphi, double *en) {
+    cphi *= sphi;
+    sphi *= sphi;
+    return(en[0] * phi - cphi * (en[1] + sphi*(en[2]
+            + sphi*(en[3] + sphi*en[4]))));
+}
+
+#ifdef BUILD_FMA_OPTIMIZED_VERSION
+__attribute__((target_clones("fma","default")))
+#endif
+inline static PJ_XY approx_e_fwd_internal (PJ_LP lp, PJ *P)
+{
     PJ_XY xy = {0.0, 0.0};
     struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(P->opaque);
     double al, als, n, cosphi, sinphi, t;
@@ -94,7 +115,7 @@ static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P) {
         FC5 * als * (5. + t * (t - 18.) + n * (14. - 58. * t)
         + FC7 * als * (61. + t * ( t * (179. - t) - 479. ) )
         )));
-    xy.y = P->k0 * (pj_mlfn(lp.phi, sinphi, cosphi, Q->en) - Q->ml0 +
+    xy.y = P->k0 * (inline_pj_mlfn(lp.phi, sinphi, cosphi, Q->en) - Q->ml0 +
         sinphi * al * lp.lam * FC2 * ( 1. +
         FC4 * als * (5. - t + n * (9. + 4. * n) +
         FC6 * als * (61. + t * (t - 58.) + n * (270. - 330 * t)
@@ -103,6 +124,10 @@ static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P) {
     return (xy);
 }
 
+static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
+{
+    return approx_e_fwd_internal(lp, P);
+}
 
 static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0,0.0};
@@ -148,18 +173,76 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
     return xy;
 }
 
+inline static double
+inline_pj_inv_mlfn(projCtx ctx, double arg, double es, double *en,
+                   double* sinphi, double* cosphi) {
+    double phi, k = 1./(1.-es);
+    int i;
+#define EPS 1e-11
+#define MAX_ITER 10
+    phi = arg;
+    double s = sin(phi);
+    double c = cos(phi);
+    for (i = MAX_ITER; i ; --i) { /* rarely goes over 2 iterations */
+        double t = 1. - es * s * s;
+        t = (inline_pj_mlfn(phi, s, c, en) - arg) * (t * sqrt(t)) * k;
+        phi -= t;
+        if (fabs(t) < EPS)
+        {
+            // Instead of recomputing sin(phi), cos(phi) from scratch,
+            // use sin(phi-t) and cos(phi-t) approximate formulas with
+            // 1-term approximation of sin(t) and cos(t)
+            *sinphi = s - c * t;
+            *cosphi = c + s * t;
+            return phi;
+        }
+        if (fabs(t) < 1e-3)
+        {
+            // 2-term approximation of sin(t) and cos(t)
+            // Max relative error is 4e-14 on cos(t), and 8e-15 on sin(t)
+            const double t2 = t * t;
+            const double cos_t = 1 - 0.5 * t2;
+            const double sin_t = t * (1 - (1. / 6) * t2);
+            const double s_new = s * cos_t - c * sin_t;
+            c = c * cos_t + s * sin_t;
+            s = s_new;
+        }
+        else if (fabs(t) < 1e-2)
+        {
+            // 3-term approximation of sin(t) and cos(t)
+            // Max relative error is 2e-15 on cos(t), and 2e-16 on sin(t)
+            const double t2 = t * t;
+            const double cos_t = 1 - 0.5 * t2 * (1 - (1. / 12) * t2);
+            const double sin_t = t * (1 - (1. / 6) * t2 * (1 - (1. / 20) * t2));
+            const double s_new = s * cos_t - c * sin_t;
+            c = c * cos_t + s * sin_t;
+            s = s_new;
+        }
+        else
+        {
+            s = sin(phi);
+            c = cos(phi);
+        }
+    }
+    *sinphi = s;
+    *cosphi = c;
+    pj_ctx_set_errno( ctx, PJD_ERR_NON_CONV_INV_MERI_DIST );
+    return phi;
+}
 
-static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
+#ifdef BUILD_FMA_OPTIMIZED_VERSION
+__attribute__((target_clones("fma","default")))
+#endif
+inline static PJ_LP approx_e_inv_internal (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(P->opaque);
 
-    lp.phi = pj_inv_mlfn(P->ctx, Q->ml0 + xy.y / P->k0, P->es, Q->en);
+    double sinphi, cosphi;
+    lp.phi = inline_pj_inv_mlfn(P->ctx, Q->ml0 + xy.y / P->k0, P->es, Q->en, &sinphi, &cosphi);
     if (fabs(lp.phi) >= M_HALFPI) {
         lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
         lp.lam = 0.;
     } else {
-        const double sinphi = sin(lp.phi);
-        const double cosphi = cos(lp.phi);
         double t = fabs (cosphi) > 1e-10 ? sinphi/cosphi : 0.;
         const double n = Q->esp * cosphi * cosphi;
         double con = 1. - P->es * sinphi * sinphi;
@@ -182,6 +265,9 @@ static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
     return lp;
 }
 
+static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
+    return approx_e_inv_internal(xy, P);
+}
 
 static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0, 0.0};
