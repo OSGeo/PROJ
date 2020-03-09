@@ -259,42 +259,31 @@ static PJ *setup_approx(PJ *P) {
 /*****************************************************************************/
 
 /* Helper functios for "exact" transverse mercator */
-#ifdef _GNU_SOURCE
-    inline
-#endif
-static double gatg(double *p1, int len_p1, double B) {
-    double *p;
-    double h = 0, h1, h2 = 0, cos_2B;
+inline
+static double gatg(const double *p1, int len_p1, double B, double cos_2B, double sin_2B) {
+    double h = 0, h1, h2 = 0;
 
-    cos_2B = 2*cos(2*B);
-    p = p1 + len_p1;
+    const double two_cos_2B = 2*cos_2B;
+    const double* p = p1 + len_p1;
     h1 = *--p;
     while (p - p1) {
-        h = -h2 + cos_2B*h1 + *--p;
+        h = -h2 + two_cos_2B*h1 + *--p;
         h2 = h1;
         h1 = h;
     }
-    return (B + h*sin(2*B));
+    return (B + h*sin_2B);
 }
 
 /* Complex Clenshaw summation */
-#ifdef _GNU_SOURCE
-    inline
-#endif
-static double clenS(double *a, int size, double arg_r, double arg_i, double *R, double *I) {
-    double      *p, r, i, hr, hr1, hr2, hi, hi1, hi2;
-    double      sin_arg_r, cos_arg_r, sinh_arg_i, cosh_arg_i;
+inline
+static double clenS(const double *a, int size,
+                    double sin_arg_r, double cos_arg_r,
+                    double sinh_arg_i, double cosh_arg_i,
+                    double *R, double *I) {
+    double      r, i, hr, hr1, hr2, hi, hi1, hi2;
 
     /* arguments */
-    p = a + size;
-#ifdef _GNU_SOURCE
-    sincos(arg_r, &sin_arg_r, &cos_arg_r);
-#else
-    sin_arg_r  = sin(arg_r);
-    cos_arg_r  = cos(arg_r);
-#endif
-    sinh_arg_i = sinh(arg_i);
-    cosh_arg_i = cosh(arg_i);
+    const double* p = a + size;
     r          =  2*cos_arg_r*cosh_arg_i;
     i          = -2*sin_arg_r*sinh_arg_i;
 
@@ -341,28 +330,70 @@ static double clens(double *a, int size, double arg_r) {
 static PJ_XY exact_e_fwd (PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(P->opaque);
-    double sin_Cn, cos_Cn, cos_Ce, sin_Ce, dCn, dCe;
-    double Cn = lp.phi, Ce = lp.lam;
 
     /* ell. LAT, LNG -> Gaussian LAT, LNG */
-    Cn  = gatg (Q->cbg, PROJ_ETMERC_ORDER, Cn);
+    double Cn  = gatg (Q->cbg, PROJ_ETMERC_ORDER, lp.phi, cos(2*lp.phi), sin(2*lp.phi));
     /* Gaussian LAT, LNG -> compl. sph. LAT */
-#ifdef _GNU_SOURCE
-    sincos (Cn, &sin_Cn, &cos_Cn);
-    sincos (Ce, &sin_Ce, &cos_Ce);
-#else
-    sin_Cn = sin (Cn);
-    cos_Cn = cos (Cn);
-    sin_Ce = sin (Ce);
-    cos_Ce = cos (Ce);
+    const double sin_Cn = sin (Cn);
+    const double cos_Cn = cos (Cn);
+    const double sin_Ce = sin (lp.lam);
+    const double cos_Ce = cos (lp.lam);
+
+    const double cos_Cn_cos_Ce = cos_Cn*cos_Ce;
+    Cn     = atan2 (sin_Cn, cos_Cn_cos_Ce);
+
+    const double inv_denom_tan_Ce = 1. / hypot (sin_Cn, cos_Cn_cos_Ce);
+    const double tan_Ce = sin_Ce*cos_Cn * inv_denom_tan_Ce;
+#if 0
+    // Variant of the above: found not to be measurably faster
+    const double sin_Ce_cos_Cn = sin_Ce*cos_Cn;
+    const double denom = sqrt(1 - sin_Ce_cos_Cn * sin_Ce_cos_Cn);
+    const double tan_Ce = sin_Ce_cos_Cn / denom;
 #endif
 
-    Cn     = atan2 (sin_Cn, cos_Ce*cos_Cn);
-    Ce     = atan2 (sin_Ce*cos_Cn,  hypot (sin_Cn, cos_Cn*cos_Ce));
-
     /* compl. sph. N, E -> ell. norm. N, E */
-    Ce  = asinh ( tan (Ce) );     /* Replaces: Ce  = log(tan(FORTPI + Ce*0.5)); */
-    Cn += clenS (Q->gtu, PROJ_ETMERC_ORDER, 2*Cn, 2*Ce, &dCn, &dCe);
+    double Ce  = asinh ( tan_Ce );     /* Replaces: Ce  = log(tan(FORTPI + Ce*0.5)); */
+
+/*
+ *  Non-optimized version:
+ *  const double sin_arg_r  = sin(2*Cn);
+ *  const double cos_arg_r  = cos(2*Cn);
+ *
+ *  Given:
+ *      sin(2 * Cn) = 2 sin(Cn) cos(Cn)
+ *          sin(atan(y)) = y / sqrt(1 + y^2)
+ *          cos(atan(y)) = 1 / sqrt(1 + y^2)
+ *      ==> sin(2 * Cn) = 2 tan_Cn / (1 + tan_Cn^2)
+ *
+ *      cos(2 * Cn) = 2cos^2(Cn) - 1
+ *                  = 2 / (1 + tan_Cn^2) - 1
+ */
+    const double tmp_r = 2 * cos_Cn_cos_Ce * inv_denom_tan_Ce * inv_denom_tan_Ce;
+    const double sin_arg_r  = sin_Cn * tmp_r;
+    const double cos_arg_r  = cos_Cn_cos_Ce * tmp_r - 1;
+
+/*
+ *  Non-optimized version:
+ *  const double sinh_arg_i = sinh(2*Ce);
+ *  const double cosh_arg_i = cosh(2*Ce);
+ *
+ *  Given
+ *      sinh(2 * Ce) = 2 sinh(Ce) cosh(Ce)
+ *          sinh(asinh(y)) = y
+ *          cosh(asinh(y)) = sqrt(1 + y^2)
+ *      ==> sinh(2 * Ce) = 2 tan_Ce sqrt(1 + tan_Ce^2)
+ *
+ *      cosh(2 * Ce) = 2cosh^2(Ce) - 1
+ *                   = 2 * (1 + tan_Ce^2) - 1
+ */
+    const double tmp_i = 1 + tan_Ce * tan_Ce;
+    const double sinh_arg_i = 2 * tan_Ce * sqrt(tmp_i);
+    const double cosh_arg_i = 2 * tmp_i - 1;
+
+    double dCn, dCe;
+    Cn += clenS (Q->gtu, PROJ_ETMERC_ORDER,
+                 sin_arg_r, cos_arg_r, sinh_arg_i, cosh_arg_i,
+                 &dCn, &dCe);
     Ce += dCe;
     if (fabs (Ce) <= 2.623395162778) {
         xy.y  = Q->Qn * Cn + Q->Zb;  /* Northing */
@@ -377,32 +408,68 @@ static PJ_XY exact_e_fwd (PJ_LP lp, PJ *P) {
 static PJ_LP exact_e_inv (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(P->opaque);
-    double sin_Cn, cos_Cn, cos_Ce, sin_Ce, dCn, dCe;
-    double Cn = xy.y, Ce = xy.x;
 
     /* normalize N, E */
-    Cn = (Cn - Q->Zb)/Q->Qn;
-    Ce = Ce/Q->Qn;
+    double Cn = (xy.y - Q->Zb)/Q->Qn;
+    double Ce = xy.x/Q->Qn;
 
     if (fabs(Ce) <= 2.623395162778) { /* 150 degrees */
         /* norm. N, E -> compl. sph. LAT, LNG */
-        Cn += clenS(Q->utg, PROJ_ETMERC_ORDER, 2*Cn, 2*Ce, &dCn, &dCe);
+        const double sin_arg_r  = sin(2*Cn);
+        const double cos_arg_r  = cos(2*Cn);
+
+        //const double sinh_arg_i = sinh(2*Ce);
+        //const double cosh_arg_i = cosh(2*Ce);
+        const double exp_2_Ce = exp(2*Ce);
+        const double half_inv_exp_2_Ce = 0.5 / exp_2_Ce;
+        const double sinh_arg_i = 0.5 * exp_2_Ce - half_inv_exp_2_Ce;
+        const double cosh_arg_i = 0.5 * exp_2_Ce + half_inv_exp_2_Ce;
+
+        double dCn_ignored, dCe;
+        Cn += clenS(Q->utg, PROJ_ETMERC_ORDER,
+                    sin_arg_r, cos_arg_r, sinh_arg_i, cosh_arg_i,
+                    &dCn_ignored, &dCe);
         Ce += dCe;
-        Ce = atan (sinh (Ce)); /* Replaces: Ce = 2*(atan(exp(Ce)) - FORTPI); */
+
         /* compl. sph. LAT -> Gaussian LAT, LNG */
-#ifdef _GNU_SOURCE
-        sincos (Cn, &sin_Cn, &cos_Cn);
-        sincos (Ce, &sin_Ce, &cos_Ce);
-#else
-        sin_Cn = sin (Cn);
-        cos_Cn = cos (Cn);
+        const double sin_Cn = sin (Cn);
+        const double cos_Cn = cos (Cn);
+
+#if 0
+        // Non-optimized version:
+        double sin_Ce, cos_Ce;
+        Ce = atan (sinh (Ce));  // Replaces: Ce = 2*(atan(exp(Ce)) - FORTPI);
         sin_Ce = sin (Ce);
         cos_Ce = cos (Ce);
-#endif
         Ce     = atan2 (sin_Ce, cos_Ce*cos_Cn);
         Cn     = atan2 (sin_Cn*cos_Ce,  hypot (sin_Ce, cos_Ce*cos_Cn));
+#else
+/*
+ *      One can divide both member of Ce = atan2(...) by cos_Ce, which gives:
+ *      Ce     = atan2 (tan_Ce, cos_Cn) = atan2(sinh(Ce), cos_Cn)
+ *
+ *      and the same for Cn = atan2(...)
+ *      Cn     = atan2 (sin_Cn, hypot (sin_Ce, cos_Ce*cos_Cn)/cos_Ce)
+ *             = atan2 (sin_Cn, hypot (sin_Ce/cos_Ce, cos_Cn))
+ *             = atan2 (sin_Cn, hypot (tan_Ce, cos_Cn))
+ *             = atan2 (sin_Cn, hypot (sinhCe, cos_Cn))
+ */
+        const double sinhCe = sinh (Ce);
+        Ce     = atan2 (sinhCe, cos_Cn);
+        const double modulus_Ce = hypot (sinhCe, cos_Cn);
+        Cn     = atan2 (sin_Cn, modulus_Ce);
+#endif
+
         /* Gaussian LAT, LNG -> ell. LAT, LNG */
-        lp.phi = gatg (Q->cgb,  PROJ_ETMERC_ORDER, Cn);
+
+        // Optimization of the computation of cos(2*Cn) and sin(2*Cn)
+        const double tmp = 2 * modulus_Ce / (sinhCe * sinhCe + 1);
+        const double sin_2_Cn  = sin_Cn * tmp;
+        const double cos_2_Cn  = tmp * modulus_Ce - 1.;
+        //const double cos_2_Cn = cos(2 * Cn);
+        //const double sin_2_Cn = sin(2 * Cn);
+
+        lp.phi = gatg (Q->cgb,  PROJ_ETMERC_ORDER, Cn, cos_2_Cn, sin_2_Cn);
         lp.lam = Ce;
     }
     else
@@ -487,7 +554,7 @@ static PJ *setup_exact(PJ *P) {
     Q->gtu[5] = np*(212378941/319334400.0);
 
     /* Gaussian latitude value of the origin latitude */
-    Z = gatg (Q->cbg, PROJ_ETMERC_ORDER, P->phi0);
+    Z = gatg (Q->cbg, PROJ_ETMERC_ORDER, P->phi0, cos(2*P->phi0), sin(2*P->phi0));
 
     /* Origin northing minus true northing at the origin latitude */
     /* i.e. true northing = N - P->Zb                         */
