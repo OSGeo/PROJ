@@ -25,7 +25,9 @@ static PJ_XY bonne_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double rh, E, c;
 
-    rh = Q->am1 + Q->m1 - pj_mlfn(lp.phi, E = sin(lp.phi), c = cos(lp.phi), Q->en);
+    E = sin(lp.phi);
+    c = cos(lp.phi);
+    rh = Q->am1 + Q->m1 - pj_mlfn(lp.phi, E, c, Q->en);
     if (fabs(rh) > EPS10) {
         E = c * lp.lam / (rh * sqrt(1. - P->es * E * E));
         xy.x = rh * sin(E);
@@ -45,7 +47,8 @@ static PJ_XY bonne_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
 
     rh = Q->cphi1 + Q->phi1 - lp.phi;
     if (fabs(rh) > EPS10) {
-        xy.x = rh * sin(E = lp.lam * cos(lp.phi) / rh);
+        E = lp.lam * cos(lp.phi) / rh;
+        xy.x = rh * sin(E);
         xy.y = Q->cphi1 - rh * cos(E);
     } else
         xy.x = xy.y = 0.;
@@ -58,7 +61,8 @@ static PJ_LP bonne_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double rh;
 
-    rh = hypot(xy.x, xy.y = Q->cphi1 - xy.y);
+    xy.y = Q->cphi1 - xy.y;
+    rh = hypot(xy.x, xy.y);
     lp.phi = Q->cphi1 + Q->phi1 - rh;
     if (fabs(lp.phi) > M_HALFPI) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -77,7 +81,8 @@ static PJ_LP bonne_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double s, rh;
 
-    rh = hypot(xy.x, xy.y = Q->am1 - xy.y);
+    xy.y = Q->am1 - xy.y;
+    rh = hypot(xy.x, xy.y);
     lp.phi = pj_inv_mlfn(P->ctx, Q->am1 + Q->m1 - rh, P->es, Q->en);
     if ((s = fabs(lp.phi)) < M_HALFPI) {
         s = sin(lp.phi);
@@ -122,8 +127,9 @@ PJ *PROJECTION(bonne) {
         Q->en = pj_enfn(P->es);
         if (nullptr==Q->en)
             return destructor(P, ENOMEM);
-        Q->m1 = pj_mlfn(Q->phi1, Q->am1 = sin(Q->phi1),
-            c = cos(Q->phi1), Q->en);
+        Q->am1 = sin(Q->phi1);
+        c = cos(Q->phi1);
+        Q->m1 = pj_mlfn(Q->phi1, Q->am1, c, Q->en);
         Q->am1 = c / (sqrt(1. - P->es * Q->am1 * Q->am1) * Q->am1);
         P->inv = bonne_e_inverse;
         P->fwd = bonne_e_forward;

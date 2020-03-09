@@ -59,7 +59,8 @@ static PJ_LP comill_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
         y2 = yc * yc;
         f = (yc * (K1 + y2 * (K2 + K3 * y2))) - xy.y;
         fder = C1 + y2 * (C2 + C3 * y2);
-        yc -= tol = f / fder;
+        tol = f / fder;
+        yc -= tol;
         if (fabs(tol) < EPS) {
             break;
         }

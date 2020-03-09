@@ -23,13 +23,13 @@ struct pj_opaque {
 static PJ_XY moll_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double k, V;
     int i;
 
-    k = Q->C_p * sin(lp.phi);
+    const double k = Q->C_p * sin(lp.phi);
     for (i = MAX_ITER; i ; --i) {
-        lp.phi -= V = (lp.phi + sin(lp.phi) - k) /
-            (1. + cos(lp.phi));
+        const double V = (lp.phi + sin(lp.phi) - k) /
+                            (1. + cos(lp.phi));
+        lp.phi -= V;
         if (fabs(V) < LOOP_TOL)
             break;
     }

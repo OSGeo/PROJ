@@ -106,8 +106,8 @@ static PJ_XY aeqd_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
         coslam = - coslam;
         /*-fallthrough*/
     case S_POLE:
-        xy.x = (rho = fabs(Q->Mp - pj_mlfn(lp.phi, sinphi, cosphi, Q->en))) *
-            sin(lp.lam);
+        rho = fabs(Q->Mp - pj_mlfn(lp.phi, sinphi, cosphi, Q->en));
+        xy.x = rho * sin(lp.lam);
         xy.y = rho * coslam;
         break;
     case EQUIT:
@@ -117,8 +117,10 @@ static PJ_XY aeqd_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
             break;
         }
 
-        phi1 = P->phi0 / DEG_TO_RAD; lam1 = P->lam0 / DEG_TO_RAD;
-        phi2 = lp.phi / DEG_TO_RAD;  lam2 = (lp.lam+P->lam0) / DEG_TO_RAD;
+        phi1 = P->phi0 / DEG_TO_RAD;
+        lam1 = P->lam0 / DEG_TO_RAD;
+        phi2 = lp.phi / DEG_TO_RAD;
+        lam2 = (lp.lam+P->lam0) / DEG_TO_RAD;
 
         geod_inverse(&Q->g, phi1, lam1, phi2, lam2, &s12, &azi1, &azi2);
         azi1 *= DEG_TO_RAD;
@@ -169,7 +171,8 @@ oblcon:
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return xy;
         }
-        xy.x = (xy.y = (M_HALFPI + lp.phi)) * sin(lp.lam);
+        xy.y = (M_HALFPI + lp.phi);
+        xy.x = xy.y * sin(lp.lam);
         xy.y *= coslam;
         break;
     }
@@ -187,8 +190,9 @@ static PJ_LP e_guam_inv(PJ_XY xy, PJ *P) { /* Guam elliptical */
     lp.phi = P->phi0;
     for (i = 0; i < 3; ++i) {
         t = P->e * sin(lp.phi);
+        t = sqrt(1. - t * t);
         lp.phi = pj_inv_mlfn(P->ctx, Q->M1 + xy.y -
-            x2 * tan(lp.phi) * (t = sqrt(1. - t * t)), P->es, Q->en);
+            x2 * tan(lp.phi) * t, P->es, Q->en);
     }
     lp.lam = xy.x * t / cos(lp.phi);
     return lp;
@@ -232,7 +236,8 @@ static PJ_LP aeqd_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double cosc, c_rh, sinc;
 
-    if ((c_rh = hypot(xy.x, xy.y)) > M_PI) {
+    c_rh = hypot(xy.x, xy.y);
+    if (c_rh > M_PI) {
         if (c_rh - EPS10 > M_PI) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return lp;
@@ -247,7 +252,7 @@ static PJ_LP aeqd_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
         sinc = sin(c_rh);
         cosc = cos(c_rh);
         if (Q->mode == EQUIT) {
-                        lp.phi = aasin(P->ctx, xy.y * sinc / c_rh);
+            lp.phi = aasin(P->ctx, xy.y * sinc / c_rh);
             xy.x *= sinc;
             xy.y = cosc * c_rh;
         } else {
@@ -311,7 +316,8 @@ PJ *PROJECTION(aeqd) {
             case EQUIT:
             case OBLIQ:
                 Q->N1 = 1. / sqrt(1. - P->es * Q->sinph0 * Q->sinph0);
-                Q->G = Q->sinph0 * (Q->He = P->e / sqrt(P->one_es));
+                Q->He = P->e / sqrt(P->one_es);
+                Q->G = Q->sinph0 * Q->He;
                 Q->He *= Q->cosph0;
                 break;
             }

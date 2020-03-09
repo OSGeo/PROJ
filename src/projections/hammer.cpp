@@ -63,12 +63,14 @@ PJ *PROJECTION(hammer) {
     P->opaque = Q;
 
     if (pj_param(P->ctx, P->params, "tW").i) {
-        if ((Q->w = fabs(pj_param(P->ctx, P->params, "dW").f)) <= 0.)
+        Q->w = fabs(pj_param(P->ctx, P->params, "dW").f);
+        if (Q->w <= 0.)
             return pj_default_destructor (P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
     } else
         Q->w = .5;
     if (pj_param(P->ctx, P->params, "tM").i) {
-        if ((Q->m = fabs(pj_param(P->ctx, P->params, "dM").f)) <= 0.)
+        Q->m = fabs(pj_param(P->ctx, P->params, "dM").f);
+        if (Q->m <= 0.)
             return pj_default_destructor (P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
     } else
         Q->m = 1.;

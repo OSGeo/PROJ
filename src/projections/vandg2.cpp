@@ -24,7 +24,8 @@ static PJ_XY vandg2_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
     double x1, at, bt, ct;
 
     bt = fabs(M_TWO_D_PI * lp.phi);
-    if ((ct = 1. - bt * bt) < 0.)
+    ct = 1. - bt * bt;
+    if (ct < 0.)
         ct = 0.;
     else
         ct = sqrt(ct);

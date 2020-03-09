@@ -48,7 +48,8 @@ static PJ_XY ortho_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         xy.y = sin(lp.phi);
         break;
     case OBLIQ:
-        if (Q->sinph0 * (sinphi = sin(lp.phi)) + Q->cosph0 * cosphi * coslam < - EPS10)
+        sinphi = sin(lp.phi);
+        if (Q->sinph0 * sinphi + Q->cosph0 * cosphi * coslam < - EPS10)
             return forward_error(P, lp, xy);
         xy.y = Q->cosph0 * sinphi - Q->sinph0 * cosphi * coslam;
         break;
@@ -69,11 +70,13 @@ static PJ_XY ortho_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
 static PJ_LP ortho_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double  rh, cosc, sinc;
+    double sinc;
 
     lp.lam = HUGE_VAL; lp.phi = HUGE_VAL;
 
-    if ((sinc = (rh = hypot(xy.x, xy.y))) > 1.) {
+    const double rh = hypot(xy.x, xy.y);
+    sinc = rh;
+    if (sinc > 1.) {
         if ((sinc - 1.) > EPS10) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             proj_log_trace(P, "Point (%.3f, %.3f) is outside the projection boundary");
@@ -81,7 +84,7 @@ static PJ_LP ortho_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         }
         sinc = 1.;
     }
-    cosc = sqrt(1. - sinc * sinc); /* in this range OK */
+    const double cosc = sqrt(1. - sinc * sinc); /* in this range OK */
     if (fabs(rh) <= EPS10) {
         lp.phi = P->phi0;
         lp.lam = 0.0;

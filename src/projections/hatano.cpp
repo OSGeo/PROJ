@@ -24,13 +24,13 @@ PROJ_HEAD(hatano, "Hatano Asymmetrical Equal Area") "\n\tPCyl, Sph";
 
 static PJ_XY hatano_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
-    double th1, c;
     int i;
     (void) P;
 
-    c = sin(lp.phi) * (lp.phi < 0. ? CSz : CN);
+    const double c = sin(lp.phi) * (lp.phi < 0. ? CSz : CN);
     for (i = NITER; i; --i) {
-        lp.phi -= th1 = (lp.phi + sin(lp.phi) - c) / (1. + cos(lp.phi));
+        const double th1 = (lp.phi + sin(lp.phi) - c) / (1. + cos(lp.phi));;
+        lp.phi -= th1;
         if (fabs(th1) < EPS) break;
     }
     xy.x = FXC * lp.lam * cos(lp.phi *= .5);
