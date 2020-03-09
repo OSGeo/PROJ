@@ -28,8 +28,8 @@ static PJ_XY eck4_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
     for (i = NITER; i ; --i) {
         c = cos(lp.phi);
         s = sin(lp.phi);
-        lp.phi -= V = (lp.phi + s * (c + 2.) - p) /
-            (1. + c * (c + 2.) - s * s);
+        V = (lp.phi + s * (c + 2.) - p) / (1. + c * (c + 2.) - s * s);
+        lp.phi -= V;
         if (fabs(V) < EPS)
             break;
     }
@@ -46,10 +46,10 @@ static PJ_XY eck4_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
 
 static PJ_LP eck4_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
-    double c;
 
     lp.phi = aasin(P->ctx,xy.y * RC_y);
-    lp.lam = xy.x / (C_x * (1. + (c = cos(lp.phi))));
+    const double c = cos(lp.phi);
+    lp.lam = xy.x / (C_x * (1. + c));
     lp.phi = aasin(P->ctx,(lp.phi + sin(lp.phi) * (c + 2.)) * RC_p);
     return lp;
 }

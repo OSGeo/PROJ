@@ -28,7 +28,8 @@ static PJ_XY tpeqd_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     z1 *= z1;
     z2 *= z2;
 
-    xy.x = Q->r2z0 * (t = z1 - z2);
+    t = z1 - z2;
+    xy.x = Q->r2z0 * t;
     t = Q->z02 - t;
     xy.y = Q->r2z0 * asqrt (4. * Q->z02 * z2 - t * t);
     if ((Q->ccs * sp - cp * (Q->cs * sin(dl1) - Q->sc * sin(dl2))) < 0.)
@@ -53,14 +54,16 @@ static PJ_LP tpeqd_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     /* lam--phi now in system relative to P1--P2 base equator */
     sp = sin (lp.phi);
     cp = cos (lp.phi);
-    lp.phi = aasin (P->ctx, Q->sa * sp + Q->ca * cp * (s = cos(lp.lam -= Q->lp)));
+    lp.lam -= Q->lp;
+    s = cos(lp.lam);
+    lp.phi = aasin (P->ctx, Q->sa * sp + Q->ca * cp * s);
     lp.lam = atan2 (cp * sin(lp.lam), Q->sa * cp * s - Q->ca * sp) + Q->lamc;
     return lp;
 }
 
 
 PJ *PROJECTION(tpeqd) {
-    double lam_1, lam_2, phi_1, phi_2, A12, pp;
+    double lam_1, lam_2, phi_1, phi_2, A12;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
@@ -94,7 +97,8 @@ PJ *PROJECTION(tpeqd) {
     Q->hz0 = .5 * Q->z02;
     A12 = atan2(Q->cp2 * sin (Q->dlam2),
         Q->cp1 * Q->sp2 - Q->sp1 * Q->cp2 * cos (Q->dlam2));
-    Q->ca = cos(pp = aasin(P->ctx, Q->cp1 * sin(A12)));
+    const double pp = aasin(P->ctx, Q->cp1 * sin(A12));
+    Q->ca = cos(pp);
     Q->sa = sin(pp);
     Q->lp = adjlon ( atan2 (Q->cp1 * cos(A12), Q->sp1) - Q->hz0);
     Q->dlam2 *= .5;

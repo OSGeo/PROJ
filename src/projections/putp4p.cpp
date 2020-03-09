@@ -22,7 +22,8 @@ static PJ_XY putp4p_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
 
     lp.phi = aasin(P->ctx,0.883883476 * sin(lp.phi));
     xy.x = Q->C_x * lp.lam * cos(lp.phi);
-    xy.x /= cos(lp.phi *= 0.333333333333333);
+    lp.phi *= 0.333333333333333;
+    xy.x /= cos(lp.phi);
     xy.y = Q->C_y * sin(lp.phi);
 
     return xy;

@@ -82,7 +82,9 @@ PJ *PROJECTION(somerc) {
     cp *= cp;
     Q->c = sqrt (1 + P->es * cp * cp * P->rone_es);
     sp = sin (P->phi0);
-    Q->cosp0 = cos( phip0 = aasin (P->ctx, Q->sinp0 = sp / Q->c) );
+    Q->sinp0 = sp / Q->c;
+    phip0 = aasin (P->ctx, Q->sinp0);
+    Q->cosp0 = cos(phip0);
     sp *= P->e;
     Q->K = log (tan (M_FORTPI + 0.5 * phip0)) - Q->c * (
         log (tan (M_FORTPI + 0.5 * P->phi0)) - Q->hlf_e *

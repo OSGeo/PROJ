@@ -25,9 +25,10 @@ struct pj_opaque {
 
 static PJ_XY gn_sinu_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
-    double s, c;
 
-    xy.y = pj_mlfn(lp.phi, s = sin(lp.phi), c = cos(lp.phi), static_cast<struct pj_opaque*>(P->opaque)->en);
+    const double s = sin(lp.phi);
+    const double c = cos(lp.phi);
+    xy.y = pj_mlfn(lp.phi, s, c, static_cast<struct pj_opaque*>(P->opaque)->en);
     xy.x = lp.lam * c / sqrt(1. - P->es * s * s);
     return xy;
 }
@@ -37,7 +38,9 @@ static PJ_LP gn_sinu_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inve
     PJ_LP lp = {0.0,0.0};
     double s;
 
-    if ((s = fabs(lp.phi = pj_inv_mlfn(P->ctx, xy.y, P->es, static_cast<struct pj_opaque*>(P->opaque)->en))) < M_HALFPI) {
+    lp.phi = pj_inv_mlfn(P->ctx, xy.y, P->es, static_cast<struct pj_opaque*>(P->opaque)->en);
+    s = fabs(lp.phi);
+    if (s < M_HALFPI) {
         s = sin(lp.phi);
         lp.lam = xy.x * sqrt(1. - P->es * s * s) / cos(lp.phi);
     } else if ((s - EPS10) < M_HALFPI) {
@@ -57,13 +60,13 @@ static PJ_XY gn_sinu_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forw
     if (Q->m == 0.0)
         lp.phi = Q->n != 1. ? aasin(P->ctx,Q->n * sin(lp.phi)): lp.phi;
     else {
-        double k, V;
         int i;
 
-        k = Q->n * sin(lp.phi);
+        const double k = Q->n * sin(lp.phi);
         for (i = MAX_ITER; i ; --i) {
-            lp.phi -= V = (Q->m * lp.phi + sin(lp.phi) - k) /
-                (Q->m + cos(lp.phi));
+            const double V = (Q->m * lp.phi + sin(lp.phi) - k) /
+                             (Q->m + cos(lp.phi));
+            lp.phi -= V;
             if (fabs(V) < LOOP_TOL)
                 break;
         }
@@ -112,7 +115,8 @@ static void setup(PJ *P) {
     P->inv = gn_sinu_s_inverse;
     P->fwd = gn_sinu_s_forward;
 
-    Q->C_x = (Q->C_y = sqrt((Q->m + 1.) / Q->n))/(Q->m + 1.);
+    Q->C_y = sqrt((Q->m + 1.) / Q->n);
+    Q->C_x = Q->C_y/(Q->m + 1.);
 }
 
 

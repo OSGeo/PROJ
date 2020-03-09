@@ -30,10 +30,13 @@ static PJ_XY cass_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
     PJ_XY xy = {0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
-    xy.y = pj_mlfn (lp.phi, n = sin (lp.phi), c = cos (lp.phi), Q->en);
+    n = sin (lp.phi);
+    c = cos (lp.phi);
+    xy.y = pj_mlfn (lp.phi, n, c, Q->en);
 
     n  = 1./sqrt(1. - P->es * n*n);
-    tn = tan(lp.phi); t = tn * tn;
+    tn = tan(lp.phi);
+    t = tn * tn;
     a1 = lp.lam * c;
     c *= P->es * c / (1 - P->es);
     a2 = a1 * a1;
@@ -61,7 +64,8 @@ static PJ_LP cass_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     ph1 = pj_inv_mlfn (P->ctx, Q->m0 + xy.y, P->es, Q->en);
-    tn  = tan (ph1); t = tn*tn;
+    tn  = tan (ph1);
+    t   = tn*tn;
     n   = sin (ph1);
     r   = 1. / (1. - P->es * n * n);
     n   = sqrt (r);

@@ -29,7 +29,8 @@ static PJ_LP eck2_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
     PJ_LP lp = {0.0,0.0};
     (void) P;
 
-    lp.lam = xy.x / (FXC * ( lp.phi = 2. - fabs(xy.y) / FYC) );
+    lp.phi = 2. - fabs(xy.y) / FYC;
+    lp.lam = xy.x / (FXC * lp.phi);
     lp.phi = (4. - lp.phi * lp.phi) * C13;
     if (fabs(lp.phi) >= 1.) {
         if (fabs(lp.phi) > ONEEPS) {

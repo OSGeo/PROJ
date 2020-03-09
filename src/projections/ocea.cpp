@@ -37,12 +37,12 @@ static PJ_XY ocea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
 static PJ_LP ocea_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double t, s;
 
     xy.y /= Q->rok;
     xy.x /= Q->rtk;
-    t = sqrt(1. - xy.y * xy.y);
-    lp.phi = asin(xy.y * Q->sinphi + t * Q->cosphi * (s = sin(xy.x)));
+    const double t = sqrt(1. - xy.y * xy.y);
+    const double s = sin(xy.x);
+    lp.phi = asin(xy.y * Q->sinphi + t * Q->cosphi * s);
     lp.lam = atan2(t * Q->sinphi * s - xy.y * Q->cosphi,
         t * cos(xy.x));
     return lp;

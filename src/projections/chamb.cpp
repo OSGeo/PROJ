@@ -129,10 +129,14 @@ PJ *PROJECTION(chamb) {
     Q->beta_0 = lc(P->ctx,Q->c[0].v.r, Q->c[2].v.r, Q->c[1].v.r);
     Q->beta_1 = lc(P->ctx,Q->c[0].v.r, Q->c[1].v.r, Q->c[2].v.r);
     Q->beta_2 = M_PI - Q->beta_0;
-    Q->p.y = 2. * (Q->c[0].p.y = Q->c[1].p.y = Q->c[2].v.r * sin(Q->beta_0));
+    Q->c[0].p.y = Q->c[2].v.r * sin(Q->beta_0);
+    Q->c[1].p.y = Q->c[0].p.y;
+    Q->p.y = 2. * Q->c[0].p.y;
     Q->c[2].p.y = 0.;
-    Q->c[0].p.x = - (Q->c[1].p.x = 0.5 * Q->c[0].v.r);
-    Q->p.x = Q->c[2].p.x = Q->c[0].p.x + Q->c[2].v.r * cos(Q->beta_0);
+    Q->c[1].p.x = 0.5 * Q->c[0].v.r;
+    Q->c[0].p.x = -Q->c[1].p.x;
+    Q->c[2].p.x = Q->c[0].p.x + Q->c[2].v.r * cos(Q->beta_0);
+    Q->p.x = Q->c[2].p.x;
 
     P->es = 0.;
     P->fwd = chamb_s_forward;
