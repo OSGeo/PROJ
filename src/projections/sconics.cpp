@@ -90,7 +90,8 @@ static PJ_LP sconics_s_inverse (PJ_XY xy, PJ *P) {  /* Spheroidal, (and ellipsoi
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double rho;
 
-    rho = hypot (xy.x,  xy.y = Q->rho_0 - xy.y);
+    xy.y = Q->rho_0 - xy.y;
+    rho = hypot (xy.x, xy.y);
     if (Q->n < 0.) {
         rho = - rho;
         xy.x = - xy.x;
@@ -164,14 +165,16 @@ static PJ *setup(PJ *P, enum Type type) {
         Q->n = sin (Q->sig);
         Q->c2 = cos (del);
         Q->c1 = 1./tan (Q->sig);
-        if (fabs (del = P->phi0 - Q->sig) - EPS10 >= M_HALFPI)
+        del = P->phi0 - Q->sig;
+        if (fabs (del) - EPS10 >= M_HALFPI)
             return pj_default_destructor(P, PJD_ERR_LAT_0_HALF_PI_FROM_MEAN);
 
         Q->rho_0 = Q->c2 * (Q->c1 - tan (del));
         break;
 
     case VITK1:
-        Q->n = (cs = tan (del)) * sin (Q->sig) / del;
+        cs = tan (del);
+        Q->n = cs * sin (Q->sig) / del;
         Q->rho_c = del / (cs * tan (Q->sig)) + Q->sig;
         Q->rho_0 = Q->rho_c - P->phi0;
         break;

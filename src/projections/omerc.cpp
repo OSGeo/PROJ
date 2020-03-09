@@ -48,26 +48,26 @@ struct pj_opaque {
 static PJ_XY omerc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double S, T, U, V, W, temp, u, v;
+    double u, v;
 
     if (fabs(fabs(lp.phi) - M_HALFPI) > EPS) {
-        W = Q->E / pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), Q->B);
-        temp = 1. / W;
-        S = .5 * (W - temp);
-        T = .5 * (W + temp);
-        V = sin(Q->B * lp.lam);
-        U = (S * Q->singam - V * Q->cosgam) / T;
+        const double W = Q->E / pow(pj_tsfn(lp.phi, sin(lp.phi), P->e), Q->B);
+        const double one_div_W = 1. / W;
+        const double S = .5 * (W - one_div_W);
+        const double T = .5 * (W + one_div_W);
+        const double V = sin(Q->B * lp.lam);
+        const double U = (S * Q->singam - V * Q->cosgam) / T;
         if (fabs(fabs(U) - 1.0) < EPS) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return xy;
         }
         v = 0.5 * Q->ArB * log((1. - U)/(1. + U));
-        temp = cos(Q->B * lp.lam);
-                if(fabs(temp) < TOL) {
-                    u = Q->A * lp.lam;
-                } else {
-                    u = Q->ArB * atan2((S * Q->cosgam + V * Q->singam), temp);
-                }
+        const double temp = cos(Q->B * lp.lam);
+        if(fabs(temp) < TOL) {
+            u = Q->A * lp.lam;
+        } else {
+            u = Q->ArB * atan2((S * Q->cosgam + V * Q->singam), temp);
+        }
     } else {
         v = lp.phi > 0 ? Q->v_pole_n : Q->v_pole_s;
         u = Q->ArB * lp.phi;

@@ -65,8 +65,12 @@ static PJ_XY nzmg_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
     int i;
 
     lp.phi = (lp.phi - P->phi0) * RAD_TO_SEC5;
-    for (p.r = *(C = tpsi + (i = Ntpsi)); i ; --i)
-        p.r = *--C + lp.phi * p.r;
+    i = Ntpsi;
+    C = tpsi + i;
+    for (p.r = *C; i ; --i) {
+        --C;
+        p.r = *C + lp.phi * p.r;
+    }
     p.r *= lp.phi;
     p.i = lp.lam;
     p = pj_zpoly1(p, bf, Nbf);
@@ -91,15 +95,21 @@ static PJ_LP nzmg_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
         f.r -= xy.y;
         f.i -= xy.x;
         den = fp.r * fp.r + fp.i * fp.i;
-        p.r += dp.r = -(f.r * fp.r + f.i * fp.i) / den;
-        p.i += dp.i = -(f.i * fp.r - f.r * fp.i) / den;
+        dp.r = -(f.r * fp.r + f.i * fp.i) / den;
+        dp.i = -(f.i * fp.r - f.r * fp.i) / den;
+        p.r += dp.r;
+        p.i += dp.i;
         if ((fabs(dp.r) + fabs(dp.i)) <= EPSLN)
             break;
     }
     if (nn) {
         lp.lam = p.i;
-        for (lp.phi = *(C = tphi + (i = Ntphi)); i ; --i)
-            lp.phi = *--C + p.r * lp.phi;
+        i = Ntphi;
+        C = tphi + i;
+        for (lp.phi = *C; i ; --i) {
+            --C;
+            lp.phi = *C + p.r * lp.phi;
+        }
         lp.phi = P->phi0 + p.r * lp.phi * SEC5_TO_RAD;
     } else
         lp.lam = lp.phi = HUGE_VAL;

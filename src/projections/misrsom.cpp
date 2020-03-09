@@ -53,7 +53,8 @@ static void seraz0(double lam, double mult, PJ *P) {
     h = sqrt((1. + Q->q * sdsq) / (1. + Q->w * sdsq)) * ((1. +
         Q->w * sdsq) / (d__1 * d__1) - Q->p22 * Q->ca);
     sq = sqrt(Q->xj * Q->xj + s * s);
-    Q->b += fc = mult * (h * Q->xj - s * s) / sq;
+    fc = mult * (h * Q->xj - s * s) / sq;
+    Q->b += fc;
     Q->a2 += fc * cos(lam + lam);
     Q->a4 += fc * cos(lam * 4.);
     fc = mult * s * (h + Q->xj) / sq;
@@ -89,7 +90,8 @@ static PJ_XY misrsom_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forw
                 fac = lampp - sin(lampp) * M_HALFPI;
             for (l = 50; l; --l) {
                     lamt = lp.lam + Q->p22 * sav;
-                    if (fabs(c = cos(lamt)) < TOL)
+                    c = cos(lamt);
+                    if (fabs(c) < TOL)
                         lamt -= TOL;
                     xlam = (P->one_es * tanphi * Q->sa + sin(lamt) * Q->ca) / c;
                     lamdp = atan(xlam) + fac;

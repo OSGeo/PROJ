@@ -54,7 +54,8 @@ static PJ_XY bipc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
         Az = atan2(sdlam , C45 * (tphi - cdlam));
     }
     if( (tag = (Az > Azba)) ) {
-        cdlam = cos(sdlam = lp.lam + R110);
+        sdlam = lp.lam + R110;
+        cdlam = cos(sdlam);
         sdlam = sin(sdlam);
         z = S20 * sphi + C20 * cphi * cdlam;
         if (fabs(z) > 1.) {
@@ -86,7 +87,8 @@ static PJ_XY bipc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
     }
-    r = F * (t = pow(tan(.5 * z), n));
+    t = pow(tan(.5 * z), n);
+    r = F * t;
     if ((al = .5 * (R104 - z)) < 0.) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
@@ -100,7 +102,8 @@ static PJ_XY bipc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
         else al = al < 0. ? -1. : 1.;
     } else
         al = acos(al);
-    if (fabs(t = n * (Av - Az)) < al)
+    t = n * (Av - Az);
+    if (fabs(t) < al)
         r /= cos(al + (tag ? t : -t));
     xy.x = r * sin(t);
     xy.y += (tag ? -r : r) * cos(t);
@@ -135,8 +138,10 @@ static PJ_LP bipc_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
         c = C45;
         Av = Azba;
     }
-    rl = rp = r = hypot(xy.x, xy.y);
-    fAz = fabs(Az = atan2(xy.x, xy.y));
+    r = hypot(xy.x, xy.y);
+    rl = rp = r;
+    Az = atan2(xy.x, xy.y);
+    fAz = fabs(Az);
     for (i = NITER; i ; --i) {
         z = 2. * atan(pow(r / F,1 / n));
         al = acos((pow(tan(.5 * z), n) +

@@ -77,7 +77,8 @@ static PJ_XY airy_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return xy;
         }
-        if (fabs(s = 1. - cosz) > EPS) {
+        s = 1. - cosz;
+        if (fabs(s) > EPS) {
             t = 0.5 * (1. + cosz);
             if(t == 0) {
                 proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -88,8 +89,7 @@ static PJ_XY airy_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
             Krho = 0.5 - Q->Cb;
         xy.x = Krho * cosphi * sinlam;
         if (Q->mode == OBLIQ)
-            xy.y = Krho * (Q->cosph0 * sinphi -
-                Q->sinph0 * cosphi * coslam);
+            xy.y = Krho * (Q->cosph0 * sinphi - Q->sinph0 * cosphi * coslam);
         else
             xy.y = Krho * sinphi;
         break;
@@ -100,7 +100,8 @@ static PJ_XY airy_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return xy;
         }
-        if ((lp.phi *= 0.5) > EPS) {
+        lp.phi *= 0.5;
+        if (lp.phi > EPS) {
             t = tan(lp.phi);
             Krho = -2.*(log(cos(lp.phi)) / t + t * Q->Cb);
             xy.x = Krho * sinlam;

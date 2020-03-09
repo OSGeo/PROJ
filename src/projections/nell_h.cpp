@@ -24,14 +24,14 @@ static PJ_XY nell_h_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
 
 static PJ_LP nell_h_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
-    double V, c, p;
     int i;
     (void) P;
 
-    p = 0.5 * xy.y;
+    const double p = 0.5 * xy.y;
     for (i = NITER; i ; --i) {
-        c = cos(0.5 * lp.phi);
-        lp.phi -= V = (lp.phi - tan(lp.phi/2) - p)/(1. - 0.5/(c*c));
+        const double c = cos(0.5 * lp.phi);
+        const double V = (lp.phi - tan(lp.phi/2) - p)/(1. - 0.5/(c*c));
+        lp.phi -= V;
         if (fabs(V) < EPS)
             break;
     }

@@ -43,9 +43,10 @@ static PJ_LP cea_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse 
 
 static PJ_LP cea_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
-    double t;
 
-    if ((t = fabs(xy.y *= P->k0)) - EPS <= 1.) {
+    xy.y *= P->k0;
+    const double t = fabs(xy.y);
+    if (t - EPS <= 1.) {
         if (t >= 1.)
             lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
         else
@@ -88,7 +89,8 @@ PJ *PROJECTION(cea) {
         t = sin(t);
         P->k0 /= sqrt(1. - P->es * t * t);
         P->e = sqrt(P->es);
-        if (!(Q->apa = pj_authset(P->es)))
+        Q->apa = pj_authset(P->es);
+        if (!(Q->apa))
             return pj_default_destructor(P, ENOMEM);
 
         Q->qp = pj_qsfn(1., P->e, P->one_es);

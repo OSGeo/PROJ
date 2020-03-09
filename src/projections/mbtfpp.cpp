@@ -40,8 +40,10 @@ static PJ_LP mbtfpp_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
     } else
         lp.phi = asin(lp.phi);
 
-    lp.lam = xy.x / ( FXC * (2. * cos(C23 * (lp.phi *= 3.)) - 1.) );
-    if (fabs(lp.phi = sin(lp.phi) / CSy) >= 1.) {
+    lp.phi *= 3.;
+    lp.lam = xy.x / ( FXC * (2. * cos(C23 * lp.phi) - 1.) );
+    lp.phi = sin(lp.phi) / CSy;
+    if (fabs(lp.phi) >= 1.) {
         if (fabs(lp.phi) > ONEEPS) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return lp;

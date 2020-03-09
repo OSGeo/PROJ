@@ -339,7 +339,7 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
     double          theta;
 
     /* additional variables from snyder */
-    double          q, Rprime, H, Ag, Azprime, Az, dprime, f, rho,
+    double          q, H, Ag, Azprime, Az, dprime, f, rho,
                     x, y;
 
     /* variables used to store intermediate results */
@@ -427,7 +427,7 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
         /* eq 5 */
         /* Rprime = 0.9449322893 * R; */
         /* R' in the paper is for the truncated */
-        Rprime = 0.91038328153090290025;
+        const double Rprime = 0.91038328153090290025;
 
         /* eq 6 */
         H = acos(sin(Az) * sin(G) * cos(g) - cos(Az) * cos(G));

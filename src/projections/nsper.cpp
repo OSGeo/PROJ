@@ -202,8 +202,10 @@ PJ *PROJECTION(tpers) {
     omega = pj_param(P->ctx, P->params, "rtilt").f;
     gamma = pj_param(P->ctx, P->params, "razi").f;
     Q->tilt = 1;
-    Q->cg = cos(gamma); Q->sg = sin(gamma);
-    Q->cw = cos(omega); Q->sw = sin(omega);
+    Q->cg = cos(gamma);
+    Q->sg = sin(gamma);
+    Q->cw = cos(omega);
+    Q->sw = sin(omega);
 
     return setup(P);
 }

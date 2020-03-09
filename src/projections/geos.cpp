@@ -121,7 +121,7 @@ static PJ_XY geos_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
 static PJ_LP geos_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double Vx, Vy, Vz, a, b, det, k;
+    double Vx, Vy, Vz, a, b, k;
 
     /* Setting three components of vector from satellite to position.*/
     Vx = -1.0;
@@ -136,7 +136,8 @@ static PJ_LP geos_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
     /* Calculation of terms in cubic equation and determinant.*/
     a = Vy * Vy + Vz * Vz + Vx * Vx;
     b = 2 * Q->radius_g * Vx;
-    if ((det = (b * b) - 4 * a * Q->C) < 0.) {
+    const double det = (b * b) - 4 * a * Q->C;
+    if (det < 0.) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return lp;
     }
@@ -158,7 +159,7 @@ static PJ_LP geos_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
 static PJ_LP geos_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double Vx, Vy, Vz, a, b, det, k;
+    double Vx, Vy, Vz, a, b, k;
 
     /* Setting three components of vector from satellite to position.*/
     Vx = -1.0;
@@ -175,7 +176,8 @@ static PJ_LP geos_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
     a = Vz / Q->radius_p;
     a   = Vy * Vy + a * a + Vx * Vx;
     b   = 2 * Q->radius_g * Vx;
-    if ((det = (b * b) - 4 * a * Q->C) < 0.) {
+    const double det = (b * b) - 4 * a * Q->C;
+    if (det < 0.) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return lp;
     }

@@ -33,14 +33,14 @@ static PJ_XY fouc_s_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
 static PJ_LP fouc_s_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double V;
     int i;
 
     if (Q->n != 0.0) {
         lp.phi = xy.y;
         for (i = MAX_ITER; i ; --i) {
-            lp.phi -= V = (Q->n * lp.phi + Q->n1 * sin(lp.phi) - xy.y ) /
-                (Q->n + Q->n1 * cos(lp.phi));
+            const double V = (Q->n * lp.phi + Q->n1 * sin(lp.phi) - xy.y ) /
+                             (Q->n + Q->n1 * cos(lp.phi));
+            lp.phi -= V;
             if (fabs(V) < LOOP_TOL)
                 break;
         }
@@ -48,7 +48,7 @@ static PJ_LP fouc_s_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
             lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
     } else
         lp.phi = aasin(P->ctx,xy.y);
-    V = cos(lp.phi);
+    const double V = cos(lp.phi);
     lp.lam = xy.x * (Q->n + Q->n1 * V) / V;
     return lp;
 }

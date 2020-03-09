@@ -61,7 +61,8 @@ static PJ_LP o_inverse(PJ_XY xy, PJ *P) {             /* spheroid */
 
     PJ_LP lp = Q->link->inv(xy, Q->link);
     if (lp.lam != HUGE_VAL) {
-        coslam = cos(lp.lam -= Q->lamp);
+        lp.lam -= Q->lamp;
+        coslam = cos(lp.lam);
         sinphi = sin(lp.phi);
         cosphi = cos(lp.phi);
         /* Formula (5-9) */
@@ -222,7 +223,8 @@ PJ *PROJECTION(ob_tran) {
         phi1 = pj_param(P->ctx, P->params, "ro_lat_1").f;
         lam2 = pj_param(P->ctx, P->params, "ro_lon_2").f;
         phi2 = pj_param(P->ctx, P->params, "ro_lat_2").f;
-        if (fabs(phi1 - phi2) <= TOL || (con = fabs(phi1)) <= TOL ||
+        con = fabs(phi1);
+        if (fabs(phi1 - phi2) <= TOL || con <= TOL ||
             fabs(con - M_HALFPI) <= TOL || fabs(fabs(phi2) - M_HALFPI) <= TOL)
                 return destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
 

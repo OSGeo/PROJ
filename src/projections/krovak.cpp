@@ -198,7 +198,8 @@ PJ *PROJECTION(krovak) {
 
     /* we want Bessel as fixed ellipsoid */
     P->a = 6377397.155;
-    P->e = sqrt(P->es = 0.006674372230614);
+    P->es = 0.006674372230614;
+    P->e = sqrt(P->es);
 
     /* if latitude of projection center is not set, use 49d30'N */
     if (!pj_param(P->ctx, P->params, "tlat_0").i)
