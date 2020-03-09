@@ -86,6 +86,15 @@ config_str = """
         - Scale_Factor: EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
         - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
 
+- Transverse_Mercator_Complex: # This is likely PROJ etmerc method
+    WKT2_name: EPSG_NAME_METHOD_TRANSVERSE_MERCATOR
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Scale_Factor: EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
+        - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
+
 - Albers:
     WKT2_name: EPSG_NAME_METHOD_ALBERS_EQUAL_AREA
     Params:
@@ -680,7 +689,6 @@ config_str = """
 # Fuller
 # Berghaus_Star
 # Cube
-# Transverse_Mercator_Complex
 # Robinson_ARC_INFO
 # Local
 # Equidistant_Cylindrical_Auxiliary_Sphere

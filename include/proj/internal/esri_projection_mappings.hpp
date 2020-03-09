@@ -114,6 +114,19 @@ static const ESRIParamMapping paramsESRI_Transverse_Mercator[] = {
      EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
     {nullptr, nullptr, 0, "0.0", false}};
 
+static const ESRIParamMapping paramsESRI_Transverse_Mercator_Complex[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Scale_Factor", EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, "0.0", false},
+    {"Latitude_Of_Origin", EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
 static const ESRIParamMapping paramsESRI_Albers[] = {
     {"False_Easting", EPSG_NAME_PARAMETER_EASTING_FALSE_ORIGIN,
      EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN, "0.0", false},
@@ -901,6 +914,9 @@ static const ESRIMethodMapping esriMappings[] = {
      EPSG_CODE_METHOD_TRANSVERSE_MERCATOR, paramsESRI_Gauss_Kruger},
     {"Transverse_Mercator", EPSG_NAME_METHOD_TRANSVERSE_MERCATOR,
      EPSG_CODE_METHOD_TRANSVERSE_MERCATOR, paramsESRI_Transverse_Mercator},
+    {"Transverse_Mercator_Complex", EPSG_NAME_METHOD_TRANSVERSE_MERCATOR,
+     EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
+     paramsESRI_Transverse_Mercator_Complex},
     {"Albers", EPSG_NAME_METHOD_ALBERS_EQUAL_AREA,
      EPSG_CODE_METHOD_ALBERS_EQUAL_AREA, paramsESRI_Albers},
     {"Sinusoidal", PROJ_WKT2_NAME_METHOD_SINUSOIDAL, 0, paramsESRI_Sinusoidal},

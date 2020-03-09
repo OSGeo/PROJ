@@ -4344,6 +4344,21 @@ static const struct {
          {"False northing", 2},
      }},
 
+    {"Transverse_Mercator_Complex",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Scale_Factor", 4},
+      {"Latitude_Of_Origin", 5}},
+     "Transverse Mercator",
+     {
+         {"Latitude of natural origin", 5},
+         {"Longitude of natural origin", 3},
+         {"Scale factor at natural origin", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
     {"Albers",
      {{"False_Easting", 1},
       {"False_Northing", 2},
