@@ -289,11 +289,11 @@ Coordinate transformation
         ...
 
         proj_trans_generic (
-            P, PJ_INV, sizeof(XYQS),
+            P, PJ_INV,
             &(survey[0].x), stride, 345,  /*  We have 345 eastings  */
             &(survey[0].y), stride, 345,  /*  ...and 345 northings. */
-            &height, 1,                   /*  The height is the constant  23.45 m */
-            0, 0                          /*  and the time is the constant 0.00 s */
+            &height, sizeof(double), 1,   /*  The height is the constant  23.45 m */
+            0, 0, 0                       /*  and the time is the constant 0.00 s */
         );
 
     This is similar to the inner workings of the deprecated :c:func:`pj_transform`
