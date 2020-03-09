@@ -21,14 +21,17 @@ shallow_clone: true
 
 build_script:
   - echo build_script
-  - git clone https://github.com/microsoft/vcpkg
-  - cd vcpkg
-  - bootstrap-vcpkg.bat
-  - set PATH=%CD%;%PATH%
-  - cd ..
+  # update vcpkg
+  - cmd: |
+      cd "C:\Tools\vcpkg"
+      git pull
+      .\bootstrap-vcpkg.bat
+      cd %APPVEYOR_BUILD_FOLDER%
   - vcpkg install sqlite3[core,tool]:"%platform%"-windows
   - vcpkg install tiff:"%platform%"-windows
   - vcpkg install curl:"%platform%"-windows
+  - dir C:\Tools\vcpkg\installed\%platform%-windows\bin
+  - set PATH=C:\Tools\vcpkg\installed\%platform%-windows\bin;%PATH%
   - if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
   - if "%platform%" == "x64" SET BUILD_SHARED_LIBS=ON
   - if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
@@ -39,9 +42,8 @@ build_script:
   - mkdir %PROJ_BUILD%
   - cd %PROJ_BUILD%
   - set PROJ_DIR=%APPVEYOR_BUILD_FOLDER%\proj_dir
-  - cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS="%BUILD_SHARED_LIBS%" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=C:/projects/proj/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
+  - cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS="%BUILD_SHARED_LIBS%" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
   - cmake --build . --config Release --target install
-  - copy c:\projects\proj\vcpkg\installed\"%platform%"-windows\bin\*.dll %PROJ_DIR%\bin
   - dir %PROJ_DIR%\bin
 
 test_script:
