@@ -5,7 +5,7 @@
 #include <math.h>
 
 PROJ_HEAD(stere, "Stereographic") "\n\tAzi, Sph&Ell\n\tlat_ts=";
-PROJ_HEAD(ups, "Universal Polar Stereographic") "\n\tAzi, Sph&Ell\n\tsouth";
+PROJ_HEAD(ups, "Universal Polar Stereographic") "\n\tAzi, Ell\n\tsouth";
 
 
 namespace { // anonymous namespace
@@ -320,8 +320,7 @@ PJ *PROJECTION(ups) {
     /* International Ellipsoid */
     P->phi0 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;
     if (P->es == 0.0) {
-        proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
     }
     P->k0 = .994;
     P->x0 = 2000000.;
