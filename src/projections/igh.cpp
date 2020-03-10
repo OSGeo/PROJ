@@ -192,6 +192,8 @@ PJ *PROJECTION(igh) {
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
 
+    // Must be set to 0 before initializing the internal sinusoidal projections
+    P->es = 0.;
 
     /* sinusoidal zones */
     SETUP(3, sinu, -d100, 0, -d100);
@@ -222,7 +224,6 @@ PJ *PROJECTION(igh) {
     P->inv = igh_s_inverse;
     P->fwd = igh_s_forward;
     P->destructor = destructor;
-    P->es = 0.;
 
     return P;
 }

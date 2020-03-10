@@ -2169,6 +2169,23 @@ accept  -200 -100
 expect  -0.001790496 -0.000895247
 
 
+-------------------------------------------------------------------------------
+operation +proj=igh   +a=6400000 +rf=300
+-------------------------------------------------------------------------------
+accept  2 1
+# The value should be identical to the spherical case above, since the
+# projection method is only defined on the sphere, and ellipsoidal parameters
+# are ignored
+expect  223878.497456271 111701.072127637
+
+-------------------------------------------------------------------------------
+operation +proj=sinu  +a=6400000
+-------------------------------------------------------------------------------
+accept  2 1
+# The northing value should match exactly the one of the igh above case
+expect  223368.11902663 111701.072127637
+
+
 ===============================================================================
 International Map of the World Polyconic
 	Mod. Polyconic, Ell
