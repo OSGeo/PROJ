@@ -22,7 +22,7 @@
 
 PROJ_HEAD(tmerc, "Transverse Mercator") "\n\tCyl, Sph&Ell\n\tapprox";
 PROJ_HEAD(etmerc, "Extended Transverse Mercator") "\n\tCyl, Sph";
-PROJ_HEAD(utm, "Universal Transverse Mercator (UTM)") "\n\tCyl, Sph\n\tzone= south approx";
+PROJ_HEAD(utm, "Universal Transverse Mercator (UTM)") "\n\tCyl, Ell\n\tzone= south approx";
 
 namespace { // anonymous namespace
 struct pj_opaque_approx {
@@ -541,8 +541,7 @@ PJ *PROJECTION(etmerc) {
 PJ *PROJECTION(utm) {
     long zone;
     if (P->es == 0.0) {
-        proj_errno_set(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
     }
     if (P->lam0 < -1000.0 || P->lam0 > 1000.0) {
         return pj_default_destructor(P, PJD_ERR_INVALID_UTM_ZONE);
