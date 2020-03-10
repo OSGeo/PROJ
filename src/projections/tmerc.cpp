@@ -19,6 +19,8 @@
 #include "proj_internal.h"
 #include <math.h>
 
+#include <limits>
+
 
 PROJ_HEAD(tmerc, "Transverse Mercator") "\n\tCyl, Sph&Ell\n\tapprox";
 PROJ_HEAD(etmerc, "Extended Transverse Mercator") "\n\tCyl, Sph";
@@ -29,6 +31,24 @@ struct pj_opaque_approx {
     double  esp;
     double  ml0;
     double  *en;
+
+    // Structure to store cached values for a given northing for the inverse
+    // computation
+    struct s_inv_cache
+    {
+        double  y;
+        double  phi;
+        double  cosphi;
+        double  con_div_one_minus_es_mul_FC2;
+        double  sqrt_con_div_k0;
+        double  phi_cst_1;
+        double  phi_cst_2;
+        double  phi_cst_3;
+        double  lam_cst_1;
+        double  lam_cst_2;
+        double  lam_cst_3;
+    };
+    s_inv_cache inv_cache;
 };
 
 struct pj_opaque_exact {
@@ -230,15 +250,39 @@ inline_pj_inv_mlfn(projCtx ctx, double arg, double es, double *en,
     return phi;
 }
 
-#ifdef BUILD_FMA_OPTIMIZED_VERSION
+#ifdef xBUILD_FMA_OPTIMIZED_VERSION
 __attribute__((target_clones("fma","default")))
 #endif
 inline static PJ_LP approx_e_inv_internal (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(P->opaque);
 
+    auto& C = Q->inv_cache;
+    if( C.y == xy.y )
+    {
+        // If the point has the same northing as the previous one, we can use
+        // cached results for many computations.
+        if( fabs(C.phi) >= M_HALFPI) {
+            lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
+            lp.lam = 0.;
+            return lp;
+        }
+
+        const double d = xy.x * C.sqrt_con_div_k0;
+        const double ds = d * d;
+        lp.phi = C.phi - ds * C.con_div_one_minus_es_mul_FC2 * (1. -
+            ds * (C.phi_cst_1 - ds * (C.phi_cst_2 - ds * C.phi_cst_3)));
+        lp.lam = d*(FC1 - ds*(C.lam_cst_1 - ds*(C.lam_cst_2 - ds * C.lam_cst_3))) / C.cosphi;
+
+        return lp;
+    }
+
     double sinphi, cosphi;
     lp.phi = inline_pj_inv_mlfn(P->ctx, Q->ml0 + xy.y / P->k0, P->es, Q->en, &sinphi, &cosphi);
+    C.y = xy.y;
+    C.phi = lp.phi;
+    C.cosphi = cosphi;
+
     if (fabs(lp.phi) >= M_HALFPI) {
         lp.phi = xy.y < 0. ? -M_HALFPI : M_HALFPI;
         lp.lam = 0.;
@@ -246,21 +290,31 @@ inline static PJ_LP approx_e_inv_internal (PJ_XY xy, PJ *P) {
         double t = fabs (cosphi) > 1e-10 ? sinphi/cosphi : 0.;
         const double n = Q->esp * cosphi * cosphi;
         double con = 1. - P->es * sinphi * sinphi;
-        const double d = xy.x * sqrt (con) / P->k0;
+        C.sqrt_con_div_k0 = sqrt (con) / P->k0;
+        const double d = xy.x * C.sqrt_con_div_k0;
         con *= t;
         t *= t;
+
+        const double con_div_one_minus_es_mul_FC2 = con / (1.-P->es) * FC2;
+        C.con_div_one_minus_es_mul_FC2 = con_div_one_minus_es_mul_FC2;
+
+        const double phi_cst_1 = FC4 * (5. + t * (3. - 9. *  n) + n * (1. - 4 * n));
+        const double phi_cst_2 = FC4 * FC6 * (61. + t * (90. - 252. * n + 45. * t) + 46. * n);
+        const double phi_cst_3 = FC4 * FC6 * FC8 * (1385. + t * (3633. + t * (4095. + 1575. * t)));
+        C.phi_cst_1 = phi_cst_1;
+        C.phi_cst_2 = phi_cst_2;
+        C.phi_cst_3 = phi_cst_3;
         const double ds = d * d;
-        lp.phi -= (con * ds / (1.-P->es)) * FC2 * (1. -
-            ds * FC4 * (5. + t * (3. - 9. *  n) + n * (1. - 4 * n) -
-            ds * FC6 * (61. + t * (90. - 252. * n +
-                45. * t) + 46. * n
-           - ds * FC8 * (1385. + t * (3633. + t * (4095. + 1575. * t)) )
-            )));
-        lp.lam = d*(FC1 -
-            ds*FC3*( 1. + 2.*t + n -
-            ds*FC5*(5. + t*(28. + 24.*t + 8.*n) + 6.*n
-           - ds * FC7 * (61. + t * (662. + t * (1320. + 720. * t)) )
-        ))) / cosphi;
+        lp.phi -= ds * con_div_one_minus_es_mul_FC2 * (1. -
+            ds * (phi_cst_1 - ds * (phi_cst_2 - ds * phi_cst_3)));
+
+        const double lam_cst_1 = FC3 * (1. + 2.*t + n);
+        const double lam_cst_2 = FC3 * FC5 * (5. + t*(28. + 24.*t + 8.*n) + 6.*n);
+        const double lam_cst_3 = FC3 * FC5 * FC7 * (61. + t * (662. + t * (1320. + 720. * t)) );
+        C.lam_cst_1 = lam_cst_1;
+        C.lam_cst_2 = lam_cst_2;
+        C.lam_cst_3 = lam_cst_3;
+        lp.lam = d*(FC1 - ds*(lam_cst_1 - ds*(lam_cst_2 - ds * lam_cst_3))) / cosphi;
     }
     return lp;
 }
@@ -303,8 +357,11 @@ static PJ *destructor_approx(PJ *P, int errlev) {
 
 
 static PJ *setup_approx(PJ *P) {
-    struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(P->opaque);
+    struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(pj_calloc (1, sizeof (struct pj_opaque_approx)));
+    if (nullptr==Q)
+        return pj_default_destructor (P, ENOMEM);
 
+    P->opaque = Q;
     P->destructor = destructor_approx;
 
     if (P->es != 0.0) {
@@ -313,6 +370,7 @@ static PJ *setup_approx(PJ *P) {
 
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
         Q->esp = P->es / (1. - P->es);
+        Q->inv_cache.y = std::numeric_limits<double>::quiet_NaN();
         P->inv = approx_e_inv;
         P->fwd = approx_e_fwd;
     } else {
@@ -596,12 +654,6 @@ PJ *PROJECTION(tmerc) {
     /* exact transverse mercator only exists in ellipsoidal form, */
     /* use approximate version if +a sphere is requested          */
     if (pj_param (P->ctx, P->params, "bapprox").i || P->es <= 0) {
-        struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(pj_calloc (1, sizeof (struct pj_opaque_approx)));
-        if (nullptr==Q)
-            return pj_default_destructor (P, ENOMEM);
-
-        P->opaque = Q;
-
         return setup_approx(P);
     } else {
         struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(pj_calloc (1, sizeof (struct pj_opaque_exact)));
@@ -658,11 +710,6 @@ PJ *PROJECTION(utm) {
     P->phi0 = 0.;
 
     if (pj_param(P->ctx, P->params, "bapprox").i) {
-        struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(pj_calloc (1, sizeof (struct pj_opaque_approx)));
-        if (nullptr==Q)
-            return pj_default_destructor (P, ENOMEM);
-        P->opaque = Q;
-
         return setup_approx(P);
     } else {
         struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(pj_calloc (1, sizeof (struct pj_opaque_exact)));
