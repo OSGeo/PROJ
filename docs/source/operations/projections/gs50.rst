@@ -7,7 +7,7 @@ Mod. Stererographics of 50 U.S.
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Azimuthal                                                |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and elliptical projection |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | All 50 states of the U.S.                                |
 +---------------------+----------------------------------------------------------+

@@ -6,7 +6,7 @@ Azimuthal Equidistant
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Azimuthal                                                |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and elliptical projection |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Alias**           | aeqd                                                     |
 +---------------------+----------------------------------------------------------+
@@ -33,7 +33,7 @@ Options
 
 .. option:: +guam
 
-    Use Guam elliptical formulas. Only accurate near the Island of Guam
+    Use Guam ellipsoidal formulas. Only accurate near the Island of Guam
     (:math:`\lambda\approx 144.5^{\circ}`, :math:`\phi\approx 13.5^{\circ}`)
 
 .. include:: ../options/k_0.rst

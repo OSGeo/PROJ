@@ -7,7 +7,7 @@ McBryde-Thomas Flat-Polar Sinusoidal
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Pseudocylindrical                                        |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and elliptical projection |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
