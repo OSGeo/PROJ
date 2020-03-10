@@ -20,7 +20,7 @@ justifies adding this otherwise non-standard projection.
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conformal conic                                          |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and elliptical projection.|
+| **Available forms** | Forward and inverse, spherical and ellipsoidal          .|
 |                     | One or two standard parallels (1SP and 2SP).             |
 |                     | "LCC 2SP Michigan" form can be used by setting           |
 |                     | `+k_0` parameter to specify elliposid scale.             |

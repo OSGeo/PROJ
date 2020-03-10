@@ -7,7 +7,7 @@ Quadrilateralized Spherical Cube
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Azimuthal                                                |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, elliptical projection               |
+| **Available forms** | Forward and inverse, ellipsoidal                         |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
