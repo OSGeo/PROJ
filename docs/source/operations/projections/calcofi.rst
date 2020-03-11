@@ -10,7 +10,7 @@ California Cooperative Oceanic Fisheries Investigations program, known as CalCOF
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conformal cylindrical                                    |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and elliptical projection |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Only valid for the west coast of USA and Mexico          |
 +---------------------+----------------------------------------------------------+

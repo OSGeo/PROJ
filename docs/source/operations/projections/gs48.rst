@@ -7,7 +7,7 @@ Mod. Stererographics of 48 U.S.
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Azimuthal                                                |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and elliptical projection |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | The lower 48 states of the U.S.                          |
 +---------------------+----------------------------------------------------------+
