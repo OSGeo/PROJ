@@ -13,14 +13,15 @@ task:
     CIRRUS_CLONE_DEPTH: 1
     MAKE_FLAGS: -j 4
 
-  cache:
-    folder: $HOME/.ccache
+  # Disable cache: its upload can take up to 30 minutes!
+  #cache:
+  #  folder: $HOME/.ccache
 
   pkginstall_script:
     - pkg install -y autoconf automake libtool pkgconf sqlite3 tiff ccache gmake
   configure_script:
     - ./autogen.sh
-    - CC="ccache cc" CXX="ccache c++" ./configure --disable-static
+    - ./configure --disable-static
   compile_script:
     - gmake $(MAKE_FLAGS)
   test_script:
