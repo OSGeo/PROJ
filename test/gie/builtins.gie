@@ -3233,10 +3233,12 @@ expect  -222638.981586547 -110579.965218249
 direction inverse
 accept  200 100
 expect  0.001796631 0.000904369
-accept  200 -100
-expect  0.001796631 -0.000904369
+# Make sure this test immediately follows the previous one so they use the same
+# northing, to test the related optimization
 accept  -200 100
 expect  -0.001796631 0.000904369
+accept  200 -100
+expect  0.001796631 -0.000904369
 accept  -200 -100
 expect  -0.001796631 -0.000904369
 
@@ -3256,10 +3258,12 @@ expect  -223402.144255274 -111706.743574944
 direction inverse
 accept  200 100
 expect  0.001790493 0.000895247
-accept  200 -100
-expect  0.001790493 -0.000895247
+# Make sure this test immediately follows the previous one so they use the same
+# northing, to test the related optimization
 accept  -200 100
 expect  -0.001790493 0.000895247
+accept  200 -100
+expect  0.001790493 -0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
 

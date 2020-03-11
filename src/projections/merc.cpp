@@ -1,5 +1,6 @@
 #define PJ_LIB__
 
+#include <errno.h>
 #include <float.h>
 #include <math.h>
 
@@ -9,6 +10,13 @@
 
 PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Ell\n\t";
+
+namespace { // anonymous namespace
+struct merc_data {
+    double  y;
+    double  phi;
+};
+}
 
 #define EPS10 1.e-10
 static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
@@ -36,7 +44,7 @@ static PJ_XY merc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
-}
+    }
     xy.x = P->k0 * lp.lam;
     xy.y = P->k0 * logtanpfpim1(lp.phi);
     return xy;
@@ -45,10 +53,17 @@ static PJ_XY merc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
 
 static PJ_LP merc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
-    if ((lp.phi = pj_phi2(P->ctx, exp(- xy.y / P->k0), P->e)) == HUGE_VAL) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-        return lp;
-}
+    merc_data *Q = static_cast<merc_data*>(P->opaque);
+    if( xy.y == Q->y ) {
+        lp.phi = Q->phi;
+    } else {
+        if ((lp.phi = pj_phi2(P->ctx, exp(- xy.y / P->k0), P->e)) == HUGE_VAL) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            return lp;
+        }
+        Q->y = xy.y;
+        Q->phi = lp.phi;
+    }
     lp.lam = xy.x / P->k0;
     return lp;
 }
@@ -56,9 +71,26 @@ static PJ_LP merc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
 
 static PJ_LP merc_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse */
     PJ_LP lp = {0.0,0.0};
-    lp.phi = atan(sinh(xy.y / P->k0));
+    merc_data *Q = static_cast<merc_data*>(P->opaque);
+    if( xy.y == Q->y ) {
+        lp.phi = Q->phi;
+    } else {
+        lp.phi = atan(sinh(xy.y / P->k0));
+        Q->y = xy.y;
+        Q->phi = lp.phi;
+    }
     lp.lam = xy.x / P->k0;
     return lp;
+}
+
+
+static PJ* setup_private_member(PJ* P)
+{
+    merc_data *Q = static_cast<merc_data*>(pj_calloc (1, sizeof (merc_data)));
+    if (nullptr==Q)
+        return pj_default_destructor (P, ENOMEM);
+    P->opaque = Q;
+    return P;
 }
 
 
@@ -71,6 +103,10 @@ PJ *PROJECTION(merc) {
         if (phits >= M_HALFPI)
             return pj_default_destructor(P, PJD_ERR_LAT_TS_LARGER_THAN_90);
     }
+
+    P = setup_private_member(P);
+    if( !P )
+        return nullptr;
 
     if (P->es != 0.0) { /* ellipsoid */
         if (is_phits)
@@ -90,6 +126,10 @@ PJ *PROJECTION(merc) {
 }
 
 PJ *PROJECTION(webmerc) {
+
+    P = setup_private_member(P);
+    if( !P )
+        return nullptr;
 
     /* Overriding k_0 with fixed parameter */
     P->k0 = 1.0;
