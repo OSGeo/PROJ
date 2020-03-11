@@ -3743,8 +3743,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                             return res;
                         }
                         res.emplace_back(crsNN, eqName ? 90 : 70);
-                    } else if (crs->nameStr() == thisName &&
-                               CRS::getPrivate()->implicitCS_ &&
+                    } else if (eqName && CRS::getPrivate()->implicitCS_ &&
                                coordinateSystem()
                                    ->axisList()[0]
                                    ->unit()
@@ -3765,7 +3764,8 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                    dbContext) &&
                                objects.size() == 1) {
                         res.clear();
-                        res.emplace_back(crsNN, 100);
+                        res.emplace_back(crsNN,
+                                         crs->nameStr() == thisName ? 100 : 90);
                         return res;
                     } else {
                         res.emplace_back(crsNN, 25);
