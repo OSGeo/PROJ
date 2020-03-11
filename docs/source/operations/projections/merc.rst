@@ -12,7 +12,7 @@ The projection is conformal which makes it suitable for navigational purposes.
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conformal cylindrical                                    |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and elliptical projection |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but best used near the equator                   |
 +---------------------+----------------------------------------------------------+
@@ -112,10 +112,10 @@ Inverse projection
     \phi = \frac{\pi}{2} - 2 \arctan \left[ e^{-y/k_0} \right]
 
 
-Elliptical form
+Ellisoidal form
 ***************
 
-For the elliptical form of the projection we introduce the scaling factor:
+For the ellipsoidal form of the projection we introduce the scaling factor:
 
 .. math::
 

@@ -11,7 +11,7 @@ longigude.
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Transverse cylindrical, conformal                        |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, Elliptical only                     |
+| **Available forms** | Forward and inverse, ellipsoidal only                    |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Within the used zone, but transformations of coordinates |
 |                     | in adjacent zones can be expected to be accurate as well |

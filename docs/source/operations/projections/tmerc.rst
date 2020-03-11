@@ -9,7 +9,7 @@ The transverse Mercator projection in its various forms is the most widely used 
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Transverse and oblique cylindrical                       |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, Spherical and Elliptical            |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but reasonably accurate only within 15 degrees   |
 |                     | of the central meridian                                  |
@@ -79,7 +79,7 @@ Parameters
 
     .. versionadded:: 6.0.0
 
-    Use the algorithm described in section "Elliptical Form" below.
+    Use the algorithm described in section "Ellipsoidal Form" below.
     It is faster than the default algorithm, but also diverges faster
     as the distance from the central meridian increases.
 
@@ -147,8 +147,8 @@ Inverse projection
   \lambda = \arctan(\frac{\sinh x'}{\cos D})
 
 
-Elliptical form
-***************
+Ellipsoidal form
+****************
 
 The formulas below describe the algorithm used when giving the
 :option:`+approx` option. They are originally from :cite:`Snyder1987`,

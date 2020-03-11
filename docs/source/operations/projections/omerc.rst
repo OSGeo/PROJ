@@ -10,7 +10,7 @@ gap between the Mercator and the Transverse Mercator projections.
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conformal cylindrical                                    |
 +---------------------+----------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical and elliptical projection |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global, but reasonably accurate only within 15 degrees   |
 |                     | of the oblique central line                              |

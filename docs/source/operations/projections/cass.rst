@@ -9,7 +9,7 @@ Although the Cassini projection has been largely replaced by the Transverse Merc
 +---------------------+-------------------------------------------------------------------------+
 | **Classification**  | Transverse and oblique cylindrical                                      |
 +---------------------+-------------------------------------------------------------------------+
-| **Available forms** | Forward and inverse, Spherical and Elliptical                           |
+| **Available forms** | Forward and inverse, Spherical and ellipsoidal                          |
 +---------------------+-------------------------------------------------------------------------+
 | **Defined area**    | Global, but best used near the central meridian with long, narrow areas |
 +---------------------+-------------------------------------------------------------------------+
@@ -100,8 +100,8 @@ Inverse projection
 
   \lambda = \arctan2(\tan(x), \cos(y+\phi_0))
 
-Elliptical form
-===============
+Ellipsoidal form
+================
 
 Forward projection
 ------------------
