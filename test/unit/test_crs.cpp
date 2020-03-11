@@ -2445,6 +2445,33 @@ TEST(crs, projectedCRS_identify_db) {
         }
         EXPECT_TRUE(found);
     }
+    {
+        // Identify a ESRI WKT where the EPSG system has Northing/Easting order
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"NZGD2000_New_Zealand_Transverse_Mercator_2000\","
+            "    GEOGCS[\"GCS_NZGD2000\","
+            "        DATUM[\"New_Zealand_Geodetic_Datum_2000\","
+            "            SPHEROID[\"GRS 1980\",6378137,298.2572221010042,"
+            "                AUTHORITY[\"EPSG\",\"7019\"]],"
+            "            AUTHORITY[\"EPSG\",\"6167\"]],"
+            "        PRIMEM[\"Greenwich\",0],"
+            "        UNIT[\"degree\",0.0174532925199433]],"
+            "        PROJECTION[\"Transverse_Mercator\"],"
+            "        PARAMETER[\"latitude_of_origin\",0],"
+            "        PARAMETER[\"central_meridian\",173],"
+            "        PARAMETER[\"scale_factor\",0.9996],"
+            "        PARAMETER[\"false_easting\",1600000],"
+            "        PARAMETER[\"false_northing\",10000000],"
+            "        UNIT[\"metre\",1,"
+            "            AUTHORITY[\"EPSG\",\"9001\"]]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(factoryAll);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2193);
+        EXPECT_EQ(res.front().second, 90);
+    }
 }
 
 // ---------------------------------------------------------------------------
