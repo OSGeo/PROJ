@@ -1157,6 +1157,11 @@ PJ PROJ_DLL *proj_list_get(PJ_CONTEXT *ctx,
 
 void PROJ_DLL proj_list_destroy(PJ_OBJ_LIST *result);
 
+int PROJ_DLL proj_get_suggested_operation(PJ_CONTEXT *ctx,
+                                          PJ_OBJ_LIST *operations,
+                                          PJ_DIRECTION direction,
+                                          PJ_COORD coord);
+
 /* ------------------------------------------------------------------------- */
 
 PJ PROJ_DLL *proj_crs_get_geodetic_crs(PJ_CONTEXT *ctx, const PJ *crs);
