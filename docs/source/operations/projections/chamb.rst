@@ -34,6 +34,8 @@ Parameters
 Required
 --------------------------------------------------------------------------------
 
+.. note:: Control points should be oriented clockwise.
+
 .. option:: +lat_1=<value>
 
     Latitude of the first control point.
