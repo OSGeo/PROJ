@@ -68,7 +68,7 @@ def ingest_epsg():
 
 def fill_unit_of_measure(proj_db_cursor):
     proj_db_cursor.execute(
-        "INSERT INTO unit_of_measure SELECT ?, uom_code, unit_of_meas_name, unit_of_meas_type, factor_b / factor_c, deprecated FROM epsg.epsg_unitofmeasure", (EPSG_AUTHORITY,))
+        "INSERT INTO unit_of_measure SELECT ?, uom_code, unit_of_meas_name, unit_of_meas_type, factor_b / factor_c, NULL, deprecated FROM epsg.epsg_unitofmeasure", (EPSG_AUTHORITY,))
 
 
 def fill_ellipsoid(proj_db_cursor):

@@ -912,6 +912,39 @@ typedef struct
     int allow_deprecated;
 } PROJ_CRS_LIST_PARAMETERS;
 
+/** \brief Structure given description of a unit.
+ *
+ * This structure may grow over time, and should not be directly allocated by
+ * client code.
+ * @since 7.1
+ */
+typedef struct
+{
+    /** Authority name. */
+    char* auth_name;
+
+    /** Object code. */
+    char* code;
+
+    /** Object name. For example "metre", "US survey foot", etc. */
+    char* name;
+
+    /** Category of the unit: one of "linear", "linear_per_time", "angular",
+     * "angular_per_time", "scale", "scale_per_time" or "time" */
+    char* category;
+
+    /** Conversion factor to apply to transform from that unit to the
+     * corresponding SI unit (metre for "linear", radian for "angular", etc.).
+     * It might be 0 in some cases to indicate no known conversion factor. */
+    double conv_factor;
+
+    /** PROJ short name, like "m", "ft", "us-ft", etc... Might be NULL */
+    char* proj_short_name;
+
+    /** Whether the object is deprecated */
+    int deprecated;
+} PROJ_UNIT_INFO;
+
 
 /**@}*/
 
@@ -1076,6 +1109,15 @@ PROJ_CRS_INFO PROJ_DLL **proj_get_crs_info_list_from_database(
                                       int *out_result_count);
 
 void PROJ_DLL proj_crs_info_list_destroy(PROJ_CRS_INFO** list);
+
+PROJ_UNIT_INFO PROJ_DLL **proj_get_units_from_database(
+                                            PJ_CONTEXT *ctx,
+                                            const char *auth_name,
+                                            const char *category,
+                                            int allow_deprecated,
+                                            int *out_result_count);
+
+void PROJ_DLL proj_unit_list_destroy(PROJ_UNIT_INFO** list);
 
 /* ------------------------------------------------------------------------- */
 

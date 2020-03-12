@@ -521,6 +521,9 @@ Lists
     entry of the returned array is a NULL-entry. The array is statically
     allocated and does not need to be freed after use.
 
+    Note: starting with PROJ 7.1, this function is deprecated by
+    :cpp:func:`proj_get_units_from_database`
+
     :returns: :c:type:`PJ_UNITS*`
 
 .. c:function:: const PJ_PRIME_MERIDIANS* proj_list_prime_meridians(void)

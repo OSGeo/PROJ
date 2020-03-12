@@ -1401,16 +1401,18 @@ class FactoryWithTmpDatabase : public ::testing::Test {
     void populateWithFakeEPSG() {
 
         ASSERT_TRUE(execute("INSERT INTO unit_of_measure "
-                            "VALUES('EPSG','9001','metre','length',1.0,0);"))
+                            "VALUES('EPSG','9001','metre','length',1.0,NULL,"
+                            "0);"))
             << last_error();
         ASSERT_TRUE(execute("INSERT INTO unit_of_measure "
                             "VALUES('EPSG','9102','degree','angle',1."
-                            "74532925199432781271e-02,0);"))
+                            "74532925199432781271e-02,NULL,0);"))
             << last_error();
         ASSERT_TRUE(execute(
             "INSERT INTO unit_of_measure VALUES('EPSG','9122','degree "
             "(supplier to "
-            "define representation)','angle',1.74532925199432781271e-02,0);"))
+            "define representation)','angle',1.74532925199432781271e-02,NULL,"
+            "0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO area "
@@ -1470,7 +1472,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             << last_error();
 
         ASSERT_TRUE(execute("INSERT INTO unit_of_measure "
-                            "VALUES('EPSG','9201','unity','scale',1.0,0);"))
+                            "VALUES('EPSG','9201','unity','scale',1.0,"
+                            "NULL,0);"))
             << last_error();
 
         ASSERT_TRUE(execute(
@@ -1547,7 +1550,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
         ASSERT_TRUE(execute(
             "INSERT INTO unit_of_measure VALUES('EPSG','9110','sexagesimal "
-            "DMS','angle',NULL,0);"))
+            "DMS','angle',NULL,NULL,0);"))
             << last_error();
 
         ASSERT_TRUE(execute(
@@ -2933,7 +2936,7 @@ TEST(factory, getCRSInfoList) {
         auto list = factory->getCRSInfoList();
         EXPECT_GT(list.size(), 1U);
         bool foundEPSG = false;
-        bool foundIGNF = true;
+        bool foundIGNF = false;
         bool found4326 = false;
         for (const auto &info : list) {
             foundEPSG |= info.authName == "EPSG";
@@ -3023,4 +3026,73 @@ TEST(factory, getCRSInfoList) {
         EXPECT_TRUE(found6871);
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, getUnitList) {
+    auto ctxt = DatabaseContext::create();
+    {
+        auto factory = AuthorityFactory::create(ctxt, std::string());
+        auto list = factory->getUnitList();
+        EXPECT_GT(list.size(), 1U);
+        bool foundEPSG = false;
+        bool foundPROJ = false;
+        bool found1027 = false;
+        bool found1028 = false;
+        bool found1032 = false;
+        bool found1036 = false;
+        bool found9001 = false;
+        bool found9101 = false;
+        for (const auto &info : list) {
+            foundEPSG |= info.authName == "EPSG";
+            foundPROJ |= info.authName == "PROJ";
+            if (info.authName == "EPSG" && info.code == "1027") {
+                EXPECT_EQ(info.name, "millimetres per year");
+                EXPECT_EQ(info.category, "linear_per_time");
+                found1027 = true;
+            } else if (info.authName == "EPSG" && info.code == "1028") {
+                EXPECT_EQ(info.name, "parts per billion");
+                EXPECT_EQ(info.category, "scale");
+                found1028 = true;
+            } else if (info.authName == "EPSG" && info.code == "1032") {
+                EXPECT_EQ(info.name, "milliarc-seconds per year");
+                EXPECT_EQ(info.category, "angular_per_time");
+                found1032 = true;
+            } else if (info.authName == "EPSG" && info.code == "1036") {
+                EXPECT_EQ(info.name, "unity per second");
+                EXPECT_EQ(info.category, "scale_per_time");
+                found1036 = true;
+            } else if (info.authName == "EPSG" && info.code == "9001") {
+                EXPECT_EQ(info.name, "metre");
+                EXPECT_EQ(info.category, "linear");
+                EXPECT_EQ(info.convFactor, 1.0);
+                EXPECT_EQ(info.projShortName, "m");
+                EXPECT_FALSE(info.deprecated);
+                found9001 = true;
+            } else if (info.authName == "EPSG" && info.code == "9101") {
+                EXPECT_EQ(info.name, "radian");
+                EXPECT_EQ(info.category, "angular");
+                EXPECT_FALSE(info.deprecated);
+                found9101 = true;
+            }
+        }
+        EXPECT_TRUE(foundEPSG);
+        EXPECT_TRUE(foundPROJ);
+        EXPECT_TRUE(found1027);
+        EXPECT_TRUE(found1028);
+        EXPECT_TRUE(found1032);
+        EXPECT_TRUE(found1036);
+        EXPECT_TRUE(found9001);
+        EXPECT_TRUE(found9101);
+    }
+    {
+        auto factory = AuthorityFactory::create(ctxt, "EPSG");
+        auto list = factory->getUnitList();
+        EXPECT_GT(list.size(), 1U);
+        for (const auto &info : list) {
+            EXPECT_EQ(info.authName, "EPSG");
+        }
+    }
+}
+
 } // namespace
