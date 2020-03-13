@@ -738,7 +738,7 @@ pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_i
         return pj_default_destructor (PIN, PJD_ERR_K_LESS_THAN_ZERO);
 
     /* Set units */
-    units = proj_list_units();
+    units = pj_list_linear_units();
     s = nullptr;
     if ((name = pj_param(ctx, start, "sunits").s) != nullptr) {
         for (i = 0; (s = units[i].id) && strcmp(name, s) ; ++i) ;

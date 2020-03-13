@@ -873,6 +873,8 @@ std::string PROJ_DLL pj_context_get_user_writable_directory(PJ_CONTEXT *ctx, boo
 void PROJ_DLL pj_context_set_user_writable_directory(PJ_CONTEXT* ctx, const std::string& path);
 std::string PROJ_DLL pj_get_relative_share_proj(PJ_CONTEXT *ctx);
 
+const PJ_UNITS *pj_list_linear_units();
+
 /* classic public API */
 #include "proj_api.h"
 
