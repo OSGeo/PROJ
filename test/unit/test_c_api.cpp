@@ -3425,6 +3425,48 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_get_units_from_database) {
+    { proj_unit_list_destroy(nullptr); }
+
+    {
+        auto list = proj_get_units_from_database(nullptr, nullptr, nullptr,
+                                                 true, nullptr);
+        ASSERT_NE(list, nullptr);
+        ASSERT_NE(list[0], nullptr);
+        ASSERT_NE(list[0]->auth_name, nullptr);
+        ASSERT_NE(list[0]->code, nullptr);
+        ASSERT_NE(list[0]->name, nullptr);
+        proj_unit_list_destroy(list);
+    }
+
+    {
+        int result_count = 0;
+        auto list = proj_get_units_from_database(nullptr, "EPSG", "linear",
+                                                 false, &result_count);
+        ASSERT_NE(list, nullptr);
+        EXPECT_GT(result_count, 1);
+        EXPECT_EQ(list[result_count], nullptr);
+        bool found9001 = false;
+        for (int i = 0; i < result_count; i++) {
+            EXPECT_EQ(std::string(list[i]->auth_name), "EPSG");
+            if (std::string(list[i]->code) == "9001") {
+                EXPECT_EQ(std::string(list[i]->name), "metre");
+                EXPECT_EQ(std::string(list[i]->category), "linear");
+                EXPECT_EQ(list[i]->conv_factor, 1.0);
+                ASSERT_NE(list[i]->proj_short_name, nullptr);
+                EXPECT_EQ(std::string(list[i]->proj_short_name), "m");
+                EXPECT_EQ(list[i]->deprecated, 0);
+                found9001 = true;
+            }
+            EXPECT_EQ(list[i]->deprecated, 0);
+        }
+        EXPECT_TRUE(found9001);
+        proj_unit_list_destroy(list);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_normalize_for_visualization) {
 
     {

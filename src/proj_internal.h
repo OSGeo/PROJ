@@ -880,11 +880,14 @@ std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
                                                      const PJ *source_crs,
                                                      const PJ *target_crs,
                                                      PJ_OBJ_LIST* op_list);
+
 int pj_get_suggested_operation(PJ_CONTEXT *ctx,
                                const std::vector<CoordOperation>& opList,
                                const int iExcluded[2],
                                PJ_DIRECTION direction,
                                PJ_COORD coord);
+
+const PJ_UNITS *pj_list_linear_units();
 
 /* classic public API */
 #include "proj_api.h"

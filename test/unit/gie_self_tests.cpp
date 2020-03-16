@@ -334,7 +334,6 @@ TEST(gie, info_functions) {
 
     const PJ_OPERATIONS *oper_list;
     const PJ_ELLPS *ellps_list;
-    const PJ_UNITS *unit_list;
     const PJ_PRIME_MERIDIANS *pm_list;
 
     char buf[40];
@@ -449,11 +448,6 @@ TEST(gie, info_functions) {
 
     n = 0;
     for (ellps_list = proj_list_ellps(); ellps_list->id; ++ellps_list)
-        n++;
-    ASSERT_NE(n, 0U);
-
-    n = 0;
-    for (unit_list = proj_list_units(); unit_list->id; ++unit_list)
         n++;
     ASSERT_NE(n, 0U);
 
