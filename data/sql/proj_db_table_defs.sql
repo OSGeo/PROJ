@@ -14,6 +14,7 @@ CREATE TABLE unit_of_measure(
     name TEXT NOT NULL CHECK (length(name) >= 2),
     type TEXT NOT NULL CHECK (type IN ('length', 'angle', 'scale', 'time')),
     conv_factor FLOAT,
+    proj_short_name TEXT, -- PROJ string name, like 'm', 'ft'. Might be NULL
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_unit_of_measure PRIMARY KEY (auth_name, code)
 );

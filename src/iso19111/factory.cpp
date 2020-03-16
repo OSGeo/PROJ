@@ -5214,6 +5214,64 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+AuthorityFactory::UnitInfo::UnitInfo()
+    : authName{}, code{}, name{}, category{}, convFactor{}, projShortName{},
+      deprecated{} {}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the list of units.
+ * @throw FactoryException
+ *
+ * @since 7.1
+ */
+std::list<AuthorityFactory::UnitInfo> AuthorityFactory::getUnitList() const {
+    std::string sql = "SELECT auth_name, code, name, type, conv_factor, "
+                      "proj_short_name, deprecated FROM unit_of_measure";
+    ListOfParams params;
+    if (d->hasAuthorityRestriction()) {
+        sql += " WHERE auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+    sql += " ORDER BY auth_name, code";
+
+    auto sqlRes = d->run(sql, params);
+    std::list<AuthorityFactory::UnitInfo> res;
+    for (const auto &row : sqlRes) {
+        AuthorityFactory::UnitInfo info;
+        info.authName = row[0];
+        info.code = row[1];
+        info.name = row[2];
+        const std::string &raw_category(row[3]);
+        if (raw_category == "length") {
+            info.category = info.name.find(" per ") != std::string::npos
+                                ? "linear_per_time"
+                                : "linear";
+        } else if (raw_category == "angle") {
+            info.category = info.name.find(" per ") != std::string::npos
+                                ? "angular_per_time"
+                                : "angular";
+        } else if (raw_category == "scale") {
+            info.category =
+                info.name.find(" per year") != std::string::npos ||
+                        info.name.find(" per second") != std::string::npos
+                    ? "scale_per_time"
+                    : "scale";
+        } else {
+            info.category = raw_category;
+        }
+        info.convFactor = row[4].empty() ? 0 : c_locale_stod(row[4]);
+        info.projShortName = row[5];
+        info.deprecated = row[6] == "1";
+        res.emplace_back(info);
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Gets the official name from a possibly alias name.
  *
  * @param aliasedName Alias name.

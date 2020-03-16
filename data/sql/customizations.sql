@@ -135,3 +135,35 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6312','hermannskogel','
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6299','ire65','PROJ');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6272','nzgd49','PROJ');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6277','OSGB36','PROJ');
+
+---- PROJ unit short names -----
+
+-- Linear units
+UPDATE unit_of_measure SET proj_short_name = 'mm'        WHERE auth_name = 'EPSG' AND code = '1025';
+UPDATE unit_of_measure SET proj_short_name = 'cm'        WHERE auth_name = 'EPSG' AND code = '1033';
+UPDATE unit_of_measure SET proj_short_name = 'm'         WHERE auth_name = 'EPSG' AND code = '9001';
+UPDATE unit_of_measure SET proj_short_name = 'ft'        WHERE auth_name = 'EPSG' AND code = '9002';
+UPDATE unit_of_measure SET proj_short_name = 'us-ft'     WHERE auth_name = 'EPSG' AND code = '9003';
+UPDATE unit_of_measure SET proj_short_name = 'fath'      WHERE auth_name = 'EPSG' AND code = '9014';
+UPDATE unit_of_measure SET proj_short_name = 'kmi'       WHERE auth_name = 'EPSG' AND code = '9030';
+UPDATE unit_of_measure SET proj_short_name = 'us-ch'     WHERE auth_name = 'EPSG' AND code = '9033';
+UPDATE unit_of_measure SET proj_short_name = 'us-mi'     WHERE auth_name = 'EPSG' AND code = '9035';
+UPDATE unit_of_measure SET proj_short_name = 'km'        WHERE auth_name = 'EPSG' AND code = '9036';
+UPDATE unit_of_measure SET proj_short_name = 'ind-ft'    WHERE auth_name = 'EPSG' AND code = '9081';
+UPDATE unit_of_measure SET proj_short_name = 'ind-yd'    WHERE auth_name = 'EPSG' AND code = '9085';
+UPDATE unit_of_measure SET proj_short_name = 'mi'        WHERE auth_name = 'EPSG' AND code = '9093';
+UPDATE unit_of_measure SET proj_short_name = 'yd'        WHERE auth_name = 'EPSG' AND code = '9096';
+UPDATE unit_of_measure SET proj_short_name = 'ch'        WHERE auth_name = 'EPSG' AND code = '9097';
+UPDATE unit_of_measure SET proj_short_name = 'link'      WHERE auth_name = 'EPSG' AND code = '9098';
+
+-- Angular units
+UPDATE unit_of_measure SET proj_short_name = 'rad'       WHERE auth_name = 'EPSG' AND code = '9101';
+UPDATE unit_of_measure SET proj_short_name = 'deg'       WHERE auth_name = 'EPSG' AND code = '9102';
+UPDATE unit_of_measure SET proj_short_name = 'grad'      WHERE auth_name = 'EPSG' AND code = '9105';
+
+-- PROJ specific units
+INSERT INTO "unit_of_measure" VALUES('PROJ','DM','decimeter','length',0.01,'dm',0);
+INSERT INTO "unit_of_measure" VALUES('PROJ','IN','inch','length',0.0254,'in',0);
+INSERT INTO "unit_of_measure" VALUES('PROJ','US_IN','US survey inch','length',0.025400050800101,'us-in',0);
+INSERT INTO "unit_of_measure" VALUES('PROJ','US_YD','US survey yard','length',0.914401828803658,'us-yd',0);
+INSERT INTO "unit_of_measure" VALUES('PROJ','IND_CH','Indian chain','length',20.11669506,'ind-ch',0);

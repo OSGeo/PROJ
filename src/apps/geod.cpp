@@ -185,11 +185,18 @@ noargument:		   emess(1,"missing argument for -%c",*arg);
                                         (void)printf("%9s %-16s %-16s %s\n",
                                                      le->id, le->major, le->ell, le->name);
 				} else if (arg[1] == 'u') { /* list of units */
-                                    const struct PJ_UNITS *lu;
-                                    
-                                    for (lu = proj_list_units();lu->id ; ++lu)
-                                        (void)printf("%12s %-20s %s\n",
-                                                     lu->id, lu->to_meter, lu->name);
+                                    auto units = proj_get_units_from_database(nullptr, nullptr, "linear", false, nullptr);
+                                    for( int i = 0; units && units[i]; i++ )
+                                    {
+                                        if( units[i]->proj_short_name )
+                                        {
+                                            (void)printf("%12s %-20.15g %s\n",
+                                                         units[i]->proj_short_name,
+                                                         units[i]->conv_factor,
+                                                         units[i]->name);
+                                        }
+                                    }
+                                    proj_unit_list_destroy(units);
 				} else
                                     emess(1,"invalid list option: l%c",arg[1]);
                                 exit( 0 );

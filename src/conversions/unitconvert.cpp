@@ -393,9 +393,7 @@ static double get_unit_conversion_factor(const char* name,
 /***********************************************************************/
     int i;
     const char* s;
-    const PJ_UNITS *units;
-
-    units = proj_list_units();
+    const PJ_UNITS *units = pj_list_linear_units();
 
     /* Try first with linear units */
     for (i = 0; (s = units[i].id) ; ++i) {

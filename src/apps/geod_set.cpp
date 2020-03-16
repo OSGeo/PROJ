@@ -14,7 +14,6 @@ geod_set(int argc, char **argv) {
 	paralist *start = nullptr, *curr;
 	double es;
 	char *name;
-	int i;
 
     /* put arguments into internal linked list */
 	if (argc <= 0)
@@ -22,7 +21,7 @@ geod_set(int argc, char **argv) {
 	start = curr = pj_mkparam(argv[0]);
 	if (!curr)
 		emess(1, "memory allocation failed");
-	for (i = 1; curr != nullptr && i < argc; ++i) {
+	for (int i = 1; curr != nullptr && i < argc; ++i) {
 		curr->next = pj_mkparam(argv[i]);
 		if (!curr->next)
 			emess(1, "memory allocation failed");
@@ -32,13 +31,20 @@ geod_set(int argc, char **argv) {
 	if (pj_ell_set(pj_get_default_ctx(),start, &geod_a, &es)) emess(1,"ellipse setup failure");
 	/* set units */
 	if ((name = pj_param(nullptr,start, "sunits").s) != nullptr) {
-		const char *s;
-                const struct PJ_UNITS *unit_list = proj_list_units();
-		for (i = 0; (s = unit_list[i].id) && strcmp(name, s) ; ++i) ;
-		if (!s)
-			emess(1,"%s unknown unit conversion id", name);
-		to_meter = unit_list[i].factor;
-		fr_meter = 1 / to_meter;
+            bool unit_found = false;
+            auto units = proj_get_units_from_database(nullptr, nullptr, "linear", false, nullptr);
+            for( int i = 0; units && units[i]; i++ )
+            {
+                if( units[i]->proj_short_name &&
+                    strcmp(units[i]->proj_short_name, name) == 0 ) {
+                    unit_found = true;
+                    to_meter = units[i]->conv_factor;
+                    fr_meter = 1 / to_meter;
+                }
+            }
+            proj_unit_list_destroy(units);
+            if( !unit_found )
+                emess(1,"%s unknown unit conversion id", name);
 	} else
 		to_meter = fr_meter = 1;
 	geod_f = es/(1 + sqrt(1 - es));

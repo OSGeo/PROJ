@@ -662,7 +662,8 @@ PJ *proj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static const char *get_unit_category(UnitOfMeasure::Type type) {
+static const char *get_unit_category(const std::string &unit_name,
+                                     UnitOfMeasure::Type type) {
     const char *ret = nullptr;
     switch (type) {
     case UnitOfMeasure::Type::UNKNOWN:
@@ -672,19 +673,26 @@ static const char *get_unit_category(UnitOfMeasure::Type type) {
         ret = "none";
         break;
     case UnitOfMeasure::Type::ANGULAR:
-        ret = "angular";
+        ret = unit_name.find(" per ") != std::string::npos ? "angular_per_time"
+                                                           : "angular";
         break;
     case UnitOfMeasure::Type::LINEAR:
-        ret = "linear";
+        ret = unit_name.find(" per ") != std::string::npos ? "linear_per_time"
+                                                           : "linear";
         break;
     case UnitOfMeasure::Type::SCALE:
-        ret = "scale";
+        ret = unit_name.find(" per year") != std::string::npos ||
+                      unit_name.find(" per second") != std::string::npos
+                  ? "scale_per_time"
+                  : "scale";
         break;
     case UnitOfMeasure::Type::TIME:
         ret = "time";
         break;
     case UnitOfMeasure::Type::PARAMETRIC:
-        ret = "parametric";
+        ret = unit_name.find(" per ") != std::string::npos
+                  ? "parametric_per_time"
+                  : "parametric";
         break;
     }
     return ret;
@@ -704,8 +712,9 @@ static const char *get_unit_category(UnitOfMeasure::Type type) {
  * @param out_conv_factor Pointer to a value to store the conversion
  * factor of the prime meridian longitude unit to radian. or NULL
  * @param out_category Pointer to a string value to store the parameter name. or
- * NULL. This value might be "unknown", "none", "linear", "angular", "scale",
- * "time" or "parametric";
+ * NULL. This value might be "unknown", "none", "linear", "linear_per_time",
+ * "angular", "angular_per_time", "scale", "scale_per_time", "time",
+ * "parametric" or "parametric_per_time"
  * @return TRUE in case of success
  */
 int proj_uom_get_info_from_database(PJ_CONTEXT *ctx, const char *auth_name,
@@ -726,7 +735,7 @@ int proj_uom_get_info_from_database(PJ_CONTEXT *ctx, const char *auth_name,
             *out_conv_factor = obj->conversionToSI();
         }
         if (out_category) {
-            *out_category = get_unit_category(obj->type());
+            *out_category = get_unit_category(obj->name(), obj->type());
         }
         ctx->cpp_context->autoCloseDbIfNeeded();
         return true;
@@ -2577,6 +2586,100 @@ void proj_crs_info_list_destroy(PROJ_CRS_INFO **list) {
             pj_dalloc(list[i]->name);
             pj_dalloc(list[i]->area_name);
             pj_dalloc(list[i]->projection_method_name);
+            delete list[i];
+        }
+        delete[] list;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Enumerate units from the database, taking into account various
+ * criteria.
+ *
+ * The returned object is an array of PROJ_UNIT_INFO* pointers, whose last
+ * entry is NULL. This array should be freed with proj_unit_list_destroy()
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param auth_name Authority name, used to restrict the search.
+ * Or NULL for all authorities.
+ * @param category Filter by category, if this parameter is not NULL. Category
+ * is one of "linear", "linear_per_time", "angular", "angular_per_time",
+ * "scale", "scale_per_time" or "time"
+ * @param allow_deprecated whether we should return deprecated objects as well.
+ * @param out_result_count Output parameter pointing to an integer to receive
+ * the size of the result list. Might be NULL
+ * @return an array of PROJ_UNIT_INFO* pointers to be freed with
+ * proj_unit_list_destroy(), or NULL in case of error.
+ *
+ * @since 7.1
+ */
+PROJ_UNIT_INFO **proj_get_units_from_database(PJ_CONTEXT *ctx,
+                                              const char *auth_name,
+                                              const char *category,
+                                              int allow_deprecated,
+                                              int *out_result_count) {
+    SANITIZE_CTX(ctx);
+    PROJ_UNIT_INFO **ret = nullptr;
+    int i = 0;
+    try {
+        auto factory = AuthorityFactory::create(getDBcontext(ctx),
+                                                auth_name ? auth_name : "");
+        auto list = factory->getUnitList();
+        ret = new PROJ_UNIT_INFO *[list.size() + 1];
+        for (const auto &info : list) {
+            if (category && info.category != category) {
+                continue;
+            }
+            if (!allow_deprecated && info.deprecated) {
+                continue;
+            }
+            ret[i] = new PROJ_UNIT_INFO;
+            ret[i]->auth_name = pj_strdup(info.authName.c_str());
+            ret[i]->code = pj_strdup(info.code.c_str());
+            ret[i]->name = pj_strdup(info.name.c_str());
+            ret[i]->category = pj_strdup(info.category.c_str());
+            ret[i]->conv_factor = info.convFactor;
+            ret[i]->proj_short_name =
+                info.projShortName.empty()
+                    ? nullptr
+                    : pj_strdup(info.projShortName.c_str());
+            ret[i]->deprecated = info.deprecated;
+            i++;
+        }
+        ret[i] = nullptr;
+        if (out_result_count)
+            *out_result_count = i;
+        ctx->cpp_context->autoCloseDbIfNeeded();
+        return ret;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ret) {
+            ret[i + 1] = nullptr;
+            proj_unit_list_destroy(ret);
+        }
+        if (out_result_count)
+            *out_result_count = 0;
+    }
+    ctx->cpp_context->autoCloseDbIfNeeded();
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Destroy the result returned by
+ * proj_get_units_from_database().
+ *
+ * @since 7.1
+ */
+void proj_unit_list_destroy(PROJ_UNIT_INFO **list) {
+    if (list) {
+        for (int i = 0; list[i] != nullptr; i++) {
+            pj_dalloc(list[i]->auth_name);
+            pj_dalloc(list[i]->code);
+            pj_dalloc(list[i]->name);
+            pj_dalloc(list[i]->category);
+            pj_dalloc(list[i]->proj_short_name);
             delete list[i];
         }
         delete[] list;
@@ -6749,8 +6852,9 @@ int proj_coordoperation_get_param_index(PJ_CONTEXT *ctx,
  * unit code. or NULL
  * @param out_unit_category Pointer to a string value to store the parameter
  * name. or
- * NULL. This value might be "unknown", "none", "linear", "angular", "scale",
- * "time" or "parametric";
+ * NULL. This value might be "unknown", "none", "linear", "linear_per_time",
+ * "angular", "angular_per_time", "scale", "scale_per_time", "time",
+ * "parametric" or "parametric_per_time"
  * @return TRUE in case of success.
  */
 
@@ -6852,7 +6956,8 @@ int proj_coordoperation_get_param(
                 *out_unit_code = unit.code().c_str();
             }
             if (out_unit_category) {
-                *out_unit_category = get_unit_category(unit.type());
+                *out_unit_category =
+                    get_unit_category(unit.name(), unit.type());
             }
         }
     }

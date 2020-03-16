@@ -151,6 +151,24 @@ extern "C" {
 #endif
 #endif
 
+#ifdef PROJ_SUPPRESS_DEPRECATION_MESSAGE
+  #define PROJ_DEPRECATED(decl, msg)            decl
+#elif defined(__has_extension)
+  #if __has_extension(attribute_deprecated_with_message)
+    #define PROJ_DEPRECATED(decl, msg)          decl __attribute__ ((deprecated(msg)))
+  #elif defined(__GNUC__)
+    #define PROJ_DEPRECATED(decl, msg)          decl __attribute__ ((deprecated))
+  #else
+    #define PROJ_DEPRECATED(decl, msg)          decl
+  #endif
+#elif defined(__GNUC__)
+  #define PROJ_DEPRECATED(decl, msg)            decl __attribute__ ((deprecated))
+#elif defined(_MSVC_VER)
+  #define PROJ_DEPRECATED(decl, msg)            __declspec(deprecated(msg)) decl
+#else
+  #define PROJ_DEPRECATED(decl, msg)            decl
+#endif
+
 /* The version numbers should be updated with every release! **/
 #define PROJ_VERSION_MAJOR 7
 #define PROJ_VERSION_MINOR 1
@@ -608,7 +626,7 @@ PJ_INIT_INFO PROJ_DLL proj_init_info(const char *initname);
 /* Get lists of operations, ellipsoids, units and prime meridians. */
 const PJ_OPERATIONS       PROJ_DLL *proj_list_operations(void);
 const PJ_ELLPS            PROJ_DLL *proj_list_ellps(void);
-const PJ_UNITS            PROJ_DLL *proj_list_units(void);
+PROJ_DEPRECATED(const PJ_UNITS            PROJ_DLL *proj_list_units(void), "Deprecated by proj_get_units_from_database");
 const PJ_UNITS            PROJ_DLL *proj_list_angular_units(void);
 const PJ_PRIME_MERIDIANS  PROJ_DLL *proj_list_prime_meridians(void);
 
@@ -912,6 +930,39 @@ typedef struct
     int allow_deprecated;
 } PROJ_CRS_LIST_PARAMETERS;
 
+/** \brief Structure given description of a unit.
+ *
+ * This structure may grow over time, and should not be directly allocated by
+ * client code.
+ * @since 7.1
+ */
+typedef struct
+{
+    /** Authority name. */
+    char* auth_name;
+
+    /** Object code. */
+    char* code;
+
+    /** Object name. For example "metre", "US survey foot", etc. */
+    char* name;
+
+    /** Category of the unit: one of "linear", "linear_per_time", "angular",
+     * "angular_per_time", "scale", "scale_per_time" or "time" */
+    char* category;
+
+    /** Conversion factor to apply to transform from that unit to the
+     * corresponding SI unit (metre for "linear", radian for "angular", etc.).
+     * It might be 0 in some cases to indicate no known conversion factor. */
+    double conv_factor;
+
+    /** PROJ short name, like "m", "ft", "us-ft", etc... Might be NULL */
+    char* proj_short_name;
+
+    /** Whether the object is deprecated */
+    int deprecated;
+} PROJ_UNIT_INFO;
+
 
 /**@}*/
 
@@ -1076,6 +1127,15 @@ PROJ_CRS_INFO PROJ_DLL **proj_get_crs_info_list_from_database(
                                       int *out_result_count);
 
 void PROJ_DLL proj_crs_info_list_destroy(PROJ_CRS_INFO** list);
+
+PROJ_UNIT_INFO PROJ_DLL **proj_get_units_from_database(
+                                            PJ_CONTEXT *ctx,
+                                            const char *auth_name,
+                                            const char *category,
+                                            int allow_deprecated,
+                                            int *out_result_count);
+
+void PROJ_DLL proj_unit_list_destroy(PROJ_UNIT_INFO** list);
 
 /* ------------------------------------------------------------------------- */
 
