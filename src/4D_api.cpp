@@ -179,7 +179,58 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
     return proj_xyz_dist (org, t);
 }
 
+/**************************************************************************************/
+int pj_get_suggested_operation(PJ_CONTEXT*,
+                               const std::vector<CoordOperation>& opList,
+                               const int iExcluded[2],
+                               PJ_DIRECTION direction,
+                               PJ_COORD coord)
+/**************************************************************************************/
+{
+    // Select the operations that match the area of use
+    // and has the best accuracy.
+    int iBest = -1;
+    double bestAccuracy = std::numeric_limits<double>::max();
+    const int nOperations = static_cast<int>(opList.size());
+    for( int i = 0; i < nOperations; i++ ) {
+        if( i == iExcluded[0] || i == iExcluded[1] ) {
+            continue;
+        }
+        const auto &alt = opList[i];
+        bool spatialCriterionOK = false;
+        if( direction == PJ_FWD ) {
+            if( coord.xyzt.x >= alt.minxSrc &&
+                coord.xyzt.y >= alt.minySrc &&
+                coord.xyzt.x <= alt.maxxSrc &&
+                coord.xyzt.y <= alt.maxySrc) {
+                spatialCriterionOK = true;
+            }
+        } else {
+            if( coord.xyzt.x >= alt.minxDst &&
+                coord.xyzt.y >= alt.minyDst &&
+                coord.xyzt.x <= alt.maxxDst &&
+                coord.xyzt.y <= alt.maxyDst ) {
+                spatialCriterionOK = true;
+            }
+        }
 
+        if( spatialCriterionOK ) {
+            // The offshore test is for the "Test bug 245 (use +datum=carthage)"
+            // of testvarious. The long=10 lat=34 point belongs both to the
+            // onshore and offshore Tunisia area of uses, but is slightly
+            // onshore. So in a general way, prefer a onshore area to a
+            // offshore one.
+            if( iBest < 0 ||
+                (alt.accuracy >= 0 && alt.accuracy < bestAccuracy &&
+                !alt.isOffshore) ) {
+                iBest = i;
+                bestAccuracy = alt.accuracy;
+            }
+        }
+    }
+
+    return iBest;
+}
 
 /**************************************************************************************/
 PJ_COORD proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord) {
@@ -211,45 +262,11 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
         {
             // Do a first pass and select the operations that match the area of use
             // and has the best accuracy.
-            int iBest = -1;
-            double bestAccuracy = std::numeric_limits<double>::max();
-            for( int i = 0; i < nOperations; i++ ) {
-                if( i == iExcluded[0] || i == iExcluded[1] ) {
-                    continue;
-                }
-                const auto &alt = P->alternativeCoordinateOperations[i];
-                bool spatialCriterionOK = false;
-                if( direction == PJ_FWD ) {
-                    if( coord.xyzt.x >= alt.minxSrc &&
-                        coord.xyzt.y >= alt.minySrc &&
-                        coord.xyzt.x <= alt.maxxSrc &&
-                        coord.xyzt.y <= alt.maxySrc) {
-                        spatialCriterionOK = true;
-                    }
-                } else {
-                    if( coord.xyzt.x >= alt.minxDst &&
-                        coord.xyzt.y >= alt.minyDst &&
-                        coord.xyzt.x <= alt.maxxDst &&
-                        coord.xyzt.y <= alt.maxyDst ) {
-                        spatialCriterionOK = true;
-                    }
-                }
-
-                if( spatialCriterionOK ) {
-                    // The offshore test is for the "Test bug 245 (use +datum=carthage)"
-                    // of testvarious. The long=10 lat=34 point belongs both to the
-                    // onshore and offshore Tunisia area of uses, but is slightly
-                    // onshore. So in a general way, prefer a onshore area to a
-                    // offshore one.
-                    if( iBest < 0 ||
-                        (alt.accuracy >= 0 && alt.accuracy < bestAccuracy &&
-                        !alt.isOffshore) ) {
-                        iBest = i;
-                        bestAccuracy = alt.accuracy;
-                    }
-                }
-            }
-
+            int iBest = pj_get_suggested_operation(P->ctx,
+                                                   P->alternativeCoordinateOperations,
+                                                   iExcluded,
+                                                   direction,
+                                                   coord);
             if( iBest < 0 ) {
                 break;
             }
@@ -968,13 +985,15 @@ static void reproject_bbox(PJ* pjGeogToCrs,
 
 
 /*****************************************************************************/
-static PJ* add_coord_op_to_list(PJ* op,
+static PJ* add_coord_op_to_list(
+                            int idxInOriginalList,
+                            PJ* op,
                             double west_lon, double south_lat,
                             double east_lon, double north_lat,
                             PJ* pjGeogToSrc,
                             PJ* pjGeogToDst,
                             bool isOffshore,
-                            std::vector<PJconsts::CoordOperation>& altCoordOps) {
+                            std::vector<CoordOperation>& altCoordOps) {
 /*****************************************************************************/
 
     double minxSrc;
@@ -997,9 +1016,10 @@ static PJ* add_coord_op_to_list(PJ* op,
         std::string name(c_name ? c_name : "");
 
         const double accuracy = proj_coordoperation_get_accuracy(op->ctx, op);
-        altCoordOps.emplace_back(minxSrc, minySrc, maxxSrc, maxySrc,
-                                    minxDst, minyDst, maxxDst, maxyDst,
-                                    op, name, accuracy, isOffshore);
+        altCoordOps.emplace_back(idxInOriginalList,
+                                 minxSrc, minySrc, maxxSrc, maxySrc,
+                                 minxDst, minyDst, maxxDst, maxyDst,
+                                 op, name, accuracy, isOffshore);
         op = nullptr;
     }
     return op;
@@ -1140,6 +1160,91 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
     return ret;
 }
 
+
+/*****************************************************************************/
+std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
+                                                     const PJ *source_crs,
+                                                     const PJ *target_crs,
+                                                     PJ_OBJ_LIST* op_list)
+/*****************************************************************************/
+{
+    auto pjGeogToSrc = create_operation_to_geog_crs(ctx, source_crs);
+    if( !pjGeogToSrc )
+    {
+        proj_context_log_debug(ctx,
+            "Cannot create transformation from geographic CRS of source CRS to source CRS");
+        return {};
+    }
+
+    auto pjGeogToDst = create_operation_to_geog_crs(ctx, target_crs);
+    if( !pjGeogToDst )
+    {
+        proj_context_log_debug(ctx,
+            "Cannot create transformation from geographic CRS of target CRS to target CRS");
+        proj_destroy(pjGeogToSrc);
+        return {};
+    }
+
+    try
+    {
+        std::vector<CoordOperation> preparedOpList;
+
+        // Iterate over source->target candidate transformations and reproject
+        // their long-lat bounding box into the source CRS.
+        const auto op_count = proj_list_get_count(op_list);
+        for( int i = 0; i < op_count; i++ )
+        {
+            auto op = proj_list_get(ctx, op_list, i);
+            assert(op);
+            double west_lon = 0.0;
+            double south_lat = 0.0;
+            double east_lon = 0.0;
+            double north_lat = 0.0;
+
+            const char* areaName = nullptr;
+            if( proj_get_area_of_use(ctx, op,
+                        &west_lon, &south_lat, &east_lon, &north_lat, &areaName) )
+            {
+                const bool isOffshore =
+                    areaName && strstr(areaName, "offshore");
+                if( west_lon <= east_lon )
+                {
+                    op = add_coord_op_to_list(i, op,
+                        west_lon, south_lat, east_lon, north_lat,
+                        pjGeogToSrc, pjGeogToDst, isOffshore,
+                        preparedOpList);
+                }
+                else
+                {
+                    auto op_clone = proj_clone(ctx, op);
+
+                    op = add_coord_op_to_list(i, op,
+                        west_lon, south_lat, 180, north_lat,
+                        pjGeogToSrc, pjGeogToDst, isOffshore,
+                        preparedOpList);
+                    op_clone = add_coord_op_to_list(i, op_clone,
+                        -180, south_lat, east_lon, north_lat,
+                        pjGeogToSrc, pjGeogToDst, isOffshore,
+                        preparedOpList);
+                    proj_destroy(op_clone);
+                }
+            }
+
+            proj_destroy(op);
+        }
+
+        proj_destroy(pjGeogToSrc);
+        proj_destroy(pjGeogToDst);
+        return preparedOpList;
+    }
+    catch( const std::exception& )
+    {
+        proj_destroy(pjGeogToSrc);
+        proj_destroy(pjGeogToDst);
+        return {};
+    }
+}
+
 /*****************************************************************************/
 PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, const PJ *target_crs, PJ_AREA *area, const char* const *) {
 /******************************************************************************
@@ -1177,16 +1282,15 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
             PROJ_GRID_AVAILABILITY_DISCARD_OPERATION_IF_MISSING_GRID);
 
     auto op_list = proj_create_operations(ctx, source_crs, target_crs, operation_ctx);
+    proj_operation_factory_context_destroy(operation_ctx);
 
     if( !op_list ) {
-        proj_operation_factory_context_destroy(operation_ctx);
         return nullptr;
     }
 
     auto op_count = proj_list_get_count(op_list);
     if( op_count == 0 ) {
         proj_list_destroy(op_list);
-        proj_operation_factory_context_destroy(operation_ctx);
 
         proj_context_log_debug(ctx, "No operation found matching criteria");
         return nullptr;
@@ -1199,112 +1303,39 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
         proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS ) {
         proj_list_destroy(op_list);
-        proj_operation_factory_context_destroy(operation_ctx);
         return P;
     }
 
-    auto pjGeogToSrc = create_operation_to_geog_crs(ctx, source_crs);
-    if( !pjGeogToSrc )
+    auto preparedOpList = pj_create_prepared_operations(ctx, source_crs, target_crs,
+                                                   op_list);
+    proj_list_destroy(op_list);
+
+    if( preparedOpList.empty() )
     {
-        proj_list_destroy(op_list);
-        proj_operation_factory_context_destroy(operation_ctx);
-        proj_context_log_debug(ctx,
-            "Cannot create transformation from geographic CRS of source CRS to source CRS");
         proj_destroy(P);
         return nullptr;
     }
 
-    auto pjGeogToDst = create_operation_to_geog_crs(ctx, target_crs);
-    if( !pjGeogToDst )
+    // If there's finally juste a single result, return it directly
+    if( preparedOpList.size() == 1 )
     {
-        proj_list_destroy(op_list);
-        proj_operation_factory_context_destroy(operation_ctx);
-        proj_context_log_debug(ctx,
-            "Cannot create transformation from geographic CRS of target CRS to target CRS");
+        auto retP = preparedOpList[0].pj;
+        preparedOpList[0].pj = nullptr;
         proj_destroy(P);
-        proj_destroy(pjGeogToSrc);
-        return nullptr;
+        return retP;
     }
 
-    try
-    {
-        // Iterate over source->target candidate transformations and reproject
-        // their long-lat bounding box into the source CRS.
-        for( int i = 0; i < op_count; i++ )
-        {
-            auto op = proj_list_get(ctx, op_list, i);
-            assert(op);
-            double west_lon = 0.0;
-            double south_lat = 0.0;
-            double east_lon = 0.0;
-            double north_lat = 0.0;
+    P->alternativeCoordinateOperations = std::move(preparedOpList);
+    // The returned P is rather dummy
+    P->iso_obj = nullptr;
+    P->fwd = nullptr;
+    P->inv = nullptr;
+    P->fwd3d = nullptr;
+    P->inv3d = nullptr;
+    P->fwd4d = nullptr;
+    P->inv4d = nullptr;
 
-            const char* areaName = nullptr;
-            if( proj_get_area_of_use(ctx, op,
-                        &west_lon, &south_lat, &east_lon, &north_lat, &areaName) )
-            {
-                const bool isOffshore =
-                    areaName && strstr(areaName, "offshore");
-                if( west_lon <= east_lon )
-                {
-                    op = add_coord_op_to_list(op,
-                        west_lon, south_lat, east_lon, north_lat,
-                        pjGeogToSrc, pjGeogToDst, isOffshore,
-                        P->alternativeCoordinateOperations);
-                }
-                else
-                {
-                    auto op_clone = proj_clone(ctx, op);
-
-                    op = add_coord_op_to_list(op,
-                        west_lon, south_lat, 180, north_lat,
-                        pjGeogToSrc, pjGeogToDst, isOffshore,
-                        P->alternativeCoordinateOperations);
-                    op_clone = add_coord_op_to_list(op_clone,
-                        -180, south_lat, east_lon, north_lat,
-                        pjGeogToSrc, pjGeogToDst, isOffshore,
-                        P->alternativeCoordinateOperations);
-                    proj_destroy(op_clone);
-                }
-            }
-
-            proj_destroy(op);
-        }
-
-        proj_list_destroy(op_list);
-
-        proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(pjGeogToSrc);
-        proj_destroy(pjGeogToDst);
-
-        // If there's finally juste a single result, return it directly
-        if( P->alternativeCoordinateOperations.size() == 1 ) {
-            auto retP = P->alternativeCoordinateOperations[0].pj;
-            P->alternativeCoordinateOperations[0].pj = nullptr;
-            proj_destroy(P);
-            P = retP;
-        } else {
-            // The returned P is rather dummy
-            P->iso_obj = nullptr;
-            P->fwd = nullptr;
-            P->inv = nullptr;
-            P->fwd3d = nullptr;
-            P->inv3d = nullptr;
-            P->fwd4d = nullptr;
-            P->inv4d = nullptr;
-        }
-
-        return P;
-    }
-    catch( const std::exception& )
-    {
-        proj_list_destroy(op_list);
-        proj_operation_factory_context_destroy(operation_ctx);
-        proj_destroy(pjGeogToSrc);
-        proj_destroy(pjGeogToDst);
-        proj_destroy(P);
-        return nullptr;
-    }
+    return P;
 }
 
 PJ *proj_destroy (PJ *P) {

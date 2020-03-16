@@ -216,11 +216,16 @@ struct PJ_OBJ_LIST {
 
     explicit PJ_OBJ_LIST(std::vector<IdentifiedObjectNNPtr> &&objectsIn)
         : objects(std::move(objectsIn)) {}
+    virtual ~PJ_OBJ_LIST();
 
     PJ_OBJ_LIST(const PJ_OBJ_LIST &) = delete;
     PJ_OBJ_LIST &operator=(const PJ_OBJ_LIST &) = delete;
     //! @endcond
 };
+
+//! @cond Doxygen_Suppress
+PJ_OBJ_LIST::~PJ_OBJ_LIST() = default;
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -7511,6 +7516,62 @@ void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+/** \brief Opaque object representing a set of operation results. */
+struct PJ_OPERATION_LIST : PJ_OBJ_LIST {
+
+    PJ *source_crs;
+    PJ *target_crs;
+    bool hasPreparedOperation = false;
+    std::vector<CoordOperation> preparedOperations{};
+
+    explicit PJ_OPERATION_LIST(PJ_CONTEXT *ctx, const PJ *source_crsIn,
+                               const PJ *target_crsIn,
+                               std::vector<IdentifiedObjectNNPtr> &&objectsIn);
+    ~PJ_OPERATION_LIST() override;
+
+    PJ_OPERATION_LIST(const PJ_OPERATION_LIST &) = delete;
+    PJ_OPERATION_LIST &operator=(const PJ_OPERATION_LIST &) = delete;
+
+    const std::vector<CoordOperation> &getPreparedOperations(PJ_CONTEXT *ctx);
+};
+
+// ---------------------------------------------------------------------------
+
+PJ_OPERATION_LIST::PJ_OPERATION_LIST(
+    PJ_CONTEXT *ctx, const PJ *source_crsIn, const PJ *target_crsIn,
+    std::vector<IdentifiedObjectNNPtr> &&objectsIn)
+    : PJ_OBJ_LIST(std::move(objectsIn)),
+      source_crs(proj_clone(ctx, source_crsIn)),
+      target_crs(proj_clone(ctx, target_crsIn)) {}
+
+// ---------------------------------------------------------------------------
+
+PJ_OPERATION_LIST::~PJ_OPERATION_LIST() {
+    auto tmpCtxt = proj_context_create();
+    proj_assign_context(source_crs, tmpCtxt);
+    proj_assign_context(target_crs, tmpCtxt);
+    proj_destroy(source_crs);
+    proj_destroy(target_crs);
+    proj_context_destroy(tmpCtxt);
+}
+
+// ---------------------------------------------------------------------------
+
+const std::vector<CoordOperation> &
+PJ_OPERATION_LIST::getPreparedOperations(PJ_CONTEXT *ctx) {
+    if (!hasPreparedOperation) {
+        hasPreparedOperation = true;
+        preparedOperations =
+            pj_create_prepared_operations(ctx, source_crs, target_crs, this);
+    }
+    return preparedOperations;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Find a list of CoordinateOperation from source_crs to target_crs.
  *
  * The operations are sorted with the most relevant ones first: by
@@ -7562,11 +7623,53 @@ proj_create_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
         for (const auto &op : ops) {
             objects.emplace_back(op);
         }
-        return new PJ_OBJ_LIST(std::move(objects));
+        return new PJ_OPERATION_LIST(ctx, source_crs, target_crs,
+                                     std::move(objects));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
     }
+}
+
+// ---------------------------------------------------------------------------
+
+/** Return the index of the operation that would be the most appropriate to
+ * transform the specified coordinates.
+ *
+ * This operation may use resources that are not locally available, depending
+ * on the search criteria used by proj_create_operations().
+ *
+ * This could be done by using proj_create_operations() with a punctual bounding
+ * box, but this function is faster when one needs to evaluate on many points
+ * with the same (source_crs, target_crs) tuple.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param operations List of operations returned by proj_create_operations()
+ * @param direction Direction into which to transform the point.
+ * @param coord Coordinate to transform
+ * @return the index in operations that would be used to transform coord. Or -1
+ * in case of error, or no match.
+ *
+ * @since 7.1
+ */
+int proj_get_suggested_operation(PJ_CONTEXT *ctx, PJ_OBJ_LIST *operations,
+                                 PJ_DIRECTION direction, PJ_COORD coord) {
+    SANITIZE_CTX(ctx);
+    auto opList = dynamic_cast<PJ_OPERATION_LIST *>(operations);
+    if (opList == nullptr) {
+        proj_log_error(ctx, __FUNCTION__,
+                       "operations is not a list of operations");
+        return -1;
+    }
+
+    int iExcluded[2] = {-1, -1};
+    const auto &preparedOps = opList->getPreparedOperations(ctx);
+    int idx = pj_get_suggested_operation(ctx, preparedOps, iExcluded, direction,
+                                         coord);
+    if (idx >= 0) {
+        idx = preparedOps[idx].idxInOriginalList;
+    }
+    return idx;
 }
 
 // ---------------------------------------------------------------------------
@@ -7892,8 +7995,8 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
                         }
                     }
                     pjNew->alternativeCoordinateOperations.emplace_back(
-                        minxSrc, minySrc, maxxSrc, maxySrc, minxDst, minyDst,
-                        maxxDst, maxyDst,
+                        alt.idxInOriginalList, minxSrc, minySrc, maxxSrc,
+                        maxySrc, minxDst, minyDst, maxxDst, maxyDst,
                         pj_obj_create(ctx, co->normalizeForVisualization()),
                         co->nameStr(), alt.accuracy, alt.isOffshore);
                 }
