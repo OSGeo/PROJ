@@ -184,7 +184,7 @@ Tests are run with::
 
     make check
 
-With a succesful install of PROJ we can now install data files using the
+With a successful install of PROJ we can now install data files using the
 :program:`projsync` utility::
 
     projsync --system-directory
