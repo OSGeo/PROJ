@@ -349,23 +349,14 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
-    // First pass to check if we have "cs2cs [-bla]* <SRC> <DEST>" syntax
-    int countNonOptionArg = 0;
+    // First pass to check if we have "cs2cs [-bla]* <SRC> <DEST> [<filename>]" syntax
+    bool isProj4StyleSyntax = false;
     for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '-') {
-            if (argv[i][1] == 'f' || argv[i][1] == 'e' || argv[i][1] == 'd' ||
-                argv[i][1] == 'D' ) {
-                i++;
-            }
-        } else {
-            if (strcmp(argv[i], "+to") == 0) {
-                countNonOptionArg = -1;
-                break;
-            }
-            countNonOptionArg++;
+        if (argv[i][0] == '+') {
+            isProj4StyleSyntax = true;
+            break;
         }
     }
-    const bool isSrcDestSyntax = (countNonOptionArg == 2);
 
     /* process run line arguments */
     while (--argc > 0) { /* collect run line arguments */
@@ -492,11 +483,15 @@ int main(int argc, char **argv) {
                 }
                 break;
             }
-        } else if (isSrcDestSyntax) {
+        } else if (!isProj4StyleSyntax) {
             if (fromStr.empty())
                 fromStr = *argv;
-            else
+            else if( toStr.empty() )
                 toStr = *argv;
+            else {
+                 /* assumed to be input file name(s) */
+                eargv[eargc++] = *argv;
+            }
         } else if (strcmp(*argv, "+to") == 0) {
             have_to_flag = 1;
 
