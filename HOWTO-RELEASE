@@ -63,7 +63,7 @@ Update the following files with the new ABI version number:
 Man pages are (mostly) automatically generated from the Sphinx docs. Follow
 these steps:
 
-    - Temporarily update version in `docs/source/conf.py`
+    - Temporarily update `version` and `data_version` in `docs/source/conf.py`
     - run `scripts/update_man.sh`
     - Revert version number in `docs/source/conf.py`
 

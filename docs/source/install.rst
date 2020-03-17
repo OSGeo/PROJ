@@ -26,13 +26,14 @@ from the ``conda-forge`` channel::
 
     conda install -c conda-forge proj
 
-Using ``conda`` you can also install the PROJ grid packages. Here's how to install
-the `proj-datumgrid-europe` package::
+Using ``conda`` you can also install the PROJ data package. Here's how to install
+the `proj-data` package::
 
-    conda install -c conda-forge proj-datumgrid-europe
+    conda install -c conda-forge proj-data
 
-Available is also the ``proj-datumgrid-north-america``, ``proj-datumgrid-oceania``
-and ``proj-datumgrid-world``.
+Available is also the legacy packages ``proj-datumgrid-europe``,
+``proj-datumgrid-north-america``, ``proj-datumgrid-oceania`` and
+``proj-datumgrid-world``.
 
 .. tip::
    Read more about the various datumgrid packages available :ref:`here<datumgrid>`.
@@ -129,9 +130,6 @@ Compilation and installation from source code
 The classic way of installing PROJ is via the source code distribution. The
 most recent version is available from the :ref:`download page<current_release>`.
 
-You will need that and at least the standard *proj-datumgrid* package for a
-successful installation.
-
 The following guides show how to compile and install the software using the
 Autotools and CMake build systems.
 
@@ -157,7 +155,7 @@ FSF's configuration procedure is used to ease installation of the PROJ system.
 
 The default destination path prefix for installed files is ``/usr/local``.
 Results from the installation script will be placed into subdirectories ``bin``,
-``include``, ``lib``, ``man/man1`` and ``man/man3``. If this default path prefix
+``include``, ``lib``, and ``man/man1``. If this default path prefix
 is proper, then execute::
 
     ./configure
@@ -175,17 +173,7 @@ If you are building from the git repository you have to first run::
 
 which will generate a configure script that can be used as described above.
 
-Before proceeding with the installation we need to add the datum grids. Unzip
-the contents of the *proj-datumgrid* package into ``data/``::
-
-    unzip proj-datumgrid-1.7.zip -d proj-5.0.1/data/
-
-The installation will automatically move the grid files to the correct location.
-Alternatively the grids can be installed manually in the directory pointed to
-by the :envvar:`PROJ_LIB` environment variable. The default location is
-``/usr/local/share/proj``.
-
-With the grid files in place we can now build and install PROJ::
+With the data files in place we can now build and install PROJ::
 
     make
     make install
@@ -196,8 +184,27 @@ Tests are run with::
 
     make check
 
-The test suite requires that the proj-datumgrid package is installed in
-:envvar:`PROJ_LIB`.
+With a successful install of PROJ we can now install data files using the
+:program:`projsync` utility::
+
+    projsync --system-directory
+
+which will download all resource files currently available for PROJ. If less than
+the entire collection of resource files is needed the call to :program:`projsync`
+can be modified to suit the users needs. See :ref:`projsync` for more options.
+
+.. note::
+
+    The use of :program:`projsync` requires that network support is enabled (the
+    default option). If the resource files are not installed using
+    :program:`projsync` PROJ will attempt to fetch them automatically when a
+    transformation needs a specific data file. This  requires that
+    :envvar:`PROJ_NETWORK` is set to ``ON``.
+
+    As an alternative on systems where network access is disabled, the
+    :ref:`proj-data <datumgrid>`
+    package can be downloaded and added to the :envvar:`PROJ_LIB` directory.
+
 
 
 Autotools configure options
@@ -252,7 +259,7 @@ With the CMake build system you can compile and install PROJ on more or less any
 platform. After unpacking the source distribution archive step into the source-
 tree::
 
-    cd proj-5.0.1
+    cd proj-{PROJVERSION}
 
 Create a build directory and step into it::
 
@@ -282,8 +289,28 @@ Tests are run with::
 
     ctest
 
-The test suite requires that the proj-datumgrid package is installed
-in :envvar:`PROJ_LIB`.
+With a successful install of PROJ we can now install data files using the
+:program:`projsync` utility::
+
+    projsync --system-directory
+
+which will download all resource files currently available for PROJ. If less than
+the entire collection of resource files is needed the call to :program:`projsync`
+can be modified to suit the users needs. See :ref:`projsync` for more options.
+
+.. note::
+
+    The use of :program:`projsync` requires that network support is enabled (the
+    default option). If the resource files are not installed using
+    :program:`projsync` PROJ will attempt to fetch them automatically when a
+    transformation needs a specific data file. This  requires that
+    :envvar:`PROJ_NETWORK` is set to ``ON``.
+
+    As an alternative on systems where network access is disabled, the
+    :ref:`proj-data <datumgrid>`
+    package can be downloaded and added to the :envvar:`PROJ_LIB` directory.
+
+
 
 
 CMake configure options
