@@ -58,6 +58,12 @@ pj_angular_units[] = {
     {nullptr,          nullptr,                     nullptr,    0.0}
 };
 
+// For internal use
+const PJ_UNITS *pj_list_angular_units()
+{
+    return pj_angular_units;
+}
+
 const PJ_UNITS *proj_list_angular_units()
 {
     return pj_angular_units;

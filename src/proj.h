@@ -627,7 +627,7 @@ PJ_INIT_INFO PROJ_DLL proj_init_info(const char *initname);
 const PJ_OPERATIONS       PROJ_DLL *proj_list_operations(void);
 const PJ_ELLPS            PROJ_DLL *proj_list_ellps(void);
 PROJ_DEPRECATED(const PJ_UNITS            PROJ_DLL *proj_list_units(void), "Deprecated by proj_get_units_from_database");
-const PJ_UNITS            PROJ_DLL *proj_list_angular_units(void);
+PROJ_DEPRECATED(const PJ_UNITS            PROJ_DLL *proj_list_angular_units(void), "Deprecated by proj_get_units_from_database");
 const PJ_PRIME_MERIDIANS  PROJ_DLL *proj_list_prime_meridians(void);
 
 /* These are trivial, and while occasionally useful in real code, primarily here to      */

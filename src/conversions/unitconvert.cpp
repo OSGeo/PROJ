@@ -409,7 +409,7 @@ static double get_unit_conversion_factor(const char* name,
     }
 
     /* And then angular units */
-    units = proj_list_angular_units();
+    units = pj_list_angular_units();
     for (i = 0; (s = units[i].id) ; ++i) {
         if ( strcmp(s, name) == 0 ) {
             if( p_normalized_name ) {
