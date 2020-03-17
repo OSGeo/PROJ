@@ -302,7 +302,7 @@ can be modified to suit the users needs. See :ref:`projsync` for more options.
 
     The use of :program:`projsync` requires that network support is enabled (the
     default option). If the resource files are not installed using
-    :program:`projsync` PROJ will attempt to fetch them automaticall when a
+    :program:`projsync` PROJ will attempt to fetch them automatically when a
     transformation needs a specific data file. This  requires that
     :envvar:`PROJ_NETWORK` is set to ``ON``.
 
