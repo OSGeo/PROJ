@@ -68,12 +68,8 @@ copyright = u'1983-{0}'.format(now.year)
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-<<<<<<< HEAD
 version = '7.0.0'
-=======
-version = '7.1.0'
 data_version = '1.0'
->>>>>>> 781dedec... Align install.rst with current version (#2075)
 
 # use same |release| as |version|
 release = version
