@@ -123,10 +123,27 @@ all formats. Using GDAL for construction of new grids is recommended.
 External resources and packaged grids
 -------------------------------------------------------------------------------
 
+proj-data
++++++++++
+
+The ``proj-data`` package is a collection of all the resource files that are
+freely available for use with PROJ. The package is maintained on
+`GitHub <https://github.com/OSGeo/PROJ-data>`_ and the contents of the package
+are show-cased on the `PROJ CDN <https://cdn.proj.org/>`_. The contents of the
+package can be installed using the :program:`projsync` package or by downloading
+the zip archive of the package and unpacking in the :envvar:`PROJ_LIB` directory.
+
 proj-datumgrid
 ++++++++++++++
 
-For a functioning PROJ, installation of the
+.. note::
+
+    The packages described below can be used with PROJ 7 and later but are
+    primarily meant to be used with PROJ 6 and earlier versions. The proj-datumgrid
+    series of packages are not maintained anymore and are only kept available for
+    legacy purposes.
+
+For a functioning builds of PROJ prior to version 7, installation of the
 `proj-datumgrid <https://github.com/OSGeo/proj-datumgrid>`_ is needed. If you
 have installed PROJ from a package system chances are that this will already be
 done for you. The *proj-datumgrid* package provides transformation grids that
