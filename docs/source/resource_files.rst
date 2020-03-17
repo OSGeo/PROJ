@@ -140,7 +140,7 @@ proj-datumgrid
 
     The packages described below can be used with PROJ 7 and later but are
     primarily meant to be used with PROJ 6 and earlier versions. The proj-datumgrid
-    series of packages are not maintained any more and are only kept available for
+    series of packages are not maintained anymore and are only kept available for
     legacy purposes.
 
 For a functioning builds of PROJ prior to version 7, installation of the
