@@ -68,7 +68,12 @@ copyright = u'1983-{0}'.format(now.year)
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
+<<<<<<< HEAD
 version = '7.0.0'
+=======
+version = '7.1.0'
+data_version = '1.0'
+>>>>>>> 781dedec... Align install.rst with current version (#2075)
 
 # use same |release| as |version|
 release = version
@@ -120,6 +125,22 @@ highlight_language = 'none'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# Replacement macros for use in code-blocks etc. With inspiration from
+# https://github.com/sphinx-doc/sphinx/issues/4054#issuecomment-329097229
+def replace_words(app, docname, source):
+    result = source[0]
+    for key in app.config.replacements:
+        result = result.replace(key, app.config.replacements[key])
+    source[0] = result
+
+replacements = {
+    "{PROJVERSION}" : "{version_number}".format(version_number=version),
+    "{PROJDATAVERSION}" : "{data_version_number}".format(data_version_number=data_version),
+}
+
+def setup(app):
+   app.add_config_value('replacements', {}, True)
+   app.connect('source-read', replace_words)
 
 # -- Options for HTML output ----------------------------------------------
 
