@@ -997,6 +997,11 @@ $EXE -f %.7f +proj=longlat +over +datum=WGS84 +to proj=merc +a=6378137 +b=637813
 -181 49
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test EPSG:xxxx EPSG:yyyy filename" >> ${OUT}
+echo "2 49" > tmp.txt
+$EXE EPSG:4326 EPSG:4326 tmp.txt -E >> ${OUT}
+rm tmp.txt
 
 # Done!
 # do 'diff' with distribution results

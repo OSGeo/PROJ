@@ -15,19 +15,16 @@ Synopsis
 
 or
 
-    **cs2cs** [**-eEfIlrstvwW** [args]] {source_crs} +to {target_crs} file ...
+    **cs2cs** [**-eEfIlrstvwW** [args]] {source_crs} {target_crs} file ...
 
     where {source_crs} or {target_crs} is a PROJ string, a WKT string or a AUTHORITY:CODE
     (where AUTHORITY is the name of a CRS authority and CODE the code of a CRS
     found in the proj.db database), expressing a coordinate reference system.
 
-.. versionadded:: 6.0.0
+    .. versionadded:: 6.0.0
 
-or
-
-    **cs2cs** [**-eEfIlrstvwW** [args]] {source_crs} {target_crs}
-
-.. versionadded:: 6.0.0
+    .. note:: before 7.0.1, it was needed to add +to between {source_crs} and {target_crs}
+              when adding a filename
 
 Description
 ***********
