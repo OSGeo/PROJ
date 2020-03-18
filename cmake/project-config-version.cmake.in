@@ -30,10 +30,10 @@ if (NOT PACKAGE_FIND_NAME STREQUAL "@PROJECT_VARIANT_NAME@")
   set (REASON "package = @PROJECT_VARIANT_NAME@, NOT ${PACKAGE_FIND_NAME}")
   set (PACKAGE_VERSION_UNSUITABLE TRUE)
 elseif (NOT (APPLE OR (NOT DEFINED CMAKE_SIZEOF_VOID_P) OR
-      CMAKE_SIZEOF_VOID_P EQUAL @CMAKE_SIZEOF_VOID_P@))
+      CMAKE_SIZEOF_VOID_P EQUAL "@CMAKE_SIZEOF_VOID_P@"))
   # Reject if there's a 32-bit/64-bit mismatch (not necessary with Apple
   # since a multi-architecture library is built for that platform).
-  set (REASON "sizeof(*void) =  @CMAKE_SIZEOF_VOID_P@")
+  set (REASON "sizeof(*void) = @CMAKE_SIZEOF_VOID_P@")
   set (PACKAGE_VERSION_UNSUITABLE TRUE)
 elseif (MSVC AND NOT (
     # toolset version must be at least as great as @PROJECT_NAME@'s
