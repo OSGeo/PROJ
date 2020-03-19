@@ -7664,6 +7664,9 @@ int proj_get_suggested_operation(PJ_CONTEXT *ctx, PJ_OBJ_LIST *operations,
 
     int iExcluded[2] = {-1, -1};
     const auto &preparedOps = opList->getPreparedOperations(ctx);
+    if (preparedOps.empty() && !opList->objects.empty()) {
+        return 0;
+    }
     int idx = pj_get_suggested_operation(ctx, preparedOps, iExcluded, direction,
                                          coord);
     if (idx >= 0) {
