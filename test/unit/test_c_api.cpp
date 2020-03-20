@@ -1382,6 +1382,43 @@ TEST_F(CApi, proj_create_operations) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_get_suggested_operation_with_operations_without_area_of_use) {
+    auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+
+    // NAD83(2011) geocentric
+    auto source_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "6317", PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+
+    // NAD83(2011) 2D
+    auto target_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "6318", PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(target_crs, nullptr);
+    ObjectKeeper keeper_target_crs(target_crs);
+
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+    auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
+    ASSERT_NE(res, nullptr);
+    ObjListKeeper keeper_res(res);
+
+    PJ_COORD coord;
+    coord.xyz.x = -463930;
+    coord.xyz.y = -4414006;
+    coord.xyz.z = 4562247;
+    int idx = proj_get_suggested_operation(m_ctxt, res, PJ_FWD, coord);
+    EXPECT_GE(idx, 0);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_create_operations_discard_superseded) {
     auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
     ASSERT_NE(ctxt, nullptr);
