@@ -12,10 +12,10 @@ if test "x${NPROC}" = "x"; then
     NPROC=2;
 fi
 echo "NPROC=${NPROC}"
+export MAKEFLAGS="-j ${NPROC}"
 
 # prepare build files
 ./autogen.sh
-TOP_DIR=$PWD
 
 # autoconf build
 mkdir build_autoconf
@@ -36,19 +36,24 @@ mkdir build_autoconf
 cd build_autoconf
 ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 
-make -j${NPROC}
+make
 
 if [ "$(uname)" == "Linux" -a -f src/.libs/libproj.so ]; then
 if objdump -TC "$1" | grep "elf64-x86-64">/dev/null; then
     echo "Checking exported symbols..."
-    ${TOP_DIR}/scripts/dump_exported_symbols.sh src/.libs/libproj.so > /tmp/got_symbols.txt
-    diff -u ${TOP_DIR}/scripts/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
+    $TRAVIS_BUILD_DIR/scripts/dump_exported_symbols.sh src/.libs/libproj.so > /tmp/got_symbols.txt
+    diff -u $TRAVIS_BUILD_DIR/scripts/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
 fi
 fi
 
 make check
 make install
 find /tmp/proj_autoconf_install_from_dist_all
+if [ $BUILD_NAME = "linux_gcc" ] || [ $BUILD_NAME = "osx" ]; then
+    $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_autoconf_install_from_dist_all
+else
+    echo "Skipping test_pkg-config.sh test for $BUILD_NAME"
+fi
 
 /tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:32631 -o PROJJSON -q > out.json
 cat out.json
@@ -85,6 +90,12 @@ if [ $TRAVIS_OS_NAME != "osx" ]; then
     mv /tmp/proj_autoconf_install_from_dist_all /tmp/proj_autoconf_install_from_dist_all_renamed/subdir
     LD_LIBRARY_PATH=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory || /bin/true
     LD_LIBRARY_PATH=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null | grep "Downloading from https://cdn.proj.org into /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/share/proj"
+    sed -i '1cprefix=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir' /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib/pkgconfig/proj.pc
+    if [ $BUILD_NAME = "linux_gcc" ]; then
+        $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_autoconf_install_from_dist_all_renamed/subdir
+    else
+        echo "Skipping test_pkg-config.sh test for $BUILD_NAME"
+    fi
 fi
 
 if [ "$BUILD_NAME" != "linux_gcc8" ]; then
@@ -93,10 +104,15 @@ if [ "$BUILD_NAME" != "linux_gcc8" ]; then
     mkdir build_cmake
     cd build_cmake
     cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
-    VERBOSE=1 make -j${NPROC}
+    VERBOSE=1 make
     make install
     ctest
     find /tmp/proj_cmake_install
+    if [ $BUILD_NAME = "linux_gcc" ] || [ $BUILD_NAME = "osx" ]; then
+        $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_cmake_install
+    else
+        echo "Skipping test_cmake.sh test for $BUILD_NAME"
+    fi
     cd ..
 
     if [ $TRAVIS_OS_NAME != "osx" ]; then
@@ -121,7 +137,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" ]; then
     else
         ./configure
     fi
-    make -j${NPROC}
+    make
     make check
 
     if [ "$BUILD_NAME" != "linux_clang" ]; then
