@@ -24,7 +24,7 @@ build_script:
   # update vcpkg
   - cmd: |
       cd "C:\Tools\vcpkg"
-      git pull
+      git pull > nul
       .\bootstrap-vcpkg.bat
       cd %APPVEYOR_BUILD_FOLDER%
   - vcpkg install sqlite3[core,tool]:"%platform%"-windows
@@ -52,6 +52,7 @@ test_script:
   - cd %PROJ_BUILD%
   - ctest -V -C Release
   - set PATH=%PROJ_DIR%\bin;%PATH%
+  - call %APPVEYOR_BUILD_FOLDER%\test\postinstall\test_cmake.bat %PROJ_DIR%
   - proj
 
 deploy: off
