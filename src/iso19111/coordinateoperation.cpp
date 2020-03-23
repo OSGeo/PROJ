@@ -2443,7 +2443,7 @@ bool ParameterValue::_isEquivalentTo(const util::IComparable *other,
     }
     switch (type()) {
     case Type::MEASURE: {
-        return value()._isEquivalentTo(otherPV->value(), criterion);
+        return value()._isEquivalentTo(otherPV->value(), criterion, 2e-10);
     }
 
     case Type::STRING:
