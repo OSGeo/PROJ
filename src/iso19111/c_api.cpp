@@ -7662,11 +7662,15 @@ int proj_get_suggested_operation(PJ_CONTEXT *ctx, PJ_OBJ_LIST *operations,
         return -1;
     }
 
-    int iExcluded[2] = {-1, -1};
-    const auto &preparedOps = opList->getPreparedOperations(ctx);
-    if (preparedOps.empty() && !opList->objects.empty()) {
+    // Special case:
+    // proj_create_crs_to_crs_from_pj() always use the unique operation
+    // if there's a single one
+    if (opList->objects.size() == 1) {
         return 0;
     }
+
+    int iExcluded[2] = {-1, -1};
+    const auto &preparedOps = opList->getPreparedOperations(ctx);
     int idx = pj_get_suggested_operation(ctx, preparedOps, iExcluded, direction,
                                          coord);
     if (idx >= 0) {
