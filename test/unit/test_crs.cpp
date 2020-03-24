@@ -2472,6 +2472,34 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 2193);
         EXPECT_EQ(res.front().second, 90);
     }
+    {
+        // Special case for https://github.com/OSGeo/PROJ/issues/2086
+        // The name of the CRS to identify is
+        // NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501
+        // whereas it should be
+        // NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501_Feet
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501\","
+            "GEOGCS[\"GCS_North_American_1983_HARN\","
+            "DATUM[\"D_North_American_1983_HARN\",SPHEROID[\"GRS_1980\","
+            "6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],"
+            "UNIT[\"Degree\",0.0174532925199433]],"
+            "PROJECTION[\"Lambert_Conformal_Conic\"],"
+            "PARAMETER[\"False_Easting\",3000000.000316083],"
+            "PARAMETER[\"False_Northing\",999999.999996],"
+            "PARAMETER[\"Central_Meridian\",-105.5],"
+            "PARAMETER[\"Standard_Parallel_1\",39.71666666666667],"
+            "PARAMETER[\"Standard_Parallel_2\",40.78333333333333],"
+            "PARAMETER[\"Latitude_Of_Origin\",39.33333333333334],"
+            "UNIT[\"Foot_US\",0.3048006096012192]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(factoryAll);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2876);
+        EXPECT_EQ(res.front().second, 100);
+    }
 }
 
 // ---------------------------------------------------------------------------
