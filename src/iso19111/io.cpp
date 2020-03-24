@@ -3647,6 +3647,15 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
 
     auto props = buildProperties(node);
 
+    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
+    const auto &nodeValue = nodeP->value();
+    if (isNull(csNode) && !ci_equal(nodeValue, WKTConstants::PROJCS) &&
+        !ci_equal(nodeValue, WKTConstants::BASEPROJCRS)) {
+        ThrowMissing(WKTConstants::CS_);
+    }
+    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+    auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
+
     const std::string projCRSName = stripQuotes(nodeP->children()[0]);
     if (esriStyle_ && dbContext_) {
         // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
@@ -3667,6 +3676,27 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
                 projCRSName, "projected_crs", "ESRI", false, outTableName,
                 authNameFromAlias, codeFromAlias);
             if (!officialName.empty()) {
+                // Special case for https://github.com/OSGeo/PROJ/issues/2086
+                // The name of the CRS to identify is
+                // NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501
+                // whereas it should be
+                // NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501_Feet
+                constexpr double US_FOOT_CONV_FACTOR = 12.0 / 39.37;
+                if (projCRSName.find("_FIPS_") != std::string::npos &&
+                    projCRSName.find("_Feet") == std::string::npos &&
+                    std::fabs(
+                        cartesianCS->axisList()[0]->unit().conversionToSI() -
+                        US_FOOT_CONV_FACTOR) < 1e-10 * US_FOOT_CONV_FACTOR) {
+                    auto officialNameFromFeet =
+                        authFactory->getOfficialNameFromAlias(
+                            projCRSName + "_Feet", "projected_crs", "ESRI",
+                            false, outTableName, authNameFromAlias,
+                            codeFromAlias);
+                    if (!officialNameFromFeet.empty()) {
+                        officialName = officialNameFromFeet;
+                    }
+                }
+
                 props.set(IdentifiedObject::NAME_KEY, officialName);
             }
         }
@@ -3696,15 +3726,6 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         !isNull(conversionNode)
             ? buildConversion(conversionNode, linearUnit, angularUnit)
             : buildProjection(node, projectionNode, linearUnit, angularUnit);
-
-    auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
-    const auto &nodeValue = nodeP->value();
-    if (isNull(csNode) && !ci_equal(nodeValue, WKTConstants::PROJCS) &&
-        !ci_equal(nodeValue, WKTConstants::BASEPROJCRS)) {
-        ThrowMissing(WKTConstants::CS_);
-    }
-    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
-    auto cartesianCS = nn_dynamic_pointer_cast<CartesianCS>(cs);
 
     // No explicit AXIS node ? (WKT1)
     if (isNull(nodeP->lookForChild(WKTConstants::AXIS))) {
