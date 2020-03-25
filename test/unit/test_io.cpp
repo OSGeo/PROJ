@@ -3936,10 +3936,15 @@ TEST(wkt_parse, LOCAL_CS_short) {
     auto cs = crs->coordinateSystem();
     ASSERT_EQ(cs->axisList().size(), 2U);
 
+    auto expected_wkt = "LOCAL_CS[\"Engineering CRS\",\n"
+                        "    UNIT[\"metre\",1,\n"
+                        "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+                        "    AXIS[\"Easting\",EAST],\n"
+                        "    AXIS[\"Northing\",NORTH]]";
     EXPECT_EQ(
         crs->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
-        wkt);
+        expected_wkt);
 }
 
 // ---------------------------------------------------------------------------

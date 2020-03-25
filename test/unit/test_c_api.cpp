@@ -2797,7 +2797,12 @@ TEST_F(CApi, proj_create_engineering_crs) {
     ASSERT_NE(crs, nullptr);
     auto wkt = proj_as_wkt(m_ctxt, crs, PJ_WKT1_GDAL, nullptr);
     ASSERT_NE(wkt, nullptr);
-    EXPECT_EQ(std::string(wkt), "LOCAL_CS[\"name\"]") << wkt;
+    EXPECT_EQ(std::string(wkt), "LOCAL_CS[\"name\",\n"
+                                "    UNIT[\"metre\",1,\n"
+                                "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+                                "    AXIS[\"Easting\",EAST],\n"
+                                "    AXIS[\"Northing\",NORTH]]")
+        << wkt;
 }
 
 // ---------------------------------------------------------------------------
