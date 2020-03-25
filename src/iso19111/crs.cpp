@@ -310,17 +310,15 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
             auto cartCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(
                 engCRS->coordinateSystem());
             if (cartCS) {
-                auto props = createPropertyMap(this);
-                props.set("FORCE_OUTPUT_CS", true);
-                return EngineeringCRS::create(props, engCRS->datum(),
+                return EngineeringCRS::create(createPropertyMap(this),
+                                              engCRS->datum(),
                                               cartCS->alterUnit(unit));
             } else {
                 auto vertCS = util::nn_dynamic_pointer_cast<cs::VerticalCS>(
                     engCRS->coordinateSystem());
                 if (vertCS) {
-                    auto props = createPropertyMap(this);
-                    props.set("FORCE_OUTPUT_CS", true);
-                    return EngineeringCRS::create(props, engCRS->datum(),
+                    return EngineeringCRS::create(createPropertyMap(this),
+                                                  engCRS->datum(),
                                                   vertCS->alterUnit(unit));
                 }
             }
@@ -5416,9 +5414,7 @@ bool TemporalCRS::_isEquivalentTo(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-struct EngineeringCRS::Private {
-    bool forceOutputCS_ = false;
-};
+struct EngineeringCRS::Private {};
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -5476,17 +5472,6 @@ EngineeringCRS::create(const util::PropertyMap &properties,
     crs->assignSelf(crs);
     crs->setProperties(properties);
 
-    const auto pVal = properties.get("FORCE_OUTPUT_CS");
-    if (pVal) {
-        if (const auto genVal =
-                dynamic_cast<const util::BoxedValue *>(pVal->get())) {
-            if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
-                genVal->booleanValue()) {
-                crs->d->forceOutputCS_ = true;
-            }
-        }
-    }
-
     return crs;
 }
 
@@ -5501,11 +5486,16 @@ void EngineeringCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->addQuotedString(nameStr());
     if (isWKT2 || !datum()->nameStr().empty()) {
         datum()->_exportToWKT(formatter);
-        coordinateSystem()->_exportToWKT(formatter);
     }
-    if (!isWKT2 && d->forceOutputCS_) {
+    if (!isWKT2) {
         coordinateSystem()->axisList()[0]->unit()._exportToWKT(formatter);
     }
+
+    const auto oldAxisOutputRule = formatter->outputAxis();
+    formatter->setOutputAxis(io::WKTFormatter::OutputAxisRule::YES);
+    coordinateSystem()->_exportToWKT(formatter);
+    formatter->setOutputAxis(oldAxisOutputRule);
+
     ObjectUsage::baseExportToWKT(formatter);
     formatter->endNode();
 }
