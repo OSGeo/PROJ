@@ -4873,7 +4873,11 @@ TEST(crs, engineeringCRS_WKT2) {
 TEST(crs, engineeringCRS_WKT1) {
 
     auto expected = "LOCAL_CS[\"Engineering CRS\",\n"
-                    "    LOCAL_DATUM[\"Engineering datum\",32767]]";
+                    "    LOCAL_DATUM[\"Engineering datum\",32767],\n"
+                    "    UNIT[\"metre\",1,\n"
+                    "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+                    "    AXIS[\"Easting\",EAST],\n"
+                    "    AXIS[\"Northing\",NORTH]]";
     EXPECT_EQ(
         createEngineeringCRS()->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
@@ -5459,7 +5463,8 @@ TEST(crs, crs_alterCSLinearUnit) {
         auto wkt = alteredCRS->exportToWKT(
             &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL)
                   ->setMultiLine(false)));
-        EXPECT_EQ(wkt, "LOCAL_CS[\"foo\",UNIT[\"my unit\",2]]");
+        EXPECT_EQ(wkt, "LOCAL_CS[\"foo\",UNIT[\"my unit\",2],"
+                       "AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]");
     }
 
     {
