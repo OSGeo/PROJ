@@ -3724,7 +3724,8 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                             return res;
                         }
                         res.emplace_back(crsNN, eqName ? 90 : 70);
-                    } else if (eqName && CRS::getPrivate()->implicitCS_ &&
+                    } else if (objects.size() == 1 &&
+                               CRS::getPrivate()->implicitCS_ &&
                                coordinateSystem()
                                    ->axisList()[0]
                                    ->unit()
@@ -3742,11 +3743,11 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                derivingConversionRef()->_isEquivalentTo(
                                    crs->derivingConversionRef().get(),
                                    util::IComparable::Criterion::EQUIVALENT,
-                                   dbContext) &&
-                               objects.size() == 1) {
+                                   dbContext)) {
                         res.clear();
-                        res.emplace_back(crsNN,
-                                         crs->nameStr() == thisName ? 100 : 90);
+                        res.emplace_back(crsNN, crs->nameStr() == thisName
+                                                    ? 100
+                                                    : eqName ? 90 : 70);
                         return res;
                     } else {
                         res.emplace_back(crsNN, 25);
