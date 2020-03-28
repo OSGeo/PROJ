@@ -41,7 +41,7 @@ set(PACKAGE_VERSION "${${PROJECT_NAME}_VERSION}")
 
 # check if a second proj_config.h exists (created by ./configure)
 # as this is within CMake's C_INCLUDES / CXX_INCLUDES
-set(AUTOCONF_PROJ_CONFIG_H "${CMAKE_SOURCE_DIR}/src/proj_config.h")
+set(AUTOCONF_PROJ_CONFIG_H "${PROJ_SOURCE_DIR}/src/proj_config.h")
 if(EXISTS ${AUTOCONF_PROJ_CONFIG_H})
   message(WARNING
     "Autoconf's ${AUTOCONF_PROJ_CONFIG_H} may interfere with this "
