@@ -8930,6 +8930,16 @@ static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
                                        const crs::CRSNNPtr &crs, bool addPushV3,
                                        const char *trfrm_name) {
     auto sourceCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
+    if (!sourceCRSGeog) {
+        auto compoundCRS = dynamic_cast<const crs::CompoundCRS *>(crs.get());
+        if (compoundCRS) {
+            const auto &components = compoundCRS->componentReferenceSystems();
+            if (!components.empty()) {
+                sourceCRSGeog = dynamic_cast<const crs::GeographicCRS *>(
+                    components[0].get());
+            }
+        }
+    }
     if (sourceCRSGeog) {
         formatter->startInversion();
         sourceCRSGeog->_exportToPROJString(formatter);
@@ -8958,6 +8968,16 @@ static void setupPROJGeodeticTargetCRS(io::PROJStringFormatter *formatter,
                                        const crs::CRSNNPtr &crs, bool addPopV3,
                                        const char *trfrm_name) {
     auto targetCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
+    if (!targetCRSGeog) {
+        auto compoundCRS = dynamic_cast<const crs::CompoundCRS *>(crs.get());
+        if (compoundCRS) {
+            const auto &components = compoundCRS->componentReferenceSystems();
+            if (!components.empty()) {
+                targetCRSGeog = dynamic_cast<const crs::GeographicCRS *>(
+                    components[0].get());
+            }
+        }
+    }
     if (targetCRSGeog) {
         formatter->addStep("cart");
         formatter->setCurrentStepInverted(true);

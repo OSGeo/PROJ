@@ -7347,6 +7347,32 @@ TEST(operation, compoundCRS_to_compoundCRS_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_compoundCRS_context_helmert_noop) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    // WGS84 + EGM96
+    auto objSrc = createFromUserInput("EPSG:4326+3855", dbContext);
+    auto srcCrs = nn_dynamic_pointer_cast<CompoundCRS>(objSrc);
+    ASSERT_TRUE(srcCrs != nullptr);
+    // ETRS89 + EGM96
+    auto objDest = createFromUserInput("EPSG:4258+3855", dbContext);
+    auto destCrs = nn_dynamic_pointer_cast<CompoundCRS>(objDest);
+    ASSERT_TRUE(destCrs != nullptr);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcCrs), NN_NO_CHECK(destCrs), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, vertCRS_to_vertCRS) {
 
     auto vertcrs_m_obj = PROJStringParser().createFromPROJString("+vunits=m");
