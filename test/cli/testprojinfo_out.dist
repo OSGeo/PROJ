@@ -901,13 +901,13 @@ Candidate operations found: 1
 -------------------------------------
 Operation No. 1:
 
-PROJ:EPSG_5613_TO_EPSG_4977, RH2000 height to SWEREF99, unknown accuracy, Sweden - onshore
+INVERSE(DERIVED_FROM(PROJ)):EPSG_4977_TO_EPSG_5613, Inverse of SWEREF99 to RH2000 height, unknown accuracy, Sweden - onshore
 
 PROJ string:
-+proj=vgridshift +grids=SWEN17_RH2000.gtx +multiplier=1
++proj=vgridshift +grids=se_lantmateriet_SWEN17_RH2000.tif +multiplier=1
 
 WKT2:2019 string:
-COORDINATEOPERATION["RH2000 height to SWEREF99",
+COORDINATEOPERATION["Inverse of SWEREF99 to RH2000 height",
     SOURCECRS[
         VERTCRS["RH2000 height",
             VDATUM["Rikets hojdsystem 2000"],
@@ -933,14 +933,14 @@ COORDINATEOPERATION["RH2000 height to SWEREF99",
                     ORDER[3],
                     LENGTHUNIT["metre",1]],
             ID["EPSG",4977]]],
-    METHOD["GravityRelatedHeight to Geographic3D",
-        ID["PROJ","HEIGHT_TO_GEOGRAPHIC3D"]],
-    PARAMETERFILE["Geoid (height correction) model file","SWEN17_RH2000.gtx"],
+    METHOD["Inverse of Geographic3D to GravityRelatedHeight (gtx)",
+        ID["INVERSE(EPSG)",9665]],
+    PARAMETERFILE["Geoid (height correction) model file","se_lantmateriet_SWEN17_RH2000.tif"],
     USAGE[
         SCOPE["unknown"],
         AREA["Sweden - onshore"],
         BBOX[55.28,10.93,69.07,24.17]],
-    ID["PROJ","EPSG_5613_TO_EPSG_4977"]]
+    ID["INVERSE(DERIVED_FROM(PROJ))","EPSG_4977_TO_EPSG_5613"]]
 
 Testing NAD83(2011) + NAVD88 height -> NAD83(2011) : projinfo -s EPSG:6349 -t EPSG:6319 --spatial-test intersects -o PROJ
 Candidate operations found: 2
