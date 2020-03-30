@@ -63,19 +63,6 @@ FOR EACH ROW BEGIN
                       (SELECT auth_name || code FROM geodetic_crs
                        WHERE type = 'geographic 2D'));
 
-    -- check that grids with HEIGHT_TO_GEOGRAPHIC3D method are properly registered
-    SELECT RAISE(ABORT, 'One grid_transformation with HEIGHT_TO_GEOGRAPHIC3D has not its source_crs in vertical_crs table')
-        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
-                      g.method_code = 'HEIGHT_TO_GEOGRAPHIC3D' AND
-                      g.source_crs_auth_name || g.source_crs_code NOT IN
-                      (SELECT auth_name || code FROM vertical_crs));
-    SELECT RAISE(ABORT, 'One grid_transformation with HEIGHT_TO_GEOGRAPHIC3D has not its target_crs in geodetic_crs table with type = ''geographic 3D''')
-        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
-                      g.method_code = 'HEIGHT_TO_GEOGRAPHIC3D' AND
-                      g.target_crs_auth_name || g.target_crs_code NOT IN
-                      (SELECT auth_name || code FROM geodetic_crs
-                       WHERE type = 'geographic 3D'));
-
     -- check that grids with Geographic3D to GravityRelatedHeight method are properly registered
     SELECT RAISE(ABORT, 'One grid_transformation with Geographic3D to GravityRelatedHeight has not its target_crs in vertical_crs table')
         WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
