@@ -5351,18 +5351,36 @@ std::string AuthorityFactory::getOfficialNameFromAlias(
         if (res.empty()) {
             return std::string();
         }
-        const auto &row = res.front();
-        outTableName = row[0];
-        outAuthName = row[1];
-        outCode = row[2];
-        sql = "SELECT name FROM \"";
-        sql += replaceAll(outTableName, "\"", "\"\"");
-        sql += "\" WHERE auth_name = ? AND code = ?";
-        res = d->run(sql, {outAuthName, outCode});
+
+        params.clear();
+        sql.clear();
+        bool first = true;
+        for (const auto &row : res) {
+            if (!first)
+                sql += " UNION ALL ";
+            first = false;
+            outTableName = row[0];
+            outAuthName = row[1];
+            outCode = row[2];
+            sql += "SELECT name, ? AS table_name, auth_name, code, deprecated "
+                   "FROM \"";
+            sql += replaceAll(outTableName, "\"", "\"\"");
+            sql += "\" WHERE auth_name = ? AND code = ?";
+            params.emplace_back(outTableName);
+            params.emplace_back(outAuthName);
+            params.emplace_back(outCode);
+        }
+        sql = "SELECT name, table_name, auth_name, code FROM (" + sql +
+              ") x ORDER BY deprecated LIMIT 1";
+        res = d->run(sql, params);
         if (res.empty()) { // shouldn't happen normally
             return std::string();
         }
-        return res.front()[0];
+        const auto &row = res.front();
+        outTableName = row[1];
+        outAuthName = row[2];
+        outCode = row[3];
+        return row[0];
     }
 }
 
