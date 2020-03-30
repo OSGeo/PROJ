@@ -2525,6 +2525,31 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 6670);
         EXPECT_EQ(res.front().second, 70);
     }
+    {
+        // Test case of https://github.com/OSGeo/PROJ/issues/2116
+        // The NAD_1983_CSRS_Prince_Edward_Island has entries in the alias
+        // table under the ESRI authority for deprecated EPSG:2292 and
+        // non-deprecated EPSG:2954
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"NAD_1983_CSRS_Prince_Edward_Island\","
+            "GEOGCS[\"GCS_North_American_1983_CSRS\","
+            "DATUM[\"D_North_American_1983_CSRS\","
+            "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+            "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+            "PROJECTION[\"Double_Stereographic\"],"
+            "PARAMETER[\"False_Easting\",400000.0],"
+            "PARAMETER[\"False_Northing\",800000.0],"
+            "PARAMETER[\"Central_Meridian\",-63.0],"
+            "PARAMETER[\"Scale_Factor\",0.999912],"
+            "PARAMETER[\"Latitude_Of_Origin\",47.25],UNIT[\"Meter\",1.0]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(factoryAll);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2954);
+        EXPECT_EQ(res.front().second, 100);
+    }
 }
 
 // ---------------------------------------------------------------------------
