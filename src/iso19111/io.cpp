@@ -3839,6 +3839,12 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         ThrowNotExpectedCSType("Cartesian");
     }
 
+    if (cartesianCS->axisList().size() == 3 &&
+        baseGeodCRS->coordinateSystem()->axisList().size() == 2) {
+        baseGeodCRS = NN_NO_CHECK(util::nn_dynamic_pointer_cast<GeodeticCRS>(
+            baseGeodCRS->promoteTo3D(std::string(), dbContext_)));
+    }
+
     addExtensionProj4ToProp(nodeP, props);
 
     return ProjectedCRS::create(props, baseGeodCRS, conversion,
