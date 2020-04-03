@@ -427,7 +427,9 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
 
 /** \brief Instantiate an object from a WKT string, PROJ string, object code
  * (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
- * "urn:ogc:def:coordinateOperation:EPSG::1671") or PROJJSON string.
+ * "urn:ogc:def:coordinateOperation:EPSG::1671"), a PROJJSON string, an object
+ * name (e.g "WGS 84") of a compound CRS build from object names
+ * (e.g "WGS 84 + EGM96 height")
  *
  * This function calls osgeo::proj::io::createFromUserInput()
  *

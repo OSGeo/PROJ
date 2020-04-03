@@ -9548,6 +9548,36 @@ TEST(io, createFromUserInput) {
                  ParsingException);
     EXPECT_NO_THROW(createFromUserInput("WGS84 UTM zone 31N", dbContext));
     EXPECT_NO_THROW(createFromUserInput("ID74", dbContext));
+
+    {
+        // Exact match on each piece of the compound CRS
+        auto obj = createFromUserInput("WGS 84 + EGM96 height", dbContext);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "WGS 84 + EGM96 height");
+    }
+
+    {
+        // Aproximate match on each piece of the compound CRS
+        auto obj = createFromUserInput("WGS84 + EGM96", dbContext);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "WGS 84 + EGM96 height");
+    }
+
+    {
+        // Exact match of a CompoundCRS object
+        auto obj = createFromUserInput(
+            "WGS 84 / World Mercator +  EGM2008 height", dbContext);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->identifiers().size(), 1U);
+    }
+
+    EXPECT_THROW(createFromUserInput("WGS 84 + foobar", dbContext),
+                 ParsingException);
+    EXPECT_THROW(createFromUserInput("foobar + EGM96 height", dbContext),
+                 ParsingException);
 }
 
 // ---------------------------------------------------------------------------

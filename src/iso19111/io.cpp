@@ -6025,32 +6025,20 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
     if (dbContext) {
         auto factory =
             AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
-        // First pass: exact match on CRS objects
-        // Second pass: exact match on other objects
-        // Third pass: approximate match on CRS objects
-        // Fourth pass: approximate match on other objects
-        constexpr size_t limitResultCount = 10;
-        for (int pass = 0; pass <= 3; ++pass) {
-            const bool approximateMatch = (pass >= 2);
+
+        const auto searchObject = [&factory](
+            const std::string &objectName, bool approximateMatch,
+            const std::vector<AuthorityFactory::ObjectType> &objectTypes,
+            bool &goOn) {
+            constexpr size_t limitResultCount = 10;
             auto res = factory->createObjectsFromName(
-                text,
-                (pass == 0 || pass == 2)
-                    ? std::vector<
-                          AuthorityFactory::ObjectType>{AuthorityFactory::
-                                                            ObjectType::CRS}
-                    : std::vector<
-                          AuthorityFactory::
-                              ObjectType>{AuthorityFactory::ObjectType::
-                                              ELLIPSOID,
-                                          AuthorityFactory::ObjectType::DATUM,
-                                          AuthorityFactory::ObjectType::
-                                              COORDINATE_OPERATION},
-                approximateMatch, limitResultCount);
+                objectName, objectTypes, approximateMatch, limitResultCount);
             if (res.size() == 1) {
                 return res.front();
             }
             if (res.size() > 1) {
-                if (pass == 0 || pass == 2) {
+                if (objectTypes.size() == 1 &&
+                    objectTypes[0] == AuthorityFactory::ObjectType::CRS) {
                     for (size_t ndim = 2; ndim <= 3; ndim++) {
                         for (const auto &obj : res) {
                             auto crs =
@@ -6078,6 +6066,79 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                     msg += obj->nameStr();
                 }
                 throw ParsingException(msg);
+            }
+            goOn = true;
+            throw ParsingException("dummy");
+        };
+
+        const auto searchCRS = [&searchObject](const std::string &objectName) {
+            bool goOn = false;
+            const auto objectTypes = std::vector<AuthorityFactory::ObjectType>{
+                AuthorityFactory::ObjectType::CRS};
+            try {
+                constexpr bool approximateMatch = false;
+                return searchObject(objectName, approximateMatch, objectTypes,
+                                    goOn);
+            } catch (const std::exception &) {
+                if (!goOn)
+                    throw;
+            }
+            constexpr bool approximateMatch = true;
+            return searchObject(objectName, approximateMatch, objectTypes,
+                                goOn);
+        };
+
+        // strings like "WGS 84 + EGM96 height"
+        CompoundCRSPtr compoundCRS;
+        try {
+            const auto tokensCompound = split(text, " + ");
+            if (tokensCompound.size() == 2) {
+                auto obj1 = searchCRS(tokensCompound[0]);
+                auto obj2 = searchCRS(tokensCompound[1]);
+                auto crs1 = util::nn_dynamic_pointer_cast<CRS>(obj1);
+                auto crs2 = util::nn_dynamic_pointer_cast<CRS>(obj2);
+                if (crs1 && crs2) {
+                    compoundCRS =
+                        CompoundCRS::create(
+                            util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                    crs1->nameStr() + " + " +
+                                                        crs2->nameStr()),
+                            {NN_NO_CHECK(crs1), NN_NO_CHECK(crs2)})
+                            .as_nullable();
+                }
+            }
+        } catch (const std::exception &) {
+        }
+
+        // First pass: exact match on CRS objects
+        // Second pass: exact match on other objects
+        // Third pass: approximate match on CRS objects
+        // Fourth pass: approximate match on other objects
+        for (int pass = 0; pass <= 3; ++pass) {
+            const bool approximateMatch = (pass >= 2);
+            bool goOn = false;
+            try {
+                return searchObject(
+                    text, approximateMatch,
+                    (pass == 0 || pass == 2)
+                        ? std::vector<
+                              AuthorityFactory::ObjectType>{AuthorityFactory::
+                                                                ObjectType::CRS}
+                        : std::vector<
+                              AuthorityFactory::
+                                  ObjectType>{AuthorityFactory::ObjectType::
+                                                  ELLIPSOID,
+                                              AuthorityFactory::ObjectType::
+                                                  DATUM,
+                                              AuthorityFactory::ObjectType::
+                                                  COORDINATE_OPERATION},
+                    goOn);
+            } catch (const std::exception &) {
+                if (!goOn)
+                    throw;
+            }
+            if (compoundCRS) {
+                return NN_NO_CHECK(compoundCRS);
             }
         }
     }
@@ -6114,6 +6175,8 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
+ * <li>a compound CRS made from two object names separated with " + ".
+ *     e.g. "WGS 84 + EGM96 height"</li>
  * <li>PROJJSON string</li>
  * </ul>
  *
@@ -6163,6 +6226,8 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>
+ * <li>a compound CRS made from two object names separated with " + ".
+ *     e.g. "WGS 84 + EGM96 height"</li>
  * <li>PROJJSON string</li>
  * </ul>
  *
