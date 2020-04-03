@@ -5644,6 +5644,22 @@ TEST(crs, promoteTo3D_and_demoteTo2D) {
         EXPECT_EQ(
             crs3DAsProjected->baseCRS()->coordinateSystem()->axisList().size(),
             3U);
+
+        // Check that importing an exported Projected 3D CRS as WKT keeps
+        // the 3D aspect of the baseCRS (see #2122)
+        {
+            WKTFormatterNNPtr f(
+                WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
+            crs3DAsProjected->exportToWKT(f.get());
+            auto obj = WKTParser().createFromWKT(f->toString());
+            auto crsFromWkt = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+            ASSERT_TRUE(crsFromWkt != nullptr);
+            EXPECT_EQ(crsFromWkt->coordinateSystem()->axisList().size(), 3U);
+            EXPECT_EQ(
+                crsFromWkt->baseCRS()->coordinateSystem()->axisList().size(),
+                3U);
+        }
+
         EXPECT_TRUE(crs3D->promoteTo3D(std::string(), nullptr)
                         ->isEquivalentTo(crs3D.get()));
 
