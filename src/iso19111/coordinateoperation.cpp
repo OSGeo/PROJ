@@ -14752,84 +14752,144 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
 
     const auto &componentsSrc = compoundSrc->componentReferenceSystems();
     const auto &componentsDst = compoundDst->componentReferenceSystems();
-    if (!componentsSrc.empty() &&
-        componentsSrc.size() == componentsDst.size()) {
-        if (componentsSrc[0]->extractGeographicCRS() &&
-            componentsDst[0]->extractGeographicCRS()) {
+    if (componentsSrc.empty() || componentsSrc.size() != componentsDst.size()) {
+        return;
+    }
+    const auto srcGeog = componentsSrc[0]->extractGeographicCRS();
+    const auto dstGeog = componentsDst[0]->extractGeographicCRS();
+    if (srcGeog == nullptr || dstGeog == nullptr) {
+        return;
+    }
 
-            std::vector<CoordinateOperationNNPtr> verticalTransforms;
-            if (componentsSrc.size() >= 2 &&
-                componentsSrc[1]->extractVerticalCRS() &&
-                componentsDst[1]->extractVerticalCRS()) {
-                if (!componentsSrc[1]->_isEquivalentTo(
-                        componentsDst[1].get())) {
-                    verticalTransforms = createOperations(
-                        componentsSrc[1], componentsDst[1], context);
+    std::vector<CoordinateOperationNNPtr> verticalTransforms;
+    if (componentsSrc.size() >= 2 && componentsSrc[1]->extractVerticalCRS() &&
+        componentsDst[1]->extractVerticalCRS()) {
+        if (!componentsSrc[1]->_isEquivalentTo(componentsDst[1].get())) {
+            verticalTransforms =
+                createOperations(componentsSrc[1], componentsDst[1], context);
+        }
+    }
+
+    // If we didn't find a non-ballbark transformation between
+    // the 2 vertical CRS, then try through intermediate geographic CRS
+    // For example
+    // WGS 84 + EGM96 --> ETRS89 + Belfast height where
+    // there is a geoid model for EGM96 referenced to WGS 84
+    // and a geoid model for Belfast height referenced to ETRS89
+    if (verticalTransforms.size() == 1 &&
+        verticalTransforms.front()->hasBallparkTransformation()) {
+        auto dbContext =
+            context.context->getAuthorityFactory()->databaseContext();
+        const auto intermGeogSrc =
+            srcGeog->promoteTo3D(std::string(), dbContext);
+        const bool intermGeogSrcIsSameAsIntermGeogDst =
+            srcGeog->_isEquivalentTo(dstGeog.get());
+        const auto intermGeogDst =
+            intermGeogSrcIsSameAsIntermGeogDst
+                ? intermGeogSrc
+                : dstGeog->promoteTo3D(std::string(), dbContext);
+        const auto opsSrcToGeog =
+            createOperations(sourceCRS, intermGeogSrc, context);
+        const auto opsGeogToTarget =
+            createOperations(intermGeogDst, targetCRS, context);
+        const bool hasNonTrivalSrcTransf =
+            !opsSrcToGeog.empty() &&
+            !opsSrcToGeog.front()->hasBallparkTransformation();
+        const bool hasNonTrivialTargetTransf =
+            !opsGeogToTarget.empty() &&
+            !opsGeogToTarget.front()->hasBallparkTransformation();
+        if (hasNonTrivalSrcTransf && hasNonTrivialTargetTransf) {
+            const auto opsGeogSrcToGeogDst =
+                createOperations(intermGeogSrc, intermGeogDst, context);
+            for (const auto &op1 : opsSrcToGeog) {
+                if (op1->hasBallparkTransformation()) {
+                    continue;
                 }
-            }
-
-            for (const auto &verticalTransform : verticalTransforms) {
-                auto interpolationGeogCRS =
-                    NN_NO_CHECK(componentsSrc[0]->extractGeographicCRS());
-                auto transformationVerticalTransform =
-                    dynamic_cast<const Transformation *>(
-                        verticalTransform.get());
-                if (transformationVerticalTransform) {
-                    auto interpTransformCRS =
-                        transformationVerticalTransform->interpolationCRS();
-                    if (interpTransformCRS) {
-                        auto nn_interpTransformCRS =
-                            NN_NO_CHECK(interpTransformCRS);
-                        if (dynamic_cast<const crs::GeographicCRS *>(
-                                nn_interpTransformCRS.get())) {
-                            interpolationGeogCRS = NN_NO_CHECK(
-                                util::nn_dynamic_pointer_cast<
-                                    crs::GeographicCRS>(nn_interpTransformCRS));
+                for (const auto &op2 : opsGeogSrcToGeogDst) {
+                    for (const auto &op3 : opsGeogToTarget) {
+                        if (op3->hasBallparkTransformation()) {
+                            continue;
                         }
-                    }
-                } else {
-                    auto compSrc0BoundCrs =
-                        dynamic_cast<crs::BoundCRS *>(componentsSrc[0].get());
-                    auto compDst0BoundCrs =
-                        dynamic_cast<crs::BoundCRS *>(componentsDst[0].get());
-                    if (compSrc0BoundCrs && compDst0BoundCrs &&
-                        dynamic_cast<crs::GeographicCRS *>(
-                            compSrc0BoundCrs->hubCRS().get()) &&
-                        compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
-                            compDst0BoundCrs->hubCRS().get())) {
-                        interpolationGeogCRS = NN_NO_CHECK(
-                            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
-                                compSrc0BoundCrs->hubCRS()));
-                    }
-                }
-                auto opSrcCRSToGeogCRS = createOperations(
-                    componentsSrc[0], interpolationGeogCRS, context);
-                auto opGeogCRStoDstCRS = createOperations(
-                    interpolationGeogCRS, componentsDst[0], context);
-                for (const auto &opSrc : opSrcCRSToGeogCRS) {
-                    for (const auto &opDst : opGeogCRStoDstCRS) {
-
                         try {
-                            auto op = createHorizVerticalHorizPROJBased(
-                                sourceCRS, targetCRS, opSrc, verticalTransform,
-                                opDst, interpolationGeogCRS, true);
-                            res.emplace_back(op);
-                        } catch (const InvalidOperationEmptyIntersection &) {
-                        } catch (const io::FormattingException &) {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    intermGeogSrcIsSameAsIntermGeogDst
+                                        ? std::vector<
+                                              CoordinateOperationNNPtr>{op1,
+                                                                        op3}
+                                        : std::vector<
+                                              CoordinateOperationNNPtr>{op1,
+                                                                        op2,
+                                                                        op3},
+                                    !allowEmptyIntersection));
+                        } catch (const std::exception &) {
                         }
                     }
                 }
             }
+        }
+        if (!res.empty()) {
+            return;
+        }
+    }
 
-            if (verticalTransforms.empty()) {
-                auto resTmp = createOperations(componentsSrc[0],
-                                               componentsDst[0], context);
-                for (const auto &op : resTmp) {
-                    auto opClone = op->shallowClone();
-                    setCRSs(opClone.get(), sourceCRS, targetCRS);
-                    res.emplace_back(opClone);
+    for (const auto &verticalTransform : verticalTransforms) {
+        auto interpolationGeogCRS = NN_NO_CHECK(srcGeog);
+        auto transformationVerticalTransform =
+            dynamic_cast<const Transformation *>(verticalTransform.get());
+        if (transformationVerticalTransform) {
+            auto interpTransformCRS =
+                transformationVerticalTransform->interpolationCRS();
+            if (interpTransformCRS) {
+                auto nn_interpTransformCRS = NN_NO_CHECK(interpTransformCRS);
+                if (dynamic_cast<const crs::GeographicCRS *>(
+                        nn_interpTransformCRS.get())) {
+                    interpolationGeogCRS = NN_NO_CHECK(
+                        util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                            nn_interpTransformCRS));
                 }
             }
+        } else {
+            auto compSrc0BoundCrs =
+                dynamic_cast<crs::BoundCRS *>(componentsSrc[0].get());
+            auto compDst0BoundCrs =
+                dynamic_cast<crs::BoundCRS *>(componentsDst[0].get());
+            if (compSrc0BoundCrs && compDst0BoundCrs &&
+                dynamic_cast<crs::GeographicCRS *>(
+                    compSrc0BoundCrs->hubCRS().get()) &&
+                compSrc0BoundCrs->hubCRS()->_isEquivalentTo(
+                    compDst0BoundCrs->hubCRS().get())) {
+                interpolationGeogCRS = NN_NO_CHECK(
+                    util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                        compSrc0BoundCrs->hubCRS()));
+            }
+        }
+        auto opSrcCRSToGeogCRS =
+            createOperations(componentsSrc[0], interpolationGeogCRS, context);
+        auto opGeogCRStoDstCRS =
+            createOperations(interpolationGeogCRS, componentsDst[0], context);
+        for (const auto &opSrc : opSrcCRSToGeogCRS) {
+            for (const auto &opDst : opGeogCRStoDstCRS) {
+
+                try {
+                    auto op = createHorizVerticalHorizPROJBased(
+                        sourceCRS, targetCRS, opSrc, verticalTransform, opDst,
+                        interpolationGeogCRS, true);
+                    res.emplace_back(op);
+                } catch (const InvalidOperationEmptyIntersection &) {
+                } catch (const io::FormattingException &) {
+                }
+            }
+        }
+    }
+
+    if (verticalTransforms.empty()) {
+        auto resTmp =
+            createOperations(componentsSrc[0], componentsDst[0], context);
+        for (const auto &op : resTmp) {
+            auto opClone = op->shallowClone();
+            setCRSs(opClone.get(), sourceCRS, targetCRS);
+            res.emplace_back(opClone);
         }
     }
 }

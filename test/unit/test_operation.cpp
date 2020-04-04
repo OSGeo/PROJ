@@ -7343,11 +7343,11 @@ TEST(operation, compoundCRS_to_compoundCRS_context_helmert_noop) {
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
     // WGS84 + EGM96
-    auto objSrc = createFromUserInput("EPSG:4326+3855", dbContext);
+    auto objSrc = createFromUserInput("EPSG:4326+5773", dbContext);
     auto srcCrs = nn_dynamic_pointer_cast<CompoundCRS>(objSrc);
     ASSERT_TRUE(srcCrs != nullptr);
     // ETRS89 + EGM96
-    auto objDest = createFromUserInput("EPSG:4258+3855", dbContext);
+    auto objDest = createFromUserInput("EPSG:4258+5773", dbContext);
     auto destCrs = nn_dynamic_pointer_cast<CompoundCRS>(objDest);
     ASSERT_TRUE(destCrs != nullptr);
     auto list = CoordinateOperationFactory::create()->createOperations(
@@ -7355,6 +7355,81 @@ TEST(operation, compoundCRS_to_compoundCRS_context_helmert_noop) {
     ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
+// EGM96 has a geoid model referenced to WGS84, and Belfast height has a
+// geoid model referenced to ETRS89
+TEST(operation, compoundCRS_to_compoundCRS_WGS84_EGM96_to_ETRS89_Belfast) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    // WGS84 + EGM96
+    auto objSrc = createFromUserInput("EPSG:4326+5773", dbContext);
+    auto srcCrs = nn_dynamic_pointer_cast<CompoundCRS>(objSrc);
+    ASSERT_TRUE(srcCrs != nullptr);
+    // ETRS89 + Belfast height
+    auto objDest = createFromUserInput("EPSG:4258+5732", dbContext);
+    auto destCrs = nn_dynamic_pointer_cast<CompoundCRS>(objDest);
+    ASSERT_TRUE(destCrs != nullptr);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcCrs), NN_NO_CHECK(destCrs), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
+                                  "Inverse of ETRS89 to WGS 84 (1) + "
+                                  "ETRS89 to Belfast height (2)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=vgridshift +grids=us_nga_egm96_15.tif +multiplier=1 "
+              "+step +inv +proj=vgridshift +grids=uk_os_OSGM15_Belfast.tif "
+              "+multiplier=1 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+// Variant of above where source intermediate geog3D CRS == target intermediate
+// geog3D CRS
+TEST(operation, compoundCRS_to_compoundCRS_WGS84_EGM96_to_WGS84_Belfast) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    // WGS84 + EGM96
+    auto objSrc = createFromUserInput("EPSG:4326+5773", dbContext);
+    auto srcCrs = nn_dynamic_pointer_cast<CompoundCRS>(objSrc);
+    ASSERT_TRUE(srcCrs != nullptr);
+    // WGS84 + Belfast height
+    auto objDest = createFromUserInput("EPSG:4326+5732", dbContext);
+    auto destCrs = nn_dynamic_pointer_cast<CompoundCRS>(objDest);
+    ASSERT_TRUE(destCrs != nullptr);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcCrs), NN_NO_CHECK(destCrs), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
+                                  "Inverse of ETRS89 to WGS 84 (1) + "
+                                  "ETRS89 to Belfast height (2) + "
+                                  "ETRS89 to WGS 84 (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=vgridshift +grids=us_nga_egm96_15.tif +multiplier=1 "
+              "+step +inv +proj=vgridshift +grids=uk_os_OSGM15_Belfast.tif "
+              "+multiplier=1 +step "
+              "+proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
