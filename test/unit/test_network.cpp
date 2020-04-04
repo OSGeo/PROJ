@@ -127,6 +127,8 @@ TEST(networking, basic) {
     ASSERT_EQ(P, nullptr);
     proj_context_destroy(ctx);
 
+    proj_cleanup();
+
 #ifdef CURL_ENABLED
     // enable through env variable
     ctx = proj_context_create();
@@ -141,6 +143,8 @@ TEST(networking, basic) {
     putenv(const_cast<char *>("PROJ_NETWORK="));
 #endif
 
+    proj_cleanup();
+
     // still disabled
     ctx = proj_context_create();
     proj_grid_cache_set_enable(ctx, false);
@@ -148,6 +152,8 @@ TEST(networking, basic) {
     P = proj_create(ctx, pipeline);
     ASSERT_EQ(P, nullptr);
     proj_context_destroy(ctx);
+
+    proj_cleanup();
 
     // enable through API
     ctx = proj_context_create();
@@ -174,6 +180,7 @@ TEST(networking, basic) {
     ASSERT_EQ(P, nullptr);
 #endif
     proj_context_destroy(ctx);
+    proj_cleanup();
 }
 
 // ---------------------------------------------------------------------------

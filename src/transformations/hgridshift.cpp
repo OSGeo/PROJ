@@ -12,6 +12,25 @@ PROJ_HEAD(hgridshift, "Horizontal grid shift");
 
 using namespace NS_PROJ;
 
+#ifdef __MINGW32__
+// mingw32-win32 doesn't implement std::mutex
+namespace {
+class MyMutex {
+  public:
+    // cppcheck-suppress functionStatic
+    void lock() { pj_acquire_lock(); }
+    // cppcheck-suppress functionStatic
+    void unlock() { pj_release_lock(); }
+};
+}
+#else
+#include <mutex>
+#define MyMutex std::mutex
+#endif
+
+static MyMutex gMutex{};
+static std::set<std::string> gKnownGrids{};
+
 namespace { // anonymous namespace
 struct hgridshiftData {
     double t_final = 0;
@@ -160,18 +179,36 @@ PJ *TRANSFORMATION(hgridshift,0) {
     if (pj_param(P->ctx, P->params, "tt_epoch").i)
         Q->t_epoch = pj_param (P->ctx, P->params, "dt_epoch").f;
 
-
     if( P->ctx->defer_grid_opening ) {
         Q->defer_grid_opening = true;
     }
     else {
-        Q->grids = pj_hgrid_init(P, "grids");
-        /* Was gridlist compiled properly? */
-        if ( proj_errno(P) ) {
-            proj_log_error(P, "hgridshift: could not find required grid(s).");
-            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        const char *gridnames = pj_param(P->ctx, P->params, "sgrids").s;
+        gMutex.lock();
+        const bool isKnownGrid = gKnownGrids.find(gridnames) != gKnownGrids.end();
+        gMutex.unlock();
+        if( isKnownGrid ) {
+            Q->defer_grid_opening = true;
         }
-     }
+        else {
+            Q->grids = pj_hgrid_init(P, "grids");
+            /* Was gridlist compiled properly? */
+            if ( proj_errno(P) ) {
+                proj_log_error(P, "hgridshift: could not find required grid(s).");
+                return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+            }
+
+            gMutex.lock();
+            gKnownGrids.insert(gridnames);
+            gMutex.unlock();
+        }
+    }
 
     return P;
+}
+
+void pj_clear_hgridshift_knowngrids_cache() {
+    gMutex.lock();
+    gKnownGrids.clear();
+    gMutex.unlock();
 }
