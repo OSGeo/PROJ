@@ -71,6 +71,7 @@ struct OutputOptions {
     bool c_ify = false;
     bool singleLine = false;
     bool strict = true;
+    bool ballparkAllowed = true;
 };
 } // anonymous namespace
 
@@ -89,10 +90,10 @@ static void usage() {
         << std::endl
         << "                [--grid-check "
            "none|discard_missing|sort|known_available] "
-           "[--show-superseded]"
         << std::endl
         << "                [--pivot-crs always|if_no_direct_transformation|"
         << "never|{auth:code[,auth:code]*}]" << std::endl
+        << "                [--show-superseded] [--hide-ballpark]" << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
@@ -725,6 +726,15 @@ static void outputOperations(
                   << std::endl;
         std::exit(1);
     }
+    if (!outputOpt.ballparkAllowed) {
+        std::vector<CoordinateOperationNNPtr> listNew;
+        for (const auto &op : list) {
+            if (!op->hasBallparkTransformation()) {
+                listNew.emplace_back(op);
+            }
+        }
+        list = std::move(listNew);
+    }
     if (outputOpt.quiet && !list.empty()) {
         outputObject(dbContext, list[0], allowUseIntermediateCRS, outputOpt);
         return;
@@ -1053,6 +1063,8 @@ int main(int argc, char **argv) {
             showSuperseded = true;
         } else if (arg == "--lax") {
             outputOpt.strict = false;
+        } else if (arg == "--hide-ballpark") {
+            outputOpt.ballparkAllowed = false;
         } else if (ci_equal(arg, "--3d")) {
             promoteTo3D = true;
         } else if (ci_equal(arg, "--searchpaths")) {

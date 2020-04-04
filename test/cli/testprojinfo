@@ -58,8 +58,8 @@ echo "Testing projinfo -s NAD27 -t NAD83" >> ${OUT}
 $EXE -s NAD27 -t NAD83 >>${OUT}
 echo "" >>${OUT}
 
-echo "Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary" >> ${OUT}
-$EXE -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary >>${OUT}
+echo "Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary --hide-ballpark" >> ${OUT}
+$EXE -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary --hide-ballpark >>${OUT}
 echo "" >>${OUT}
 
 echo "Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects" >> ${OUT}

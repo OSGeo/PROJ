@@ -266,8 +266,8 @@ COORDINATEOPERATION["Ballpark geographic offset from NAD27 to NAD83",
         AREA["World"],
         BBOX[-90,-180,90,180]]]
 
-Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary
-Candidate operations found: 10
+Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary --hide-ballpark
+Candidate operations found: 9
 DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada
 DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - NAD27
 DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, USA - CONUS including EEZ
@@ -275,7 +275,6 @@ DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, USA - Alaska including EEZ
 DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec
 EPSG:1462, NAD27 to NAD83 (5), 2.0 m, Canada - Quebec
 EPSG:9111, NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan
-unknown id, Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, World, has ballpark transformation
 EPSG:8555, NAD27 to NAD83 (7), 0.15 m, USA - CONUS and GoM
 EPSG:8549, NAD27 to NAD83 (8), 0.5 m, USA - Alaska
 
