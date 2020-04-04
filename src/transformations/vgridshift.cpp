@@ -12,6 +12,27 @@ PROJ_HEAD(vgridshift, "Vertical grid shift");
 
 using namespace NS_PROJ;
 
+
+#ifdef __MINGW32__
+// mingw32-win32 doesn't implement std::mutex
+namespace {
+class MyMutex {
+  public:
+    // cppcheck-suppress functionStatic
+    void lock() { pj_acquire_lock(); }
+    // cppcheck-suppress functionStatic
+    void unlock() { pj_release_lock(); }
+};
+}
+#else
+#include <mutex>
+#define MyMutex std::mutex
+#endif
+
+static MyMutex gMutex{};
+static std::set<std::string> gKnownGrids{};
+
+
 namespace { // anonymous namespace
 struct vgridshiftData {
     double t_final = 0;
@@ -192,13 +213,27 @@ PJ *TRANSFORMATION(vgridshift,0) {
         Q->defer_grid_opening = true;
     }
     else {
-        /* Build gridlist. P->vgridlist_geoid can be empty if +grids only ask for optional grids. */
-        Q->grids = pj_vgrid_init(P, "grids");
+        const char *gridnames = pj_param(P->ctx, P->params, "sgrids").s;
+        gMutex.lock();
+        const bool isKnownGrid = gKnownGrids.find(gridnames) != gKnownGrids.end();
+        gMutex.unlock();
 
-        /* Was gridlist compiled properly? */
-        if ( proj_errno(P) ) {
-            proj_log_error(P, "vgridshift: could not find required grid(s).");
-            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+        if( isKnownGrid ) {
+            Q->defer_grid_opening = true;
+        }
+        else {
+            /* Build gridlist. P->vgridlist_geoid can be empty if +grids only ask for optional grids. */
+            Q->grids = pj_vgrid_init(P, "grids");
+
+            /* Was gridlist compiled properly? */
+            if ( proj_errno(P) ) {
+                proj_log_error(P, "vgridshift: could not find required grid(s).");
+                return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+            }
+
+            gMutex.lock();
+            gKnownGrids.insert(gridnames);
+            gMutex.unlock();
         }
     }
 
@@ -213,4 +248,10 @@ PJ *TRANSFORMATION(vgridshift,0) {
     P->right = PJ_IO_UNITS_RADIANS;
 
     return P;
+}
+
+void pj_clear_vgridshift_knowngrids_cache() {
+    gMutex.lock();
+    gKnownGrids.clear();
+    gMutex.unlock();
 }
