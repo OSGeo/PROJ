@@ -873,26 +873,9 @@ std::string PROJ_DLL pj_context_get_user_writable_directory(PJ_CONTEXT *ctx, boo
 void PROJ_DLL pj_context_set_user_writable_directory(PJ_CONTEXT* ctx, const std::string& path);
 std::string PROJ_DLL pj_get_relative_share_proj(PJ_CONTEXT *ctx);
 
-<<<<<<< HEAD
-=======
-std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
-                                                     const PJ *source_crs,
-                                                     const PJ *target_crs,
-                                                     PJ_OBJ_LIST* op_list);
-
-int pj_get_suggested_operation(PJ_CONTEXT *ctx,
-                               const std::vector<CoordOperation>& opList,
-                               const int iExcluded[2],
-                               PJ_DIRECTION direction,
-                               PJ_COORD coord);
-
-const PJ_UNITS *pj_list_linear_units();
-const PJ_UNITS *pj_list_angular_units();
-
 void pj_clear_hgridshift_knowngrids_cache();
 void pj_clear_vgridshift_knowngrids_cache();
 
->>>>>>> 1f792e6b... hgridshift/vgridshift: defer grid opening when grid has already been opened
 /* classic public API */
 #include "proj_api.h"
 
