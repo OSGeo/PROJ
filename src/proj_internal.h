@@ -890,6 +890,9 @@ int pj_get_suggested_operation(PJ_CONTEXT *ctx,
 const PJ_UNITS *pj_list_linear_units();
 const PJ_UNITS *pj_list_angular_units();
 
+void pj_clear_hgridshift_knowngrids_cache();
+void pj_clear_vgridshift_knowngrids_cache();
+
 /* classic public API */
 #include "proj_api.h"
 

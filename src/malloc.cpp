@@ -264,4 +264,6 @@ void proj_cleanup() {
   pj_clear_initcache();
   pj_deallocate_grids();
   FileManager::clearMemoryCache();
+  pj_clear_hgridshift_knowngrids_cache();
+  pj_clear_vgridshift_knowngrids_cache();
 }
