@@ -17,7 +17,7 @@ Glossary
         lead in some cases to errors of a few hundreds of metres.
 
         For a transformation between two vertical CRS or a vertical CRS and
-        a geogrpahic CRS, a ballpark transformation only takes into account
+        a geographic CRS, a ballpark transformation only takes into account
         potential different in units (e.g. metres vs feet). Its accuracy is
         unknown, and could lead in some cases to errors of a few tens of metres.
 
