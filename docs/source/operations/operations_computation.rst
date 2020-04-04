@@ -660,46 +660,73 @@ CompoundCRS to CompoundCRS
 ---------------------------------------------------------------------------------
 
 There is some similarity with the previous paragraph. We first research the
-vertical transformations between the vertical CRS. If such tranformation has
-a registered interpolation geographic CRS, then it is used. Otherwise we fallback
-to the geographic CRS of the source CRS.
+vertical transformations between the two vertical CRS.
 
-Finally, a 3-level loop to create the final set of operations chaining together:
+1. If there is such a tranformation, be it direct, or if both vertical CRS
+   relate to a common intermediate CRS.
+   If it has a registered interpolation geographic CRS, then it is used.
+   Otherwise we fallback to the geographic CRS of the source CRS.
 
-- the horizontal transformation from the source CRS to the interpolation CRS
-- the vertical transformation
-- the horizontal transformation from the interpolation CRS to the target CRS.
+   Finally, a 3-level loop to create the final set of operations chaining together:
 
-This is implemented by the ``createOperationsCompoundToGeog`` method
+   - the horizontal transformation from the source CRS to the interpolation CRS
+   - the vertical transformation
+   - the horizontal transformation from the interpolation CRS to the target CRS.
 
-Example:
+    Example:
 
-.. code-block:: shell
+    .. code-block:: shell
 
-    $ projinfo -s "NAD27 + NGVD29 height (ftUS)" -t "NAD83 + NAVD88 height" --spatial-test intersects --summary
+        $ projinfo -s "NAD27 + NGVD29 height (ftUS)" -t "NAD83 + NAVD88 height" --spatial-test intersects --summary
 
-    Candidate operations found: 20
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + NAD27 to NAD83 (1), 0.17 m, USA - CONUS east of 89°W - onshore
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (2) + NAD27 to NAD83 (1), 0.17 m, USA - CONUS 89°W-107°W - onshore
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (1) + NAD27 to NAD83 (1), 0.17 m, USA - CONUS west of 107°W - onshore
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + NAD27 to NAD83 (3), 1.02 m, unknown domain of validity
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (2) + NAD27 to NAD83 (3), 1.02 m, unknown domain of validity
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (1) + NAD27 to NAD83 (3), 1.02 m, unknown domain of validity
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + NAD27 to NAD83 (5), 1.02 m, unknown domain of validity, at least one grid missing
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + NAD27 to NAD83 (6), 1.52 m, unknown domain of validity, at least one grid missing
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (2) + NAD27 to NAD83 (9), 1.52 m, unknown domain of validity, at least one grid missing
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (1) + NAD27 to NAD83 (9), 1.52 m, unknown domain of validity, at least one grid missing
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, USA - CONUS east of 89°W - onshore, has ballpark transformation
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (2) + Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, USA - CONUS 89°W-107°W - onshore, has ballpark transformation
-    unknown id, NGVD29 height (ftUS) to NAVD88 height (1) + Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, USA - CONUS west of 107°W - onshore, has ballpark transformation
-    unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (1), unknown accuracy, USA - CONUS including EEZ, has ballpark transformation
-    unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (3), unknown accuracy, Canada, has ballpark transformation
-    unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (4), unknown accuracy, Canada - NAD27, has ballpark transformation
-    unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (5), unknown accuracy, Canada - Quebec, has ballpark transformation, at least one grid missing
-    unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (6), unknown accuracy, Canada - Quebec, has ballpark transformation, at least one grid missing
-    unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (9), unknown accuracy, Canada - Saskatchewan, has ballpark transformation, at least one grid missing
-    unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, World, has ballpark transformation
+        Candidate operations found: 20
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + NAD27 to NAD83 (1), 0.17 m, USA - CONUS east of 89°W - onshore
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (2) + NAD27 to NAD83 (1), 0.17 m, USA - CONUS 89°W-107°W - onshore
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (1) + NAD27 to NAD83 (1), 0.17 m, USA - CONUS west of 107°W - onshore
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + NAD27 to NAD83 (3), 1.02 m, unknown domain of validity
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (2) + NAD27 to NAD83 (3), 1.02 m, unknown domain of validity
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (1) + NAD27 to NAD83 (3), 1.02 m, unknown domain of validity
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + NAD27 to NAD83 (5), 1.02 m, unknown domain of validity, at least one grid missing
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + NAD27 to NAD83 (6), 1.52 m, unknown domain of validity, at least one grid missing
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (2) + NAD27 to NAD83 (9), 1.52 m, unknown domain of validity, at least one grid missing
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (1) + NAD27 to NAD83 (9), 1.52 m, unknown domain of validity, at least one grid missing
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (3) + Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, USA - CONUS east of 89°W - onshore, has ballpark transformation
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (2) + Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, USA - CONUS 89°W-107°W - onshore, has ballpark transformation
+        unknown id, NGVD29 height (ftUS) to NAVD88 height (1) + Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, USA - CONUS west of 107°W - onshore, has ballpark transformation
+        unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (1), unknown accuracy, USA - CONUS including EEZ, has ballpark transformation
+        unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (3), unknown accuracy, Canada, has ballpark transformation
+        unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (4), unknown accuracy, Canada - NAD27, has ballpark transformation
+        unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (5), unknown accuracy, Canada - Quebec, has ballpark transformation, at least one grid missing
+        unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (6), unknown accuracy, Canada - Quebec, has ballpark transformation, at least one grid missing
+        unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + NAD27 to NAD83 (9), unknown accuracy, Canada - Saskatchewan, has ballpark transformation, at least one grid missing
+        unknown id, Transformation from NGVD29 height (ftUS) to NAVD88 height (ballpark vertical transformation) + Ballpark geographic offset from NAD27 to NAD83, unknown accuracy, World, has ballpark transformation
 
+
+2. Otherwise, when there is no such transformation, we decompose into 3 steps:
+
+   - transform from the source CRS to the geographic 3D CRS corresponding to it
+   - transform from the geographic 3D CRS corresponding to the source CRS to the
+     geographic 3D CRS corresponding to the target CRS
+   - transform from the geographic 3D CRS corresponding to the target CRS to the
+     target CRS.
+
+    Example:
+
+    .. code-block:: shell
+
+        $  projinfo -s "WGS 84 + EGM96 height" -t "ETRS89 + Belfast height" --spatial-test intersects --summary
+
+        Candidate operations found: 7
+        unknown id, Inverse of WGS 84 to EGM96 height (1) + Inverse of ETRS89 to WGS 84 (1) + ETRS89 to Belfast height (2), 2.014 m, UK - Northern Ireland - onshore
+        unknown id, Inverse of WGS 84 to EGM96 height (1) + Inverse of ETRS89 to WGS 84 (1) + ETRS89 to Belfast height (1), 2.03 m, UK - Northern Ireland - onshore, at least one grid missing
+        unknown id, Inverse of WGS 84 to EGM96 height (1) + Null geographic offset from WGS 84 (geog3D) to WGS 84 (geog2D) + Inverse of OSGB 1936 to WGS 84 (4) + OSGB 1936 to ETRS89 (2) + Null geographic offset from ETRS89 (geog2D) to ETRS89 (geog3D) + ETRS89 to Belfast height (2), 19.044 m, unknown domain of validity
+        unknown id, Inverse of WGS 84 to EGM96 height (1) + Null geographic offset from WGS 84 (geog3D) to WGS 84 (geog2D) + Inverse of OSGB 1936 to WGS 84 (2) + OSGB 1936 to ETRS89 (2) + Null geographic offset from ETRS89 (geog2D) to ETRS89 (geog3D) + ETRS89 to Belfast height (2), 11.044 m, unknown domain of validity
+        unknown id, Inverse of WGS 84 to EGM96 height (1) + Null geographic offset from WGS 84 (geog3D) to WGS 84 (geog2D) + Inverse of TM75 to WGS 84 (2) + TM75 to ETRS89 (3) + Null geographic offset from ETRS89 (geog2D) to ETRS89 (geog3D) + ETRS89 to Belfast height (2), 2.424 m, UK - Northern Ireland - onshore, at least one grid missing
+        unknown id, Inverse of WGS 84 to EGM96 height (1) + Null geographic offset from WGS 84 (geog3D) to WGS 84 (geog2D) + Inverse of TM75 to WGS 84 (2) + TM75 to ETRS89 (3) + Null geographic offset from ETRS89 (geog2D) to ETRS89 (geog3D) + ETRS89 to Belfast height (1), 2.44 m, UK - Northern Ireland - onshore, at least one grid missing
+        unknown id, Inverse of WGS 84 to EGM96 height (1) + Null geographic offset from WGS 84 (geog3D) to WGS 84 (geog2D) + Inverse of OSGB 1936 to WGS 84 (4) + OSGB 1936 to ETRS89 (2) + Null geographic offset from ETRS89 (geog2D) to ETRS89 (geog3D) + ETRS89 to Belfast height (1), 19.06 m, unknown domain of validity, at least one grid missing
+
+
+This is implemented by the ``createOperationsCompoundToCompound`` method
 
 When the source or target CRS is a BoundCRS
 ---------------------------------------------------------------------------------
