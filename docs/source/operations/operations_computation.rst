@@ -106,11 +106,8 @@ which can be used as an override).
 
 As those results all involve operations that does not have a perfect accuracy and that
 does not cover the area of use of the 2 CRSs, a
-'Ballpark geographic offset from NAD27 to NAD83' operation is synthetized by PROJ.
-This operation is a sort of dummy operation that only takes into account potential
-difference of axis orders (long-lat vs lat-long), units (degree vs grads) and
-prime meridian (Greewich vs Paris/Rome/other historic prime meridians). It does
-not attempt any datum shift, hence the "ballpark" qualifier in its name.
+'Ballpark geographic offset from NAD27 to NAD83' operation is synthetized by PROJ
+(see :term:`Ballpark transformation`)
 
 Filtering and sorting of coordinate operations
 ----------------------------------------------
