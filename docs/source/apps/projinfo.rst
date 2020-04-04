@@ -206,7 +206,8 @@ The following control parameters can appear in any order:
 
     .. versionadded:: 7.1
 
-    Hides any coordinate operation that is, or contains, a ballpark transformation.
+    Hides any coordinate operation that is, or contains, a
+    :term:`Ballpark transformation`
 
     .. note:: only used for coordinate operation computation
 
