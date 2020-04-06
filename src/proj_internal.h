@@ -823,8 +823,8 @@ void     *pj_dealloc_params (projCtx_t *ctx, paralist *start, int errlev);
 
 
 double *pj_enfn(double);
-double  pj_mlfn(double, double, double, double *);
-double  pj_inv_mlfn(projCtx_t *, double, double, double *);
+double  pj_mlfn(double, double, double, const double *);
+double  pj_inv_mlfn(projCtx_t *, double, double, const double *);
 double  pj_qsfn(double, double, double);
 double  pj_tsfn(double, double, double);
 double  pj_msfn(double, double, double);
