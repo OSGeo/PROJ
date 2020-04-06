@@ -61,7 +61,7 @@ struct pj_opaque_exact {
 // mechanism for that, where the compiler builds a default version, and one that
 // uses FMA. And at runtimes it figures out automatically which version can be used
 // by the current CPU. This allows to create general purpose binaries.
-#if defined(__GNUC__) && __GNUC__ >= 6 && defined(__x86_64__) && !defined(__FMA__)
+#if defined(TARGET_CLONES_FMA_ALLOWED) && defined(__GNUC__) && __GNUC__ >= 6 && defined(__x86_64__) && !defined(__FMA__)
 #define BUILD_FMA_OPTIMIZED_VERSION
 #endif
 
