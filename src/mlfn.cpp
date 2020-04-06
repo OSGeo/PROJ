@@ -2,6 +2,7 @@
 
 #include "proj.h"
 #include "proj_internal.h"
+#include "mlfn.hpp"
 
 /* meridional distance for ellipsoid and inverse
 **	8th degree - accurate to < 1e-5 meters when used in conjunction
@@ -20,46 +21,32 @@
 #define C66 .36458333333333333333
 #define C68 .00569661458333333333
 #define C88 .3076171875
-#define EPS 1e-11
-#define MAX_ITER 10
 #define EN_SIZE 5
 
 double *pj_enfn(double es) {
     double t, *en;
 
-	en = (double *) pj_malloc(EN_SIZE * sizeof (double));
-	if (nullptr==en)
-	    return nullptr;
+    en = (double *) pj_malloc(EN_SIZE * sizeof (double));
+    if (nullptr==en)
+        return nullptr;
 
     en[0] = C00 - es * (C02 + es * (C04 + es * (C06 + es * C08)));
     en[1] = es * (C22 - es * (C04 + es * (C06 + es * C08)));
     en[2] = (t = es * es) * (C44 - es * (C46 + es * C48));
     en[3] = (t *= es) * (C66 - es * C68);
-	en[4] = t * es * C88;
+    en[4] = t * es * C88;
 
     return en;
 }
 
-	double
-pj_mlfn(double phi, double sphi, double cphi, double *en) {
-	cphi *= sphi;
-	sphi *= sphi;
-	return(en[0] * phi - cphi * (en[1] + sphi*(en[2]
-		+ sphi*(en[3] + sphi*en[4]))));
+double
+pj_mlfn(double phi, double sphi, double cphi, const double *en) {
+    return inline_pj_mlfn(phi, sphi, cphi, en);
 }
-	double
-pj_inv_mlfn(projCtx ctx, double arg, double es, double *en) {
-	double s, t, phi, k = 1./(1.-es);
-	int i;
 
-	phi = arg;
-	for (i = MAX_ITER; i ; --i) { /* rarely goes over 2 iterations */
-		s = sin(phi);
-		t = 1. - es * s * s;
-		phi -= t = (pj_mlfn(phi, s, cos(phi), en) - arg) * (t * sqrt(t)) * k;
-		if (fabs(t) < EPS)
-			return phi;
-	}
-	pj_ctx_set_errno( ctx, PJD_ERR_NON_CONV_INV_MERI_DIST );
-	return phi;
+double
+pj_inv_mlfn(projCtx ctx, double arg, double es, const double *en) {
+    double sinphi_ignored;
+    double cosphi_ignored;
+    return inline_pj_inv_mlfn(ctx, arg, es, en, &sinphi_ignored, &cosphi_ignored);
 }

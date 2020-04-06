@@ -18,7 +18,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 #include <math.h>
-
+#include "mlfn.hpp"
 
 PROJ_HEAD(tmerc, "Transverse Mercator") "\n\tCyl, Sph&Ell\n\tapprox";
 PROJ_HEAD(etmerc, "Extended Transverse Mercator") "\n\tCyl, Sph";
@@ -71,13 +71,6 @@ struct pj_opaque_exact {
 //
 /*****************************************************************************/
 
-
-inline static double inline_pj_mlfn(double phi, double sphi, double cphi, double *en) {
-    cphi *= sphi;
-    sphi *= sphi;
-    return(en[0] * phi - cphi * (en[1] + sphi*(en[2]
-            + sphi*(en[3] + sphi*en[4]))));
-}
 
 #ifdef BUILD_FMA_OPTIMIZED_VERSION
 __attribute__((target_clones("fma","default")))
@@ -171,63 +164,6 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
         xy.y = -xy.y;
     xy.y = static_cast<struct pj_opaque_approx*>(P->opaque)->esp * (xy.y - P->phi0);
     return xy;
-}
-
-inline static double
-inline_pj_inv_mlfn(projCtx ctx, double arg, double es, double *en,
-                   double* sinphi, double* cosphi) {
-    double phi, k = 1./(1.-es);
-    int i;
-#define EPS 1e-11
-#define MAX_ITER 10
-    phi = arg;
-    double s = sin(phi);
-    double c = cos(phi);
-    for (i = MAX_ITER; i ; --i) { /* rarely goes over 2 iterations */
-        double t = 1. - es * s * s;
-        t = (inline_pj_mlfn(phi, s, c, en) - arg) * (t * sqrt(t)) * k;
-        phi -= t;
-        if (fabs(t) < EPS)
-        {
-            // Instead of recomputing sin(phi), cos(phi) from scratch,
-            // use sin(phi-t) and cos(phi-t) approximate formulas with
-            // 1-term approximation of sin(t) and cos(t)
-            *sinphi = s - c * t;
-            *cosphi = c + s * t;
-            return phi;
-        }
-        if (fabs(t) < 1e-3)
-        {
-            // 2-term approximation of sin(t) and cos(t)
-            // Max relative error is 4e-14 on cos(t), and 8e-15 on sin(t)
-            const double t2 = t * t;
-            const double cos_t = 1 - 0.5 * t2;
-            const double sin_t = t * (1 - (1. / 6) * t2);
-            const double s_new = s * cos_t - c * sin_t;
-            c = c * cos_t + s * sin_t;
-            s = s_new;
-        }
-        else if (fabs(t) < 1e-2)
-        {
-            // 3-term approximation of sin(t) and cos(t)
-            // Max relative error is 2e-15 on cos(t), and 2e-16 on sin(t)
-            const double t2 = t * t;
-            const double cos_t = 1 - 0.5 * t2 * (1 - (1. / 12) * t2);
-            const double sin_t = t * (1 - (1. / 6) * t2 * (1 - (1. / 20) * t2));
-            const double s_new = s * cos_t - c * sin_t;
-            c = c * cos_t + s * sin_t;
-            s = s_new;
-        }
-        else
-        {
-            s = sin(phi);
-            c = cos(phi);
-        }
-    }
-    *sinphi = s;
-    *cosphi = c;
-    pj_ctx_set_errno( ctx, PJD_ERR_NON_CONV_INV_MERI_DIST );
-    return phi;
 }
 
 #ifdef BUILD_FMA_OPTIMIZED_VERSION
