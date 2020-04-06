@@ -301,6 +301,8 @@ source_group("CMake Files" FILES CMakeLists.txt)
 # Embed PROJ_LIB data files location
 add_definitions(-DPROJ_LIB="${CMAKE_INSTALL_PREFIX}/${DATADIR}")
 
+add_definitions(-DTARGET_CLONES_FMA_ALLOWED)
+
 #################################################
 ## targets: libproj and proj_config.h
 #################################################
