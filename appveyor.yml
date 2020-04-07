@@ -1,7 +1,3 @@
-platform:
-- x64
-- x86
-
 branches:
   except:
     - /(cherry-pick-)?backport-\d+-to-/
@@ -10,12 +6,16 @@ environment:
   matrix:
 
 # VS 2015
-  - VS_VERSION: Visual Studio 14
+  - platform: x86
+    VS_VERSION: Visual Studio 14
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    BUILD_SHARED_LIBS: OFF
 
 # VS 2017
-  - VS_VERSION: Visual Studio 15
+  - platform: x64
+    VS_VERSION: Visual Studio 15
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    BUILD_SHARED_LIBS: ON
 
 shallow_clone: true
 
@@ -30,9 +30,7 @@ build_script:
   - vcpkg install tiff:"%platform%"-windows
   - vcpkg install curl:"%platform%"-windows
   - if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
-  - if "%platform%" == "x64" SET BUILD_SHARED_LIBS=ON
   - if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
-  - if "%platform%" == "x86" SET BUILD_SHARED_LIBS=OFF
   - echo "%VS_FULL%"
 #
   - set PROJ_BUILD=%APPVEYOR_BUILD_FOLDER%\build
