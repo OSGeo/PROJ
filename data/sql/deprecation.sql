@@ -456,3 +456,10 @@ INSERT INTO "deprecation" VALUES('projected_crs','EPSG','3911','EPSG','8686','EP
 INSERT INTO "deprecation" VALUES('geodetic_crs','EPSG','8449','EPSG','8860','EPSG');
 INSERT INTO "deprecation" VALUES('geodetic_crs','EPSG','4280','EPSG','4211','EPSG');
 INSERT INTO "deprecation" VALUES('geodetic_crs','EPSG','4808','EPSG','4813','EPSG');
+INSERT INTO "deprecation" VALUES('projected_crs','EPSG','2163','EPSG','9311','EPSG');
+INSERT INTO "deprecation" VALUES('projected_crs','EPSG','3408','EPSG','6931','EPSG');
+INSERT INTO "deprecation" VALUES('projected_crs','EPSG','3409','EPSG','6932','EPSG');
+INSERT INTO "deprecation" VALUES('projected_crs','EPSG','3410','EPSG','6933','EPSG');
+INSERT INTO "deprecation" VALUES('projected_crs','EPSG','3411','EPSG','3413','EPSG');
+INSERT INTO "deprecation" VALUES('projected_crs','EPSG','3412','EPSG','3976','EPSG');
+INSERT INTO "deprecation" VALUES('projected_crs','EPSG','4088','EPSG','4087','EPSG');

@@ -50,12 +50,6 @@ INSERT INTO "grid_transformation" VALUES(
     'EPSG','8666','Geoid (height correction) model file','SWEN17_RH2000.gtx',
     NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
------ Hopefully temporary entry for SeTa2016.gsb grid -----
-
-INSERT INTO "area" VALUES('PROJ','SETA2016','Germany - Saarland','Germany - Saarland',49.10,49.64,6.345,7.45,0);
--- Advertize a 0.8 accuracy slightly better than the 0.9 of BETA2007 for sort purposes
-INSERT INTO "grid_transformation" VALUES('PROJ','SETA2016','DHDN to ETRS89 (SETA2016)','DHDN to ETRS89 for Saarland. Using official SETA2016 grid but this transformation entry has been created temporarily by PROJ. Accuracy indication not to be considered as authoritative','For applications requiring an accuracy of better than 1 metre.','EPSG','9615','NTv2','EPSG','4314','EPSG','4258','PROJ','SETA2016',0.89,'EPSG','8656','Latitude and longitude difference file','SeTa2016.gsb',NULL,NULL,NULL,NULL,NULL,NULL,'-',0);
-
 -- Iceland
 
 INSERT INTO "grid_transformation" VALUES(
@@ -68,7 +62,7 @@ INSERT INTO "grid_transformation" VALUES(
     NULL,
     'EPSG','8666','Geoid (height correction) model file','Icegeoid_ISN2004.gtx',
     NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-    
+
 INSERT INTO "grid_transformation" VALUES(
     'PROJ','EPSG_4945_TO_EPSG_8089','ISN93 to ISH2004 height',
     NULL,NULL,
@@ -79,7 +73,7 @@ INSERT INTO "grid_transformation" VALUES(
     NULL,
     'EPSG','8666','Geoid (height correction) model file','Icegeoid_ISN93.gtx',
     NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-    
+
 INSERT INTO "grid_transformation" VALUES(
     'PROJ','EPSG_8085_TO_EPSG_8089','ISN2016 to ISH2004 height',
     NULL,NULL,
