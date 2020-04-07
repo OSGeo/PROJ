@@ -96,9 +96,9 @@ bool ExtentAndRes::intersects(const ExtentAndRes &other) const {
 
 // ---------------------------------------------------------------------------
 
-Grid::Grid(const std::string &name, int widthIn, int heightIn,
+Grid::Grid(const std::string &nameIn, int widthIn, int heightIn,
            const ExtentAndRes &extentIn)
-    : m_name(name), m_width(widthIn), m_height(heightIn), m_extent(extentIn) {}
+    : m_name(nameIn), m_width(widthIn), m_height(heightIn), m_extent(extentIn) {}
 
 // ---------------------------------------------------------------------------
 
@@ -479,7 +479,7 @@ GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
             std::string value;
             value.append(endTag + 1, endValue - (endTag + 1));
 
-            std::string name;
+            std::string gridName;
             auto namePos = tag.find("name=\"");
             if (namePos == std::string::npos)
                 break;
@@ -488,7 +488,7 @@ GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
                 const auto endQuote = tag.find('"', namePos);
                 if (endQuote == std::string::npos)
                     break;
-                name = tag.substr(namePos, endQuote - namePos);
+                gridName = tag.substr(namePos, endQuote - namePos);
             }
 
             const auto samplePos = tag.find("sample=\"");
@@ -497,7 +497,7 @@ GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
                 sample = atoi(tag.c_str() + samplePos + strlen("sample=\""));
             }
 
-            m_metadata[std::pair<int, std::string>(sample, name)] = value;
+            m_metadata[std::pair<int, std::string>(sample, gridName)] = value;
 
             auto rolePos = tag.find("role=\"");
             if (rolePos != std::string::npos) {
