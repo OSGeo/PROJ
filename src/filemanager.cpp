@@ -70,7 +70,7 @@ NS_PROJ_START
 
 // ---------------------------------------------------------------------------
 
-File::File(const std::string &name) : name_(name) {}
+File::File(const std::string &filename) : name_(filename) {}
 
 // ---------------------------------------------------------------------------
 
@@ -716,8 +716,8 @@ class FileStdio : public File {
     FileStdio &operator=(const FileStdio &) = delete;
 
   protected:
-    FileStdio(const std::string &name, PJ_CONTEXT *ctx, FILE *fp)
-        : File(name), m_ctx(ctx), m_fp(fp) {}
+    FileStdio(const std::string &filename, PJ_CONTEXT *ctx, FILE *fp)
+        : File(filename), m_ctx(ctx), m_fp(fp) {}
 
   public:
     ~FileStdio() override;
@@ -796,8 +796,8 @@ class FileLegacyAdapter : public File {
     FileLegacyAdapter &operator=(const FileLegacyAdapter &) = delete;
 
   protected:
-    FileLegacyAdapter(const std::string &name, PJ_CONTEXT *ctx, PAFile fp)
-        : File(name), m_ctx(ctx), m_fp(fp) {}
+    FileLegacyAdapter(const std::string &filename, PJ_CONTEXT *ctx, PAFile fp)
+        : File(filename), m_ctx(ctx), m_fp(fp) {}
 
   public:
     ~FileLegacyAdapter() override;
@@ -863,9 +863,9 @@ class FileApiAdapter : public File {
     FileApiAdapter &operator=(const FileApiAdapter &) = delete;
 
   protected:
-    FileApiAdapter(const std::string &name, PJ_CONTEXT *ctx,
+    FileApiAdapter(const std::string &filename, PJ_CONTEXT *ctx,
                    PROJ_FILE_HANDLE *fp)
-        : File(name), m_ctx(ctx), m_fp(fp) {}
+        : File(filename), m_ctx(ctx), m_fp(fp) {}
 
   public:
     ~FileApiAdapter() override;

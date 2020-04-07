@@ -17,5 +17,6 @@ scripts/doxygen.sh
 
 pip3 install --user sphinxcontrib-bibtex
 pip3 install --user cpp-coveralls
+pip3 install --user cmake==3.9.6
 
 ./travis/docker.sh
