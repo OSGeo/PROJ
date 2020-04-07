@@ -103,6 +103,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" ]; then
     # cmake build from generated tarball
     mkdir build_cmake
     cd build_cmake
+    cmake --version
     cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
     VERBOSE=1 make
     make install

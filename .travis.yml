@@ -21,7 +21,13 @@ matrix:
         - docker
       env:
         - BUILD_NAME=linux_gcc
-        - DETAILS="linux, gcc"
+        - DETAILS="linux, gcc-4.8"
+        - CC=gcc-4.8
+        - CXX=g++-4.8
+      addons:
+        apt:
+          packages:
+            - g++-4.8
 
     - os: linux
       dist: xenial
