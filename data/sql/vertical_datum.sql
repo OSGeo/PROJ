@@ -128,9 +128,9 @@ INSERT INTO "vertical_datum" VALUES('EPSG','5141','Foula',NULL,NULL,'EPSG','2796
 INSERT INTO "vertical_datum" VALUES('EPSG','5142','Sule Skerry',NULL,NULL,'EPSG','2797',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5143','North Rona',NULL,NULL,'EPSG','2798',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5144','Stornoway',NULL,NULL,'EPSG','2799',NULL,0);
-INSERT INTO "vertical_datum" VALUES('EPSG','5145','St Kilda',NULL,NULL,'EPSG','2800',NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','5145','St. Kilda',NULL,NULL,'EPSG','2800',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5146','Flannan Isles',NULL,NULL,'EPSG','2801',NULL,0);
-INSERT INTO "vertical_datum" VALUES('EPSG','5147','St Marys',NULL,NULL,'EPSG','2802',NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','5147','St. Marys',NULL,NULL,'EPSG','2802',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5148','Douglas',NULL,NULL,'EPSG','2803',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5149','Fao',NULL,NULL,'EPSG','3390',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5150','Bandar Abbas',NULL,NULL,'EPSG','3336','2001-01-01',0);

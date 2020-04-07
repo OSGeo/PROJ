@@ -78,9 +78,9 @@ INSERT INTO "vertical_crs" VALUES('EPSG','5743','Foula height',NULL,NULL,'EPSG',
 INSERT INTO "vertical_crs" VALUES('EPSG','5744','Sule Skerry height',NULL,NULL,'EPSG','6499','EPSG','5142','EPSG','2797',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5745','North Rona height',NULL,NULL,'EPSG','6499','EPSG','5143','EPSG','2798',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5746','Stornoway height',NULL,NULL,'EPSG','6499','EPSG','5144','EPSG','2799',0);
-INSERT INTO "vertical_crs" VALUES('EPSG','5747','St Kilda height',NULL,NULL,'EPSG','6499','EPSG','5145','EPSG','2800',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','5747','St. Kilda height',NULL,NULL,'EPSG','6499','EPSG','5145','EPSG','2800',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5748','Flannan Isles height',NULL,NULL,'EPSG','6499','EPSG','5146','EPSG','2801',0);
-INSERT INTO "vertical_crs" VALUES('EPSG','5749','St Marys height',NULL,NULL,'EPSG','6499','EPSG','5147','EPSG','2802',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','5749','St. Marys height',NULL,NULL,'EPSG','6499','EPSG','5147','EPSG','2802',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5750','Douglas height',NULL,NULL,'EPSG','6499','EPSG','5148','EPSG','2803',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5751','Fao height',NULL,NULL,'EPSG','6499','EPSG','5149','EPSG','3390',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5752','Bandar Abbas height',NULL,NULL,'EPSG','6499','EPSG','5150','EPSG','3336',0);

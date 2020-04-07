@@ -151,6 +151,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1254','SIRGAS-Chile',NULL,NULL,'EPSG
 INSERT INTO "geodetic_datum" VALUES('EPSG','1257','Tapi Aike',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','4569','1945-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1258','Ministerio de Marina Norte',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','2357',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1259','Ministerio de Marina Sur',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','2357',NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1263','Oman National Geodetic Datum 2017',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1183','2017-11-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1268','Kingdom of Saudi Arabia Geodetic Reference Frame 2017',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1206','2017-12-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,NULL,'EPSG','7001','EPSG','8901','EPSG','1263',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,NULL,'EPSG','7002','EPSG','8901','EPSG','1263',NULL,0);
