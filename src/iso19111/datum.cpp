@@ -203,10 +203,10 @@ void Datum::setAnchor(const util::optional<std::string> &anchor) {
 void Datum::setProperties(
     const util::PropertyMap &properties) // throw(InvalidValueTypeException)
 {
-    std::string publicationDate;
-    properties.getStringValue("PUBLICATION_DATE", publicationDate);
-    if (!publicationDate.empty()) {
-        d->publicationDate = common::DateTime::create(publicationDate);
+    std::string publicationDateResult;
+    properties.getStringValue("PUBLICATION_DATE", publicationDateResult);
+    if (!publicationDateResult.empty()) {
+        d->publicationDate = common::DateTime::create(publicationDateResult);
     }
     ObjectUsage::setProperties(properties);
 }
@@ -1376,13 +1376,13 @@ bool GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(
     if (dbContext) {
         if (!identifiers().empty()) {
             const auto &id = identifiers().front();
-            auto aliases =
+            auto aliasesResult =
                 dbContext->getAliases(*(id->codeSpace()), id->code(), nameStr(),
                                       "geodetic_datum", std::string());
             const char *otherName = other->nameStr().c_str();
-            for (const auto &alias : aliases) {
+            for (const auto &aliasResult : aliasesResult) {
                 if (metadata::Identifier::isEquivalentName(otherName,
-                                                           alias.c_str())) {
+                                                           aliasResult.c_str())) {
                     return true;
                 }
             }
@@ -1395,13 +1395,13 @@ bool GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(
             return false;
         }
 
-        auto aliases =
+        auto aliasesResult =
             dbContext->getAliases(std::string(), std::string(), nameStr(),
                                   "geodetic_datum", std::string());
         const char *otherName = other->nameStr().c_str();
-        for (const auto &alias : aliases) {
+        for (const auto &aliasResult : aliasesResult) {
             if (metadata::Identifier::isEquivalentName(otherName,
-                                                       alias.c_str())) {
+                                                       aliasResult.c_str())) {
                 return true;
             }
         }
