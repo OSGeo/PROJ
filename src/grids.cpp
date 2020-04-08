@@ -98,7 +98,8 @@ bool ExtentAndRes::intersects(const ExtentAndRes &other) const {
 
 Grid::Grid(const std::string &nameIn, int widthIn, int heightIn,
            const ExtentAndRes &extentIn)
-    : m_name(nameIn), m_width(widthIn), m_height(heightIn), m_extent(extentIn) {}
+    : m_name(nameIn), m_width(widthIn), m_height(heightIn), m_extent(extentIn) {
+}
 
 // ---------------------------------------------------------------------------
 

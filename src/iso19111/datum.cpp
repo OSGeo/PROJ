@@ -1381,8 +1381,8 @@ bool GeodeticReferenceFrame::hasEquivalentNameToUsingAlias(
                                       "geodetic_datum", std::string());
             const char *otherName = other->nameStr().c_str();
             for (const auto &aliasResult : aliasesResult) {
-                if (metadata::Identifier::isEquivalentName(otherName,
-                                                           aliasResult.c_str())) {
+                if (metadata::Identifier::isEquivalentName(
+                        otherName, aliasResult.c_str())) {
                     return true;
                 }
             }
