@@ -9167,8 +9167,8 @@ TEST(io, projparse_init) {
 
     {
         // Test that +no_defs +type=crs have no effect
-        auto obj = createFromUserInput("+init=epsg:4326 +no_defs +type=crs",
-                                       dbContext, true);
+        auto obj = createFromUserInput(
+            "+init=epsg:4326 +no_defs +type=crs +wktext", dbContext, true);
         auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
 
