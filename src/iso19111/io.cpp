@@ -9117,7 +9117,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 bool hasSignificantParamValues = false;
                 for (const auto &kv : d->steps_[0].paramValues) {
                     if (!((kv.key == "type" && kv.value == "crs") ||
-                          kv.key == "no_defs")) {
+                          kv.key == "wktext" || kv.key == "no_defs")) {
                         hasSignificantParamValues = true;
                         break;
                     }
