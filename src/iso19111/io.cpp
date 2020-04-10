@@ -9437,12 +9437,17 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     if (!pj_context) {
         throw ParsingException("out of memory");
     }
+
+    // Backup error logger and level, and install temporary handler
+    auto old_logger = pj_context->logger;
+    auto old_logger_app_data = pj_context->logger_app_data;
+    auto log_level = proj_log_level(pj_context, PJ_LOG_ERROR);
+    proj_log_func(pj_context, &logger, Logger::log);
+
     if (pj_context != d->ctx_) {
-        proj_log_func(pj_context, &logger, Logger::log);
         proj_context_use_proj4_init_rules(pj_context, d->usePROJ4InitRules_);
     }
     pj_context->projStringParserCreateFromPROJStringRecursionCounter++;
-    auto log_level = proj_log_level(pj_context, PJ_LOG_NONE);
     auto pj = pj_create_internal(
         pj_context, (projString.find("type=crs") != std::string::npos
                          ? projString + " +disable_grid_presence_check"
@@ -9450,7 +9455,11 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                         .c_str());
     pj_context->projStringParserCreateFromPROJStringRecursionCounter--;
     valid = pj != nullptr;
+
+    // Restore initial error logger and level
     proj_log_level(pj_context, log_level);
+    pj_context->logger = old_logger;
+    pj_context->logger_app_data = old_logger_app_data;
 
     // Remove parameters not understood by PROJ.
     if (valid && d->steps_.size() == 1) {
@@ -9512,13 +9521,13 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
     proj_destroy(pj);
 
     if (!valid) {
-        std::string prefix("Error " + toString(proj_context_errno(pj_context)) +
-                           ": ");
+        const int l_errno = proj_context_errno(pj_context);
+        std::string prefix("Error " + toString(l_errno) + " (" +
+                           proj_errno_string(l_errno) + ")");
         if (logger.msg.empty()) {
-            logger.msg =
-                prefix + proj_errno_string(proj_context_errno(pj_context));
+            logger.msg = prefix;
         } else {
-            logger.msg = prefix + logger.msg;
+            logger.msg = prefix + ": " + logger.msg;
         }
     }
 
