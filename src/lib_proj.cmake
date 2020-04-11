@@ -217,8 +217,6 @@ set(SRC_LIBPROJ_CORE
   fileapi.cpp
   fwd.cpp
   gauss.cpp
-  geocent.cpp
-  geocent.h
   geodesic.c
   init.cpp
   initcache.cpp
