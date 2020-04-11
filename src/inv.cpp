@@ -54,6 +54,9 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
     case PJ_IO_UNITS_WHATEVER:
         return coo;
 
+    case PJ_IO_UNITS_DEGREES:
+        return coo;
+
     /* de-scale and de-offset */
     case PJ_IO_UNITS_CARTESIAN:
         coo.xyz.x *= P->to_meter;
