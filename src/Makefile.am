@@ -208,7 +208,7 @@ libproj_la_SOURCES = \
 	fileapi.cpp \
 	\
 	datums.cpp datum_set.cpp transform.cpp \
-	geocent.cpp geocent.h utils.cpp \
+	utils.cpp \
 	mutex.cpp initcache.cpp geodesic.c \
 	strtod.cpp \
 	\

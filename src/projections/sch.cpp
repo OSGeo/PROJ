@@ -37,7 +37,6 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "geocent.h"
 
 namespace { // anonymous namespace
 struct pj_opaque {
@@ -48,123 +47,115 @@ struct pj_opaque {
     double transMat[9];
     double xyzoff[3];
     double rcurv;
-    GeocentricInfo sph;
-    GeocentricInfo elp_0;
+    PJ* cart;
+    PJ* cart_sph;
 };
 } // anonymous namespace
 
 PROJ_HEAD(sch, "Spherical Cross-track Height") "\n\tMisc\n\tplat_0= plon_0= phdg_0= [h_0=]";
 
 static PJ_LPZ sch_inverse3d(PJ_XYZ xyz, PJ *P) {
-    PJ_LPZ lpz = {0.0, 0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double temp[3];
-    /* Local lat,lon using radius */
-    double pxyz[] = {
-        xyz.y * P->a / Q->rcurv,
-        xyz.x * P->a / Q->rcurv,
-        xyz.z
-    };
 
-    if( pj_Convert_Geodetic_To_Geocentric( &(Q->sph), pxyz[0], pxyz[1], pxyz[2], temp, temp+1, temp+2) != 0) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-            return lpz;
-    }
+    PJ_LPZ lpz;
+    lpz.lam = xyz.x * (P->a / Q->rcurv);
+    lpz.phi = xyz.y * (P->a / Q->rcurv);
+    lpz.z = xyz.z;
+    xyz  =  Q->cart_sph->fwd3d (lpz, Q->cart_sph);
 
     /* Apply rotation */
-    pxyz[0] = Q->transMat[0] * temp[0] + Q->transMat[1] * temp[1] + Q->transMat[2] * temp[2];
-    pxyz[1] = Q->transMat[3] * temp[0] + Q->transMat[4] * temp[1] + Q->transMat[5] * temp[2];
-    pxyz[2] = Q->transMat[6] * temp[0] + Q->transMat[7] * temp[1] + Q->transMat[8] * temp[2];
+    xyz = {
+        Q->transMat[0] * xyz.x + Q->transMat[1] * xyz.y + Q->transMat[2] * xyz.z,
+        Q->transMat[3] * xyz.x + Q->transMat[4] * xyz.y + Q->transMat[5] * xyz.z,
+        Q->transMat[6] * xyz.x + Q->transMat[7] * xyz.y + Q->transMat[8] * xyz.z
+    };
 
     /* Apply offset */
-    pxyz[0] += Q->xyzoff[0];
-    pxyz[1] += Q->xyzoff[1];
-    pxyz[2] += Q->xyzoff[2];
+    xyz.x += Q->xyzoff[0];
+    xyz.y += Q->xyzoff[1];
+    xyz.z += Q->xyzoff[2];
 
     /* Convert geocentric coordinates to lat lon */
-    pj_Convert_Geocentric_To_Geodetic( &(Q->elp_0), pxyz[0], pxyz[1], pxyz[2],
-            temp, temp+1, temp+2);
-
-
-    lpz.lam = temp[1] ;
-    lpz.phi = temp[0] ;
-    lpz.z = temp[2];
-
-    return lpz;
+    return Q->cart->inv3d (xyz, Q->cart);
 }
 
 static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
-    PJ_XYZ xyz = {0.0, 0.0, 0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double temp[3];
 
     /* Convert lat lon to geocentric coordinates */
-    if( pj_Convert_Geodetic_To_Geocentric( &(Q->elp_0), lpz.phi, lpz.lam, lpz.z, temp, temp+1, temp+2 ) != 0 ) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-        return xyz;
-    }
-
+    PJ_XYZ xyz  =  Q->cart->fwd3d (lpz, Q->cart);
 
     /* Adjust for offset */
-    temp[0] -= Q->xyzoff[0];
-    temp[1] -= Q->xyzoff[1];
-    temp[2] -= Q->xyzoff[2];
-
+    xyz.x -= Q->xyzoff[0];
+    xyz.y -= Q->xyzoff[1];
+    xyz.z -= Q->xyzoff[2];
 
     /* Apply rotation */
-    double pxyz[] = {
-        Q->transMat[0] * temp[0] + Q->transMat[3] * temp[1] + Q->transMat[6] * temp[2],
-        Q->transMat[1] * temp[0] + Q->transMat[4] * temp[1] + Q->transMat[7] * temp[2],
-        Q->transMat[2] * temp[0] + Q->transMat[5] * temp[1] + Q->transMat[8] * temp[2]
+    xyz = {
+        Q->transMat[0] * xyz.x + Q->transMat[3] * xyz.y + Q->transMat[6] * xyz.z,
+        Q->transMat[1] * xyz.x + Q->transMat[4] * xyz.y + Q->transMat[7] * xyz.z,
+        Q->transMat[2] * xyz.x + Q->transMat[5] * xyz.y + Q->transMat[8] * xyz.z
     };
 
     /* Convert to local lat,lon */
-    pj_Convert_Geocentric_To_Geodetic( &(Q->sph), pxyz[0], pxyz[1], pxyz[2],
-            temp, temp+1, temp+2);
-
+    lpz  =  Q->cart_sph->inv3d (xyz, Q->cart_sph);
 
     /* Scale by radius */
-    xyz.x = temp[1] * Q->rcurv / P->a;
-    xyz.y = temp[0] * Q->rcurv / P->a;
-    xyz.z = temp[2];
+    xyz.x = lpz.lam * (Q->rcurv / P->a);
+    xyz.y = lpz.phi * (Q->rcurv / P->a);
+    xyz.z = lpz.z;
 
     return xyz;
 }
 
+static PJ *destructor (PJ *P, int errlev) {
+    if (nullptr==P)
+        return nullptr;
+
+    auto Q = static_cast<struct pj_opaque*>(P->opaque);
+    if( Q )
+    {
+        if (Q->cart)
+            Q->cart->destructor (Q->cart, errlev);
+        if (Q->cart_sph)
+            Q->cart_sph->destructor (Q->cart_sph, errlev);
+    }
+
+    return pj_default_destructor(P, errlev);
+}
 
 static PJ *setup(PJ *P) { /* general initialization */
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double reast, rnorth;
-    double chdg, shdg;
-    double clt, slt;
-    double clo, slo;
-    double temp;
-    double pxyz[3];
-
-    temp = P->a * sqrt(1.0 - P->es);
 
     /* Setup original geocentric system */
-    if ( pj_Set_Geocentric_Parameters(&(Q->elp_0), P->a, temp) != 0)
-        return pj_default_destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+    // Pass a dummy ellipsoid definition that will be overridden just afterwards
+    Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
+    if (Q->cart == nullptr)
+        return destructor(P, ENOMEM);
 
-    clt = cos(Q->plat);
-    slt = sin(Q->plat);
-    clo = cos(Q->plon);
-    slo = sin(Q->plon);
+    /* inherit ellipsoid definition from P to Q->cart */
+    pj_inherit_ellipsoid_def (P, Q->cart);
+
+    const double clt = cos(Q->plat);
+    const double slt = sin(Q->plat);
+    const double clo = cos(Q->plon);
+    const double slo = sin(Q->plon);
 
     /* Estimate the radius of curvature for given peg */
-    temp = sqrt(1.0 - (P->es) * slt * slt);
-    reast = (P->a)/temp;
-    rnorth = (P->a) * (1.0 - (P->es))/pow(temp,3);
+    const double temp = sqrt(1.0 - (P->es) * slt * slt);
+    const double reast = (P->a)/temp;
+    const double rnorth = (P->a) * (1.0 - (P->es))/pow(temp,3);
 
-    chdg = cos(Q->phdg);
-    shdg = sin(Q->phdg);
+    const double chdg = cos(Q->phdg);
+    const double shdg = sin(Q->phdg);
 
     Q->rcurv = Q->h0 + (reast*rnorth)/(reast * chdg * chdg + rnorth * shdg * shdg);
 
     /* Set up local sphere at the given peg point */
-    if ( pj_Set_Geocentric_Parameters(&(Q->sph), Q->rcurv, Q->rcurv) != 0)
-            return pj_default_destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+    Q->cart_sph = proj_create(P->ctx, "+proj=cart +a=1");
+    if (Q->cart_sph == nullptr)
+        return destructor(P, ENOMEM);
+    pj_calc_ellipsoid_params(Q->cart_sph, Q->rcurv, 0);
 
     /* Set up the transformation matrices */
     Q->transMat[0] = clt * clo;
@@ -177,15 +168,14 @@ static PJ *setup(PJ *P) { /* general initialization */
     Q->transMat[7] =  clt*chdg;
     Q->transMat[8] =  clt*shdg;
 
-
-    if( pj_Convert_Geodetic_To_Geocentric( &(Q->elp_0), Q->plat, Q->plon, Q->h0,
-                                           pxyz, pxyz+1, pxyz+2 ) != 0 )
-        return pj_default_destructor(P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
-
-
-    Q->xyzoff[0] = pxyz[0] - (Q->rcurv) * clt * clo;
-    Q->xyzoff[1] = pxyz[1] - (Q->rcurv) * clt * slo;
-    Q->xyzoff[2] = pxyz[2] - (Q->rcurv) * slt;
+    PJ_LPZ lpz;
+    lpz.lam = Q->plon;
+    lpz.phi = Q->plat;
+    lpz.z = Q->h0;
+    PJ_XYZ xyz  =  Q->cart->fwd3d (lpz, Q->cart);
+    Q->xyzoff[0] = xyz.x - (Q->rcurv) * clt * clo;
+    Q->xyzoff[1] = xyz.y- (Q->rcurv) * clt * slo;
+    Q->xyzoff[2] = xyz.z - (Q->rcurv) * slt;
 
     P->fwd3d = sch_forward3d;
     P->inv3d = sch_inverse3d;
@@ -198,6 +188,7 @@ PJ *PROJECTION(sch) {
     if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
+    P->destructor = destructor;
 
     Q->h0 = 0.0;
 
