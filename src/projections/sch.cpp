@@ -62,26 +62,21 @@ static PJ_LPZ sch_inverse3d(PJ_XYZ xyz, PJ *P) {
     lpz.phi = xyz.y * (P->a / Q->rcurv);
     lpz.z = xyz.z;
     xyz  =  Q->cart_sph->fwd3d (lpz, Q->cart_sph);
-    double temp[] = {xyz.x, xyz.y, xyz.z};
 
     /* Apply rotation */
-    double pxyz[] = {
-        Q->transMat[0] * temp[0] + Q->transMat[1] * temp[1] + Q->transMat[2] * temp[2],
-        Q->transMat[3] * temp[0] + Q->transMat[4] * temp[1] + Q->transMat[5] * temp[2],
-        Q->transMat[6] * temp[0] + Q->transMat[7] * temp[1] + Q->transMat[8] * temp[2]
+    xyz = {
+        Q->transMat[0] * xyz.x + Q->transMat[1] * xyz.y + Q->transMat[2] * xyz.z,
+        Q->transMat[3] * xyz.x + Q->transMat[4] * xyz.y + Q->transMat[5] * xyz.z,
+        Q->transMat[6] * xyz.x + Q->transMat[7] * xyz.y + Q->transMat[8] * xyz.z
     };
 
     /* Apply offset */
-    pxyz[0] += Q->xyzoff[0];
-    pxyz[1] += Q->xyzoff[1];
-    pxyz[2] += Q->xyzoff[2];
+    xyz.x += Q->xyzoff[0];
+    xyz.y += Q->xyzoff[1];
+    xyz.z += Q->xyzoff[2];
 
     /* Convert geocentric coordinates to lat lon */
-    xyz.x = pxyz[0];
-    xyz.y = pxyz[1];
-    xyz.z = pxyz[2];
-    lpz  =  Q->cart->inv3d (xyz, Q->cart);
-    return lpz;
+    return Q->cart->inv3d (xyz, Q->cart);
 }
 
 static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
@@ -89,25 +84,20 @@ static PJ_XYZ sch_forward3d(PJ_LPZ lpz, PJ *P) {
 
     /* Convert lat lon to geocentric coordinates */
     PJ_XYZ xyz  =  Q->cart->fwd3d (lpz, Q->cart);
-    double temp[] = {xyz.x, xyz.y, xyz.z};
 
     /* Adjust for offset */
-    temp[0] -= Q->xyzoff[0];
-    temp[1] -= Q->xyzoff[1];
-    temp[2] -= Q->xyzoff[2];
-
+    xyz.x -= Q->xyzoff[0];
+    xyz.y -= Q->xyzoff[1];
+    xyz.z -= Q->xyzoff[2];
 
     /* Apply rotation */
-    double pxyz[] = {
-        Q->transMat[0] * temp[0] + Q->transMat[3] * temp[1] + Q->transMat[6] * temp[2],
-        Q->transMat[1] * temp[0] + Q->transMat[4] * temp[1] + Q->transMat[7] * temp[2],
-        Q->transMat[2] * temp[0] + Q->transMat[5] * temp[1] + Q->transMat[8] * temp[2]
+    xyz = {
+        Q->transMat[0] * xyz.x + Q->transMat[3] * xyz.y + Q->transMat[6] * xyz.z,
+        Q->transMat[1] * xyz.x + Q->transMat[4] * xyz.y + Q->transMat[7] * xyz.z,
+        Q->transMat[2] * xyz.x + Q->transMat[5] * xyz.y + Q->transMat[8] * xyz.z
     };
 
     /* Convert to local lat,lon */
-    xyz.x = pxyz[0];
-    xyz.y = pxyz[1];
-    xyz.z = pxyz[2];
     lpz  =  Q->cart_sph->inv3d (xyz, Q->cart_sph);
 
     /* Scale by radius */
