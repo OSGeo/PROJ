@@ -248,7 +248,11 @@ def plotproj(plotdef, data, outdir):
             (plotdef['lonmax'], plotdef['latmax']),
             (plotdef['lonmax'], plotdef['latmin']),
         ])
-        temp_pol = temp_pol.intersection(box)
+        try:
+            temp_pol = temp_pol.intersection(box)
+        except Exception as e:
+            continue
+
 
         if plotdef['type'] == 'poly':
             if isinstance(temp_pol, MultiPolygon):

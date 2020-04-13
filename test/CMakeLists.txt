@@ -11,6 +11,11 @@ proj_add_gie_test("4D-API-cs2cs-style" "gie/4D-API_cs2cs-style.gie")
 proj_add_gie_test("DHDN_ETRS89" "gie/DHDN_ETRS89.gie")
 proj_add_gie_test("Unitconvert" "gie/unitconvert.gie")
 proj_add_gie_test("geotiff_grids" "gie/geotiff_grids.gie")
+proj_add_gie_test("adams_hemi" "gie/adams_hemi.gie")
+proj_add_gie_test("adams_ws1" "gie/adams_ws1.gie")
+proj_add_gie_test("adams_ws2" "gie/adams_ws2.gie")
+proj_add_gie_test("guyou" "gie/guyou.gie")
+proj_add_gie_test("peirce_q" "gie/peirce_q.gie")
 
 # GIGS tests. Uncommented tests are expected to fail due to issues with
 # various projections. Should be investigated further and fixed.
