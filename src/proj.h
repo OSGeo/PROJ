@@ -567,6 +567,8 @@ typedef enum PJ_DIRECTION PJ_DIRECTION;
 int PROJ_DLL proj_angular_input (PJ *P, enum PJ_DIRECTION dir);
 int PROJ_DLL proj_angular_output (PJ *P, enum PJ_DIRECTION dir);
 
+int PROJ_DLL proj_degree_input (PJ *P, enum PJ_DIRECTION dir);
+int PROJ_DLL proj_degree_output (PJ *P, enum PJ_DIRECTION dir);
 
 PJ_COORD PROJ_DLL proj_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coord);
 int PROJ_DLL proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord);

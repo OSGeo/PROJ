@@ -681,7 +681,7 @@ Various
 
 .. c:function:: int proj_angular_input (PJ *P, enum PJ_DIRECTION dir)
 
-    Check if a operation expects input in radians or not.
+    Check if an operation expects input in radians or not.
 
     :param `P`: Transformation object
     :type `P`: const PJ*
@@ -698,6 +698,30 @@ Various
     :param `direction`: Starting direction of transformation
     :type `direction`: PJ_DIRECTION
     :returns: :c:type:`int` 1 if output units is expected in radians, otherwise 0
+
+.. c:function:: int proj_degree_input (PJ *P, enum PJ_DIRECTION dir)
+
+    .. versionadded:: 7.1.0
+
+    Check if an operation expects input in degrees or not.
+
+    :param `P`: Transformation object
+    :type `P`: const PJ*
+    :param `direction`: Starting direction of transformation
+    :type `direction`: PJ_DIRECTION
+    :returns: :c:type:`int` 1 if input units is expected in degrees, otherwise 0
+
+.. c:function:: int proj_degree_output (PJ *P, enum PJ_DIRECTION dir)
+
+    .. versionadded:: 7.1.0
+
+    Check if an operation returns output in degrees or not.
+
+    :param `P`: Transformation object
+    :type `P`: const PJ*
+    :param `direction`: Starting direction of transformation
+    :type `direction`: PJ_DIRECTION
+    :returns: :c:type:`int` 1 if output units is expected in degrees, otherwise 0
 
 
 Setting custom I/O functions

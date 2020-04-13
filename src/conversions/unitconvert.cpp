@@ -476,8 +476,12 @@ PJ *CONVERSION(unitconvert,0) {
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
         Q->xy_factor = f;
-        if (normalized_name != nullptr && strcmp(normalized_name, "Radian") == 0)
-            P->left = PJ_IO_UNITS_RADIANS;
+        if (normalized_name != nullptr) {
+            if (strcmp(normalized_name, "Radian") == 0)
+                P->left = PJ_IO_UNITS_RADIANS;
+            if (strcmp(normalized_name, "Degree") == 0)
+                P->left = PJ_IO_UNITS_DEGREES;
+        }
     }
 
     if ((name = pj_param (P->ctx, P->params, "sxy_out").s) != nullptr) {
@@ -491,8 +495,12 @@ PJ *CONVERSION(unitconvert,0) {
                 return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
         }
         Q->xy_factor /= f;
-        if (normalized_name != nullptr && strcmp(normalized_name, "Radian") == 0)
-            P->right= PJ_IO_UNITS_RADIANS;
+        if (normalized_name != nullptr) {
+            if (strcmp(normalized_name, "Radian") == 0)
+                P->right= PJ_IO_UNITS_RADIANS;
+            if (strcmp(normalized_name, "Degree") == 0)
+                P->right= PJ_IO_UNITS_DEGREES;
+        }
     }
 
     if( xy_in_is_linear >= 0 && xy_out_is_linear >= 0 &&

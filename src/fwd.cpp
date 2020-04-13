@@ -134,6 +134,9 @@ static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
     case PJ_IO_UNITS_WHATEVER:
         break;
 
+    case PJ_IO_UNITS_DEGREES:
+        break;
+
     case PJ_IO_UNITS_RADIANS:
         coo.lpz.z = P->vfr_meter * (coo.lpz.z + P->z0);
 

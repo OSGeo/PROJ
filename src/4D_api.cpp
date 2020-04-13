@@ -93,6 +93,27 @@ int proj_angular_output (PJ *P, enum PJ_DIRECTION dir) {
     return proj_angular_input (P, opposite_direction(dir));
 }
 
+/*****************************************************************************/
+int proj_degree_input (PJ *P, enum PJ_DIRECTION dir) {
+/******************************************************************************
+    Returns 1 if the operator P expects degree input coordinates when
+    operating in direction dir, 0 otherwise.
+    dir: {PJ_FWD, PJ_INV}
+******************************************************************************/
+    if (PJ_FWD==dir)
+        return pj_left (P)==PJ_IO_UNITS_DEGREES;
+    return pj_right (P)==PJ_IO_UNITS_DEGREES;
+}
+
+/*****************************************************************************/
+int proj_degree_output (PJ *P, enum PJ_DIRECTION dir) {
+/******************************************************************************
+    Returns 1 if the operator P provides degree output coordinates when
+    operating in direction dir, 0 otherwise.
+    dir: {PJ_FWD, PJ_INV}
+******************************************************************************/
+    return proj_degree_input (P, opposite_direction(dir));
+}
 
 /* Geodesic distance (in meter) + fwd and rev azimuth between two points on the ellipsoid */
 PJ_COORD proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b) {
