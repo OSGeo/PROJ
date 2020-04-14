@@ -390,7 +390,9 @@ static PJ_XY exact_e_fwd (PJ_LP lp, PJ *P) {
  *      cos(2 * Cn) = 2cos^2(Cn) - 1
  *                  = 2 / (1 + tan_Cn^2) - 1
  */
-    const double tmp_r = 2 * cos_Cn_cos_Ce * inv_denom_tan_Ce * inv_denom_tan_Ce;
+    const double two_inv_denom_tan_Ce = 2 * inv_denom_tan_Ce;
+    const double two_inv_denom_tan_Ce_square = two_inv_denom_tan_Ce * inv_denom_tan_Ce;
+    const double tmp_r = cos_Cn_cos_Ce * two_inv_denom_tan_Ce_square;
     const double sin_arg_r  = sin_Cn * tmp_r;
     const double cos_arg_r  = cos_Cn_cos_Ce * tmp_r - 1;
 
@@ -407,10 +409,15 @@ static PJ_XY exact_e_fwd (PJ_LP lp, PJ *P) {
  *
  *      cosh(2 * Ce) = 2cosh^2(Ce) - 1
  *                   = 2 * (1 + tan_Ce^2) - 1
+ *
+ * and 1+tan_Ce^2 = 1 + sin_Ce^2 * cos_Cn^2 / (sin_Cn^2 + cos_Cn^2 * cos_Ce^2)
+ *                = (sin_Cn^2 + cos_Cn^2 * cos_Ce^2 + sin_Ce^2 * cos_Cn^2) / (sin_Cn^2 + cos_Cn^2 * cos_Ce^2)
+ *                = 1. / (sin_Cn^2 + cos_Cn^2 * cos_Ce^2)
+ *                = inv_denom_tan_Ce^2
+ *
  */
-    const double tmp_i = 1 + tan_Ce * tan_Ce;
-    const double sinh_arg_i = 2 * tan_Ce * sqrt(tmp_i);
-    const double cosh_arg_i = 2 * tmp_i - 1;
+    const double sinh_arg_i = tan_Ce * two_inv_denom_tan_Ce;
+    const double cosh_arg_i = two_inv_denom_tan_Ce_square - 1;
 
     double dCn, dCe;
     Cn += clenS (Q->gtu, PROJ_ETMERC_ORDER,
