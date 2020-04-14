@@ -142,6 +142,9 @@ static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         lp.phi = (5 * i + t) * DEG_TO_RAD;
         if (xy.y < 0.) lp.phi = -lp.phi;
         lp.lam /= V(X[i], t);
+        if( fabs(lp.lam) > M_PI ) {
+            lp.lam = lp.phi = HUGE_VAL;
+        }
     }
     return lp;
 }
