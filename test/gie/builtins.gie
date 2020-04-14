@@ -5365,13 +5365,108 @@ expect  -0.001790493 0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
 
-
 -------------------------------------------------------------------------------
 operation +proj=tmerc   +R=1
 -------------------------------------------------------------------------------
 direction inverse
 accept -1e200 0
 expect  failure errno invalid_x_or_y
+
+
+===============================================================================
+Test Transverse Mercator +algo
+===============================================================================
+
+-------------------------------------------------------------------------------
+operation +proj=tmerc +ellps=GRS80 +algo=auto
+# We show that the values are the same as poder_engsager within 0.1 mm
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    2.9                 0
+expect    322965.3802         0.0000
+roundtrip 1
+
+accept    2.9                 40
+expect    247660.7575         4433559.6623
+roundtrip 1
+
+accept    2.9                 85
+expect    28218.2464          9444221.7042
+roundtrip 1
+
+accept    6                   0
+expect    669149.3483         0.0000
+roundtrip 1
+
+accept    6                   40
+expect    512526.6344         4446813.3655
+roundtrip 1
+
+accept    6                   85
+expect    58302.0560          9446554.0371
+roundtrip 1
+
+-------------------------------------------------------------------------------
+operation +proj=tmerc +ellps=GRS80 +algo=poder_engsager
+# Same values as above
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    2.9                 0
+expect    322965.3802         0.0000
+roundtrip 1
+
+accept    2.9                 40
+expect    247660.7575         4433559.6623
+roundtrip 1
+
+accept    2.9                 85
+expect    28218.2464          9444221.7042
+roundtrip 1
+
+accept    6                   0
+expect    669149.3483         0.0000
+roundtrip 1
+
+accept    6                   40
+expect    512526.6344         4446813.3655
+roundtrip 1
+
+accept    6                   85
+expect    58302.0560          9446554.0371
+roundtrip 1
+
+-------------------------------------------------------------------------------
+operation +proj=tmerc +ellps=GRS80 +algo=evenden_snyder
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    2.9                 0
+expect    322965.3802         0.0000
+roundtrip 1
+
+accept    2.9                 40
+expect    247660.7575         4433559.6623
+roundtrip 1
+
+accept    2.9                 85
+expect    28218.2464          9444221.7042
+roundtrip 1
+
+# Small difference with poder_engsager
+accept    6                   0
+expect    669149.3474         0.0000
+#roundtrip 1
+
+# Small difference with poder_engsager
+accept    6                   40
+expect    512526.6346         4446813.3655
+#roundtrip 1
+
+accept    6                   85
+expect    58302.0560          9446554.0371
+roundtrip 1
 
 ===============================================================================
 Tobler-Mercator

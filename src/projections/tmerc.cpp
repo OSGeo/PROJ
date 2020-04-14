@@ -25,19 +25,29 @@ PROJ_HEAD(etmerc, "Extended Transverse Mercator") "\n\tCyl, Sph";
 PROJ_HEAD(utm, "Universal Transverse Mercator (UTM)") "\n\tCyl, Ell\n\tzone= south approx";
 
 namespace { // anonymous namespace
-struct pj_opaque_approx {
+
+// Approximate: Evenden/Snyder
+struct EvendenSnyder
+{
     double  esp;
     double  ml0;
     double  *en;
 };
 
-struct pj_opaque_exact {
+// More exact: Poder/Engsager
+struct PoderEngsager
+{
     double    Qn;     /* Merid. quad., scaled to the projection */
     double    Zb;     /* Radius vector in polar coord. systems  */
     double    cgb[6]; /* Constants for Gauss -> Geo lat */
     double    cbg[6]; /* Constants for Geo lat -> Gauss */
     double    utg[6]; /* Constants for transv. merc. -> geo */
     double    gtu[6]; /* Constants for geo -> transv. merc. */
+};
+
+struct tmerc_data {
+    EvendenSnyder approx;
+    PoderEngsager exact;
 };
 
 } // anonymous namespace
@@ -78,7 +88,7 @@ __attribute__((target_clones("fma","default")))
 inline static PJ_XY approx_e_fwd_internal (PJ_LP lp, PJ *P)
 {
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(P->opaque);
+    const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
     double al, als, n, cosphi, sinphi, t;
 
     /*
@@ -125,6 +135,7 @@ static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
 static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0,0.0};
     double b, cosphi;
+    const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
 
     /*
      * Fail if our longitude is more than 90 degrees from the
@@ -147,7 +158,7 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
         return xy;
     }
 
-    xy.x = static_cast<struct pj_opaque_approx*>(P->opaque)->ml0 * log ((1. + b) / (1. - b));
+    xy.x = Q->ml0 * log ((1. + b) / (1. - b));
     xy.y = cosphi * cos (lp.lam) / sqrt (1. - b * b);
 
     b = fabs ( xy.y );
@@ -162,7 +173,7 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
 
     if (lp.phi < 0.)
         xy.y = -xy.y;
-    xy.y = static_cast<struct pj_opaque_approx*>(P->opaque)->esp * (xy.y - P->phi0);
+    xy.y = Q->esp * (xy.y - P->phi0);
     return xy;
 }
 
@@ -171,7 +182,7 @@ __attribute__((target_clones("fma","default")))
 #endif
 inline static PJ_LP approx_e_inv_internal (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0,0.0};
-    struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(P->opaque);
+    const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
 
     double sinphi, cosphi;
     lp.phi = inline_pj_inv_mlfn(P->ctx, Q->ml0 + xy.y / P->k0, P->es, Q->en, &sinphi, &cosphi);
@@ -208,14 +219,15 @@ static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
 static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0, 0.0};
     double h, g;
+    const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
 
-    h = exp(xy.x / static_cast<struct pj_opaque_approx*>(P->opaque)->esp);
+    h = exp(xy.x / Q->esp);
     if( h == 0 ) {
         proj_errno_set(P, PJD_ERR_INVALID_X_OR_Y);
         return proj_coord_error().lp;
     }
     g = .5 * (h - 1. / h);
-    h = cos (P->phi0 + xy.y / static_cast<struct pj_opaque_approx*>(P->opaque)->esp);
+    h = cos (P->phi0 + xy.y / Q->esp);
     lp.phi = asin(sqrt((1. - h * h) / (1. + g * g)));
 
     /* Make sure that phi is on the correct hemisphere when false northing is used */
@@ -226,22 +238,20 @@ static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
 }
 
 
-static PJ *destructor_approx(PJ *P, int errlev) {
+static PJ *destructor(PJ *P, int errlev) {
     if (nullptr==P)
         return nullptr;
 
     if (nullptr==P->opaque)
         return pj_default_destructor(P, errlev);
 
-    pj_dealloc (static_cast<struct pj_opaque_approx*>(P->opaque)->en);
+    pj_dealloc (static_cast<struct tmerc_data*>(P->opaque)->approx.en);
     return pj_default_destructor(P, errlev);
 }
 
 
 static PJ *setup_approx(PJ *P) {
-    struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(P->opaque);
-
-    P->destructor = destructor_approx;
+    auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
 
     if (P->es != 0.0) {
         if (!(Q->en = pj_enfn(P->es)))
@@ -249,13 +259,9 @@ static PJ *setup_approx(PJ *P) {
 
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
         Q->esp = P->es / (1. - P->es);
-        P->inv = approx_e_inv;
-        P->fwd = approx_e_fwd;
     } else {
         Q->esp = P->k0;
         Q->ml0 = .5 * Q->esp;
-        P->inv = approx_s_inv;
-        P->fwd = approx_s_fwd;
     }
     return P;
 }
@@ -330,10 +336,10 @@ static double clenS(const double *a, int size,
 
 
 /* Real Clenshaw summation */
-static double clens(double *a, int size, double arg_r) {
-    double      *p, r, hr, hr1, hr2, cos_arg_r;
+static double clens(const double *a, int size, double arg_r) {
+    double      r, hr, hr1, hr2, cos_arg_r;
 
-    p = a + size;
+    const double* p = a + size;
     cos_arg_r  = cos(arg_r);
     r          =  2*cos_arg_r;
 
@@ -351,7 +357,7 @@ static double clens(double *a, int size, double arg_r) {
 /* Ellipsoidal, forward */
 static PJ_XY exact_e_fwd (PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0,0.0};
-    struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(P->opaque);
+    const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->exact);
 
     /* ell. LAT, LNG -> Gaussian LAT, LNG */
     double Cn  = gatg (Q->cbg, PROJ_ETMERC_ORDER, lp.phi, cos(2*lp.phi), sin(2*lp.phi));
@@ -429,7 +435,7 @@ static PJ_XY exact_e_fwd (PJ_LP lp, PJ *P) {
 /* Ellipsoidal, inverse */
 static PJ_LP exact_e_inv (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0,0.0};
-    struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(P->opaque);
+    const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->exact);
 
     /* normalize N, E */
     double Cn = (xy.y - Q->Zb)/Q->Qn;
@@ -501,11 +507,9 @@ static PJ_LP exact_e_inv (PJ_XY xy, PJ *P) {
 
 static PJ *setup_exact(PJ *P) {
     double f, n, np, Z;
-    struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(P->opaque);
+    auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->exact);
 
-    if (P->es <= 0) {
-        return pj_default_destructor(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
-    }
+    assert( P->es > 0 );
 
     /* flattening */
     f = P->es / (1 + sqrt (1 -  P->es)); /* Replaces: f = 1 - sqrt(1-P->es); */
@@ -581,12 +585,135 @@ static PJ *setup_exact(PJ *P) {
     /* Origin northing minus true northing at the origin latitude */
     /* i.e. true northing = N - P->Zb                         */
     Q->Zb  = - Q->Qn*(Z + clens(Q->gtu, PROJ_ETMERC_ORDER, 2*Z));
-    P->inv = exact_e_inv;
-    P->fwd = exact_e_fwd;
+
     return P;
 }
 
 
+
+static PJ_XY auto_e_fwd (PJ_LP lp, PJ *P) {
+    if( fabs(lp.lam) > 3 * DEG_TO_RAD )
+        return exact_e_fwd(lp, P);
+    else
+        return approx_e_fwd(lp, P);
+}
+
+static PJ_LP auto_e_inv (PJ_XY xy, PJ *P) {
+    // For k = 1 and lon = 3 (from central meridian),
+    // At lat = 0, we get x ~= 0.052, y = 0
+    // At lat = 90, we get x = 0, y ~= 1.57
+    // And the shape of this x=f(y) frontier curve is very very rougly a
+    // parabola. Hence:
+    if( fabs(xy.x) > 0.053 - 0.022 * xy.y * xy.y )
+        return exact_e_inv(xy, P);
+    else
+        return approx_e_inv(xy, P);
+}
+
+static PJ *setup(PJ *P, TMercAlgo eAlg) {
+
+    struct tmerc_data *Q = static_cast<struct tmerc_data*>(pj_calloc (1, sizeof (struct tmerc_data)));
+    if (nullptr==Q)
+        return pj_default_destructor (P, ENOMEM);
+    P->opaque = Q;
+
+    if( P->es == 0 )
+        eAlg = TMercAlgo::EVENDEN_SNYDER;
+
+    switch( eAlg )
+    {
+        case TMercAlgo::EVENDEN_SNYDER:
+        {
+            P->destructor = destructor;
+            if( !setup_approx(P) )
+                return nullptr;
+            if( P->es == 0 )
+            {
+                P->inv = approx_s_inv;
+                P->fwd = approx_s_fwd;
+            }
+            else
+            {
+                P->inv = approx_e_inv;
+                P->fwd = approx_e_fwd;
+            }
+            break;
+        }
+
+        case TMercAlgo::PODER_ENGSAGER:
+        {
+            setup_exact(P);
+            P->inv = exact_e_inv;
+            P->fwd = exact_e_fwd;
+            break;
+        }
+
+        case TMercAlgo::AUTO:
+        {
+            P->destructor = destructor;
+            if( !setup_approx(P) )
+                return nullptr;
+            setup_exact(P);
+
+            P->inv = auto_e_inv;
+            P->fwd = auto_e_fwd;
+            break;
+        }
+    }
+    return P;
+}
+
+
+static bool getAlgoFromParams(PJ* P, TMercAlgo& algo)
+{
+    if( pj_param (P->ctx, P->params, "bapprox").i )
+    {
+        algo = TMercAlgo::EVENDEN_SNYDER;
+        return true;
+    }
+
+    const char* algStr = pj_param (P->ctx, P->params, "salgo").s;
+    if( algStr )
+    {
+        if( strcmp(algStr, "evenden_snyder") == 0 )
+        {
+            algo = TMercAlgo::EVENDEN_SNYDER;
+            return true;
+        }
+        if( strcmp(algStr, "poder_engsager") == 0 )
+        {
+            algo = TMercAlgo::PODER_ENGSAGER;
+            return true;
+        }
+        if( strcmp(algStr, "auto") == 0 )
+        {
+            algo = TMercAlgo::AUTO;
+            // Don't return so that we can run a later validity check
+        }
+        else
+        {
+            proj_log_error (P, "unknown value for +algo");
+            return false;
+        }
+    }
+    else
+    {
+        pj_load_ini(P->ctx); // if not already done
+        pj_ctx_set_errno(P->ctx, 0); // reset error in case proj.ini couldn't be found
+        algo = P->ctx->defaultTmercAlgo;
+    }
+
+    // We haven't worked on the criterion on inverse transformation
+    // when phi0 != 0 or if k0 is not close to 1 or for very oblate
+    // ellipsoid (es > 0.1 is ~ rf < 200)
+    if( algo == TMercAlgo::AUTO &&
+            (P->es > 0.1 || P->phi0 != 0 || fabs(P->k0 - 1) > 0.01) )
+    {
+        algo = TMercAlgo::PODER_ENGSAGER;
+    }
+
+    return true;
+}
 
 
 /*****************************************************************************/
@@ -598,30 +725,20 @@ static PJ *setup_exact(PJ *P) {
 PJ *PROJECTION(tmerc) {
     /* exact transverse mercator only exists in ellipsoidal form, */
     /* use approximate version if +a sphere is requested          */
-    if (pj_param (P->ctx, P->params, "bapprox").i || P->es <= 0) {
-        struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(pj_calloc (1, sizeof (struct pj_opaque_approx)));
-        if (nullptr==Q)
-            return pj_default_destructor (P, ENOMEM);
 
-        P->opaque = Q;
-
-        return setup_approx(P);
-    } else {
-        struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(pj_calloc (1, sizeof (struct pj_opaque_exact)));
-        if (nullptr==Q)
-            return pj_default_destructor (P, ENOMEM);
-        P->opaque = Q;
-       return setup_exact (P);
-    }
+    TMercAlgo algo;
+    if( !getAlgoFromParams(P, algo) )
+        return pj_default_destructor(P, PJD_ERR_INVALID_ARG);
+    return setup(P, algo);
 }
 
 
 PJ *PROJECTION(etmerc) {
-    struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(pj_calloc (1, sizeof (struct pj_opaque_exact)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
-    P->opaque = Q;
-   return setup_exact (P);
+    if (P->es == 0.0) {
+        return pj_default_destructor(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+    }
+
+   return setup (P, TMercAlgo::PODER_ENGSAGER);
 }
 
 
@@ -659,19 +776,8 @@ PJ *PROJECTION(utm) {
     P->k0 = 0.9996;
     P->phi0 = 0.;
 
-    if (pj_param(P->ctx, P->params, "bapprox").i) {
-        struct pj_opaque_approx *Q = static_cast<struct pj_opaque_approx*>(pj_calloc (1, sizeof (struct pj_opaque_approx)));
-        if (nullptr==Q)
-            return pj_default_destructor (P, ENOMEM);
-        P->opaque = Q;
-
-        return setup_approx(P);
-    } else {
-        struct pj_opaque_exact *Q = static_cast<struct pj_opaque_exact*>(pj_calloc (1, sizeof (struct pj_opaque_exact)));
-        if (nullptr==Q)
-            return pj_default_destructor (P, ENOMEM);
-        P->opaque = Q;
-
-        return setup_exact(P);
-    }
+    TMercAlgo algo;
+    if( !getAlgoFromParams(P, algo) )
+        return pj_default_destructor(P, PJD_ERR_INVALID_ARG);
+    return setup(P, algo);
 }
