@@ -142,6 +142,10 @@ static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         lp.phi = (5 * i + t) * DEG_TO_RAD;
         if (xy.y < 0.) lp.phi = -lp.phi;
         lp.lam /= V(X[i], t);
+        if( fabs(lp.lam) > M_PI ) {
+            proj_errno_set(P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
+            lp = proj_coord_error().lp;
+        }
     }
     return lp;
 }
@@ -154,5 +158,4 @@ PJ *PROJECTION(robin) {
 
     return P;
 }
-
 
