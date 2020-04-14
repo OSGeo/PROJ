@@ -10462,6 +10462,7 @@ struct CoordinateOperationContext::Private {
     std::vector<std::pair<std::string, std::string>>
         intermediateCRSAuthCodes_{};
     bool discardSuperseded_ = true;
+    bool allowBallpark_ = true;
 };
 //! @endcond
 
@@ -10512,6 +10513,20 @@ double CoordinateOperationContext::getDesiredAccuracy() const {
 /** \brief Set the desired accuracy (in metre), or 0 */
 void CoordinateOperationContext::setDesiredAccuracy(double accuracy) {
     d->accuracy_ = accuracy;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether ballpark transformations are allowed */
+bool CoordinateOperationContext::getAllowBallparkTransformations() const {
+    return d->allowBallpark_;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set whether ballpark transformations are allowed */
+void CoordinateOperationContext::setAllowBallparkTransformations(bool allow) {
+    d->allowBallpark_ = allow;
 }
 
 // ---------------------------------------------------------------------------
@@ -11185,7 +11200,7 @@ struct FilterResults {
     const CoordinateOperationContext::SourceTargetCRSExtentUse
         sourceAndTargetCRSExtentUse;
 
-    bool hasOpThatContainsAreaOfInterest = false;
+    bool hasOpThatContainsAreaOfInterestAndNoGrid = false;
     std::vector<CoordinateOperationNNPtr> res{};
 
     // ----------------------------------------------------------------------
@@ -11231,12 +11246,16 @@ struct FilterResults {
                       STRICT_CONTAINMENT
                 : context->getSpatialCriterion();
         bool hasFoundOpWithExtent = false;
+        const bool allowBallpark = context->getAllowBallparkTransformations();
         for (const auto &op : sourceList) {
             if (desiredAccuracy != 0) {
                 const double accuracy = getAccuracy(op);
                 if (accuracy < 0 || accuracy > desiredAccuracy) {
                     continue;
                 }
+            }
+            if (!allowBallpark && op->hasBallparkTransformation()) {
+                continue;
             }
             if (areaOfInterest) {
                 bool emptyIntersection = false;
@@ -11246,9 +11265,11 @@ struct FilterResults {
                 hasFoundOpWithExtent = true;
                 bool extentContains =
                     extent->contains(NN_NO_CHECK(areaOfInterest));
-                if (extentContains) {
-                    if (!op->hasBallparkTransformation()) {
-                        hasOpThatContainsAreaOfInterest = true;
+                if (!hasOpThatContainsAreaOfInterestAndNoGrid &&
+                    extentContains) {
+                    if (!op->hasBallparkTransformation() &&
+                        op->gridsNeeded(nullptr, true).empty()) {
+                        hasOpThatContainsAreaOfInterestAndNoGrid = true;
                     }
                 }
                 if (spatialCriterion ==
@@ -11275,9 +11296,11 @@ struct FilterResults {
                     !extent1 || extent->contains(NN_NO_CHECK(extent1));
                 bool extentContainsExtent2 =
                     !extent2 || extent->contains(NN_NO_CHECK(extent2));
-                if (extentContainsExtent1 && extentContainsExtent2) {
-                    if (!op->hasBallparkTransformation()) {
-                        hasOpThatContainsAreaOfInterest = true;
+                if (!hasOpThatContainsAreaOfInterestAndNoGrid &&
+                    extentContainsExtent1 && extentContainsExtent2) {
+                    if (!op->hasBallparkTransformation() &&
+                        op->gridsNeeded(nullptr, true).empty()) {
+                        hasOpThatContainsAreaOfInterestAndNoGrid = true;
                     }
                 }
                 if (spatialCriterion ==
@@ -11310,6 +11333,9 @@ struct FilterResults {
                     if (accuracy < 0 || accuracy > desiredAccuracy) {
                         continue;
                     }
+                }
+                if (!allowBallpark && op->hasBallparkTransformation()) {
+                    continue;
                 }
                 res.emplace_back(op);
             }
@@ -11444,12 +11470,13 @@ struct FilterResults {
 
         // If we have more than one result, and than the last result is the
         // default "Ballpark geographic offset" or "Ballpark geocentric
-        // translation"
-        // operations we have synthetized, and that at least one operation
-        // has the desired area of interest, remove it as
-        // all previous results are necessarily better
-        if (hasOpThatContainsAreaOfInterest && res.size() > 1) {
-            const std::string &name = res.back()->nameStr();
+        // translation" operations we have synthetized, and that at least one
+        // operation has the desired area of interest and does not require the
+        // use of grids, remove it as all previous results are necessarily
+        // better
+        if (hasOpThatContainsAreaOfInterestAndNoGrid && res.size() > 1) {
+            const auto &opLast = res.back();
+            const std::string &name = opLast->nameStr();
             if (name.find(BALLPARK_GEOGRAPHIC_OFFSET) != std::string::npos ||
                 name.find(NULL_GEOGRAPHIC_OFFSET) != std::string::npos ||
                 name.find(NULL_GEOCENTRIC_TRANSLATION) != std::string::npos ||
@@ -14770,7 +14797,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
         }
     }
 
-    // If we didn't find a non-ballbark transformation between
+    // If we didn't find a non-ballpark transformation between
     // the 2 vertical CRS, then try through intermediate geographic CRS
     // For example
     // WGS 84 + EGM96 --> ETRS89 + Belfast height where
