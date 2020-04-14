@@ -100,12 +100,10 @@ TEST(AngularUnits, Pipelines3) {
 
 TEST(AngularUnits, Degrees) {
     auto ctx = proj_context_create();
-    auto P = proj_create(
-        ctx,
-        "+proj=pipeline "
-        "+step +inv +proj=utm +zone=32 +ellps=GRS80 "
-        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-    );
+    auto P =
+        proj_create(ctx, "+proj=pipeline "
+                         "+step +inv +proj=utm +zone=32 +ellps=GRS80 "
+                         "+step +proj=unitconvert +xy_in=rad +xy_out=deg ");
 
     EXPECT_FALSE(proj_degree_input(P, PJ_FWD));
     EXPECT_TRUE(proj_degree_input(P, PJ_INV));
@@ -114,7 +112,6 @@ TEST(AngularUnits, Degrees) {
 
     proj_destroy(P);
     proj_context_destroy(ctx);
-
 }
 
 } // namespace
