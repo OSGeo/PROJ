@@ -1202,6 +1202,11 @@ void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
     PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
     int discard);
 
+void PROJ_DLL proj_operation_factory_context_set_allow_ballpark_transformations(
+    PJ_CONTEXT *ctx,
+    PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    int allow);
+
 /* ------------------------------------------------------------------------- */
 
 
