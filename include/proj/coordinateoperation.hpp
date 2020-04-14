@@ -1759,6 +1759,10 @@ class PROJ_GCC_DLL CoordinateOperationContext {
 
     PROJ_DLL void setDesiredAccuracy(double accuracy);
 
+    PROJ_DLL void setAllowBallparkTransformations(bool allow);
+
+    PROJ_DLL bool getAllowBallparkTransformations() const;
+
     /** Specify how source and target CRS extent should be used to restrict
      * candidate operations (only taken into account if no explicit area of
      * interest is specified. */
