@@ -705,6 +705,7 @@ static void outputOperations(
         ctxt->setIntermediateCRS(pivots);
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         ctxt->setDiscardSuperseded(!showSuperseded);
+        ctxt->setAllowBallparkTransformations(outputOpt.ballparkAllowed);
         list = CoordinateOperationFactory::create()->createOperations(
             nnSourceCRS, nnTargetCRS, ctxt);
         if (!spatialCriterionExplicitlySpecified &&
@@ -725,15 +726,6 @@ static void outputOperations(
         std::cerr << "createOperations() failed with: " << e.what()
                   << std::endl;
         std::exit(1);
-    }
-    if (!outputOpt.ballparkAllowed) {
-        std::vector<CoordinateOperationNNPtr> listNew;
-        for (const auto &op : list) {
-            if (!op->hasBallparkTransformation()) {
-                listNew.emplace_back(op);
-            }
-        }
-        list = std::move(listNew);
     }
     if (outputOpt.quiet && !list.empty()) {
         outputObject(dbContext, list[0], allowUseIntermediateCRS, outputOpt);
