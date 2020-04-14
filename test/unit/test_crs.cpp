@@ -2550,6 +2550,30 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 2954);
         EXPECT_EQ(res.front().second, 100);
     }
+    {
+        // Test identification of LCC_2SP with switched standard parallels.
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"foo\",\n"
+            "    GEOGCS[\"RGF93\",\n"
+            "        DATUM[\"Reseau_Geodesique_Francais_1993\",\n"
+            "            SPHEROID[\"GRS 1980\",6378137,298.257222101]],\n"
+            "        PRIMEM[\"Greenwich\",0],\n"
+            "        UNIT[\"degree\",0.0174532925199433]],\n"
+            "    PROJECTION[\"Lambert_Conformal_Conic_2SP\"],\n"
+            "    PARAMETER[\"latitude_of_origin\",46.5],\n"
+            "    PARAMETER[\"central_meridian\",3],\n"
+            "    PARAMETER[\"standard_parallel_1\",44],\n"
+            "    PARAMETER[\"standard_parallel_2\",49],\n"
+            "    PARAMETER[\"false_easting\",700000],\n"
+            "    PARAMETER[\"false_northing\",6600000],\n"
+            "    UNIT[\"metre\",1]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2154);
+        EXPECT_EQ(res.front().second, 70);
+    }
 }
 
 // ---------------------------------------------------------------------------

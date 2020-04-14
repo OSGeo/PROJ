@@ -5993,8 +5993,15 @@ AuthorityFactory::createProjectedCRSFromExisting(
         params.emplace_back(d->authority());
     }
 
-    int iParam = 1;
+    int iParam = 0;
+    bool hasLat1stStd = false;
+    double lat1stStd = 0;
+    int iParamLat1stStd = 0;
+    bool hasLat2ndStd = false;
+    double lat2ndStd = 0;
+    int iParamLat2ndStd = 0;
     for (const auto &genOpParamvalue : conv->parameterValues()) {
+        iParam++;
         auto opParamvalue =
             dynamic_cast<const operation::OperationParameterValue *>(
                 genOpParamvalue.get());
@@ -6012,6 +6019,23 @@ AuthorityFactory::createProjectedCRSFromExisting(
         const auto &unit = measure.unit();
         if (unit == common::UnitOfMeasure::DEGREE &&
             geogCRS->coordinateSystem()->axisList()[0]->unit() == unit) {
+            if (methodEPSGCode ==
+                EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP) {
+                // Special case for standard parallels of LCC_2SP. See below
+                if (paramEPSGCode ==
+                    EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL) {
+                    hasLat1stStd = true;
+                    lat1stStd = measure.value();
+                    iParamLat1stStd = iParam;
+                    continue;
+                } else if (paramEPSGCode ==
+                           EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL) {
+                    hasLat2ndStd = true;
+                    lat2ndStd = measure.value();
+                    iParamLat2ndStd = iParam;
+                    continue;
+                }
+            }
             const auto iParamAsStr(toString(iParam));
             sql += " AND conv.param";
             sql += iParamAsStr;
@@ -6026,7 +6050,44 @@ AuthorityFactory::createProjectedCRSFromExisting(
             params.emplace_back(measure.value() - 1);
             params.emplace_back(measure.value() + 1);
         }
-        iParam++;
+    }
+
+    // Special case for standard parallels of LCC_2SP: they can be switched
+    if (methodEPSGCode == EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP &&
+        hasLat1stStd && hasLat2ndStd) {
+        const auto iParam1AsStr(toString(iParamLat1stStd));
+        const auto iParam2AsStr(toString(iParamLat2ndStd));
+        sql += " AND conv.param";
+        sql += iParam1AsStr;
+        sql += "_code = ? AND conv.param";
+        sql += iParam1AsStr;
+        sql += "_auth_name = 'EPSG' AND conv.param";
+        sql += iParam2AsStr;
+        sql += "_code = ? AND conv.param";
+        sql += iParam2AsStr;
+        sql += "_auth_name = 'EPSG' AND ((";
+        params.emplace_back(
+            toString(EPSG_CODE_PARAMETER_LATITUDE_1ST_STD_PARALLEL));
+        params.emplace_back(
+            toString(EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL));
+        double val1 = lat1stStd;
+        double val2 = lat2ndStd;
+        for (int i = 0; i < 2; i++) {
+            if (i == 1) {
+                sql += ") OR (";
+                std::swap(val1, val2);
+            }
+            sql += "conv.param";
+            sql += iParam1AsStr;
+            sql += "_value BETWEEN ? AND ? AND conv.param";
+            sql += iParam2AsStr;
+            sql += "_value BETWEEN ? AND ?";
+            params.emplace_back(val1 - 1);
+            params.emplace_back(val1 + 1);
+            params.emplace_back(val2 - 1);
+            params.emplace_back(val2 + 1);
+        }
+        sql += "))";
     }
     auto sqlRes = d->run(sql, params);
 
