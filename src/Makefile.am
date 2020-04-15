@@ -72,6 +72,7 @@ libproj_la_SOURCES = \
 	iso19111/c_api.cpp \
 	\
 	projections/aeqd.cpp \
+	projections/adams.cpp \
 	projections/gnom.cpp \
 	projections/laea.cpp \
 	projections/mod_ster.cpp \

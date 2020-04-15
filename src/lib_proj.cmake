@@ -56,6 +56,7 @@ print_variable(ENABLE_IPO)
 
 set(SRC_LIBPROJ_PROJECTIONS
   projections/aeqd.cpp
+  projections/adams.cpp
   projections/gnom.cpp
   projections/laea.cpp
   projections/mod_ster.cpp

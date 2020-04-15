@@ -1,5 +1,41 @@
 [
     {
+        "filename": "adams_hemi.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "adams_hemi",
+        "projstring": "+proj=adams_hemi",
+        "res": "low",
+        "type": "poly"
+
+    },
+    {
+        "filename": "adams_ws1.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "adams_ws1",
+        "projstring": "+proj=adams_ws1",
+        "res": "low",
+        "type": "poly"
+
+    },
+    {
+        "filename": "adams_ws2.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "adams_ws2",
+        "projstring": "+proj=adams_ws2",
+        "res": "low",
+        "type": "poly"
+
+    },
+    {
         "filename": "aea.png",
         "latmax": 90,
         "latmin": -90,
@@ -472,6 +508,17 @@
         "name": "gs50",
         "projstring": "+proj=gs50",
         "res": "med",
+        "type": "poly"
+    },
+    {
+        "filename": "guyou.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "guyou",
+        "projstring": "+proj=guyou",
+        "res": "low",
         "type": "poly"
     },
     {
@@ -989,6 +1036,17 @@
         "lonmin": -180,
         "name": "patterson",
         "projstring": "+proj=patterson",
+        "res": "low",
+        "type": "poly"
+    },
+    {
+        "filename": "peirce_q.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "peirce_q",
+        "projstring": "+proj=peirce_q",
         "res": "low",
         "type": "poly"
     },
