@@ -7518,6 +7518,27 @@ void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set whether ballpark transformations are allowed.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
+ * @param allow set to TRUE to allow ballpark transformations.
+ * @since 7.1
+ */
+void PROJ_DLL proj_operation_factory_context_set_allow_ballpark_transformations(
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx, int allow) {
+    SANITIZE_CTX(ctx);
+    assert(factory_ctx);
+    try {
+        factory_ctx->operationContext->setAllowBallparkTransformations(allow !=
+                                                                       0);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 /** \brief Opaque object representing a set of operation results. */
 struct PJ_OPERATION_LIST : PJ_OBJ_LIST {

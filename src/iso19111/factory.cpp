@@ -926,7 +926,8 @@ bool DatabaseContext::lookForGridAlternative(const std::string &officialName,
                                              bool &inverse) const {
     auto res = d->run(
         "SELECT proj_grid_name, proj_grid_format, inverse_direction FROM "
-        "grid_alternatives WHERE original_grid_name = ?",
+        "grid_alternatives WHERE original_grid_name = ? AND "
+        "proj_grid_name <> ''",
         {officialName});
     if (res.empty()) {
         return false;
