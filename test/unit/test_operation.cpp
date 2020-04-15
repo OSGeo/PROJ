@@ -4195,6 +4195,29 @@ TEST(operation, laborde_oblique_mercator) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, adams_ws2_export) {
+    auto dbContext = DatabaseContext::create();
+    // ESRI:54098 WGS_1984_Adams_Square_II
+    auto crs = AuthorityFactory::create(dbContext, "ESRI")
+                   ->createProjectedCRS("54098");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=adams_ws2 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m "
+              "+no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, adams_ws2_export_failure) {
+    auto dbContext = DatabaseContext::create();
+    // ESRI:54099 WGS_1984_Spilhaus_Ocean_Map_in_Square
+    auto crs = AuthorityFactory::create(dbContext, "ESRI")
+                   ->createProjectedCRS("54099");
+    EXPECT_THROW(crs->exportToPROJString(PROJStringFormatter::create().get()),
+                 FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, PROJ_based) {
     auto conv = SingleOperation::createPROJBased(PropertyMap(), "+proj=merc",
                                                  nullptr, nullptr);
