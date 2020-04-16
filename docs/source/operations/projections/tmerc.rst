@@ -83,6 +83,21 @@ Parameters
     It is faster than the default algorithm, but also diverges faster
     as the distance from the central meridian increases.
 
+.. option:: +algo=auto/evenden_snyder/poder_engsager
+
+    .. versionadded:: 7.1
+
+    Selects the algorithm to use. The hardcoded value and the one defined in
+    :ref:`proj-ini` default to ``poder_engsager``, that is the most precise
+    one.
+
+    When using auto, a heuristics based on the input coordinate to transform
+    is used to determine if the faster Evenden-Snyder method can be used, for
+    faster computation, without causing an error greater than 0.1 mm (for an
+    ellipsoid of the size of Earth)
+
+    Note that :option:`+approx` and :option:`+algo` are mutually exclusive.
+
 .. include:: ../options/lon_0.rst
 
 .. include:: ../options/lat_0.rst

@@ -1848,6 +1848,18 @@ void pj_load_ini(projCtx ctx) {
                     val > 0 ? static_cast<long long>(val) * 1024 * 1024 : -1;
             } else if (key == "cache_ttl_sec") {
                 ctx->gridChunkCache.ttl = atoi(value.c_str());
+            } else if (key == "tmerc_default_algo") {
+                if (value == "auto") {
+                    ctx->defaultTmercAlgo = TMercAlgo::AUTO;
+                } else if (value == "evenden_snyder") {
+                    ctx->defaultTmercAlgo = TMercAlgo::EVENDEN_SNYDER;
+                } else if (value == "poder_engsager") {
+                    ctx->defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER;
+                } else {
+                    pj_log(
+                        ctx, PJ_LOG_ERROR,
+                        "pj_load_ini(): Invalid value for tmerc_default_algo");
+                }
             }
         }
 
