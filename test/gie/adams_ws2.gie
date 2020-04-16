@@ -1,7 +1,8 @@
 <gie>
 ------------------------------------------------------------
-This gie file was automatically generated using libproject
-where the adams_ws2 code was adapted from
+This gie file was initially generated from "random" test points
+got by using libproject where the adams_ws2 code was adapted from
+It can be edited.
 ------------------------------------------------------------
 
 ------------------------------------------------------------
@@ -2116,5 +2117,59 @@ expect    failure errno -14
 
 accept     180.2003062924   109.9750225424
 expect    failure errno -14
+
+-------------------------------------------------------------------------------
+Test inverse
+-------------------------------------------------------------------------------
+operation +proj=adams_ws2 +ellps=WGS84
+-------------------------------------------------------------------------------
+direction forward
+tolerance 1 mm
+
+accept    0 0
+expect    0 0
+roundtrip  1
+
+accept    40 60
+expect    2021909.611    4162291.966
+roundtrip  1
+
+accept    179.999 0
+expect    16686159.356   0.000
+roundtrip  1
+
+accept    -179.999 0
+expect    -16686159.356   0.000
+roundtrip  1
+
+accept    0           89.999
+expect    0           15743336.122
+roundtrip  1
+
+accept    0           -89.999
+expect    0           -15743336.122
+roundtrip  1
+
+# Results a bit different on x86
+tolerance 3 mm
+accept    179.999     89.999
+expect    693320.704  16030515.906
+roundtrip  1
+
+accept    179.999     -89.999
+expect    693320.702  -16030515.904
+roundtrip  1
+
+accept    -179.999     89.999
+expect    -693320.702  16030515.904
+roundtrip  1
+
+accept    -179.999     -89.999
+expect    -693320.704  -16030515.906
+roundtrip  1
+
+direction  inverse
+accept     0.000005801264 16722285.492330472916
+expect     failure  errno non_convergent
 
 </gie>

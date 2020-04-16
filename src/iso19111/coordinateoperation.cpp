@@ -6183,6 +6183,42 @@ void Conversion::_exportToPROJString(
         formatter->addParam("o_lat_p", -southPoleLat);
         formatter->addParam("lon_0", southPoleLon);
         bConversionDone = true;
+    } else if (ci_equal(methodName, "Adams_Square_II")) {
+        // Look for ESRI method and parameter names (to be opposed
+        // to the OGC WKT2 names we use elsewhere, because there's no mapping
+        // of those parameters to OGC WKT2)
+        // We also reject non-default values for a number of parameters,
+        // because they are not implemented on PROJ side. The subset we
+        // support can handle ESRI:54098 WGS_1984_Adams_Square_II, but not
+        // ESRI:54099 WGS_1984_Spilhaus_Ocean_Map_in_Square
+        const double falseEasting = parameterValueNumeric(
+            "False_Easting", common::UnitOfMeasure::METRE);
+        const double falseNorthing = parameterValueNumeric(
+            "False_Northing", common::UnitOfMeasure::METRE);
+        const double scaleFactor =
+            parameterValue("Scale_Factor", 0)
+                ? parameterValueNumeric("Scale_Factor",
+                                        common::UnitOfMeasure::SCALE_UNITY)
+                : 1.0;
+        const double azimuth =
+            parameterValueNumeric("Azimuth", common::UnitOfMeasure::DEGREE);
+        const double longitudeOfCenter = parameterValueNumeric(
+            "Longitude_Of_Center", common::UnitOfMeasure::DEGREE);
+        const double latitudeOfCenter = parameterValueNumeric(
+            "Latitude_Of_Center", common::UnitOfMeasure::DEGREE);
+        const double XYPlaneRotation = parameterValueNumeric(
+            "XY_Plane_Rotation", common::UnitOfMeasure::DEGREE);
+        if (scaleFactor != 1.0 || azimuth != 0.0 || latitudeOfCenter != 0.0 ||
+            XYPlaneRotation != 0.0) {
+            throw io::FormattingException("Unsupported value for one or "
+                                          "several parameters of "
+                                          "Adams_Square_II");
+        }
+        formatter->addStep("adams_ws2");
+        formatter->addParam("lon_0", longitudeOfCenter);
+        formatter->addParam("x_0", falseEasting);
+        formatter->addParam("y_0", falseNorthing);
+        bConversionDone = true;
     } else if (formatter->convention() ==
                    io::PROJStringFormatter::Convention::PROJ_5 &&
                isZUnitConversion) {

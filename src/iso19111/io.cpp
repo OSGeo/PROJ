@@ -2899,7 +2899,8 @@ UnitOfMeasure WKTParser::Private::guessUnitForParameter(
                ci_find(paramName, "parallel") != std::string::npos ||
                ci_find(paramName, "azimuth") != std::string::npos ||
                ci_find(paramName, "angle") != std::string::npos ||
-               ci_find(paramName, "heading") != std::string::npos) {
+               ci_find(paramName, "heading") != std::string::npos ||
+               ci_find(paramName, "rotation") != std::string::npos) {
         unit = defaultAngularUnit;
     } else if (ci_find(paramName, "easting") != std::string::npos ||
                ci_find(paramName, "northing") != std::string::npos ||
