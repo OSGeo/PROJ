@@ -22,18 +22,22 @@ del /f /q build 2> nul
 :: Check CMake project name PROJ
 md build
 cd build
-cmake -G "%VS_FULL%" -DCMAKE_PREFIX_PATH=%CMAKE_PREFIX_PATH% -DUSE_PROJ_NAME=PROJ ..  || exit /B 2
-cmake --build . --config Release || exit /B 3
-ctest --build-config Release -VV || exit /B 4
+cmake -GNinja -DCMAKE_BUILD_TYPE=Release ^
+  -DCMAKE_PREFIX_PATH=%CMAKE_PREFIX_PATH% ^
+  -DUSE_PROJ_NAME=PROJ ..  || exit /B 2
+ninja -v || exit /B 3
+ctest -VV || exit /B 4
 cd ..
 del /f /q build
 
 :: Check legacy CMake project name PROJ4
 md build
 cd build
-cmake -G "%VS_FULL%" -DCMAKE_PREFIX_PATH=%CMAKE_PREFIX_PATH% -DUSE_PROJ_NAME=PROJ4 .. || exit /B 2
-cmake --build . --config Release || exit /B 3
-ctest --build-config Release -VV || exit /B 4
+cmake -GNinja -DCMAKE_BUILD_TYPE=Release ^
+  -DCMAKE_PREFIX_PATH=%CMAKE_PREFIX_PATH% ^
+  -DUSE_PROJ_NAME=PROJ4 .. || exit /B 2
+ninja -v || exit /B 3
+ctest -VV || exit /B 4
 cd ..
 del /f /q build
 

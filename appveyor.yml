@@ -7,41 +7,46 @@ environment:
 
 # VS 2015
   - platform: x86
-    VS_VERSION: Visual Studio 14
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     BUILD_SHARED_LIBS: OFF
 
 # VS 2017
   - platform: x64
-    VS_VERSION: Visual Studio 15
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     BUILD_SHARED_LIBS: ON
 
 shallow_clone: true
 
+cache:
+  - C:\Tools\vcpkg\installed\ -> appveyor.yml
+
 build_script:
-  - echo build_script
-  # update vcpkg
-  - cmd: |
-      cd "C:\Tools\vcpkg"
-      git pull > nul
-      .\bootstrap-vcpkg.bat
+  - set VCPKG_INSTALLED=C:\Tools\vcpkg\installed\%platform%-windows
+  # If cached directory does not exist, update vcpkg and install dependencies
+  - if not exist %VCPKG_INSTALLED%\bin (
+      cd "C:\Tools\vcpkg" &
+      git pull > nul &
+      .\bootstrap-vcpkg.bat -disableMetrics &
+      vcpkg install sqlite3[core,tool]:"%platform%"-windows &
+      vcpkg install tiff:"%platform%"-windows &
+      vcpkg install curl:"%platform%"-windows &
       cd %APPVEYOR_BUILD_FOLDER%
-  - vcpkg install sqlite3[core,tool]:"%platform%"-windows
-  - vcpkg install tiff:"%platform%"-windows
-  - vcpkg install curl:"%platform%"-windows
-  - dir C:\Tools\vcpkg\installed\%platform%-windows\bin
-  - set PATH=C:\Tools\vcpkg\installed\%platform%-windows\bin;%PATH%
-  - if "%platform%" == "x64" SET VS_FULL=%VS_VERSION% Win64
-  - if "%platform%" == "x86" SET VS_FULL=%VS_VERSION%
-  - echo "%VS_FULL%"
+    )
+  - dir %VCPKG_INSTALLED%\bin
+  - set PATH=%VCPKG_INSTALLED%\bin;%PATH%
+  # See https://www.appveyor.com/docs/lang/cpp/
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" if %platform%==x86
+      (call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86)
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017"
+      (call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %platform% )
 #
   - set PROJ_BUILD=%APPVEYOR_BUILD_FOLDER%\build
   - mkdir %PROJ_BUILD%
   - cd %PROJ_BUILD%
   - set PROJ_DIR=%APPVEYOR_BUILD_FOLDER%\proj_dir
-  - cmake -G "%VS_FULL%" .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS="%BUILD_SHARED_LIBS%" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
-  - cmake --build . --config Release --target install
+  - cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS="%BUILD_SHARED_LIBS%" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
+  - ninja -v
+  - ninja install
   - dir %PROJ_DIR%\bin
 
 test_script:
