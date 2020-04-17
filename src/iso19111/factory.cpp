@@ -1311,6 +1311,10 @@ struct AuthorityFactory::Private {
         return !authority_.empty() && authority_ != "any";
     }
 
+    SQLResultSet createProjectedCRSBegin(const std::string &code);
+    crs::ProjectedCRSNNPtr createProjectedCRSEnd(const std::string &code,
+                                                 const SQLResultSet &res);
+
   private:
     DatabaseContextNNPtr context_;
     std::string authority_;
@@ -2502,16 +2506,38 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         throw NoSuchAuthorityCodeException("projectedCRS not found",
                                            d->authority(), code);
     }
-    auto res = d->runWithCodeParam(
+    return d->createProjectedCRSEnd(code, d->createProjectedCRSBegin(code));
+}
+
+// ---------------------------------------------------------------------------
+//! @cond Doxygen_Suppress
+
+/** Returns the result of the SQL query needed by createProjectedCRSEnd
+ *
+ * The split in two functions is for createFromCoordinateReferenceSystemCodes()
+ * convenience, to avoid throwing exceptions.
+ */
+SQLResultSet
+AuthorityFactory::Private::createProjectedCRSBegin(const std::string &code) {
+    return runWithCodeParam(
         "SELECT name, coordinate_system_auth_name, "
         "coordinate_system_code, geodetic_crs_auth_name, geodetic_crs_code, "
         "conversion_auth_name, conversion_code, "
         "area_of_use_auth_name, area_of_use_code, text_definition, "
         "deprecated FROM projected_crs WHERE auth_name = ? AND code = ?",
         code);
+}
+
+// ---------------------------------------------------------------------------
+
+/** Build a ProjectedCRS from the result of createProjectedCRSBegin() */
+crs::ProjectedCRSNNPtr
+AuthorityFactory::Private::createProjectedCRSEnd(const std::string &code,
+                                                 const SQLResultSet &res) {
+    const auto cacheKey(authority() + code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("projectedCRS not found",
-                                           d->authority(), code);
+                                           authority(), code);
     }
     try {
         const auto &row = res.front();
@@ -2527,13 +2553,13 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         const auto &text_definition = row[9];
         const bool deprecated = row[10] == "1";
 
-        auto props = d->createProperties(
-            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
+        auto props = createProperties(code, name, deprecated,
+                                      area_of_use_auth_name, area_of_use_code);
 
         if (!text_definition.empty()) {
-            DatabaseContext::Private::RecursionDetector detector(d->context());
+            DatabaseContext::Private::RecursionDetector detector(context());
             auto obj = createFromUserInput(
-                pj_add_type_crs_if_needed(text_definition), d->context());
+                pj_add_type_crs_if_needed(text_definition), context());
             auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(obj.get());
             if (projCRS) {
                 const auto conv = projCRS->derivingConversion();
@@ -2547,7 +2573,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
                 auto crsRet = crs::ProjectedCRS::create(
                     props, projCRS->baseCRS(), newConv,
                     projCRS->coordinateSystem());
-                d->context()->d->cache(cacheKey, crsRet);
+                context()->d->cache(cacheKey, crsRet);
                 return crsRet;
             }
 
@@ -2571,13 +2597,12 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
                 "text_definition does not define a ProjectedCRS");
         }
 
-        auto cs =
-            d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
+        auto cs = createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
 
-        auto baseCRS = d->createFactory(geodetic_crs_auth_name)
+        auto baseCRS = createFactory(geodetic_crs_auth_name)
                            ->createGeodeticCRS(geodetic_crs_code);
 
-        auto conv = d->createFactory(conversion_auth_name)
+        auto conv = createFactory(conversion_auth_name)
                         ->createConversion(conversion_code);
         if (conv->nameStr() == "unnamed") {
             conv = conv->shallowClone();
@@ -2589,7 +2614,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         if (cartesianCS) {
             auto crsRet = crs::ProjectedCRS::create(props, baseCRS, conv,
                                                     NN_NO_CHECK(cartesianCS));
-            d->context()->d->cache(cacheKey, crsRet);
+            context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
         throw FactoryException("unsupported CS type for projectedCRS: " +
@@ -2598,6 +2623,7 @@ AuthorityFactory::createProjectedCRS(const std::string &code) const {
         throw buildFactoryException("projectedCRS", code, ex);
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -3493,17 +3519,38 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         return list;
     }
 
+    // Check if sourceCRS would be the base of a ProjectedCRS targetCRS
+    // In which case use the conversion of the ProjectedCRS
     if (!targetCRSAuthName.empty()) {
         auto targetFactory = d->createFactory(targetCRSAuthName);
-        try {
-            auto targetCRS = targetFactory->createProjectedCRS(targetCRSCode);
-            const auto &baseIds = targetCRS->baseCRS()->identifiers();
+        const auto cacheKeyProjectedCRS(targetFactory->d->authority() +
+                                        targetCRSCode);
+        auto crs = targetFactory->d->context()->d->getCRSFromCache(
+            cacheKeyProjectedCRS);
+        crs::ProjectedCRSPtr targetProjCRS;
+        if (crs) {
+            targetProjCRS = std::dynamic_pointer_cast<crs::ProjectedCRS>(crs);
+        } else {
+            const auto sqlRes =
+                targetFactory->d->createProjectedCRSBegin(targetCRSCode);
+            if (!sqlRes.empty()) {
+                try {
+                    targetProjCRS =
+                        targetFactory->d
+                            ->createProjectedCRSEnd(targetCRSCode, sqlRes)
+                            .as_nullable();
+                } catch (const std::exception &) {
+                }
+            }
+        }
+        if (targetProjCRS) {
+            const auto &baseIds = targetProjCRS->baseCRS()->identifiers();
             if (sourceCRSAuthName.empty() ||
                 (!baseIds.empty() &&
                  *(baseIds.front()->codeSpace()) == sourceCRSAuthName &&
                  baseIds.front()->code() == sourceCRSCode)) {
                 bool ok = true;
-                auto conv = targetCRS->derivingConversion();
+                auto conv = targetProjCRS->derivingConversion();
                 if (d->hasAuthorityRestriction()) {
                     ok = *(conv->identifiers().front()->codeSpace()) ==
                          d->authority();
@@ -3514,9 +3561,9 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
                     return list;
                 }
             }
-        } catch (const std::exception &) {
         }
     }
+
     std::string sql;
     if (discardSuperseded) {
         sql = "SELECT source_crs_auth_name, source_crs_code, "
