@@ -512,6 +512,10 @@ int PROJ_DLL proj_context_is_network_enabled(PJ_CONTEXT* ctx);
 
 void PROJ_DLL proj_context_set_url_endpoint(PJ_CONTEXT* ctx, const char* url);
 
+const char PROJ_DLL *proj_context_get_url_endpoint(PJ_CONTEXT* ctx);
+
+const char PROJ_DLL *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx, int create);
+
 void PROJ_DLL proj_grid_cache_set_enable(PJ_CONTEXT* ctx, int enabled);
 
 void PROJ_DLL proj_grid_cache_set_filename(PJ_CONTEXT* ctx, const char* fullname);

@@ -753,6 +753,12 @@ Network related functionality
 .. doxygenfunction:: proj_context_set_url_endpoint
    :project: doxygen_api
 
+.. doxygenfunction:: proj_context_get_url_endpoint
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_context_get_user_writable_directory
+   :project: doxygen_api
+
 .. doxygenfunction:: proj_grid_cache_set_enable
    :project: doxygen_api
 
