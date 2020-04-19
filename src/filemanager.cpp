@@ -1186,7 +1186,7 @@ static void CreateDirectoryRecursively(PJ_CONTEXT *ctx,
 /** Get the PROJ user writable directory for datumgrid files.
  *
  * @param ctx PROJ context, or NULL
- * @param create Create the directory if it does not exist already.
+ * @param create If set to TRUE, create the directory if it does not exist already.
  * @return The path to the PROJ user writable directory.
  * @since 7.1
 */
