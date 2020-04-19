@@ -174,7 +174,7 @@ For ASCII input data the two data values must be in the first two white space
 separated fields and when both input and output are ASCII all trailing
 portions of the input line are appended to the output line.
 
-Input geographic data (longitude and latitude) must be in DMS format and input
+Input geographic data (longitude and latitude) must be in DMS or decimal degrees format and input
 cartesian data must be in units consistent with the ellipsoid major axis or
 sphere radius units. Output geographic coordinates will be in DMS (if the
 ``-w`` switch is not employed) and precise to 0.001" with trailing, zero-valued
