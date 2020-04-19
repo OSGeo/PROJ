@@ -11,22 +11,22 @@ but provided through a different interface.
 ===============================================================================
 
 
-<gie>
+<gie-strict>
 
 -------------------------------------------------------------------------------
-Test the handling of the +towgs84 parameter.
+# Test the handling of the +towgs84 parameter.
 -------------------------------------------------------------------------------
-(additional tests of the towgs84 handling can be found in DHDN_ETRS89.gie)
+# (additional tests of the towgs84 handling can be found in DHDN_ETRS89.gie)
 -------------------------------------------------------------------------------
 
 
 -------------------------------------------------------------------------------
-This example is from Lotti Jivall: "Simplified transformations from
-ITRF2008/IGS08 to ETRS89 for maritime applications" (see also more_builtins.gie)
+# This example is from Lotti Jivall: "Simplified transformations from
+# ITRF2008/IGS08 to ETRS89 for maritime applications" (see also more_builtins.gie)
 -------------------------------------------------------------------------------
-operation  proj=geocent
-           towgs84 = 0.676780, 0.654950, -0.528270,
-                    -0.022742, 0.012667,  0.022704,
+operation  proj=geocent \
+           towgs84 = 0.676780, 0.654950, -0.528270, \
+                    -0.022742, 0.012667,  0.022704, \
                     -0.01070
 -------------------------------------------------------------------------------
 tolerance 1 um
@@ -40,10 +40,10 @@ direction inverse
 
 
 -------------------------------------------------------------------------------
-This example is a random point, transformed from ED50 to ETRS89 using KMStrans2.
+# This example is a random point, transformed from ED50 to ETRS89 using KMStrans2.
 -------------------------------------------------------------------------------
-operation proj=latlong ellps=intl
-          towgs84 =  -081.07030, -089.36030, -115.75260,
+operation proj=latlong ellps=intl \
+          towgs84 =  -081.07030, -089.36030, -115.75260, \
                       000.48488, 000.02436, 000.41321, -0.540645
 -------------------------------------------------------------------------------
 tolerance  25 mm
@@ -57,7 +57,7 @@ expect     16.8210462130   55.1705688946       29.0317
 -------------------------------------------------------------------------------
 operation  proj=latlong nadgrids=ntf_r93.gsb  ellps=GRS80
 -------------------------------------------------------------------------------
-This functionality is also tested in more_builtins.gie
+# This functionality is also tested in more_builtins.gie
 -------------------------------------------------------------------------------
 tolerance 1 mm
 accept    2.25                 46.5
@@ -95,11 +95,11 @@ expect    12.5 55.5 0
 
 
 -------------------------------------------------------------------------------
-Same as the two above, but also do axis swapping.
+# Same as the two above, but also do axis swapping.
 -------------------------------------------------------------------------------
-NOTE: A number of the tests below are commented out. The actually do the
-right thing, but the gie distance computation is not yet able to cope
-with "unusual" axis orders
+# NOTE: A number of the tests below are commented out. The actually do the
+# right thing, but the gie distance computation is not yet able to cope
+# with "unusual" axis orders
 -------------------------------------------------------------------------------
 operation  proj=latlong geoidgrids=egm96_15.gtx  axis=neu ellps=GRS80
 -------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ expect    12.5 55.5 0
 
 
 -------------------------------------------------------------------------------
-Some more complex axis swapping.
+# Some more complex axis swapping.
 -------------------------------------------------------------------------------
 operation  proj=latlong geoidgrids=egm96_15.gtx  axis=nue ellps=GRS80
 -------------------------------------------------------------------------------
@@ -157,26 +157,26 @@ expect    -7424275.1946 -36.3941  1391493.6349 0.0000
 
 
 -------------------------------------------------------------------------------
-A test case from a comment by Github user c0nk
+# A test case from a comment by Github user c0nk
 -------------------------------------------------------------------------------
-operation  proj=somerc
-           lat_0=46.95240555555556 lon_0=7.439583333333333 k_0=1
-           x_0=2600000 y_0=1200000 ellps=bessel
+operation  proj=somerc \
+           lat_0=46.95240555555556 lon_0=7.439583333333333 k_0=1 \
+           x_0=2600000 y_0=1200000 ellps=bessel \
            towgs84=674.374,15.056,405.346
 -------------------------------------------------------------------------------
 tolerance 20 cm
 accept    7.438632495 46.951082877
 expect    2600000.0  1200000.0
 -------------------------------------------------------------------------------
-Same test, but now implemented as a pipeline. This is for testing a nasty bug,
-where, at the end of pipeline creation, a false warning about missing ellps was
-left behind from the creation of the Helmert step  (now repaired in pj_init).
+# Same test, but now implemented as a pipeline. This is for testing a nasty bug,
+# where, at the end of pipeline creation, a false warning about missing ellps was
+# left behind from the creation of the Helmert step  (now repaired in pj_init).
 -------------------------------------------------------------------------------
-operation proj=pipeline
-     step proj=cart ellps=WGS84
-     step proj=helmert x=674.37400 y=15.05600 z=405.34600 inv
-     step proj=cart ellps=bessel inv
-     step proj=somerc lat_0=46.95240555555556 lon_0=7.439583333333333
+operation proj=pipeline \
+     step proj=cart ellps=WGS84 \
+     step proj=helmert x=674.37400 y=15.05600 z=405.34600 inv \
+     step proj=cart ellps=bessel inv \
+     step proj=somerc lat_0=46.95240555555556 lon_0=7.439583333333333 \
                       k_0=1 x_0=2600000 y_0=1200000 ellps=bessel units=m
 -------------------------------------------------------------------------------
 tolerance 20 cm
@@ -186,7 +186,7 @@ expect    2600000.0  1200000.0
 
 
 -------------------------------------------------------------------------------
-Make sure that transient errors are returned correctly.
+# Make sure that transient errors are returned correctly.
 -------------------------------------------------------------------------------
 operation +proj=geos +lon_0=0.00 +lat_0=0.00 +a=6378169.00 +b=6356583.80 +h=35785831.0
 -------------------------------------------------------------------------------
@@ -200,7 +200,7 @@ accept  85.05493299 46.5261074 0 0
 expect  failure
 
 -------------------------------------------------------------------------------
-Test that Google's Web Mercator works as intended (see #834 for details).
+# Test that Google's Web Mercator works as intended (see #834 for details).
 -------------------------------------------------------------------------------
 use_proj4_init_rules true
 operation   proj=pipeline step init=epsg:26915 inv step init=epsg:3857
@@ -214,7 +214,7 @@ expect      -10370728.80        5552839.74          0
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Test Google's Web Mercator with +proj=webmerc +ellps=WGS84
+# Test Google's Web Mercator with +proj=webmerc +ellps=WGS84
 -------------------------------------------------------------------------------
 use_proj4_init_rules true
 operation   proj=pipeline step init=epsg:26915 inv step proj=webmerc datum=WGS84
@@ -228,7 +228,7 @@ expect      -10370728.80        5552839.74          0
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Web Mercator test data from EPSG Guidance Note 7-2, p. 44.
+# Web Mercator test data from EPSG Guidance Note 7-2, p. 44.
 -------------------------------------------------------------------------------
 operation   proj=webmerc +ellps=WGS84
 tolerance   1 cm
@@ -241,11 +241,11 @@ expect      -11169055.58        2800000.00
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Test that +datum parameters are handled correctly in pipelines.
-See #872 for details.
+# Test that +datum parameters are handled correctly in pipelines.
+# See #872 for details.
 -------------------------------------------------------------------------------
-operation   +proj=pipeline
-            +step +proj=longlat +datum=GGRS87 +inv
+operation   +proj=pipeline \
+            +step +proj=longlat +datum=GGRS87 +inv \
             +step +proj=longlat +datum=WGS84
 -------------------------------------------------------------------------------
 tolerance   20 cm
@@ -255,11 +255,11 @@ expect      23.729194873180   37.986398897578   31.289740102
 
 
 -------------------------------------------------------------------------------
-Test that +towgs84=0,0,0 parameter is handled as still implying cart
-transformation
+# Test that +towgs84=0,0,0 parameter is handled as still implying cart
+# transformation
 -------------------------------------------------------------------------------
-operation   +proj=pipeline
-            +step +proj=utm +zone=11 +ellps=clrk66 +towgs84=0,0,0 +inv
+operation   +proj=pipeline \
+            +step +proj=utm +zone=11 +ellps=clrk66 +towgs84=0,0,0 +inv \
             +step +proj=utm +zone=11 +datum=WGS84
 
 -------------------------------------------------------------------------------
@@ -269,45 +269,45 @@ expect      440719.958709357 3751294.2109841 -4.44340920541435
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Test that pipelines with unit mismatch between steps can't be constructed.
+# Test that pipelines with unit mismatch between steps can't be constructed.
 -------------------------------------------------------------------------------
-operation   +proj=pipeline
-            +step +proj=merc
+operation   +proj=pipeline \
+            +step +proj=merc \
             +step +proj=merc
 expect      failure pjd_err_malformed_pipeline
 
-operation   +proj=pipeline
-            +step +proj=latlong
-            +step +proj=merc
+operation   +proj=pipeline \
+            +step +proj=latlong \
+            +step +proj=merc \
             +step +proj=helmert +x=200 +y=100
 expect      failure pjd_err_malformed_pipeline
 
-operation   +proj=pipeline
-            +step +proj=merc +ellps=WGS84
+operation   +proj=pipeline \
+            +step +proj=merc +ellps=WGS84 \
             +step +proj=unitconvert +xy_in=m +xy_out=km
 accept      12          56
 expect      1335.8339   7522.963
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Test Pipeline Coordinate Stack
+# Test Pipeline Coordinate Stack
 -------------------------------------------------------------------------------
-operation  +proj=pipeline
-            +step +proj=push +v_1
-            +step +proj=utm +zone=32
-            +step +proj=utm +zone=33 +inv
+operation  +proj=pipeline \
+            +step +proj=push +v_1 \
+            +step +proj=utm +zone=32 \
+            +step +proj=utm +zone=33 +inv \
             +step +proj=pop +v_1
 
 accept      12  56  0   2020
 expect      12  56  0   2020
 roundtrip   10
 
-#operation   +proj=pipeline
-            +step +proj=latlon # dummy step
-            +step +proj=push +v_1
-            +step +proj=utm +zone=32
-            +step +proj=utm +zone=33 +inv
-            +step +proj=pop +v_1
+operation   +proj=pipeline \
+            +step +proj=latlon \ # dummy step
+            +step +proj=push +v_1 \
+            +step +proj=utm +zone=32 \
+            +step +proj=utm +zone=33 +inv \
+            +step +proj=pop +v_1 \
             +step +proj=affine # dummy step
 
 accept      12  56  0   2020
@@ -315,41 +315,41 @@ expect      12  56  0   2020
 roundtrip   10
 
 # push value to stack without popping it again
-operation  +proj=pipeline
-            +step +proj=push +v_1
-            +step +proj=utm +zone=32
+operation  +proj=pipeline \
+            +step +proj=push +v_1 \
+            +step +proj=utm +zone=32 \
             +step +proj=utm +zone=33 +inv
 
 accept      12  56  0   2020
 expect      18  56  0   2020
 
 # test that multiple pushes and pops works
-operation  +proj=pipeline
-            +step +proj=push +v_1
-            +step +proj=utm +zone=32
-            +step +proj=push +v_1
-            +step +proj=utm +zone=33 +inv
-            +step +proj=utm +zone=34
-            +step +proj=pop +v_1
-            +step +proj=utm +zone=32 +inv
+operation  +proj=pipeline \
+            +step +proj=push +v_1 \
+            +step +proj=utm +zone=32 \
+            +step +proj=push +v_1 \
+            +step +proj=utm +zone=33 +inv \
+            +step +proj=utm +zone=34 \
+            +step +proj=pop +v_1 \
+            +step +proj=utm +zone=32 +inv \
             +step +proj=pop +v_1
 
 accept      12  56  0   2020
 expect      12  56  0   2020
 
 # pop from empty stack
-operation  +proj=pipeline
-            +step +proj=utm +zone=32
-            +step +proj=utm +zone=33 +inv
+operation  +proj=pipeline \
+            +step +proj=utm +zone=32 \
+            +step +proj=utm +zone=33 +inv \
             +step +proj=pop +v_1
 
 accept      12  56  0   2020
 expect      18  56  0   2020
 
-operation   +proj=pipeline
-            +step +proj=push +v_2
-            +step +inv +proj=eqearth
-            +step +proj=laea
+operation   +proj=pipeline \
+            +step +proj=push +v_2 \
+            +step +inv +proj=eqearth \
+            +step +proj=laea \
             +step +proj=pop +v_2
 
 accept      900000      6000000 0   2020
@@ -358,11 +358,11 @@ expect      896633.0226 6000000 0   2020
 # Datum shift in cartesian space but keeping the height
 # (simulates a datum-shift with affin since ISO19111 code
 # currrently obfuscates proj-strings using cart/helmert/invcart)
-operation   +proj=pipeline +ellps=GRS80
-            +step +proj=push +v_3
-            +step +proj=cart
-            +step +proj=affine +xoff=1000 +yoff=2000 +xoff=3000
-            +step +proj=cart +inv
+operation   +proj=pipeline +ellps=GRS80 \
+            +step +proj=push +v_3 \
+            +step +proj=cart \
+            +step +proj=affine +xoff=1000 +yoff=2000 +xoff=3000 \
+            +step +proj=cart +inv \
             +step +proj=pop +v_3
 tolerance   50 cm
 
@@ -379,11 +379,10 @@ accept      12 56 0 0
 expect      12 56 0 0
 
 -------------------------------------------------------------------------------
-Test Pipeline +omit_inv
+# Test Pipeline +omit_inv
 -------------------------------------------------------------------------------
 
-operation   +proj=pipeline
-                +step +proj=affine +xoff=1 +yoff=1 +omit_inv
+operation   +proj=pipeline +step +proj=affine +xoff=1 +yoff=1 +omit_inv
 
 accept      2 49 0 0
 expect      3 50 0 0
@@ -393,8 +392,7 @@ accept      2 49 0 0
 expect      2 49 0 0
 
 
-operation   +proj=pipeline
-                +step +inv +proj=affine +xoff=1 +yoff=1 +omit_inv
+operation   +proj=pipeline +step +inv +proj=affine +xoff=1 +yoff=1 +omit_inv
 
 accept      2 49 0 0
 expect      1 48 0 0
@@ -404,11 +402,10 @@ accept      2 49 0 0
 expect      2 49 0 0
 
 -------------------------------------------------------------------------------
-Test Pipeline +omit_fwd
+# Test Pipeline +omit_fwd
 -------------------------------------------------------------------------------
 
-operation   +proj=pipeline
-                +step +proj=affine +xoff=1 +yoff=1 +omit_fwd
+operation   +proj=pipeline +step +proj=affine +xoff=1 +yoff=1 +omit_fwd
 
 accept      2 49 0 0
 expect      2 49 0 0
@@ -418,8 +415,7 @@ accept      2 49 0 0
 expect      1 48 0 0
 
 
-operation   +proj=pipeline
-                +step +inv +proj=affine +xoff=1 +yoff=1 +omit_fwd
+operation   +proj=pipeline +step +inv +proj=affine +xoff=1 +yoff=1 +omit_fwd
 
 accept      2 49 0 0
 expect      2 49 0 0
@@ -429,8 +425,8 @@ accept      2 49 0 0
 expect      3 50 0 0
 
 -------------------------------------------------------------------------------
-Test bugfix of https://github.com/OSGeo/proj.4/issues/1002
-(do not interpolate nodata values)
+# Test bugfix of https://github.com/OSGeo/proj.4/issues/1002
+# (do not interpolate nodata values)
 -------------------------------------------------------------------------------
 operation   +proj=latlong +ellps=WGS84 +geoidgrids=tests/test_nodata.gtx
 -------------------------------------------------------------------------------
@@ -439,7 +435,7 @@ expect      4.05        52.1        -10
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Test null grid with vgridshift
+# Test null grid with vgridshift
 -------------------------------------------------------------------------------
 operation   proj=vgridshift  grids=tests/test_nodata.gtx,null  ellps=GRS80
 -------------------------------------------------------------------------------
@@ -452,13 +448,13 @@ expect      4.05        -52.1        0
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-Test bug fix of https://github.com/OSGeo/proj.4/issues/1025.
-Using geocent in the new API with a custom ellipsoid should return coordinates
-that correspond to that particular ellipsoid and not WGS84 as demonstrated in
-the bug report.
+# Test bug fix of https://github.com/OSGeo/proj.4/issues/1025.
+# Using geocent in the new API with a custom ellipsoid should return coordinates
+# that correspond to that particular ellipsoid and not WGS84 as demonstrated in
+# the bug report.
 -------------------------------------------------------------------------------
-operation   +proj=pipeline +step
-            +proj=longlat +a=3396190 +b=3376200 +inv +step
+operation   +proj=pipeline +step \
+            +proj=longlat +a=3396190 +b=3376200 +inv +step \
             +proj=geocent +a=3396190 +b=3376200 +lon_0=0 +units=m
 accept      0.0         0.0     0.0
 expect      3396190.0   0.0     0.0
@@ -471,7 +467,7 @@ roundtrip   1
 
 
 -------------------------------------------------------------------------------
-Check that geocent and cart take into account to_meter (#1053)
+# Check that geocent and cart take into account to_meter (#1053)
 -------------------------------------------------------------------------------
 
 operation   +proj=geocent +a=1000 +b=1000 +to_meter=1000
@@ -485,7 +481,7 @@ expect      0 1 0
 roundtrip   1
 
 -------------------------------------------------------------------------------
-Check that vunits / vto_meter is honored
+# Check that vunits / vto_meter is honored
 -------------------------------------------------------------------------------
 
 operation   +proj=longlat +a=1 +b=1 +vto_meter=1000
@@ -522,14 +518,14 @@ expect      0 0 1
 roundtrip   1
 
 -------------------------------------------------------------------------------
-Check that proj_create() returns a generic error when an exception is caught
-in the creation of a PJ object.
+# Check that proj_create() returns a generic error when an exception is caught
+# in the creation of a PJ object.
 -------------------------------------------------------------------------------
 operation   this is a bogus CRS meant to trigger a generic error in proj_create()
 expect      failure   errno generic error
 
 -------------------------------------------------------------------------------
-Test proj=set
+# Test proj=set
 -------------------------------------------------------------------------------
 
 operation   +proj=set
@@ -546,4 +542,4 @@ direction   inverse
 accept      1 2 3 4
 expect      10 20 30 40
 
-</gie>
+</gie-strict>

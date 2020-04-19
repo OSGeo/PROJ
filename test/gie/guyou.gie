@@ -1,7 +1,7 @@
-<gie>
+<gie-strict>
 ------------------------------------------------------------
-This gie file was automatically generated using libproject
-where the guyou code was adapted from
+# This gie file was automatically generated using libproject
+# where the guyou code was adapted from
 ------------------------------------------------------------
 
 ------------------------------------------------------------
@@ -2130,4 +2130,4 @@ accept     0 -90
 expect     0 -1.85407
 ------------------------------------------------------------
 
-</gie>
+</gie-strict>

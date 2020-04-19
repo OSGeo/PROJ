@@ -4,13 +4,13 @@ Test 5103 (part 1), Lambert Conic Conformal (2SP), v2-0_2011-06-28.
 
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4313 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4313 +inv \
            +step +init=epsg:31370
 
 tolerance  30 mm
@@ -77,8 +77,8 @@ expect    595117.95 430202.63
 
 
 --------------------------------------------------------------------------------
-operation  proj=pipeline
-           step init=epsg:31370 inv
+operation  proj=pipeline \
+           step init=epsg:31370 inv \
            step init=epsg:4313
 
 tolerance  30 mm
@@ -144,8 +144,8 @@ accept    595117.95 430202.63
 expect    11 53
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline   towgs84=0,0,0   # turn off dual datum shift
-           +step +init=epsg:4313 +inv
+operation  +proj=pipeline   towgs84=0,0,0 \  # turn off dual datum shift
+           +step +init=epsg:4313 +inv \
            +step +init=epsg:31370
 
 tolerance  6 mm
@@ -210,4 +210,4 @@ roundtrip 1000
 accept    11 53
 roundtrip 1000
 
-</gie>
+</gie-strict>

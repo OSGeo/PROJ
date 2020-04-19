@@ -4,13 +4,13 @@ Test 5112, Mercator (variant B),  v2-0_2011-06-28.
 
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  proj=pipeline
-           step init=epsg:4284 inv
+operation  proj=pipeline \
+           step init=epsg:4284 inv \
            step init=epsg:3388
 
 tolerance 50 mm
@@ -31,8 +31,8 @@ accept    67.0 -41.0
 expect    1325634.35 -3709687.25
 
 --------------------------------------------------------------------------------
-operation  proj=pipeline
-           step init=epsg:3388 inv
+operation  proj=pipeline \
+           step init=epsg:3388 inv \
            step init=epsg:4284
 
 tolerance 50 mm
@@ -53,8 +53,8 @@ accept    1325634.35 -3709687.25
 expect    67.0 -41.0
 
 --------------------------------------------------------------------------------
-operation proj=pipeline towgs84=0,0,0
-          step init=epsg:4284 inv
+operation proj=pipeline towgs84=0,0,0 \
+          step init=epsg:4284 inv \
           step init=epsg:3388
 
 tolerance 6 mm
@@ -74,4 +74,4 @@ roundtrip 1000
 accept    67.0 -41.0
 roundtrip 1000
 
-</gie>
+</gie-strict>

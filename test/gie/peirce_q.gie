@@ -1,7 +1,7 @@
-<gie>
+<gie-strict>
 ------------------------------------------------------------
-This gie file was automatically generated using libproject
-where the peirce_q code was adapted from
+# This gie file was automatically generated using libproject
+# where the peirce_q code was adapted from
 ------------------------------------------------------------
 
 ------------------------------------------------------------
@@ -2117,4 +2117,4 @@ expect    failure errno -14
 accept     180.7137917600   105.8174218935
 expect    failure errno -14
 
-</gie>
+</gie-strict>

@@ -18,17 +18,17 @@ myself - it probably should come from official AU sources.
 Thomas Knudsen, thokn@sdfe.dk, 2017-11-27
 -----------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 -----------------------------------------------------------------------------------
-GDA94 to GDA2020
+# GDA94 to GDA2020
 -----------------------------------------------------------------------------------
-Just the Helmert transformation, to verify that we are within 100 um
+# Just the Helmert transformation, to verify that we are within 100 um
 -----------------------------------------------------------------------------------
-operation proj=helmert
-          convention=coordinate_frame
-          x =  0.06155   rx = -0.0394924
-          y = -0.01087   ry = -0.0327221
+operation proj=helmert \
+          convention=coordinate_frame \
+          x =  0.06155   rx = -0.0394924 \
+          y = -0.01087   ry = -0.0327221 \
           z = -0.04019   rz = -0.0328979    s = -0.009994
 
 -----------------------------------------------------------------------------------
@@ -39,17 +39,17 @@ expect    -4052052.7379 4212835.9897 -2545104.5898
 
 
 -----------------------------------------------------------------------------------
-GDA94 to GDA2020
+# GDA94 to GDA2020
 -----------------------------------------------------------------------------------
-All the way from geographic-to-cartesian-and-back-to-geographic
+# All the way from geographic-to-cartesian-and-back-to-geographic
 -----------------------------------------------------------------------------------
-operation proj = pipeline ellps=GRS80;
-          step proj = cart;
-          step proj = helmert
-               convention=coordinate_frame
-               x  =  0.06155;   rx = -0.0394924;
-               y  = -0.01087;   ry = -0.0327221;
-               z  = -0.04019;   rz = -0.0328979;  s = -0.009994;
+operation proj = pipeline ellps=GRS80; \
+          step proj = cart; \
+          step proj = helmert \
+               convention=coordinate_frame \
+               x  =  0.06155;   rx = -0.0394924; \
+               y  = -0.01087;   ry = -0.0327221; \
+               z  = -0.04019;   rz = -0.0328979;  s = -0.009994; \
           step proj = cart inv;
 -----------------------------------------------------------------------------------
 tolerance  2 mm
@@ -59,16 +59,14 @@ expect    133.8855216  -23.67011014  603.2489  0   # Alice Springs GDA2020
 
 
 -----------------------------------------------------------------------------------
-ITRF2014@2018 to GDA2020  -  Test point ALIC (Alice Springs)
+# ITRF2014@2018 to GDA2020  -  Test point ALIC (Alice Springs)
 -----------------------------------------------------------------------------------
-Just the Helmert transformation, to verify that we are within 100 um
+# Just the Helmert transformation, to verify that we are within 100 um
 -----------------------------------------------------------------------------------
-operation proj = helmert    exact convention=coordinate_frame
-
-          x = 0   rx = 0   dx = 0   drx = 0.00150379
-          y = 0   ry = 0   dy = 0   dry = 0.00118346
-          z = 0   rz = 0   dz = 0   drz = 0.00120716
-
+operation proj = helmert    exact convention=coordinate_frame \
+          x = 0   rx = 0   dx = 0   drx = 0.00150379 \
+          y = 0   ry = 0   dy = 0   dry = 0.00118346 \
+          z = 0   rz = 0   dz = 0   drz = 0.00120716 \
           s = 0   ds = 0   t_epoch=2020.0
 -----------------------------------------------------------------------------------
 tolerance  40 um
@@ -76,4 +74,4 @@ accept     -4052052.6588 4212835.9938 -2545104.6946 2018.0      # ITRF2014@2018.
 expect     -4052052.7373 4212835.9835 -2545104.5867             #  GDA2020
 -----------------------------------------------------------------------------------
 
-</gie>
+</gie-strict>

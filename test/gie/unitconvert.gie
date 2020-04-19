@@ -2,7 +2,7 @@
                         Tests for the unitconvert operation
 -------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 operation   proj=unitconvert xy_in=m xy_out=dm z_in=cm z_out=mm
 tolerance   0.1
@@ -67,4 +67,4 @@ expect      failure
 operation   proj=unitconvert z_out=1e400
 expect      failure
 
-</gie>
+</gie-strict>

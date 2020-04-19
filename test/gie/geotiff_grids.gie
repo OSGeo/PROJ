@@ -4,7 +4,7 @@
 Test GeoTIFF grids
 ===============================================================================
 
-<gie>
+<gie-strict>
 
 # Those first tests using +proj=vgridshift only test the capability of reading
 # correctly a value from various formulations of GeoTIFF file, hence only the
@@ -333,15 +333,15 @@ expect      failure errno failed_to_load_grid
 
 # IGNF:LAMBE to IGNF:LAMB93 using xyzgridshift operation
 -------------------------------------------------------------------------------
-operation   +proj=pipeline
-                +step +inv +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0
-                    +k_0=0.99987742 +x_0=600000 +y_0=2200000 +ellps=clrk80ign +pm=paris
-                +step +proj=push +v_3
-                +step +proj=cart +ellps=clrk80ign
-                +step +proj=xyzgridshift +grids=tests/subset_of_gr3df97a.tif +grid_ref=output_crs +ellps=GRS80
-                +step +proj=cart +ellps=GRS80 +inv
-                +step +proj=pop +v_3
-                +step +proj=lcc +lat_0=46.5 +lon_0=3 +lat_1=49 +lat_2=44
+operation   +proj=pipeline \
+                +step +inv +proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 \
+                    +k_0=0.99987742 +x_0=600000 +y_0=2200000 +ellps=clrk80ign +pm=paris \
+                +step +proj=push +v_3 \
+                +step +proj=cart +ellps=clrk80ign \
+                +step +proj=xyzgridshift +grids=tests/subset_of_gr3df97a.tif +grid_ref=output_crs +ellps=GRS80 \
+                +step +proj=cart +ellps=GRS80 +inv \
+                +step +proj=pop +v_3 \
+                +step +proj=lcc +lat_0=46.5 +lon_0=3 +lat_1=49 +lat_2=44 \
                     +x_0=700000 +y_0=6600000 +ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance 1 mm
@@ -354,4 +354,4 @@ roundtrip 1
 -------------------------------------------------------------------------------
 
 
-</gie>
+</gie-strict>

@@ -20,13 +20,13 @@ To be on the safe side we, use 0.01 m as the tolerance.
 
 
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4275 +inv
+operation  +proj=pipeline\
+           +step +init=epsg:4275 +inv\
            +step +init=epsg:4807
 --------------------------------------------------------------------------------
 tolerance 0.01 m
@@ -86,8 +86,8 @@ accept    11 53
 expect    8.66277083 53
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4807 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4807 +inv \
            +step +init=epsg:4275
 --------------------------------------------------------------------------------
 tolerance 0.01 m
@@ -147,8 +147,8 @@ accept    8.66277083 53
 expect    11 53
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4275 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4275 +inv \
            +step +init=epsg:4807
 --------------------------------------------------------------------------------
 tolerance 0.01 m
@@ -207,4 +207,4 @@ tolerance 0.01 m
 accept    11 53
 roundtrip 1000
 
-</gie>
+</gie-strict>

@@ -4,13 +4,13 @@ Test 5109, Albers Equal Area, v2-0_2011-06-28.
 
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4283 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4283 +inv \
            +step +init=epsg:3577
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -66,8 +66,8 @@ accept    170 -60
 expect    2656914.716 -6784621.89
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:3577 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:3577 +inv \
            +step +init=epsg:4283
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -123,8 +123,8 @@ accept    2656914.716 -6784621.89
 expect    170 -60
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4283 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4283 +inv \
            +step +init=epsg:3577
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -179,4 +179,4 @@ tolerance  0.006 m
 accept    170 -60
 roundtrip 1000
 
-</gie>
+</gie-strict>

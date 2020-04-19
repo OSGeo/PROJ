@@ -123,7 +123,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2017-10-01/2017-10-08
 /* Package for flexible format I/O - ffio */
 typedef struct ffio {
     FILE *f;
-    const char **tags;
+    const char * const *tags;
     const char *tag;
     char *args;
     char *next_args;
@@ -133,23 +133,24 @@ typedef struct ffio {
     size_t argc;
     size_t lineno, next_lineno;
     size_t level;
+    bool strict_mode;
 }  ffio;
 
 static int get_inp (ffio *G);
 static int skip_to_next_tag (ffio *G);
 static int step_into_gie_block (ffio *G);
-static int locate_tag (ffio *G, const char *tag);
 static int nextline (ffio *G);
 static int at_end_delimiter (ffio *G);
 static const char *at_tag (ffio *G);
 static int at_decorative_element (ffio *G);
 static ffio *ffio_destroy (ffio *G);
-static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size);
+static ffio *ffio_create (const char * const *tags, size_t n_tags, size_t max_record_size);
 
-static const char *gie_tags[] = {
+static const char * const gie_tags[] = {
     "<gie>", "operation", "crs_src", "crs_dst", "use_proj4_init_rules",
     "accept", "expect", "roundtrip", "banner", "verbose",
-    "direction", "tolerance", "ignore", "require_grid", "echo", "skip", "</gie>"
+    "direction", "tolerance", "ignore", "require_grid", "echo", "skip", "</gie>",
+    "<gie-strict>", "</gie-strict>",
 };
 
 static const size_t n_gie_tags = sizeof gie_tags / sizeof gie_tags[0];
@@ -426,7 +427,12 @@ static int process_file (const char *fname) {
     if (F->level==0)
         return errmsg (-3, "File '%s':Missing '<gie>' cmnd - bye!\n", fname);
     if (F->level && F->level%2)
-        return errmsg (-4, "File '%s':Missing '</gie>' cmnd - bye!\n", fname);
+    {
+        if( F->strict_mode )
+            return errmsg (-4, "File '%s':Missing '</gie-strict>' cmnd - bye!\n", fname);
+        else
+            return errmsg (-4, "File '%s':Missing '</gie>' cmnd - bye!\n", fname);
+    }
     return 0;
 }
 
@@ -1267,7 +1273,7 @@ See the PROJ ".gie" test suites for examples of supported formatting.
 
 
 /***************************************************************************************/
-static ffio *ffio_create (const char **tags, size_t n_tags, size_t max_record_size) {
+static ffio *ffio_create (const char * const *tags, size_t n_tags, size_t max_record_size) {
 /****************************************************************************************
 Constructor for the ffio object.
 ****************************************************************************************/
@@ -1396,24 +1402,6 @@ Read next line of input file. Returns 1 on success, 0 on failure.
 }
 
 
-
-/***************************************************************************************/
-static int locate_tag (ffio *G, const char *tag) {
-/****************************************************************************************
-Find start-of-line tag (currently only used to search for for <gie>, but any tag
-valid).
-
-Returns 1 on success, 0 on failure.
-****************************************************************************************/
-    size_t n = strlen (tag);
-    while (0!=strncmp (tag, G->next_args, n))
-        if (0==nextline (G))
-            return 0;
-    return 1;
-}
-
-
-
 /***************************************************************************************/
 static int step_into_gie_block (ffio *G) {
 /****************************************************************************************
@@ -1423,22 +1411,25 @@ Make sure we're inside a <gie>-block. Return 1 on success, 0 otherwise.
     if (G->level % 2)
         return 1;
 
-    if (0==locate_tag (G, "<gie>"))
-        return 0;
-
-    while (0!=strncmp ("<gie>", G->next_args, 5)) {
-        G->next_args[0] = 0;
-        if (feof (G->f))
+    while (strncmp (G->next_args, "<gie>", strlen("<gie>")) != 0 &&
+           strncmp (G->next_args, "<gie-strict>", strlen("<gie-strict>")) != 0 )
+    {
+        if (0==nextline (G))
             return 0;
-        if (nullptr==fgets (G->next_args, (int) G->next_args_size - 1, G->f))
-            return 0;
-        pj_chomp (G->next_args);
-        G->next_lineno++;
     }
+
     G->level++;
 
-    /* We're ready at the start - now step into the block */
-    return nextline (G);
+    if( strncmp (G->next_args, "<gie-strict>", strlen("<gie-strict>")) == 0 )
+    {
+        G->strict_mode = true;
+        return 0;
+    }
+    else
+    {
+        /* We're ready at the start - now step into the block */
+        return nextline (G);
+    }
 }
 
 
@@ -1514,8 +1505,54 @@ whitespace etc. The block is stored in G->args. Returns 1 on success, 0 otherwis
 ****************************************************************************************/
     G->args[0] = 0;
 
-    if (0==skip_to_next_tag (G))
+    // Special parsing in strict_mode:
+    // - All non-comment/decoration lines must start with a valid tag
+    // - Commands split on several lines should be terminated with " \"
+    if( G->strict_mode )
+    {
+        while( nextline(G) )
+        {
+            G->lineno = G->next_lineno;
+            if( G->next_args[0] == 0 || at_decorative_element(G) ) {
+                continue;
+            }
+            G->tag = at_tag (G);
+            if (nullptr==G->tag)
+            {
+                another_failure();
+                fprintf (T.fout, "unsupported command line %d: %s\n", (int)G->lineno, G->next_args);
+                return 0;
+            }
+
+            append_args (G);
+            pj_shrink (G->args);
+            while( G->args[0] != '\0' && G->args[strlen(G->args)-1] == '\\' )
+            {
+                G->args[strlen(G->args)-1] = 0;
+                if( !nextline(G) )
+                {
+                    return 0;
+                }
+                G->lineno = G->next_lineno;
+                append_args (G);
+                pj_shrink (G->args);
+            }
+            if ( 0==strcmp (G->tag, "</gie-strict>")) {
+                G->level++;
+                G->strict_mode = false;
+            }
+            return 1;
+        }
         return 0;
+    }
+
+    if (0==skip_to_next_tag (G))
+    {
+        // If we just entered <gie-strict>, re-enter to read the first command
+        if( G->strict_mode )
+            return get_inp(G);
+        return 0;
+    }
     G->tag = at_tag (G);
 
     if (nullptr==G->tag)

@@ -1,7 +1,8 @@
-<gie>
+<gie-strict>
+
 ------------------------------------------------------------
-This gie file was automatically generated using libproject
-where the adams_ws1 code was adapted from
+# This gie file was automatically generated using libproject
+# where the adams_ws1 code was adapted from
 ------------------------------------------------------------
 
 ------------------------------------------------------------
@@ -2117,4 +2118,4 @@ expect    failure errno -14
 accept     180.9197969760   110.0988929845
 expect    failure errno -14
 
-</gie>
+</gie-strict>

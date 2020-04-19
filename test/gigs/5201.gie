@@ -10,13 +10,13 @@ Test 5201, Geographic Geocentric conversions, v2.0_2011-09-28. (EPSG 4979 - WGS8
 <4326> +proj=longlat +datum=WGS84  <>
 
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4978 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4978 +inv \
            +step +init=epsg:4326
 --------------------------------------------------------------------------------
 tolerance  0.01 m
@@ -128,8 +128,8 @@ accept    -2187336.719 -112 -5970149.093
 expect    -179.99706624 -70.00224647 -1039.2896
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4326 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4326 +inv \
            +step +init=epsg:4978
 --------------------------------------------------------------------------------
 tolerance  0.01  m
@@ -241,8 +241,8 @@ accept    -179.99706624 -70.00224647 -1039.2896
 expect    -2187336.719 -112 -5970149.093
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4978 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4978 +inv \
            +step +init=epsg:4326
 --------------------------------------------------------------------------------
 tolerance  0.01  m
@@ -353,4 +353,4 @@ tolerance  0.01  m
 accept    -2187336.719 -112 -5970149.093
 roundtrip 1000
 
-</gie>
+</gie-strict>

@@ -1,9 +1,9 @@
-<gie>
+<gie-strict>
 
 -------------------------------------------------------------------------------
 operation proj=latlong datum=potsdam ellps=bessel
 -------------------------------------------------------------------------------
-DE_DHDN (BeTA, 2007) to ETRS89 using NTv2 grid. epsg:15948
+#DE_DHDN (BeTA, 2007) to ETRS89 using NTv2 grid. epsg:15948
 -------------------------------------------------------------------------------
 
 tolerance 1 mm
@@ -79,11 +79,11 @@ expect       7.532530252396  47.665765608135  # ETRS89_Lat-Lon
 
 
 -------------------------------------------------------------------------------
-operation proj=latlong
+operation proj=latlong \
           towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 ellps=bessel
 -------------------------------------------------------------------------------
-DE_DHDN to ETRS89 using deprecated 7 parameter Helmert transform. The results
-agree at the 3 m level.
+# DE_DHDN to ETRS89 using deprecated 7 parameter Helmert transform. The results
+# agree at the 3 m level.
 -------------------------------------------------------------------------------
 
 require_grid  BETA2007.gsb
@@ -158,7 +158,7 @@ expect       7.249209260581  49.332249456364  # ETRS89_Lat-Lon
 accept       7.533333333333  47.666666666667  # DE_DHDN_Lat-Lon
 expect       7.532530252396  47.665765608135  # ETRS89_Lat-Lon
 -------------------------------------------------------------------------------
-</gie>
+</gie-strict>
 
 
 

@@ -4,13 +4,13 @@ Test 5105 (part 2), Oblique Mercator (variant B), v2-0_2011-06-28.
 
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4237 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4237 +inv \
            +step +init=epsg:23700
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -62,8 +62,8 @@ accept    16.36 45.5
 expect    439836.709 20816.456
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:23700 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:23700 +inv \
            +step +init=epsg:4237
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -115,8 +115,8 @@ accept    439836.709 20816.456
 expect    16.36 45.5
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4237 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4237 +inv \
            +step +init=epsg:23700
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -167,4 +167,4 @@ tolerance  0.006 m
 accept    16.36 45.5
 roundtrip 1000
 
-</gie>
+</gie-strict>

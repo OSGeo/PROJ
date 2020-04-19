@@ -324,6 +324,33 @@ gie command language
         expect  0   110579.9
         </gie>
 
+
+Strict mode
+***********
+
+.. versionadded:: 7.1
+
+A stricter variant of normal gie syntax can be used by wrapping gie commands
+between ``<gie-strict>`` and ``</gie-strict>``. In strict mode, comment lines
+must start with a sharp character. Unknown commands will be considered as an error.
+A command can still be split on several lines, but intermediate lines must
+end with the space character followed by backslash to mark the continuation.
+
+    .. code-block:: console
+
+        <gie-strict>
+        # This is a comment. The following line with multiple repeated characters too
+        -------------------------------------------------
+        # A command on several lines must use " \" continuation
+        operation proj=hgridshift +grids=nzgd2kgrid0005.gsb \
+                  ellps=GRS80
+        tolerance 1 mm
+        ignore    pjd_err_failed_to_load_grid
+        accept    172.999892181021551 -45.001620431954613
+        expect    173                 -45
+        </gie-strict>
+
+
 Background
 **********
 
