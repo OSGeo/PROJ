@@ -1774,7 +1774,7 @@ int pj_find_file(projCtx ctx, const char *short_filename,
 /** Get the URL endpoint to query for remote grids.
 *
 * @param ctx PROJ context, or NULL
-* @return Endpoint URL.
+* @return Endpoint URL. The returned pointer would be invalidated by a later call to proj_context_set_url_endpoint()
 * @since 7.1
 */
 const char* proj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
