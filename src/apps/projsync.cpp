@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (targetDir.empty()) {
-        targetDir = std::string(proj_context_get_user_writable_directory(ctx, true));
+        targetDir = proj_context_get_user_writable_directory(ctx, true);
     } else {
         if (targetDir.back() == '/') {
             targetDir.resize(targetDir.size() - 1);

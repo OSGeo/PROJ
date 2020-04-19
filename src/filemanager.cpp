@@ -1090,6 +1090,19 @@ std::string FileManager::getProjLibEnvVar(PJ_CONTEXT *ctx) {
 
 NS_PROJ_END
 
+// ---------------------------------------------------------------------------
+
+static void CreateDirectoryRecursively(PJ_CONTEXT *ctx,
+                                       const std::string &path) {
+    if (NS_PROJ::FileManager::exists(ctx, path.c_str()))
+        return;
+    auto pos = path.find_last_of("/\\");
+    if (pos == 0 || pos == std::string::npos)
+        return;
+    CreateDirectoryRecursively(ctx, path.substr(0, pos));
+    NS_PROJ::FileManager::mkdir(ctx, path.c_str());
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -1163,24 +1176,6 @@ void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
     ctx->custom_sqlite3_vfs_name = name ? name : std::string();
 }
 
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-
-// ---------------------------------------------------------------------------
-
-static void CreateDirectoryRecursively(PJ_CONTEXT *ctx,
-                                       const std::string &path) {
-    if (NS_PROJ::FileManager::exists(ctx, path.c_str()))
-        return;
-    auto pos = path.find_last_of("/\\");
-    if (pos == 0 || pos == std::string::npos)
-        return;
-    CreateDirectoryRecursively(ctx, path.substr(0, pos));
-    NS_PROJ::FileManager::mkdir(ctx, path.c_str());
-}
-
 // ---------------------------------------------------------------------------
 
 /** Get the PROJ user writable directory for datumgrid files.
@@ -1248,6 +1243,28 @@ const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
     }
     return ctx->user_writable_directory.c_str();
 }
+
+/** Get the URL endpoint to query for remote grids.
+*
+* @param ctx PROJ context, or NULL
+* @return Endpoint URL. The returned pointer would be invalidated
+* by a later call to proj_context_set_url_endpoint()
+* @since 7.1
+*/
+const char* proj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    if (!ctx->endpoint.empty()) {
+        return ctx->endpoint.c_str();
+    }
+    pj_load_ini(ctx);
+    return ctx->endpoint.c_str();
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 
 // ---------------------------------------------------------------------------
 
@@ -1491,7 +1508,7 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
                             DIR_CHAR + name)
                                .c_str(),
                       mode)) != nullptr) {
-            fname = std::string(proj_context_get_user_writable_directory(ctx, false));
+            fname = proj_context_get_user_writable_directory(ctx, false);
             fname += DIR_CHAR;
             fname += name;
             sysname = fname.c_str();
@@ -1563,7 +1580,7 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
         getenv("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY");
     if (ignoreUserWritableDirectory == nullptr ||
         ignoreUserWritableDirectory[0] == '\0') {
-        ret.push_back(std::string(proj_context_get_user_writable_directory(ctx, false)));
+        ret.push_back(proj_context_get_user_writable_directory(ctx, false));
     }
     const std::string envPROJ_LIB = NS_PROJ::FileManager::getProjLibEnvVar(ctx);
     if (!envPROJ_LIB.empty()) {
@@ -1766,26 +1783,6 @@ int pj_find_file(projCtx ctx, const char *short_filename,
     }
 
     return file != nullptr;
-}
-
-/************************************************************************/
-/*                    proj_context_get_url_endpoint()                   */
-/************************************************************************/
-/** Get the URL endpoint to query for remote grids.
-*
-* @param ctx PROJ context, or NULL
-* @return Endpoint URL. The returned pointer would be invalidated by a later call to proj_context_set_url_endpoint()
-* @since 7.1
-*/
-const char* proj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
-    if (ctx == nullptr) {
-        ctx = pj_get_default_ctx();
-    }
-    if (!ctx->endpoint.empty()) {
-        return ctx->endpoint.c_str();
-    }
-    pj_load_ini(ctx);
-    return ctx->endpoint.c_str();
 }
 
 /************************************************************************/

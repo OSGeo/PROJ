@@ -1074,7 +1074,7 @@ int main(int argc, char **argv) {
 #ifdef CURL_ENABLED
             if (proj_context_is_network_enabled(nullptr)) {
                 std::cout << "Status: enabled" << std::endl;
-                std::cout << "URL: " << std::string(proj_context_get_url_endpoint(nullptr))
+                std::cout << "URL: " << proj_context_get_url_endpoint(nullptr)
                           << std::endl;
             } else {
                 std::cout << "Status: disabled" << std::endl;
