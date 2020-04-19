@@ -1298,19 +1298,22 @@ struct WKTParser::Private {
     static std::string projectionGetParameter(const WKTNodeNNPtr &projCRSNode,
                                               const char *paramName);
 
-    ConversionNNPtr buildProjection(const WKTNodeNNPtr &projCRSNode,
+    ConversionNNPtr buildProjection(const GeodeticCRSNNPtr &baseGeodCRS,
+                                    const WKTNodeNNPtr &projCRSNode,
                                     const WKTNodeNNPtr &projectionNode,
                                     const UnitOfMeasure &defaultLinearUnit,
                                     const UnitOfMeasure &defaultAngularUnit);
 
     ConversionNNPtr
-    buildProjectionStandard(const WKTNodeNNPtr &projCRSNode,
+    buildProjectionStandard(const GeodeticCRSNNPtr &baseGeodCRS,
+                            const WKTNodeNNPtr &projCRSNode,
                             const WKTNodeNNPtr &projectionNode,
                             const UnitOfMeasure &defaultLinearUnit,
                             const UnitOfMeasure &defaultAngularUnit);
 
     ConversionNNPtr
-    buildProjectionFromESRI(const WKTNodeNNPtr &projCRSNode,
+    buildProjectionFromESRI(const GeodeticCRSNNPtr &baseGeodCRS,
+                            const WKTNodeNNPtr &projCRSNode,
                             const WKTNodeNNPtr &projectionNode,
                             const UnitOfMeasure &defaultLinearUnit,
                             const UnitOfMeasure &defaultAngularUnit);
@@ -3138,9 +3141,40 @@ bool WKTParser::Private::hasWebMercPROJ4String(
 
 // ---------------------------------------------------------------------------
 
+static const MethodMapping *
+selectSphericalOrEllipsoidal(const MethodMapping *mapping,
+                             const GeodeticCRSNNPtr &baseGeodCRS) {
+    if (mapping->epsg_code ==
+            EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL ||
+        mapping->epsg_code == EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA) {
+        mapping = getMapping(
+            baseGeodCRS->ellipsoid()->isSphere()
+                ? EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL
+                : EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA);
+    } else if (mapping->epsg_code ==
+                   EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL ||
+               mapping->epsg_code ==
+                   EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA) {
+        mapping = getMapping(
+            baseGeodCRS->ellipsoid()->isSphere()
+                ? EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL
+                : EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA);
+    } else if (mapping->epsg_code ==
+                   EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL ||
+               mapping->epsg_code == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL) {
+        mapping =
+            getMapping(baseGeodCRS->ellipsoid()->isSphere()
+                           ? EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL
+                           : EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL);
+    }
+    return mapping;
+}
+
+// ---------------------------------------------------------------------------
+
 ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
-    const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode,
-    const UnitOfMeasure &defaultLinearUnit,
+    const GeodeticCRSNNPtr &baseGeodCRS, const WKTNodeNNPtr &projCRSNode,
+    const WKTNodeNNPtr &projectionNode, const UnitOfMeasure &defaultLinearUnit,
     const UnitOfMeasure &defaultAngularUnit) {
     const std::string esriProjectionName =
         stripQuotes(projectionNode->GP()->children()[0]);
@@ -3150,7 +3184,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     // on the parameters / their values
     const auto esriMappings = getMappingsFromESRI(esriProjectionName);
     if (esriMappings.empty()) {
-        return buildProjectionStandard(projCRSNode, projectionNode,
+        return buildProjectionStandard(baseGeodCRS, projCRSNode, projectionNode,
                                        defaultLinearUnit, defaultAngularUnit);
     }
 
@@ -3229,6 +3263,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
         }
     }
     assert(wkt2_mapping);
+
+    wkt2_mapping = selectSphericalOrEllipsoidal(wkt2_mapping, baseGeodCRS);
 
     PropertyMap propertiesMethod;
     propertiesMethod.set(IdentifiedObject::NAME_KEY, wkt2_mapping->wkt2_name);
@@ -3317,19 +3353,18 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr
-WKTParser::Private::buildProjection(const WKTNodeNNPtr &projCRSNode,
-                                    const WKTNodeNNPtr &projectionNode,
-                                    const UnitOfMeasure &defaultLinearUnit,
-                                    const UnitOfMeasure &defaultAngularUnit) {
+ConversionNNPtr WKTParser::Private::buildProjection(
+    const GeodeticCRSNNPtr &baseGeodCRS, const WKTNodeNNPtr &projCRSNode,
+    const WKTNodeNNPtr &projectionNode, const UnitOfMeasure &defaultLinearUnit,
+    const UnitOfMeasure &defaultAngularUnit) {
     if (projectionNode->GP()->childrenSize() == 0) {
         ThrowNotEnoughChildren(WKTConstants::PROJECTION);
     }
     if (esriStyle_) {
-        return buildProjectionFromESRI(projCRSNode, projectionNode,
+        return buildProjectionFromESRI(baseGeodCRS, projCRSNode, projectionNode,
                                        defaultLinearUnit, defaultAngularUnit);
     }
-    return buildProjectionStandard(projCRSNode, projectionNode,
+    return buildProjectionStandard(baseGeodCRS, projCRSNode, projectionNode,
                                    defaultLinearUnit, defaultAngularUnit);
 }
 
@@ -3354,8 +3389,8 @@ WKTParser::Private::projectionGetParameter(const WKTNodeNNPtr &projCRSNode,
 // ---------------------------------------------------------------------------
 
 ConversionNNPtr WKTParser::Private::buildProjectionStandard(
-    const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode,
-    const UnitOfMeasure &defaultLinearUnit,
+    const GeodeticCRSNNPtr &baseGeodCRS, const WKTNodeNNPtr &projCRSNode,
+    const WKTNodeNNPtr &projectionNode, const UnitOfMeasure &defaultLinearUnit,
     const UnitOfMeasure &defaultAngularUnit) {
     std::string wkt1ProjectionName =
         stripQuotes(projectionNode->GP()->children()[0]);
@@ -3473,6 +3508,9 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     std::string projectionName(wkt1ProjectionName);
     const MethodMapping *mapping =
         tryToIdentifyWKT1Method ? getMappingFromWKT1(projectionName) : nullptr;
+    if (mapping) {
+        mapping = selectSphericalOrEllipsoidal(mapping, baseGeodCRS);
+    }
 
     // For Krovak, we need to look at axis to decide between the Krovak and
     // Krovak East-North Oriented methods
@@ -3725,7 +3763,8 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
     auto conversion =
         !isNull(conversionNode)
             ? buildConversion(conversionNode, linearUnit, angularUnit)
-            : buildProjection(node, projectionNode, linearUnit, angularUnit);
+            : buildProjection(baseGeodCRS, node, projectionNode, linearUnit,
+                              angularUnit);
 
     // No explicit AXIS node ? (WKT1)
     if (isNull(nodeP->lookForChild(WKTConstants::AXIS))) {
@@ -8563,6 +8602,9 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     auto &step = steps_[iStep];
     auto mappings = getMappingsFromPROJName(step.name);
     const MethodMapping *mapping = mappings.empty() ? nullptr : mappings[0];
+    if (mapping) {
+        mapping = selectSphericalOrEllipsoidal(mapping, geogCRS);
+    }
 
     assert(isProjectedStep(step.name));
     assert(iUnitConvert < 0 ||
@@ -8608,8 +8650,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         }
     } else if (step.name == "aeqd" && hasParamValue(step, "guam")) {
         mapping = getMapping(EPSG_CODE_METHOD_GUAM_PROJECTION);
-    } else if (step.name == "cea" && !geogCRS->ellipsoid()->isSphere()) {
-        mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA);
     } else if (step.name == "geos" && getParamValue(step, "sweep") == "x") {
         mapping =
             getMapping(PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X);
@@ -8714,15 +8754,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             } else {
                 axisType = AxisType::SOUTH_POLE;
             }
-        }
-        if (geogCRS->ellipsoid()->isSphere()) {
-            mapping = getMapping(
-                EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL);
-        }
-    } else if (step.name == "eqc") {
-        if (geogCRS->ellipsoid()->isSphere()) {
-            mapping =
-                getMapping(EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL);
         }
     }
 
