@@ -4658,7 +4658,7 @@ static const struct {
       {"False_Northing", 2},
       {"Central_Meridian", 3},
       {"Standard_Parallel_1", 4}},
-     "Lambert Cylindrical Equal Area (Spherical)",
+     "Lambert Cylindrical Equal Area",
      {
          {"Latitude of 1st standard parallel", 4},
          {"Longitude of natural origin", 3},
@@ -7969,6 +7969,30 @@ TEST(io, projparse_aeqd_guam) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_cea_spherical) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=cea +R=6371228 +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL);
+
+    auto crs2 = ProjectedCRS::create(
+        PropertyMap(), crs->baseCRS(),
+        Conversion::createLambertCylindricalEqualArea(
+            PropertyMap(), Angle(0), Angle(0), Length(0), Length(0)),
+        crs->coordinateSystem());
+    EXPECT_EQ(crs2->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA);
+
+    EXPECT_TRUE(
+        crs->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        crs2->isEquivalentTo(crs.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_cea_ellipsoidal) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=cea +ellps=GRS80 +type=crs");
@@ -8492,6 +8516,17 @@ TEST(io, projparse_laea_spherical) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_laea_ellipsoidal) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=laea +ellps=WGS84 +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_eqc_spherical) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=eqc +R=6371228 +type=crs");
@@ -8512,6 +8547,17 @@ TEST(io, projparse_eqc_spherical) {
         crs->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
     EXPECT_TRUE(
         crs2->isEquivalentTo(crs.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_eqc_ellipsoidal) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=eqc +ellps=WGS84 +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL);
 }
 
 // ---------------------------------------------------------------------------
