@@ -1794,6 +1794,14 @@ bool SingleOperation::_isEquivalentTo(const util::IComparable *other,
                  EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA &&
              methodEPSGCode ==
                  EPSG_CODE_METHOD_LAMBERT_AZIMUTHAL_EQUAL_AREA_SPHERICAL) ||
+            (methodEPSGCode ==
+                 EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA &&
+             otherMethodEPSGCode ==
+                 EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL) ||
+            (otherMethodEPSGCode ==
+                 EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA &&
+             methodEPSGCode ==
+                 EPSG_CODE_METHOD_LAMBERT_CYLINDRICAL_EQUAL_AREA_SPHERICAL) ||
             (methodEPSGCode == EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL &&
              otherMethodEPSGCode ==
                  EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL_SPHERICAL) ||
