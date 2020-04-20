@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     auto ctx = pj_get_default_ctx();
 
     std::string targetDir;
-    std::string endpoint(pj_context_get_url_endpoint(ctx));
+    std::string endpoint(proj_context_get_url_endpoint(ctx));
     const std::string geojsonFile("files.geojson");
     std::string queriedSourceId;
     std::string queriedAreaOfUse;
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (targetDir.empty()) {
-        targetDir = pj_context_get_user_writable_directory(ctx, true);
+        targetDir = proj_context_get_user_writable_directory(ctx, true);
     } else {
         if (targetDir.back() == '/') {
             targetDir.resize(targetDir.size() - 1);

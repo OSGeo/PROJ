@@ -1090,6 +1090,19 @@ std::string FileManager::getProjLibEnvVar(PJ_CONTEXT *ctx) {
 
 NS_PROJ_END
 
+// ---------------------------------------------------------------------------
+
+static void CreateDirectoryRecursively(PJ_CONTEXT *ctx,
+                                       const std::string &path) {
+    if (NS_PROJ::FileManager::exists(ctx, path.c_str()))
+        return;
+    auto pos = path.find_last_of("/\\");
+    if (pos == 0 || pos == std::string::npos)
+        return;
+    CreateDirectoryRecursively(ctx, path.substr(0, pos));
+    NS_PROJ::FileManager::mkdir(ctx, path.c_str());
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -1165,25 +1178,16 @@ void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
+/** Get the PROJ user writable directory for datumgrid files.
+ *
+ * @param ctx PROJ context, or NULL
+ * @param create If set to TRUE, create the directory if it does not exist already.
+ * @return The path to the PROJ user writable directory.
+ * @since 7.1
+*/
 
-// ---------------------------------------------------------------------------
-
-static void CreateDirectoryRecursively(PJ_CONTEXT *ctx,
-                                       const std::string &path) {
-    if (NS_PROJ::FileManager::exists(ctx, path.c_str()))
-        return;
-    auto pos = path.find_last_of("/\\");
-    if (pos == 0 || pos == std::string::npos)
-        return;
-    CreateDirectoryRecursively(ctx, path.substr(0, pos));
-    NS_PROJ::FileManager::mkdir(ctx, path.c_str());
-}
-
-// ---------------------------------------------------------------------------
-
-std::string pj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
-                                                   bool create) {
+const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
+                                                     int create) {
     if (!ctx)
         ctx = pj_get_default_ctx();
     if (ctx->user_writable_directory.empty()) {
@@ -1234,11 +1238,33 @@ std::string pj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
         path += "/proj";
         ctx->user_writable_directory = path;
     }
-    if (create) {
+    if (create != FALSE) {
         CreateDirectoryRecursively(ctx, ctx->user_writable_directory);
     }
-    return ctx->user_writable_directory;
+    return ctx->user_writable_directory.c_str();
 }
+
+/** Get the URL endpoint to query for remote grids.
+*
+* @param ctx PROJ context, or NULL
+* @return Endpoint URL. The returned pointer would be invalidated
+* by a later call to proj_context_set_url_endpoint()
+* @since 7.1
+*/
+const char* proj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
+    if (ctx == nullptr) {
+        ctx = pj_get_default_ctx();
+    }
+    if (!ctx->endpoint.empty()) {
+        return ctx->endpoint.c_str();
+    }
+    pj_load_ini(ctx);
+    return ctx->endpoint.c_str();
+}
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 
 // ---------------------------------------------------------------------------
 
@@ -1478,11 +1504,11 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
 
         else if (!dontReadUserWritableDirectory() &&
                  (fid = open_file(
-                      ctx, (pj_context_get_user_writable_directory(ctx, false) +
+                      ctx, (std::string(proj_context_get_user_writable_directory(ctx, false)) +
                             DIR_CHAR + name)
                                .c_str(),
                       mode)) != nullptr) {
-            fname = pj_context_get_user_writable_directory(ctx, false);
+            fname = proj_context_get_user_writable_directory(ctx, false);
             fname += DIR_CHAR;
             fname += name;
             sysname = fname.c_str();
@@ -1554,7 +1580,7 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
         getenv("PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY");
     if (ignoreUserWritableDirectory == nullptr ||
         ignoreUserWritableDirectory[0] == '\0') {
-        ret.push_back(pj_context_get_user_writable_directory(ctx, false));
+        ret.push_back(proj_context_get_user_writable_directory(ctx, false));
     }
     const std::string envPROJ_LIB = NS_PROJ::FileManager::getProjLibEnvVar(ctx);
     if (!envPROJ_LIB.empty()) {
@@ -1674,7 +1700,7 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
         !is_rel_or_absolute_filename(name) && !starts_with(name, "http://") &&
         !starts_with(name, "https://") &&
         proj_context_is_network_enabled(ctx)) {
-        std::string remote_file(pj_context_get_url_endpoint(ctx));
+        std::string remote_file(proj_context_get_url_endpoint(ctx));
         if (!remote_file.empty()) {
             if (remote_file.back() != '/') {
                 remote_file += '/';
@@ -1757,21 +1783,6 @@ int pj_find_file(projCtx ctx, const char *short_filename,
     }
 
     return file != nullptr;
-}
-
-/************************************************************************/
-/*                    pj_context_get_url_endpoint()                     */
-/************************************************************************/
-
-std::string pj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
-    if (ctx == nullptr) {
-        ctx = pj_get_default_ctx();
-    }
-    if (!ctx->endpoint.empty()) {
-        return ctx->endpoint;
-    }
-    pj_load_ini(ctx);
-    return ctx->endpoint;
 }
 
 /************************************************************************/
