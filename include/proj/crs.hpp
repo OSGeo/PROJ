@@ -138,6 +138,8 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
 
     PROJ_INTERNAL CRSNNPtr normalizeForVisualization() const;
 
+    PROJ_INTERNAL CRSNNPtr allowNonConformantWKT1Export() const;
+
     //! @endcond
 
   protected:
@@ -891,6 +893,14 @@ class PROJ_GCC_DLL CompoundCRS final : public CRS,
     create(const util::PropertyMap &properties,
            const std::vector<CRSNNPtr>
                &components); // throw InvalidCompoundCRSException
+
+    //! @cond Doxygen_Suppress
+    PROJ_INTERNAL static CRSNNPtr
+    createLax(const util::PropertyMap &properties,
+              const std::vector<CRSNNPtr> &components,
+              const io::DatabaseContextPtr
+                  &dbContext); // throw InvalidCompoundCRSException
+                               //! @endcond
 
   protected:
     // relaxed: standard say SingleCRSNNPtr
