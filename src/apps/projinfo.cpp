@@ -481,8 +481,8 @@ static void outputObject(
                     std::cout << "WKT1:GDAL string:" << std::endl;
                 }
 
-                auto formatter =
-                    WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL);
+                auto formatter = WKTFormatter::create(
+                    WKTFormatter::Convention::WKT1_GDAL, dbContext);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
