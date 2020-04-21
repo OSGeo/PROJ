@@ -748,7 +748,7 @@ struct projCtx_t {
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
 
-    TMercAlgo defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER; // can be overriden by content of proj.ini
+    TMercAlgo defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER; // can be overridden by content of proj.ini
 
     projCtx_t() = default;
     projCtx_t(const projCtx_t&);

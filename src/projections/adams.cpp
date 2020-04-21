@@ -180,7 +180,7 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
 
 static PJ_LP inverse_with_newton_raphson(PJ_XY xy,
                                          PJ *P,
-                                         PJ_LP lp, // inital guess
+                                         PJ_LP lp, // initial guess
                                          PJ_XY  (*fwd)(PJ_LP,    PJ *))
 {
     double deriv_lam_X = 0;

@@ -1630,7 +1630,7 @@ TEST_F(CApi, proj_create_operations_allow_ballpark_transformations) {
         EXPECT_EQ(proj_list_get_count(res), 1);
     }
 
-    // Allow explictly
+    // Allow explicitly
     {
         proj_operation_factory_context_set_allow_ballpark_transformations(
             m_ctxt, ctxt, true);
