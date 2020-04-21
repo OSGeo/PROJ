@@ -93,6 +93,7 @@ struct CRS::Private {
     BoundCRSPtr canonicalBoundCRS_{};
     std::string extensionProj4_{};
     bool implicitCS_ = false;
+    bool allowNonConformantWKT1Export_ = false;
 
     void setImplicitCS(const util::PropertyMap &properties) {
         const auto pVal = properties.get("IMPLICIT_CS");
@@ -552,6 +553,18 @@ CRSNNPtr CRS::stripVerticalComponent() const {
 
 /** \brief Return a shallow clone of this object. */
 CRSNNPtr CRS::shallowClone() const { return _shallowClone(); }
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+CRSNNPtr CRS::allowNonConformantWKT1Export() const {
+    auto crs = shallowClone();
+    crs->d->allowNonConformantWKT1Export_ = true;
+    return crs;
+}
 
 //! @endcond
 
@@ -1334,6 +1347,36 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     const bool isGeographic =
         dynamic_cast<const GeographicCRS *>(this) != nullptr;
+
+    const auto &cs = coordinateSystem();
+    const auto &axisList = cs->axisList();
+    const auto oldAxisOutputRule = formatter->outputAxis();
+    auto l_name = nameStr();
+    const auto &dbContext = formatter->databaseContext();
+
+    if (formatter->useESRIDialect()) {
+        if (axisList.size() != 2) {
+            io::FormattingException::Throw(
+                "Only export of Geographic 2D CRS is supported in WKT1_ESRI");
+        }
+    }
+
+    if (!isWKT2 && formatter->isStrict() && isGeographic &&
+        axisList.size() != 2 &&
+        oldAxisOutputRule != io::WKTFormatter::OutputAxisRule::NO) {
+        if (CRS::getPrivate()->allowNonConformantWKT1Export_) {
+            formatter->startNode(io::WKTConstants::COMPD_CS, false);
+            formatter->addQuotedString(l_name + " + " + l_name);
+            auto geogCRS = demoteTo2D(std::string(), dbContext);
+            geogCRS->_exportToWKT(formatter);
+            geogCRS->_exportToWKT(formatter);
+            formatter->endNode();
+            return;
+        }
+        io::FormattingException::Throw(
+            "WKT1 does not support Geographic 3D CRS.");
+    }
+
     formatter->startNode(isWKT2
                              ? ((formatter->use2019Keywords() && isGeographic)
                                     ? io::WKTConstants::GEOGCRS
@@ -1341,23 +1384,12 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                              : isGeocentric() ? io::WKTConstants::GEOCCS
                                               : io::WKTConstants::GEOGCS,
                          !identifiers().empty());
-    auto l_name = nameStr();
-    const auto &cs = coordinateSystem();
-    const auto &axisList = cs->axisList();
-
-    const auto oldAxisOutputRule = formatter->outputAxis();
 
     if (formatter->useESRIDialect()) {
-        if (axisList.size() != 2) {
-            io::FormattingException::Throw(
-                "Only export of Geographic 2D CRS is supported in WKT1_ESRI");
-        }
-
         if (l_name == "WGS 84") {
             l_name = "GCS_WGS_1984";
         } else {
             bool aliasFound = false;
-            const auto &dbContext = formatter->databaseContext();
             if (dbContext) {
                 auto l_alias = dbContext->getAliasFromOfficialName(
                     l_name, "geodetic_crs", "ESRI");
@@ -1373,11 +1405,6 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                 }
             }
         }
-    } else if (!isWKT2 && formatter->isStrict() && isGeographic &&
-               axisList.size() != 2 &&
-               oldAxisOutputRule != io::WKTFormatter::OutputAxisRule::NO) {
-        io::FormattingException::Throw(
-            "WKT1 does not support Geographic 3D CRS.");
     }
 
     if (!isWKT2 && !formatter->useESRIDialect() && isDeprecated()) {
@@ -3163,6 +3190,36 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const auto &dbContext = formatter->databaseContext();
 
     auto l_name = nameStr();
+    const auto &l_coordinateSystem = d->coordinateSystem();
+    const auto &axisList = l_coordinateSystem->axisList();
+    if (axisList.size() == 3 && !(isWKT2 && formatter->use2019Keywords())) {
+        if (!formatter->useESRIDialect() &&
+            CRS::getPrivate()->allowNonConformantWKT1Export_) {
+            formatter->startNode(io::WKTConstants::COMPD_CS, false);
+            formatter->addQuotedString(l_name + " + " + baseCRS()->nameStr());
+            auto projCRS2D = demoteTo2D(std::string(), dbContext);
+            if (dbContext) {
+                const auto res =
+                    projCRS2D->identify(io::AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext), "EPSG"));
+                if (res.size() == 1) {
+                    const auto &front = res.front();
+                    if (front.second == 100) {
+                        projCRS2D = front.first;
+                    }
+                }
+            }
+            projCRS2D->_exportToWKT(formatter);
+            baseCRS()
+                ->demoteTo2D(std::string(), dbContext)
+                ->_exportToWKT(formatter);
+            formatter->endNode();
+            return;
+        }
+        io::FormattingException::Throw(
+            "Projected 3D CRS can only be exported since WKT2:2019");
+    }
+
     std::string l_alias;
     if (formatter->useESRIDialect() && dbContext) {
         l_alias = dbContext->getAliasFromOfficialName(l_name, "projected_crs",
@@ -3212,13 +3269,6 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             }
         } catch (const std::exception &) {
         }
-    }
-
-    const auto &l_coordinateSystem = d->coordinateSystem();
-    const auto &axisList = l_coordinateSystem->axisList();
-    if (axisList.size() == 3 && !(isWKT2 && formatter->use2019Keywords())) {
-        io::FormattingException::Throw(
-            "Projected 3D CRS can only be exported since WKT2:2019");
     }
 
     const auto exportAxis = [&l_coordinateSystem, &axisList, &formatter]() {
@@ -4087,6 +4137,54 @@ CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
 
     return compoundCRS;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+/** \brief Instantiate a CompoundCRS, a Geographic 3D CRS or a Projected CRS
+ * from a vector of CRS.
+ *
+ * Be a bit "lax", in allowing formulations like EPSG:4326+4326 or
+ * EPSG:32631+4326 to express Geographic 3D CRS / Projected3D CRS.
+ *
+ * @param properties See \ref general_properties.
+ * At minimum the name should be defined.
+ * @param components the component CRS of the CompoundCRS.
+ * @return new CRS.
+ * @throw InvalidCompoundCRSException
+ */
+CRSNNPtr CompoundCRS::createLax(const util::PropertyMap &properties,
+                                const std::vector<CRSNNPtr> &components,
+                                const io::DatabaseContextPtr &dbContext) {
+
+    if (components.size() == 2) {
+        auto comp0 = components[0].get();
+        auto comp1 = components[1].get();
+        auto comp0Geog = dynamic_cast<const GeographicCRS *>(comp0);
+        auto comp0Proj = dynamic_cast<const ProjectedCRS *>(comp0);
+        auto comp1Geog = dynamic_cast<const GeographicCRS *>(comp1);
+        if ((comp0Geog != nullptr || comp0Proj != nullptr) &&
+            comp1Geog != nullptr) {
+            const auto horizGeog =
+                (comp0Proj != nullptr)
+                    ? comp0Proj->baseCRS().as_nullable().get()
+                    : comp0Geog;
+            if (horizGeog->_isEquivalentTo(
+                    comp1Geog->demoteTo2D(std::string(), dbContext).get())) {
+                return components[0]
+                    ->promoteTo3D(std::string(), dbContext)
+                    ->allowNonConformantWKT1Export();
+            }
+            throw InvalidCompoundCRSException(
+                "The 'vertical' geographic CRS is not equivalent to the "
+                "geographic CRS of the horizontal part");
+        }
+    }
+
+    return create(properties, components);
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 

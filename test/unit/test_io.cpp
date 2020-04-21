@@ -2430,6 +2430,53 @@ TEST(wkt_parse, COMPD_CS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, COMPD_CS_non_conformant_horizontal_plus_horizontal_as_in_LAS) {
+    auto obj = WKTParser().createFromWKT(
+        "COMPD_CS[\"horizontal + vertical\",\n"
+        "    PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+        "        GEOGCS[\"WGS 84\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    AUTHORITY[\"EPSG\",\"7030\"]],\n"
+        "                AUTHORITY[\"EPSG\",\"6326\"]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "            UNIT[\"degree\",0.0174532925199433,\n"
+        "                AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "            AXIS[\"Latitude\",NORTH],\n"
+        "            AXIS[\"Longitude\",EAST],\n"
+        "            AUTHORITY[\"EPSG\",\"4326\"]],\n"
+        "        PROJECTION[\"Transverse_Mercator\"],\n"
+        "        PARAMETER[\"latitude_of_origin\",0],\n"
+        "        PARAMETER[\"central_meridian\",3],\n"
+        "        PARAMETER[\"scale_factor\",0.9996],\n"
+        "        PARAMETER[\"false_easting\",500000],\n"
+        "        PARAMETER[\"false_northing\",0],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "        AXIS[\"Easting\",EAST],\n"
+        "        AXIS[\"Northing\",NORTH],\n"
+        "        AUTHORITY[\"EPSG\",\"32631\"]],\n"
+        "    GEOGCS[\"WGS 84\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
+        "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+        "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+        "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "        UNIT[\"degree\",0.0174532925199433,\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "        AXIS[\"Latitude\",NORTH],\n"
+        "        AXIS[\"Longitude\",EAST],\n"
+        "        AUTHORITY[\"EPSG\",\"4326\"]]]");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N");
+    EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, COORDINATEOPERATION) {
 
     std::string src_wkt;
@@ -9488,6 +9535,101 @@ TEST(io, createFromUserInput) {
         EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 4979);
         EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
         EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
+    }
+
+    // We accept non-conformant EPSG:4326+4326
+    {
+        auto obj = createFromUserInput("EPSG:4326+4326", dbContext);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "WGS 84");
+        EXPECT_EQ(crs->getEPSGCode(), 4979);
+        EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
+
+        const auto wkt =
+            "COMPD_CS[\"WGS 84 + WGS 84\",\n"
+            "    GEOGCS[\"WGS 84\",\n"
+            "        DATUM[\"WGS_1984\",\n"
+            "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+            "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+            "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+            "        UNIT[\"degree\",0.0174532925199433,\n"
+            "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+            "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
+            "    GEOGCS[\"WGS 84\",\n"
+            "        DATUM[\"WGS_1984\",\n"
+            "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+            "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+            "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+            "        UNIT[\"degree\",0.0174532925199433,\n"
+            "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+            "        AUTHORITY[\"EPSG\",\"4326\"]]]";
+
+        EXPECT_EQ(
+            crs->exportToWKT(WKTFormatter::create(
+                                 WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                                 .get()),
+            wkt);
+    }
+
+    // Non consistent
+    EXPECT_THROW(createFromUserInput("EPSG:4326+4258", dbContext),
+                 InvalidCompoundCRSException);
+
+    // We accept non-conformant EPSG:32631+4326
+    {
+        auto obj = createFromUserInput("EPSG:32631+4326", dbContext);
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N");
+        EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 4979);
+        EXPECT_EQ(crs->baseCRS()->coordinateSystem()->axisList().size(), 3U);
+        EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
+
+        const auto wkt =
+            "COMPD_CS[\"WGS 84 / UTM zone 31N + WGS 84\",\n"
+            "    PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+            "        GEOGCS[\"WGS 84\",\n"
+            "            DATUM[\"WGS_1984\",\n"
+            "                SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+            "                    AUTHORITY[\"EPSG\",\"7030\"]],\n"
+            "                AUTHORITY[\"EPSG\",\"6326\"]],\n"
+            "            PRIMEM[\"Greenwich\",0,\n"
+            "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
+            "            UNIT[\"degree\",0.0174532925199433,\n"
+            "                AUTHORITY[\"EPSG\",\"9122\"]],\n"
+            "            AUTHORITY[\"EPSG\",\"4326\"]],\n"
+            "        PROJECTION[\"Transverse_Mercator\"],\n"
+            "        PARAMETER[\"latitude_of_origin\",0],\n"
+            "        PARAMETER[\"central_meridian\",3],\n"
+            "        PARAMETER[\"scale_factor\",0.9996],\n"
+            "        PARAMETER[\"false_easting\",500000],\n"
+            "        PARAMETER[\"false_northing\",0],\n"
+            "        UNIT[\"metre\",1,\n"
+            "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+            "        AXIS[\"Easting\",EAST],\n"
+            "        AXIS[\"Northing\",NORTH],\n"
+            "        AUTHORITY[\"EPSG\",\"32631\"]],\n"
+            "    GEOGCS[\"WGS 84\",\n"
+            "        DATUM[\"WGS_1984\",\n"
+            "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+            "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+            "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+            "        UNIT[\"degree\",0.0174532925199433,\n"
+            "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+            "        AUTHORITY[\"EPSG\",\"4326\"]]]";
+
+        EXPECT_EQ(
+            crs->exportToWKT(WKTFormatter::create(
+                                 WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                                 .get()),
+            wkt);
     }
 
     EXPECT_THROW(createFromUserInput(

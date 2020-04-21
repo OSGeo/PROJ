@@ -1334,7 +1334,7 @@ struct WKTParser::Private {
 
     DerivedVerticalCRSNNPtr buildDerivedVerticalCRS(const WKTNodeNNPtr &node);
 
-    CompoundCRSNNPtr buildCompoundCRS(const WKTNodeNNPtr &node);
+    CRSNNPtr buildCompoundCRS(const WKTNodeNNPtr &node);
 
     BoundCRSNNPtr buildBoundCRS(const WKTNodeNNPtr &node);
 
@@ -4157,8 +4157,7 @@ WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
-CompoundCRSNNPtr
-WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
+CRSNNPtr WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
     std::vector<CRSNNPtr> components;
     for (const auto &child : node->GP()->children()) {
         auto crs = buildCRS(child);
@@ -4166,7 +4165,13 @@ WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
             components.push_back(NN_NO_CHECK(crs));
         }
     }
-    return CompoundCRS::create(buildProperties(node), components);
+
+    if (ci_equal(node->GP()->value(), WKTConstants::COMPD_CS)) {
+        return CompoundCRS::createLax(buildProperties(node), components,
+                                      dbContext_);
+    } else {
+        return CompoundCRS::create(buildProperties(node), components);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -5851,11 +5856,11 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                 tokensCode[0], false));
                             auto crs2(factory->createCoordinateReferenceSystem(
                                 tokensCode[1], false));
-                            return CompoundCRS::create(
+                            return CompoundCRS::createLax(
                                 util::PropertyMap().set(
                                     IdentifiedObject::NAME_KEY,
                                     crs1->nameStr() + " + " + crs2->nameStr()),
-                                {crs1, crs2});
+                                {crs1, crs2}, dbContext);
                         }
                         throw;
                     }
