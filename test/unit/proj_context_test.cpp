@@ -154,7 +154,8 @@ TEST(proj_context, proj_context_set_search_paths) {
 TEST(proj_context, read_grid_from_user_writable_directory) {
 
     auto ctx = proj_context_create();
-    auto path = std::string(proj_context_get_user_writable_directory(ctx, true));
+    auto path =
+        std::string(proj_context_get_user_writable_directory(ctx, true));
     EXPECT_TRUE(!path.empty());
     auto filename = path + DIR_CHAR + "temp_proj_dic3";
     EXPECT_TRUE(createTmpFile(filename));

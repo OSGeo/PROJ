@@ -2213,7 +2213,8 @@ int proj_is_download_needed(PJ_CONTEXT *ctx, const char *url_or_filename,
     if (filename == nullptr)
         return false;
     const auto localFilename(
-        std::string(proj_context_get_user_writable_directory(ctx, false)) + filename);
+        std::string(proj_context_get_user_writable_directory(ctx, false)) +
+        filename);
 
     auto f = NS_PROJ::FileManager::open(ctx, localFilename.c_str(),
                                         NS_PROJ::FileAccess::READ_ONLY);
@@ -2351,8 +2352,9 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
     const char *filename = strrchr(url.c_str(), '/');
     if (filename == nullptr)
         return false;
-    const auto localFilename(std::string(proj_context_get_user_writable_directory(ctx, true)) +
-                             filename);
+    const auto localFilename(
+        std::string(proj_context_get_user_writable_directory(ctx, true)) +
+        filename);
 
 #ifdef _WIN32
     const int nPID = GetCurrentProcessId();

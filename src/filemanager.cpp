@@ -1181,7 +1181,8 @@ void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
 /** Get the PROJ user writable directory for datumgrid files.
  *
  * @param ctx PROJ context, or NULL
- * @param create If set to TRUE, create the directory if it does not exist already.
+ * @param create If set to TRUE, create the directory if it does not exist
+ * already.
  * @return The path to the PROJ user writable directory.
  * @since 7.1
 */
@@ -1251,7 +1252,7 @@ const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
 * by a later call to proj_context_set_url_endpoint()
 * @since 7.1
 */
-const char* proj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
+const char *proj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
     }
@@ -1504,9 +1505,11 @@ pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
 
         else if (!dontReadUserWritableDirectory() &&
                  (fid = open_file(
-                      ctx, (std::string(proj_context_get_user_writable_directory(ctx, false)) +
-                            DIR_CHAR + name)
-                               .c_str(),
+                      ctx,
+                      (std::string(proj_context_get_user_writable_directory(
+                           ctx, false)) +
+                       DIR_CHAR + name)
+                          .c_str(),
                       mode)) != nullptr) {
             fname = proj_context_get_user_writable_directory(ctx, false);
             fname += DIR_CHAR;
