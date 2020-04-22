@@ -1,7 +1,7 @@
-<gie>
+<gie-strict>
 ------------------------------------------------------------
-This gie file was automatically generated using libproject
-where the adams_hemi code was adapted from
+# This gie file was automatically generated using libproject
+#where the adams_hemi code was adapted from
 ------------------------------------------------------------
 
 ------------------------------------------------------------
@@ -2117,4 +2117,4 @@ expect    failure errno -14
 accept     180.9080349563   107.0582862622
 expect    failure errno -14
 
-</gie>
+</gie-strict>

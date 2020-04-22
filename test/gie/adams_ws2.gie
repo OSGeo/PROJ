@@ -1,8 +1,9 @@
-<gie>
+<gie-strict>
+
 ------------------------------------------------------------
-This gie file was initially generated from "random" test points
-got by using libproject where the adams_ws2 code was adapted from
-It can be edited.
+# This gie file was initially generated from "random" test points
+# got by using libproject where the adams_ws2 code was adapted from
+# It can be edited.
 ------------------------------------------------------------
 
 ------------------------------------------------------------
@@ -2119,7 +2120,7 @@ accept     180.2003062924   109.9750225424
 expect    failure errno -14
 
 -------------------------------------------------------------------------------
-Test inverse
+# Test inverse
 -------------------------------------------------------------------------------
 operation +proj=adams_ws2 +ellps=WGS84
 -------------------------------------------------------------------------------
@@ -2172,4 +2173,4 @@ direction  inverse
 accept     0.000005801264 16722285.492330472916
 expect     failure  errno non_convergent
 
-</gie>
+</gie-strict>

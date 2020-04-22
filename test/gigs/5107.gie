@@ -4,13 +4,13 @@ Test 5107, American Polyconic, v2-0_2011-06-28.
 
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4674 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4674 +inv \
            +step +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m 
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -66,8 +66,8 @@ accept    -30 -22.5
 expect    7458947.70133 7313327.31691
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m  +inv
+operation  +proj=pipeline \
+           +step +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m  +inv \
            +step +init=epsg:4674
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -123,8 +123,8 @@ accept    7458947.70133 7313327.31691
 expect    -30 -22.5
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4674 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4674 +inv \
            +step +proj=poly +lat_0=0 +lon_0=-54 +x_0=5000000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m 
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -179,4 +179,4 @@ tolerance  0.006 m
 accept    -30 -22.5
 roundtrip 1000
 
-</gie>
+</gie-strict>

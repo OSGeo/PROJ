@@ -10,13 +10,13 @@ Test 5111 (part 1), Mercator (variant A), v2-0_2011-06-28.
 <3001> +proj=merc +lon_0=110 +k=0.997 +x_0=3900000 +y_0=900000 +ellps=bessel +towgs84=-377,681,-50,0,0,0,0 +units=m  <>
 
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline towgs84=0,0,0
-           +step +init=epsg:4211 +inv
+operation  +proj=pipeline towgs84=0,0,0 \
+           +step +init=epsg:4211 +inv \
            +step +init=epsg:3001
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -160,8 +160,8 @@ accept    -69.0 -2.0
 expect    -15964105.84 679490.65
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline towgs84=0,0,0
-           +step +init=epsg:3001 +inv
+operation  +proj=pipeline towgs84=0,0,0 \
+           +step +init=epsg:3001 +inv \
            +step +init=epsg:4211
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -305,8 +305,8 @@ accept    -15964105.84 679490.65
 expect    -69.0 -2.0
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline towgs84=0,0,0
-           +step +init=epsg:4211 +inv
+operation  +proj=pipeline towgs84=0,0,0 \
+           +step +init=epsg:4211 +inv \
            +step +init=epsg:3001
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -449,4 +449,4 @@ tolerance  0.006 m
 accept    -69.0 -2.0
 roundtrip 1000
 
-</gie>
+</gie-strict>

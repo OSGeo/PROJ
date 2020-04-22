@@ -4,13 +4,13 @@ Test 5101 (part 4), Transverse Mercator, v2-0_2011-06-28, recommended JHS formul
 
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4190 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4190 +inv \
            +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m
 --------------------------------------------------------------------------------
 tolerance  0.03 m
@@ -106,8 +106,8 @@ accept    -57.0000158 -40.0002087
 expect    5756200.0 5568100.0
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +inv
+operation  +proj=pipeline \
+           +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +inv \
            +step +init=epsg:4190
 --------------------------------------------------------------------------------
 tolerance  0.03 m
@@ -203,8 +203,8 @@ accept    5756200.0 5568100.0
 expect    -57.0000158 -40.0002087
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4190 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4190 +inv \
            +step +proj=etmerc +lat_0=-90 +lon_0=-60 +k=1 +x_0=5500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -299,4 +299,4 @@ tolerance  0.006 m
 accept    -57.0000158 -40.0002087
 roundtrip 1000
 
-</gie>
+</gie-strict>

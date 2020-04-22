@@ -9,16 +9,16 @@ The input coordinate is located at lon=60, lam=-160 - somewhere in Alaska.
 
 ===============================================================================
 
-<gie>
+<gie-strict>
 
 -------------------------------------------------------------------------------
-Test with an extract of nkgrf03vel_realigned with ctable2+gtx
+# Test with an extract of nkgrf03vel_realigned with ctable2+gtx
 -------------------------------------------------------------------------------
-operation    +proj=pipeline
-             +step +proj=cart +ellps=GRS80
-             +step +proj=deformation
-             +xy_grids=tests/nkgrf03vel_realigned_xy_extract.ct2
-             +z_grids=tests/nkgrf03vel_realigned_z_extract.gtx +ellps=GRS80 +dt=1
+operation    +proj=pipeline \
+             +step +proj=cart +ellps=GRS80 \
+             +step +proj=deformation \
+             +xy_grids=tests/nkgrf03vel_realigned_xy_extract.ct2 \
+             +z_grids=tests/nkgrf03vel_realigned_z_extract.gtx +ellps=GRS80 +dt=1 \
              +step +proj=cart +ellps=GRS80 +inv
 -------------------------------------------------------------------------------
 tolerance   0.05 mm
@@ -27,12 +27,12 @@ expect      21.5000000049   62.9999999937        0.0083
 roundtrip   5
 
 -------------------------------------------------------------------------------
-Test with an extract of nkgrf03vel_realigned with GeoTIFF
+# Test with an extract of nkgrf03vel_realigned with GeoTIFF
 -------------------------------------------------------------------------------
-operation    +proj=pipeline
-             +step +proj=cart +ellps=GRS80
-             +step +proj=deformation
-             +grids=tests/nkgrf03vel_realigned_extract.tif +ellps=GRS80 +dt=1
+operation    +proj=pipeline \
+             +step +proj=cart +ellps=GRS80 \
+             +step +proj=deformation \
+             +grids=tests/nkgrf03vel_realigned_extract.tif +ellps=GRS80 +dt=1 \
              +step +proj=cart +ellps=GRS80 +inv
 -------------------------------------------------------------------------------
 tolerance   0.05 mm
@@ -41,9 +41,9 @@ expect      21.5000000049   62.9999999937        0.0083
 roundtrip   5
 
 -------------------------------------------------------------------------------
-Test the +dt parameter
+# Test the +dt parameter
 -------------------------------------------------------------------------------
-operation   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx
+operation   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx \
             +ellps=GRS80 +dt=16.0 # 2016.0 - 2000.0
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
@@ -61,9 +61,9 @@ expect      failure errno grid_area
 
 
 -------------------------------------------------------------------------------
-Test using both horizontal and vertical grids
+# Test using both horizontal and vertical grids
 -------------------------------------------------------------------------------
-operation   +proj=deformation
+operation   +proj=deformation \
             +xy_grids=alaska +z_grids=egm96_15.gtx +t_epoch=2016.0 +ellps=GRS80
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
@@ -74,19 +74,17 @@ expect      -3004295.7000       -1093474.2097       5500477.3397       2000.0
 roundtrip   5
 
 -------------------------------------------------------------------------------
-operation   proj=deformation xy_grids=alaska +dt=1.0
-            ellps=GRS80
+operation   proj=deformation xy_grids=alaska +dt=1.0 ellps=GRS80
 expect      failure pjd_err_no_args
 
-operation   proj=deformation z_grids=egm96_15.gtx +dt=1.0
-            ellps=GRS80
+operation   proj=deformation z_grids=egm96_15.gtx +dt=1.0 ellps=GRS80
 expect      failure pjd_err_no_args
 
-operation   proj=deformation xy_grids=nonexisting z_grids=egm96_15.gtx
+operation   proj=deformation xy_grids=nonexisting z_grids=egm96_15.gtx \
             +dt=1.0 ellps=GRS80
 expect      failure pjd_err_failed_to_load_grid
 
-operation   proj=deformation xy_grids=alaska z_grids=nonexisting
+operation   proj=deformation xy_grids=alaska z_grids=nonexisting \
             +dt=1.0 ellps=GRS80
 expect      failure pjd_err_failed_to_load_grid
 
@@ -172,4 +170,4 @@ expect      -147.0              64.0                0.0     3011.0
 roundtrip   100
 
 
-</gie>
+</gie-strict>

@@ -4,13 +4,13 @@ Test 5113, Transverse Mercator (South Oriented), v2-0_2011-06-28.
 
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4148 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4148 +inv \
            +step +init=epsg:2049
 --------------------------------------------------------------------------------
 tolerance  0.03 m
@@ -34,8 +34,8 @@ accept    19.5 -35.0
 expect    136937.65 3875621.18
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:2049 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:2049 +inv \
            +step +init=epsg:4148
 --------------------------------------------------------------------------------
 tolerance  0.03 m
@@ -59,8 +59,8 @@ accept    136937.65 3875621.18
 expect    19.5 -35.0
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4148 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4148 +inv \
            +step +init=epsg:2049
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -83,4 +83,4 @@ tolerance  0.006 m
 accept    19.5 -35.0
 roundtrip 1000
 
-</gie>
+</gie-strict>

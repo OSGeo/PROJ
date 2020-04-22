@@ -4,13 +4,13 @@ Test 5101 (part 2), Transverse Mercator, v2-0_2011-06-28, recommended JHS formul
 
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
 
 use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4326 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4326 +inv \
            +step +init=epsg:32631
 --------------------------------------------------------------------------------
 tolerance  0.03 m
@@ -106,8 +106,8 @@ accept    8.0 60.0
 expect    778711.23 6661953.041
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:32631 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:32631 +inv \
            +step +init=epsg:4326
 --------------------------------------------------------------------------------
 tolerance  0.03 m
@@ -203,8 +203,8 @@ accept    778711.23 6661953.041
 expect    8.0 60.0
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4326 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4326 +inv \
            +step +init=epsg:32631
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -299,4 +299,4 @@ tolerance  0.006 m
 accept    8.0 60.0
 roundtrip 1000
 
-</gie>
+</gie-strict>
