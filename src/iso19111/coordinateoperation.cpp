@@ -5825,6 +5825,24 @@ static bool createPROJ4WebMercator(const Conversion *conv,
         return false;
     }
 
+    std::string units("m");
+    auto targetCRS = conv->targetCRS();
+    auto targetProjCRS =
+        dynamic_cast<const crs::ProjectedCRS *>(targetCRS.get());
+    if (targetProjCRS) {
+        const auto &axisList = targetProjCRS->coordinateSystem()->axisList();
+        const auto &unit = axisList[0]->unit();
+        if (!unit._isEquivalentTo(common::UnitOfMeasure::METRE,
+                                  util::IComparable::Criterion::EQUIVALENT)) {
+            auto projUnit = unit.exportToPROJString();
+            if (!projUnit.empty()) {
+                units = projUnit;
+            } else {
+                return false;
+            }
+        }
+    }
+
     formatter->addStep("merc");
     const double a = geogCRS->ellipsoid()->semiMajorAxis().getSIValue();
     formatter->addParam("a", a);
@@ -5834,7 +5852,7 @@ static bool createPROJ4WebMercator(const Conversion *conv,
     formatter->addParam("x_0", falseEasting);
     formatter->addParam("y_0", falseNorthing);
     formatter->addParam("k", 1.0);
-    formatter->addParam("units", "m");
+    formatter->addParam("units", units);
     formatter->addParam("nadgrids", "@null");
     formatter->addParam("wktext");
     formatter->addParam("no_defs");
