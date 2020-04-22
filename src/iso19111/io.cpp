@@ -3696,13 +3696,13 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
 
 // ---------------------------------------------------------------------------
 
-static ProjectedCRSNNPtr createPseudoMercator(const PropertyMap &props) {
+static ProjectedCRSNNPtr createPseudoMercator(const PropertyMap &props,
+                                              const cs::CartesianCSNNPtr &cs) {
     auto conversion = Conversion::createPopularVisualisationPseudoMercator(
         PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"), Angle(0),
         Angle(0), Length(0), Length(0));
-    return ProjectedCRS::create(
-        props, GeographicCRS::EPSG_4326, conversion,
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+    return ProjectedCRS::create(props, GeographicCRS::EPSG_4326, conversion,
+                                cs);
 }
 
 // ---------------------------------------------------------------------------
@@ -3783,21 +3783,22 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         }
     }
 
-    if (isNull(conversionNode) && hasWebMercPROJ4String(node, projectionNode)) {
+    if (isNull(conversionNode) && hasWebMercPROJ4String(node, projectionNode) &&
+        cartesianCS) {
         toWGS84Parameters_.clear();
-        return createPseudoMercator(props);
+        return createPseudoMercator(props, NN_NO_CHECK(cartesianCS));
     }
 
     // WGS_84_Pseudo_Mercator: Particular case for corrupted ESRI WKT generated
     // by older GDAL versions
     // https://trac.osgeo.org/gdal/changeset/30732
     // WGS_1984_Web_Mercator: deprecated ESRI:102113
-    if (metadata::Identifier::isEquivalentName(projCRSName.c_str(),
-                                               "WGS_84_Pseudo_Mercator") ||
-        metadata::Identifier::isEquivalentName(projCRSName.c_str(),
-                                               "WGS_1984_Web_Mercator")) {
+    if (cartesianCS && (metadata::Identifier::isEquivalentName(
+                            projCRSName.c_str(), "WGS_84_Pseudo_Mercator") ||
+                        metadata::Identifier::isEquivalentName(
+                            projCRSName.c_str(), "WGS_1984_Web_Mercator"))) {
         toWGS84Parameters_.clear();
-        return createPseudoMercator(props);
+        return createPseudoMercator(props, NN_NO_CHECK(cartesianCS));
     }
 
     auto linearUnit = buildUnitInSubNode(node, UnitOfMeasure::Type::LINEAR);
@@ -8740,6 +8741,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     auto axisType = AxisType::REGULAR;
     bool bWebMercator = false;
+    std::string webMercatorName("WGS 84 / Pseudo-Mercator");
 
     if (step.name == "tmerc" &&
         ((getParamValue(step, "axis") == "wsu" && iAxisSwap < 0) ||
@@ -8828,6 +8830,11 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 getAngularValue(getParamValue(step, "x_0")) == 0.0 &&
                 getAngularValue(getParamValue(step, "y_0")) == 0.0) {
                 bWebMercator = true;
+                if (hasParamValue(step, "units") &&
+                    getParamValue(step, "units") != "m") {
+                    webMercatorName +=
+                        " (unit " + getParamValue(step, "units") + ')';
+                }
             }
         } else if (hasParamValue(step, "lat_ts")) {
             mapping = getMapping(EPSG_CODE_METHOD_MERCATOR_VARIANT_B);
@@ -9111,8 +9118,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
 
     CRSNNPtr crs =
         bWebMercator
-            ? createPseudoMercator(props.set(IdentifiedObject::NAME_KEY,
-                                             "WGS 84 / Pseudo-Mercator"))
+            ? createPseudoMercator(
+                  props.set(IdentifiedObject::NAME_KEY, webMercatorName), cs)
             : ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
 
     if (!hasParamValue(step, "geoidgrids") &&

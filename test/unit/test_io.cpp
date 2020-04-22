@@ -8511,6 +8511,67 @@ TEST(io, projparse_merc_google_mercator) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_merc_google_mercator_non_metre_unit) {
+    auto projString =
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 "
+        "+k=1 +units=ft +nadgrids=@null +no_defs +type=crs";
+    auto obj = PROJStringParser().createFromPROJString(projString);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / Pseudo-Mercator (unit ft)");
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
+              "Popular Visualisation Pseudo Mercator");
+    EXPECT_EQ(
+        replaceAll(crs->exportToPROJString(PROJStringFormatter::create().get()),
+                   " +wktext", ""),
+        projString);
+
+    auto wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
+    auto expected_wkt =
+        "PROJCRS[\"WGS 84 / Pseudo-Mercator (unit ft)\",\n"
+        "    BASEGEOGCRS[\"WGS 84\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",4326]],\n"
+        "    CONVERSION[\"unnamed\",\n"
+        "        METHOD[\"Popular Visualisation Pseudo Mercator\",\n"
+        "            ID[\"EPSG\",1024]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"False easting\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"foot\",0.3048,\n"
+        "                ID[\"EPSG\",9002]]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"foot\",0.3048,\n"
+        "                ID[\"EPSG\",9002]]]]";
+    EXPECT_EQ(wkt, expected_wkt);
+
+    auto objFromWkt = WKTParser().createFromWKT(wkt);
+    auto crsFromWkt = nn_dynamic_pointer_cast<ProjectedCRS>(objFromWkt);
+    ASSERT_TRUE(crsFromWkt != nullptr);
+    EXPECT_TRUE(crs->isEquivalentTo(crsFromWkt.get(),
+                                    IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_merc_not_quite_google_mercator) {
     auto projString =
         "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=10 +x_0=0 +y_0=0 "
