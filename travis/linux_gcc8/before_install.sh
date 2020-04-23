@@ -5,7 +5,8 @@ set -e
 ./travis/before_install_apt.sh
 ./travis/before_install_pip.sh
 
-sudo apt-get install -qq \
+sudo aptitude remove -q -y libtiff-dev libcurl4-gnutls-dev
+sudo aptitude install -q -y \
         lcov \
         doxygen graphviz \
         sqlite3 libsqlite3-dev:$ARCH \
