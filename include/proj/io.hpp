@@ -38,10 +38,11 @@
 
 #include "proj.h"
 
-#include "proj_json_streaming_writer.hpp"
 #include "util.hpp"
 
 NS_PROJ_START
+
+class CPLJSonStreamingWriter;
 
 namespace common {
 class UnitOfMeasure;
@@ -490,7 +491,7 @@ class PROJ_GCC_DLL JSONFormatter {
     PROJ_PRIVATE :
 
         //! @cond Doxygen_Suppress
-        PROJ_INTERNAL CPLJSonStreamingWriter &
+        PROJ_INTERNAL CPLJSonStreamingWriter *
         writer() const;
 
     struct ObjectContext {
