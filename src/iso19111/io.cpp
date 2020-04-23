@@ -4440,7 +4440,28 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     if (ci_equal(name, WKTConstants::PROJCS) ||
         ci_equal(name, WKTConstants::PROJCRS) ||
         ci_equal(name, WKTConstants::PROJECTEDCRS)) {
-        return util::nn_static_pointer_cast<CRS>(buildProjectedCRS(node));
+        auto projCRS =
+            util::nn_static_pointer_cast<CRS>(buildProjectedCRS(node));
+        auto projString = projCRS->getExtensionProj4();
+        if (starts_with(projString, "+proj=ob_tran +o_proj=longlat") ||
+            starts_with(projString, "+proj=ob_tran +o_proj=lonlat") ||
+            starts_with(projString, "+proj=ob_tran +o_proj=latlong") ||
+            starts_with(projString, "+proj=ob_tran +o_proj=latlon")) {
+            // Those are not a projected CRS, but a DerivedGeographic one...
+            if (projString.find(" +type=crs") == std::string::npos) {
+                projString += " +type=crs";
+            }
+            try {
+                auto projObj =
+                    PROJStringParser().createFromPROJString(projString);
+                auto crs = nn_dynamic_pointer_cast<CRS>(projObj);
+                if (crs) {
+                    return crs;
+                }
+            } catch (const io::ParsingException &) {
+            }
+        }
+        return projCRS.as_nullable();
     }
 
     if (ci_equal(name, WKTConstants::VERT_CS) ||
