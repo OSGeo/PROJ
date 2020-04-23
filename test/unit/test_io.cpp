@@ -3586,6 +3586,65 @@ TEST(wkt_parse, DerivedGeodeticCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, DerivedGeographicCRS_GDAL_PROJ4_EXSTENSION_hack) {
+    auto wkt =
+        "PROJCS[\"unnamed\","
+        "   GEOGCS[\"unknown\","
+        "       DATUM[\"unnamed\","
+        "           SPHEROID[\"Spheroid\",6367470,594.313048347956]],"
+        "       PRIMEM[\"Greenwich\",0],"
+        "       UNIT[\"degree\",0.0174532925199433,"
+        "           AUTHORITY[\"EPSG\",\"9122\"]]],"
+        "   PROJECTION[\"Rotated_pole\"],"
+        "       UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],"
+        "       AXIS[\"Easting\",EAST],"
+        "       AXIS[\"Northing\",NORTH],"
+        "       EXTENSION[\"PROJ4\",\"+proj=ob_tran +o_proj=longlat +lon_0=18 "
+        "+o_lon_p=0 +o_lat_p=39.25 +a=6367470 +b=6367470 "
+        "+to_meter=0.0174532925199 +wktext\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto obj2 = PROJStringParser().createFromPROJString(
+        "+proj=ob_tran +o_proj=longlat +lon_0=18 "
+        "+o_lon_p=0 +o_lat_p=39.25 +a=6367470 +b=6367470 "
+        "+to_meter=0.0174532925199 +wktext +type=crs");
+    auto crs2 = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj2);
+    ASSERT_TRUE(crs2 != nullptr);
+
+    EXPECT_TRUE(
+        crs->isEquivalentTo(crs2.get(), IComparable::Criterion::EQUIVALENT));
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            crs->baseCRS(), NN_NO_CHECK(crs));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=ob_tran +o_proj=longlat +lon_0=18 +o_lon_p=0 "
+                  "+o_lat_p=39.25 +R=6367470 "
+                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+    }
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_NO_CHECK(crs), crs->baseCRS());
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_EQ(
+            op->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +inv +proj=ob_tran +o_proj=longlat +lon_0=18 +o_lon_p=0 "
+            "+o_lat_p=39.25 +R=6367470 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, DerivedProjectedCRS) {
     auto wkt =
         "DERIVEDPROJCRS[\"derived projectedCRS\",\n"

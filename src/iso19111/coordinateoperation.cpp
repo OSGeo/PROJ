@@ -6344,10 +6344,9 @@ void Conversion::_exportToPROJString(
 
         auto derivedGeographicCRS =
             dynamic_cast<const crs::DerivedGeographicCRS *>(horiz);
-        if (derivedGeographicCRS) {
-            auto baseGeodCRS = derivedGeographicCRS->baseCRS();
+        if (!formatter->getCRSExport() && derivedGeographicCRS) {
             formatter->setOmitProjLongLatIfPossible(true);
-            baseGeodCRS->_exportToPROJString(formatter);
+            derivedGeographicCRS->addAngularUnitConvertAndAxisSwap(formatter);
             formatter->setOmitProjLongLatIfPossible(false);
         }
     }
