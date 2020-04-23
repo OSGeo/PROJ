@@ -48,6 +48,8 @@
 #include "proj_internal.h" // M_PI
 // clang-format on
 
+#include "proj_json_streaming_writer.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -1052,12 +1054,12 @@ void OperationMethod::_exportToWKT(io::WKTFormatter *formatter) const {
 void OperationMethod::_exportToJSON(
     io::JSONFormatter *formatter) const // throw(FormattingException)
 {
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     auto objectContext(formatter->MakeObjectContext("OperationMethod",
                                                     !identifiers().empty()));
 
-    writer.AddObjKey("name");
-    writer.Add(nameStr());
+    writer->AddObjKey("name");
+    writer->Add(nameStr());
 
     if (formatter->outputId()) {
         formatID(formatter);
@@ -1247,29 +1249,29 @@ void OperationParameterValue::_exportToWKT(io::WKTFormatter *formatter,
 //! @cond Doxygen_Suppress
 void OperationParameterValue::_exportToJSON(
     io::JSONFormatter *formatter) const {
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     auto objectContext(formatter->MakeObjectContext(
         "ParameterValue", !parameter()->identifiers().empty()));
 
-    writer.AddObjKey("name");
-    writer.Add(parameter()->nameStr());
+    writer->AddObjKey("name");
+    writer->Add(parameter()->nameStr());
 
     const auto &l_value(parameterValue());
     if (l_value->type() == ParameterValue::Type::MEASURE) {
-        writer.AddObjKey("value");
-        writer.Add(l_value->value().value(), 15);
-        writer.AddObjKey("unit");
+        writer->AddObjKey("value");
+        writer->Add(l_value->value().value(), 15);
+        writer->AddObjKey("unit");
         const auto &l_unit(l_value->value().unit());
         if (l_unit == common::UnitOfMeasure::METRE ||
             l_unit == common::UnitOfMeasure::DEGREE ||
             l_unit == common::UnitOfMeasure::SCALE_UNITY) {
-            writer.Add(l_unit.name());
+            writer->Add(l_unit.name());
         } else {
             l_unit._exportToJSON(formatter);
         }
     } else if (l_value->type() == ParameterValue::Type::FILENAME) {
-        writer.AddObjKey("value");
-        writer.Add(l_value->valueFile());
+        writer->AddObjKey("value");
+        writer->Add(l_value->valueFile());
     }
 
     if (formatter->outputId()) {
@@ -5763,28 +5765,28 @@ void Conversion::_exportToWKT(io::WKTFormatter *formatter) const {
 void Conversion::_exportToJSON(
     io::JSONFormatter *formatter) const // throw(FormattingException)
 {
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     auto objectContext(
         formatter->MakeObjectContext("Conversion", !identifiers().empty()));
 
-    writer.AddObjKey("name");
+    writer->AddObjKey("name");
     auto l_name = nameStr();
     if (l_name.empty()) {
-        writer.Add("unnamed");
+        writer->Add("unnamed");
     } else {
-        writer.Add(l_name);
+        writer->Add(l_name);
     }
 
-    writer.AddObjKey("method");
+    writer->AddObjKey("method");
     formatter->setOmitTypeInImmediateChild();
     formatter->setAllowIDInImmediateChild();
     method()->_exportToJSON(formatter);
 
     const auto &l_parameterValues = parameterValues();
     if (!l_parameterValues.empty()) {
-        writer.AddObjKey("parameters");
+        writer->AddObjKey("parameters");
         {
-            auto parametersContext(writer.MakeArrayContext(false));
+            auto parametersContext(writer->MakeArrayContext(false));
             for (const auto &genOpParamvalue : l_parameterValues) {
                 formatter->setAllowIDInImmediateChild();
                 formatter->setOmitTypeInImmediateChild();
@@ -8230,45 +8232,45 @@ void Transformation::_exportToWKT(io::WKTFormatter *formatter) const {
 void Transformation::_exportToJSON(
     io::JSONFormatter *formatter) const // throw(FormattingException)
 {
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     auto objectContext(formatter->MakeObjectContext(
         formatter->abridgedTransformation() ? "AbridgedTransformation"
                                             : "Transformation",
         !identifiers().empty()));
 
-    writer.AddObjKey("name");
+    writer->AddObjKey("name");
     auto l_name = nameStr();
     if (l_name.empty()) {
-        writer.Add("unnamed");
+        writer->Add("unnamed");
     } else {
-        writer.Add(l_name);
+        writer->Add(l_name);
     }
 
     if (!formatter->abridgedTransformation()) {
-        writer.AddObjKey("source_crs");
+        writer->AddObjKey("source_crs");
         formatter->setAllowIDInImmediateChild();
         sourceCRS()->_exportToJSON(formatter);
 
-        writer.AddObjKey("target_crs");
+        writer->AddObjKey("target_crs");
         formatter->setAllowIDInImmediateChild();
         targetCRS()->_exportToJSON(formatter);
 
         const auto &l_interpolationCRS = interpolationCRS();
         if (l_interpolationCRS) {
-            writer.AddObjKey("interpolation_crs");
+            writer->AddObjKey("interpolation_crs");
             formatter->setAllowIDInImmediateChild();
             l_interpolationCRS->_exportToJSON(formatter);
         }
     }
 
-    writer.AddObjKey("method");
+    writer->AddObjKey("method");
     formatter->setOmitTypeInImmediateChild();
     formatter->setAllowIDInImmediateChild();
     method()->_exportToJSON(formatter);
 
-    writer.AddObjKey("parameters");
+    writer->AddObjKey("parameters");
     {
-        auto parametersContext(writer.MakeArrayContext(false));
+        auto parametersContext(writer->MakeArrayContext(false));
         for (const auto &genOpParamvalue : parameterValues()) {
             formatter->setAllowIDInImmediateChild();
             formatter->setOmitTypeInImmediateChild();
@@ -8278,8 +8280,8 @@ void Transformation::_exportToJSON(
 
     if (!formatter->abridgedTransformation()) {
         if (!coordinateOperationAccuracies().empty()) {
-            writer.AddObjKey("accuracy");
-            writer.Add(coordinateOperationAccuracies()[0]->value());
+            writer->AddObjKey("accuracy");
+            writer->Add(coordinateOperationAccuracies()[0]->value());
         }
     }
 
@@ -10178,29 +10180,29 @@ void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
 void ConcatenatedOperation::_exportToJSON(
     io::JSONFormatter *formatter) const // throw(FormattingException)
 {
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     auto objectContext(formatter->MakeObjectContext("ConcatenatedOperation",
                                                     !identifiers().empty()));
 
-    writer.AddObjKey("name");
+    writer->AddObjKey("name");
     auto l_name = nameStr();
     if (l_name.empty()) {
-        writer.Add("unnamed");
+        writer->Add("unnamed");
     } else {
-        writer.Add(l_name);
+        writer->Add(l_name);
     }
 
-    writer.AddObjKey("source_crs");
+    writer->AddObjKey("source_crs");
     formatter->setAllowIDInImmediateChild();
     sourceCRS()->_exportToJSON(formatter);
 
-    writer.AddObjKey("target_crs");
+    writer->AddObjKey("target_crs");
     formatter->setAllowIDInImmediateChild();
     targetCRS()->_exportToJSON(formatter);
 
-    writer.AddObjKey("steps");
+    writer->AddObjKey("steps");
     {
-        auto parametersContext(writer.MakeArrayContext(false));
+        auto parametersContext(writer->MakeArrayContext(false));
         for (const auto &operation : operations()) {
             formatter->setAllowIDInImmediateChild();
             operation->_exportToJSON(formatter);
@@ -15146,39 +15148,39 @@ void PROJBasedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
 void PROJBasedOperation::_exportToJSON(
     io::JSONFormatter *formatter) const // throw(FormattingException)
 {
-    auto &writer = formatter->writer();
+    auto writer = formatter->writer();
     auto objectContext(formatter->MakeObjectContext(
         (sourceCRS() && targetCRS()) ? "Transformation" : "Conversion",
         !identifiers().empty()));
 
-    writer.AddObjKey("name");
+    writer->AddObjKey("name");
     auto l_name = nameStr();
     if (l_name.empty()) {
-        writer.Add("unnamed");
+        writer->Add("unnamed");
     } else {
-        writer.Add(l_name);
+        writer->Add(l_name);
     }
 
     if (sourceCRS() && targetCRS()) {
-        writer.AddObjKey("source_crs");
+        writer->AddObjKey("source_crs");
         formatter->setAllowIDInImmediateChild();
         sourceCRS()->_exportToJSON(formatter);
 
-        writer.AddObjKey("target_crs");
+        writer->AddObjKey("target_crs");
         formatter->setAllowIDInImmediateChild();
         targetCRS()->_exportToJSON(formatter);
     }
 
-    writer.AddObjKey("method");
+    writer->AddObjKey("method");
     formatter->setOmitTypeInImmediateChild();
     formatter->setAllowIDInImmediateChild();
     method()->_exportToJSON(formatter);
 
     const auto &l_parameterValues = parameterValues();
     if (!l_parameterValues.empty()) {
-        writer.AddObjKey("parameters");
+        writer->AddObjKey("parameters");
         {
-            auto parametersContext(writer.MakeArrayContext(false));
+            auto parametersContext(writer->MakeArrayContext(false));
             for (const auto &genOpParamvalue : l_parameterValues) {
                 formatter->setAllowIDInImmediateChild();
                 formatter->setOmitTypeInImmediateChild();
