@@ -30,25 +30,23 @@ matrix:
             - g++-4.8
 
     - os: linux
-      dist: xenial
+      dist: bionic
       compiler: gcc
       services:
         - docker
       env:
         - BUILD_NAME=linux_gcc8
         - DETAILS="linux, gcc8"
-        - ARCH=amd64
-#        - DETAILS="linux, gcc8, i386"
-#        - ARCH=i386
+        - DETAILS="linux, gcc8, i386"
+        - ARCH=i386
         - CC=gcc-8
         - CXX=g++-8
-        - CXXFLAGS='-g -O2 -D_GLIBCXX_ASSERTIONS'
-#        - CXXFLAGS='-g -O2 -m32 -D_GLIBCXX_ASSERTIONS'
-#        - CFLAGS='-g -O2 -m32'
-#        - TIFF_CFLAGS=-I/usr/include/i386-linux-gnu
-#        - TIFF_LIBS="-L/usr/lib/i386-linux-gnu -ltiff"
-#        - SQLITE3_CFLAGS=-I/usr/include/i386-linux-gnu
-#        - SQLITE3_LIBS="-L/usr/lib/i386-linux-gnu -lsqlite3"
+        - CXXFLAGS='-g -O2 -m32 -D_GLIBCXX_ASSERTIONS'
+        - CFLAGS='-g -O2 -m32'
+        - TIFF_CFLAGS=-I/usr/include/i386-linux-gnu
+        - TIFF_LIBS="-L/usr/lib/i386-linux-gnu -ltiff"
+        - SQLITE3_CFLAGS=-I/usr/include/i386-linux-gnu
+        - SQLITE3_LIBS="-L/usr/lib/i386-linux-gnu -lsqlite3"
       addons:
         apt:
           sources:
