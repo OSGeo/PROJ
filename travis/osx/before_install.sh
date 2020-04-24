@@ -15,7 +15,7 @@ brew reinstall wget
 
 ./travis/before_install_pip.sh
 
-pip3 install --user sphinx==2.4.4 sphinx-rtd-theme sphinxcontrib-bibtex breathe==4.14.0
+pip3 install --user sphinx sphinx-rtd-theme sphinxcontrib-bibtex breathe
 which sphinx-build
 
 (cd docs; make html)
