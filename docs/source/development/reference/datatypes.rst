@@ -37,15 +37,15 @@ Transformation objects
             PJ_INV   = -1    /* Inverse    */
         } PJ_DIRECTION;
 
-    .. c:member:: PJ_FWD
+    .. cpp:enumerator:: PJ_FWD
 
         Perform transformation in the forward direction.
 
-    .. c:member:: PJ_IDENT
+    .. cpp:enumerator:: PJ_IDENT
 
         Identity. Do nothing.
 
-    .. c:member:: PJ_INV
+    .. cpp:enumerator:: PJ_INV
 
         Perform transformation in the inverse direction.
 
@@ -486,7 +486,7 @@ List structures
 
         Operation entry point.
 
-    .. c:member:: char * const *
+    .. c:member:: char * const * descr
 
         Description of operation.
 
@@ -755,24 +755,24 @@ Logging
     Enum of logging levels in PROJ. Used to set the logging level in PROJ.
     Usually using :c:func:`proj_log_level`.
 
-    .. c:member:: PJ_LOG_NONE
+    .. cpp:enumerator:: PJ_LOG_NONE
 
         Don't log anything.
 
-    .. c:member:: PJ_LOG_ERROR
+    .. cpp:enumerator:: PJ_LOG_ERROR
 
         Log only errors.
 
-    .. c:member:: PJ_LOG_DEBUG
+    .. cpp:enumerator:: PJ_LOG_DEBUG
 
         Log errors and additional debug information.
 
-    .. c:member:: PJ_LOG_TRACE
+    .. cpp:enumerator:: PJ_LOG_TRACE
 
         Highest logging level. Log everything including very detailed debug
         information.
 
-    .. c:member:: PJ_LOG_TELL
+    .. cpp:enumerator:: PJ_LOG_TELL
 
         Special logging level that when used in :c:func:`proj_log_level`
         will return the current logging level set in PROJ.
@@ -788,9 +788,9 @@ Logging
 
         typedef void (*PJ_LOG_FUNCTION)(void *, int, const char *);
 
-    where the :c:type:`void` pointer references a data structure used by the
-    calling application, the :c:type:`int` is used to set the logging level
-    and the :c:type:`const char` pointer is the string that will be logged
+    where the first argument (void pointer) references a data structure used by the
+    calling application, the second argument (int type) is used to set the logging level
+    and the third argument (const char pointer) is the string that will be logged
     by the function.
 
 
