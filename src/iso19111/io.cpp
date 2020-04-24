@@ -1285,6 +1285,8 @@ struct WKTParser::Private {
                            const UnitOfMeasure &defaultLinearUnit,
                            const UnitOfMeasure &defaultAngularUnit);
 
+    static std::string getExtensionProj4(const WKTNode::Private *nodeP);
+
     static void addExtensionProj4ToProp(const WKTNode::Private *nodeP,
                                         PropertyMap &props);
 
@@ -2665,14 +2667,25 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
 
 // ---------------------------------------------------------------------------
 
-void WKTParser::Private::addExtensionProj4ToProp(const WKTNode::Private *nodeP,
-                                                 PropertyMap &props) {
+std::string
+WKTParser::Private::getExtensionProj4(const WKTNode::Private *nodeP) {
     auto &extensionNode = nodeP->lookForChild(WKTConstants::EXTENSION);
     const auto &extensionChildren = extensionNode->GP()->children();
     if (extensionChildren.size() == 2) {
         if (ci_equal(stripQuotes(extensionChildren[0]), "PROJ4")) {
-            props.set("EXTENSION_PROJ4", stripQuotes(extensionChildren[1]));
+            return stripQuotes(extensionChildren[1]);
         }
+    }
+    return std::string();
+}
+
+// ---------------------------------------------------------------------------
+
+void WKTParser::Private::addExtensionProj4ToProp(const WKTNode::Private *nodeP,
+                                                 PropertyMap &props) {
+    const auto extensionProj4(getExtensionProj4(nodeP));
+    if (!extensionProj4.empty()) {
+        props.set("EXTENSION_PROJ4", extensionProj4);
     }
 }
 
@@ -4514,13 +4527,15 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     if (ci_equal(name, WKTConstants::PROJCS) ||
         ci_equal(name, WKTConstants::PROJCRS) ||
         ci_equal(name, WKTConstants::PROJECTEDCRS)) {
-        auto projCRS =
-            util::nn_static_pointer_cast<CRS>(buildProjectedCRS(node));
-        auto projString = projCRS->getExtensionProj4();
-        if (starts_with(projString, "+proj=ob_tran +o_proj=longlat") ||
-            starts_with(projString, "+proj=ob_tran +o_proj=lonlat") ||
-            starts_with(projString, "+proj=ob_tran +o_proj=latlong") ||
-            starts_with(projString, "+proj=ob_tran +o_proj=latlon")) {
+        // Get the EXTENSION "PROJ4" node before attempting to call
+        // buildProjectedCRS() since formulations of WKT1_GDAL from GDAL 2.x
+        // with the netCDF driver and the lack the required UNIT[] node
+        std::string projString = getExtensionProj4(nodeP);
+        if (!projString.empty() &&
+            (starts_with(projString, "+proj=ob_tran +o_proj=longlat") ||
+             starts_with(projString, "+proj=ob_tran +o_proj=lonlat") ||
+             starts_with(projString, "+proj=ob_tran +o_proj=latlong") ||
+             starts_with(projString, "+proj=ob_tran +o_proj=latlon"))) {
             // Those are not a projected CRS, but a DerivedGeographic one...
             if (projString.find(" +type=crs") == std::string::npos) {
                 projString += " +type=crs";
@@ -4535,7 +4550,7 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
             } catch (const io::ParsingException &) {
             }
         }
-        return projCRS.as_nullable();
+        return util::nn_static_pointer_cast<CRS>(buildProjectedCRS(node));
     }
 
     if (ci_equal(name, WKTConstants::VERT_CS) ||

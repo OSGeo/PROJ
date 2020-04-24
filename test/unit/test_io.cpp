@@ -3626,6 +3626,7 @@ TEST(wkt_parse, DerivedGeodeticCRS) {
 // ---------------------------------------------------------------------------
 
 TEST(wkt_parse, DerivedGeographicCRS_GDAL_PROJ4_EXSTENSION_hack) {
+    // Note the lack of UNIT[] node
     auto wkt =
         "PROJCS[\"unnamed\","
         "   GEOGCS[\"unknown\","
@@ -3635,14 +3636,11 @@ TEST(wkt_parse, DerivedGeographicCRS_GDAL_PROJ4_EXSTENSION_hack) {
         "       UNIT[\"degree\",0.0174532925199433,"
         "           AUTHORITY[\"EPSG\",\"9122\"]]],"
         "   PROJECTION[\"Rotated_pole\"],"
-        "       UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],"
-        "       AXIS[\"Easting\",EAST],"
-        "       AXIS[\"Northing\",NORTH],"
         "       EXTENSION[\"PROJ4\",\"+proj=ob_tran +o_proj=longlat +lon_0=18 "
         "+o_lon_p=0 +o_lat_p=39.25 +a=6367470 +b=6367470 "
         "+to_meter=0.0174532925199 +wktext\"]]";
 
-    auto obj = WKTParser().createFromWKT(wkt);
+    auto obj = WKTParser().setStrict(false).createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<DerivedGeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
