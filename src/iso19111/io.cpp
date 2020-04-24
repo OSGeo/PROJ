@@ -9609,7 +9609,7 @@ JSONFormatter::~JSONFormatter() = default;
 
 // ---------------------------------------------------------------------------
 
-CPLJSonStreamingWriter &JSONFormatter::writer() const { return d->writer_; }
+CPLJSonStreamingWriter *JSONFormatter::writer() const { return &(d->writer_); }
 
 // ---------------------------------------------------------------------------
 
