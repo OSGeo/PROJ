@@ -190,7 +190,7 @@ Updates
 * :c:func:`proj_trans`: add retry logic to select other transformation if the best one
   fails. (`#1809 <https://github.com/OSGeo/PROJ/issues/1809>`_)
 
-* :c:func:`BoundCRS::identify()`: improvements to discard CRS that aren't relevant
+* `BoundCRS::identify()`: improvements to discard CRS that aren't relevant
   (`#1802 <https://github.com/OSGeo/PROJ/issues/1802>`_)
 
 * Database: update to IGNF v3.1.0 (`#1785 <https://github.com/OSGeo/PROJ/issues/1785>`_)
@@ -263,7 +263,7 @@ Bug fixes
 
 * :c:func:`proj_create_crs_to_crs_from_pj()`: make the PJ* arguments const PJ* (`#1583 <https://github.com/OSGeo/PROJ/issues/1583>`_)
 
-* :c:func:`PROJStringParser::createFromPROJString()`: avoid potential infinite
+* `PROJStringParser::createFromPROJString()`: avoid potential infinite
   recursion (`#1574 <https://github.com/OSGeo/PROJ/issues/1574>`_)
 
 * Avoid core dump when setting ``ctx==NULL`` in functions
