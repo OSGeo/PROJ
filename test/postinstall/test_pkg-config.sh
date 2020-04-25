@@ -80,4 +80,6 @@ make clean
 
 cd ..
 
+(cd testcpp && make && make clean)
+
 exit $ERRORS
