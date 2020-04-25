@@ -554,7 +554,8 @@ static void outputObject(
     }
 
     auto op = dynamic_cast<CoordinateOperation *>(obj.get());
-    if (op && dbContext && getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
+    if (!outputOpt.quiet && op && dbContext &&
+        getenv("PROJINFO_NO_GRID_CHECK") == nullptr) {
         try {
             auto setGrids = op->gridsNeeded(dbContext, false);
             bool firstWarning = true;
