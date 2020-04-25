@@ -92,6 +92,15 @@ namespace proj {}
 #include "nn.hpp"
 
 /* To allow customizing the base namespace of PROJ */
+#ifdef PROJ_INTERNAL_CPP_NAMESPACE
+#define NS_PROJ osgeo::internalproj
+#define NS_PROJ_START                                                          \
+    namespace osgeo {                                                          \
+    namespace internalproj {
+#define NS_PROJ_END                                                            \
+    }                                                                          \
+    }
+#else
 #ifndef NS_PROJ
 #define NS_PROJ osgeo::proj
 #define NS_PROJ_START                                                          \
@@ -100,6 +109,7 @@ namespace proj {}
 #define NS_PROJ_END                                                            \
     }                                                                          \
     }
+#endif
 #endif
 
 // Private-implementation (Pimpl) pattern
