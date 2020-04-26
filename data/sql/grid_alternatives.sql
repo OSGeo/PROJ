@@ -140,8 +140,6 @@ VALUES
 -- Portugal
 ('DLx_ETRS89_geo.gsb','pt_dgt_DLx_ETRS89_geo.tif','DLx_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_DLx_ETRS89_geo.tif',1,1,NULL),
 ('D73_ETRS89_geo.gsb','pt_dgt_D73_ETRS89_geo.tif','D73_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_D73_ETRS89_geo.tif',1,1,NULL),
-('portugal/DLX_ETRS89_geo','pt_dgt_DLx_ETRS89_geo.tif','DLx_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_DLx_ETRS89_geo.tif',1,1,NULL),
-('portugal/D73_ETRS89_geo','pt_dgt_D73_ETRS89_geo.tif','D73_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_D73_ETRS89_geo.tif',1,1,NULL),
 -- Canada provincial grids
 ('AB_CSRS.DAC','ca_nrc_ABCSRSV4.tif','ABCSRSV4.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_ABCSRSV4.tif',1,1,NULL),
 ('CRD27_00.GSB','ca_nrc_CRD27_00.tif','CRD27_00.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_CRD27_00.tif',1,1,NULL),

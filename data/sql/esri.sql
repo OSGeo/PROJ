@@ -12232,9 +12232,7 @@ INSERT INTO "helmert_transformation" VALUES('ESRI','108300','NAD_1983_HARN_To_WG
 INSERT INTO "grid_transformation" VALUES('ESRI','108302','ATS_1977_To_NAD_1983_CSRS_NTv2_Maritimes',NULL,NULL,'EPSG','9615','NTv2','EPSG','4122','EPSG','4617','EPSG','1283',999.0,'EPSG','8656','Latitude and longitude difference file','canada/GS7783',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "helmert_transformation" VALUES('ESRI','108303','Pohnpei_To_WGS_1984',NULL,NULL,'EPSG','9603','Geocentric translations (geog2D domain)','ESRI','104109','EPSG','4326','EPSG','1161',999.0,-89.121,-348.182,260.871,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "grid_transformation" VALUES('ESRI','108304','Guam_1963_To_NAD_1983_HARN_Saipan',NULL,NULL,'EPSG','9615','NTv2','EPSG','4675','EPSG','4152','ESRI','150',999.0,'EPSG','8656','Latitude and longitude difference file','c1hpgn',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO grid_alternatives VALUES ('c1hpgn', 'us_noaa_c1hpgn.tif', 'c1hpgn.gsb', 'GTiff', 'hgridshift', 0, NULL, 'https://cdn.proj.org/us_noaa_c1hpgn.tif', 1, 1, NULL);
 INSERT INTO "grid_transformation" VALUES('ESRI','108305','Guam_1963_To_NAD_1983_HARN_Rota',NULL,NULL,'EPSG','9615','NTv2','EPSG','4675','EPSG','4152','ESRI','149',999.0,'EPSG','8656','Latitude and longitude difference file','c2hpgn',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO grid_alternatives VALUES ('c2hpgn', 'us_noaa_c2hpgn.tif', 'c2hpgn.gsb', 'GTiff', 'hgridshift', 0, NULL, 'https://cdn.proj.org/us_noaa_c2hpgn.tif', 1, 1, NULL);
 INSERT INTO "grid_transformation" VALUES('ESRI','108306','Old_Hawaiian_To_NAD_1983_HARN_Hawaii',NULL,NULL,'EPSG','9615','NTv2','EPSG','4135','EPSG','4152','EPSG','1334',0.05,'EPSG','8656','Latitude and longitude difference file','ohdhihpgn',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "area" VALUES('ESRI','155','Pacific - USA interests Pacific and Mariana plates','Pacific - USA interests Pacific and Mariana plates',-17.56,31.8,129.48,-151.27,0);
 INSERT INTO "helmert_transformation" VALUES('ESRI','108307','NAD_1983_HARN_PACP00_MARP00_To_WGS_1984',NULL,NULL,'EPSG','9607','Coordinate Frame rotation (geog2D domain)','EPSG','4152','EPSG','4326','ESRI','155',999.0,-0.9102,2.0141,0.5602,'EPSG','9001',-0.029039,-0.010065,-0.010101,'EPSG','9104',0.0,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
@@ -12291,3 +12289,46 @@ INSERT INTO "grid_transformation" VALUES('ESRI','108453','AGD_1984_To_GDA_1994_N
 INSERT INTO "helmert_transformation" VALUES('ESRI','108457','Amersfoort_To_WGS_1984_2008_MB',NULL,NULL,'EPSG','9636','Molodensky-Badekas (CF geog2D domain)','EPSG','4289','EPSG','4326','EPSG','1275',0.5,593.0248,25.9984,478.7459,'EPSG','9001',0.3989573882431337,-0.3439878173782826,1.877401639980446,'EPSG','9104',4.0725,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,3903453.1482,368135.3134,5012970.3051,'EPSG','9001',NULL,0);
 INSERT INTO "grid_transformation" VALUES('ESRI','108471','RGNC_1991_To_IGN72_Grande_Terre_NTv2',NULL,NULL,'EPSG','9615','NTv2','EPSG','4645','EPSG','4662','EPSG','2822',0.1,'EPSG','8656','Latitude and longitude difference file','france/RGNC1991_IGN72GrandeTerre',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "grid_transformation" VALUES('ESRI','108472','RGNC_1991_To_NEA74_Noumea_NTv2',NULL,NULL,'EPSG','9615','NTv2','EPSG','4645','EPSG','4644','EPSG','2823',999.0,'EPSG','8656','Latitude and longitude difference file','france/RGNC1991_NEA74Noumea',NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+------------------
+-- ESRI grid names
+------------------
+INSERT INTO grid_alternatives(original_grid_name,
+                              proj_grid_name,
+                              old_proj_grid_name,
+                              proj_grid_format,
+                              proj_method,
+                              inverse_direction,
+                              package_name,
+                              url, direct_download, open_license, directory)
+VALUES
+('prvi','us_noaa_prvi.tif','prvi','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/us_noaa_prvi.tif', 1, 1, NULL),
+('portugal/DLX_ETRS89_geo','pt_dgt_DLx_ETRS89_geo.tif','DLX_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_DLx_ETRS89_geo.tif',1,1,NULL),
+('portugal/D73_ETRS89_geo','pt_dgt_D73_ETRS89_geo.tif','D73_ETRS89_geo.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/pt_dgt_D73_ETRS89_geo.tif',1,1,NULL),
+('netherlands/rdtrans2008','','rdtrans2008.gsb','NTv2','hgridshift',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',1,0,NULL),
+('uk/OSTN15_NTv2','uk_os_OSTN15_NTv2_OSGBtoETRS.tif','OSTN15_NTv2_OSGBtoETRS.gsb','GTiff','hgridshift',1  -- reverse direction
+    ,NULL,'https://cdn.proj.org/uk_os_OSTN15_NTv2_OSGBtoETRS.tif',1,1,NULL),
+('canada/GS7783','ca_nrc_GS7783.tif','GS7783.GSB','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_GS7783.tif',1,1,NULL),
+('c1hpgn', 'us_noaa_c1hpgn.tif', 'c1hpgn.gsb', 'GTiff', 'hgridshift', 0, NULL, 'https://cdn.proj.org/us_noaa_c1hpgn.tif', 1, 1, NULL),
+('c2hpgn', 'us_noaa_c2hpgn.tif', 'c2hpgn.gsb', 'GTiff', 'hgridshift', 0, NULL, 'https://cdn.proj.org/us_noaa_c2hpgn.tif', 1, 1, NULL),
+('spain/100800401','es_cat_icgc_100800401.tif','100800401.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_cat_icgc_100800401.tif',1,1,NULL),
+('australia/QLD_0900','au_icsm_National_84_02_07_01.tif','National_84_02_07_01.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/au_icsm_National_84_02_07_01.tif',1,1,NULL) -- From https://www.dnrme.qld.gov.au/__data/assets/pdf_file/0006/105765/gday-21-user-guide.pdf: "Note that the Queensland grid QLD_0900.gsb produces identical results to the National AGD84 grid for the equivalent coverage."
+;
+-- 'france/RGNC1991_IGN72GrandeTerre' : we have a 3D geocentric corresponding one: no need for mapping
+-- 'france/RGNC1991_NEA74Noumea' : we have a 3D geocentric corresponding one: no need for mapping
+-- 'gc_nad83_harn_2007_conus_shifts': no mapping
+-- 'gc_nad83_harn_2007_alaska_shifts': no mapping
+-- 'gc_nad83_harn_2007_prvi_shifts': no mapping
+-- 'gc_nad83_2007_2011_conus_shifts': no mapping
+-- 'gc_nad83_2007_2011_alaska_shifts': no mapping
+-- 'gc_nad83_2007_2011_prvi_shifts': no mapping
+-- 'uk/osgb36_xrail84': no mapping
+-- 'spain/PENR2009': no mapping
+-- 'spain/BALR2009': no mapping
+-- 'japan/tky2jgd': no mapping
+-- 'spain/baleares': no mapping
+-- 'spain/peninsula': no mapping
+-- 'icegrid2004': no mapping
+-- 'ICEGRID93': no mapping
+-- 'imhpgn': no mapping
+-- 'ohdhihpgn': no mapping
+-- 'switzerland/ntv2-ch03p-etrs': no mapping
