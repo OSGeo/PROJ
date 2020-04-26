@@ -747,6 +747,7 @@ struct projCtx_t {
     projGridChunkCache gridChunkCache{};
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
+    int pipelineInitRecursiongCounter = 0; // to avoid potential infinite recursion in pipeline.cpp
 
     TMercAlgo defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER; // can be overridden by content of proj.ini
 
