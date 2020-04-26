@@ -735,6 +735,7 @@ struct projCtx_t {
     projGridChunkCache gridChunkCache{};
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
+    int pipelineInitRecursiongCounter = 0; // to avoid potential infinite recursion in pipeline.cpp
 
     projCtx_t() = default;
     projCtx_t(const projCtx_t&);
