@@ -90,13 +90,18 @@ The following control parameters can appear in any order:
 
 .. option:: -r
 
-    This options reverses the order of the expected input from
-    longitude-latitude or x-y to latitude-longitude or y-x.
+    This options reverses the order of the first two expected
+    inputs from that specified by the CRS to the opposite
+    order.  The third coordinate, typically height, remains
+    third.
 
 .. option:: -s
 
-    This options reverses the order of the output from x-y or longitude-latitude
-    to y-x or latitude-longitude.
+    This options reverses the order of the first two expected
+    outputs from that specified by the CRS to the opposite
+    order.  The third coordinate, typically height, remains
+    third.
+
 
 .. option:: -f <format>
 
