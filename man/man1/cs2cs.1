@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CS2CS" "1" "Feb 10, 2020" "6.3.1" "PROJ"
+.TH "CS2CS" "1" "Apr 27, 2020" "6.3.2" "PROJ"
 .SH NAME
 cs2cs \- Cartographic coordinate system filter
 .
@@ -136,14 +136,18 @@ List of datums that can be selected with the \fI+datum\fP parameter.
 .INDENT 0.0
 .TP
 .B \-r
-This options reverses the order of the expected input from
-longitude\-latitude or x\-y to latitude\-longitude or y\-x.
+This options reverses the order of the first two expected
+inputs from that specified by the CRS to the opposite
+order.  The third coordinate, typically height, remains
+third.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-s
-This options reverses the order of the output from x\-y or longitude\-latitude
-to y\-x or latitude\-longitude.
+This options reverses the order of the first two expected
+outputs from that specified by the CRS to the opposite
+order.  The third coordinate, typically height, remains
+third.
 .UNINDENT
 .INDENT 0.0
 .TP
