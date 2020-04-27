@@ -1,3 +1,61 @@
+6.3.2 Release Notes
+-------------------
+
+ Bug fixes
+ ---------
+
+ o validateParameters(): fix false-positive warning on
+   Equidistant Cylindrical (#1947)
+
+ o proj_create_crs_to_crs(): avoid potential reprojection failures when
+   reprojecting area of use to source and target CRS (#1993)
+
+ o createOperations(): fix wrong pipeline generation with CRS that has +nadgrids=
+   and +pm= (#2003)
+
+ o Fix bad copy&replace pattern on HEALPix and rHEALPix projection names (#2006)
+
+ o createUnitOfMeasure(): use full double resolution for the conversion
+   factor (#2013)
+
+ o data/Makefile.am: remove bashism (#2047)
+
+ o ProjectedCRS::identify(): tune it to better work with ESRI WKT representation
+   of EPSG:2193 (#2058)
+
+ o EngineeringCRS: when exporting to WKT1_GDAL, output unit and axis (#2091)
+
+ o Add missing entries in grid_alternatives for Portugal grids coming from
+   ESRI entries (#2103)
+
+ o Fix working of Helmert transform between the horizontal part of 2
+   compoundCRS (#2110)
+
+ o ESRI_WKT ingestion: make sure to identify to non-deprecated EPSG entry when
+   possible (#2118)
+
+ o Make sure that importing a Projected 3D CRS from WKT:2019 keeps the base
+   geographic CRS as 3D (#2124)
+
+ o createOperations(): improve results of compoundCRS to compoundCRS case (#2130)
+
+ o PROJ4 string import: take into correctly non-metre unit when the string looks
+   like the one for WGS 84 / Pseudo Mercator (#2178)
+
+ o Fix support of WKT1_GDAL with netCDF rotated pole formulation (#2187)
+
+ o io.hpp: avoid dependency to proj_json_streaming_writer.hpp (#2188)
+
+
+ THANKS TO
+ ---------
+
+ Pedro Venancio
+ Bas Couwenberg
+ Martin Dobias
+ Kristian Evers
+ Even Rouault
+
 6.3.1 Release Notes
 -------------------
 
