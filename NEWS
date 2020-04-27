@@ -1,3 +1,116 @@
+7.0.1 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Database: update to EPSG v9.8.9 #2141
+
+ Bug fixes
+ ---------
+
+ o Make tests independent of proj-datumgrid (#1995)
+
+ o Add missing projection property tables (#1996)
+
+ o Avoid crash when running against SQLite3 binary built with
+   -DSQLITE_OMIT_AUTOINIT (#1999)
+
+ o createOperations(): fix wrong pipeline generation with CRS that has +nadgrids=
+   and +pm= (#2002)
+
+ o Fix bad copy&replace pattern on HEALPix and rHEALPix projection names (#2007)
+
+ o createUnitOfMeasure(): use full double resolution for the conversion
+   factor (#2014)
+
+ o Update README with info on PROJ-data (#2015)
+
+ o utm/ups: make sure to set errno to PJD_ERR_ELLIPSOID_USE_REQUIRED if
+   es==0 (#2045)
+
+ o data/Makefile.am: remove bashism (#2048)
+
+ o ProjectedCRS::identify(): tune it to better work with ESRI WKT
+   representation of EPSG:2193 (#2059)
+
+ o Fix build with gcc 4.8.5 (#2066)
+
+ o Autotools/pkg-conf: Define datarootdir (#2069)
+
+ o cs2cs: don't require +to for '{source_crs} {target_crs} filename...'
+   syntax (#2081)
+
+ o CMake: fix bug with find_package(PROJ) with macOS (#2082)
+
+ o ESRI WKT import / identification: special case for
+   NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501 with Foot_US unit (#2088)
+
+ o ESRI WKT import / identification: special case for
+   NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501 with Foot_US unit (#2089)
+
+ o EngineeringCRS: when exporting to WKT1_GDAL, output unit and axis (#2092)
+
+ o Use jtsk03-jtsk horizontal grid from CDN (#2098)
+
+ o CMake: prefer to use use PROJ_SOURCE_DIR and PROJ_BINARY_DIR (#2100)
+
+ o Fix wrong grids file name in esri.sql (#2104)
+
+ o Fix identification of projected CRS whose name is close but not strictly
+   equal to a ESRI alias (#2106)
+
+ o Fix working of Helmert transform between the horizontal part of
+   2 compoundCRS (#2111)
+
+ o Database: fix registration of custom entries of grid_transformation_custom.sql
+   for geoid grids (#2114)
+
+ o ESRI_WKT ingestion: make sure to identify to non-deprecated EPSG entry when
+   possible (#2119)
+
+ o Make sure that importing a Projected 3D CRS from WKT:2019 keeps the base
+   geographic CRS as 3D (#2125)
+
+ o createOperations(): improve results of compoundCRS to compoundCRS case (#2131)
+
+ o hgridshift/vgridshift: defer grid opening when grid has already
+   been opened (#2132)
+
+ o Resolve a few shadowed declaration warnings (#2142)
+
+ o ProjectedCRS identification: deal with switched 1st/2nd std parallels for
+   LCC_2SP(#2153)
+
+ o Fix Robinson inverse projection (#2154)
+
+ o createOperations(): do not remove ballpark transformation if there are only
+   grid based operations, even if they cover the whole area of use (#2156)
+
+ o createFromCoordinateReferenceSystemCodes(): 'optimization' to avoid using
+   C++ exceptions (#2161)
+
+ o Ingestion of WKT1_GDAL: correctly map 'Cylindrical_Equal_Area' (#2167)
+
+ o Add limited support for non-conformant WKT1 LAS COMPD_CS[] (#2172)
+
+ o PROJ4 string import: take into correctly non-metre unit when the string
+   looks like the one for WGS 84 / Pseudo Mercator (#2177)
+
+ o io.hpp: avoid dependency to proj_json_streaming_writer.hpp (#2184)
+
+ o Fix support of WKT1_GDAL with netCDF rotated pole formulation (#2186)
+
+
+ THANKS TO
+ ---------
+
+ Mike Taves
+ Chris Mayo
+ Kristian Evers
+ Even Rouault
+
+
 7.0.0 Release Notes
 -------------------
 
