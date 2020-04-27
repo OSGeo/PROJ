@@ -2653,12 +2653,12 @@ TEST(operation, imw_polyconic_export) {
 
 TEST(operation, krovak_north_oriented_export) {
     auto conv = Conversion::createKrovakNorthOriented(
-        PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.28813972222222),
+        PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.2881397527778),
         Angle(78.5), Scale(0.9999), Length(5), Length(6));
     EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=krovak +lat_0=49.5 +lon_0=42.5 +alpha=30.2881397222222 "
+              "+proj=krovak +lat_0=49.5 +lon_0=42.5 +alpha=30.2881397527778 "
               "+k=0.9999 +x_0=5 +y_0=6");
 
     EXPECT_EQ(
@@ -2672,7 +2672,7 @@ TEST(operation, krovak_north_oriented_export) {
         "    PARAMETER[\"Longitude of origin\",42.5,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "        ID[\"EPSG\",8833]],\n"
-        "    PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "    PARAMETER[\"Co-latitude of cone axis\",30.2881397527778,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "        ID[\"EPSG\",1036]],\n"
         "    PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
@@ -2694,7 +2694,7 @@ TEST(operation, krovak_north_oriented_export) {
         "PROJECTION[\"Krovak\"],\n"
         "PARAMETER[\"latitude_of_center\",49.5],\n"
         "PARAMETER[\"longitude_of_center\",42.5],\n"
-        "PARAMETER[\"azimuth\",30.2881397222222],\n"
+        "PARAMETER[\"azimuth\",30.2881397527778],\n"
         "PARAMETER[\"pseudo_standard_parallel_1\",78.5],\n"
         "PARAMETER[\"scale_factor\",0.9999],\n"
         "PARAMETER[\"false_easting\",5],\n"
@@ -2705,13 +2705,13 @@ TEST(operation, krovak_north_oriented_export) {
 
 TEST(operation, krovak_export) {
     auto conv = Conversion::createKrovak(
-        PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.28813972222222),
+        PropertyMap(), Angle(49.5), Angle(42.5), Angle(30.2881397527778),
         Angle(78.5), Scale(0.9999), Length(5), Length(6));
     EXPECT_TRUE(conv->validateParameters().empty());
 
     EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=krovak +axis=swu +lat_0=49.5 +lon_0=42.5 "
-              "+alpha=30.2881397222222 +k=0.9999 +x_0=5 "
+              "+alpha=30.2881397527778 +k=0.9999 +x_0=5 "
               "+y_0=6");
 
     EXPECT_EQ(
@@ -2725,7 +2725,7 @@ TEST(operation, krovak_export) {
         "    PARAMETER[\"Longitude of origin\",42.5,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "        ID[\"EPSG\",8833]],\n"
-        "    PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "    PARAMETER[\"Co-latitude of cone axis\",30.2881397527778,\n"
         "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "        ID[\"EPSG\",1036]],\n"
         "    PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
@@ -2747,7 +2747,7 @@ TEST(operation, krovak_export) {
         "PROJECTION[\"Krovak\"],\n"
         "PARAMETER[\"latitude_of_center\",49.5],\n"
         "PARAMETER[\"longitude_of_center\",42.5],\n"
-        "PARAMETER[\"azimuth\",30.2881397222222],\n"
+        "PARAMETER[\"azimuth\",30.2881397527778],\n"
         "PARAMETER[\"pseudo_standard_parallel_1\",78.5],\n"
         "PARAMETER[\"scale_factor\",0.9999],\n"
         "PARAMETER[\"false_easting\",5],\n"
