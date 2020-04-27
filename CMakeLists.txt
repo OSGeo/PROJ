@@ -105,7 +105,7 @@ message(STATUS "Configuring PROJ:")
 include(ProjVersion)
 proj_version(MAJOR 7 MINOR 0 PATCH 0)
 set(PROJ_API_VERSION "19")
-set(PROJ_BUILD_VERSION "19.0.0")
+set(PROJ_BUILD_VERSION "19.1.0")
 
 ################################################################################
 # Build features and variants
