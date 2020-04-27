@@ -89,6 +89,7 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		tests/us_noaa_geoid06_ak_subset_at_antimeridian.tif \
 		tests/test_hgrid_little_endian.gsb \
 		tests/test_hgrid_big_endian.gsb \
+		tests/test_3d_grid_projected.tif \
 		tests/BETA2007.gsb \
 		tests/MD \
 		tests/alaska \

@@ -1681,14 +1681,14 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
         grinfo.n_lat = grid.height();
 
         /* cell size */
-        grinfo.cs_lon = extent.resLon;
-        grinfo.cs_lat = extent.resLat;
+        grinfo.cs_lon = extent.resX;
+        grinfo.cs_lat = extent.resY;
 
         /* bounds of grid */
-        grinfo.lowerleft.lam  = extent.westLon;
-        grinfo.lowerleft.phi  = extent.southLat;
-        grinfo.upperright.lam = extent.eastLon;
-        grinfo.upperright.phi = extent.northLat;
+        grinfo.lowerleft.lam  = extent.west;
+        grinfo.lowerleft.phi  = extent.south;
+        grinfo.upperright.lam = extent.east;
+        grinfo.upperright.phi = extent.north;
     };
 
     {
