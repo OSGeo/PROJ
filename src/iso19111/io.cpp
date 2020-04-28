@@ -7975,7 +7975,7 @@ std::string PROJStringParser::Private::guessBodyName(double a) {
 GeodeticReferenceFrameNNPtr
 PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
 
-    const auto &ellpsStr = getParamValue(step, "ellps");
+    std::string ellpsStr = getParamValue(step, "ellps");
     const auto &datumStr = getParamValue(step, "datum");
     const auto &RStr = getParamValue(step, "R");
     const auto &aStr = getParamValue(step, "a");
@@ -7991,6 +7991,11 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
     const bool numericParamPresent =
         !RStr.empty() || !aStr.empty() || !bStr.empty() || !rfStr.empty() ||
         !fStr.empty() || !esStr.empty() || !eStr.empty();
+
+    if (!numericParamPresent && ellpsStr.empty() && datumStr.empty() &&
+        step.name == "krovak") {
+        ellpsStr = "bessel";
+    }
 
     PrimeMeridianNNPtr pm(buildPrimeMeridian(step));
     PropertyMap grfMap;
@@ -8390,6 +8395,9 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                 throw ParsingException("Unhandled order=" + orderStr);
             }
         }
+    } else if (step.name == "krovak" && hasParamValue(step, "czech")) {
+        axis[0] = west;
+        axis[1] = south;
     }
     return axis;
 }
@@ -8727,9 +8735,14 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 Step::KeyValue("lonc", getParamValue(step, "lon_0")));
         }
     } else if (step.name == "krovak" &&
-               ((getParamValue(step, "axis") == "swu" && iAxisSwap < 0) ||
+               ((iAxisSwap < 0 && getParamValue(step, "axis") == "swu" &&
+                 !hasParamValue(step, "czech")) ||
                 (iAxisSwap > 0 &&
-                 getParamValue(steps_[iAxisSwap], "order") == "-2,-1"))) {
+                 getParamValue(steps_[iAxisSwap], "order") == "-2,-1" &&
+                 !hasParamValue(step, "czech")))) {
+        mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
+    } else if (step.name == "krovak" && iAxisSwap < 0 &&
+               hasParamValue(step, "czech") && !hasParamValue(step, "axis")) {
         mapping = getMapping(EPSG_CODE_METHOD_KROVAK);
     } else if (step.name == "merc") {
         if (hasParamValue(step, "a") && hasParamValue(step, "b") &&
@@ -8878,9 +8891,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                 if (hasError) {
                     throw ParsingException("invalid value for " + proj_name);
                 }
-
-            } else if (param->unit_type == UnitOfMeasure::Type::SCALE) {
-                value = 1;
             }
             // For omerc, if gamma is missing, the default value is
             // alpha
@@ -8890,13 +8900,24 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     value = getAngularValue(*paramValue);
                 }
             } else if (step.name == "krovak") {
+                // Keep it in sync with defaults of krovak.cpp
                 if (param->epsg_code ==
-                    EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
+                    EPSG_CODE_PARAMETER_LATITUDE_PROJECTION_CENTRE) {
+                    value = 49.5;
+                } else if (param->epsg_code ==
+                           EPSG_CODE_PARAMETER_LONGITUDE_OF_ORIGIN) {
+                    value = 24.833333333333333333;
+                } else if (param->epsg_code ==
+                           EPSG_CODE_PARAMETER_COLATITUDE_CONE_AXIS) {
                     value = 30.28813975277777776;
                 } else if (
                     param->epsg_code ==
                     EPSG_CODE_PARAMETER_LATITUDE_PSEUDO_STANDARD_PARALLEL) {
                     value = 78.5;
+                } else if (
+                    param->epsg_code ==
+                    EPSG_CODE_PARAMETER_SCALE_FACTOR_PSEUDO_STANDARD_PARALLEL) {
+                    value = 0.9999;
                 }
             } else if (step.name == "cea" && proj_name == "lat_ts") {
                 paramValue = &getParamValueK(step);
@@ -8920,6 +8941,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                         throw ParsingException("k/k_0 should be in [0,1]");
                     }
                 }
+            } else if (param->unit_type == UnitOfMeasure::Type::SCALE) {
+                value = 1;
             }
 
             PropertyMap propertiesParameter;
