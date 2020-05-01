@@ -1220,7 +1220,7 @@ TEST(wkt_parse, wkt1_krovak_south_west) {
         "    PROJECTION[\"Krovak\"],"
         "    PARAMETER[\"latitude_of_center\",49.5],"
         "    PARAMETER[\"longitude_of_center\",24.83333333333333],"
-        "    PARAMETER[\"azimuth\",30.28813972222222],"
+        "    PARAMETER[\"azimuth\",30.2881397527778],"
         "    PARAMETER[\"pseudo_standard_parallel_1\",78.5],"
         "    PARAMETER[\"scale_factor\",0.9999],"
         "    PARAMETER[\"false_easting\",0],"
@@ -1254,7 +1254,7 @@ TEST(wkt_parse, wkt1_krovak_south_west) {
         "        PARAMETER[\"Longitude of origin\",24.8333333333333,\n"
         "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "            ID[\"EPSG\",8833]],\n"
-        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397527778,\n"
         "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "            ID[\"EPSG\",1036]],\n"
         "        PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
@@ -1284,37 +1284,44 @@ TEST(wkt_parse, wkt1_krovak_south_west) {
     auto projString =
         crs->exportToPROJString(PROJStringFormatter::create().get());
     auto expectedPROJString = "+proj=krovak +axis=swu +lat_0=49.5 "
-                              "+lon_0=24.8333333333333 +alpha=30.2881397222222 "
+                              "+lon_0=24.8333333333333 +alpha=30.2881397527778 "
                               "+k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +units=m "
                               "+no_defs +type=crs";
     EXPECT_EQ(projString, expectedPROJString);
 
     obj = PROJStringParser().createFromPROJString(projString);
-    crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
-    ASSERT_TRUE(crs != nullptr);
-    auto wkt2 = crs->exportToWKT(WKTFormatter::create().get());
+    auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs2 != nullptr);
+    auto wkt2 = crs2->exportToWKT(WKTFormatter::create().get());
     EXPECT_TRUE(wkt2.find("METHOD[\"Krovak\"") != std::string::npos) << wkt2;
     EXPECT_TRUE(
         wkt2.find("PARAMETER[\"Latitude of pseudo standard parallel\",78.5,") !=
         std::string::npos)
         << wkt2;
     EXPECT_TRUE(
-        wkt2.find("PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,") !=
+        wkt2.find("PARAMETER[\"Co-latitude of cone axis\",30.2881397527778,") !=
         std::string::npos)
         << wkt2;
-    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+    EXPECT_EQ(crs2->exportToPROJString(PROJStringFormatter::create().get()),
+              expectedPROJString);
+
+    obj = PROJStringParser().createFromPROJString(
+        "+proj=krovak +czech +type=crs");
+    crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs2 != nullptr);
+    EXPECT_EQ(crs2->exportToPROJString(PROJStringFormatter::create().get()),
               expectedPROJString);
 
     obj = PROJStringParser().createFromPROJString(
         "+type=crs +proj=pipeline +step +proj=unitconvert +xy_in=deg "
         "+xy_out=rad "
         "+step +proj=krovak +lat_0=49.5 "
-        "+lon_0=24.8333333333333 +alpha=30.2881397222222 "
+        "+lon_0=24.8333333333333 +alpha=30.2881397527778 "
         "+k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
         "+step +proj=axisswap +order=-2,-1");
-    crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
-    ASSERT_TRUE(crs != nullptr);
-    wkt2 = crs->exportToWKT(WKTFormatter::create().get());
+    crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs2 != nullptr);
+    wkt2 = crs2->exportToWKT(WKTFormatter::create().get());
     EXPECT_TRUE(wkt2.find("METHOD[\"Krovak\"") != std::string::npos) << wkt2;
 }
 
@@ -1336,7 +1343,7 @@ TEST(wkt_parse, wkt1_krovak_north_oriented) {
         "    PROJECTION[\"Krovak\"],"
         "    PARAMETER[\"latitude_of_center\",49.5],"
         "    PARAMETER[\"longitude_of_center\",24.83333333333333],"
-        "    PARAMETER[\"azimuth\",30.28813972222222],"
+        "    PARAMETER[\"azimuth\",30.2881397527778],"
         "    PARAMETER[\"pseudo_standard_parallel_1\",78.5],"
         "    PARAMETER[\"scale_factor\",0.9999],"
         "    PARAMETER[\"false_easting\",0],"
@@ -1372,7 +1379,7 @@ TEST(wkt_parse, wkt1_krovak_north_oriented) {
         "        PARAMETER[\"Longitude of origin\",24.8333333333333,\n"
         "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "            ID[\"EPSG\",8833]],\n"
-        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397527778,\n"
         "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
         "            ID[\"EPSG\",1036]],\n"
         "        PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
@@ -1399,7 +1406,7 @@ TEST(wkt_parse, wkt1_krovak_north_oriented) {
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=krovak +lat_0=49.5 +lon_0=24.8333333333333 "
-              "+alpha=30.2881397222222 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
+              "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel "
               "+units=m +no_defs +type=crs");
 }
 
@@ -5328,7 +5335,7 @@ TEST(wkt_parse,
                "UNIT[\"Degree\",0.017453292519943295]],PROJECTION[\"Krovak\"],"
                "PARAMETER[\"latitude_of_center\",49.5],"
                "PARAMETER[\"longitude_of_center\",24.83333333333333],"
-               "PARAMETER[\"azimuth\",30.28813972222222],"
+               "PARAMETER[\"azimuth\",30.2881397527778],"
                "PARAMETER[\"pseudo_standard_parallel_1\",78.5],"
                "PARAMETER[\"scale_factor\",0.9999],"
                "PARAMETER[\"false_easting\",0],"
@@ -5362,7 +5369,7 @@ TEST(wkt_parse,
         "        PARAMETER[\"Longitude of origin\",24.8333333333333,\n"
         "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
         "            ID[\"EPSG\",8833]],\n"
-        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397222222,\n"
+        "        PARAMETER[\"Co-latitude of cone axis\",30.2881397527778,\n"
         "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
         "            ID[\"EPSG\",1036]],\n"
         "        PARAMETER[\"Latitude of pseudo standard parallel\",78.5,\n"
