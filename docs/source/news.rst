@@ -3,6 +3,163 @@
 News
 ###############################################################################
 
+7.0.1 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*May 1st 2020*
+
+Updates
+-------
+
+* Database: update to EPSG v9.8.9 (`#2141 <https://github.com/OSGeo/PROJ/issues/2141>`_)
+
+Bug fixes
+---------
+
+* Make tests independent of proj-datumgrid (`#1995 <https://github.com/OSGeo/PROJ/issues/1995>`_)
+
+* Add missing projection property tables (`#1996 <https://github.com/OSGeo/PROJ/issues/1996>`_)
+
+* Avoid crash when running against SQLite3 binary built with
+  ``-DSQLITE_OMIT_AUTOINIT`` (`#1999 <https://github.com/OSGeo/PROJ/issues/1999>`_)
+
+* :c:func:`createOperations`: fix wrong pipeline generation with CRS that has ``+nadgrids=``
+  and ``+pm=`` (`#2002 <https://github.com/OSGeo/PROJ/issues/2002>`_)
+
+* Fix bad copy&replace pattern on HEALPix and rHEALPix projection names (`#2007 <https://github.com/OSGeo/PROJ/issues/2007>`_)
+
+* :c:func:`createUnitOfMeasure`: use full double resolution for the conversion
+  factor (`#2014 <https://github.com/OSGeo/PROJ/issues/2014>`_)
+
+* Update README with info on PROJ-data (`#2015 <https://github.com/OSGeo/PROJ/issues/2015>`_)
+
+* ``utm/ups``: make sure to set errno to ``PJD_ERR_ELLIPSOID_USE_REQUIRED`` if
+  ``+es==0`` (`#2045 <https://github.com/OSGeo/PROJ/issues/2045>`_)
+
+* ``data/Makefile.am``: remove bashism (`#2048 <https://github.com/OSGeo/PROJ/issues/2048>`_)
+
+* :cpp:func:`ProjectedCRS::identify`: tune it to better work with ESRI WKT
+  representation of EPSG:2193 (`#2059 <https://github.com/OSGeo/PROJ/issues/2059>`_)
+
+* Fix build with gcc 4.8.5 (`#2066 <https://github.com/OSGeo/PROJ/issues/2066>`_)
+
+* Autotools/pkg-conf: Define datarootdir (`#2069 <https://github.com/OSGeo/PROJ/issues/2069>`_)
+
+* :program:`cs2cs`: don't require ``+to`` for '{source_crs} {target_crs} filename...'
+  syntax (`#2081 <https://github.com/OSGeo/PROJ/issues/2081>`_)
+
+* CMake: fix bug with ``find_package(PROJ)`` with macOS (`#2082 <https://github.com/OSGeo/PROJ/issues/2082>`_)
+
+* ESRI WKT import / identification: special case for
+  NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501 with Foot_US unit (`#2088 <https://github.com/OSGeo/PROJ/issues/2088>`_)
+
+* ESRI WKT import / identification: special case for
+  NAD_1983_HARN_StatePlane_Colorado_North_FIPS_0501 with Foot_US unit (`#2089 <https://github.com/OSGeo/PROJ/issues/2089>`_)
+
+* EngineeringCRS: when exporting to WKT1_GDAL, output unit and axis (`#2092 <https://github.com/OSGeo/PROJ/issues/2092>`_)
+
+* Use jtsk03-jtsk horizontal grid from CDN (`#2098 <https://github.com/OSGeo/PROJ/issues/2098>`_)
+
+* CMake: prefer to use use PROJ_SOURCE_DIR and PROJ_BINARY_DIR (`#2100 <https://github.com/OSGeo/PROJ/issues/2100>`_)
+
+* Fix wrong grids file name in esri.sql (`#2104 <https://github.com/OSGeo/PROJ/issues/2104>`_)
+
+* Fix identification of projected CRS whose name is close but not strictly
+  equal to a ESRI alias (`#2106 <https://github.com/OSGeo/PROJ/issues/2106>`_)
+
+* Fix working of Helmert transform between the horizontal part of
+  2 compoundCRS (`#2111 <https://github.com/OSGeo/PROJ/issues/2111>`_)
+
+* Database: fix registration of custom entries of grid_transformation_custom.sql
+  for geoid grids (`#2114 <https://github.com/OSGeo/PROJ/issues/2114>`_)
+
+* ESRI_WKT ingestion: make sure to identify to non-deprecated EPSG entry when
+  possible (`#2119 <https://github.com/OSGeo/PROJ/issues/2119>`_)
+
+* Make sure that importing a Projected 3D CRS from WKT:2019 keeps the base
+  geographic CRS as 3D (`#2125 <https://github.com/OSGeo/PROJ/issues/2125>`_)
+
+* :c:func:`createOperations`: improve results of compoundCRS to compoundCRS case (`#2131 <https://github.com/OSGeo/PROJ/issues/2131>`_)
+
+* hgridshift/vgridshift: defer grid opening when grid has already
+  been opened (`#2132 <https://github.com/OSGeo/PROJ/issues/2132>`_)
+
+* Resolve a few shadowed declaration warnings (`#2142 <https://github.com/OSGeo/PROJ/issues/2142>`_)
+
+* ProjectedCRS identification: deal with switched 1st/2nd std parallels for
+  LCC_2SP(`#2153 <https://github.com/OSGeo/PROJ/issues/2153>`_)
+
+* Fix Robinson inverse projection (`#2154 <https://github.com/OSGeo/PROJ/issues/2154>`_)
+
+* :c:func:`createOperations()`: do not remove ballpark transformation if there are only
+  grid based operations, even if they cover the whole area of use (`#2156 <https://github.com/OSGeo/PROJ/issues/2156>`_)
+
+* :c:func:`createFromCoordinateReferenceSystemCodes`: 'optimization' to avoid using
+  C++ exceptions (`#2161 <https://github.com/OSGeo/PROJ/issues/2161>`_)
+
+* Ingestion of WKT1_GDAL: correctly map 'Cylindrical_Equal_Area' (`#2167 <https://github.com/OSGeo/PROJ/issues/2167>`_)
+
+* Add limited support for non-conformant WKT1 LAS COMPD_CS[] (`#2172 <https://github.com/OSGeo/PROJ/issues/2172>`_)
+
+* PROJ4 string import: take into correctly non-metre unit when the string
+  looks like the one for WGS 84 / Pseudo Mercator (`#2177 <https://github.com/OSGeo/PROJ/issues/2177>`_)
+
+* ``io.hpp``: avoid dependency to ``proj_json_streaming_writer.hpp`` (`#2184 <https://github.com/OSGeo/PROJ/issues/2184>`_)
+
+* Fix support of WKT1_GDAL with netCDF rotated pole formulation (`#2186 <https://github.com/OSGeo/PROJ/issues/2186>`_)
+
+
+
+6.3.2 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*May 1st 2020*
+
+
+Bug fixes
+---------
+
+* :c:func:`validateParameters`: fix false-positive warning on
+  Equidistant Cylindrical (`#1947 <https://github.com/OSGeo/PROJ/issues/1947>`_)
+
+* :c:func:`proj_create_crs_to_cr`: avoid potential reprojection failures when
+  reprojecting area of use to source and target CRS (`#1993 <https://github.com/OSGeo/PROJ/issues/1993>`_)
+
+* :c:func:`createOperations`: fix wrong pipeline generation with CRS that has ``+nadgrids=``
+  and ``+pm=`` (`#2003 <https://github.com/OSGeo/PROJ/issues/2003>`_)
+
+* Fix bad copy&replace pattern on HEALPix and rHEALPix projection names (`#2006 <https://github.com/OSGeo/PROJ/issues/2006>`_)
+
+* :c:func:`createUnitOfMeasure`: use full double resolution for the conversion
+  factor (`#2013 <https://github.com/OSGeo/PROJ/issues/2013>`_)
+
+* ``data/Makefile.am``: remove bashism (`#2047 <https://github.com/OSGeo/PROJ/issues/2047>`_)
+
+* :cpp:func:``ProjectedCRS::identify``: tune it to better work with ESRI WKT representation
+  of EPSG:2193 (`#2058 <https://github.com/OSGeo/PROJ/issues/2058>`_)
+
+* EngineeringCRS: when exporting to WKT1_GDAL, output unit and axis (`#2091 <https://github.com/OSGeo/PROJ/issues/2091>`_)
+
+* Add missing entries in grid_alternatives for Portugal grids coming from
+  ESRI entries (`#2103 <https://github.com/OSGeo/PROJ/issues/2103>`_)
+
+* Fix working of Helmert transform between the horizontal part of 2
+  compoundCRS (`#2110 <https://github.com/OSGeo/PROJ/issues/2110>`_)
+
+* ESRI_WKT ingestion: make sure to identify to non-deprecated EPSG entry when
+  possible (`#2118 <https://github.com/OSGeo/PROJ/issues/2118>`_)
+
+* Make sure that importing a Projected 3D CRS from WKT:2019 keeps the base
+  geographic CRS as 3D (`#2124 <https://github.com/OSGeo/PROJ/issues/2124>`_)
+
+* :c:func:`createOperations`: improve results of compoundCRS to compoundCRS case (`#2130 <https://github.com/OSGeo/PROJ/issues/2130>`_)
+
+* PROJ4 string import: take into correctly non-metre unit when the string looks
+  like the one for WGS 84 / Pseudo Mercator (`#2178 <https://github.com/OSGeo/PROJ/issues/2178>`_)
+
+* Fix support of WKT1_GDAL with netCDF rotated pole formulation (`#2187 <https://github.com/OSGeo/PROJ/issues/2187>`_)
+
+* ``io.hpp``: avoid dependency to ``proj_json_streaming_writer.hpp`` (`#2188 <https://github.com/OSGeo/PROJ/issues/2188>`_)
+
+
 7.0.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *March 1st 2020*
