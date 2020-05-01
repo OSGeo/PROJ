@@ -176,9 +176,17 @@ See step 1.6 above. Do not rename the archives with RC postfixes.
 ------------------------------------------------------------------------------
 
   - Add the release notes from `NEWS` to `docs/source/news.rst`
+
+    These vim substitutions are helpfull when converting NEWS to rst:
+
+    :!(\#(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/issues/\1>`_)!
+    :s/^o/*/
+
   - Update download links in `docs/source/download.rst`
   - Update `$TRAVIS_BRANCH` in `travis\after_success.sh` to new maintenance
     branch.
+
+
 
 *Commit the changes to master and cherry-pick into maintenance branch.*
 
