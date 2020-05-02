@@ -64,5 +64,12 @@ mv ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml.tmp  ${
 sed "s/CONST_CHAR/const char/"  < ${TOPDIR}/docs/build/xml/proj_8h.xml > ${TOPDIR}/docs/build/xml/proj_8h.xml.tmp
 mv ${TOPDIR}/docs/build/xml/proj_8h.xml.tmp ${TOPDIR}/docs/build/xml/proj_8h.xml
 
+# Hack for Breathe 4.17.0 issue that is confused by osgeo::proj::common::UnitOfMeasure::Type::NONE (enumeration value of Type) and osgeo::proj::common::UnitOfMeasure::NONE (member value), whereas 4.16.0 works fine.
+# Filed as https://github.com/michaeljones/breathe/issues/518
+sed "s/          <name>NONE<\/name>/          <name>Type::NONE<\/name>/"  < ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1common_1_1UnitOfMeasure.xml > ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1common_1_1UnitOfMeasure.xml.tmp
+mv ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1common_1_1UnitOfMeasure.xml.tmp ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1common_1_1UnitOfMeasure.xml
+sed 's/refid="classosgeo_1_1proj_1_1common_1_1UnitOfMeasure_1a400c71b5a6d7927e3e5850cee2b07d10ab50339a10e1de285ac99d4c3990b8693" kind="enumvalue"><name>NONE<\/name><\/member>/refid="classosgeo_1_1proj_1_1common_1_1UnitOfMeasure_1a400c71b5a6d7927e3e5850cee2b07d10ab50339a10e1de285ac99d4c3990b8693" kind="enumvalue"><name>Type::NONE<\/name><\/member>/' < ${TOPDIR}/docs/build/xml/index.xml > ${TOPDIR}/docs/build/xml/index.xml.tmp
+mv ${TOPDIR}/docs/build/xml/index.xml.tmp ${TOPDIR}/docs/build/xml/index.xml
+
 popd > /dev/null || exit
 
