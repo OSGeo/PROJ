@@ -723,18 +723,27 @@ Attempt to interpret args as a PJ_COORD.
         /* This could be avoided if proj_dmstor used the same proj_strtod()  */
         /* as gie, but that is not the case (yet). When we remove projects.h */
         /* from the public API we can change that.                           */
+
+        // Even Rouault: unsure about the above. Coordinates are not necessarily
+        // geographic coordinates, and the roundtrip through radians for
+        // big projected coordinates cause inaccuracies, that can cause
+        // test failures when testing points at edge of grids.
+        // For example 1501000.0 becomes 1501000.000000000233
         double d = proj_strtod(prev,  (char **) &endp);
-        double dms = PJ_TODEG(proj_dmstor (prev, (char **) &dmsendp));
-       /* TODO: When projects.h is removed, call proj_dmstor() in all cases */
-        if (d != dms && fabs(d) < fabs(dms) && fabs(dms) < fabs(d) + 1) {
-            d = dms;
-            endp = dmsendp;
+        if( *endp != '\0' && !isspace(*endp) )
+        {
+            double dms = PJ_TODEG(proj_dmstor (prev, (char **) &dmsendp));
+            /* TODO: When projects.h is removed, call proj_dmstor() in all cases */
+            if (d != dms && fabs(d) < fabs(dms) && fabs(dms) < fabs(d) + 1) {
+                d = dms;
+                endp = dmsendp;
+            }
+            /* A number like -81d00'00.000 will be parsed correctly by both */
+            /* proj_strtod and proj_dmstor but only the latter will return  */
+            /* the correct end-pointer.                                     */
+            if (d == dms && endp != dmsendp)
+                endp = dmsendp;
         }
-        /* A number like -81d00'00.000 will be parsed correctly by both */
-        /* proj_strtod and proj_dmstor but only the latter will return  */
-        /* the correct end-pointer.                                     */
-        if (d == dms && endp != dmsendp)
-            endp = dmsendp;
 
         /* Break out if there were no more numerals */
         if (prev==endp)
