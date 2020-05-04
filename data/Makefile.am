@@ -3,7 +3,8 @@ DATAPATH = $(top_srcdir)/data
 pkgdata_DATA = proj.ini GL27 nad.lst nad27 nad83 world other.extra \
 		CH \
 		ITRF2000 ITRF2008 ITRF2014 proj.db \
-		projjson.schema.json
+		projjson.schema.json \
+		deformation_model.schema.json
 
 SQL_ORDERED_LIST = sql/begin.sql \
 		sql/proj_db_table_defs.sql \
@@ -43,6 +44,7 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		CH \
 		ITRF2000 ITRF2008 ITRF2014 \
 		projjson.schema.json \
+		deformation_model.schema.json \
 		CMakeLists.txt \
 		tests/test_nodata.gtx \
 		tests/test_vgrid_bigendian_bigtiff.tif \
@@ -98,6 +100,22 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		tests/ntv1_can.dat \
 		tests/ntv2_0_downsampled.gsb \
 		tests/ntf_r93.gsb \
+		tests/simple_model_degree_3d_grid.tif \
+		tests/simple_model_degree_horizontal.json \
+		tests/simple_model_degree_3d.json \
+		tests/simple_model_metre_3d_grid.tif \
+		tests/simple_model_metre_horizontal.json \
+		tests/simple_model_metre_3d.json \
+		tests/simple_model_metre_3d_geocentric.json \
+		tests/simple_model_metre_vertical_grid.tif \
+		tests/simple_model_metre_vertical.json \
+		tests/simple_model_polar.json \
+		tests/simple_model_polar.tif \
+		tests/simple_model_wrap_east.json \
+		tests/simple_model_wrap_east.tif \
+		tests/simple_model_wrap_west.json \
+		tests/simple_model_wrap_west.tif \
+		tests/simple_model_projected.json \
 		generate_all_sql_in.cmake sql_filelist.cmake \
 		$(SQL_ORDERED_LIST)
 

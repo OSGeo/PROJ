@@ -1,0 +1,124 @@
+
+-------------------------------------------------------------------------------
+===============================================================================
+Test +proj=defmodel
+===============================================================================
+
+<gie-strict>
+
+# Missing +model
+operation   +proj=defmodel
+expect failure errno no_args
+
+# +model doesn't point to an existing file
+operation   +proj=defmodel +model=i_do_not_exist
+expect failure errno invalid_arg
+
+# Not a JSON file
+operation   +proj=defmodel +model=proj.ini
+expect failure errno invalid_arg
+
+# Horizontal deformation with horizontal unit = degree
+operation   +proj=defmodel +model=tests/simple_model_degree_horizontal.json
+tolerance 0.1 mm
+accept 2 49 30 2020
+expect 3 51 30 2020
+roundtrip 1
+
+# 3D deformation with horizontal unit = degree
+operation   +proj=defmodel +model=tests/simple_model_degree_3d.json
+tolerance 0.1 mm
+accept 2 49 30 2020
+expect 3 51 33 2020
+roundtrip 1
+
+# Horizontal deformation with horizontal unit = metre
+operation   +proj=pipeline +step +inv +proj=merc +step +proj=defmodel +model=tests/simple_model_metre_horizontal.json +step +proj=merc
+tolerance 0.1 mm
+accept 10 20 30 2020
+expect 11 22 30 2020
+roundtrip 1
+
+# 3D deformation with horizontal unit = metre
+operation   +proj=pipeline +step +inv +proj=merc +step +proj=defmodel +model=tests/simple_model_metre_3d.json +step +proj=merc
+tolerance 0.1 mm
+accept 10 20 30 2020
+expect 11 22 33 2020
+roundtrip 1
+
+# 3D deformation with horizontal unit = metre and a projeced grid
+operation   +proj=pipeline +step +proj=defmodel +model=tests/simple_model_projected.json
+tolerance 0.1 mm
+
+accept 1500200.0 5400400.0 30 2020
+expect 1500200.588 5400399.722 30.6084 2020
+roundtrip 1
+
+# South-west corner
+accept 1500000.0 5400000.0 30 2020
+expect 1500000.4 5399999.8 30.84 2020
+roundtrip 1
+
+# South-east corner
+accept 1501000.0 5400000.0 30 2020
+expect 1501000.5 5399999.75 30.75 2020
+roundtrip 1
+
+# North-west corner
+accept 1500000.0 5401000.0 30 2020
+expect 1500000.8 5400999.6 30.36 2020
+roundtrip 1
+
+# North-east corner
+accept 1501000.0 5401000.0 30 2020
+expect 1501001.0 5400999.7 30 2020
+roundtrip 1
+
+# Test geocentric addition of components
+operation   +proj=pipeline +step +inv +proj=merc +step +proj=defmodel +model=tests/simple_model_metre_3d_geocentric.json +step +proj=merc
+tolerance 0.1 mm
+accept 10 20 30 2020
+expect 11 22 33 2020
+roundtrip 1
+
+# Vertical deformation with vertical unit = metre
+operation   +proj=defmodel +model=tests/simple_model_metre_vertical.json
+tolerance 0.1 mm
+accept 2 49 30 2020
+expect 2 49 33 2020
+roundtrip 1
+
+# Adjust for 360 degree longitude offsets
+operation   +proj=defmodel +model=tests/simple_model_metre_vertical.json
+tolerance 0.1 mm
+
+accept 362 49 30 2020
+expect 2 49 33 2020
+
+operation +proj=defmodel +model=tests/simple_model_wrap_east.json
+
+accept 165.9 -37.3 10 2020
+expect 165.9 -37.3 10.4525 2020
+
+operation +proj=defmodel +model=tests/simple_model_wrap_west.json
+
+accept 165.9 -37.3 10 2020
+expect 165.9 -37.3 10.4525 2020
+
+# Test geocentric bilinear interpolation method
+operation   +proj=defmodel +model=tests/simple_model_polar.json
+tolerance 0.1 mm
+
+accept  20 -90 15 2020
+expect 27.4743245365 -89.9999747721 18.0000 2020
+
+accept  120 -90 15 2020
+expect 27.4737934098 -89.9999747718 18.0000 2020
+
+accept  235 -89.5 15 2020
+expect -124.9986638571 -89.5000223708 17.3750 2020
+
+accept  45 -89.5 15 2020
+expect 44.9991295392 -89.4999759438 18.5469 2020
+
+</gie-strict>

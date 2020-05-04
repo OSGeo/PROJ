@@ -232,17 +232,17 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff_projected) {
         m_ctxt, "tests/test_3d_grid_projected.tif");
     ASSERT_NE(gridSet, nullptr);
     ASSERT_EQ(gridSet->gridAt(-1000, -1000), nullptr);
-    auto grid = gridSet->gridAt(0, 0);
+    auto grid = gridSet->gridAt(1500300.0, 5400300.0);
     ASSERT_NE(grid, nullptr);
     EXPECT_EQ(grid->width(), 2);
     EXPECT_EQ(grid->height(), 2);
     EXPECT_EQ(grid->extentAndRes().isGeographic, false);
-    EXPECT_EQ(grid->extentAndRes().west, -180);
-    EXPECT_EQ(grid->extentAndRes().east, 180);
-    EXPECT_EQ(grid->extentAndRes().south, -90);
-    EXPECT_EQ(grid->extentAndRes().north, 90);
-    EXPECT_EQ(grid->extentAndRes().resX, 360);
-    EXPECT_EQ(grid->extentAndRes().resY, 180);
+    EXPECT_EQ(grid->extentAndRes().west, 1500000.0);
+    EXPECT_EQ(grid->extentAndRes().east, 1501000.0);
+    EXPECT_EQ(grid->extentAndRes().south, 5400000.0);
+    EXPECT_EQ(grid->extentAndRes().north, 5401000.0);
+    EXPECT_EQ(grid->extentAndRes().resX, 1000);
+    EXPECT_EQ(grid->extentAndRes().resY, 1000);
 }
 
 } // namespace
