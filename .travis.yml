@@ -97,13 +97,13 @@ script:
 
 after_success: ./travis/${BUILD_NAME}/after_success.sh
 
-notifications:
-  #email:
-  #  recipients:
-  #    - gdal-commits@lists.osgeo.org
-
-  irc:
-    channels:
-      - "irc.freenode.org#gdal"
-      - "irc.freenode.org#proj"
-    use_notice: true
+#notifications:
+#  #email:
+#  #  recipients:
+#  #    - gdal-commits@lists.osgeo.org
+#
+#  irc:
+#    channels:
+#      - "irc.freenode.org#gdal"
+#      - "irc.freenode.org#proj"
+#    use_notice: true
