@@ -1,2 +1,3 @@
 $EXE +units=us-ft +init=${INIT_FILE}:404 -E -f '%.3f' >>${OUT} <<EOF
   (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)
+{"CPM", 	"a=6375738.7",		"rf=334.29",		"Comm. des Poids et Mesures 1799"},

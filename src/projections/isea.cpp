@@ -322,7 +322,7 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
 
     /*
      * spherical distance from center of polygon face to any of its
-     * vertexes on the globe
+     * vertices on the globe
      */
     double          g;
 

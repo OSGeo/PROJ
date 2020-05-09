@@ -90,7 +90,7 @@ is an easy way to inspect such grid files:
   half-pixel shift regarding to the coordinates stored in the original grid file. On
   the reading side, PROJ will accept both conventions (for equivalent georeferencing,
   the value of the origin in a PixelIsArea convention is shifted by a half-pixel
-  towards the upper-left direction). Unspecified behaviour if this GeoKey is absent.
+  towards the upper-left direction). Unspecified behavior if this GeoKey is absent.
 
 - Files hosted on the CDN will be tiled, presumably with 256x256 tiles (small
   grids that are smaller than 256x256 will use a single strip). On the reading
@@ -601,9 +601,9 @@ will be followed by:
 .. note::
 
     TIFF has another mechanism to link IFDs, the SubIFD tag. This potentially
-    enables to define a hiearchy of IFDs (similar to HDF5 groups). There is no
+    enables to define a hierarchy of IFDs (similar to HDF5 groups). There is no
     support for that in most TIFF-using software, notably GDAL, and no compelling
-    need to have a nested hiearchy, so "flat" organization with the standard IFD chaining
+    need to have a nested hierarchy, so "flat" organization with the standard IFD chaining
     mechanism is adopted.
 
 Examples of multi-grid dataset

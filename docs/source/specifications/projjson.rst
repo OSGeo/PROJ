@@ -75,7 +75,7 @@ Examples
 GeographicCRS
 +++++++++++++
 
-The following invokation
+The following invocation
 
 ::
 
@@ -132,7 +132,7 @@ will output:
 ProjectedCRS
 ++++++++++++
 
-The following invokation
+The following invocation
 
 ::
 

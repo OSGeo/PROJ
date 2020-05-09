@@ -135,7 +135,7 @@ performed in the order they are listed below:
    ballpark vertical transformation (occurs when there is a geoid model).
 3. if both operations evaluate identically with respect to the above criterion,
    consider as more relevant an operation that does not include a synthetic
-   ballpark horizontal tranformation.
+   ballpark horizontal transformation.
 4. consider as more relevant an operation that refers to shift grids that are locally available.
 5. consider as more relevant an operation that refers to grids that are available
    in one of the proj-datumgrid packages, but not necessarily locally available
@@ -149,7 +149,7 @@ performed in the order they are listed below:
 10. in case of same accuracy, consider as more relevant an operation that does
     not use grids (operations that use only parameters will be faster)
 11. consider as more relevant an operation that involves less transformation steps
-12. and for completness, if two operations are comparable given all the above criteria,
+12. and for completeness, if two operations are comparable given all the above criteria,
     consider as more relevant the one which has the shorter name, and if they
     have the same length, consider as more relevant the one whose name comes first in
     lexicographic order (obviously completely arbitrary, but a sorting
@@ -403,7 +403,7 @@ following results for the AGD84 to GDA2020 coordinate operations lookup:
                    +step +proj=axisswap +order=2,1
 
 One can see that the selected intermediate CRS that has been used is GDA94.
-This is a completely novel behaviour of PROJ 6 as opposed to the logic of PROJ.4 
+This is a completely novel behavior of PROJ 6 as opposed to the logic of PROJ.4 
 where datum transformations implied using EPSG:4326 / WGS 84 has the mandatory
 datum hub. PROJ 6 no longer hardcodes it as the mandatory datum hub, and relies
 on the database to find the appropriate hub(s).
@@ -468,7 +468,7 @@ techniques, we would only find one non-ballpark operation taking the route:
 
 This is not bad, but the global validity area of use is "Australia - onshore and EEZ",
 whereas GDA94 has a larger area of use.
-There is another road that can be taken by going throug GDA2020 instead of ITRF2008.
+There is another road that can be taken by going through GDA2020 instead of ITRF2008.
 The GDA94 to GDA2020 transformations operate on the respective geographic CRS,
 whereas GDA2020 to WGS 84 (G1762) operate on the geocentric CRS. Consequently,
 GDA2020 cannot be identifier as a hub by a "simple" self-join SQL request on
@@ -508,7 +508,7 @@ particular case. Such transformations are done in 2 steps:
 
 This is implemented by the ``createOperationsDerivedTo`` method
 
-For the symetric case, source CRS to a derived CRS, the above algorithm is applied
+For the symmetric case, source CRS to a derived CRS, the above algorithm is applied
 by switching the source and target CRS, and then inverting the resulting operation(s).
 This is mostly a matter of avoiding to write very similar code twice. This logic
 is also applied to all below cases when considering the transformation between 2 different
@@ -659,7 +659,7 @@ CompoundCRS to CompoundCRS
 There is some similarity with the previous paragraph. We first research the
 vertical transformations between the two vertical CRS.
 
-1. If there is such a tranformation, be it direct, or if both vertical CRS
+1. If there is such a transformation, be it direct, or if both vertical CRS
    relate to a common intermediate CRS.
    If it has a registered interpolation geographic CRS, then it is used.
    Otherwise we fallback to the geographic CRS of the source CRS.

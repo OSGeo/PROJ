@@ -179,7 +179,7 @@ struct WKTFormatter::Private {
  *
  * A formatter can be used only once (its internal state is mutated)
  *
- * Its default behaviour can be adjusted with the different setters.
+ * Its default behavior can be adjusted with the different setters.
  *
  * @param convention WKT flavor. Defaults to Convention::WKT2
  * @param dbContext Database context, to allow queries in it if needed.
@@ -201,7 +201,7 @@ WKTFormatterNNPtr WKTFormatter::create(Convention convention,
  *
  * A formatter can be used only once (its internal state is mutated)
  *
- * Its default behaviour can be adjusted with the different setters.
+ * Its default behavior can be adjusted with the different setters.
  *
  * @param other source formatter.
  * @return new formatter.
@@ -6631,7 +6631,7 @@ PROJStringFormatter::~PROJStringFormatter() = default;
  *
  * A formatter can be used only once (its internal state is mutated)
  *
- * Its default behaviour can be adjusted with the different setters.
+ * Its default behavior can be adjusted with the different setters.
  *
  * @param conventionIn PROJ string flavor. Defaults to Convention::PROJ_5
  * @param dbContext Database context (can help to find alternative grid names).

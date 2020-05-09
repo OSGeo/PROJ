@@ -216,7 +216,7 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
 
     /* Even if P==0, we set the errlev on pj_error and the default context   */
     /* Note that both, in the multithreaded case, may then contain undefined */
-    /* values. This is expected behaviour. For MT have one ctx per thread    */
+    /* values. This is expected behavior. For MT have one ctx per thread    */
     if (0!=errlev)
         pj_ctx_set_errno (pj_get_ctx(P), errlev);
 

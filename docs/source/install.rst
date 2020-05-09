@@ -212,7 +212,7 @@ Autotools configure options
 
 Most POSIX systems may not require any options to ``./configure`` if all
 PROJ requirements are met, installed into common directories, and a
-"default" behaviour is desired.
+"default" behavior is desired.
 
 Some influential environment variables are used by ``./configure``,
 with no expected defaults:

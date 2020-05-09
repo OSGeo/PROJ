@@ -46,7 +46,7 @@ struct vgridshiftData {
 static void deal_with_vertcon_gtx_hack(PJ *P)
 {
     struct vgridshiftData *Q = (struct vgridshiftData *) P->opaque;
-    // The .gtx VERTCON files stored millimetres, but the .tif files
+    // The .gtx VERTCON files stored millimeters, but the .tif files
     // are in metres.
     if( Q->forward_multiplier != 0.001 ) {
         return;

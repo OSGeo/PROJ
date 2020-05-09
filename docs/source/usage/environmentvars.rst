@@ -48,7 +48,7 @@ done by setting the variable with no content::
 
     Starting with PROJ version 6.1.0, the paths set by
     :func:`proj_context_set_search_paths` will have priority over the
-    :envvar:`PROJ_LIB` to allow for mutliple versions of PROJ
+    :envvar:`PROJ_LIB` to allow for multiple versions of PROJ
     resource files on your system without conflicting.
 
 .. envvar:: PROJ_DEBUG

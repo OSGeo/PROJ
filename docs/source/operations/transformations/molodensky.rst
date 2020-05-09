@@ -10,7 +10,7 @@ The Molodensky transformation resembles a :ref:`Helmert` with zero
 rotations and a scale of unity, but converts directly from geodetic coordinates to
 geodetic coordinates, without the intermediate shifts to and from cartesian
 geocentric coordinates, associated with the Helmert transformation.
-The Molodensky transformation is simple to implement and to parameterize, requiring
+The Molodensky transformation is simple to implement and to parametrize, requiring
 only the 3 shifts between the input and output frame, and the corresponding
 differences between the semimajor axes and flattening parameters of the reference
 ellipsoids. Due to its algorithmic simplicity, it was popular prior to the

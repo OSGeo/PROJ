@@ -2904,7 +2904,7 @@ TEST(operation, wkt1_import_mercator_variant_A) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, wkt1_import_mercator_variant_A_that_is_variant_B) {
-    // Adresses https://trac.osgeo.org/gdal/ticket/3026
+    // Addresses https://trac.osgeo.org/gdal/ticket/3026
     auto wkt = "PROJCS[\"test\",\n"
                "    GEOGCS[\"WGS 84\",\n"
                "        DATUM[\"WGS 1984\",\n"
@@ -4648,7 +4648,7 @@ TEST(operation, geogCRS_to_geogCRS_context_NAD27_to_WGS84_G1762) {
 // ---------------------------------------------------------------------------
 
 TEST(operation, geogCRS_to_geogCRS_context_WGS84_G1674_to_WGS84_G1762) {
-    // Check that particular behaviour with WGS 84 (Gxxx) related to
+    // Check that particular behavior with WGS 84 (Gxxx) related to
     // 'geodetic_datum_preferred_hub' table and custom no-op transformations
     // between WGS 84 and WGS 84 (Gxxx) doesn't affect direct transformations
     // to those realizations.

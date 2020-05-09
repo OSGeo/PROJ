@@ -32,22 +32,22 @@
 if ! test -d fix_typos; then
     # Get our fork of codespell that adds --words-white-list and full filename support for -S option
     mkdir fix_typos
-    cd fix_typos
-    git clone https://github.com/rouault/codespell
-    cd codespell
-    git checkout gdal_improvements
-    cd ..
-    # Aggregate base dictionary + QGIS one + Debian Lintian one
-    curl https://raw.githubusercontent.com/qgis/QGIS/master/scripts/spelling.dat | sed "s/:/->/" | grep -v "colour->" | grep -v "colours->" > qgis.txt
-    curl https://anonscm.debian.org/cgit/lintian/lintian.git/plain/data/spelling/corrections| grep "||" | grep -v "#" | sed "s/||/->/" > debian.txt
-    cat codespell/data/dictionary.txt qgis.txt debian.txt | awk 'NF' > gdal_dict.txt
-    echo "difered->deferred" >> gdal_dict.txt
-    echo "differed->deferred" >> gdal_dict.txt
-    cd ..
+    (cd fix_typos
+     git clone https://github.com/rouault/codespell
+     (cd codespell && git checkout gdal_improvements)
+     # Aggregate base dictionary + QGIS one + Debian Lintian one
+     curl https://raw.githubusercontent.com/qgis/QGIS/master/scripts/spell_check/spelling.dat | sed "s/:/->/" | grep -v "colour->" | grep -v "colours->" > qgis.txt
+     curl https://salsa.debian.org/lintian/lintian/-/raw/master/data/spelling/corrections | grep "||" | grep -v "#" | sed "s/||/->/" > debian.txt
+     cat codespell/data/dictionary.txt qgis.txt debian.txt | awk 'NF' > gdal_dict.txt
+     echo "difered->deferred" >> gdal_dict.txt
+     echo "differed->deferred" >> gdal_dict.txt
+     grep -v 404 < gdal_dict.txt > gdal_dict.txt.tmp
+     mv gdal_dict.txt.tmp gdal_dict.txt
+    )
 fi
 
 EXCLUDED_FILES="*configure,config.status,config.sub,*/autom4te.cache/*,libtool,aclocal.m4,depcomp,ltmain.sh,*.pdf,./m4/*,./fix_typos/*,./docs/build/*,./src/*generated*,./test/googletest/*,./include/proj/internal/nlohmann/json.hpp,*.before_reformat"
-WORDS_WHITE_LIST="metres,als,lsat,twon,ang,PJD_ERR_LSAT_NOT_IN_RANGE,COLOR_GRAT,interm"
+WORDS_WHITE_LIST="metres,als,lsat,twon,ang,PJD_ERR_LSAT_NOT_IN_RANGE,COLOR_GRAT,interm,Interm,Cartesian,cartesian,CARTESIAN,kilometre,centimetre,millimetre,millimetres,Australia"
 
 python3 fix_typos/codespell/codespell.py -w -i 3 -q 2 -S $EXCLUDED_FILES \
     -x scripts/typos_whitelist.txt --words-white-list=$WORDS_WHITE_LIST \

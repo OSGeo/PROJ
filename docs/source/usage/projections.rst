@@ -46,7 +46,7 @@ name for a unit (ie. ``us-ft``).  Alternatively the translation to meters can be
 specified with the ``+to_meter`` keyword (ie. 0.304800609601219 for US feet).  The
 ``-lu`` argument to ``cs2cs`` or ``proj`` can be used to list symbolic unit names.
 The default unit for projected coordinates is the meter.
-A few special projections deviate from this behaviour, most notably the
+A few special projections deviate from this behavior, most notably the
 latlong pseudo-projection that returns degrees.
 
 Vertical (Z) units can be specified using the ``+vunits`` keyword with a

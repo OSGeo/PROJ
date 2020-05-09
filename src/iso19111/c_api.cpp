@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  * Project:  PROJ
- * Purpose:  C API wraper of C++ API
+ * Purpose:  C API wrapper of C++ API
  * Author:   Even Rouault <even dot rouault at spatialys dot com>
  *
  ******************************************************************************
@@ -1354,7 +1354,7 @@ const char *proj_get_id_code(const PJ *obj, int index) {
  * supported options are:
  * <ul>
  * <li>MULTILINE=YES/NO. Defaults to YES, except for WKT1_ESRI</li>
- * <li>INDENTATION_WIDTH=number. Defauls to 4 (when multiline output is
+ * <li>INDENTATION_WIDTH=number. Defaults to 4 (when multiline output is
  * on).</li>
  * <li>OUTPUT_AXIS=AUTO/YES/NO. In AUTO mode, axis will be output for WKT2
  * variants, for WKT1_GDAL for ProjectedCRS with easting/northing ordering
@@ -1524,7 +1524,7 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
  * supported options are:
  * <ul>
  * <li>MULTILINE=YES/NO. Defaults to YES</li>
- * <li>INDENTATION_WIDTH=number. Defauls to 2 (when multiline output is
+ * <li>INDENTATION_WIDTH=number. Defaults to 2 (when multiline output is
  * on).</li>
  * <li>SCHEMA=string. URL to PROJJSON schema. Can be set to empty string to
  * disable it.</li>
@@ -3198,7 +3198,7 @@ PJ *proj_create_vertical_crs(PJ_CONTEXT *ctx, const char *crs_name,
  * use.
  * It should be used by at most one thread at a time.
  *
- * This is an extented (_ex) version of proj_create_vertical_crs() that adds
+ * This is an extended (_ex) version of proj_create_vertical_crs() that adds
  * the capability of defining a geoid model.
  *
  * @param ctx PROJ context, or NULL for default context
@@ -7434,7 +7434,7 @@ void proj_operation_factory_context_set_use_proj_alternative_grid_names(
  * step.
  *
  * By default, with the IF_NO_DIRECT_TRANSFORMATION stratgey, all potential
- * C candidates will be used if there is no direct tranformation.
+ * C candidates will be used if there is no direct transformation.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param factory_ctx Operation factory context. must not be NULL

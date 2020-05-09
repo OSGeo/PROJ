@@ -4,10 +4,10 @@
 Known differences between versions
 ================================================================================
 
-Once in a while, a new version of PROJ causes changes in the existing behaviour.
+Once in a while, a new version of PROJ causes changes in the existing behavior.
 In this section we track deliberate changes to PROJ that break from previous
-behaviour. Most times that will be caused by a bug fix. Unfortunately, some bugs
-have existed for so long that their faulty behaviour is relied upon by software
+behavior. Most times that will be caused by a bug fix. Unfortunately, some bugs
+have existed for so long that their faulty behavior is relied upon by software
 that uses PROJ.
 
 Behavioural changes caused by new bugs are not tracked here, as they should be
@@ -57,7 +57,7 @@ rotation of the circle larger than :math:`\lambda=-70^{\circ}` and hence
 should return the same output for both.
 
 Adding the ``+over`` flag to the projection definition provides
-the old behaviour.
+the old behavior.
 
 Version 6.0.0
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

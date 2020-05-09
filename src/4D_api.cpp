@@ -605,7 +605,7 @@ static int cs2cs_emulation_setup (PJ *P) {
 /**************************************************************************************
 If any cs2cs style modifiers are given (axis=..., towgs84=..., ) create the 4D API
 equivalent operations, so the preparation and finalization steps in the pj_inv/pj_fwd
-invocators can emulate the behaviour of pj_transform and the cs2cs app.
+invocators can emulate the behavior of pj_transform and the cs2cs app.
 
 Returns 1 on success, 0 on failure
 **************************************************************************************/

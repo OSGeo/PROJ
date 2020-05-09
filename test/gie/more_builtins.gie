@@ -429,7 +429,7 @@ expect     failure   errno invalid_arg
 operation  proj=helmert rx=1 convention=1
 expect     failure   errno invalid_arg
 
-# towgs84 in helmert context should alwas be position_vector
+# towgs84 in helmert context should always be position_vector
 operation  proj=helmert towgs84=1,2,3,4,5,6,7 convention=coordinate_frame
 expect     failure   errno invalid_arg
 
