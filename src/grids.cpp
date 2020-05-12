@@ -3381,7 +3381,12 @@ bool pj_bilinear_interpolation_three_samples(
         return false;
     }
 
+    // From a input location lp, determine the grid cell into which it falls,
+    // by identifying the lower-left x,y of it (ix, iy), and the upper-right
+    // (ix2, iy2)
+
     double grid_x = (lp.lam - extent.west) / extent.resX;
+    // Special case for grids with world extent, and dealing with wrap-around
     if (lp.lam < extent.west) {
         grid_x = (lp.lam + 2 * M_PI - extent.west) / extent.resX;
     } else if (lp.lam > extent.east) {
@@ -3417,6 +3422,7 @@ bool pj_bilinear_interpolation_three_samples(
         return false;
     }
 
+    // Bilinear interpolation
     double frct_lam = grid_x - ix;
     double frct_phi = grid_y - iy;
     double m10 = frct_lam;
