@@ -306,7 +306,7 @@ struct BaseObjectNNPtr : public util::nn<BaseObjectPtr> {
 using BaseObjectNNPtr = util::nn<BaseObjectPtr>;
 #endif
 
-/** \brief Class that can be derived from, to emulate Java's Object behaviour.
+/** \brief Class that can be derived from, to emulate Java's Object behavior.
  */
 class PROJ_GCC_DLL BaseObject {
   public:

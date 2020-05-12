@@ -46,7 +46,7 @@
  * Converts ASCII string to floating point number.
  *
  * This function converts the initial portion of the string pointed to
- * by nptr to double floating point representation. The behaviour is the
+ * by nptr to double floating point representation. The behavior is the
  * same as
  *
  *   pj_strtod(nptr, (char **)NULL);

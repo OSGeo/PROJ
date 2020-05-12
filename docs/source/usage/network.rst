@@ -43,7 +43,7 @@ Authorizing network access can be done in multiple ways:
     Instead of using the `libcurl` implementation, an application using the PROJ
     API can supply its own network implementation through C function callbacks
     with :cpp:func:`proj_context_set_network_callbacks`. Enabling network use
-    must still be done with one of the above mentionned method.
+    must still be done with one of the above mentioned method.
 
 Setting endpoint
 ----------------

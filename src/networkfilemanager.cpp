@@ -2180,7 +2180,7 @@ void proj_grid_cache_clear(PJ_CONTEXT *ctx) {
  * use the "downloaded_file_properties" table of its grid cache database.
  * Consequently files manually placed in the user-writable
  * directory without using this function would be considered as
- * non-existing/obsolete and would be unconditionnaly downloaded again.
+ * non-existing/obsolete and would be unconditionally downloaded again.
  *
  * This function can only be used if networking is enabled, and either
  * the default curl network API or a custom one have been installed.
@@ -2309,7 +2309,7 @@ int proj_is_download_needed(PJ_CONTEXT *ctx, const char *url_or_filename,
  * use the "downloaded_file_properties" table of its grid cache database.
  * Consequently files manually placed in the user-writable
  * directory without using this function would be considered as
- * non-existing/obsolete and would be unconditionnaly downloaded again.
+ * non-existing/obsolete and would be unconditionally downloaded again.
  *
  * This function can only be used if networking is enabled, and either
  * the default curl network API or a custom one have been installed.

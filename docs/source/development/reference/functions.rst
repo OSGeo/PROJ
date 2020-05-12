@@ -276,7 +276,7 @@ Coordinate transformation
 
     .. note:: Even though he coordinate components are named :c:data:`x`, :c:data:`y`,
               :c:data:`z` and :c:data:`t`, axis ordering of the to and from CRS
-              is respected. Transformations exhibit the same behaviour
+              is respected. Transformations exhibit the same behavior
               as if they were gathered in a :c:type:`PJ_COORD` struct.
 
 

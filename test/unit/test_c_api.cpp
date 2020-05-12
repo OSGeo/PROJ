@@ -1497,7 +1497,7 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
 
     // There is no direct transformations between both
 
-    // Default behaviour: allow any pivot
+    // Default behavior: allow any pivot
     {
         auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
         ASSERT_NE(ctxt, nullptr);
@@ -1621,7 +1621,7 @@ TEST_F(CApi, proj_create_operations_allow_ballpark_transformations) {
     proj_operation_factory_context_set_grid_availability_use(
         m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
 
-    // Default: allowed implictly
+    // Default: allowed implicitly
     {
         auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
@@ -4350,7 +4350,7 @@ TEST_F(
     // In this particular case, PROJ computes a transformation from NAD83(2011)
     // (EPSG:6318) to WGS84 (EPSG:4979) for the initial horizontal adjustment
     // before the geoidgrids application. There are 6 candidate transformations
-    // for that in subzones of the US and one last no-op tranformation flagged
+    // for that in subzones of the US and one last no-op transformation flagged
     // as ballpark. That one used to be eliminated because by
     // proj_create_crs_to_crs() because there were non Ballpark transformations
     // available. This resulted thus in an error when transforming outside of

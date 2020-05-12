@@ -110,7 +110,7 @@ The following control parameters can appear in any order:
 
 .. option:: --dry-run
 
-    Simulate the behaviour of the tool without downloading resource files.
+    Simulate the behavior of the tool without downloading resource files.
 
 .. option:: --list-files
 

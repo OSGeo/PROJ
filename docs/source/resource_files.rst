@@ -23,7 +23,7 @@ PROJ will attempt to locate its resource files - database, transformation grids
 or init-files - from several directories.
 The following paths are checked in order:
 
-- For resource files that have an explict relative or absolute path,
+- For resource files that have an explicit relative or absolute path,
   the directory specified in the filename.
 
 - Path resolved by the callback function set with

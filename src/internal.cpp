@@ -475,7 +475,7 @@ void proj_context_log_debug (PJ_CONTEXT *ctx, const char *fmt, ...) {
 /*****************************************************************************/
 void proj_log_trace (PJ *P, const char *fmt, ...) {
 /******************************************************************************
-   For reporting embarrasingly detailed debugging information.
+   For reporting embarrassingly detailed debugging information.
 ******************************************************************************/
     va_list args;
     va_start( args, fmt );

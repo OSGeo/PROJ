@@ -286,7 +286,7 @@ static PJ *setup_approx(PJ *P) {
 //
 /*****************************************************************************/
 
-/* Helper functios for "exact" transverse mercator */
+/* Helper functions for "exact" transverse mercator */
 inline
 static double gatg(const double *p1, int len_p1, double B, double cos_2B, double sin_2B) {
     double h = 0, h1, h2 = 0;
@@ -750,7 +750,7 @@ PJ *PROJECTION(etmerc) {
 
 
 /* UTM uses the Poder/Engsager implementation for the underlying projection      */
-/* UNLESS +approx is set in which case the Evenden/Snyder implemenation is used. */
+/* UNLESS +approx is set in which case the Evenden/Snyder implementation is used. */
 PJ *PROJECTION(utm) {
     long zone;
     if (P->es == 0.0) {

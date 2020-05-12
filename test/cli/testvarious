@@ -959,7 +959,7 @@ echo  "Test EPSG:4896 to EPSG:7930" >> ${OUT}
 # compatibility, the t-component is not written to STDOUT as part of the
 # coordinate data, but rather as part of the string that follows the xyz
 # components. This is only seen by users when the -E option is used. Which
-# means that this test also experience that behaviour.
+# means that this test also experience that behavior.
 $EXE -f %.4f EPSG:4896 EPSG:7930 -E >> ${OUT} <<EOF
 3496737.2679    743254.4507  5264462.9620 2019.0
 3496737.2679    743254.4507  5264462.9620 2029.0

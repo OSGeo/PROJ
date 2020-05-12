@@ -70,7 +70,7 @@ int pj_ellipsoid (PJ *P) {
     are are taken into account as modifiers for the built in ellipsoid definition.
 
     While this may seem strange, it is in accordance with historical PROJ
-    behaviour. It can e.g. be used to define coordinates on the ellipsoid
+    behavior. It can e.g. be used to define coordinates on the ellipsoid
     scaled to unit semimajor axis by specifying "+ellps=xxx +a=1"
 
 ****************************************************************************************/

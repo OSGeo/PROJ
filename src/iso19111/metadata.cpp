@@ -777,7 +777,7 @@ bool Extent::_isEquivalentTo(const util::IComparable *other,
 
 /** \brief Returns whether this extent contains the other one.
  *
- * Behaviour only well specified if each sub-extent category as at most
+ * Behavior only well specified if each sub-extent category as at most
  * one element.
  */
 bool Extent::contains(const ExtentNNPtr &other) const {
@@ -802,7 +802,7 @@ bool Extent::contains(const ExtentNNPtr &other) const {
 
 /** \brief Returns whether this extent intersects the other one.
  *
- * Behaviour only well specified if each sub-extent category as at most
+ * Behavior only well specified if each sub-extent category as at most
  * one element.
  */
 bool Extent::intersects(const ExtentNNPtr &other) const {
@@ -829,7 +829,7 @@ bool Extent::intersects(const ExtentNNPtr &other) const {
 
 /** \brief Returns the intersection of this extent with another one.
  *
- * Behaviour only well specified if there is one single GeographicExtent
+ * Behavior only well specified if there is one single GeographicExtent
  * in each object.
  * Returns nullptr otherwise.
  */

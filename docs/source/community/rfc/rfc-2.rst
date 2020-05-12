@@ -405,7 +405,7 @@ be combined together.
     - `alias_names`: list possible alias for the `name` field of object table
     - `link_from_deprecated_to_non_deprecated`: to handle the link between old ESRI to new ESRI/EPSG codes
 
-- Commmon:
+- Common:
     - `unit_of_measure`: table with UnitOfMeasure definitions.
     - `area`: table with area-of-use (bounding boxes) applicable to CRS and coordinate operations.
 

@@ -65,12 +65,12 @@ PJ *PROJECTION(ocea) {
         /*Define Pole of oblique transformation from 1 point & 1 azimuth*/
         // ERO: I've added M_PI so that the alpha is the angle from point 1 to point 2
         // from the North in a clockwise direction
-        // (to be consistent with omerc behaviour)
+        // (to be consistent with omerc behavior)
         alpha   = M_PI + pj_param(P->ctx, P->params, "ralpha").f;
         lonz = pj_param(P->ctx, P->params, "rlonc").f;
         /*Equation 9-8 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
         // Actually slightliy modified to use atan2(), as it is suggested by
-        // Snyder for equation 9-1, but this is not mentionned here
+        // Snyder for equation 9-1, but this is not mentioned here
         lam_p = atan2(-cos(alpha) , -sin(P->phi0) * sin(alpha)) + lonz;
         /*Equation 9-7 page 80 (http://pubs.usgs.gov/pp/1395/report.pdf)*/
         phi_p = asin(cos(P->phi0) * sin(alpha));

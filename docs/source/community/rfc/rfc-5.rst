@@ -96,7 +96,7 @@ Backward compatibility
 This change is considered to be *mostly* backward compatible. There might be
 impacts for software using :cpp:func:`proj_coordoperation_get_grid_used` and
 assuming that the url returned is one of the proj-datumgrid-xxx files at
-https://download.osgeo.org. As mentionned in
+https://download.osgeo.org. As mentioned in
 https://lists.osgeo.org/pipermail/proj/2020-January/009274.html , this
 assumption was not completely bullet-proof either.
 There will be impacts on software checking the value of PROJ pipeline strings

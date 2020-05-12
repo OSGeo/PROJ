@@ -422,7 +422,7 @@ bool Measure::operator==(const Measure &other) PROJ_PURE_DEFN {
 
 /** \brief Returns whether an object is equivalent to another one.
  * @param other other object to compare to
- * @param criterion comparaison criterion.
+ * @param criterion comparison criterion.
  * @param maxRelativeError Maximum relative error allowed.
  * @return true if objects are equivalent.
  */

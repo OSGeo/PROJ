@@ -150,7 +150,7 @@ PROJ 4.x/5.x paradigm
     ============   ==============================================================
 
 .. warning::
-    This section documents the behaviour of PROJ 4.x and 5.x. In PROJ 6.x,
+    This section documents the behavior of PROJ 4.x and 5.x. In PROJ 6.x,
     :program:`cs2cs` has been reworked to use :c:func:`proj_create_crs_to_crs` internally,
     with *late binding* capabilities, and thus is no longer constrained to using
     WGS84 as a pivot (also called as *early binding* method).

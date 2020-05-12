@@ -120,7 +120,7 @@ development, but it is allowed in case future development of PROJ warrants an
 update. Changes in minimum version requirements are allowed to happen with
 minor version releases of PROJ.
 
-At the time of writing the minimum version requried for SQLite it 3.7 which was
+At the time of writing the minimum version required for SQLite it 3.7 which was
 released in 2010. CMake currently is required to be at least at version 2.8.3
 which was also released in 2010.
 

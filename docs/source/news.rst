@@ -167,7 +167,7 @@ Bug fixes
 The major feature in PROJ 7 is significantly improved handling of gridded
 models. This was implemented in :ref:`RFC4`.
 The main features of the RFC4 work is that PROJ now implements a new grid format,
-Geodetic TIFF grids, for exchaning gridded transformation models. In addition
+Geodetic TIFF grids, for exchanging gridded transformation models. In addition
 to the new grid format, PROJ can now also access grids online using a data
 store in the cloud.
 
@@ -530,7 +530,7 @@ Bug Fixes
 * Do not include :envvar:`PROJ_LIB` in ``proj_info().searchpath`` when context
   search path is set (`#1498 <https://github.com/OSGeo/PROJ/issues/1498>`_)
 
-* Use correct delimeter for the current platform when parsing
+* Use correct delimiter for the current platform when parsing
   PROJ_LIB (`#1497 <https://github.com/OSGeo/PROJ/issues/1497>`_)
 
 * Do not confuse 'ID74' CRS with WKT2 ID[] node (`#1506 <https://github.com/OSGeo/PROJ/issues/1506>`_)
@@ -691,15 +691,15 @@ UPDATES
 * Removed :c:func:`proj_geocentric_latitude` from `proj.h` API
   (`#1170 <https://github.com/OSGeo/proj.4/issues/1170>`_)
 
-* Changed behaviour of :program:`proj`: Now only allow initialization of
+* Changed behavior of :program:`proj`: Now only allow initialization of
   projections (`#1162 <https://github.com/OSGeo/proj.4/issues/1162>`_)
 
-* Changed behaviour of :ref:`tmerc <tmerc>`: Now defaults to the Extended
+* Changed behavior of :ref:`tmerc <tmerc>`: Now defaults to the Extended
   Transverse Mercator algorithm (``etmerc``). Old implementation available
   by adding ``+approx``
   (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)
 
-* Chaged behaviour: Default ellipsoid now set to GRS80 (was WGS84) (`#1210 <https://github.com/OSGeo/proj.4/issues/1210>`_)
+* Chaged behavior: Default ellipsoid now set to GRS80 (was WGS84) (`#1210 <https://github.com/OSGeo/proj.4/issues/1210>`_)
 
 * Allow multiple directories in :envvar:`PROJ_LIB` environment variable (`#1281 <https://github.com/OSGeo/proj.4/issues/1281>`_)
 

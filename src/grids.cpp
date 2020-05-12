@@ -1118,7 +1118,7 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
     const auto &extent = grid->extentAndRes();
 
     // If we have one or both of grid_name and parent_grid_name, try to use
-    // the names to recreate the hiearchy
+    // the names to recreate the hierarchy
     if (!gridName.empty()) {
         if (mapGrids.find(gridName) != mapGrids.end()) {
             pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Several grids called %s found!",

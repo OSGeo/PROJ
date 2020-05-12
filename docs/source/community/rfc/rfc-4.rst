@@ -70,7 +70,7 @@ Summary of work planned by this RFC
   implemented.
 
 The use of grids locally available will of course still be available, and will
-be the default behaviour. 
+be the default behavior. 
 
 Network access to grids
 -------------------------------------------------------------------------------
@@ -220,7 +220,7 @@ The preliminary C API for the above is:
 To make network access efficient, PROJ will internally have a in-memory cache
 of file ranges to only issue network requests by chunks of 16 KB or multiple of them,
 to limit the number of HTTP GET requests and minimize latency caused by network
-access. This is very similar to the behaviour of the GDAL
+access. This is very similar to the behavior of the GDAL
 `/vsicurl/ <https://gdal.org/user/virtual_file_systems.html#vsicurl-http-https-ftp-files-random-access>`_
 I/O layer. The plan is to mostly copy GDAL's vsicurl implementation inside PROJ, with
 needed adjustmeents and proper namespacing of it.
@@ -495,7 +495,7 @@ Several formats exist depending on the ad-hoc needs and ideas of the original
 data producer. It would be appropriate to converge on a common format able to
 address the different use cases.
 
-- Not tiled. Tiling is a nice to have propery for cloud-friendly access to
+- Not tiled. Tiling is a nice to have property for cloud-friendly access to
   large files.
 - No support for compression
 - The NTv2 structures is roughly: header of main grid, data of main grid,
@@ -511,13 +511,13 @@ Discussion on choice of format
 We have been made recently aware of other initiatives from the industry to come
 with a common format to store geodetic adjustment data. Some discussions have
 happen recently within the OGC CRS Working group. Past efforts include the
-Esri's proposed Geodetic data Grid eXchange Format, GGXF, briefly mentionned at
+Esri's proposed Geodetic data Grid eXchange Format, GGXF, briefly mentioned at
 page 86 of
 https://iag.dgfi.tum.de/fileadmin/IAG-docs/Travaux2015/01_Travaux_Template_Comm_1_tvd.pdf
 and page 66 of ftp://ftp.iaspei.org/pub/meetings/2010-2019/2015-Prague/IAG-Geodesy.pdf
 The current trend of those works would be to use a netCDF / HDF5 container.
 
-So, for the sake of completness, we list hereafter a few potential candidate
+So, for the sake of completeness, we list hereafter a few potential candidate
 formats and their pros and cons.
 
 TIFF/GeoTIFF
@@ -610,7 +610,7 @@ Weak points:
   metadata <http://cfconventions.org/>`_
   but there is nothing really handy in them for simple georeferencing with
   the coordinate of the upper-left pixel and the resolution. The practice is
-  to write explict lon and lat variables with all values taken by the grid.
+  to write explicit lon and lat variables with all values taken by the grid.
   GDAL has for many years supported a simpler syntax, using a GeoTransform
   attribute.
 
@@ -652,7 +652,7 @@ Weak points:
   is more complex than netCDF v3, and likely more than TIFF. We do not have
   in-depth expertise of it to assess its cloud-friendliness.
 
-* The ones mentionned for netCDF v3 regarding georeferencing and security apply.
+* The ones mentioned for netCDF v3 regarding georeferencing and security apply.
 
 
 GeoPackage
@@ -719,7 +719,7 @@ Build requirements
 
 The minimum libtiff version will be 4.0 (RHEL 7 ships with libtiff 4.0.3).
 To be able to read grids stored on the CDN, libtiff will need to build against
-zlib to have DEFLATE and LZW suport, which is met by all known binary distributions
+zlib to have DEFLATE and LZW support, which is met by all known binary distributions
 of libtiff.
 
 The libtiff dependency can be disabled at build time, but this must be

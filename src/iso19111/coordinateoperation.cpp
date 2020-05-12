@@ -4684,7 +4684,7 @@ ConversionNNPtr Conversion::createEqualEarth(
  * 0.</li>
  * </ul>
  *
- * For completness, PROJ adds the falseEasting and falseNorthing parameter,
+ * For completeness, PROJ adds the falseEasting and falseNorthing parameter,
  * which are not described in EPSG. They should usually be set to 0.
  *
  * @param properties See \ref general_properties of the conversion. If the name
@@ -4717,7 +4717,7 @@ ConversionNNPtr Conversion::createVerticalPerspective(
 /** \brief Instantiate a conversion based on the Pole Rotation method, using
  * the conventions of the GRIB 1 and GRIB 2 data formats.
  *
- * Those are mentionned in the Note 2 of
+ * Those are mentioned in the Note 2 of
  * https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_temp3-1.shtml
  *
  * Several conventions for the pole rotation method exists.
@@ -10739,7 +10739,7 @@ CoordinateOperationContext::getGridAvailabilityUse() const {
  * step.
  *
  * By default, with the IF_NO_DIRECT_TRANSFORMATION stratgey, all potential
- * C candidates will be used if there is no direct tranformation.
+ * C candidates will be used if there is no direct transformation.
  */
 void CoordinateOperationContext::setAllowUseIntermediateCRS(
     IntermediateCRSUse use) {
@@ -12110,7 +12110,7 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
 
                 // If doing GeogCRS --> GeogCRS, only use GeogCRS as
                 // intermediate CRS
-                // Avoid weird behaviour when doing NAD83 -> NAD83(2011)
+                // Avoid weird behavior when doing NAD83 -> NAD83(2011)
                 // that would go through NAVD88 otherwise.
                 if (context.context->getIntermediateCRS().empty() &&
                     dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get()) &&

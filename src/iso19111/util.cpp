@@ -686,7 +686,7 @@ IComparable::~IComparable() = default;
 
 /** \brief Returns whether an object is equivalent to another one.
  * @param other other object to compare to
- * @param criterion comparaison criterion.
+ * @param criterion comparison criterion.
  * @param dbContext Database context, or nullptr.
  * @return true if objects are equivalent.
  */
