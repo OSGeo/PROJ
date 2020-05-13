@@ -2303,7 +2303,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 3044);
-        EXPECT_EQ(res.front().second, 25);
+        EXPECT_EQ(res.front().second, 50);
     }
     {
         // Identify from a WKT1 string, without explicit axis
@@ -2397,7 +2397,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto res = crs->identify(factoryEPSG);
         EXPECT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2327);
-        EXPECT_EQ(res.front().second, 50);
+        EXPECT_EQ(res.front().second, 70);
     }
     {
         // EPSG:6646 as PROJ.4 string, using clrk80 which is pretty generic
@@ -2439,7 +2439,7 @@ TEST(crs, projectedCRS_identify_db) {
         for (const auto &pair : res) {
             if (pair.first->identifiers()[0]->code() == "102039") {
                 found = true;
-                EXPECT_EQ(pair.second, 25);
+                EXPECT_EQ(pair.second, 50);
                 break;
             }
         }
@@ -2573,6 +2573,48 @@ TEST(crs, projectedCRS_identify_db) {
         ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2154);
         EXPECT_EQ(res.front().second, 70);
+    }
+    {
+        // Test identification of LKS92_Latvia_TM (#2214)
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"LKS92_Latvia_TM\",GEOGCS[\"GCS_LKS92\","
+            "DATUM[\"D_Latvia_1992\","
+            "SPHEROID[\"GRS_1980\",6378137,298.257222101]],"
+            "PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]],"
+            "PROJECTION[\"Transverse_Mercator\"],"
+            "PARAMETER[\"latitude_of_origin\",0],"
+            "PARAMETER[\"central_meridian\",24],"
+            "PARAMETER[\"scale_factor\",0.9996],"
+            "PARAMETER[\"false_easting\",500000],"
+            "PARAMETER[\"false_northing\",-6000000],"
+            "UNIT[\"Meter\",1]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 3059);
+        EXPECT_EQ(res.front().second, 90);
+    }
+    {
+        // Test identification of CRS where everything but datum names matches
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"WGS_1984_UTM_Zone_31N\",GEOGCS[\"GCS_WGS_1984\","
+            "DATUM[\"wrong_datum_name\","
+            "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+            "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+            "PROJECTION[\"Transverse_Mercator\"],"
+            "PARAMETER[\"False_Easting\",500000.0],"
+            "PARAMETER[\"False_Northing\",0.0],"
+            "PARAMETER[\"Central_Meridian\",3.0],"
+            "PARAMETER[\"Scale_Factor\",0.9996],"
+            "PARAMETER[\"Latitude_Of_Origin\",0.0],"
+            "UNIT[\"Meter\",1.0]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
+        EXPECT_EQ(res.front().second, 60);
     }
 }
 
@@ -4121,7 +4163,7 @@ TEST(crs, boundCRS_identify_db) {
         EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 2106);
         EXPECT_EQ(boundCRS->transformation()->nameStr(),
                   "NZGD2000 to WGS 84 (1)");
-        EXPECT_EQ(res.front().second, 50);
+        EXPECT_EQ(res.front().second, 70);
     }
 
     {
