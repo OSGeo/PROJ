@@ -1703,7 +1703,7 @@ static bool hasCodeCompatibleOfAuthorityFactory(
  * same.
  * <li>70% means that CRS are equivalent (equivalent datum and coordinate
  * system),
- * but the names do not match at all.</li>
+ * but the names are not equivalent.</li>
  * <li>60% means that ellipsoid, prime meridian and coordinate systems are
  * equivalent, but the CRS and datum names do not match.</li>
  * <li>25% means that the CRS are not equivalent, but there is some similarity
@@ -2808,7 +2808,7 @@ bool VerticalCRS::_isEquivalentTo(
  * single result is returned.
  * 90% means that CRS are equivalent, but the names are not exactly the same.
  * 70% means that CRS are equivalent (equivalent datum and coordinate system),
- * but the names do not match at all.
+ * but the names are not equivalent.
  * 25% means that the CRS are not equivalent, but there is some similarity in
  * the names.
  *
@@ -3630,8 +3630,11 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
  * single result is returned.
  * 90% means that CRS are equivalent, but the names are not exactly the same.
  * 70% means that CRS are equivalent (equivalent base CRS, conversion and
- * coordinate system), but the names do not match at all.
- * 50% means that CRS have similarity (equivalent base CRS and conversion),
+ * coordinate system), but the names are not equivalent.
+ * 60% means that CRS have strong similarity (equivalent base datum, conversion
+ * and coordinate system), but the names are not equivalent.
+ * 50% means that CRS have similarity (equivalent base ellipsoid and
+ * conversion),
  * but the coordinate system do not match (e.g. different axis ordering or
  * axis unit).
  * 25% means that the CRS are not equivalent, but there is some similarity in
@@ -3655,6 +3658,11 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
     std::list<std::pair<GeodeticCRSNNPtr, int>> baseRes;
     const auto &l_baseCRS(baseCRS());
+    const auto l_datum = l_baseCRS->datum();
+    const bool significantNameForDatum =
+        l_datum != nullptr && !ci_starts_with(l_datum->nameStr(), "unknown") &&
+        l_datum->nameStr() != "unnamed";
+    const auto &ellipsoid = l_baseCRS->ellipsoid();
     auto geogCRS = dynamic_cast<const GeographicCRS *>(l_baseCRS.get());
     if (geogCRS &&
         geogCRS->coordinateSystem()->axisOrder() ==
@@ -3742,6 +3750,59 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         }
     }
 
+    const bool l_implicitCS = CRS::getPrivate()->implicitCS_;
+    const auto addCRS = [&](const ProjectedCRSNNPtr &crs, const bool eqName) {
+        const auto &l_unit = cs->axisList()[0]->unit();
+        if (_isEquivalentTo(crs.get(), util::IComparable::Criterion::
+                                           EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
+                            dbContext) ||
+            (l_implicitCS &&
+             l_unit._isEquivalentTo(
+                 crs->coordinateSystem()->axisList()[0]->unit(),
+                 util::IComparable::Criterion::EQUIVALENT) &&
+             l_baseCRS->_isEquivalentTo(
+                 crs->baseCRS().get(), util::IComparable::Criterion::
+                                           EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
+                 dbContext) &&
+             derivingConversionRef()->_isEquivalentTo(
+                 crs->derivingConversionRef().get(),
+                 util::IComparable::Criterion::EQUIVALENT, dbContext))) {
+            if (crs->nameStr() == thisName) {
+                res.clear();
+                res.emplace_back(crs, 100);
+            } else {
+                res.emplace_back(crs, eqName ? 90 : 70);
+            }
+        } else if (ellipsoid->_isEquivalentTo(
+                       crs->baseCRS()->ellipsoid().get(),
+                       util::IComparable::Criterion::EQUIVALENT, dbContext) &&
+                   derivingConversionRef()->_isEquivalentTo(
+                       crs->derivingConversionRef().get(),
+                       util::IComparable::Criterion::EQUIVALENT, dbContext)) {
+            if ((l_implicitCS &&
+                 l_unit._isEquivalentTo(
+                     crs->coordinateSystem()->axisList()[0]->unit(),
+                     util::IComparable::Criterion::EQUIVALENT)) ||
+                cs->_isEquivalentTo(crs->coordinateSystem().get(),
+                                    util::IComparable::Criterion::EQUIVALENT,
+                                    dbContext)) {
+                if (!significantNameForDatum ||
+                    (crs->baseCRS()->datum() &&
+                     l_datum->_isEquivalentTo(
+                         crs->baseCRS()->datum().get(),
+                         util::IComparable::Criterion::EQUIVALENT))) {
+                    res.emplace_back(crs, 70);
+                } else {
+                    res.emplace_back(crs, 60);
+                }
+            } else {
+                res.emplace_back(crs, 50);
+            }
+        } else {
+            res.emplace_back(crs, 25);
+        }
+    };
+
     if (authorityFactory) {
 
         const bool unsignificantName = thisName.empty() ||
@@ -3782,43 +3843,10 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     const bool eqName = metadata::Identifier::isEquivalentName(
                         thisName.c_str(), crs->nameStr().c_str());
                     foundEquivalentName |= eqName;
-                    if (_isEquivalentTo(
-                            crs.get(), util::IComparable::Criterion::
-                                           EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
-                            dbContext)) {
-                        if (crs->nameStr() == thisName) {
-                            res.clear();
-                            res.emplace_back(crsNN, 100);
-                            return res;
-                        }
-                        res.emplace_back(crsNN, eqName ? 90 : 70);
-                    } else if (objects.size() == 1 &&
-                               CRS::getPrivate()->implicitCS_ &&
-                               coordinateSystem()
-                                   ->axisList()[0]
-                                   ->unit()
-                                   ._isEquivalentTo(
-                                       crs->coordinateSystem()
-                                           ->axisList()[0]
-                                           ->unit(),
-                                       util::IComparable::Criterion::
-                                           EQUIVALENT) &&
-                               l_baseCRS->_isEquivalentTo(
-                                   crs->baseCRS().get(),
-                                   util::IComparable::Criterion::
-                                       EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
-                                   dbContext) &&
-                               derivingConversionRef()->_isEquivalentTo(
-                                   crs->derivingConversionRef().get(),
-                                   util::IComparable::Criterion::EQUIVALENT,
-                                   dbContext)) {
-                        res.clear();
-                        res.emplace_back(crsNN, crs->nameStr() == thisName
-                                                    ? 100
-                                                    : eqName ? 90 : 70);
+
+                    addCRS(crsNN, eqName);
+                    if (res.back().second == 100) {
                         return res;
-                    } else {
-                        res.emplace_back(crsNN, 25);
                     }
                 }
                 if (!res.empty()) {
@@ -3867,7 +3895,6 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 shared_from_this().as_nullable()));
             auto candidates =
                 authorityFactory->createProjectedCRSFromExisting(self);
-            const auto &ellipsoid = l_baseCRS->ellipsoid();
             for (const auto &crs : candidates) {
                 const auto &ids = crs->identifiers();
                 assert(!ids.empty());
@@ -3877,30 +3904,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     continue;
                 }
 
-                if (_isEquivalentTo(crs.get(),
-                                    util::IComparable::Criterion::
-                                        EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS,
-                                    dbContext)) {
-                    res.emplace_back(crs, unsignificantName ? 90 : 70);
-                } else if (ellipsoid->_isEquivalentTo(
-                               crs->baseCRS()->ellipsoid().get(),
-                               util::IComparable::Criterion::EQUIVALENT,
-                               dbContext) &&
-                           derivingConversionRef()->_isEquivalentTo(
-                               crs->derivingConversionRef().get(),
-                               util::IComparable::Criterion::EQUIVALENT,
-                               dbContext)) {
-                    if (coordinateSystem()->_isEquivalentTo(
-                            crs->coordinateSystem().get(),
-                            util::IComparable::Criterion::EQUIVALENT,
-                            dbContext)) {
-                        res.emplace_back(crs, 70);
-                    } else {
-                        res.emplace_back(crs, 50);
-                    }
-                } else {
-                    res.emplace_back(crs, 25);
-                }
+                addCRS(crs, unsignificantName);
             }
 
             res.sort(lambdaSort);
@@ -4293,7 +4297,7 @@ bool CompoundCRS::_isEquivalentTo(
  * single result is returned.
  * 90% means that CRS are equivalent, but the names are not exactly the same.
  * 70% means that CRS are equivalent (equivalent horizontal and vertical CRS),
- * but the names do not match at all.
+ * but the names are not equivalent.
  * 25% means that the CRS are not equivalent, but there is some similarity in
  * the names.
  *
