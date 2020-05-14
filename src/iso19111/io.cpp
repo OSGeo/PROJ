@@ -4544,12 +4544,27 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
     const std::string &name(nodeP->value());
 
+    const auto applyHorizontalBoundCRSParams = [&](const CRSNNPtr &crs) {
+        if (!toWGS84Parameters_.empty()) {
+            auto ret = BoundCRS::createFromTOWGS84(crs, toWGS84Parameters_);
+            toWGS84Parameters_.clear();
+            return util::nn_static_pointer_cast<CRS>(ret);
+        } else if (!datumPROJ4Grids_.empty()) {
+            auto ret = BoundCRS::createFromNadgrids(crs, datumPROJ4Grids_);
+            datumPROJ4Grids_.clear();
+            return util::nn_static_pointer_cast<CRS>(ret);
+        }
+        return crs;
+    };
+
     if (isGeodeticCRS(name)) {
         if (!isNull(nodeP->lookForChild(WKTConstants::BASEGEOGCRS,
                                         WKTConstants::BASEGEODCRS))) {
-            return buildDerivedGeodeticCRS(node);
+            return util::nn_static_pointer_cast<CRS>(
+                applyHorizontalBoundCRSParams(buildDerivedGeodeticCRS(node)));
         } else {
-            return util::nn_static_pointer_cast<CRS>(buildGeodeticCRS(node));
+            return util::nn_static_pointer_cast<CRS>(
+                applyHorizontalBoundCRSParams(buildGeodeticCRS(node)));
         }
     }
 
@@ -4574,12 +4589,14 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
                     PROJStringParser().createFromPROJString(projString);
                 auto crs = nn_dynamic_pointer_cast<CRS>(projObj);
                 if (crs) {
-                    return crs;
+                    return util::nn_static_pointer_cast<CRS>(
+                        applyHorizontalBoundCRSParams(NN_NO_CHECK(crs)));
                 }
             } catch (const io::ParsingException &) {
             }
         }
-        return util::nn_static_pointer_cast<CRS>(buildProjectedCRS(node));
+        return util::nn_static_pointer_cast<CRS>(
+            applyHorizontalBoundCRSParams(buildProjectedCRS(node)));
     }
 
     if (ci_equal(name, WKTConstants::VERT_CS) ||
@@ -4652,16 +4669,6 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
     auto crs = buildCRS(node);
     if (crs) {
-        if (!toWGS84Parameters_.empty()) {
-            return util::nn_static_pointer_cast<BaseObject>(
-                BoundCRS::createFromTOWGS84(NN_NO_CHECK(crs),
-                                            toWGS84Parameters_));
-        }
-        if (!datumPROJ4Grids_.empty()) {
-            return util::nn_static_pointer_cast<BaseObject>(
-                BoundCRS::createFromNadgrids(NN_NO_CHECK(crs),
-                                             datumPROJ4Grids_));
-        }
         return util::nn_static_pointer_cast<BaseObject>(NN_NO_CHECK(crs));
     }
 
