@@ -5543,7 +5543,7 @@ AuthorityFactory::createObjectsFromName(
                 case ObjectType::GEOCENTRIC_CRS:
                     addToListStringWithOR(
                         otherConditions,
-                        "(" + colName + " = " GEOCENTRIC_SINGLE_QUOTED " AND "
+                        "(" + colName + " = 'geodetic_crs' AND "
                                         "type = " GEOCENTRIC_SINGLE_QUOTED ")");
                     break;
                 case ObjectType::GEOGRAPHIC_CRS:

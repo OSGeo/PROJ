@@ -2763,6 +2763,13 @@ TEST(factory, createObjectsFromName) {
                   .size(),
               3U);
 
+    EXPECT_EQ(
+        factory
+            ->createObjectsFromName(
+                "WGS 84", {AuthorityFactory::ObjectType::GEOCENTRIC_CRS}, false)
+            .size(),
+        1U);
+
     {
         auto res = factoryEPSG->createObjectsFromName(
             "WGS84", {AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS}, true);
