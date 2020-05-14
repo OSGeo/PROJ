@@ -5434,25 +5434,6 @@ std::string AuthorityFactory::getOfficialNameFromAlias(
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
-
-static void addToListString(std::string &out, const char *in) {
-    if (!out.empty()) {
-        out += ',';
-    }
-    out += in;
-}
-
-static void addToListStringWithOR(std::string &out, const std::string &in) {
-    if (!out.empty()) {
-        out += " OR ";
-    }
-    out += in;
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
 /** \brief Return a list of objects by their name
  *
  * @param searchedName Searched name. Must be at least 2 character long.
@@ -5485,155 +5466,169 @@ AuthorityFactory::createObjectsFromName(
     }
 
     std::string sql(
-        "SELECT table_name, auth_name, code, name, deprecated, is_alias FROM ("
-        "SELECT table_name, auth_name, code, name, deprecated, 0 as is_alias "
-        "FROM object_view WHERE ");
-    if (deprecated) {
-        sql += "deprecated = 1 AND ";
-    }
-    ListOfParams params;
-    if (!approximateMatch) {
-        sql += "name LIKE ? AND ";
-        params.push_back(searchedNameWithoutDeprecated);
-    }
-    if (d->hasAuthorityRestriction()) {
-        sql += "auth_name = ? AND ";
-        params.emplace_back(d->authority());
-    }
+        "SELECT table_name, auth_name, code, name, deprecated, is_alias "
+        "FROM (");
 
-    const auto getTableNameConstraint = [&allowedObjectTypes](
-        const std::string &colName) {
+    const auto getTableAndTypeConstraints = [&allowedObjectTypes]() {
+        typedef std::pair<std::string, std::string> TableType;
+        std::list<TableType> res;
         if (allowedObjectTypes.empty()) {
-            return colName + " IN ("
-                             "'prime_meridian','ellipsoid','geodetic_datum',"
-                             "'vertical_datum','geodetic_crs','projected_crs',"
-                             "'vertical_crs','compound_crs','conversion',"
-                             "'helmert_transformation','grid_transformation',"
-                             "'other_transformation','concatenated_operation'"
-                             ")";
+            for (const auto &tableName :
+                 {"prime_meridian", "ellipsoid", "geodetic_datum",
+                  "vertical_datum", "geodetic_crs", "projected_crs",
+                  "vertical_crs", "compound_crs", "conversion",
+                  "helmert_transformation", "grid_transformation",
+                  "other_transformation", "concatenated_operation"}) {
+                res.emplace_back(TableType(tableName, std::string()));
+            }
         } else {
-            std::string tableNameList;
-            std::string otherConditions;
             for (const auto type : allowedObjectTypes) {
                 switch (type) {
                 case ObjectType::PRIME_MERIDIAN:
-                    addToListString(tableNameList, "'prime_meridian'");
+                    res.emplace_back(
+                        TableType("prime_meridian", std::string()));
                     break;
                 case ObjectType::ELLIPSOID:
-                    addToListString(tableNameList, "'ellipsoid'");
+                    res.emplace_back(TableType("ellipsoid", std::string()));
                     break;
                 case ObjectType::DATUM:
-                    addToListString(tableNameList,
-                                    "'geodetic_datum','vertical_datum'");
+                    res.emplace_back(
+                        TableType("geodetic_datum", std::string()));
+                    res.emplace_back(
+                        TableType("vertical_datum", std::string()));
                     break;
                 case ObjectType::GEODETIC_REFERENCE_FRAME:
-                    addToListString(tableNameList, "'geodetic_datum'");
+                    res.emplace_back(
+                        TableType("geodetic_datum", std::string()));
                     break;
                 case ObjectType::VERTICAL_REFERENCE_FRAME:
-                    addToListString(tableNameList, "'vertical_datum'");
+                    res.emplace_back(
+                        TableType("vertical_datum", std::string()));
                     break;
                 case ObjectType::CRS:
-                    addToListString(tableNameList,
-                                    "'geodetic_crs','projected_crs',"
-                                    "'vertical_crs','compound_crs'");
+                    res.emplace_back(TableType("geodetic_crs", std::string()));
+                    res.emplace_back(TableType("projected_crs", std::string()));
+                    res.emplace_back(TableType("vertical_crs", std::string()));
+                    res.emplace_back(TableType("compound_crs", std::string()));
                     break;
                 case ObjectType::GEODETIC_CRS:
-                    addToListString(tableNameList, "'geodetic_crs'");
+                    res.emplace_back(TableType("geodetic_crs", std::string()));
                     break;
                 case ObjectType::GEOCENTRIC_CRS:
-                    addToListStringWithOR(
-                        otherConditions,
-                        "(" + colName + " = 'geodetic_crs' AND "
-                                        "type = " GEOCENTRIC_SINGLE_QUOTED ")");
+                    res.emplace_back(TableType("geodetic_crs", GEOCENTRIC));
                     break;
                 case ObjectType::GEOGRAPHIC_CRS:
-                    addToListStringWithOR(otherConditions,
-                                          "(" + colName +
-                                              " = 'geodetic_crs' AND "
-                                              "type IN (" GEOG_2D_SINGLE_QUOTED
-                                              "," GEOG_3D_SINGLE_QUOTED "))");
+                    res.emplace_back(TableType("geodetic_crs", GEOG_2D));
+                    res.emplace_back(TableType("geodetic_crs", GEOG_3D));
                     break;
                 case ObjectType::GEOGRAPHIC_2D_CRS:
-                    addToListStringWithOR(
-                        otherConditions,
-                        "(" + colName + " = 'geodetic_crs' AND "
-                                        "type = " GEOG_2D_SINGLE_QUOTED ")");
+                    res.emplace_back(TableType("geodetic_crs", GEOG_2D));
                     break;
                 case ObjectType::GEOGRAPHIC_3D_CRS:
-                    addToListStringWithOR(
-                        otherConditions,
-                        "(" + colName + " = 'geodetic_crs' AND "
-                                        "type = " GEOG_3D_SINGLE_QUOTED ")");
+                    res.emplace_back(TableType("geodetic_crs", GEOG_3D));
                     break;
                 case ObjectType::PROJECTED_CRS:
-                    addToListString(tableNameList, "'projected_crs'");
+                    res.emplace_back(TableType("projected_crs", std::string()));
                     break;
                 case ObjectType::VERTICAL_CRS:
-                    addToListString(tableNameList, "'vertical_crs'");
+                    res.emplace_back(TableType("vertical_crs", std::string()));
                     break;
                 case ObjectType::COMPOUND_CRS:
-                    addToListString(tableNameList, "'compound_crs'");
+                    res.emplace_back(TableType("compound_crs", std::string()));
                     break;
                 case ObjectType::COORDINATE_OPERATION:
-                    addToListString(
-                        tableNameList,
-                        "'conversion','helmert_transformation',"
-                        "'grid_transformation','other_transformation',"
-                        "'concatenated_operation'");
+                    res.emplace_back(TableType("conversion", std::string()));
+                    res.emplace_back(
+                        TableType("helmert_transformation", std::string()));
+                    res.emplace_back(
+                        TableType("grid_transformation", std::string()));
+                    res.emplace_back(
+                        TableType("other_transformation", std::string()));
+                    res.emplace_back(
+                        TableType("concatenated_operation", std::string()));
                     break;
                 case ObjectType::CONVERSION:
-                    addToListString(tableNameList, "'conversion'");
+                    res.emplace_back(TableType("conversion", std::string()));
                     break;
                 case ObjectType::TRANSFORMATION:
-                    addToListString(
-                        tableNameList,
-                        "'helmert_transformation',"
-                        "'grid_transformation','other_transformation'");
+                    res.emplace_back(
+                        TableType("helmert_transformation", std::string()));
+                    res.emplace_back(
+                        TableType("grid_transformation", std::string()));
+                    res.emplace_back(
+                        TableType("other_transformation", std::string()));
                     break;
                 case ObjectType::CONCATENATED_OPERATION:
-                    addToListString(tableNameList, "'concatenated_operation'");
+                    res.emplace_back(
+                        TableType("concatenated_operation", std::string()));
                     break;
                 }
             }
-            std::string l_sql;
-            if (!tableNameList.empty()) {
-                l_sql = "((" + colName + " IN (";
-                l_sql += tableNameList;
-                l_sql += "))";
-                if (!otherConditions.empty()) {
-                    l_sql += " OR ";
-                    l_sql += otherConditions;
-                }
-                l_sql += ')';
-            } else if (!otherConditions.empty()) {
-                l_sql = "(";
-                l_sql += otherConditions;
-                l_sql += ')';
-            }
-            return l_sql;
         }
+        return res;
     };
 
-    sql += getTableNameConstraint("table_name");
+    const auto listTableNameType = getTableAndTypeConstraints();
+    bool first = true;
+    ListOfParams params;
+    for (const auto &tableNameTypePair : listTableNameType) {
+        if (!first) {
+            sql += " UNION ";
+        }
+        first = false;
+        sql += "SELECT '";
+        sql += tableNameTypePair.first;
+        sql += "' AS table_name, auth_name, code, name, deprecated, "
+               "0 AS is_alias FROM ";
+        sql += tableNameTypePair.first;
+        sql += " WHERE 1 = 1 ";
+        if (!tableNameTypePair.second.empty()) {
+            sql += "AND type = '";
+            sql += tableNameTypePair.second;
+            sql += "' ";
+        }
+        if (deprecated) {
+            sql += "AND deprecated = 1 ";
+        }
+        if (!approximateMatch) {
+            sql += "AND name LIKE ? ";
+            params.push_back(searchedNameWithoutDeprecated);
+        }
+        if (d->hasAuthorityRestriction()) {
+            sql += "AND auth_name = ? ";
+            params.emplace_back(d->authority());
+        }
 
-    sql += " UNION SELECT ov.table_name AS table_name, "
-           "ov.auth_name AS auth_name, "
-           "ov.code AS code, a.alt_name AS name, "
-           "ov.deprecated AS deprecated, 1 as is_alias FROM object_view ov "
-           "JOIN alias_name a ON ov.table_name = a.table_name AND "
-           "ov.auth_name = a.auth_name AND ov.code = a.code WHERE ";
-    if (deprecated) {
-        sql += "ov.deprecated = 1 AND ";
+        sql += " UNION SELECT '";
+        sql += tableNameTypePair.first;
+        sql += "' AS table_name, "
+               "ov.auth_name AS auth_name, "
+               "ov.code AS code, a.alt_name AS name, "
+               "ov.deprecated AS deprecated, 1 as is_alias FROM ";
+        sql += tableNameTypePair.first;
+        sql += " ov "
+               "JOIN alias_name a ON "
+               "ov.auth_name = a.auth_name AND ov.code = a.code WHERE "
+               "a.table_name = '";
+        sql += tableNameTypePair.first;
+        sql += "' ";
+        if (!tableNameTypePair.second.empty()) {
+            sql += "AND ov.type = '";
+            sql += tableNameTypePair.second;
+            sql += "' ";
+        }
+        if (deprecated) {
+            sql += "AND ov.deprecated = 1 ";
+        }
+        if (!approximateMatch) {
+            sql += "AND a.alt_name LIKE ? ";
+            params.push_back(searchedNameWithoutDeprecated);
+        }
+        if (d->hasAuthorityRestriction()) {
+            sql += "AND ov.auth_name = ? ";
+            params.emplace_back(d->authority());
+        }
     }
-    if (!approximateMatch) {
-        sql += "a.alt_name LIKE ? AND ";
-        params.push_back(searchedNameWithoutDeprecated);
-    }
-    if (d->hasAuthorityRestriction()) {
-        sql += "ov.auth_name = ? AND ";
-        params.emplace_back(d->authority());
-    }
-    sql += getTableNameConstraint("ov.table_name");
 
     sql += ") ORDER BY deprecated, is_alias, length(name), name";
     if (limitResultCount > 0 &&
