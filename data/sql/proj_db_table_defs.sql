@@ -1340,6 +1340,8 @@ CREATE TABLE alias_name(
     source TEXT
 );
 
+CREATE INDEX idx_alias_name_code ON alias_name(code);
+
 CREATE TRIGGER alias_name_insert_trigger
 BEFORE INSERT ON alias_name
 FOR EACH ROW BEGIN
