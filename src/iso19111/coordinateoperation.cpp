@@ -13212,7 +13212,7 @@ CoordinateOperationFactory::Private::createOperations(
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
-    // boundCRS to boundCRS using the same geographic hubCRS
+    // boundCRS to boundCRS
     if (boundSrc && boundDst) {
         createOperationsBoundToBound(sourceCRS, targetCRS, context, boundSrc,
                                      boundDst, res);
@@ -14348,6 +14348,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToBound(
 
     ENTER_FUNCTION();
 
+    // BoundCRS to BoundCRS of horizontal CRS using the same (geographic) hub
     const auto &hubSrc = boundSrc->hubCRS();
     auto hubSrcGeog = dynamic_cast<const crs::GeographicCRS *>(hubSrc.get());
     const auto &hubDst = boundDst->hubCRS();
@@ -14396,6 +14397,28 @@ void CoordinateOperationFactory::Private::createOperationsBoundToBound(
         }
     }
 
+    // BoundCRS to BoundCRS of vertical CRS using the same vertical datum
+    // ==> ignore the bound transformation
+    auto baseOfBoundSrcAsVertCRS =
+        dynamic_cast<crs::VerticalCRS *>(boundSrc->baseCRS().get());
+    auto baseOfBoundDstAsVertCRS =
+        dynamic_cast<crs::VerticalCRS *>(boundDst->baseCRS().get());
+    if (baseOfBoundSrcAsVertCRS && baseOfBoundDstAsVertCRS) {
+        const auto datumSrc = baseOfBoundSrcAsVertCRS->datum();
+        const auto datumDst = baseOfBoundDstAsVertCRS->datum();
+        if (datumSrc && datumDst &&
+            datumSrc->nameStr() == datumDst->nameStr() &&
+            (datumSrc->nameStr() != "unknown" ||
+             boundSrc->transformation()->_isEquivalentTo(
+                 boundDst->transformation().get(),
+                 util::IComparable::Criterion::EQUIVALENT))) {
+            res = createOperations(boundSrc->baseCRS(), boundDst->baseCRS(),
+                                   context);
+            return;
+        }
+    }
+
+    // BoundCRS to BoundCRS of vertical CRS
     auto vertCRSOfBaseOfBoundSrc = boundSrc->baseCRS()->extractVerticalCRS();
     auto vertCRSOfBaseOfBoundDst = boundDst->baseCRS()->extractVerticalCRS();
     if (hubSrcGeog && hubDstGeog &&

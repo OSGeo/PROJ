@@ -7531,8 +7531,8 @@ TEST(
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
 
-    auto authFactory =
-        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setGridAvailabilityUse(
         CoordinateOperationContext::GridAvailabilityUse::
@@ -7545,11 +7545,11 @@ TEST(
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of unnamed + "
               "Transformation from NAD83 to WGS84 + "
-              "NAVD88 height to WGS84 ellipsoidal height + "
-              "Inverse of NAVD88 height to WGS84 ellipsoidal height + "
               "NAVD88 height to NAVD88 height (ftUS) + "
               "Inverse of Transformation from NAD83 to WGS84 + "
               "unnamed");
+    auto grids = list[0]->gridsNeeded(dbContext, false);
+    EXPECT_TRUE(grids.empty());
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
               "+step +inv +proj=tmerc +lat_0=30 +lon_0=-87.5 +k=0.999933333 "
