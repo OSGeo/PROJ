@@ -4620,18 +4620,9 @@ BoundCRS::create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
 BoundCRSNNPtr
 BoundCRS::createFromTOWGS84(const CRSNNPtr &baseCRSIn,
                             const std::vector<double> &TOWGS84Parameters) {
-
-    auto geodCRS = baseCRSIn->extractGeodeticCRS();
-    auto targetCRS =
-        geodCRS.get() == nullptr ||
-                dynamic_cast<const crs::GeographicCRS *>(geodCRS.get())
-            ? util::nn_static_pointer_cast<crs::CRS>(
-                  crs::GeographicCRS::EPSG_4326)
-            : util::nn_static_pointer_cast<crs::CRS>(
-                  crs::GeodeticCRS::EPSG_4978);
-    return create(
-        baseCRSIn, targetCRS,
-        operation::Transformation::createTOWGS84(baseCRSIn, TOWGS84Parameters));
+    auto transf =
+        operation::Transformation::createTOWGS84(baseCRSIn, TOWGS84Parameters);
+    return create(baseCRSIn, transf->targetCRS(), transf);
 }
 
 // ---------------------------------------------------------------------------
