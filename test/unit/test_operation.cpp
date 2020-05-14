@@ -7136,6 +7136,61 @@ TEST(operation,
 
 // ---------------------------------------------------------------------------
 
+TEST(operation,
+     compoundCRS_with_boundProjCRS_with_ftus_and_boundVerticalCRS_to_geogCRS) {
+
+    auto wkt =
+        "COMPD_CS[\"NAD_1983_StatePlane_Alabama_West_FIPS_0102_Feet + "
+        "NAVD88 height - Geoid12B (US Feet)\",\n"
+        "    PROJCS[\"NAD_1983_StatePlane_Alabama_West_FIPS_0102_Feet\",\n"
+        "        GEOGCS[\"NAD83\",\n"
+        "            DATUM[\"North_American_Datum_1983\",\n"
+        "                SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    AUTHORITY[\"EPSG\",\"7019\"]],\n"
+        "                TOWGS84[0,0,0,0,0,0,0],\n"
+        "                AUTHORITY[\"EPSG\",\"6269\"]],\n"
+        "            PRIMEM[\"Greenwich\",0],\n"
+        "            UNIT[\"Degree\",0.0174532925199433]],\n"
+        "        PROJECTION[\"Transverse_Mercator\"],\n"
+        "        PARAMETER[\"latitude_of_origin\",30],\n"
+        "        PARAMETER[\"central_meridian\",-87.5],\n"
+        "        PARAMETER[\"scale_factor\",0.999933333333333],\n"
+        "        PARAMETER[\"false_easting\",1968500],\n"
+        "        PARAMETER[\"false_northing\",0],\n"
+        "        UNIT[\"US survey foot\",0.304800609601219,\n"
+        "            AUTHORITY[\"EPSG\",\"9003\"]],\n"
+        "        AXIS[\"Easting\",EAST],\n"
+        "        AXIS[\"Northing\",NORTH],\n"
+        "        AUTHORITY[\"ESRI\",\"102630\"]],\n"
+        "    VERT_CS[\"NAVD88 height (ftUS)\",\n"
+        "        VERT_DATUM[\"North American Vertical Datum 1988\",2005,\n"
+        "            EXTENSION[\"PROJ4_GRIDS\",\"foo.gtx\"],\n"
+        "            AUTHORITY[\"EPSG\",\"5103\"]],\n"
+        "        UNIT[\"US survey foot\",0.304800609601219,\n"
+        "            AUTHORITY[\"EPSG\",\"9003\"]],\n"
+        "        AXIS[\"Gravity-related height\",UP],\n"
+        "        AUTHORITY[\"EPSG\",\"6360\"]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_NO_CHECK(crs), GeographicCRS::EPSG_4979);
+    ASSERT_TRUE(op != nullptr);
+
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=us-ft +xy_out=m "
+              "+step +inv +proj=tmerc +lat_0=30 +lon_0=-87.5 "
+              "+k=0.999933333333333 +x_0=600000 +y_0=0 +ellps=GRS80 "
+              "+step +proj=unitconvert +z_in=us-ft +z_out=m "
+              "+step +proj=vgridshift +grids=foo.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geocent_to_compoundCRS) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=geocent +datum=WGS84 +units=m +type=crs");
