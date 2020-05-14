@@ -2043,15 +2043,19 @@ SingleOperation::gridsNeeded(const io::DatabaseContextPtr &databaseContext,
         if (opParamvalue) {
             const auto &value = opParamvalue->parameterValue();
             if (value->type() == ParameterValue::Type::FILENAME) {
-                GridDescription desc;
-                desc.shortName = value->valueFile();
-                if (databaseContext) {
-                    databaseContext->lookForGridInfo(
-                        desc.shortName, considerKnownGridsAsAvailable,
-                        desc.fullName, desc.packageName, desc.url,
-                        desc.directDownload, desc.openLicense, desc.available);
+                const auto gridNames = split(value->valueFile(), ",");
+                for (const auto &gridName : gridNames) {
+                    GridDescription desc;
+                    desc.shortName = gridName;
+                    if (databaseContext) {
+                        databaseContext->lookForGridInfo(
+                            desc.shortName, considerKnownGridsAsAvailable,
+                            desc.fullName, desc.packageName, desc.url,
+                            desc.directDownload, desc.openLicense,
+                            desc.available);
+                    }
+                    res.insert(desc);
                 }
-                res.insert(desc);
             }
         }
     }
