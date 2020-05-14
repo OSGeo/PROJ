@@ -5794,6 +5794,21 @@ TEST(crs, promoteTo3D_and_demoteTo2D) {
                 nn_dynamic_pointer_cast<ProjectedCRS>(crs3DAsBound->baseCRS());
             ASSERT_TRUE(baseCRS != nullptr);
             EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 3U);
+
+            auto hubCRS =
+                nn_dynamic_pointer_cast<GeographicCRS>(crs3DAsBound->hubCRS());
+            ASSERT_TRUE(hubCRS != nullptr);
+            EXPECT_EQ(hubCRS->coordinateSystem()->axisList().size(), 3U);
+
+            auto transfSrcCRS = nn_dynamic_pointer_cast<GeographicCRS>(
+                crs3DAsBound->transformation()->sourceCRS());
+            ASSERT_TRUE(transfSrcCRS != nullptr);
+            EXPECT_EQ(transfSrcCRS->coordinateSystem()->axisList().size(), 3U);
+
+            auto transfDstCRS = nn_dynamic_pointer_cast<GeographicCRS>(
+                crs3DAsBound->transformation()->targetCRS());
+            ASSERT_TRUE(transfDstCRS != nullptr);
+            EXPECT_EQ(transfDstCRS->coordinateSystem()->axisList().size(), 3U);
         }
 
         auto demoted = crs3DAsBound->demoteTo2D(std::string(), nullptr);
@@ -5804,6 +5819,21 @@ TEST(crs, promoteTo3D_and_demoteTo2D) {
                 nn_dynamic_pointer_cast<ProjectedCRS>(crs2DAsBound->baseCRS());
             ASSERT_TRUE(baseCRS != nullptr);
             EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 2U);
+
+            auto hubCRS =
+                nn_dynamic_pointer_cast<GeographicCRS>(crs2DAsBound->hubCRS());
+            ASSERT_TRUE(hubCRS != nullptr);
+            EXPECT_EQ(hubCRS->coordinateSystem()->axisList().size(), 2U);
+
+            auto transfSrcCRS = nn_dynamic_pointer_cast<GeographicCRS>(
+                crs2DAsBound->transformation()->sourceCRS());
+            ASSERT_TRUE(transfSrcCRS != nullptr);
+            EXPECT_EQ(transfSrcCRS->coordinateSystem()->axisList().size(), 2U);
+
+            auto transfDstCRS = nn_dynamic_pointer_cast<GeographicCRS>(
+                crs2DAsBound->transformation()->targetCRS());
+            ASSERT_TRUE(transfDstCRS != nullptr);
+            EXPECT_EQ(transfDstCRS->coordinateSystem()->axisList().size(), 2U);
         }
     }
 

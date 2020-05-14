@@ -902,9 +902,17 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
 
     const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
     if (boundCRS) {
-        return BoundCRS::create(
-            boundCRS->baseCRS()->promoteTo3D(newName, dbContext),
-            boundCRS->hubCRS(), boundCRS->transformation());
+        auto base3DCRS = boundCRS->baseCRS()->promoteTo3D(newName, dbContext);
+        auto transf = boundCRS->transformation();
+        try {
+            transf->getTOWGS84Parameters();
+            return BoundCRS::create(
+                base3DCRS,
+                boundCRS->hubCRS()->promoteTo3D(std::string(), dbContext),
+                transf->promoteTo3D(std::string(), dbContext));
+        } catch (const io::FormattingException &) {
+            return BoundCRS::create(base3DCRS, boundCRS->hubCRS(), transf);
+        }
     }
 
     return NN_NO_CHECK(
@@ -937,9 +945,17 @@ CRSNNPtr CRS::demoteTo2D(const std::string &newName,
 
     const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
     if (boundCRS) {
-        return BoundCRS::create(
-            boundCRS->baseCRS()->demoteTo2D(newName, dbContext),
-            boundCRS->hubCRS(), boundCRS->transformation());
+        auto base2DCRS = boundCRS->baseCRS()->demoteTo2D(newName, dbContext);
+        auto transf = boundCRS->transformation();
+        try {
+            transf->getTOWGS84Parameters();
+            return BoundCRS::create(
+                base2DCRS,
+                boundCRS->hubCRS()->demoteTo2D(std::string(), dbContext),
+                transf->demoteTo2D(std::string(), dbContext));
+        } catch (const io::FormattingException &) {
+            return BoundCRS::create(base2DCRS, boundCRS->hubCRS(), transf);
+        }
     }
 
     const auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);

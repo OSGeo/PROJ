@@ -6590,6 +6590,31 @@ TransformationNNPtr Transformation::shallowClone() const {
 CoordinateOperationNNPtr Transformation::_shallowClone() const {
     return util::nn_static_pointer_cast<CoordinateOperation>(shallowClone());
 }
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr
+Transformation::promoteTo3D(const std::string &,
+                            const io::DatabaseContextPtr &dbContext) const {
+    auto transf = shallowClone();
+    transf->setCRSs(sourceCRS()->promoteTo3D(std::string(), dbContext),
+                    targetCRS()->promoteTo3D(std::string(), dbContext),
+                    interpolationCRS());
+    return transf;
+}
+
+// ---------------------------------------------------------------------------
+
+TransformationNNPtr
+Transformation::demoteTo2D(const std::string &,
+                           const io::DatabaseContextPtr &dbContext) const {
+    auto transf = shallowClone();
+    transf->setCRSs(sourceCRS()->demoteTo2D(std::string(), dbContext),
+                    targetCRS()->demoteTo2D(std::string(), dbContext),
+                    interpolationCRS());
+    return transf;
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
