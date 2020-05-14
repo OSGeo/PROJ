@@ -6531,7 +6531,7 @@ struct Transformation::Private {
 
     TransformationPtr forwardOperation_{};
 
-    TransformationNNPtr registerInv(util::BaseObjectNNPtr thisIn,
+    TransformationNNPtr registerInv(const Transformation *thisIn,
                                     TransformationNNPtr invTransform);
 };
 //! @endcond
@@ -8000,12 +8000,11 @@ createApproximateInverseIfPossible(const Transformation *op) {
 
 //! @cond Doxygen_Suppress
 TransformationNNPtr
-Transformation::Private::registerInv(util::BaseObjectNNPtr thisIn,
+Transformation::Private::registerInv(const Transformation *thisIn,
                                      TransformationNNPtr invTransform) {
-    invTransform->d->forwardOperation_ =
-        util::nn_dynamic_pointer_cast<Transformation>(thisIn);
+    invTransform->d->forwardOperation_ = thisIn->shallowClone().as_nullable();
     invTransform->setHasBallparkTransformation(
-        invTransform->d->forwardOperation_->hasBallparkTransformation());
+        thisIn->hasBallparkTransformation());
     return invTransform;
 }
 //! @endcond
@@ -8043,12 +8042,24 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
             parameterValueNumericAsSI(EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION);
         double z =
             parameterValueNumericAsSI(EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION);
+        auto properties = createPropertiesForInverse(this, false, false);
         return d->registerInv(
-            shared_from_this(),
-            createGeocentricTranslations(
-                createPropertiesForInverse(this, false, false), l_targetCRS,
-                l_sourceCRS, negate(x), negate(y), negate(z),
-                coordinateOperationAccuracies()));
+            this, create(properties, l_targetCRS, l_sourceCRS, nullptr,
+                         createMethodMapNameEPSGCode(
+                             useOperationMethodEPSGCodeIfPresent(
+                                 properties, methodEPSGCode)),
+                         VectorOfParameters{
+                             createOpParamNameEPSGCode(
+                                 EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION),
+                             createOpParamNameEPSGCode(
+                                 EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION),
+                             createOpParamNameEPSGCode(
+                                 EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION),
+                         },
+                         createParams(common::Length(negate(x)),
+                                      common::Length(negate(y)),
+                                      common::Length(negate(z))),
+                         coordinateOperationAccuracies()));
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_MOLODENSKY ||
@@ -8066,14 +8077,14 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
 
         if (methodEPSGCode == EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY) {
             return d->registerInv(
-                shared_from_this(),
+                this,
                 createAbridgedMolodensky(
                     createPropertiesForInverse(this, false, false), l_targetCRS,
                     l_sourceCRS, negate(x), negate(y), negate(z), negate(da),
                     negate(df), coordinateOperationAccuracies()));
         } else {
             return d->registerInv(
-                shared_from_this(),
+                this,
                 createMolodensky(createPropertiesForInverse(this, false, false),
                                  l_targetCRS, l_sourceCRS, negate(x), negate(y),
                                  negate(z), negate(da), negate(df),
@@ -8086,10 +8097,9 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
             parameterValueMeasure(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
         const common::Angle newOffset(negate(offset.value()), offset.unit());
         return d->registerInv(
-            shared_from_this(),
-            createLongitudeRotation(
-                createPropertiesForInverse(this, false, false), l_targetCRS,
-                l_sourceCRS, newOffset));
+            this, createLongitudeRotation(
+                      createPropertiesForInverse(this, false, false),
+                      l_targetCRS, l_sourceCRS, newOffset));
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS) {
@@ -8104,11 +8114,10 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
                                           offsetLong.unit());
 
         return d->registerInv(
-            shared_from_this(),
-            createGeographic2DOffsets(
-                createPropertiesForInverse(this, false, false), l_targetCRS,
-                l_sourceCRS, newOffsetLat, newOffsetLong,
-                coordinateOperationAccuracies()));
+            this, createGeographic2DOffsets(
+                      createPropertiesForInverse(this, false, false),
+                      l_targetCRS, l_sourceCRS, newOffsetLat, newOffsetLong,
+                      coordinateOperationAccuracies()));
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS) {
@@ -8128,11 +8137,10 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
                                              offsetHeight.unit());
 
         return d->registerInv(
-            shared_from_this(),
-            createGeographic3DOffsets(
-                createPropertiesForInverse(this, false, false), l_targetCRS,
-                l_sourceCRS, newOffsetLat, newOffsetLong, newOffsetHeight,
-                coordinateOperationAccuracies()));
+            this, createGeographic3DOffsets(
+                      createPropertiesForInverse(this, false, false),
+                      l_targetCRS, l_sourceCRS, newOffsetLat, newOffsetLong,
+                      newOffsetHeight, coordinateOperationAccuracies()));
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS) {
@@ -8152,11 +8160,10 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
                                              offsetHeight.unit());
 
         return d->registerInv(
-            shared_from_this(),
-            createGeographic2DWithHeightOffsets(
-                createPropertiesForInverse(this, false, false), l_targetCRS,
-                l_sourceCRS, newOffsetLat, newOffsetLong, newOffsetHeight,
-                coordinateOperationAccuracies()));
+            this, createGeographic2DWithHeightOffsets(
+                      createPropertiesForInverse(this, false, false),
+                      l_targetCRS, l_sourceCRS, newOffsetLat, newOffsetLong,
+                      newOffsetHeight, coordinateOperationAccuracies()));
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_OFFSET) {
@@ -8167,7 +8174,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
                                              offsetHeight.unit());
 
         return d->registerInv(
-            shared_from_this(),
+            this,
             createVerticalOffset(createPropertiesForInverse(this, false, false),
                                  l_targetCRS, l_sourceCRS, newOffsetHeight,
                                  coordinateOperationAccuracies()));
@@ -8177,18 +8184,17 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
         const double convFactor = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
         return d->registerInv(
-            shared_from_this(),
-            createChangeVerticalUnit(
-                createPropertiesForInverse(this, false, false), l_targetCRS,
-                l_sourceCRS, common::Scale(1.0 / convFactor),
-                coordinateOperationAccuracies()));
+            this, createChangeVerticalUnit(
+                      createPropertiesForInverse(this, false, false),
+                      l_targetCRS, l_sourceCRS, common::Scale(1.0 / convFactor),
+                      coordinateOperationAccuracies()));
     }
 
 #ifdef notdef
     // We don't need that currently, but we might...
     if (methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
         return d->registerInv(
-            shared_from_this(),
+            this,
             createHeightDepthReversal(
                 createPropertiesForInverse(this, false, false), l_targetCRS,
                 l_sourceCRS, coordinateOperationAccuracies()));
@@ -8993,20 +8999,41 @@ static void ThrowExceptionNotGeodeticGeographic(const char *trfrm_name) {
 
 // ---------------------------------------------------------------------------
 
-static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
-                                       const crs::CRSNNPtr &crs, bool addPushV3,
-                                       const char *trfrm_name) {
-    auto sourceCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
-    if (!sourceCRSGeog) {
-        auto compoundCRS = dynamic_cast<const crs::CompoundCRS *>(crs.get());
+// If crs is a geographic CRS, or a compound CRS of a geographic CRS,
+// or a compoundCRS of a bound CRS of a geographic CRS, return that
+// geographic CRS
+static crs::GeographicCRSPtr
+extractGeographicCRSIfGeographicCRSOrEquivalent(const crs::CRSNNPtr &crs) {
+    auto geogCRS = util::nn_dynamic_pointer_cast<crs::GeographicCRS>(crs);
+    if (!geogCRS) {
+        auto compoundCRS = util::nn_dynamic_pointer_cast<crs::CompoundCRS>(crs);
         if (compoundCRS) {
             const auto &components = compoundCRS->componentReferenceSystems();
             if (!components.empty()) {
-                sourceCRSGeog = dynamic_cast<const crs::GeographicCRS *>(
-                    components[0].get());
+                geogCRS = util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                    components[0]);
+                if (!geogCRS) {
+                    auto boundCRS =
+                        util::nn_dynamic_pointer_cast<crs::BoundCRS>(
+                            components[0]);
+                    if (boundCRS) {
+                        geogCRS =
+                            util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                                boundCRS->baseCRS());
+                    }
+                }
             }
         }
     }
+    return geogCRS;
+}
+
+// ---------------------------------------------------------------------------
+
+static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
+                                       const crs::CRSNNPtr &crs, bool addPushV3,
+                                       const char *trfrm_name) {
+    auto sourceCRSGeog = extractGeographicCRSIfGeographicCRSOrEquivalent(crs);
     if (sourceCRSGeog) {
         formatter->startInversion();
         sourceCRSGeog->_exportToPROJString(formatter);
@@ -9034,17 +9061,7 @@ static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
 static void setupPROJGeodeticTargetCRS(io::PROJStringFormatter *formatter,
                                        const crs::CRSNNPtr &crs, bool addPopV3,
                                        const char *trfrm_name) {
-    auto targetCRSGeog = dynamic_cast<const crs::GeographicCRS *>(crs.get());
-    if (!targetCRSGeog) {
-        auto compoundCRS = dynamic_cast<const crs::CompoundCRS *>(crs.get());
-        if (compoundCRS) {
-            const auto &components = compoundCRS->componentReferenceSystems();
-            if (!components.empty()) {
-                targetCRSGeog = dynamic_cast<const crs::GeographicCRS *>(
-                    components[0].get());
-            }
-        }
-    }
+    auto targetCRSGeog = extractGeographicCRSIfGeographicCRSOrEquivalent(crs);
     if (targetCRSGeog) {
         formatter->addStep("cart");
         formatter->setCurrentStepInverted(true);
@@ -9544,14 +9561,14 @@ void Transformation::_exportToPROJString(
                                                          : CTABLE2Filename;
     if (!hGridShiftFilename.empty()) {
         auto sourceCRSGeog =
-            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
+            extractGeographicCRSIfGeographicCRSOrEquivalent(sourceCRS());
         if (!sourceCRSGeog) {
             throw io::FormattingException(
                 concat("Can apply ", methodName, " only to GeographicCRS"));
         }
 
         auto targetCRSGeog =
-            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
+            extractGeographicCRSIfGeographicCRSOrEquivalent(targetCRS());
         if (!targetCRSGeog) {
             throw io::FormattingException(
                 concat("Can apply ", methodName, " only to GeographicCRS"));
