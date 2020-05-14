@@ -9854,8 +9854,18 @@ TEST(io, createFromUserInput) {
 
     // Search names in the database
     EXPECT_THROW(createFromUserInput("foobar", dbContext), ParsingException);
-    EXPECT_NO_THROW(createFromUserInput("WGS 84", dbContext));
-    EXPECT_NO_THROW(createFromUserInput("WGS84", dbContext));
+    {
+        // Official name
+        auto obj = createFromUserInput("WGS 84", dbContext);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        EXPECT_TRUE(crs != nullptr);
+    }
+    {
+        // PROJ alias
+        auto obj = createFromUserInput("WGS84", dbContext);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        EXPECT_TRUE(crs != nullptr);
+    }
     EXPECT_NO_THROW(createFromUserInput("UTM zone 31N", dbContext));
     EXPECT_THROW(createFromUserInput("UTM zone 31", dbContext),
                  ParsingException);
