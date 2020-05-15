@@ -186,8 +186,8 @@ static PJ *destructor (PJ *P, int errlev) {
     -180    -100      -20         80          180
 */
 
-static bool setup_zone(PJ *P, struct pj_opaque *Q, int n, \
-                       PJ*(*proj_ptr)(PJ*), double x_0, \
+static bool setup_zone(PJ *P, struct pj_opaque *Q, int n,
+                       PJ*(*proj_ptr)(PJ*), double x_0,
                        double y_0, double lon_0) {
     if (!(Q->pj[n-1] = proj_ptr(nullptr))) return false;
     if (!(Q->pj[n-1] = proj_ptr(Q->pj[n-1]))) return false;
