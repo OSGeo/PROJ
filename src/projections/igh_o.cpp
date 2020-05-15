@@ -14,7 +14,7 @@ projection that emphasizes ocean areas. The projection is a
 compilation of 12 separate sub-projections. Sinusoidal projections
 are found near the equator and Mollweide projections are found at
 higher latitudes. The transition between the two occurs at 40 degrees
-latitude and is represented by `d4044118`.
+latitude and is represented by `phi_boundary`.
 
 Each sub-projection is assigned an integer label
 numbered 1 through 12. Most of this code contains logic to assign
@@ -28,7 +28,7 @@ Transition from sinusoidal to Mollweide projection
 Latitude (phi): 40deg 44' 11.8" 
 */
 
-#define d4044118 ((40 + 44/60. + 11.8/3600.) * DEG_TO_RAD)
+static const double phi_boundary = (40 + 44/60. + 11.8/3600.) * DEG_TO_RAD;
 
 static const double d10  =  10 * DEG_TO_RAD;
 static const double d40  =  40 * DEG_TO_RAD;
@@ -64,7 +64,7 @@ static PJ_XY igh_o_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int z;
 
-    if (lp.phi >=  d4044118) {
+    if (lp.phi >=  phi_boundary) {
            if (lp.lam <=  -d110) z =  1;
       else if (lp.lam >=    d50) z =  3;
       else z = 2;
@@ -74,7 +74,7 @@ static PJ_XY igh_o_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
       else if (lp.lam >=    d50) z =  6;
       else z = 5;
     }
-    else if (lp.phi >= -d4044118) {
+    else if (lp.phi >= -phi_boundary) {
            if (lp.lam <=  -d75) z =  7;
       else if (lp.lam >=   d90) z =  9;
       else z = 8;
@@ -102,7 +102,7 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     int z = 0;
     if (xy.y > y90+EPSLN || xy.y < -y90+EPSLN) /* 0 */
       z = 0;
-    else if (xy.y >=  d4044118)
+    else if (xy.y >=  phi_boundary)
            if (xy.x <=  -d110) z =  1;
       else if (xy.x >=    d50) z =  3;
       else z = 2;
@@ -110,7 +110,7 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
            if (xy.x <=  -d110) z =  4;
       else if (xy.x >=    d50) z =  6;
       else z = 5;
-    else if (xy.y >= -d4044118) {
+    else if (xy.y >= -phi_boundary) {
            if (xy.x <=   -d75) z =  7;
       else if (xy.x >=    d90) z =  9;
       else z = 8;
@@ -212,7 +212,7 @@ static PJ *destructor (PJ *P, int errlev) {
 
 PJ *PROJECTION(igh_o) {
     PJ_XY xy1, xy3;
-    PJ_LP lp = { 0, d4044118 };
+    PJ_LP lp = { 0, phi_boundary };
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
