@@ -555,6 +555,17 @@
         "type": "line"
     },
     {
+        "filename": "igh_o.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "igh",
+        "projstring": "+proj=igh_o +lon_0=-150",
+        "res": "low",
+        "type": "line"
+    },
+    {
         "filename": "imw_p.png",
         "latmax": 90,
         "latmin": -90,
