@@ -119,8 +119,6 @@ static const char *BALLPARK_GEOCENTRIC_TRANSLATION =
 static const char *NULL_GEOGRAPHIC_OFFSET = "Null geographic offset";
 static const char *NULL_GEOCENTRIC_TRANSLATION = "Null geocentric translation";
 static const char *BALLPARK_GEOGRAPHIC_OFFSET = "Ballpark geographic offset";
-static const char *BALLPARK_VERTICAL_TRANSFORMATION_PREFIX =
-    " (ballpark vertical transformation";
 static const char *BALLPARK_VERTICAL_TRANSFORMATION =
     " (ballpark vertical transformation)";
 static const char *BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT =
@@ -11123,8 +11121,8 @@ struct SortFunction {
 
     // Sorting function
     // Return true if a < b
-    bool operator()(const CoordinateOperationNNPtr &a,
-                    const CoordinateOperationNNPtr &b) const {
+    bool compare(const CoordinateOperationNNPtr &a,
+                 const CoordinateOperationNNPtr &b) const {
         auto iterA = map.find(a.get());
         assert(iterA != map.end());
         auto iterB = map.find(b.get());
@@ -11249,6 +11247,15 @@ struct SortFunction {
         // Arbitrary final criterion
         return a_name < b_name;
     }
+
+    bool operator()(const CoordinateOperationNNPtr &a,
+                    const CoordinateOperationNNPtr &b) const {
+        const bool ret = compare(a, b);
+#if 0
+        std::cerr << a->nameStr() << " < " << b->nameStr() << " : " << ret << std::endl;
+#endif
+        return ret;
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -11260,6 +11267,17 @@ static size_t getStepCount(const CoordinateOperationNNPtr &op) {
         stepCount = concat->operations().size();
     }
     return stepCount;
+}
+
+// ---------------------------------------------------------------------------
+
+static bool isNullTransformation(const std::string &name) {
+    if (name.find(" + ") != std::string::npos)
+        return false;
+    return starts_with(name, BALLPARK_GEOCENTRIC_TRANSLATION) ||
+           starts_with(name, BALLPARK_GEOGRAPHIC_OFFSET) ||
+           starts_with(name, NULL_GEOGRAPHIC_OFFSET) ||
+           starts_with(name, NULL_GEOCENTRIC_TRANSLATION);
 }
 
 // ---------------------------------------------------------------------------
@@ -11514,19 +11532,6 @@ struct FilterResults {
 
             const auto stepCount = getStepCount(op);
 
-            const bool isApprox =
-                op->nameStr().find(BALLPARK_VERTICAL_TRANSFORMATION_PREFIX) !=
-                std::string::npos;
-            const bool isNullTransformation =
-                op->nameStr().find(BALLPARK_GEOGRAPHIC_OFFSET) !=
-                    std::string::npos ||
-                op->nameStr().find(NULL_GEOGRAPHIC_OFFSET) !=
-                    std::string::npos ||
-                op->nameStr().find(NULL_GEOCENTRIC_TRANSLATION) !=
-                    std::string::npos ||
-                op->nameStr().find(BALLPARK_GEOCENTRIC_TRANSLATION) !=
-                    std::string::npos;
-
             bool isPROJExportable = false;
             auto formatter = io::PROJStringFormatter::create();
             try {
@@ -11537,10 +11542,24 @@ struct FilterResults {
             } catch (const std::exception &) {
             }
 
+#if 0
+            std::cerr << op->nameStr() << " ";
+            std::cerr << area << " ";
+            std::cerr << getAccuracy(op) << " ";
+            std::cerr << isPROJExportable << " ";
+            std::cerr << hasGrids << " ";
+            std::cerr << gridsAvailable << " ";
+            std::cerr << gridsKnown << " ";
+            std::cerr << stepCount << " ";
+            std::cerr << op->hasBallparkTransformation() << " ";
+            std::cerr << isNullTransformation(op->nameStr()) << " ";
+            std::cerr << std::endl;
+#endif
             map[op.get()] = PrecomputedOpCharacteristics(
                 area, getAccuracy(op), isPROJExportable, hasGrids,
-                gridsAvailable, gridsKnown, stepCount, isApprox,
-                isNullTransformation);
+                gridsAvailable, gridsKnown, stepCount,
+                op->hasBallparkTransformation(),
+                isNullTransformation(op->nameStr()));
         }
 
         // Sort !
@@ -11587,12 +11606,8 @@ struct FilterResults {
         // better
         if (hasOpThatContainsAreaOfInterestAndNoGrid && res.size() > 1) {
             const auto &opLast = res.back();
-            const std::string &name = opLast->nameStr();
-            if (name.find(BALLPARK_GEOGRAPHIC_OFFSET) != std::string::npos ||
-                name.find(NULL_GEOGRAPHIC_OFFSET) != std::string::npos ||
-                name.find(NULL_GEOCENTRIC_TRANSLATION) != std::string::npos ||
-                name.find(BALLPARK_GEOCENTRIC_TRANSLATION) !=
-                    std::string::npos) {
+            if (opLast->hasBallparkTransformation() ||
+                isNullTransformation(opLast->nameStr())) {
                 std::vector<CoordinateOperationNNPtr> resTemp;
                 for (size_t i = 0; i < res.size() - 1; i++) {
                     resTemp.emplace_back(res[i]);
@@ -12438,7 +12453,8 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
         horizTransform, verticalTransform, geogDst);
 
     const bool horizTransformIsNoOp =
-        starts_with(horizTransform->nameStr(), NULL_GEOGRAPHIC_OFFSET);
+        starts_with(horizTransform->nameStr(), NULL_GEOGRAPHIC_OFFSET) &&
+        horizTransform->nameStr().find(" + ") == std::string::npos;
     if (horizTransformIsNoOp) {
         auto properties = util::PropertyMap();
         properties.set(common::IdentifiedObject::NAME_KEY,
@@ -12496,11 +12512,13 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
             interpolationGeogCRS);
 
     std::vector<CoordinateOperationNNPtr> ops;
-    if (!starts_with(opSrcCRSToGeogCRS->nameStr(), NULL_GEOGRAPHIC_OFFSET)) {
+    if (!(starts_with(opSrcCRSToGeogCRS->nameStr(), NULL_GEOGRAPHIC_OFFSET) &&
+          opSrcCRSToGeogCRS->nameStr().find(" + ") == std::string::npos)) {
         ops.emplace_back(opSrcCRSToGeogCRS);
     }
     ops.emplace_back(verticalTransform);
-    if (!starts_with(opGeogCRStoDstCRS->nameStr(), NULL_GEOGRAPHIC_OFFSET)) {
+    if (!(starts_with(opGeogCRStoDstCRS->nameStr(), NULL_GEOGRAPHIC_OFFSET) &&
+          opGeogCRStoDstCRS->nameStr().find(" + ") == std::string::npos)) {
         ops.emplace_back(opGeogCRStoDstCRS);
     }
 
@@ -12788,16 +12806,6 @@ findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
         }
     }
     return candidates;
-}
-
-// ---------------------------------------------------------------------------
-
-static bool isNullTransformation(const std::string &name) {
-
-    return starts_with(name, BALLPARK_GEOCENTRIC_TRANSLATION) ||
-           starts_with(name, BALLPARK_GEOGRAPHIC_OFFSET) ||
-           starts_with(name, NULL_GEOGRAPHIC_OFFSET) ||
-           starts_with(name, NULL_GEOCENTRIC_TRANSLATION);
 }
 
 // ---------------------------------------------------------------------------

@@ -8691,13 +8691,18 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
         "    VDATUM[\"Normaal Amsterdams Peil\"],\n"
         "    CS[vertical,1],\n"
         "        AXIS[\"gravity-related height (H)\",up,\n"
-        "            LENGTHUNIT[\"metre\",1]]]]";
+        "        LENGTHUNIT[\"metre\",1]]],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"unknown\"],\n"
+        "        AREA[\"Netherlands - onshore\"],\n"
+        "        BBOX[50.75,3.2,53.7,7.22]]]";
+
     auto obj = WKTParser().createFromWKT(wkt2);
     auto src_from_wkt2 = nn_dynamic_pointer_cast<CRS>(obj);
     ASSERT_TRUE(src_from_wkt2 != nullptr);
     auto list2 = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(src_from_wkt2), dst, ctxt);
-    ASSERT_GE(list.size(), list2.size() - 1);
+    ASSERT_EQ(list.size(), list2.size());
     for (size_t i = 0; i < list.size(); i++) {
         const auto &op = list[i];
         const auto &op2 = list2[i];
