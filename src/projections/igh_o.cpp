@@ -8,14 +8,26 @@
 
 PROJ_HEAD(igh_o, "Interrupted Goode Homolosine Oceanic View") "\n\tPCyl, Sph";
 
+/*
+This projection is a variant of the Interrupted Goode Homolosine
+projection that emphasizes ocean areas. The projection is a
+compilation of 12 separate sub-projections. Sinusoidal projections
+are found near the equator and Mollweide projections are found at
+higher latitudes. The transition between the two occurs at 40 degrees
+latitude and is represented by `d4044118`.
+
+Each sub-projection is assigned an integer label
+numbered 1 through 12. Most of this code contains logic to assign
+the labels based on latitude (phi) and longitude (lam) regions.
+*/
+
 C_NAMESPACE PJ *pj_sinu(PJ *), *pj_moll(PJ *);
 
-/* 40d 44' 11.8" [degrees] */
-/*
-static const double d4044118 = (40 + 44/60. + 11.8/3600.) * DEG_TO_RAD;
-has been replaced by this define, to eliminate portability issue:
-Initializer element not computable at load time
+/* 
+Transition from sinusoidal to Mollweide projection
+Latitude (phi): 40deg 44' 11.8" 
 */
+
 #define d4044118 ((40 + 44/60. + 11.8/3600.) * DEG_TO_RAD)
 
 static const double d10  =  10 * DEG_TO_RAD;
@@ -40,6 +52,12 @@ struct pj_opaque {
 };
 } // anonymous namespace
 
+
+/*
+Assign an integer index representing each of the 12 
+sub-projection zones based on latitude (phi) and
+longitude (lam) ranges.
+*/
 
 static PJ_XY igh_o_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy;
@@ -112,6 +130,7 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         lp.lam += Q->pj[z-1]->lam0;
 
         switch (z) {
+        /* Extend the plottable area slightly for each sub-projection */
         case  1:  ok = (lp.lam  >= -d180-EPSLN && lp.lam <= -d110+EPSLN) ||
                        ((lp.lam >= -d180-EPSLN && lp.lam <=  -d70+EPSLN) &&
                        (lp.phi  >=   d60-EPSLN && lp.phi <=   d90+EPSLN)); break;
