@@ -1593,6 +1593,14 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
 
     PROJ_INTERNAL TransformationNNPtr shallowClone() const;
 
+    PROJ_INTERNAL TransformationNNPtr
+    promoteTo3D(const std::string &newName,
+                const io::DatabaseContextPtr &dbContext) const;
+
+    PROJ_INTERNAL TransformationNNPtr
+    demoteTo2D(const std::string &newName,
+               const io::DatabaseContextPtr &dbContext) const;
+
     //! @endcond
 
   protected:
