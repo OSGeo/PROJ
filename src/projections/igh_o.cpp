@@ -201,14 +201,17 @@ static PJ *destructor (PJ *P, int errlev) {
     -180          -75               90        180
 */
 
-#define SETUP(n, proj, x_0, y_0, lon_0) \
-    if (!(Q->pj[n-1] = pj_##proj(nullptr))) return destructor(P, ENOMEM); \
-    if (!(Q->pj[n-1] = pj_##proj(Q->pj[n-1]))) return destructor(P, ENOMEM); \
-    Q->pj[n-1]->ctx = P->ctx; \
-    Q->pj[n-1]->x0 = x_0; \
-    Q->pj[n-1]->y0 = y_0; \
+static bool setup_zone(PJ *P, struct pj_opaque *Q, int n, \
+                       PJ*(*proj_ptr)(PJ*), double x_0, \
+                       double y_0, double lon_0) {
+    if (!(Q->pj[n-1] = proj_ptr(nullptr))) return false;
+    if (!(Q->pj[n-1] = proj_ptr(Q->pj[n-1]))) return false;
+    Q->pj[n-1]->ctx = P->ctx;
+    Q->pj[n-1]->x0 = x_0;
+    Q->pj[n-1]->y0 = y_0;
     Q->pj[n-1]->lam0 = lon_0;
-
+    return true;
+}
 
 PJ *PROJECTION(igh_o) {
     PJ_XY xy1, xy3;
@@ -220,15 +223,19 @@ PJ *PROJECTION(igh_o) {
 
 
     /* sinusoidal zones */
-    SETUP(4, sinu, -d150, 0, -d150);
-    SETUP(5, sinu, -d40,  0,  -d40);
-    SETUP(6, sinu,  d120, 0,  d120);
-    SETUP(7, sinu, -d120, 0, -d120);
-    SETUP(8, sinu,   d10, 0,   d10);
-    SETUP(9, sinu,  d130, 0,  d130);
+    if (!setup_zone(P, Q, 4, pj_sinu, -d150, 0, -d150) ||
+        !setup_zone(P, Q, 5, pj_sinu, -d40,  0,  -d40) ||
+        !setup_zone(P, Q, 6, pj_sinu,  d120, 0,  d120) ||
+        !setup_zone(P, Q, 7, pj_sinu, -d120, 0, -d120) ||
+        !setup_zone(P, Q, 8, pj_sinu,   d10, 0,   d10) ||
+        !setup_zone(P, Q, 9, pj_sinu,  d130, 0,  d130))
+    {
+       return destructor(P, ENOMEM);
+    }
+
 
     /* mollweide zones */
-    SETUP(1, moll, -d150, 0, -d150);
+    setup_zone(P, Q, 1, pj_moll,  -d150, 0,  -d150);
 
     /* y0 ? */
     xy1 = Q->pj[0]->fwd(lp, Q->pj[0]); /* zone 1 */
@@ -239,11 +246,14 @@ PJ *PROJECTION(igh_o) {
     Q->pj[0]->y0 = Q->dy0;
 
     /* mollweide zones (cont'd) */
-    SETUP( 2, moll,  -d40,  Q->dy0,  -d40);
-    SETUP( 3, moll,  d120,  Q->dy0,  d120);
-    SETUP(10, moll, -d120, -Q->dy0, -d120);
-    SETUP(11, moll,   d10, -Q->dy0,   d10);
-    SETUP(12, moll,  d130, -Q->dy0,  d130);
+    if (!setup_zone(P, Q,  2, pj_moll,  -d40,  Q->dy0,  -d40)  ||
+        !setup_zone(P, Q,  3, pj_moll,  d120,  Q->dy0,  d120)  ||
+        !setup_zone(P, Q, 10, pj_moll, -d120, -Q->dy0, -d120)  ||
+        !setup_zone(P, Q, 11, pj_moll,   d10, -Q->dy0,   d10)  ||
+        !setup_zone(P, Q, 12, pj_moll,  d130, -Q->dy0,  d130))
+    {
+       return destructor(P, ENOMEM);
+    }
 
     P->inv = igh_o_s_inverse;
     P->fwd = igh_o_s_forward;
