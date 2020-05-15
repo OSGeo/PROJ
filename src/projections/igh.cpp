@@ -156,9 +156,11 @@ static PJ *destructor (PJ *P, int errlev) {
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+
     for (i = 0; i < 12; ++i) {
-        if (static_cast<struct pj_opaque*>(P->opaque)->pj[i])
-            static_cast<struct pj_opaque*>(P->opaque)->pj[i]->destructor(static_cast<struct pj_opaque*>(P->opaque)->pj[i], errlev);
+        if (Q->pj[i])
+            Q->pj[i]->destructor(Q->pj[i], errlev);
     }
 
     return pj_default_destructor(P, errlev);
