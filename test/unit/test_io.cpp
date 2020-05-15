@@ -3442,6 +3442,32 @@ TEST(wkt_parse, WKT1_VERT_DATUM_EXTENSION) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, WKT1_VERT_DATUM_EXTENSION_units_ftUS) {
+    auto wkt = "VERT_CS[\"NAVD88 height (ftUS)\","
+               "     VERT_DATUM[\"North American Vertical Datum 1988\",2005,"
+               "         EXTENSION[\"PROJ4_GRIDS\",\"foo.gtx\"],"
+               "         AUTHORITY[\"EPSG\",\"5103\"]],"
+               "     UNIT[\"US survey foot\",0.304800609601219,"
+               "         AUTHORITY[\"EPSG\",\"9003\"]],"
+               "     AXIS[\"Gravity-related height\",UP],"
+               "     AUTHORITY[\"EPSG\",\"6360\"]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->transformation()->nameStr(),
+              "NAVD88 height to WGS84 ellipsoidal height"); // no (ftUS)
+    auto sourceTransformationCRS = crs->transformation()->sourceCRS();
+    auto sourceTransformationVertCRS =
+        nn_dynamic_pointer_cast<VerticalCRS>(sourceTransformationCRS);
+    EXPECT_EQ(
+        sourceTransformationVertCRS->coordinateSystem()->axisList()[0]->unit(),
+        UnitOfMeasure::METRE);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, WKT1_DATUM_EXTENSION) {
     auto wkt =
         "PROJCS[\"unnamed\",\n"

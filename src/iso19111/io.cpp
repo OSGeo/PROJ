@@ -3987,6 +3987,79 @@ WKTParser::Private::buildParametricDatum(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+static CRSNNPtr
+createBoundCRSSourceTransformationCRS(const crs::CRSPtr &sourceCRS,
+                                      const crs::CRSPtr &targetCRS) {
+    CRSPtr sourceTransformationCRS;
+    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
+        GeographicCRSPtr sourceGeographicCRS =
+            sourceCRS->extractGeographicCRS();
+        sourceTransformationCRS = sourceGeographicCRS;
+        if (sourceGeographicCRS) {
+            if (sourceGeographicCRS->datum() != nullptr &&
+                sourceGeographicCRS->primeMeridian()
+                        ->longitude()
+                        .getSIValue() != 0.0) {
+                sourceTransformationCRS =
+                    GeographicCRS::create(
+                        util::PropertyMap().set(
+                            common::IdentifiedObject::NAME_KEY,
+                            sourceGeographicCRS->nameStr() +
+                                " (with Greenwich prime meridian)"),
+                        datum::GeodeticReferenceFrame::create(
+                            util::PropertyMap().set(
+                                common::IdentifiedObject::NAME_KEY,
+                                sourceGeographicCRS->datum()->nameStr() +
+                                    " (with Greenwich prime meridian)"),
+                            sourceGeographicCRS->datum()->ellipsoid(),
+                            util::optional<std::string>(),
+                            datum::PrimeMeridian::GREENWICH),
+                        sourceGeographicCRS->coordinateSystem())
+                        .as_nullable();
+            }
+        } else {
+            auto vertSourceCRS =
+                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS);
+            if (!vertSourceCRS) {
+                throw ParsingException(
+                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
+            }
+            const auto &axis = vertSourceCRS->coordinateSystem()->axisList()[0];
+            if (axis->unit() == common::UnitOfMeasure::METRE &&
+                &(axis->direction()) == &AxisDirection::UP) {
+                sourceTransformationCRS = sourceCRS;
+            } else {
+                std::string sourceTransformationCRSName(
+                    vertSourceCRS->nameStr());
+                if (ends_with(sourceTransformationCRSName, " (ftUS)")) {
+                    sourceTransformationCRSName.resize(
+                        sourceTransformationCRSName.size() - strlen(" (ftUS)"));
+                }
+                if (ends_with(sourceTransformationCRSName, " depth")) {
+                    sourceTransformationCRSName.resize(
+                        sourceTransformationCRSName.size() - strlen(" depth"));
+                }
+                if (!ends_with(sourceTransformationCRSName, " height")) {
+                    sourceTransformationCRSName += " height";
+                }
+                sourceTransformationCRS =
+                    VerticalCRS::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          sourceTransformationCRSName),
+                        vertSourceCRS->datum(), vertSourceCRS->datumEnsemble(),
+                        VerticalCS::createGravityRelatedHeight(
+                            common::UnitOfMeasure::METRE))
+                        .as_nullable();
+            }
+        }
+    } else {
+        sourceTransformationCRS = sourceCRS;
+    }
+    return NN_NO_CHECK(sourceTransformationCRS);
+}
+
+// ---------------------------------------------------------------------------
+
 CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
     auto &datumNode =
@@ -4111,16 +4184,18 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
                     gridName != "g2012a_conus.gtx,g2012a_alaska.gtx,"
                                 "g2012a_guam.gtx,g2012a_hawaii.gtx,"
                                 "g2012a_puertorico.gtx,g2012a_samoa.gtx") {
-                    std::string transformationName(crs->nameStr());
-                    if (!ends_with(transformationName, " height")) {
-                        transformationName += " height";
-                    }
-                    transformationName += " to WGS84 ellipsoidal height";
+                    auto sourceTransformationCRS =
+                        createBoundCRSSourceTransformationCRS(
+                            crs.as_nullable(),
+                            GeographicCRS::EPSG_4979.as_nullable());
                     auto transformation = Transformation::
                         createGravityRelatedHeightToGeographic3D(
-                            PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                              transformationName),
-                            crs, GeographicCRS::EPSG_4979, nullptr, gridName,
+                            PropertyMap().set(
+                                IdentifiedObject::NAME_KEY,
+                                sourceTransformationCRS->nameStr() +
+                                    " to WGS84 ellipsoidal height"),
+                            sourceTransformationCRS, GeographicCRS::EPSG_4979,
+                            nullptr, gridName,
                             std::vector<PositionalAccuracyNNPtr>());
                     return nn_static_pointer_cast<CRS>(BoundCRS::create(
                         crs, GeographicCRS::EPSG_4979, transformation));
@@ -4186,52 +4261,6 @@ CRSNNPtr WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
     } else {
         return CompoundCRS::create(buildProperties(node), components);
     }
-}
-
-// ---------------------------------------------------------------------------
-
-static CRSNNPtr
-createBoundCRSSourceTransformationCRS(const crs::CRSPtr &sourceCRS,
-                                      const crs::CRSPtr &targetCRS) {
-    CRSPtr sourceTransformationCRS;
-    if (dynamic_cast<GeographicCRS *>(targetCRS.get())) {
-        GeographicCRSPtr sourceGeographicCRS =
-            sourceCRS->extractGeographicCRS();
-        sourceTransformationCRS = sourceGeographicCRS;
-        if (sourceGeographicCRS) {
-            if (sourceGeographicCRS->datum() != nullptr &&
-                sourceGeographicCRS->primeMeridian()
-                        ->longitude()
-                        .getSIValue() != 0.0) {
-                sourceTransformationCRS =
-                    GeographicCRS::create(
-                        util::PropertyMap().set(
-                            common::IdentifiedObject::NAME_KEY,
-                            sourceGeographicCRS->nameStr() +
-                                " (with Greenwich prime meridian)"),
-                        datum::GeodeticReferenceFrame::create(
-                            util::PropertyMap().set(
-                                common::IdentifiedObject::NAME_KEY,
-                                sourceGeographicCRS->datum()->nameStr() +
-                                    " (with Greenwich prime meridian)"),
-                            sourceGeographicCRS->datum()->ellipsoid(),
-                            util::optional<std::string>(),
-                            datum::PrimeMeridian::GREENWICH),
-                        sourceGeographicCRS->coordinateSystem())
-                        .as_nullable();
-            }
-        } else {
-            sourceTransformationCRS =
-                std::dynamic_pointer_cast<VerticalCRS>(sourceCRS);
-            if (!sourceTransformationCRS) {
-                throw ParsingException(
-                    "Cannot find GeographicCRS or VerticalCRS in sourceCRS");
-            }
-        }
-    } else {
-        sourceTransformationCRS = sourceCRS;
-    }
-    return NN_NO_CHECK(sourceTransformationCRS);
 }
 
 // ---------------------------------------------------------------------------
@@ -4515,12 +4544,27 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
     const std::string &name(nodeP->value());
 
+    const auto applyHorizontalBoundCRSParams = [&](const CRSNNPtr &crs) {
+        if (!toWGS84Parameters_.empty()) {
+            auto ret = BoundCRS::createFromTOWGS84(crs, toWGS84Parameters_);
+            toWGS84Parameters_.clear();
+            return util::nn_static_pointer_cast<CRS>(ret);
+        } else if (!datumPROJ4Grids_.empty()) {
+            auto ret = BoundCRS::createFromNadgrids(crs, datumPROJ4Grids_);
+            datumPROJ4Grids_.clear();
+            return util::nn_static_pointer_cast<CRS>(ret);
+        }
+        return crs;
+    };
+
     if (isGeodeticCRS(name)) {
         if (!isNull(nodeP->lookForChild(WKTConstants::BASEGEOGCRS,
                                         WKTConstants::BASEGEODCRS))) {
-            return buildDerivedGeodeticCRS(node);
+            return util::nn_static_pointer_cast<CRS>(
+                applyHorizontalBoundCRSParams(buildDerivedGeodeticCRS(node)));
         } else {
-            return util::nn_static_pointer_cast<CRS>(buildGeodeticCRS(node));
+            return util::nn_static_pointer_cast<CRS>(
+                applyHorizontalBoundCRSParams(buildGeodeticCRS(node)));
         }
     }
 
@@ -4545,12 +4589,14 @@ CRSPtr WKTParser::Private::buildCRS(const WKTNodeNNPtr &node) {
                     PROJStringParser().createFromPROJString(projString);
                 auto crs = nn_dynamic_pointer_cast<CRS>(projObj);
                 if (crs) {
-                    return crs;
+                    return util::nn_static_pointer_cast<CRS>(
+                        applyHorizontalBoundCRSParams(NN_NO_CHECK(crs)));
                 }
             } catch (const io::ParsingException &) {
             }
         }
-        return util::nn_static_pointer_cast<CRS>(buildProjectedCRS(node));
+        return util::nn_static_pointer_cast<CRS>(
+            applyHorizontalBoundCRSParams(buildProjectedCRS(node)));
     }
 
     if (ci_equal(name, WKTConstants::VERT_CS) ||
@@ -4623,16 +4669,6 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
     auto crs = buildCRS(node);
     if (crs) {
-        if (!toWGS84Parameters_.empty()) {
-            return util::nn_static_pointer_cast<BaseObject>(
-                BoundCRS::createFromTOWGS84(NN_NO_CHECK(crs),
-                                            toWGS84Parameters_));
-        }
-        if (!datumPROJ4Grids_.empty()) {
-            return util::nn_static_pointer_cast<BaseObject>(
-                BoundCRS::createFromNadgrids(NN_NO_CHECK(crs),
-                                             datumPROJ4Grids_));
-        }
         return util::nn_static_pointer_cast<BaseObject>(NN_NO_CHECK(crs));
     }
 
@@ -7594,7 +7630,10 @@ std::set<std::string> PROJStringFormatter::getUsedGridNames() const {
     for (const auto &step : d->steps_) {
         for (const auto &param : step.paramValues) {
             if (param.keyEquals("grids")) {
-                res.insert(param.value);
+                const auto gridNames = split(param.value, ",");
+                for (const auto &gridName : gridNames) {
+                    res.insert(gridName);
+                }
             }
         }
     }
