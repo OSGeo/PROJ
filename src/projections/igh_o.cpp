@@ -122,7 +122,7 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     }
 
     if (z) {
-        int ok = 0;
+        bool ok = false;
 
         xy.x -= Q->pj[z-1]->x0;
         xy.y -= Q->pj[z-1]->y0;
