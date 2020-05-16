@@ -26,12 +26,12 @@ Interrupted Goode Homolosine (Oceanic View)
    :align: center
    :alt:   Interrupted Goode Homolosine
 
-   proj-string: ``+proj=igh_o +lon_0=-150``
+   proj-string: ``+proj=igh_o +lon_0=-160``
 
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the projection. A value of +lon_0=-150 is recommended.
+.. note:: All parameters are optional for the projection. A value of +lon_0=-160 is recommended.
 
 .. include:: ../options/lon_0.rst
 

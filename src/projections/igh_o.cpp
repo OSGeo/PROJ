@@ -19,6 +19,11 @@ latitude and is represented by `phi_boundary`.
 Each sub-projection is assigned an integer label
 numbered 1 through 12. Most of this code contains logic to assign
 the labels based on latitude (phi) and longitude (lam) regions.
+
+Original Reference:
+J. Paul Goode (1925) THE HOMOLOSINE PROJECTION: A NEW DEVICE FOR 
+    PORTRAYING THE EARTH'S SURFACE ENTIRE, Annals of the Association of 
+    American Geographers, 15:3, 119-125, DOI: 10.1080/00045602509356949
 */
 
 C_NAMESPACE PJ *pj_sinu(PJ *), *pj_moll(PJ *);
@@ -31,16 +36,15 @@ Latitude (phi): 40deg 44' 11.8"
 static const double phi_boundary = (40 + 44/60. + 11.8/3600.) * DEG_TO_RAD;
 
 static const double d10  =  10 * DEG_TO_RAD;
-static const double d40  =  40 * DEG_TO_RAD;
+static const double d20  =  20 * DEG_TO_RAD;
 static const double d50  =  50 * DEG_TO_RAD;
 static const double d60  =  60 * DEG_TO_RAD;
-static const double d70  =  70 * DEG_TO_RAD;
-static const double d75  =  75 * DEG_TO_RAD;
 static const double d90  =  90 * DEG_TO_RAD;
 static const double d110 = 110 * DEG_TO_RAD;
-static const double d120 = 120 * DEG_TO_RAD;
-static const double d130 = 130 * DEG_TO_RAD;
+static const double d140 = 140 * DEG_TO_RAD;
 static const double d150 = 150 * DEG_TO_RAD;
+static const double d160 = 160 * DEG_TO_RAD;
+static const double d130 = 130 * DEG_TO_RAD;
 static const double d180 = 180 * DEG_TO_RAD;
 
 static const double EPSLN = 1.e-10; /* allow a little 'slack' on zone edge positions */
@@ -65,22 +69,22 @@ static PJ_XY igh_o_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     int z;
 
     if (lp.phi >=  phi_boundary) {
-           if (lp.lam <=  -d110) z =  1;
-      else if (lp.lam >=    d50) z =  3;
+           if (lp.lam <=   -d90) z =  1;
+      else if (lp.lam >=    d60) z =  3;
       else z = 2;
     }
     else if (lp.phi >=  0) {
-           if (lp.lam <=  -d110) z =  4;
-      else if (lp.lam >=    d50) z =  6;
+           if (lp.lam <=   -d90) z =  4;
+      else if (lp.lam >=    d60) z =  6;
       else z = 5;
     }
     else if (lp.phi >= -phi_boundary) {
-           if (lp.lam <=  -d75) z =  7;
+           if (lp.lam <=  -d60) z =  7;
       else if (lp.lam >=   d90) z =  9;
       else z = 8;
     }
     else {
-           if (lp.lam <=  -d75) z =  10;
+           if (lp.lam <=  -d60) z =  10;
       else if (lp.lam >=   d90) z =  12;
       else z = 11;
     }
@@ -103,20 +107,20 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     if (xy.y > y90+EPSLN || xy.y < -y90+EPSLN) /* 0 */
       z = 0;
     else if (xy.y >=  phi_boundary)
-           if (xy.x <=  -d110) z =  1;
-      else if (xy.x >=    d50) z =  3;
+           if (xy.x <=   -d90) z =  1;
+      else if (xy.x >=    d60) z =  3;
       else z = 2;
     else if (xy.y >=  0)
-           if (xy.x <=  -d110) z =  4;
-      else if (xy.x >=    d50) z =  6;
+           if (xy.x <=   -d90) z =  4;
+      else if (xy.x >=    d60) z =  6;
       else z = 5;
     else if (xy.y >= -phi_boundary) {
-           if (xy.x <=   -d75) z =  7;
+           if (xy.x <=   -d60) z =  7;
       else if (xy.x >=    d90) z =  9;
       else z = 8;
     }
     else {
-           if (xy.x <=   -d75) z =  10;
+           if (xy.x <=   -d60) z =  10;
       else if (xy.x >=    d90) z =  11;
       else z = 12;
     }
@@ -130,27 +134,23 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         lp.lam += Q->pj[z-1]->lam0;
 
         switch (z) {
-        /* Extend the plottable area slightly for each sub-projection */
-        case  1:  ok = (lp.lam  >= -d180-EPSLN && lp.lam <= -d110+EPSLN) ||
-                       ((lp.lam >= -d180-EPSLN && lp.lam <=  -d70+EPSLN) &&
-                       (lp.phi  >=   d60-EPSLN && lp.phi <=   d90+EPSLN)); break;
-        case  2:  ok = (lp.lam  >= -d110-EPSLN && lp.lam <=   d50+EPSLN) ||
-                       ((lp.lam >=   d50-EPSLN && lp.lam <=   d60+EPSLN) &&
-                       (lp.phi  >=   d60-EPSLN && lp.phi <=   d90+EPSLN)) ||
-                       ((lp.lam <= -d120-EPSLN && lp.lam >= -d110+EPSLN) &&
-                       (lp.phi  >=   d60-EPSLN && lp.phi <=   d90+EPSLN)) ; break;
-        case  3:  ok = (lp.lam  >=   d50-EPSLN && lp.lam <=  d180+EPSLN) ||
-                       ((lp.lam >=   d10-EPSLN && lp.lam <=   d60+EPSLN) &&
-                       (lp.phi  >=   d60-EPSLN && lp.phi <=   d90+EPSLN)); break;
-        case  4:  ok = (lp.lam  >= -d180-EPSLN && lp.lam <= -d110+EPSLN); break;
-        case  5:  ok = (lp.lam  >= -d110-EPSLN && lp.lam <=   d50+EPSLN); break;
-        case  6:  ok = (lp.lam  >=   d50-EPSLN && lp.lam <=  d180+EPSLN); break;
-        case  7:  ok = (lp.lam  >= -d180-EPSLN && lp.lam <=  -d75+EPSLN); break;
-        case  8:  ok = (lp.lam  >=  -d75-EPSLN && lp.lam <=   d90+EPSLN); break;
-        case  9:  ok = (lp.lam  >=   d90-EPSLN && lp.lam <=  d180+EPSLN); break;
-        case  10: ok = (lp.lam  >= -d180-EPSLN && lp.lam <=  -d75+EPSLN); break;
-        case  11: ok = (lp.lam  >=  -d75-EPSLN && lp.lam <=   d90+EPSLN); break;
-        case  12: ok = (lp.lam  >=   d90-EPSLN && lp.lam <=  d180+EPSLN); break;
+        /* Plot projectable ranges with exetension lobes in zones 1 & 3 */
+        case  1:  ok = (lp.lam  >= -d180-EPSLN && lp.lam <=  -d90+EPSLN) ||
+                       ((lp.lam >=  d160-EPSLN && lp.lam <=  d180+EPSLN) &&
+                       (lp.phi  >=   d50-EPSLN && lp.phi <=   d90+EPSLN)); break;
+        case  2:  ok = (lp.lam  >=  -d90-EPSLN && lp.lam <=   d60+EPSLN);  break;
+        case  3:  ok = (lp.lam  >=   d60-EPSLN && lp.lam <=  d180+EPSLN) ||
+                       ((lp.lam >= -d180-EPSLN && lp.lam <= -d160+EPSLN) &&
+                       (lp.phi  >=   d50-EPSLN && lp.phi <=   d90+EPSLN)); break;
+        case  4:  ok = (lp.lam  >= -d180-EPSLN && lp.lam <=  -d90+EPSLN);  break;
+        case  5:  ok = (lp.lam  >=  -d90-EPSLN && lp.lam <=   d60+EPSLN);  break;
+        case  6:  ok = (lp.lam  >=   d60-EPSLN && lp.lam <=  d180+EPSLN);  break;
+        case  7:  ok = (lp.lam  >= -d180-EPSLN && lp.lam <=  -d60+EPSLN);  break;
+        case  8:  ok = (lp.lam  >=  -d60-EPSLN && lp.lam <=   d90+EPSLN);  break;
+        case  9:  ok = (lp.lam  >=   d90-EPSLN && lp.lam <=  d180+EPSLN);  break;
+        case  10: ok = (lp.lam  >= -d180-EPSLN && lp.lam <=  -d60+EPSLN);  break;
+        case  11: ok = (lp.lam  >=  -d60-EPSLN && lp.lam <=   d90+EPSLN);  break;
+        case  12: ok = (lp.lam  >=   d90-EPSLN && lp.lam <=  d180+EPSLN);  break;
 
         }
       z = (!ok? 0: z); /* projectable? */
@@ -186,7 +186,7 @@ static PJ *destructor (PJ *P, int errlev) {
 /*
   Zones:
 
-    -180      -110               50           180
+    -180       -90               60           180
       +---------+----------------+-------------+    Zones 1,2,3,10,11 & 12:
       |1        |2               |3            |    Mollweide projection
       |         |                |             |
@@ -200,7 +200,7 @@ static PJ *destructor (PJ *P, int errlev) {
       |10          |11              |12        |
       |            |                |          |
       +------------+----------------+----------+
-    -180          -75               90        180
+    -180          -60               90        180
 */
 
 static bool setup_zone(PJ *P, struct pj_opaque *Q, int n,
@@ -225,19 +225,21 @@ PJ *PROJECTION(igh_o) {
 
 
     /* sinusoidal zones */
-    if (!setup_zone(P, Q, 4, pj_sinu, -d150, 0, -d150) ||
-        !setup_zone(P, Q, 5, pj_sinu, -d40,  0,  -d40) ||
-        !setup_zone(P, Q, 6, pj_sinu,  d120, 0,  d120) ||
-        !setup_zone(P, Q, 7, pj_sinu, -d120, 0, -d120) ||
-        !setup_zone(P, Q, 8, pj_sinu,   d10, 0,   d10) ||
-        !setup_zone(P, Q, 9, pj_sinu,  d130, 0,  d130))
+    if (!setup_zone(P, Q, 4, pj_sinu, -d140, 0, -d140) ||
+        !setup_zone(P, Q, 5, pj_sinu,   d10, 0,   d10) ||
+        !setup_zone(P, Q, 6, pj_sinu,  d130, 0,  d130) ||
+        !setup_zone(P, Q, 7, pj_sinu, -d110, 0, -d110) ||
+        !setup_zone(P, Q, 8, pj_sinu,   d20, 0,   d20) ||
+        !setup_zone(P, Q, 9, pj_sinu,  d150, 0,  d150))
     {
        return destructor(P, ENOMEM);
     }
 
 
     /* mollweide zones */
-    setup_zone(P, Q, 1, pj_moll,  -d150, 0,  -d150);
+    if (!setup_zone(P, Q, 1, pj_moll,  -d140, 0,  -d140)) {
+       return destructor(P, ENOMEM);
+    }
 
     /* y0 ? */
     xy1 = Q->pj[0]->fwd(lp, Q->pj[0]); /* zone 1 */
@@ -248,11 +250,11 @@ PJ *PROJECTION(igh_o) {
     Q->pj[0]->y0 = Q->dy0;
 
     /* mollweide zones (cont'd) */
-    if (!setup_zone(P, Q,  2, pj_moll,  -d40,  Q->dy0,  -d40)  ||
-        !setup_zone(P, Q,  3, pj_moll,  d120,  Q->dy0,  d120)  ||
-        !setup_zone(P, Q, 10, pj_moll, -d120, -Q->dy0, -d120)  ||
-        !setup_zone(P, Q, 11, pj_moll,   d10, -Q->dy0,   d10)  ||
-        !setup_zone(P, Q, 12, pj_moll,  d130, -Q->dy0,  d130))
+    if (!setup_zone(P, Q,  2, pj_moll,   d10,  Q->dy0,   d10)  ||
+        !setup_zone(P, Q,  3, pj_moll,  d130,  Q->dy0,  d130)  ||
+        !setup_zone(P, Q, 10, pj_moll, -d110, -Q->dy0, -d110)  ||
+        !setup_zone(P, Q, 11, pj_moll,   d20, -Q->dy0,   d20)  ||
+        !setup_zone(P, Q, 12, pj_moll,  d150, -Q->dy0,  d150))
     {
        return destructor(P, ENOMEM);
     }

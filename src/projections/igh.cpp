@@ -18,6 +18,11 @@ constant `phi_boundary`.
 Each sub-projection is assigned an integer label
 numbered 1 through 12. Most of this code contains logic to assign
 the labels based on latitude (phi) and longitude (lam) regions.
+
+Original Reference:
+J. Paul Goode (1925) THE HOMOLOSINE PROJECTION: A NEW DEVICE FOR 
+    PORTRAYING THE EARTH'S SURFACE ENTIRE, Annals of the Association of 
+    American Geographers, 15:3, 119-125, DOI: 10.1080/00045602509356949
 */
 
 C_NAMESPACE PJ *pj_sinu(PJ *), *pj_moll(PJ *);
