@@ -560,7 +560,7 @@
         "latmin": -90,
         "lonmax": 180,
         "lonmin": -180,
-        "name": "igh",
+        "name": "igh_o",
         "projstring": "+proj=igh_o +lon_0=-160",
         "res": "low",
         "type": "line"
