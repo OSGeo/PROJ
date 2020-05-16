@@ -94,7 +94,11 @@ struct CRS::Private {
     BoundCRSPtr canonicalBoundCRS_{};
     std::string extensionProj4_{};
     bool implicitCS_ = false;
+
     bool allowNonConformantWKT1Export_ = false;
+    // for what was initially a COMPD_CS with a VERT_CS with a datum type ==
+    // ellipsoidal height / 2002
+    VerticalCRSPtr originalVertCRS_{};
 
     void setImplicitCS(const util::PropertyMap &properties) {
         const auto pVal = properties.get("IMPLICIT_CS");
@@ -562,8 +566,28 @@ CRSNNPtr CRS::shallowClone() const { return _shallowClone(); }
 //! @cond Doxygen_Suppress
 
 CRSNNPtr CRS::allowNonConformantWKT1Export() const {
-    auto crs = shallowClone();
+    auto crs(shallowClone());
     crs->d->allowNonConformantWKT1Export_ = true;
+    return crs;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+CRSNNPtr CRS::attachOriginalVertCRS(const VerticalCRSNNPtr &vertCRS) const {
+
+    const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+    if (boundCRS) {
+        return BoundCRS::create(
+            boundCRS->baseCRS()->attachOriginalVertCRS(vertCRS),
+            boundCRS->hubCRS(), boundCRS->transformation());
+    }
+
+    auto crs(shallowClone());
+    crs->d->originalVertCRS_ = vertCRS.as_nullable();
     return crs;
 }
 
@@ -1381,15 +1405,39 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     if (!isWKT2 && formatter->isStrict() && isGeographic &&
         axisList.size() != 2 &&
         oldAxisOutputRule != io::WKTFormatter::OutputAxisRule::NO) {
+
+        auto geogCRS2D = demoteTo2D(std::string(), dbContext);
+        if (dbContext) {
+            const auto res = geogCRS2D->identify(
+                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "EPSG"));
+            if (res.size() == 1) {
+                const auto &front = res.front();
+                if (front.second == 100) {
+                    geogCRS2D = front.first;
+                }
+            }
+        }
+
         if (CRS::getPrivate()->allowNonConformantWKT1Export_) {
             formatter->startNode(io::WKTConstants::COMPD_CS, false);
             formatter->addQuotedString(l_name + " + " + l_name);
-            auto geogCRS = demoteTo2D(std::string(), dbContext);
-            geogCRS->_exportToWKT(formatter);
-            geogCRS->_exportToWKT(formatter);
+            geogCRS2D->_exportToWKT(formatter);
+            geogCRS2D->_exportToWKT(formatter);
             formatter->endNode();
             return;
         }
+
+        auto &originalVertCRS = CRS::getPrivate()->originalVertCRS_;
+        if (originalVertCRS) {
+            formatter->startNode(io::WKTConstants::COMPD_CS, false);
+            formatter->addQuotedString(l_name + " + " +
+                                       originalVertCRS->nameStr());
+            geogCRS2D->_exportToWKT(formatter);
+            originalVertCRS->_exportToWKT(formatter);
+            formatter->endNode();
+            return;
+        }
+
         io::FormattingException::Throw(
             "WKT1 does not support Geographic 3D CRS.");
     }
@@ -2047,6 +2095,7 @@ GeodeticCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 //! @cond Doxygen_Suppress
 struct GeographicCRS::Private {
     cs::EllipsoidalCSNNPtr coordinateSystem_;
+
     explicit Private(const cs::EllipsoidalCSNNPtr &csIn)
         : coordinateSystem_(csIn) {}
 };
@@ -3210,22 +3259,22 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const auto &l_coordinateSystem = d->coordinateSystem();
     const auto &axisList = l_coordinateSystem->axisList();
     if (axisList.size() == 3 && !(isWKT2 && formatter->use2019Keywords())) {
+        auto projCRS2D = demoteTo2D(std::string(), dbContext);
+        if (dbContext) {
+            const auto res = projCRS2D->identify(
+                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "EPSG"));
+            if (res.size() == 1) {
+                const auto &front = res.front();
+                if (front.second == 100) {
+                    projCRS2D = front.first;
+                }
+            }
+        }
+
         if (!formatter->useESRIDialect() &&
             CRS::getPrivate()->allowNonConformantWKT1Export_) {
             formatter->startNode(io::WKTConstants::COMPD_CS, false);
             formatter->addQuotedString(l_name + " + " + baseCRS()->nameStr());
-            auto projCRS2D = demoteTo2D(std::string(), dbContext);
-            if (dbContext) {
-                const auto res =
-                    projCRS2D->identify(io::AuthorityFactory::create(
-                        NN_NO_CHECK(dbContext), "EPSG"));
-                if (res.size() == 1) {
-                    const auto &front = res.front();
-                    if (front.second == 100) {
-                        projCRS2D = front.first;
-                    }
-                }
-            }
             projCRS2D->_exportToWKT(formatter);
             baseCRS()
                 ->demoteTo2D(std::string(), dbContext)
@@ -3233,6 +3282,18 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             formatter->endNode();
             return;
         }
+
+        auto &originalVertCRS = CRS::getPrivate()->originalVertCRS_;
+        if (!formatter->useESRIDialect() && originalVertCRS) {
+            formatter->startNode(io::WKTConstants::COMPD_CS, false);
+            formatter->addQuotedString(l_name + " + " +
+                                       originalVertCRS->nameStr());
+            projCRS2D->_exportToWKT(formatter);
+            originalVertCRS->_exportToWKT(formatter);
+            formatter->endNode();
+            return;
+        }
+
         io::FormattingException::Throw(
             "Projected 3D CRS can only be exported since WKT2:2019");
     }
@@ -4200,6 +4261,22 @@ CRSNNPtr CompoundCRS::createLax(const util::PropertyMap &properties,
             throw InvalidCompoundCRSException(
                 "The 'vertical' geographic CRS is not equivalent to the "
                 "geographic CRS of the horizontal part");
+        }
+
+        // Detect a COMPD_CS whose VERT_CS is for ellipoidal heights
+        auto comp1Vert =
+            util::nn_dynamic_pointer_cast<VerticalCRS>(components[1]);
+        if (comp1Vert != nullptr && comp1Vert->datum() &&
+            comp1Vert->datum()->getWKT1DatumType() == "2002") {
+            const auto &axis = comp1Vert->coordinateSystem()->axisList()[0];
+            if (axis->unit()._isEquivalentTo(
+                    common::UnitOfMeasure::METRE,
+                    util::IComparable::Criterion::EQUIVALENT) &&
+                &(axis->direction()) == &(cs::AxisDirection::UP)) {
+                return components[0]
+                    ->promoteTo3D(std::string(), dbContext)
+                    ->attachOriginalVertCRS(NN_NO_CHECK(comp1Vert));
+            }
         }
     }
 
