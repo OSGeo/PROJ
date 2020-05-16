@@ -126,6 +126,8 @@ static const char *BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT =
     "height correction)";
 
 static const std::string AXIS_ORDER_CHANGE_2D_NAME = "axis order change (2D)";
+static const std::string AXIS_ORDER_CHANGE_3D_NAME =
+    "axis order change (geographic3D horizontal)";
 //! @endcond
 
 //! @cond Doxygen_Suppress
@@ -4840,8 +4842,7 @@ Conversion::createHeightDepthReversal(const util::PropertyMap &properties) {
  */
 ConversionNNPtr Conversion::createAxisOrderReversal(bool is3D) {
     if (is3D) {
-        return create(createMapNameEPSGCode(
-                          "axis order change (geographic3D horizontal)", 15499),
+        return create(createMapNameEPSGCode(AXIS_ORDER_CHANGE_3D_NAME, 15499),
                       createMethodMapNameEPSGCode(
                           EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_3D),
                       {}, {});
@@ -7827,7 +7828,8 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
                 }
                 if (starts_with(tokens[i], INVERSE_OF)) {
                     name += tokens[i].substr(INVERSE_OF.size());
-                } else if (tokens[i] == AXIS_ORDER_CHANGE_2D_NAME) {
+                } else if (tokens[i] == AXIS_ORDER_CHANGE_2D_NAME ||
+                           tokens[i] == AXIS_ORDER_CHANGE_3D_NAME) {
                     name += tokens[i];
                 } else {
                     name += INVERSE_OF + tokens[i];
