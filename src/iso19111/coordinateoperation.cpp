@@ -14797,10 +14797,16 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                         if (!componentsSrc[0]->isEquivalentTo(
                                 target2D.get(),
                                 util::IComparable::Criterion::EQUIVALENT)) {
-                            interpToTargetOps = createOperations(
-                                NN_NO_CHECK(interpolationGeogCRS),
-                                targetCRS->demoteTo2D(std::string(), dbContext),
-                                context);
+                            // We do the transformation from the
+                            // interpolationCRS
+                            // to the target one in 3D (see #2225)
+                            // But we don't do that between sourceCRS and
+                            // interpolationCRS, as this would mess with an
+                            // orthometric elevation.
+                            auto interp3D = interpolationGeogCRS->promoteTo3D(
+                                std::string(), dbContext);
+                            interpToTargetOps =
+                                createOperations(interp3D, targetCRS, context);
                         }
                     };
 

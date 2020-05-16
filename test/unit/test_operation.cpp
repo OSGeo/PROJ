@@ -8066,6 +8066,49 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_geogCRS_3D_with_3D_helmert_context) {
+    // Use case of https://github.com/OSGeo/PROJ/issues/2225
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // WGS84 + EGM96 height
+    auto srcObj = createFromUserInput("EPSG:4326+5773", dbContext, false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src),
+        // CH1903+
+        authFactory->createCoordinateReferenceSystem("4150")->promoteTo3D(
+            std::string(), dbContext),
+        ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
+                                  "Inverse of CH1903+ to WGS 84 (1)");
+    // Check that there is no push v_3 / pop v_3
+    const char *expected_proj =
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=vgridshift +grids=us_nga_egm96_15.tif +multiplier=1 "
+        "+step +proj=cart +ellps=WGS84 "
+        "+step +proj=helmert +x=-674.374 +y=-15.056 +z=-405.346 "
+        "+step +inv +proj=cart +ellps=bessel "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+        "+step +proj=axisswap +order=2,1";
+    EXPECT_EQ(list[0]->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              expected_proj);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
