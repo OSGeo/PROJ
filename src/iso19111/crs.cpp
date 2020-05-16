@@ -566,6 +566,12 @@ CRSNNPtr CRS::shallowClone() const { return _shallowClone(); }
 //! @cond Doxygen_Suppress
 
 CRSNNPtr CRS::allowNonConformantWKT1Export() const {
+    const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+    if (boundCRS) {
+        return BoundCRS::create(
+            boundCRS->baseCRS()->allowNonConformantWKT1Export(),
+            boundCRS->hubCRS(), boundCRS->transformation());
+    }
     auto crs(shallowClone());
     crs->d->allowNonConformantWKT1Export_ = true;
     return crs;
@@ -1422,7 +1428,10 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             formatter->startNode(io::WKTConstants::COMPD_CS, false);
             formatter->addQuotedString(l_name + " + " + l_name);
             geogCRS2D->_exportToWKT(formatter);
+            const auto oldTOWGSParameters = formatter->getTOWGS84Parameters();
+            formatter->setTOWGS84Parameters({});
             geogCRS2D->_exportToWKT(formatter);
+            formatter->setTOWGS84Parameters(oldTOWGSParameters);
             formatter->endNode();
             return;
         }
@@ -4245,6 +4254,14 @@ CRSNNPtr CompoundCRS::createLax(const util::PropertyMap &properties,
         auto comp1 = components[1].get();
         auto comp0Geog = dynamic_cast<const GeographicCRS *>(comp0);
         auto comp0Proj = dynamic_cast<const ProjectedCRS *>(comp0);
+        if (comp0Geog == nullptr && comp0Proj == nullptr) {
+            auto comp0Bound = dynamic_cast<const BoundCRS *>(comp0);
+            if (comp0Bound) {
+                const auto *baseCRS = comp0Bound->baseCRS().get();
+                comp0Geog = dynamic_cast<const GeographicCRS *>(baseCRS);
+                comp0Proj = dynamic_cast<const ProjectedCRS *>(baseCRS);
+            }
+        }
         auto comp1Geog = dynamic_cast<const GeographicCRS *>(comp1);
         if ((comp0Geog != nullptr || comp0Proj != nullptr) &&
             comp1Geog != nullptr) {
