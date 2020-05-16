@@ -7003,13 +7003,17 @@ TEST(operation, compoundCRS_with_boundGeogCRS_to_geogCRS) {
         compound, GeographicCRS::EPSG_4979);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 "
-              "+step +proj=cart +ellps=WGS84 +step +proj=helmert +x=1 +y=2 "
-              "+z=3 +rx=4 +ry=5 +rz=6 +s=7 +convention=position_vector +step "
-              "+inv +proj=cart +ellps=WGS84 +step +proj=pop +v_3 +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
-              "+order=2,1");
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
