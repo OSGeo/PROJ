@@ -140,6 +140,9 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
 
     PROJ_INTERNAL CRSNNPtr allowNonConformantWKT1Export() const;
 
+    PROJ_INTERNAL CRSNNPtr
+    attachOriginalVertCRS(const VerticalCRSNNPtr &vertCRS) const;
+
     //! @endcond
 
   protected:
