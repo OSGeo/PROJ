@@ -38,6 +38,8 @@ construction of new grids is recommended.
 Starting with PROJ 7.0, use of a GeoTIFF format is recommended to store both
 the horizontal and vertical velocities.
 
+More complex deformations can be done with the :ref:`Multi-component time-based deformation model <defmodel>` transformation.
+
 Example
 -------------------------------------------------------------------------------
 

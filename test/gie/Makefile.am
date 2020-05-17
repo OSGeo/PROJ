@@ -15,8 +15,8 @@ EXTRA_DIST = 4D-API_cs2cs-style.gie \
 	adams_ws1.gie \
 	adams_ws2.gie \
 	guyou.gie \
-	peirce_q.gie
-
+	peirce_q.gie \
+	defmodel.gie
 
 PROJ_LIB ?= ../../data/for_tests
 
@@ -65,4 +65,7 @@ guyou: guyou.gie
 peirce_q: peirce_q.gie
 	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
 
-check-local: 4D-API-cs2cs-style GDA axisswap builtins deformation ellipsoid more_builtins unitconvert DHDN_ETRS89 geotiff_grids adams_hemi adams_ws1 adams_ws2 guyou peirce_q
+defmodel: defmodel.gie
+	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(GIEEXE) $<
+
+check-local: 4D-API-cs2cs-style GDA axisswap builtins deformation ellipsoid more_builtins unitconvert DHDN_ETRS89 geotiff_grids adams_hemi adams_ws1 adams_ws2 guyou peirce_q defmodel

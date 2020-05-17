@@ -1,0 +1,49 @@
+{
+  "file_type": "deformation_model_master_file",
+  "format_version": "1.0",
+  "source_crs": "EPSG:4326",
+  "target_crs": "foo:ignored",
+  "definition_crs": "EPSG:4326",
+  "vertical_offset_unit": "metre",
+  "extent": {
+    "type": "bbox",
+    "parameters": {
+      "bbox": [
+        -180,
+        -90,
+        180,
+        90
+      ]
+    }
+  },
+  "time_extent": {
+    "first": "1900-01-01T00:00:00Z",
+    "last": "2050-01-01T00:00:00Z"
+  },
+  "components": [
+    {
+      "description": "test",
+      "displacement_type": "vertical",
+      "uncertainty_type": "none",
+      "extent": {
+        "type": "bbox",
+        "parameters": {
+          "bbox": [
+            -180,
+            -90,
+            180,
+            90
+          ]
+        }
+      },
+      "spatial_model": {
+        "type": "GeoTIFF",
+        "interpolation_method": "bilinear",
+        "filename": "tests/simple_model_metre_vertical_grid.tif"
+      },
+      "time_function": {
+        "type": "constant"
+      }
+    }
+  ]
+}

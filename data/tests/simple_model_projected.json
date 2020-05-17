@@ -1,0 +1,51 @@
+{
+  "file_type": "deformation_model_master_file",
+  "format_version": "1.0",
+  "source_crs": "EPSG:2193",
+  "target_crs": "foo:ignored",
+  "definition_crs": "EPSG:2193",
+  "horizontal_offset_unit": "metre",
+  "horizontal_offset_method": "addition",
+  "vertical_offset_unit": "metre",
+  "extent": {
+    "type": "bbox",
+    "parameters": {
+      "bbox": [
+        1500000.0,
+        5400000.0,
+        1501000.0,
+        5401000.0
+      ]
+    }
+  },
+  "time_extent": {
+    "first": "1900-01-01T00:00:00Z",
+    "last": "2050-01-01T00:00:00Z"
+  },
+  "components": [
+    {
+      "description": "test",
+      "displacement_type": "3d",
+      "uncertainty_type": "none",
+      "extent": {
+        "type": "bbox",
+        "parameters": {
+          "bbox": [
+            1500000.0,
+            5400000.0,
+            1501000.0,
+            5401000.0
+          ]
+        }
+      },
+      "spatial_model": {
+        "type": "GeoTIFF",
+        "interpolation_method": "bilinear",
+        "filename": "tests/test_3d_grid_projected.tif"
+      },
+      "time_function": {
+        "type": "constant"
+      }
+    }
+  ]
+}

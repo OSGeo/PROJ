@@ -124,7 +124,7 @@ static bool get_grid_values(PJ* P,
     }
 
     bool must_retry = false;
-    if( !pj_bilinear_interpolation_three_samples(grid, lp,
+    if( !pj_bilinear_interpolation_three_samples(P->ctx, grid, lp,
                                                  sampleE, sampleN, sampleU,
                                                  vx, vy, vz,
                                                  must_retry) )

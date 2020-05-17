@@ -37,12 +37,14 @@
 NS_PROJ_START
 
 struct ExtentAndRes {
-    double westLon;  // in radian
-    double southLat; // in radian
-    double eastLon;  // in radian
-    double northLat; // in radian
-    double resLon;   // in radian
-    double resLat;   // in radian
+    bool isGeographic; // whether extent and resolutions are in a geographic or
+                       // projected CRS
+    double west;       // in radian for geographic, in CRS units otherwise
+    double south;      // in radian for geographic, in CRS units otherwise
+    double east;       // in radian for geographic, in CRS units otherwise
+    double north;      // in radian for geographic, in CRS units otherwise
+    double resX;       // in radian for geographic, in CRS units otherwise
+    double resY;       // in radian for geographic, in CRS units otherwise
 
     bool fullWorldLongitude() const;
     bool contains(const ExtentAndRes &other) const;
@@ -188,7 +190,7 @@ class PROJ_GCC_DLL GenericShiftGrid : public Grid {
 
     PROJ_FOR_TEST ~GenericShiftGrid() override;
 
-    PROJ_FOR_TEST const GenericShiftGrid *gridAt(double lon, double lat) const;
+    PROJ_FOR_TEST const GenericShiftGrid *gridAt(double x, double y) const;
 
     PROJ_FOR_TEST virtual std::string unit(int sample) const = 0;
 
@@ -228,7 +230,7 @@ class PROJ_GCC_DLL GenericShiftGridSet {
     grids() const {
         return m_grids;
     }
-    PROJ_FOR_TEST const GenericShiftGrid *gridAt(double lon, double lat) const;
+    PROJ_FOR_TEST const GenericShiftGrid *gridAt(double x, double y) const;
 
     PROJ_FOR_TEST virtual void reassign_context(PJ_CONTEXT *ctx);
     PROJ_FOR_TEST virtual bool reopen(PJ_CONTEXT *ctx);
@@ -253,11 +255,9 @@ PJ_LP pj_hgrid_apply(PJ_CONTEXT *ctx, const ListOfHGrids &grids, PJ_LP lp,
 const GenericShiftGrid *pj_find_generic_grid(const ListOfGenericGrids &grids,
                                              const PJ_LP &input,
                                              GenericShiftGridSet *&gridSetOut);
-bool pj_bilinear_interpolation_three_samples(const GenericShiftGrid *grid,
-                                             const PJ_LP &lp, int idx1,
-                                             int idx2, int idx3, double &v1,
-                                             double &v2, double &v3,
-                                             bool &must_retry);
+bool pj_bilinear_interpolation_three_samples(
+    PJ_CONTEXT *ctx, const GenericShiftGrid *grid, const PJ_LP &lp, int idx1,
+    int idx2, int idx3, double &v1, double &v2, double &v3, bool &must_retry);
 
 NS_PROJ_END
 
