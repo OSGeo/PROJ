@@ -2167,6 +2167,7 @@ operation +proj=igh   +a=6400000
 tolerance 0.1 mm
 accept  2 1
 expect  223878.497456271 111701.072127637
+roundtrip 1
 accept  2 -1
 expect  223708.371313058 -111701.072127637
 accept  -2 1
@@ -2246,6 +2247,7 @@ operation +proj=igh_o   +a=6400000
 tolerance 0.1 mm
 accept  2 1
 expect  223538.245169845 111701.072127637
+roundtrip 1
 accept  2 -1
 expect  223708.371313058 -111701.072127637
 accept  -2 1
