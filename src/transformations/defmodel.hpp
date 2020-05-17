@@ -475,21 +475,25 @@ struct GridPrototype {
     int width = 0;
     int height = 0;
 
+    // cppcheck-suppress functionStatic
     bool getLonLatOffset(int /*ix*/, int /*iy*/, double & /*lonOffsetRadian*/,
                          double & /*latOffsetRadian*/) const {
         throw UnimplementedException("getLonLatOffset unimplemented");
     }
 
+    // cppcheck-suppress functionStatic
     bool getZOffset(int /*ix*/, int /*iy*/, double & /*zOffset*/) const {
         throw UnimplementedException("getZOffset unimplemented");
     }
 
+    // cppcheck-suppress functionStatic
     bool getEastingNorthingOffset(int /*ix*/, int /*iy*/,
                                   double & /*eastingOffset*/,
                                   double & /*northingOffset*/) const {
         throw UnimplementedException("getEastingNorthingOffset unimplemented");
     }
 
+    // cppcheck-suppress functionStatic
     bool getLonLatZOffset(int /*ix*/, int /*iy*/, double & /*lonOffsetRadian*/,
                           double & /*latOffsetRadian*/,
                           double & /*zOffset*/) const {
@@ -500,6 +504,7 @@ struct GridPrototype {
 #endif
     }
 
+    // cppcheck-suppress functionStatic
     bool getEastingNorthingZOffset(int /*ix*/, int /*iy*/,
                                    double & /*eastingOffset*/,
                                    double & /*northingOffset*/,
@@ -526,6 +531,7 @@ struct GridPrototype {
 template <class Grid = GridPrototype> struct GridSetPrototype {
     // The return pointer should remain "stable" over time for a given grid
     // of a GridSet.
+    // cppcheck-suppress functionStatic
     const Grid *gridAt(double /*x */, double /* y */) {
         throw UnimplementedException("gridAt unimplemented");
     }
@@ -542,6 +548,7 @@ struct EvaluatorIfacePrototype {
         throw UnimplementedException("open unimplemented");
     }
 
+    // cppcheck-suppress functionStatic
     void geographicToGeocentric(double /* lam */, double /* phi */,
                                 double /* height*/, double /* a */,
                                 double /* b */, double /*es*/, double & /* X */,
@@ -549,6 +556,7 @@ struct EvaluatorIfacePrototype {
         throw UnimplementedException("geographicToGeocentric unimplemented");
     }
 
+    // cppcheck-suppress functionStatic
     void geocentricToGeographic(double /* X */, double /* Y */, double /* Z */,
                                 double /* a */, double /* b */, double /*es*/,
                                 double & /* lam */, double & /* phi */,
@@ -556,6 +564,7 @@ struct EvaluatorIfacePrototype {
         throw UnimplementedException("geocentricToGeographic unimplemented");
     }
 
+    // cppcheck-suppress functionStatic
     bool isGeographicCRS(const std::string & /* crsDef */) {
         throw UnimplementedException("isGeographicCRS unimplemented");
     }

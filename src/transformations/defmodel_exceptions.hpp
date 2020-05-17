@@ -38,7 +38,7 @@ namespace DEFORMATON_MODEL_NAMESPACE {
 /** Parsing exception. */
 class ParsingException : public std::exception {
   public:
-    ParsingException(const std::string &msg) : msg_(msg) {}
+    explicit ParsingException(const std::string &msg) : msg_(msg) {}
     const char *what() const noexcept override;
 
   private:
@@ -51,7 +51,7 @@ const char *ParsingException::what() const noexcept { return msg_.c_str(); }
 
 class UnimplementedException : public std::exception {
   public:
-    UnimplementedException(const std::string &msg) : msg_(msg) {}
+    explicit UnimplementedException(const std::string &msg) : msg_(msg) {}
     const char *what() const noexcept override;
 
   private:
@@ -67,7 +67,7 @@ const char *UnimplementedException::what() const noexcept {
 /** Evaluator exception. */
 class EvaluatorException : public std::exception {
   public:
-    EvaluatorException(const std::string &msg) : msg_(msg) {}
+    explicit EvaluatorException(const std::string &msg) : msg_(msg) {}
     const char *what() const noexcept override;
 
   private:

@@ -6530,8 +6530,8 @@ struct Transformation::Private {
 
     TransformationPtr forwardOperation_{};
 
-    TransformationNNPtr registerInv(const Transformation *thisIn,
-                                    TransformationNNPtr invTransform);
+    static TransformationNNPtr registerInv(const Transformation *thisIn,
+                                           TransformationNNPtr invTransform);
 };
 //! @endcond
 
@@ -8068,7 +8068,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
         double z =
             parameterValueNumericAsSI(EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION);
         auto properties = createPropertiesForInverse(this, false, false);
-        return d->registerInv(
+        return Private::registerInv(
             this, create(properties, l_targetCRS, l_sourceCRS, nullptr,
                          createMethodMapNameEPSGCode(
                              useOperationMethodEPSGCodeIfPresent(
@@ -8101,14 +8101,14 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
             EPSG_CODE_PARAMETER_FLATTENING_DIFFERENCE);
 
         if (methodEPSGCode == EPSG_CODE_METHOD_ABRIDGED_MOLODENSKY) {
-            return d->registerInv(
+            return Private::registerInv(
                 this,
                 createAbridgedMolodensky(
                     createPropertiesForInverse(this, false, false), l_targetCRS,
                     l_sourceCRS, negate(x), negate(y), negate(z), negate(da),
                     negate(df), coordinateOperationAccuracies()));
         } else {
-            return d->registerInv(
+            return Private::registerInv(
                 this,
                 createMolodensky(createPropertiesForInverse(this, false, false),
                                  l_targetCRS, l_sourceCRS, negate(x), negate(y),
@@ -8121,7 +8121,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
         auto offset =
             parameterValueMeasure(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET);
         const common::Angle newOffset(negate(offset.value()), offset.unit());
-        return d->registerInv(
+        return Private::registerInv(
             this, createLongitudeRotation(
                       createPropertiesForInverse(this, false, false),
                       l_targetCRS, l_sourceCRS, newOffset));
@@ -8138,7 +8138,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
         const common::Angle newOffsetLong(negate(offsetLong.value()),
                                           offsetLong.unit());
 
-        return d->registerInv(
+        return Private::registerInv(
             this, createGeographic2DOffsets(
                       createPropertiesForInverse(this, false, false),
                       l_targetCRS, l_sourceCRS, newOffsetLat, newOffsetLong,
@@ -8161,7 +8161,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
         const common::Length newOffsetHeight(negate(offsetHeight.value()),
                                              offsetHeight.unit());
 
-        return d->registerInv(
+        return Private::registerInv(
             this, createGeographic3DOffsets(
                       createPropertiesForInverse(this, false, false),
                       l_targetCRS, l_sourceCRS, newOffsetLat, newOffsetLong,
@@ -8184,7 +8184,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
         const common::Length newOffsetHeight(negate(offsetHeight.value()),
                                              offsetHeight.unit());
 
-        return d->registerInv(
+        return Private::registerInv(
             this, createGeographic2DWithHeightOffsets(
                       createPropertiesForInverse(this, false, false),
                       l_targetCRS, l_sourceCRS, newOffsetLat, newOffsetLong,
@@ -8198,7 +8198,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
         const common::Length newOffsetHeight(negate(offsetHeight.value()),
                                              offsetHeight.unit());
 
-        return d->registerInv(
+        return Private::registerInv(
             this,
             createVerticalOffset(createPropertiesForInverse(this, false, false),
                                  l_targetCRS, l_sourceCRS, newOffsetHeight,
@@ -8208,7 +8208,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
     if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
         const double convFactor = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
-        return d->registerInv(
+        return Private::registerInv(
             this, createChangeVerticalUnit(
                       createPropertiesForInverse(this, false, false),
                       l_targetCRS, l_sourceCRS, common::Scale(1.0 / convFactor),
@@ -8218,7 +8218,7 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
 #ifdef notdef
     // We don't need that currently, but we might...
     if (methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
-        return d->registerInv(
+        return Private::registerInv(
             this,
             createHeightDepthReversal(
                 createPropertiesForInverse(this, false, false), l_targetCRS,
