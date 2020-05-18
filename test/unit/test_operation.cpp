@@ -7566,6 +7566,85 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_compoundCRS_issue_2232) {
+    auto objSrc = WKTParser().createFromWKT(
+        "COMPD_CS[\"NAD83 / Alabama West + NAVD88 height - Geoid12B "
+        "(Meters)\",\n"
+        "    PROJCS[\"NAD83 / Alabama West\",\n"
+        "        GEOGCS[\"NAD83\",\n"
+        "            DATUM[\"North_American_Datum_1983\",\n"
+        "                SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    AUTHORITY[\"EPSG\",\"7019\"]],\n"
+        "                TOWGS84[0,0,0,0,0,0,0],\n"
+        "                AUTHORITY[\"EPSG\",\"6269\"]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "            UNIT[\"degree\",0.0174532925199433,\n"
+        "                AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "            AUTHORITY[\"EPSG\",\"4269\"]],\n"
+        "        PROJECTION[\"Transverse_Mercator\"],\n"
+        "        PARAMETER[\"latitude_of_origin\",30],\n"
+        "        PARAMETER[\"central_meridian\",-87.5],\n"
+        "        PARAMETER[\"scale_factor\",0.999933333],\n"
+        "        PARAMETER[\"false_easting\",600000],\n"
+        "        PARAMETER[\"false_northing\",0],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "        AXIS[\"X\",EAST],\n"
+        "        AXIS[\"Y\",NORTH],\n"
+        "        AUTHORITY[\"EPSG\",\"26930\"]],\n"
+        "    VERT_CS[\"NAVD88 height - Geoid12B (Meters)\",\n"
+        "        VERT_DATUM[\"North American Vertical Datum 1988\",2005,\n"
+        "            EXTENSION[\"PROJ4_GRIDS\",\"foo.gtx\"],\n"
+        "            AUTHORITY[\"EPSG\",\"5103\"]],\n"
+        "        UNIT[\"metre\",1.0,\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "        AXIS[\"Gravity-related height\",UP],\n"
+        "        AUTHORITY[\"EPSG\",\"5703\"]]]");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDst = WKTParser().createFromWKT(
+        "COMPD_CS[\"NAD83 + some CRS (US Feet)\",\n"
+        "    GEOGCS[\"NAD83\",\n"
+        "        DATUM[\"North_American_Datum_1983\",\n"
+        "            SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                AUTHORITY[\"EPSG\",\"7019\"]],\n"
+        "            TOWGS84[0,0,0,0,0,0,0],\n"
+        "            AUTHORITY[\"EPSG\",\"6269\"]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "        UNIT[\"degree\",0.0174532925199433,\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "        AUTHORITY[\"EPSG\",\"4269\"]],\n"
+        "    VERT_CS[\"some CRS (US Feet)\",\n"
+        "        VERT_DATUM[\"some datum\",2005],\n"
+        "        UNIT[\"US survey foot\",0.3048006096012192,\n"
+        "            AUTHORITY[\"EPSG\",\"9003\"]],\n"
+        "        AXIS[\"Up\",UP]]]");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst), ctxt);
+    EXPECT_GE(list.size(), 1U);
+
+    auto list2 = CoordinateOperationFactory::create()->createOperations(
+        NN_CHECK_ASSERT(dst), NN_CHECK_ASSERT(src), ctxt);
+    EXPECT_EQ(list2.size(), list.size());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_to_compoundCRS_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");

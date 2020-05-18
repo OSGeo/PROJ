@@ -6587,6 +6587,10 @@ TransformationNNPtr Transformation::shallowClone() const {
     auto transf = Transformation::nn_make_shared<Transformation>(*this);
     transf->assignSelf(transf);
     transf->setCRSs(this, false);
+    if (transf->d->forwardOperation_) {
+        transf->d->forwardOperation_ =
+            transf->d->forwardOperation_->shallowClone().as_nullable();
+    }
     return transf;
 }
 
