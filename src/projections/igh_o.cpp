@@ -216,7 +216,7 @@ static bool setup_zone(PJ *P, struct pj_opaque *Q, int n,
 }
 
 PJ *PROJECTION(igh_o) {
-    PJ_XY xy1, xy3;
+    PJ_XY xy1, xy4;
     PJ_LP lp = { 0, phi_boundary };
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
@@ -243,9 +243,9 @@ PJ *PROJECTION(igh_o) {
 
     /* y0 ? */
     xy1 = Q->pj[0]->fwd(lp, Q->pj[0]); /* zone 1 */
-    xy3 = Q->pj[4]->fwd(lp, Q->pj[4]); /* zone 3 */
-    /* y0 + xy1.y = xy3.y for lt = 40d44'11.8" */
-    Q->dy0 = xy3.y - xy1.y;
+    xy4 = Q->pj[3]->fwd(lp, Q->pj[3]); /* zone 4 */
+    /* y0 + xy1.y = xy4.y for lt = 40d44'11.8" */
+    Q->dy0 = xy4.y - xy1.y;
 
     Q->pj[0]->y0 = Q->dy0;
 
