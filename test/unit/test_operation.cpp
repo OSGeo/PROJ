@@ -6379,6 +6379,26 @@ TEST(operation, geogCRS_to_boundCRS_of_geogCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, boundCRS_to_geogCRS_same_datum_context) {
+    auto boundCRS = BoundCRS::createFromTOWGS84(
+        GeographicCRS::EPSG_4269, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        boundCRS, GeographicCRS::EPSG_4269, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, boundCRS_to_boundCRS) {
     auto utm31 = ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4807,
@@ -7545,7 +7565,7 @@ TEST(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst), ctxt);
-    ASSERT_GE(list.size(), 1U);
+    ASSERT_EQ(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of unnamed + "
               "Transformation from NAD83 to WGS84 + "

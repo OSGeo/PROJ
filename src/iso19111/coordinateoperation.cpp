@@ -13997,6 +13997,20 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
     const auto &hubSrc = boundSrc->hubCRS();
     auto hubSrcGeog = dynamic_cast<const crs::GeographicCRS *>(hubSrc.get());
     auto geogCRSOfBaseOfBoundSrc = boundSrc->baseCRS()->extractGeographicCRS();
+    auto geogDstDatum = geogDst->datum();
+
+    // If the underlying datum of the source is the same as the target, do
+    // not consider the boundCRS at all, but just its base
+    if (geogCRSOfBaseOfBoundSrc && geogDstDatum) {
+        auto geogCRSOfBaseOfBoundSrcDatum = geogCRSOfBaseOfBoundSrc->datum();
+        if (geogCRSOfBaseOfBoundSrcDatum &&
+            geogCRSOfBaseOfBoundSrcDatum->_isEquivalentTo(
+                geogDstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
+            res = createOperations(boundSrc->baseCRS(), targetCRS, context);
+            return;
+        }
+    }
+
     bool triedBoundCrsToGeogCRSSameAsHubCRS = false;
     // Is it: boundCRS to a geogCRS that is the same as the hubCRS ?
     if (hubSrcGeog && geogCRSOfBaseOfBoundSrc &&
@@ -14043,9 +14057,9 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         }
         // If the datum are equivalent, this is also fine
     } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
-               geogDst->datum() &&
+               geogDstDatum &&
                hubSrcGeog->datum()->_isEquivalentTo(
-                   geogDst->datum().get(),
+                   geogDstDatum.get(),
                    util::IComparable::Criterion::EQUIVALENT)) {
         auto opsFirst = createOperations(
             boundSrc->baseCRS(), NN_NO_CHECK(geogCRSOfBaseOfBoundSrc), context);
@@ -14088,14 +14102,14 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         // +nadgrids=ntv1_can.dat,conus"
         // to "+proj=latlong +datum=NAD83"
     } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
-               geogDst->datum() &&
+               geogDstDatum &&
                geogCRSOfBaseOfBoundSrc->ellipsoid()->_isEquivalentTo(
                    datum::Ellipsoid::CLARKE_1866.get(),
                    util::IComparable::Criterion::EQUIVALENT) &&
                hubSrcGeog->datum()->_isEquivalentTo(
                    datum::GeodeticReferenceFrame::EPSG_6326.get(),
                    util::IComparable::Criterion::EQUIVALENT) &&
-               geogDst->datum()->_isEquivalentTo(
+               geogDstDatum->_isEquivalentTo(
                    datum::GeodeticReferenceFrame::EPSG_6269.get(),
                    util::IComparable::Criterion::EQUIVALENT)) {
         auto nnGeogCRSOfBaseOfBoundSrc = NN_NO_CHECK(geogCRSOfBaseOfBoundSrc);
