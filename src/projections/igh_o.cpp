@@ -125,7 +125,7 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
       else z = 12;
     }
 
-    if (z) {
+    if (z >= 1) {
         bool ok = false;
 
         xy.x -= Q->pj[z-1]->x0;
@@ -153,11 +153,11 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         case  12: ok = (lp.lam  >=   d90-EPSLN && lp.lam <=  d180+EPSLN);  break;
 
         }
-      z = (!ok? 0: z); /* projectable? */
+      z = (!ok? false: z); /* projectable? */
     }
 
-    if (!z) lp.lam = HUGE_VAL;
-    if (!z) lp.phi = HUGE_VAL;
+    if (z == 0) lp.lam = HUGE_VAL;
+    if (z == 0) lp.phi = HUGE_VAL;
 
     return lp;
 }
