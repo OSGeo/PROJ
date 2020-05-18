@@ -12946,7 +12946,6 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                 (isNullFirst || isNullThird || sourceAndTargetAre3D)
                     ? opSecond->shallowClone()
                     : opSecond);
-            CoordinateOperation *invCOForward = nullptr;
             if (isNullFirst || isNullThird) {
                 if (opSecondCloned->identifiers().size() == 1 &&
                     (*opSecondCloned->identifiers()[0]->codeSpace())
@@ -12960,7 +12959,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                     auto invCO = dynamic_cast<InverseCoordinateOperation *>(
                         opSecondCloned.get());
                     if (invCO) {
-                        invCOForward = invCO->forwardOperation().get();
+                        auto invCOForward = invCO->forwardOperation().get();
                         if (invCOForward->identifiers().size() == 1 &&
                             (*invCOForward->identifiers()[0]->codeSpace())
                                     .find("DERIVED_FROM") ==
@@ -12978,25 +12977,19 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                 auto invCO = dynamic_cast<InverseCoordinateOperation *>(
                     opSecondCloned.get());
                 if (invCO) {
-                    invCOForward = invCO->forwardOperation().get();
+                    auto invCOForward = invCO->forwardOperation().get();
                     invCOForward->getPrivate()->use3DHelmert_ = true;
                 }
             }
             if (isNullFirst) {
                 auto oldTarget(NN_CHECK_ASSERT(opSecondCloned->targetCRS()));
                 setCRSs(opSecondCloned.get(), sourceCRS, oldTarget);
-                if (invCOForward) {
-                    setCRSs(invCOForward, oldTarget, sourceCRS);
-                }
             } else {
                 subOps.emplace_back(opFirst);
             }
             if (isNullThird) {
                 auto oldSource(NN_CHECK_ASSERT(opSecondCloned->sourceCRS()));
                 setCRSs(opSecondCloned.get(), oldSource, targetCRS);
-                if (invCOForward) {
-                    setCRSs(invCOForward, targetCRS, oldSource);
-                }
                 subOps.emplace_back(opSecondCloned);
             } else {
                 subOps.emplace_back(opSecondCloned);
