@@ -121,8 +121,8 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     }
     else {
            if (xy.x <=   -d60) z =  10;
-      else if (xy.x >=    d90) z =  11;
-      else z = 12;
+      else if (xy.x >=    d90) z =  12;
+      else z = 11;
     }
 
     if (z) {
