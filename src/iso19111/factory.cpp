@@ -499,6 +499,15 @@ void DatabaseContext::Private::open(const std::string &databasePath,
     if (!ctx) {
         ctx = pj_get_default_ctx();
     }
+
+    const int sqlite3VersionNumber = sqlite3_libversion_number();
+    // Minimum version for correct performance: 3.11
+    if (sqlite3VersionNumber < 3 * 1000000 + 11 * 1000) {
+        pj_log(ctx, PJ_LOG_ERROR,
+               "SQLite3 version is %s, whereas at least 3.11 should be used",
+               sqlite3_libversion());
+    }
+
     setPjCtxt(ctx);
     std::string path(databasePath);
     if (path.empty()) {
