@@ -37,9 +37,11 @@ static const double phi_boundary = (40 + 44/60. + 11.8/3600.) * DEG_TO_RAD;
 
 static const double d10  =  10 * DEG_TO_RAD;
 static const double d20  =  20 * DEG_TO_RAD;
+static const double d40  =  40 * DEG_TO_RAD;
 static const double d50  =  50 * DEG_TO_RAD;
 static const double d60  =  60 * DEG_TO_RAD;
 static const double d90  =  90 * DEG_TO_RAD;
+static const double d100 = 100 * DEG_TO_RAD;
 static const double d110 = 110 * DEG_TO_RAD;
 static const double d140 = 140 * DEG_TO_RAD;
 static const double d150 = 150 * DEG_TO_RAD;
@@ -149,7 +151,9 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         case  8:  ok = (lp.lam  >=  -d60-EPSLN && lp.lam <=   d90+EPSLN);  break;
         case  9:  ok = (lp.lam  >=   d90-EPSLN && lp.lam <=  d180+EPSLN);  break;
         case  10: ok = (lp.lam  >= -d180-EPSLN && lp.lam <=  -d60+EPSLN);  break;
-        case  11: ok = (lp.lam  >=  -d60-EPSLN && lp.lam <=   d90+EPSLN);  break;
+        case  11: ok = (lp.lam  >=  -d60-EPSLN && lp.lam <=   d90+EPSLN) ||
+                       ((lp.lam >=   d90-EPSLN && lp.lam <=  d100+EPSLN) &&
+                       (lp.phi  >=  -d90-EPSLN && lp.phi <=  -d40+EPSLN)); break;
         case  12: ok = (lp.lam  >=   d90-EPSLN && lp.lam <=  d180+EPSLN);  break;
 
         }
@@ -226,7 +230,7 @@ PJ *PROJECTION(igh_o) {
 
     /* sinusoidal zones */
     if (!setup_zone(P, Q, 4, pj_sinu, -d140, 0, -d140) ||
-        !setup_zone(P, Q, 5, pj_sinu,   d10, 0,   d10) ||
+        !setup_zone(P, Q, 5, pj_sinu,  -d10, 0,  -d10) ||
         !setup_zone(P, Q, 6, pj_sinu,  d130, 0,  d130) ||
         !setup_zone(P, Q, 7, pj_sinu, -d110, 0, -d110) ||
         !setup_zone(P, Q, 8, pj_sinu,   d20, 0,   d20) ||
@@ -250,7 +254,7 @@ PJ *PROJECTION(igh_o) {
     Q->pj[0]->y0 = Q->dy0;
 
     /* mollweide zones (cont'd) */
-    if (!setup_zone(P, Q,  2, pj_moll,   d10,  Q->dy0,   d10)  ||
+    if (!setup_zone(P, Q,  2, pj_moll,  -d10,  Q->dy0,  -d10)  ||
         !setup_zone(P, Q,  3, pj_moll,  d130,  Q->dy0,  d130)  ||
         !setup_zone(P, Q, 10, pj_moll, -d110, -Q->dy0, -d110)  ||
         !setup_zone(P, Q, 11, pj_moll,   d20, -Q->dy0,   d20)  ||
