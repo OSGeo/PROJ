@@ -15218,10 +15218,15 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                             }
                         }
                     }
+                    return;
                 }
             }
         }
     }
+
+    // There might be better things to do, but for now just ignore the
+    // transformation of the bound CRS
+    res = createOperations(boundSrc->baseCRS(), targetCRS, context);
 }
 //! @endcond
 

@@ -7408,6 +7408,84 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(
+    operation,
+    compoundCRS_with_boundVerticalCRS_from_grids_to_boundGeogCRS_with_ftus_ctxt) {
+
+    // Variant of above but with TOWGS84 in target CRS only
+
+    auto dbContext = DatabaseContext::create();
+
+    const char *wktSrc =
+        "COMPD_CS[\"NAD83 + NAVD88 height - Geoid12B (Meters)\",\n"
+        "    GEOGCS[\"NAD83\",\n"
+        "        DATUM[\"North_American_Datum_1983\",\n"
+        "            SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                AUTHORITY[\"EPSG\",\"7019\"]],\n"
+        "            AUTHORITY[\"EPSG\",\"6269\"]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "        UNIT[\"degree\",0.0174532925199433,\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "        AUTHORITY[\"EPSG\",\"4269\"]],\n"
+        "    VERT_CS[\"NAVD88 height - Geoid12B (Meters)\",\n"
+        "        VERT_DATUM[\"North American Vertical Datum 1988\",2005,\n"
+        "            EXTENSION[\"PROJ4_GRIDS\",\"@foo.gtx\"],\n"
+        "            AUTHORITY[\"EPSG\",\"5103\"]],\n"
+        "        UNIT[\"metre\",1.0,\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "        AXIS[\"Gravity-related height\",UP],\n"
+        "        AUTHORITY[\"EPSG\",\"5703\"]]]";
+    auto objSrc =
+        WKTParser().attachDatabaseContext(dbContext).createFromWKT(wktSrc);
+    auto srcCRS = nn_dynamic_pointer_cast<CompoundCRS>(objSrc);
+    ASSERT_TRUE(srcCRS != nullptr);
+
+    const char *wktDst =
+        "COMPD_CS[\"NAD83 + Ellipsoid (US Feet)\",\n"
+        "    GEOGCS[\"NAD83\",\n"
+        "        DATUM[\"North_American_Datum_1983\",\n"
+        "            SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                AUTHORITY[\"EPSG\",\"7019\"]],\n"
+        "            TOWGS84[0,0,0,0,0,0,0],\n"
+        "            AUTHORITY[\"EPSG\",\"6269\"]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "        UNIT[\"degree\",0.0174532925199433,\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "        AUTHORITY[\"EPSG\",\"4269\"]],\n"
+        "    VERT_CS[\"Ellipsoid (US Feet)\",\n"
+        "        VERT_DATUM[\"Ellipsoid\",2002],\n"
+        "        UNIT[\"US survey foot\",0.304800609601219,\n"
+        "            AUTHORITY[\"EPSG\",\"9003\"]],\n"
+        "        AXIS[\"Up\",UP]]]";
+    auto objDst =
+        WKTParser().attachDatabaseContext(dbContext).createFromWKT(wktDst);
+    auto dstCRS = nn_dynamic_pointer_cast<BoundCRS>(objDst);
+    ASSERT_TRUE(dstCRS != nullptr);
+
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcCRS), NN_NO_CHECK(dstCRS), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m "
+              "+xy_out=deg +z_out=us-ft "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geocent_to_compoundCRS) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=geocent +datum=WGS84 +units=m +type=crs");
