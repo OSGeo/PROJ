@@ -150,6 +150,7 @@ libproj_la_SOURCES = \
 	projections/gn_sinu.cpp \
 	projections/goode.cpp \
 	projections/igh.cpp \
+	projections/igh_o.cpp \
 	projections/hatano.cpp \
 	projections/loxim.cpp \
 	projections/mbt_fps.cpp \

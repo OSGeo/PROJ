@@ -8,15 +8,31 @@
 
 PROJ_HEAD(igh, "Interrupted Goode Homolosine") "\n\tPCyl, Sph";
 
+/*
+This projection is a compilation of 12 separate sub-projections.
+Sinusoidal projections are found near the equator and Mollweide
+projections are found at higher latitudes. The transition between
+the two occurs at 40 degrees latitude and is represented by the 
+constant `phi_boundary`.
+
+Each sub-projection is assigned an integer label
+numbered 1 through 12. Most of this code contains logic to assign
+the labels based on latitude (phi) and longitude (lam) regions.
+
+Original Reference:
+J. Paul Goode (1925) THE HOMOLOSINE PROJECTION: A NEW DEVICE FOR 
+    PORTRAYING THE EARTH'S SURFACE ENTIRE, Annals of the Association of 
+    American Geographers, 15:3, 119-125, DOI: 10.1080/00045602509356949
+*/
+
 C_NAMESPACE PJ *pj_sinu(PJ *), *pj_moll(PJ *);
 
-/* 40d 44' 11.8" [degrees] */
-/*
-static const double d4044118 = (40 + 44/60. + 11.8/3600.) * DEG_TO_RAD;
-has been replaced by this define, to eliminate portability issue:
-Initializer element not computable at load time
+/* 
+Transition from sinusoidal to Mollweide projection
+Latitude (phi): 40deg 44' 11.8" 
 */
-#define d4044118 ((40 + 44/60. + 11.8/3600.) * DEG_TO_RAD)
+
+static const double phi_boundary = (40 + 44/60. + 11.8/3600.) * DEG_TO_RAD;
 
 static const double d10  =  10 * DEG_TO_RAD;
 static const double d20  =  20 * DEG_TO_RAD;
@@ -46,13 +62,13 @@ static PJ_XY igh_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int z;
 
-    if (lp.phi >=  d4044118) {          /* 1|2 */
+    if (lp.phi >=  phi_boundary) {          /* 1|2 */
       z = (lp.lam <= -d40 ? 1: 2);
     }
     else if (lp.phi >=  0) {            /* 3|4 */
       z = (lp.lam <= -d40 ? 3: 4);
     }
-    else if (lp.phi >= -d4044118) {     /* 5|6|7|8 */
+    else if (lp.phi >= -phi_boundary) {     /* 5|6|7|8 */
            if (lp.lam <= -d100) z =  5; /* 5 */
       else if (lp.lam <=  -d20) z =  6; /* 6 */
       else if (lp.lam <=   d80) z =  7; /* 7 */
@@ -82,11 +98,11 @@ static PJ_LP igh_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse 
     int z = 0;
     if (xy.y > y90+EPSLN || xy.y < -y90+EPSLN) /* 0 */
       z = 0;
-    else if (xy.y >=  d4044118)       /* 1|2 */
+    else if (xy.y >=  phi_boundary)       /* 1|2 */
       z = (xy.x <= -d40? 1: 2);
     else if (xy.y >=  0)              /* 3|4 */
       z = (xy.x <= -d40? 3: 4);
-    else if (xy.y >= -d4044118) {     /* 5|6|7|8 */
+    else if (xy.y >= -phi_boundary) {     /* 5|6|7|8 */
            if (xy.x <= -d100) z =  5; /* 5 */
       else if (xy.x <=  -d20) z =  6; /* 6 */
       else if (xy.x <=   d80) z =  7; /* 7 */
@@ -100,7 +116,7 @@ static PJ_LP igh_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse 
     }
 
     if (z) {
-        int ok = 0;
+        bool ok = false;
 
         xy.x -= Q->pj[z-1]->x0;
         xy.y -= Q->pj[z-1]->y0;
@@ -145,9 +161,11 @@ static PJ *destructor (PJ *P, int errlev) {
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+
     for (i = 0; i < 12; ++i) {
-        if (static_cast<struct pj_opaque*>(P->opaque)->pj[i])
-            static_cast<struct pj_opaque*>(P->opaque)->pj[i]->destructor(static_cast<struct pj_opaque*>(P->opaque)->pj[i], errlev);
+        if (Q->pj[i])
+            Q->pj[i]->destructor(Q->pj[i], errlev);
     }
 
     return pj_default_destructor(P, errlev);
@@ -175,18 +193,21 @@ static PJ *destructor (PJ *P, int errlev) {
     -180    -100      -20         80          180
 */
 
-#define SETUP(n, proj, x_0, y_0, lon_0) \
-    if (!(Q->pj[n-1] = pj_##proj(nullptr))) return destructor(P, ENOMEM); \
-    if (!(Q->pj[n-1] = pj_##proj(Q->pj[n-1]))) return destructor(P, ENOMEM); \
-    Q->pj[n-1]->ctx = P->ctx; \
-    Q->pj[n-1]->x0 = x_0; \
-    Q->pj[n-1]->y0 = y_0; \
+static bool setup_zone(PJ *P, struct pj_opaque *Q, int n,
+                       PJ*(*proj_ptr)(PJ*), double x_0,
+                       double y_0, double lon_0) {
+    if (!(Q->pj[n-1] = proj_ptr(nullptr))) return false;
+    if (!(Q->pj[n-1] = proj_ptr(Q->pj[n-1]))) return false;
+    Q->pj[n-1]->ctx = P->ctx;
+    Q->pj[n-1]->x0 = x_0;
+    Q->pj[n-1]->y0 = y_0;
     Q->pj[n-1]->lam0 = lon_0;
-
+    return true;
+}
 
 PJ *PROJECTION(igh) {
     PJ_XY xy1, xy3;
-    PJ_LP lp = { 0, d4044118 };
+    PJ_LP lp = { 0, phi_boundary };
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
@@ -194,15 +215,18 @@ PJ *PROJECTION(igh) {
 
 
     /* sinusoidal zones */
-    SETUP(3, sinu, -d100, 0, -d100);
-    SETUP(4, sinu,   d30, 0,   d30);
-    SETUP(5, sinu, -d160, 0, -d160);
-    SETUP(6, sinu,  -d60, 0,  -d60);
-    SETUP(7, sinu,   d20, 0,   d20);
-    SETUP(8, sinu,  d140, 0,  d140);
+    if (!setup_zone(P, Q, 3, pj_sinu, -d100, 0, -d100) ||
+        !setup_zone(P, Q, 4, pj_sinu,   d30, 0,   d30) ||
+        !setup_zone(P, Q, 5, pj_sinu, -d160, 0, -d160) ||
+        !setup_zone(P, Q, 6, pj_sinu,  -d60, 0,  -d60) ||
+        !setup_zone(P, Q, 7, pj_sinu,   d20, 0,   d20) ||
+        !setup_zone(P, Q, 8, pj_sinu,  d140, 0,  d140))
+    {
+       return destructor(P, ENOMEM);
+    }
 
     /* mollweide zones */
-    SETUP(1, moll, -d100, 0, -d100);
+    setup_zone(P, Q, 1, pj_moll, -d100, 0, -d100);
 
     /* y0 ? */
     xy1 = Q->pj[0]->fwd(lp, Q->pj[0]); /* zone 1 */
@@ -213,11 +237,14 @@ PJ *PROJECTION(igh) {
     Q->pj[0]->y0 = Q->dy0;
 
     /* mollweide zones (cont'd) */
-    SETUP( 2, moll,   d30,  Q->dy0,   d30);
-    SETUP( 9, moll, -d160, -Q->dy0, -d160);
-    SETUP(10, moll,  -d60, -Q->dy0,  -d60);
-    SETUP(11, moll,   d20, -Q->dy0,   d20);
-    SETUP(12, moll,  d140, -Q->dy0,  d140);
+    if (!setup_zone(P, Q, 2, pj_moll,   d30,  Q->dy0,   d30) ||
+        !setup_zone(P, Q, 9, pj_moll, -d160, -Q->dy0, -d160) ||
+        !setup_zone(P, Q,10, pj_moll,  -d60, -Q->dy0,  -d60) ||
+        !setup_zone(P, Q,11, pj_moll,   d20, -Q->dy0,   d20) ||
+        !setup_zone(P, Q,12, pj_moll,  d140, -Q->dy0,  d140))
+    {
+       return destructor(P, ENOMEM);
+    }
 
     P->inv = igh_s_inverse;
     P->fwd = igh_s_forward;
