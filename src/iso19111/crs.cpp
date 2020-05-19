@@ -98,7 +98,7 @@ struct CRS::Private {
     bool allowNonConformantWKT1Export_ = false;
     // for what was initially a COMPD_CS with a VERT_CS with a datum type ==
     // ellipsoidal height / 2002
-    VerticalCRSPtr originalVertCRS_{};
+    CompoundCRSPtr originalCompoundCRS_{};
 
     void setImplicitCS(const util::PropertyMap &properties) {
         const auto pVal = properties.get("IMPLICIT_CS");
@@ -583,17 +583,18 @@ CRSNNPtr CRS::allowNonConformantWKT1Export() const {
 
 //! @cond Doxygen_Suppress
 
-CRSNNPtr CRS::attachOriginalVertCRS(const VerticalCRSNNPtr &vertCRS) const {
+CRSNNPtr
+CRS::attachOriginalCompoundCRS(const CompoundCRSNNPtr &compoundCRS) const {
 
     const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
     if (boundCRS) {
         return BoundCRS::create(
-            boundCRS->baseCRS()->attachOriginalVertCRS(vertCRS),
+            boundCRS->baseCRS()->attachOriginalCompoundCRS(compoundCRS),
             boundCRS->hubCRS(), boundCRS->transformation());
     }
 
     auto crs(shallowClone());
-    crs->d->originalVertCRS_ = vertCRS.as_nullable();
+    crs->d->originalCompoundCRS_ = compoundCRS.as_nullable();
     return crs;
 }
 
@@ -868,7 +869,22 @@ CRS::getNonDeprecated(const io::DatabaseContextNNPtr &dbContext) const {
  */
 CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                           const io::DatabaseContextPtr &dbContext) const {
+    auto upAxis = cs::CoordinateSystemAxis::create(
+        util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                cs::AxisName::Ellipsoidal_height),
+        cs::AxisAbbreviation::h, cs::AxisDirection::UP,
+        common::UnitOfMeasure::METRE);
+    return promoteTo3D(newName, dbContext, upAxis);
+}
 
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+CRSNNPtr CRS::promoteTo3D(const std::string &newName,
+                          const io::DatabaseContextPtr &dbContext,
+                          const cs::CoordinateSystemAxisNNPtr
+                              &verticalAxisIfNotAlreadyPresent) const {
     const auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
     if (geogCRS) {
         const auto &axisList = geogCRS->coordinateSystem()->axisList();
@@ -886,21 +902,23 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                     false);
                 if (!res.empty()) {
                     const auto &firstRes = res.front();
-                    if (geogCRS->is2DPartOf3D(NN_NO_CHECK(
-                            dynamic_cast<GeographicCRS *>(firstRes.get())))) {
+                    const auto firstResGeog =
+                        dynamic_cast<GeographicCRS *>(firstRes.get());
+                    const auto &firstResAxisList =
+                        firstResGeog->coordinateSystem()->axisList();
+                    if (firstResAxisList[2]->_isEquivalentTo(
+                            verticalAxisIfNotAlreadyPresent.get(),
+                            util::IComparable::Criterion::EQUIVALENT) &&
+                        geogCRS->is2DPartOf3D(NN_NO_CHECK(firstResGeog))) {
                         return NN_NO_CHECK(
                             util::nn_dynamic_pointer_cast<CRS>(firstRes));
                     }
                 }
             }
 
-            auto upAxis = cs::CoordinateSystemAxis::create(
-                util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                        cs::AxisName::Ellipsoidal_height),
-                cs::AxisAbbreviation::h, cs::AxisDirection::UP,
-                common::UnitOfMeasure::METRE);
             auto cs = cs::EllipsoidalCS::create(
-                util::PropertyMap(), axisList[0], axisList[1], upAxis);
+                util::PropertyMap(), axisList[0], axisList[1],
+                verticalAxisIfNotAlreadyPresent);
             return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
                 util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                         !newName.empty() ? newName : nameStr()),
@@ -914,13 +932,9 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         if (axisList.size() == 2) {
             auto base3DCRS =
                 projCRS->baseCRS()->promoteTo3D(std::string(), dbContext);
-            auto upAxis = cs::CoordinateSystemAxis::create(
-                util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                        cs::AxisName::Ellipsoidal_height),
-                cs::AxisAbbreviation::h, cs::AxisDirection::UP,
-                common::UnitOfMeasure::METRE);
             auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
-                                              axisList[1], upAxis);
+                                              axisList[1],
+                                              verticalAxisIfNotAlreadyPresent);
             return util::nn_static_pointer_cast<CRS>(ProjectedCRS::create(
                 util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                         !newName.empty() ? newName : nameStr()),
@@ -932,7 +946,8 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
 
     const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
     if (boundCRS) {
-        auto base3DCRS = boundCRS->baseCRS()->promoteTo3D(newName, dbContext);
+        auto base3DCRS = boundCRS->baseCRS()->promoteTo3D(
+            newName, dbContext, verticalAxisIfNotAlreadyPresent);
         auto transf = boundCRS->transformation();
         try {
             transf->getTOWGS84Parameters();
@@ -948,6 +963,9 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
     return NN_NO_CHECK(
         std::static_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
+
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
 /** \brief Return a variant of this CRS "demoted" to a 2D one, if not already
@@ -1436,14 +1454,9 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             return;
         }
 
-        auto &originalVertCRS = CRS::getPrivate()->originalVertCRS_;
-        if (originalVertCRS) {
-            formatter->startNode(io::WKTConstants::COMPD_CS, false);
-            formatter->addQuotedString(l_name + " + " +
-                                       originalVertCRS->nameStr());
-            geogCRS2D->_exportToWKT(formatter);
-            originalVertCRS->_exportToWKT(formatter);
-            formatter->endNode();
+        auto &originalCompoundCRS = CRS::getPrivate()->originalCompoundCRS_;
+        if (originalCompoundCRS) {
+            originalCompoundCRS->_exportToWKT(formatter);
             return;
         }
 
@@ -3292,14 +3305,9 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             return;
         }
 
-        auto &originalVertCRS = CRS::getPrivate()->originalVertCRS_;
-        if (!formatter->useESRIDialect() && originalVertCRS) {
-            formatter->startNode(io::WKTConstants::COMPD_CS, false);
-            formatter->addQuotedString(l_name + " + " +
-                                       originalVertCRS->nameStr());
-            projCRS2D->_exportToWKT(formatter);
-            originalVertCRS->_exportToWKT(formatter);
-            formatter->endNode();
+        auto &originalCompoundCRS = CRS::getPrivate()->originalCompoundCRS_;
+        if (!formatter->useESRIDialect() && originalCompoundCRS) {
+            originalCompoundCRS->_exportToWKT(formatter);
             return;
         }
 
@@ -4254,8 +4262,8 @@ CRSNNPtr CompoundCRS::createLax(const util::PropertyMap &properties,
         auto comp1 = components[1].get();
         auto comp0Geog = dynamic_cast<const GeographicCRS *>(comp0);
         auto comp0Proj = dynamic_cast<const ProjectedCRS *>(comp0);
+        auto comp0Bound = dynamic_cast<const BoundCRS *>(comp0);
         if (comp0Geog == nullptr && comp0Proj == nullptr) {
-            auto comp0Bound = dynamic_cast<const BoundCRS *>(comp0);
             if (comp0Bound) {
                 const auto *baseCRS = comp0Bound->baseCRS().get();
                 comp0Geog = dynamic_cast<const GeographicCRS *>(baseCRS);
@@ -4286,14 +4294,20 @@ CRSNNPtr CompoundCRS::createLax(const util::PropertyMap &properties,
         if (comp1Vert != nullptr && comp1Vert->datum() &&
             comp1Vert->datum()->getWKT1DatumType() == "2002") {
             const auto &axis = comp1Vert->coordinateSystem()->axisList()[0];
-            if (axis->unit()._isEquivalentTo(
-                    common::UnitOfMeasure::METRE,
-                    util::IComparable::Criterion::EQUIVALENT) &&
-                &(axis->direction()) == &(cs::AxisDirection::UP)) {
-                return components[0]
-                    ->promoteTo3D(std::string(), dbContext)
-                    ->attachOriginalVertCRS(NN_NO_CHECK(comp1Vert));
+            std::string name(components[0]->nameStr());
+            if (!(axis->unit()._isEquivalentTo(
+                      common::UnitOfMeasure::METRE,
+                      util::IComparable::Criterion::EQUIVALENT) &&
+                  &(axis->direction()) == &(cs::AxisDirection::UP))) {
+                name += " (" + comp1Vert->nameStr() + ')';
             }
+            return components[0]
+                ->promoteTo3D(name, dbContext, axis)
+                ->attachOriginalCompoundCRS(create(
+                    properties,
+                    comp0Bound ? std::vector<CRSNNPtr>{comp0Bound->baseCRS(),
+                                                       components[1]}
+                               : components));
         }
     }
 

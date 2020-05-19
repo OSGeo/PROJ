@@ -68,6 +68,12 @@ using BoundCRSPtr = std::shared_ptr<BoundCRS>;
 /** Non-null shared pointer of BoundCRS */
 using BoundCRSNNPtr = util::nn<BoundCRSPtr>;
 
+class CompoundCRS;
+/** Shared pointer of CompoundCRS */
+using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
+/** Non-null shared pointer of CompoundCRS */
+using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
+
 // ---------------------------------------------------------------------------
 
 class CRS;
@@ -141,7 +147,12 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
     PROJ_INTERNAL CRSNNPtr allowNonConformantWKT1Export() const;
 
     PROJ_INTERNAL CRSNNPtr
-    attachOriginalVertCRS(const VerticalCRSNNPtr &vertCRS) const;
+    attachOriginalCompoundCRS(const CompoundCRSNNPtr &compoundCRS) const;
+
+    PROJ_INTERNAL CRSNNPtr promoteTo3D(
+        const std::string &newName, const io::DatabaseContextPtr &dbContext,
+        const cs::CoordinateSystemAxisNNPtr &verticalAxisIfNotAlreadyPresent)
+        const;
 
     //! @endcond
 
@@ -854,12 +865,6 @@ class PROJ_GCC_DLL InvalidCompoundCRSException : public util::Exception {
 };
 
 // ---------------------------------------------------------------------------
-
-class CompoundCRS;
-/** Shared pointer of CompoundCRS */
-using CompoundCRSPtr = std::shared_ptr<CompoundCRS>;
-/** Non-null shared pointer of CompoundCRS */
-using CompoundCRSNNPtr = util::nn<CompoundCRSPtr>;
 
 /** \brief A coordinate reference system describing the position of points
  * through two or more independent single coordinate reference systems.
