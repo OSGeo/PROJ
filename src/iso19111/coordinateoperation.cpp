@@ -14221,8 +14221,57 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
     if (vertCRSOfBaseOfBoundSrc && hubSrcGeog) {
         auto opsFirst = createOperations(sourceCRS, hubSrc, context);
         if (context.skipHorizontalTransformation) {
-            if (!opsFirst.empty())
-                res = opsFirst;
+            if (!opsFirst.empty()) {
+                const auto &hubAxisList =
+                    hubSrcGeog->coordinateSystem()->axisList();
+                const auto &targetAxisList =
+                    geogDst->coordinateSystem()->axisList();
+                if (hubAxisList.size() == 3 && hubAxisList.size() == 3 &&
+                    !hubAxisList[2]->_isEquivalentTo(
+                        targetAxisList[2].get(),
+                        util::IComparable::Criterion::EQUIVALENT)) {
+
+                    const auto &srcAxis = hubAxisList[2];
+                    const double convSrc = srcAxis->unit().conversionToSI();
+                    const auto &dstAxis = targetAxisList[2];
+                    const double convDst = dstAxis->unit().conversionToSI();
+                    const bool srcIsUp =
+                        srcAxis->direction() == cs::AxisDirection::UP;
+                    const bool srcIsDown =
+                        srcAxis->direction() == cs::AxisDirection::DOWN;
+                    const bool dstIsUp =
+                        dstAxis->direction() == cs::AxisDirection::UP;
+                    const bool dstIsDown =
+                        dstAxis->direction() == cs::AxisDirection::DOWN;
+                    const bool heightDepthReversal =
+                        ((srcIsUp && dstIsDown) || (srcIsDown && dstIsUp));
+
+                    const double factor = convSrc / convDst;
+                    auto conv = Conversion::createChangeVerticalUnit(
+                        util::PropertyMap().set(
+                            common::IdentifiedObject::NAME_KEY,
+                            "Change of vertical unit"),
+                        common::Scale(heightDepthReversal ? -factor : factor));
+                    auto dbContext = context.context->getAuthorityFactory()
+                                         ->databaseContext();
+                    conv->setCRSs(
+                        hubSrc,
+                        hubSrc->demoteTo2D(std::string(), dbContext)
+                            ->promoteTo3D(std::string(), dbContext, dstAxis),
+                        nullptr);
+
+                    for (const auto &op : opsFirst) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {op, conv}, !allowEmptyIntersection));
+                        } catch (const InvalidOperationEmptyIntersection &) {
+                        }
+                    }
+                } else {
+                    res = opsFirst;
+                }
+            }
             return;
         } else {
             auto opsSecond = createOperations(hubSrc, targetCRS, context);
