@@ -66,7 +66,7 @@ TEST_F(GridTest, VerticalShiftGridSet_null) {
     ASSERT_NE(grid, nullptr);
     EXPECT_EQ(grid->width(), 3);
     EXPECT_EQ(grid->height(), 3);
-    EXPECT_EQ(grid->extentAndRes().westLon, -M_PI);
+    EXPECT_EQ(grid->extentAndRes().west, -M_PI);
     EXPECT_TRUE(grid->isNullGrid());
     EXPECT_FALSE(grid->hasChanged());
     float out = -1.0f;
@@ -103,7 +103,7 @@ TEST_F(GridTest, HorizontalShiftGridSet_null) {
     ASSERT_NE(grid, nullptr);
     EXPECT_EQ(grid->width(), 3);
     EXPECT_EQ(grid->height(), 3);
-    EXPECT_EQ(grid->extentAndRes().westLon, -M_PI);
+    EXPECT_EQ(grid->extentAndRes().west, -M_PI);
     EXPECT_TRUE(grid->isNullGrid());
     EXPECT_FALSE(grid->hasChanged());
     float out1 = -1.0f;
@@ -131,7 +131,7 @@ TEST_F(GridTest, HorizontalShiftGridSet_gtiff) {
     ASSERT_NE(grid, nullptr);
     EXPECT_EQ(grid->width(), 4);
     EXPECT_EQ(grid->height(), 4);
-    EXPECT_EQ(grid->extentAndRes().westLon, 4.0 / 180 * M_PI);
+    EXPECT_EQ(grid->extentAndRes().west, 4.0 / 180 * M_PI);
     EXPECT_FALSE(grid->isNullGrid());
     EXPECT_FALSE(grid->hasChanged());
     float out1 = -1.0f;
@@ -154,7 +154,7 @@ TEST_F(GridTest, GenericShiftGridSet_null) {
     ASSERT_NE(grid, nullptr);
     EXPECT_EQ(grid->width(), 3);
     EXPECT_EQ(grid->height(), 3);
-    EXPECT_EQ(grid->extentAndRes().westLon, -M_PI);
+    EXPECT_EQ(grid->extentAndRes().west, -M_PI);
     EXPECT_TRUE(grid->isNullGrid());
     EXPECT_FALSE(grid->hasChanged());
     float out = -1.0f;
@@ -180,7 +180,8 @@ TEST_F(GridTest, GenericShiftGridSet_gtiff) {
     ASSERT_NE(grid, nullptr);
     EXPECT_EQ(grid->width(), 5);
     EXPECT_EQ(grid->height(), 5);
-    EXPECT_EQ(grid->extentAndRes().westLon, 21.0 / 180 * M_PI);
+    EXPECT_EQ(grid->extentAndRes().isGeographic, true);
+    EXPECT_EQ(grid->extentAndRes().west, 21.0 / 180 * M_PI);
     EXPECT_FALSE(grid->isNullGrid());
     EXPECT_FALSE(grid->hasChanged());
     float out = -1.0f;
@@ -222,6 +223,26 @@ TEST_F(GridTest,
     ASSERT_NE(grid, nullptr);
     EXPECT_EQ(grid->width(), 8);
     EXPECT_EQ(grid->height(), 8);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(GridTest, GenericShiftGridSet_gtiff_projected) {
+    auto gridSet = NS_PROJ::GenericShiftGridSet::open(
+        m_ctxt, "tests/test_3d_grid_projected.tif");
+    ASSERT_NE(gridSet, nullptr);
+    ASSERT_EQ(gridSet->gridAt(-1000, -1000), nullptr);
+    auto grid = gridSet->gridAt(1500300.0, 5400300.0);
+    ASSERT_NE(grid, nullptr);
+    EXPECT_EQ(grid->width(), 2);
+    EXPECT_EQ(grid->height(), 2);
+    EXPECT_EQ(grid->extentAndRes().isGeographic, false);
+    EXPECT_EQ(grid->extentAndRes().west, 1500000.0);
+    EXPECT_EQ(grid->extentAndRes().east, 1501000.0);
+    EXPECT_EQ(grid->extentAndRes().south, 5400000.0);
+    EXPECT_EQ(grid->extentAndRes().north, 5401000.0);
+    EXPECT_EQ(grid->extentAndRes().resX, 1000);
+    EXPECT_EQ(grid->extentAndRes().resY, 1000);
 }
 
 } // namespace

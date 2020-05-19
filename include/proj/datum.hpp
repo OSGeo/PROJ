@@ -590,6 +590,8 @@ class PROJ_GCC_DLL VerticalReferenceFrame : public Datum {
     PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(FormattingException)
 
+    PROJ_INTERNAL const std::string &getWKT1DatumType() const;
+
     //! @endcond
 
   protected:

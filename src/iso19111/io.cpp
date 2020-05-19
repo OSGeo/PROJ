@@ -3944,9 +3944,18 @@ VerticalReferenceFrameNNPtr WKTParser::Private::buildVerticalReferenceFrame(
             modelName);
     }
 
-    // WKT1 VERT_DATUM has a datum type after the datum name that we ignore.
-    return VerticalReferenceFrame::create(buildProperties(node),
-                                          getAnchor(node));
+    // WKT1 VERT_DATUM has a datum type after the datum name
+    const auto *nodeP = node->GP();
+    const std::string &name(nodeP->value());
+    auto &props = buildProperties(node);
+    if (ci_equal(name, WKTConstants::VERT_DATUM)) {
+        const auto &children = nodeP->children();
+        if (children.size() >= 2) {
+            props.set("VERT_DATUM_TYPE", children[1]->GP()->value());
+        }
+    }
+
+    return VerticalReferenceFrame::create(props, getAnchor(node));
 }
 
 // ---------------------------------------------------------------------------

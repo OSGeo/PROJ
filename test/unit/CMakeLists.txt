@@ -170,3 +170,14 @@ target_link_libraries(test_network
 add_test(NAME test_network COMMAND test_network)
 set_property(TEST test_network
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+
+
+add_executable(test_defmodel
+  main.cpp
+  test_defmodel.cpp)
+target_link_libraries(test_defmodel
+  GTest::gtest
+  ${PROJ_LIBRARIES})
+add_test(NAME test_defmodel COMMAND test_defmodel)
+set_property(TEST test_defmodel
+  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})

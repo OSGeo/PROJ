@@ -1788,6 +1788,9 @@ operator=(const RealizationMethod &other) {
 //! @cond Doxygen_Suppress
 struct VerticalReferenceFrame::Private {
     util::optional<RealizationMethod> realizationMethod_{};
+
+    // 2005 = CS_VD_GeoidModelDerived from OGC 01-009
+    std::string wkt1DatumType_{"2005"};
 };
 //! @endcond
 
@@ -1837,8 +1840,17 @@ VerticalReferenceFrameNNPtr VerticalReferenceFrame::create(
         realizationMethodIn));
     rf->setAnchor(anchor);
     rf->setProperties(properties);
+    properties.getStringValue("VERT_DATUM_TYPE", rf->d->wkt1DatumType_);
     return rf;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+const std::string &VerticalReferenceFrame::getWKT1DatumType() const {
+    return d->wkt1DatumType_;
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1861,7 +1873,7 @@ void VerticalReferenceFrame::_exportToWKT(
     if (isWKT2) {
         Datum::getPrivate()->exportAnchorDefinition(formatter);
     } else if (!formatter->useESRIDialect()) {
-        formatter->add(2005); // CS_VD_GeoidModelDerived from OGC 01-009
+        formatter->add(d->wkt1DatumType_);
         const auto &extension = formatter->getVDatumExtension();
         if (!extension.empty()) {
             formatter->startNode(io::WKTConstants::EXTENSION, false);

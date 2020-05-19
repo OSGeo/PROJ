@@ -2484,6 +2484,136 @@ TEST(wkt_parse, COMPD_CS_non_conformant_horizontal_plus_horizontal_as_in_LAS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse,
+     COMPD_CS_non_conformant_horizontal_TOWGS84_plus_horizontal_as_in_LAS) {
+
+    const auto wkt = "COMPD_CS[\"WGS 84 + WGS 84\",\n"
+                     "    GEOGCS[\"WGS 84\",\n"
+                     "        DATUM[\"WGS_1984\",\n"
+                     "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+                     "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+                     "            TOWGS84[0,0,0,0,0,0,0],\n"
+                     "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+                     "        PRIMEM[\"Greenwich\",0,\n"
+                     "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+                     "        UNIT[\"degree\",0.0174532925199433,\n"
+                     "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+                     "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
+                     "    GEOGCS[\"WGS 84\",\n"
+                     "        DATUM[\"WGS_1984\",\n"
+                     "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+                     "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+                     "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+                     "        PRIMEM[\"Greenwich\",0,\n"
+                     "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+                     "        UNIT[\"degree\",0.0174532925199433,\n"
+                     "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+                     "        AUTHORITY[\"EPSG\",\"4326\"]]]";
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto baseCRS = nn_dynamic_pointer_cast<GeographicCRS>(crs->baseCRS());
+    ASSERT_TRUE(baseCRS != nullptr);
+    EXPECT_EQ(baseCRS->nameStr(), "WGS 84");
+    EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 3U);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse,
+     COMPD_CS_horizontal_bound_geog_plus_vertical_ellipsoidal_height) {
+    // See https://github.com/OSGeo/PROJ/issues/2228
+    const char *wkt =
+        "COMPD_CS[\"NAD83 + Ellipsoid (Meters)\",\n"
+        "    GEOGCS[\"NAD83\",\n"
+        "        DATUM[\"North_American_Datum_1983\",\n"
+        "            SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                AUTHORITY[\"EPSG\",\"7019\"]],\n"
+        "            TOWGS84[0,0,0,0,0,0,0],\n"
+        "            AUTHORITY[\"EPSG\",\"6269\"]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "        UNIT[\"degree\",0.0174532925199433,\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "        AUTHORITY[\"EPSG\",\"4269\"]],\n"
+        "    VERT_CS[\"Ellipsoid (Meters)\",\n"
+        "        VERT_DATUM[\"Ellipsoid\",2002],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "        AXIS[\"Up\",UP]]]";
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    auto baseCRS = nn_dynamic_pointer_cast<GeographicCRS>(crs->baseCRS());
+    ASSERT_TRUE(baseCRS != nullptr);
+    EXPECT_EQ(baseCRS->nameStr(), "NAD83");
+    EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 3U);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse,
+     COMPD_CS_horizontal_projected_plus_vertical_ellipsoidal_height) {
+    // Variant of above
+    const char *wkt =
+        "COMPD_CS[\"WGS 84 / UTM zone 31N + Ellipsoid (Meters)\",\n"
+        "    PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+        "        GEOGCS[\"WGS 84\",\n"
+        "            DATUM[\"WGS_1984\",\n"
+        "                SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    AUTHORITY[\"EPSG\",\"7030\"]],\n"
+        "                AUTHORITY[\"EPSG\",\"6326\"]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "            UNIT[\"degree\",0.0174532925199433,\n"
+        "                AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "            AUTHORITY[\"EPSG\",\"4326\"]],\n"
+        "        PROJECTION[\"Transverse_Mercator\"],\n"
+        "        PARAMETER[\"latitude_of_origin\",0],\n"
+        "        PARAMETER[\"central_meridian\",3],\n"
+        "        PARAMETER[\"scale_factor\",0.9996],\n"
+        "        PARAMETER[\"false_easting\",500000],\n"
+        "        PARAMETER[\"false_northing\",0],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "        AXIS[\"Easting\",EAST],\n"
+        "        AXIS[\"Northing\",NORTH],\n"
+        "        AUTHORITY[\"EPSG\",\"32631\"]],\n"
+        "    VERT_CS[\"Ellipsoid (Meters)\",\n"
+        "        VERT_DATUM[\"Ellipsoid\",2002],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "        AXIS[\"Up\",UP]]]";
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N");
+    EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, COORDINATEOPERATION) {
 
     std::string src_wkt;

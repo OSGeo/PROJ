@@ -2158,6 +2158,7 @@ expect  135 50
 ===============================================================================
 # Interrupted Goode Homolosine
 # 	PCyl, Sph.
+# (Each of the 12 sub-projections tested separately)
 ===============================================================================
 
 -------------------------------------------------------------------------------
@@ -2166,12 +2167,53 @@ operation +proj=igh   +a=6400000
 tolerance 0.1 mm
 accept  2 1
 expect  223878.497456271 111701.072127637
+roundtrip 1
 accept  2 -1
 expect  223708.371313058 -111701.072127637
+roundtrip 1
 accept  -2 1
 expect  -222857.740596992 111701.072127637
+roundtrip 1
 accept  -2 -1
 expect  -223027.866740205 -111701.072127637
+roundtrip 1
+
+accept -100.0 22.0
+expect -11170107.212763708 2457423.5868080168
+roundtrip 1
+accept -30.0 22.0
+expect -2863013.673043605 2457423.586808016
+roundtrip 1
+accept -100.0 67.0
+expect -11170107.212763708 7205942.523056464
+roundtrip 1
+accept -30.0 67.0
+expect 17045.719482862 7205942.523056464
+roundtrip 1
+accept -160.0 -22.0
+expect -17872171.540421933 -2457423.586808016
+roundtrip 1
+accept -60.0 -22.0
+expect -6702064.327658225 -2457423.586808016
+roundtrip 1
+accept 20.0 -22.0
+expect 2234021.442552742 -2457423.586808016
+roundtrip 1
+accept 140.0 -22.0
+expect 15638150.097869191 -2457423.586808016
+roundtrip 1
+accept -160.0 -67.0
+expect -17872171.540421933 -7205942.523056464
+roundtrip 1
+accept -60.0 -67.0
+expect -6702064.327658225 -7205942.523056464
+roundtrip 1
+accept 20.0 -67.0
+expect 2234021.442552742 -7205942.523056464
+roundtrip 1
+accept 140.0 -67.0
+expect 15638150.097869191 -7205942.523056464
+roundtrip 1
 
 direction inverse
 accept  200 100
@@ -2183,6 +2225,75 @@ expect  -0.001790497 0.000895247
 accept  -200 -100
 expect  -0.001790496 -0.000895247
 
+===============================================================================
+# Interrupted Goode Homolosine Ocean View
+# 	PCyl, Sph.
+# (Each of the 12 sub-projections tested separately)
+===============================================================================
+
+-------------------------------------------------------------------------------
+operation +proj=igh_o   +a=6400000
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+accept  2 1
+expect  223538.245169845 111701.072127637
+roundtrip 1
+accept  2 -1
+expect  223708.371313058 -111701.072127637
+roundtrip 1
+accept  -2 1
+expect  -223197.992883418 111701.072127637
+roundtrip 1
+accept  -2 -1
+expect  -223027.866740205 -111701.072127637
+roundtrip 1
+
+accept -140.0 22.0
+expect -15638150.097869192 2457423.586808016
+roundtrip 1
+accept -10.0 22.0
+expect -954337.891014535 2457423.586808016
+roundtrip 1
+accept 130.0 22.0
+expect 14521139.376592822 2457423.586808016
+roundtrip 1
+accept -140.0 67.0
+expect -15638150.097869191 7205942.523056464
+roundtrip 1
+accept -10.0 67.0
+expect 5681.906494287 7205942.523056464
+roundtrip 1
+accept 130.0 67.0
+expect 14521139.376592822 7205942.523056464
+roundtrip 1
+accept -110.0 -22.0
+expect -12287117.934040081 -2457423.586808016
+roundtrip 1
+accept 20.0 -22.0
+expect 2234021.442552742 -2457423.586808016
+roundtrip 1
+accept 150.0 -22.0
+expect 16755160.819145568 -2457423.586808016
+roundtrip 1
+accept -110.0 -67.0
+expect -12287117.934040081 -7205942.523056464
+roundtrip 1
+accept 20.0 -67.0
+expect 2234021.442552742 -7205942.523056464
+roundtrip 1
+accept 150.0 -67.0
+expect 16755160.819145564 -7205942.523056464
+roundtrip 1
+
+direction inverse
+accept  200 100
+expect  0.001790492 0.000895247
+accept  200 -100
+expect  0.001790491 -0.000895247
+accept  -200 100
+expect  -0.001790494 0.000895247
+accept  -200 -100
+expect  -0.001790496 -0.000895247
 
 ===============================================================================
 # International Map of the World Polyconic
@@ -3411,12 +3522,16 @@ operation +proj=moll   +a=6400000
 tolerance 0.1 mm
 accept  2 1
 expect  201113.698641813 124066.283433860
+roundtrip 1
 accept  2 -1
 expect  201113.698641813 -124066.283433860
+roundtrip 1
 accept  -2 1
 expect  -201113.698641813 124066.283433860
+roundtrip 1
 accept  -2 -1
 expect  -201113.698641813 -124066.283433860
+roundtrip 1
 
 direction inverse
 accept  200 100

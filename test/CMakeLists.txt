@@ -16,6 +16,7 @@ proj_add_gie_test("adams_ws1" "gie/adams_ws1.gie")
 proj_add_gie_test("adams_ws2" "gie/adams_ws2.gie")
 proj_add_gie_test("guyou" "gie/guyou.gie")
 proj_add_gie_test("peirce_q" "gie/peirce_q.gie")
+proj_add_gie_test("defmodel" "gie/defmodel.gie")
 
 # GIGS tests. Uncommented tests are expected to fail due to issues with
 # various projections. Should be investigated further and fixed.

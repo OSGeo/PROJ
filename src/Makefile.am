@@ -150,6 +150,7 @@ libproj_la_SOURCES = \
 	projections/gn_sinu.cpp \
 	projections/goode.cpp \
 	projections/igh.cpp \
+	projections/igh_o.cpp \
 	projections/hatano.cpp \
 	projections/loxim.cpp \
 	projections/mbt_fps.cpp \
@@ -196,6 +197,10 @@ libproj_la_SOURCES = \
 	transformations/molodensky.cpp \
 	transformations/vgridshift.cpp \
 	transformations/xyzgridshift.cpp \
+	transformations/defmodel.cpp \
+	transformations/defmodel.hpp \
+	transformations/defmodel_exceptions.hpp \
+	transformations/defmodel_impl.hpp \
 	\
 	aasincos.cpp adjlon.cpp \
 	dmstor.cpp auth.cpp \
