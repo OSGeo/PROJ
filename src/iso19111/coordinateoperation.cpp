@@ -6587,6 +6587,10 @@ TransformationNNPtr Transformation::shallowClone() const {
     auto transf = Transformation::nn_make_shared<Transformation>(*this);
     transf->assignSelf(transf);
     transf->setCRSs(this, false);
+    if (transf->d->forwardOperation_) {
+        transf->d->forwardOperation_ =
+            transf->d->forwardOperation_->shallowClone().as_nullable();
+    }
     return transf;
 }
 
@@ -12942,7 +12946,6 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                 (isNullFirst || isNullThird || sourceAndTargetAre3D)
                     ? opSecond->shallowClone()
                     : opSecond);
-            CoordinateOperation *invCOForward = nullptr;
             if (isNullFirst || isNullThird) {
                 if (opSecondCloned->identifiers().size() == 1 &&
                     (*opSecondCloned->identifiers()[0]->codeSpace())
@@ -12956,7 +12959,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                     auto invCO = dynamic_cast<InverseCoordinateOperation *>(
                         opSecondCloned.get());
                     if (invCO) {
-                        invCOForward = invCO->forwardOperation().get();
+                        auto invCOForward = invCO->forwardOperation().get();
                         if (invCOForward->identifiers().size() == 1 &&
                             (*invCOForward->identifiers()[0]->codeSpace())
                                     .find("DERIVED_FROM") ==
@@ -12974,25 +12977,19 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                 auto invCO = dynamic_cast<InverseCoordinateOperation *>(
                     opSecondCloned.get());
                 if (invCO) {
-                    invCOForward = invCO->forwardOperation().get();
+                    auto invCOForward = invCO->forwardOperation().get();
                     invCOForward->getPrivate()->use3DHelmert_ = true;
                 }
             }
             if (isNullFirst) {
                 auto oldTarget(NN_CHECK_ASSERT(opSecondCloned->targetCRS()));
                 setCRSs(opSecondCloned.get(), sourceCRS, oldTarget);
-                if (invCOForward) {
-                    setCRSs(invCOForward, oldTarget, sourceCRS);
-                }
             } else {
                 subOps.emplace_back(opFirst);
             }
             if (isNullThird) {
                 auto oldSource(NN_CHECK_ASSERT(opSecondCloned->sourceCRS()));
                 setCRSs(opSecondCloned.get(), oldSource, targetCRS);
-                if (invCOForward) {
-                    setCRSs(invCOForward, targetCRS, oldSource);
-                }
                 subOps.emplace_back(opSecondCloned);
             } else {
                 subOps.emplace_back(opSecondCloned);
@@ -14000,6 +13997,20 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
     const auto &hubSrc = boundSrc->hubCRS();
     auto hubSrcGeog = dynamic_cast<const crs::GeographicCRS *>(hubSrc.get());
     auto geogCRSOfBaseOfBoundSrc = boundSrc->baseCRS()->extractGeographicCRS();
+    auto geogDstDatum = geogDst->datum();
+
+    // If the underlying datum of the source is the same as the target, do
+    // not consider the boundCRS at all, but just its base
+    if (geogCRSOfBaseOfBoundSrc && geogDstDatum) {
+        auto geogCRSOfBaseOfBoundSrcDatum = geogCRSOfBaseOfBoundSrc->datum();
+        if (geogCRSOfBaseOfBoundSrcDatum &&
+            geogCRSOfBaseOfBoundSrcDatum->_isEquivalentTo(
+                geogDstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
+            res = createOperations(boundSrc->baseCRS(), targetCRS, context);
+            return;
+        }
+    }
+
     bool triedBoundCrsToGeogCRSSameAsHubCRS = false;
     // Is it: boundCRS to a geogCRS that is the same as the hubCRS ?
     if (hubSrcGeog && geogCRSOfBaseOfBoundSrc &&
@@ -14007,25 +14018,38 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
              geogDst, util::IComparable::Criterion::EQUIVALENT) ||
          hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst)))) {
         triedBoundCrsToGeogCRSSameAsHubCRS = true;
+
+        CoordinateOperationPtr opIntermediate;
+        if (!geogCRSOfBaseOfBoundSrc->_isEquivalentTo(
+                boundSrc->transformation()->sourceCRS().get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
+            auto opsIntermediate = createOperations(
+                NN_NO_CHECK(geogCRSOfBaseOfBoundSrc),
+                boundSrc->transformation()->sourceCRS(), context);
+            assert(!opsIntermediate.empty());
+            opIntermediate = opsIntermediate.front();
+        }
+
         if (boundSrc->baseCRS() == geogCRSOfBaseOfBoundSrc) {
-            // Optimization to avoid creating a useless concatenated
-            // operation
-            res.emplace_back(boundSrc->transformation());
+            if (opIntermediate) {
+                try {
+                    res.emplace_back(
+                        ConcatenatedOperation::createComputeMetadata(
+                            {NN_NO_CHECK(opIntermediate),
+                             boundSrc->transformation()},
+                            !allowEmptyIntersection));
+                } catch (const InvalidOperationEmptyIntersection &) {
+                }
+            } else {
+                // Optimization to avoid creating a useless concatenated
+                // operation
+                res.emplace_back(boundSrc->transformation());
+            }
             return;
         }
         auto opsFirst = createOperations(
             boundSrc->baseCRS(), NN_NO_CHECK(geogCRSOfBaseOfBoundSrc), context);
         if (!opsFirst.empty()) {
-            CoordinateOperationPtr opIntermediate;
-            if (!geogCRSOfBaseOfBoundSrc->_isEquivalentTo(
-                    boundSrc->transformation()->sourceCRS().get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opsIntermediate = createOperations(
-                    NN_NO_CHECK(geogCRSOfBaseOfBoundSrc),
-                    boundSrc->transformation()->sourceCRS(), context);
-                assert(!opsIntermediate.empty());
-                opIntermediate = opsIntermediate.front();
-            }
             for (const auto &opFirst : opsFirst) {
                 try {
                     std::vector<CoordinateOperationNNPtr> subops;
@@ -14046,9 +14070,9 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         }
         // If the datum are equivalent, this is also fine
     } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
-               geogDst->datum() &&
+               geogDstDatum &&
                hubSrcGeog->datum()->_isEquivalentTo(
-                   geogDst->datum().get(),
+                   geogDstDatum.get(),
                    util::IComparable::Criterion::EQUIVALENT)) {
         auto opsFirst = createOperations(
             boundSrc->baseCRS(), NN_NO_CHECK(geogCRSOfBaseOfBoundSrc), context);
@@ -14091,14 +14115,14 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         // +nadgrids=ntv1_can.dat,conus"
         // to "+proj=latlong +datum=NAD83"
     } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
-               geogDst->datum() &&
+               geogDstDatum &&
                geogCRSOfBaseOfBoundSrc->ellipsoid()->_isEquivalentTo(
                    datum::Ellipsoid::CLARKE_1866.get(),
                    util::IComparable::Criterion::EQUIVALENT) &&
                hubSrcGeog->datum()->_isEquivalentTo(
                    datum::GeodeticReferenceFrame::EPSG_6326.get(),
                    util::IComparable::Criterion::EQUIVALENT) &&
-               geogDst->datum()->_isEquivalentTo(
+               geogDstDatum->_isEquivalentTo(
                    datum::GeodeticReferenceFrame::EPSG_6269.get(),
                    util::IComparable::Criterion::EQUIVALENT)) {
         auto nnGeogCRSOfBaseOfBoundSrc = NN_NO_CHECK(geogCRSOfBaseOfBoundSrc);
@@ -14197,8 +14221,57 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
     if (vertCRSOfBaseOfBoundSrc && hubSrcGeog) {
         auto opsFirst = createOperations(sourceCRS, hubSrc, context);
         if (context.skipHorizontalTransformation) {
-            if (!opsFirst.empty())
-                res = opsFirst;
+            if (!opsFirst.empty()) {
+                const auto &hubAxisList =
+                    hubSrcGeog->coordinateSystem()->axisList();
+                const auto &targetAxisList =
+                    geogDst->coordinateSystem()->axisList();
+                if (hubAxisList.size() == 3 && hubAxisList.size() == 3 &&
+                    !hubAxisList[2]->_isEquivalentTo(
+                        targetAxisList[2].get(),
+                        util::IComparable::Criterion::EQUIVALENT)) {
+
+                    const auto &srcAxis = hubAxisList[2];
+                    const double convSrc = srcAxis->unit().conversionToSI();
+                    const auto &dstAxis = targetAxisList[2];
+                    const double convDst = dstAxis->unit().conversionToSI();
+                    const bool srcIsUp =
+                        srcAxis->direction() == cs::AxisDirection::UP;
+                    const bool srcIsDown =
+                        srcAxis->direction() == cs::AxisDirection::DOWN;
+                    const bool dstIsUp =
+                        dstAxis->direction() == cs::AxisDirection::UP;
+                    const bool dstIsDown =
+                        dstAxis->direction() == cs::AxisDirection::DOWN;
+                    const bool heightDepthReversal =
+                        ((srcIsUp && dstIsDown) || (srcIsDown && dstIsUp));
+
+                    const double factor = convSrc / convDst;
+                    auto conv = Conversion::createChangeVerticalUnit(
+                        util::PropertyMap().set(
+                            common::IdentifiedObject::NAME_KEY,
+                            "Change of vertical unit"),
+                        common::Scale(heightDepthReversal ? -factor : factor));
+                    auto dbContext = context.context->getAuthorityFactory()
+                                         ->databaseContext();
+                    conv->setCRSs(
+                        hubSrc,
+                        hubSrc->demoteTo2D(std::string(), dbContext)
+                            ->promoteTo3D(std::string(), dbContext, dstAxis),
+                        nullptr);
+
+                    for (const auto &op : opsFirst) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {op, conv}, !allowEmptyIntersection));
+                        } catch (const InvalidOperationEmptyIntersection &) {
+                        }
+                    }
+                } else {
+                    res = opsFirst;
+                }
+            }
             return;
         } else {
             auto opsSecond = createOperations(hubSrc, targetCRS, context);
@@ -15145,10 +15218,15 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                             }
                         }
                     }
+                    return;
                 }
             }
         }
     }
+
+    // There might be better things to do, but for now just ignore the
+    // transformation of the bound CRS
+    res = createOperations(boundSrc->baseCRS(), targetCRS, context);
 }
 //! @endcond
 

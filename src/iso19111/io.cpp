@@ -6963,6 +6963,38 @@ const std::string &PROJStringFormatter::toString() const {
                 break;
             }
 
+            // +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2 +z_out=Z2
+            //  +step +proj=unitconvert +z_in=Z2 +z_out=Z3
+            // ==> step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2
+            // +z_out=Z3
+            if (prevStep.name == "unitconvert" &&
+                curStep.name == "unitconvert" && !prevStep.inverted &&
+                !curStep.inverted && prevStep.paramValues.size() == 4 &&
+                curStep.paramValues.size() == 2 &&
+                prevStep.paramValues[0].keyEquals("xy_in") &&
+                prevStep.paramValues[1].keyEquals("z_in") &&
+                prevStep.paramValues[2].keyEquals("xy_out") &&
+                prevStep.paramValues[3].keyEquals("z_out") &&
+                curStep.paramValues[0].keyEquals("z_in") &&
+                curStep.paramValues[1].keyEquals("z_out") &&
+                prevStep.paramValues[3].value == curStep.paramValues[0].value) {
+                auto xy_in = prevStep.paramValues[0].value;
+                auto z_in = prevStep.paramValues[1].value;
+                auto xy_out = prevStep.paramValues[2].value;
+                auto z_out = curStep.paramValues[1].value;
+                d->steps_.erase(iterPrev, iterCur);
+                iterCur->paramValues.clear();
+                iterCur->paramValues.emplace_back(
+                    Step::KeyValue("xy_in", xy_in));
+                iterCur->paramValues.emplace_back(Step::KeyValue("z_in", z_in));
+                iterCur->paramValues.emplace_back(
+                    Step::KeyValue("xy_out", xy_out));
+                iterCur->paramValues.emplace_back(
+                    Step::KeyValue("z_out", z_out));
+                changeDone = true;
+                break;
+            }
+
             // unitconvert (1), axisswap order=2,1, unitconvert(2)  ==>
             // axisswap order=2,1, unitconvert (1), unitconvert(2) which
             // will get further optimized by previous case
