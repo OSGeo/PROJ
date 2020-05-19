@@ -6399,6 +6399,46 @@ TEST(operation, boundCRS_to_geogCRS_same_datum_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, boundCRS_to_geogCRS_hubCRS_and_targetCRS_same_but_baseCRS_not) {
+    const char *wkt =
+        "COMPD_CS[\"NAD83 + Ellipsoid (US Feet)\",\n"
+        "    GEOGCS[\"NAD83\",\n"
+        "        DATUM[\"North_American_Datum_1983\",\n"
+        "            SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                AUTHORITY[\"EPSG\",\"7019\"]],\n"
+        "                TOWGS84[0,0,0,0,0,0,0],\n"
+        "            AUTHORITY[\"EPSG\",\"6269\"]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "        UNIT[\"degree\",0.0174532925199433,\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "        AUTHORITY[\"EPSG\",\"4269\"]],\n"
+        "    VERT_CS[\"Ellipsoid (US Feet)\",\n"
+        "        VERT_DATUM[\"Ellipsoid\",2002],\n"
+        "        UNIT[\"US survey foot\",0.304800609601219,\n"
+        "            AUTHORITY[\"EPSG\",\"9003\"]],\n"
+        "        AXIS[\"Up\",UP]]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(boundCRS != nullptr);
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(boundCRS), GeographicCRS::EPSG_4979, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=unitconvert +z_in=us-ft +z_out=m");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, boundCRS_to_boundCRS) {
     auto utm31 = ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4807,

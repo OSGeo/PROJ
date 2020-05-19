@@ -14018,25 +14018,38 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
              geogDst, util::IComparable::Criterion::EQUIVALENT) ||
          hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst)))) {
         triedBoundCrsToGeogCRSSameAsHubCRS = true;
+
+        CoordinateOperationPtr opIntermediate;
+        if (!geogCRSOfBaseOfBoundSrc->_isEquivalentTo(
+                boundSrc->transformation()->sourceCRS().get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
+            auto opsIntermediate = createOperations(
+                NN_NO_CHECK(geogCRSOfBaseOfBoundSrc),
+                boundSrc->transformation()->sourceCRS(), context);
+            assert(!opsIntermediate.empty());
+            opIntermediate = opsIntermediate.front();
+        }
+
         if (boundSrc->baseCRS() == geogCRSOfBaseOfBoundSrc) {
-            // Optimization to avoid creating a useless concatenated
-            // operation
-            res.emplace_back(boundSrc->transformation());
+            if (opIntermediate) {
+                try {
+                    res.emplace_back(
+                        ConcatenatedOperation::createComputeMetadata(
+                            {NN_NO_CHECK(opIntermediate),
+                             boundSrc->transformation()},
+                            !allowEmptyIntersection));
+                } catch (const InvalidOperationEmptyIntersection &) {
+                }
+            } else {
+                // Optimization to avoid creating a useless concatenated
+                // operation
+                res.emplace_back(boundSrc->transformation());
+            }
             return;
         }
         auto opsFirst = createOperations(
             boundSrc->baseCRS(), NN_NO_CHECK(geogCRSOfBaseOfBoundSrc), context);
         if (!opsFirst.empty()) {
-            CoordinateOperationPtr opIntermediate;
-            if (!geogCRSOfBaseOfBoundSrc->_isEquivalentTo(
-                    boundSrc->transformation()->sourceCRS().get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opsIntermediate = createOperations(
-                    NN_NO_CHECK(geogCRSOfBaseOfBoundSrc),
-                    boundSrc->transformation()->sourceCRS(), context);
-                assert(!opsIntermediate.empty());
-                opIntermediate = opsIntermediate.front();
-            }
             for (const auto &opFirst : opsFirst) {
                 try {
                     std::vector<CoordinateOperationNNPtr> subops;
