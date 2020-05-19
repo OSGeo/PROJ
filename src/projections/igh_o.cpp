@@ -152,7 +152,7 @@ static PJ_LP igh_o_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         case  9:  ok = (lp.lam  >=   d90-EPSLN && lp.lam <=  d180+EPSLN);  break;
         case  10: ok = (lp.lam  >= -d180-EPSLN && lp.lam <=  -d60+EPSLN);  break;
         case  11: ok = (lp.lam  >=  -d60-EPSLN && lp.lam <=   d90+EPSLN) ||
-                       ((lp.lam >=  -d60-EPSLN && lp.lam <=  d100+EPSLN) &&
+                       ((lp.lam >=   d90-EPSLN && lp.lam <=  d100+EPSLN) &&
                        (lp.phi  >=  -d90-EPSLN && lp.phi <=  -d40+EPSLN)); break;
         case  12: ok = (lp.lam  >=   d90-EPSLN && lp.lam <=  d180+EPSLN);  break;
 
