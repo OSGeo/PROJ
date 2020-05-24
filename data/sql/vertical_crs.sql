@@ -84,7 +84,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','5749','St. Marys height',NULL,NULL,'EP
 INSERT INTO "vertical_crs" VALUES('EPSG','5750','Douglas height',NULL,NULL,'EPSG','6499','EPSG','5148','EPSG','2803',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5751','Fao height',NULL,NULL,'EPSG','6499','EPSG','5149','EPSG','3390',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5752','Bandar Abbas height',NULL,NULL,'EPSG','6499','EPSG','5150','EPSG','3336',0);
-INSERT INTO "vertical_crs" VALUES('EPSG','5753','NGNC height',NULL,NULL,'EPSG','6499','EPSG','5151','EPSG','2822',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','5753','NGNC69 height',NULL,NULL,'EPSG','6499','EPSG','5151','EPSG','2822',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5754','Poolbeg height (ft(Br36))',NULL,NULL,'EPSG','6496','EPSG','5152','EPSG','1305',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5755','NGG1977 height',NULL,NULL,'EPSG','6499','EPSG','5153','EPSG','3146',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5756','Martinique 1987 height',NULL,NULL,'EPSG','6499','EPSG','5154','EPSG','3276',0);
@@ -212,6 +212,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','8675','N43 height',NULL,NULL,'EPSG','6
 INSERT INTO "vertical_crs" VALUES('EPSG','8690','SVS2010 height',NULL,NULL,'EPSG','6499','EPSG','1215','EPSG','3307',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8691','SRB_VRS12 height',NULL,NULL,'EPSG','6499','EPSG','1216','EPSG','4543',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8841','MVGC height',NULL,NULL,'EPSG','6499','EPSG','1219','EPSG','3303',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','8881','Vienna height',NULL,NULL,'EPSG','6499','EPSG','1267','EPSG','4585',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8897','EPSG example wellbore local vertical CRS (ft)',NULL,NULL,'EPSG','1050','EPSG','1205','EPSG','4393',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8904','TWVD 2001 height',NULL,NULL,'EPSG','6499','EPSG','1224','EPSG','3982',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','8911','DACR52 height',NULL,NULL,'EPSG','6499','EPSG','1226','EPSG','3232',0);
@@ -221,3 +222,4 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9255','SRVN16 height',NULL,NULL,'EPSG'
 INSERT INTO "vertical_crs" VALUES('EPSG','9274','EVRF2000 Austria height',NULL,NULL,'EPSG','6499','EPSG','1261','EPSG','1037',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','9279','SA LLD height',NULL,NULL,'EPSG','6499','EPSG','1262','EPSG','3309',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','9335','KSA-VRF14 height',NULL,NULL,'EPSG','6499','EPSG','1269','EPSG','3303',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9351','NGNC08 height',NULL,NULL,'EPSG','6499','EPSG','1255','EPSG','3430',0);
