@@ -2392,7 +2392,8 @@ operation::ConversionNNPtr
 AuthorityFactory::createConversion(const std::string &code) const {
 
     static const char *sql =
-        "SELECT name, area_of_use_auth_name, area_of_use_code, "
+        "SELECT name, description, scope, "
+        "area_of_use_auth_name, area_of_use_code, "
         "method_auth_name, method_code, method_name, "
 
         "param1_auth_name, param1_code, param1_name, param1_value, "
@@ -2441,6 +2442,8 @@ AuthorityFactory::createConversion(const std::string &code) const {
         const auto &row = res.front();
         size_t idx = 0;
         const auto &name = row[idx++];
+        const auto &description = row[idx++];
+        const auto &scope = row[idx++];
         const auto &area_of_use_auth_name = row[idx++];
         const auto &area_of_use_code = row[idx++];
         const auto &method_auth_name = row[idx++];
@@ -2475,8 +2478,9 @@ AuthorityFactory::createConversion(const std::string &code) const {
         }
         const bool deprecated = row[base_param_idx + N_MAX_PARAMS * 6] == "1";
 
-        auto propConversion = d->createProperties(
-            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
+        auto propConversion =
+            d->createProperties(code, name, deprecated, description, scope,
+                                area_of_use_auth_name, area_of_use_code);
 
         auto propMethod = util::PropertyMap().set(
             common::IdentifiedObject::NAME_KEY, method_name);

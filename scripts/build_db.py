@@ -142,8 +142,8 @@ BEGIN
     # don't refer to particular CRS, and instances pointing to CRS names
     # The later are imported in the other_transformation table since we recover
     # the source/target CRS names from the transformation name.
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, area_of_use_code, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH' AND (coord_op_method_code NOT IN (1068, 1069) OR coord_op_code IN (7812,7813))")
-    for (code, name, area_of_use_code, method_code, method_name, deprecated) in proj_db_cursor.fetchall():
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, area_of_use_code, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated, coord_op_scope, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH' AND (coord_op_method_code NOT IN (1068, 1069) OR coord_op_code IN (7812,7813))")
+    for (code, name, area_of_use_code, method_code, method_name, deprecated, scope, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 7
         param_auth_name = [None for i in range(max_n_params)]
@@ -190,7 +190,7 @@ BEGIN
             trigger_sql += ");\n"
 
         arg = (EPSG_AUTHORITY, code, name,
-               None, None, # description + scope
+               remarks, scope,
                EPSG_AUTHORITY, area_of_use_code,
                EPSG_AUTHORITY, method_code, method_name,
                param_auth_name[0], param_code[0], param_name[0],
