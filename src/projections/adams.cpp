@@ -118,6 +118,10 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
         }
         break;
     case PEIRCE_Q: {
+            if( lp.phi < -TOL ) {
+                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                return proj_coord_error().xy;
+            }
             const double sl = sin(lp.lam);
             const double cl = cos(lp.lam);
             const double cp = cos(lp.phi);
