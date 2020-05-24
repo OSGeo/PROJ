@@ -619,9 +619,16 @@ def fill_supersession(proj_db_cursor):
         assert superseded_table_name, row
         assert replacement_table_name, row
         if superseded_table_name == 'grid_transformation' and replacement_table_name == 'grid_transformation' and src_name.startswith('NAD27 to NAD83'):
-            print('Skipping supersession of %d (%s) by %d (%s)' % (code, src_name, superseded_by, dst_name))
+            print('Skipping supersession of %d (%s) by %d (%s) because of exception specific to NAD27 to NAD83' % (code, src_name, superseded_by, dst_name))
             continue
-        proj_db_cursor.execute("INSERT INTO supersession VALUES (?,'EPSG',?,?,'EPSG',?,'EPSG')", (superseded_table_name, code, replacement_table_name, superseded_by))
+
+        proj_db_cursor.execute("SELECT source_crs_code, target_crs_code FROM epsg_coordoperation WHERE coord_op_code = ?", (code,))
+        source_crs_code_superseded, target_crs_code_superseded = proj_db_cursor.fetchone()
+
+        proj_db_cursor.execute("SELECT source_crs_code, target_crs_code FROM epsg_coordoperation WHERE coord_op_code = ?", (superseded_by,))
+        source_crs_code_replacement, target_crs_code_replacement = proj_db_cursor.fetchone()
+        same_source_target_crs = (source_crs_code_superseded, target_crs_code_superseded) == (source_crs_code_replacement, target_crs_code_replacement)
+        proj_db_cursor.execute("INSERT INTO supersession VALUES (?,'EPSG',?,?,'EPSG',?,'EPSG',?)", (superseded_table_name, code, replacement_table_name, superseded_by, same_source_target_crs))
 
 def fill_deprecation(proj_db_cursor):
     proj_db_cursor.execute("SELECT object_code, replaced_by FROM epsg.epsg_deprecation WHERE object_table_name = 'epsg_coordinatereferencesystem' AND object_code != replaced_by")

@@ -638,7 +638,7 @@ def import_geogcs():
                     src_row = cursor.fetchone()
                     assert src_row, (code, latestWkid)
 
-                    sql = """INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','%s','geodetic_crs','EPSG','%s','ESRI');""" % (
+                    sql = """INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','%s','geodetic_crs','EPSG','%s','ESRI',1);""" % (
                         code, latestWkid)
                     all_sql.append(sql)
 
@@ -1017,7 +1017,7 @@ def import_projcs():
             latestWkid = mapDeprecatedToNonDeprecated[deprecated]
 
             if latestWkid in wkid_set:
-                sql = """INSERT INTO "supersession" VALUES('projected_crs','ESRI','%s','projected_crs','ESRI','%s','ESRI');""" % (
+                sql = """INSERT INTO "supersession" VALUES('projected_crs','ESRI','%s','projected_crs','ESRI','%s','ESRI',1);""" % (
                     code, latestWkid)
                 all_sql.append(sql)
             else:
@@ -1025,7 +1025,7 @@ def import_projcs():
                     "SELECT name FROM projected_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
                 src_row = cursor.fetchone()
                 assert src_row, row
-                sql = """INSERT INTO "supersession" VALUES('projected_crs','ESRI','%s','projected_crs','EPSG','%s','ESRI');""" % (
+                sql = """INSERT INTO "supersession" VALUES('projected_crs','ESRI','%s','projected_crs','EPSG','%s','ESRI',1);""" % (
                     code, latestWkid)
                 all_sql.append(sql)
 
@@ -1251,7 +1251,7 @@ def import_vertcs():
                     src_row = cursor.fetchone()
                     assert src_row
 
-                    sql = """INSERT INTO "supersession" VALUES('vertical_crs','ESRI','%s','vertical_crs','EPSG','%s','ESRI');""" % (
+                    sql = """INSERT INTO "supersession" VALUES('vertical_crs','ESRI','%s','vertical_crs','EPSG','%s','ESRI',1);""" % (
                         code, latestWkid)
                     all_sql.append(sql)
 
