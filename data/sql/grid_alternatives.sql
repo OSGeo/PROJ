@@ -182,6 +182,7 @@ VALUES
 ('gr3dnc01b.mnt','nc_dittt_gr3dnc01b.tif',NULL,'GTiff','geocentricoffset',0,NULL,'https://cdn.proj.org/nc_dittt_gr3dnc01b.tif',1,1,NULL),
 ('gr3dnc02b.mnt','nc_dittt_gr3dnc02b.tif',NULL,'GTiff','geocentricoffset',0,NULL,'https://cdn.proj.org/nc_dittt_gr3dnc02b.tif',1,1,NULL),
 ('gr3dnc03a.mnt','nc_dittt_gr3dnc03a.tif',NULL,'GTiff','geocentricoffset',0,NULL,'https://cdn.proj.org/nc_dittt_gr3dnc03a.tif',1,1,NULL),
+('Ranc08_Circe.mnt','nc_dittt_Ranc08_Circe.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nc_dittt_Ranc08_Circe.tif',1,1,NULL),
 -- New Zealand grid shift models.
 ('auckland-1946-to-nzvd2016-conversion.csv','nz_linz_auckht1946-nzvd2016.tif','auckht1946-nzvd2016.gtx','GTiff','vgridshift',0,NULL,'https://cdn.proj.org/nz_linz_auckht1946-nzvd2016.tif',1,1,NULL),
 -- Slovakia
