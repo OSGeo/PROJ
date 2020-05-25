@@ -376,7 +376,6 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1173','WGS 84 Tritan St
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1177','SHVD2015','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1180','ETRF91','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1178','ETRF89','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1178','EUREF89','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1179','ETRF90','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1181','ETRF92','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1182','ETRF93','EPSG');
@@ -484,7 +483,9 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1261','EVRF2000 Austria
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1262','SA LLD','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1263','ONGD17','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1269','KSA-VRF14','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1255','NGNC08','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1268','KSA-GRF17','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1266','TPEN11-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1042','Red Geodesica Nacional 1992','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1046','Morro do Papagaio','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1046','Island of Principe datum','EPSG');
@@ -1079,6 +1080,8 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2164','Cote d''Ivoire / 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2164','Port Bouet / TM 5 NW','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2165','Cote d''Ivoire / TM 5 NW','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2165','Port Bouet / TM 5 NW','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9367','ETRS89 / TPEN11 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9368','ETRS89 / TPEN11 SnakeGrid + Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6696','JGD2000','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6697','JGD2011','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2393','KKJ / Basic Coordinate System zone 3','EPSG');
@@ -1097,6 +1100,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2167','Pulkovo 1942(83) 
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4181','LUREF','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6791','NAD83(2011) / OCRS_BKF (ft)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8233','NAD83(CSRS98)','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8881','Wiener Null','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','3906','HR1901','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6795','NAD83(2011) / OCRS_BRP (ft)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6794','NAD83(2011) / OCRS_BRP (m)','EPSG');
@@ -6007,7 +6011,9 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9285','Pampa del Castill
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4289','RD-Bessel','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4776','New Beijing / 3GK zone 40','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4777','New Beijing / 3GK zone 41','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5753','NGNC height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9311','US National Atlas EA','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9354','WGS 84 / IBCSO PS','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31289','MGI (Ferro) / M31','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31290','MGI (Ferro) / M34','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31288','MGI (Ferro) / M28','EPSG');
@@ -6279,9 +6285,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5302','DRUKREF 03 / S Jo
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5309','DRUKREF 03 / Wangdue TM','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5300','DRUKREF 03 / P-Gatsh TM','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5306','DRUKREF 03 / T-Gang TM','EPSG');
-INSERT INTO "alias_name" VALUES('compound_crs','EPSG','5318','ETRF89 / Faroe TM + FVR09 height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5316','ETRS89 / FOTM','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5316','ETRF89 / Faroe TM','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5224','S-JTSK/05 (F) / ModKrovak','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5225','S-JTSK/05 (F) / ModKrovakEN','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5221','S-JTSK (F) / Krovak EN','EPSG');

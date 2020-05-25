@@ -1367,7 +1367,8 @@ CREATE TABLE supersession(
         'helmert_transformation', 'other_transformation', 'concatenated_operation')),
     replacement_auth_name TEXT NOT NULL,
     replacement_code TEXT NOT NULL,
-    source TEXT
+    source TEXT,
+    same_source_target_crs BOOLEAN NOT NULL CHECK (same_source_target_crs IN (0, 1)) -- for transformations, whether the (source_crs, target_crs) of the replacement transfrm is the same as the superseded one
 );
 
 CREATE INDEX idx_supersession ON supersession(superseded_table_name, superseded_auth_name, superseded_code);

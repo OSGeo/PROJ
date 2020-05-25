@@ -2392,7 +2392,8 @@ operation::ConversionNNPtr
 AuthorityFactory::createConversion(const std::string &code) const {
 
     static const char *sql =
-        "SELECT name, area_of_use_auth_name, area_of_use_code, "
+        "SELECT name, description, scope, "
+        "area_of_use_auth_name, area_of_use_code, "
         "method_auth_name, method_code, method_name, "
 
         "param1_auth_name, param1_code, param1_name, param1_value, "
@@ -2441,6 +2442,8 @@ AuthorityFactory::createConversion(const std::string &code) const {
         const auto &row = res.front();
         size_t idx = 0;
         const auto &name = row[idx++];
+        const auto &description = row[idx++];
+        const auto &scope = row[idx++];
         const auto &area_of_use_auth_name = row[idx++];
         const auto &area_of_use_code = row[idx++];
         const auto &method_auth_name = row[idx++];
@@ -2475,8 +2478,9 @@ AuthorityFactory::createConversion(const std::string &code) const {
         }
         const bool deprecated = row[base_param_idx + N_MAX_PARAMS * 6] == "1";
 
-        auto propConversion = d->createProperties(
-            code, name, deprecated, area_of_use_auth_name, area_of_use_code);
+        auto propConversion =
+            d->createProperties(code, name, deprecated, description, scope,
+                                area_of_use_auth_name, area_of_use_code);
 
         auto propMethod = util::PropertyMap().set(
             common::IdentifiedObject::NAME_KEY, method_name);
@@ -3587,7 +3591,8 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
               "ss.superseded_table_name = cov.table_name AND "
               "ss.superseded_auth_name = cov.auth_name AND "
               "ss.superseded_code = cov.code AND "
-              "ss.superseded_table_name = ss.replacement_table_name "
+              "ss.superseded_table_name = ss.replacement_table_name AND "
+              "ss.same_source_target_crs = 1 "
               "WHERE ";
     } else {
         sql = "SELECT source_crs_auth_name, source_crs_code, "
@@ -3920,12 +3925,14 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         "ss1.superseded_table_name = v1.table_name AND "
         "ss1.superseded_auth_name = v1.auth_name AND "
         "ss1.superseded_code = v1.code AND "
-        "ss1.superseded_table_name = ss1.replacement_table_name "
+        "ss1.superseded_table_name = ss1.replacement_table_name AND "
+        "ss1.same_source_target_crs = 1 "
         "LEFT JOIN supersession ss2 ON "
         "ss2.superseded_table_name = v2.table_name AND "
         "ss2.superseded_auth_name = v2.auth_name AND "
         "ss2.superseded_code = v2.code AND "
-        "ss2.superseded_table_name = ss2.replacement_table_name ");
+        "ss2.superseded_table_name = ss2.replacement_table_name AND "
+        "ss2.same_source_target_crs = 1 ");
     const std::string joinArea(
         (discardSuperseded ? joinSupersession : std::string()) +
         "JOIN area a1 ON v1.area_of_use_auth_name = a1.auth_name "
@@ -4529,10 +4536,11 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
 
     const auto filterOutSuperseded = [&](SQLResultSet &&resultSet) {
         std::set<std::pair<std::string, std::string>> setTransf;
-        std::string findSupersededSql("SELECT superseded_table_name, "
-                                      "superseded_auth_name, superseded_code, "
-                                      "replacement_auth_name, replacement_code "
-                                      "FROM supersession WHERE ");
+        std::string findSupersededSql(
+            "SELECT superseded_table_name, "
+            "superseded_auth_name, superseded_code, "
+            "replacement_auth_name, replacement_code "
+            "FROM supersession WHERE same_source_target_crs = 1 AND (");
         bool findSupersededFirstWhere = true;
         ListOfParams findSupersededParams;
 
@@ -4583,6 +4591,7 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
             setTransf.insert(
                 std::pair<std::string, std::string>(auth_name2, code2));
         }
+        findSupersededSql += ')';
 
         std::map<std::string, std::vector<std::pair<std::string, std::string>>>
             mapSupersession;

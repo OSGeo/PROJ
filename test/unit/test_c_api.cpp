@@ -3711,22 +3711,39 @@ TEST_F(CApi, proj_coordoperation_create_inverse) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_get_remarks) {
-    auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
-                                        PJ_CATEGORY_COORDINATE_OPERATION, false,
-                                        nullptr);
-    ObjectKeeper keeper(co);
-    ASSERT_NE(co, nullptr);
+    // Transformation
+    {
+        auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
+                                            PJ_CATEGORY_COORDINATE_OPERATION,
+                                            false, nullptr);
+        ObjectKeeper keeper(co);
+        ASSERT_NE(co, nullptr);
 
-    auto remarks = proj_get_remarks(co);
-    ASSERT_NE(remarks, nullptr);
-    EXPECT_TRUE(std::string(remarks).find(
-                    "Scale difference in ppb where 1/billion = 1E-9.") == 0)
-        << remarks;
+        auto remarks = proj_get_remarks(co);
+        ASSERT_NE(remarks, nullptr);
+        EXPECT_TRUE(std::string(remarks).find(
+                        "Scale difference in ppb where 1/billion = 1E-9.") == 0)
+            << remarks;
+    }
+
+    // Conversion
+    {
+        auto co = proj_create_from_database(m_ctxt, "EPSG", "3811",
+                                            PJ_CATEGORY_COORDINATE_OPERATION,
+                                            false, nullptr);
+        ObjectKeeper keeper(co);
+        ASSERT_NE(co, nullptr);
+
+        auto remarks = proj_get_remarks(co);
+        ASSERT_NE(remarks, nullptr);
+        EXPECT_EQ(remarks, std::string("Replaces Lambert 2005."));
+    }
 }
 
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_get_scope) {
+    // Transformation
     {
         auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
                                             PJ_CATEGORY_COORDINATE_OPERATION,
@@ -3740,6 +3757,22 @@ TEST_F(CApi, proj_get_scope) {
                   std::string("Conformal transformation of GDA94 coordinates "
                               "that have been derived through GNSS CORS."));
     }
+
+    // Conversion
+    {
+        auto co = proj_create_from_database(m_ctxt, "EPSG", "3811",
+                                            PJ_CATEGORY_COORDINATE_OPERATION,
+                                            false, nullptr);
+        ObjectKeeper keeper(co);
+        ASSERT_NE(co, nullptr);
+
+        auto scope = proj_get_scope(co);
+        ASSERT_NE(scope, nullptr);
+        EXPECT_EQ(scope,
+                  std::string("Large and medium scale topographic mapping "
+                              "and engineering survey."));
+    }
+
     {
         auto P = proj_create(m_ctxt, "+proj=noop");
         ObjectKeeper keeper(P);

@@ -3557,5 +3557,8 @@ INSERT INTO "area" VALUES('EPSG','4578','Argentina - 67.5°W to 64.5°W mainland
 INSERT INTO "area" VALUES('EPSG','4579','Argentina - 64.5°W to 61.5°W mainland onshore','Argentina - between 64°30''W and 61°30''W, onshore mainland.',-43.14,-21.99,-64.5,-61.49,0);
 INSERT INTO "area" VALUES('EPSG','4580','Germany - Baden-Wurttemberg','Germany - Baden-Wurttemberg.',47.54,49.8,7.51,10.5,0);
 INSERT INTO "area" VALUES('EPSG','4581','Africa - Morocco and Western Sahara - onshore','Africa - Morocco and Western Sahara - onshore.',20.71,35.97,-17.16,-1.01,0);
+INSERT INTO "area" VALUES('EPSG','4583','UK - Liverpool to Leeds','UK - on or related to the Trans-Pennine rail route from Liverpool via Manchester to Bradford and Leeds.',53.32,53.9,-3.14,-1.34,0);
 INSERT INTO "area" VALUES('EPSG','4584','Germany - Saarland','Germany - Saarland.',49.11,49.64,6.35,7.41,0);
+INSERT INTO "area" VALUES('EPSG','4585','Austria - Vienna','Austria - Vienna city state.',48.12,48.34,16.18,16.59,0);
+INSERT INTO "area" VALUES('EPSG','4586','World - south of 50°S','Southern hemisphere - south of 50°S onshore and offshore, including Antarctica.',-90.0,-50.0,-180.0,180.0,0);
 INSERT INTO "area" VALUES('EPSG','4587','Congo DR (Zaire) - 6th parallel south 21.5°E to 23°E','The Democratic Republic of the Congo (Zaire) - adjacent to 6th parallel south traverse between 21°30''E and 23°E.',-7.31,-5.31,21.5,23.01,0);

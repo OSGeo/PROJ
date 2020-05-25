@@ -51,10 +51,10 @@ cursor = conn.cursor()
 all_sql = []
 
 # TODO: update this !
-version = 'ArcMap 10.8.0'
+version = 'ArcMap 10.8.1'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.VERSION', '%s');""" % (version))
-date = '2019-12-01'
+date = '2020-05-24'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.DATE', '%s');""" % (date))
 
@@ -638,7 +638,7 @@ def import_geogcs():
                     src_row = cursor.fetchone()
                     assert src_row, (code, latestWkid)
 
-                    sql = """INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','%s','geodetic_crs','EPSG','%s','ESRI');""" % (
+                    sql = """INSERT INTO "supersession" VALUES('geodetic_crs','ESRI','%s','geodetic_crs','EPSG','%s','ESRI',1);""" % (
                         code, latestWkid)
                     all_sql.append(sql)
 
@@ -1017,7 +1017,7 @@ def import_projcs():
             latestWkid = mapDeprecatedToNonDeprecated[deprecated]
 
             if latestWkid in wkid_set:
-                sql = """INSERT INTO "supersession" VALUES('projected_crs','ESRI','%s','projected_crs','ESRI','%s','ESRI');""" % (
+                sql = """INSERT INTO "supersession" VALUES('projected_crs','ESRI','%s','projected_crs','ESRI','%s','ESRI',1);""" % (
                     code, latestWkid)
                 all_sql.append(sql)
             else:
@@ -1025,7 +1025,7 @@ def import_projcs():
                     "SELECT name FROM projected_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
                 src_row = cursor.fetchone()
                 assert src_row, row
-                sql = """INSERT INTO "supersession" VALUES('projected_crs','ESRI','%s','projected_crs','EPSG','%s','ESRI');""" % (
+                sql = """INSERT INTO "supersession" VALUES('projected_crs','ESRI','%s','projected_crs','EPSG','%s','ESRI',1);""" % (
                     code, latestWkid)
                 all_sql.append(sql)
 
@@ -1251,7 +1251,7 @@ def import_vertcs():
                     src_row = cursor.fetchone()
                     assert src_row
 
-                    sql = """INSERT INTO "supersession" VALUES('vertical_crs','ESRI','%s','vertical_crs','EPSG','%s','ESRI');""" % (
+                    sql = """INSERT INTO "supersession" VALUES('vertical_crs','ESRI','%s','vertical_crs','EPSG','%s','ESRI',1);""" % (
                         code, latestWkid)
                     all_sql.append(sql)
 
@@ -1476,13 +1476,16 @@ def import_geogtran():
                 is_geocon = 'METHOD["GEOCON"]' in wkt
                 is_harn = 'METHOD["HARN"]' in wkt
                 is_molodensky_badekas = 'METHOD["Molodensky_Badekas"]' in wkt
-                assert is_cf or is_pv or is_geocentric_translation or is_molodensky_badekas or is_nadcon or is_geog2d_offset or is_ntv2 or is_geocon or is_null or is_harn or is_unitchange, (
-                    row)
+                is_Time_Based_Helmert_Position_Vector = 'METHOD["Time_Based_Helmert_Position_Vector"]' in wkt
+                is_Time_Based_Helmert_Coordinate_Frame = 'METHOD["Time_Based_Helmert_Coordinate_Frame"]' in wkt
+                assert is_cf or is_pv or is_geocentric_translation or is_molodensky_badekas or is_nadcon or is_geog2d_offset or is_ntv2 or is_geocon or is_null or is_harn or is_unitchange or is_Time_Based_Helmert_Position_Vector or is_Time_Based_Helmert_Coordinate_Frame, row
 
                 area_auth_name, area_code = find_area(
                     row[idx_areaname], row[idx_slat], row[idx_nlat], row[idx_llon], row[idx_rlon])
 
                 accuracy = row[idx_accuracy]
+                if float(accuracy) == 999:
+                    accuracy = 'NULL'
 
                 if is_cf or is_pv:
                     x = get_parameter(wkt, 'X_Axis_Translation')
@@ -1538,6 +1541,36 @@ def import_geogtran():
 
                     sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, deprecated)
+                    all_sql.append(sql)
+
+                elif is_Time_Based_Helmert_Position_Vector or is_Time_Based_Helmert_Coordinate_Frame:
+
+                    x = get_parameter(wkt, 'X_Axis_Translation')
+                    y = get_parameter(wkt, 'Y_Axis_Translation')
+                    z = get_parameter(wkt, 'Z_Axis_Translation')
+                    rx = get_parameter(wkt, 'X_Axis_Rotation')  # in arc second
+                    ry = get_parameter(wkt, 'Y_Axis_Rotation')
+                    rz = get_parameter(wkt, 'Z_Axis_Rotation')
+                    s = get_parameter(wkt, 'Scale_Difference')  # in ppm
+                    rate_x = get_parameter(wkt, 'X_Axis_Translation_Rate')
+                    rate_y = get_parameter(wkt, 'Y_Axis_Translation_Rate')
+                    rate_z = get_parameter(wkt, 'Z_Axis_Translation_Rate')
+                    rate_rx = get_parameter(wkt, 'X_Axis_Rotation_Rate')  # in arc second / year
+                    rate_ry = get_parameter(wkt, 'Y_Axis_Rotation_Rate')
+                    rate_rz = get_parameter(wkt, 'Z_Axis_Rotation_Rate')
+                    rate_s = get_parameter(wkt, 'Scale_Difference_Rate')  # in ppm / year
+                    reference_time = get_parameter(wkt, 'Reference_Time')
+                    assert wkt.count('PARAMETER[') == 15
+
+                    if is_Time_Based_Helmert_Coordinate_Frame:
+                        method_code = '1057'
+                        method_name = 'Time-dependent Coordinate Frame rotation (geog2D)'
+                    else:
+                        method_code = '1054'
+                        method_name = 'Time-dependent Position Vector tfm (geog2D)'
+
+                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,NULL,'EPSG','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',%s,%s,%s,'EPSG','1042',%s,%s,%s,'EPSG','1043',%s,'EPSG','1041',%s,'EPSG','1029',NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                        wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, area_auth_name, area_code, accuracy, x, y, z, rx, ry, rz, s, rate_x, rate_y, rate_z, rate_rx, rate_ry, rate_rz, rate_s, reference_time, deprecated)
                     all_sql.append(sql)
 
                 elif is_geog2d_offset:
