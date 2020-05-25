@@ -2523,7 +2523,7 @@ TEST(crs, projectedCRS_identify_db) {
         auto res = crs->identify(factoryAll);
         ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 6670);
-        EXPECT_EQ(res.front().second, 70);
+        EXPECT_EQ(res.front().second, 90);
     }
     {
         // Test case of https://github.com/OSGeo/PROJ/issues/2116
@@ -2615,6 +2615,30 @@ TEST(crs, projectedCRS_identify_db) {
         ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
         EXPECT_EQ(res.front().second, 60);
+    }
+    {
+        // Test case of https://github.com/qgis/QGIS/issues/36111
+        // The name of the CRS to identify is
+        // ETRS89_LAEA_Europe
+        // We identify it through a registered EPSG alias "ETRS89 / LAEA Europe"
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"ETRS89_LAEA_Europe\","
+            "GEOGCS[\"GCS_ETRS_1989\",DATUM[\"D_ETRS_1989\","
+            "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+            "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+            "PROJECTION[\"Lambert_Azimuthal_Equal_Area\"],"
+            "PARAMETER[\"false_easting\",4321000.0],"
+            "PARAMETER[\"false_northing\",3210000.0],"
+            "PARAMETER[\"central_meridian\",10.0],"
+            "PARAMETER[\"latitude_of_origin\",52.0],"
+            "UNIT[\"Meter\",1.0]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(factoryAll);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 3035);
+        EXPECT_EQ(res.front().second, 90);
     }
 }
 

@@ -3927,15 +3927,16 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         } else if (!unsignificantName) {
             for (int ipass = 0; ipass < 2; ipass++) {
                 const bool approximateMatch = ipass == 1;
-                auto objects = authorityFactory->createObjectsFromName(
+                auto objects = authorityFactory->createObjectsFromNameEx(
                     thisName, {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
                     approximateMatch);
-                for (const auto &obj : objects) {
-                    auto crs = util::nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+                for (const auto &pairObjName : objects) {
+                    auto crs = util::nn_dynamic_pointer_cast<ProjectedCRS>(
+                        pairObjName.first);
                     assert(crs);
                     auto crsNN = NN_NO_CHECK(crs);
                     const bool eqName = metadata::Identifier::isEquivalentName(
-                        thisName.c_str(), crs->nameStr().c_str());
+                        thisName.c_str(), pairObjName.second.c_str());
                     foundEquivalentName |= eqName;
 
                     addCRS(crsNN, eqName);
