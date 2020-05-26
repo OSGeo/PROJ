@@ -212,6 +212,7 @@ libproj_la_SOURCES = \
 	tsfn.cpp units.cpp ctx.cpp log.cpp zpoly1.cpp rtodms.cpp \
 	release.cpp gauss.cpp \
 	fileapi.cpp \
+	generic_inverse.cpp \
 	\
 	datums.cpp datum_set.cpp transform.cpp \
 	utils.cpp \

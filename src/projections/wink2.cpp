@@ -6,7 +6,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-PROJ_HEAD(wink2, "Winkel II") "\n\tPCyl, Sph, no inv\n\tlat_1=";
+PROJ_HEAD(wink2, "Winkel II") "\n\tPCyl, Sph\n\tlat_1=";
 
 namespace { // anonymous namespace
 struct pj_opaque {
@@ -41,6 +41,16 @@ static PJ_XY wink2_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     return xy;
 }
 
+static PJ_LP wink2_s_inverse(PJ_XY xy, PJ *P)
+{
+    PJ_LP lpInit;
+
+    lpInit.phi = xy.y;
+    lpInit.lam = xy.x;
+
+    return pj_generic_inverse_2d(xy, P, lpInit);
+}
+
 
 PJ *PROJECTION(wink2) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
@@ -50,8 +60,8 @@ PJ *PROJECTION(wink2) {
 
     static_cast<struct pj_opaque*>(P->opaque)->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f);
     P->es  = 0.;
-    P->inv = nullptr;
     P->fwd = wink2_s_forward;
+    P->inv = wink2_s_inverse;
 
     return P;
 }

@@ -182,84 +182,6 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     return xy;
 }
 
-static PJ_LP inverse_with_newton_raphson(PJ_XY xy,
-                                         PJ *P,
-                                         PJ_LP lp, // initial guess
-                                         PJ_XY  (*fwd)(PJ_LP,    PJ *))
-{
-    double deriv_lam_X = 0;
-    double deriv_lam_Y = 0;
-    double deriv_phi_X = 0;
-    double deriv_phi_Y = 0;
-    for(int i = 0; i < 15; i++ )
-    {
-        PJ_XY xyApprox = fwd(lp, P);
-        const double deltaX = xyApprox.x - xy.x;
-        const double deltaY = xyApprox.y - xy.y;
-        if( fabs(deltaX) < 1e-10 && fabs(deltaY) < 1e-10 )
-        {
-            return lp;
-        }
-
-        if( fabs(deltaX) > 1e-6 || fabs(deltaY) > 1e-6 )
-        {
-            // Compute Jacobian matrix (only if we aren't close to the final
-            // result to speed things a bit)
-            PJ_LP lp2;
-            PJ_XY xy2;
-            const double dLam = lp.lam > 0 ? -1e-6 : 1e-6;
-            lp2.lam = lp.lam + dLam;
-            lp2.phi = lp.phi;
-            xy2 = fwd(lp2, P);
-            const double deriv_X_lam = (xy2.x - xyApprox.x) / dLam;
-            const double deriv_Y_lam = (xy2.y - xyApprox.y) / dLam;
-
-            const double dPhi = lp.phi > 0 ? -1e-6 : 1e-6;
-            lp2.lam = lp.lam;
-            lp2.phi = lp.phi + dPhi;
-            xy2 = fwd(lp2, P);
-            const double deriv_X_phi = (xy2.x - xyApprox.x) / dPhi;
-            const double deriv_Y_phi = (xy2.y - xyApprox.y) / dPhi;
-
-            // Inverse of Jacobian matrix
-            const double det = deriv_X_lam * deriv_Y_phi - deriv_X_phi * deriv_Y_lam;
-            if( det != 0  )
-            {
-                deriv_lam_X =  deriv_Y_phi / det;
-                deriv_lam_Y = -deriv_X_phi / det;
-                deriv_phi_X = -deriv_Y_lam / det;
-                deriv_phi_Y =  deriv_X_lam / det;
-            }
-        }
-
-        if( xy.x != 0 )
-        {
-            // Limit the amplitude of correction to avoid overshoots due to
-            // bad initial guess
-            const double delta_lam = std::max(std::min(
-                deltaX * deriv_lam_X + deltaY * deriv_lam_Y, 0.3), -0.3);
-            lp.lam -= delta_lam;
-            if( lp.lam < -M_PI )
-                lp.lam = -M_PI;
-            else if( lp.lam > M_PI )
-                lp.lam = M_PI;
-        }
-
-        if( xy.y != 0 )
-        {
-            const double delta_phi = std::max(std::min(
-                deltaX * deriv_phi_X + deltaY * deriv_phi_Y, 0.3), -0.3);
-            lp.phi -= delta_phi;
-            if( lp.phi < -M_HALFPI )
-                lp.phi = -M_HALFPI ;
-            else if( lp.phi > M_HALFPI )
-                lp.phi = M_HALFPI;
-        }
-    }
-    pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
-    return lp;
-}
-
 static PJ_LP adams_inverse(PJ_XY xy, PJ *P)
 {
     PJ_LP lp;
@@ -277,7 +199,7 @@ static PJ_LP adams_inverse(PJ_XY xy, PJ *P)
     lp.lam = fabs(lp.phi) >= M_HALFPI ? 0 :
         std::max(std::min(xy.x / 2.62205760 / cos(lp.phi), 1.0), -1.0) * M_PI;
 
-    return inverse_with_newton_raphson(xy, P, lp, adams_forward);
+    return pj_generic_inverse_2d(xy, P, lp);
 }
 
 

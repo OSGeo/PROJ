@@ -220,6 +220,7 @@ set(SRC_LIBPROJ_CORE
   fileapi.cpp
   fwd.cpp
   gauss.cpp
+  generic_inverse.cpp
   geodesic.c
   init.cpp
   initcache.cpp
