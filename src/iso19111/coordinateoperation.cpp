@@ -10119,6 +10119,17 @@ void ConcatenatedOperation::fixStepsDirection(
 
     // Set of heuristics to assign CRS to steps, and possibly reverse them.
 
+    const auto isGeographic = [](const crs::CRS *crs) -> bool {
+        return dynamic_cast<const crs::GeographicCRS *>(crs) != nullptr;
+    };
+
+    const auto isGeocentric = [](const crs::CRS *crs) -> bool {
+        auto geodCRS = dynamic_cast<const crs::GeodeticCRS *>(crs);
+        if (geodCRS && geodCRS->coordinateSystem()->axisList().size() == 3)
+            return true;
+        return false;
+    };
+
     for (size_t i = 0; i < operationsInOut.size(); ++i) {
         auto &op = operationsInOut[i];
         auto l_sourceCRS = op->sourceCRS();
@@ -10209,18 +10220,6 @@ void ConcatenatedOperation::fixStepsDirection(
             }
         } else if (!conv && l_sourceCRS && l_targetCRS) {
 
-            const auto isGeographic = [](const crs::CRS *crs) -> bool {
-                return dynamic_cast<const crs::GeographicCRS *>(crs) != nullptr;
-            };
-
-            const auto isGeocentric = [](const crs::CRS *crs) -> bool {
-                auto geodCRS = dynamic_cast<const crs::GeodeticCRS *>(crs);
-                if (geodCRS &&
-                    geodCRS->coordinateSystem()->axisList().size() == 3)
-                    return true;
-                return false;
-            };
-
             // Transformations might be mentioned in their forward directions,
             // whereas we should instead use the reverse path.
             auto prevOpTarget = (i == 0) ? concatOpSourceCRS.as_nullable()
@@ -10265,10 +10264,20 @@ void ConcatenatedOperation::fixStepsDirection(
         auto l_targetCRS = operationsInOut.back()->targetCRS();
         if (l_targetCRS &&
             !compareStepCRS(l_targetCRS.get(), concatOpTargetCRS.get())) {
-            throw InvalidOperation("The target CRS of the last step of "
-                                   "concatenated operation is not the same "
-                                   "as the target CRS of the concatenated "
-                                   "operation itself");
+            if (l_targetCRS->nameStr() == concatOpTargetCRS->nameStr() &&
+                ((isGeographic(l_targetCRS.get()) &&
+                  isGeocentric(concatOpTargetCRS.get())) ||
+                 (isGeocentric(l_targetCRS.get()) &&
+                  isGeographic(concatOpTargetCRS.get())))) {
+                auto newOp(Conversion::createGeographicGeocentric(
+                    NN_NO_CHECK(l_targetCRS), concatOpTargetCRS));
+                operationsInOut.push_back(newOp);
+            } else {
+                throw InvalidOperation("The target CRS of the last step of "
+                                       "concatenated operation is not the same "
+                                       "as the target CRS of the concatenated "
+                                       "operation itself");
+            }
         }
     }
 }
