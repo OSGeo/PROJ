@@ -22,6 +22,7 @@ for i in "$TOPDIR"/include/proj/*.hpp "$TOPDIR"/include/proj/internal/*.hpp \
          "$TOPDIR"/src/filemanager.hpp "$TOPDIR"/src/filemanager.cpp \
          "$TOPDIR"/src/networkfilemanager.cpp \
          "$TOPDIR"/src/sqlite3_utils.hpp "$TOPDIR"/src/sqlite3_utils.cpp \
+         "$TOPDIR"/src/generic_inverse.cpp \
          "$TOPDIR"/src/transformations/defmodel.hpp \
          "$TOPDIR"/src/transformations/defmodel_exceptions.hpp \
          "$TOPDIR"/src/transformations/defmodel_impl.hpp \
