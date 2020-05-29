@@ -1203,12 +1203,12 @@ const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
     if (ctx->user_writable_directory.empty()) {
         std::string path;
 #ifdef _WIN32
-        std::wstring wPath;
-        wPath.resize(MAX_PATH);
-        if (SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0,
-                             &wPath[0]) == S_OK) {
-            wPath.resize(wcslen(wPath.data()));
-            path = NS_PROJ::WStringToUTF8(wPath);
+      wchar_t* wPath;
+        if (SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &wPath) == S_OK){
+            std::wstring ws(wPath);
+            std::string str(ws.begin(), ws.end()); // CAUTION: wstring->string conversion will mangle or drop non-ascii characters.
+            path = str;
+            CoTaskMemFree(wPath);
         } else {
             const char *local_app_data = getenv("LOCALAPPDATA");
             if (!local_app_data) {
