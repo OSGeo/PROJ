@@ -294,7 +294,8 @@ int main(int argc, char *argv[]) {
         }
         std::vector<std::string> to_download;
         unsigned long long total_size_to_download = 0;
-        for (const auto feat : j["features"]) {
+        const auto features = j["features"];
+        for (const auto &feat : features) {
             if (!feat.is_object()) {
                 continue;
             }
@@ -411,7 +412,7 @@ int main(int argc, char *argv[]) {
                         std::vector<std::vector<double>> grid_bboxes;
                         bool foundMinus180 = false;
                         bool foundPlus180 = false;
-                        for (const auto obj : j_coordinates) {
+                        for (const auto &obj : j_coordinates) {
                             if (obj.is_array()) {
                                 const auto tmp = get_bbox(obj);
                                 if (tmp.size() == 4) {
