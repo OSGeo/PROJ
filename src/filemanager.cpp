@@ -1211,8 +1211,9 @@ const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
             wPath.resize(wcslen(wPath.data()));
             path = NS_PROJ::WStringToUTF8(wPath);
 #else
-        wchar_t* wPath;
-        if (SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &wPath) == S_OK){
+        wchar_t *wPath;
+        if (SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &wPath) ==
+            S_OK) {
             std::wstring ws(wPath);
             std::string str = NS_PROJ::WStringToUTF8(ws);
             path = str;
