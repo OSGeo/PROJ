@@ -47,6 +47,8 @@ VALUES
 ('OSGM15_Malin.gri','uk_os_OSGM15_Malin.tif','OSGM15_Malin.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/uk_os_OSGM15_Malin.tif',1,1,NULL),
 -- Northern Ireland: OSGM15 height, Belfast height -> ETRS89 ellipsoidal heights
 ('OSGM15_Belfast.gri','uk_os_OSGM15_Belfast.tif','OSGM15_Belfast.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/uk_os_OSGM15_Belfast.tif',1,1,NULL),
+-- United Kingdom: OSGM15 height, ODN height -> ETRS89 ellipsoidal heights
+('OSTN15_OSGM15_GB.txt','uk_os_OSGM15_GB.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/uk_os_OSGM15_GB.tif',1,1,NULL),
 -- US GEOID99 height models. Not mapped: Alaska: g1999a01.gtx to g1999a04.gtx. Hawaii: g1999h01.gtx, Puerto Rico: g1999p01.gtx
 ('g1999u01.bin','us_noaa_g1999u01.tif','g1999u01.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/us_noaa_g1999u01.tif',1,1,NULL),
 ('g1999u02.bin','us_noaa_g1999u02.tif','g1999u02.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/us_noaa_g1999u02.tif',1,1,NULL),
