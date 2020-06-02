@@ -1,0 +1,81 @@
+###############################################################################
+
+                       Specifying ellipsoid models
+
+In this exercise we will introduce some of the many ways one can specify the
+ellipsoid model used in projections and transformations.
+
+We will be using the Mercator projection to illustrate the different ellipsoid
+settings, but note that the same parameter settings can be used for setting
+the ellipsoid used for most PROJ projections and transformations.
+
+###############################################################################
+<gie>
+
+
+1. Use a sphere of radius 1 as the ellipsoid model:
+-------------------------------------------------------------------------------
+Hints:
+
+  * Check the Mercator documentation to find out how to specify an ellipsoid:
+    https://proj.org/operations/projections/merc.html
+-------------------------------------------------------------------------------
+
+operation   +proj=merc  <your answer here>
+tolerance   1 cm
+
+accept      24.745          59.437          # Talinn
+expect      0.4319          1.2975
+
+-------------------------------------------------------------------------------
+
+
+2. Specify the Hayford (International) ellipsoid
+-------------------------------------------------------------------------------
+Hints:
+
+  * Check the Mercator documentation to find out how to specify an ellipsoid:
+    https://proj.org/operations/projections/merc.html
+
+  * Running `proj -le` will return a list of ellipsoids and their parameters.
+-------------------------------------------------------------------------------
+
+operation   +proj=merc  <your answer here>
+tolerance   1 cm
+
+accept      24.745          59.437          # Talinn
+expect      2754709.2020    8238786.4803
+
+-------------------------------------------------------------------------------
+
+
+3. Specify the Hayford ellipsoid by its semimajor axis radius and inverse
+   flattening
+-------------------------------------------------------------------------------
+Hints:
+
+  * Find the parameters in the list returned by `proj -le`
+
+-------------------------------------------------------------------------------
+
+operation   +proj=merc  <your answer here>
+tolerance   1 cm
+
+accept      24.745          59.437          # Talinn
+expect      2754709.2020    8238786.4803
+
+-------------------------------------------------------------------------------
+
+
+4. Set the Clarke 1866 ellipsoid by its semimajor and semiminor axis radii
+-------------------------------------------------------------------------------
+
+operation   +proj=merc  <your answer here>
+tolerance   1 cm
+
+accept      24.745          59.437          # Talinn
+expect      2754630.7723    8238298.4968
+
+-------------------------------------------------------------------------------
+
+</gie>

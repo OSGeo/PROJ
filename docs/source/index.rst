@@ -19,6 +19,7 @@ PROJ
    development/index
    specifications/index
    community/index
+   tutorials/index
    faq
    glossary
    zreferences
