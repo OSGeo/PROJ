@@ -1057,6 +1057,38 @@ TEST(crs, EPSG_5042_projected_south_pole_east_north) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_5482_projected_south_pole_south_west) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("5482");
+    auto proj_crs = nn_dynamic_pointer_cast<ProjectedCRS>(crs);
+    ASSERT_TRUE(proj_crs != nullptr);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        factory->createCoordinateReferenceSystem("4764"),
+        NN_NO_CHECK(proj_crs));
+    ASSERT_TRUE(op != nullptr);
+    auto proj_string = "+proj=pipeline "
+                       "+step +proj=axisswap +order=2,1 "
+                       "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                       "+step +proj=stere +lat_0=-90 +lon_0=180 +k=0.994 "
+                       "+x_0=5000000 +y_0=1000000 +ellps=GRS80 "
+                       "+step +proj=axisswap +order=2,1";
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              proj_string);
+
+    auto opNormalized = op->normalizeForVisualization();
+    auto proj_string_normalized =
+        "+proj=pipeline "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=stere +lat_0=-90 +lon_0=180 +k=0.994 "
+        "+x_0=5000000 +y_0=1000000 +ellps=GRS80";
+    EXPECT_EQ(
+        opNormalized->exportToPROJString(PROJStringFormatter::create().get()),
+        proj_string_normalized);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, geodetic_crs_both_datum_datum_ensemble_null) {
     EXPECT_THROW(GeodeticCRS::create(
                      PropertyMap(), nullptr, nullptr,

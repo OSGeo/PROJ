@@ -662,18 +662,26 @@ static bool mustAxisOrderBeSwitchedForVisualizationInternal(
                         90.0) < 1e-10;
     }
 
-    // Address EPSG:32761 "WGS 84 / UPS South (N,E)"
     if (&dir0 == &cs::AxisDirection::NORTH &&
         &dir1 == &cs::AxisDirection::NORTH) {
         const auto &meridian0 = axisList[0]->meridian();
         const auto &meridian1 = axisList[1]->meridian();
         return meridian0 != nullptr && meridian1 != nullptr &&
-               std::abs(meridian0->longitude().convertToUnit(
-                            common::UnitOfMeasure::DEGREE) -
-                        0.0) < 1e-10 &&
-               std::abs(meridian1->longitude().convertToUnit(
-                            common::UnitOfMeasure::DEGREE) -
-                        90.0) < 1e-10;
+               ((
+                    // Address EPSG:32761 "WGS 84 / UPS South (N,E)"
+                    std::abs(meridian0->longitude().convertToUnit(
+                                 common::UnitOfMeasure::DEGREE) -
+                             0.0) < 1e-10 &&
+                    std::abs(meridian1->longitude().convertToUnit(
+                                 common::UnitOfMeasure::DEGREE) -
+                             90.0) < 1e-10) ||
+                // Address EPSG:5482 "RSRGD2000 / RSPS2000"
+                (std::abs(meridian0->longitude().convertToUnit(
+                              common::UnitOfMeasure::DEGREE) -
+                          180) < 1e-10 &&
+                 std::abs(meridian1->longitude().convertToUnit(
+                              common::UnitOfMeasure::DEGREE) -
+                          -90.0) < 1e-10));
     }
 
     return false;
