@@ -23,9 +23,11 @@ cache:
 build_script:
   - set VCPKG_INSTALLED=C:\Tools\vcpkg\installed\%platform%-windows
   # If cached directory does not exist, update vcpkg and install dependencies
+  # The checkout of a precise sha1 for VS2015 is a workaround for https://github.com/microsoft/vcpkg/issues/11666
   - if not exist %VCPKG_INSTALLED%\bin (
       cd "C:\Tools\vcpkg" &
       git pull > nul &
+      (if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" (git checkout a64dc07690bc8806e717e190f62eb58e198b599c)) &
       .\bootstrap-vcpkg.bat -disableMetrics &
       vcpkg install sqlite3[core,tool]:"%platform%"-windows &
       vcpkg install tiff:"%platform%"-windows &
