@@ -62,8 +62,7 @@ to the Danish realisation of ETRS89 is in PROJ described as::
             z = -0.048  rz = -0.008712 drz = -0.000792
             # ETRF2000@t_obs -> NKG_ETRF00@2000.0
     step    proj = deformation t_epoch = 2000.0
-            xy_grids = ./nkgrf03vel_realigned_xy.ct2
-            z_grids  = ./nkgrf03vel_realigned_z.gtx
+            grids = ./eur_nkg_nkgrf03vel_realigned.tif
             inv
             # NKG_ETRF@2000.0 -> ETRF92@2000.0
     step    proj=helmert convention=position_vector s = -0.009420e
@@ -72,16 +71,13 @@ to the Danish realisation of ETRS89 is in PROJ described as::
             z = 0.02776 rz = 4.729e-05
             # ETRF92@2000.0 -> ETRF92@1994.704
     step    proj = deformation dt = -5.296
-            xy_grids = ./nkgrf03vel_realigned_xy.ct2
-            z_grids  = ./nkgrf03vel_realigned_z.gtx
+            grids = ./eur_nkg_nkgrf03vel_realigned.tif
 
 From this we can see that the transformation from ITRF2008 to the Danish realisation of
 ETRS89 is a combination of Helmert transformations and adjustments with a deformation
 model. The first use of the deformation operation is::
 
-    proj = deformation t_epoch = 2000.0
-    xy_grids = ./nkgrf03vel_realigned_xy.ct2
-    z_grids  = ./nkgrf03vel_realigned_z.gtx
+    proj = deformation t_epoch = 2000.0 grids = ./eur_nkg_nkgrf03vel_realigned.tif
 
 Here we set the central epoch of the transformation, 2000.0. The observation epoch
 is expected as part of the input coordinate tuple. The deformation model is
