@@ -172,26 +172,8 @@ paragraph for more details.
 
     :param `options`: should be set to NULL currently.
 
-.. c:function:: PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ* obj)
-
-    .. versionadded:: 6.1.0
-
-    Returns a PJ* object whose axis order is the one expected for
-    visualization purposes.
-
-    The input object must be a coordinate operation, that has been created with
-    proj_create_crs_to_crs().
-    If the axis order of its source or target CRS is northing,easting, then an
-    axis swap operation will be inserted.
-
-    The returned :c:type:`PJ`-pointer should be deallocated with :c:func:`proj_destroy`.
-
-    :param ctx: Threading context.
-    :type ctx: :c:type:`PJ_CONTEXT` *
-    :param `obj`: Object of type CoordinateOperation
-    :type `obj`: const :c:type:`PJ` *
-    :returns: :c:type:`PJ` *
-
+.. doxygenfunction:: proj_normalize_for_visualization
+   :project: doxygen_api
 
 .. c:function:: PJ* proj_destroy(PJ *P)
 
