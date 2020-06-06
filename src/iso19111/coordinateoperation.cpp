@@ -7822,9 +7822,34 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
     auto targetCRS = op->targetCRS();
     std::string name;
     if (!forwardName.empty()) {
-        if (starts_with(forwardName, INVERSE_OF) ||
-            forwardName.find(" + ") != std::string::npos) {
-            auto tokens = split(forwardName, " + ");
+        if (dynamic_cast<const Transformation *>(op) == nullptr &&
+            dynamic_cast<const ConcatenatedOperation *>(op) == nullptr &&
+            (starts_with(forwardName, INVERSE_OF) ||
+             forwardName.find(" + ") != std::string::npos)) {
+            std::vector<std::string> tokens;
+            std::string curToken;
+            bool inString = false;
+            for (size_t i = 0; i < forwardName.size(); ++i) {
+                if (inString) {
+                    curToken += forwardName[i];
+                    if (forwardName[i] == '\'') {
+                        inString = false;
+                    }
+                } else if (i + 3 < forwardName.size() &&
+                           memcmp(&forwardName[i], " + ", 3) == 0) {
+                    tokens.push_back(curToken);
+                    curToken.clear();
+                    i += 2;
+                } else if (forwardName[i] == '\'') {
+                    inString = true;
+                    curToken += forwardName[i];
+                } else {
+                    curToken += forwardName[i];
+                }
+            }
+            if (!curToken.empty()) {
+                tokens.push_back(curToken);
+            }
             for (size_t i = tokens.size(); i > 0;) {
                 i--;
                 if (!name.empty()) {
@@ -7841,7 +7866,11 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
             }
         } else if (!sourceCRS || !targetCRS ||
                    forwardName != buildOpName(opType, sourceCRS, targetCRS)) {
-            name = INVERSE_OF + forwardName;
+            if (forwardName.find(" + ") != std::string::npos) {
+                name = INVERSE_OF + '\'' + forwardName + '\'';
+            } else {
+                name = INVERSE_OF + forwardName;
+            }
         }
     }
     if (name.empty() && sourceCRS && targetCRS) {

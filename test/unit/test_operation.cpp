@@ -4927,6 +4927,9 @@ TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
             "+grids=sk_gku_Slovakia_ETRS89h_to_Baltic1957.tif +multiplier=1 "
             "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
             "+step +proj=axisswap +order=2,1");
+
+        EXPECT_EQ(list[0]->inverse()->nameStr(),
+                  "Inverse of 'ETRS89 to ETRS89 + Baltic 1957 height (1)'");
     }
 }
 
@@ -8167,6 +8170,44 @@ TEST(operation, compoundCRS_to_compoundCRS_WGS84_EGM96_to_WGS84_Belfast) {
               "+multiplier=1 +step "
               "+proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    compoundCRS_to_compoundCRS_concatenated_operation_with_two_vert_transformation) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            // ETRS89 + Baltic 1957 height
+            authFactory->createCoordinateReferenceSystem("8360"),
+            // ETRS89 + EVRF2007 height
+            authFactory->createCoordinateReferenceSystem("7423"), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=vgridshift "
+            "+grids=sk_gku_Slovakia_ETRS89h_to_Baltic1957.tif +multiplier=1 "
+            "+step +inv +proj=vgridshift "
+            "+grids=sk_gku_Slovakia_ETRS89h_to_EVRF2007.tif +multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
+        EXPECT_EQ(
+            list[0]->nameStr(),
+            "ETRS89 + Baltic 1957 height to ETRS89 + EVRF2007 height (1)");
+        EXPECT_EQ(list[0]->inverse()->nameStr(), "Inverse of 'ETRS89 + Baltic "
+                                                 "1957 height to ETRS89 + "
+                                                 "EVRF2007 height (1)'");
+    }
 }
 
 // ---------------------------------------------------------------------------
