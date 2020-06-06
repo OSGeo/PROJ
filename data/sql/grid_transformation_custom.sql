@@ -84,3 +84,15 @@ INSERT INTO "grid_transformation" VALUES(
     NULL,
     'EPSG','8666','Geoid (height correction) model file','Icegeoid_ISN2016.gtx',
     NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+-- Spain
+
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_4937_TO_EPSG_5782','ETRS89 to Alicante height',
+    NULL,NULL,
+    'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',
+    'EPSG','4937', -- source CRS (ETRS89 geographic 3D)
+    'EPSG','5782', -- target CRS (Alicante height)
+    'EPSG','2366', -- area of use: Spain - mainland onshore
+    NULL,
+    'EPSG','8666','Geoid (height correction) model file','EGM08_REDNAP.asc',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
