@@ -187,6 +187,8 @@ VALUES
 ('auckland-1946-to-nzvd2016-conversion.csv','nz_linz_auckht1946-nzvd2016.tif','auckht1946-nzvd2016.gtx','GTiff','vgridshift',0,NULL,'https://cdn.proj.org/nz_linz_auckht1946-nzvd2016.tif',1,1,NULL),
 -- Slovakia
 ('Slovakia_JTSK03_to_JTSK.LAS','sk_gku_JTSK03_to_JTSK.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/sk_gku_JTSK03_to_JTSK.tif',1,1,NULL),
+('Slovakia_ETRS89h_to_Baltic1957.gtx','sk_gku_Slovakia_ETRS89h_to_Baltic1957.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/sk_gku_Slovakia_ETRS89h_to_Baltic1957.tif',1,1,NULL),
+('Slovakia_ETRS89h_to_EVRF2007.gtx','sk_gku_Slovakia_ETRS89h_to_EVRF2007.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/sk_gku_Slovakia_ETRS89h_to_EVRF2007.tif',1,1,NULL),
 -- Superseded entries
 ('bluff-1955-to-nzvd2016-conversion.csv','nz_linz_blufht1955-nzvd2016.tif','blufht1955-nzvd2016.gtx','GTiff','vgridshift',0,NULL,'https://cdn.proj.org/nz_linz_blufht1955-nzvd2016.tif',1,1,NULL),
 ('dunedin-1958-to-nzvd2016-conversion.csv','nz_linz_duneht1958-nzvd2016.tif','duneht1958-nzvd2016.gtx','GTiff','vgridshift',0,NULL,'https://cdn.proj.org/nz_linz_duneht1958-nzvd2016.tif',1,1,NULL),
