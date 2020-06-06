@@ -4819,12 +4819,18 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
         ASSERT_EQ(list.size(), 2U);
-        EXPECT_EQ(list[1]->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_5,
-                          authFactory->databaseContext())
-                          .get()),
-                  "+proj=vgridshift +grids=us_nga_egm08_25.tif +multiplier=1");
+        EXPECT_EQ(
+            list[1]->exportToPROJString(
+                PROJStringFormatter::create(
+                    PROJStringFormatter::Convention::PROJ_5,
+                    authFactory->databaseContext())
+                    .get()),
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=vgridshift +grids=us_nga_egm08_25.tif +multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
     }
     {
         auto ctxt =
@@ -4837,7 +4843,12 @@ TEST(operation, vertCRS_to_geogCRS_context) {
         ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=vgridshift +grids=us_nga_egm08_25.tif +multiplier=1");
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=vgridshift +grids=us_nga_egm08_25.tif +multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
     }
     {
         auto ctxt =
@@ -4850,9 +4861,13 @@ TEST(operation, vertCRS_to_geogCRS_context) {
         ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=pipeline +step +inv +proj=vgridshift "
-            "+grids=us_nga_egm08_25.tif "
-            "+multiplier=1");
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +inv +proj=vgridshift +grids=us_nga_egm08_25.tif "
+            "+multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
     }
     {
         auto ctxt =
@@ -4877,7 +4892,41 @@ TEST(operation, vertCRS_to_geogCRS_context) {
         ASSERT_EQ(list.size(), 1U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=vgridshift +grids=nz_linz_nzgeoid2016.tif +multiplier=1");
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=vgridshift +grids=nz_linz_nzgeoid2016.tif "
+            "+multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geog3DCRS_to_geog2DCRS_plus_vertCRS_context) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        ctxt->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            // ETRS89 (3D)
+            authFactory->createCoordinateReferenceSystem("4937"),
+            // ETRS89 + Baltic 1957 height
+            authFactory->createCoordinateReferenceSystem("8360"), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +inv +proj=vgridshift "
+            "+grids=sk_gku_Slovakia_ETRS89h_to_Baltic1957.tif +multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
     }
 }
 
@@ -6774,7 +6823,13 @@ static BoundCRSNNPtr createBoundVerticalCRS() {
 TEST(operation, transformation_height_to_PROJ_string) {
     auto transf = createBoundVerticalCRS()->transformation();
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=vgridshift +grids=us_nga_egm08_25.tif +multiplier=1");
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=vgridshift +grids=us_nga_egm08_25.tif "
+              "+multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 
     auto grids = transf->gridsNeeded(DatabaseContext::create(), false);
     ASSERT_EQ(grids.size(), 1U);
@@ -6843,8 +6898,13 @@ TEST(operation, transformation_Geographic3D_to_GravityRelatedHeight_gtx) {
     // Check that we correctly inverse files in the case of
     // "Geographic3D to GravityRelatedHeight (US .gtx)"
     EXPECT_EQ(transf->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +inv +proj=vgridshift "
-              "+grids=naptrans2008.gtx +multiplier=1");
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=vgridshift "
+              "+grids=naptrans2008.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -10710,6 +10770,10 @@ TEST(operation,
     // Test that even if the .gtx file is unknown, we export in the correct
     // direction
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +inv +proj=vgridshift +grids=foo.gtx "
-              "+multiplier=1");
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=vgridshift +grids=foo.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 }
