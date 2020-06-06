@@ -4900,6 +4900,33 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
             "+step +proj=axisswap +order=2,1");
     }
+    {
+        // Test actually the database where we derive records using the more
+        // classic 'Geographic3D to GravityRelatedHeight' method from
+        // records using EPSG:9635
+        //'Geog3D to Geog2D+GravityRelatedHeight (US .gtx)' method
+        auto ctxt = CoordinateOperationContext::create(
+            AuthorityFactory::create(DatabaseContext::create(), std::string()),
+            nullptr, 0.0);
+        ctxt->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            // Baltic 1957 height
+            authFactory->createCoordinateReferenceSystem("8357"),
+            // ETRS89
+            authFactory->createCoordinateReferenceSystem("4937"), ctxt);
+        ASSERT_EQ(list.size(), 1U);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=vgridshift "
+            "+grids=sk_gku_Slovakia_ETRS89h_to_Baltic1957.tif "
+            "+multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
+    }
 }
 
 // ---------------------------------------------------------------------------

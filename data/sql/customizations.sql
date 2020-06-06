@@ -171,3 +171,42 @@ INSERT INTO "unit_of_measure" VALUES('PROJ','IN','inch','length',0.0254,'in',0);
 INSERT INTO "unit_of_measure" VALUES('PROJ','US_IN','US survey inch','length',0.025400050800101,'us-in',0);
 INSERT INTO "unit_of_measure" VALUES('PROJ','US_YD','US survey yard','length',0.914401828803658,'us-yd',0);
 INSERT INTO "unit_of_measure" VALUES('PROJ','IND_CH','Indian chain','length',20.11669506,'ind-ch',0);
+
+-- Deal with grid_transformation using EPSG:9635 'Geog3D to Geog2D+GravityRelatedHeight (US .gtx)' method
+-- We derive records using the more classic 'Geographic3D to GravityRelatedHeight' method
+-- We could probably do that at runtime too, but more simple and efficient to create records
+
+INSERT INTO "grid_transformation"
+SELECT
+    'PROJ' AS auth_name,
+    gt.auth_name || '_' || gt.code || '_RESTRICTED_TO_VERTCRS' AS code,
+    gcrs.name || ' to ' || vcrs.name || ' (from ' || gt.name || ')' AS name,
+    NULL AS description,
+    gt.scope,
+    'EPSG' AS method_auth_name,
+    '9665' AS method_code,
+    'Geographic3D to GravityRelatedHeight (gtx)' AS method_name,
+    gt.source_crs_auth_name,
+    gt.source_crs_code,
+    c.vertical_crs_auth_name AS target_crs_auth_name,
+    c.vertical_crs_code AS target_crs_code,
+    gt.area_of_use_auth_name,
+    gt.area_of_use_code,
+    gt.accuracy,
+    gt.grid_param_auth_name,
+    gt.grid_param_code,
+    gt.grid_param_name,
+    gt.grid_name,
+    gt.grid2_param_auth_name,
+    gt.grid2_param_code,
+    gt.grid2_param_name,
+    gt.grid2_name,
+    gt.interpolation_crs_auth_name,
+    gt.interpolation_crs_code,
+    gt.operation_version,
+    gt.deprecated
+FROM grid_transformation gt
+JOIN compound_crs c ON gt.target_crs_code = c.code AND gt.target_crs_auth_name = c.auth_name
+JOIN geodetic_crs gcrs ON gt.source_crs_auth_name = gcrs.auth_name AND gt.source_crs_code = gcrs.code
+JOIN vertical_crs vcrs on vcrs.auth_name = c.vertical_crs_auth_name AND vcrs.code = c.vertical_crs_code
+WHERE method_auth_name = 'EPSG' AND method_code = '9635' AND gt.deprecated = 0;
