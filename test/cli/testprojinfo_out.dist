@@ -903,7 +903,7 @@ Operation No. 1:
 INVERSE(DERIVED_FROM(PROJ)):EPSG_4977_TO_EPSG_5613, Inverse of SWEREF99 to RH2000 height, unknown accuracy, Sweden - onshore
 
 PROJ string:
-+proj=vgridshift +grids=se_lantmateriet_SWEN17_RH2000.tif +multiplier=1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=se_lantmateriet_SWEN17_RH2000.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["Inverse of SWEREF99 to RH2000 height",
@@ -967,7 +967,7 @@ Operation No. 1:
 INVERSE(DERIVED_FROM(EPSG)):8885, Inverse of RGF93 to NGF-IGN69 height (3), 0.01 m, France - mainland onshore
 
 PROJ string:
-+proj=vgridshift +grids=fr_ign_RAF18.tif +multiplier=1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=fr_ign_RAF18.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 -------------------------------------
 Operation No. 2:
@@ -975,7 +975,7 @@ Operation No. 2:
 INVERSE(EPSG):10000, Inverse of RGF93 to NGF-IGN69 height (1), 0.5 m, France - mainland onshore
 
 PROJ string:
-+proj=vgridshift +grids=ggf97a.txt +multiplier=1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=ggf97a.txt +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing EPSG:32631 --3d
 PROJ.4 string:
@@ -1081,7 +1081,7 @@ Operation No. 1:
 DERIVED_FROM(EPSG):5656, GDA94 to AHD height (49), 0.03 m, Australia - mainland
 
 PROJ string:
-+proj=pipeline +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid09_V1.01.tif +multiplier=1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid09_V1.01.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing -s "GDA2020" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects
 Candidate operations found: 1
@@ -1091,7 +1091,7 @@ Operation No. 1:
 DERIVED_FROM(EPSG):8451, GDA2020 to AHD height (1), 0.03 m, Australia Christmas and Cocos - onshore
 
 PROJ string:
-+proj=pipeline +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid2020_20180201.tif +multiplier=1
++proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid2020_20180201.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing -k ellipsoid WGS84
 PROJ string:

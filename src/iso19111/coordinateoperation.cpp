@@ -7822,9 +7822,34 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
     auto targetCRS = op->targetCRS();
     std::string name;
     if (!forwardName.empty()) {
-        if (starts_with(forwardName, INVERSE_OF) ||
-            forwardName.find(" + ") != std::string::npos) {
-            auto tokens = split(forwardName, " + ");
+        if (dynamic_cast<const Transformation *>(op) == nullptr &&
+            dynamic_cast<const ConcatenatedOperation *>(op) == nullptr &&
+            (starts_with(forwardName, INVERSE_OF) ||
+             forwardName.find(" + ") != std::string::npos)) {
+            std::vector<std::string> tokens;
+            std::string curToken;
+            bool inString = false;
+            for (size_t i = 0; i < forwardName.size(); ++i) {
+                if (inString) {
+                    curToken += forwardName[i];
+                    if (forwardName[i] == '\'') {
+                        inString = false;
+                    }
+                } else if (i + 3 < forwardName.size() &&
+                           memcmp(&forwardName[i], " + ", 3) == 0) {
+                    tokens.push_back(curToken);
+                    curToken.clear();
+                    i += 2;
+                } else if (forwardName[i] == '\'') {
+                    inString = true;
+                    curToken += forwardName[i];
+                } else {
+                    curToken += forwardName[i];
+                }
+            }
+            if (!curToken.empty()) {
+                tokens.push_back(curToken);
+            }
             for (size_t i = tokens.size(); i > 0;) {
                 i--;
                 if (!name.empty()) {
@@ -7841,7 +7866,11 @@ createPropertiesForInverse(const CoordinateOperation *op, bool derivedFrom,
             }
         } else if (!sourceCRS || !targetCRS ||
                    forwardName != buildOpName(opType, sourceCRS, targetCRS)) {
-            name = INVERSE_OF + forwardName;
+            if (forwardName.find(" + ") != std::string::npos) {
+                name = INVERSE_OF + '\'' + forwardName + '\'';
+            } else {
+                name = INVERSE_OF + forwardName;
+            }
         }
     }
     if (name.empty() && sourceCRS && targetCRS) {
@@ -8662,6 +8691,7 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
         "9663", // Geographic3D to GravityRelatedHeight (OSGM-GB)
         "9664", // Geographic3D to GravityRelatedHeight (IGN1997)
         "9665", // Geographic3D to GravityRelatedHeight (US .gtx)
+        "9635", // Geog3D to Geog2D+GravityRelatedHeight (US .gtx)
     };
 
     if (ci_find(methodName, "Geographic3D to GravityRelatedHeight") == 0) {
@@ -9697,6 +9727,21 @@ void Transformation::_exportToPROJString(
 
     const auto &heightFilename = _getHeightToGeographic3DFilename(this, true);
     if (!heightFilename.empty()) {
+        auto targetCRSGeog =
+            extractGeographicCRSIfGeographicCRSOrEquivalent(targetCRS());
+        if (!targetCRSGeog) {
+            throw io::FormattingException(
+                concat("Can apply ", methodName, " only to GeographicCRS"));
+        }
+
+        if (!formatter->omitHorizontalConversionInVertTransformation()) {
+            formatter->startInversion();
+            formatter->pushOmitZUnitConversion();
+            targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+            formatter->popOmitZUnitConversion();
+            formatter->stopInversion();
+        }
+
         if (isMethodInverseOf) {
             formatter->startInversion();
         }
@@ -9706,6 +9751,13 @@ void Transformation::_exportToPROJString(
         if (isMethodInverseOf) {
             formatter->stopInversion();
         }
+
+        if (!formatter->omitHorizontalConversionInVertTransformation()) {
+            formatter->pushOmitZUnitConversion();
+            targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+            formatter->popOmitZUnitConversion();
+        }
+
         return;
     }
 
@@ -9716,6 +9768,22 @@ void Transformation::_exportToPROJString(
         if (fileParameter &&
             fileParameter->type() == ParameterValue::Type::FILENAME) {
             auto filename = fileParameter->valueFile();
+
+            auto sourceCRSGeog =
+                extractGeographicCRSIfGeographicCRSOrEquivalent(sourceCRS());
+            if (!sourceCRSGeog) {
+                throw io::FormattingException(
+                    concat("Can apply ", methodName, " only to GeographicCRS"));
+            }
+
+            if (!formatter->omitHorizontalConversionInVertTransformation()) {
+                formatter->startInversion();
+                formatter->pushOmitZUnitConversion();
+                sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+                formatter->popOmitZUnitConversion();
+                formatter->stopInversion();
+            }
+
             bool doInversion = isMethodInverseOf;
             // The EPSG Geog3DToHeight is the reverse convention of PROJ !
             doInversion = !doInversion;
@@ -9728,6 +9796,13 @@ void Transformation::_exportToPROJString(
             if (doInversion) {
                 formatter->stopInversion();
             }
+
+            if (!formatter->omitHorizontalConversionInVertTransformation()) {
+                formatter->pushOmitZUnitConversion();
+                sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+                formatter->popOmitZUnitConversion();
+            }
+
             return;
         }
     }
@@ -12286,6 +12361,8 @@ createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
 
 //! @cond Doxygen_Suppress
 
+// ---------------------------------------------------------------------------
+
 struct MyPROJStringExportableGeodToGeod final
     : public io::IPROJStringExportable {
     crs::GeodeticCRSPtr geodSrc{};
@@ -12332,14 +12409,18 @@ struct MyPROJStringExportableHorizVertical final
         _exportToPROJString(io::PROJStringFormatter *formatter) const override {
 
         formatter->pushOmitZUnitConversion();
+
         horizTransform->_exportToPROJString(formatter);
 
         formatter->startInversion();
         geogDst->addAngularUnitConvertAndAxisSwap(formatter);
         formatter->stopInversion();
+
         formatter->popOmitZUnitConversion();
 
+        formatter->pushOmitHorizontalConversionInVertTransformation();
         verticalTransform->_exportToPROJString(formatter);
+        formatter->popOmitHorizontalConversionInVertTransformation();
 
         formatter->pushOmitZUnitConversion();
         geogDst->addAngularUnitConvertAndAxisSwap(formatter);
@@ -12385,7 +12466,9 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
 
         formatter->popOmitZUnitConversion();
 
+        formatter->pushOmitHorizontalConversionInVertTransformation();
         verticalTransform->_exportToPROJString(formatter);
+        formatter->popOmitHorizontalConversionInVertTransformation();
 
         formatter->pushOmitZUnitConversion();
 

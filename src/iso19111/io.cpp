@@ -6635,6 +6635,7 @@ struct PROJStringFormatter::Private {
     std::vector<InversionStackElt> inversionStack_{InversionStackElt()};
     bool omitProjLongLatIfPossible_ = false;
     std::vector<bool> omitZUnitConversion_{false};
+    std::vector<bool> omitHorizontalConversionInVertTransformation_{false};
     DatabaseContextPtr dbContext_{};
     bool useApproxTMerc_ = false;
     bool addNoDefs_ = true;
@@ -7735,6 +7736,25 @@ void PROJStringFormatter::popOmitZUnitConversion() {
 
 bool PROJStringFormatter::omitZUnitConversion() const {
     return d->omitZUnitConversion_.back();
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::pushOmitHorizontalConversionInVertTransformation() {
+    d->omitHorizontalConversionInVertTransformation_.push_back(true);
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::popOmitHorizontalConversionInVertTransformation() {
+    assert(d->omitHorizontalConversionInVertTransformation_.size() > 1);
+    d->omitHorizontalConversionInVertTransformation_.pop_back();
+}
+
+// ---------------------------------------------------------------------------
+
+bool PROJStringFormatter::omitHorizontalConversionInVertTransformation() const {
+    return d->omitHorizontalConversionInVertTransformation_.back();
 }
 
 // ---------------------------------------------------------------------------

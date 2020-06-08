@@ -439,6 +439,10 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_INTERNAL void popOmitZUnitConversion();
     PROJ_INTERNAL bool omitZUnitConversion() const;
 
+    PROJ_INTERNAL void pushOmitHorizontalConversionInVertTransformation();
+    PROJ_INTERNAL void popOmitHorizontalConversionInVertTransformation();
+    PROJ_INTERNAL bool omitHorizontalConversionInVertTransformation() const;
+
     PROJ_INTERNAL void setLegacyCRSToCRSContext(bool legacyContext);
     PROJ_INTERNAL bool getLegacyCRSToCRSContext() const;
 
