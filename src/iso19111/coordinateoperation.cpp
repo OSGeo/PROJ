@@ -6259,9 +6259,11 @@ void Conversion::_exportToPROJString(
                                          common::UnitOfMeasure::Type::LINEAR)
                        .exportToPROJString();
         auto reverse_uom =
-            common::UnitOfMeasure(std::string(), 1.0 / convFactor,
-                                  common::UnitOfMeasure::Type::LINEAR)
-                .exportToPROJString();
+            convFactor == 0.0
+                ? std::string()
+                : common::UnitOfMeasure(std::string(), 1.0 / convFactor,
+                                        common::UnitOfMeasure::Type::LINEAR)
+                      .exportToPROJString();
         if (uom == "m") {
             // do nothing
         } else if (!uom.empty()) {
