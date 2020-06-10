@@ -348,6 +348,10 @@ const char *proj_context_get_database_metadata(PJ_CONTEXT *ctx,
         // temporary variable must be used as getDBcontext() might create
         // ctx->cpp_context
         auto osVal(getDBcontext(ctx)->getMetadata(key));
+        if (osVal == nullptr) {
+            ctx->cpp_context->autoCloseDbIfNeeded();
+            return nullptr;
+        }
         ctx->cpp_context->lastDbMetadataItem_ = osVal;
         ctx->cpp_context->autoCloseDbIfNeeded();
         return ctx->cpp_context->lastDbMetadataItem_.c_str();

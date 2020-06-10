@@ -2616,6 +2616,9 @@ TEST_F(CApi, proj_cs_get_axis_info) {
 TEST_F(CApi, proj_context_get_database_metadata) {
     EXPECT_TRUE(proj_context_get_database_metadata(m_ctxt, "IGNF.VERSION") !=
                 nullptr);
+
+    EXPECT_TRUE(proj_context_get_database_metadata(m_ctxt, "FOO") ==
+                nullptr);
 }
 
 // ---------------------------------------------------------------------------
