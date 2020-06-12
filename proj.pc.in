@@ -10,5 +10,5 @@ Description: Coordinate transformation software library
 Requires:
 Version: @VERSION@
 Libs: -L${libdir} -lproj
-Libs.private: @SQLITE3_LIBS@ -lstdc++
+Libs.private: @SQLITE3_LIBS@ @TIFF_LIBS@ @CURL_LIBS@ -lstdc++
 Cflags: -I${includedir}
