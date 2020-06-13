@@ -71,5 +71,8 @@ mv ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1common_1_1UnitOfMeasure.xml.tm
 sed 's/refid="classosgeo_1_1proj_1_1common_1_1UnitOfMeasure_1a400c71b5a6d7927e3e5850cee2b07d10ab50339a10e1de285ac99d4c3990b8693" kind="enumvalue"><name>NONE<\/name><\/member>/refid="classosgeo_1_1proj_1_1common_1_1UnitOfMeasure_1a400c71b5a6d7927e3e5850cee2b07d10ab50339a10e1de285ac99d4c3990b8693" kind="enumvalue"><name>Type::NONE<\/name><\/member>/' < ${TOPDIR}/docs/build/xml/index.xml > ${TOPDIR}/docs/build/xml/index.xml.tmp
 mv ${TOPDIR}/docs/build/xml/index.xml.tmp ${TOPDIR}/docs/build/xml/index.xml
 
+sed "s/noexceptoverride/noexcept override/" < ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1util_1_1Exception.xml > ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1util_1_1Exception.xml.tmp
+mv ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1util_1_1Exception.xml.tmp ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1util_1_1Exception.xml
+
 popd > /dev/null || exit
 
