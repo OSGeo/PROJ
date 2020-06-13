@@ -51,14 +51,23 @@ Coding conventions
 Programming language
 ^^^^^^^^^^^^^^^^^^^^
 
-PROJ is developed strictly in ANSI C 89.
+PROJ was originally developed in ANSI C. Today PROJ is mostly developed in C++11,
+with a few parts of the code base still being C. Most of the older parts of the
+code base is effectively C with a few modifications so that it compiles better as
+C++.
 
 Coding style
 ^^^^^^^^^^^^
 
-We don't enforce any particular coding style, but please try to keep it
-as simple as possible. If improving existing code, please try to conform
-with the style of the locally surrounding code.
+The parts of the code base that has started its life as C++ is formatted with
+``clang-format`` using the sript ``scripts/reformat_cpp.sh``. This is mostly
+contained to the code in `src/iso19111/` but a few other `.cpp`-files are
+covered as well.
+
+For the rest of the code base, which has its origin in C, we don't enforce any
+particular coding style, but please try to keep it as simple as possible. If
+improving existing code, please try to conform with the style of the locally
+surrounding code.
 
 Whitespace
 ^^^^^^^^^^
@@ -71,18 +80,19 @@ other changes. This makes it a lot easier to see the changes in diffs
 when evaluating the changed code. New files should use spaces as
 whitespace.
 
-File names
-^^^^^^^^^^
-
-Files in which projections are implemented are prefixed with an
-upper-case ``PJ_`` and most other files are prefixed with lower-case
-``pj_``. Some file deviate from this pattern, most of them dates back to
-the very early releases of PROJ. New contributions should follow the
-pj-prefix pattern. Unless there are obvious reasons not to.
-
 
 Tools
 ###############################################################################
+
+Reformatting C++ code
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The script in ``scripts/reformat_cpp.sh`` will reformat C++ code in accordance
+to the project preference.
+
+If you are writing a new ``.cpp``-file it should be added to the list in the
+reformatting script.
+
 
 cppcheck static analyzer
 ~~~~~~~~~~~~~~~~~~~~~~~~
