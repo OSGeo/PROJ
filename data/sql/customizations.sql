@@ -25,6 +25,51 @@ INSERT INTO "geodetic_crs" VALUES('OGC','CRS84','WGS 84 (CRS84)',NULL,NULL,'geog
 
 INSERT INTO "other_transformation" VALUES('PROJ','CRS84_TO_EPSG_4326','OGC:CRS84 to WGS 84',NULL,NULL,'EPSG','9843','Axis Order Reversal (2D)','OGC','CRS84','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
+-- Temporary entry for NZGD2000 deformation model
+INSERT INTO other_transformation VALUES(
+    'PROJ','NZGD2000-20180701','NZGD2000 to ITRF96',
+    'New Zealand Deformation Model. Defines the secular model (National Deformation Model) and patches for significant deformation events since 2000', NULL,
+    'PROJ', 'PROJString',
+    '+proj=pipeline ' ||
+        '+step +proj=unitconvert +xy_in=deg +xy_out=rad ' ||
+        '+step +proj=axisswap +order=2,1 ' ||
+        '+step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json ' ||
+        '+step +proj=axisswap +order=2,1 ' ||
+        '+step +proj=unitconvert +xy_in=rad +xy_out=deg',
+    'EPSG','4959',
+    'EPSG','7907',
+    'EPSG','1175',
+    NULL, --accuracy
+    NULL,NULL,NULL,NULL,NULL,NULL, -- param1
+    NULL,NULL,NULL,NULL,NULL,NULL, -- param2
+    NULL,NULL,NULL,NULL,NULL,NULL, -- param3
+    NULL,NULL,NULL,NULL,NULL,NULL, -- param4
+    NULL,NULL,NULL,NULL,NULL,NULL, -- param5
+    NULL,NULL,NULL,NULL,NULL,NULL, -- param6
+    NULL,NULL,NULL,NULL,NULL,NULL, -- param7
+    '20180701', -- operation version
+    0);
+
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF97','NZGD2000 to ITRF97','Concatenation of PROJ:NZGD2000-20180701 and 9079','','EPSG','4959','EPSG','7908','EPSG','1175',NULL,NULL,0);
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF97',1,'PROJ','NZGD2000-20180701');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF97',2,'EPSG','9079');
+
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2000','NZGD2000 to ITRF2000','Concatenation of PROJ:NZGD2000-20180701 and 9080','','EPSG','4959','EPSG','7909','EPSG','1175',NULL,NULL,0);
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2000',1,'PROJ','NZGD2000-20180701');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2000',2,'EPSG','9080');
+
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2005','NZGD2000 to ITRF2005','Concatenation of PROJ:NZGD2000-20180701 and 9081','','EPSG','4959','EPSG','7910','EPSG','1175',NULL,NULL,0);
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2005',1,'PROJ','NZGD2000-20180701');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2005',2,'EPSG','9081');
+
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2008','NZGD2000 to ITRF2008','Concatenation of PROJ:NZGD2000-20180701 and EPSG:9082','','EPSG','4959','EPSG','7911','EPSG','1175',NULL,NULL,0);
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2008',1,'PROJ','NZGD2000-20180701');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2008',2,'EPSG','9082');
+
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2014','NZGD2000 to ITRF2014','Concatenation of PROJ:NZGD2000-20180701 and EPSG:9083','','EPSG','4959','EPSG','7912','EPSG','1175',NULL,NULL,0);
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2014',1,'PROJ','NZGD2000-20180701');
+INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2014',2,'EPSG','9083');
+
 -- alias of EPSG:3857
 INSERT INTO "projected_crs" VALUES('EPSG','900913','Google Maps Global Mercator',NULL,NULL,'EPSG','4499','EPSG','4326','EPSG','3856','EPSG','3544',NULL,1);
 

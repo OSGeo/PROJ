@@ -201,6 +201,34 @@ fi
 rm testprojinfo_out_remotedata.txt
 unset PROJ_NETWORK
 
+######################
+# NZGD2000 -> ITRFxx #
+######################
+echo 'Testing -s NZGD2000 -t ITRF96 -o PROJ -q' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF96 -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s NZGD2000 -t ITRF97 -o PROJ -q' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF97 -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s NZGD2000 -t ITRF2000 -o PROJ -q' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF2000 -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s NZGD2000 -t ITRF2005 -o PROJ -q' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF2005 -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s NZGD2000 -t ITRF2008 -o PROJ -q' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF2008 -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s NZGD2000 -t ITRF2014 -o PROJ -q' >> ${OUT}
+$EXE -s NZGD2000 -t ITRF2014 -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
