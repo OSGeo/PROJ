@@ -6251,6 +6251,51 @@ TEST(operation, boundCRS_of_geogCRS_to_geogCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, boundCRS_of_geogCRS_to_geodCRS) {
+    auto boundCRS = BoundCRS::createFromTOWGS84(
+        GeographicCRS::EPSG_4807, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        boundCRS, GeodeticCRS::EPSG_4978);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step "
+              "+proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=grad +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=clrk80ign +pm=paris "
+              "+step +proj=cart +ellps=clrk80ign "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, boundCRS_of_geogCRS_to_geodCRS_not_related_to_hub) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto boundCRS = BoundCRS::createFromTOWGS84(
+        GeographicCRS::EPSG_4807, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        boundCRS,
+        // ETRS89 geocentric
+        authFactory->createCoordinateReferenceSystem("4936"), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline +step "
+              "+proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=grad +xy_out=rad "
+              "+step +inv +proj=longlat +ellps=clrk80ign +pm=paris "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=clrk80ign "
+              "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 +ry=5 +rz=6 +s=7 "
+              "+convention=position_vector "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=cart +ellps=GRS80");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, boundCRS_of_geogCRS_to_geogCRS_with_area) {
     auto boundCRS = BoundCRS::createFromTOWGS84(
         GeographicCRS::EPSG_4267, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
