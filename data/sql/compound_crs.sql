@@ -278,3 +278,4 @@ INSERT INTO "compound_crs" VALUES('EPSG','8814','NAD83 / Missouri Central + NAVD
 INSERT INTO "compound_crs" VALUES('EPSG','8815','NAD83 / Missouri West + NAVD88 height',NULL,NULL,'EPSG','26998','EPSG','5703','EPSG','2220',0);
 INSERT INTO "compound_crs" VALUES('EPSG','8912','CR-SIRGAS / CRTM05 + DACR52 height',NULL,NULL,'EPSG','8908','EPSG','8911','EPSG','3232',0);
 INSERT INTO "compound_crs" VALUES('EPSG','9368','TPEN11 Grid + ODN height',NULL,NULL,'EPSG','9367','EPSG','5701','EPSG','4583',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9374','MML07 Grid + ODN height',NULL,NULL,'EPSG','9373','EPSG','5701','EPSG','4588',0);

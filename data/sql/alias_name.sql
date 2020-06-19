@@ -296,6 +296,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6652','IERS Terrestrial
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6653','IERS Terrestrial Reference Frame 1994','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5204','IGLD 1955','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5205','IGLD 1985','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1271','MML07-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5206','DVR90','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1140','SHD','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6758','JAD2001','EPSG');
@@ -2228,6 +2229,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3404','NAD83(HPGN) / Nor
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3414','SVY21 plane coordinate system','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3174','NAD83 / GLGIS Albers (basin)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3175','NAD83 / GLGIS Albers (basin+SLS)','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9373','ETRS89 / MML07 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3415','WGS 72BE / SCS Lambert','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3425','NAD83(HPGN) / Iowa North (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3426','NAD83(HPGN) / Iowa South (ftUS)','EPSG');
@@ -2385,6 +2387,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3568','NAD83(HPGN) / Uta
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3569','NAD83(HPGN) / Utah Central (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3570','NAD83(HPGN) / Utah South (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3448','JAD2001 / Jamaica Metric Grid 2001','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9374','ETRS89 / MML07 SnakeGrid + Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3038','ETRF89 / TM26','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3039','ETRF89 / TM27','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3050','ETRF89 / TM38','EPSG');
@@ -2698,11 +2701,13 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','26862','NAD83(HPGN) / We
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3800','NAD27 / Alberta 3TM ref merid 120','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3801','NAD83 / Alberta 3TM ref merid 120','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3802','NAD83(CSRS) / Alberta 3TM ref merid 120','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9378','727','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3812','ETRS89 / Lambert 2008','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3814','NAD83 / MSTM','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3815','NAD83(HARN) / MSTM','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3815','NAD83(HPGN) / Mississippi TM','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3816','NAD83(NSRS2007) / MSTM','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9378','IGb14 - XYZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3812','ETRS89 / LB08','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3447','ETRS89 / LB05','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31370','BD 72 / LB72','EPSG');
@@ -4206,7 +4211,11 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3085','NAD83(HARN) / TX 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3091','KY1Z','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3090','NAD83(HARN) / KY1Z','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3088','NAD83 / KY1Z (m)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9379','726','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3857','WGS 84 / Popular Visualisation Pseudo-Mercator','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9379','IGb14 - LatLonEHt','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9380','725','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9380','IGb14 - LatLon','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','3886','National Elevation Network height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3893','ED50 / Iraq Nat. Grid','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4743','Karbala 1979 (Polservice)','EPSG');
