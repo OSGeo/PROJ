@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "GIE" "1" "Feb 17, 2020" "7.0.0" "PROJ"
+.TH "GIE" "1" "Jul 1, 2020" "7.1.0" "PROJ"
 .SH NAME
 gie \- The Geospatial Integrity Investigation Environment
 .
@@ -435,6 +435,40 @@ expect  0   110579.9
 </gie>
 .ft P
 .fi
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH STRICT MODE
+.sp
+New in version 7.1.
+
+.sp
+A stricter variant of normal gie syntax can be used by wrapping gie commands
+between \fB<gie\-strict>\fP and \fB</gie\-strict>\fP\&. In strict mode, comment lines
+must start with a sharp character. Unknown commands will be considered as an error.
+A command can still be split on several lines, but intermediate lines must
+end with the space character followed by backslash to mark the continuation.
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+<gie\-strict>
+# This is a comment. The following line with multiple repeated characters too
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+# A command on several lines must use " \e" continuation
+operation proj=hgridshift +grids=nzgd2kgrid0005.gsb \e
+          ellps=GRS80
+tolerance 1 mm
+ignore    pjd_err_failed_to_load_grid
+accept    172.999892181021551 \-45.001620431954613
+expect    173                 \-45
+</gie\-strict>
+.ft P
+.fi
+.UNINDENT
 .UNINDENT
 .UNINDENT
 .UNINDENT

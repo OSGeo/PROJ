@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJINFO" "1" "Feb 17, 2020" "7.0.0" "PROJ"
+.TH "PROJINFO" "1" "Jul 1, 2020" "7.1.0" "PROJ"
 .SH NAME
 projinfo \- Geodetic object and coordinate operation queries
 .
@@ -40,8 +40,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [[–area name_or_code] | [–bbox west_long,south_lat,east_long,north_lat]]
 [–spatial\-test contains|intersects]
 [–crs\-extent\-use none|both|intersection|smallest]
-[–grid\-check none|discard_missing|sort|known_available] [–show\-superseded]
+[–grid\-check none|discard_missing|sort|known_available]
 [–pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
+[–show\-superseded] [–hide\-ballpark]
 [–boundcrs\-to\-wgs84]
 [–main\-db\-path path] [–aux\-db\-path path]*
 [–identify] [–3d]
@@ -63,6 +64,9 @@ a WKT string,
 an object code (like “EPSG:4326”, “urn:ogc:def:crs:EPSG::4326”,
 “urn:ogc:def:coordinateOperation:EPSG::1671”),
 .IP \(bu 2
+an Object name. e.g “WGS 84”, “WGS 84 / UTM zone 31N”. In that case as
+uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
+.IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
 (e.g “\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP” or custom abbreviated
 syntax “EPSG:2393+5717”),
@@ -76,6 +80,8 @@ a OGC URN combining references for concatenated operations
 (e.g. “\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP”)
 .IP \(bu 2
 a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.1/projjson.schema.json\fP (\fIadded in 6.2\fP)
+.IP \(bu 2
+a compound CRS made from two object names separated with ” + “. e.g. “WGS 84 + EGM96 height” (\fIadded in 7.1\fP)
 .UNINDENT
 .sp
 {object_reference} is a filename preceded by the ‘@’ character.  The
@@ -252,7 +258,27 @@ only used for coordinate operation computation
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-show\-superseded
+.B \-\-pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}
+Determine if intermediate (pivot) CRS can be used when researching coordinate
+operation between 2 CRS. A typical example is the WGS84 pivot. By default,
+projinfo will consider any potential pivot if there is no direct transformation
+( \fBif_no_direct_transformation\fP). If using the \fBnever\fP strategy,
+only direct transformations between the source and target CRS will be
+used. If using the \fBalways\fP strategy, intermediate CRS will be considered
+even if there are direct transformations.
+It is also possible to restrict the pivot CRS to consider by specifying
+one or several CRS by their AUTHORITY:CODE.
+.sp
+\fBNOTE:\fP
+.INDENT 7.0
+.INDENT 3.5
+only used for coordinate operation computation
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-show\-superseded
 When enabled, coordinate operations that are superseded by others will be
 listed. Note that supersession is not equivalent to deprecation: superseded
 operations are still considered valid although they have a better equivalent,
@@ -268,16 +294,12 @@ only used for coordinate operation computation
 .UNINDENT
 .INDENT 0.0
 .TP
-.B \-\-pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}
-Determine if intermediate (pivot) CRS can be used when researching coordinate
-operation between 2 CRS. A typical example is the WGS84 pivot. By default,
-projinfo will consider any potential pivot if there is no direct transformation
-( \fBif_no_direct_transformation\fP). If using the \fBnever\fP strategy,
-only direct transformations between the source and target CRS will be
-used. If using the \fBalways\fP strategy, intermediate CRS will be considered
-even if there are direct transformations.
-It is also possible to restrict the pivot CRS to consider by specifying
-one or several CRS by their AUTHORITY:CODE.
+.B \-\-hide\-ballpark
+New in version 7.1.
+
+.sp
+Hides any coordinate operation that is, or contains, a
+Ballpark transformation
 .sp
 \fBNOTE:\fP
 .INDENT 7.0

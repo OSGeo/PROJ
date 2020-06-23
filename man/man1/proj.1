@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJ" "1" "Feb 17, 2020" "7.0.0" "PROJ"
+.TH "PROJ" "1" "Jul 1, 2020" "7.1.0" "PROJ"
 .SH NAME
 proj \- Cartographic projection filter
 .
@@ -208,7 +208,7 @@ For ASCII input data the two data values must be in the first two white space
 separated fields and when both input and output are ASCII all trailing
 portions of the input line are appended to the output line.
 .sp
-Input geographic data (longitude and latitude) must be in DMS format and input
+Input geographic data (longitude and latitude) must be in DMS or decimal degrees format and input
 cartesian data must be in units consistent with the ellipsoid major axis or
 sphere radius units. Output geographic coordinates will be in DMS (if the
 \fB\-w\fP switch is not employed) and precise to 0.001” with trailing, zero\-valued

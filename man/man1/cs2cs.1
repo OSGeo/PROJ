@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CS2CS" "1" "Feb 17, 2020" "7.0.0" "PROJ"
+.TH "CS2CS" "1" "Jul 1, 2020" "7.1.0" "PROJ"
 .SH NAME
 cs2cs \- Cartographic coordinate system filter
 .
@@ -40,26 +40,24 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 or
 .INDENT 0.0
 .INDENT 3.5
-\fBcs2cs\fP [\fB\-eEfIlrstvwW\fP [args]] {source_crs} +to {target_crs} file …
+\fBcs2cs\fP [\fB\-eEfIlrstvwW\fP [args]] {source_crs} {target_crs} file …
 .sp
 where {source_crs} or {target_crs} is a PROJ string, a WKT string or a AUTHORITY:CODE
 (where AUTHORITY is the name of a CRS authority and CODE the code of a CRS
 found in the proj.db database), expressing a coordinate reference system.
-.UNINDENT
-.UNINDENT
 .sp
 New in version 6.0.0.
 
 .sp
-or
+\fBNOTE:\fP
 .INDENT 0.0
 .INDENT 3.5
-\fBcs2cs\fP [\fB\-eEfIlrstvwW\fP [args]] {source_crs} {target_crs}
+before 7.0.1, it was needed to add +to between {source_crs} and {target_crs}
+when adding a filename
 .UNINDENT
 .UNINDENT
-.sp
-New in version 6.0.0.
-
+.UNINDENT
+.UNINDENT
 .SH DESCRIPTION
 .sp
 \fBcs2cs\fP performs transformation between the source and destination
@@ -131,14 +129,18 @@ List of all distance units that can be selected with the \fI+units\fP parameter.
 .INDENT 0.0
 .TP
 .B \-r
-This options reverses the order of the expected input from
-longitude\-latitude or x\-y to latitude\-longitude or y\-x.
+This options reverses the order of the first two expected
+inputs from that specified by the CRS to the opposite
+order.  The third coordinate, typically height, remains
+third.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-s
-This options reverses the order of the output from x\-y or longitude\-latitude
-to y\-x or latitude\-longitude.
+This options reverses the order of the first two expected
+outputs from that specified by the CRS to the opposite
+order.  The third coordinate, typically height, remains
+third.
 .UNINDENT
 .INDENT 0.0
 .TP
