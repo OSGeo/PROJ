@@ -1371,7 +1371,7 @@ TEST(defmodel, evaluator_horizontal_unit_metre) {
         DeltaLongLatToEastingNorthing(DegToRad(lat), newLon - DegToRad(lon),
                                       newLat - DegToRad(lat), a, b, de, dn);
         EXPECT_NEAR(de, tFactor * expected_de, 1e-10);
-        EXPECT_NEAR(dn, tFactor * expected_dn, 1e-10);
+        EXPECT_NEAR(dn, tFactor * expected_dn, 1e-9);
         EXPECT_NEAR(newZ - zVal, tFactor * 0.84, 1e-4);
     }
 }
