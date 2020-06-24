@@ -1203,7 +1203,9 @@ static int proj_is_equivalent_to_internal(PJ_CONTEXT *ctx, const PJ *obj,
                                           PJ_COMPARISON_CRITERION criterion) {
 
     if (!obj || !other){
-        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        if (ctx) {
+            proj_log_error(ctx, __FUNCTION__, "missing required input");
+        }
         return false;
     }
     if (!obj->iso_obj || !other->iso_obj) {
