@@ -67,6 +67,10 @@
       use discard change of ellipsoidal height if a Helmert transformation is
       involved (#2227)
 
+    o proj_list_units() deprecated, superceeded by proj_get_units_from_database()
+
+    o proj_list_angular_units() deprecated, superceeded by proj_get_units_from_database()
+
  + Optimizations:
 
     o tmerc/utm: add a +algo=auto/evenden_snyder/poder_engsager parameter (#2030)
