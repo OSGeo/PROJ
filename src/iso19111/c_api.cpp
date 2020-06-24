@@ -1016,10 +1016,8 @@ PJ_OBJ_LIST *proj_create_from_name(PJ_CONTEXT *ctx, const char *auth_name,
                                    size_t limitResultCount,
                                    const char *const *options) {
     SANITIZE_CTX(ctx);
-    if (!searchedName ||
-        (types != nullptr && typesCount <= 0) ||
-        (types == nullptr && typesCount > 0)
-    ) {
+    if (!searchedName || (types != nullptr && typesCount <= 0) ||
+        (types == nullptr && typesCount > 0)) {
         proj_log_error(ctx, __FUNCTION__, "invalid input");
         return nullptr;
     }
@@ -1202,7 +1200,7 @@ static int proj_is_equivalent_to_internal(PJ_CONTEXT *ctx, const PJ *obj,
                                           const PJ *other,
                                           PJ_COMPARISON_CRITERION criterion) {
 
-    if (!obj || !other){
+    if (!obj || !other) {
         if (ctx) {
             proj_log_error(ctx, __FUNCTION__, "missing required input");
         }
