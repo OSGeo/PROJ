@@ -7793,7 +7793,7 @@ proj_create_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
                        const PJ_OPERATION_FACTORY_CONTEXT *operationContext) {
     SANITIZE_CTX(ctx);
     if (!source_crs || !target_crs || !operationContext) {
-        proj_log_error(ctx, __FUNCTION__, "invalid input data");
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
     auto sourceCRS = std::dynamic_pointer_cast<CRS>(source_crs->iso_obj);
