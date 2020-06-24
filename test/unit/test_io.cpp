@@ -5326,8 +5326,23 @@ static const struct {
      }},
 
     {"Goode_Homolosine",
-     {{"False_Easting", 1}, {"False_Northing", 2}, {"Central_Meridian", 3}},
-     "Goode Homolosine",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Option", 1.0}},
+     "Interrupted Goode Homolosine",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Goode_Homolosine",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
+      {"Option", 2.0}},
+     "Interrupted Goode Homolosine Ocean",
      {
          {"Longitude of natural origin", 3},
          {"False easting", 1},

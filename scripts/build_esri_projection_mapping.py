@@ -541,11 +541,19 @@ config_str = """
         - XY_Plane_Rotation: EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID
 
 - Goode_Homolosine:
-    WKT2_name: "Goode Homolosine"
-    Params:
+    - WKT2_name: PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE
+      Params:
         - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Option: 1.0
+
+    - WKT2_name: PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE_OCEAN
+      Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Option: 2.0
 
 - Equidistant_Cylindrical_Ellipsoidal:
     WKT2_name: EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL

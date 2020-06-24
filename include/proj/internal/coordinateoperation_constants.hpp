@@ -640,6 +640,9 @@ static const MethodMapping projectionMethodMappings[] = {
     {PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE, 0,
      "Interrupted_Goode_Homolosine", "igh", nullptr, paramsLonNatOrigin},
 
+    {PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE_OCEAN, 0, nullptr,
+     "igh_o", nullptr, paramsLonNatOrigin},
+
     // No proper WKT1 representation fr sweep=x
     {PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X, 0, nullptr, "geos",
      "sweep=x", paramsGeos},

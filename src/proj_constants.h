@@ -118,6 +118,9 @@
 #define PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE \
     "Interrupted Goode Homolosine"
 
+#define PROJ_WKT2_NAME_METHOD_INTERRUPTED_GOODE_HOMOLOSINE_OCEAN \
+    "Interrupted Goode Homolosine Ocean"
+
 #define PROJ_WKT2_NAME_METHOD_GEOSTATIONARY_SATELLITE_SWEEP_X \
     "Geostationary Satellite (Sweep X)"
 
