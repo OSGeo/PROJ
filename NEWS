@@ -131,6 +131,8 @@
 
  o Fix access violation in proj_context_get_database_metadata (#2260)
 
+ o Fail gracefully when calling API functions with invalid input (#2272)
+
  THANKS TO
  ---------
 
