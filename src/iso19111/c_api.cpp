@@ -915,6 +915,18 @@ convertPJObjectTypeToObjectType(PJ_TYPE type, bool &valid) {
         cppType = AuthorityFactory::ObjectType::DATUM;
         break;
 
+    case PJ_TYPE_TEMPORAL_DATUM:
+        valid = false;
+        break;
+
+    case PJ_TYPE_ENGINEERING_DATUM:
+        valid = false;
+        break;
+
+    case PJ_TYPE_PARAMETRIC_DATUM:
+        valid = false;
+        break;
+
     case PJ_TYPE_CRS:
         cppType = AuthorityFactory::ObjectType::CRS;
         break;
@@ -1083,6 +1095,15 @@ PJ_TYPE proj_get_type(const PJ *obj) {
     }
     if (dynamic_cast<DatumEnsemble *>(ptr)) {
         return PJ_TYPE_DATUM_ENSEMBLE;
+    }
+    if (dynamic_cast<TemporalDatum *>(ptr)) {
+        return PJ_TYPE_TEMPORAL_DATUM;
+    }
+    if (dynamic_cast<EngineeringDatum *>(ptr)) {
+        return PJ_TYPE_ENGINEERING_DATUM;
+    }
+    if (dynamic_cast<ParametricDatum *>(ptr)) {
+        return PJ_TYPE_PARAMETRIC_DATUM;
     }
 
     {
