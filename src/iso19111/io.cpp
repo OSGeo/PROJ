@@ -2642,10 +2642,15 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         }
     } else if (ci_equal(csType, "temporal")) { // WKT2-2015
         if (axisCount == 1) {
-            return DateTimeTemporalCS::create(
-                csMap,
-                axisList[0]); // FIXME: there are 3 possible subtypes of
-                              // TemporalCS
+            if (isNull(
+                    parentNode->GP()->lookForChild(WKTConstants::TIMEUNIT)) &&
+                isNull(parentNode->GP()->lookForChild(WKTConstants::UNIT))) {
+                return DateTimeTemporalCS::create(csMap, axisList[0]);
+            } else {
+                // Default to TemporalMeasureCS
+                // TemporalCount could also be possible
+                return TemporalMeasureCS::create(csMap, axisList[0]);
+            }
         }
     } else if (ci_equal(csType, "TemporalDateTime")) { // WKT2-2019
         if (axisCount == 1) {
