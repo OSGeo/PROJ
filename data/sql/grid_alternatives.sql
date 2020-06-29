@@ -224,5 +224,10 @@ VALUES
 ('nzgeoid2016.gtx','nz_linz_nzgeoid2016.tif','nzgeoid2016.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nz_linz_nzgeoid2016.tif',1,1,NULL),
 -- Superseded
 ('nzgeoid09.sid','nz_linz_nzgeoid2009.tif','nzgeoid2009.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nz_linz_nzgeoid2009.tif',1,1,NULL),
-('nzgeoid2009.gtx','nz_linz_nzgeoid2009.tif','nzgeoid2009.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nz_linz_nzgeoid2009.tif',1,1,NULL)
+('nzgeoid2009.gtx','nz_linz_nzgeoid2009.tif','nzgeoid2009.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nz_linz_nzgeoid2009.tif',1,1,NULL),
+-- Brazil
+('CA61_003.gsb','br_ibge_CA61_003.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/br_ibge_CA61_003.tif',1,1,NULL),
+('CA7072_003.gsb','br_ibge_CA7072_003.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/br_ibge_CA7072_003.tif',1,1,NULL),
+('SAD69_003.gsb','br_ibge_SAD69_003.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/br_ibge_SAD69_003.tif',1,1,NULL),
+('SAD96_003.gsb','br_ibge_SAD96_003.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/br_ibge_SAD96_003.tif',1,1,NULL)
 ;
