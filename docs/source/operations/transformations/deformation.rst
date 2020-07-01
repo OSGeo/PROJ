@@ -9,6 +9,8 @@ Kinematic datum shifting utilizing a deformation model
 Perform datum shifts means of a deformation/velocity model.
 
 +-----------------+--------------------------------------------------------------------+
+| **Alias**       | deformation                                                        |
++-----------------+--------------------------------------------------------------------+
 | **Input type**  | Cartesian coordinates (spatial), decimalyears (temporal).          |
 +-----------------+--------------------------------------------------------------------+
 | **Output type** | Cartesian coordinates (spatial), decimalyears (temporal).          |

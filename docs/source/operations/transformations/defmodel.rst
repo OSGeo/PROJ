@@ -7,6 +7,8 @@ Multi-component time-based deformation model
 .. versionadded:: 7.1.0
 
 +---------------------+--------------------------------------------------------------------+
+| **Alias**           | defmodel                                                           |
++---------------------+--------------------------------------------------------------------+
 | **Input type**      | Geodetic or projected coordinates (horizontal), meters (vertical), |
 |                     | decimalyear (temporal)                                             |
 +---------------------+--------------------------------------------------------------------+
