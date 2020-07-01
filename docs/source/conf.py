@@ -68,8 +68,8 @@ copyright = u'1983-{0}'.format(now.year)
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-version = '7.1.0'
-data_version = '1.0'
+version = '7.2.0'
+data_version = '1.1'
 
 # use same |release| as |version|
 release = version
@@ -193,7 +193,7 @@ html_context = {
     'github_user': 'OSGeo',
     'github_repo': 'PROJ',
     # TODO: edit when switching active branch
-    'github_version': '/7.0/docs/source/',
+    'github_version': '/7.1/docs/source/',
     'css_files': [
         '_static/theme_overrides.css',  # override wide tables in RTD theme
     ],
