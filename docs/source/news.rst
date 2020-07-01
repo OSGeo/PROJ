@@ -10,6 +10,10 @@ News
 Updates
 -------
 
++ **New transformations**
+
+  * Add a +proj=defmodel transformation for multi-component time-based deformation models (`#2206 <https://github.com/OSGeo/PROJ/pull/2206>`_):
+
 + **New projections**
 
   * Add square conformal projections from libproject (`#2148 <https://github.com/OSGeo/issues/2148>`_):

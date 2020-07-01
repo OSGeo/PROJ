@@ -4,6 +4,10 @@
  Updates
  -------
 
+  + New transformations:
+
+    o Add a +proj=defmodel transformation for multi-component time-based deformation models (#2206)
+
   + New projections:
 
     o Add square conformal projections from libproject:
