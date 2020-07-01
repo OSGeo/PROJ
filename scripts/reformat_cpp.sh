@@ -27,6 +27,11 @@ for i in "$TOPDIR"/include/proj/*.hpp "$TOPDIR"/include/proj/internal/*.hpp \
          "$TOPDIR"/src/transformations/defmodel_exceptions.hpp \
          "$TOPDIR"/src/transformations/defmodel_impl.hpp \
          "$TOPDIR"/src/transformations/defmodel.cpp \
+         "$TOPDIR"/src/transformations/tinshift.hpp \
+         "$TOPDIR"/src/transformations/tinshift_exceptions.hpp \
+         "$TOPDIR"/src/transformations/tinshift_impl.hpp \
+         "$TOPDIR"/src/transformations/tinshift.cpp \
+         "$TOPDIR"/src/quadtree.hpp \
          ; do
     if ! echo "$i" | grep -q "lru_cache.hpp"; then
         "$SCRIPT_DIR"/reformat.sh "$i";

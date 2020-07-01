@@ -66,6 +66,7 @@ html: .doxygen_up_to_date
 	@sed "s/<em class=\"property\">namespace <\/em>//g" < $(BUILDDIR)/html/development/reference/cpp/cpp_general.html > $(BUILDDIR)/html/development/reference/cpp/cpp_general.html.tmp
 	@mv $(BUILDDIR)/html/development/reference/cpp/cpp_general.html.tmp $(BUILDDIR)/html/development/reference/cpp/cpp_general.html
 	@cp -r ../schemas $(BUILDDIR)/html/schemas
+	@cp ../data/triangulation.schema.json $(BUILDDIR)/html/schemas
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 

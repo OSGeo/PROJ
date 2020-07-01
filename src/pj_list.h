@@ -150,6 +150,7 @@ PROJ_HEAD(gstmerc, "Gauss-Schreiber Transverse Mercator (aka Gauss-Laborde Reuni
 PROJ_HEAD(tcc, "Transverse Central Cylindrical")
 PROJ_HEAD(tcea, "Transverse Cylindrical Equal Area")
 PROJ_HEAD(times, "Times Projection")
+PROJ_HEAD(tinshift, "Triangulation based transformation")
 PROJ_HEAD(tissot, "Tissot Conic")
 PROJ_HEAD(tmerc, "Transverse Mercator")
 PROJ_HEAD(tobmerc, "Tobler-Mercator")
