@@ -193,7 +193,7 @@ html_context = {
     'github_user': 'OSGeo',
     'github_repo': 'PROJ',
     # TODO: edit when switching active branch
-    'github_version': '/7.0/docs/source/',
+    'github_version': '/7.1/docs/source/',
     'css_files': [
         '_static/theme_overrides.css',  # override wide tables in RTD theme
     ],
