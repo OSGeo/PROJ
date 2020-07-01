@@ -5,6 +5,141 @@ News
 
 7.0.1 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
+*July 1st 2020*
+
+Updates
+-------
+
++ **New projections**
+
+  * Add square conformal projections from libproject (`#2148 <https://github.com/OSGeo/issues/2148>`_):
+
+    - :ref:`adams_hemi`
+
+    - :ref:`adams_ws1`
+
+    - :ref:`adams_ws2`
+
+    - :ref:`guyou`
+
+    - :ref:`peirce_q`
+
+  * Adams Square II: map ESRI WKT to PROJ string, and implement iterative
+    inverse method (`#2157 <https://github.com/OSGeo/issues/2157>`_)
+
+  * Added :ref:`igh_o` projection (`#2226 <https://github.com/OSGeo/issues/2226>`_)
+
+  * Add :ref:`wink2` inverse by generic inversion of forward method (`#2243 <https://github.com/OSGeo/issues/2243>`_)
+
++ **Database**
+
+  * Update to EPSG 9.8.12, ESRI 10.8.1 and import scope and remarks for
+    conversion (`#2238 <https://github.com/OSGeo/issues/2238>`_) (#2267)
+
+  * Map the Behrman projection to ``cae`` when converting ESRI CRSes (`#1986 <https://github.com/OSGeo/issues/1986>`_)
+
+  * Support conversion of Flat_Polar_Quartic projection method (`#1987 <https://github.com/OSGeo/issues/1987>`_)
+
+  * Register 4 new Austrian height grids (see https://github.com/OSGeo/PROJ-data/pull/13)
+    and handle 'Vertical Offset by Grid Interpolation (BEV AT)' method (`#1989 <https://github.com/OSGeo/issues/1989>`_)
+
+  * Add ESRI projection method mappings for Mercator_Variant_A, Mercator_Variant_B
+    and Transverse_Cylindrical_Equal_Area and various grid mappings (`#2020 <https://github.com/OSGeo/issues/2020>`_) (#2195)
+
+  * Map ESRI Transverse_Mercator_Complex to Transverse Mercator (`#2040 <https://github.com/OSGeo/issues/2040>`_)
+
+  * Register grids for New Caledonia (see https://github.com/OSGeo/PROJ-data/pull/16) (`#2051 <https://github.com/OSGeo/issues/2051>`_) (#2239)
+
+  * Register NZGD2000 -> ITRF96 transformation for NZGD2000 database (`#2248 <https://github.com/OSGeo/issues/2248>`_)
+
+  * Register geoid file for UK added
+    (see https://github.com/OSGeo//PROJ-data/pull/25() (`#2250 <https://github.com/OSGeo/issues/2250>`_)
+
+  * Register Slovakian geoid transformations with needed code changes (`#2259 <https://github.com/OSGeo/issues/2259>`_)
+
+  * Register Spanish SPED2ETV2 grid for ED50->ETRS89 (`#2261 <https://github.com/OSGeo/issues/2261>`_)
+
++ **API**
+
+  * Add API function :c:func:`proj_get_units_from_database()` (`#2065 <https://github.com/OSGeo/issues/2065>`_)
+
+  * Add API function :c:func:`proj_get_suggested_operation()` (`#2068 <https://github.com/OSGeo/issues/2068>`_)
+
+  * Add API functions :c:func:`proj_degree_input()` and :c:func:`proj_degree_output()` (`#2144 <https://github.com/OSGeo/issues/2144>`_)
+
+  * Moved :c:func:`proj_context_get_url_endpoint()` & :c:func:`proj_context_get_user_writable_directory()`
+    from ``proj_experimental.h`` to ``proj.h`` (`#2162 <https://github.com/OSGeo/issues/2162>`_)
+
+  * :c:func:`createFromUserInput()`: allow compound CRS with the 2 parts given by names,
+    e.g. 'WGS 84 + EGM96 height' (`#2126 <https://github.com/OSGeo/issues/2126>`_)
+
+  * :c:func:`createOperations()`: when converting CompoundCRS<-->Geographic3DCrs, do not
+    use discard change of ellipsoidal height if a Helmert transformation is
+    involved (`#2227 <https://github.com/OSGeo/issues/2227>`_)
+
++ **Optimizations**
+
+  * ``tmerc/utm``: add a +algo=auto/evenden_snyder/poder_engsager parameter (`#2030 <https://github.com/OSGeo/issues/2030>`_)
+
+  * Extended ``tmerc`` (Poder/Engsager): speed optimizations (`#2036 <https://github.com/OSGeo/issues/2036>`_)
+
+  * Approximate ``tmerc`` (Snyder): speed optimizations (`#2039 <https://github.com/OSGeo/issues/2039>`_)
+
+  * :c:func:`pj_phi2()`: speed-up computation (and thus inverse ellipsoidal Mercator and LCC) (`#2052 <https://github.com/OSGeo/issues/2052>`_)
+
+  * Inverse ``cart``: speed-up computation by 33% (`#2145 <https://github.com/OSGeo/issues/2145>`_)
+
+  * Extended ``tmerc``: speed-up forward path by ~5% (`#2147 <https://github.com/OSGeo/issues/2147>`_)
+
++ **Various**
+
+  * Follow PDAL's CMake RPATH strategy (`#2009 <https://github.com/OSGeo/issues/2009>`_)
+
+  * WKT import/export: add support for WKT1_ESRI VERTCS synta (`#2024 <https://github.com/OSGeo/issues/2024>`_)
+
+  * :program:`projinfo`: add a ``--hide-ballpark`` option (`#2127 <https://github.com/OSGeo/issues/2127>`_)
+
+  * :program:`gie`: implement a strict mode with ``<gie-strict> </gie-strict>`` (`#2168 <https://github.com/OSGeo/issues/2168>`_)
+
+  * Allow importing WKT1 COMPD_CS with a VERT_DATUM[Ellipsoid,2002] (`#2229 <https://github.com/OSGeo/issues/2229>`_)
+
+  * Add runtime checking that sqlite3 is >= 3.11 (`#2235 <https://github.com/OSGeo/issues/2235>`_)
+
+
+Bug fixes
+---------
+
+* :cpp:func:`createOperations()`: do not remove ballpark transformation if there are only grid
+  based operations, even if they cover the whole area of use (`#2155 <https://github.com/OSGeo/issues/2155>`_)
+
+* :cpp:func:`createFromProjString()`: handle default parameters of '+krovak +type=crs', and
+  handle ``+czech`` correctly (`#2200 <https://github.com/OSGeo/issues/2200>`_)
+
+* :cpp:func:`ProjectedCRS::identify()`: fix identification of EPSG:3059 (`#2215 <https://github.com/OSGeo/issues/2215>`_)
+
+* Database: add a 'WGS84' alias for the EPSG:4326 CRS (`#2218 <https://github.com/OSGeo/issues/2218>`_)
+
+* Fixes related to CompoundCRS and BoundCRS (`#2222 <https://github.com/OSGeo/issues/2222>`_)
+
+* Avoid 2 warnings about missing database indices (`#2223 <https://github.com/OSGeo/issues/2223>`_)
+
+* Make ``projinfo --3d --boundcrs-to-wgs84`` work better (`#2224 <https://github.com/OSGeo/issues/2224>`_)
+
+* Many fixes regarding BoundCRS, CompoundCRS, Geographic3D CRS with
+  non-metre units (`#2234 <https://github.com/OSGeo/issues/2234>`_)
+
+* Fix identification of (one of the) ESRI WKT formulations of EPSG:3035 (`#2240 <https://github.com/OSGeo/issues/2240>`_)
+
+* Avoid using deprecated and removed Windows API function with Mingw32 (`#2246 <https://github.com/OSGeo/issues/2246>`_)
+
+* :cpp:func:`normalizeForVisualization()`: make it switch axis for EPSG:5482
+  (RSRGD2000 / RSPS2000) (`#2256 <https://github.com/OSGeo/issues/2256>`_)
+
+* Fix access violation in :c:func:`proj_context_get_database_metadata()` (`#2260 <https://github.com/OSGeo/issues/2260>`_)
+
+
+7.0.1 Release Notes
+++++++++++++++++++++++++++++++++++++++++
 *May 1st 2020*
 
 Updates
