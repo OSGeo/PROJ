@@ -4013,7 +4013,7 @@ TEST(wkt_parse, TemporalDatum_no_calendar) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, dateTimeTemporalCRS_WKT2) {
+TEST(wkt_parse, dateTimeTemporalCRS_WKT2_2015) {
     auto wkt = "TIMECRS[\"Temporal CRS\",\n"
                "    TDATUM[\"Gregorian calendar\",\n"
                "        TIMEORIGIN[0000-01-01]],\n"
@@ -4117,6 +4117,34 @@ TEST(wkt_parse, temporalCountCRSWithoutConvFactor_WKT2_2019) {
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().name(), "hour");
     EXPECT_EQ(crs->coordinateSystem()->axisList()[0]->unit().conversionToSI(),
               0.0);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, temporalMeasureCRS_WKT2_2015) {
+    auto wkt = "TIMECRS[\"GPS Time\",\n"
+               "    TDATUM[\"Time origin\",\n"
+               "        TIMEORIGIN[1980-01-01T00:00:00.0Z]],\n"
+               "    CS[temporal,1],\n"
+               "    AXIS[\"time\",future],\n"
+               "    TIMEUNIT[\"day\",86400.0]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<TemporalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->nameStr(), "GPS Time");
+    auto tdatum = crs->datum();
+    EXPECT_EQ(tdatum->nameStr(), "Time origin");
+    EXPECT_EQ(tdatum->temporalOrigin().toString(), "1980-01-01T00:00:00.0Z");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<TemporalMeasureCS>(
+                    crs->coordinateSystem()) != nullptr);
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 1U);
+    auto axis = cs->axisList()[0];
+    EXPECT_EQ(axis->nameStr(), "Time");
+    EXPECT_EQ(axis->unit().name(), "day");
+    EXPECT_EQ(axis->unit().conversionToSI(), 86400.0);
 }
 
 // ---------------------------------------------------------------------------
