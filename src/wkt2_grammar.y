@@ -561,7 +561,7 @@ conversion_factor: unsigned_numeric_literal
 
 // coordinate_system: spatial_cs |  temporalcountmeasure_cs | ordinatedatetime_cs
 
-coordinate_system_scope_extent_identifier_remark: spatial_cs_scope_extent_identifier_remark | temporalcountmeasure_cs_scope_extent_identifier_remark | ordinaldatetime_cs_scope_extent_identifier_remark
+coordinate_system_scope_extent_identifier_remark: spatial_cs_scope_extent_identifier_remark | wkt2015temporal_cs_scope_extent_identifier_remark | temporalcountmeasure_cs_scope_extent_identifier_remark | ordinaldatetime_cs_scope_extent_identifier_remark
 
 spatial_cs_scope_extent_identifier_remark: cs_keyword left_delimiter spatial_cs_type
             wkt_separator dimension
@@ -574,6 +574,18 @@ opt_separator_spatial_axis_list_opt_separator_cs_unit_scope_extent_identifier_re
   | wkt_separator cs_unit opt_separator_scope_extent_identifier_remark
   | wkt_separator spatial_axis opt_separator_spatial_axis_list_opt_separator_cs_unit_scope_extent_identifier_remark
   | wkt_separator no_opt_separator_scope_extent_identifier_remark
+
+wkt2015temporal_cs_scope_extent_identifier_remark: cs_keyword left_delimiter T_TEMPORAL
+            wkt_separator dimension
+            opt_separator_identifier_list
+            right_delimiter
+            wkt_separator temporalcountmeasure_axis
+            opt_separator_cs_unit_scope_extent_identifier_remark
+
+opt_separator_cs_unit_scope_extent_identifier_remark:
+    | wkt_separator cs_unit
+    | wkt_separator cs_unit wkt_separator no_opt_separator_scope_extent_identifier_remark
+    | wkt_separator no_opt_separator_scope_extent_identifier_remark
 
 temporalcountmeasure_cs_scope_extent_identifier_remark: cs_keyword left_delimiter temporalcountmeasure_cs_type
             wkt_separator dimension
@@ -597,8 +609,7 @@ cs_keyword: T_CS
 
 spatial_cs_type: T_AFFINE | T_CARTESIAN | T_CYLINDRICAL | T_ELLIPSOIDAL | T_LINEAR | T_PARAMETRIC | T_POLAR | T_SPHERICAL | T_VERTICAL
 
-// T_TEMPORAL: WKT2_2015
-temporalcountmeasure_cs_type: T_TEMPORAL | T_TEMPORALCOUNT | T_TEMPORALMEASURE
+temporalcountmeasure_cs_type: T_TEMPORALCOUNT | T_TEMPORALMEASURE
 
 ordinaldatetime_cs_type: T_ORDINAL | T_TEMPORALDATETIME
 
