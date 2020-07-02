@@ -266,10 +266,11 @@ Create a build directory and step into it::
     mkdir build
     cd build
 
-From the build directory you can now configure CMake and build the binaries::
+From the build directory you can now configure CMake, build and install the binaries::
 
     cmake ..
     cmake --build .
+    cmake --build . --target install
 
 On Windows, one may need to specify generator::
 
