@@ -31,7 +31,8 @@ Synopsis
     |    {object_reference} | (-s {srs_def} -t {srs_def})
     |
 
-    where {object_definition} or {srs_def} is
+    where {object_definition} or {srs_def} is one of the possibilities accepted
+    by :c:func:`proj_create`
 
     - a proj-string,
     - a WKT string,
@@ -48,7 +49,7 @@ Synopsis
       (*added in 6.2*)
     - a OGC URN combining references for concatenated operations
       (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
-    - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.1/projjson.schema.json (*added in 6.2*)
+    - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.2/projjson.schema.json (*added in 6.2*)
     - a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (*added in 7.1*)
 
     {object_reference} is a filename preceded by the '@' character.  The
