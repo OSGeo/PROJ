@@ -270,7 +270,7 @@ From the build directory you can now configure CMake, build and install the bina
 
     cmake ..
     cmake --build .
-    cmake --install .
+    cmake --build . --target install
 
 On Windows, one may need to specify generator::
 
