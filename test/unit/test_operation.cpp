@@ -8406,10 +8406,97 @@ TEST(operation, vertCRS_to_vertCRS_New_Zealand_context) {
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, compoundCRS_to_geogCRS_3D) {
+TEST(operation, projCRS_3D_to_geogCRS_3D) {
 
     auto compoundcrs_ft_obj = PROJStringParser().createFromPROJString(
         "+proj=merc +vunits=ft +type=crs");
+    auto proj3DCRS_ft = nn_dynamic_pointer_cast<CRS>(compoundcrs_ft_obj);
+    ASSERT_TRUE(proj3DCRS_ft != nullptr);
+
+    auto geogcrs_m_obj = PROJStringParser().createFromPROJString(
+        "+proj=longlat +vunits=m +type=crs");
+    auto geogcrs_m = nn_dynamic_pointer_cast<CRS>(geogcrs_m_obj);
+    ASSERT_TRUE(geogcrs_m != nullptr);
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(proj3DCRS_ft), NN_CHECK_ASSERT(geogcrs_m));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_FALSE(op->hasBallparkTransformation());
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline "
+                  "+step +proj=unitconvert +xy_in=m +z_in=ft "
+                  "+xy_out=m +z_out=m "
+                  "+step +inv +proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 "
+                  "+ellps=WGS84 "
+                  "+step +proj=unitconvert +xy_in=rad +z_in=m "
+                  "+xy_out=deg +z_out=m");
+    }
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(geogcrs_m), NN_CHECK_ASSERT(proj3DCRS_ft));
+        ASSERT_TRUE(op != nullptr);
+        EXPECT_FALSE(op->hasBallparkTransformation());
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline "
+                  "+step +proj=unitconvert +z_in=m +z_out=ft "
+                  "+step +proj=unitconvert +xy_in=deg +z_in=ft "
+                  "+xy_out=rad +z_out=m "
+                  "+step +proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 "
+                  "+step +proj=unitconvert +xy_in=m +z_in=m "
+                  "+xy_out=m +z_out=ft");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_to_geogCRS_3D) {
+
+    auto compoundcrs_ft_obj = WKTParser().createFromWKT(
+        "COMPOUNDCRS[\"unknown\",\n"
+        "    PROJCRS[\"unknown\",\n"
+        "        BASEGEOGCRS[\"unknown\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                ID[\"EPSG\",6326]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8901]]],\n"
+        "        CONVERSION[\"unknown\",\n"
+        "            METHOD[\"Mercator (variant A)\",\n"
+        "                ID[\"EPSG\",9804]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",1,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"(E)\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"metre\",1,\n"
+        "                    ID[\"EPSG\",9001]]],\n"
+        "            AXIS[\"(N)\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"metre\",1,\n"
+        "                    ID[\"EPSG\",9001]]]],\n"
+        "    VERTCRS[\"unknown\",\n"
+        "        VDATUM[\"unknown\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"foot\",0.3048,\n"
+        "                    ID[\"EPSG\",9002]]]]]");
     auto compoundcrs_ft = nn_dynamic_pointer_cast<CRS>(compoundcrs_ft_obj);
     ASSERT_TRUE(compoundcrs_ft != nullptr);
 
@@ -9307,9 +9394,78 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, compoundCRS_with_non_meter_horiz_and_vertical_to_geog) {
+TEST(operation, proj3DCRS_with_non_meter_horiz_and_vertical_to_geog) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=utm +zone=31 +datum=WGS84 +units=us-ft +vunits=us-ft +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), authFactory->createCoordinateReferenceSystem("4326"),
+        ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    // Check that vertical unit conversion is done just once
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=us-ft +z_in=us-ft "
+              "+xy_out=m +z_out=m "
+              "+step +inv +proj=utm +zone=31 +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_with_non_meter_horiz_and_vertical_to_geog) {
+    auto objSrc = WKTParser().createFromWKT(
+        "COMPOUNDCRS[\"unknown\",\n"
+        "    PROJCRS[\"unknown\",\n"
+        "        BASEGEOGCRS[\"unknown\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                ID[\"EPSG\",6326]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8901]]],\n"
+        "        CONVERSION[\"UTM zone 31N\",\n"
+        "            METHOD[\"Transverse Mercator\",\n"
+        "                ID[\"EPSG\",9807]],\n"
+        "            PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8801]],\n"
+        "            PARAMETER[\"Longitude of natural origin\",3,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8802]],\n"
+        "            PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "                SCALEUNIT[\"unity\",1],\n"
+        "                ID[\"EPSG\",8805]],\n"
+        "            PARAMETER[\"False easting\",500000,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8806]],\n"
+        "            PARAMETER[\"False northing\",0,\n"
+        "                LENGTHUNIT[\"metre\",1],\n"
+        "                ID[\"EPSG\",8807]],\n"
+        "            ID[\"EPSG\",16031]],\n"
+        "        CS[Cartesian,2],\n"
+        "            AXIS[\"(E)\",east,\n"
+        "                ORDER[1],\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219,\n"
+        "                    ID[\"EPSG\",9003]]],\n"
+        "            AXIS[\"(N)\",north,\n"
+        "                ORDER[2],\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219,\n"
+        "                    ID[\"EPSG\",9003]]]],\n"
+        "    VERTCRS[\"unknown\",\n"
+        "        VDATUM[\"unknown\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height (H)\",up,\n"
+        "                LENGTHUNIT[\"US survey foot\",0.304800609601219,\n"
+        "                    ID[\"EPSG\",9003]]]]]"
+
+        );
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto authFactory =

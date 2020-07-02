@@ -9296,18 +9296,11 @@ TEST(io, projparse_projected_to_meter_unknown) {
 TEST(io, projparse_projected_vunits) {
     auto obj = PROJStringParser().createFromPROJString(
         "+proj=tmerc +vunits=ft +type=crs");
-    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
-    WKTFormatterNNPtr f(WKTFormatter::create());
-    f->simulCurNodeHasId();
-    f->setMultiLine(false);
-    crs->exportToWKT(f.get());
-    auto wkt = f->toString();
-    EXPECT_TRUE(wkt.find("CS[Cartesian,2]") != std::string::npos) << wkt;
-    EXPECT_TRUE(wkt.find("CS[vertical,1],AXIS[\"gravity-related height "
-                         "(H)\",up,LENGTHUNIT[\"foot\",0.3048]") !=
-                std::string::npos)
-        << wkt;
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 3U);
+    EXPECT_EQ(cs->axisList()[2]->unit().name(), "foot");
 }
 
 // ---------------------------------------------------------------------------
