@@ -7877,8 +7877,7 @@ struct PROJStringParser::Private {
     GeodeticReferenceFrameNNPtr buildDatum(Step &step,
                                            const std::string &title);
     GeographicCRSNNPtr buildGeographicCRS(int iStep, int iUnitConvert,
-                                          int iAxisSwap, bool ignoreVUnits,
-                                          bool ignorePROJAxis);
+                                          int iAxisSwap, bool ignorePROJAxis);
     GeodeticCRSNNPtr buildGeocentricCRS(int iStep, int iUnitConvert);
     CRSNNPtr buildProjectedCRS(int iStep, GeographicCRSNNPtr geogCRS,
                                int iUnitConvert, int iAxisSwap);
@@ -7893,8 +7892,7 @@ struct PROJStringParser::Private {
                     AxisType axisType, bool ignorePROJAxis);
 
     EllipsoidalCSNNPtr buildEllipsoidalCS(int iStep, int iUnitConvert,
-                                          int iAxisSwap, bool ignoreVUnits,
-                                          bool ignorePROJAxis);
+                                          int iAxisSwap, bool ignorePROJAxis);
 };
 
 // ---------------------------------------------------------------------------
@@ -8623,10 +8621,8 @@ PROJStringParser::Private::processAxisSwap(Step &step,
 
 // ---------------------------------------------------------------------------
 
-EllipsoidalCSNNPtr
-PROJStringParser::Private::buildEllipsoidalCS(int iStep, int iUnitConvert,
-                                              int iAxisSwap, bool ignoreVUnits,
-                                              bool ignorePROJAxis) {
+EllipsoidalCSNNPtr PROJStringParser::Private::buildEllipsoidalCS(
+    int iStep, int iUnitConvert, int iAxisSwap, bool ignorePROJAxis) {
     auto &step = steps_[iStep];
     assert(iUnitConvert < 0 ||
            ci_equal(steps_[iUnitConvert].name, "unitconvert"));
@@ -8661,7 +8657,7 @@ PROJStringParser::Private::buildEllipsoidalCS(int iStep, int iUnitConvert,
         AxisAbbreviation::h, AxisDirection::UP,
         buildUnit(step, "vunits", "vto_meter"));
 
-    return (!ignoreVUnits && !hasParamValue(step, "geoidgrids") &&
+    return (!hasParamValue(step, "geoidgrids") &&
             (hasParamValue(step, "vunits") || hasParamValue(step, "vto_meter")))
                ? EllipsoidalCS::create(emptyPropertyMap, axis[0], axis[1], up)
                : EllipsoidalCS::create(emptyPropertyMap, axis[0], axis[1]);
@@ -8688,10 +8684,8 @@ namespace {
 template <class T> inline void ignoreRetVal(T) {}
 }
 
-GeographicCRSNNPtr
-PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
-                                              int iAxisSwap, bool ignoreVUnits,
-                                              bool ignorePROJAxis) {
+GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
+    int iStep, int iUnitConvert, int iAxisSwap, bool ignorePROJAxis) {
     auto &step = steps_[iStep];
 
     const bool l_isGeographicStep = isGeographicStep(step.name);
@@ -8705,8 +8699,8 @@ PROJStringParser::Private::buildGeographicCRS(int iStep, int iUnitConvert,
 
     auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
                                    title.empty() ? "unknown" : title);
-    auto cs = buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignoreVUnits,
-                                 ignorePROJAxis);
+    auto cs =
+        buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignorePROJAxis);
 
     if (l_isGeographicStep &&
         (hasUnusedParameters(step) ||
@@ -9262,15 +9256,18 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
             return DerivedGeographicCRS::create(
                 PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
                 geogCRS, NN_NO_CHECK(conv),
-                buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, false,
-                                   false));
+                buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, false));
         }
     }
 
     std::vector<CoordinateSystemAxisNNPtr> axis =
         processAxisSwap(step, unit, iAxisSwap, axisType, false);
 
-    auto cs = CartesianCS::create(emptyPropertyMap, axis[0], axis[1]);
+    auto csGeogCRS = geogCRS->coordinateSystem();
+    auto cs = csGeogCRS->axisList().size() == 2
+                  ? CartesianCS::create(emptyPropertyMap, axis[0], axis[1])
+                  : CartesianCS::create(emptyPropertyMap, axis[0], axis[1],
+                                        csGeogCRS->axisList()[2]);
 
     auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
                                    title.empty() ? "unknown" : title);
@@ -9286,19 +9283,6 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                   props.set(IdentifiedObject::NAME_KEY, webMercatorName), cs)
             : ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
 
-    if (!hasParamValue(step, "geoidgrids") &&
-        (hasParamValue(step, "vunits") || hasParamValue(step, "vto_meter"))) {
-        auto vdatum = VerticalReferenceFrame::create(mapWithUnknownName);
-
-        const UnitOfMeasure vunit = buildUnit(step, "vunits", "vto_meter");
-
-        auto vcrs =
-            VerticalCRS::create(mapWithUnknownName, vdatum,
-                                VerticalCS::createGravityRelatedHeight(vunit));
-
-        crs = CompoundCRS::create(mapWithUnknownName,
-                                  std::vector<CRSNNPtr>{crs, vcrs});
-    }
     return crs;
 }
 
@@ -9766,13 +9750,11 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             iSecondGeogStep < 0 && iProjStep < 0 &&
             (iFirstUnitConvert < 0 || iSecondUnitConvert < 0) &&
             (iFirstAxisSwap < 0 || iSecondAxisSwap < 0)) {
-            const bool ignoreVUnits = false;
             // First run is dry run to mark all recognized/unrecognized tokens
             for (int iter = 0; iter < 2; iter++) {
                 auto obj = d->buildBoundOrCompoundCRSIfNeeded(
-                    0,
-                    d->buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                          iFirstAxisSwap, ignoreVUnits, false));
+                    0, d->buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
+                                             iFirstAxisSwap, false));
                 if (iter == 1) {
                     return nn_static_pointer_cast<BaseObject>(obj);
                 }
@@ -9783,7 +9765,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             iSecondGeogStep < 0) {
             if (iFirstGeogStep < 0)
                 iFirstGeogStep = iProjStep;
-            const bool ignoreVUnits = true;
             // First run is dry run to mark all recognized/unrecognized tokens
             for (int iter = 0; iter < 2; iter++) {
                 auto obj = d->buildBoundOrCompoundCRSIfNeeded(
@@ -9796,7 +9777,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                                                 : -1,
                             iFirstAxisSwap < iFirstGeogStep ? iFirstAxisSwap
                                                             : -1,
-                            ignoreVUnits, true),
+                            true),
                         iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
                                                            : iFirstUnitConvert,
                         iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap
