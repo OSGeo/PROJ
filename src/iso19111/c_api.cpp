@@ -3356,11 +3356,11 @@ PJ *proj_create_vertical_crs_ex(
 PJ *proj_create_compound_crs(PJ_CONTEXT *ctx, const char *crs_name,
                              PJ *horiz_crs, PJ *vert_crs) {
 
+    SANITIZE_CTX(ctx);
     if (!horiz_crs || !vert_crs) {
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
-    SANITIZE_CTX(ctx);
     auto l_horiz_crs = std::dynamic_pointer_cast<CRS>(horiz_crs->iso_obj);
     if (!l_horiz_crs) {
         return nullptr;
@@ -4232,6 +4232,7 @@ static CoordinateSystemAxisNNPtr createAxis(const PJ_AXIS_DESCRIPTION &axis) {
 
 PJ *proj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
                    int axis_count, const PJ_AXIS_DESCRIPTION *axis) {
+    SANITIZE_CTX(ctx);
     try {
         switch (type) {
         case PJ_CS_TYPE_UNKNOWN:
@@ -4360,6 +4361,7 @@ PJ *proj_create_cs(PJ_CONTEXT *ctx, PJ_COORDINATE_SYSTEM_TYPE type,
 PJ *proj_create_cartesian_2D_cs(PJ_CONTEXT *ctx, PJ_CARTESIAN_CS_2D_TYPE type,
                                 const char *unit_name,
                                 double unit_conv_factor) {
+    SANITIZE_CTX(ctx);
     try {
         switch (type) {
         case PJ_CART2D_EASTING_NORTHING:
@@ -4414,6 +4416,7 @@ PJ *proj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
                                   PJ_ELLIPSOIDAL_CS_2D_TYPE type,
                                   const char *unit_name,
                                   double unit_conv_factor) {
+    SANITIZE_CTX(ctx);
     try {
         switch (type) {
         case PJ_ELLPS2D_LONGITUDE_LATITUDE:
@@ -4460,6 +4463,7 @@ PJ *proj_create_ellipsoidal_3D_cs(PJ_CONTEXT *ctx,
                                   double horizontal_angular_unit_conv_factor,
                                   const char *vertical_linear_unit_name,
                                   double vertical_linear_unit_conv_factor) {
+    SANITIZE_CTX(ctx);
     try {
         switch (type) {
         case PJ_ELLPS3D_LONGITUDE_LATITUDE_HEIGHT:
