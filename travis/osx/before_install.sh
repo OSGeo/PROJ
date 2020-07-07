@@ -4,6 +4,7 @@ set -e
 
 export PATH=$HOME/Library/Python/3.7/bin:$PATH
 
+brew unlink python@2
 brew update
 brew install ccache
 #brew upgrade sqlite3
