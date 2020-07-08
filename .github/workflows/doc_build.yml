@@ -1,0 +1,21 @@
+name: Doc building
+
+on: [push, pull_request]
+
+jobs:
+
+  doc_building:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Requirements
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip python3-setuptools python3-dev python3-wheel doxygen gcc
+          sudo pip3 install sphinx sphinx-rtd-theme sphinxcontrib-bibtex breathe
+
+      - name: Build doc
+        run: |
+            (cd docs; make html)
