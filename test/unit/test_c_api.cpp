@@ -718,26 +718,23 @@ TEST_F(CApi, proj_get_type) {
                    "     CALENDAR[\"proleptic Gregorian\"],\n"
                    "     TIMEORIGIN[0000-01-01]]";
 
-        auto datum = proj_create_from_wkt(
-            m_ctxt, wkt,
-            nullptr, nullptr, nullptr);
+        auto datum =
+            proj_create_from_wkt(m_ctxt, wkt, nullptr, nullptr, nullptr);
         ObjectKeeper keeper(datum);
         ASSERT_NE(datum, nullptr);
         EXPECT_EQ(proj_get_type(datum), PJ_TYPE_TEMPORAL_DATUM);
     }
     {
         auto wkt = "ENGINEERINGDATUM[\"Engineering datum\"]";
-        auto datum = proj_create_from_wkt(
-            m_ctxt, wkt,
-            nullptr, nullptr, nullptr);
+        auto datum =
+            proj_create_from_wkt(m_ctxt, wkt, nullptr, nullptr, nullptr);
         ObjectKeeper keeper(datum);
         EXPECT_EQ(proj_get_type(datum), PJ_TYPE_ENGINEERING_DATUM);
     }
     {
         auto wkt = "PDATUM[\"Mean Sea Level\",ANCHOR[\"1013.25 hPa at 15°C\"]]";
-        auto datum = proj_create_from_wkt(
-            m_ctxt, wkt,
-            nullptr, nullptr, nullptr);
+        auto datum =
+            proj_create_from_wkt(m_ctxt, wkt, nullptr, nullptr, nullptr);
         ObjectKeeper keeper(datum);
         EXPECT_EQ(proj_get_type(datum), PJ_TYPE_PARAMETRIC_DATUM);
     }
@@ -1188,7 +1185,8 @@ TEST_F(CApi, proj_get_codes_from_database) {
         ListFreer feer(list);
         if (type == PJ_TYPE_TEMPORAL_CRS || type == PJ_TYPE_BOUND_CRS ||
             type == PJ_TYPE_UNKNOWN || type == PJ_TYPE_TEMPORAL_DATUM ||
-            type == PJ_TYPE_ENGINEERING_DATUM || type == PJ_TYPE_PARAMETRIC_DATUM) {
+            type == PJ_TYPE_ENGINEERING_DATUM ||
+            type == PJ_TYPE_PARAMETRIC_DATUM) {
             EXPECT_EQ(list, nullptr) << type;
         } else {
             ASSERT_NE(list, nullptr) << type;
