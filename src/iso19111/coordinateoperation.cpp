@@ -6282,6 +6282,8 @@ void Conversion::_exportToPROJString(
         bEllipsoidParametersDone = true;
     }
 
+    auto l_targetCRS = targetCRS();
+
     bool bAxisSpecFound = false;
     if (!bConversionDone) {
         const MethodMapping *mapping = getMapping(l_method.get());
@@ -6291,14 +6293,32 @@ void Conversion::_exportToPROJString(
                 formatter->addParam("approx");
             }
             if (mapping->proj_name_aux) {
+                bool addAux = true;
                 if (internal::starts_with(mapping->proj_name_aux, "axis=")) {
+                    if (mapping->epsg_code == EPSG_CODE_METHOD_KROVAK) {
+                        auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(
+                            l_targetCRS.get());
+                        if (projCRS) {
+                            const auto &axisList =
+                                projCRS->coordinateSystem()->axisList();
+                            if (axisList[0]->direction() ==
+                                    cs::AxisDirection::WEST &&
+                                axisList[1]->direction() ==
+                                    cs::AxisDirection::SOUTH) {
+                                formatter->addParam("czech");
+                                addAux = false;
+                            }
+                        }
+                    }
                     bAxisSpecFound = true;
                 }
-                auto kv = split(mapping->proj_name_aux, '=');
-                if (kv.size() == 2) {
-                    formatter->addParam(kv[0], kv[1]);
-                } else {
-                    formatter->addParam(mapping->proj_name_aux);
+                if (addAux) {
+                    auto kv = split(mapping->proj_name_aux, '=');
+                    if (kv.size() == 2) {
+                        formatter->addParam(kv[0], kv[1]);
+                    } else {
+                        formatter->addParam(mapping->proj_name_aux);
+                    }
                 }
             }
 
@@ -6352,7 +6372,6 @@ void Conversion::_exportToPROJString(
         }
     }
 
-    auto l_targetCRS = targetCRS();
     if (l_targetCRS && applyTargetCRSModifiers) {
         crs::CRS *horiz = l_targetCRS.get();
         const auto compound = dynamic_cast<const crs::CompoundCRS *>(horiz);
