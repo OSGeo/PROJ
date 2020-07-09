@@ -6165,6 +6165,25 @@ void Conversion::_exportToPROJString(
                 std::string("Unsupported value for ") +
                 EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
         }
+    } else if (methodEPSGCode ==
+               EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED) {
+        // We map TMSO to tmerc with axis=wsu. This only works if false easting
+        // and northings are zero, which is the case in practice for South
+        // African and Namibian EPSG CRS
+        const auto falseEasting = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_FALSE_EASTING, common::UnitOfMeasure::METRE);
+        if (falseEasting != 0) {
+            throw io::FormattingException(
+                std::string("Unsupported value for ") +
+                EPSG_NAME_PARAMETER_FALSE_EASTING);
+        }
+        const auto falseNorthing = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_FALSE_NORTHING, common::UnitOfMeasure::METRE);
+        if (falseNorthing != 0) {
+            throw io::FormattingException(
+                std::string("Unsupported value for ") +
+                EPSG_NAME_PARAMETER_FALSE_NORTHING);
+        }
         // PROJ.4 specific hack for webmercator
     } else if (formatter->getCRSExport() &&
                methodEPSGCode ==

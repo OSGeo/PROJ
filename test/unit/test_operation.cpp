@@ -1342,8 +1342,9 @@ TEST(operation, tmerc_south_oriented_export) {
         PropertyMap(), Angle(1), Angle(2), Scale(3), Length(4), Length(5));
     EXPECT_TRUE(conv->validateParameters().empty());
 
-    EXPECT_EQ(conv->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=tmerc +axis=wsu +lat_0=1 +lon_0=2 +k=3 +x_0=4 +y_0=5");
+    // False easting/northing != 0 not supported
+    EXPECT_THROW(conv->exportToPROJString(PROJStringFormatter::create().get()),
+                 FormattingException);
 
     EXPECT_EQ(conv->exportToWKT(WKTFormatter::create().get()),
               "CONVERSION[\"Transverse Mercator (South Orientated)\",\n"
