@@ -1306,13 +1306,6 @@ TEST(wkt_parse, wkt1_krovak_south_west) {
               expectedPROJString);
 
     obj = PROJStringParser().createFromPROJString(
-        "+proj=krovak +czech +type=crs");
-    crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
-    ASSERT_TRUE(crs2 != nullptr);
-    EXPECT_EQ(crs2->exportToPROJString(PROJStringFormatter::create().get()),
-              expectedPROJString);
-
-    obj = PROJStringParser().createFromPROJString(
         "+type=crs +proj=pipeline +step +proj=unitconvert +xy_in=deg "
         "+xy_out=rad "
         "+step +proj=krovak +lat_0=49.5 "
@@ -8703,6 +8696,33 @@ TEST(io, projparse_krovak_axis_swu) {
     crs->exportToWKT(f.get());
     auto wkt = f->toString();
     EXPECT_TRUE(wkt.find("METHOD[\"Krovak\",ID[\"EPSG\",9819]]") !=
+                std::string::npos)
+        << wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_krovak_czech) {
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=krovak +czech +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=krovak +czech +lat_0=49.5 +lon_0=24.8333333333333 "
+              "+alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 "
+              "+ellps=bessel +units=m +no_defs +type=crs");
+    WKTFormatterNNPtr f(WKTFormatter::create());
+    f->simulCurNodeHasId();
+    f->setMultiLine(false);
+    crs->exportToWKT(f.get());
+    auto wkt = f->toString();
+    EXPECT_TRUE(wkt.find("METHOD[\"Krovak\",ID[\"EPSG\",9819]]") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find(",AXIS[\"westing\",west,ORDER[1]") !=
+                std::string::npos)
+        << wkt;
+    EXPECT_TRUE(wkt.find(",AXIS[\"southing\",south,ORDER[2]") !=
                 std::string::npos)
         << wkt;
 }
