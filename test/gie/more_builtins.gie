@@ -386,7 +386,7 @@ expect     3370658.18890 711877.42370 5349787.12430  2017.0  # ITRF93@2017.0
 # from NAD27 (ft) -> NAD83 (m). The paper reports a difference of 0.0014 m from
 # measured to computed coordinates, hence the test tolerance is set accordingly.
 -------------------------------------------------------------------------------
-operation  proj=helmert convention=coordinate_frame \
+operation  proj=helmert \
            x=-9597.3572 y=.6112 \
            s=0.304794780637 theta=-1.244048
 -------------------------------------------------------------------------------

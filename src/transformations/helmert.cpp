@@ -654,7 +654,7 @@ PJ *TRANSFORMATION(helmert, 0) {
     Q->scale  =  Q->scale_0;
     Q->theta  =  Q->theta_0;
 
-    if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) && (Q->scale==0) &&
+    if ((Q->opk.o==0)  && (Q->opk.p==0)  && (Q->opk.k==0) &&
         (Q->dopk.o==0) && (Q->dopk.p==0) && (Q->dopk.k==0)) {
         Q->no_rotation = 1;
     }
