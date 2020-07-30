@@ -8122,7 +8122,7 @@ static bool isProjectedStep(const std::string &name) {
     // transformations.
     if (name == "pipeline" || name == "geoc" || name == "deformation" ||
         name == "helmert" || name == "hgridshift" || name == "molodensky" ||
-        name == "vgridshit") {
+        name == "vgridshift") {
         return false;
     }
     const auto *operations = proj_list_operations();
