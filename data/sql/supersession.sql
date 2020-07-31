@@ -242,3 +242,5 @@ INSERT INTO "supersession" VALUES('grid_transformation','EPSG','9176','grid_tran
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','10084','grid_transformation','EPSG','3858','EPSG',0);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','9168','grid_transformation','EPSG','9173','EPSG',0);
 INSERT INTO "supersession" VALUES('grid_transformation','EPSG','9169','grid_transformation','EPSG','9174','EPSG',0);
+INSERT INTO "supersession" VALUES('grid_transformation','EPSG','15932','grid_transformation','EPSG','9409','EPSG',1);
+INSERT INTO "supersession" VALUES('grid_transformation','EPSG','15932','grid_transformation','EPSG','9408','EPSG',1);

@@ -277,5 +277,18 @@ INSERT INTO "compound_crs" VALUES('EPSG','8813','NAD83 / Missouri East + NAVD88 
 INSERT INTO "compound_crs" VALUES('EPSG','8814','NAD83 / Missouri Central + NAVD88 height',NULL,NULL,'EPSG','26997','EPSG','5703','EPSG','2218',0);
 INSERT INTO "compound_crs" VALUES('EPSG','8815','NAD83 / Missouri West + NAVD88 height',NULL,NULL,'EPSG','26998','EPSG','5703','EPSG','2220',0);
 INSERT INTO "compound_crs" VALUES('EPSG','8912','CR-SIRGAS / CRTM05 + DACR52 height',NULL,NULL,'EPSG','8908','EPSG','8911','EPSG','3232',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9306','HS2 Survey Grid + HS2-VRF height',NULL,NULL,'EPSG','9300','EPSG','9303','EPSG','4582',0);
 INSERT INTO "compound_crs" VALUES('EPSG','9368','TPEN11 Grid + ODN height',NULL,NULL,'EPSG','9367','EPSG','5701','EPSG','4583',0);
 INSERT INTO "compound_crs" VALUES('EPSG','9374','MML07 Grid + ODN height',NULL,NULL,'EPSG','9373','EPSG','5701','EPSG','4588',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9388','AbInvA96_2020 Grid + ODN height',NULL,NULL,'EPSG','9387','EPSG','5701','EPSG','4589',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9422','ETRS89 + EVRF2019 height',NULL,NULL,'EPSG','4258','EPSG','9389','EPSG','4609',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9423','ETRS89 + EVRF2019 mean-tide height',NULL,NULL,'EPSG','4258','EPSG','9390','EPSG','4609',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9424','ETRS89 + ODN height',NULL,NULL,'EPSG','4258','EPSG','5701','EPSG','2792',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9425','ETRS89 + ODN (Offshore) height',NULL,NULL,'EPSG','4258','EPSG','7707','EPSG','4391',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9426','ETRS89 + ODN Orkney height',NULL,NULL,'EPSG','4258','EPSG','5740','EPSG','2793',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9427','ETRS89 + Lerwick height',NULL,NULL,'EPSG','4258','EPSG','5742','EPSG','2795',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9428','ETRS89 + Stornoway height',NULL,NULL,'EPSG','4258','EPSG','5746','EPSG','2799',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9429','ETRS89 + Douglas height',NULL,NULL,'EPSG','4258','EPSG','5750','EPSG','2803',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9430','ETRS89 + St. Marys height',NULL,NULL,'EPSG','4258','EPSG','5749','EPSG','2802',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9449','ETRS89 + Malin Head height',NULL,NULL,'EPSG','4258','EPSG','5731','EPSG','1305',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9450','ETRS89 + Belfast height',NULL,NULL,'EPSG','4258','EPSG','5732','EPSG','2530',0);
