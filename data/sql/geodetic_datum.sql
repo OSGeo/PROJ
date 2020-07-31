@@ -152,10 +152,13 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1257','Tapi Aike',NULL,NULL,'EPSG','
 INSERT INTO "geodetic_datum" VALUES('EPSG','1258','Ministerio de Marina Norte',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','2357',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1259','Ministerio de Marina Sur',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','2357',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1263','Oman National Geodetic Datum 2017',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1183','2017-11-01',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1264','HS2 Intermediate Reference Frame',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','4582',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1266','TPEN11 Intermediate Reference Frame',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','4583',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1268','Kingdom of Saudi Arabia Geodetic Reference Frame 2017',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1206','2019-07-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1271','MML07 Intermediate Reference Frame',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','4588',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1272','IGb14',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1262','2010-01-01',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1273','AbInvA96_2020 Intermediate Reference Frame',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','4589',NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1286','Pico de las Nieves 1968',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','3873',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,NULL,'EPSG','7001','EPSG','8901','EPSG','1263',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,NULL,'EPSG','7002','EPSG','8901','EPSG','1263',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6003','Not specified (based on Australian National Spheroid)',NULL,NULL,'EPSG','7003','EPSG','8901','EPSG','1263',NULL,0);
@@ -521,7 +524,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','6724','Diego Garcia 1969',NULL,NULL,
 INSERT INTO "geodetic_datum" VALUES('EPSG','6725','Johnston Island 1961',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','3201','1961-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6726','Sister Islands Geodetic Datum 1961',NULL,NULL,'EPSG','7008','EPSG','8901','EPSG','3186','1961-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6727','Midway 1961',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','3202','1961-01-01',0);
-INSERT INTO "geodetic_datum" VALUES('EPSG','6728','Pico de las Nieves 1984',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','3873',NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','6728','Pico de las Nieves 1984',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','4598',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6729','Pitcairn 1967',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','3208','1967-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6730','Santo 1965',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','3194','1965-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6731','Viti Levu 1916',NULL,NULL,'EPSG','7012','EPSG','8901','EPSG','3195','1916-01-01',1);

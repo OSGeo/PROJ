@@ -4,7 +4,7 @@ INSERT INTO "prime_meridian" VALUES('EPSG','8901','Greenwich',0.0,'EPSG','9102',
 INSERT INTO "prime_meridian" VALUES('EPSG','8902','Lisbon',-9.0754862,'EPSG','9110',0);
 INSERT INTO "prime_meridian" VALUES('EPSG','8903','Paris',2.5969213,'EPSG','9105',0);
 INSERT INTO "prime_meridian" VALUES('EPSG','8904','Bogota',-74.04513,'EPSG','9110',0);
-INSERT INTO "prime_meridian" VALUES('EPSG','8905','Madrid',-3.411658,'EPSG','9110',0);
+INSERT INTO "prime_meridian" VALUES('EPSG','8905','Madrid',-3.411455,'EPSG','9110',0);
 INSERT INTO "prime_meridian" VALUES('EPSG','8906','Rome',12.27084,'EPSG','9110',0);
 INSERT INTO "prime_meridian" VALUES('EPSG','8907','Bern',7.26225,'EPSG','9110',0);
 INSERT INTO "prime_meridian" VALUES('EPSG','8908','Jakarta',106.482779,'EPSG','9110',0);
