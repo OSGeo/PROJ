@@ -407,6 +407,10 @@ def fill_grid_transformation(proj_db_cursor):
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
+        elif method_code == 1085: # Vertical Offset by Grid Interpolation (asc)
+            assert param_code[1] == 1048, (code, method_code, param_code[1])
+            interpolation_crs_auth_name = EPSG_AUTHORITY
+            interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
         else:
             assert n_params == 1, (code, method_code)
 
@@ -827,6 +831,7 @@ for (name, sql) in proj_db_cursor.fetchall():
         proj_db_cursor.execute("DROP VIEW " + name)
         proj_db_cursor.execute(sql.replace('helmert_transformation_table', 'helmert_transformation'))
 
+proj_db_cursor = proj_db_conn.cursor()
 proj_db_cursor.execute("ATTACH DATABASE '%s' AS epsg;" % epsg_tmp_db_filename)
 
 

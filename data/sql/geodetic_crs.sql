@@ -461,7 +461,7 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','4724','Diego Garcia 1969',NULL,NULL,'g
 INSERT INTO "geodetic_crs" VALUES('EPSG','4725','Johnston Island 1961',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6725','EPSG','3201',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4726','SIGD61',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6726','EPSG','3186',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4727','Midway 1961',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6727','EPSG','3202',NULL,0);
-INSERT INTO "geodetic_crs" VALUES('EPSG','4728','Pico de las Nieves 1984',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6728','EPSG','3873',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','4728','PN84',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6728','EPSG','4598',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4729','Pitcairn 1967',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6729','EPSG','3208',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4730','Santo 1965',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6730','EPSG','3194',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','4731','Viti Levu 1916',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','6731','EPSG','3195',NULL,1);
@@ -1023,9 +1023,9 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','9148','SIRGAS-Chile 2013',NULL,NULL,'g
 INSERT INTO "geodetic_crs" VALUES('EPSG','9151','SIRGAS-Chile 2016',NULL,NULL,'geocentric','EPSG','6500','EPSG','1253','EPSG','1066',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9152','SIRGAS-Chile 2016',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','1253','EPSG','1066',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9153','SIRGAS-Chile 2016',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1253','EPSG','1066',NULL,0);
-INSERT INTO "geodetic_crs" VALUES('EPSG','9182','SIRGAS-Chile',NULL,NULL,'geocentric','EPSG','6500','EPSG','1254','EPSG','1066',NULL,0);
-INSERT INTO "geodetic_crs" VALUES('EPSG','9183','SIRGAS-Chile',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','1254','EPSG','1066',NULL,0);
-INSERT INTO "geodetic_crs" VALUES('EPSG','9184','SIRGAS-Chile',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1254','EPSG','1066',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','9182','SIRGAS-Chile',NULL,NULL,'geocentric','EPSG','6500','EPSG','1254','EPSG','1066',NULL,1);
+INSERT INTO "geodetic_crs" VALUES('EPSG','9183','SIRGAS-Chile',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','1254','EPSG','1066',NULL,1);
+INSERT INTO "geodetic_crs" VALUES('EPSG','9184','SIRGAS-Chile',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1254','EPSG','1066',NULL,1);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9248','Tapi Aike',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1257','EPSG','4569',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9251','MMN',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1258','EPSG','2357',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9253','MMS',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1259','EPSG','2357',NULL,0);
@@ -1034,6 +1034,7 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','9267','MGI',NULL,NULL,'geographic 3D',
 INSERT INTO "geodetic_crs" VALUES('EPSG','9292','ONGD17',NULL,NULL,'geocentric','EPSG','6500','EPSG','1263','EPSG','1183',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9293','ONGD17',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','1263','EPSG','1183',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9294','ONGD17',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1263','EPSG','1183',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','9299','HS2-IRF',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1264','EPSG','4582',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9331','KSA-GRF17',NULL,NULL,'geocentric','EPSG','6500','EPSG','1268','EPSG','1206',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9332','KSA-GRF17',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','1268','EPSG','1206',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9333','KSA-GRF17',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1268','EPSG','1206',NULL,0);
@@ -1042,3 +1043,5 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','9372','MML07-IRF',NULL,NULL,'geographi
 INSERT INTO "geodetic_crs" VALUES('EPSG','9378','IGb14',NULL,NULL,'geocentric','EPSG','6500','EPSG','1272','EPSG','2830',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9379','IGb14',NULL,NULL,'geographic 3D','EPSG','6423','EPSG','1272','EPSG','1262',NULL,0);
 INSERT INTO "geodetic_crs" VALUES('EPSG','9380','IGb14',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1191','EPSG','1262',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','9384','AbInvA96_2020-IRF',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1273','EPSG','4589',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','9403','PN68',NULL,NULL,'geographic 2D','EPSG','6422','EPSG','1286','EPSG','3873',NULL,0);
