@@ -20,7 +20,7 @@ CDN of GeoTIFF grids
 Files are accessed by default through a CDN (Content Delivery Network),
 accessible through https://cdn.proj.org, that contains :ref:`geodetictiffgrids`
 datasets which are mirrored and managed by the
-https://github.com/OSGeo/proj-datumgrid-geotiff/ GitHub project.
+https://github.com/OSGeo/PROJ-data/ GitHub project.
 Files in the CDN are designed to be used by PROJ 7 or later, but any software
 project wishing to use the CDN for shifting support are encouraged to
 participate in the project and leverage the CDN. 
