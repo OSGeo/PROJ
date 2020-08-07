@@ -5642,7 +5642,7 @@ AuthorityFactory::createObjectsFromNameEx(
             sql += "AND deprecated = 1 ";
         }
         if (!approximateMatch) {
-            sql += "AND name LIKE ? ";
+            sql += "AND name = ? ";
             params.push_back(searchedNameWithoutDeprecated);
         }
         if (d->hasAuthorityRestriction()) {
@@ -5672,7 +5672,7 @@ AuthorityFactory::createObjectsFromNameEx(
             sql += "AND ov.deprecated = 1 ";
         }
         if (!approximateMatch) {
-            sql += "AND a.alt_name LIKE ? ";
+            sql += "AND a.alt_name = ? ";
             params.push_back(searchedNameWithoutDeprecated);
         }
         if (d->hasAuthorityRestriction()) {

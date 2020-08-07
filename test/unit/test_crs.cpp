@@ -2672,6 +2672,28 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 3035);
         EXPECT_EQ(res.front().second, 90);
     }
+    {
+        // Test case of https://github.com/qgis/QGIS/issues/32255
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "PROJCS[\"RGF93_Lambert_93\",GEOGCS[\"GCS_RGF_1993\","
+            "DATUM[\"D_RGF_1993\","
+            "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+            "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+            "PROJECTION[\"Lambert_Conformal_Conic\"],"
+            "PARAMETER[\"False_Easting\",700000.0],"
+            "PARAMETER[\"False_Northing\",6600000.0],"
+            "PARAMETER[\"Central_Meridian\",3.0],"
+            "PARAMETER[\"Standard_Parallel_1\",44.0],"
+            "PARAMETER[\"Standard_Parallel_2\",49.0],"
+            "PARAMETER[\"Latitude_Of_Origin\",46.5],UNIT[\"Meter\",1.0]]");
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(factoryAll);
+        ASSERT_GE(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 2154);
+        EXPECT_EQ(res.front().second, 90);
+    }
 }
 
 // ---------------------------------------------------------------------------
