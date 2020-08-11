@@ -2054,7 +2054,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                 auto &idNode = nodeP->lookForChild(WKTConstants::AUTHORITY);
                 if (!isNull(idNode)) {
                     try {
-                        auto id = buildId(idNode, true, false);
+                        auto id = buildId(idNode, false, false);
                         auto authFactory2 = AuthorityFactory::create(
                             NN_NO_CHECK(dbContext_), *id->codeSpace());
                         auto dbDatum =
