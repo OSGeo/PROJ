@@ -34,7 +34,7 @@ The following control parameters can appear in any order:
 
 .. option:: -d <n>
 
-.. versionadded:: 5.2.0
+    .. versionadded:: 5.2.0
 
     Specify the number of decimals in the output.
 
