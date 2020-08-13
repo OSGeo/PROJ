@@ -5910,6 +5910,42 @@ TEST(wkt_parse, wkt1_esri_gauss_kruger) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_oracle) {
+    // WKT from mdsys.cs_srs Oracle table
+    auto wkt = "PROJCS[\"RGF93 / Lambert-93\", GEOGCS [ \"RGF93\", "
+               "DATUM [\"Reseau Geodesique Francais 1993 (EPSG ID 6171)\", "
+               "SPHEROID [\"GRS 1980 (EPSG ID 7019)\", 6378137.0, "
+               "298.257222101]], PRIMEM [ \"Greenwich\", 0.000000000 ], "
+               "UNIT [\"Decimal Degree\", 0.0174532925199433]], "
+               "PROJECTION [\"Lambert Conformal Conic\"], "
+               "PARAMETER [\"Latitude_Of_Origin\", 46.5], "
+               "PARAMETER [\"Central_Meridian\", 3.0], "
+               "PARAMETER [\"Standard_Parallel_1\", 49.0], "
+               "PARAMETER [\"Standard_Parallel_2\", 44.0], "
+               "PARAMETER [\"False_Easting\", 700000.0], "
+               "PARAMETER [\"False_Northing\", 6600000.0], "
+               "UNIT [\"Meter\", 1.0]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->baseCRS()->datum()->nameStr(),
+              "Reseau Geodesique Francais 1993");
+    EXPECT_EQ(crs->baseCRS()->datum()->getEPSGCode(), 6171);
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
+              "Lambert Conic Conformal (2SP)");
+
+    auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+    auto res = crs->identify(factoryAll);
+    ASSERT_GE(res.size(), 1U);
+    EXPECT_EQ(res.front().first->getEPSGCode(), 2154);
+    EXPECT_EQ(res.front().second, 100);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
