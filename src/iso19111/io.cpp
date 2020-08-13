@@ -1535,6 +1535,19 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
     std::string codeFromAlias;
     const auto *nodeP = node->GP();
     const auto &nodeChildren = nodeP->children();
+
+    auto identifiers = ArrayOfBaseObject::create();
+    for (const auto &subNode : nodeChildren) {
+        const auto &subNodeName(subNode->GP()->value());
+        if (ci_equal(subNodeName, WKTConstants::ID) ||
+            ci_equal(subNodeName, WKTConstants::AUTHORITY)) {
+            auto id = buildId(subNode, true, removeInverseOf);
+            if (id) {
+                identifiers->add(NN_NO_CHECK(id));
+            }
+        }
+    }
+
     if (!nodeChildren.empty()) {
         const auto &nodeName(nodeP->value());
         auto name(stripQuotes(nodeChildren[0]));
@@ -1545,6 +1558,26 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
         if (ends_with(name, " (deprecated)")) {
             name.resize(name.size() - strlen(" (deprecated)"));
             properties->set(common::IdentifiedObject::DEPRECATED_KEY, true);
+        }
+
+        // Oracle WKT can contain names like
+        // "Reseau Geodesique Francais 1993 (EPSG ID 6171)"
+        // for WKT attributes to the auth_name = "IGN - Paris"
+        // Strip that suffix from the name and assign a true EPSG code to the
+        // object
+        if (identifiers->empty()) {
+            const auto pos = name.find(" (EPSG ID ");
+            if (pos != std::string::npos && name.back() == ')') {
+                const auto code =
+                    name.substr(pos + strlen(" (EPSG ID "),
+                                name.size() - 1 - pos - strlen(" (EPSG ID "));
+                name.resize(pos);
+
+                PropertyMap propertiesId;
+                propertiesId.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
+                propertiesId.set(Identifier::AUTHORITY_KEY, Identifier::EPSG);
+                identifiers->add(Identifier::create(code, propertiesId));
+            }
         }
 
         const char *tableNameForAlias = nullptr;
@@ -1589,17 +1622,6 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
         properties->set(IdentifiedObject::NAME_KEY, name);
     }
 
-    auto identifiers = ArrayOfBaseObject::create();
-    for (const auto &subNode : nodeChildren) {
-        const auto &subNodeName(subNode->GP()->value());
-        if (ci_equal(subNodeName, WKTConstants::ID) ||
-            ci_equal(subNodeName, WKTConstants::AUTHORITY)) {
-            auto id = buildId(subNode, true, removeInverseOf);
-            if (id) {
-                identifiers->add(NN_NO_CHECK(id));
-            }
-        }
-    }
     if (identifiers->empty() && !authNameFromAlias.empty()) {
         identifiers->add(Identifier::create(
             codeFromAlias,
@@ -3606,6 +3628,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
         }
         foundParameters.resize(countParams);
     }
+    bool found2ndStdParallel = false;
     for (const auto &childNode : projCRSNode->GP()->children()) {
         if (ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER)) {
             const auto &childNodeChildren = childNode->GP()->children();
@@ -3658,6 +3681,10 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                     propertiesParameter.set(Identifier::CODESPACE_KEY,
                                             Identifier::EPSG);
                 }
+                if (paramMapping->epsg_code ==
+                    EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL) {
+                    found2ndStdParallel = true;
+                }
             }
             propertiesParameter.set(IdentifiedObject::NAME_KEY, parameterName);
             parameters.push_back(
@@ -3672,6 +3699,14 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                     concat("unhandled parameter value type : ", paramValue));
             }
         }
+    }
+
+    // Oracle WKT: make sure that the 2nd std parallel parameter is found to
+    // select the LCC_2SP mapping
+    if (metadata::Identifier::isEquivalentName(wkt1ProjectionName.c_str(),
+                                               "Lambert Conformal Conic") &&
+        !found2ndStdParallel) {
+        propertiesMethod.set(IdentifiedObject::NAME_KEY, wkt1ProjectionName);
     }
 
     // Add back important parameters that should normally be present, but
