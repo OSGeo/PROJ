@@ -1522,7 +1522,7 @@ struct CurlFileHandle {
     CurlFileHandle(const CurlFileHandle &) = delete;
     CurlFileHandle &operator=(const CurlFileHandle &) = delete;
 
-    explicit CurlFileHandle(const char *url, CURL *handle);
+    explicit CurlFileHandle(const char *url, CURL *handle, const char *ca_bundle_path);
     ~CurlFileHandle();
 
     static PROJ_NETWORK_HANDLE *
@@ -1594,7 +1594,7 @@ static std::string GetExecutableName() {
 
 // ---------------------------------------------------------------------------
 
-CurlFileHandle::CurlFileHandle(const char *url, CURL *handle)
+CurlFileHandle::CurlFileHandle(const char *url, CURL *handle, const char *ca_bundle_path)
     : m_url(url), m_handle(handle) {
     curl_easy_setopt(handle, CURLOPT_URL, m_url.c_str());
 
@@ -1613,6 +1613,23 @@ CurlFileHandle::CurlFileHandle(const char *url, CURL *handle)
     if (getenv("PROJ_UNSAFE_SSL")) {
         curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, 0L);
+    }
+
+    // Custom path to SSL certificates.
+    if (ca_bundle_path == nullptr) {
+        ca_bundle_path = getenv("PROJ_CURL_CA_BUNDLE");
+    }
+    if (ca_bundle_path == nullptr) {
+        // Name of environment variable used by the curl binary
+        ca_bundle_path = getenv("CURL_CA_BUNDLE");
+    }
+    if (ca_bundle_path == nullptr) {
+        // Name of environment variable used by the curl binary (tested
+        // after CURL_CA_BUNDLE
+        ca_bundle_path = getenv("SSL_CERT_FILE");
+    }
+    if (ca_bundle_path != nullptr) {
+        curl_easy_setopt(handle, CURLOPT_CAINFO, ca_bundle_path);
     }
 
     curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, m_szCurlErrBuf);
@@ -1683,7 +1700,8 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
         return nullptr;
 
     auto file =
-        std::unique_ptr<CurlFileHandle>(new CurlFileHandle(url, hCurlHandle));
+        std::unique_ptr<CurlFileHandle>(new CurlFileHandle(
+            url, hCurlHandle, ctx->ca_bundle_path.c_str()));
 
     double oldDelay = MIN_RETRY_DELAY_MS;
     std::string headers;

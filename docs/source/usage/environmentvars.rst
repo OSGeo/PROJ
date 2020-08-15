@@ -74,3 +74,11 @@ done by setting the variable with no content::
     configuration file locale in :envvar:`PROJ_LIB`.
     Alternatively, the :c:func:`proj_context_set_url_endpoint` function can
     be used.
+
+.. envvar:: PROJ_CURL_CA_BUNDLE
+
+    .. versionadded:: 7.2.0
+
+    Define a custum path to the CA Bundle file. This can be useful if `curl`
+    and :envvar:`PROJ_NETWORK` are enabled. Alternatively, the 
+    :c:func:`proj_curl_set_ca_bundle_path` function can be used.

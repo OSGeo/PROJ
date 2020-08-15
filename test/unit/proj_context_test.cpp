@@ -179,4 +179,24 @@ TEST(proj_context, read_grid_from_user_writable_directory) {
     MyUnlink(filename);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(proj_context, proj_context_set_ca_bundle_path) {
+
+    std::string dirname;
+    auto filename = createTempDict(dirname, "temp_proj_dic2");
+    if (filename.empty())
+        return;
+
+    auto ctx = proj_context_create();
+
+    const char *path = dirname.c_str();
+    proj_context_set_ca_bundle_path(ctx, path);
+    ASSERT_EQ(ctx->ca_bundle_path, dirname);
+
+    proj_context_destroy(ctx);
+
+    MyUnlink(filename);
+}
+
 } // namespace

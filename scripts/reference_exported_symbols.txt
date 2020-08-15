@@ -844,6 +844,7 @@ proj_context_set_file_finder
 proj_context_set_network_callbacks
 proj_context_set(PJconsts*, projCtx_t*)
 proj_context_set_search_paths
+proj_context_set_ca_bundle_path
 proj_context_set_sqlite3_vfs_name
 proj_context_set_url_endpoint
 proj_context_use_proj4_init_rules
