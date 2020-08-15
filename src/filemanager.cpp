@@ -2015,7 +2015,7 @@ void proj_context_set_ca_bundle_path(PJ_CONTEXT *ctx, const char *path) {
     if (!ctx)
         return;
     try {
-      ctx->set_ca_bundle_path(path);
+      ctx->set_ca_bundle_path(path != nullptr ? path : "");
     } catch (const std::exception &) {
     }
 }
