@@ -1701,7 +1701,7 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
 
     auto file =
         std::unique_ptr<CurlFileHandle>(new CurlFileHandle(
-            url, hCurlHandle, ctx->ca_bundle_path.c_str()));
+            url, hCurlHandle, ctx->ca_bundle_path.empty() ? nullptr : ctx->ca_bundle_path.c_str()));
 
     double oldDelay = MIN_RETRY_DELAY_MS;
     std::string headers;
