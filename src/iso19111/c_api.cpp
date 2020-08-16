@@ -125,7 +125,7 @@ projCppContext::toVector(const char *const *auxDbPaths) {
 
 // ---------------------------------------------------------------------------
 
-projCppContext* projCppContext::clone(PJ_CONTEXT *ctx) {
+projCppContext* projCppContext::clone(PJ_CONTEXT *ctx) const {
     projCppContext* newContext = new projCppContext(
         ctx,
         getDbPath().c_str(),
