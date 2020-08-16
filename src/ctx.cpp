@@ -24,6 +24,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
+#endif
 
 #include <errno.h>
 #include <stdlib.h>
@@ -34,6 +37,7 @@
 #include "proj_experimental.h"
 #include "proj_internal.h"
 #include "filemanager.hpp"
+#include "proj/internal/io_internal.hpp"
 
 /************************************************************************/
 /*                             pj_get_ctx()                             */
@@ -152,6 +156,9 @@ projCtx_t::projCtx_t(const projCtx_t& other)
     file_finder_user_data = other.file_finder_user_data;
     networking = other.networking;
     ca_bundle_path = other.ca_bundle_path;
+    if (other.cpp_context != nullptr) {
+        cpp_context = other.cpp_context->clone(this);
+    }
 }
 
 /************************************************************************/

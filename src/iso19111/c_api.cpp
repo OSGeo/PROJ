@@ -125,6 +125,18 @@ projCppContext::toVector(const char *const *auxDbPaths) {
 
 // ---------------------------------------------------------------------------
 
+projCppContext* projCppContext::clone(PJ_CONTEXT *ctx) {
+    projCppContext* newContext = new projCppContext(
+        ctx,
+        getDbPath().c_str(),
+        getAuxDbPaths()
+    );
+    newContext->setAutoCloseDb(getAutoCloseDb());
+    return newContext;
+}
+
+// ---------------------------------------------------------------------------
+
 void projCppContext::closeDb() { databaseContext_ = nullptr; }
 
 // ---------------------------------------------------------------------------
