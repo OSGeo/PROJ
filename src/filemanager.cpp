@@ -1994,7 +1994,7 @@ void pj_set_searchpath(int count, const char **path) {
 /*                  proj_context_set_ca_bundle_path()                   */
 /************************************************************************/
 
-/** \brief Sets CA Bundle paths.
+/** \brief Sets CA Bundle path.
  *
  * Those CA Bundle path will be used by PROJ when curl and PROJ_NETWORK
  * are enabled.
@@ -2002,7 +2002,7 @@ void pj_set_searchpath(int count, const char **path) {
  * If set on the default context, they will be inherited by contexts created
  * later.
  *
- * The path(s) should be encoded in UTF-8.
+ * The path should be encoded in UTF-8.
  *
  * @param ctx PROJ context, or NULL for the default context.
  * @param path Path. May be NULL.
