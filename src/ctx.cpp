@@ -126,6 +126,15 @@ void projCtx_t::set_search_paths(const std::vector<std::string>& search_paths_in
     }
 }
 
+/**************************************************************************/
+/*                           set_ca_bundle_path()                         */
+/**************************************************************************/
+
+void projCtx_t::set_ca_bundle_path(const std::string& ca_bundle_path_in)
+{
+    ca_bundle_path = ca_bundle_path_in;
+}
+
 /************************************************************************/
 /*                  projCtx_t(const projCtx_t& other)                   */
 /************************************************************************/
@@ -142,6 +151,7 @@ projCtx_t::projCtx_t(const projCtx_t& other)
     file_finder_legacy = other.file_finder_legacy;
     file_finder_user_data = other.file_finder_user_data;
     networking = other.networking;
+    ca_bundle_path = other.ca_bundle_path;
 }
 
 /************************************************************************/

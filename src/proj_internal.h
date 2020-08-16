@@ -725,6 +725,7 @@ struct projCtx_t {
     struct projCppContext* cpp_context = nullptr; /* internal context for C++ code */
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
+    std::string ca_bundle_path{};
 
     std::string env_var_proj_lib{}; // content of PROJ_LIB environment variable. Use Filemanager::getProjLibEnvVar() to access
     std::vector<std::string> search_paths{};
@@ -758,6 +759,7 @@ struct projCtx_t {
     projCtx_t& operator= (const projCtx_t&) = delete;
 
     void set_search_paths(const std::vector<std::string>& search_paths_in);
+    void set_ca_bundle_path(const std::string& ca_bundle_path_in);
 
     static projCtx_t createDefault();
 };
