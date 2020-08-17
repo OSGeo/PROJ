@@ -1627,10 +1627,7 @@ static void *pj_open_file_with_manager(projCtx ctx, const char *name,
 
 static NS_PROJ::io::DatabaseContextPtr getDBcontext(PJ_CONTEXT *ctx) {
     try {
-        if (ctx->cpp_context == nullptr) {
-            ctx->cpp_context = new projCppContext(ctx);
-        }
-        return ctx->cpp_context->getDatabaseContext().as_nullable();
+        return ctx->get_cpp_context()->getDatabaseContext().as_nullable();
     } catch (const std::exception &e) {
         pj_log(ctx, PJ_LOG_DEBUG, "%s", e.what());
         return nullptr;

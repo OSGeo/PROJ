@@ -758,6 +758,8 @@ struct projCtx_t {
 
     projCtx_t& operator= (const projCtx_t&) = delete;
 
+    projCppContext* get_cpp_context();
+    void safeAutoCloseDbIfNeeded();
     void set_search_paths(const std::vector<std::string>& search_paths_in);
     void set_ca_bundle_path(const std::string& ca_bundle_path_in);
 

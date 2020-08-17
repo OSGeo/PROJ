@@ -113,6 +113,30 @@ projCtx_t projCtx_t::createDefault()
     return ctx;
 }
 
+/**************************************************************************/
+/*                           get_cpp_context()                            */
+/**************************************************************************/
+
+projCppContext* projCtx_t::get_cpp_context()
+{
+    if (cpp_context == nullptr) {
+        cpp_context = new projCppContext(this);
+    }
+    return cpp_context;
+}
+
+
+/**************************************************************************/
+/*                           safeAutoCloseDbIfNeeded()                      */
+/**************************************************************************/
+
+void projCtx_t::safeAutoCloseDbIfNeeded()
+{
+    if (cpp_context) {
+        cpp_context->autoCloseDbIfNeeded();
+    }
+}
+
 /************************************************************************/
 /*                           set_search_paths()                         */
 /************************************************************************/
