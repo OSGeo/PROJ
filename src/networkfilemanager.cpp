@@ -1522,7 +1522,8 @@ struct CurlFileHandle {
     CurlFileHandle(const CurlFileHandle &) = delete;
     CurlFileHandle &operator=(const CurlFileHandle &) = delete;
 
-    explicit CurlFileHandle(const char *url, CURL *handle, const char *ca_bundle_path);
+    explicit CurlFileHandle(const char *url, CURL *handle,
+                            const char *ca_bundle_path);
     ~CurlFileHandle();
 
     static PROJ_NETWORK_HANDLE *
@@ -1594,7 +1595,8 @@ static std::string GetExecutableName() {
 
 // ---------------------------------------------------------------------------
 
-CurlFileHandle::CurlFileHandle(const char *url, CURL *handle, const char *ca_bundle_path)
+CurlFileHandle::CurlFileHandle(const char *url, CURL *handle,
+                               const char *ca_bundle_path)
     : m_url(url), m_handle(handle) {
     curl_easy_setopt(handle, CURLOPT_URL, m_url.c_str());
 
@@ -1699,9 +1701,9 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
     if (!hCurlHandle)
         return nullptr;
 
-    auto file =
-        std::unique_ptr<CurlFileHandle>(new CurlFileHandle(
-            url, hCurlHandle, ctx->ca_bundle_path.empty() ? nullptr : ctx->ca_bundle_path.c_str()));
+    auto file = std::unique_ptr<CurlFileHandle>(new CurlFileHandle(
+        url, hCurlHandle,
+        ctx->ca_bundle_path.empty() ? nullptr : ctx->ca_bundle_path.c_str()));
 
     double oldDelay = MIN_RETRY_DELAY_MS;
     std::string headers;

@@ -125,12 +125,9 @@ projCppContext::toVector(const char *const *auxDbPaths) {
 
 // ---------------------------------------------------------------------------
 
-projCppContext* projCppContext::clone(PJ_CONTEXT *ctx) const {
-    projCppContext* newContext = new projCppContext(
-        ctx,
-        getDbPath().c_str(),
-        getAuxDbPaths()
-    );
+projCppContext *projCppContext::clone(PJ_CONTEXT *ctx) const {
+    projCppContext *newContext =
+        new projCppContext(ctx, getDbPath().c_str(), getAuxDbPaths());
     newContext->setAutoCloseDb(getAutoCloseDb());
     return newContext;
 }
@@ -815,8 +812,8 @@ int PROJ_DLL proj_grid_get_info_from_database(
         if (!db_context->lookForGridInfo(
                 grid_name, false, ctx->get_cpp_context()->lastGridFullName_,
                 ctx->get_cpp_context()->lastGridPackageName_,
-                ctx->get_cpp_context()->lastGridUrl_, direct_download, open_license,
-                available)) {
+                ctx->get_cpp_context()->lastGridUrl_, direct_download,
+                open_license, available)) {
             ctx->safeAutoCloseDbIfNeeded();
             return false;
         }
@@ -824,7 +821,8 @@ int PROJ_DLL proj_grid_get_info_from_database(
         if (out_full_name)
             *out_full_name = ctx->get_cpp_context()->lastGridFullName_.c_str();
         if (out_package_name)
-            *out_package_name = ctx->get_cpp_context()->lastGridPackageName_.c_str();
+            *out_package_name =
+                ctx->get_cpp_context()->lastGridPackageName_.c_str();
         if (out_url)
             *out_url = ctx->get_cpp_context()->lastGridUrl_.c_str();
         if (out_direct_download)

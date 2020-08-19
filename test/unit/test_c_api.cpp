@@ -134,14 +134,12 @@ class CApi : public ::testing::Test {
 
     struct PjContextKeeper {
         PJ_CONTEXT *m_ctxt = nullptr;
-        explicit PjContextKeeper(PJ_CONTEXT *ctxt)
-            : m_ctxt(ctxt) {}
+        explicit PjContextKeeper(PJ_CONTEXT *ctxt) : m_ctxt(ctxt) {}
         ~PjContextKeeper() { proj_context_destroy(m_ctxt); }
 
         PjContextKeeper(const PjContextKeeper &) = delete;
         PjContextKeeper &operator=(const PjContextKeeper &) = delete;
     };
-
 
     struct ContextKeeper {
         PJ_OPERATION_FACTORY_CONTEXT *m_op_ctxt = nullptr;
@@ -4071,9 +4069,8 @@ TEST_F(CApi, proj_context_clone) {
     if (!tempdir) {
         tempdir = "/tmp";
     }
-    std::string tmp_filename(
-        std::string(tempdir) +
-        "/test_proj_context_set_autoclose_database.db");
+    std::string tmp_filename(std::string(tempdir) +
+                             "/test_proj_context_set_autoclose_database.db");
     f = fopen(tmp_filename.c_str(), "wb");
     if (!f) {
         std::cerr << "Cannot create " << tmp_filename << std::endl;
@@ -4083,14 +4080,14 @@ TEST_F(CApi, proj_context_clone) {
     fclose(f);
 
     auto c_default_path = proj_context_get_database_path(nullptr);
-    std::string default_path(c_default_path ? c_default_path: "");
+    std::string default_path(c_default_path ? c_default_path : "");
     EXPECT_TRUE(proj_context_set_database_path(nullptr, tmp_filename.c_str(),
                                                nullptr, nullptr));
 
     PJ_CONTEXT *new_ctx = proj_context_create();
     EXPECT_TRUE(proj_context_set_database_path(
-        nullptr, default_path.empty() ? nullptr : default_path.c_str(),
-        nullptr, nullptr));
+        nullptr, default_path.empty() ? nullptr : default_path.c_str(), nullptr,
+        nullptr));
 
     EXPECT_NE(new_ctx, nullptr);
     PjContextKeeper keeper_ctxt(new_ctx);
