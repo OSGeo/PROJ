@@ -303,19 +303,6 @@ source_group("CMake Files" FILES CMakeLists.txt)
 # Embed PROJ_LIB data files location
 add_definitions(-DPROJ_LIB="${CMAKE_INSTALL_PREFIX}/${DATADIR}")
 
-# The gcc "target_clones" function attribute relies on an extension
-# to the ELF standard. It must not be used on MinGW.
-include(CheckCXXSourceCompiles)
-set(CMAKE_REQUIRED_QUIET TRUE)
-check_cxx_source_compiles([[
-  __attribute__((target_clones("fma","default")))
-  int clonable() { return 0; }
-  int main() { return clonable(); }
-]] TARGET_CLONES_FMA_ALLOWED)
-if(TARGET_CLONES_FMA_ALLOWED)
-  add_definitions(-DTARGET_CLONES_FMA_ALLOWED)
-endif()
-
 #################################################
 ## targets: libproj and proj_config.h
 #################################################

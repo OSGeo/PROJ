@@ -66,15 +66,6 @@ struct tmerc_data {
 /* Constant for "exact" transverse mercator */
 #define PROJ_ETMERC_ORDER 6
 
-// Determine if we should try to provide optimized versions for the Fused Multiply Addition
-// Intel instruction set. We use GCC 6 __attribute__((target_clones("fma","default")))
-// mechanism for that, where the compiler builds a default version, and one that
-// uses FMA. And at runtimes it figures out automatically which version can be used
-// by the current CPU. This allows to create general purpose binaries.
-#if defined(TARGET_CLONES_FMA_ALLOWED) && defined(__GNUC__) && __GNUC__ >= 6 && defined(__x86_64__) && !defined(__FMA__)
-#define BUILD_FMA_OPTIMIZED_VERSION
-#endif
-
 /*****************************************************************************/
 //
 //                  Approximate Transverse Mercator functions
@@ -82,10 +73,7 @@ struct tmerc_data {
 /*****************************************************************************/
 
 
-#ifdef BUILD_FMA_OPTIMIZED_VERSION
-__attribute__((target_clones("fma","default")))
-#endif
-inline static PJ_XY approx_e_fwd_internal (PJ_LP lp, PJ *P)
+static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
 {
     PJ_XY xy = {0.0, 0.0};
     const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
@@ -125,11 +113,6 @@ inline static PJ_XY approx_e_fwd_internal (PJ_LP lp, PJ *P)
         + FC8 * als * (1385. + t * ( t * (543. - t) - 3111.) )
         ))));
     return (xy);
-}
-
-static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
-{
-    return approx_e_fwd_internal(lp, P);
 }
 
 static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
@@ -177,10 +160,7 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
     return xy;
 }
 
-#ifdef BUILD_FMA_OPTIMIZED_VERSION
-__attribute__((target_clones("fma","default")))
-#endif
-inline static PJ_LP approx_e_inv_internal (PJ_XY xy, PJ *P) {
+static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0,0.0};
     const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
 
@@ -210,10 +190,6 @@ inline static PJ_LP approx_e_inv_internal (PJ_XY xy, PJ *P) {
         ))) / cosphi;
     }
     return lp;
-}
-
-static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
-    return approx_e_inv_internal(xy, P);
 }
 
 static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
