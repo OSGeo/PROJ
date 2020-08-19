@@ -128,27 +128,6 @@ fi
 AC_LANG_POP([C++])
 
 dnl ---------------------------------------------------------------------------
-dnl Check if __attribute__((target_clones("fma","default"))) works
-dnl This is needed for example on Alpine Linux where for some reason, building
-dnl such tagged functions fails with 'error: the call requires 'ifunc', which is not supported by this target'
-dnl ---------------------------------------------------------------------------
-
-TARGET_CLONES_FMA_FLAGS=""
-AC_MSG_CHECKING([if target_clones_fma works])
-SAVED_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -Werror"
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-[[
-__attribute__((target_clones("fma","default"))) void foo() {}
-]])],
-[AC_MSG_RESULT([yes])]
-[TARGET_CLONES_FMA_FLAGS="-DTARGET_CLONES_FMA_ALLOWED"],
-[AC_MSG_RESULT([no])])
-CFLAGS="$SAVED_CFLAGS"
-AC_SUBST(TARGET_CLONES_FMA_FLAGS,$TARGET_CLONES_FMA_FLAGS)
-
-
-dnl ---------------------------------------------------------------------------
 dnl Check for --enable-lto
 dnl ---------------------------------------------------------------------------
 
