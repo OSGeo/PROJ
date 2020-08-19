@@ -4083,12 +4083,14 @@ TEST_F(CApi, proj_context_clone) {
     fclose(f);
 
     auto c_default_path = proj_context_get_database_path(nullptr);
+    std::string default_path(c_default_path ? c_default_path: "");
     EXPECT_TRUE(proj_context_set_database_path(nullptr, tmp_filename.c_str(),
                                                nullptr, nullptr));
 
     PJ_CONTEXT *new_ctx = proj_context_create();
-    EXPECT_TRUE(proj_context_set_database_path(nullptr, c_default_path,
-                                               nullptr, nullptr));
+    EXPECT_TRUE(proj_context_set_database_path(
+        nullptr, default_path.empty() ? nullptr : default_path.c_str(),
+        nullptr, nullptr));
 
     EXPECT_NE(new_ctx, nullptr);
     PjContextKeeper keeper_ctxt(new_ctx);
