@@ -191,6 +191,8 @@ struct projCppContext {
     explicit projCppContext(PJ_CONTEXT *ctx, const char *dbPath = nullptr,
                             const std::vector<std::string> &auxDbPaths = {});
 
+    projCppContext* clone(PJ_CONTEXT *ctx) const;
+
     // cppcheck-suppress functionStatic
     inline const std::string &getDbPath() const { return dbPath_; }
 
