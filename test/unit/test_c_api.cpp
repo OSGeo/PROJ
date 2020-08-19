@@ -132,6 +132,17 @@ class CApi : public ::testing::Test {
         ObjectKeeper &operator=(const ObjectKeeper &) = delete;
     };
 
+    struct PjContextKeeper {
+        PJ_CONTEXT *m_ctxt = nullptr;
+        explicit PjContextKeeper(PJ_CONTEXT *ctxt)
+            : m_ctxt(ctxt) {}
+        ~PjContextKeeper() { proj_context_destroy(m_ctxt); }
+
+        PjContextKeeper(const PjContextKeeper &) = delete;
+        PjContextKeeper &operator=(const PjContextKeeper &) = delete;
+    };
+
+
     struct ContextKeeper {
         PJ_OPERATION_FACTORY_CONTEXT *m_op_ctxt = nullptr;
         explicit ContextKeeper(PJ_OPERATION_FACTORY_CONTEXT *op_ctxt)
@@ -4080,7 +4091,7 @@ TEST_F(CApi, proj_context_clone) {
                                                nullptr, nullptr));
 
     EXPECT_NE(new_ctx, nullptr);
-    ContextKeeper keeper_ctxt(new_ctx);
+    PjContextKeeper keeper_ctxt(new_ctx);
     auto c_new_path = proj_context_get_database_path(new_ctx);
     ASSERT_TRUE(c_new_path != nullptr);
     std::string new_db_path(c_new_path);
