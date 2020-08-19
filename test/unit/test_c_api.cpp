@@ -4038,6 +4038,57 @@ TEST_F(Fixture_proj_context_set_autoclose_database,
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_context_clone) {
+    auto c_path = proj_context_get_database_path(m_ctxt);
+    ASSERT_TRUE(c_path != nullptr);
+    std::string path(c_path);
+
+    FILE *f = fopen(path.c_str(), "rb");
+    ASSERT_NE(f, nullptr);
+    fseek(f, 0, SEEK_END);
+    auto length = ftell(f);
+    std::string content;
+    content.resize(static_cast<size_t>(length));
+    fseek(f, 0, SEEK_SET);
+    auto read_bytes = fread(&content[0], 1, content.size(), f);
+    ASSERT_EQ(read_bytes, content.size());
+    fclose(f);
+    const char *tempdir = getenv("TEMP");
+    if (!tempdir) {
+        tempdir = getenv("TMP");
+    }
+    if (!tempdir) {
+        tempdir = "/tmp";
+    }
+    std::string tmp_filename(
+        std::string(tempdir) +
+        "/test_proj_context_set_autoclose_database.db");
+    f = fopen(tmp_filename.c_str(), "wb");
+    if (!f) {
+        std::cerr << "Cannot create " << tmp_filename << std::endl;
+        return;
+    }
+    fwrite(content.data(), 1, content.size(), f);
+    fclose(f);
+
+    auto c_default_path = proj_context_get_database_path(nullptr);
+    EXPECT_TRUE(proj_context_set_database_path(nullptr, tmp_filename.c_str(),
+                                               nullptr, nullptr));
+
+    PJ_CONTEXT *new_ctx = proj_context_create();
+    EXPECT_TRUE(proj_context_set_database_path(nullptr, c_default_path,
+                                               nullptr, nullptr));
+
+    EXPECT_NE(new_ctx, nullptr);
+    ContextKeeper keeper_ctxt(new_ctx);
+    auto c_new_path = proj_context_get_database_path(new_ctx);
+    ASSERT_TRUE(c_new_path != nullptr);
+    std::string new_db_path(c_new_path);
+    ASSERT_EQ(new_db_path, tmp_filename);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_create_crs_to_crs_from_pj) {
 
     auto src = proj_create(m_ctxt, "EPSG:4326");
