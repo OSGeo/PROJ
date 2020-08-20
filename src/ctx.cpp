@@ -173,12 +173,22 @@ projCtx_t::projCtx_t(const projCtx_t& other)
     logger = other.logger;
     logger_app_data = other.logger_app_data;
     fileapi_legacy = other.fileapi_legacy;
+    use_proj4_init_rules = other.use_proj4_init_rules;
     epsg_file_exists = other.epsg_file_exists;
+    env_var_proj_lib = other.env_var_proj_lib;
     set_search_paths(other.search_paths);
+    user_writable_directory = other.user_writable_directory;
     file_finder = other.file_finder;
     file_finder_legacy = other.file_finder_legacy;
     file_finder_user_data = other.file_finder_user_data;
+    custom_sqlite3_vfs_name = other.custom_sqlite3_vfs_name;
+    // BEGIN ini file settings
+    iniFileLoaded = other.iniFileLoaded;
+    gridChunkCache = other.gridChunkCache;
+    endpoint = other.endpoint;
     networking = other.networking;
+    defaultTmercAlgo = other.defaultTmercAlgo;
+    // END ini file settings
     ca_bundle_path = other.ca_bundle_path;
     if (other.cpp_context != nullptr) {
         cpp_context = other.cpp_context->clone(this);
