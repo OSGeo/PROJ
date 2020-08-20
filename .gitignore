@@ -93,6 +93,7 @@ install_manifest.txt
 /data/stlrnc
 /data/stpaul
 /data/tv_out
+/data/for_tests/
 
 # docs
 tmp_breathe
@@ -117,6 +118,7 @@ m4/lt~obsolete.m4
 /src/proj_config.h
 /src/proj_config.h.in
 /src/projinfo
+/src/projsync
 /src/stamp-h1
 /src/test-suite.log
 
@@ -130,6 +132,9 @@ m4/lt~obsolete.m4
 /test/unit/proj_context_test
 /test/unit/test_cpp_api
 /test/unit/proj_errno_string_test
+/test/unit/test_defmodel
+/test/unit/test_network
+/tmp_alias/
 
 # jniwrap
 jniwrap/out
