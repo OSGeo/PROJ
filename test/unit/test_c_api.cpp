@@ -4828,7 +4828,7 @@ TEST_F(CApi, use_proj4_init_rules) {
 
 TEST_F(CApi, use_proj4_init_rules__from_global_context) {
 
-    bool initial_rules = proj_context_get_use_proj4_init_rules(nullptr, true);
+    int initial_rules = proj_context_get_use_proj4_init_rules(nullptr, true);
     proj_context_use_proj4_init_rules(nullptr, true);
     PJ_CONTEXT *ctx = proj_context_create();
     ASSERT_TRUE(proj_context_get_use_proj4_init_rules(ctx, true));
