@@ -735,7 +735,7 @@ struct projCtx_t {
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
 
-    bool defer_grid_opening = false; // set by pj_obj_create()
+    bool defer_grid_opening = false; // set transiently by pj_obj_create()
 
     projFileApiCallbackAndData fileApi{};
     std::string custom_sqlite3_vfs_name{};
