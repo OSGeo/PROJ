@@ -167,22 +167,30 @@ void projCtx_t::set_ca_bundle_path(const std::string& ca_bundle_path_in)
 /*                  projCtx_t(const projCtx_t& other)                   */
 /************************************************************************/
 
-projCtx_t::projCtx_t(const projCtx_t& other)
+projCtx_t::projCtx_t(const projCtx_t& other) :
+    debug_level(other.debug_level),
+    logger(other.logger),
+    logger_app_data(other.logger_app_data),
+    fileapi_legacy(other.fileapi_legacy),
+    cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),
+    use_proj4_init_rules(other.use_proj4_init_rules),
+    epsg_file_exists(other.epsg_file_exists),
+    ca_bundle_path(other.ca_bundle_path),
+    env_var_proj_lib(other.env_var_proj_lib),
+    file_finder_legacy(other.file_finder_legacy),
+    file_finder(other.file_finder),
+    file_finder_user_data(other.file_finder_user_data),
+    custom_sqlite3_vfs_name(other.custom_sqlite3_vfs_name),
+    user_writable_directory(other.user_writable_directory),
+    // BEGIN ini file settings
+    iniFileLoaded(other.iniFileLoaded),
+    endpoint(other.endpoint),
+    networking(other.networking),
+    gridChunkCache(other.gridChunkCache),
+    defaultTmercAlgo(other.defaultTmercAlgo)
+    // END ini file settings
 {
-    debug_level = other.debug_level;
-    logger = other.logger;
-    logger_app_data = other.logger_app_data;
-    fileapi_legacy = other.fileapi_legacy;
-    epsg_file_exists = other.epsg_file_exists;
     set_search_paths(other.search_paths);
-    file_finder = other.file_finder;
-    file_finder_legacy = other.file_finder_legacy;
-    file_finder_user_data = other.file_finder_user_data;
-    networking = other.networking;
-    ca_bundle_path = other.ca_bundle_path;
-    if (other.cpp_context != nullptr) {
-        cpp_context = other.cpp_context->clone(this);
-    }
 }
 
 /************************************************************************/

@@ -4797,6 +4797,51 @@ TEST_F(CApi, proj_context_set_sqlite3_vfs_name) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_context_set_sqlite3_vfs_name__from_global_context) {
+
+    // Set a dummy VFS and check it is taken into account
+    // (failure to open proj.db)
+    proj_context_set_sqlite3_vfs_name(nullptr, "dummy_vfs_name");
+
+    PJ_CONTEXT *ctx = proj_context_create();
+    proj_log_func(ctx, nullptr, [](void *, int, const char *) -> void {});
+
+    ASSERT_EQ(proj_create(ctx, "EPSG:4326"), nullptr);
+
+    // Restore default VFS
+    proj_context_set_sqlite3_vfs_name(nullptr, nullptr);
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, use_proj4_init_rules) {
+    PJ_CONTEXT *ctx = proj_context_create();
+    proj_context_use_proj4_init_rules(ctx, true);
+    ASSERT_TRUE(proj_context_get_use_proj4_init_rules(ctx, true));
+    proj_context_use_proj4_init_rules(ctx, false);
+    ASSERT_TRUE(!proj_context_get_use_proj4_init_rules(ctx, true));
+    proj_context_destroy(ctx);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, use_proj4_init_rules_from_global_context) {
+
+    int initial_rules = proj_context_get_use_proj4_init_rules(nullptr, true);
+    proj_context_use_proj4_init_rules(nullptr, true);
+    PJ_CONTEXT *ctx = proj_context_create();
+    ASSERT_TRUE(proj_context_get_use_proj4_init_rules(ctx, true));
+    proj_context_destroy(ctx);
+    proj_context_use_proj4_init_rules(nullptr, false);
+    ctx = proj_context_create();
+    ASSERT_TRUE(!proj_context_get_use_proj4_init_rules(ctx, true));
+    proj_context_destroy(ctx);
+    proj_context_use_proj4_init_rules(nullptr, initial_rules);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_is_equivalent_to_with_ctx) {
     auto from_epsg = proj_create_from_database(m_ctxt, "EPSG", "7844",
                                                PJ_CATEGORY_CRS, false, nullptr);

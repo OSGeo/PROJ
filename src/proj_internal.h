@@ -735,22 +735,23 @@ struct projCtx_t {
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
 
-    projNetworkCallbacksAndData networking{};
-    bool defer_grid_opening = false; // set by pj_obj_create()
+    bool defer_grid_opening = false; // set transiently by pj_obj_create()
 
     projFileApiCallbackAndData fileApi{};
     std::string custom_sqlite3_vfs_name{};
+    std::string user_writable_directory{};
 
+    // BEGIN ini file settings
     bool iniFileLoaded = false;
     std::string endpoint{};
-
-    std::string user_writable_directory{};
+    projNetworkCallbacksAndData networking{};
     projGridChunkCache gridChunkCache{};
+    TMercAlgo defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER; // can be overridden by content of proj.ini
+    // END ini file settings
 
     int projStringParserCreateFromPROJStringRecursionCounter = 0; // to avoid potential infinite recursion in PROJStringParser::createFromPROJString()
     int pipelineInitRecursiongCounter = 0; // to avoid potential infinite recursion in pipeline.cpp
 
-    TMercAlgo defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER; // can be overridden by content of proj.ini
 
     projCtx_t() = default;
     projCtx_t(const projCtx_t&);
