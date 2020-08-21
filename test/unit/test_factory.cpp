@@ -2782,6 +2782,12 @@ TEST(factory, createObjectsFromName) {
         }
     }
 
+    // Exact name, but just not the official case ==> should match with exact
+    // match
+    EXPECT_EQ(factory->createObjectsFromName("WGS 84 / utm zone 31n", {}, false)
+                  .size(),
+              1U);
+
     // Prime meridian
     EXPECT_EQ(factoryEPSG->createObjectsFromName("Paris", {}, false, 2).size(),
               1U);
