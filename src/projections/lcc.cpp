@@ -140,6 +140,11 @@ PJ *PROJECTION(lcc) {
             Q->n = log(cosphi / cos(Q->phi2)) /
                log(tan(M_FORTPI + .5 * Q->phi2) /
                tan(M_FORTPI + .5 * Q->phi1));
+        if( Q->n == 0 ) {
+            // Likely reason is that phi1 / phi2 are too close to zero.
+            // Can be reproduced with +proj=lcc +a=1 +lat_2=.0000001
+            return pj_default_destructor(P, PJD_ERR_CONIC_LAT_EQUAL);
+        }
         Q->c = cosphi * pow(tan(M_FORTPI + .5 * Q->phi1), Q->n) / Q->n;
         Q->rho0 = (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) ? 0. :
             Q->c * pow(tan(M_FORTPI + .5 * P->phi0), -Q->n);
