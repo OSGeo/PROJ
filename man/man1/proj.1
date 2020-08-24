@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJ" "1" "Jul 1, 2020" "7.1.0" "PROJ"
+.TH "PROJ" "1" "Sep 1, 2020" "7.1.1" "PROJ"
 .SH NAME
 proj \- Cartographic projection filter
 .
@@ -33,9 +33,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH SYNOPSIS
 .INDENT 0.0
 .INDENT 3.5
-\fBproj\fP [\fB\-beEfiIlmorsStTvVwW\fP] [args]] [\fI+opt[=arg]\fP …] file …
+\fBproj\fP [\fB\-beEfiIlmorsStTvVwW\fP] [args]] [\fI+opt[=arg]\fP ...] file ...
 .sp
-\fBinvproj\fP [\fB\-beEfiIlmorsStTvVwW\fP] [args]] [\fI+opt[=arg]\fP …] file …
+\fBinvproj\fP [\fB\-beEfiIlmorsStTvVwW\fP] [args]] [\fI+opt[=arg]\fP ...] file ...
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
@@ -211,7 +211,7 @@ portions of the input line are appended to the output line.
 Input geographic data (longitude and latitude) must be in DMS or decimal degrees format and input
 cartesian data must be in units consistent with the ellipsoid major axis or
 sphere radius units. Output geographic coordinates will be in DMS (if the
-\fB\-w\fP switch is not employed) and precise to 0.001” with trailing, zero\-valued
+\fB\-w\fP switch is not employed) and precise to 0.001" with trailing, zero\-valued
 minute\-second fields deleted.
 .SH EXAMPLE
 .sp

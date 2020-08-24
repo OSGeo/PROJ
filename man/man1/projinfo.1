@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJINFO" "1" "Jul 1, 2020" "7.1.0" "PROJ"
+.TH "PROJINFO" "1" "Sep 1, 2020" "7.1.1" "PROJ"
 .SH NAME
 projinfo \- Geodetic object and coordinate operation queries
 .
@@ -36,55 +36,56 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .nf
 \fBprojinfo\fP
 .in +2
-[\-o formats] [\-k crs|operation|datum|ellipsoid] [–summary] [\-q]
-[[–area name_or_code] | [–bbox west_long,south_lat,east_long,north_lat]]
-[–spatial\-test contains|intersects]
-[–crs\-extent\-use none|both|intersection|smallest]
-[–grid\-check none|discard_missing|sort|known_available]
-[–pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
-[–show\-superseded] [–hide\-ballpark]
-[–boundcrs\-to\-wgs84]
-[–main\-db\-path path] [–aux\-db\-path path]*
-[–identify] [–3d]
-[–c\-ify] [–single\-line]
-–searchpaths | –remote\-data | {object_definition} |
+[\-o formats] [\-k crs|operation|datum|ellipsoid] [\-\-summary] [\-q]
+[[\-\-area name_or_code] | [\-\-bbox west_long,south_lat,east_long,north_lat]]
+[\-\-spatial\-test contains|intersects]
+[\-\-crs\-extent\-use none|both|intersection|smallest]
+[\-\-grid\-check none|discard_missing|sort|known_available]
+[\-\-pivot\-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
+[\-\-show\-superseded] [\-\-hide\-ballpark]
+[\-\-boundcrs\-to\-wgs84]
+[\-\-main\-db\-path path] [\-\-aux\-db\-path path]*
+[\-\-identify] [\-\-3d]
+[\-\-c\-ify] [\-\-single\-line]
+\-\-searchpaths | \-\-remote\-data | {object_definition} |
 {object_reference} | (\-s {srs_def} \-t {srs_def})
 
 .in -2
 .fi
 .sp
 .sp
-where {object_definition} or {srs_def} is
+where {object_definition} or {srs_def} is one of the possibilities accepted
+by \fBproj_create()\fP
 .INDENT 0.0
 .IP \(bu 2
 a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like “EPSG:4326”, “urn:ogc:def:crs:EPSG::4326”,
-“urn:ogc:def:coordinateOperation:EPSG::1671”),
+an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
+"urn:ogc:def:coordinateOperation:EPSG::1671"),
 .IP \(bu 2
-an Object name. e.g “WGS 84”, “WGS 84 / UTM zone 31N”. In that case as
+an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
 uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
 .IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
-(e.g “\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP” or custom abbreviated
-syntax “EPSG:2393+5717”),
+(e.g "\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP" or custom abbreviated
+syntax "EPSG:2393+5717"),
 .IP \(bu 2
 a OGC URN combining references for references for projected or derived CRSs
-e.g. for Projected 3D CRS “UTM zone 31N / WGS 84 (3D)”:
-“\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP”
+e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
+"\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP"
 (\fIadded in 6.2\fP)
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. “\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP”)
+(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
 .IP \(bu 2
-a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.1/projjson.schema.json\fP (\fIadded in 6.2\fP)
+a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.2/projjson.schema.json\fP (\fIadded in 6.2\fP)
 .IP \(bu 2
-a compound CRS made from two object names separated with ” + “. e.g. “WGS 84 + EGM96 height” (\fIadded in 7.1\fP)
+a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (\fIadded in 7.1\fP)
 .UNINDENT
 .sp
-{object_reference} is a filename preceded by the ‘@’ character.  The
+{object_reference} is a filename preceded by the \(aq@\(aq character.  The
 file referenced by the {object_reference} must contain a valid
 {object_definition}.
 .UNINDENT
@@ -120,7 +121,7 @@ WKT2_2019 was previously called WKT2_2018.
 \fBNOTE:\fP
 .INDENT 7.0
 .INDENT 3.5
-Before PROJ 6.3.0, WKT1:GDAL was implicitly calling –boundcrs\-to\-wgs84.
+Before PROJ 6.3.0, WKT1:GDAL was implicitly calling \-\-boundcrs\-to\-wgs84.
 This is no longer the case.
 .UNINDENT
 .UNINDENT
@@ -159,7 +160,7 @@ potentially compatible of being piped in other utilities.
 .B \-\-area name_or_code
 Specify an area of interest to restrict the results when researching
 coordinate operations between 2 CRS. The area of interest can be specified either
-as a name (e.g “Denmark \- onshore”) or a AUTHORITY:CODE (EPSG:3237)
+as a name (e.g "Denmark \- onshore") or a AUTHORITY:CODE (EPSG:3237)
 This option is exclusive of \fI\%\-\-bbox\fP\&.
 .sp
 \fBNOTE:\fP
@@ -348,7 +349,7 @@ with a likelihood of 70% to EPSG:32631
 New in version 6.3.
 
 .sp
-“Promote” the CRS(s) to their 3D version. In the context of researching
+"Promote" the CRS(s) to their 3D version. In the context of researching
 available coordinate transformations, explicitly specifying this option is
 not necessary, because when one of the source or target CRS has a vertical
 component but not the other one, the one that has no vertical component is
