@@ -873,6 +873,10 @@ class PROJ_GCC_DLL DatabaseContext {
     getNonDeprecated(const std::string &tableName, const std::string &authName,
                      const std::string &code) const;
 
+    PROJ_INTERNAL static std::vector<operation::CoordinateOperationNNPtr>
+    getTransformationsForGridName(const DatabaseContextNNPtr &databaseContext,
+                                  const std::string &gridName);
+
     //! @endcond
 
   protected:
@@ -1184,6 +1188,7 @@ class PROJ_GCC_DLL AuthorityFactory {
                                 std::vector<ObjectType>(),
                             bool approximateMatch = true,
                             size_t limitResultCount = 0) const;
+
     //! @endcond
 
   protected:

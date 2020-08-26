@@ -4571,10 +4571,11 @@ TEST_F(CApi, proj_create_vertical_crs_ex) {
     ObjectKeeper keeper_horiz_crs(horiz_crs);
     ASSERT_NE(horiz_crs, nullptr);
 
+    const char *options[] = {"ACCURACY=123", nullptr};
     auto vert_crs = proj_create_vertical_crs_ex(
         m_ctxt, "myVertCRS (ftUS)", "myVertDatum", nullptr, nullptr,
         "US survey foot", 0.304800609601219, "PROJ @foo.gtx", nullptr, nullptr,
-        nullptr, nullptr);
+        nullptr, options);
     ObjectKeeper keeper_vert_crs(vert_crs);
     ASSERT_NE(vert_crs, nullptr);
 
@@ -4609,6 +4610,8 @@ TEST_F(CApi, proj_create_vertical_crs_ex) {
               "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
+
+    ASSERT_EQ(proj_coordoperation_get_accuracy(m_ctxt, P), 123.0);
 }
 
 // ---------------------------------------------------------------------------
@@ -4687,6 +4690,54 @@ TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
     auto proj_5_bis = proj_as_proj_string(m_ctxt, P2, PJ_PROJ_5, nullptr);
     ASSERT_NE(proj_5_bis, nullptr);
     EXPECT_EQ(std::string(proj_5_bis), std::string(proj_5));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_vertical_crs_ex_implied_accuracy) {
+
+    PJ *crsH = proj_create(m_ctxt, "EPSG:4283"); // GDA94
+    ASSERT_NE(crsH, nullptr);
+    ObjectKeeper keeper_crsH(crsH);
+    PJ *crsV = proj_create(m_ctxt, "EPSG:5711"); // AHD height
+    ASSERT_NE(crsV, nullptr);
+    ObjectKeeper keeper_crsV(crsV);
+    PJ *crsGeoid = proj_create(m_ctxt, "EPSG:4939"); // GDA94 3D
+    ASSERT_NE(crsGeoid, nullptr);
+    ObjectKeeper keeper_crsGeoid(crsGeoid);
+
+    PJ *vertDatum = proj_crs_get_datum(m_ctxt, crsV);
+    ObjectKeeper keeper_vertDatum(vertDatum);
+    const char *vertDatumName = proj_get_name(vertDatum);
+    const char *vertDatumAuthority = proj_get_id_auth_name(vertDatum, 0);
+    const char *vertDatumCode = proj_get_id_code(vertDatum, 0);
+    PJ *crsVGeoid = proj_create_vertical_crs_ex(
+        m_ctxt, "Vertical", vertDatumName, vertDatumAuthority, vertDatumCode,
+        "metre", 1.0, "PROJ au_ga_AUSGeoid09_V1.01.tif", nullptr, nullptr,
+        crsGeoid, nullptr);
+    ObjectKeeper keeper_crsVGeoid(crsVGeoid);
+    PJ *crsCompoundGeoid = proj_create_compound_crs(
+        m_ctxt, "Compound with geoid", crsH, crsVGeoid);
+    ObjectKeeper keeper_crsCompoundGeoid(crsCompoundGeoid);
+
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt =
+        proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+    PJ_OBJ_LIST *operations =
+        proj_create_operations(m_ctxt, crsCompoundGeoid, crsGeoid, ctxt);
+    ASSERT_NE(operations, nullptr);
+    ObjListKeeper keeper_operations(operations);
+    EXPECT_GE(proj_list_get_count(operations), 1);
+    PJ *transform = proj_list_get(m_ctxt, operations, 0);
+    ObjectKeeper keeper_transform(transform);
+
+    // This is the accuracy of operations EPSG:5656 / 5657
+    ASSERT_EQ(proj_coordoperation_get_accuracy(m_ctxt, transform), 0.03);
 }
 
 // ---------------------------------------------------------------------------

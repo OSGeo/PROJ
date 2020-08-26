@@ -3287,7 +3287,9 @@ PJ *proj_create_vertical_crs(PJ_CONTEXT *ctx, const char *crs_name,
  * @param geoid_model_code Code of the transformation for
  * the geoid model. or NULL
  * @param geoid_geog_crs Geographic CRS for the geoid transformation, or NULL.
- * @param options should be set to NULL for now
+ * @param options NULL-terminated list of strings with "KEY=VALUE" format. or
+ * NULL.
+ * The currently recognized option is ACCURACY=value, where value is in metre.
  * @return Object of type VerticalCRS that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
  */
@@ -3299,7 +3301,6 @@ PJ *proj_create_vertical_crs_ex(
     const char *geoid_model_code, const PJ *geoid_geog_crs,
     const char *const *options) {
     SANITIZE_CTX(ctx);
-    (void)options;
     try {
         const UnitOfMeasure linearUnit(
             createLinearUnit(linear_units, linear_units_conv));
@@ -3317,13 +3318,22 @@ PJ *proj_create_vertical_crs_ex(
                                       geoid_geog_crs->iso_obj)
                     ? std::dynamic_pointer_cast<CRS>(geoid_geog_crs->iso_obj)
                     : nullptr;
+
+            std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+            for (auto iter = options; iter && iter[0]; ++iter) {
+                const char *value;
+                if ((value = getOptionValue(*iter, "ACCURACY="))) {
+                    accuracies.emplace_back(
+                        metadata::PositionalAccuracy::create(value));
+                }
+            }
             const auto model(Transformation::create(
                 propsModel, vertCRSWithoutGeoid,
                 GeographicCRS::EPSG_4979, // arbitrarily chosen. Ignored
                 interpCRS,
                 OperationMethod::create(PropertyMap(),
                                         std::vector<OperationParameterNNPtr>()),
-                {}, {}));
+                {}, accuracies));
             props.set("GEOID_MODEL", model);
         }
         auto vertCRS = VerticalCRS::create(props, datum, cs);

@@ -13738,7 +13738,8 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
         return ret;
     };
 
-    const auto getProjGeoidTransformation = [&sourceCRS, &targetCRS, &vertDst](
+    const auto getProjGeoidTransformation = [&sourceCRS, &targetCRS, &vertDst,
+                                             &context](
         const CoordinateOperationNNPtr &model,
         const std::string &projFilename) {
 
@@ -13784,8 +13785,32 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
         const auto properties = util::PropertyMap().set(
             common::IdentifiedObject::NAME_KEY,
             buildOpName("Transformation", vertCRSMetre, geogSrcCRS));
+
+        // Try to find a representative value for the accuracy of this grid
+        // from the registered transformations.
+        std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
+        const auto &modelAccuracies = model->coordinateOperationAccuracies();
+        if (modelAccuracies.empty()) {
+            const auto &authFactory = context.context->getAuthorityFactory();
+            if (authFactory) {
+                const auto transformationsForGrid =
+                    io::DatabaseContext::getTransformationsForGridName(
+                        authFactory->databaseContext(), projFilename);
+                double accuracy = -1;
+                for (const auto &transf : transformationsForGrid) {
+                    accuracy = std::max(accuracy, getAccuracy(transf));
+                }
+                if (accuracy >= 0) {
+                    accuracies.emplace_back(
+                        metadata::PositionalAccuracy::create(
+                            toString(accuracy)));
+                }
+            }
+        }
+
         return Transformation::createGravityRelatedHeightToGeographic3D(
-            properties, vertCRSMetre, geogSrcCRS, nullptr, projFilename, {});
+            properties, vertCRSMetre, geogSrcCRS, nullptr, projFilename,
+            !modelAccuracies.empty() ? modelAccuracies : accuracies);
     };
 
     std::vector<CoordinateOperationNNPtr> res;
