@@ -314,6 +314,48 @@ Ancillary types for geodetic computations
 
         Third rotation angle, kappa.
 
+.. c:type:: PJ_ENU
+
+    East, north and up components.
+
+    .. code-block:: c
+
+        typedef struct { double e, n, u; }          PJ_ENU;
+
+    .. c:member:: double PJ_ENU.e
+
+        East component.
+
+    .. c:member:: double PJ_ENU.n
+
+        North component.
+
+    .. c:member:: double PJ_ENU.u
+
+        Up component.
+
+
+.. c:type:: PJ_GEOD
+
+    Geodesic length, forward and reverse azimuths.
+
+    .. code-block:: C
+
+        typedef struct { double s, a1, a2; }        PJ_GEOD;
+
+    .. c:member:: double PJ_GEOD.s
+
+        Geodesic length.
+
+    .. c:member:: double PJ_GEOD.a1
+
+        Forward azimuth.
+
+    .. c:member:: double PJ_GEOD.a2
+
+        Reverse azimuth.
+
+
 
 Complex coordinate types
 --------------------------------------------------------------------------------
@@ -331,6 +373,9 @@ Complex coordinate types
             PJ_XYZT xyzt;
             PJ_UVWT uvwt;
             PJ_LPZT lpzt;
+            PJ_GEOD geod;
+            PJ_OPK opk;
+            PJ_ENU enu;
             PJ_XYZ  xyz;
             PJ_UVW  uvw;
             PJ_LPZ  lpz;
@@ -354,6 +399,18 @@ Complex coordinate types
     .. c:member:: PJ_LPZT PJ_COORD.lpzt
 
         Longitude, latitude, vertical and time components.
+
+    .. c:member:: PJ_GEOD PJ_COORD.geod
+
+        Geodesic length, forward and reverse azimuths.
+
+    .. c:member:: PJ_OPK PJ_COORD.opk
+
+        Rotations, for instance three euler angles.
+
+    .. c:member:: PJ_ENU PJ_COORD.enu
+
+        East, north and up components.
 
     .. c:member:: PJ_XYZ PJ_COORD.xyz
 
