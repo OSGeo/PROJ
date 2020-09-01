@@ -3,6 +3,47 @@
 News
 ###############################################################################
 
+7.1.1 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*September 1st 2020*
+
+
+Updates
+-------
+
+* Added various Brazillian grids to the database (`#2277 <https://github.com/OSGeo/issues/2277>`_)
+
+* Added geoid file for Canary Islands to the database (`#2312 <https://github.com/OSGeo/issues/2312>`_)
+
+* Updated EPSG database to version 9.8.15 (`#2310 <https://github.com/OSGeo/issues/2310>`_)
+
+Bug fixes
+---------
+
+* WKT parser: do not raise warning when parsing a WKT2:2015 TIMECRS
+  whose TIMEUNIT is at the CS level, and not inside (`#2281 <https://github.com/OSGeo/issues/2281>`_)
+
+* Parse '+proj=something_not_latlong +vunits=' without +geoidgrids as a
+  Projected3D CRS and not a compound CRS with a unknown datum (`#2289 <https://github.com/OSGeo/issues/2289>`_)
+
+* C API: Avoid crashing due to missing SANITIZE_CTX() in entry points (`#2293 <https://github.com/OSGeo/issues/2293>`_)
+
+* CMake build: Check "target_clones" before use (`#2297 <https://github.com/OSGeo/issues/2297>`_)
+
+* PROJ string export of +proj=krovak +czech: make sure we export +czech… (`#2301 <https://github.com/OSGeo/issues/2301>`_)
+
+* Helmert 2D: do not require a useless +convention= parameter (`#2305 <https://github.com/OSGeo/issues/2305>`_)
+
+* Fix a few spelling errors ("vgridshit" vs. "vgridshift") (`#2307 <https://github.com/OSGeo/issues/2307>`_)
+
+* Fix ability to identify EPSG:2154 as a candidate for 'RGF93_Lambert_93' (`#2316 <https://github.com/OSGeo/issues/2316>`_)
+
+* WKT importer: tune for Oracle WKT and 'Lambert Conformal Conic' (`#2322 <https://github.com/OSGeo/issues/2322>`_)
+
+* Revert compiler generated Fused Multiply Addition optimized routines (`#2328 <https://github.com/OSGeo/issues/2328>`_)
+
+
+
 7.1.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *July 1st 2020*

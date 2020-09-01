@@ -13,9 +13,12 @@ distribution of the source code and various resource file archives. See
 Current Release
 --------------------------------------------------------------------------------
 
-* **2020-07-01** `proj-7.1.0.tar.gz`_ (`md5`_)
+* **2020-09-01** `proj-7.1.1.tar.gz`_ (`md5`_)
+* **2020-07-01** `proj-7.1.0.tar.gz`_
 * **2020-05-01** `proj-6.3.2.tar.gz`_
+* **2020-09-01** `proj-data-1.2.tar.gz`_
 * **2020-05-01** `proj-data-1.1.tar.gz`_
+* **2020-03-01** `proj-data-1.0.tar.gz`_
 * **2018-09-15** `proj-datumgrid-1.8.zip`_
 * **2020-03-01** `proj-datumgrid-europe-1.6.zip`_
 * **2020-03-01** `proj-datumgrid-north-america-1.4.zip`_
@@ -68,8 +71,9 @@ Past Releases
 * **2018-03-01** `proj-datumgrid-oceania-1.1.zip`_
 * **2018-03-01** `proj-datumgrid-oceania-1.0.zip`_
 
+.. _`proj-7.1.1.tar.gz`: https://download.osgeo.org/proj/proj-7.1.1.tar.gz
+.. _`md5`: https://download.osgeo.org/proj/proj-7.1.1.tar.gz.md5
 .. _`proj-7.1.0.tar.gz`: https://download.osgeo.org/proj/proj-7.1.0.tar.gz
-.. _`md5`: https://download.osgeo.org/proj/proj-7.1.0.tar.gz.md5
 .. _`proj-7.0.1.tar.gz`: https://download.osgeo.org/proj/proj-7.0.1.tar.gz
 .. _`proj-7.0.0.tar.gz`: https://download.osgeo.org/proj/proj-7.0.0.tar.gz
 .. _`proj-6.3.2.tar.gz`: https://download.osgeo.org/proj/proj-6.3.2.tar.gz
@@ -87,6 +91,7 @@ Past Releases
 .. _`proj-4.9.1.tar.gz`: https://download.osgeo.org/proj/proj-4.9.1.tar.gz
 .. _`proj-4.9.2.tar.gz`: https://download.osgeo.org/proj/proj-4.9.2.tar.gz
 .. _`proj-4.9.3.tar.gz`: https://download.osgeo.org/proj/proj-4.9.3.tar.gz
+.. _`proj-data-1.2.tar.gz`: https://download.osgeo.org/proj/proj-data-1.2.tar.gz
 .. _`proj-data-1.1.tar.gz`: https://download.osgeo.org/proj/proj-data-1.1.tar.gz
 .. _`proj-data-1.0.tar.gz`: https://download.osgeo.org/proj/proj-data-1.0.tar.gz
 .. _`proj-datumgrid-1.6.zip`: https://download.osgeo.org/proj/proj-datumgrid-1.6.zip
