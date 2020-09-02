@@ -897,5 +897,6 @@ C API for ISO-19111 functionality
 .. doxygengroup:: iso19111_types
    :project: doxygen_api
    :content-only:
+   :members:
 
 
