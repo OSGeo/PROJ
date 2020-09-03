@@ -2497,9 +2497,9 @@ void proj_get_crs_list_parameters_destroy(PROJ_CRS_LIST_PARAMETERS *params) {
  * entry is NULL. This array should be freed with proj_crs_info_list_destroy()
  *
  * When no filter parameters are set, this is functionnaly equivalent to
- * proj_get_crs_info_list_from_database(), instantiating a PJ* object for each
- * of the proj_create_from_database() and retrieving information with the
- * various getters. However this function will be much faster.
+ * proj_get_codes_from_database(), instantiating a PJ* object for each
+ * of the codes with proj_create_from_database() and retrieving information
+ * with the various getters. However this function will be much faster.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param auth_name Authority name, used to restrict the search.
