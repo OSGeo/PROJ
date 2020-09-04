@@ -692,7 +692,7 @@ class CodeList {
     //! @endcond
   protected:
     explicit CodeList(const std::string &nameIn) : name_(nameIn) {}
-    CodeList(const CodeList &other) = default;
+    CodeList(const CodeList &) = default;
     CodeList &operator=(const CodeList &other);
 
   private:
