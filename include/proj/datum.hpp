@@ -541,7 +541,7 @@ class PROJ_GCC_DLL RealizationMethod : public util::CodeList {
     PROJ_FRIEND_OPTIONAL(RealizationMethod);
     PROJ_DLL explicit RealizationMethod(
         const std::string &nameIn = std::string());
-    PROJ_DLL RealizationMethod(const RealizationMethod &other);
+    PROJ_DLL RealizationMethod(const RealizationMethod &other) = default;
     PROJ_DLL RealizationMethod &operator=(const RealizationMethod &other);
 };
 

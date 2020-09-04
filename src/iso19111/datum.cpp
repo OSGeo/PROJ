@@ -1773,10 +1773,6 @@ RealizationMethod::RealizationMethod(const std::string &nameIn)
 
 // ---------------------------------------------------------------------------
 
-RealizationMethod::RealizationMethod(const RealizationMethod &) = default;
-
-// ---------------------------------------------------------------------------
-
 RealizationMethod &RealizationMethod::
 operator=(const RealizationMethod &other) {
     CodeList::operator=(other);
