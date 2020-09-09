@@ -8726,6 +8726,7 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
         "1072", // Geographic3D to GravityRelatedHeight (OSGM15-Ire)
         "1073", // Geographic3D to GravityRelatedHeight (IGN2009)
         "1081", // Geographic3D to GravityRelatedHeight (BEV AT)
+        "1083", // Geog3D to Geog2D+Vertical (AUSGeoid v2)
         "9661", // Geographic3D to GravityRelatedHeight (EGM)
         "9662", // Geographic3D to GravityRelatedHeight (Ausgeoid98)
         "9663", // Geographic3D to GravityRelatedHeight (OSGM-GB)
