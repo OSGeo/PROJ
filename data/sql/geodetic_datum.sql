@@ -159,6 +159,9 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1271','MML07 Intermediate Reference 
 INSERT INTO "geodetic_datum" VALUES('EPSG','1272','IGb14',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','1262','2010-01-01',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1273','AbInvA96_2020 Intermediate Reference Frame',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','4589',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','1286','Pico de las Nieves 1968',NULL,NULL,'EPSG','7022','EPSG','8901','EPSG','3873',NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1289','GBK19 Intermediate Reference Frame',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','4607',NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1291','Australian Terrestrial Reference Frame 2014',NULL,NULL,'EPSG','7019','EPSG','8901','EPSG','4177','2020-01-01',0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1293','Sistem Referensi Geospasial Indonesia 2013',NULL,NULL,'EPSG','7030','EPSG','8901','EPSG','1122','2013-10-11',0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,NULL,'EPSG','7001','EPSG','8901','EPSG','1263',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,NULL,'EPSG','7002','EPSG','8901','EPSG','1263',NULL,0);
 INSERT INTO "geodetic_datum" VALUES('EPSG','6003','Not specified (based on Australian National Spheroid)',NULL,NULL,'EPSG','7003','EPSG','8901','EPSG','1263',NULL,0);

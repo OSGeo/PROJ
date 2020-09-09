@@ -4737,7 +4737,7 @@ TEST_F(CApi, proj_create_vertical_crs_ex_implied_accuracy) {
     ObjectKeeper keeper_transform(transform);
 
     // This is the accuracy of operations EPSG:5656 / 5657
-    ASSERT_EQ(proj_coordoperation_get_accuracy(m_ctxt, transform), 0.03);
+    ASSERT_EQ(proj_coordoperation_get_accuracy(m_ctxt, transform), 0.15);
 }
 
 // ---------------------------------------------------------------------------

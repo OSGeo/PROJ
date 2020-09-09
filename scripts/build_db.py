@@ -398,19 +398,19 @@ def fill_grid_transformation(proj_db_cursor):
         # 1071: Vertical Offset by Grid Interpolation (NZLVD)
         # 1080: Vertical Offset by Grid Interpolation (BEV AT)
         # 1081: Geographic3D to GravityRelatedHeight (BEV AT)
+        # 1083: Geog3D to Geog2D+Vertical (AUSGeoid v2)
         # 1084: Vertical Offset by Grid Interpolation (gtx)
-        elif method_code in (1071, 1080, 1081, 1084) and n_params == 2:
+        # 1085: Vertical Offset by Grid Interpolation (asc)
+        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085) and n_params == 2:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
-        elif method_name == 'Geocentric translation by Grid Interpolation (IGN)':
+        # 1087: Geocentric translation by Grid Interpolation (IGN)
+        elif method_code in (1087, ) and n_params == 3:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
-        elif method_code == 1085: # Vertical Offset by Grid Interpolation (asc)
-            assert param_code[1] == 1048, (code, method_code, param_code[1])
-            interpolation_crs_auth_name = EPSG_AUTHORITY
-            interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
+            # ignoring parameter 2 Standard CT code
         else:
             assert n_params == 1, (code, method_code)
 

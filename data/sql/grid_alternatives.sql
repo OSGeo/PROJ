@@ -121,9 +121,10 @@ VALUES
 ('GDA94_GDA2020_conformal_christmas_island.gsb','au_icsm_GDA94_GDA2020_conformal_christmas_island.tif','GDA94_GDA2020_conformal_christmas_island.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/au_icsm_GDA94_GDA2020_conformal_christmas_island.tif',1,1,NULL),
 ('GDA94_GDA2020_conformal_cocos_island.gsb','au_icsm_GDA94_GDA2020_conformal_cocos_island.tif','GDA94_GDA2020_conformal_cocos_island.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/au_icsm_GDA94_GDA2020_conformal_cocos_island.tif',1,1,NULL),
 -- source file contains undulation in first band, and deflection in 2nd and 3d band
+('AUSGeoid09_V1.01.gsb','au_ga_AUSGeoid09_V1.01.tif','AUSGeoid09_V1.01.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/au_ga_AUSGeoid09_V1.01.tif',1,1,NULL),
 ('AUSGeoid09_GDA94_V1.01_DOV_windows.gsb','au_ga_AUSGeoid09_V1.01.tif','AUSGeoid09_V1.01.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/au_ga_AUSGeoid09_V1.01.tif',1,1,NULL),
 -- source file contains undulation in first band, and deflection in 2nd and 3d band
-('AUSGeoid2020_windows_binary.gsb','au_ga_AUSGeoid2020_20180201.tif','AUSGeoid2020_20180201.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/au_ga_AUSGeoid2020_20180201.tif',1,1,NULL),
+('AUSGeoid2020_20180201.gsb','au_ga_AUSGeoid2020_20180201.tif','AUSGeoid2020_20180201.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/au_ga_AUSGeoid2020_20180201.tif',1,1,NULL),
 -- Netherlands / RDNAP (non-free grids). See https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/master/debian/copyright
 ('naptrans2008.gtx','','naptrans2008.gtx','GTX','geoid_like',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/naptrans2008.gtx',1,0,NULL),
 ('rdtrans2008.gsb','','rdtrans2008.gsb','NTv2','hgridshift',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',1,0,NULL),
