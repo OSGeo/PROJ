@@ -11,8 +11,8 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1051','Genoa',NULL,NULL,'EPSG','3736
 INSERT INTO "vertical_datum" VALUES('EPSG','1054','Sri Lanka Vertical Datum',NULL,NULL,'EPSG','3310','1932-01-01',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1059','Faroe Islands Vertical Reference 2009',NULL,NULL,'EPSG','3248','2009-01-01',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1079','Fehmarnbelt Vertical Reference 2010',NULL,NULL,'EPSG','3890','2010-01-01',0);
-INSERT INTO "vertical_datum" VALUES('EPSG','1080','Lowest Astronomic Tide',NULL,NULL,'EPSG','1262',NULL,0);
-INSERT INTO "vertical_datum" VALUES('EPSG','1082','Highest Astronomic Tide',NULL,NULL,'EPSG','1262',NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1080','Lowest Astronomical Tide',NULL,NULL,'EPSG','1262',NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1082','Highest Astronomical Tide',NULL,NULL,'EPSG','1262',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1083','Lower Low Water Large Tide',NULL,NULL,'EPSG','1262',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1084','Higher High Water Large Tide',NULL,NULL,'EPSG','1262',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1085','Indian Spring Low Water',NULL,NULL,'EPSG','1262',NULL,0);
@@ -87,6 +87,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1262','South Africa Land Levelling D
 INSERT INTO "vertical_datum" VALUES('EPSG','1265','HS2 Vertical Reference Frame',NULL,NULL,'EPSG','4582',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1267','Wiener Null',NULL,NULL,'EPSG','4585',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1269','Kingdom of Saudi Arabia Vertical Reference Frame Jeddah 2014',NULL,NULL,'EPSG','3303','2014-10-01',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1270','Mean Sea Level Netherlands',NULL,NULL,'EPSG','1630',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1274','European Vertical Reference Frame 2019',NULL,NULL,'EPSG','4608','2000-01-01',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1275','Mallorca',NULL,NULL,'EPSG','4602',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1276','Menorca',NULL,NULL,'EPSG','4603',NULL,0);
@@ -100,6 +101,9 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1283','La Palma',NULL,NULL,'EPSG','4
 INSERT INTO "vertical_datum" VALUES('EPSG','1284','El Hierro',NULL,NULL,'EPSG','4597',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1285','Ceuta 2',NULL,NULL,'EPSG','4590',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','1287','European Vertical Reference Frame 2019 mean tide',NULL,NULL,'EPSG','4608','2000-01-01',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1290','Lowest Astronomical Tide Netherlands',NULL,NULL,'EPSG','1630',NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1292','Australian Vertical Working Surface',NULL,NULL,'EPSG','4177','2020-07-14',0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1294','Indonesian Geoid 2020',NULL,NULL,'EPSG','1122',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,'EPSG','1262',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,NULL,'EPSG','2792',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5102','National Geodetic Vertical Datum 1929',NULL,NULL,'EPSG','1323','1929-01-01',0);
@@ -108,7 +112,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','5104','Yellow Sea 1956',NULL,NULL,'E
 INSERT INTO "vertical_datum" VALUES('EPSG','5105','Baltic 1977',NULL,NULL,'EPSG','2423','1977-01-01',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5106','Caspian Sea',NULL,NULL,'EPSG','1291',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5107','Nivellement general de la France',NULL,NULL,'EPSG','1326',NULL,1);
-INSERT INTO "vertical_datum" VALUES('EPSG','5109','Normaal Amsterdams Peil',NULL,NULL,'EPSG','1275',NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','5109','Normaal Amsterdams Peil',NULL,NULL,'EPSG','1172',NULL,0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5110','Ostend',NULL,NULL,'EPSG','1347','1981-01-01',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5111','Australian Height Datum',NULL,NULL,'EPSG','4493','1971-05-05',0);
 INSERT INTO "vertical_datum" VALUES('EPSG','5112','Australian Height Datum (Tasmania)',NULL,NULL,'EPSG','2947','1972-01-01',0);

@@ -40,7 +40,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','5703','NAVD88 height',NULL,NULL,'EPSG'
 INSERT INTO "vertical_crs" VALUES('EPSG','5704','Yellow Sea',NULL,NULL,'EPSG','6499','EPSG','5104','EPSG','1067',1);
 INSERT INTO "vertical_crs" VALUES('EPSG','5705','Baltic 1977 height',NULL,NULL,'EPSG','6499','EPSG','5105','EPSG','2423',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5706','Caspian depth',NULL,NULL,'EPSG','6498','EPSG','5106','EPSG','1291',0);
-INSERT INTO "vertical_crs" VALUES('EPSG','5709','NAP height',NULL,NULL,'EPSG','6499','EPSG','5109','EPSG','1275',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','5709','NAP height',NULL,NULL,'EPSG','6499','EPSG','5109','EPSG','1172',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5710','Ostend height',NULL,NULL,'EPSG','6499','EPSG','5110','EPSG','1347',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5711','AHD height',NULL,NULL,'EPSG','6499','EPSG','5111','EPSG','4493',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','5712','AHD (Tasmania) height',NULL,NULL,'EPSG','6499','EPSG','5112','EPSG','2947',0);
@@ -221,6 +221,8 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9245','CGVD2013(CGG2013a) height',NULL
 INSERT INTO "vertical_crs" VALUES('EPSG','9255','SRVN16 height',NULL,NULL,'EPSG','6499','EPSG','1260','EPSG','4573',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','9274','EVRF2000 Austria height',NULL,NULL,'EPSG','6499','EPSG','1261','EPSG','1037',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','9279','SA LLD height',NULL,NULL,'EPSG','6499','EPSG','1262','EPSG','3309',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9287','LAT NL depth',NULL,NULL,'EPSG','6498','EPSG','1290','EPSG','1630',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9288','MSL NL depth',NULL,NULL,'EPSG','6498','EPSG','1270','EPSG','1630',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','9303','HS2-VRF height',NULL,NULL,'EPSG','6499','EPSG','1265','EPSG','4582',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','9335','KSA-VRF14 height',NULL,NULL,'EPSG','6499','EPSG','1269','EPSG','3303',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','9351','NGNC08 height',NULL,NULL,'EPSG','6499','EPSG','1255','EPSG','3430',0);
@@ -237,3 +239,5 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9399','La Gomera height',NULL,NULL,'EP
 INSERT INTO "vertical_crs" VALUES('EPSG','9400','La Palma height',NULL,NULL,'EPSG','6499','EPSG','1283','EPSG','4596',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','9401','El Hierro height',NULL,NULL,'EPSG','6499','EPSG','1284','EPSG','4597',0);
 INSERT INTO "vertical_crs" VALUES('EPSG','9402','Ceuta 2 height',NULL,NULL,'EPSG','6499','EPSG','1285','EPSG','4590',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9458','AVWS height',NULL,NULL,'EPSG','6499','EPSG','1292','EPSG','4177',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9471','INAGeoid2020 height',NULL,NULL,'EPSG','6499','EPSG','1294','EPSG','1122',0);
