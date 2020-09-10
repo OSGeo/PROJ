@@ -291,6 +291,15 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             if( iBest < 0 ) {
                 break;
             }
+            if( iRetry > 0 ) {
+                const int oldErrno = proj_errno_reset(P);
+                if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
+                    pj_log(P->ctx, PJ_LOG_DEBUG, proj_errno_string(oldErrno));
+                }
+                pj_log(P->ctx, PJ_LOG_DEBUG,
+                    "Did not result in valid result. "
+                    "Attempting a retry with another operation.");
+            }
 
             const auto& alt = P->alternativeCoordinateOperations[iBest];
             if( P->iCurCoordOp != iBest ) {
@@ -309,9 +318,6 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             if( res.xyzt.x != HUGE_VAL ) {
                 return res;
             }
-            pj_log(P->ctx, PJ_LOG_DEBUG,
-                   "Did not result in valid result. "
-                   "Attempting a retry with another operation.");
             if( iRetry == N_MAX_RETRY ) {
                 break;
             }
