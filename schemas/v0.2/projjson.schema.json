@@ -756,7 +756,7 @@
         "$schema" : { "type": "string" },
         "type": { "type": "string", "enum": ["PrimeMeridian"] },
         "name": { "type": "string" },
-        "longitude": { "$ref": "#/definitions/value_and_unit" },
+        "longitude": { "$ref": "#/definitions/value_in_degree_or_value_and_unit" },
         "id": { "$ref": "#/definitions/id" },
         "ids": { "$ref": "#/definitions/ids" }
       },
@@ -910,6 +910,13 @@
       },
       "required" : [ "value", "unit" ],
       "additionalProperties": false
+    },
+
+    "value_in_degree_or_value_and_unit": {
+      "oneOf": [
+        { "type": "number" },
+        { "$ref": "#/definitions/value_and_unit" }
+      ]
     },
 
     "value_in_metre_or_value_and_unit": {
