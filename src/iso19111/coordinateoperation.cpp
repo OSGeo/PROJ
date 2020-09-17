@@ -11407,6 +11407,23 @@ static size_t getStepCount(const CoordinateOperationNNPtr &op) {
 
 // ---------------------------------------------------------------------------
 
+// Return number of steps that are transformations (and not conversions)
+static size_t getTransformationStepCount(const CoordinateOperationNNPtr &op) {
+    auto concat = dynamic_cast<const ConcatenatedOperation *>(op.get());
+    size_t stepCount = 1;
+    if (concat) {
+        stepCount = 0;
+        for (const auto &subOp : concat->operations()) {
+            if (dynamic_cast<const Conversion *>(subOp.get()) == nullptr) {
+                stepCount++;
+            }
+        }
+    }
+    return stepCount;
+}
+
+// ---------------------------------------------------------------------------
+
 static bool isNullTransformation(const std::string &name) {
     if (name.find(" + ") != std::string::npos)
         return false;
@@ -11442,8 +11459,7 @@ struct FilterResults {
         // results
         // ...
         removeSyntheticNullTransforms();
-        if (context->getDiscardSuperseded())
-            removeUninterestingOps();
+        removeUninterestingOps();
         removeDuplicateOps();
         removeSyntheticNullTransforms();
         return *this;
@@ -11758,50 +11774,23 @@ struct FilterResults {
     void removeUninterestingOps() {
 
         // Eliminate operations that bring nothing, ie for a given area of use,
-        // do not keep operations that have greater accuracy. Actually we must
-        // be a bit more subtle than that, and take into account grid
-        // availability
+        // do not keep operations that have similar or worse accuracy, but
+        // involve more (non conversion) steps
         std::vector<CoordinateOperationNNPtr> resTemp;
         metadata::ExtentPtr lastExtent;
         double lastAccuracy = -1;
-        bool lastHasGrids = false;
-        bool lastGridsAvailable = true;
-        std::set<std::set<std::string>> setOfSetOfGrids;
         size_t lastStepCount = 0;
         CoordinateOperationPtr lastOp;
 
         bool first = true;
-        const auto gridAvailabilityUse = context->getGridAvailabilityUse();
         for (const auto &op : res) {
             const auto curAccuracy = getAccuracy(op);
             bool dummy = false;
             const auto curExtent = getExtent(op, true, dummy);
-            bool curHasGrids = false;
-            bool curGridsAvailable = true;
-            std::set<std::string> curSetOfGrids;
-
-            const auto curStepCount = getStepCount(op);
-
-            if (context->getAuthorityFactory()) {
-                const auto gridsNeeded = op->gridsNeeded(
-                    context->getAuthorityFactory()->databaseContext(),
-                    gridAvailabilityUse ==
-                        CoordinateOperationContext::GridAvailabilityUse::
-                            KNOWN_AVAILABLE);
-                for (const auto &gridDesc : gridsNeeded) {
-                    curHasGrids = true;
-                    curSetOfGrids.insert(gridDesc.shortName);
-                    if (!gridDesc.available) {
-                        curGridsAvailable = false;
-                    }
-                }
-            }
+            const auto curStepCount = getTransformationStepCount(op);
 
             if (first) {
                 resTemp.emplace_back(op);
-
-                lastHasGrids = curHasGrids;
-                lastGridsAvailable = curGridsAvailable;
                 first = false;
             } else {
                 if (lastOp->_isEquivalentTo(op.get())) {
@@ -11812,66 +11801,19 @@ struct FilterResults {
                      (curExtent && lastExtent &&
                       curExtent->contains(NN_NO_CHECK(lastExtent)) &&
                       lastExtent->contains(NN_NO_CHECK(curExtent))));
-                if (((curAccuracy > lastAccuracy && lastAccuracy >= 0) ||
+                if (((curAccuracy >= lastAccuracy && lastAccuracy >= 0) ||
                      (curAccuracy < 0 && lastAccuracy >= 0)) &&
-                    sameExtent) {
-                    // If that set of grids has always been used for that
-                    // extent,
-                    // no need to add them again
-                    if (setOfSetOfGrids.find(curSetOfGrids) !=
-                        setOfSetOfGrids.end()) {
-                        continue;
-                    }
-
-                    const bool sameNameOrEmptyName =
-                        ((!curExtent && !lastExtent) ||
-                         (curExtent && lastExtent &&
-                          !curExtent->description()->empty() &&
-                          *(curExtent->description()) ==
-                              *(lastExtent->description())));
-
-                    // If we have already found a operation without grids for
-                    // that extent, no need to add any lower accuracy operation
-                    if (!lastHasGrids && sameNameOrEmptyName) {
-                        continue;
-                    }
-                    // If we had only operations involving grids, but one
-                    // past operation had available grids, no need to add
-                    // the new one.
-                    if (curHasGrids && curGridsAvailable &&
-                        lastGridsAvailable) {
-                        continue;
-                    }
-                } else if (curAccuracy == lastAccuracy && sameExtent) {
-                    if (curStepCount > lastStepCount) {
-                        continue;
-                    }
+                    sameExtent && curStepCount > lastStepCount) {
+                    continue;
                 }
 
                 resTemp.emplace_back(op);
-
-                if (sameExtent) {
-                    if (!curHasGrids) {
-                        lastHasGrids = false;
-                    }
-                    if (curGridsAvailable) {
-                        lastGridsAvailable = true;
-                    }
-                } else {
-                    setOfSetOfGrids.clear();
-
-                    lastHasGrids = curHasGrids;
-                    lastGridsAvailable = curGridsAvailable;
-                }
             }
 
             lastOp = op.as_nullable();
             lastStepCount = curStepCount;
             lastExtent = curExtent;
             lastAccuracy = curAccuracy;
-            if (!curSetOfGrids.empty()) {
-                setOfSetOfGrids.insert(curSetOfGrids);
-            }
         }
         res = std::move(resTemp);
     }

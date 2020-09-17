@@ -5422,40 +5422,18 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
     {
         // Pulkovo 42 Romania
         auto crs_3844 = factory->createCoordinateReferenceSystem("3844");
-        auto bound = crs_3844->createBoundCRSToWGS84IfPossible(
-            dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
-        EXPECT_NE(bound, crs_3844);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(
+        EXPECT_EQ(crs_3844->createBoundCRSToWGS84IfPossible(
                       dbContext,
                       CoordinateOperationContext::IntermediateCRSUse::NEVER),
-                  bound);
-        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
-        ASSERT_TRUE(boundCRS != nullptr);
-        EXPECT_EQ(
-            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 "
-            "+y_0=500000 +ellps=krass "
-            "+towgs84=2.329,-147.042,-92.08,-0.309,0.325,0.497,5.69 "
-            "+units=m +no_defs +type=crs");
+                  crs_3844);
     }
     {
         // Pulkovo 42 Poland
         auto crs_2171 = factory->createCoordinateReferenceSystem("2171");
-        auto bound = crs_2171->createBoundCRSToWGS84IfPossible(
-            dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
-        EXPECT_NE(bound, crs_2171);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(
+        EXPECT_EQ(crs_2171->createBoundCRSToWGS84IfPossible(
                       dbContext,
                       CoordinateOperationContext::IntermediateCRSUse::NEVER),
-                  bound);
-        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
-        ASSERT_TRUE(boundCRS != nullptr);
-        EXPECT_EQ(
-            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=sterea +lat_0=50.625 +lon_0=21.0833333333333 "
-            "+k=0.9998 +x_0=4637000 +y_0=5647000 +ellps=krass "
-            "+towgs84=33.4,-146.6,-76.3,-0.359,-0.053,0.844,-0.84 "
-            "+units=m +no_defs +type=crs");
+                  crs_2171);
     }
     {
         // NTF (Paris)
@@ -5546,6 +5524,15 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
         const auto time_after =
             ::testing::UnitTest::GetInstance()->elapsed_time();
         EXPECT_LE(time_after - time_before, 500);
+    }
+    {
+        // POSGAR 2007: it has 2 helmert shifts to WGS84 (#2356). Don't take
+        // an arbitrary one
+        auto crs_5340 = factory->createCoordinateReferenceSystem("5340");
+        EXPECT_EQ(crs_5340->createBoundCRSToWGS84IfPossible(
+                      dbContext,
+                      CoordinateOperationContext::IntermediateCRSUse::NEVER),
+                  crs_5340);
     }
 }
 

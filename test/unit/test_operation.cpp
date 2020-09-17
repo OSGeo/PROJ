@@ -4599,7 +4599,7 @@ TEST(operation, geogCRS_to_geogCRS_context_NAD27_to_WGS84) {
         authFactory->createCoordinateReferenceSystem("4267"), // NAD27
         authFactory->createCoordinateReferenceSystem("4326"), // WGS84
         ctxt);
-    ASSERT_EQ(list.size(), 78U);
+    ASSERT_EQ(list.size(), 79U);
     EXPECT_EQ(list[0]->nameStr(),
               "NAD27 to WGS 84 (33)"); // 1.0 m, Canada - NAD27
     EXPECT_EQ(list[1]->nameStr(),
@@ -5050,7 +5050,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
         authFactory->createCoordinateReferenceSystem("4807"), // NTF(Paris)
         authFactory->createCoordinateReferenceSystem("4171"), // RGF93
         ctxt);
-    ASSERT_EQ(list.size(), 5U);
+    ASSERT_EQ(list.size(), 4U);
 
     EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to RGF93 (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -5158,7 +5158,7 @@ TEST(operation, geogCRS_to_geogCRS_CH1903_to_CH1903plus_context) {
         authFactory->createCoordinateReferenceSystem("4149"), // CH1903
         authFactory->createCoordinateReferenceSystem("4150"), // CH1903+
         ctxt);
-    ASSERT_TRUE(list.size() == 2U || list.size() == 3U);
+    ASSERT_TRUE(list.size() == 1U);
 
     EXPECT_EQ(list[0]->nameStr(), "CH1903 to CH1903+ (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -5167,25 +5167,6 @@ TEST(operation, geogCRS_to_geogCRS_CH1903_to_CH1903plus_context) {
               "+step +proj=hgridshift +grids=ch_swisstopo_CHENyx06a.tif "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
-
-    if (list.size() == 2U) {
-        // Grids not there
-        EXPECT_EQ(list[1]->nameStr(),
-                  "CH1903 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
-        EXPECT_EQ(
-            list[1]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=noop");
-    } else {
-        // Grids available
-        EXPECT_EQ(list[1]->nameStr(),
-                  "CH1903 to ETRS89 (2) + Inverse of CH1903+ to ETRS89 (1)");
-
-        EXPECT_EQ(list[2]->nameStr(),
-                  "CH1903 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
-        EXPECT_EQ(
-            list[2]->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=noop");
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -6069,7 +6050,7 @@ TEST(operation, projCRS_to_projCRS_context_compatible_area) {
         authFactory->createCoordinateReferenceSystem(
             "2171"), // Pulkovo 42 Poland I
         ctxt);
-    ASSERT_EQ(list.size(), 1U);
+    ASSERT_EQ(list.size(), 2U);
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of UTM zone 34N + Inverse of Pulkovo 1942(58) to WGS 84 "
               "(1) + Poland zone I");
@@ -6088,7 +6069,7 @@ TEST(operation, projCRS_to_projCRS_context_compatible_area_bis) {
             "3844"), // Pulkovo 42 Stereo 70 (Romania)
         authFactory->createCoordinateReferenceSystem("32634"), // UTM 34
         ctxt);
-    ASSERT_EQ(list.size(), 1U);
+    ASSERT_EQ(list.size(), 3U);
     EXPECT_EQ(list[0]->nameStr(), "Inverse of Stereo 70 + "
                                   "Pulkovo 1942(58) to WGS 84 "
                                   "(19) + UTM zone 34N");
@@ -6107,7 +6088,7 @@ TEST(operation, projCRS_to_projCRS_context_one_incompatible_area) {
         authFactory->createCoordinateReferenceSystem(
             "2171"), // Pulkovo 42 Poland I
         ctxt);
-    ASSERT_EQ(list.size(), 1U);
+    ASSERT_EQ(list.size(), 2U);
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of UTM zone 31N + Inverse of Pulkovo 1942(58) to WGS 84 "
               "(1) + Poland zone I");
