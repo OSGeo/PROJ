@@ -11380,8 +11380,31 @@ struct SortFunction {
             return false;
         }
 
-        // Arbitrary final criterion
-        return a_name < b_name;
+        // Arbitrary final criterion. We actually return the greater element
+        // first, so that "Amersfoort to WGS 84 (4)" is presented before
+        // "Amersfoort to WGS 84 (3)", which is probably a better guess.
+
+        // Except for French NTF (Paris) to NTF, where the (1) conversion
+        // should be preferred because in the remarks of (2), it is mentionned
+        // OGP prefers value from IGN Paris (code 1467)...
+        if (a_name.find("NTF (Paris) to NTF (1)") != std::string::npos &&
+            b_name.find("NTF (Paris) to NTF (2)") != std::string::npos) {
+            return true;
+        }
+        if (a_name.find("NTF (Paris) to NTF (2)") != std::string::npos &&
+            b_name.find("NTF (Paris) to NTF (1)") != std::string::npos) {
+            return false;
+        }
+        if (a_name.find("NTF (Paris) to RGF93 (1)") != std::string::npos &&
+            b_name.find("NTF (Paris) to RGF93 (2)") != std::string::npos) {
+            return true;
+        }
+        if (a_name.find("NTF (Paris) to RGF93 (2)") != std::string::npos &&
+            b_name.find("NTF (Paris) to RGF93 (1)") != std::string::npos) {
+            return false;
+        }
+
+        return a_name > b_name;
     }
 
     bool operator()(const CoordinateOperationNNPtr &a,

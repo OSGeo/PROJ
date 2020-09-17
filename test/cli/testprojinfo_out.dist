@@ -1048,8 +1048,8 @@ Candidate operations found: 7
 unknown id, GDA94 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.21 m, Australia - GDA
 unknown id, GDA94 to WGS 84 (1) + WGS 84 to WGS 84 (G1762), 5 m, Australia - GDA
 unknown id, Conversion from GDA94 (geog2D) to GDA94 (geocentric) + Inverse of ITRF2008 to GDA94 (1) + Inverse of WGS 84 (G1762) to ITRF2008 (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.04 m, Australia - onshore and EEZ
-unknown id, GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - onshore
 unknown id, GDA94 to GDA2020 (3) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - onshore
+unknown id, GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - onshore
 unknown id, GDA94 to GDA2020 (5) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Cocos (Keeling) Islands - onshore
 unknown id, GDA94 to GDA2020 (4) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Christmas Island - onshore
 
