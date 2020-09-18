@@ -540,7 +540,7 @@ TEST_F(CApi, proj_as_proj_string_approx_tmerc_option_yes) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_crs_create_bound_crs_to_WGS84) {
-    auto crs = proj_create_from_database(m_ctxt, "EPSG", "3844",
+    auto crs = proj_create_from_database(m_ctxt, "EPSG", "4807",
                                          PJ_CATEGORY_CRS, false, nullptr);
     ObjectKeeper keeper(crs);
     ASSERT_NE(crs, nullptr);
@@ -552,10 +552,8 @@ TEST_F(CApi, proj_crs_create_bound_crs_to_WGS84) {
     auto proj_4 = proj_as_proj_string(m_ctxt, res, PJ_PROJ_4, nullptr);
     ASSERT_NE(proj_4, nullptr);
     EXPECT_EQ(std::string(proj_4),
-              "+proj=sterea +lat_0=46 +lon_0=25 +k=0.99975 +x_0=500000 "
-              "+y_0=500000 +ellps=krass "
-              "+towgs84=2.329,-147.042,-92.08,-0.309,0.325,0.497,5.69 "
-              "+units=m +no_defs +type=crs");
+              "+proj=longlat +ellps=clrk80ign +pm=paris "
+              "+towgs84=-168,-60,320,0,0,0,0 +no_defs +type=crs");
 
     auto base_crs = proj_get_source_crs(m_ctxt, res);
     ObjectKeeper keeper_base_crs(base_crs);
@@ -572,8 +570,7 @@ TEST_F(CApi, proj_crs_create_bound_crs_to_WGS84) {
     std::vector<double> values(7, 0);
     EXPECT_TRUE(proj_coordoperation_get_towgs84_values(m_ctxt, transf,
                                                        values.data(), 7, true));
-    auto expected = std::vector<double>{2.329, -147.042, -92.08, -0.309,
-                                        0.325, 0.497,    5.69};
+    auto expected = std::vector<double>{-168, -60, 320, 0, 0, 0, 0};
     EXPECT_EQ(values, expected);
 
     auto res2 = proj_crs_create_bound_crs(m_ctxt, base_crs, hub_crs, transf);
@@ -1485,7 +1482,7 @@ TEST_F(CApi, proj_create_operations_discard_superseded) {
     ASSERT_NE(res, nullptr);
     ObjListKeeper keeper_res(res);
 
-    EXPECT_EQ(proj_list_get_count(res), 2);
+    EXPECT_EQ(proj_list_get_count(res), 4);
 }
 
 // ---------------------------------------------------------------------------
@@ -1594,7 +1591,7 @@ TEST_F(CApi, proj_create_operations_with_pivot) {
         auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
         ASSERT_NE(res, nullptr);
         ObjListKeeper keeper_res(res);
-        EXPECT_EQ(proj_list_get_count(res), 7);
+        EXPECT_EQ(proj_list_get_count(res), 8);
         auto op = proj_list_get(m_ctxt, res, 0);
         ASSERT_NE(op, nullptr);
         ObjectKeeper keeper_op(op);

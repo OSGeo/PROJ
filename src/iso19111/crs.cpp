@@ -378,7 +378,8 @@ VerticalCRSPtr CRS::extractVerticalCRS() const {
  * a +towgs84 parameter or a WKT1:GDAL string with a TOWGS node.
  *
  * This method will fetch the GeographicCRS of this CRS and find a
- * transformation to EPSG:4326 using the domain of the validity of the main CRS.
+ * transformation to EPSG:4326 using the domain of the validity of the main CRS,
+ * and there's only one Helmert transformation.
  *
  * @return a CRS.
  */
@@ -456,6 +457,7 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
             auto list =
                 operation::CoordinateOperationFactory::create()
                     ->createOperations(NN_NO_CHECK(geodCRS), hubCRS, ctxt);
+            CRSPtr candidateBoundCRS;
             for (const auto &op : list) {
                 auto transf =
                     util::nn_dynamic_pointer_cast<operation::Transformation>(
@@ -466,8 +468,13 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                     } catch (const std::exception &) {
                         continue;
                     }
-                    return util::nn_static_pointer_cast<CRS>(BoundCRS::create(
-                        thisAsCRS, hubCRS, NN_NO_CHECK(transf)));
+                    if (candidateBoundCRS) {
+                        candidateBoundCRS = nullptr;
+                        break;
+                    }
+                    candidateBoundCRS =
+                        BoundCRS::create(thisAsCRS, hubCRS, NN_NO_CHECK(transf))
+                            .as_nullable();
                 } else {
                     auto concatenated =
                         dynamic_cast<const operation::ConcatenatedOperation *>(
@@ -499,14 +506,22 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                                     } catch (const std::exception &) {
                                         continue;
                                     }
-                                    return util::nn_static_pointer_cast<CRS>(
+                                    if (candidateBoundCRS) {
+                                        candidateBoundCRS = nullptr;
+                                        break;
+                                    }
+                                    candidateBoundCRS =
                                         BoundCRS::create(thisAsCRS, hubCRS,
-                                                         NN_NO_CHECK(transf)));
+                                                         NN_NO_CHECK(transf))
+                                            .as_nullable();
                                 }
                             }
                         }
                     }
                 }
+            }
+            if (candidateBoundCRS) {
+                return NN_NO_CHECK(candidateBoundCRS);
             }
         } catch (const std::exception &) {
         }

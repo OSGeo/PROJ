@@ -1044,25 +1044,29 @@ Testing -s +proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs -t EPSG:432
 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=@foo.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing -s "GDA94" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include transformations through ITRF2008 and GDA2020
-Candidate operations found: 6
+Candidate operations found: 7
 unknown id, GDA94 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.21 m, Australia - GDA
+unknown id, GDA94 to WGS 84 (1) + WGS 84 to WGS 84 (G1762), 5 m, Australia - GDA
 unknown id, Conversion from GDA94 (geog2D) to GDA94 (geocentric) + Inverse of ITRF2008 to GDA94 (1) + Inverse of WGS 84 (G1762) to ITRF2008 (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.04 m, Australia - onshore and EEZ
-unknown id, GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - onshore
 unknown id, GDA94 to GDA2020 (3) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - onshore
+unknown id, GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - onshore
 unknown id, GDA94 to GDA2020 (5) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Cocos (Keeling) Islands - onshore
 unknown id, GDA94 to GDA2020 (4) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Christmas Island - onshore
 
 Testing -s "AGD66" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include a transformation through GDA2020
-Candidate operations found: 11
+Candidate operations found: 14
 unknown id, AGD66 to WGS 84 (18) + WGS 84 to WGS 84 (G1762), 5 m, Australia - offshore
 unknown id, AGD66 to WGS 84 (16) + WGS 84 to WGS 84 (G1762), 7 m, Australia - onshore
+unknown id, AGD66 to WGS 84 (20) + WGS 84 to WGS 84 (G1762), 11 m, Australia - onshore
 unknown id, AGD66 to WGS 84 (15) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Northern Territory
 unknown id, AGD66 to WGS 84 (13) + WGS 84 to WGS 84 (G1762), 3 m, Australia - New South Wales and Victoria
 unknown id, AGD66 to WGS 84 (21) + WGS 84 to WGS 84 (G1762), 7 m, Papua New Guinea - mainland onshore
 unknown id, AGD66 to WGS 84 (14) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Tasmania
 unknown id, AGD66 to WGS 84 (19) + WGS 84 to WGS 84 (G1762), 4 m, Papua New Guinea - PFTB
+unknown id, AGD66 to WGS 84 (22) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - PFTB
 unknown id, AGD66 to WGS 84 (23) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - North Fly
 unknown id, AGD66 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - Australian Capital Territory
+unknown id, AGD66 to WGS 84 (12) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Australian Capital Territory
 unknown id, AGD66 to WGS 84 (17) + WGS 84 to WGS 84 (G1762), 3 m, Australia - onshore
 unknown id, Ballpark geographic offset from AGD66 to WGS 84 (G1762), unknown accuracy, World, has ballpark transformation
 
