@@ -3792,8 +3792,8 @@ TEST_F(CApi, proj_get_scope) {
         auto scope = proj_get_scope(co);
         ASSERT_NE(scope, nullptr);
         EXPECT_EQ(scope,
-                  std::string("Conformal transformation of GDA94 coordinates "
-                              "that have been derived through GNSS CORS."));
+                  std::string("Transformation of GDA94 coordinates that have "
+                              "been derived through GNSS CORS."));
     }
 
     // Conversion
@@ -3807,8 +3807,7 @@ TEST_F(CApi, proj_get_scope) {
         auto scope = proj_get_scope(co);
         ASSERT_NE(scope, nullptr);
         EXPECT_EQ(scope,
-                  std::string("Large and medium scale topographic mapping "
-                              "and engineering survey."));
+                  std::string("Engineering survey, topographic mapping."));
     }
 
     {

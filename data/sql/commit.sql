@@ -30,6 +30,20 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'corrupt definition of authority_list')
         WHERE (SELECT 1 FROM authority_list LIMIT 1) = 0;
 
+    -- check that a usage is registered for most objects where this is needed
+    SELECT RAISE(ABORT, 'One or several objects lack a corresponding record in the usage table')
+        WHERE EXISTS (
+            SELECT * FROM object_view o WHERE NOT EXISTS (
+                SELECT 1 FROM usage u WHERE
+                    o.table_name = u.object_table_name AND
+                    o.auth_name = u.object_auth_name AND
+                    o.code = u.object_code)
+            AND o.table_name NOT IN ('unit_of_measure', 'axis',
+                'celestial_body', 'ellipsoid', 'prime_meridian', 'extent')
+            -- the IGNF registry lacks extent for the following objects
+            AND NOT (o.auth_name = 'IGNF' AND o.table_name IN ('geodetic_datum', 'vertical_datum', 'conversion'))
+        );
+
     -- test to check that our custom grid transformation overrides are really needed
     SELECT RAISE(ABORT, 'PROJ grid_transformation defined whereas EPSG has one')
         WHERE EXISTS (SELECT 1 FROM grid_transformation g1
@@ -93,27 +107,39 @@ FOR EACH ROW BEGIN
     -- check that transformations intersect the area of use of their source/target CRS
     -- EPSG, ESRI and IGNF have cases where this does not hold.
     SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its source CRS')
-        WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, area va, area ca WHERE
+        WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, usage vu, extent ve, usage cu, extent ce WHERE
                       v.deprecated = 0 AND
                       v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF') AND
                       v.source_crs_auth_name = c.auth_name AND
                       v.source_crs_code = c.code AND
-                      v.area_of_use_auth_name = va.auth_name AND
-                      v.area_of_use_code = va.code AND
-                      c.area_of_use_auth_name = ca.auth_name AND
-                      c.area_of_use_code = ca.code AND
-                      NOT (ca.south_lat < va.north_lat AND va.south_lat < ca.north_lat));
+                      vu.object_table_name = v.table_name AND
+                      vu.object_auth_name = v.auth_name AND
+                      vu.object_code = v.code AND
+                      vu.extent_auth_name = ve.auth_name AND
+                      vu.extent_code = ve.code AND
+                      cu.object_table_name = c.table_name AND
+                      cu.object_auth_name = c.auth_name AND
+                      cu.object_code = c.code AND
+                      cu.extent_auth_name = ce.auth_name AND
+                      cu.extent_code = ce.code AND
+                      NOT (ce.south_lat < ve.north_lat AND ve.south_lat < ce.north_lat));
     SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its target CRS')
-        WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, area va, area ca WHERE
+        WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, usage vu, extent ve, usage cu, extent ce WHERE
                       v.deprecated = 0 AND
                       v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF') AND
                       v.target_crs_auth_name = c.auth_name AND
                       v.target_crs_code = c.code AND
-                      v.area_of_use_auth_name = va.auth_name AND
-                      v.area_of_use_code = va.code AND
-                      c.area_of_use_auth_name = ca.auth_name AND
-                      c.area_of_use_code = ca.code AND
-                      NOT (ca.south_lat < va.north_lat AND va.south_lat < ca.north_lat));
+                      vu.object_table_name = v.table_name AND
+                      vu.object_auth_name = v.auth_name AND
+                      vu.object_code = v.code AND
+                      vu.extent_auth_name = ve.auth_name AND
+                      vu.extent_code = ve.code AND
+                      cu.object_table_name = c.table_name AND
+                      cu.object_auth_name = c.auth_name AND
+                      cu.object_code = c.code AND
+                      cu.extent_auth_name = ce.auth_name AND
+                      cu.extent_code = ce.code AND
+                      NOT (ce.south_lat < ve.north_lat AND ve.south_lat < ce.north_lat));
 
     -- check geoid_model table
     SELECT RAISE(ABORT, 'missing GEOID99 in geoid_model')

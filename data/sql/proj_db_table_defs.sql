@@ -55,7 +55,7 @@ FOR EACH ROW BEGIN
         WHERE (SELECT type FROM unit_of_measure WHERE auth_name = NEW.uom_auth_name AND code = NEW.uom_code) != 'length';
 END;
 
-CREATE TABLE area(
+CREATE TABLE extent(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
@@ -65,9 +65,56 @@ CREATE TABLE area(
     west_lon FLOAT CHECK (west_lon BETWEEN -180 AND 180),
     east_lon FLOAT CHECK (east_lon BETWEEN -180 AND 180),
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
-    CONSTRAINT pk_area PRIMARY KEY (auth_name, code),
-    CONSTRAINT check_area_lat CHECK (south_lat <= north_lat)
+    CONSTRAINT pk_extent PRIMARY KEY (auth_name, code),
+    CONSTRAINT check_extent_lat CHECK (south_lat <= north_lat)
 );
+
+CREATE TABLE scope(
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    scope TEXT NOT NULL CHECK (length(scope) >= 1),
+    deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
+    CONSTRAINT pk_scope PRIMARY KEY (auth_name, code)
+);
+
+CREATE TABLE usage(
+    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
+    code TEXT NOT NULL CHECK (length(code) >= 1),
+    object_table_name TEXT NOT NULL CHECK (object_table_name IN (
+        'geodetic_datum', 'vertical_datum',
+        'geodetic_crs', 'projected_crs', 'vertical_crs', 'compound_crs',
+        'conversion', 'grid_transformation',
+        'helmert_transformation', 'other_transformation', 'concatenated_operation')),
+    object_auth_name TEXT NOT NULL,
+    object_code TEXT NOT NULL,
+    extent_auth_name TEXT NOT NULL,
+    extent_code TEXT NOT NULL,
+    scope_auth_name TEXT NOT NULL,
+    scope_code TEXT NOT NULL,
+    CONSTRAINT pk_usage PRIMARY KEY (auth_name, code),
+    CONSTRAINT fk_usage_extent FOREIGN KEY (extent_auth_name, extent_code) REFERENCES extent(auth_name, code),
+    CONSTRAINT fk_usage_scope FOREIGN KEY (scope_auth_name, scope_code) REFERENCES scope(auth_name, code)
+);
+
+CREATE INDEX idx_usage_object ON usage(object_table_name, object_auth_name, object_code);
+
+CREATE TRIGGER usage_insert_trigger
+BEFORE INSERT ON usage
+FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on usage violates constraint: new entry refers to unexisting code')
+        WHERE NOT EXISTS (SELECT 1 FROM object_view o WHERE o.table_name = NEW.object_table_name AND o.auth_name = NEW.object_auth_name AND o.code = NEW.object_code);
+    SELECT RAISE(ABORT, 'insert on usage violates constraint: extent must not be deprecated when object is not deprecated')
+        WHERE EXISTS (
+            SELECT 1 FROM extent JOIN object_view o WHERE
+                NOT (o.table_name IN ('projected_crs', 'conversion') AND o.auth_name = 'ESRI') AND
+                o.table_name = NEW.object_table_name AND
+                o.auth_name = NEW.object_auth_name AND
+                o.code = NEW.object_code AND
+                extent.auth_name = NEW.extent_auth_name AND
+                extent.code = NEW.extent_code AND
+                extent.deprecated = 1 AND
+                o.deprecated = 0);
+END;
 
 CREATE TABLE prime_meridian(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -93,19 +140,15 @@ CREATE TABLE geodetic_datum (
     code TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
-    scope TEXT,
     ellipsoid_auth_name TEXT NOT NULL,
     ellipsoid_code TEXT NOT NULL,
     prime_meridian_auth_name TEXT NOT NULL,
     prime_meridian_code TEXT NOT NULL,
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
     publication_date TEXT, --- YYYY-MM-DD format
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_datum_ellipsoid FOREIGN KEY (ellipsoid_auth_name, ellipsoid_code) REFERENCES ellipsoid(auth_name, code),
-    CONSTRAINT fk_geodetic_datum_prime_meridian FOREIGN KEY (prime_meridian_auth_name, prime_meridian_code) REFERENCES prime_meridian(auth_name, code),
-    CONSTRAINT fk_geodetic_datum_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
+    CONSTRAINT fk_geodetic_datum_prime_meridian FOREIGN KEY (prime_meridian_auth_name, prime_meridian_code) REFERENCES prime_meridian(auth_name, code)
 );
 
 CREATE TRIGGER geodetic_datum_insert_trigger
@@ -115,8 +158,6 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM ellipsoid WHERE ellipsoid.auth_name = NEW.ellipsoid_auth_name AND ellipsoid.code = NEW.ellipsoid_code AND ellipsoid.deprecated != 0) AND NEW.deprecated = 0;
     SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: prime_meridian must not be deprecated when geodetic_datum is not deprecated')
         WHERE EXISTS(SELECT 1 FROM prime_meridian WHERE prime_meridian.auth_name = NEW.prime_meridian_auth_name AND prime_meridian.code = NEW.prime_meridian_code AND prime_meridian.deprecated != 0) AND NEW.deprecated = 0;
-    SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: area_of_use must not be deprecated when geodetic_datum is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 CREATE TABLE vertical_datum (
@@ -124,26 +165,15 @@ CREATE TABLE vertical_datum (
     code TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
-    scope TEXT,
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
     publication_date TEXT CHECK (NULL OR length(publication_date) = 10), --- YYYY-MM-DD format
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
-    CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_vertical_datum_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
+    CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code)
 );
-
-CREATE TRIGGER vertical_datum_insert_trigger
-BEFORE INSERT ON vertical_datum
-FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on vertical_datum violates constraint: area_of_use must not be deprecated when vertical_datum is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
-END;
 
 CREATE TABLE coordinate_system(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code TEXT NOT NULL CHECK (length(code) >= 1),
-    type TEXT NOT NULL CHECK (type IN ('Cartesian', 'vertical', 'ellipsoidal', 'spherical')),
+    type TEXT NOT NULL CHECK (type IN ('Cartesian', 'vertical', 'ellipsoidal', 'spherical', 'ordinal')),
     dimension SMALLINT NOT NULL CHECK (dimension BETWEEN 1 AND 3),
     CONSTRAINT pk_coordinate_system PRIMARY KEY (auth_name, code),
     CONSTRAINT check_cs_vertical CHECK (type != 'vertical' OR dimension = 1),
@@ -160,8 +190,8 @@ CREATE TABLE axis(
     coordinate_system_auth_name TEXT NOT NULL,
     coordinate_system_code TEXT NOT NULL,
     coordinate_system_order SMALLINT NOT NULL CHECK (coordinate_system_order BETWEEN 1 AND 3),
-    uom_auth_name TEXT NOT NULL,
-    uom_code TEXT NOT NULL,
+    uom_auth_name TEXT,
+    uom_code TEXT,
     CONSTRAINT pk_axis PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_axis_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_axis_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code)
@@ -172,6 +202,8 @@ BEFORE INSERT ON axis
 FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on axis violates constraint: coordinate_system_order should be <= coordinate_system.dimension')
         WHERE NEW.coordinate_system_order > (SELECT dimension FROM coordinate_system WHERE auth_name = NEW.coordinate_system_auth_name AND code = NEW.coordinate_system_code);
+    SELECT RAISE(ABORT, 'insert on axis violates constraint: uom should be defined unless the coordinate system is ordinal')
+        WHERE EXISTS(SELECT 1 FROM coordinate_system cs WHERE cs.type != 'ordinal' AND (NEW.uom_auth_name IS NULL OR NEW.uom_code IS NULL) AND cs.auth_name = NEW.coordinate_system_auth_name AND cs.code = NEW.coordinate_system_code);
 END;
 
 CREATE TABLE geodetic_crs(
@@ -179,25 +211,20 @@ CREATE TABLE geodetic_crs(
     code TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
-    scope TEXT,
     type TEXT NOT NULL CHECK (type IN ('geographic 2D', 'geographic 3D', 'geocentric')),
     coordinate_system_auth_name TEXT,
     coordinate_system_code TEXT,
     datum_auth_name TEXT,
     datum_code TEXT,
-    area_of_use_auth_name TEXT,
-    area_of_use_code TEXT,
     text_definition TEXT, -- PROJ string or WKT string. Use of this is discouraged as prone to definition ambiguities
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_crs PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_geodetic_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES geodetic_datum(auth_name, code),
-    CONSTRAINT fk_geodetic_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
     CONSTRAINT check_geodetic_crs_cs CHECK (NOT ((coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL) AND text_definition IS NULL)),
     CONSTRAINT check_geodetic_crs_cs_bis CHECK (NOT ((NOT(coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL)) AND text_definition IS NOT NULL)),
     CONSTRAINT check_geodetic_crs_datum CHECK (NOT ((datum_auth_name IS NULL OR datum_code IS NULL) AND text_definition IS NULL)),
-    CONSTRAINT check_geodetic_crs_datum_bis CHECK (NOT ((NOT(datum_auth_name IS NULL OR datum_code IS NULL)) AND text_definition IS NOT NULL)),
-    CONSTRAINT check_geodetic_crs_area CHECK (NOT ((area_of_use_auth_name IS NULL OR area_of_use_code IS NULL) AND text_definition IS NULL))
+    CONSTRAINT check_geodetic_crs_datum_bis CHECK (NOT ((NOT(datum_auth_name IS NULL OR datum_code IS NULL)) AND text_definition IS NOT NULL))
 );
 
 CREATE TRIGGER geodetic_crs_insert_trigger
@@ -209,9 +236,6 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: datum must not be deprecated when geodetic_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM geodetic_datum datum WHERE datum.auth_name = NEW.datum_auth_name AND datum.code = NEW.datum_code AND datum.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
-
-    SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: area_of_use must not be deprecated when geodetic_crs is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
 
     SELECT RAISE(ABORT, 'insert on geodetic_crs violates constraint: coordinate_system.dimension must be 3 for type = ''geocentric''')
         WHERE NEW.type = 'geocentric' AND (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 3;
@@ -234,18 +258,14 @@ CREATE TABLE vertical_crs(
     code TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
-    scope TEXT,
     coordinate_system_auth_name TEXT NOT NULL,
     coordinate_system_code TEXT NOT NULL,
     datum_auth_name TEXT NOT NULL,
     datum_code TEXT NOT NULL,
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_vertical_crs PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_vertical_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
-    CONSTRAINT fk_vertical_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES vertical_datum(auth_name, code),
-    CONSTRAINT fk_vertical_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
+    CONSTRAINT fk_vertical_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES vertical_datum(auth_name, code)
 );
 
 CREATE TRIGGER vertical_crs_insert_trigger
@@ -257,9 +277,6 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: datum must not be deprecated when vertical_crs is not deprecated')
         WHERE EXISTS(SELECT 1 FROM vertical_crs datum WHERE datum.auth_name = NEW.datum_auth_name AND datum.code = NEW.datum_code AND datum.deprecated != 0) AND NEW.deprecated = 0;
-
-    SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: area_of_use must not be deprecated when vertical_crs is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 
     SELECT RAISE(ABORT, 'insert on vertical_crs violates constraint: coordinate_system.type must be ''vertical''')
         WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'vertical';
@@ -289,10 +306,6 @@ CREATE TABLE conversion_table(
     name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
-    scope TEXT,
-
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
 
     method_auth_name TEXT CHECK (method_auth_name IS NULL OR length(method_auth_name) >= 1),
     method_code TEXT CHECK (method_code IS NULL OR length(method_code) >= 1),
@@ -350,7 +363,6 @@ CREATE TABLE conversion_table(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_conversion PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_conversion_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
     CONSTRAINT fk_conversion_method FOREIGN KEY (method_auth_name, method_code) REFERENCES conversion_method(auth_name, code),
     --CONSTRAINT fk_conversion_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_conversion_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
@@ -368,10 +380,6 @@ CREATE VIEW conversion AS SELECT
     c.name,
 
     c.description,
-    c.scope,
-
-    c.area_of_use_auth_name,
-    c.area_of_use_code,
 
     c.method_auth_name,
     c.method_code,
@@ -584,10 +592,6 @@ INSERT INTO conversion_table VALUES
     NEW.name,
 
     NEW.description,
-    NEW.scope,
-
-    NEW.area_of_use_auth_name,
-    NEW.area_of_use_code,
 
     NEW.method_auth_name,
     NEW.method_code,
@@ -651,27 +655,22 @@ CREATE TABLE projected_crs(
     code TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
-    scope TEXT,
     coordinate_system_auth_name TEXT,
     coordinate_system_code TEXT,
     geodetic_crs_auth_name TEXT,
     geodetic_crs_code TEXT,
     conversion_auth_name TEXT,
     conversion_code TEXT,
-    area_of_use_auth_name TEXT,
-    area_of_use_code TEXT,
     text_definition TEXT, -- PROJ string or WKT string. Use of this is discouraged as prone to definition ambiguities
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_projected_crs PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_projected_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_projected_crs_geodetic_crs FOREIGN KEY (geodetic_crs_auth_name, geodetic_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT fk_projected_crs_conversion FOREIGN KEY (conversion_auth_name, conversion_code) REFERENCES conversion_table(auth_name, code),
-    CONSTRAINT fk_projected_crs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
     CONSTRAINT check_projected_crs_cs CHECK (NOT((coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL) AND text_definition IS NULL)),
     CONSTRAINT check_projected_crs_cs_bis CHECK (NOT((NOT(coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL)) AND text_definition IS NOT NULL)),
     CONSTRAINT check_projected_crs_geodetic_crs CHECK (NOT((geodetic_crs_auth_name IS NULL OR geodetic_crs_code IS NULL) AND text_definition IS NULL)),
-    CONSTRAINT check_projected_crs_conversion CHECK (NOT((NOT(conversion_auth_name IS NULL OR conversion_code IS NULL)) AND text_definition IS NOT NULL)),
-    CONSTRAINT check_projected_crs_area CHECK (NOT((area_of_use_auth_name IS NULL OR area_of_use_code IS NULL) AND text_definition IS NULL))
+    CONSTRAINT check_projected_crs_conversion CHECK (NOT((NOT(conversion_auth_name IS NULL OR conversion_code IS NULL)) AND text_definition IS NOT NULL))
 );
 
 CREATE TRIGGER projected_crs_insert_trigger
@@ -693,9 +692,6 @@ FOR EACH ROW BEGIN
     --SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: geodetic_crs must NOT be defined when text_definition is NOT NULL')
     --    WHERE (NOT(NEW.geodetic_crs_auth_name IS NULL OR NEW.geodetic_crs_code IS NULL)) AND NEW.text_definition IS NOT NULL;
 
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: area_of_use must not be deprecated when projected_crs is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0 AND NEW.text_definition IS NOT NULL;
-
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system.type must be ''cartesian''')
         WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'Cartesian';
 
@@ -709,17 +705,13 @@ CREATE TABLE compound_crs(
     code TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
-    scope TEXT,
     horiz_crs_auth_name TEXT NOT NULL,
     horiz_crs_code TEXT NOT NULL,
     vertical_crs_auth_name TEXT NOT NULL,
     vertical_crs_code TEXT NOT NULL,
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_compound_crs PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_compound_crs_vertical_crs FOREIGN KEY (vertical_crs_auth_name, vertical_crs_code) REFERENCES vertical_crs(auth_name, code),
-    CONSTRAINT fk_compoundcrs_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
+    CONSTRAINT fk_compound_crs_vertical_crs FOREIGN KEY (vertical_crs_auth_name, vertical_crs_code) REFERENCES vertical_crs(auth_name, code)
 );
 
 CREATE TRIGGER compound_crs_insert_trigger
@@ -743,9 +735,6 @@ FOR EACH ROW BEGIN
 
     SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: vertical_crs must not be deprecated when compound_crs is not deprecated')
         WHERE EXISTS (SELECT 1 FROM vertical_crs WHERE vertical_crs.auth_name = NEW.vertical_crs_auth_name AND vertical_crs.code = NEW.vertical_crs_code AND vertical_crs.deprecated != 0) AND NEW.deprecated = 0;
-
-    SELECT RAISE(ABORT, 'insert on compound_crs violates constraint: area_of_use must not be deprecated when compound_crs is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 CREATE TABLE coordinate_operation_method(
@@ -762,7 +751,6 @@ CREATE TABLE helmert_transformation_table(
     name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
-    scope TEXT,
 
     method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
     method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
@@ -772,9 +760,6 @@ CREATE TABLE helmert_transformation_table(
     source_crs_code TEXT NOT NULL,
     target_crs_auth_name TEXT NOT NULL,
     target_crs_code TEXT NOT NULL,
-
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
 
     accuracy FLOAT CHECK (accuracy >= 0),
 
@@ -820,7 +805,6 @@ CREATE TABLE helmert_transformation_table(
     CONSTRAINT pk_helmert_transformation PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_helmert_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT fk_helmert_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES geodetic_crs(auth_name, code),
-    CONSTRAINT fk_helmert_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code),
     CONSTRAINT fk_helmert_transformation_method FOREIGN KEY (method_auth_name, method_code) REFERENCES coordinate_operation_method(auth_name, code),
     --CONSTRAINT fk_helmert_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     CONSTRAINT fk_helmert_translation_uom FOREIGN KEY (translation_uom_auth_name, translation_uom_code) REFERENCES unit_of_measure(auth_name, code),
@@ -839,7 +823,6 @@ CREATE VIEW helmert_transformation AS SELECT
     h.name,
 
     h.description,
-    h.scope,
 
     h.method_auth_name,
     h.method_code,
@@ -849,9 +832,6 @@ CREATE VIEW helmert_transformation AS SELECT
     h.source_crs_code,
     h.target_crs_auth_name,
     h.target_crs_code,
-
-    h.area_of_use_auth_name,
-    h.area_of_use_code,
 
     h.accuracy,
 
@@ -916,7 +896,6 @@ INSERT INTO helmert_transformation_table VALUES
     NEW.name,
 
     NEW.description,
-    NEW.scope,
 
     NEW.method_auth_name,
     NEW.method_code,
@@ -926,9 +905,6 @@ INSERT INTO helmert_transformation_table VALUES
     NEW.source_crs_code,
     NEW.target_crs_auth_name,
     NEW.target_crs_code,
-
-    NEW.area_of_use_auth_name,
-    NEW.area_of_use_code,
 
     NEW.accuracy,
 
@@ -996,11 +972,9 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: pivot_uom.type must be ''length''')
         WHERE (SELECT type FROM unit_of_measure WHERE unit_of_measure.auth_name = NEW.pivot_uom_auth_name AND unit_of_measure.code = NEW.pivot_uom_code) != 'length';
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: source_crs must not be deprecated when helmert_transformation is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM geodetic_crs crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
+        WHERE EXISTS(SELECT 1 FROM geodetic_crs crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI') AND NOT (NEW.auth_name = 'EPSG' AND NEW.code = '5375'); -- Issue with EPSG:5375 "SIRGAS-Chile to WGS 84 (1)"
     SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: target_crs must not be deprecated when helmert_transformation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM geodetic_crs crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
-    SELECT RAISE(ABORT, 'insert on helmert_transformation violates constraint: area_of_use must not be deprecated when helmert_transformation is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 CREATE TABLE grid_transformation(
@@ -1009,7 +983,6 @@ CREATE TABLE grid_transformation(
     name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
-    scope TEXT,
 
     method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
     method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
@@ -1019,9 +992,6 @@ CREATE TABLE grid_transformation(
     source_crs_code TEXT NOT NULL,
     target_crs_auth_name TEXT NOT NULL,
     target_crs_code TEXT NOT NULL,
-
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
 
     accuracy FLOAT CHECK (accuracy >= 0),
 
@@ -1046,8 +1016,7 @@ CREATE TABLE grid_transformation(
     --CONSTRAINT fk_grid_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     --CONSTRAINT fk_grid_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     --CONSTRAINT fk_grid_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code),
-    CONSTRAINT fk_grid_transformation_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
+    CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code)
 );
 
 CREATE TRIGGER grid_transformation_insert_trigger
@@ -1066,8 +1035,6 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
     SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: target_crs must not be deprecated when grid_transformation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
-    SELECT RAISE(ABORT, 'insert on grid_transformation violates constraint: area_of_use must not be deprecated when grid_transformation is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 -- Table that describe packages/archives that contain several grids
@@ -1128,7 +1095,6 @@ CREATE TABLE other_transformation(
     name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
-    scope TEXT,
 
     -- if method_auth_name = 'PROJ', method_code can be 'PROJString' for a
     -- PROJ string and then method_name is a PROJ string (typically a pipeline)
@@ -1142,9 +1108,6 @@ CREATE TABLE other_transformation(
     source_crs_code TEXT NOT NULL,
     target_crs_auth_name TEXT NOT NULL,
     target_crs_code TEXT NOT NULL,
-
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
 
     accuracy FLOAT CHECK (accuracy >= 0),
 
@@ -1205,7 +1168,6 @@ CREATE TABLE other_transformation(
     --CONSTRAINT fk_other_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     --CONSTRAINT fk_other_transformation_source_crs FOREIGN1 KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     --CONSTRAINT fk_other_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_other_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
     CONSTRAINT fk_other_transformation_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_other_transformation_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_other_transformation_param3_uom FOREIGN KEY (param3_uom_auth_name, param3_uom_code) REFERENCES unit_of_measure(auth_name, code),
@@ -1232,8 +1194,6 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
     SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: target_crs must not be deprecated when other_transformation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
-    SELECT RAISE(ABORT, 'insert on other_transformation violates constraint: area_of_use must not be deprecated when other_transformation is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 -- Note: in EPSG, the steps might be to be chained in reverse order, so we cannot
@@ -1244,15 +1204,11 @@ CREATE TABLE concatenated_operation(
     name TEXT NOT NULL CHECK (length(name) >= 2),
 
     description TEXT,
-    scope TEXT,
 
     source_crs_auth_name TEXT NOT NULL,
     source_crs_code TEXT NOT NULL,
     target_crs_auth_name TEXT NOT NULL,
     target_crs_code TEXT NOT NULL,
-
-    area_of_use_auth_name TEXT NOT NULL,
-    area_of_use_code TEXT NOT NULL,
 
     accuracy FLOAT CHECK (accuracy >= 0),
 
@@ -1260,11 +1216,10 @@ CREATE TABLE concatenated_operation(
 
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
-    CONSTRAINT pk_concatenated_operation PRIMARY KEY (auth_name, code),
+    CONSTRAINT pk_concatenated_operation PRIMARY KEY (auth_name, code)
     --CONSTRAINT fk_concatenated_operation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     --CONSTRAINT fk_concatenated_operation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     --CONSTRAINT fk_concatenated_operation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_concatenated_operation_transformation_area FOREIGN KEY (area_of_use_auth_name, area_of_use_code) REFERENCES area(auth_name, code)
 );
 
 CREATE TRIGGER concatenated_operation_insert_trigger
@@ -1284,8 +1239,6 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.source_crs_auth_name AND crs.code = NEW.source_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
     SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: target_crs must not be deprecated when concatenated_operation is not deprecated')
         WHERE EXISTS(SELECT 1 FROM crs_view crs WHERE crs.auth_name = NEW.target_crs_auth_name AND crs.code = NEW.target_crs_code AND crs.deprecated != 0) AND NEW.deprecated = 0 AND NOT (NEW.auth_name = 'ESRI');
-    SELECT RAISE(ABORT, 'insert on concatenated_operation violates constraint: area_of_use must not be deprecated when concatenated_operation is not deprecated')
-        WHERE EXISTS(SELECT 1 FROM area WHERE area.auth_name = NEW.area_of_use_auth_name AND area.code = NEW.area_of_use_code AND area.deprecated != 0) AND NEW.deprecated = 0;
 END;
 
 CREATE TABLE concatenated_operation_step(
@@ -1331,7 +1284,7 @@ END;
 CREATE TABLE alias_name(
     table_name TEXT NOT NULL CHECK (table_name IN (
         'unit_of_measure', 'celestial_body', 'ellipsoid', 
-        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'extent', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
         'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
         'helmert_transformation', 'other_transformation', 'concatenated_operation')),
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -1355,14 +1308,14 @@ END;
 CREATE TABLE supersession(
     superseded_table_name TEXT NOT NULL CHECK (superseded_table_name IN (
         'unit_of_measure', 'celestial_body', 'ellipsoid', 
-        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'extent', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
         'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
         'helmert_transformation', 'other_transformation', 'concatenated_operation')),
     superseded_auth_name TEXT NOT NULL,
     superseded_code TEXT NOT NULL,
     replacement_table_name TEXT NOT NULL CHECK (replacement_table_name IN (
         'unit_of_measure', 'celestial_body', 'ellipsoid', 
-        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'extent', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
         'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
         'helmert_transformation', 'other_transformation', 'concatenated_operation')),
     replacement_auth_name TEXT NOT NULL,
@@ -1387,7 +1340,7 @@ END;
 CREATE TABLE deprecation(
     table_name TEXT NOT NULL CHECK (table_name IN (
         'unit_of_measure', 'celestial_body', 'ellipsoid',
-        'area', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
+        'extent', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
         'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
         'helmert_transformation', 'other_transformation', 'concatenated_operation')),
     deprecated_auth_name TEXT NOT NULL,
@@ -1411,31 +1364,27 @@ END;
 
 CREATE VIEW coordinate_operation_view AS
     SELECT 'grid_transformation' AS table_name, auth_name, code, name,
-           description, scope,
+           description,
            method_auth_name, method_code, method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
-           area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM grid_transformation
     UNION ALL
     SELECT 'helmert_transformation' AS table_name, auth_name, code, name,
-           description, scope,
+           description,
            method_auth_name, method_code, method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
-           area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM helmert_transformation
     UNION ALL
     SELECT 'other_transformation' AS table_name, auth_name, code, name,
-           description, scope,
+           description,
            method_auth_name, method_code, method_name, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
-           area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM other_transformation
     UNION ALL
     SELECT 'concatenated_operation' AS table_name, auth_name, code, name,
-           description, scope,
+           description,
            NULL, NULL, NULL, source_crs_auth_name,
            source_crs_code, target_crs_auth_name, target_crs_code,
-           area_of_use_auth_name, area_of_use_code,
            accuracy, deprecated FROM concatenated_operation
 ;
 
@@ -1445,48 +1394,44 @@ CREATE VIEW coordinate_operation_with_conversion_view AS
 
 CREATE VIEW crs_view AS
     SELECT 'geodetic_crs' AS table_name, auth_name, code, name, type,
-           description, scope,
-           area_of_use_auth_name, area_of_use_code,
+           description,
            deprecated FROM geodetic_crs
     UNION ALL
     SELECT 'projected_crs' AS table_name, auth_name, code, name, 'projected',
-           description, scope,
-           area_of_use_auth_name, area_of_use_code,
+           description,
            deprecated FROM projected_crs
     UNION ALL
     SELECT 'vertical_crs' AS table_name, auth_name, code, name, 'vertical',
-           description, scope,
-           area_of_use_auth_name, area_of_use_code,
+           description,
            deprecated FROM vertical_crs
     UNION ALL
     SELECT 'compound_crs' AS table_name, auth_name, code, name, 'compound',
-           description, scope,
-           area_of_use_auth_name, area_of_use_code,
+           description,
            deprecated FROM compound_crs
 ;
 
 CREATE VIEW object_view AS
-    SELECT 'unit_of_measure' AS table_name, auth_name, code, name, NULL as type, NULL as area_of_use_auth_name, NULL as area_of_use_code, deprecated FROM unit_of_measure
+    SELECT 'unit_of_measure' AS table_name, auth_name, code, name, NULL as type, deprecated FROM unit_of_measure
     UNION ALL
-    SELECT 'celestial_body', auth_name, code, name, NULL, NULL, NULL, 0 FROM celestial_body
+    SELECT 'celestial_body', auth_name, code, name, NULL, 0 FROM celestial_body
     UNION ALL
-    SELECT 'ellipsoid', auth_name, code, name, NULL, NULL, NULL, deprecated FROM ellipsoid
+    SELECT 'ellipsoid', auth_name, code, name, NULL, deprecated FROM ellipsoid
     UNION ALL
-    SELECT 'area', auth_name, code, name, NULL, NULL, NULL, deprecated FROM area
+    SELECT 'extent', auth_name, code, name, NULL, deprecated FROM extent
     UNION ALL
-    SELECT 'prime_meridian', auth_name, code, name, NULL, NULL, NULL, deprecated FROM prime_meridian
+    SELECT 'prime_meridian', auth_name, code, name, NULL, deprecated FROM prime_meridian
     UNION ALL
-    SELECT 'geodetic_datum', auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM geodetic_datum
+    SELECT 'geodetic_datum', auth_name, code, name, NULL, deprecated FROM geodetic_datum
     UNION ALL
-    SELECT 'vertical_datum', auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM vertical_datum
+    SELECT 'vertical_datum', auth_name, code, name, NULL, deprecated FROM vertical_datum
     UNION ALL
-    SELECT 'axis', auth_name, code, name, NULL, NULL, NULL, 0 as deprecated FROM axis
+    SELECT 'axis', auth_name, code, name, NULL, 0 as deprecated FROM axis
     UNION ALL
-    SELECT table_name, auth_name, code, name, type, area_of_use_auth_name, area_of_use_code, deprecated FROM crs_view
+    SELECT table_name, auth_name, code, name, type, deprecated FROM crs_view
     UNION ALL
-    SELECT 'conversion', auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM conversion_table
+    SELECT 'conversion', auth_name, code, name, NULL, deprecated FROM conversion_table
     UNION ALL
-    SELECT table_name, auth_name, code, name, NULL, area_of_use_auth_name, area_of_use_code, deprecated FROM coordinate_operation_view
+    SELECT table_name, auth_name, code, name, NULL, deprecated FROM coordinate_operation_view
 ;
 
 CREATE VIEW authority_list AS
@@ -1496,7 +1441,11 @@ CREATE VIEW authority_list AS
     UNION
     SELECT DISTINCT auth_name FROM ellipsoid
     UNION
-    SELECT DISTINCT auth_name FROM area
+    SELECT DISTINCT auth_name FROM extent
+    UNION
+    SELECT DISTINCT auth_name FROM scope
+    UNION
+    SELECT DISTINCT auth_name FROM usage
     UNION
     SELECT DISTINCT auth_name FROM prime_meridian
     UNION

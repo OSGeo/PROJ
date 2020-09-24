@@ -12,7 +12,8 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/conversion_triggers.sql \
 		sql/metadata.sql \
 		sql/unit_of_measure.sql \
-		sql/area.sql \
+		sql/extent.sql \
+		sql/scope.sql \
 		sql/coordinate_system.sql \
 		sql/axis.sql \
 		sql/ellipsoid.sql \
@@ -30,6 +31,7 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/other_transformation.sql \
 		sql/concatenated_operation.sql \
 		sql/concatenated_operation_step.sql \
+		sql/usage.sql \
 		sql/alias_name.sql \
 		sql/supersession.sql \
 		sql/deprecation.sql \

@@ -17,7 +17,7 @@ GEOGCRS["WGS 84",
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Horizontal component of 3D system."],
         AREA["World"],
         BBOX[-90,-180,90,180]],
     ID["EPSG",4326]]
@@ -51,6 +51,7 @@ GEODCRS["WGS 84",
         AXIS["geodetic longitude (Lon)",east,
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
+    SCOPE["Horizontal component of 3D system."],
     AREA["World"],
     BBOX[-90,-180,90,180],
     ID["EPSG",4326]]
@@ -71,7 +72,7 @@ GEOGCRS["WGS 84",
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Horizontal component of 3D system."],
         AREA["World"],
         BBOX[-90,-180,90,180]],
     ID["EPSG",4326]]
@@ -94,6 +95,7 @@ GEODCRS["WGS 84",
         AXIS["geodetic longitude (Lon)",east,
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
+    SCOPE["Horizontal component of 3D system."],
     AREA["World"],
     BBOX[-90,-180,90,180],
     ID["EPSG",4326]]
@@ -113,7 +115,7 @@ GEOGCRS["WGS 84",
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Horizontal component of 3D system."],
         AREA["World"],
         BBOX[-90,-180,90,180]],
     ID["EPSG",4326]]
@@ -166,6 +168,7 @@ PROJJSON:
       }
     ]
   },
+  "scope": "Horizontal component of 3D system.",
   "area": "World",
   "bbox": {
     "south_latitude": -90,
@@ -373,7 +376,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (4)",
     PARAMETERFILE["Latitude and longitude difference file","ca_nrc_ntv2_0.tif"],
     OPERATIONACCURACY[1.5],
     USAGE[
-        SCOPE["Accuracy 1-2 metres."],
+        SCOPE["Transformation of coordinates at 1m to 2m level of accuracy."],
         AREA["Canada - NAD27"],
         BBOX[40.04,-141.01,83.17,-47.74]],
     ID["DERIVED_FROM(EPSG)",1313]]
@@ -422,7 +425,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (1)",
     PARAMETERFILE["Latitude and longitude difference file","us_noaa_conus.tif"],
     OPERATIONACCURACY[0.15],
     USAGE[
-        SCOPE["Accuracy at 67% confidence level is 0.15m onshore, 5m nearshore and undetermined farther offshore."],
+        SCOPE["Transformation of coordinates at 0.2m level of accuracy."],
         AREA["USA - CONUS including EEZ"],
         BBOX[23.81,-129.17,49.38,-65.69]],
     ID["DERIVED_FROM(EPSG)",1241]]
@@ -471,7 +474,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (2)",
     PARAMETERFILE["Latitude and longitude difference file","us_noaa_alaska.tif"],
     OPERATIONACCURACY[0.5],
     USAGE[
-        SCOPE["Accuracy at 67% confidence level is 0.5m onshore, 5m nearshore and undetermined farther offshore."],
+        SCOPE["Geodesy."],
         AREA["USA - Alaska including EEZ"],
         BBOX[47.88,167.65,74.71,-129.99]],
     ID["DERIVED_FROM(EPSG)",1243]]
@@ -520,7 +523,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (6)",
     PARAMETERFILE["Latitude and longitude difference file","ca_que_mern_na27na83.tif"],
     OPERATIONACCURACY[1.5],
     USAGE[
-        SCOPE["Accuracy 1-2 metres."],
+        SCOPE["Transformation of coordinates at 1m to 2m level of accuracy."],
         AREA["Canada - Quebec"],
         BBOX[44.99,-79.85,62.62,-57.1]],
     ID["DERIVED_FROM(EPSG)",1573]]
@@ -623,7 +626,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (9)",
     PARAMETERFILE["Latitude and longitude difference file","SK27-83.gsb"],
     OPERATIONACCURACY[1.5],
     USAGE[
-        SCOPE["Spatial referencing."],
+        SCOPE["Geodesy."],
         AREA["Canada - Saskatchewan"],
         BBOX[49,-110,60.01,-101.34]],
     ID["EPSG",9111]]
@@ -727,7 +730,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (7)",
     PARAMETERFILE["Longitude difference file","nadcon5.nad27.nad83_1986.conus.lon.trn.20160901.b"],
     OPERATIONACCURACY[0.15],
     USAGE[
-        SCOPE["Spatial referencing."],
+        SCOPE["Geodesy."],
         AREA["USA - CONUS and GoM"],
         BBOX[23.82,-124.79,49.38,-66.91]],
     ID["EPSG",8555],
@@ -779,7 +782,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (8)",
     PARAMETERFILE["Longitude difference file","nadcon5.nad27.nad83_1986.alaska.lon.trn.20160901.b"],
     OPERATIONACCURACY[0.5],
     USAGE[
-        SCOPE["Spatial referencing."],
+        SCOPE["Geodesy."],
         AREA["USA - Alaska"],
         BBOX[51.3,172.42,71.4,-129.99]],
     ID["EPSG",8549],
@@ -816,7 +819,7 @@ Testing projinfo -s EPSG:4230 -t EPSG:4258 --area no_match --summary
 No area of use matching provided name
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area WRONG:CODE --summary
-Area of use retrieval failed: area not found
+Area of use retrieval failed: extent not found
 
 Testing deprecated CRS: projinfo EPSG:26591
 Warning: object is deprecated
@@ -861,7 +864,7 @@ PROJCRS["Monte Mario (Rome) / Italy zone 1",
             ORDER[2],
             LENGTHUNIT["metre",1]],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Engineering survey, topographic mapping."],
         AREA["Italy - west of 12°E"],
         BBOX[36.53,5.94,47.04,12]],
     ID["EPSG",26591]]
@@ -936,7 +939,7 @@ COORDINATEOPERATION["Inverse of SWEREF99 to RH2000 height",
         ID["INVERSE(EPSG)",9665]],
     PARAMETERFILE["Geoid (height correction) model file","se_lantmateriet_SWEN17_RH2000.tif"],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Not known."],
         AREA["Sweden - onshore"],
         BBOX[55.28,10.93,69.07,24.17]],
     ID["INVERSE(DERIVED_FROM(PROJ))","EPSG_4977_TO_EPSG_5613"]]
@@ -960,7 +963,7 @@ PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=us_noaa_g2012ba0.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing NGF IGN69 height to RGF93: projinfo -s EPSG:5720 -t EPSG:4965 -o PROJ
-Candidate operations found: 2
+Candidate operations found: 1
 -------------------------------------
 Operation No. 1:
 
@@ -968,14 +971,6 @@ INVERSE(DERIVED_FROM(EPSG)):8885, Inverse of RGF93 to NGF-IGN69 height (3), 0.01
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=fr_ign_RAF18.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
-
--------------------------------------
-Operation No. 2:
-
-INVERSE(EPSG):10000, Inverse of RGF93 to NGF-IGN69 height (1), 0.5 m, France - mainland onshore
-
-PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=ggf97a.txt +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing EPSG:32631 --3d
 PROJ.4 string:
