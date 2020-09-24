@@ -888,6 +888,14 @@ for line in proj_db_conn.iterdump():
 #    f.write(("--- Non imported: " + str(row) + '\n').encode('UTF-8'))
 del files
 
+# Content already in proj_db_table_defs.sql
+os.unlink(os.path.join(sql_dir_name, 'celestial_body') + '.sql')
+
+# Those are generated through INSERT triggers
+os.unlink(os.path.join(sql_dir_name, 'conversion_method') + '.sql')
+os.unlink(os.path.join(sql_dir_name, 'conversion_param') + '.sql')
+os.unlink(os.path.join(sql_dir_name, 'coordinate_operation_method') + '.sql')
+
 proj_db_conn = None
 
 epsg_db_conn = None
