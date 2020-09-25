@@ -3290,7 +3290,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     }
 
     // Compare parameters present with the ones expected in the mapping
-    const ESRIMethodMapping *esriMapping = esriMappings[0];
+    const ESRIMethodMapping *esriMapping = nullptr;
     int bestMatchCount = -1;
     for (const auto &mapping : esriMappings) {
         int matchCount = 0;
@@ -3298,12 +3298,20 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
             auto iter = mapParamNameToValue.find(param->esri_name);
             if (iter != mapParamNameToValue.end()) {
                 if (param->wkt2_name == nullptr) {
+                    bool ok = true;
                     try {
                         if (io::asDouble(param->fixed_value) ==
                             io::asDouble(iter->second)) {
                             matchCount++;
+                        } else {
+                            ok = false;
                         }
                     } catch (const std::exception &) {
+                        ok = false;
+                    }
+                    if (!ok) {
+                        matchCount = -1;
+                        break;
                     }
                 } else {
                     matchCount++;
@@ -3316,6 +3324,10 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
             esriMapping = mapping;
             bestMatchCount = matchCount;
         }
+    }
+    if (esriMapping == nullptr) {
+        return buildProjectionStandard(baseGeodCRS, projCRSNode, projectionNode,
+                                       defaultLinearUnit, defaultAngularUnit);
     }
 
     std::map<std::string, const char *> mapWKT2NameToESRIName;
@@ -8898,8 +8910,29 @@ static bool is_in_stringlist(const std::string &str, const char *stringlist) {
 CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     int iStep, GeographicCRSNNPtr geogCRS, int iUnitConvert, int iAxisSwap) {
     auto &step = steps_[iStep];
-    auto mappings = getMappingsFromPROJName(step.name);
+    const auto mappings = getMappingsFromPROJName(step.name);
     const MethodMapping *mapping = mappings.empty() ? nullptr : mappings[0];
+
+    if (mappings.size() >= 2) {
+        // To distinguish for example +ortho from +ortho +f=0
+        for (const auto *mappingIter : mappings) {
+            if (mappingIter->proj_name_aux != nullptr &&
+                strchr(mappingIter->proj_name_aux, '=') == nullptr &&
+                hasParamValue(step, mappingIter->proj_name_aux)) {
+                mapping = mappingIter;
+                break;
+            } else if (mappingIter->proj_name_aux != nullptr &&
+                       strchr(mappingIter->proj_name_aux, '=') != nullptr) {
+                const auto tokens = split(mappingIter->proj_name_aux, '=');
+                if (tokens.size() == 2 &&
+                    getParamValue(step, tokens[0]) == tokens[1]) {
+                    mapping = mappingIter;
+                    break;
+                }
+            }
+        }
+    }
+
     if (mapping) {
         mapping = selectSphericalOrEllipsoidal(mapping, geogCRS);
     }

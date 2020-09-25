@@ -4251,7 +4251,7 @@ ConversionNNPtr Conversion::createObliqueStereographic(
  * This method is defined as [EPSG:9840]
  * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9840)
  *
- * \note At the time of writing, PROJ only implements the spherical formulation
+ * \note Before PROJ 7.2, only the spherical formulation was implemented.
  *
  * @param properties See \ref general_properties of the conversion. If the name
  * is not provided, it is automatically set.

@@ -4266,7 +4266,7 @@ expect  -223374.577355253 -111701.072127637
 
 ===============================================================================
 # Orthographic
-# 	Azi, Sph.
+# 	Azi, Sph&Ell.
 ===============================================================================
 
 -------------------------------------------------------------------------------
@@ -4420,6 +4420,72 @@ expect      failure errno tolerance_condition
 # it should still results in a correct coordinate.
 accept      0.70710678118 0.7071067812
 expect      45  0
+
+
+-------------------------------------------------------------------------------
+# Test the ellipsoidal formulation
+
+# Test data from Guidance Note 7 part 2, March 2020,  p. 90
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=55 +lon_0=5
+-------------------------------------------------------------------------------
+tolerance   1 mm
+accept      2.12955      53.80939444444444
+expect      -189011.711  -128640.567
+roundtrip   1
+
+# Equatorial
+operation   +proj=ortho +ellps=WGS84
+tolerance   0.1 mm
+accept      0               0
+expect      0               0
+roundtrip   1
+
+accept      0               89.99
+expect      0               6356752.2167
+roundtrip   1
+
+accept      0               -89.99
+expect      0               -6356752.2167
+roundtrip   1
+
+# Consistant with WGS84 semi-minor axis
+# The inverse transformation doesn't converge due to properties of the projection
+accept      0               90
+expect      0               6356752.3142
+
+# North pole tests
+operation   +proj=ortho +ellps=WGS84 +lat_0=90
+tolerance   0.1 mm
+accept      0               90
+expect      0               0
+roundtrip   1
+
+accept      1               89.999
+expect      1.9493         -111.6770
+roundtrip   1
+
+# Consistant with WGS84 semi-major axis
+# The inverse transformation doesn't converge due to properties of the projection
+accept      0               0
+expect      0               -6378137
+
+# South pole tests
+operation   +proj=ortho +ellps=WGS84 +lat_0=-90
+tolerance   0.1 mm
+accept      0               -90
+expect      0               0
+roundtrip   1
+
+accept      1               -89.999
+expect      1.9493          111.6770
+roundtrip   1
+
+# Consistant with WGS84 semi-major axis
+# The inverse transformation doesn't converge due to properties of the projection
+accept      0               0
+expect      0               6378137
+
 
 ===============================================================================
 # Perspective Conic

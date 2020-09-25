@@ -5225,12 +5225,45 @@ static const struct {
       {"False_Northing", 2},
       {"Longitude_Of_Center", 3},
       {"Latitude_Of_Center", 4}},
+     "Orthographic (Spherical)",
+     {
+         {"Latitude of natural origin", 4},
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Local",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Scale_Factor", 1},
+      {"Azimuth", 0},
+      {"Longitude_Of_Center", 3},
+      {"Latitude_Of_Center", 4}},
      "Orthographic",
      {
          {"Latitude of natural origin", 4},
          {"Longitude of natural origin", 3},
          {"False easting", 1},
          {"False northing", 2},
+     }},
+
+    // Local with unsupported value for Azimuth
+    {"Local",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Scale_Factor", 1},
+      {"Azimuth", 123},
+      {"Longitude_Of_Center", 3},
+      {"Latitude_Of_Center", 4}},
+     "Local",
+     {
+         {"False_Easting", 1},
+         {"False_Northing", 2},
+         {"Scale_Factor", 1},
+         {"Azimuth", 123},
+         {"Longitude_Of_Center", 3},
+         {"Latitude_Of_Center", 4},
      }},
 
     {"Winkel_Tripel",
@@ -5543,7 +5576,6 @@ static const struct {
          {"Longitude_Of_Origin", 3},
          {"Latitude_Of_Origin", 4}},
     },
-
 };
 
 TEST(wkt_parse, esri_projcs) {
@@ -9192,6 +9224,40 @@ TEST(io, projparse_non_earth_ellipsoid) {
     auto obj = PROJStringParser().createFromPROJString(input);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        input);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_ortho_ellipsoidal) {
+    std::string input("+proj=ortho +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+                      "+ellps=WGS84 +units=m +no_defs +type=crs");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->derivingConversion()->method()->getEPSGCode(),
+              EPSG_CODE_METHOD_ORTHOGRAPHIC);
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        input);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_ortho_spherical) {
+    std::string input("+proj=ortho +f=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+                      "+ellps=WGS84 +units=m +no_defs +type=crs");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
+              PROJ_WKT2_NAME_ORTHOGRAPHIC_SPHERICAL);
     EXPECT_EQ(
         crs->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)

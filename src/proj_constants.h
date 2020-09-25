@@ -183,6 +183,9 @@
 #define EPSG_NAME_METHOD_ORTHOGRAPHIC "Orthographic"
 #define EPSG_CODE_METHOD_ORTHOGRAPHIC 9840
 
+#define PROJ_WKT2_NAME_ORTHOGRAPHIC_SPHERICAL \
+    "Orthographic (Spherical)"
+
 #define PROJ_WKT2_NAME_METHOD_PATTERSON "Patterson"
 
 #define EPSG_NAME_METHOD_AMERICAN_POLYCONIC "American Polyconic"

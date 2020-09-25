@@ -4,7 +4,7 @@
 #include "proj_internal.h"
 #include <math.h>
 
-PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph";
+PROJ_HEAD(ortho, "Orthographic") "\n\tAzi, Sph&Ell";
 
 namespace { // anonymous namespace
 enum Mode {
@@ -19,6 +19,7 @@ namespace { // anonymous namespace
 struct pj_opaque {
     double  sinph0;
     double  cosph0;
+    double  nu0;
     enum Mode mode;
 };
 } // anonymous namespace
@@ -121,6 +122,72 @@ static PJ_LP ortho_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
 }
 
 
+static PJ_XY ortho_e_forward (PJ_LP lp, PJ *P) {           /* Ellipsoidal, forward */
+    PJ_XY xy;
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+
+    // From EPSG guidance note 7.2
+    const double cosphi = cos(lp.phi);
+    const double sinphi = sin(lp.phi);
+    const double coslam = cos(lp.lam);
+    const double sinlam = sin(lp.lam);
+    const double nu = 1.0 / sqrt(1.0 - P->es * sinphi * sinphi);
+    xy.x = nu * cosphi * sinlam;
+    xy.y = nu * (sinphi * Q->cosph0 - cosphi * Q->sinph0 * coslam) +
+            P->es * (Q->nu0 * Q->sinph0 - nu * sinphi) * Q->cosph0;
+
+    return xy;
+}
+
+
+
+static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inverse */
+    PJ_LP lp;
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+
+    // From EPSG guidance note 7.2
+
+    // It suggests as initial guess:
+    // lp.lam = 0;
+    // lp.phi = P->phi0;
+    // But for poles, this will not converge well. Better use:
+    lp = ortho_s_inverse(xy, P);
+
+    for( int i = 0; i < 20; i++ )
+    {
+        const double cosphi = cos(lp.phi);
+        const double sinphi = sin(lp.phi);
+        const double coslam = cos(lp.lam);
+        const double sinlam = sin(lp.lam);
+        const double one_minus_es_sinphi2 = 1.0 - P->es * sinphi * sinphi;
+        const double nu = 1.0 / sqrt(one_minus_es_sinphi2);
+        PJ_XY xy_new;
+        xy_new.x = nu * cosphi * sinlam;
+        xy_new.y = nu * (sinphi * Q->cosph0 - cosphi * Q->sinph0 * coslam) +
+                P->es * (Q->nu0 * Q->sinph0 - nu * sinphi) * Q->cosph0;
+        const double rho = (1.0 - P->es) * nu / one_minus_es_sinphi2;
+        const double J11 = -rho * sinphi * sinlam;
+        const double J12 = nu * cosphi * coslam;
+        const double J21 = rho * (cosphi * Q->cosph0 + sinphi * Q->sinph0 * coslam);
+        const double J22 = nu * Q->sinph0 * Q->cosph0 * sinlam;
+        const double D = J11 * J22 - J12 * J21;
+        const double dx = xy.x - xy_new.x;
+        const double dy = xy.y - xy_new.y;
+        const double dphi = (J22 * dx - J12 * dy) / D;
+        const double dlam = (-J21 * dx + J11 * dy) / D;
+        lp.phi += dphi;
+        if( lp.phi > M_PI_2) lp.phi = M_PI_2;
+        else if( lp.phi < -M_PI_2) lp.phi = -M_PI_2;
+        lp.lam += dlam;
+        if( fabs(dphi) < 1e-12 && fabs(dlam) < 1e-12 )
+        {
+            return lp;
+        }
+    }
+    pj_ctx_set_errno(P->ctx, PJD_ERR_NON_CONVERGENT);
+    return lp;
+}
+
 
 PJ *PROJECTION(ortho) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
@@ -128,17 +195,25 @@ PJ *PROJECTION(ortho) {
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
 
+    Q->sinph0 = sin(P->phi0);
+    Q->cosph0 = cos(P->phi0);
     if (fabs(fabs(P->phi0) - M_HALFPI) <= EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
     else if (fabs(P->phi0) > EPS10) {
         Q->mode = OBLIQ;
-        Q->sinph0 = sin(P->phi0);
-        Q->cosph0 = cos(P->phi0);
     } else
         Q->mode = EQUIT;
-    P->inv = ortho_s_inverse;
-    P->fwd = ortho_s_forward;
-    P->es = 0.;
+    if( P->es == 0 )
+    {
+        P->inv = ortho_s_inverse;
+        P->fwd = ortho_s_forward;
+    }
+    else
+    {
+        Q->nu0 = 1.0 / sqrt(1.0 - P->es * Q->sinph0 * Q->sinph0);
+        P->inv = ortho_e_inverse;
+        P->fwd = ortho_e_forward;
+    }
 
     return P;
 }
