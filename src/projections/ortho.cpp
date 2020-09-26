@@ -50,6 +50,13 @@ static PJ_XY ortho_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         break;
     case OBLIQ:
         sinphi = sin(lp.phi);
+
+        // Is the point visible from the projection plane ?
+        // From https://lists.osgeo.org/pipermail/proj/2020-September/009831.html
+        // this is the dot product of the normal of the ellipsoid at the center of
+        // the projection and at the point considered for projection.
+        // [cos(phi)*cos(lambda), cos(phi)*sin(lambda), sin(phi)]
+        // Also from Snyder's Map Projection - A working manual, equation (5-3), page 149
         if (Q->sinph0 * sinphi + Q->cosph0 * cosphi * coslam < - EPS10)
             return forward_error(P, lp, xy);
         xy.y = Q->cosph0 * sinphi - Q->sinph0 * cosphi * coslam;
@@ -131,6 +138,14 @@ static PJ_XY ortho_e_forward (PJ_LP lp, PJ *P) {           /* Ellipsoidal, forwa
     const double sinphi = sin(lp.phi);
     const double coslam = cos(lp.lam);
     const double sinlam = sin(lp.lam);
+
+    // Is the point visible from the projection plane ?
+    // Same condition as in spherical case
+    if (Q->sinph0 * sinphi + Q->cosph0 * cosphi * coslam < - EPS10) {
+        xy.x = HUGE_VAL; xy.y = HUGE_VAL;
+        return forward_error(P, lp, xy);
+    }
+
     const double nu = 1.0 / sqrt(1.0 - P->es * sinphi * sinphi);
     xy.x = nu * cosphi * sinlam;
     xy.y = nu * (sinphi * Q->cosph0 - cosphi * Q->sinph0 * coslam) +
