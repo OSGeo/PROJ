@@ -160,6 +160,66 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
     PJ_LP lp;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
+    if( Q->mode == N_POLE || Q->mode == S_POLE )
+    {
+        // Polar case. Forward case equations can be simplified as:
+        // xy.x = nu * cosphi * sinlam
+        // xy.y = nu * -cosphi * coslam * sign(phi0)
+        // ==> lam = atan2(xy.x, -xy.y * sign(phi0))
+        // ==> xy.x^2 + xy.y^2 = nu^2 * cosphi^2
+        //                rh^2 = cosphi^2 / (1 - es * sinphi^2)
+        // ==>  sinphi^2 = (1 - rh^2) / (1 - es * rh^2)
+
+        const double rh2 = xy.x * xy.x + xy.y * xy.y;
+        if (rh2 >= 1. - 1e-15) {
+            if ((rh2 - 1.) > EPS10) {
+                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                proj_log_trace(P, "Point (%.3f, %.3f) is outside the projection boundary");
+                lp.lam = HUGE_VAL; lp.phi = HUGE_VAL;
+                return lp;
+            }
+            lp.phi = 0;
+        }
+        else {
+            lp.phi = asin(sqrt((1 - rh2) / (1 - P->es * rh2))) * (Q->mode == N_POLE ? 1 : -1);
+        }
+        lp.lam = atan2(xy.x, xy.y * (Q->mode == N_POLE ? -1 : 1));
+        return lp;
+    }
+
+    if( Q->mode == EQUIT )
+    {
+        // Equatorial case. Forward case equations can be simplified as:
+        // xy.x = nu * cosphi * sinlam
+        // xy.y  = nu * sinphi * (1 - P->es)
+        // x^2 * (1 - es * sinphi^2) = (1 - sinphi^2) * sinlam^2
+        // y^2 / ((1 - es)^2 + y^2 * es) = sinphi^2
+
+        const auto SQ = [](double x) { return x*x; };
+
+        // Equation of the ellipse
+        if( SQ(xy.x) + SQ(xy.y * (P->a / P->b)) > 1 + 1e-11 ) {
+            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_log_trace(P, "Point (%.3f, %.3f) is outside the projection boundary");
+            lp.lam = HUGE_VAL; lp.phi = HUGE_VAL;
+            return lp;
+        }
+
+        const double sinphi2 = xy.y == 0 ? 0 : 1.0 / (SQ((1 - P->es) / xy.y) + P->es);
+        if( sinphi2 > 1 - 1e-11 ) {
+            lp.phi = M_PI_2 * (xy.y > 0 ? 1 : -1);
+            lp.lam = 0;
+            return lp;
+        }
+        lp.phi = asin(sqrt(sinphi2)) * (xy.y > 0 ? 1 : -1);
+        const double sinlam = xy.x * sqrt((1 - P->es * sinphi2) / (1 - sinphi2));
+        if( fabs(sinlam) - 1 > -1e-15 )
+            lp.lam = M_PI_2 * (xy.x > 0 ? 1: -1);
+        else
+            lp.lam = asin(sinlam);
+        return lp;
+    }
+
     // From EPSG guidance note 7.2
 
     // It suggests as initial guess:

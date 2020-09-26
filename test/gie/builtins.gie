@@ -4270,7 +4270,7 @@ expect  -223374.577355253 -111701.072127637
 ===============================================================================
 
 -------------------------------------------------------------------------------
-# Test the equatorial aspect of the Orthopgraphic projection.
+# Test the equatorial aspect of the Orthographic projection.
 
 # Test data from Snyder (1987), table 22, p. 151.
 -------------------------------------------------------------------------------
@@ -4322,7 +4322,7 @@ expect      failure errno tolerance_condition
 
 
 -------------------------------------------------------------------------------
-# Test the oblique aspect of the Orthopgraphic projection.
+# Test the oblique aspect of the Orthographic projection.
 
 # Test data from Snyder (1987), table 23, pp. 152-153.
 -------------------------------------------------------------------------------
@@ -4356,7 +4356,7 @@ expect      failure errno tolerance_condition
 
 
 -------------------------------------------------------------------------------
-# Test the north polar aspect of the Orthopgraphic projection.
+# Test the north polar aspect of the Orthographic projection.
 -------------------------------------------------------------------------------
 operation   +proj=ortho +R=1 +lat_0=90 +lon_0=0
 -------------------------------------------------------------------------------
@@ -4386,7 +4386,7 @@ accept      2   2
 expect      failure errno tolerance_condition
 
 -------------------------------------------------------------------------------
-# Test the south polar aspect of the Orthopgraphic projection.
+# Test the south polar aspect of the Orthographic projection.
 -------------------------------------------------------------------------------
 operation   +proj=ortho +R=1 +lat_0=-90 +lon_0=0
 -------------------------------------------------------------------------------
@@ -4443,6 +4443,22 @@ accept      0               0
 expect      0               0
 roundtrip   1
 
+accept      1               1
+expect      111296.9991     110568.7748
+roundtrip   1
+
+accept      1               -1
+expect      111296.9991     -110568.7748
+roundtrip   1
+
+accept      -1              1
+expect      -111296.9991    110568.7748
+roundtrip   1
+
+accept      -1              -1
+expect      -111296.9991    -110568.7748
+roundtrip   1
+
 accept      89.99           0
 expect      6378136.9029    0
 roundtrip   1
@@ -4468,20 +4484,37 @@ accept      -90.00001       0
 expect      failure         errno tolerance_condition
 
 # Consistant with WGS84 semi-major axis
-# The inverse transformation doesn't converge due to properties of the projection
 accept      90              0
 expect      6378137         0
+roundtrip   1
 
 accept      -90             0
 expect      -6378137        0
+roundtrip   1
 
 # Consistant with WGS84 semi-minor axis
-# The inverse transformation doesn't converge due to properties of the projection
 accept      0               90
 expect      0               6356752.3142
+roundtrip   1
 
 accept      0               -90
 expect      0               -6356752.3142
+roundtrip   1
+
+# Point not visible from the projection plane
+direction   inverse
+accept      0               6356752.3143
+expect      failure         errno tolerance_condition
+
+# Point not visible from the projection plane
+direction   inverse
+accept      1000            6356752.314
+expect      failure         errno tolerance_condition
+
+# Point not visible from the projection plane
+direction   inverse
+accept      6378137.0001    0
+expect      failure         errno tolerance_condition
 
 -------------------------------------------------------------------------------
 # North pole tests
@@ -4501,9 +4534,14 @@ accept      0               -0.0000001
 expect      failure         errno tolerance_condition
 
 # Consistant with WGS84 semi-major axis
-# The inverse transformation doesn't converge due to properties of the projection
 accept      0               0
 expect      0               -6378137
+roundtrip   1
+
+# Point not visible from the projection plane
+direction   inverse
+accept      0               -6378137.1
+expect      failure         errno tolerance_condition
 
 -------------------------------------------------------------------------------
 # South pole tests
@@ -4523,9 +4561,14 @@ accept      0               0.0000001
 expect      failure         errno tolerance_condition
 
 # Consistant with WGS84 semi-major axis
-# The inverse transformation doesn't converge due to properties of the projection
 accept      0               0
 expect      0               6378137
+roundtrip   1
+
+# Point not visible from the projection plane
+direction   inverse
+accept      0               6378137.1
+expect      failure         errno tolerance_condition
 
 
 ===============================================================================
