@@ -4565,8 +4565,12 @@ accept      0               90
 expect      0               0
 roundtrip   1
 
-accept      1               89.999
-expect      1.9493         -111.6770
+accept      30              45
+expect      2258795.4394   -3912348.4650
+roundtrip   1
+
+accept      135             89.999999873385
+expect      0.01            0.01
 roundtrip   1
 
 # Point not visible from the projection plane
@@ -4592,8 +4596,8 @@ accept      0               -90
 expect      0               0
 roundtrip   1
 
-accept      1               -89.999
-expect      1.9493          111.6770
+accept      135             -89.999999873385
+expect      0.01            -0.01
 roundtrip   1
 
 # Point not visible from the projection plane

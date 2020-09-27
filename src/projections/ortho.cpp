@@ -171,7 +171,7 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
         // ==> lam = atan2(xy.x, -xy.y * sign(phi0))
         // ==> xy.x^2 + xy.y^2 = nu^2 * cosphi^2
         //                rh^2 = cosphi^2 / (1 - es * sinphi^2)
-        // ==>  sinphi^2 = (1 - rh^2) / (1 - es * rh^2)
+        // ==>  cosphi^2 = rh^2 * (1 - es) / (1 - es * rh^2)
 
         const double rh2 = SQ(xy.x) + SQ(xy.y);
         if (rh2 >= 1. - 1e-15) {
@@ -184,7 +184,7 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
             lp.phi = 0;
         }
         else {
-            lp.phi = asin(sqrt((1 - rh2) / (1 - P->es * rh2))) * (Q->mode == N_POLE ? 1 : -1);
+            lp.phi = acos(sqrt(rh2 * P->one_es / (1 - P->es * rh2))) * (Q->mode == N_POLE ? 1 : -1);
         }
         lp.lam = atan2(xy.x, xy.y * (Q->mode == N_POLE ? -1 : 1));
         return lp;
