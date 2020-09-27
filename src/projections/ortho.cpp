@@ -20,6 +20,8 @@ struct pj_opaque {
     double  sinph0;
     double  cosph0;
     double  nu0;
+    double  y_shift;
+    double  y_scale;
     enum Mode mode;
 };
 } // anonymous namespace
@@ -155,10 +157,11 @@ static PJ_XY ortho_e_forward (PJ_LP lp, PJ *P) {           /* Ellipsoidal, forwa
 }
 
 
-
 static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inverse */
     PJ_LP lp;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+
+    const auto SQ = [](double x) { return x*x; };
 
     if( Q->mode == N_POLE || Q->mode == S_POLE )
     {
@@ -170,7 +173,7 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
         //                rh^2 = cosphi^2 / (1 - es * sinphi^2)
         // ==>  sinphi^2 = (1 - rh^2) / (1 - es * rh^2)
 
-        const double rh2 = xy.x * xy.x + xy.y * xy.y;
+        const double rh2 = SQ(xy.x) + SQ(xy.y);
         if (rh2 >= 1. - 1e-15) {
             if ((rh2 - 1.) > EPS10) {
                 proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -195,8 +198,6 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
         // x^2 * (1 - es * sinphi^2) = (1 - sinphi^2) * sinlam^2
         // y^2 / ((1 - es)^2 + y^2 * es) = sinphi^2
 
-        const auto SQ = [](double x) { return x*x; };
-
         // Equation of the ellipse
         if( SQ(xy.x) + SQ(xy.y * (P->a / P->b)) > 1 + 1e-11 ) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
@@ -220,13 +221,26 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
         return lp;
     }
 
+    // Using Q->sinph0 * sinphi + Q->cosph0 * cosphi * coslam == 0 (visibity
+    // condition of the forward case) in the forward equations, and a lot of
+    // substition games...
+    PJ_XY xy_recentered;
+    xy_recentered.x = xy.x;
+    xy_recentered.y = (xy.y - Q->y_shift) / Q->y_scale;
+    if( SQ(xy.x) + SQ(xy_recentered.y) > 1 + 1e-11 ) {
+        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_log_trace(P, "Point (%.3f, %.3f) is outside the projection boundary");
+        lp.lam = HUGE_VAL; lp.phi = HUGE_VAL;
+        return lp;
+    }
+
     // From EPSG guidance note 7.2
 
     // It suggests as initial guess:
     // lp.lam = 0;
     // lp.phi = P->phi0;
     // But for poles, this will not converge well. Better use:
-    lp = ortho_s_inverse(xy, P);
+    lp = ortho_s_inverse(xy_recentered, P);
 
     for( int i = 0; i < 20; i++ )
     {
@@ -286,6 +300,8 @@ PJ *PROJECTION(ortho) {
     else
     {
         Q->nu0 = 1.0 / sqrt(1.0 - P->es * Q->sinph0 * Q->sinph0);
+        Q->y_shift = P->es * Q->nu0 * Q->sinph0 * Q->cosph0;
+        Q->y_scale = 1.0 / sqrt(1.0 - P->es * Q->cosph0 * Q->cosph0);
         P->inv = ortho_e_inverse;
         P->fwd = ortho_e_forward;
     }

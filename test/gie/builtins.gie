@@ -4435,6 +4435,46 @@ expect      -189011.711  -128640.567
 roundtrip   1
 
 -------------------------------------------------------------------------------
+# Oblique
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=30
+
+# On boundary of visibility domain.
+direction   forward
+tolerance   0.1 mm
+accept      -90             0
+expect      -6378137        18504.1253
+
+# This test is fragile. Note the slighly important tolerance
+# direction   inverse
+# tolerance   100 mm
+# accept      -6378137        18504.125313223721605027
+# expect      -90             0
+
+# Slightly outside
+direction   inverse
+accept      -6378137.001    18504.1253
+expect      failure errno tolerance_condition
+
+# On boundary of visibility domain
+direction   forward
+tolerance   0.1 mm
+accept      0               -60
+expect      0               -6343601.0991
+
+# Just on it, but fails to converge. This test might be fragile
+direction   inverse
+accept      0               -6343601.099075031466782093
+expect      failure errno non_convergent
+
+# Slightly inside
+direction   inverse
+tolerance   0.1 mm
+accept      0               -6343600
+expect      0               -59.966377950099655436
+
+
+-------------------------------------------------------------------------------
 # Equatorial
 -------------------------------------------------------------------------------
 operation   +proj=ortho +ellps=WGS84
