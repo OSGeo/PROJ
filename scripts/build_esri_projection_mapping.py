@@ -436,11 +436,23 @@ config_str = """
         - Longitude_Of_Origin: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
         - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
 
+# ESRI's Orthographic is a spherical-only formulation. The ellipsoidal capable
+# name is Local. See below
 - Orthographic:
+    WKT2_name: PROJ_WKT2_NAME_ORTHOGRAPHIC_SPHERICAL
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Longitude_Of_Center: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Latitude_Of_Center: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
+
+- Local:
     WKT2_name: EPSG_NAME_METHOD_ORTHOGRAPHIC
     Params:
         - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Scale_Factor: 1.0
+        - Azimuth: 0.0
         - Longitude_Of_Center: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
         - Latitude_Of_Center: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
 

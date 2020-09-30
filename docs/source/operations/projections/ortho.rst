@@ -10,7 +10,7 @@ around a given latitude and longitude.
 +---------------------+--------------------------------------------------------+
 | **Classification**  | Azimuthal                                              |
 +---------------------+--------------------------------------------------------+
-| **Available forms** | Forward and inverse, spherical projection              |
+| **Available forms** | Forward and inverse, spherical and ellipsoidal         |
 +---------------------+--------------------------------------------------------+
 | **Defined area**    | Global, although only one hemisphere can be seen at a  |
 |                     | time                                                   |
@@ -31,6 +31,12 @@ around a given latitude and longitude.
 
    proj-string: ``+proj=ortho``
 
+
+.. note:: Before PROJ 7.2, only the spherical formulation was implemented. If
+          wanting to replicate PROJ < 7.2 results with newer versions, the
+          ellipsoid must be forced to a sphere, for example by adding a ``+f=0``
+          parameter.
+
 Parameters
 ################################################################################
 
@@ -39,6 +45,8 @@ Parameters
 .. include:: ../options/lon_0.rst
 
 .. include:: ../options/lat_0.rst
+
+.. include:: ../options/ellps.rst
 
 .. include:: ../options/R.rst
 

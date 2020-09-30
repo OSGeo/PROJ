@@ -4266,11 +4266,11 @@ expect  -223374.577355253 -111701.072127637
 
 ===============================================================================
 # Orthographic
-# 	Azi, Sph.
+# 	Azi, Sph&Ell.
 ===============================================================================
 
 -------------------------------------------------------------------------------
-# Test the equatorial aspect of the Orthopgraphic projection.
+# Test the equatorial aspect of the Orthographic projection.
 
 # Test data from Snyder (1987), table 22, p. 151.
 -------------------------------------------------------------------------------
@@ -4322,7 +4322,7 @@ expect      failure errno tolerance_condition
 
 
 -------------------------------------------------------------------------------
-# Test the oblique aspect of the Orthopgraphic projection.
+# Test the oblique aspect of the Orthographic projection.
 
 # Test data from Snyder (1987), table 23, pp. 152-153.
 -------------------------------------------------------------------------------
@@ -4356,7 +4356,7 @@ expect      failure errno tolerance_condition
 
 
 -------------------------------------------------------------------------------
-# Test the north polar aspect of the Orthopgraphic projection.
+# Test the north polar aspect of the Orthographic projection.
 -------------------------------------------------------------------------------
 operation   +proj=ortho +R=1 +lat_0=90 +lon_0=0
 -------------------------------------------------------------------------------
@@ -4386,7 +4386,7 @@ accept      2   2
 expect      failure errno tolerance_condition
 
 -------------------------------------------------------------------------------
-# Test the south polar aspect of the Orthopgraphic projection.
+# Test the south polar aspect of the Orthographic projection.
 -------------------------------------------------------------------------------
 operation   +proj=ortho +R=1 +lat_0=-90 +lon_0=0
 -------------------------------------------------------------------------------
@@ -4420,6 +4420,200 @@ expect      failure errno tolerance_condition
 # it should still results in a correct coordinate.
 accept      0.70710678118 0.7071067812
 expect      45  0
+
+
+-------------------------------------------------------------------------------
+# Test the ellipsoidal formulation
+
+# Test data from Guidance Note 7 part 2, March 2020,  p. 90
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=55 +lon_0=5
+-------------------------------------------------------------------------------
+tolerance   1 mm
+accept      2.12955      53.80939444444444
+expect      -189011.711  -128640.567
+roundtrip   1
+
+-------------------------------------------------------------------------------
+# Oblique
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=30
+
+# On boundary of visibility domain.
+direction   forward
+tolerance   0.1 mm
+accept      -90             0
+expect      -6378137        18504.1253
+
+# This test is fragile. Note the slighly important tolerance
+# direction   inverse
+# tolerance   100 mm
+# accept      -6378137        18504.125313223721605027
+# expect      -90             0
+
+# Slightly outside
+direction   inverse
+accept      -6378137.001    18504.1253
+expect      failure errno tolerance_condition
+
+# On boundary of visibility domain
+direction   forward
+tolerance   0.1 mm
+accept      0               -60
+expect      0               -6343601.0991
+
+# Just on it, but fails to converge. This test might be fragile
+direction   inverse
+accept      0               -6343601.099075031466782093
+expect      failure errno non_convergent
+
+# Slightly inside
+direction   inverse
+tolerance   0.1 mm
+accept      0               -6343600
+expect      0               -59.966377950099655436
+
+
+-------------------------------------------------------------------------------
+# Equatorial
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84
+tolerance   0.1 mm
+accept      0               0
+expect      0               0
+roundtrip   1
+
+accept      1               1
+expect      111296.9991     110568.7748
+roundtrip   1
+
+accept      1               -1
+expect      111296.9991     -110568.7748
+roundtrip   1
+
+accept      -1              1
+expect      -111296.9991    110568.7748
+roundtrip   1
+
+accept      -1              -1
+expect      -111296.9991    -110568.7748
+roundtrip   1
+
+accept      89.99           0
+expect      6378136.9029    0
+roundtrip   1
+
+accept      -89.99          0
+expect      -6378136.9029   0
+roundtrip   1
+
+accept      0               89.99
+expect      0               6356752.2167
+roundtrip   1
+
+accept      0               -89.99
+expect      0               -6356752.2167
+roundtrip   1
+
+# Point not visible from the projection plane
+accept      90.00001        0
+expect      failure         errno tolerance_condition
+
+# Point not visible from the projection plane
+accept      -90.00001       0
+expect      failure         errno tolerance_condition
+
+# Consistant with WGS84 semi-major axis
+accept      90              0
+expect      6378137         0
+roundtrip   1
+
+accept      -90             0
+expect      -6378137        0
+roundtrip   1
+
+# Consistant with WGS84 semi-minor axis
+accept      0               90
+expect      0               6356752.3142
+roundtrip   1
+
+accept      0               -90
+expect      0               -6356752.3142
+roundtrip   1
+
+# Point not visible from the projection plane
+direction   inverse
+accept      0               6356752.3143
+expect      failure         errno tolerance_condition
+
+# Point not visible from the projection plane
+direction   inverse
+accept      1000            6356752.314
+expect      failure         errno tolerance_condition
+
+# Point not visible from the projection plane
+direction   inverse
+accept      6378137.0001    0
+expect      failure         errno tolerance_condition
+
+-------------------------------------------------------------------------------
+# North pole tests
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=90
+tolerance   0.1 mm
+accept      0               90
+expect      0               0
+roundtrip   1
+
+accept      30              45
+expect      2258795.4394   -3912348.4650
+roundtrip   1
+
+accept      135             89.999999873385
+expect      0.01            0.01
+roundtrip   1
+
+# Point not visible from the projection plane
+accept      0               -0.0000001
+expect      failure         errno tolerance_condition
+
+# Consistant with WGS84 semi-major axis
+accept      0               0
+expect      0               -6378137
+roundtrip   1
+
+# Point not visible from the projection plane
+direction   inverse
+accept      0               -6378137.1
+expect      failure         errno tolerance_condition
+
+-------------------------------------------------------------------------------
+# South pole tests
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=-90
+tolerance   0.1 mm
+accept      0               -90
+expect      0               0
+roundtrip   1
+
+accept      135             -89.999999873385
+expect      0.01            -0.01
+roundtrip   1
+
+# Point not visible from the projection plane
+accept      0               0.0000001
+expect      failure         errno tolerance_condition
+
+# Consistant with WGS84 semi-major axis
+accept      0               0
+expect      0               6378137
+roundtrip   1
+
+# Point not visible from the projection plane
+direction   inverse
+accept      0               6378137.1
+expect      failure         errno tolerance_condition
+
 
 ===============================================================================
 # Perspective Conic
