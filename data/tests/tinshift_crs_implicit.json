@@ -1,0 +1,46 @@
+{
+  "file_type": "triangulation_file",
+  "format_version": "1.0",
+  "name": "Name",
+  "version": "Version",
+  "publication_date": "2018-07-01T00:00:00Z",
+  "license": "Creative Commons Attribution 4.0 International",
+  "description": "Test triangulation",
+  "authority": {
+    "name": "Authority name",
+    "url": "http://example.com",
+    "address": "Adress",
+    "email": "test@example.com"
+  },
+  "links": [
+    {
+      "href": "https://example.com/about.html",
+      "rel": "about",
+      "type": "text/html",
+      "title": "About"
+    },
+    {
+      "href": "https://example.com/download",
+      "rel": "source",
+      "type": "application/zip",
+      "title": "Authoritative source"
+    },
+    {
+      "href": "https://creativecommons.org/licenses/by/4.0/",
+      "rel": "license",
+      "type": "text/html",
+      "title": "Creative Commons Attribution 4.0 International license"
+    },
+    {
+      "href": "https://example.com/metadata.xml",
+      "rel": "metadata",
+      "type": "application/xml",
+      "title": " ISO 19115 XML encoded metadata regarding the deformation model"
+    }
+  ],
+  "transformed_components": [ "horizontal" ],
+  "vertices_columns": [ "source_x", "source_y", "target_x", "target_y" ],
+  "triangles_columns": [ "idx_vertex1", "idx_vertex2", "idx_vertex3" ],
+  "vertices": [ [2,49,2.1,49.1], [3,50,3.1,50.1], [2, 50, 2.1,50.1] ],
+  "triangles": [ [0, 1, 2] ]
+}

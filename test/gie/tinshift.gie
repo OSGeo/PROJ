@@ -1,0 +1,50 @@
+
+-------------------------------------------------------------------------------
+===============================================================================
+Test +proj=tinshift
+===============================================================================
+
+<gie-strict>
+
+# Missing +file
+operation   +proj=tinshift
+expect failure errno no_args
+
+# +file doesn't point to an existing file
+operation   +proj=tinshift +file=i_do_not_exist
+expect failure errno invalid_arg
+
+# Not a JSON file
+operation   +proj=tinshift +file=proj.ini
+expect failure errno invalid_arg
+
+
+# Tests on a file without explicit CRS
+operation   +proj=tinshift +file=tests/tinshift_crs_implicit.json
+accept    2   49
+expect    2.1 49.1
+roundtrip 1
+
+accept    0   0
+expect    failure
+
+direction inverse
+accept    0   0
+expect    failure
+
+
+# Tests on a file with explicit CRS
+operation   +proj=tinshift +file=tests/tinshift_simplified_kkj_etrs.json
+tolerance   0.1 mm
+# Verified with https://kartta.paikkatietoikkuna.fi/?lang=en with EPSG:2393 to EPSG:3067
+accept      3210000.0000 6700000.0000
+expect       209948.3217 6697187.0009
+roundtrip   1
+
+operation   +proj=tinshift +file=tests/tinshift_simplified_n60_n2000.json
+tolerance   0.1 mm
+accept      3210000.0000 6700000.0000   10.0
+expect      3210000.0000 6700000.0000   10.2886
+roundtrip   1
+
+</gie-strict>

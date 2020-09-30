@@ -186,6 +186,7 @@ set(SRC_LIBPROJ_TRANSFORMATIONS
   transformations/vgridshift.cpp
   transformations/xyzgridshift.cpp
   transformations/defmodel.cpp
+  transformations/tinshift.cpp
 )
 
 set(SRC_LIBPROJ_ISO19111
