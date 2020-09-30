@@ -489,16 +489,13 @@ static PJ_LP exact_e_inv (PJ_XY xy, PJ *P) {
 }
 
 static PJ *setup_exact(PJ *P) {
-    double f, n, np, Z;
     auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->exact);
 
     assert( P->es > 0 );
 
-    /* flattening */
-    f = P->es / (1 + sqrt (1 -  P->es)); /* Replaces: f = 1 - sqrt(1-P->es); */
-
     /* third flattening */
-    np = n = f/(2 - f);
+    const double n = P->n;
+    double np = n;
 
     /* COEF. OF TRIG SERIES GEO <-> GAUSS */
     /* cgb := Gaussian -> Geodetic, KW p190 - 191 (61) - (62) */
@@ -563,7 +560,7 @@ static PJ *setup_exact(PJ *P) {
     Q->gtu[5] = np*(212378941/319334400.0);
 
     /* Gaussian latitude value of the origin latitude */
-    Z = gatg (Q->cbg, PROJ_ETMERC_ORDER, P->phi0, cos(2*P->phi0), sin(2*P->phi0));
+    const double Z = gatg (Q->cbg, PROJ_ETMERC_ORDER, P->phi0, cos(2*P->phi0), sin(2*P->phi0));
 
     /* Origin northing minus true northing at the origin latitude */
     /* i.e. true northing = N - P->Zb                         */
