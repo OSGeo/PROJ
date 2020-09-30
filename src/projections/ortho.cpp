@@ -135,7 +135,7 @@ static PJ_XY ortho_e_forward (PJ_LP lp, PJ *P) {           /* Ellipsoidal, forwa
     PJ_XY xy;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
-    // From EPSG guidance note 7.2
+    // From EPSG guidance note 7.2, March 2020, §3.3.5 Orthographic
     const double cosphi = cos(lp.phi);
     const double sinphi = sin(lp.phi);
     const double coslam = cos(lp.lam);
@@ -234,7 +234,7 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
         return lp;
     }
 
-    // From EPSG guidance note 7.2
+    // From EPSG guidance note 7.2, March 2020, §3.3.5 Orthographic
 
     // It suggests as initial guess:
     // lp.lam = 0;
