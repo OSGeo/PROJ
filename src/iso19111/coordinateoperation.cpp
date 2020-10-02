@@ -14340,8 +14340,9 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
             for (const auto &opFirst : opsFirst) {
                 for (const auto &opLast : opsLast) {
                     // Exclude artificial transformations from the hub
-                    // to the target CRS
-                    if (!opLast->hasBallparkTransformation()) {
+                    // to the target CRS, if it is the only one.
+                    if (opsLast.size() > 1 ||
+                        !opLast->hasBallparkTransformation()) {
                         try {
                             res.emplace_back(
                                 ConcatenatedOperation::createComputeMetadata(
@@ -14349,6 +14350,9 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                                     disallowEmptyIntersection));
                         } catch (const InvalidOperationEmptyIntersection &) {
                         }
+                    } else {
+                        // std::cerr << "excluded " << opLast->nameStr() <<
+                        // std::endl;
                     }
                 }
             }
@@ -14432,6 +14436,9 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                             } catch (
                                 const InvalidOperationEmptyIntersection &) {
                             }
+                        } else {
+                            // std::cerr << "excluded " << opLast->nameStr() <<
+                            // std::endl;
                         }
                     }
                 }
@@ -15201,11 +15208,14 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 createOperations(intermGeogSrc, intermGeogDst, context);
             for (const auto &op1 : opsSrcToGeog) {
                 if (op1->hasBallparkTransformation()) {
+                    // std::cerr << "excluded " << op1->nameStr() << std::endl;
                     continue;
                 }
                 for (const auto &op2 : opsGeogSrcToGeogDst) {
                     for (const auto &op3 : opsGeogToTarget) {
                         if (op3->hasBallparkTransformation()) {
+                            // std::cerr << "excluded " << op3->nameStr() <<
+                            // std::endl;
                             continue;
                         }
                         try {

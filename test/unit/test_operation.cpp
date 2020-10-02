@@ -6801,7 +6801,7 @@ TEST(operation, nadgrids_with_pm) {
     dst = authFactory->createCoordinateReferenceSystem("4258");
     list = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(src), dst, ctxt);
-    ASSERT_EQ(list.size(), 1U);
+    ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
               "+step +inv +proj=tmerc +lat_0=39.6666666666667 +lon_0=1 "
@@ -6819,7 +6819,7 @@ TEST(operation, nadgrids_with_pm) {
     ASSERT_TRUE(crsFromWkt);
     list = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(crsFromWkt), dst, ctxt);
-    ASSERT_EQ(list.size(), 1U);
+    ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
               "+step +inv +proj=tmerc +lat_0=39.6666666666667 +lon_0=1 "
@@ -7617,6 +7617,97 @@ TEST(
               "+step +proj=unitconvert +xy_in=rad +z_in=m "
               "+xy_out=deg +z_out=us-ft "
               "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     compoundCRS_with_boundGeogCRS_and_geoid_to_geodCRS_NAD2011_ctxt) {
+
+    auto dbContext = DatabaseContext::create();
+
+    const char *wktSrc =
+        "COMPD_CS[\"NAD83 / California zone 5 (ftUS) + "
+        "NAVD88 height - Geoid12B (ftUS)\","
+        "   PROJCS[\"NAD83 / California zone 5 (ftUS)\","
+        "       GEOGCS[\"NAD83\","
+        "           DATUM[\"North_American_Datum_1983\","
+        "               SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+        "                   AUTHORITY[\"EPSG\",\"7019\"]],"
+        "               TOWGS84[0,0,0,0,0,0,0],"
+        "               AUTHORITY[\"EPSG\",\"6269\"]],"
+        "           PRIMEM[\"Greenwich\",0,"
+        "               AUTHORITY[\"EPSG\",\"8901\"]],"
+        "           UNIT[\"degree\",0.0174532925199433,"
+        "               AUTHORITY[\"EPSG\",\"9122\"]],"
+        "           AUTHORITY[\"EPSG\",\"4269\"]],"
+        "       PROJECTION[\"Lambert_Conformal_Conic_2SP\"],"
+        "       PARAMETER[\"standard_parallel_1\",35.46666666666667],"
+        "       PARAMETER[\"standard_parallel_2\",34.03333333333333],"
+        "       PARAMETER[\"latitude_of_origin\",33.5],"
+        "       PARAMETER[\"central_meridian\",-118],"
+        "       PARAMETER[\"false_easting\",6561666.667],"
+        "       PARAMETER[\"false_northing\",1640416.667],"
+        "       UNIT[\"US survey foot\",0.3048006096012192,"
+        "           AUTHORITY[\"EPSG\",\"9003\"]],"
+        "       AXIS[\"X\",EAST],"
+        "       AXIS[\"Y\",NORTH],"
+        "       AUTHORITY[\"EPSG\",\"2229\"]],"
+        "VERT_CS[\"NAVD88 height - Geoid12B (ftUS)\","
+        "   VERT_DATUM[\"North American Vertical Datum 1988\",2005,"
+        "       AUTHORITY[\"EPSG\",\"5103\"]],"
+        "   UNIT[\"US survey foot\",0.3048006096012192,"
+        "       AUTHORITY[\"EPSG\",\"9003\"]],"
+        "   AXIS[\"Gravity-related height\",UP],"
+        "   AUTHORITY[\"EPSG\",\"6360\"]]]";
+    auto objSrc =
+        WKTParser().attachDatabaseContext(dbContext).createFromWKT(wktSrc);
+    auto srcCRS = nn_dynamic_pointer_cast<CompoundCRS>(objSrc);
+    ASSERT_TRUE(srcCRS != nullptr);
+
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    // NAD83(2011) geocentric
+    auto dstCRS = authFactoryEPSG->createCoordinateReferenceSystem("6317");
+
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcCRS), dstCRS, ctxt);
+    bool found = false;
+    for (const auto &op : list) {
+        if (op->nameStr() ==
+            "Inverse of unnamed + "
+            "Transformation from NAD83 to WGS84 + "
+            "Ballpark geographic offset from WGS 84 to NAD83(2011) + "
+            "Transformation from NAVD88 height (ftUS) to NAVD88 height + "
+            "Inverse of NAD83(2011) to NAVD88 height (1) + "
+            "Conversion from NAD83(2011) (geog3D) to NAD83(2011) "
+            "(geocentric)") {
+            found = true;
+            EXPECT_EQ(
+                op->exportToPROJString(PROJStringFormatter::create().get()),
+                "+proj=pipeline "
+                "+step +proj=unitconvert +xy_in=us-ft +xy_out=m "
+                "+step +inv +proj=lcc +lat_0=33.5 +lon_0=-118 "
+                "+lat_1=35.4666666666667 +lat_2=34.0333333333333 "
+                "+x_0=2000000.0001016 +y_0=500000.0001016 +ellps=GRS80 "
+                "+step +proj=unitconvert +z_in=us-ft +z_out=m "
+                "+step +proj=vgridshift +grids=us_noaa_g2012bu0.tif "
+                "+multiplier=1 "
+                "+step +proj=cart +ellps=GRS80");
+        }
+    }
+    EXPECT_TRUE(found);
+    if (!found) {
+        for (const auto &op : list) {
+            std::cerr << op->nameStr() << std::endl;
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
