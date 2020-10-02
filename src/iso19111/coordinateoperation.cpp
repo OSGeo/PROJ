@@ -608,6 +608,7 @@ struct CoordinateOperation::Private {
           interpolationCRS_(other.interpolationCRS_),
           sourceCoordinateEpoch_(other.sourceCoordinateEpoch_),
           targetCoordinateEpoch_(other.targetCoordinateEpoch_),
+          hasBallparkTransformation_(other.hasBallparkTransformation_),
           strongRef_(other.strongRef_ ? internal::make_unique<CRSStrongRef>(
                                             *(other.strongRef_))
                                       : nullptr) {}
