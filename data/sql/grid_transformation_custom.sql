@@ -85,7 +85,7 @@ INSERT INTO "grid_transformation" VALUES(
     'EPSG','8666','Geoid (height correction) model file','Icegeoid_ISN2016.gtx',
     NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
--- Norway Iceland
+-- Norway
 	
  INSERT INTO "grid_transformation" VALUES(
     'PROJ','EPSG_5776_TO_EPSG_5941','ETRS89 to NN2000 height',
