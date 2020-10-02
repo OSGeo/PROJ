@@ -11039,7 +11039,7 @@ struct CoordinateOperationFactory::Private {
                      const crs::CRSNNPtr &targetCRS, Context &context);
 
   private:
-    static constexpr bool allowEmptyIntersection = true;
+    static constexpr bool disallowEmptyIntersection = true;
 
     static void
     buildCRSIds(const crs::CRSNNPtr &crs, Private::Context &context,
@@ -12554,7 +12554,8 @@ createGeodToGeodPROJBased(const crs::CRSNNPtr &geodSrc,
 static CoordinateOperationNNPtr createHorizVerticalPROJBased(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     const operation::CoordinateOperationNNPtr &horizTransform,
-    const operation::CoordinateOperationNNPtr &verticalTransform) {
+    const operation::CoordinateOperationNNPtr &verticalTransform,
+    bool checkExtent) {
 
     auto geogDst = util::nn_dynamic_pointer_cast<crs::GeographicCRS>(targetCRS);
     assert(geogDst);
@@ -12580,10 +12581,16 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
             verticalTransform->coordinateOperationAccuracies(),
             verticalTransform->hasBallparkTransformation());
     } else {
-        bool dummy = false;
+        bool emptyIntersection = false;
         auto ops = std::vector<CoordinateOperationNNPtr>{horizTransform,
                                                          verticalTransform};
-        auto extent = getExtent(ops, true, dummy);
+        auto extent = getExtent(ops, true, emptyIntersection);
+        if (checkExtent && emptyIntersection) {
+            std::string msg(
+                "empty intersection of area of validity of concatenated "
+                "operations");
+            throw InvalidOperationEmptyIntersection(msg);
+        }
         auto properties = util::PropertyMap();
         properties.set(common::IdentifiedObject::NAME_KEY,
                        computeConcatenatedName(ops));
@@ -12845,7 +12852,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
     }
 
     auto op = ConcatenatedOperation::createComputeMetadata(
-        steps, !allowEmptyIntersection);
+        steps, disallowEmptyIntersection);
     op->setHasBallparkTransformation(!sameDatum);
     res.emplace_back(op);
     return res;
@@ -13114,8 +13121,11 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
             }
             logTrace("transformation " + debugStr);
 #endif
-            res.emplace_back(ConcatenatedOperation::createComputeMetadata(
-                subOps, !allowEmptyIntersection));
+            try {
+                res.emplace_back(ConcatenatedOperation::createComputeMetadata(
+                    subOps, disallowEmptyIntersection));
+            } catch (const InvalidOperationEmptyIntersection &) {
+            }
         }
     };
 
@@ -13701,7 +13711,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
                                    context, targetOp, vertDst, tmp);
         assert(!tmp.empty());
         auto ret = ConcatenatedOperation::createComputeMetadata(
-            {op, tmp.front()}, !allowEmptyIntersection);
+            {op, tmp.front()}, disallowEmptyIntersection);
         return ret;
     };
 
@@ -13859,7 +13869,7 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
                             res.emplace_back(
                                 ConcatenatedOperation::createComputeMetadata(
                                     {opFirst, opsSecond.front()},
-                                    !allowEmptyIntersection));
+                                    disallowEmptyIntersection));
                         }
                     }
                 }
@@ -14044,7 +14054,7 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
             auto opSecond =
                 Conversion::createGeographicGeocentric(interm_crs, targetCRS);
             res.emplace_back(ConcatenatedOperation::createComputeMetadata(
-                {opFirst, opSecond}, !allowEmptyIntersection));
+                {opFirst, opSecond}, disallowEmptyIntersection));
         } else {
             // Apply previous case in reverse way
             std::vector<CoordinateOperationNNPtr> resTmp;
@@ -14110,7 +14120,7 @@ void CoordinateOperationFactory::Private::createOperationsDerivedTo(
     for (const auto &opSecond : opsSecond) {
         try {
             res.emplace_back(ConcatenatedOperation::createComputeMetadata(
-                {opFirst, opSecond}, !allowEmptyIntersection));
+                {opFirst, opSecond}, disallowEmptyIntersection));
         } catch (const InvalidOperationEmptyIntersection &) {
         }
     }
@@ -14169,7 +14179,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                         ConcatenatedOperation::createComputeMetadata(
                             {NN_NO_CHECK(opIntermediate),
                              boundSrc->transformation()},
-                            !allowEmptyIntersection));
+                            disallowEmptyIntersection));
                 } catch (const InvalidOperationEmptyIntersection &) {
                 }
             } else {
@@ -14192,7 +14202,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                     subops.emplace_back(boundSrc->transformation());
                     res.emplace_back(
                         ConcatenatedOperation::createComputeMetadata(
-                            subops, !allowEmptyIntersection));
+                            subops, disallowEmptyIntersection));
                 } catch (const InvalidOperationEmptyIntersection &) {
                 }
             }
@@ -14232,7 +14242,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                         subops.emplace_back(opLast);
                         res.emplace_back(
                             ConcatenatedOperation::createComputeMetadata(
-                                subops, !allowEmptyIntersection));
+                                subops, disallowEmptyIntersection));
                     } catch (const InvalidOperationEmptyIntersection &) {
                     }
                 }
@@ -14283,7 +14293,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                     try {
                         res.emplace_back(
                             ConcatenatedOperation::createComputeMetadata(
-                                {opFirst, transf}, !allowEmptyIntersection));
+                                {opFirst, transf}, disallowEmptyIntersection));
                     } catch (const InvalidOperationEmptyIntersection &) {
                     }
                 }
@@ -14309,7 +14319,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                     res.emplace_back(
                         ConcatenatedOperation::createComputeMetadata(
                             {opFirst, boundSrc->transformation()},
-                            !allowEmptyIntersection));
+                            disallowEmptyIntersection));
                 } catch (const InvalidOperationEmptyIntersection &) {
                 }
             }
@@ -14336,7 +14346,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                             res.emplace_back(
                                 ConcatenatedOperation::createComputeMetadata(
                                     {opFirst, opLast},
-                                    !allowEmptyIntersection));
+                                    disallowEmptyIntersection));
                         } catch (const InvalidOperationEmptyIntersection &) {
                         }
                     }
@@ -14396,7 +14406,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                         try {
                             res.emplace_back(
                                 ConcatenatedOperation::createComputeMetadata(
-                                    {op, conv}, !allowEmptyIntersection));
+                                    {op, conv}, disallowEmptyIntersection));
                         } catch (const InvalidOperationEmptyIntersection &) {
                         }
                     }
@@ -14418,7 +14428,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                                     ConcatenatedOperation::
                                         createComputeMetadata(
                                             {opFirst, opLast},
-                                            !allowEmptyIntersection));
+                                            disallowEmptyIntersection));
                             } catch (
                                 const InvalidOperationEmptyIntersection &) {
                             }
@@ -14626,7 +14636,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToBound(
                         }
                         res.emplace_back(
                             ConcatenatedOperation::createComputeMetadata(
-                                ops, !allowEmptyIntersection));
+                                ops, disallowEmptyIntersection));
                     } catch (const InvalidOperationEmptyIntersection &) {
                     }
                 }
@@ -14673,7 +14683,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToBound(
                     try {
                         res.emplace_back(
                             ConcatenatedOperation::createComputeMetadata(
-                                {opFirst, opLast}, !allowEmptyIntersection));
+                                {opFirst, opLast}, disallowEmptyIntersection));
                     } catch (const InvalidOperationEmptyIntersection &) {
                     }
                 }
@@ -14845,7 +14855,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                         res.emplace_back(
                             ConcatenatedOperation::createComputeMetadata(
                                 {opsFirst.front(), opLast},
-                                !allowEmptyIntersection));
+                                disallowEmptyIntersection));
                     } catch (const std::exception &) {
                     }
                 }
@@ -15083,7 +15093,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                     try {
                         auto op = createHorizVerticalPROJBased(
                             sourceCRS, targetCRS, horizTransform,
-                            verticalTransform);
+                            verticalTransform, disallowEmptyIntersection);
                         res.emplace_back(op);
                     } catch (const std::exception &) {
                     }
@@ -15118,9 +15128,13 @@ void CoordinateOperationFactory::Private::createOperationsToGeod(
             for (const auto &op : sourceToGeog3DOps) {
                 auto newOp = op->shallowClone();
                 setCRSs(newOp.get(), sourceCRS, intermGeog3DCRS);
-                res.emplace_back(ConcatenatedOperation::createComputeMetadata(
-                    {newOp, geog3DToTargetOps.front()},
-                    !allowEmptyIntersection));
+                try {
+                    res.emplace_back(
+                        ConcatenatedOperation::createComputeMetadata(
+                            {newOp, geog3DToTargetOps.front()},
+                            disallowEmptyIntersection));
+                } catch (const InvalidOperationEmptyIntersection &) {
+                }
             }
         }
     }
@@ -15205,7 +15219,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                                               CoordinateOperationNNPtr>{op1,
                                                                         op2,
                                                                         op3},
-                                    !allowEmptyIntersection));
+                                    disallowEmptyIntersection));
                         } catch (const std::exception &) {
                         }
                     }
@@ -15341,14 +15355,14 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                                             createComputeMetadata(
                                                 {opSrc, intermOps.front(),
                                                  opDst},
-                                                !allowEmptyIntersection));
+                                                disallowEmptyIntersection));
                                 }
                             } else {
                                 res.emplace_back(
                                     ConcatenatedOperation::
                                         createComputeMetadata(
                                             {opSrc, opDst},
-                                            !allowEmptyIntersection));
+                                            disallowEmptyIntersection));
                             }
                         }
                     }
