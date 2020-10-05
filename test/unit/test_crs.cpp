@@ -5453,26 +5453,52 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
             "+towgs84=-168,-60,320,0,0,0,0 +no_defs +type=crs");
     }
     {
-        // NTF (Paris) / Lambert zone II + NGF-IGN69 height
-        auto crs_7421 = factory->createCoordinateReferenceSystem("7421");
-        auto bound = crs_7421->createBoundCRSToWGS84IfPossible(
+        // WGS 84 + EGM2008 height
+        auto obj = createFromUserInput("EPSG:4326+3855", dbContext);
+        auto crs = nn_dynamic_pointer_cast<CRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->createBoundCRSToWGS84IfPossible(
             dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
-        EXPECT_NE(bound, crs_7421);
-        EXPECT_EQ(bound->createBoundCRSToWGS84IfPossible(
+        EXPECT_NE(res, crs);
+        EXPECT_EQ(res->createBoundCRSToWGS84IfPossible(
                       dbContext,
                       CoordinateOperationContext::IntermediateCRSUse::NEVER),
-                  bound);
-        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(bound);
-        ASSERT_TRUE(boundCRS != nullptr);
-        EXPECT_EQ(
-            boundCRS->exportToPROJString(PROJStringFormatter::create().get()),
-            "+proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 "
-            "+x_0=600000 +y_0=2200000 +ellps=clrk80ign +pm=paris "
-            "+towgs84=-168,-60,320,0,0,0,0 +units=m "
-            "+vunits=m +no_defs +type=crs");
+                  res);
+        auto compoundCRS = nn_dynamic_pointer_cast<CompoundCRS>(res);
+        ASSERT_TRUE(compoundCRS != nullptr);
+        EXPECT_EQ(compoundCRS->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=longlat +datum=WGS84 +geoidgrids=us_nga_egm08_25.tif "
+                  "+vunits=m +no_defs +type=crs");
+    }
+    {
+        // NTF (Paris) / Lambert zone II + NGF-IGN69 height
+        auto crs_7421 = factory->createCoordinateReferenceSystem("7421");
+        auto res = crs_7421->createBoundCRSToWGS84IfPossible(
+            dbContext, CoordinateOperationContext::IntermediateCRSUse::NEVER);
+        EXPECT_NE(res, crs_7421);
+        EXPECT_EQ(res->createBoundCRSToWGS84IfPossible(
+                      dbContext,
+                      CoordinateOperationContext::IntermediateCRSUse::NEVER),
+                  res);
+        auto compoundCRS = nn_dynamic_pointer_cast<CompoundCRS>(res);
+        ASSERT_TRUE(compoundCRS != nullptr);
+        EXPECT_EQ(compoundCRS->exportToPROJString(
+                      PROJStringFormatter::create().get()),
+                  "+proj=lcc +lat_1=46.8 +lat_0=46.8 +lon_0=0 +k_0=0.99987742 "
+                  "+x_0=600000 +y_0=2200000 +ellps=clrk80ign +pm=paris "
+                  "+towgs84=-168,-60,320,0,0,0,0 +units=m "
+                  "+geoidgrids=fr_ign_RAF18.tif +vunits=m +no_defs +type=crs");
     }
     {
         auto crs = createVerticalCRS();
+        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(
+                      dbContext,
+                      CoordinateOperationContext::IntermediateCRSUse::NEVER),
+                  crs);
+    }
+    {
+        auto crs = createCompoundCRS();
         EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(
                       dbContext,
                       CoordinateOperationContext::IntermediateCRSUse::NEVER),
