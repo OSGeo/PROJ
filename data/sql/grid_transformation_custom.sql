@@ -88,7 +88,7 @@ INSERT INTO "grid_transformation" VALUES(
 -- Norway
 	
  INSERT INTO "grid_transformation" VALUES(
-    'PROJ','EPSG_5776_TO_EPSG_5941','ETRS89 to NN2000 height',
+    'PROJ','EPSG_4937_TO_EPSG_5941','ETRS89 to NN2000 height',
     NULL,NULL,
     'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',
     'EPSG','4937', -- source CRS (ETRS89 geographic 3D)
