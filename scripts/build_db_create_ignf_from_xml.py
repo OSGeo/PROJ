@@ -144,7 +144,7 @@ def ingest_datums(root, all_sql, mapEllpsId, mapPmId):
                 ellpsCode = extract_id_from_href(node.find('usesEllipsoid').attrib['href'])
                 assert ellpsCode in mapEllpsId
 
-                sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s',NULL,'%s','%s','%s','%s',NULL,0);""" % (id, names[0], mapEllpsId[ellpsCode][0], mapEllpsId[ellpsCode][1], mapPmId[pmCode][0], mapPmId[pmCode][1])
+                sql = """INSERT INTO "geodetic_datum" VALUES('IGNF','%s','%s',NULL,'%s','%s','%s','%s',NULL,NULL,0);""" % (id, names[0], mapEllpsId[ellpsCode][0], mapEllpsId[ellpsCode][1], mapPmId[pmCode][0], mapPmId[pmCode][1])
                 all_sql.append(sql)
 
                 mapDatumId[id] = ('IGNF', id)

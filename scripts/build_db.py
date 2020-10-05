@@ -167,7 +167,7 @@ def fill_geodetic_datum(proj_db_cursor):
     for (datum_code, datum_name, ellipsoid_code, prime_meridian_code, publication_date, frame_reference_epoch, deprecated) in res:
         publication_date = compute_publication_date(datum_code, datum_name, frame_reference_epoch, publication_date)
         proj_db_cursor.execute(
-        "INSERT INTO geodetic_datum VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, EPSG_AUTHORITY, ellipsoid_code, EPSG_AUTHORITY, prime_meridian_code, publication_date, deprecated))
+        "INSERT INTO geodetic_datum VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, EPSG_AUTHORITY, ellipsoid_code, EPSG_AUTHORITY, prime_meridian_code, publication_date, frame_reference_epoch, deprecated))
 
 
 def fill_vertical_datum(proj_db_cursor):

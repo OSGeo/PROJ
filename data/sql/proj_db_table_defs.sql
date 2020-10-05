@@ -145,6 +145,7 @@ CREATE TABLE geodetic_datum (
     prime_meridian_auth_name TEXT NOT NULL,
     prime_meridian_code TEXT NOT NULL,
     publication_date TEXT, --- YYYY-MM-DD format
+    frame_reference_epoch FLOAT, --- only set for dynamic datum, and should be set when it is a dynamic datum
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_datum_ellipsoid FOREIGN KEY (ellipsoid_auth_name, ellipsoid_code) REFERENCES ellipsoid(auth_name, code),
