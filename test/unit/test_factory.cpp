@@ -246,6 +246,8 @@ TEST(factory, AuthorityFactory_createGeodeticDatum) {
     EXPECT_THROW(factory->createGeodeticDatum("-1"),
                  NoSuchAuthorityCodeException);
     auto grf = factory->createGeodeticDatum("6326");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(grf) ==
+                nullptr);
     ASSERT_EQ(grf->identifiers().size(), 1U);
     EXPECT_EQ(grf->identifiers()[0]->code(), "6326");
     EXPECT_EQ(*(grf->identifiers()[0]->codeSpace()), "EPSG");
@@ -266,10 +268,22 @@ TEST(factory, AuthorityFactory_createGeodeticDatum) {
 
 TEST(factory, AuthorityFactory_createGeodeticDatum_with_publication_date) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
-    //'World Geodetic System 1984 (G1762)
-    auto grf = factory->createGeodeticDatum("1156");
+    // North American Datum 1983
+    auto grf = factory->createGeodeticDatum("6269");
+    EXPECT_TRUE(nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(grf) ==
+                nullptr);
     EXPECT_TRUE(grf->publicationDate().has_value());
-    EXPECT_EQ(grf->publicationDate()->toString(), "2005-01-01");
+    EXPECT_EQ(grf->publicationDate()->toString(), "1986-01-01");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createDynamicGeodeticDatum) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto grf = factory->createGeodeticDatum("1165"); // ITRF 2014
+    auto dgrf = nn_dynamic_pointer_cast<DynamicGeodeticReferenceFrame>(grf);
+    ASSERT_TRUE(dgrf != nullptr);
+    EXPECT_EQ(dgrf->frameReferenceEpoch().value(), 2010.0);
 }
 
 // ---------------------------------------------------------------------------
@@ -747,6 +761,8 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
         "    VERSION[\"GA-Aus 2010\"],\n"
         "    SOURCECRS[\n"
         "        GEODCRS[\"ITRF2008\",\n"
+        "            DYNAMIC[\n"
+        "                FRAMEEPOCH[2005]],\n"
         "            DATUM[\"International Terrestrial Reference Frame "
         "2008\",\n"
         "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"

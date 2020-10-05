@@ -2011,7 +2011,8 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
     auto res =
         d->runWithCodeParam("SELECT name, ellipsoid_auth_name, ellipsoid_code, "
                             "prime_meridian_auth_name, prime_meridian_code, "
-                            "publication_date, deprecated FROM geodetic_datum "
+                            "publication_date, frame_reference_epoch, "
+                            "deprecated FROM geodetic_datum "
                             "WHERE "
                             "auth_name = ? AND code = ?",
                             code);
@@ -2027,7 +2028,8 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
         const auto &prime_meridian_auth_name = row[3];
         const auto &prime_meridian_code = row[4];
         const auto &publication_date = row[5];
-        const bool deprecated = row[6] == "1";
+        const auto &frame_reference_epoch = row[6];
+        const bool deprecated = row[7] == "1";
         auto ellipsoid = d->createFactory(ellipsoid_auth_name)
                              ->createEllipsoid(ellipsoid_code);
         auto pm = d->createFactory(prime_meridian_auth_name)
@@ -2039,7 +2041,15 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
             props.set("PUBLICATION_DATE", publication_date);
         }
         auto datum =
-            datum::GeodeticReferenceFrame::create(props, ellipsoid, anchor, pm);
+            frame_reference_epoch.empty()
+                ? datum::GeodeticReferenceFrame::create(props, ellipsoid,
+                                                        anchor, pm)
+                : util::nn_static_pointer_cast<datum::GeodeticReferenceFrame>(
+                      datum::DynamicGeodeticReferenceFrame::create(
+                          props, ellipsoid, anchor, pm,
+                          common::Measure(c_locale_stod(frame_reference_epoch),
+                                          common::UnitOfMeasure::YEAR),
+                          util::optional<std::string>()));
         d->context()->d->cache(cacheKey, datum);
         return datum;
     } catch (const std::exception &ex) {
