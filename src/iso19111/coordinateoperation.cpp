@@ -8702,15 +8702,6 @@ _getHeightToGeographic3DFilename(const Transformation *op, bool allowInverse) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-const std::string &Transformation::getHeightToGeographic3DFilename() const {
-
-    return _getHeightToGeographic3DFilename(this, false);
-}
-//! @endcond
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
 static bool
 isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
                                      bool allowInverse) {
@@ -8759,6 +8750,27 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
         }
     }
     return false;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+const std::string &Transformation::getHeightToGeographic3DFilename() const {
+
+    const std::string &ret = _getHeightToGeographic3DFilename(this, false);
+    if (!ret.empty())
+        return ret;
+    if (isGeographic3DToGravityRelatedHeight(method(), false)) {
+        const auto &fileParameter =
+            parameterValue(EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME,
+                           EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            return fileParameter->valueFile();
+        }
+    }
+    return nullString;
 }
 //! @endcond
 
