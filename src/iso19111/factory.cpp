@@ -1432,7 +1432,7 @@ util::PropertyMap AuthorityFactory::Private::createPropertiesSearchUsages(
     const std::string &name, bool deprecated) {
 
     const std::string sql(
-        "SELECT extent.name, extent.description, extent.south_lat, "
+        "SELECT extent.description, extent.south_lat, "
         "extent.north_lat, extent.west_lon, extent.east_lon, "
         "scope.scope, "
         "(CASE WHEN scope.scope LIKE '%large scale%' THEN 0 ELSE 1 END) "
@@ -1450,8 +1450,7 @@ util::PropertyMap AuthorityFactory::Private::createPropertiesSearchUsages(
     for (const auto &row : res) {
         try {
             size_t idx = 0;
-            const auto &extent_name = row[idx++];
-            idx++; /*const auto &extent_description = row[idx++];*/
+            const auto &extent_description = row[idx++];
             const auto &south_lat_str = row[idx++];
             const auto &north_lat_str = row[idx++];
             const auto &west_lon_str = row[idx++];
@@ -1465,10 +1464,10 @@ util::PropertyMap AuthorityFactory::Private::createPropertiesSearchUsages(
 
             metadata::ExtentPtr extent;
             if (south_lat_str.empty()) {
-                extent =
-                    metadata::Extent::create(
-                        util::optional<std::string>(extent_name), {}, {}, {})
-                        .as_nullable();
+                extent = metadata::Extent::create(
+                             util::optional<std::string>(extent_description),
+                             {}, {}, {})
+                             .as_nullable();
             } else {
                 double south_lat = c_locale_stod(south_lat_str);
                 double north_lat = c_locale_stod(north_lat_str);
@@ -1477,7 +1476,7 @@ util::PropertyMap AuthorityFactory::Private::createPropertiesSearchUsages(
                 auto bbox = metadata::GeographicBoundingBox::create(
                     west_lon, south_lat, east_lon, north_lat);
                 extent = metadata::Extent::create(
-                             util::optional<std::string>(extent_name),
+                             util::optional<std::string>(extent_description),
                              std::vector<metadata::GeographicExtentNNPtr>{bbox},
                              std::vector<metadata::VerticalExtentNNPtr>(),
                              std::vector<metadata::TemporalExtentNNPtr>())
@@ -1706,7 +1705,7 @@ AuthorityFactory::createExtent(const std::string &code) const {
             return NN_NO_CHECK(extent);
         }
     }
-    auto sql = "SELECT name, south_lat, north_lat, west_lon, east_lon, "
+    auto sql = "SELECT description, south_lat, north_lat, west_lon, east_lon, "
                "deprecated FROM extent WHERE auth_name = ? AND code = ?";
     auto res = d->runWithCodeParam(sql, code);
     if (res.empty()) {
@@ -1715,10 +1714,10 @@ AuthorityFactory::createExtent(const std::string &code) const {
     }
     try {
         const auto &row = res.front();
-        const auto &name = row[0];
+        const auto &description = row[0];
         if (row[1].empty()) {
             auto extent = metadata::Extent::create(
-                util::optional<std::string>(name), {}, {}, {});
+                util::optional<std::string>(description), {}, {}, {});
             d->context()->d->cache(cacheKey, extent);
             return extent;
         }
@@ -1730,7 +1729,7 @@ AuthorityFactory::createExtent(const std::string &code) const {
             west_lon, south_lat, east_lon, north_lat);
 
         auto extent = metadata::Extent::create(
-            util::optional<std::string>(name),
+            util::optional<std::string>(description),
             std::vector<metadata::GeographicExtentNNPtr>{bbox},
             std::vector<metadata::VerticalExtentNNPtr>(),
             std::vector<metadata::TemporalExtentNNPtr>());

@@ -1233,7 +1233,7 @@ std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
                         &west_lon, &south_lat, &east_lon, &north_lat, &areaName) )
             {
                 const bool isOffshore =
-                    areaName && strstr(areaName, "offshore");
+                    areaName && strstr(areaName, "- offshore");
                 if( west_lon <= east_lon )
                 {
                     op = add_coord_op_to_list(i, op,

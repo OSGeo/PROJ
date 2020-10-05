@@ -1929,7 +1929,7 @@ TEST_F(CApi, proj_get_area_of_use) {
         EXPECT_EQ(e, 180);
         EXPECT_EQ(n, 90);
         ASSERT_TRUE(name != nullptr);
-        EXPECT_EQ(std::string(name), "World");
+        EXPECT_EQ(std::string(name), "World.");
     }
     {
         auto obj = proj_create(m_ctxt, "+proj=longlat +type=crs");

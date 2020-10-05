@@ -218,7 +218,7 @@ TEST(factory, AuthorityFactory_createExtent) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createExtent("-1"), NoSuchAuthorityCodeException);
     auto extent = factory->createExtent("1262");
-    EXPECT_EQ(*(extent->description()), "World");
+    EXPECT_EQ(*(extent->description()), "World.");
     const auto &geogElts = extent->geographicElements();
     ASSERT_EQ(geogElts.size(), 1U);
     auto bbox = nn_dynamic_pointer_cast<GeographicBoundingBox>(geogElts[0]);
@@ -234,7 +234,7 @@ TEST(factory, AuthorityFactory_createExtent) {
 TEST(factory, AuthorityFactory_createExtent_no_bbox) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto extent = factory->createExtent("1361"); // Sudan - south. Deprecated
-    EXPECT_EQ(*(extent->description()), "Sudan - south");
+    EXPECT_EQ(*(extent->description()), "Sudan - south.");
     const auto &geogElts = extent->geographicElements();
     EXPECT_TRUE(geogElts.empty());
 }
@@ -852,7 +852,9 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_helmert_15_CF) {
         "    OPERATIONACCURACY[0.03],\n"
         "    USAGE[\n"
         "        SCOPE[\"Geodesy.\"],\n"
-        "        AREA[\"Australia - onshore and EEZ\"],\n"
+        "        AREA[\"Australia - onshore and offshore to 200 nautical mile "
+        "EEZ boundary. Includes Lord Howe Island, Ashmore and Cartier "
+        "Islands.\"],\n"
         "        BBOX[-47.2,109.23,-8.88,163.2]],\n"
         "    ID[\"EPSG\",6276],\n"
         "    REMARK[\"RMS residuals 5mm north, 8mm east and 28mm vertical, "
@@ -960,7 +962,7 @@ TEST(
         "    OPERATIONACCURACY[0.05],\n"
         "    USAGE[\n"
         "        SCOPE[\"Geodesy.\"],\n"
-        "        AREA[\"New Caledonia - Grande Terre - Noumea\"],\n"
+        "        AREA[\"New Caledonia - Grande Terre - Noumea district.\"],\n"
         "        BBOX[-22.37,166.35,-22.19,166.54]],\n"
         "    ID[\"EPSG\",1295],\n"
         "    REMARK[\"Emulation using NTv2 method of tfm NEA74 Noumea to "
@@ -1036,7 +1038,7 @@ TEST(factory, AuthorityFactory_createCoordinateOperation_other_transformation) {
         "    OPERATIONACCURACY[0.0],\n"
         "    USAGE[\n"
         "        SCOPE[\"Change of prime meridian.\"],\n"
-        "        AREA[\"Europe - Czechoslovakia\"],\n"
+        "        AREA[\"Czechia; Slovakia.\"],\n"
         "        BBOX[47.73,12.09,51.06,22.56]],\n"
         "    ID[\"EPSG\",1884]]";
 
