@@ -671,7 +671,7 @@ def fill_concatenated_operation(proj_db_cursor):
 
 
 def fill_alias(proj_db_cursor):
-    proj_db_cursor.execute("SELECT object_code, alias FROM epsg.epsg_alias WHERE object_table_name = 'epsg_datum'")
+    proj_db_cursor.execute("SELECT DISTINCT object_code, alias FROM epsg.epsg_alias WHERE object_table_name = 'epsg_datum'")
     for row in proj_db_cursor.fetchall():
         code, alt_name = row
         proj_db_cursor.execute('SELECT 1 FROM geodetic_datum WHERE code = ?', (code,))
@@ -684,7 +684,7 @@ def fill_alias(proj_db_cursor):
             else:
                 print('Cannot find datum %s in geodetic_datum or vertical_datum' % (code))
 
-    proj_db_cursor.execute("SELECT object_code, alias FROM epsg.epsg_alias WHERE object_table_name = 'epsg_coordinatereferencesystem'")
+    proj_db_cursor.execute("SELECT DISTINCT object_code, alias FROM epsg.epsg_alias WHERE object_table_name = 'epsg_coordinatereferencesystem'")
     for row in proj_db_cursor.fetchall():
         code, alt_name = row
         if int(code) > 60000000:

@@ -5072,7 +5072,6 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8360','ETRS89 [ETRF2000] 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4417','Pulkovo 42(83) / 3GK zn7','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8357','Bpv','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4434','Pulkovo 42(83) / 3GK zn8','EPSG');
-INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8360','ETRS89 [ETRF2000] + Bpv','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8351','S-JTSK (JTSK03)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8352','S-JTSK (JTSK03) / Krovak','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8357','SK_KRON / NH','EPSG');
