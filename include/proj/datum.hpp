@@ -147,7 +147,10 @@ class PROJ_GCC_DLL DatumEnsemble final : public common::ObjectUsage,
 
     PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(io::FormattingException)
-                        //! @endcond
+
+    PROJ_FOR_TEST DatumNNPtr
+    asDatum(const io::DatabaseContextPtr &dbContext) const;
+    //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED

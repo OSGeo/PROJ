@@ -1613,16 +1613,83 @@ DatumEnsemble::positionalAccuracy() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+DatumNNPtr
+DatumEnsemble::asDatum(const io::DatabaseContextPtr &dbContext) const {
+
+    const auto &l_datums = datums();
+    auto *grf = dynamic_cast<const GeodeticReferenceFrame *>(l_datums[0].get());
+
+    const auto &l_identifiers = identifiers();
+    if (dbContext) {
+        if (!l_identifiers.empty()) {
+            const auto &id = l_identifiers[0];
+            try {
+                auto factory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), *(id->codeSpace()));
+                if (grf) {
+                    return factory->createGeodeticDatum(id->code());
+                } else {
+                    return factory->createVerticalDatum(id->code());
+                }
+            } catch (const std::exception &) {
+            }
+        }
+    }
+
+    std::string l_name(nameStr());
+    if (grf) {
+        // Remap to traditional datum names
+        if (l_name == "World Geodetic System 1984 ensemble") {
+            l_name = "World Geodetic System 1984";
+        } else if (l_name ==
+                   "European Terrestrial Reference System 1989 ensemble") {
+            l_name = "European Terrestrial Reference System 1989";
+        }
+    }
+    auto props =
+        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, l_name);
+    if (isDeprecated()) {
+        props.set(common::IdentifiedObject::DEPRECATED_KEY, true);
+    }
+    if (!l_identifiers.empty()) {
+        const auto &id = l_identifiers[0];
+        props.set(metadata::Identifier::CODESPACE_KEY, *(id->codeSpace()))
+            .set(metadata::Identifier::CODE_KEY, id->code());
+    }
+    const auto &l_usages = domains();
+    if (!l_usages.empty()) {
+
+        auto array(util::ArrayOfBaseObject::create());
+        for (const auto &usage : l_usages) {
+            array->add(usage);
+        }
+        props.set(common::ObjectUsage::OBJECT_DOMAIN_KEY,
+                  util::nn_static_pointer_cast<util::BaseObject>(array));
+    }
+    const auto anchor = util::optional<std::string>();
+
+    if (grf) {
+        return GeodeticReferenceFrame::create(props, grf->ellipsoid(), anchor,
+                                              grf->primeMeridian());
+    } else {
+        assert(dynamic_cast<VerticalReferenceFrame *>(l_datums[0].get()));
+        return datum::VerticalReferenceFrame::create(props, anchor);
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 void DatumEnsemble::_exportToWKT(
     io::WKTFormatter *formatter) const // throw(FormattingException)
 {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2 || !formatter->use2019Keywords()) {
-        throw io::FormattingException(
-            "DatumEnsemble can only be exported to WKT2:2019");
+        return asDatum(formatter->databaseContext())->_exportToWKT(formatter);
     }
 
-    auto l_datums = datums();
+    const auto &l_datums = datums();
     assert(!l_datums.empty());
 
     formatter->startNode(io::WKTConstants::ENSEMBLE, false);
@@ -1679,7 +1746,7 @@ void DatumEnsemble::_exportToJSON(
         writer->Add(l_name);
     }
 
-    auto l_datums = datums();
+    const auto &l_datums = datums();
     writer->AddObjKey("members");
     {
         auto membersContext(writer->MakeArrayContext(false));

@@ -334,6 +334,24 @@ TEST(factory, AuthorityFactory_createDatumEnsembleGeodetic) {
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
     EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
+
+    {
+        // Without using db
+        auto datum = ensemble->asDatum(nullptr);
+        EXPECT_EQ(datum->nameStr(), "World Geodetic System 1984");
+        auto grf = dynamic_cast<GeodeticReferenceFrame *>(datum.get());
+        ASSERT_TRUE(grf != nullptr);
+        EXPECT_TRUE(grf->isEquivalentTo(factory->createDatum("6326").get()));
+    }
+
+    {
+        // Using db
+        auto datum = ensemble->asDatum(DatabaseContext::create());
+        EXPECT_EQ(datum->nameStr(), "World Geodetic System 1984");
+        auto grf = dynamic_cast<GeodeticReferenceFrame *>(datum.get());
+        ASSERT_TRUE(grf != nullptr);
+        EXPECT_TRUE(grf->isEquivalentTo(factory->createDatum("6326").get()));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -354,6 +372,22 @@ TEST(factory, AuthorityFactory_createDatumEnsembleVertical) {
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
     EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("4606").get()));
+
+    {
+        // Without using db
+        auto datum = ensemble->asDatum(nullptr);
+        auto vrf = dynamic_cast<VerticalReferenceFrame *>(datum.get());
+        ASSERT_TRUE(vrf != nullptr);
+        EXPECT_TRUE(vrf->isEquivalentTo(factory->createDatum("1288").get()));
+    }
+
+    {
+        // Using db
+        auto datum = ensemble->asDatum(DatabaseContext::create());
+        auto vrf = dynamic_cast<VerticalReferenceFrame *>(datum.get());
+        ASSERT_TRUE(vrf != nullptr);
+        EXPECT_TRUE(vrf->isEquivalentTo(factory->createDatum("1288").get()));
+    }
 }
 
 // ---------------------------------------------------------------------------

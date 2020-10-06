@@ -234,6 +234,7 @@ osgeo::proj::cs::VerticalCS::~VerticalCS()
 osgeo::proj::datum::Datum::anchorDefinition() const
 osgeo::proj::datum::Datum::conventionalRS() const
 osgeo::proj::datum::Datum::~Datum()
+osgeo::proj::datum::DatumEnsemble::asDatum(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::datum::DatumEnsemble::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Datum> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Datum> > > > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > const&)
 osgeo::proj::datum::DatumEnsemble::~DatumEnsemble()
 osgeo::proj::datum::DatumEnsemble::datums() const
