@@ -1456,7 +1456,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_datum "
                     "VALUES('EPSG','6326','World Geodetic System 1984','',"
-                    "'EPSG','7030','EPSG','8901',NULL,NULL,0);"))
+                    "'EPSG','7030','EPSG','8901',NULL,NULL,NULL,0);"))
             << last_error();
         ASSERT_TRUE(execute("INSERT INTO usage VALUES('EPSG',"
                             "'geodetic_datum_6326_usage','geodetic_datum',"
@@ -1464,7 +1464,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO vertical_datum VALUES('EPSG','1027','EGM2008 "
-                    "geoid',NULL,NULL,0);"))
+                    "geoid',NULL,NULL,NULL,0);"))
             << last_error();
         ASSERT_TRUE(execute("INSERT INTO usage VALUES('EPSG',"
                             "'vertical_datum_1027_usage','vertical_datum',"
@@ -1663,7 +1663,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                                 "VALUES('FOO','" +
                                 val + "','" + val +
                                 "','',"
-                                "'EPSG','7030','EPSG','8901',NULL,NULL,0);"))
+                                "'EPSG','7030','EPSG','8901',"
+                                "NULL,NULL,NULL,0);"))
                 << last_error();
             ASSERT_TRUE(execute("INSERT INTO usage VALUES('FOO',"
                                 "'geodetic_datum_" +

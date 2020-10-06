@@ -44,6 +44,20 @@ FOR EACH ROW BEGIN
             AND NOT (o.auth_name = 'IGNF' AND o.table_name IN ('geodetic_datum', 'vertical_datum', 'conversion'))
         );
 
+    SELECT RAISE(ABORT, 'Geodetic datum ensemble defined, but no ensemble member')
+        WHERE EXISTS (
+            SELECT * FROM geodetic_datum d WHERE ensemble_accuracy IS NOT NULL
+            AND NOT EXISTS (SELECT 1 FROM geodetic_datum_ensemble_member WHERE
+                d.auth_name = ensemble_auth_name AND d.code = ensemble_code)
+        );
+
+    SELECT RAISE(ABORT, 'Vertical datum ensemble defined, but no ensemble member')
+        WHERE EXISTS (
+            SELECT * FROM vertical_datum d WHERE ensemble_accuracy IS NOT NULL
+            AND NOT EXISTS (SELECT 1 FROM vertical_datum_ensemble_member WHERE
+                d.auth_name = ensemble_auth_name AND d.code = ensemble_code)
+        );
+
     -- test to check that our custom grid transformation overrides are really needed
     SELECT RAISE(ABORT, 'PROJ grid_transformation defined whereas EPSG has one')
         WHERE EXISTS (SELECT 1 FROM grid_transformation g1

@@ -19,7 +19,9 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/ellipsoid.sql \
 		sql/prime_meridian.sql \
 		sql/geodetic_datum.sql \
+		sql/geodetic_datum_ensemble_member.sql \
 		sql/vertical_datum.sql \
+		sql/vertical_datum_ensemble_member.sql \
 		sql/conversion.sql \
 		sql/geodetic_crs.sql \
 		sql/projected_crs.sql \

@@ -146,6 +146,7 @@ CREATE TABLE geodetic_datum (
     prime_meridian_code TEXT NOT NULL,
     publication_date TEXT, --- YYYY-MM-DD format
     frame_reference_epoch FLOAT, --- only set for dynamic datum, and should be set when it is a dynamic datum
+    ensemble_accuracy FLOAT CHECK (ensemble_accuracy IS NULL OR ensemble_accuracy > 0), --- only for a datum ensemble. and should be set when it is a datum ensemble
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_datum_ellipsoid FOREIGN KEY (ellipsoid_auth_name, ellipsoid_code) REFERENCES ellipsoid(auth_name, code),
@@ -159,7 +160,20 @@ FOR EACH ROW BEGIN
         WHERE EXISTS(SELECT 1 FROM ellipsoid WHERE ellipsoid.auth_name = NEW.ellipsoid_auth_name AND ellipsoid.code = NEW.ellipsoid_code AND ellipsoid.deprecated != 0) AND NEW.deprecated = 0;
     SELECT RAISE(ABORT, 'insert on geodetic_datum violates constraint: prime_meridian must not be deprecated when geodetic_datum is not deprecated')
         WHERE EXISTS(SELECT 1 FROM prime_meridian WHERE prime_meridian.auth_name = NEW.prime_meridian_auth_name AND prime_meridian.code = NEW.prime_meridian_code AND prime_meridian.deprecated != 0) AND NEW.deprecated = 0;
+    SELECT RAISE(ABORT, 'frame_reference_epoch and ensemble_accuracy are mutually exclusive')
+        WHERE NEW.frame_reference_epoch IS NOT NULL AND NEW.ensemble_accuracy IS NOT NULL;
 END;
+
+CREATE TABLE geodetic_datum_ensemble_member (
+    ensemble_auth_name TEXT NOT NULL,
+    ensemble_code TEXT NOT NULL,
+    member_auth_name TEXT NOT NULL,
+    member_code TEXT NOT NULL,
+    sequence INTEGER NOT NULL CHECK (sequence >= 1),
+    CONSTRAINT fk_geodetic_datum_ensemble_member_ensemble FOREIGN KEY (ensemble_auth_name, ensemble_code) REFERENCES geodetic_datum(auth_name, code),
+    CONSTRAINT fk_geodetic_datum_ensemble_member_ensemble_member FOREIGN KEY (member_auth_name, member_code) REFERENCES geodetic_datum(auth_name, code),
+    CONSTRAINT unique_geodetic_datum_ensemble_member UNIQUE (ensemble_auth_name, ensemble_code, sequence)
+);
 
 CREATE TABLE vertical_datum (
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -167,8 +181,20 @@ CREATE TABLE vertical_datum (
     name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
     publication_date TEXT CHECK (NULL OR length(publication_date) = 10), --- YYYY-MM-DD format
+    ensemble_accuracy FLOAT CHECK (ensemble_accuracy IS NULL OR ensemble_accuracy > 0), --- only for a datum ensemble. and should be set when it is a datum ensemble
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code)
+);
+
+CREATE TABLE vertical_datum_ensemble_member (
+    ensemble_auth_name TEXT NOT NULL,
+    ensemble_code TEXT NOT NULL,
+    member_auth_name TEXT NOT NULL,
+    member_code TEXT NOT NULL,
+    sequence INTEGER NOT NULL CHECK (sequence >= 1),
+    CONSTRAINT fk_vertical_datum_ensemble_member_ensemble FOREIGN KEY (ensemble_auth_name, ensemble_code) REFERENCES vertical_datum(auth_name, code),
+    CONSTRAINT fk_vertical_datum_ensemble_member_ensemble_member FOREIGN KEY (member_auth_name, member_code) REFERENCES vertical_datum(auth_name, code),
+    CONSTRAINT unique_vertical_datum_ensemble_member UNIQUE (ensemble_auth_name, ensemble_code, sequence)
 );
 
 CREATE TABLE coordinate_system(
@@ -1422,9 +1448,9 @@ CREATE VIEW object_view AS
     UNION ALL
     SELECT 'prime_meridian', auth_name, code, name, NULL, deprecated FROM prime_meridian
     UNION ALL
-    SELECT 'geodetic_datum', auth_name, code, name, NULL, deprecated FROM geodetic_datum
+    SELECT 'geodetic_datum', auth_name, code, name, CASE WHEN ensemble_accuracy IS NOT NULL THEN "ensemble" ELSE "datum" END, deprecated FROM geodetic_datum
     UNION ALL
-    SELECT 'vertical_datum', auth_name, code, name, NULL, deprecated FROM vertical_datum
+    SELECT 'vertical_datum', auth_name, code, name, CASE WHEN ensemble_accuracy IS NOT NULL THEN "ensemble" ELSE "datum" END, deprecated FROM vertical_datum
     UNION ALL
     SELECT 'axis', auth_name, code, name, NULL, 0 as deprecated FROM axis
     UNION ALL
