@@ -274,7 +274,6 @@ osgeo::proj::datum::PrimeMeridian::create(osgeo::proj::util::PropertyMap const&,
 osgeo::proj::datum::PrimeMeridian::longitude() const
 osgeo::proj::datum::PrimeMeridian::~PrimeMeridian()
 osgeo::proj::datum::RealizationMethod::operator=(osgeo::proj::datum::RealizationMethod const&)
-osgeo::proj::datum::RealizationMethod::RealizationMethod(osgeo::proj::datum::RealizationMethod const&)
 osgeo::proj::datum::RealizationMethod::RealizationMethod(std::string const&)
 osgeo::proj::datum::TemporalDatum::calendar() const
 osgeo::proj::datum::TemporalDatum::create(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::DateTime const&, std::string const&)
@@ -346,8 +345,10 @@ osgeo::proj::io::AuthorityFactory::getAuthority() const
 osgeo::proj::io::AuthorityFactory::getCRSInfoList() const
 osgeo::proj::io::AuthorityFactory::getDescriptionText(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getOfficialNameFromAlias(std::string const&, std::string const&, std::string const&, bool, std::string&, std::string&, std::string&) const
+osgeo::proj::io::AuthorityFactory::getUnitList() const
 osgeo::proj::io::AuthorityFactory::identifyBodyFromSemiMajorAxis(double, double) const
 osgeo::proj::io::AuthorityFactory::listAreaOfUseFromName(std::string const&, bool) const
+osgeo::proj::io::AuthorityFactory::UnitInfo::UnitInfo()
 osgeo::proj::io::createFromUserInput(std::string const&, projCtx_t*)
 osgeo::proj::io::createFromUserInput(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool)
 osgeo::proj::io::DatabaseContext::create(std::string const&, std::vector<std::string, std::allocator<std::string> > const&, projCtx_t*)
@@ -576,6 +577,7 @@ osgeo::proj::operation::Conversion::inverse() const
 osgeo::proj::operation::Conversion::isUTM(int&, bool&) const
 osgeo::proj::operation::CoordinateOperationContext::~CoordinateOperationContext()
 osgeo::proj::operation::CoordinateOperationContext::create(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&, std::shared_ptr<osgeo::proj::metadata::Extent> const&, double)
+osgeo::proj::operation::CoordinateOperationContext::getAllowBallparkTransformations() const
 osgeo::proj::operation::CoordinateOperationContext::getAllowUseIntermediateCRS() const
 osgeo::proj::operation::CoordinateOperationContext::getAreaOfInterest() const
 osgeo::proj::operation::CoordinateOperationContext::getAuthorityFactory() const
@@ -586,6 +588,7 @@ osgeo::proj::operation::CoordinateOperationContext::getIntermediateCRS() const
 osgeo::proj::operation::CoordinateOperationContext::getSourceAndTargetCRSExtentUse() const
 osgeo::proj::operation::CoordinateOperationContext::getSpatialCriterion() const
 osgeo::proj::operation::CoordinateOperationContext::getUsePROJAlternativeGridNames() const
+osgeo::proj::operation::CoordinateOperationContext::setAllowBallparkTransformations(bool)
 osgeo::proj::operation::CoordinateOperationContext::setAllowUseIntermediateCRS(osgeo::proj::operation::CoordinateOperationContext::IntermediateCRSUse)
 osgeo::proj::operation::CoordinateOperationContext::setAreaOfInterest(std::shared_ptr<osgeo::proj::metadata::Extent> const&)
 osgeo::proj::operation::CoordinateOperationContext::setDesiredAccuracy(double)
@@ -745,8 +748,6 @@ pj_cleanup_lock
 pj_clear_initcache
 pj_compare_datums
 pj_context_get_grid_cache_filename(projCtx_t*)
-proj_context_get_url_endpoint(projCtx_t*)
-proj_context_get_user_writable_directory(projCtx_t*, int)
 pj_context_set_user_writable_directory(projCtx_t*, std::string const&)
 pj_ctx_alloc
 pj_ctx_fclose
@@ -833,10 +834,13 @@ proj_context_destroy
 proj_context_errno
 proj_context_get_database_metadata
 proj_context_get_database_path
+proj_context_get_url_endpoint
 proj_context_get_use_proj4_init_rules
+proj_context_get_user_writable_directory
 proj_context_guess_wkt_dialect
 proj_context_is_network_enabled
 proj_context_set_autoclose_database
+proj_context_set_ca_bundle_path
 proj_context_set_database_path
 proj_context_set_enable_network
 proj_context_set_fileapi
@@ -844,7 +848,6 @@ proj_context_set_file_finder
 proj_context_set_network_callbacks
 proj_context_set(PJconsts*, projCtx_t*)
 proj_context_set_search_paths
-proj_context_set_ca_bundle_path
 proj_context_set_sqlite3_vfs_name
 proj_context_set_url_endpoint
 proj_context_use_proj4_init_rules
@@ -974,6 +977,8 @@ proj_crs_promote_to_3D
 proj_cs_get_axis_count
 proj_cs_get_axis_info
 proj_cs_get_type
+proj_degree_input
+proj_degree_output
 proj_destroy
 proj_dmstor
 proj_download_file
@@ -1000,8 +1005,10 @@ proj_get_prime_meridian
 proj_get_remarks
 proj_get_scope
 proj_get_source_crs
+proj_get_suggested_operation
 proj_get_target_crs
 proj_get_type
+proj_get_units_from_database
 proj_grid_cache_clear
 proj_grid_cache_set_enable
 proj_grid_cache_set_filename
@@ -1034,6 +1041,7 @@ proj_lp_dist
 proj_lpz_dist
 proj_normalize_for_visualization
 proj_operation_factory_context_destroy
+proj_operation_factory_context_set_allow_ballpark_transformations
 proj_operation_factory_context_set_allowed_intermediate_crs
 proj_operation_factory_context_set_allow_use_intermediate_crs
 proj_operation_factory_context_set_area_of_interest
@@ -1054,6 +1062,7 @@ proj_torad
 proj_trans
 proj_trans_array
 proj_trans_generic
+proj_unit_list_destroy
 proj_uom_get_info_from_database
 proj_xy_dist
 proj_xyz_dist
