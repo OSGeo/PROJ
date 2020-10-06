@@ -39,7 +39,7 @@ cd build_autoconf
 make
 
 if [ "$(uname)" == "Linux" -a -f src/.libs/libproj.so ]; then
-if objdump -TC "$1" | grep "elf64-x86-64">/dev/null; then
+if objdump -TC "src/.libs/libproj.so" | grep "elf64-x86-64">/dev/null; then
     echo "Checking exported symbols..."
     $TRAVIS_BUILD_DIR/scripts/dump_exported_symbols.sh src/.libs/libproj.so > /tmp/got_symbols.txt
     diff -u $TRAVIS_BUILD_DIR/scripts/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
