@@ -58,6 +58,15 @@ FOR EACH ROW BEGIN
                 d.auth_name = ensemble_auth_name AND d.code = ensemble_code)
         );
 
+    SELECT RAISE(ABORT, 'PROJ defines an alias that exists in EPSG')
+        WHERE EXISTS (
+         SELECT * FROM (
+            SELECT count(*) AS count, table_name, auth_name, code, alt_name FROM alias_name
+            WHERE source in ('EPSG', 'PROJ')
+            AND NOT (source = 'PROJ' AND alt_name IN ('GGRS87', 'NAD27', 'NAD83'))
+            GROUP BY table_name, auth_name, code, alt_name) x WHERE count > 1
+        );
+
     -- test to check that our custom grid transformation overrides are really needed
     SELECT RAISE(ABORT, 'PROJ grid_transformation defined whereas EPSG has one')
         WHERE EXISTS (SELECT 1 FROM grid_transformation g1

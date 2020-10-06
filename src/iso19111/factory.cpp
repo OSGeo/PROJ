@@ -1064,16 +1064,6 @@ std::string DatabaseContext::getOldProjGridName(const std::string &gridName) {
 
 // ---------------------------------------------------------------------------
 
-// FIXME: as we don't support datum ensemble yet, remove it from name
-static std::string addEnsembleSuffix(const std::string &name) {
-    if (name == "World Geodetic System 1984") {
-        return "World Geodetic System 1984 ensemble";
-    } else if (name == "European Terrestrial Reference System 1989") {
-        return "European Terrestrial Reference System 1989 ensemble";
-    }
-    return name;
-}
-
 // FIXME: as we don't support datum ensemble yet, add it from name
 static std::string removeEnsembleSuffix(const std::string &name) {
     if (name == "World Geodetic System 1984 ensemble") {
@@ -1104,9 +1094,15 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
     if (tableName == "geodetic_crs") {
         sql += " AND type = " GEOG_2D_SINGLE_QUOTED;
     }
-    auto res = d->run(sql, {addEnsembleSuffix(officialName)});
+    auto res = d->run(sql, {officialName});
     if (res.empty()) {
-        return std::string();
+        res = d->run(
+            "SELECT auth_name, code FROM alias_name WHERE table_name = ? AND "
+            "alt_name = ? AND source IN ('EPSG', 'PROJ')",
+            {tableName, officialName});
+        if (res.size() != 1) {
+            return std::string();
+        }
     }
     const auto &row = res.front();
     res = d->run("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
@@ -1151,10 +1147,16 @@ std::list<std::string> DatabaseContext::getAliases(
         if (tableName == "geodetic_crs") {
             sql += " AND type = " GEOG_2D_SINGLE_QUOTED;
         }
-        auto resSql = d->run(sql, {addEnsembleSuffix(officialName)});
+        auto resSql = d->run(sql, {officialName});
         if (resSql.empty()) {
-            d->cacheAliasNames_.insert(key, res);
-            return res;
+            resSql = d->run("SELECT auth_name, code FROM alias_name WHERE "
+                            "table_name = ? AND "
+                            "alt_name = ? AND source IN ('EPSG', 'PROJ')",
+                            {tableName, officialName});
+            if (resSql.size() != 1) {
+                d->cacheAliasNames_.insert(key, res);
+                return res;
+            }
         }
         const auto &row = resSql.front();
         resolvedAuthName = row[0];
@@ -5613,7 +5615,7 @@ AuthorityFactory::createObjectsFromNameEx(
     const std::string &searchedName,
     const std::vector<ObjectType> &allowedObjectTypes, bool approximateMatch,
     size_t limitResultCount) const {
-    std::string searchedNameWithoutDeprecated(addEnsembleSuffix(searchedName));
+    std::string searchedNameWithoutDeprecated(searchedName);
     bool deprecated = false;
     if (ends_with(searchedNameWithoutDeprecated, " (deprecated)")) {
         deprecated = true;
