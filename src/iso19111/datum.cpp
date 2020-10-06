@@ -1574,8 +1574,7 @@ DatumEnsemble::DatumEnsemble(const std::vector<DatumNNPtr> &datumsIn,
 
 #ifdef notdef
 DatumEnsemble::DatumEnsemble(const DatumEnsemble &other)
-    : common::IdentifiedObject(other),
-      d(internal::make_unique<Private>(*other.d)) {}
+    : common::ObjectUsage(other), d(internal::make_unique<Private>(*other.d)) {}
 #endif
 
 // ---------------------------------------------------------------------------

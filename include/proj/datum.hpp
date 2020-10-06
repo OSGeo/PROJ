@@ -125,7 +125,7 @@ using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
  *
  * \remark Implements DatumEnsemble from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL DatumEnsemble final : public common::IdentifiedObject,
+class PROJ_GCC_DLL DatumEnsemble final : public common::ObjectUsage,
                                          public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress

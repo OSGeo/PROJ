@@ -321,6 +321,7 @@ osgeo::proj::io::AuthorityFactory::createConversion(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createCoordinateOperation(std::string const&, bool) const
 osgeo::proj::io::AuthorityFactory::createCoordinateReferenceSystem(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createCoordinateSystem(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createDatumEnsemble(std::string const&, std::string const&) const
 osgeo::proj::io::AuthorityFactory::createDatum(std::string const&) const
 osgeo::proj::io::AuthorityFactory::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> > const&, std::string const&)
 osgeo::proj::io::AuthorityFactory::createEllipsoid(std::string const&) const

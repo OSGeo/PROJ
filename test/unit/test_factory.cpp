@@ -316,6 +316,48 @@ TEST(factory, AuthorityFactory_createDatum) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createDatumEnsembleGeodetic) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createDatumEnsemble("-1"),
+                 NoSuchAuthorityCodeException);
+    EXPECT_THROW(factory->createDatumEnsemble("6326", "vertical_datum"),
+                 NoSuchAuthorityCodeException);
+    auto ensemble = factory->createDatumEnsemble("6326");
+    EXPECT_EQ(ensemble->nameStr(), "World Geodetic System 1984 ensemble");
+    ASSERT_EQ(ensemble->identifiers().size(), 1U);
+    EXPECT_EQ(ensemble->identifiers()[0]->code(), "6326");
+    EXPECT_EQ(*(ensemble->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(ensemble->datums().size(), 6U);
+    EXPECT_EQ(ensemble->positionalAccuracy()->value(), "2.0");
+    ASSERT_TRUE(!ensemble->domains().empty());
+    auto domain = ensemble->domains()[0];
+    auto extent = domain->domainOfValidity();
+    ASSERT_TRUE(extent != nullptr);
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createDatumEnsembleVertical) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createDatumEnsemble("1288", "geodetic_datum"),
+                 NoSuchAuthorityCodeException);
+    auto ensemble = factory->createDatumEnsemble("1288");
+    EXPECT_EQ(ensemble->nameStr(), "British Isles height ensemble");
+    ASSERT_EQ(ensemble->identifiers().size(), 1U);
+    EXPECT_EQ(ensemble->identifiers()[0]->code(), "1288");
+    EXPECT_EQ(*(ensemble->identifiers()[0]->codeSpace()), "EPSG");
+    EXPECT_EQ(ensemble->datums().size(), 9U);
+    EXPECT_EQ(ensemble->positionalAccuracy()->value(), "0.4");
+    ASSERT_TRUE(!ensemble->domains().empty());
+    auto domain = ensemble->domains()[0];
+    auto extent = domain->domainOfValidity();
+    ASSERT_TRUE(extent != nullptr);
+    EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("4606").get()));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createCoordinateSystem_ellipsoidal_2_axis) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createCoordinateSystem("-1"),

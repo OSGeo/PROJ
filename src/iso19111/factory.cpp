@@ -1604,9 +1604,9 @@ AuthorityFactory::CRSInfo::CRSInfo()
 util::BaseObjectNNPtr
 AuthorityFactory::createObject(const std::string &code) const {
 
-    auto res = d->runWithCodeParam(
-        "SELECT table_name FROM object_view WHERE auth_name = ? AND code = ?",
-        code);
+    auto res = d->runWithCodeParam("SELECT table_name, type FROM object_view "
+                                   "WHERE auth_name = ? AND code = ?",
+                                   code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("not found", d->authority(), code);
     }
@@ -1622,7 +1622,9 @@ AuthorityFactory::createObject(const std::string &code) const {
         }
         throw FactoryException(msg);
     }
-    const auto &table_name = res.front()[0];
+    const auto &first_row = res.front();
+    const auto &table_name = first_row[0];
+    const auto &type = first_row[1];
     if (table_name == "extent") {
         return util::nn_static_pointer_cast<util::BaseObject>(
             createExtent(code));
@@ -1640,10 +1642,18 @@ AuthorityFactory::createObject(const std::string &code) const {
             createEllipsoid(code));
     }
     if (table_name == "geodetic_datum") {
+        if (type == "ensemble") {
+            return util::nn_static_pointer_cast<util::BaseObject>(
+                createDatumEnsemble(code, table_name));
+        }
         return util::nn_static_pointer_cast<util::BaseObject>(
             createGeodeticDatum(code));
     }
     if (table_name == "vertical_datum") {
+        if (type == "ensemble") {
+            return util::nn_static_pointer_cast<util::BaseObject>(
+                createDatumEnsemble(code, table_name));
+        }
         return util::nn_static_pointer_cast<util::BaseObject>(
             createVerticalDatum(code));
     }
@@ -2089,6 +2099,62 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
     } catch (const std::exception &ex) {
         throw buildFactoryException("vertical reference frame", code, ex);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a datum::DatumEnsemble from the specified code.
+ *
+ * @param code Object code allocated by authority.
+ * @param type "geodetic_datum", "vertical_datum" or empty string if unknown
+ * @return object.
+ * @throw NoSuchAuthorityCodeException
+ * @throw FactoryException
+ */
+
+datum::DatumEnsembleNNPtr
+AuthorityFactory::createDatumEnsemble(const std::string &code,
+                                      const std::string &type) const {
+    auto res = d->run(
+        "SELECT 'geodetic_datum', name, ensemble_accuracy, deprecated FROM "
+        "geodetic_datum WHERE "
+        "auth_name = ? AND code = ? AND ensemble_accuracy IS NOT NULL "
+        "UNION ALL "
+        "SELECT 'vertical_datum', name, ensemble_accuracy, deprecated FROM "
+        "vertical_datum WHERE "
+        "auth_name = ? AND code = ? AND ensemble_accuracy IS NOT NULL",
+        {d->authority(), code, d->authority(), code});
+    if (res.empty()) {
+        throw NoSuchAuthorityCodeException("datum ensemble not found",
+                                           d->authority(), code);
+    }
+    for (const auto &row : res) {
+        const std::string &gotType = row[0];
+        const std::string &name = row[1];
+        const std::string &ensembleAccuracy = row[2];
+        const bool deprecated = row[3] == "1";
+        if (type.empty() || type == gotType) {
+            auto resMembers =
+                d->run("SELECT member_auth_name, member_code FROM " + gotType +
+                           "_ensemble_member WHERE "
+                           "ensemble_auth_name = ? AND ensemble_code = ? "
+                           "ORDER BY sequence",
+                       {d->authority(), code});
+
+            std::vector<datum::DatumNNPtr> members;
+            for (const auto &memberRow : resMembers) {
+                members.push_back(
+                    d->createFactory(memberRow[0])->createDatum(memberRow[1]));
+            }
+            auto props = d->createPropertiesSearchUsages(gotType, code, name,
+                                                         deprecated);
+            return datum::DatumEnsemble::create(
+                props, std::move(members),
+                metadata::PositionalAccuracy::create(ensembleAccuracy));
+        }
+    }
+    throw NoSuchAuthorityCodeException("datum ensemble not found",
+                                       d->authority(), code);
 }
 
 // ---------------------------------------------------------------------------
