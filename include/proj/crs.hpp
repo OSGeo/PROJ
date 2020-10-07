@@ -194,7 +194,10 @@ class PROJ_GCC_DLL SingleCRS : public CRS {
         PROJ_INTERNAL void
         exportDatumOrDatumEnsembleToWkt(io::WKTFormatter *formatter)
             const; // throw(io::FormattingException)
-                   //! @endcond
+
+    PROJ_INTERNAL const datum::DatumNNPtr
+    datumNonNull(const io::DatabaseContextPtr &dbContext) const;
+    //! @endcond
 
   protected:
     PROJ_INTERNAL SingleCRS(const datum::DatumPtr &datumIn,
@@ -288,6 +291,9 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL void
         addDatumInfoToPROJString(io::PROJStringFormatter *formatter) const;
+
+    PROJ_INTERNAL const datum::GeodeticReferenceFrameNNPtr
+    datumNonNull(const io::DatabaseContextPtr &dbContext) const;
 
     PROJ_INTERNAL void addGeocentricUnitConversionIntoPROJString(
         io::PROJStringFormatter *formatter) const;
@@ -473,6 +479,9 @@ class PROJ_GCC_DLL VerticalCRS : virtual public SingleCRS,
         //! @cond Doxygen_Suppress
         PROJ_INTERNAL void
         addLinearUnitConvert(io::PROJStringFormatter *formatter) const;
+
+    PROJ_INTERNAL const datum::VerticalReferenceFrameNNPtr
+    datumNonNull(const io::DatabaseContextPtr &dbContext) const;
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)

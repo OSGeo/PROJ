@@ -1680,6 +1680,90 @@ TEST(crs, geodeticcrs_identify_db) {
         EXPECT_EQ(res.front().first->identifiers()[0]->code(), "7844");
         EXPECT_EQ(res.front().second, 100);
     }
+    {
+        // Identify with DatumEnsemble
+        auto wkt =
+            "GEOGCRS[\"WGS 84\","
+            "  ENSEMBLE[\"World Geodetic System 1984 ensemble\","
+            "     MEMBER[\"World Geodetic System 1984 (Transit)\","
+            "       ID[\"EPSG\",1166]],"
+            "     MEMBER[\"World Geodetic System 1984 (G730)\","
+            "       ID[\"EPSG\",1152]],"
+            "     MEMBER[\"World Geodetic System 1984 (G873)\","
+            "       ID[\"EPSG\",1153]],"
+            "     MEMBER[\"World Geodetic System 1984 (G1150)\","
+            "       ID[\"EPSG\",1154]],"
+            "     MEMBER[\"World Geodetic System 1984 (G1674)\","
+            "       ID[\"EPSG\",1155]],"
+            "     MEMBER[\"World Geodetic System 1984 (G1762)\","
+            "       ID[\"EPSG\",1156]],"
+            "     ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+            "      LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]],"
+            "      ID[\"EPSG\",7030]],"
+            "     ENSEMBLEACCURACY[2]],"
+            "  PRIMEM[\"Greenwich\",0,"
+            "    ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9102]],"
+            "    ID[\"EPSG\",8901]],"
+            "  CS[ellipsoidal,2,"
+            "    ID[\"EPSG\",6422]],"
+            "  AXIS[\"Geodetic latitude (Lat)\",north,"
+            "    ORDER[1]],"
+            "  AXIS[\"Geodetic longitude (Lon)\",east,"
+            "    ORDER[2]],"
+            "  ANGLEUNIT[\"degree (supplier to define representation)\","
+            "0.0174532925199433,ID[\"EPSG\",9122]]]";
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
+        EXPECT_EQ(res.front().second, 100.0);
+    }
+    {
+        // Identify with DatumEnsemble and unknown CRS name
+        auto wkt =
+            "GEOGCRS[\"unknown\","
+            "  ENSEMBLE[\"World Geodetic System 1984 ensemble\","
+            "     MEMBER[\"World Geodetic System 1984 (Transit)\","
+            "       ID[\"EPSG\",1166]],"
+            "     MEMBER[\"World Geodetic System 1984 (G730)\","
+            "       ID[\"EPSG\",1152]],"
+            "     MEMBER[\"World Geodetic System 1984 (G873)\","
+            "       ID[\"EPSG\",1153]],"
+            "     MEMBER[\"World Geodetic System 1984 (G1150)\","
+            "       ID[\"EPSG\",1154]],"
+            "     MEMBER[\"World Geodetic System 1984 (G1674)\","
+            "       ID[\"EPSG\",1155]],"
+            "     MEMBER[\"World Geodetic System 1984 (G1762)\","
+            "       ID[\"EPSG\",1156]],"
+            "     ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+            "      LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]],"
+            "      ID[\"EPSG\",7030]],"
+            "     ENSEMBLEACCURACY[2]],"
+            "  PRIMEM[\"Greenwich\",0,"
+            "    ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9102]],"
+            "    ID[\"EPSG\",8901]],"
+            "  CS[ellipsoidal,2,"
+            "    ID[\"EPSG\",6422]],"
+            "  AXIS[\"Geodetic latitude (Lat)\",north,"
+            "    ORDER[1]],"
+            "  AXIS[\"Geodetic longitude (Lon)\",east,"
+            "    ORDER[2]],"
+            "  ANGLEUNIT[\"degree (supplier to define representation)\","
+            "0.0174532925199433,ID[\"EPSG\",9122]]]";
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 4326);
+        EXPECT_EQ(res.front().second, 70.0);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2693,6 +2777,105 @@ TEST(crs, projectedCRS_identify_db) {
         ASSERT_GE(res.size(), 1U);
         EXPECT_EQ(res.front().first->getEPSGCode(), 2154);
         EXPECT_EQ(res.front().second, 90);
+    }
+    {
+        // Identify with DatumEnsemble
+        auto wkt =
+            "PROJCRS[\"WGS 84 / UTM zone 31N\","
+            "  BASEGEOGCRS[\"WGS 84\","
+            "    ENSEMBLE[\"World Geodetic System 1984 ensemble\","
+            "       MEMBER[\"World Geodetic System 1984 (Transit)\","
+            "         ID[\"EPSG\",1166]],"
+            "       MEMBER[\"World Geodetic System 1984 (G730)\","
+            "         ID[\"EPSG\",1152]],"
+            "       MEMBER[\"World Geodetic System 1984 (G873)\","
+            "         ID[\"EPSG\",1153]],"
+            "       MEMBER[\"World Geodetic System 1984 (G1150)\","
+            "         ID[\"EPSG\",1154]],"
+            "       MEMBER[\"World Geodetic System 1984 (G1674)\","
+            "         ID[\"EPSG\",1155]],"
+            "       MEMBER[\"World Geodetic System 1984 (G1762)\","
+            "         ID[\"EPSG\",1156]],"
+            "       ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+            "        LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]],"
+            "       ENSEMBLEACCURACY[2]]],"
+            "  CONVERSION[\"UTM zone 31N\","
+            "    METHOD[\"Transverse Mercator\","
+            "      ID[\"EPSG\",9807]],"
+            "    PARAMETER[\"Latitude of natural origin\",0,"
+            "      ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9102]]],"
+            "    PARAMETER[\"Longitude of natural origin\",3,"
+            "      ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9102]]],"
+            "    PARAMETER[\"Scale factor at natural origin\",0.9996,"
+            "      SCALEUNIT[\"unity\",1,ID[\"EPSG\",9201]]],"
+            "    PARAMETER[\"False easting\",500000,"
+            "      LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]],"
+            "    PARAMETER[\"False northing\",0,"
+            "      LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],"
+            "  CS[Cartesian,2],"
+            " AXIS[\"Easting (E)\",east,"
+            "   ORDER[1]],"
+            "  AXIS[\"Northing (N)\",north,"
+            "    ORDER[2]],"
+            "  LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]";
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto allFactory = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(allFactory);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
+        EXPECT_EQ(res.front().second, 100.0);
+    }
+    {
+        // Identify with DatumEnsemble and unknown CRS name
+        auto wkt =
+            "PROJCRS[\"unknown\","
+            "  BASEGEOGCRS[\"unknown\","
+            "    ENSEMBLE[\"World Geodetic System 1984 ensemble\","
+            "       MEMBER[\"World Geodetic System 1984 (Transit)\","
+            "         ID[\"EPSG\",1166]],"
+            "       MEMBER[\"World Geodetic System 1984 (G730)\","
+            "         ID[\"EPSG\",1152]],"
+            "       MEMBER[\"World Geodetic System 1984 (G873)\","
+            "         ID[\"EPSG\",1153]],"
+            "       MEMBER[\"World Geodetic System 1984 (G1150)\","
+            "         ID[\"EPSG\",1154]],"
+            "       MEMBER[\"World Geodetic System 1984 (G1674)\","
+            "         ID[\"EPSG\",1155]],"
+            "       MEMBER[\"World Geodetic System 1984 (G1762)\","
+            "         ID[\"EPSG\",1156]],"
+            "       ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+            "        LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]],"
+            "       ENSEMBLEACCURACY[2]]],"
+            "  CONVERSION[\"UTM zone 31N\","
+            "    METHOD[\"Transverse Mercator\","
+            "      ID[\"EPSG\",9807]],"
+            "    PARAMETER[\"Latitude of natural origin\",0,"
+            "      ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9102]]],"
+            "    PARAMETER[\"Longitude of natural origin\",3,"
+            "      ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9102]]],"
+            "    PARAMETER[\"Scale factor at natural origin\",0.9996,"
+            "      SCALEUNIT[\"unity\",1,ID[\"EPSG\",9201]]],"
+            "    PARAMETER[\"False easting\",500000,"
+            "      LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]],"
+            "    PARAMETER[\"False northing\",0,"
+            "      LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],"
+            "  CS[Cartesian,2],"
+            " AXIS[\"Easting (E)\",east,"
+            "   ORDER[1]],"
+            "  AXIS[\"Northing (N)\",north,"
+            "    ORDER[2]],"
+            "  LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]";
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
+        EXPECT_GE(res.front().second, 70.0);
     }
 }
 
