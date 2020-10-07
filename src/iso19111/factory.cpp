@@ -2366,18 +2366,16 @@ static crs::GeodeticCRSNNPtr
 cloneWithProps(const crs::GeodeticCRSNNPtr &geodCRS,
                const util::PropertyMap &props) {
     auto cs = geodCRS->coordinateSystem();
-    auto datum = geodCRS->datum();
-    if (!datum) {
-        return geodCRS;
-    }
     auto ellipsoidalCS = util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
-        return crs::GeographicCRS::create(props, NN_NO_CHECK(datum),
+        return crs::GeographicCRS::create(props, geodCRS->datum(),
+                                          geodCRS->datumEnsemble(),
                                           NN_NO_CHECK(ellipsoidalCS));
     }
     auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
     if (geocentricCS) {
-        return crs::GeodeticCRS::create(props, NN_NO_CHECK(datum),
+        return crs::GeodeticCRS::create(props, geodCRS->datum(),
+                                        geodCRS->datumEnsemble(),
                                         NN_NO_CHECK(geocentricCS));
     }
     return geodCRS;
