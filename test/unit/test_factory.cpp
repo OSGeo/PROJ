@@ -3151,7 +3151,7 @@ TEST(factory, getCRSInfoList) {
                 EXPECT_EQ(info.south_lat_degree, -90.0);
                 EXPECT_EQ(info.east_lon_degree, 180.0);
                 EXPECT_EQ(info.north_lat_degree, 90.0);
-                EXPECT_EQ(info.areaName, "World");
+                EXPECT_EQ(info.areaName, "World.");
                 EXPECT_TRUE(info.projectionMethodName.empty());
                 found4326 = true;
             } else if (info.code == "4296") { // Soudan - deprecated
@@ -3180,9 +3180,10 @@ TEST(factory, getCRSInfoList) {
                 EXPECT_EQ(info.south_lat_degree, 0.0);
                 EXPECT_EQ(info.east_lon_degree, 6.0);
                 EXPECT_EQ(info.north_lat_degree, 84.0);
-                EXPECT_EQ(info.areaName, "World - N hemisphere - 0\xC2\xB0"
-                                         "E to 6\xC2\xB0"
-                                         "E - by country");
+                EXPECT_TRUE(info.areaName.find("Between 0\xC2\xB0"
+                                               "E and 6\xC2\xB0"
+                                               "E, northern hemisphere") == 0)
+                    << info.areaName;
                 EXPECT_EQ(info.projectionMethodName, "Transverse Mercator");
                 found32631 = true;
             } else if (info.code == "3855") {

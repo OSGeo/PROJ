@@ -5308,7 +5308,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     std::string sql = "SELECT c.auth_name, c.code, c.name, c.type, "
                       "c.deprecated, "
                       "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-                      "a.name, NULL FROM geodetic_crs c " +
+                      "a.description, NULL FROM geodetic_crs c " +
                       getSqlArea("geodetic_crs");
     ListOfParams params;
     if (d->hasAuthorityRestriction()) {
@@ -5319,7 +5319,8 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     sql += "SELECT c.auth_name, c.code, c.name, 'projected', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-           "a.name, cm.name AS conversion_method_name FROM projected_crs c " +
+           "a.description, cm.name AS conversion_method_name FROM "
+           "projected_crs c " +
            getSqlArea("projected_crs") +
            "LEFT JOIN conversion_table conv ON "
            "c.conversion_auth_name = conv.auth_name AND "
@@ -5335,7 +5336,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     sql += "SELECT c.auth_name, c.code, c.name, 'vertical', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-           "a.name, NULL FROM vertical_crs c " +
+           "a.description, NULL FROM vertical_crs c " +
            getSqlArea("vertical_crs");
     if (d->hasAuthorityRestriction()) {
         sql += " WHERE c.auth_name = ?";
@@ -5345,7 +5346,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     sql += "SELECT c.auth_name, c.code, c.name, 'compound', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-           "a.name, NULL FROM compound_crs c " +
+           "a.description, NULL FROM compound_crs c " +
            getSqlArea("compound_crs");
     if (d->hasAuthorityRestriction()) {
         sql += " WHERE c.auth_name = ?";

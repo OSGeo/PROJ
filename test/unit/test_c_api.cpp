@@ -3397,7 +3397,7 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
                 EXPECT_EQ(list[i]->south_lat_degree, -90.0);
                 EXPECT_EQ(list[i]->east_lon_degree, 180.0);
                 EXPECT_EQ(list[i]->north_lat_degree, 90.0);
-                EXPECT_EQ(std::string(list[i]->area_name), "World");
+                EXPECT_EQ(std::string(list[i]->area_name), "World.");
                 EXPECT_EQ(list[i]->projection_method_name, nullptr);
             } else if (code == "4978") {
                 found4978 = true;
