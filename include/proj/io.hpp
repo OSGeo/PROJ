@@ -1225,6 +1225,12 @@ class PROJ_GCC_DLL AuthorityFactory {
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA
+
+    PROJ_INTERNAL void
+    createGeodeticDatumOrEnsemble(const std::string &code,
+                                  datum::GeodeticReferenceFramePtr &outDatum,
+                                  datum::DatumEnsemblePtr &outDatumEnsemble,
+                                  bool turnEnsembleAsDatum) const;
 };
 
 // ---------------------------------------------------------------------------

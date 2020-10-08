@@ -531,8 +531,10 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic2D) {
     EXPECT_EQ(gcrs->identifiers()[0]->code(), "4326");
     EXPECT_EQ(*(gcrs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(gcrs->name()->description()), "WGS 84");
-    EXPECT_TRUE(
-        gcrs->datum()->isEquivalentTo(factory->createDatum("6326").get()));
+    ASSERT_TRUE(gcrs->datum() == nullptr);
+    ASSERT_TRUE(gcrs->datumEnsemble() != nullptr);
+    EXPECT_TRUE(gcrs->datumEnsemble()->isEquivalentTo(
+        factory->createDatumEnsemble("6326").get()));
     EXPECT_TRUE(gcrs->coordinateSystem()->isEquivalentTo(
         factory->createCoordinateSystem("6422").get()));
     auto domain = crs->domains()[0];
@@ -566,8 +568,10 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geographic3D) {
     EXPECT_EQ(gcrs->identifiers()[0]->code(), "4979");
     EXPECT_EQ(*(gcrs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(gcrs->name()->description()), "WGS 84");
-    EXPECT_TRUE(
-        gcrs->datum()->isEquivalentTo(factory->createDatum("6326").get()));
+    ASSERT_TRUE(gcrs->datum() == nullptr);
+    ASSERT_TRUE(gcrs->datumEnsemble() != nullptr);
+    EXPECT_TRUE(gcrs->datumEnsemble()->isEquivalentTo(
+        factory->createDatumEnsemble("6326").get()));
     EXPECT_TRUE(gcrs->coordinateSystem()->isEquivalentTo(
         factory->createCoordinateSystem("6423").get()));
 }
@@ -582,8 +586,10 @@ TEST(factory, AuthorityFactory_createGeodeticCRS_geocentric) {
     EXPECT_EQ(crs->identifiers()[0]->code(), "4978");
     EXPECT_EQ(*(crs->identifiers()[0]->codeSpace()), "EPSG");
     EXPECT_EQ(*(crs->name()->description()), "WGS 84");
-    EXPECT_TRUE(
-        crs->datum()->isEquivalentTo(factory->createDatum("6326").get()));
+    ASSERT_TRUE(crs->datum() == nullptr);
+    ASSERT_TRUE(crs->datumEnsemble() != nullptr);
+    EXPECT_TRUE(crs->datumEnsemble()->isEquivalentTo(
+        factory->createDatumEnsemble("6326").get()));
     EXPECT_TRUE(crs->coordinateSystem()->isEquivalentTo(
         factory->createCoordinateSystem("6500").get()));
 }

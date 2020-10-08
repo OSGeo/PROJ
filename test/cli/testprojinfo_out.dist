@@ -4,9 +4,16 @@ PROJ.4 string:
 
 WKT2:2019 string:
 GEOGCRS["WGS 84",
-    DATUM["World Geodetic System 1984",
+    ENSEMBLE["World Geodetic System 1984 ensemble",
+        MEMBER["World Geodetic System 1984 (Transit)"],
+        MEMBER["World Geodetic System 1984 (G730)"],
+        MEMBER["World Geodetic System 1984 (G873)"],
+        MEMBER["World Geodetic System 1984 (G1150)"],
+        MEMBER["World Geodetic System 1984 (G1674)"],
+        MEMBER["World Geodetic System 1984 (G1762)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
-            LENGTHUNIT["metre",1]]],
+            LENGTHUNIT["metre",1]],
+        ENSEMBLEACCURACY[2.0]],
     PRIMEM["Greenwich",0,
         ANGLEUNIT["degree",0.0174532925199433]],
     CS[ellipsoidal,2],
@@ -59,9 +66,16 @@ GEODCRS["WGS 84",
 Testing projinfo -o WKT2_2019 EPSG:4326
 WKT2:2019 string:
 GEOGCRS["WGS 84",
-    DATUM["World Geodetic System 1984",
+    ENSEMBLE["World Geodetic System 1984 ensemble",
+        MEMBER["World Geodetic System 1984 (Transit)"],
+        MEMBER["World Geodetic System 1984 (G730)"],
+        MEMBER["World Geodetic System 1984 (G873)"],
+        MEMBER["World Geodetic System 1984 (G1150)"],
+        MEMBER["World Geodetic System 1984 (G1674)"],
+        MEMBER["World Geodetic System 1984 (G1762)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
-            LENGTHUNIT["metre",1]]],
+            LENGTHUNIT["metre",1]],
+        ENSEMBLEACCURACY[2.0]],
     PRIMEM["Greenwich",0,
         ANGLEUNIT["degree",0.0174532925199433]],
     CS[ellipsoidal,2],
@@ -102,9 +116,16 @@ GEODCRS["WGS 84",
 
 WKT2:2019 string:
 GEOGCRS["WGS 84",
-    DATUM["World Geodetic System 1984",
+    ENSEMBLE["World Geodetic System 1984 ensemble",
+        MEMBER["World Geodetic System 1984 (Transit)"],
+        MEMBER["World Geodetic System 1984 (G730)"],
+        MEMBER["World Geodetic System 1984 (G873)"],
+        MEMBER["World Geodetic System 1984 (G1150)"],
+        MEMBER["World Geodetic System 1984 (G1674)"],
+        MEMBER["World Geodetic System 1984 (G1762)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
-            LENGTHUNIT["metre",1]]],
+            LENGTHUNIT["metre",1]],
+        ENSEMBLEACCURACY[2.0]],
     PRIMEM["Greenwich",0,
         ANGLEUNIT["degree",0.0174532925199433]],
     CS[ellipsoidal,2],
@@ -142,13 +163,61 @@ PROJJSON:
   "$schema": "https://proj.org/schemas/v0.2/projjson.schema.json",
   "type": "GeographicCRS",
   "name": "WGS 84",
-  "datum": {
-    "type": "GeodeticReferenceFrame",
-    "name": "World Geodetic System 1984",
+  "datum_ensemble": {
+    "name": "World Geodetic System 1984 ensemble",
+    "members": [
+      {
+        "name": "World Geodetic System 1984 (Transit)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1166
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G730)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1152
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G873)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1153
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G1150)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1154
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G1674)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1155
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G1762)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1156
+        }
+      }
+    ],
     "ellipsoid": {
       "name": "WGS 84",
       "semi_major_axis": 6378137,
       "inverse_flattening": 298.257223563
+    },
+    "accuracy": "2.0",
+    "id": {
+      "authority": "EPSG",
+      "code": 6326
     }
   },
   "coordinate_system": {
@@ -1023,9 +1092,16 @@ PROJ.4 string:
 WKT2:2019 string:
 PROJCRS["WGS 84 / UTM zone 31N",
     BASEGEOGCRS["WGS 84",
-        DATUM["World Geodetic System 1984",
+        ENSEMBLE["World Geodetic System 1984 ensemble",
+            MEMBER["World Geodetic System 1984 (Transit)"],
+            MEMBER["World Geodetic System 1984 (G730)"],
+            MEMBER["World Geodetic System 1984 (G873)"],
+            MEMBER["World Geodetic System 1984 (G1150)"],
+            MEMBER["World Geodetic System 1984 (G1674)"],
+            MEMBER["World Geodetic System 1984 (G1762)"],
             ELLIPSOID["WGS 84",6378137,298.257223563,
-                LENGTHUNIT["metre",1]]],
+                LENGTHUNIT["metre",1]],
+            ENSEMBLEACCURACY[2.0]],
         PRIMEM["Greenwich",0,
             ANGLEUNIT["degree",0.0174532925199433]],
         ID["EPSG",4979]],
@@ -1198,9 +1274,23 @@ Testing -k operation EPSG:8457 -o PROJ -q
 
 Testing D_WGS_1984
 WKT2:2019 string:
-DATUM["World Geodetic System 1984",
+ENSEMBLE["World Geodetic System 1984 ensemble",
+    MEMBER["World Geodetic System 1984 (Transit)",
+        ID["EPSG",1166]],
+    MEMBER["World Geodetic System 1984 (G730)",
+        ID["EPSG",1152]],
+    MEMBER["World Geodetic System 1984 (G873)",
+        ID["EPSG",1153]],
+    MEMBER["World Geodetic System 1984 (G1150)",
+        ID["EPSG",1154]],
+    MEMBER["World Geodetic System 1984 (G1674)",
+        ID["EPSG",1155]],
+    MEMBER["World Geodetic System 1984 (G1762)",
+        ID["EPSG",1156]],
     ELLIPSOID["WGS 84",6378137,298.257223563,
-        LENGTHUNIT["metre",1]],
+        LENGTHUNIT["metre",1],
+        ID["EPSG",7030]],
+    ENSEMBLEACCURACY[2.0],
     ID["EPSG",6326]]
 
 Testing -k datum D_WGS_1984

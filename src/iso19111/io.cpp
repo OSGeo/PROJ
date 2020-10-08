@@ -2110,6 +2110,10 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             name = "World Geodetic System 1984";
             authNameFromAlias = Identifier::EPSG;
             codeFromAlias = "6326";
+        } else if (name == "D_ETRS_1989") {
+            name = "European Terrestrial Reference System 1989";
+            authNameFromAlias = Identifier::EPSG;
+            codeFromAlias = "6258";
         } else {
             tableNameForAlias = "geodetic_datum";
         }
