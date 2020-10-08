@@ -982,6 +982,22 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                           const io::DatabaseContextPtr &dbContext,
                           const cs::CoordinateSystemAxisNNPtr
                               &verticalAxisIfNotAlreadyPresent) const {
+
+    const auto createProperties = [this, &newName]() {
+        auto props =
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    !newName.empty() ? newName : nameStr());
+        const auto &l_identifiers = identifiers();
+        if (l_identifiers.size() == 1) {
+            std::string remarks("Promoted to 3D from ");
+            remarks += *(l_identifiers[0]->codeSpace());
+            remarks += ':';
+            remarks += l_identifiers[0]->code();
+            props.set(common::IdentifiedObject::REMARKS_KEY, remarks);
+        }
+        return props;
+    };
+
     const auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
     if (geogCRS) {
         const auto &axisList = geogCRS->coordinateSystem()->axisList();
@@ -1016,10 +1032,9 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
             auto cs = cs::EllipsoidalCS::create(
                 util::PropertyMap(), axisList[0], axisList[1],
                 verticalAxisIfNotAlreadyPresent);
-            return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        !newName.empty() ? newName : nameStr()),
-                geogCRS->datum(), geogCRS->datumEnsemble(), cs));
+            return util::nn_static_pointer_cast<CRS>(
+                GeographicCRS::create(createProperties(), geogCRS->datum(),
+                                      geogCRS->datumEnsemble(), cs));
         }
     }
 
@@ -1033,8 +1048,7 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                                               axisList[1],
                                               verticalAxisIfNotAlreadyPresent);
             return util::nn_static_pointer_cast<CRS>(ProjectedCRS::create(
-                util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
-                                        !newName.empty() ? newName : nameStr()),
+                createProperties(),
                 NN_NO_CHECK(
                     util::nn_dynamic_pointer_cast<GeodeticCRS>(base3DCRS)),
                 projCRS->derivingConversion(), cs));

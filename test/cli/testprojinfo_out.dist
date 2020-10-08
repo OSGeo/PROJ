@@ -1021,7 +1021,8 @@ PROJCRS["WGS 84 / UTM zone 31N",
         AXIS["ellipsoidal height (h)",up,
             ORDER[3],
             LENGTHUNIT["metre",1,
-                ID["EPSG",9001]]]]
+                ID["EPSG",9001]]],
+    REMARK["Promoted to 3D from EPSG:32631"]]
 
 Testing -s EPSG:32631 -t EPSG:4326+3855 --summary
 Candidate operations found: 3
