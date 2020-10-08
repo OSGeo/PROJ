@@ -10444,6 +10444,14 @@ TEST(io, createFromUserInput) {
                  ParsingException);
     EXPECT_THROW(createFromUserInput("foobar + EGM96 height", dbContext),
                  ParsingException);
+
+    {
+        auto obj = createFromUserInput("World Geodetic System 1984 ensemble",
+                                       dbContext);
+        auto ensemble = nn_dynamic_pointer_cast<DatumEnsemble>(obj);
+        ASSERT_TRUE(ensemble != nullptr);
+        EXPECT_EQ(ensemble->identifiers().size(), 1U);
+    }
 }
 
 // ---------------------------------------------------------------------------

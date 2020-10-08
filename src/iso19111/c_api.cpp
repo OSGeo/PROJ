@@ -916,7 +916,7 @@ convertPJObjectTypeToObjectType(PJ_TYPE type, bool &valid) {
         break;
 
     case PJ_TYPE_DATUM_ENSEMBLE:
-        cppType = AuthorityFactory::ObjectType::DATUM;
+        cppType = AuthorityFactory::ObjectType::DATUM_ENSEMBLE;
         break;
 
     case PJ_TYPE_TEMPORAL_DATUM:

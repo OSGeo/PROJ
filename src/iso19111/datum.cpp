@@ -1731,6 +1731,14 @@ void DatumEnsemble::_exportToWKT(
     formatter->startNode(io::WKTConstants::ENSEMBLEACCURACY, false);
     formatter->add(positionalAccuracy()->value());
     formatter->endNode();
+
+    // In theory, we should do the following, but currently the WKT grammar
+    // doesn't allow this
+    // ObjectUsage::baseExportToWKT(formatter);
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+
     formatter->endNode();
 }
 //! @endcond

@@ -3186,6 +3186,29 @@ TEST(factory, createObjectsFromName) {
             .size(),
         1U);
 
+    {
+        auto res = factory->createObjectsFromName(
+            "World Geodetic System 1984 ensemble",
+            {AuthorityFactory::ObjectType::DATUM_ENSEMBLE}, false);
+        EXPECT_EQ(res.size(), 1U);
+        if (!res.empty()) {
+            EXPECT_EQ(res.front()->getEPSGCode(), 6326);
+            EXPECT_TRUE(dynamic_cast<DatumEnsemble *>(res.front().get()) !=
+                        nullptr);
+        }
+    }
+
+    {
+        auto res = factory->createObjectsFromName(
+            "World Geodetic System 1984 ensemble", {}, false);
+        EXPECT_EQ(res.size(), 1U);
+        if (!res.empty()) {
+            EXPECT_EQ(res.front()->getEPSGCode(), 6326);
+            EXPECT_TRUE(dynamic_cast<DatumEnsemble *>(res.front().get()) !=
+                        nullptr);
+        }
+    }
+
     const auto types = std::vector<AuthorityFactory::ObjectType>{
         AuthorityFactory::ObjectType::PRIME_MERIDIAN,
         AuthorityFactory::ObjectType::ELLIPSOID,
@@ -3207,6 +3230,7 @@ TEST(factory, createObjectsFromName) {
         AuthorityFactory::ObjectType::CONVERSION,
         AuthorityFactory::ObjectType::TRANSFORMATION,
         AuthorityFactory::ObjectType::CONCATENATED_OPERATION,
+        AuthorityFactory::ObjectType::DATUM_ENSEMBLE,
     };
     for (const auto type : types) {
         factory->createObjectsFromName("i_dont_exist", {type}, false, 1);

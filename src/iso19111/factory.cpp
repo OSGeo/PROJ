@@ -5452,6 +5452,11 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
     case ObjectType::CONCATENATED_OPERATION:
         sql = "SELECT code FROM concatenated_operation WHERE ";
         break;
+    case ObjectType::DATUM_ENSEMBLE:
+        sql = "SELECT code FROM object_view WHERE table_name IN "
+              "('geodetic_datum', 'vertical_datum') AND "
+              "type = 'ensemble' AND ";
+        break;
     }
 
     sql += "auth_name = ?";
@@ -5961,11 +5966,27 @@ AuthorityFactory::createObjectsFromNameEx(
                     res.emplace_back(
                         TableType("concatenated_operation", std::string()));
                     break;
+                case ObjectType::DATUM_ENSEMBLE:
+                    res.emplace_back(TableType("geodetic_datum", "ensemble"));
+                    res.emplace_back(TableType("vertical_datum", "ensemble"));
+                    break;
                 }
             }
         }
         return res;
     };
+
+    bool datumEnsembleAllowed = false;
+    if (allowedObjectTypes.empty()) {
+        datumEnsembleAllowed = true;
+    } else {
+        for (const auto type : allowedObjectTypes) {
+            if (type == ObjectType::DATUM_ENSEMBLE) {
+                datumEnsembleAllowed = true;
+                break;
+            }
+        }
+    }
 
     const auto listTableNameType = getTableAndTypeConstraints();
     bool first = true;
@@ -5984,6 +6005,8 @@ AuthorityFactory::createObjectsFromNameEx(
         if (!tableNameTypePair.second.empty()) {
             if (tableNameTypePair.second == "frame_reference_epoch") {
                 sql += "AND frame_reference_epoch IS NOT NULL ";
+            } else if (tableNameTypePair.second == "ensemble") {
+                sql += "AND ensemble_accuracy IS NOT NULL ";
             } else {
                 sql += "AND type = '";
                 sql += tableNameTypePair.second;
@@ -6018,6 +6041,8 @@ AuthorityFactory::createObjectsFromNameEx(
         if (!tableNameTypePair.second.empty()) {
             if (tableNameTypePair.second == "frame_reference_epoch") {
                 sql += "AND ov.frame_reference_epoch IS NOT NULL ";
+            } else if (tableNameTypePair.second == "ensemble") {
+                sql += "AND ov.ensemble_accuracy IS NOT NULL ";
             } else {
                 sql += "AND ov.type = '";
                 sql += tableNameTypePair.second;
@@ -6165,7 +6190,7 @@ AuthorityFactory::createObjectsFromNameEx(
                 break;
             }
             auto factory = d->createFactory(auth_name);
-            auto getObject = [&factory](
+            auto getObject = [&factory, datumEnsembleAllowed](
                 const std::string &l_table_name,
                 const std::string &l_code) -> common::IdentifiedObjectNNPtr {
                 if (l_table_name == "prime_meridian") {
@@ -6173,8 +6198,32 @@ AuthorityFactory::createObjectsFromNameEx(
                 } else if (l_table_name == "ellipsoid") {
                     return factory->createEllipsoid(l_code);
                 } else if (l_table_name == "geodetic_datum") {
+                    if (datumEnsembleAllowed) {
+                        datum::GeodeticReferenceFramePtr datum;
+                        datum::DatumEnsemblePtr datumEnsemble;
+                        constexpr bool turnEnsembleAsDatum = false;
+                        factory->createGeodeticDatumOrEnsemble(
+                            l_code, datum, datumEnsemble, turnEnsembleAsDatum);
+                        if (datum) {
+                            return NN_NO_CHECK(datum);
+                        }
+                        assert(datumEnsemble);
+                        return NN_NO_CHECK(datumEnsemble);
+                    }
                     return factory->createGeodeticDatum(l_code);
                 } else if (l_table_name == "vertical_datum") {
+                    if (datumEnsembleAllowed) {
+                        datum::VerticalReferenceFramePtr datum;
+                        datum::DatumEnsemblePtr datumEnsemble;
+                        constexpr bool turnEnsembleAsDatum = false;
+                        factory->createVerticalDatumOrEnsemble(
+                            l_code, datum, datumEnsemble, turnEnsembleAsDatum);
+                        if (datum) {
+                            return NN_NO_CHECK(datum);
+                        }
+                        assert(datumEnsemble);
+                        return NN_NO_CHECK(datumEnsemble);
+                    }
                     return factory->createVerticalDatum(l_code);
                 } else if (l_table_name == "geodetic_crs") {
                     return factory->createGeodeticCRS(l_code);

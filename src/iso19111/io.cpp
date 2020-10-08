@@ -6267,6 +6267,9 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         if (type == "datum") {
             return factory->createDatum(code);
         }
+        if (type == "ensemble") {
+            return factory->createDatumEnsemble(code);
+        }
         if (type == "ellipsoid") {
             return factory->createEllipsoid(code);
         }
@@ -6384,6 +6387,8 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                                   ELLIPSOID,
                                               AuthorityFactory::ObjectType::
                                                   DATUM,
+                                              AuthorityFactory::ObjectType::
+                                                  DATUM_ENSEMBLE,
                                               AuthorityFactory::ObjectType::
                                                   COORDINATE_OPERATION},
                     goOn);

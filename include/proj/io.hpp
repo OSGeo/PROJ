@@ -1032,6 +1032,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         DYNAMIC_GEODETIC_REFERENCE_FRAME,
         /** Object of type datum::DynamicVerticalReferenceFrame */
         DYNAMIC_VERTICAL_REFERENCE_FRAME,
+        /** Object of type datum::DatumEnsemble */
+        DATUM_ENSEMBLE,
     };
 
     PROJ_DLL std::set<std::string>
