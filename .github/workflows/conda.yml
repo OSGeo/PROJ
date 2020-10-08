@@ -1,0 +1,43 @@
+name: Conda
+
+on:
+  push:
+    branches: '*'
+
+jobs:
+  build:
+    name: Conda ${{ matrix.platform }}
+
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: ['ubuntu-latest','windows-latest','macos-latest']
+
+    env:
+      PLATFORM: ${{ matrix.platform }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: goanpeca/setup-miniconda@v1
+      with:
+        channels: conda-forge
+        auto-update-conda: true
+
+    - name: Setup
+      shell: bash -l {0}
+      run: |
+          source ./scripts/ci/conda/setup.sh
+
+    - name: Build
+      shell: bash -l {0}
+      run: |
+          source ../scripts/ci/conda/compile.sh
+      working-directory: ./pdal-feedstock
+
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.platform }}-conda-package
+        path: ./pdal-feedstock/packages/
