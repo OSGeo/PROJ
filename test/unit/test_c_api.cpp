@@ -4917,4 +4917,102 @@ TEST_F(CApi, proj_is_equivalent_to_with_ctx) {
                                                PJ_COMP_EQUIVALENT));
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, datum_ensemble) {
+    auto wkt =
+        "GEOGCRS[\"ETRS89\","
+        "    ENSEMBLE[\"European Terrestrial Reference System 1989 ensemble\","
+        "        MEMBER[\"European Terrestrial Reference Frame 1989\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 1990\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 1991\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 1992\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 1993\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 1994\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 1996\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 1997\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 2000\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 2005\"],"
+        "        MEMBER[\"European Terrestrial Reference Frame 2014\"],"
+        "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,"
+        "            LENGTHUNIT[\"metre\",1]],"
+        "        ENSEMBLEACCURACY[0.1]],"
+        "    PRIMEM[\"Greenwich\",0,"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "    CS[ellipsoidal,2],"
+        "        AXIS[\"geodetic latitude (Lat)\",north,"
+        "            ORDER[1],"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],"
+        "        AXIS[\"geodetic longitude (Lon)\",east,"
+        "            ORDER[2],"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+    auto from_wkt =
+        proj_create_from_wkt(m_ctxt, wkt, nullptr, nullptr, nullptr);
+    ObjectKeeper keeper_from_wkt(from_wkt);
+    EXPECT_NE(from_wkt, nullptr);
+
+    auto datum = proj_crs_get_datum(m_ctxt, from_wkt);
+    ObjectKeeper keeper_datum(datum);
+    ASSERT_EQ(datum, nullptr);
+
+    auto datum_ensemble = proj_crs_get_datum_ensemble(m_ctxt, from_wkt);
+    ObjectKeeper keeper_datum_ensemble(datum_ensemble);
+    ASSERT_NE(datum_ensemble, nullptr);
+
+    ASSERT_EQ(proj_datum_ensemble_get_member_count(m_ctxt, datum_ensemble), 11);
+    ASSERT_EQ(proj_datum_ensemble_get_member(m_ctxt, datum_ensemble, -1),
+              nullptr);
+    ASSERT_EQ(proj_datum_ensemble_get_member(m_ctxt, datum_ensemble, 11),
+              nullptr);
+
+    {
+        auto member = proj_datum_ensemble_get_member(m_ctxt, datum_ensemble, 0);
+        ObjectKeeper keeper_member(member);
+        ASSERT_NE(member, nullptr);
+
+        EXPECT_EQ(proj_get_name(member),
+                  std::string("European Terrestrial Reference Frame 1989"));
+    }
+
+    {
+        auto member =
+            proj_datum_ensemble_get_member(m_ctxt, datum_ensemble, 10);
+        ObjectKeeper keeper_member(member);
+        ASSERT_NE(member, nullptr);
+
+        EXPECT_EQ(proj_get_name(member),
+                  std::string("European Terrestrial Reference Frame 2014"));
+    }
+
+    ASSERT_EQ(proj_datum_ensemble_get_accuracy(m_ctxt, datum_ensemble), 0.1);
+
+    auto datum_forced = proj_crs_get_datum_forced(m_ctxt, from_wkt);
+    ObjectKeeper keeper_datum_forced(datum_forced);
+    ASSERT_NE(datum_forced, nullptr);
+
+    EXPECT_EQ(proj_get_name(datum_forced),
+              std::string("European Terrestrial Reference System 1989"));
+
+    auto cs = proj_crs_get_coordinate_system(m_ctxt, from_wkt);
+    ObjectKeeper keeper_cs(cs);
+    EXPECT_NE(cs, nullptr);
+
+    {
+        auto built_crs = proj_create_geographic_crs_from_datum(
+            m_ctxt, proj_get_name(from_wkt), datum_ensemble, cs);
+        ObjectKeeper keeper_built_crs(built_crs);
+        EXPECT_NE(built_crs, nullptr);
+
+        EXPECT_TRUE(proj_is_equivalent_to_with_ctx(m_ctxt, built_crs, from_wkt,
+                                                   PJ_COMP_EQUIVALENT));
+    }
+
+    {
+        auto built_crs = proj_create_geocentric_crs_from_datum(
+            m_ctxt, proj_get_name(from_wkt), datum_ensemble, "metre", 1.0);
+        ObjectKeeper keeper_built_crs(built_crs);
+        EXPECT_NE(built_crs, nullptr);
+    }
+}
+
 } // namespace

@@ -971,6 +971,8 @@ proj_crs_demote_to_2D
 proj_crs_get_coordinate_system
 proj_crs_get_coordoperation
 proj_crs_get_datum
+proj_crs_get_datum_ensemble
+proj_crs_get_datum_forced
 proj_crs_get_geodetic_crs
 proj_crs_get_horizontal_datum
 proj_crs_get_sub_crs
@@ -979,6 +981,9 @@ proj_crs_promote_to_3D
 proj_cs_get_axis_count
 proj_cs_get_axis_info
 proj_cs_get_type
+proj_datum_ensemble_get_accuracy
+proj_datum_ensemble_get_member
+proj_datum_ensemble_get_member_count
 proj_degree_input
 proj_degree_output
 proj_destroy

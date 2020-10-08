@@ -3044,31 +3044,35 @@ PJ *proj_create_geographic_crs(PJ_CONTEXT *ctx, const char *crs_name,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param crs_name Name of the GeographicCRS. Or NULL
- * @param datum Datum. Must not be NULL.
+ * @param datum_or_datum_ensemble Datum or DatumEnsemble (DatumEnsemble possible
+ * since 7.2). Must not be NULL.
  * @param ellipsoidal_cs Coordinate system. Must not be NULL.
  *
  * @return Object of type GeographicCRS that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
  */
 PJ *proj_create_geographic_crs_from_datum(PJ_CONTEXT *ctx, const char *crs_name,
-                                          PJ *datum, PJ *ellipsoidal_cs) {
+                                          PJ *datum_or_datum_ensemble,
+                                          PJ *ellipsoidal_cs) {
 
     SANITIZE_CTX(ctx);
-    auto l_datum =
-        std::dynamic_pointer_cast<GeodeticReferenceFrame>(datum->iso_obj);
-    if (!l_datum) {
+    if (datum_or_datum_ensemble == nullptr) {
         proj_log_error(ctx, __FUNCTION__,
-                       "datum is not a GeodeticReferenceFrame");
+                       "Missing input datum_or_datum_ensemble");
         return nullptr;
     }
+    auto l_datum = std::dynamic_pointer_cast<GeodeticReferenceFrame>(
+        datum_or_datum_ensemble->iso_obj);
+    auto l_datum_ensemble = std::dynamic_pointer_cast<DatumEnsemble>(
+        datum_or_datum_ensemble->iso_obj);
     auto cs = std::dynamic_pointer_cast<EllipsoidalCS>(ellipsoidal_cs->iso_obj);
     if (!cs) {
         return nullptr;
     }
     try {
         auto geogCRS =
-            GeographicCRS::create(createPropertyMapName(crs_name),
-                                  NN_NO_CHECK(l_datum), NN_NO_CHECK(cs));
+            GeographicCRS::create(createPropertyMapName(crs_name), l_datum,
+                                  l_datum_ensemble, NN_NO_CHECK(cs));
         return pj_obj_create(ctx, geogCRS);
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
@@ -3141,7 +3145,8 @@ PJ *proj_create_geocentric_crs(
  *
  * @param ctx PROJ context, or NULL for default context
  * @param crs_name Name of the GeographicCRS. Or NULL
- * @param datum Datum. Must not be NULL.
+ * @param datum_or_datum_ensemble Datum or DatumEnsemble (DatumEnsemble possible
+ * since 7.2). Must not be NULL.
  * @param linear_units Name of the linear units. Or NULL for Metre
  * @param linear_units_conv Conversion factor from the linear unit to metre. Or
  * 0 for Metre if linear_units == NULL. Otherwise should be not NULL
@@ -3150,22 +3155,24 @@ PJ *proj_create_geocentric_crs(
  * proj_destroy(), or NULL in case of error.
  */
 PJ *proj_create_geocentric_crs_from_datum(PJ_CONTEXT *ctx, const char *crs_name,
-                                          const PJ *datum,
+                                          const PJ *datum_or_datum_ensemble,
                                           const char *linear_units,
                                           double linear_units_conv) {
     SANITIZE_CTX(ctx);
+    if (datum_or_datum_ensemble == nullptr) {
+        proj_log_error(ctx, __FUNCTION__,
+                       "Missing input datum_or_datum_ensemble");
+        return nullptr;
+    }
+    auto l_datum = std::dynamic_pointer_cast<GeodeticReferenceFrame>(
+        datum_or_datum_ensemble->iso_obj);
+    auto l_datum_ensemble = std::dynamic_pointer_cast<DatumEnsemble>(
+        datum_or_datum_ensemble->iso_obj);
     try {
         const UnitOfMeasure linearUnit(
             createLinearUnit(linear_units, linear_units_conv));
-        auto l_datum =
-            std::dynamic_pointer_cast<GeodeticReferenceFrame>(datum->iso_obj);
-        if (!l_datum) {
-            proj_log_error(ctx, __FUNCTION__,
-                           "datum is not a GeodeticReferenceFrame");
-            return nullptr;
-        }
         auto geodCRS = GeodeticCRS::create(
-            createPropertyMapName(crs_name), NN_NO_CHECK(l_datum),
+            createPropertyMapName(crs_name), l_datum, l_datum_ensemble,
             cs::CartesianCS::createGeocentric(linearUnit));
         return pj_obj_create(ctx, geodCRS);
     } catch (const std::exception &e) {
@@ -7977,6 +7984,173 @@ PJ *proj_crs_get_datum(PJ_CONTEXT *ctx, const PJ *crs) {
         return nullptr;
     }
     return pj_obj_create(ctx, NN_NO_CHECK(datum));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the datum ensemble of a SingleCRS.
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs Object of type SingleCRS (must not be NULL)
+ * @return Object that must be unreferenced with proj_destroy(), or NULL
+ * in case of error (or if there is no datum ensemble)
+ *
+ * @since 7.2
+ */
+PJ *proj_crs_get_datum_ensemble(PJ_CONTEXT *ctx, const PJ *crs) {
+    SANITIZE_CTX(ctx);
+    if (!crs) {
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    auto l_crs = dynamic_cast<const SingleCRS *>(crs->iso_obj.get());
+    if (!l_crs) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a SingleCRS");
+        return nullptr;
+    }
+    const auto &datumEnsemble = l_crs->datumEnsemble();
+    if (!datumEnsemble) {
+        return nullptr;
+    }
+    return pj_obj_create(ctx, NN_NO_CHECK(datumEnsemble));
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the number of members of a datum ensemble.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param datum_ensemble Object of type DatumEnsemble (must not be NULL)
+ *
+ * @since 7.2
+ */
+int proj_datum_ensemble_get_member_count(PJ_CONTEXT *ctx,
+                                         const PJ *datum_ensemble) {
+    SANITIZE_CTX(ctx);
+    if (!datum_ensemble) {
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return 0;
+    }
+    auto l_datum_ensemble =
+        dynamic_cast<const DatumEnsemble *>(datum_ensemble->iso_obj.get());
+    if (!l_datum_ensemble) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a DatumEnsemble");
+        return 0;
+    }
+    return static_cast<int>(l_datum_ensemble->datums().size());
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns the positional accuracy of the datum ensemble.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param datum_ensemble Object of type DatumEnsemble (must not be NULL)
+ * @return the accuracy, or -1 in case of error.
+ *
+ * @since 7.2
+ */
+double proj_datum_ensemble_get_accuracy(PJ_CONTEXT *ctx,
+                                        const PJ *datum_ensemble) {
+    SANITIZE_CTX(ctx);
+    if (!datum_ensemble) {
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return -1;
+    }
+    auto l_datum_ensemble =
+        dynamic_cast<const DatumEnsemble *>(datum_ensemble->iso_obj.get());
+    if (!l_datum_ensemble) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a DatumEnsemble");
+        return -1;
+    }
+    const auto &accuracy = l_datum_ensemble->positionalAccuracy();
+    try {
+        return c_locale_stod(accuracy->value());
+    } catch (const std::exception &) {
+    }
+    return -1;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a member from a datum ensemble.
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param datum_ensemble Object of type DatumEnsemble (must not be NULL)
+ * @param member_index Index of the datum member to extract (between 0 and
+ * proj_datum_ensemble_get_member_count()-1)
+ * @return Object that must be unreferenced with proj_destroy(), or NULL
+ * in case of error (or if there is no datum ensemble)
+ *
+ * @since 7.2
+ */
+PJ *proj_datum_ensemble_get_member(PJ_CONTEXT *ctx, const PJ *datum_ensemble,
+                                   int member_index) {
+    SANITIZE_CTX(ctx);
+    if (!datum_ensemble) {
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    auto l_datum_ensemble =
+        dynamic_cast<const DatumEnsemble *>(datum_ensemble->iso_obj.get());
+    if (!l_datum_ensemble) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a DatumEnsemble");
+        return nullptr;
+    }
+    if (member_index < 0 ||
+        member_index >= static_cast<int>(l_datum_ensemble->datums().size())) {
+        proj_log_error(ctx, __FUNCTION__, "Invalid member_index");
+        return nullptr;
+    }
+    return pj_obj_create(ctx, l_datum_ensemble->datums()[member_index]);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a datum for a SingleCRS.
+ *
+ * If the SingleCRS has a datum, then this datum is returned.
+ * Otherwise, the SingleCRS has a datum ensemble, and this datum ensemble is
+ * returned as a regular datum instead of a datum ensemble.
+ *
+ * The returned object must be unreferenced with proj_destroy() after
+ * use.
+ * It should be used by at most one thread at a time.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs Object of type SingleCRS (must not be NULL)
+ * @return Object that must be unreferenced with proj_destroy(), or NULL
+ * in case of error (or if there is no datum)
+ *
+ * @since 7.2
+ */
+PJ *proj_crs_get_datum_forced(PJ_CONTEXT *ctx, const PJ *crs) {
+    SANITIZE_CTX(ctx);
+    if (!crs) {
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    auto l_crs = dynamic_cast<const SingleCRS *>(crs->iso_obj.get());
+    if (!l_crs) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a SingleCRS");
+        return nullptr;
+    }
+    const auto &datum = l_crs->datum();
+    if (datum) {
+        return pj_obj_create(ctx, NN_NO_CHECK(datum));
+    }
+    const auto &datumEnsemble = l_crs->datumEnsemble();
+    assert(datumEnsemble);
+    auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
+    return pj_obj_create(ctx, datumEnsemble->asDatum(dbContext));
 }
 
 // ---------------------------------------------------------------------------
