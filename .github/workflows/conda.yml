@@ -34,10 +34,10 @@ jobs:
       shell: bash -l {0}
       run: |
           source ../scripts/ci/conda/compile.sh
-      working-directory: ./pdal-feedstock
+      working-directory: ./proj.4-feedstock
 
 
     - uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.platform }}-conda-package
-        path: ./pdal-feedstock/packages/
+        path: ./proj.4-feedstock/packages/
