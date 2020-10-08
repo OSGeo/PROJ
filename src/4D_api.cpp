@@ -1069,28 +1069,18 @@ static PJ* create_operation_to_geog_crs(PJ_CONTEXT* ctx, const PJ* crs) {
         geodetic_crs_type == PJ_TYPE_GEOGRAPHIC_3D_CRS )
     {
         auto datum = proj_crs_get_datum(ctx, geodetic_crs);
-        if( datum )
-        {
-            auto cs = proj_create_ellipsoidal_2D_cs(
-                ctx, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
-            auto ellps = proj_get_ellipsoid(ctx, datum);
-            proj_destroy(datum);
-            double semi_major_metre = 0;
-            double inv_flattening = 0;
-            proj_ellipsoid_get_parameters(ctx, ellps, &semi_major_metre,
-                                          nullptr, nullptr, &inv_flattening);
-            auto temp = proj_create_geographic_crs(
-                ctx, "unnamed crs", "unnamed datum",
-                proj_get_name(ellps),
-                semi_major_metre, inv_flattening,
-                "Reference prime meridian", 0, nullptr, 0,
-                cs);
-            proj_destroy(ellps);
-            proj_destroy(cs);
-            proj_destroy(geodetic_crs);
-            geodetic_crs = temp;
-            geodetic_crs_type = proj_get_type(geodetic_crs);
-        }
+        auto datum_ensemble = proj_crs_get_datum_ensemble(ctx, geodetic_crs);
+        auto cs = proj_create_ellipsoidal_2D_cs(
+            ctx, PJ_ELLPS2D_LONGITUDE_LATITUDE, nullptr, 0);
+        auto temp = proj_create_geographic_crs_from_datum(
+            ctx, "unnamed crs", datum ? datum : datum_ensemble,
+            cs);
+        proj_destroy(datum);
+        proj_destroy(datum_ensemble);
+        proj_destroy(cs);
+        proj_destroy(geodetic_crs);
+        geodetic_crs = temp;
+        geodetic_crs_type = proj_get_type(geodetic_crs);
     }
     if( geodetic_crs_type != PJ_TYPE_GEOGRAPHIC_2D_CRS )
     {
