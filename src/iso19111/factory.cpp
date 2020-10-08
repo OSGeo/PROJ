@@ -2146,9 +2146,23 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
 
 datum::VerticalReferenceFrameNNPtr
 AuthorityFactory::createVerticalDatum(const std::string &code) const {
+    datum::VerticalReferenceFramePtr datum;
+    datum::DatumEnsemblePtr datumEnsemble;
+    constexpr bool turnEnsembleAsDatum = true;
+    createVerticalDatumOrEnsemble(code, datum, datumEnsemble,
+                                  turnEnsembleAsDatum);
+    return NN_NO_CHECK(datum);
+}
+
+// ---------------------------------------------------------------------------
+
+void AuthorityFactory::createVerticalDatumOrEnsemble(
+    const std::string &code, datum::VerticalReferenceFramePtr &outDatum,
+    datum::DatumEnsemblePtr &outDatumEnsemble, bool turnEnsembleAsDatum) const {
     auto res =
         d->runWithCodeParam("SELECT name, publication_date, "
-                            "frame_reference_epoch, deprecated FROM "
+                            "frame_reference_epoch, ensemble_accuracy, "
+                            "deprecated FROM "
                             "vertical_datum WHERE auth_name = ? AND code = ?",
                             code);
     if (res.empty()) {
@@ -2160,24 +2174,49 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
         const auto &name = row[0];
         const auto &publication_date = row[1];
         const auto &frame_reference_epoch = row[2];
-        const bool deprecated = row[3] == "1";
+        const auto &ensemble_accuracy = row[3];
+        const bool deprecated = row[4] == "1";
         auto props = d->createPropertiesSearchUsages("vertical_datum", code,
                                                      name, deprecated);
-        if (!publication_date.empty()) {
-            props.set("PUBLICATION_DATE", publication_date);
-        }
-        if (d->authority() == "ESRI" && starts_with(code, "from_geogdatum_")) {
-            props.set("VERT_DATUM_TYPE", "2002");
-        }
-        auto anchor = util::optional<std::string>();
-        if (frame_reference_epoch.empty()) {
-            return datum::VerticalReferenceFrame::create(props, anchor);
+        if (!turnEnsembleAsDatum && !ensemble_accuracy.empty()) {
+            auto resMembers =
+                d->run("SELECT member_auth_name, member_code FROM "
+                       "vertical_datum_ensemble_member WHERE "
+                       "ensemble_auth_name = ? AND ensemble_code = ? "
+                       "ORDER BY sequence",
+                       {d->authority(), code});
+
+            std::vector<datum::DatumNNPtr> members;
+            for (const auto &memberRow : resMembers) {
+                members.push_back(
+                    d->createFactory(memberRow[0])->createDatum(memberRow[1]));
+            }
+            auto datumEnsemble = datum::DatumEnsemble::create(
+                props, std::move(members),
+                metadata::PositionalAccuracy::create(ensemble_accuracy));
+            outDatumEnsemble = datumEnsemble.as_nullable();
         } else {
-            return datum::DynamicVerticalReferenceFrame::create(
-                props, anchor, util::optional<datum::RealizationMethod>(),
-                common::Measure(c_locale_stod(frame_reference_epoch),
-                                common::UnitOfMeasure::YEAR),
-                util::optional<std::string>());
+            if (!publication_date.empty()) {
+                props.set("PUBLICATION_DATE", publication_date);
+            }
+            if (d->authority() == "ESRI" &&
+                starts_with(code, "from_geogdatum_")) {
+                props.set("VERT_DATUM_TYPE", "2002");
+            }
+            auto anchor = util::optional<std::string>();
+            if (frame_reference_epoch.empty()) {
+                outDatum = datum::VerticalReferenceFrame::create(props, anchor)
+                               .as_nullable();
+            } else {
+                outDatum =
+                    datum::DynamicVerticalReferenceFrame::create(
+                        props, anchor,
+                        util::optional<datum::RealizationMethod>(),
+                        common::Measure(c_locale_stod(frame_reference_epoch),
+                                        common::UnitOfMeasure::YEAR),
+                        util::optional<std::string>())
+                        .as_nullable();
+            }
         }
     } catch (const std::exception &ex) {
         throw buildFactoryException("vertical reference frame", code, ex);
@@ -2609,16 +2648,19 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
         const bool deprecated = row[5] == "1";
         auto cs =
             d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
-        auto datum =
-            d->createFactory(datum_auth_name)->createVerticalDatum(datum_code);
-
+        datum::VerticalReferenceFramePtr datum;
+        datum::DatumEnsemblePtr datumEnsemble;
+        constexpr bool turnEnsembleAsDatum = false;
+        d->createFactory(datum_auth_name)
+            ->createVerticalDatumOrEnsemble(datum_code, datum, datumEnsemble,
+                                            turnEnsembleAsDatum);
         auto props = d->createPropertiesSearchUsages("vertical_crs", code, name,
                                                      deprecated);
 
         auto verticalCS = util::nn_dynamic_pointer_cast<cs::VerticalCS>(cs);
         if (verticalCS) {
-            auto crsRet =
-                crs::VerticalCRS::create(props, datum, NN_NO_CHECK(verticalCS));
+            auto crsRet = crs::VerticalCRS::create(props, datum, datumEnsemble,
+                                                   NN_NO_CHECK(verticalCS));
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }

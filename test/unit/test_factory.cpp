@@ -619,6 +619,20 @@ TEST(factory, AuthorityFactory_createVerticalCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_createVerticalCRS_with_datum_ensemble) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    EXPECT_THROW(factory->createVerticalCRS("-1"),
+                 NoSuchAuthorityCodeException);
+
+    auto crs = factory->createVerticalCRS("9451"); // BI height
+    ASSERT_TRUE(crs->datum() == nullptr);
+    ASSERT_TRUE(crs->datumEnsemble() != nullptr);
+    EXPECT_TRUE(crs->datumEnsemble()->isEquivalentTo(
+        factory->createDatumEnsemble("1288").get()));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_createConversion) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->createConversion("-1"), NoSuchAuthorityCodeException);

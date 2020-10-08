@@ -1231,6 +1231,12 @@ class PROJ_GCC_DLL AuthorityFactory {
                                   datum::GeodeticReferenceFramePtr &outDatum,
                                   datum::DatumEnsemblePtr &outDatumEnsemble,
                                   bool turnEnsembleAsDatum) const;
+
+    PROJ_INTERNAL void
+    createVerticalDatumOrEnsemble(const std::string &code,
+                                  datum::VerticalReferenceFramePtr &outDatum,
+                                  datum::DatumEnsemblePtr &outDatumEnsemble,
+                                  bool turnEnsembleAsDatum) const;
 };
 
 // ---------------------------------------------------------------------------
