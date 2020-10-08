@@ -395,8 +395,9 @@ class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
     PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(FormattingException)
 
-    PROJ_DLL bool
-    is2DPartOf3D(util::nn<const GeographicCRS *> other) PROJ_PURE_DECL;
+    PROJ_DLL bool is2DPartOf3D(
+        util::nn<const GeographicCRS *> other,
+        const io::DatabaseContextPtr &dbContext = nullptr) PROJ_PURE_DECL;
 
     PROJ_INTERNAL bool _isEquivalentTo(
         const util::IComparable *other,

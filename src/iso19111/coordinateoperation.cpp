@@ -14196,7 +14196,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
     if (hubSrcGeog && geogCRSOfBaseOfBoundSrc &&
         (hubSrcGeog->_isEquivalentTo(
              geogDst, util::IComparable::Criterion::EQUIVALENT) ||
-         hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst)))) {
+         hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst), dbContext))) {
         triedBoundCrsToGeogCRSSameAsHubCRS = true;
 
         CoordinateOperationPtr opIntermediate;
@@ -14976,7 +14976,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
             if (!foundRegisteredTransformWithAllGridsAvailable && srcGeogCRS &&
                 !srcGeogCRS->_isEquivalentTo(
                     geogDst, util::IComparable::Criterion::EQUIVALENT) &&
-                !srcGeogCRS->is2DPartOf3D(NN_NO_CHECK(geogDst))) {
+                !srcGeogCRS->is2DPartOf3D(NN_NO_CHECK(geogDst), dbContext)) {
                 auto verticalTransformsTmp = createOperations(
                     componentsSrc[1],
                     NN_NO_CHECK(srcGeogCRS)

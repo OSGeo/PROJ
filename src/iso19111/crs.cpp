@@ -1006,7 +1006,8 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                     if (firstResAxisList[2]->_isEquivalentTo(
                             verticalAxisIfNotAlreadyPresent.get(),
                             util::IComparable::Criterion::EQUIVALENT) &&
-                        geogCRS->is2DPartOf3D(NN_NO_CHECK(firstResGeog))) {
+                        geogCRS->is2DPartOf3D(NN_NO_CHECK(firstResGeog),
+                                              dbContext)) {
                         return NN_NO_CHECK(
                             util::nn_dynamic_pointer_cast<CRS>(firstRes));
                     }
@@ -2371,7 +2372,8 @@ GeographicCRS::create(const util::PropertyMap &properties,
 /** \brief Return whether the current GeographicCRS is the 2D part of the
  * other 3D GeographicCRS.
  */
-bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
+bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other,
+                                 const io::DatabaseContextPtr &dbContext)
     PROJ_PURE_DEFN {
     const auto &axis = d->coordinateSystem_->axisList();
     const auto &otherAxis = other->d->coordinateSystem_->axisList();
@@ -2389,19 +2391,10 @@ bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
               util::IComparable::Criterion::EQUIVALENT))) {
         return false;
     }
-    const auto &thisDatum = GeodeticCRS::getPrivate()->datum_;
-    const auto &otherDatum = other->GeodeticCRS::getPrivate()->datum_;
-    if (thisDatum && otherDatum) {
-        return thisDatum->_isEquivalentTo(
-            otherDatum.get(), util::IComparable::Criterion::EQUIVALENT);
-    }
-    const auto &thisDatumEnsemble = datumEnsemble();
-    const auto &otherDatumEnsemble = other->datumEnsemble();
-    if (thisDatumEnsemble && otherDatumEnsemble) {
-        return thisDatumEnsemble->_isEquivalentTo(
-            otherDatumEnsemble.get(), util::IComparable::Criterion::EQUIVALENT);
-    }
-    return false;
+    const auto thisDatum = datumNonNull(dbContext);
+    const auto otherDatum = other->datumNonNull(dbContext);
+    return thisDatum->_isEquivalentTo(otherDatum.get(),
+                                      util::IComparable::Criterion::EQUIVALENT);
 }
 
 //! @endcond
@@ -2543,7 +2536,8 @@ GeographicCRS::demoteTo2D(const std::string &newName,
                 auto firstResAsGeogCRS =
                     util::nn_dynamic_pointer_cast<GeographicCRS>(firstRes);
                 if (firstResAsGeogCRS &&
-                    firstResAsGeogCRS->is2DPartOf3D(NN_NO_CHECK(this))) {
+                    firstResAsGeogCRS->is2DPartOf3D(NN_NO_CHECK(this),
+                                                    dbContext)) {
                     return NN_NO_CHECK(firstResAsGeogCRS);
                 }
             }
