@@ -1,9 +1,14 @@
 #!/bin/bash
 
 conda update -n base -c defaults conda -y
-conda install conda-build ninja compilers automake libtool -y
 
-./autogen.sh
+if [ "$PLATFORM" == "ubuntu-latest" ]; then
+    conda install conda-build ninja compilers automake libtool -y
+    ./autogen.sh
+else
+    conda install conda-build ninja compilers -y
+fi
+
 
 pwd
 ls
