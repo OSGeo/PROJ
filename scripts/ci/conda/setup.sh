@@ -1,7 +1,10 @@
 #!/bin/bash
 
-conda update -n base -c defaults conda
-conda install conda-build ninja compilers -y
+conda update -n base -c defaults conda -y
+conda install conda-build ninja compilers automake libtool -y
+
+./autogen.sh
+
 pwd
 ls
 git clone https://github.com/conda-forge/proj.4-feedstock.git
