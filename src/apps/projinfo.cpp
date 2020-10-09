@@ -99,9 +99,9 @@ static void usage() {
         << std::endl
         << "                [--identify] [--3d]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
-        << "                --searchpaths | --remote-data | "
-           "{object_definition} |"
-        << "                (-s {srs_def} -t {srs_def})" << std::endl;
+        << "                --searchpaths | --remote-data |" << std::endl
+        << "                {object_definition} | (-s {srs_def} -t {srs_def})"
+        << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
                  "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
