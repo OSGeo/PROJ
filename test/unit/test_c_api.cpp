@@ -845,6 +845,13 @@ TEST_F(CApi, proj_create_from_database) {
         EXPECT_EQ(proj_get_type(datum), PJ_TYPE_GEODETIC_REFERENCE_FRAME);
     }
     {
+        auto ensemble = proj_create_from_database(
+            m_ctxt, "EPSG", "6326", PJ_CATEGORY_DATUM_ENSEMBLE, false, nullptr);
+        ASSERT_NE(ensemble, nullptr);
+        ObjectKeeper keeper(ensemble);
+        EXPECT_EQ(proj_get_type(ensemble), PJ_TYPE_DATUM_ENSEMBLE);
+    }
+    {
         // International Terrestrial Reference Frame 2008
         auto datum = proj_create_from_database(
             m_ctxt, "EPSG", "1061", PJ_CATEGORY_DATUM, false, nullptr);

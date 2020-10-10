@@ -675,6 +675,9 @@ PJ *proj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                           codeStr, usePROJAlternativeGridNames != 0)
                       .as_nullable();
             break;
+        case PJ_CATEGORY_DATUM_ENSEMBLE:
+            obj = factory->createDatumEnsemble(codeStr).as_nullable();
+            break;
         }
         return pj_obj_create(ctx, NN_NO_CHECK(obj));
     } catch (const std::exception &e) {
