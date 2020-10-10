@@ -388,6 +388,12 @@ void WKTFormatter::leave() {
 
 // ---------------------------------------------------------------------------
 
+bool WKTFormatter::isAtTopLevel() const {
+    return d->level_ == 0 && d->indentLevel_ == 0;
+}
+
+// ---------------------------------------------------------------------------
+
 void WKTFormatter::startNode(const std::string &keyword, bool hasId) {
     if (!d->stackHasChild_.empty()) {
         d->startNewChild();
@@ -4733,13 +4739,7 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
         return util::nn_static_pointer_cast<BaseObject>(NN_NO_CHECK(crs));
     }
 
-    if (ci_equal(name, WKTConstants::DATUM) ||
-        ci_equal(name, WKTConstants::GEODETICDATUM) ||
-        ci_equal(name, WKTConstants::TRF)) {
-        return util::nn_static_pointer_cast<BaseObject>(
-            buildGeodeticReferenceFrame(node, PrimeMeridian::GREENWICH,
-                                        null_node));
-    }
+    // Datum handled by caller code WKTParser::createFromWKT()
 
     if (ci_equal(name, WKTConstants::ENSEMBLE)) {
         return util::nn_static_pointer_cast<BaseObject>(buildDatumEnsemble(
@@ -6441,8 +6441,36 @@ BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
  * @throw ParsingException
  */
 BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
-    WKTNodeNNPtr root = WKTNode::createFrom(wkt);
-    auto obj = d->build(root);
+    const auto build = [this, &wkt]() -> BaseObjectNNPtr {
+        size_t indexEnd;
+        WKTNodeNNPtr root = WKTNode::createFrom(wkt, 0, 0, indexEnd);
+        const std::string &name(root->GP()->value());
+        if (ci_equal(name, WKTConstants::DATUM) ||
+            ci_equal(name, WKTConstants::GEODETICDATUM) ||
+            ci_equal(name, WKTConstants::TRF)) {
+
+            auto primeMeridian = PrimeMeridian::GREENWICH;
+            if (indexEnd < wkt.size()) {
+                indexEnd = skipSpace(wkt, indexEnd);
+                if (indexEnd < wkt.size() && wkt[indexEnd] == ',') {
+                    ++indexEnd;
+                    indexEnd = skipSpace(wkt, indexEnd);
+                    if (indexEnd < wkt.size() &&
+                        ci_starts_with(wkt.c_str() + indexEnd,
+                                       WKTConstants::PRIMEM.c_str())) {
+                        primeMeridian = d->buildPrimeMeridian(
+                            WKTNode::createFrom(wkt, indexEnd + 1, 0, indexEnd),
+                            UnitOfMeasure::DEGREE);
+                    }
+                }
+            }
+            return d->buildGeodeticReferenceFrame(root, primeMeridian,
+                                                  null_node);
+        }
+        return d->build(root);
+    };
+
+    auto obj = build();
 
     const auto dialect = guessDialect(wkt);
     if (dialect == WKTGuessedDialect::WKT1_GDAL ||
