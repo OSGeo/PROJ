@@ -209,7 +209,7 @@ input:
     map_projection
 
 datum:
-    geodetic_reference_frame_without_pm | datum_ensemble |
+    geodetic_reference_frame_with_opt_pm | datum_ensemble |
     vertical_reference_frame | engineering_datum | parametric_datum |
     temporal_datum
 
@@ -966,6 +966,10 @@ irm_longitude_opt_separator_identifier_list:
   | signed_numeric_literal opt_separator_identifier_list
 
 // Geodetic reference frame
+
+geodetic_reference_frame_with_opt_pm:
+    geodetic_reference_frame_without_pm
+  | geodetic_reference_frame_without_pm wkt_separator prime_meridian
 
 geodetic_reference_frame_without_pm: geodetic_reference_frame_keyword
                           left_delimiter datum_name wkt_separator ellipsoid
