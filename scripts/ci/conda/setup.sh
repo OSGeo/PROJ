@@ -1,18 +1,11 @@
 #!/bin/bash
 
 conda update -n base -c defaults conda -y
-
-if [ "$PLATFORM" == "ubuntu-latest" ]; then
-    conda install conda-build ninja compilers automake libtool -y
-    ./autogen.sh
-else
-    conda install conda-build ninja compilers -y
-fi
-
+conda install conda-build ninja compilers -y
 
 pwd
 ls
-git clone https://github.com/conda-forge/proj.4-feedstock.git
+git clone https://github.com/hobu/proj.4-feedstock.git
 
 cd proj.4-feedstock
 cat > recipe/recipe_clobber.yaml <<EOL
