@@ -8163,6 +8163,40 @@ PJ *proj_crs_get_datum_forced(PJ_CONTEXT *ctx, const PJ *crs) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the frame reference epoch of a dynamic geodetic or vertical
+ * reference frame.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param datum Object of type DynamicGeodeticReferenceFrame or
+ * DynamicVerticalReferenceFrame (must not be NULL)
+ * @return the frame reference epoch as decimal year, or -1 in case of error.
+ *
+ * @since 7.2
+ */
+double proj_dynamic_datum_get_frame_reference_epoch(PJ_CONTEXT *ctx,
+                                                    const PJ *datum) {
+    SANITIZE_CTX(ctx);
+    if (!datum) {
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return -1;
+    }
+    auto dgrf = dynamic_cast<const DynamicGeodeticReferenceFrame *>(
+        datum->iso_obj.get());
+    auto dvrf = dynamic_cast<const DynamicVerticalReferenceFrame *>(
+        datum->iso_obj.get());
+    if (!dgrf && !dvrf) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a "
+                                          "DynamicGeodeticReferenceFrame or "
+                                          "DynamicVerticalReferenceFrame");
+        return -1;
+    }
+    const auto &frameReferenceEpoch =
+        dgrf ? dgrf->frameReferenceEpoch() : dvrf->frameReferenceEpoch();
+    return frameReferenceEpoch.value();
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns the coordinate system of a SingleCRS.
  *
  * The returned object must be unreferenced with proj_destroy() after

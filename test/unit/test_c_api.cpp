@@ -852,6 +852,8 @@ TEST_F(CApi, proj_create_from_database) {
         ObjectKeeper keeper(datum);
         EXPECT_EQ(proj_get_type(datum),
                   PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME);
+        EXPECT_EQ(proj_dynamic_datum_get_frame_reference_epoch(m_ctxt, datum),
+                  2005.0);
     }
     {
         // Norway Normal Null 2000
@@ -861,6 +863,8 @@ TEST_F(CApi, proj_create_from_database) {
         ObjectKeeper keeper(datum);
         EXPECT_EQ(proj_get_type(datum),
                   PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME);
+        EXPECT_EQ(proj_dynamic_datum_get_frame_reference_epoch(m_ctxt, datum),
+                  2000.0);
     }
     {
         auto op = proj_create_from_database(m_ctxt, "EPSG", "16031",

@@ -989,6 +989,7 @@ proj_degree_output
 proj_destroy
 proj_dmstor
 proj_download_file
+proj_dynamic_datum_get_frame_reference_epoch
 proj_ellipsoid_get_parameters
 proj_errno
 proj_errno_reset

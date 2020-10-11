@@ -1263,6 +1263,9 @@ PJ PROJ_DLL *proj_datum_ensemble_get_member(PJ_CONTEXT *ctx,
                                             const PJ *datum_ensemble,
                                             int member_index);
 
+double PROJ_DLL proj_dynamic_datum_get_frame_reference_epoch(PJ_CONTEXT *ctx,
+                                                     const PJ *datum);
+
 PJ PROJ_DLL *proj_crs_get_coordinate_system(PJ_CONTEXT *ctx, const PJ *crs);
 
 PJ_COORDINATE_SYSTEM_TYPE PROJ_DLL proj_cs_get_type(PJ_CONTEXT *ctx,
