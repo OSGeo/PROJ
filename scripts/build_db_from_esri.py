@@ -1259,7 +1259,7 @@ def import_vertcs():
                         datum_written.add(datum_code)
 
                         p = map_vdatum_esri_to_parameters[datum_code]
-                        sql = """INSERT INTO "vertical_datum" VALUES('ESRI','%s','%s',NULL,NULL,NULL,%d);""" % (
+                        sql = """INSERT INTO "vertical_datum" VALUES('ESRI','%s','%s',NULL,NULL,NULL,NULL,%d);""" % (
                             datum_code, p['esri_name'], p['deprecated'])
                         all_sql.append(sql)
                         sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','vertical_datum','ESRI','%s','%s','%s','%s','%s');""" % (datum_code, datum_code, extent_auth_name, extent_code, 'EPSG', '1024')

@@ -2081,7 +2081,8 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
 datum::VerticalReferenceFrameNNPtr
 AuthorityFactory::createVerticalDatum(const std::string &code) const {
     auto res =
-        d->runWithCodeParam("SELECT name, deprecated FROM "
+        d->runWithCodeParam("SELECT name, publication_date, "
+                            "frame_reference_epoch, deprecated FROM "
                             "vertical_datum WHERE auth_name = ? AND code = ?",
                             code);
     if (res.empty()) {
@@ -2091,11 +2092,23 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
     try {
         const auto &row = res.front();
         const auto &name = row[0];
-        const bool deprecated = row[1] == "1";
+        const auto &publication_date = row[1];
+        const auto &frame_reference_epoch = row[2];
+        const bool deprecated = row[3] == "1";
         auto props = d->createPropertiesSearchUsages("vertical_datum", code,
                                                      name, deprecated);
+        if (!publication_date.empty()) {
+            props.set("PUBLICATION_DATE", publication_date);
+        }
         auto anchor = util::optional<std::string>();
-        return datum::VerticalReferenceFrame::create(props, anchor);
+        return frame_reference_epoch.empty()
+                   ? datum::VerticalReferenceFrame::create(props, anchor)
+                   : datum::DynamicVerticalReferenceFrame::create(
+                         props, anchor,
+                         util::optional<datum::RealizationMethod>(),
+                         common::Measure(c_locale_stod(frame_reference_epoch),
+                                         common::UnitOfMeasure::YEAR),
+                         util::optional<std::string>());
     } catch (const std::exception &ex) {
         throw buildFactoryException("vertical reference frame", code, ex);
     }

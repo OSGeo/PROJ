@@ -181,6 +181,7 @@ CREATE TABLE vertical_datum (
     name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
     publication_date TEXT CHECK (NULL OR length(publication_date) = 10), --- YYYY-MM-DD format
+    frame_reference_epoch FLOAT, --- only set for dynamic datum, and should be set when it is a dynamic datum
     ensemble_accuracy FLOAT CHECK (ensemble_accuracy IS NULL OR ensemble_accuracy > 0), --- only for a datum ensemble. and should be set when it is a datum ensemble
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code)

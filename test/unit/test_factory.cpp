@@ -301,6 +301,18 @@ TEST(factory, AuthorityFactory_createVerticalDatum) {
     auto extent = domain->domainOfValidity();
     ASSERT_TRUE(extent != nullptr);
     EXPECT_TRUE(extent->isEquivalentTo(factory->createExtent("1262").get()));
+    EXPECT_TRUE(vrf->publicationDate().has_value());
+    EXPECT_EQ(vrf->publicationDate()->toString(), "2008-01-01");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, AuthorityFactory_createDynamicVerticalDatum) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto grf = factory->createVerticalDatum("1096"); // Norway Normal Null 2000
+    auto dvrf = nn_dynamic_pointer_cast<DynamicVerticalReferenceFrame>(grf);
+    ASSERT_TRUE(dvrf != nullptr);
+    EXPECT_EQ(dvrf->frameReferenceEpoch().value(), 2000.0);
 }
 
 // ---------------------------------------------------------------------------
@@ -1540,7 +1552,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO vertical_datum VALUES('EPSG','1027','EGM2008 "
-                    "geoid',NULL,NULL,NULL,0);"))
+                    "geoid',NULL,NULL,NULL,NULL,0);"))
             << last_error();
         ASSERT_TRUE(execute("INSERT INTO usage VALUES('EPSG',"
                             "'vertical_datum_1027_usage','vertical_datum',"

@@ -912,6 +912,8 @@ WKT2:2019 string:
 COORDINATEOPERATION["Inverse of SWEREF99 to RH2000 height",
     SOURCECRS[
         VERTCRS["RH2000 height",
+            DYNAMIC[
+                FRAMEEPOCH[2000]],
             VDATUM["Rikets hojdsystem 2000"],
             CS[vertical,1],
                 AXIS["gravity-related height (H)",up,

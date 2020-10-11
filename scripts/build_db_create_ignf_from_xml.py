@@ -154,7 +154,7 @@ def ingest_datums(root, all_sql, mapEllpsId, mapPmId):
                 id = node.attrib['id']
                 names = [_name.text for _name in node.iter('name')]
 
-                sql = """INSERT INTO "vertical_datum" VALUES('IGNF','%s','%s',NULL,NULL,NULL,0);"""% (id, names[0])
+                sql = """INSERT INTO "vertical_datum" VALUES('IGNF','%s','%s',NULL,NULL,NULL,NULL,0);"""% (id, names[0])
                 all_sql.append(sql)
 
                 mapVerticalDatumId[id] = ('IGNF', id)

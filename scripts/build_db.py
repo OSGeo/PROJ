@@ -177,7 +177,7 @@ def fill_vertical_datum(proj_db_cursor):
     for (datum_code, datum_name, publication_date, frame_reference_epoch, deprecated) in res:
         publication_date = compute_publication_date(datum_code, datum_name, frame_reference_epoch, publication_date)
         proj_db_cursor.execute(
-        "INSERT INTO vertical_datum VALUES (?, ?, ?, NULL, ?, NULL, ?)", (EPSG_AUTHORITY, datum_code, datum_name,publication_date, deprecated))
+        "INSERT INTO vertical_datum VALUES (?, ?, ?, NULL, ?, ?, NULL, ?)", (EPSG_AUTHORITY, datum_code, datum_name, publication_date, frame_reference_epoch, deprecated))
 
 
 def fill_datumensemble(proj_db_cursor):
@@ -192,7 +192,7 @@ def fill_datumensemble(proj_db_cursor):
         datum_type = subrows[0][0]
         if datum_type == 'vertical':
             datum_ensemble_member_table = 'vertical_datum_ensemble_member'
-            proj_db_cursor.execute("INSERT INTO vertical_datum (auth_name, code, name, description, publication_date, ensemble_accuracy, deprecated) VALUES (?, ?, ?, ?, ?, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, None, None, ensemble_accuracy, deprecated))
+            proj_db_cursor.execute("INSERT INTO vertical_datum (auth_name, code, name, description, publication_date, frame_reference_epoch, ensemble_accuracy, deprecated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, None, None, None, ensemble_accuracy, deprecated))
         else:
             datum_ensemble_member_table = 'geodetic_datum_ensemble_member'
             assert datum_type in ('dynamic geodetic', 'geodetic'), datum_code
@@ -201,7 +201,7 @@ def fill_datumensemble(proj_db_cursor):
             assert ellipsoid_code, datum_code
             assert prime_meridian_code, datum_code
             proj_db_cursor.execute(
-            "INSERT INTO geodetic_datum (auth_name, code, name, description, ellipsoid_auth_name, ellipsoid_code, prime_meridian_auth_name, prime_meridian_code, publication_date , ensemble_accuracy, deprecated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, None, EPSG_AUTHORITY, ellipsoid_code, EPSG_AUTHORITY, prime_meridian_code, None, ensemble_accuracy, deprecated))
+            "INSERT INTO geodetic_datum (auth_name, code, name, description, ellipsoid_auth_name, ellipsoid_code, prime_meridian_auth_name, prime_meridian_code, publication_date, frame_reference_epoch, ensemble_accuracy, deprecated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (EPSG_AUTHORITY, datum_code, datum_name, None, EPSG_AUTHORITY, ellipsoid_code, EPSG_AUTHORITY, prime_meridian_code, None, None, ensemble_accuracy, deprecated))
 
         proj_db_cursor.execute("SELECT datum_code, datum_sequence FROM epsg.epsg_datumensemblemember WHERE datum_ensemble_code = ? ORDER by datum_sequence", (datum_code,))
         for member_code, sequence in proj_db_cursor.fetchall():
