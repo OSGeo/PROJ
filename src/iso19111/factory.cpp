@@ -2101,14 +2101,15 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
             props.set("PUBLICATION_DATE", publication_date);
         }
         auto anchor = util::optional<std::string>();
-        return frame_reference_epoch.empty()
-                   ? datum::VerticalReferenceFrame::create(props, anchor)
-                   : datum::DynamicVerticalReferenceFrame::create(
-                         props, anchor,
-                         util::optional<datum::RealizationMethod>(),
-                         common::Measure(c_locale_stod(frame_reference_epoch),
-                                         common::UnitOfMeasure::YEAR),
-                         util::optional<std::string>());
+        if (frame_reference_epoch.empty()) {
+            return datum::VerticalReferenceFrame::create(props, anchor);
+        } else {
+            return datum::DynamicVerticalReferenceFrame::create(
+                props, anchor, util::optional<datum::RealizationMethod>(),
+                common::Measure(c_locale_stod(frame_reference_epoch),
+                                common::UnitOfMeasure::YEAR),
+                util::optional<std::string>());
+        }
     } catch (const std::exception &ex) {
         throw buildFactoryException("vertical reference frame", code, ex);
     }
@@ -5260,8 +5261,16 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
     case ObjectType::GEODETIC_REFERENCE_FRAME:
         sql = "SELECT code FROM geodetic_datum WHERE ";
         break;
+    case ObjectType::DYNAMIC_GEODETIC_REFERENCE_FRAME:
+        sql = "SELECT code FROM geodetic_datum WHERE "
+              "frame_reference_epoch IS NOT NULL AND ";
+        break;
     case ObjectType::VERTICAL_REFERENCE_FRAME:
         sql = "SELECT code FROM vertical_datum WHERE ";
+        break;
+    case ObjectType::DYNAMIC_VERTICAL_REFERENCE_FRAME:
+        sql = "SELECT code FROM vertical_datum WHERE "
+              "frame_reference_epoch IS NOT NULL AND ";
         break;
     case ObjectType::CRS:
         sql = "SELECT code FROM crs_view WHERE ";
@@ -5742,9 +5751,17 @@ AuthorityFactory::createObjectsFromNameEx(
                     res.emplace_back(
                         TableType("geodetic_datum", std::string()));
                     break;
+                case ObjectType::DYNAMIC_GEODETIC_REFERENCE_FRAME:
+                    res.emplace_back(
+                        TableType("geodetic_datum", "frame_reference_epoch"));
+                    break;
                 case ObjectType::VERTICAL_REFERENCE_FRAME:
                     res.emplace_back(
                         TableType("vertical_datum", std::string()));
+                    break;
+                case ObjectType::DYNAMIC_VERTICAL_REFERENCE_FRAME:
+                    res.emplace_back(
+                        TableType("vertical_datum", "frame_reference_epoch"));
                     break;
                 case ObjectType::CRS:
                     res.emplace_back(TableType("geodetic_crs", std::string()));
@@ -5824,9 +5841,13 @@ AuthorityFactory::createObjectsFromNameEx(
         sql += tableNameTypePair.first;
         sql += " WHERE 1 = 1 ";
         if (!tableNameTypePair.second.empty()) {
-            sql += "AND type = '";
-            sql += tableNameTypePair.second;
-            sql += "' ";
+            if (tableNameTypePair.second == "frame_reference_epoch") {
+                sql += "AND frame_reference_epoch IS NOT NULL ";
+            } else {
+                sql += "AND type = '";
+                sql += tableNameTypePair.second;
+                sql += "' ";
+            }
         }
         if (deprecated) {
             sql += "AND deprecated = 1 ";
@@ -5854,9 +5875,13 @@ AuthorityFactory::createObjectsFromNameEx(
         sql += tableNameTypePair.first;
         sql += "' ";
         if (!tableNameTypePair.second.empty()) {
-            sql += "AND ov.type = '";
-            sql += tableNameTypePair.second;
-            sql += "' ";
+            if (tableNameTypePair.second == "frame_reference_epoch") {
+                sql += "AND ov.frame_reference_epoch IS NOT NULL ";
+            } else {
+                sql += "AND ov.type = '";
+                sql += tableNameTypePair.second;
+                sql += "' ";
+            }
         }
         if (deprecated) {
             sql += "AND ov.deprecated = 1 ";

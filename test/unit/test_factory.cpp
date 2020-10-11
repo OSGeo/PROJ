@@ -1337,10 +1337,28 @@ TEST(factory, AuthorityFactory_getAuthorityCodes) {
         ASSERT_TRUE(!setGeodeticDatum.empty());
         factory->createGeodeticDatum(*(setGeodeticDatum.begin()));
 
+        auto setDynamicGeodeticDatum = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::DYNAMIC_GEODETIC_REFERENCE_FRAME);
+        ASSERT_TRUE(!setDynamicGeodeticDatum.empty());
+        auto dgrf =
+            factory->createGeodeticDatum(*(setDynamicGeodeticDatum.begin()));
+        EXPECT_TRUE(dynamic_cast<DynamicGeodeticReferenceFrame *>(dgrf.get()) !=
+                    nullptr);
+        EXPECT_LT(setDynamicGeodeticDatum.size(), setGeodeticDatum.size());
+
         auto setVerticalDatum = factory->getAuthorityCodes(
             AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME);
         ASSERT_TRUE(!setVerticalDatum.empty());
         factory->createVerticalDatum(*(setVerticalDatum.begin()));
+
+        auto setDynamicVerticalDatum = factory->getAuthorityCodes(
+            AuthorityFactory::ObjectType::DYNAMIC_VERTICAL_REFERENCE_FRAME);
+        ASSERT_TRUE(!setDynamicVerticalDatum.empty());
+        auto dvrf =
+            factory->createVerticalDatum(*(setDynamicVerticalDatum.begin()));
+        EXPECT_TRUE(dynamic_cast<DynamicVerticalReferenceFrame *>(dvrf.get()) !=
+                    nullptr);
+        EXPECT_LT(setDynamicVerticalDatum.size(), setVerticalDatum.size());
 
         std::set<std::string> setMerged;
         for (const auto &v : setGeodeticDatum) {
@@ -3128,12 +3146,34 @@ TEST(factory, createObjectsFromName) {
             .size(),
         1U);
 
+    // Dynamic Geodetic datum
+    EXPECT_EQ(factoryEPSG
+                  ->createObjectsFromName(
+                      "International Terrestrial Reference Frame 2008",
+                      {AuthorityFactory::ObjectType::
+                           DYNAMIC_GEODETIC_REFERENCE_FRAME},
+                      false, 2)
+                  .size(),
+              1U);
+
+    // Dynamic Vertical datum
+    EXPECT_EQ(
+        factoryEPSG
+            ->createObjectsFromName("Norway Normal Null 2000",
+                                    {AuthorityFactory::ObjectType::
+                                         DYNAMIC_VERTICAL_REFERENCE_FRAME},
+                                    false, 2)
+            .size(),
+        1U);
+
     const auto types = std::vector<AuthorityFactory::ObjectType>{
         AuthorityFactory::ObjectType::PRIME_MERIDIAN,
         AuthorityFactory::ObjectType::ELLIPSOID,
         AuthorityFactory::ObjectType::DATUM,
         AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME,
+        AuthorityFactory::ObjectType::DYNAMIC_GEODETIC_REFERENCE_FRAME,
         AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME,
+        AuthorityFactory::ObjectType::DYNAMIC_VERTICAL_REFERENCE_FRAME,
         AuthorityFactory::ObjectType::CRS,
         AuthorityFactory::ObjectType::GEODETIC_CRS,
         AuthorityFactory::ObjectType::GEOCENTRIC_CRS,

@@ -898,13 +898,21 @@ convertPJObjectTypeToObjectType(PJ_TYPE type, bool &valid) {
         break;
 
     case PJ_TYPE_GEODETIC_REFERENCE_FRAME:
-    case PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME:
         cppType = AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME;
         break;
 
+    case PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME:
+        cppType =
+            AuthorityFactory::ObjectType::DYNAMIC_GEODETIC_REFERENCE_FRAME;
+        break;
+
     case PJ_TYPE_VERTICAL_REFERENCE_FRAME:
-    case PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME:
         cppType = AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME;
+        break;
+
+    case PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME:
+        cppType =
+            AuthorityFactory::ObjectType::DYNAMIC_VERTICAL_REFERENCE_FRAME;
         break;
 
     case PJ_TYPE_DATUM_ENSEMBLE:

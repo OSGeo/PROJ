@@ -845,6 +845,24 @@ TEST_F(CApi, proj_create_from_database) {
         EXPECT_EQ(proj_get_type(datum), PJ_TYPE_GEODETIC_REFERENCE_FRAME);
     }
     {
+        // International Terrestrial Reference Frame 2008
+        auto datum = proj_create_from_database(
+            m_ctxt, "EPSG", "1061", PJ_CATEGORY_DATUM, false, nullptr);
+        ASSERT_NE(datum, nullptr);
+        ObjectKeeper keeper(datum);
+        EXPECT_EQ(proj_get_type(datum),
+                  PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME);
+    }
+    {
+        // Norway Normal Null 2000
+        auto datum = proj_create_from_database(
+            m_ctxt, "EPSG", "1096", PJ_CATEGORY_DATUM, false, nullptr);
+        ASSERT_NE(datum, nullptr);
+        ObjectKeeper keeper(datum);
+        EXPECT_EQ(proj_get_type(datum),
+                  PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME);
+    }
+    {
         auto op = proj_create_from_database(m_ctxt, "EPSG", "16031",
                                             PJ_CATEGORY_COORDINATE_OPERATION,
                                             false, nullptr);
@@ -1197,6 +1215,14 @@ TEST_F(CApi, proj_get_codes_from_database) {
         } else {
             ASSERT_NE(list, nullptr) << type;
             ASSERT_NE(list[0], nullptr) << type;
+            if (type == PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME ||
+                type == PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME) {
+                auto obj = proj_create_from_database(
+                    m_ctxt, "EPSG", list[0], PJ_CATEGORY_DATUM, false, nullptr);
+                ASSERT_NE(obj, nullptr);
+                ObjectKeeper keeper(obj);
+                EXPECT_EQ(proj_get_type(obj), type) << type << " " << list[0];
+            }
         }
     }
 }

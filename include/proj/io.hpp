@@ -1022,6 +1022,10 @@ class PROJ_GCC_DLL AuthorityFactory {
         /** Object of type operation::ConcatenatedOperation (and derived
            classes) */
         CONCATENATED_OPERATION,
+        /** Object of type datum::DynamicGeodeticReferenceFrame */
+        DYNAMIC_GEODETIC_REFERENCE_FRAME,
+        /** Object of type datum::DynamicVerticalReferenceFrame */
+        DYNAMIC_VERTICAL_REFERENCE_FRAME,
     };
 
     PROJ_DLL std::set<std::string>
