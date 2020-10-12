@@ -5,12 +5,12 @@ conda install conda-build ninja compilers -y
 
 pwd
 ls
-git clone https://github.com/hobu/proj.4-feedstock.git
+git clone https://github.com/conda-forge/proj.4-feedstock.git
 
 cd proj.4-feedstock
 cat > recipe/recipe_clobber.yaml <<EOL
 source:
-  git_url: https://github.com/hobu/PROJ.git
+  git_url: https://github.com/OSGeo/PROJ.git
   git_rev: ${GITHUB_SHA}
   url:
   sha256:
