@@ -26,7 +26,7 @@ Ellipsoid Size parameters
     Parameter      Description
     ============   ==============================================================
     +R             Radius of a spherical planet
-    +a             Semimajor axis of an ellipsoidal planet
+    +a             Semi-major axis of an ellipsoidal planet
     ============   ==============================================================
 
 Ellipsoid Shape parameters 
@@ -70,10 +70,9 @@ ellipsoid definitions.
 Local Ellipsoid examples 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 .. _pj_ellipsoid :
-
-    ============   ================================     ====================
+    ============   =================================    ============================            
     ellps          Parameters                           Datum
-    ============   ================================     =====================   
+    ============   =================================    ============================                  
     GRS80          a=6378137.0      rf=298.257222101    GRS 1980(IUGG, 1980)
     airy           a=6377563.396    b=6356256.910       Airy 1830
     bessel         a=6377397.155    rf=299.1528128      Bessel 1841
@@ -84,7 +83,7 @@ Local Ellipsoid examples
     WGS72          a=6378135.0      rf=298.26           WGS 72
     WGS84          a=6378137.0      rf=298.257223563    WGS 84
     sphere         a=6370997.0      b=6370997.0         Normal Sphere (r=6370997)
-    ============   ================================     ===========
+    ============   ================================     ============================
 
 If size and shape are given as ellps=xxx, later shape and size parameters
 are are taken into account as modifiers for the built in ellipsoid definition.
