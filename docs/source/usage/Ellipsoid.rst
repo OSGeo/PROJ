@@ -20,7 +20,7 @@ parameter.
 
 Ellipsoid Size parameters 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-..  ./oprations/options/ :
+.. _ellipsoid_parameters : PROJ/docs/source/oprations/options/
 
 	============   ==============================================================
 	Parameter      Description
@@ -31,7 +31,7 @@ Ellipsoid Size parameters
 
 Ellipsoid Shape parameters 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-..  ./oprations/options/ :
+.. _ellipsoid_parameters : PROJ/docs/source/oprations/options/
 
 	============   ==============================================================
 	Parameter      Description
@@ -48,7 +48,7 @@ the ellipsoid into a sphere with features defined by the ellipsoid.
 
 Ellipsoid Spherification parameters 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-..  ./oprations/options/ :
+.. _ellipsoid_parameters : PROJ/docs/source/oprations/options/
 
 	============   ==============================================================
 	Parameter      Description
@@ -69,7 +69,7 @@ ellipsoid definitions.
 
 Local Ellipsoid examples 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-..  ./oprations/options/ :
+.. _ellipsoid_parameters : PROJ/docs/source/oprations/options/
 
 	============   =================================    ============================            
 	ellps          Parameters                           Datum name
@@ -114,3 +114,4 @@ Spherical earth based on volume of ellipsoid
 
 :: 
 	proj=merc a=6378137.0 rf=298.25 +R_V
+
