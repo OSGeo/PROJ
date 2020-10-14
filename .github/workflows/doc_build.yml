@@ -20,7 +20,7 @@ jobs:
         run: |
             conda update -n base -c defaults conda
             conda install descartes shapely geopandas matplotlib proj
-      - name: Setup
+      - name: Plot
         shell: bash -l {0}
         working-directory: ./docs/plot
         run: |
@@ -56,6 +56,7 @@ jobs:
     - name: Doxygen
       shell: bash -l {0}
       run: |
+        mkdir -p docs/build
         doxygen Doxyfile
     - name: HTML
       shell: bash -l {0}
