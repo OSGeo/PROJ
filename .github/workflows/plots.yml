@@ -6,6 +6,8 @@ jobs:
 
   plots:
     runs-on: ubuntu-latest
+    env:
+      PROJ_EXE: proj
     steps:
       - name: Checkout
         uses: actions/checkout@v2
