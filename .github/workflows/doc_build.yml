@@ -48,6 +48,11 @@ jobs:
       run: |
           python3 --version
           sphinx-build --version
+    - uses: actions/download-artifact@v1
+      name: Images
+      with:
+        name: Images
+        path: ./docs/source/operations/projections/images
     - name: Lint .rst files
       shell: bash -l {0}
       run: |
