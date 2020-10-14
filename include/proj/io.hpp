@@ -252,6 +252,8 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL void startNode(const std::string &keyword, bool hasId);
     PROJ_INTERNAL void endNode();
 
+    PROJ_INTERNAL bool isAtTopLevel() const;
+
     PROJ_DLL WKTFormatter &simulCurNodeHasId();
 
     PROJ_INTERNAL void addQuotedString(const char *str);

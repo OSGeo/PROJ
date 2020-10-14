@@ -1300,6 +1300,13 @@ void GeodeticReferenceFrame::_exportToWKT(
     }
     // the PRIMEM is exported as a child of the CRS
     formatter->endNode();
+
+    if (formatter->isAtTopLevel()) {
+        const auto &l_primeMeridian(primeMeridian());
+        if (l_primeMeridian->nameStr() != "Greenwich") {
+            l_primeMeridian->_exportToWKT(formatter);
+        }
+    }
 }
 //! @endcond
 

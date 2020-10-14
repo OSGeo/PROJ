@@ -190,6 +190,28 @@ TEST(wkt_parse, datum_with_ANCHOR) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, datum_with_pm) {
+    const char *wkt =
+        "DATUM[\"Nouvelle Triangulation Francaise (Paris)\",\n"
+        "    ELLIPSOID[\"Clarke 1880 (IGN)\",6378249.2,293.466021293627,\n"
+        "        LENGTHUNIT[\"metre\",1]],\n"
+        "    ID[\"EPSG\",6807]],\n"
+        "PRIMEM[\"Paris\",2.5969213,\n"
+        "    ANGLEUNIT[\"grad\",0.0157079632679489],\n"
+        "    ID[\"EPSG\",8903]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto datum = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(datum != nullptr);
+    EXPECT_EQ(datum->primeMeridian()->nameStr(), "Paris");
+    EXPECT_EQ(
+        datum->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, datum_no_pm_not_earth) {
     auto obj = WKTParser().createFromWKT("DATUM[\"unnamed\",\n"
                                          "    ELLIPSOID[\"unnamed\",1,0,\n"
