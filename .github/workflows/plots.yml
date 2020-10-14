@@ -17,7 +17,7 @@ jobs:
         shell: bash -l {0}
         run: |
             conda update -n base -c defaults conda
-            conda install descartes shapely geopandas matplotlib
+            conda install descartes shapely geopandas matplotlib proj
       - name: Setup
         shell: bash -l {0}
         working-directory: ./docs/plot
