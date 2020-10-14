@@ -14,15 +14,15 @@ jobs:
           channels: conda-forge
           auto-update-conda: true
       - name: Setup
-          shell: bash -l {0}
-          run: |
-              conda update -n base -c defaults conda
-              conda install descartes shapely geopandas matplotlib
+        shell: bash -l {0}
+        run: |
+            conda update -n base -c defaults conda
+            conda install descartes shapely geopandas matplotlib
       - name: Setup
-          shell: bash -l {0}
-          working-directory: ./docs/plot
-          run: |
-              ./plot.sh
+        shell: bash -l {0}
+        working-directory: ./docs/plot
+        run: |
+            ./plot.sh
 
       - uses: actions/upload-artifact@v2
         with:
