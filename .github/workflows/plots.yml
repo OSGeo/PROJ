@@ -4,7 +4,6 @@ on: [push, pull_request]
 
 jobs:
 
-  needs: [Docs]
   plots:
 
     runs-on: ubuntu-latest
