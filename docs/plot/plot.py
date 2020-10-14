@@ -46,6 +46,7 @@ from __future__ import division
 
 import os
 import os.path
+import shutil
 import sys
 import json
 import subprocess
@@ -61,8 +62,12 @@ from shapely.geometry import shape
 from shapely.ops import transform
 from descartes import PolygonPatch
 
-PROJ = os.environ.get('PROJ_EXE', '../../src/proj')
-PROJ_LIB = '../../data'
+PROJ_COMMAND = os.environ.get('PROJ_EXE', '../../src/proj')
+if not os.path.exists(PROJ_COMMAND):
+    PROJ = shutil.which(PROJ_COMMAND)
+else:
+    PROJ = PROJ_COMMAND
+PROJ_LIB = os.environ.get('PROJ_LIB', '../../data')
 
 LINE_LOW = 'data/coastline.geojson'
 LINE_MED = 'data/coastline50.geojson'
@@ -160,9 +165,9 @@ def project(coordinates, proj_string, in_radians=False):
     try:
         proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                 env={'PROJ_LIB': os.path.abspath(PROJ_LIB)})
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         print("'proj' binary not found, set the PROJ_EXE environment variable "
-              "to point to your local 'proj' binary")
+              "to point to your local 'proj' binary --%s--" % e)
         exit(1)
 
     stdout, _ = proc.communicate(coordinates.tobytes(order='C'))
@@ -223,7 +228,10 @@ def resample_polygon(polygon):
     '''
     Use interp_coords() to resample (multi)polygons.
     '''
-    xy = polygon.exterior.coords.xy
+    try:
+        xy = polygon.exterior.coords.xy
+    except AttributeError: #no xy's
+        return polygon
     ext = interp_coords(xy, 2)
     # interiors
     rings = []
@@ -267,8 +275,11 @@ def plotproj(plotdef, data, outdir):
         proj_geom = transform(trans, pol)
 
         if plotdef['type'] == 'poly':
-            patch = PolygonPatch(proj_geom, fc=COLOR_LAND, zorder=0)
-            axes.add_patch(patch)
+            try:
+                patch = PolygonPatch(proj_geom, fc=COLOR_LAND, zorder=0)
+                axes.add_patch(patch)
+            except TypeError:
+                pass
         else:
             x, y = proj_geom.xy
             axes.plot(x, y, color=COLOR_COAST, linewidth=0.5)

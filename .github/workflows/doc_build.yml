@@ -1,21 +1,93 @@
-name: Doc building
+name: Docs
 
 on: [push, pull_request]
 
 jobs:
-
-  doc_building:
+  plots:
+    name: Plots
     runs-on: ubuntu-latest
+    env:
+      PROJ_EXE: proj
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Install Requirements
+      - uses: goanpeca/setup-miniconda@v1
+        with:
+          channels: conda-forge
+          auto-update-conda: true
+      - name: Setup
+        shell: bash -l {0}
         run: |
-          sudo apt update
-          sudo apt install -y python3-pip python3-setuptools python3-dev python3-wheel doxygen gcc
-          sudo pip3 install sphinx sphinx-rtd-theme sphinxcontrib-bibtex breathe
-
-      - name: Build doc
+            conda update -n base -c defaults conda
+            conda install descartes shapely geopandas matplotlib proj
+      - name: Plot
+        shell: bash -l {0}
+        working-directory: ./docs/plot
         run: |
-            (cd docs; make html)
+            ./plot.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Images
+          path: docs/plot/images
+
+  docs:
+    name: Docs
+
+    needs: [plots]
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    container: osgeo/proj-docs
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Print versions
+      shell: bash -l {0}
+      run: |
+          python3 --version
+          sphinx-build --version
+    - uses: actions/download-artifact@v2
+      name: Images
+      with:
+        name: Images
+        path: ./docs/source/operations/projections/images
+    - name: Lint .rst files
+      shell: bash -l {0}
+      run: |
+        if find . -name '*.rst' | xargs grep -P '\t'; then echo 'Tabs are bad, please use four spaces in .rst files.'; false; fi
+      working-directory: ./docs
+    - name: Doxygen
+      shell: bash -l {0}
+      run: |
+        mkdir -p docs/build
+        doxygen Doxyfile
+    - name: HTML
+      shell: bash -l {0}
+      run: |
+        make html
+      working-directory: ./docs
+    - name: PDF
+      shell: bash -l {0}
+      run: |
+        make latexpdf
+      working-directory: ./docs
+    - name: Spelling
+      shell: bash -l {0}
+      run: |
+        make spelling
+      working-directory: ./docs
+    - uses: actions/upload-artifact@v2
+      with:
+        name: PDF
+        path: docs/build/latex/proj.pdf
+    - uses: actions/upload-artifact@v2
+      with:
+        name: HTML
+        path: docs/build/html/*
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Misspelled
+        path: docs/build/spelling/output.txt
+

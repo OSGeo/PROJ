@@ -45,7 +45,7 @@ The Bertin 1953 projection has no special options. Its rotation parameters
 are fixed. Here is an example of a forward projection with scale 1:
 
     $ echo 122 47 | src/proj +proj=bertin1953 +R=1
-    0.72	0.73
+    0.72    0.73
 
 Parameters
 ################################################################################
