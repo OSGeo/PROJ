@@ -32,7 +32,7 @@ Equal Earth
    proj-string: ``+proj=eqearth``
 
 
-The Equal Earth projection is intended for making world maps. Equal Earth is a 
+The Equal Earth projection is intended for making world maps. Equal Earth is a
 projection inspired by the Robinson projection, but unlike
 the Robinson projection retains the relative size of areas. The projection
 was designed in 2018 by Bojan Savric, Tom Patterson and Bernhard Jenny :cite:`Savric2018`.
@@ -45,7 +45,7 @@ The Equal Earth projection has no special options. Here is
 an example of an forward projection on a sphere with a radius of 1 m::
 
     $ echo 122 47 | src/proj +proj=eqearth +R=1
-    1.55	0.89
+    1.55    0.89
 
 Parameters
 ################################################################################

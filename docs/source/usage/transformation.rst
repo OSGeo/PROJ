@@ -209,11 +209,11 @@ With PROJ 6, you can simply use the following:
 
     cs2cs "GGRS87" "WGS 84"
     35 20
-    35d0'9.575"N	20d0'5.467"E 0.000
+    35d0'9.575"N    20d0'5.467"E 0.000
 
     cs2cs EPSG:4121 EPSG:4326
     35 20
-    35d0'9.575"N	20d0'5.467"E 0.000
+    35d0'9.575"N    20d0'5.467"E 0.000
 
 The EPSG database provides this example for transforming from WGS72 to WGS84
 using an approximated 7 parameter transformation.
@@ -232,11 +232,11 @@ latitude and longitude)
 
     cs2cs "WGS 72" "WGS 84"
     55 4
-    55d0'0.09"N	4d0'0.554"E 0.000
+    55d0'0.09"N 4d0'0.554"E 0.000
 
     cs2cs EPSG:4322 EPSG:4326
     55 4
-    55d0'0.09"N	4d0'0.554"E 0.000
+    55d0'0.09"N 4d0'0.554"E 0.000
 
 
 Grid Based Datum Adjustments

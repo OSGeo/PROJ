@@ -41,12 +41,12 @@ The Cassini-Soldner was also used for the detailed mapping of many German states
 Example using EPSG 30200 (Trinidad 1903, units in clarke's links)::
 
     $ echo 0.17453293 -1.08210414 | proj +proj=cass +lat_0=10.44166666666667 +lon_0=-61.33333333333334 +x_0=86501.46392051999 +y_0=65379.0134283 +a=6378293.645208759 +b=6356617.987679838 +to_meter=0.201166195164
-    66644.94	82536.22
+    66644.94    82536.22
 
 Example using EPSG 3068 (Soldner Berlin)::
 
     $ echo 13.5 52.4 | proj +proj=cass +lat_0=52.41864827777778 +lon_0=13.62720366666667 +x_0=40000 +y_0=10000 +ellps=bessel +units=m
-    31343.05	7932.76
+    31343.05    7932.76
 
 Options
 ################################################################################
