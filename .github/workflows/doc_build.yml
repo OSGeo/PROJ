@@ -81,13 +81,13 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: PDF
-        path: doc/build/latex/PROJ.pdf
+        path: docs/build/latex/proj.pdf
     - uses: actions/upload-artifact@v2
       with:
         name: HTML
-        path: doc/build/html/*
+        path: docs/build/html/*
     - uses: actions/upload-artifact@v2
       with:
         name: Misspelled
-        path: doc/build/spelling/output.txt
+        path: docs/build/spelling/output.txt
 
