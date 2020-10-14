@@ -48,7 +48,7 @@ jobs:
       run: |
           python3 --version
           sphinx-build --version
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v2
       name: Images
       with:
         name: Images
