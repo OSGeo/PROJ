@@ -844,8 +844,7 @@ Alternative non-deprecated CRS:
   EPSG:3003
 
 PROJ.4 string:
-+proj=tmerc +lat_0=0 +lon_0=9 +k=0.9996 +x_0=1500000 +y_0=0 +ellps=intl +pm=rome
-      +units=m +no_defs +type=crs
++proj=tmerc +lat_0=0 +lon_0=9 +k=0.9996 +x_0=1500000 +y_0=0 +ellps=intl +pm=rome +units=m +no_defs +type=crs
 
 WKT2:2019 string:
 PROJCRS["Monte Mario (Rome) / Italy zone 1",
@@ -914,8 +913,7 @@ GEOGCRS["WGS 84",
 
 Testing CRS with towgs84: projinfo -o PROJ EPSG:25832
 PROJ.4 string:
-+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
-      +type=crs
++proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs
 
 Testing RH2000 height to SWEREF99: projinfo -s EPSG:5613 -t EPSG:4977
 Candidate operations found: 1

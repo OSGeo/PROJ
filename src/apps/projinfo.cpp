@@ -352,7 +352,8 @@ static void outputObject(
 
                 auto formatter = PROJStringFormatter::create(
                     PROJStringFormatter::Convention::PROJ_5, dbContext);
-                formatter->setMultiLine(!outputOpt.singleLine);
+                formatter->setMultiLine(!outputOpt.singleLine &&
+                                        crs == nullptr);
                 std::cout << objToExport->exportToPROJString(formatter.get())
                           << std::endl;
             } catch (const std::exception &e) {
