@@ -50,8 +50,8 @@ echo "Testing projinfo -o ALL EPSG:4326" >> ${OUT}
 $EXE -o ALL EPSG:4326 >>${OUT}
 echo "" >>${OUT}
 
-echo "Testing projinfo -s EPSG:4326 -t EPSG:32631" >> ${OUT}
-$EXE -s EPSG:4326 -t EPSG:32631 >>${OUT}
+echo "Testing projinfo -s EPSG:4326 -t EPSG:32631 --single-line" >> ${OUT}
+$EXE -s EPSG:4326 -t EPSG:32631 --single-line >>${OUT}
 echo "" >>${OUT}
 
 echo "Testing projinfo -s NAD27 -t NAD83" >> ${OUT}

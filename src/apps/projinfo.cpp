@@ -350,11 +350,10 @@ static void outputObject(
                     objToExport = projStringExportable;
                 }
 
-                std::cout << objToExport->exportToPROJString(
-                                 PROJStringFormatter::create(
-                                     PROJStringFormatter::Convention::PROJ_5,
-                                     dbContext)
-                                     .get())
+                auto formatter = PROJStringFormatter::create(
+                    PROJStringFormatter::Convention::PROJ_5, dbContext);
+                formatter->setMultiLine(!outputOpt.singleLine);
+                std::cout << objToExport->exportToPROJString(formatter.get())
                           << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
@@ -376,9 +375,7 @@ static void outputObject(
                 }
                 auto formatter =
                     WKTFormatter::create(WKTFormatter::Convention::WKT2_2015);
-                if (outputOpt.singleLine) {
-                    formatter->setMultiLine(false);
-                }
+                formatter->setMultiLine(!outputOpt.singleLine);
                 formatter->setStrict(outputOpt.strict);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {

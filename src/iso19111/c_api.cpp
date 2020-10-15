@@ -1504,9 +1504,16 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
  * @param obj Object (must not be NULL)
  * @param type PROJ String version.
  * @param options NULL-terminated list of strings with "KEY=VALUE" format. or
- * NULL.
- * The currently recognized option is USE_APPROX_TMERC=YES to add the +approx
- * flag to +proj=tmerc or +proj=utm
+ * NULL. Currently supported options are:
+ * <ul>
+ * <li>USE_APPROX_TMERC=YES to add the +approx flag to +proj=tmerc or
+ * +proj=utm.</li>
+ * <li>MULTILINE=YES/NO. Defaults to NO</li>
+ * <li>INDENTATION_WIDTH=number. Defaults to 2 (when multiline output is
+ * on).</li>
+ * <li>MAX_LINE_LENGTH=number. Defaults to 80 (when multiline output is
+ * on).</li>
+ * </ul>
  * @return a string, or NULL in case of error.
  */
 const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
@@ -1542,9 +1549,21 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
     try {
         auto formatter = PROJStringFormatter::create(convention, dbContext);
-        if (options != nullptr && options[0] != nullptr) {
-            if (ci_equal(options[0], "USE_APPROX_TMERC=YES")) {
-                formatter->setUseApproxTMerc(true);
+        for (auto iter = options; iter && iter[0]; ++iter) {
+            const char *value;
+            if ((value = getOptionValue(*iter, "MULTILINE="))) {
+                formatter->setMultiLine(ci_equal(value, "YES"));
+            } else if ((value = getOptionValue(*iter, "INDENTATION_WIDTH="))) {
+                formatter->setIndentationWidth(std::atoi(value));
+            } else if ((value = getOptionValue(*iter, "MAX_LINE_LENGTH="))) {
+                formatter->setMaxLineLength(std::atoi(value));
+            } else if ((value = getOptionValue(*iter, "USE_APPROX_TMERC="))) {
+                formatter->setUseApproxTMerc(ci_equal(value, "YES"));
+            } else {
+                std::string msg("Unknown option :");
+                msg += *iter;
+                proj_log_error(ctx, __FUNCTION__, msg.c_str());
+                return nullptr;
             }
         }
         obj->lastPROJString = exportable->exportToPROJString(formatter.get());

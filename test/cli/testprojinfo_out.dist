@@ -182,7 +182,7 @@ PROJJSON:
   }
 }
 
-Testing projinfo -s EPSG:4326 -t EPSG:32631
+Testing projinfo -s EPSG:4326 -t EPSG:32631 --single-line
 Candidate operations found: 1
 -------------------------------------
 Operation No. 1:
@@ -193,25 +193,7 @@ PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=31 +ellps=WGS84
 
 WKT2:2019 string:
-CONVERSION["UTM zone 31N",
-    METHOD["Transverse Mercator",
-        ID["EPSG",9807]],
-    PARAMETER["Latitude of natural origin",0,
-        ANGLEUNIT["degree",0.0174532925199433],
-        ID["EPSG",8801]],
-    PARAMETER["Longitude of natural origin",3,
-        ANGLEUNIT["degree",0.0174532925199433],
-        ID["EPSG",8802]],
-    PARAMETER["Scale factor at natural origin",0.9996,
-        SCALEUNIT["unity",1],
-        ID["EPSG",8805]],
-    PARAMETER["False easting",500000,
-        LENGTHUNIT["metre",1],
-        ID["EPSG",8806]],
-    PARAMETER["False northing",0,
-        LENGTHUNIT["metre",1],
-        ID["EPSG",8807]],
-    ID["EPSG",16031]]
+CONVERSION["UTM zone 31N",METHOD["Transverse Mercator",ID["EPSG",9807]],PARAMETER["Latitude of natural origin",0,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8801]],PARAMETER["Longitude of natural origin",3,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["Scale factor at natural origin",0.9996,SCALEUNIT["unity",1],ID["EPSG",8805]],PARAMETER["False easting",500000,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",0,LENGTHUNIT["metre",1],ID["EPSG",8807]],ID["EPSG",16031]]
 
 Testing projinfo -s NAD27 -t NAD83
 Candidate operations found: 1
@@ -289,7 +271,12 @@ Operation No. 1:
 DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ca_nrc_ntv1_can.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=hgridshift +grids=ca_nrc_ntv1_can.tif
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (3)",
@@ -338,7 +325,12 @@ Operation No. 2:
 DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ca_nrc_ntv2_0.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=hgridshift +grids=ca_nrc_ntv2_0.tif
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (4)",
@@ -387,7 +379,12 @@ Operation No. 3:
 DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, United States (USA) - CONUS including EEZ -onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=us_noaa_conus.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=hgridshift +grids=us_noaa_conus.tif
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (1)",
@@ -436,7 +433,12 @@ Operation No. 4:
 DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, United States (USA) - Alaska including EEZ.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=us_noaa_alaska.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=hgridshift +grids=us_noaa_alaska.tif
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (2)",
@@ -485,7 +487,12 @@ Operation No. 5:
 DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ca_que_mern_na27na83.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=hgridshift +grids=ca_que_mern_na27na83.tif
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (6)",
@@ -534,7 +541,12 @@ Operation No. 6:
 EPSG:1462, NAD27 to NAD83 (5), 2.0 m, Canada - Quebec.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=GS2783v1.QUE +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=hgridshift +grids=GS2783v1.QUE
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (5)",
@@ -586,7 +598,12 @@ Operation No. 7:
 EPSG:9111, NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=SK27-83.gsb +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=hgridshift +grids=SK27-83.gsb
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["NAD27 to NAD83 (9)",
@@ -827,7 +844,8 @@ Alternative non-deprecated CRS:
   EPSG:3003
 
 PROJ.4 string:
-+proj=tmerc +lat_0=0 +lon_0=9 +k=0.9996 +x_0=1500000 +y_0=0 +ellps=intl +pm=rome +units=m +no_defs +type=crs
++proj=tmerc +lat_0=0 +lon_0=9 +k=0.9996 +x_0=1500000 +y_0=0 +ellps=intl +pm=rome
+      +units=m +no_defs +type=crs
 
 WKT2:2019 string:
 PROJCRS["Monte Mario (Rome) / Italy zone 1",
@@ -896,7 +914,8 @@ GEOGCRS["WGS 84",
 
 Testing CRS with towgs84: projinfo -o PROJ EPSG:25832
 PROJ.4 string:
-+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs
++proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
+      +type=crs
 
 Testing RH2000 height to SWEREF99: projinfo -s EPSG:5613 -t EPSG:4977
 Candidate operations found: 1
@@ -906,7 +925,12 @@ Operation No. 1:
 INVERSE(DERIVED_FROM(PROJ)):EPSG_4977_TO_EPSG_5613, Inverse of SWEREF99 to RH2000 height, unknown accuracy, Sweden - onshore.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=se_lantmateriet_SWEN17_RH2000.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=vgridshift +grids=se_lantmateriet_SWEN17_RH2000.tif +multiplier=1
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 WKT2:2019 string:
 COORDINATEOPERATION["Inverse of SWEREF99 to RH2000 height",
@@ -954,7 +978,12 @@ Operation No. 1:
 unknown id, Inverse of NAD83(2011) to NAVD88 height (3), 0.015 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 -------------------------------------
 Operation No. 2:
@@ -962,7 +991,12 @@ Operation No. 2:
 unknown id, Inverse of NAD83(2011) to NAVD88 height (2), 0.02 m, United States (USA) - Alaska.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=us_noaa_g2012ba0.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=vgridshift +grids=us_noaa_g2012ba0.tif +multiplier=1
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing NGF IGN69 height to RGF93: projinfo -s EPSG:5720 -t EPSG:4965 -o PROJ
 Candidate operations found: 1
@@ -972,7 +1006,12 @@ Operation No. 1:
 INVERSE(DERIVED_FROM(EPSG)):8885, Inverse of RGF93 to NGF-IGN69 height (3), 0.01 m, France - mainland onshore.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=fr_ign_RAF18.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=vgridshift +grids=fr_ign_RAF18.tif +multiplier=1
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing EPSG:32631 --3d
 PROJ.4 string:
@@ -1039,7 +1078,11 @@ unknown id, Ballpark geocentric translation from ETRS89 to WGS 84, unknown accur
 INVERSE(EPSG):9225, Inverse of WGS 84 to ETRS89 (2), 0.1 m, Germany - offshore North Sea. Netherlands - offshore east of 5E.
 
 Testing -s +proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs -t EPSG:4326 -o PROJ -q
-+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=@foo.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=vgridshift +grids=@foo.gtx +multiplier=1
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing -s "GDA94" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include transformations through ITRF2008 and GDA2020
 Candidate operations found: 7
@@ -1083,7 +1126,12 @@ Operation No. 1:
 DERIVED_FROM(EPSG):5656, GDA94 to AHD height (49), 0.15 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Western Australia; Victoria.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid09_V1.01.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid09_V1.01.tif +multiplier=1
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing -s "GDA2020" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects
 Candidate operations found: 1
@@ -1093,7 +1141,13 @@ Operation No. 1:
 DERIVED_FROM(EPSG):8451, GDA2020 to AHD height (1), 0.15 m, Australia - Australian Capital Territory, New South Wales, Northern Territory, Queensland, South Australia, Tasmania, Western Australia and Victoria - onshore. Christmas Island - onshore. Cocos and Keeling Islands - onshore.
 
 PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid2020_20180201.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid2020_20180201.tif
+        +multiplier=1
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing -k ellipsoid WGS84
 PROJ string:
@@ -1128,23 +1182,92 @@ DATUM["World Geodetic System 1984",
     ID["EPSG",6326]]
 
 Testing -k operation EPSG:8457 -o PROJ -q
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 +step +proj=cart +ellps=bessel +step +proj=helmert +x=674.374 +y=15.056 +z=405.346 +step +inv +proj=cart +ellps=WGS84 +step +proj=pop +v_3 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=push +v_3
+  +step +proj=cart +ellps=bessel
+  +step +proj=helmert +x=674.374 +y=15.056 +z=405.346
+  +step +inv +proj=cart +ellps=WGS84
+  +step +proj=pop +v_3
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing -s NZGD2000 -t ITRF96 -o PROJ -q
-+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=axisswap +order=2,1 +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=rad +xy_out=deg
++proj=pipeline
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=axisswap +order=2,1
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
 
 Testing -s NZGD2000 -t ITRF97 -o PROJ -q
-+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=axisswap +order=2,1 +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json +step +proj=cart +ellps=GRS80 +step +inv +proj=helmert +x=0 +y=-0.00051 +z=0.01553 +rx=-0.00016508 +ry=0.00026897 +rz=5.984e-05 +s=-0.00151099 +dx=0.00069 +dy=-0.0001 +dz=0.00186 +drx=-1.347e-05 +dry=1.514e-05 +drz=-2.7e-07 +ds=-0.00019201 +t_epoch=2000 +convention=position_vector +step +inv +proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=axisswap +order=2,1
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+  +step +proj=cart +ellps=GRS80
+  +step +inv +proj=helmert +x=0 +y=-0.00051 +z=0.01553 +rx=-0.00016508
+        +ry=0.00026897 +rz=5.984e-05 +s=-0.00151099 +dx=0.00069 +dy=-0.0001
+        +dz=0.00186 +drx=-1.347e-05 +dry=1.514e-05 +drz=-2.7e-07 +ds=-0.00019201
+        +t_epoch=2000 +convention=position_vector
+  +step +inv +proj=cart +ellps=GRS80
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing -s NZGD2000 -t ITRF2000 -o PROJ -q
-+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=axisswap +order=2,1 +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json +step +proj=cart +ellps=GRS80 +step +inv +proj=helmert +x=0.0067 +y=0.00379 +z=-0.00717 +rx=-0.00016508 +ry=0.00026897 +rz=0.00011984 +s=6.901e-05 +dx=0.00069 +dy=-0.0007 +dz=0.00046 +drx=-1.347e-05 +dry=1.514e-05 +drz=1.973e-05 +ds=-0.00018201 +t_epoch=2000 +convention=position_vector +step +inv +proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=axisswap +order=2,1
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+  +step +proj=cart +ellps=GRS80
+  +step +inv +proj=helmert +x=0.0067 +y=0.00379 +z=-0.00717 +rx=-0.00016508
+        +ry=0.00026897 +rz=0.00011984 +s=6.901e-05 +dx=0.00069 +dy=-0.0007
+        +dz=0.00046 +drx=-1.347e-05 +dry=1.514e-05 +drz=1.973e-05 +ds=-0.00018201
+        +t_epoch=2000 +convention=position_vector
+  +step +inv +proj=cart +ellps=GRS80
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing -s NZGD2000 -t ITRF2005 -o PROJ -q
-+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=axisswap +order=2,1 +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json +step +proj=cart +ellps=GRS80 +step +inv +proj=helmert +x=0.0068 +y=0.00299 +z=-0.01297 +rx=-0.00016508 +ry=0.00026897 +rz=0.00011984 +s=0.00046901 +dx=0.00049 +dy=-0.0006 +dz=-0.00134 +drx=-1.347e-05 +dry=1.514e-05 +drz=1.973e-05 +ds=-0.00010201 +t_epoch=2000 +convention=position_vector +step +inv +proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=axisswap +order=2,1
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+  +step +proj=cart +ellps=GRS80
+  +step +inv +proj=helmert +x=0.0068 +y=0.00299 +z=-0.01297 +rx=-0.00016508
+        +ry=0.00026897 +rz=0.00011984 +s=0.00046901 +dx=0.00049 +dy=-0.0006
+        +dz=-0.00134 +drx=-1.347e-05 +dry=1.514e-05 +drz=1.973e-05
+        +ds=-0.00010201 +t_epoch=2000 +convention=position_vector
+  +step +inv +proj=cart +ellps=GRS80
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing -s NZGD2000 -t ITRF2008 -o PROJ -q
-+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=axisswap +order=2,1 +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json +step +proj=cart +ellps=GRS80 +step +inv +proj=helmert +x=0.0048 +y=0.00209 +z=-0.01767 +rx=-0.00016508 +ry=0.00026897 +rz=0.00011984 +s=0.00140901 +dx=0.00079 +dy=-0.0006 +dz=-0.00134 +drx=-1.347e-05 +dry=1.514e-05 +drz=1.973e-05 +ds=-0.00010201 +t_epoch=2000 +convention=position_vector +step +inv +proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=axisswap +order=2,1
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+  +step +proj=cart +ellps=GRS80
+  +step +inv +proj=helmert +x=0.0048 +y=0.00209 +z=-0.01767 +rx=-0.00016508
+        +ry=0.00026897 +rz=0.00011984 +s=0.00140901 +dx=0.00079 +dy=-0.0006
+        +dz=-0.00134 +drx=-1.347e-05 +dry=1.514e-05 +drz=1.973e-05
+        +ds=-0.00010201 +t_epoch=2000 +convention=position_vector
+  +step +inv +proj=cart +ellps=GRS80
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 
 Testing -s NZGD2000 -t ITRF2014 -o PROJ -q
-+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=axisswap +order=2,1 +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json +step +proj=cart +ellps=GRS80 +step +inv +proj=helmert +x=0.0064 +y=0.00399 +z=-0.01427 +rx=-0.00016508 +ry=0.00026897 +rz=0.00011984 +s=0.00108901 +dx=0.00079 +dy=-0.0006 +dz=-0.00144 +drx=-1.347e-05 +dry=1.514e-05 +drz=1.973e-05 +ds=-7.201e-05 +t_epoch=2000 +convention=position_vector +step +inv +proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
++proj=pipeline
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=axisswap +order=2,1
+  +step +proj=defmodel +model=nz_linz_nzgd2000-20180701.json
+  +step +proj=cart +ellps=GRS80
+  +step +inv +proj=helmert +x=0.0064 +y=0.00399 +z=-0.01427 +rx=-0.00016508
+        +ry=0.00026897 +rz=0.00011984 +s=0.00108901 +dx=0.00079 +dy=-0.0006
+        +dz=-0.00144 +drx=-1.347e-05 +dry=1.514e-05 +drz=1.973e-05 +ds=-7.201e-05
+        +t_epoch=2000 +convention=position_vector
+  +step +inv +proj=cart +ellps=GRS80
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
 

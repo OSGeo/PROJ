@@ -3764,16 +3764,26 @@ TEST_F(CApi, proj_coordoperation_create_inverse) {
     ObjectKeeper keeper_Pinversed(Pinversed);
     ASSERT_NE(Pinversed, nullptr);
 
-    auto projstr = proj_as_proj_string(m_ctxt, Pinversed, PJ_PROJ_5, nullptr);
+    const char *options[] = {"MULTILINE=YES", "INDENTATION_WIDTH=4",
+                             "MAX_LINE_LENGTH=40", nullptr};
+    auto projstr = proj_as_proj_string(m_ctxt, Pinversed, PJ_PROJ_5, options);
     ASSERT_NE(projstr, nullptr);
-    EXPECT_EQ(std::string(projstr),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 "
-              "+step +proj=cart +ellps=WGS84 +step +inv +proj=helmert +x=293 "
-              "+y=836 +z=318 +rx=0.5 +ry=1.6 +rz=-2.8 +s=2.1 "
-              "+convention=position_vector +step +inv +proj=cart "
-              "+ellps=evrst30 +step +proj=pop +v_3 +step +proj=unitconvert "
-              "+xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1");
+    const char *expected_projstr = "+proj=pipeline\n"
+                                   "    +step +proj=axisswap +order=2,1\n"
+                                   "    +step +proj=unitconvert +xy_in=deg\n"
+                                   "          +xy_out=rad\n"
+                                   "    +step +proj=push +v_3\n"
+                                   "    +step +proj=cart +ellps=WGS84\n"
+                                   "    +step +inv +proj=helmert +x=293\n"
+                                   "          +y=836 +z=318 +rx=0.5 +ry=1.6\n"
+                                   "          +rz=-2.8 +s=2.1\n"
+                                   "          +convention=position_vector\n"
+                                   "    +step +inv +proj=cart +ellps=evrst30\n"
+                                   "    +step +proj=pop +v_3\n"
+                                   "    +step +proj=unitconvert +xy_in=rad\n"
+                                   "          +xy_out=deg\n"
+                                   "    +step +proj=axisswap +order=2,1";
+    EXPECT_EQ(std::string(projstr), expected_projstr);
 }
 
 // ---------------------------------------------------------------------------
