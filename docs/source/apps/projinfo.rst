@@ -261,7 +261,7 @@ The following control parameters can appear in any order:
 .. option:: --single-line
 
     Output PROJ, WKT or PROJJSON strings on a single line, instead of multiple
-    intended lines by default.
+    indented lines by default.
 
 .. option:: --searchpaths
 
