@@ -228,6 +228,15 @@ Relation between geographic coordinates
 
 .. math::
 
+   \phi' = \tan^{-1}\sinh\bigl(\sinh^{-1}\tan\phi
+   - e \tanh^{-1}(e\sin\phi)\bigr)
+
+Instead of using this analytical formula for :math:`\phi'`, the
+conversions between :math:`\phi` and :math:`\phi'` use the series
+approximations:
+
+.. math::
+
   \phi' = \phi + \mathbf S(\phi) \cdot \mathsf C_{\chi,\phi} \cdot \mathbf N
 
 .. math::
