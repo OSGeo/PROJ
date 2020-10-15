@@ -4,11 +4,13 @@ Test 5104, Oblique stereographic, v2-0_2011-06-28.
 
 --------------------------------------------------------------------------------
 
-<gie>
+<gie-strict>
+
+use_proj4_init_rules true
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4289 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4289 +inv \
            +step +init=epsg:28992
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -92,8 +94,8 @@ accept    11 53
 expect    531469.2 571538.84
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:28992 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:28992 +inv \
            +step +init=epsg:4289
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -177,8 +179,8 @@ accept    531469.2 571538.84
 expect    11 53
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4289 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4289 +inv \
            +step +init=epsg:28992
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -261,4 +263,4 @@ tolerance  0.006 m
 accept    11 53
 roundtrip 1000
 
-</gie>
+</gie-strict>
