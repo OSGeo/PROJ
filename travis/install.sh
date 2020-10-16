@@ -21,7 +21,7 @@ export MAKEFLAGS="-j ${NPROC}"
 mkdir build_autoconf
 cd build_autoconf
 ../configure
-make dist-all
+make dist-all >/dev/null
 # Check consistency of generated tarball
 TAR_FILENAME=`ls *.tar.gz`
 TAR_DIRECTORY=`basename $TAR_FILENAME .tar.gz`
@@ -36,7 +36,7 @@ mkdir build_autoconf
 cd build_autoconf
 ../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
 
-make
+make >/dev/null
 
 if [ "$(uname)" == "Linux" -a -f src/.libs/libproj.so ]; then
 if objdump -TC "src/.libs/libproj.so" | grep "elf64-x86-64">/dev/null; then
@@ -80,7 +80,7 @@ jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projj
 diff -u out.json out2.json
 
 # Test make clean target
-make clean
+make clean > /dev/null
 
 cd ..
 
@@ -105,8 +105,8 @@ if [ "$BUILD_NAME" != "linux_gcc8" ]; then
     cd build_cmake
     cmake --version
     cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
-    VERBOSE=1 make
-    make install
+    VERBOSE=1 make >/dev/null
+    make install >/dev/null
     ctest
     find /tmp/proj_cmake_install
     if [ $BUILD_NAME = "linux_gcc" ] || [ $BUILD_NAME = "osx" ]; then
@@ -138,7 +138,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" ]; then
     else
         ./configure
     fi
-    make
+    make >/dev/null
     make check
 
     if [ "$BUILD_NAME" != "linux_clang" ]; then
