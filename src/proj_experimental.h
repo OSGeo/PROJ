@@ -168,7 +168,7 @@ PJ PROJ_DLL *proj_create_geographic_crs(
 PJ PROJ_DLL *proj_create_geographic_crs_from_datum(
                             PJ_CONTEXT *ctx,
                             const char *crs_name,
-                            PJ* datum,
+                            PJ* datum_or_datum_ensemble,
                             PJ* ellipsoidal_cs);
 
 PJ PROJ_DLL *proj_create_geocentric_crs(
@@ -187,7 +187,7 @@ PJ PROJ_DLL *proj_create_geocentric_crs(
 PJ PROJ_DLL *proj_create_geocentric_crs_from_datum(
                             PJ_CONTEXT *ctx,
                             const char *crs_name,
-                            const PJ* datum,
+                            const PJ* datum_or_datum_ensemble,
                             const char *linear_units,
                             double linear_units_conv);
 

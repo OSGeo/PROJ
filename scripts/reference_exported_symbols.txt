@@ -155,7 +155,7 @@ osgeo::proj::crs::GeographicCRS::create(osgeo::proj::util::PropertyMap const&, d
 osgeo::proj::crs::GeographicCRS::create(osgeo::proj::util::PropertyMap const&, std::shared_ptr<osgeo::proj::datum::GeodeticReferenceFrame> const&, std::shared_ptr<osgeo::proj::datum::DatumEnsemble> const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::EllipsoidalCS> > const&)
 osgeo::proj::crs::GeographicCRS::demoteTo2D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::GeographicCRS::~GeographicCRS()
-osgeo::proj::crs::GeographicCRS::is2DPartOf3D(dropbox::oxygen::nn<osgeo::proj::crs::GeographicCRS const*>) const
+osgeo::proj::crs::GeographicCRS::is2DPartOf3D(dropbox::oxygen::nn<osgeo::proj::crs::GeographicCRS const*>, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::InvalidCompoundCRSException::~InvalidCompoundCRSException()
 osgeo::proj::crs::InvalidCompoundCRSException::InvalidCompoundCRSException(osgeo::proj::crs::InvalidCompoundCRSException const&)
 osgeo::proj::crs::ParametricCRS::coordinateSystem() const
@@ -234,6 +234,7 @@ osgeo::proj::cs::VerticalCS::~VerticalCS()
 osgeo::proj::datum::Datum::anchorDefinition() const
 osgeo::proj::datum::Datum::conventionalRS() const
 osgeo::proj::datum::Datum::~Datum()
+osgeo::proj::datum::DatumEnsemble::asDatum(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::datum::DatumEnsemble::create(osgeo::proj::util::PropertyMap const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Datum> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::datum::Datum> > > > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > const&)
 osgeo::proj::datum::DatumEnsemble::~DatumEnsemble()
 osgeo::proj::datum::DatumEnsemble::datums() const
@@ -321,6 +322,7 @@ osgeo::proj::io::AuthorityFactory::createConversion(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createCoordinateOperation(std::string const&, bool) const
 osgeo::proj::io::AuthorityFactory::createCoordinateReferenceSystem(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createCoordinateSystem(std::string const&) const
+osgeo::proj::io::AuthorityFactory::createDatumEnsemble(std::string const&, std::string const&) const
 osgeo::proj::io::AuthorityFactory::createDatum(std::string const&) const
 osgeo::proj::io::AuthorityFactory::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> > const&, std::string const&)
 osgeo::proj::io::AuthorityFactory::createEllipsoid(std::string const&) const
@@ -969,6 +971,8 @@ proj_crs_demote_to_2D
 proj_crs_get_coordinate_system
 proj_crs_get_coordoperation
 proj_crs_get_datum
+proj_crs_get_datum_ensemble
+proj_crs_get_datum_forced
 proj_crs_get_geodetic_crs
 proj_crs_get_horizontal_datum
 proj_crs_get_sub_crs
@@ -977,11 +981,15 @@ proj_crs_promote_to_3D
 proj_cs_get_axis_count
 proj_cs_get_axis_info
 proj_cs_get_type
+proj_datum_ensemble_get_accuracy
+proj_datum_ensemble_get_member
+proj_datum_ensemble_get_member_count
 proj_degree_input
 proj_degree_output
 proj_destroy
 proj_dmstor
 proj_download_file
+proj_dynamic_datum_get_frame_reference_epoch
 proj_ellipsoid_get_parameters
 proj_errno
 proj_errno_reset

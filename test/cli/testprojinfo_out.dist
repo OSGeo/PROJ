@@ -17,8 +17,8 @@ GEOGCRS["WGS 84",
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
     USAGE[
-        SCOPE["unknown"],
-        AREA["World"],
+        SCOPE["Horizontal component of 3D system."],
+        AREA["World."],
         BBOX[-90,-180,90,180]],
     ID["EPSG",4326]]
 
@@ -51,7 +51,8 @@ GEODCRS["WGS 84",
         AXIS["geodetic longitude (Lon)",east,
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
-    AREA["World"],
+    SCOPE["Horizontal component of 3D system."],
+    AREA["World."],
     BBOX[-90,-180,90,180],
     ID["EPSG",4326]]
 
@@ -71,8 +72,8 @@ GEOGCRS["WGS 84",
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
     USAGE[
-        SCOPE["unknown"],
-        AREA["World"],
+        SCOPE["Horizontal component of 3D system."],
+        AREA["World."],
         BBOX[-90,-180,90,180]],
     ID["EPSG",4326]]
 
@@ -94,7 +95,8 @@ GEODCRS["WGS 84",
         AXIS["geodetic longitude (Lon)",east,
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
-    AREA["World"],
+    SCOPE["Horizontal component of 3D system."],
+    AREA["World."],
     BBOX[-90,-180,90,180],
     ID["EPSG",4326]]
 
@@ -113,8 +115,8 @@ GEOGCRS["WGS 84",
             ORDER[2],
             ANGLEUNIT["degree",0.0174532925199433]],
     USAGE[
-        SCOPE["unknown"],
-        AREA["World"],
+        SCOPE["Horizontal component of 3D system."],
+        AREA["World."],
         BBOX[-90,-180,90,180]],
     ID["EPSG",4326]]
 
@@ -166,7 +168,8 @@ PROJJSON:
       }
     ]
   },
-  "area": "World",
+  "scope": "Horizontal component of 3D system.",
+  "area": "World.",
   "bbox": {
     "south_latitude": -90,
     "west_longitude": -180,
@@ -184,7 +187,7 @@ Candidate operations found: 1
 -------------------------------------
 Operation No. 1:
 
-EPSG:16031, UTM zone 31N, 0 m, World - N hemisphere - 0°E to 6°E
+EPSG:16031, UTM zone 31N, 0 m, Between 0°E and 6°E, northern hemisphere between equator and 84°N, onshore and offshore.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=31 +ellps=WGS84
@@ -268,22 +271,22 @@ COORDINATEOPERATION["Ballpark geographic offset from NAD27 to NAD83",
 
 Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary --hide-ballpark
 Candidate operations found: 9
-DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada
-DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - NAD27
-DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, USA - CONUS including EEZ
-DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, USA - Alaska including EEZ
-DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec
-EPSG:1462, NAD27 to NAD83 (5), 2.0 m, Canada - Quebec
-EPSG:9111, NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan
-EPSG:8555, NAD27 to NAD83 (7), 0.15 m, USA - CONUS and GoM
-EPSG:8549, NAD27 to NAD83 (8), 0.5 m, USA - Alaska
+DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.
+DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
+DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, United States (USA) - CONUS including EEZ -onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS.
+DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, United States (USA) - Alaska including EEZ.
+DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec.
+EPSG:1462, NAD27 to NAD83 (5), 2.0 m, Canada - Quebec.
+EPSG:9111, NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan.
+EPSG:8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS).
+EPSG:8549, NAD27 to NAD83 (8), 0.5 m, United States (USA) - Alaska.
 
 Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects
 Candidate operations found: 10
 -------------------------------------
 Operation No. 1:
 
-DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada
+DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ca_nrc_ntv1_can.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -325,14 +328,14 @@ COORDINATEOPERATION["NAD27 to NAD83 (3)",
     OPERATIONACCURACY[2.0],
     USAGE[
         SCOPE["Historic record only - now superseded - see remarks."],
-        AREA["Canada"],
+        AREA["Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon."],
         BBOX[40.04,-141.01,86.46,-47.74]],
     ID["DERIVED_FROM(EPSG)",1312]]
 
 -------------------------------------
 Operation No. 2:
 
-DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - NAD27
+DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ca_nrc_ntv2_0.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -373,15 +376,15 @@ COORDINATEOPERATION["NAD27 to NAD83 (4)",
     PARAMETERFILE["Latitude and longitude difference file","ca_nrc_ntv2_0.tif"],
     OPERATIONACCURACY[1.5],
     USAGE[
-        SCOPE["Accuracy 1-2 metres."],
-        AREA["Canada - NAD27"],
+        SCOPE["Transformation of coordinates at 1m to 2m level of accuracy."],
+        AREA["Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast."],
         BBOX[40.04,-141.01,83.17,-47.74]],
     ID["DERIVED_FROM(EPSG)",1313]]
 
 -------------------------------------
 Operation No. 3:
 
-DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, USA - CONUS including EEZ
+DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, United States (USA) - CONUS including EEZ -onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=us_noaa_conus.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -422,15 +425,15 @@ COORDINATEOPERATION["NAD27 to NAD83 (1)",
     PARAMETERFILE["Latitude and longitude difference file","us_noaa_conus.tif"],
     OPERATIONACCURACY[0.15],
     USAGE[
-        SCOPE["Accuracy at 67% confidence level is 0.15m onshore, 5m nearshore and undetermined farther offshore."],
-        AREA["USA - CONUS including EEZ"],
+        SCOPE["Transformation of coordinates at 0.2m level of accuracy."],
+        AREA["United States (USA) - CONUS including EEZ -onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS."],
         BBOX[23.81,-129.17,49.38,-65.69]],
     ID["DERIVED_FROM(EPSG)",1241]]
 
 -------------------------------------
 Operation No. 4:
 
-DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, USA - Alaska including EEZ
+DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, United States (USA) - Alaska including EEZ.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=us_noaa_alaska.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -471,15 +474,15 @@ COORDINATEOPERATION["NAD27 to NAD83 (2)",
     PARAMETERFILE["Latitude and longitude difference file","us_noaa_alaska.tif"],
     OPERATIONACCURACY[0.5],
     USAGE[
-        SCOPE["Accuracy at 67% confidence level is 0.5m onshore, 5m nearshore and undetermined farther offshore."],
-        AREA["USA - Alaska including EEZ"],
+        SCOPE["Geodesy."],
+        AREA["United States (USA) - Alaska including EEZ."],
         BBOX[47.88,167.65,74.71,-129.99]],
     ID["DERIVED_FROM(EPSG)",1243]]
 
 -------------------------------------
 Operation No. 5:
 
-DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec
+DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=ca_que_mern_na27na83.tif +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -520,15 +523,15 @@ COORDINATEOPERATION["NAD27 to NAD83 (6)",
     PARAMETERFILE["Latitude and longitude difference file","ca_que_mern_na27na83.tif"],
     OPERATIONACCURACY[1.5],
     USAGE[
-        SCOPE["Accuracy 1-2 metres."],
-        AREA["Canada - Quebec"],
+        SCOPE["Transformation of coordinates at 1m to 2m level of accuracy."],
+        AREA["Canada - Quebec."],
         BBOX[44.99,-79.85,62.62,-57.1]],
     ID["DERIVED_FROM(EPSG)",1573]]
 
 -------------------------------------
 Operation No. 6:
 
-EPSG:1462, NAD27 to NAD83 (5), 2.0 m, Canada - Quebec
+EPSG:1462, NAD27 to NAD83 (5), 2.0 m, Canada - Quebec.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=GS2783v1.QUE +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -572,7 +575,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (5)",
     OPERATIONACCURACY[2.0],
     USAGE[
         SCOPE["Historic record only - now superseded - see remarks."],
-        AREA["Canada - Quebec"],
+        AREA["Canada - Quebec."],
         BBOX[44.99,-79.85,62.62,-57.1]],
     ID["EPSG",1462],
     REMARK["Densification for Quebec of code 1312. Replaced by NAD27 to NAD83 (6) (code 1573). Uses NT method which expects longitudes positive west; EPSG GeogCRSs NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
@@ -580,7 +583,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (5)",
 -------------------------------------
 Operation No. 7:
 
-EPSG:9111, NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan
+EPSG:9111, NAD27 to NAD83 (9), 1.5 m, Canada - Saskatchewan.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=SK27-83.gsb +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -623,8 +626,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (9)",
     PARAMETERFILE["Latitude and longitude difference file","SK27-83.gsb"],
     OPERATIONACCURACY[1.5],
     USAGE[
-        SCOPE["Spatial referencing."],
-        AREA["Canada - Saskatchewan"],
+        SCOPE["Geodesy."],
+        AREA["Canada - Saskatchewan."],
         BBOX[49,-110,60.01,-101.34]],
     ID["EPSG",9111]]
 
@@ -684,7 +687,7 @@ COORDINATEOPERATION["Ballpark geographic offset from NAD27 to NAD83",
 -------------------------------------
 Operation No. 9:
 
-EPSG:8555, NAD27 to NAD83 (7), 0.15 m, USA - CONUS and GoM
+EPSG:8555, NAD27 to NAD83 (7), 0.15 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS).
 
 PROJ string:
 
@@ -727,8 +730,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (7)",
     PARAMETERFILE["Longitude difference file","nadcon5.nad27.nad83_1986.conus.lon.trn.20160901.b"],
     OPERATIONACCURACY[0.15],
     USAGE[
-        SCOPE["Spatial referencing."],
-        AREA["USA - CONUS and GoM"],
+        SCOPE["Geodesy."],
+        AREA["United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico offshore continental shelf (GoM OCS)."],
         BBOX[23.82,-124.79,49.38,-66.91]],
     ID["EPSG",8555],
     REMARK["Uses NADCON5 method which expects longitudes positive east in range 0-360°; source and target CRSs have longitudes positive east in range -180° to +180°. Accuracy at 67% confidence level is 0.15m onshore, 1m nearshore and undetermined farther offshore."]]
@@ -736,7 +739,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (7)",
 -------------------------------------
 Operation No. 10:
 
-EPSG:8549, NAD27 to NAD83 (8), 0.5 m, USA - Alaska
+EPSG:8549, NAD27 to NAD83 (8), 0.5 m, United States (USA) - Alaska.
 
 PROJ string:
 
@@ -779,8 +782,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (8)",
     PARAMETERFILE["Longitude difference file","nadcon5.nad27.nad83_1986.alaska.lon.trn.20160901.b"],
     OPERATIONACCURACY[0.5],
     USAGE[
-        SCOPE["Spatial referencing."],
-        AREA["USA - Alaska"],
+        SCOPE["Geodesy."],
+        AREA["United States (USA) - Alaska."],
         BBOX[51.3,172.42,71.4,-129.99]],
     ID["EPSG",8549],
     REMARK["Uses NADCON5 method which expects longitudes positive east in range 0-360°; source and target CRSs have longitudes positive east in range -180° to +180°. Accuracy at 67% confidence level is 0.5m onshore, 5m nearshore and undetermined farther offshore."]]
@@ -788,35 +791,35 @@ COORDINATEOPERATION["NAD27 to NAD83 (8)",
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --bbox 8,54.51,15.24,57.8 --summary
 Candidate operations found: 1
 Note: using '--spatial-test intersects' would bring more results (2)
-EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore
+EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore.
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area EPSG:3237 --summary
 Candidate operations found: 1
 Note: using '--spatial-test intersects' would bring more results (2)
-EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore
+EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore.
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark - onshore' --summary
 Candidate operations found: 1
 Note: using '--spatial-test intersects' would bring more results (2)
-EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore
+EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore.
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark -' --summary
 Several candidates area of use matching provided name :
-  EPSG:2531 : Denmark - onshore Jutland and Funen
-  EPSG:2532 : Denmark - onshore Zealand and Lolland
-  EPSG:2533 : Denmark - onshore Bornholm
-  EPSG:3237 : Denmark - onshore
-  EPSG:3471 : Denmark - onshore west of 12°E
-  EPSG:3472 : Denmark - onshore east of 12°E
-  EPSG:3631 : Denmark - onshore Jutland west of 10°E
-  EPSG:3632 : Denmark - onshore Jutland east of 9°E and Funen
-  EPSG:4575 : Denmark - onshore Jutland, Funen, Zealand and Lolland
+  EPSG:2531 : Denmark - Jutland and Funen - onshore.
+  EPSG:2532 : Denmark - Zealand and Lolland (onshore).
+  EPSG:2533 : Denmark - Bornholm onshore.
+  EPSG:3237 : Denmark - onshore.
+  EPSG:3471 : Denmark - onshore west of 12°E - Zealand, Jutland, Fuen and Lolland.
+  EPSG:3472 : Denmark - onshore east of 12°E - Zealand and Falster, Bornholm.
+  EPSG:3631 : Denmark - Jutland onshore west of 10°E.
+  EPSG:3632 : Denmark - onshore - Jutland east of 9°E and Funen.
+  EPSG:4575 : Denmark - onshore Jutland, Funen, Zealand and Lolland.
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area no_match --summary
 No area of use matching provided name
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area WRONG:CODE --summary
-Area of use retrieval failed: area not found
+Area of use retrieval failed: extent not found
 
 Testing deprecated CRS: projinfo EPSG:26591
 Warning: object is deprecated
@@ -861,8 +864,8 @@ PROJCRS["Monte Mario (Rome) / Italy zone 1",
             ORDER[2],
             LENGTHUNIT["metre",1]],
     USAGE[
-        SCOPE["unknown"],
-        AREA["Italy - west of 12°E"],
+        SCOPE["Engineering survey, topographic mapping."],
+        AREA["Italy - onshore and offshore - west of 12°E."],
         BBOX[36.53,5.94,47.04,12]],
     ID["EPSG",26591]]
 
@@ -900,7 +903,7 @@ Candidate operations found: 1
 -------------------------------------
 Operation No. 1:
 
-INVERSE(DERIVED_FROM(PROJ)):EPSG_4977_TO_EPSG_5613, Inverse of SWEREF99 to RH2000 height, unknown accuracy, Sweden - onshore
+INVERSE(DERIVED_FROM(PROJ)):EPSG_4977_TO_EPSG_5613, Inverse of SWEREF99 to RH2000 height, unknown accuracy, Sweden - onshore.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=se_lantmateriet_SWEN17_RH2000.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -909,6 +912,8 @@ WKT2:2019 string:
 COORDINATEOPERATION["Inverse of SWEREF99 to RH2000 height",
     SOURCECRS[
         VERTCRS["RH2000 height",
+            DYNAMIC[
+                FRAMEEPOCH[2000]],
             VDATUM["Rikets hojdsystem 2000"],
             CS[vertical,1],
                 AXIS["gravity-related height (H)",up,
@@ -936,8 +941,8 @@ COORDINATEOPERATION["Inverse of SWEREF99 to RH2000 height",
         ID["INVERSE(EPSG)",9665]],
     PARAMETERFILE["Geoid (height correction) model file","se_lantmateriet_SWEN17_RH2000.tif"],
     USAGE[
-        SCOPE["unknown"],
-        AREA["Sweden - onshore"],
+        SCOPE["Not known."],
+        AREA["Sweden - onshore."],
         BBOX[55.28,10.93,69.07,24.17]],
     ID["INVERSE(DERIVED_FROM(PROJ))","EPSG_4977_TO_EPSG_5613"]]
 
@@ -946,7 +951,7 @@ Candidate operations found: 2
 -------------------------------------
 Operation No. 1:
 
-unknown id, Inverse of NAD83(2011) to NAVD88 height (3), 0.015 m, USA - CONUS - onshore
+unknown id, Inverse of NAD83(2011) to NAVD88 height (3), 0.015 m, United States (USA) - CONUS onshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -954,28 +959,20 @@ PROJ string:
 -------------------------------------
 Operation No. 2:
 
-unknown id, Inverse of NAD83(2011) to NAVD88 height (2), 0.02 m, USA - Alaska
+unknown id, Inverse of NAD83(2011) to NAVD88 height (2), 0.02 m, United States (USA) - Alaska.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=us_noaa_g2012ba0.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing NGF IGN69 height to RGF93: projinfo -s EPSG:5720 -t EPSG:4965 -o PROJ
-Candidate operations found: 2
+Candidate operations found: 1
 -------------------------------------
 Operation No. 1:
 
-INVERSE(DERIVED_FROM(EPSG)):8885, Inverse of RGF93 to NGF-IGN69 height (3), 0.01 m, France - mainland onshore
+INVERSE(DERIVED_FROM(EPSG)):8885, Inverse of RGF93 to NGF-IGN69 height (3), 0.01 m, France - mainland onshore.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=fr_ign_RAF18.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
-
--------------------------------------
-Operation No. 2:
-
-INVERSE(EPSG):10000, Inverse of RGF93 to NGF-IGN69 height (1), 0.5 m, France - mainland onshore
-
-PROJ string:
-+proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=ggf97a.txt +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing EPSG:32631 --3d
 PROJ.4 string:
@@ -1026,64 +1023,64 @@ PROJCRS["WGS 84 / UTM zone 31N",
 
 Testing -s EPSG:32631 -t EPSG:4326+3855 --summary
 Candidate operations found: 3
-unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 1 m, World
-unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.5 m, World
+unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 1 m, World.
+unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.5 m, World.
 unknown id, Inverse of UTM zone 31N + Inverse of Transformation from EGM2008 height to WGS 84 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
 
 Testing -s EPSG:32631 -t EPSG:4326+3855 --3d --summary
 Candidate operations found: 3
-unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 1 m, World
-unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.5 m, World
+unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 1 m, World.
+unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.5 m, World.
 unknown id, Inverse of UTM zone 31N + Inverse of Transformation from EGM2008 height to WGS 84 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
 
 Testing -s EPSG:4936 -t EPSG:4978 --spatial-test intersects --summary where WGS 84 to ETRS89 (2) uses a transformation method not supported by PROJ currently (time-specific Helmert), and thus must be sorted last
 Candidate operations found: 2
 unknown id, Ballpark geocentric translation from ETRS89 to WGS 84, unknown accuracy, World, has ballpark transformation
-INVERSE(EPSG):9225, Inverse of WGS 84 to ETRS89 (2), 0.1 m, Europe - offshore North Sea - Germany and Netherlands east of 5°E
+INVERSE(EPSG):9225, Inverse of WGS 84 to ETRS89 (2), 0.1 m, Germany - offshore North Sea. Netherlands - offshore east of 5E.
 
 Testing -s +proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs -t EPSG:4326 -o PROJ -q
 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=@foo.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing -s "GDA94" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include transformations through ITRF2008 and GDA2020
 Candidate operations found: 7
-unknown id, GDA94 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.21 m, Australia - GDA
-unknown id, GDA94 to WGS 84 (1) + WGS 84 to WGS 84 (G1762), 5 m, Australia - GDA
-unknown id, Conversion from GDA94 (geog2D) to GDA94 (geocentric) + Inverse of ITRF2008 to GDA94 (1) + Inverse of WGS 84 (G1762) to ITRF2008 (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.04 m, Australia - onshore and EEZ
-unknown id, GDA94 to GDA2020 (3) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - onshore
-unknown id, GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - onshore
-unknown id, GDA94 to GDA2020 (5) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Cocos (Keeling) Islands - onshore
-unknown id, GDA94 to GDA2020 (4) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Christmas Island - onshore
+unknown id, GDA94 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.21 m, Australia including Lord Howe Island, Macquarie Islands, Ashmore and Cartier Islands, Christmas Island, Cocos (Keeling) Islands, Norfolk Island. All onshore and offshore.
+unknown id, GDA94 to WGS 84 (1) + WGS 84 to WGS 84 (G1762), 5 m, Australia including Lord Howe Island, Macquarie Islands, Ashmore and Cartier Islands, Christmas Island, Cocos (Keeling) Islands, Norfolk Island. All onshore and offshore.
+unknown id, Conversion from GDA94 (geog2D) to GDA94 (geocentric) + Inverse of ITRF2008 to GDA94 (1) + Inverse of WGS 84 (G1762) to ITRF2008 (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.04 m, Australia - onshore and offshore to 200 nautical mile EEZ boundary. Includes Lord Howe Island, Ashmore and Cartier Islands.
+unknown id, GDA94 to GDA2020 (3) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
+unknown id, GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
+unknown id, GDA94 to GDA2020 (5) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Cocos (Keeling) Islands - onshore.
+unknown id, GDA94 to GDA2020 (4) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Christmas Island - onshore.
 
 Testing -s "AGD66" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include a transformation through GDA2020
 Candidate operations found: 14
-unknown id, AGD66 to WGS 84 (18) + WGS 84 to WGS 84 (G1762), 5 m, Australia - offshore
-unknown id, AGD66 to WGS 84 (16) + WGS 84 to WGS 84 (G1762), 7 m, Australia - onshore
-unknown id, AGD66 to WGS 84 (20) + WGS 84 to WGS 84 (G1762), 11 m, Australia - onshore
-unknown id, AGD66 to WGS 84 (15) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Northern Territory
-unknown id, AGD66 to WGS 84 (13) + WGS 84 to WGS 84 (G1762), 3 m, Australia - New South Wales and Victoria
-unknown id, AGD66 to WGS 84 (21) + WGS 84 to WGS 84 (G1762), 7 m, Papua New Guinea - mainland onshore
-unknown id, AGD66 to WGS 84 (14) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Tasmania
-unknown id, AGD66 to WGS 84 (19) + WGS 84 to WGS 84 (G1762), 4 m, Papua New Guinea - PFTB
-unknown id, AGD66 to WGS 84 (22) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - PFTB
-unknown id, AGD66 to WGS 84 (23) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - North Fly
-unknown id, AGD66 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - Australian Capital Territory
-unknown id, AGD66 to WGS 84 (12) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Australian Capital Territory
-unknown id, AGD66 to WGS 84 (17) + WGS 84 to WGS 84 (G1762), 3 m, Australia - onshore
+unknown id, AGD66 to WGS 84 (18) + WGS 84 to WGS 84 (G1762), 5 m, Australia - offshore including EEZ.
+unknown id, AGD66 to WGS 84 (16) + WGS 84 to WGS 84 (G1762), 7 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
+unknown id, AGD66 to WGS 84 (20) + WGS 84 to WGS 84 (G1762), 11 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
+unknown id, AGD66 to WGS 84 (15) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Northern Territory.
+unknown id, AGD66 to WGS 84 (13) + WGS 84 to WGS 84 (G1762), 3 m, Australia - New South Wales and Victoria.
+unknown id, AGD66 to WGS 84 (21) + WGS 84 to WGS 84 (G1762), 7 m, Papua New Guinea - mainland onshore.
+unknown id, AGD66 to WGS 84 (14) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Tasmania including islands - onshore.
+unknown id, AGD66 to WGS 84 (19) + WGS 84 to WGS 84 (G1762), 4 m, Papua New Guinea - Papuan fold and thrust belt.
+unknown id, AGD66 to WGS 84 (22) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - Papuan fold and thrust belt.
+unknown id, AGD66 to WGS 84 (23) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - North Fly area (between 5°04'S and 6°36'S and west of 141°32'E).
+unknown id, AGD66 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - Australian Capital Territory.
+unknown id, AGD66 to WGS 84 (12) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Australian Capital Territory.
+unknown id, AGD66 to WGS 84 (17) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
 unknown id, Ballpark geographic offset from AGD66 to WGS 84 (G1762), unknown accuracy, World, has ballpark transformation
 
 Testing -s EPSG:31467 -t ETRS89 --spatial-test intersects --grid-check none --bbox 8,48,9,49 --summary. Should include both DHDN to ETRS89 (8) and DHDN to ETRS89 (BWTA2017)
 Candidate operations found: 4
-unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (9), 0.1 m, Germany - Baden-Wurttemberg
-unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (8), 0.9 m, Germany - onshore
-unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (3), 1 m, Germany - West Germany S
-unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (2), 3 m, Germany - West Germany all states
+unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (9), 0.1 m, Germany - Baden-Wurttemberg.
+unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (8), 0.9 m, Germany - onshore - states of Baden-Wurtemberg, Bayern, Berlin, Brandenburg, Bremen, Hamburg, Hessen, Mecklenburg-Vorpommern, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland, Sachsen, Sachsen-Anhalt, Schleswig-Holstein, Thuringen.
+unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (3), 1 m, Germany - states of former West Germany - south of 50°20'N.
+unknown id, Inverse of 3-degree Gauss-Kruger zone 3 + DHDN to ETRS89 (2), 3 m, Germany - states of former West Germany onshore - Baden-Wurtemberg, Bayern, Bremen, Hamburg, Hessen, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland, Schleswig-Holstein.
 
 Testing -s "GDA94" -t "AHD height" --grid-check none -o PROJ --spatial-test intersects
 Candidate operations found: 1
 -------------------------------------
 Operation No. 1:
 
-DERIVED_FROM(EPSG):5656, GDA94 to AHD height (49), 0.15 m, Australia - mainland
+DERIVED_FROM(EPSG):5656, GDA94 to AHD height (49), 0.15 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Western Australia; Victoria.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid09_V1.01.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
@@ -1093,7 +1090,7 @@ Candidate operations found: 1
 -------------------------------------
 Operation No. 1:
 
-DERIVED_FROM(EPSG):8451, GDA2020 to AHD height (1), 0.15 m, Australia Christmas and Cocos - onshore
+DERIVED_FROM(EPSG):8451, GDA2020 to AHD height (1), 0.15 m, Australia - Australian Capital Territory, New South Wales, Northern Territory, Queensland, South Australia, Tasmania, Western Australia and Victoria - onshore. Christmas Island - onshore. Cocos and Keeling Islands - onshore.
 
 PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +inv +proj=vgridshift +grids=au_ga_AUSGeoid2020_20180201.tif +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1

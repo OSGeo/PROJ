@@ -11174,7 +11174,8 @@ struct CoordinateOperationFactory::Private {
     static std::vector<CoordinateOperationNNPtr> createOperationsGeogToGeog(
         std::vector<CoordinateOperationNNPtr> &res,
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-        const crs::GeographicCRS *geogSrc, const crs::GeographicCRS *geogDst);
+        Private::Context &context, const crs::GeographicCRS *geogSrc,
+        const crs::GeographicCRS *geogDst);
 
     static void createOperationsWithDatumPivot(
         std::vector<CoordinateOperationNNPtr> &res,
@@ -12338,16 +12339,17 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
 //! @cond Doxygen_Suppress
 static TransformationNNPtr
 createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
-                               const crs::CRSNNPtr &targetCRS) {
+                               const crs::CRSNNPtr &targetCRS,
+                               const io::DatabaseContextPtr &dbContext) {
 
     const crs::GeographicCRS *geogSrc =
         dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
     const crs::GeographicCRS *geogDst =
         dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
-    const bool isSameDatum =
-        geogSrc && geogDst && geogSrc->datum() && geogDst->datum() &&
-        geogSrc->datum()->_isEquivalentTo(
-            geogDst->datum().get(), util::IComparable::Criterion::EQUIVALENT);
+    const bool isSameDatum = geogSrc && geogDst &&
+                             geogSrc->datumNonNull(dbContext)->_isEquivalentTo(
+                                 geogDst->datumNonNull(dbContext).get(),
+                                 util::IComparable::Criterion::EQUIVALENT);
 
     auto name = buildOpName(isSameDatum ? NULL_GEOGRAPHIC_OFFSET
                                         : BALLPARK_GEOGRAPHIC_OFFSET,
@@ -12692,8 +12694,8 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
 std::vector<CoordinateOperationNNPtr>
 CoordinateOperationFactory::Private::createOperationsGeogToGeog(
     std::vector<CoordinateOperationNNPtr> &res, const crs::CRSNNPtr &sourceCRS,
-    const crs::CRSNNPtr &targetCRS, const crs::GeographicCRS *geogSrc,
-    const crs::GeographicCRS *geogDst) {
+    const crs::CRSNNPtr &targetCRS, Private::Context &context,
+    const crs::GeographicCRS *geogSrc, const crs::GeographicCRS *geogDst) {
 
     assert(sourceCRS.get() == geogSrc);
     assert(targetCRS.get() == geogDst);
@@ -12723,10 +12725,13 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
 
     std::string name(buildTransfName(geogSrc->nameStr(), geogDst->nameStr()));
 
-    const bool sameDatum =
-        geogSrc->datum() != nullptr && geogDst->datum() != nullptr &&
-        geogSrc->datum()->_isEquivalentTo(
-            geogDst->datum().get(), util::IComparable::Criterion::EQUIVALENT);
+    const auto &authFactory = context.context->getAuthorityFactory();
+    const auto dbContext =
+        authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
+
+    const bool sameDatum = geogSrc->datumNonNull(dbContext)->_isEquivalentTo(
+        geogDst->datumNonNull(dbContext).get(),
+        util::IComparable::Criterion::EQUIVALENT);
 
     // Do the CRS differ by their axis order ?
     bool axisReversal2D = false;
@@ -12821,7 +12826,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
                 datum, dstCS));
 
         steps.emplace_back(
-            createBallparkGeographicOffset(sourceCRS, interm_crs));
+            createBallparkGeographicOffset(sourceCRS, interm_crs, dbContext));
 
         steps.emplace_back(Transformation::createLongitudeRotation(
             util::PropertyMap()
@@ -12855,11 +12860,11 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
                     .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
                          metadata::Extent::WORLD),
                 sourceCRS, interm_crs, offset_pm));
-            steps.emplace_back(
-                createBallparkGeographicOffset(interm_crs, targetCRS));
+            steps.emplace_back(createBallparkGeographicOffset(
+                interm_crs, targetCRS, dbContext));
         } else {
-            steps.emplace_back(
-                createBallparkGeographicOffset(sourceCRS, targetCRS));
+            steps.emplace_back(createBallparkGeographicOffset(
+                sourceCRS, targetCRS, dbContext));
         }
     }
 
@@ -13030,10 +13035,14 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
     CreateOperationsWithDatumPivotAntiRecursion guard(context);
 
     const auto &authFactory = context.context->getAuthorityFactory();
+    const auto &dbContext = authFactory->databaseContext();
+
     const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
-        authFactory, geodSrc, geodSrc->datum().get()));
+        authFactory, geodSrc,
+        geodSrc->datumNonNull(dbContext.as_nullable()).get()));
     const auto candidatesDstGeod(findCandidateGeodCRSForDatum(
-        authFactory, geodDst, geodDst->datum().get()));
+        authFactory, geodDst,
+        geodDst->datumNonNull(dbContext.as_nullable()).get()));
 
     const bool sourceAndTargetAre3D =
         geodSrc->coordinateSystem()->axisList().size() == 3 &&
@@ -13545,16 +13554,16 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         }
     } else if (geodSrc && geodDst) {
 
-        const auto &srcDatum = geodSrc->datum();
-        const auto &dstDatum = geodDst->datum();
-        sameGeodeticDatum =
-            srcDatum != nullptr && dstDatum != nullptr &&
-            srcDatum->_isEquivalentTo(dstDatum.get(),
-                                      util::IComparable::Criterion::EQUIVALENT);
+        const auto &authFactory = context.context->getAuthorityFactory();
+        const auto dbContext = authFactory->databaseContext().as_nullable();
+
+        const auto srcDatum = geodSrc->datumNonNull(dbContext);
+        const auto dstDatum = geodDst->datumNonNull(dbContext);
+        sameGeodeticDatum = srcDatum->_isEquivalentTo(
+            dstDatum.get(), util::IComparable::Criterion::EQUIVALENT);
 
         if (res.empty() && !sameGeodeticDatum &&
-            !context.inCreateOperationsWithDatumPivotAntiRecursion &&
-            srcDatum != nullptr && dstDatum != nullptr) {
+            !context.inCreateOperationsWithDatumPivotAntiRecursion) {
             // If we still didn't find a transformation, and that the source
             // and target are GeodeticCRS, then go through their underlying
             // datum to find potential transformations between other
@@ -13860,8 +13869,10 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
     };
     AntiRecursionGuard guard(context);
     const auto &authFactory = context.context->getAuthorityFactory();
-    auto candidatesVert =
-        findCandidateVertCRSForDatum(authFactory, vertDst->datum().get());
+    const auto dbContext = authFactory->databaseContext().as_nullable();
+
+    auto candidatesVert = findCandidateVertCRSForDatum(
+        authFactory, vertDst->datumNonNull(dbContext).get());
     for (const auto &candidateVert : candidatesVert) {
         auto resTmp = createOperations(sourceCRS, candidateVert, context);
         if (!resTmp.empty()) {
@@ -13964,11 +13975,14 @@ void CoordinateOperationFactory::Private::
         const crs::GeographicCRS *geogSrcIn, const crs::VerticalCRS *vertDstIn,
         const crs::CRSNNPtr &targetCRSIn) {
         if (res.empty() && geogSrcIn && vertDstIn &&
-            geogSrcIn->coordinateSystem()->axisList().size() == 3 &&
-            geogSrcIn->datum()) {
+            geogSrcIn->coordinateSystem()->axisList().size() == 3) {
             const auto &authFactory = context.context->getAuthorityFactory();
+            const auto dbContext =
+                authFactory ? authFactory->databaseContext().as_nullable()
+                            : nullptr;
             const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
-                authFactory, geogSrcIn, geogSrcIn->datum().get()));
+                authFactory, geogSrcIn,
+                geogSrcIn->datumNonNull(dbContext).get()));
             for (const auto &candidate : candidatesSrcGeod) {
                 auto geogCandidate =
                     util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
@@ -14030,7 +14044,8 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
     auto geogDst = dynamic_cast<const crs::GeographicCRS *>(geodDst);
 
     if (geogSrc && geogDst) {
-        createOperationsGeogToGeog(res, sourceCRS, targetCRS, geogSrc, geogDst);
+        createOperationsGeogToGeog(res, sourceCRS, targetCRS, context, geogSrc,
+                                   geogDst);
         return;
     }
 
@@ -14038,14 +14053,23 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
     const bool isSrcGeographic = geogSrc != nullptr;
     const bool isTargetGeocentric = geodDst->isGeocentric();
     const bool isTargetGeographic = geogDst != nullptr;
+
+    const auto IsSameDatum = [&context, &geodSrc, &geodDst]() {
+        const auto &authFactory = context.context->getAuthorityFactory();
+        const auto dbContext =
+            authFactory ? authFactory->databaseContext().as_nullable()
+                        : nullptr;
+
+        return geodSrc->datumNonNull(dbContext)->_isEquivalentTo(
+            geodDst->datumNonNull(dbContext).get(),
+            util::IComparable::Criterion::EQUIVALENT);
+    };
+
     if (((isSrcGeocentric && isTargetGeographic) ||
-         (isSrcGeographic && isTargetGeocentric)) &&
-        geodSrc->datum() != nullptr && geodDst->datum() != nullptr) {
+         (isSrcGeographic && isTargetGeocentric))) {
 
         // Same datum ?
-        if (geodSrc->datum()->_isEquivalentTo(
-                geodDst->datum().get(),
-                util::IComparable::Criterion::EQUIVALENT)) {
+        if (IsSameDatum()) {
             res.emplace_back(
                 Conversion::createGeographicGeocentric(sourceCRS, targetCRS));
         } else if (isSrcGeocentric && geogDst) {
@@ -14057,7 +14081,7 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
                                    common::IdentifiedObject::NAME_KEY,
                                    interm_crs_name),
                                geogDst),
-                    NN_NO_CHECK(geogDst->datum()),
+                    geogDst->datum(), geogDst->datumEnsemble(),
                     NN_CHECK_ASSERT(
                         util::nn_dynamic_pointer_cast<cs::CartesianCS>(
                             geodSrc->coordinateSystem()))));
@@ -14082,10 +14106,7 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
     if (isSrcGeocentric && isTargetGeocentric) {
         if (sourceCRS->_isEquivalentTo(
                 targetCRS.get(), util::IComparable::Criterion::EQUIVALENT) ||
-            (geodSrc->datum() != nullptr && geodDst->datum() != nullptr &&
-             geodSrc->datum()->_isEquivalentTo(
-                 geodDst->datum().get(),
-                 util::IComparable::Criterion::EQUIVALENT))) {
+            IsSameDatum()) {
             std::string name(NULL_GEOCENTRIC_TRANSLATION);
             name += " from ";
             name += sourceCRS->nameStr();
@@ -14151,14 +14172,19 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
     const auto &hubSrc = boundSrc->hubCRS();
     auto hubSrcGeog = dynamic_cast<const crs::GeographicCRS *>(hubSrc.get());
     auto geogCRSOfBaseOfBoundSrc = boundSrc->baseCRS()->extractGeographicCRS();
-    auto geogDstDatum = geogDst->datum();
+
+    const auto &authFactory = context.context->getAuthorityFactory();
+    const auto dbContext =
+        authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
+
+    const auto geogDstDatum = geogDst->datumNonNull(dbContext);
 
     // If the underlying datum of the source is the same as the target, do
     // not consider the boundCRS at all, but just its base
-    if (geogCRSOfBaseOfBoundSrc && geogDstDatum) {
-        auto geogCRSOfBaseOfBoundSrcDatum = geogCRSOfBaseOfBoundSrc->datum();
-        if (geogCRSOfBaseOfBoundSrcDatum &&
-            geogCRSOfBaseOfBoundSrcDatum->_isEquivalentTo(
+    if (geogCRSOfBaseOfBoundSrc) {
+        auto geogCRSOfBaseOfBoundSrcDatum =
+            geogCRSOfBaseOfBoundSrc->datumNonNull(dbContext);
+        if (geogCRSOfBaseOfBoundSrcDatum->_isEquivalentTo(
                 geogDstDatum.get(), util::IComparable::Criterion::EQUIVALENT)) {
             res = createOperations(boundSrc->baseCRS(), targetCRS, context);
             return;
@@ -14170,7 +14196,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
     if (hubSrcGeog && geogCRSOfBaseOfBoundSrc &&
         (hubSrcGeog->_isEquivalentTo(
              geogDst, util::IComparable::Criterion::EQUIVALENT) ||
-         hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst)))) {
+         hubSrcGeog->is2DPartOf3D(NN_NO_CHECK(geogDst), dbContext))) {
         triedBoundCrsToGeogCRSSameAsHubCRS = true;
 
         CoordinateOperationPtr opIntermediate;
@@ -14223,9 +14249,8 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
             }
         }
         // If the datum are equivalent, this is also fine
-    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
-               geogDstDatum &&
-               hubSrcGeog->datum()->_isEquivalentTo(
+    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog &&
+               hubSrcGeog->datumNonNull(dbContext)->_isEquivalentTo(
                    geogDstDatum.get(),
                    util::IComparable::Criterion::EQUIVALENT)) {
         auto opsFirst = createOperations(
@@ -14268,12 +14293,11 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
         // Case of "+proj=latlong +ellps=clrk66
         // +nadgrids=ntv1_can.dat,conus"
         // to "+proj=latlong +datum=NAD83"
-    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog && hubSrcGeog->datum() &&
-               geogDstDatum &&
+    } else if (geogCRSOfBaseOfBoundSrc && hubSrcGeog &&
                geogCRSOfBaseOfBoundSrc->ellipsoid()->_isEquivalentTo(
                    datum::Ellipsoid::CLARKE_1866.get(),
                    util::IComparable::Criterion::EQUIVALENT) &&
-               hubSrcGeog->datum()->_isEquivalentTo(
+               hubSrcGeog->datumNonNull(dbContext)->_isEquivalentTo(
                    datum::GeodeticReferenceFrame::EPSG_6326.get(),
                    util::IComparable::Criterion::EQUIVALENT) &&
                geogDstDatum->_isEquivalentTo(
@@ -14410,8 +14434,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                             common::IdentifiedObject::NAME_KEY,
                             "Change of vertical unit"),
                         common::Scale(heightDepthReversal ? -factor : factor));
-                    auto dbContext = context.context->getAuthorityFactory()
-                                         ->databaseContext();
+
                     conv->setCRSs(
                         hubSrc,
                         hubSrc->demoteTo2D(std::string(), dbContext)
@@ -14492,18 +14515,20 @@ void CoordinateOperationFactory::Private::createOperationsBoundToVert(
 
 void CoordinateOperationFactory::Private::createOperationsVertToVert(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
-    Private::Context & /*context*/, const crs::VerticalCRS *vertSrc,
+    Private::Context &context, const crs::VerticalCRS *vertSrc,
     const crs::VerticalCRS *vertDst,
     std::vector<CoordinateOperationNNPtr> &res) {
 
     ENTER_FUNCTION();
 
-    const auto &srcDatum = vertSrc->datum();
-    const auto &dstDatum = vertDst->datum();
-    const bool equivalentVDatum =
-        (srcDatum && dstDatum &&
-         srcDatum->_isEquivalentTo(dstDatum.get(),
-                                   util::IComparable::Criterion::EQUIVALENT));
+    const auto &authFactory = context.context->getAuthorityFactory();
+    const auto dbContext =
+        authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
+
+    const auto srcDatum = vertSrc->datumNonNull(dbContext);
+    const auto dstDatum = vertDst->datumNonNull(dbContext);
+    const bool equivalentVDatum = srcDatum->_isEquivalentTo(
+        dstDatum.get(), util::IComparable::Criterion::EQUIVALENT);
 
     const auto &srcAxis = vertSrc->coordinateSystem()->axisList()[0];
     const double convSrc = srcAxis->unit().conversionToSI();
@@ -14673,10 +14698,15 @@ void CoordinateOperationFactory::Private::createOperationsBoundToBound(
     auto baseOfBoundDstAsVertCRS =
         dynamic_cast<crs::VerticalCRS *>(boundDst->baseCRS().get());
     if (baseOfBoundSrcAsVertCRS && baseOfBoundDstAsVertCRS) {
-        const auto datumSrc = baseOfBoundSrcAsVertCRS->datum();
-        const auto datumDst = baseOfBoundDstAsVertCRS->datum();
-        if (datumSrc && datumDst &&
-            datumSrc->nameStr() == datumDst->nameStr() &&
+
+        const auto &authFactory = context.context->getAuthorityFactory();
+        const auto dbContext =
+            authFactory ? authFactory->databaseContext().as_nullable()
+                        : nullptr;
+
+        const auto datumSrc = baseOfBoundSrcAsVertCRS->datumNonNull(dbContext);
+        const auto datumDst = baseOfBoundDstAsVertCRS->datumNonNull(dbContext);
+        if (datumSrc->nameStr() == datumDst->nameStr() &&
             (datumSrc->nameStr() != "unknown" ||
              boundSrc->transformation()->_isEquivalentTo(
                  boundDst->transformation().get(),
@@ -14946,7 +14976,7 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
             if (!foundRegisteredTransformWithAllGridsAvailable && srcGeogCRS &&
                 !srcGeogCRS->_isEquivalentTo(
                     geogDst, util::IComparable::Criterion::EQUIVALENT) &&
-                !srcGeogCRS->is2DPartOf3D(NN_NO_CHECK(geogDst))) {
+                !srcGeogCRS->is2DPartOf3D(NN_NO_CHECK(geogDst), dbContext)) {
                 auto verticalTransformsTmp = createOperations(
                     componentsSrc[1],
                     NN_NO_CHECK(srcGeogCRS)
@@ -15128,32 +15158,29 @@ void CoordinateOperationFactory::Private::createOperationsToGeod(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     Private::Context &context, const crs::GeodeticCRS *geodDst,
     std::vector<CoordinateOperationNNPtr> &res) {
-    auto datum = geodDst->datum();
-    if (datum) {
-        auto cs = cs::EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
-            common::UnitOfMeasure::DEGREE, common::UnitOfMeasure::METRE);
-        auto intermGeog3DCRS =
-            util::nn_static_pointer_cast<crs::CRS>(crs::GeographicCRS::create(
-                util::PropertyMap()
-                    .set(common::IdentifiedObject::NAME_KEY, geodDst->nameStr())
-                    .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
-                         metadata::Extent::WORLD),
-                NN_NO_CHECK(datum), cs));
-        auto sourceToGeog3DOps =
-            createOperations(sourceCRS, intermGeog3DCRS, context);
-        auto geog3DToTargetOps =
-            createOperations(intermGeog3DCRS, targetCRS, context);
-        if (!geog3DToTargetOps.empty()) {
-            for (const auto &op : sourceToGeog3DOps) {
-                auto newOp = op->shallowClone();
-                setCRSs(newOp.get(), sourceCRS, intermGeog3DCRS);
-                try {
-                    res.emplace_back(
-                        ConcatenatedOperation::createComputeMetadata(
-                            {newOp, geog3DToTargetOps.front()},
-                            disallowEmptyIntersection));
-                } catch (const InvalidOperationEmptyIntersection &) {
-                }
+
+    auto cs = cs::EllipsoidalCS::createLatitudeLongitudeEllipsoidalHeight(
+        common::UnitOfMeasure::DEGREE, common::UnitOfMeasure::METRE);
+    auto intermGeog3DCRS =
+        util::nn_static_pointer_cast<crs::CRS>(crs::GeographicCRS::create(
+            util::PropertyMap()
+                .set(common::IdentifiedObject::NAME_KEY, geodDst->nameStr())
+                .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                     metadata::Extent::WORLD),
+            geodDst->datum(), geodDst->datumEnsemble(), cs));
+    auto sourceToGeog3DOps =
+        createOperations(sourceCRS, intermGeog3DCRS, context);
+    auto geog3DToTargetOps =
+        createOperations(intermGeog3DCRS, targetCRS, context);
+    if (!geog3DToTargetOps.empty()) {
+        for (const auto &op : sourceToGeog3DOps) {
+            auto newOp = op->shallowClone();
+            setCRSs(newOp.get(), sourceCRS, intermGeog3DCRS);
+            try {
+                res.emplace_back(ConcatenatedOperation::createComputeMetadata(
+                    {newOp, geog3DToTargetOps.front()},
+                    disallowEmptyIntersection));
+            } catch (const InvalidOperationEmptyIntersection &) {
             }
         }
     }
@@ -15322,6 +15349,10 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
     const crs::CompoundCRS *compoundDst,
     std::vector<CoordinateOperationNNPtr> &res) {
 
+    const auto &authFactory = context.context->getAuthorityFactory();
+    const auto dbContext =
+        authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
+
     const auto &componentsDst = compoundDst->componentReferenceSystems();
     if (!componentsDst.empty()) {
         auto compDst0BoundCrs =
@@ -15333,13 +15364,11 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                 dynamic_cast<crs::GeographicCRS *>(
                     compDst0BoundCrs->hubCRS().get());
             if (boundSrcHubAsGeogCRS && compDst0BoundCrsHubAsGeogCRS) {
-                const auto &boundSrcHubAsGeogCRSDatum =
-                    boundSrcHubAsGeogCRS->datum();
-                const auto &compDst0BoundCrsHubAsGeogCRSDatum =
-                    compDst0BoundCrsHubAsGeogCRS->datum();
-                if (boundSrcHubAsGeogCRSDatum &&
-                    compDst0BoundCrsHubAsGeogCRSDatum &&
-                    boundSrcHubAsGeogCRSDatum->_isEquivalentTo(
+                const auto boundSrcHubAsGeogCRSDatum =
+                    boundSrcHubAsGeogCRS->datumNonNull(dbContext);
+                const auto compDst0BoundCrsHubAsGeogCRSDatum =
+                    compDst0BoundCrsHubAsGeogCRS->datumNonNull(dbContext);
+                if (boundSrcHubAsGeogCRSDatum->_isEquivalentTo(
                         compDst0BoundCrsHubAsGeogCRSDatum.get())) {
                     auto cs = cs::EllipsoidalCS::
                         createLatitudeLongitudeEllipsoidalHeight(
@@ -15352,7 +15381,8 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                                  boundSrcHubAsGeogCRS->nameStr())
                             .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
                                  metadata::Extent::WORLD),
-                        NN_NO_CHECK(boundSrcHubAsGeogCRSDatum), cs));
+                        boundSrcHubAsGeogCRS->datum(),
+                        boundSrcHubAsGeogCRS->datumEnsemble(), cs));
                     auto sourceToGeog3DOps =
                         createOperations(sourceCRS, intermGeog3DCRS, context);
                     auto geog3DToTargetOps =

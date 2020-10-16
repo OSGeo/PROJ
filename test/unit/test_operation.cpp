@@ -4807,6 +4807,54 @@ TEST(operation, geogCRS_to_geogCRS_context_invalid_EPSG_ID) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_datum_ensemble) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+
+    auto dst_wkt =
+        "GEOGCRS[\"unknown\","
+        "  ENSEMBLE[\"World Geodetic System 1984 ensemble\","
+        "     MEMBER[\"World Geodetic System 1984 (Transit)\","
+        "       ID[\"EPSG\",1166]],"
+        "     MEMBER[\"World Geodetic System 1984 (G730)\","
+        "       ID[\"EPSG\",1152]],"
+        "     MEMBER[\"World Geodetic System 1984 (G873)\","
+        "       ID[\"EPSG\",1153]],"
+        "     MEMBER[\"World Geodetic System 1984 (G1150)\","
+        "       ID[\"EPSG\",1154]],"
+        "     MEMBER[\"World Geodetic System 1984 (G1674)\","
+        "       ID[\"EPSG\",1155]],"
+        "     MEMBER[\"World Geodetic System 1984 (G1762)\","
+        "       ID[\"EPSG\",1156]],"
+        "     ELLIPSOID[\"WGS 84\",6378137,298.257223563,"
+        "      LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]],"
+        "      ID[\"EPSG\",7030]],"
+        "     ENSEMBLEACCURACY[2]],"
+        "  PRIMEM[\"Greenwich\",0,"
+        "    ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9102]],"
+        "    ID[\"EPSG\",8901]],"
+        "  CS[ellipsoidal,2,"
+        "    ID[\"EPSG\",6422]],"
+        "  AXIS[\"Geodetic latitude (Lat)\",north,"
+        "    ORDER[1]],"
+        "  AXIS[\"Geodetic longitude (Lon)\",east,"
+        "    ORDER[2]],"
+        "  ANGLEUNIT[\"degree (supplier to define representation)\","
+        "0.0174532925199433,ID[\"EPSG\",9122]]]";
+    auto dstObj = WKTParser().createFromWKT(dst_wkt);
+    auto dstCRS = nn_dynamic_pointer_cast<CRS>(dstObj);
+    ASSERT_TRUE(dstCRS != nullptr);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
+        NN_NO_CHECK(dstCRS), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(), "ETRS89 to WGS 84 (1)");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, vertCRS_to_geogCRS_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");

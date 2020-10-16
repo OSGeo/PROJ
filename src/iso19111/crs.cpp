@@ -1022,7 +1022,8 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
                     if (firstResAxisList[2]->_isEquivalentTo(
                             verticalAxisIfNotAlreadyPresent.get(),
                             util::IComparable::Criterion::EQUIVALENT) &&
-                        geogCRS->is2DPartOf3D(NN_NO_CHECK(firstResGeog))) {
+                        geogCRS->is2DPartOf3D(NN_NO_CHECK(firstResGeog),
+                                              dbContext)) {
                         return NN_NO_CHECK(
                             util::nn_dynamic_pointer_cast<CRS>(firstRes));
                     }
@@ -1202,6 +1203,18 @@ const datum::DatumEnsemblePtr &SingleCRS::datumEnsemble() PROJ_PURE_DEFN {
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+/** \brief Return the real datum or a synthetized one if a datumEnsemble.
+ */
+const datum::DatumNNPtr
+SingleCRS::datumNonNull(const io::DatabaseContextPtr &dbContext) const {
+    return d->datum ? NN_NO_CHECK(d->datum)
+                    : d->datumEnsemble->asDatum(dbContext);
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the cs::CoordinateSystem associated with the CRS.
  *
  * @return a CoordinateSystem.
@@ -1221,20 +1234,41 @@ bool SingleCRS::baseIsEquivalentTo(
          !ObjectUsage::_isEquivalentTo(other, criterion, dbContext))) {
         return false;
     }
-    const auto &thisDatum = d->datum;
-    const auto &otherDatum = otherSingleCRS->d->datum;
-    if (thisDatum) {
-        if (!thisDatum->_isEquivalentTo(otherDatum.get(), criterion,
-                                        dbContext)) {
-            return false;
+
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        const auto &thisDatum = d->datum;
+        const auto &otherDatum = otherSingleCRS->d->datum;
+        if (thisDatum) {
+            if (!thisDatum->_isEquivalentTo(otherDatum.get(), criterion,
+                                            dbContext)) {
+                return false;
+            }
+        } else {
+            if (otherDatum) {
+                return false;
+            }
+        }
+
+        const auto &thisDatumEnsemble = d->datumEnsemble;
+        const auto &otherDatumEnsemble = otherSingleCRS->d->datumEnsemble;
+        if (thisDatumEnsemble) {
+            if (!thisDatumEnsemble->_isEquivalentTo(otherDatumEnsemble.get(),
+                                                    criterion, dbContext)) {
+                return false;
+            }
+        } else {
+            if (otherDatumEnsemble) {
+                return false;
+            }
         }
     } else {
-        if (otherDatum) {
+        if (!datumNonNull(dbContext)->_isEquivalentTo(
+                otherSingleCRS->datumNonNull(dbContext).get(), criterion,
+                dbContext)) {
             return false;
         }
     }
 
-    // TODO test DatumEnsemble
     return d->coordinateSystem->_isEquivalentTo(
                otherSingleCRS->d->coordinateSystem.get(), criterion,
                dbContext) &&
@@ -1351,6 +1385,21 @@ CRSNNPtr GeodeticCRS::_shallowClone() const {
 const datum::GeodeticReferenceFramePtr &GeodeticCRS::datum() PROJ_PURE_DEFN {
     return d->datum_;
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+/** \brief Return the real datum or a synthetized one if a datumEnsemble.
+ */
+const datum::GeodeticReferenceFrameNNPtr
+GeodeticCRS::datumNonNull(const io::DatabaseContextPtr &dbContext) const {
+    return NN_NO_CHECK(
+        d->datum_
+            ? d->datum_
+            : util::nn_dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
+                  SingleCRS::getPrivate()->datumEnsemble->asDatum(dbContext)));
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -1718,8 +1767,8 @@ void GeodeticCRS::addDatumInfoToPROJString(
     const auto &TOWGS84Params = formatter->getTOWGS84Parameters();
     bool datumWritten = false;
     const auto &nadgrids = formatter->getHDatumExtension();
-    const auto &l_datum = datum();
-    if (formatter->getCRSExport() && l_datum && TOWGS84Params.empty() &&
+    const auto l_datum = datumNonNull(formatter->databaseContext());
+    if (formatter->getCRSExport() && TOWGS84Params.empty() &&
         nadgrids.empty()) {
         if (l_datum->_isEquivalentTo(
                 datum::GeodeticReferenceFrame::EPSG_6326.get(),
@@ -1967,11 +2016,12 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
     if (authorityFactory) {
 
-        const auto &thisDatum(datum());
+        const auto thisDatum(datumNonNull(dbContext));
 
-        auto searchByDatum = [this, &authorityFactory, &res, &thisDatum,
-                              &geodetic_crs_type, crsCriterion, &dbContext]() {
-            for (const auto &id : thisDatum->identifiers()) {
+        auto searchByDatumCode = [this, &authorityFactory, &res,
+                                  &geodetic_crs_type, crsCriterion, &dbContext](
+            const common::IdentifiedObjectNNPtr &l_datum) {
+            for (const auto &id : l_datum->identifiers()) {
                 try {
                     auto tempRes = authorityFactory->createGeodeticCRSFromDatum(
                         *id->codeSpace(), id->code(), geodetic_crs_type);
@@ -1986,10 +2036,10 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
         };
 
-        const auto &thisEllipsoid(ellipsoid());
         auto searchByEllipsoid = [this, &authorityFactory, &res, &thisDatum,
-                                  &thisEllipsoid, &geodetic_crs_type,
-                                  l_implicitCS, &dbContext]() {
+                                  &geodetic_crs_type, l_implicitCS,
+                                  &dbContext]() {
+            const auto &thisEllipsoid = thisDatum->ellipsoid();
             const auto ellipsoids =
                 thisEllipsoid->identifiers().empty()
                     ? authorityFactory->createEllipsoidFromExisting(
@@ -2003,9 +2053,8 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                 *id->codeSpace(), id->code(),
                                 geodetic_crs_type);
                         for (const auto &crs : tempRes) {
-                            const auto &crsDatum(crs->datum());
-                            if (crsDatum &&
-                                crsDatum->ellipsoid()->_isEquivalentTo(
+                            const auto crsDatum(crs->datumNonNull(dbContext));
+                            if (crsDatum->ellipsoid()->_isEquivalentTo(
                                     ellps.get(),
                                     util::IComparable::Criterion::EQUIVALENT,
                                     dbContext) &&
@@ -2027,18 +2076,32 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
         };
 
+        const auto searchByDatumOrEllipsoid = [&authorityFactory, &res,
+                                               &thisDatum, searchByDatumCode,
+                                               searchByEllipsoid]() {
+            if (!thisDatum->identifiers().empty()) {
+                searchByDatumCode(thisDatum);
+            } else {
+                auto candidateDatums = authorityFactory->createObjectsFromName(
+                    thisDatum->nameStr(), {io::AuthorityFactory::ObjectType::
+                                               GEODETIC_REFERENCE_FRAME},
+                    false);
+                const size_t sizeBefore = res.size();
+                for (const auto &candidateDatum : candidateDatums) {
+                    searchByDatumCode(candidateDatum);
+                }
+                if (sizeBefore == res.size()) {
+                    searchByEllipsoid();
+                }
+            }
+        };
+
         const bool unsignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
                                        ci_equal(thisName, "unnamed");
 
         if (unsignificantName) {
-            if (thisDatum) {
-                if (!thisDatum->identifiers().empty()) {
-                    searchByDatum();
-                } else {
-                    searchByEllipsoid();
-                }
-            }
+            searchByDatumOrEllipsoid();
         } else if (hasCodeCompatibleOfAuthorityFactory(this,
                                                        authorityFactory)) {
             // If the CRS has already an id, check in the database for the
@@ -2088,12 +2151,8 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     break;
                 }
             }
-            if (!gotAbove25Pct && thisDatum) {
-                if (!thisDatum->identifiers().empty()) {
-                    searchByDatum();
-                } else {
-                    searchByEllipsoid();
-                }
+            if (!gotAbove25Pct) {
+                searchByDatumOrEllipsoid();
             }
         }
 
@@ -2120,22 +2179,20 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
 
             // Then datum matching
-            const auto &aDatum(a.first->datum());
-            const auto &bDatum(b.first->datum());
-            if (thisDatum && aDatum && bDatum) {
-                const auto thisEquivADatum(thisDatum->_isEquivalentTo(
-                    aDatum.get(), util::IComparable::Criterion::EQUIVALENT,
-                    dbContext));
-                const auto thisEquivBDatum(thisDatum->_isEquivalentTo(
-                    bDatum.get(), util::IComparable::Criterion::EQUIVALENT,
-                    dbContext));
+            const auto aDatum(a.first->datumNonNull(dbContext));
+            const auto bDatum(b.first->datumNonNull(dbContext));
+            const auto thisEquivADatum(thisDatum->_isEquivalentTo(
+                aDatum.get(), util::IComparable::Criterion::EQUIVALENT,
+                dbContext));
+            const auto thisEquivBDatum(thisDatum->_isEquivalentTo(
+                bDatum.get(), util::IComparable::Criterion::EQUIVALENT,
+                dbContext));
 
-                if (thisEquivADatum && !thisEquivBDatum) {
-                    return true;
-                }
-                if (!thisEquivADatum && thisEquivBDatum) {
-                    return false;
-                }
+            if (thisEquivADatum && !thisEquivBDatum) {
+                return true;
+            }
+            if (!thisEquivADatum && thisEquivBDatum) {
+                return false;
             }
 
             // Then coordinate system matching
@@ -2167,23 +2224,21 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 return false;
             }
 
-            if (aDatum && bDatum) {
-                // Favor the CRS whole ellipsoid names matches the ellipsoid
-                // name (WGS84...)
-                const bool aEllpsNameEqCRSName =
-                    metadata::Identifier::isEquivalentName(
-                        aDatum->ellipsoid()->nameStr().c_str(),
-                        a.first->nameStr().c_str());
-                const bool bEllpsNameEqCRSName =
-                    metadata::Identifier::isEquivalentName(
-                        bDatum->ellipsoid()->nameStr().c_str(),
-                        b.first->nameStr().c_str());
-                if (aEllpsNameEqCRSName && !bEllpsNameEqCRSName) {
-                    return true;
-                }
-                if (bEllpsNameEqCRSName && !aEllpsNameEqCRSName) {
-                    return false;
-                }
+            // Favor the CRS whole ellipsoid names matches the ellipsoid
+            // name (WGS84...)
+            const bool aEllpsNameEqCRSName =
+                metadata::Identifier::isEquivalentName(
+                    aDatum->ellipsoid()->nameStr().c_str(),
+                    a.first->nameStr().c_str());
+            const bool bEllpsNameEqCRSName =
+                metadata::Identifier::isEquivalentName(
+                    bDatum->ellipsoid()->nameStr().c_str(),
+                    b.first->nameStr().c_str());
+            if (aEllpsNameEqCRSName && !bEllpsNameEqCRSName) {
+                return true;
+            }
+            if (bEllpsNameEqCRSName && !aEllpsNameEqCRSName) {
+                return false;
             }
 
             // Arbitrary final sorting criterion
@@ -2331,7 +2386,8 @@ GeographicCRS::create(const util::PropertyMap &properties,
 /** \brief Return whether the current GeographicCRS is the 2D part of the
  * other 3D GeographicCRS.
  */
-bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
+bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other,
+                                 const io::DatabaseContextPtr &dbContext)
     PROJ_PURE_DEFN {
     const auto &axis = d->coordinateSystem_->axisList();
     const auto &otherAxis = other->d->coordinateSystem_->axisList();
@@ -2349,13 +2405,10 @@ bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other)
               util::IComparable::Criterion::EQUIVALENT))) {
         return false;
     }
-    const auto &thisDatum = GeodeticCRS::getPrivate()->datum_;
-    const auto &otherDatum = other->GeodeticCRS::getPrivate()->datum_;
-    if (thisDatum && otherDatum) {
-        return thisDatum->_isEquivalentTo(
-            otherDatum.get(), util::IComparable::Criterion::EQUIVALENT);
-    }
-    return false;
+    const auto thisDatum = datumNonNull(dbContext);
+    const auto otherDatum = other->datumNonNull(dbContext);
+    return thisDatum->_isEquivalentTo(otherDatum.get(),
+                                      util::IComparable::Criterion::EQUIVALENT);
 }
 
 //! @endcond
@@ -2497,7 +2550,8 @@ GeographicCRS::demoteTo2D(const std::string &newName,
                 auto firstResAsGeogCRS =
                     util::nn_dynamic_pointer_cast<GeographicCRS>(firstRes);
                 if (firstResAsGeogCRS &&
-                    firstResAsGeogCRS->is2DPartOf3D(NN_NO_CHECK(this))) {
+                    firstResAsGeogCRS->is2DPartOf3D(NN_NO_CHECK(this),
+                                                    dbContext)) {
                     return NN_NO_CHECK(firstResAsGeogCRS);
                 }
             }
@@ -2594,15 +2648,13 @@ void GeographicCRS::_exportToPROJString(
         if (formatter->getLegacyCRSToCRSContext() &&
             formatter->getHDatumExtension().empty() &&
             formatter->getTOWGS84Parameters().empty()) {
-            const auto &l_datum = datum();
-            if (l_datum &&
-                l_datum->_isEquivalentTo(
+            const auto l_datum = datumNonNull(formatter->databaseContext());
+            if (l_datum->_isEquivalentTo(
                     datum::GeodeticReferenceFrame::EPSG_6326.get(),
                     util::IComparable::Criterion::EQUIVALENT)) {
                 done = true;
                 formatter->addParam("ellps", "WGS84");
-            } else if (l_datum &&
-                       l_datum->_isEquivalentTo(
+            } else if (l_datum->_isEquivalentTo(
                            datum::GeodeticReferenceFrame::EPSG_6269.get(),
                            util::IComparable::Criterion::EQUIVALENT)) {
                 done = true;
@@ -2765,6 +2817,19 @@ const cs::VerticalCSNNPtr VerticalCRS::coordinateSystem() const {
     return util::nn_static_pointer_cast<cs::VerticalCS>(
         SingleCRS::getPrivate()->coordinateSystem);
 }
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+/** \brief Return the real datum or a synthetized one if a datumEnsemble.
+ */
+const datum::VerticalReferenceFrameNNPtr
+VerticalCRS::datumNonNull(const io::DatabaseContextPtr &dbContext) const {
+    return NN_NO_CHECK(
+        util::nn_dynamic_pointer_cast<datum::VerticalReferenceFrame>(
+            SingleCRS::datumNonNull(dbContext)));
+}
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -3860,12 +3925,15 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     std::list<Pair> res;
 
     const auto &thisName(nameStr());
+    io::DatabaseContextPtr dbContext =
+        authorityFactory ? authorityFactory->databaseContext().as_nullable()
+                         : nullptr;
 
     std::list<std::pair<GeodeticCRSNNPtr, int>> baseRes;
     const auto &l_baseCRS(baseCRS());
-    const auto l_datum = l_baseCRS->datum();
+    const auto l_datum = l_baseCRS->datumNonNull(dbContext);
     const bool significantNameForDatum =
-        l_datum != nullptr && !ci_starts_with(l_datum->nameStr(), "unknown") &&
+        !ci_starts_with(l_datum->nameStr(), "unknown") &&
         l_datum->nameStr() != "unnamed";
     const auto &ellipsoid = l_baseCRS->ellipsoid();
     auto geogCRS = dynamic_cast<const GeographicCRS *>(l_baseCRS.get());
@@ -3900,9 +3968,6 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
     const auto &conv = derivingConversionRef();
     const auto &cs = coordinateSystem();
-    io::DatabaseContextPtr dbContext =
-        authorityFactory ? authorityFactory->databaseContext().as_nullable()
-                         : nullptr;
 
     if (baseRes.size() == 1 && baseRes.front().second >= 70 &&
         conv->isUTM(zone, north) &&
@@ -3992,10 +4057,9 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                     util::IComparable::Criterion::EQUIVALENT,
                                     dbContext)) {
                 if (!significantNameForDatum ||
-                    (crs->baseCRS()->datum() &&
-                     l_datum->_isEquivalentTo(
-                         crs->baseCRS()->datum().get(),
-                         util::IComparable::Criterion::EQUIVALENT))) {
+                    l_datum->_isEquivalentTo(
+                        crs->baseCRS()->datumNonNull(dbContext).get(),
+                        util::IComparable::Criterion::EQUIVALENT)) {
                     res.emplace_back(crs, 70);
                 } else {
                     res.emplace_back(crs, 60);
@@ -4877,7 +4941,6 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
             ? NN_NO_CHECK(std::static_pointer_cast<CRS>(sourceGeographicCRS))
             : baseCRSIn;
     if (sourceGeographicCRS != nullptr &&
-        sourceGeographicCRS->datum() != nullptr &&
         sourceGeographicCRS->primeMeridian()->longitude().getSIValue() != 0.0) {
         transformationSourceCRS = GeographicCRS::create(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
@@ -4886,9 +4949,9 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
             datum::GeodeticReferenceFrame::create(
                 util::PropertyMap().set(
                     common::IdentifiedObject::NAME_KEY,
-                    sourceGeographicCRS->datum()->nameStr() +
+                    sourceGeographicCRS->datumNonNull(nullptr)->nameStr() +
                         " (with Greenwich prime meridian)"),
-                sourceGeographicCRS->datum()->ellipsoid(),
+                sourceGeographicCRS->datumNonNull(nullptr)->ellipsoid(),
                 util::optional<std::string>(), datum::PrimeMeridian::GREENWICH),
             sourceGeographicCRS->coordinateSystem());
     }

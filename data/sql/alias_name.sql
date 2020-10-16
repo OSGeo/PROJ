@@ -608,6 +608,7 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1131','JGD2011 (vertica
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1130','JGD2000 (vertical)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1129','JSLD72','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1132','RDN2008','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1288','BI','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -2791,7 +2792,6 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2058','ED50(ED77) / UTM 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2059','ED50(ED77) / UTM 39N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2060','ED50(ED77) / UTM 40N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2061','ED50(ED77) / UTM 41N','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2062','Madrid (Madrid) / Spain LCC','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2063','Dabola 1981 / UTM 28N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2064','Dabola 1981 / UTM 29N','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2104','Lake / La Rosa Grid','EPSG');
@@ -4837,7 +4837,6 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2315','Campo Inchauspe /
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2316','Campo Inchauspe /UTM 20S','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','7992','Malongo 1987 / UTM 33S','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','7976','Hong Kong Principal Datum depth','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2062','Madrid - LCC','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8042','S-SC','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8042','Stable Cadastre','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8043','Stable cadastre','EPSG');
@@ -5073,7 +5072,6 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8360','ETRS89 [ETRF2000] 
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4417','Pulkovo 42(83) / 3GK zn7','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8357','Bpv','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4434','Pulkovo 42(83) / 3GK zn8','EPSG');
-INSERT INTO "alias_name" VALUES('compound_crs','EPSG','8360','ETRS89 [ETRF2000] + Bpv','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8351','S-JTSK (JTSK03)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8352','S-JTSK (JTSK03) / Krovak','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','8357','SK_KRON / NH','EPSG');
@@ -6087,7 +6085,6 @@ INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5195','MK_TRIE / NOH','EP
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4826','WGS 84 / Cape Verde New','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','9390','EVRF2019mean_AMST / NH','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4479','732','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4479','CGCS 2000 - XYZ','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4480','733','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9450','ETRS89 + Belfast Lough height','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4480','CGCS 2000 - LatLonEht','EPSG');
@@ -7195,3 +7192,5 @@ INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','6693','JSLD height','EPSG
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6707','RDN2008 / TM32','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6708','RDN2008 / TM33','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6709','RDN2008 / TM34','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2062','Madrid (Madrid) / Spain LCC','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2062','Madrid - LCC','EPSG');

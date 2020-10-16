@@ -22,18 +22,77 @@ INSERT INTO grid_alternatives(original_grid_name,
 
 -- OGC CRS84, CRS27 and CRS83 longitude/latitude ordered CRS
 
-INSERT INTO "geodetic_crs" VALUES('OGC','CRS84','WGS 84 (CRS84)',NULL,NULL,'geographic 2D','EPSG','6424','EPSG','6326','EPSG','1262',NULL,0);
-INSERT INTO "geodetic_crs" VALUES('OGC','CRS27','NAD27 (CRS27)',NULL,NULL,'geographic 2D','EPSG','6424','EPSG','6267','EPSG','1349',NULL,0);
-INSERT INTO "geodetic_crs" VALUES('OGC','CRS83','NAD83 (CRS83)',NULL,NULL,'geographic 2D','EPSG','6424','EPSG','6269','EPSG','1350',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('OGC','CRS84','WGS 84 (CRS84)',NULL,'geographic 2D','EPSG','6424','EPSG','6326',NULL,0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'OGC_CRS84_USAGE',
+    'geodetic_crs',
+    'OGC',
+    'CRS84',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
 
-INSERT INTO "other_transformation" VALUES('PROJ','CRS84_TO_EPSG_4326','OGC:CRS84 to WGS 84',NULL,NULL,'EPSG','9843','Axis Order Reversal (2D)','OGC','CRS84','EPSG','4326','EPSG','1262',0.0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "other_transformation" VALUES('PROJ','CRS27_TO_EPSG_4267','OGC:CRS27 to NAD27',NULL,NULL,'EPSG','9843','Axis Order Reversal (2D)','OGC','CRS27','EPSG','4267','EPSG','1262',0.0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
-INSERT INTO "other_transformation" VALUES('PROJ','CRS83_TO_EPSG_4269','OGC:CRS83 to NAD83',NULL,NULL,'EPSG','9843','Axis Order Reversal (2D)','OGC','CRS83','EPSG','4269','EPSG','1262',0.0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "geodetic_crs" VALUES('OGC','CRS27','NAD27 (CRS27)',NULL,'geographic 2D','EPSG','6424','EPSG','6267',NULL,0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'OGC_CRS27_USAGE',
+    'geodetic_crs',
+    'OGC',
+    'CRS27',
+    'EPSG','1349', -- extent
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "geodetic_crs" VALUES('OGC','CRS83','NAD83 (CRS83)',NULL,'geographic 2D','EPSG','6424','EPSG','6269',NULL,0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'OGC_CRS83_USAGE',
+    'geodetic_crs',
+    'OGC',
+    'CRS83',
+    'EPSG','1350', -- extent
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "other_transformation" VALUES('PROJ','CRS84_TO_EPSG_4326','OGC:CRS84 to WGS 84',NULL,'EPSG','9843','Axis Order Reversal (2D)','OGC','CRS84','EPSG','4326',0.0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'CRS84_TO_EPSG_4326_USAGE',
+    'other_transformation',
+    'PROJ',
+    'CRS84_TO_EPSG_4326',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "other_transformation" VALUES('PROJ','CRS27_TO_EPSG_4267','OGC:CRS27 to NAD27',NULL,'EPSG','9843','Axis Order Reversal (2D)','OGC','CRS27','EPSG','4267',0.0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'CRS27_TO_EPSG_4267_USAGE',
+    'other_transformation',
+    'PROJ',
+    'CRS27_TO_EPSG_4267',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "other_transformation" VALUES('PROJ','CRS83_TO_EPSG_4269','OGC:CRS83 to NAD83',NULL,'EPSG','9843','Axis Order Reversal (2D)','OGC','CRS83','EPSG','4269',0.0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'CRS83_TO_EPSG_4269_USAGE',
+    'other_transformation',
+    'PROJ',
+    'CRS83_TO_EPSG_4269',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
+
 
 -- Temporary entry for NZGD2000 deformation model
 INSERT INTO other_transformation VALUES(
     'PROJ','NZGD2000-20180701','NZGD2000 to ITRF96',
-    'New Zealand Deformation Model. Defines the secular model (National Deformation Model) and patches for significant deformation events since 2000', NULL,
+    'New Zealand Deformation Model. Defines the secular model (National Deformation Model) and patches for significant deformation events since 2000',
     'PROJ', 'PROJString',
     '+proj=pipeline ' ||
         '+step +proj=unitconvert +xy_in=deg +xy_out=rad ' ||
@@ -43,7 +102,6 @@ INSERT INTO other_transformation VALUES(
         '+step +proj=unitconvert +xy_in=rad +xy_out=deg',
     'EPSG','4959',
     'EPSG','7907',
-    'EPSG','1175',
     NULL, --accuracy
     NULL,NULL,NULL,NULL,NULL,NULL, -- param1
     NULL,NULL,NULL,NULL,NULL,NULL, -- param2
@@ -54,29 +112,94 @@ INSERT INTO other_transformation VALUES(
     NULL,NULL,NULL,NULL,NULL,NULL, -- param7
     '20180701', -- operation version
     0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'NZGD2000-20180701_USAGE',
+    'other_transformation',
+    'PROJ',
+    'NZGD2000-20180701',
+    'EPSG','1175', -- extent
+    'EPSG','1024'  -- unknown
+);
 
-INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF97','NZGD2000 to ITRF97','Concatenation of PROJ:NZGD2000-20180701 and 9079','','EPSG','4959','EPSG','7908','EPSG','1175',NULL,NULL,0);
+
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF97','NZGD2000 to ITRF97','Concatenation of PROJ:NZGD2000-20180701 and 9079','EPSG','4959','EPSG','7908',NULL,NULL,0);
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF97',1,'PROJ','NZGD2000-20180701');
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF97',2,'EPSG','9079');
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'NZGD2000_TO_ITRF97_USAGE',
+    'concatenated_operation',
+    'PROJ',
+    'NZGD2000_TO_ITRF97',
+    'EPSG','1175', -- extent
+    'EPSG','1024'  -- unknown
+);
 
-INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2000','NZGD2000 to ITRF2000','Concatenation of PROJ:NZGD2000-20180701 and 9080','','EPSG','4959','EPSG','7909','EPSG','1175',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2000','NZGD2000 to ITRF2000','Concatenation of PROJ:NZGD2000-20180701 and 9080','EPSG','4959','EPSG','7909',NULL,NULL,0);
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2000',1,'PROJ','NZGD2000-20180701');
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2000',2,'EPSG','9080');
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'NZGD2000_TO_ITRF2000_USAGE',
+    'concatenated_operation',
+    'PROJ',
+    'NZGD2000_TO_ITRF2000',
+    'EPSG','1175', -- extent
+    'EPSG','1024'  -- unknown
+);
 
-INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2005','NZGD2000 to ITRF2005','Concatenation of PROJ:NZGD2000-20180701 and 9081','','EPSG','4959','EPSG','7910','EPSG','1175',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2005','NZGD2000 to ITRF2005','Concatenation of PROJ:NZGD2000-20180701 and 9081','EPSG','4959','EPSG','7910',NULL,NULL,0);
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2005',1,'PROJ','NZGD2000-20180701');
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2005',2,'EPSG','9081');
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'NZGD2000_TO_ITRF2005_USAGE',
+    'concatenated_operation',
+    'PROJ',
+    'NZGD2000_TO_ITRF2005',
+    'EPSG','1175', -- extent
+    'EPSG','1024'  -- unknown
+);
 
-INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2008','NZGD2000 to ITRF2008','Concatenation of PROJ:NZGD2000-20180701 and EPSG:9082','','EPSG','4959','EPSG','7911','EPSG','1175',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2008','NZGD2000 to ITRF2008','Concatenation of PROJ:NZGD2000-20180701 and EPSG:9082','EPSG','4959','EPSG','7911',NULL,NULL,0);
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2008',1,'PROJ','NZGD2000-20180701');
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2008',2,'EPSG','9082');
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'NZGD2000_TO_ITRF2008_USAGE',
+    'concatenated_operation',
+    'PROJ',
+    'NZGD2000_TO_ITRF2008',
+    'EPSG','1175', -- extent
+    'EPSG','1024'  -- unknown
+);
 
-INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2014','NZGD2000 to ITRF2014','Concatenation of PROJ:NZGD2000-20180701 and EPSG:9083','','EPSG','4959','EPSG','7912','EPSG','1175',NULL,NULL,0);
+INSERT INTO "concatenated_operation" VALUES('PROJ','NZGD2000_TO_ITRF2014','NZGD2000 to ITRF2014','Concatenation of PROJ:NZGD2000-20180701 and EPSG:9083','EPSG','4959','EPSG','7912',NULL,NULL,0);
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2014',1,'PROJ','NZGD2000-20180701');
 INSERT INTO "concatenated_operation_step" VALUES('PROJ','NZGD2000_TO_ITRF2014',2,'EPSG','9083');
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'NZGD2000_TO_ITRF2014_USAGE',
+    'concatenated_operation',
+    'PROJ',
+    'NZGD2000_TO_ITRF2014',
+    'EPSG','1175', -- extent
+    'EPSG','1024'  -- unknown
+);
 
 -- alias of EPSG:3857
-INSERT INTO "projected_crs" VALUES('EPSG','900913','Google Maps Global Mercator',NULL,NULL,'EPSG','4499','EPSG','4326','EPSG','3856','EPSG','3544',NULL,1);
+INSERT INTO "projected_crs" VALUES('EPSG','900913','Google Maps Global Mercator',NULL,'EPSG','4499','EPSG','4326','EPSG','3856',NULL,1);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    '900913_USAGE',
+    'projected_crs',
+    'EPSG',
+    '900913',
+    'EPSG','3544', -- extent
+    'EPSG','1098'
+);
+
 
 -- ('EPSG','7001','ETRS89 to NAP height (1)') lacks an interpolationCRS with Amersfoort / EPSG:4289
 -- See https://salsa.debian.org/debian-gis-team/proj-rdnap/blob/debian/2008-8/Use%20of%20RDTRANS2008%20and%20NAPTRANS2008.pdf
@@ -149,12 +272,71 @@ INSERT INTO "axis" VALUES('PROJ','2','Northing','N','north','PROJ','ENh',2,'EPSG
 INSERT INTO "axis" VALUES('PROJ','3','Ellipsoidal height','h','up','PROJ','ENh',2,'EPSG','9001');
 
 -- Consider all WGS84 related CRS are equivalent with an accuracy of 2m
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G730','WGS 84 to WGS 84 (G730)','','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9053','EPSG','1262',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G873','WGS 84 to WGS 84 (G873)','','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9054','EPSG','1262',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1150','WGS 84 to WGS 84 (G1150)','','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9055','EPSG','1262',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1674','WGS 84 to WGS 84 (G1674)','','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9056','EPSG','1262',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1762','WGS 84 to WGS 84 (G1762)','','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9057','EPSG','1262',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_TRANSIT','WGS 84 to WGS 84 (Transit)','','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','8888','EPSG','1262',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
+INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G730','WGS 84 to WGS 84 (G730)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9053',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'WGS84_TO_WGS84_G730_USAGE',
+    'helmert_transformation',
+    'PROJ',
+    'WGS84_TO_WGS84_G730',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G873','WGS 84 to WGS 84 (G873)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9054',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'WGS84_TO_WGS84_G873_USAGE',
+    'helmert_transformation',
+    'PROJ',
+    'WGS84_TO_WGS84_G873',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1150','WGS 84 to WGS 84 (G1150)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9055',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'WGS84_TO_WGS84_G1150_USAGE',
+    'helmert_transformation',
+    'PROJ',
+    'WGS84_TO_WGS84_G1150',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1674','WGS 84 to WGS 84 (G1674)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9056',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'WGS84_TO_WGS84_G1674_USAGE',
+    'helmert_transformation',
+    'PROJ',
+    'WGS84_TO_WGS84_G1674',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1762','WGS 84 to WGS 84 (G1762)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9057',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'WGS84_TO_WGS84_G1762_USAGE',
+    'helmert_transformation',
+    'PROJ',
+    'WGS84_TO_WGS84_G1762',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_TRANSIT','WGS 84 to WGS 84 (Transit)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','8888',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'WGS84_TO_WGS84_TRANSIT_USAGE',
+    'helmert_transformation',
+    'PROJ',
+    'WGS84_TO_WGS84_TRANSIT',
+    'EPSG','1262', -- extent
+    'EPSG','1024'  -- unknown
+);
 
 ---- Geoid models -----
 
@@ -191,6 +373,12 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6277','OSGB36','PROJ');
 -- Given that we have installed above a WGS84 alias to the datum, add also one
 -- to the EPSG:4326 CRS, as this is a common use case (https://github.com/OSGeo/PROJ/issues/2216)
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4326','WGS84','PROJ');
+
+---- Aliases from old datum names to new datum ensemble names -----
+
+-- Those have been reported to IOGP and will hopefully be integrated in a later EPSG release
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6326','World Geodetic System 1984','PROJ');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6258','European Terrestrial Reference System 1989','PROJ');
 
 ---- PROJ unit short names -----
 
@@ -234,7 +422,6 @@ SELECT
     gt.auth_name || '_' || gt.code || '_RESTRICTED_TO_VERTCRS' AS code,
     gcrs.name || ' to ' || vcrs.name || ' (from ' || gt.name || ')' AS name,
     NULL AS description,
-    gt.scope,
     'EPSG' AS method_auth_name,
     '9665' AS method_code,
     'Geographic3D to GravityRelatedHeight (gtx)' AS method_name,
@@ -242,8 +429,6 @@ SELECT
     gt.source_crs_code,
     c.vertical_crs_auth_name AS target_crs_auth_name,
     c.vertical_crs_code AS target_crs_code,
-    gt.area_of_use_auth_name,
-    gt.area_of_use_code,
     gt.accuracy,
     gt.grid_param_auth_name,
     gt.grid_param_code,
@@ -261,4 +446,19 @@ FROM grid_transformation gt
 JOIN compound_crs c ON gt.target_crs_code = c.code AND gt.target_crs_auth_name = c.auth_name
 JOIN geodetic_crs gcrs ON gt.source_crs_auth_name = gcrs.auth_name AND gt.source_crs_code = gcrs.code
 JOIN vertical_crs vcrs on vcrs.auth_name = c.vertical_crs_auth_name AND vcrs.code = c.vertical_crs_code
+WHERE method_auth_name = 'EPSG' AND method_code = '9635' AND gt.deprecated = 0;
+
+INSERT INTO "usage"
+SELECT
+    'PROJ' AS auth_name,
+    gt.auth_name || '_' || gt.code || '_RESTRICTED_TO_VERTCRS_USAGE' AS code,
+    'grid_transformation' AS object_table_name,
+    'PROJ' AS object_auth_name,
+    gt.auth_name || '_' || gt.code || '_RESTRICTED_TO_VERTCRS' AS object_code,
+    u.extent_auth_name,
+    u.extent_code,
+    u.scope_auth_name,
+    u.scope_code
+FROM grid_transformation gt
+JOIN usage u ON u.object_auth_name = gt.auth_name AND u.object_code = gt.code AND u.object_table_name = 'grid_transformation'
 WHERE method_auth_name = 'EPSG' AND method_code = '9635' AND gt.deprecated = 0;

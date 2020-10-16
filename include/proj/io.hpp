@@ -71,6 +71,10 @@ class Datum;
 using DatumPtr = std::shared_ptr<Datum>;
 using DatumNNPtr = util::nn<DatumPtr>;
 
+class DatumEnsemble;
+using DatumEnsemblePtr = std::shared_ptr<DatumEnsemble>;
+using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
+
 class Ellipsoid;
 using EllipsoidPtr = std::shared_ptr<Ellipsoid>;
 using EllipsoidNNPtr = util::nn<EllipsoidPtr>;
@@ -932,6 +936,10 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_DLL datum::DatumNNPtr createDatum(const std::string &code) const;
 
+    PROJ_DLL datum::DatumEnsembleNNPtr
+    createDatumEnsemble(const std::string &code,
+                        const std::string &type = std::string()) const;
+
     PROJ_DLL datum::GeodeticReferenceFrameNNPtr
     createGeodeticDatum(const std::string &code) const;
 
@@ -1016,6 +1024,10 @@ class PROJ_GCC_DLL AuthorityFactory {
         /** Object of type operation::ConcatenatedOperation (and derived
            classes) */
         CONCATENATED_OPERATION,
+        /** Object of type datum::DynamicGeodeticReferenceFrame */
+        DYNAMIC_GEODETIC_REFERENCE_FRAME,
+        /** Object of type datum::DynamicVerticalReferenceFrame */
+        DYNAMIC_VERTICAL_REFERENCE_FRAME,
     };
 
     PROJ_DLL std::set<std::string>
