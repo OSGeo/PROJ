@@ -116,15 +116,17 @@ Mathematical definition
 #######################
 
 The formulation given here for the Transverse Mercator projection is due
-to Krüger :cite:`Krueger1912` who gave the series expansions accurate
-to :math:`n^4`, where :math:`n = (a-b)/(a+b)` is the third flattening.
+to Krüger :cite:`Krueger1912` who gave the series expansions accurate to
+:math:`n^4`, where :math:`n = (a-b)/(a+b)` is the third flattening.
 These series were extended to sixth order by Engsager and Poder in
 :cite:`Poder1998` and :cite:`Engsager2007`.  This gives full
-double-precision accuracy withing 3900 km of the central meridian
-:cite:`Karney2011tm`.
+double-precision accuracy withing 3900 km of the central meridian (about
+57% of the surface of the earth) :cite:`Karney2011tm`.  The error is
+less than 0.1 mm within 7000 km of the central meridian (about 89% of
+the surface of the earth).
 
 This formulation consists of three steps: a conformal projection from
-the ellipsoid to a sphere, the spherical transversion Mercator
+the ellipsoid to a sphere, the spherical transverse Mercator
 projection, rectifying this projection to give constant scale on the
 central meridian.
 
@@ -139,20 +141,29 @@ translate the projected coordinates so that at :math:`(\phi, \lambda) =
 (x_0,y_0)`.  To simplify the formulas below, these options are set to
 zero (their default values).
 
+Because the projection is conformal, the formulation is most
+conveniently given in terms of complex numbers.  In particular, the
+unscaled projected coordinates :math:`\eta` (proportional to the
+easting, :math:`x`) and :math:`\xi` (proportional to the northing,
+:math:`y`) are combined into the single complex quantity :math:`\zeta =
+\xi + i\eta`, where :math:`i=\sqrt{-1}`.  Then any analytic function
+:math:`f(\zeta)` defines a conformal mapping (this follows from the
+Cauchy-Riemann conditions).
+
 Spherical form
 **************
 
 Because the full (ellipsoidal) projection includes the spherical
 projection as one of the components, we present the spherial form first
 with the coordinates tagged with primes, :math:`\phi'`,
-:math:`\lambda'`, :math:`\zeta'`, :math:`x'`, :math:`y'`, so that they
-can be distinguished from the corresponding ellipsoidal coordinates
-(without the primes).  The projected coordinates for the sphere are
-given by
+:math:`\lambda'`, :math:`\zeta' = \xi' + i\eta'`, :math:`x'`,
+:math:`y'`, so that they can be distinguished from the corresponding
+ellipsoidal coordinates (without the primes).  The projected coordinates
+for the sphere are given by
 
 .. math::
 
-   \zeta' = \xi' + i\eta';\qquad x' = k_0 R \eta';\qquad y' = k_0 R \xi'
+   x' = k_0 R \eta';\qquad y' = k_0 R \xi'
 
 Forward projection
 ==================
