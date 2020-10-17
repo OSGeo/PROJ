@@ -752,7 +752,6 @@ pj_compare_datums
 pj_context_get_grid_cache_filename(projCtx_t*)
 pj_context_set_user_writable_directory(projCtx_t*, std::string const&)
 pj_ctx_alloc
-pj_ctx_clone
 pj_ctx_fclose
 pj_ctx_fgets
 pj_ctx_fopen

@@ -29,7 +29,6 @@
 #define pj_clear_initcache internal_pj_clear_initcache
 #define pj_compare_datums internal_pj_compare_datums
 #define pj_ctx_alloc internal_pj_ctx_alloc
-#define pj_ctx_clone internal_pj_ctx_clone
 #define pj_ctx_fclose internal_pj_ctx_fclose
 #define pj_ctx_fgets internal_pj_ctx_fgets
 #define pj_ctx_fopen internal_pj_ctx_fopen

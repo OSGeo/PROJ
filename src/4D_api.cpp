@@ -1453,13 +1453,6 @@ PJ_CONTEXT *proj_context_create (void) {
     return pj_ctx_alloc ();
 }
 
-/* Create a new context based on a custom context */
-PJ_CONTEXT *proj_context_clone (PJ_CONTEXT *ctx) {
-    if (nullptr==ctx)
-        return pj_ctx_alloc ();
-
-    return pj_ctx_clone (ctx);
-}
 
 PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx) {
     if (nullptr==ctx)
