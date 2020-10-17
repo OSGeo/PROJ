@@ -4477,8 +4477,12 @@ CRSNNPtr CompoundCRS::createLax(const util::PropertyMap &properties,
                   &(axis->direction()) == &(cs::AxisDirection::UP))) {
                 name += " (" + comp1Vert->nameStr() + ')';
             }
+            auto newVertAxis = cs::CoordinateSystemAxis::create(
+                util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                        cs::AxisName::Ellipsoidal_height),
+                cs::AxisAbbreviation::h, axis->direction(), axis->unit());
             return components[0]
-                ->promoteTo3D(name, dbContext, axis)
+                ->promoteTo3D(name, dbContext, newVertAxis)
                 ->attachOriginalCompoundCRS(create(
                     properties,
                     comp0Bound ? std::vector<CRSNNPtr>{comp0Bound->baseCRS(),
