@@ -192,6 +192,7 @@ void PROJ_DLL pj_cleanup_lock(void);
 
 void PROJ_DLL pj_set_ctx( projPJ, projCtx );
 projCtx PROJ_DLL pj_ctx_alloc(void);
+projCtx PROJ_DLL pj_ctx_clone( projCtx );
 void    PROJ_DLL pj_ctx_free( projCtx );
 int PROJ_DLL pj_ctx_get_errno( projCtx );
 void PROJ_DLL pj_ctx_set_errno( projCtx, int );

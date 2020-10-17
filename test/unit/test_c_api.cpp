@@ -4073,7 +4073,7 @@ TEST_F(Fixture_proj_context_set_autoclose_database,
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_context_clone) {
+TEST_F(CApi, proj_context_copy_from_default) {
     auto c_path = proj_context_get_database_path(m_ctxt);
     ASSERT_TRUE(c_path != nullptr);
     std::string path(c_path);
@@ -4121,6 +4121,28 @@ TEST_F(CApi, proj_context_clone) {
     ASSERT_TRUE(c_new_path != nullptr);
     std::string new_db_path(c_new_path);
     ASSERT_EQ(new_db_path, tmp_filename);
+}
+
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_clone) {
+    int new_init_rules = proj_context_get_use_proj4_init_rules(NULL, 0) > 0 ? 0 : 1;
+    PJ_CONTEXT *new_ctx = proj_context_create();
+    EXPECT_NE(new_ctx, nullptr);
+    PjContextKeeper keeper_ctxt(new_ctx);
+    proj_context_use_proj4_init_rules(new_ctx, new_init_rules);
+    PJ_CONTEXT *clone_ctx = proj_context_clone(new_ctx);
+    EXPECT_NE(clone_ctx, nullptr);
+    PjContextKeeper keeper_clone_ctxt(clone_ctx);
+    ASSERT_EQ(
+        proj_context_get_use_proj4_init_rules(new_ctx, 0),
+        proj_context_get_use_proj4_init_rules(clone_ctx, 0)
+    );
+    EXPECT_NE(
+        proj_context_get_use_proj4_init_rules(NULL, 0),
+        proj_context_get_use_proj4_init_rules(clone_ctx, 0)
+    );
 }
 
 // ---------------------------------------------------------------------------
