@@ -205,7 +205,7 @@ The projected coordinates are given by
    A = \frac a{1+n}\biggl(1 + \frac14 n^2 + \frac1{64} n^4 +
    \frac1{256}n^6\biggr)
 
-The series for convertion between ellipsoidal and spherical geographic
+The series for conversion between ellipsoidal and spherical geographic
 coordinates and ellipsoidal and spherical projected coordinates are
 given in matrix notation where :math:`\mathbf S(\theta)` and
 :math:`\mathbf N` are the row and column vectors of length 6
