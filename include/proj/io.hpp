@@ -387,6 +387,10 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_DLL ~PROJStringFormatter();
     //! @endcond
 
+    PROJ_DLL PROJStringFormatter &setMultiLine(bool multiLine) noexcept;
+    PROJ_DLL PROJStringFormatter &setIndentationWidth(int width) noexcept;
+    PROJ_DLL PROJStringFormatter &setMaxLineLength(int maxLineLength) noexcept;
+
     PROJ_DLL void setUseApproxTMerc(bool flag);
 
     PROJ_DLL const std::string &toString() const;

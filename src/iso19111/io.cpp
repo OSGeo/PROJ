@@ -6722,6 +6722,10 @@ struct PROJStringFormatter::Private {
     bool coordOperationOptimizations_ = false;
     bool crsExport_ = false;
     bool legacyCRSToCRSContext_ = false;
+    bool multiLine_ = false;
+    int indentWidth_ = 2;
+    int indentLevel_ = 0;
+    int maxLineLength_ = 80;
 
     std::string result_{};
 
@@ -6776,6 +6780,36 @@ PROJStringFormatter::create(Convention conventionIn,
 /** \brief Set whether approximate Transverse Mercator or UTM should be used */
 void PROJStringFormatter::setUseApproxTMerc(bool flag) {
     d->useApproxTMerc_ = flag;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Whether to use multi line output or not. */
+PROJStringFormatter &
+PROJStringFormatter::setMultiLine(bool multiLine) noexcept {
+    d->multiLine_ = multiLine;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set number of spaces for each indentation level (defaults to 2).
+ */
+PROJStringFormatter &
+PROJStringFormatter::setIndentationWidth(int width) noexcept {
+    d->indentWidth_ = width;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set the maximum size of a line (when multiline output is enable).
+ * Can be set to 0 for unlimited length.
+ */
+PROJStringFormatter &
+PROJStringFormatter::setMaxLineLength(int maxLineLength) noexcept {
+    d->maxLineLength_ = maxLineLength;
+    return *this;
 }
 
 // ---------------------------------------------------------------------------
@@ -7308,28 +7342,56 @@ const std::string &PROJStringFormatter::toString() const {
                     pj_double_quote_string_param_if_needed(paramValue.value);
             }
         }
+
+        if (d->multiLine_) {
+            d->indentLevel_++;
+        }
     }
 
     for (const auto &step : d->steps_) {
+        std::string curLine;
         if (!d->result_.empty()) {
-            d->appendToResult("+step");
-        }
-        if (step.inverted) {
-            d->appendToResult("+inv");
-        }
-        if (!step.name.empty()) {
-            d->appendToResult(step.isInit ? "+init=" : "+proj=");
-            d->result_ += step.name;
-        }
-        for (const auto &paramValue : step.paramValues) {
-            d->appendToResult("+");
-            d->result_ += paramValue.key;
-            if (!paramValue.value.empty()) {
-                d->result_ += '=';
-                d->result_ +=
-                    pj_double_quote_string_param_if_needed(paramValue.value);
+            if (d->multiLine_) {
+                curLine = std::string(d->indentLevel_ * d->indentWidth_, ' ');
+                curLine += "+step";
+            } else {
+                curLine = " +step";
             }
         }
+        if (step.inverted) {
+            curLine += " +inv";
+        }
+        if (!step.name.empty()) {
+            if (!curLine.empty())
+                curLine += ' ';
+            curLine += step.isInit ? "+init=" : "+proj=";
+            curLine += step.name;
+        }
+        for (const auto &paramValue : step.paramValues) {
+            std::string newKV = "+";
+            newKV += paramValue.key;
+            if (!paramValue.value.empty()) {
+                newKV += '=';
+                newKV +=
+                    pj_double_quote_string_param_if_needed(paramValue.value);
+            }
+            if (d->maxLineLength_ > 0 && d->multiLine_ &&
+                curLine.size() + newKV.size() >
+                    static_cast<size_t>(d->maxLineLength_)) {
+                if (d->multiLine_ && !d->result_.empty())
+                    d->result_ += '\n';
+                d->result_ += curLine;
+                curLine = std::string(
+                    d->indentLevel_ * d->indentWidth_ + strlen("+step "), ' ');
+            } else {
+                if (!curLine.empty())
+                    curLine += ' ';
+            }
+            curLine += newKV;
+        }
+        if (d->multiLine_ && !d->result_.empty())
+            d->result_ += '\n';
+        d->result_ += curLine;
     }
 
     if (d->result_.empty()) {
