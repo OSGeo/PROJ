@@ -1448,7 +1448,7 @@ int proj_errno_reset (const PJ *P) {
 }
 
 
-/* Create a new context */
+/* Create a new context based on the default context */
 PJ_CONTEXT *proj_context_create (void) {
     return pj_ctx_alloc ();
 }

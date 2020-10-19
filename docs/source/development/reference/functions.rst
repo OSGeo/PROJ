@@ -13,6 +13,14 @@ Threading contexts
 
     :returns: a new context
 
+.. c:function:: PJ_CONTEXT* proj_context_clone(PJ_CONTEXT *ctx)
+
+    .. versionadded:: 7.2
+
+    Create a new threading-context based on an existing context.
+
+    :returns: a new context
+
 .. c:function:: void proj_context_destroy(PJ_CONTEXT *ctx)
 
     Deallocate a threading-context.

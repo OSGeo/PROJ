@@ -226,6 +226,19 @@ projCtx pj_ctx_alloc()
 }
 
 /************************************************************************/
+/*                            proj_context_clone()                      */
+/*           Create a new context based on a custom context             */
+/************************************************************************/
+
+PJ_CONTEXT *proj_context_clone (PJ_CONTEXT *ctx) 
+{
+    if (nullptr==ctx)
+        return pj_ctx_alloc ();
+
+    return new (std::nothrow) projCtx_t(*ctx);
+}
+
+/************************************************************************/
 /*                            pj_ctx_free()                             */
 /************************************************************************/
 

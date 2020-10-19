@@ -833,6 +833,7 @@ proj_cleanup
 proj_clone
 proj_concatoperation_get_step
 proj_concatoperation_get_step_count
+proj_context_clone
 proj_context_create
 proj_context_delete_cpp_context(projCppContext*)
 proj_context_destroy
