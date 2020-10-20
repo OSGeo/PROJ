@@ -3593,7 +3593,7 @@ TEST(crs, verticalCRS_as_WKT1_GDAL) {
 
 TEST(crs, verticalCRS_as_WKT1_ESRI) {
     auto crs = createVerticalCRS();
-    auto expected = "VERTCS[\"ODN height\",VDATUM[\"Ordnance Datum Newlyn\"],"
+    auto expected = "VERTCS[\"ODN_height\",VDATUM[\"Ordnance_Datum_Newlyn\"],"
                     "PARAMETER[\"Vertical_Shift\",0.0],"
                     "PARAMETER[\"Direction\",1.0],"
                     "UNIT[\"Meter\",1.0]]";
@@ -3603,6 +3603,23 @@ TEST(crs, verticalCRS_as_WKT1_ESRI) {
             WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI).get()),
         expected);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, verticalCRS_as_WKT1_ESRI_context) {
+    auto crs = createVerticalCRS();
+    auto expected = "VERTCS[\"Newlyn\",VDATUM[\"Ordnance_Datum_Newlyn\"],"
+                    "PARAMETER[\"Vertical_Shift\",0.0],"
+                    "PARAMETER[\"Direction\",1.0],"
+                    "UNIT[\"Meter\",1.0]]";
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
 // ---------------------------------------------------------------------------
 
 TEST(crs, verticalCRS_down_as_WKT1_ESRI) {

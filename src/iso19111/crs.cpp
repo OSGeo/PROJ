@@ -2851,7 +2851,25 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                                       ? io::WKTConstants::VERTCS
                                       : io::WKTConstants::VERT_CS,
                          !identifiers().empty());
-    formatter->addQuotedString(nameStr());
+
+    auto l_name = nameStr();
+    if (formatter->useESRIDialect()) {
+        bool aliasFound = false;
+        const auto &dbContext = formatter->databaseContext();
+        if (dbContext) {
+            auto l_alias = dbContext->getAliasFromOfficialName(
+                l_name, "vertical_crs", "ESRI");
+            if (!l_alias.empty()) {
+                l_name = l_alias;
+                aliasFound = true;
+            }
+        }
+        if (!aliasFound) {
+            l_name = io::WKTFormatter::morphNameToESRI(l_name);
+        }
+    }
+
+    formatter->addQuotedString(l_name);
     exportDatumOrDatumEnsembleToWkt(formatter);
     const auto &cs = SingleCRS::getPrivate()->coordinateSystem;
     const auto &axisList = cs->axisList();

@@ -1933,8 +1933,23 @@ void VerticalReferenceFrame::_exportToWKT(
                                       ? io::WKTConstants::VDATUM
                                       : io::WKTConstants::VERT_DATUM,
                          !identifiers().empty());
-    const auto &l_name = nameStr();
+    auto l_name = nameStr();
     if (!l_name.empty()) {
+        if (!isWKT2 && formatter->useESRIDialect()) {
+            bool aliasFound = false;
+            const auto &dbContext = formatter->databaseContext();
+            if (dbContext) {
+                auto l_alias = dbContext->getAliasFromOfficialName(
+                    l_name, "vertical_datum", "ESRI");
+                if (!l_alias.empty()) {
+                    l_name = l_alias;
+                    aliasFound = true;
+                }
+            }
+            if (!aliasFound) {
+                l_name = io::WKTFormatter::morphNameToESRI(l_name);
+            }
+        }
         formatter->addQuotedString(l_name);
     } else {
         formatter->addQuotedString("unnamed");

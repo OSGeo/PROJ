@@ -2106,6 +2106,31 @@ TEST(wkt_parse, VERTCS_WKT1_ESRI) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, VERTCS_WKT1_ESRI_context) {
+    auto wkt = "VERTCS[\"EGM2008_Geoid\",VDATUM[\"EGM2008_Geoid\"],"
+               "PARAMETER[\"Vertical_Shift\",0.0],"
+               "PARAMETER[\"Direction\",1.0],UNIT[\"Meter\",1.0]]";
+
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->nameStr(), "EGM2008 height");
+
+    auto datum = crs->datum();
+    EXPECT_EQ(datum->nameStr(), "EGM2008 geoid");
+
+    auto cs = crs->coordinateSystem();
+    ASSERT_EQ(cs->axisList().size(), 1U);
+    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::UP);
+
+    EXPECT_EQ(WKTParser().guessDialect(wkt),
+              WKTParser::WKTGuessedDialect::WKT1_ESRI);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, VERTCS_WKT1_ESRI_down) {
     auto wkt = "VERTCS[\"Caspian\",VDATUM[\"Caspian_Sea\"],"
                "PARAMETER[\"Vertical_Shift\",0.0],"
