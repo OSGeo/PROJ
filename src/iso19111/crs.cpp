@@ -132,6 +132,16 @@ CRS::~CRS() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+
+/** \brief Return whether the CRS has an implicit coordinate system
+ * (e.g from ESRI WKT) */
+bool CRS::hasImplicitCS() const { return d->implicitCS_; }
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the BoundCRS potentially attached to this CRS.
  *
  * In the case this method is called on a object returned by
@@ -1971,7 +1981,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     io::DatabaseContextPtr dbContext =
         authorityFactory ? authorityFactory->databaseContext().as_nullable()
                          : nullptr;
-    const bool l_implicitCS = CRS::getPrivate()->implicitCS_;
+    const bool l_implicitCS = hasImplicitCS();
     const auto crsCriterion =
         l_implicitCS
             ? util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS
@@ -4020,7 +4030,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         }
     }
 
-    const bool l_implicitCS = CRS::getPrivate()->implicitCS_;
+    const bool l_implicitCS = hasImplicitCS();
     const auto addCRS = [&](const ProjectedCRSNNPtr &crs, const bool eqName) {
         const auto &l_unit = cs->axisList()[0]->unit();
         if (_isEquivalentTo(crs.get(), util::IComparable::Criterion::
@@ -4617,6 +4627,13 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
     const auto &thisName(nameStr());
 
+    const auto &components = componentReferenceSystems();
+    const bool l_implicitCS = components[0]->hasImplicitCS();
+    const auto crsCriterion =
+        l_implicitCS
+            ? util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS
+            : util::IComparable::Criterion::EQUIVALENT;
+
     if (authorityFactory) {
         const io::DatabaseContextNNPtr &dbContext =
             authorityFactory->databaseContext();
@@ -4635,9 +4652,8 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                         auto crs = io::AuthorityFactory::create(
                                        dbContext, *id->codeSpace())
                                        ->createCompoundCRS(id->code());
-                        bool match = _isEquivalentTo(
-                            crs.get(), util::IComparable::Criterion::EQUIVALENT,
-                            dbContext);
+                        bool match =
+                            _isEquivalentTo(crs.get(), crsCriterion, dbContext);
                         res.emplace_back(crs, match ? 100 : 25);
                         return res;
                     } catch (const std::exception &) {
@@ -4657,9 +4673,7 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     const bool eqName = metadata::Identifier::isEquivalentName(
                         thisName.c_str(), crs->nameStr().c_str());
                     foundEquivalentName |= eqName;
-                    if (_isEquivalentTo(
-                            crs.get(), util::IComparable::Criterion::EQUIVALENT,
-                            dbContext)) {
+                    if (_isEquivalentTo(crs.get(), crsCriterion, dbContext)) {
                         if (crs->nameStr() == thisName) {
                             res.clear();
                             res.emplace_back(crsNN, 100);
@@ -4667,6 +4681,7 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                         }
                         res.emplace_back(crsNN, eqName ? 90 : 70);
                     } else {
+
                         res.emplace_back(crsNN, 25);
                     }
                 }
@@ -4725,9 +4740,7 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     continue;
                 }
 
-                if (_isEquivalentTo(crs.get(),
-                                    util::IComparable::Criterion::EQUIVALENT,
-                                    dbContext)) {
+                if (_isEquivalentTo(crs.get(), crsCriterion, dbContext)) {
                     res.emplace_back(crs, unsignificantName ? 90 : 70);
                 } else {
                     res.emplace_back(crs, 25);
@@ -4735,6 +4748,33 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
 
             res.sort(lambdaSort);
+        }
+
+        // If we didn't find a match for the CompoundCRS, check if the
+        // horizontal and vertical parts are not themselves well known.
+        if (identifiers().empty() && res.empty() && components.size() == 2) {
+            auto candidatesHorizCRS = components[0]->identify(authorityFactory);
+            auto candidatesVertCRS = components[1]->identify(authorityFactory);
+            if (candidatesHorizCRS.size() == 1 &&
+                candidatesVertCRS.size() == 1 &&
+                candidatesHorizCRS.front().second >= 70 &&
+                candidatesVertCRS.front().second >= 70) {
+                auto newCRS = CompoundCRS::create(
+                    util::PropertyMap().set(
+                        common::IdentifiedObject::NAME_KEY,
+                        candidatesHorizCRS.front().first->nameStr() + " + " +
+                            candidatesVertCRS.front().first->nameStr()),
+                    {candidatesHorizCRS.front().first,
+                     candidatesVertCRS.front().first});
+                const bool eqName = metadata::Identifier::isEquivalentName(
+                    thisName.c_str(), newCRS->nameStr().c_str());
+                res.emplace_back(
+                    newCRS,
+                    std::min(thisName == newCRS->nameStr() ? 100 : eqName ? 90
+                                                                          : 70,
+                             std::min(candidatesHorizCRS.front().second,
+                                      candidatesVertCRS.front().second)));
+            }
         }
 
         // Keep only results of the highest confidence
