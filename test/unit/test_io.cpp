@@ -9272,7 +9272,7 @@ TEST(io, projparse_ortho_ellipsoidal) {
 
 // ---------------------------------------------------------------------------
 
-TEST(io, projparse_ortho_spherical) {
+TEST(io, projparse_ortho_spherical_on_ellipsoid) {
     std::string input("+proj=ortho +f=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
                       "+ellps=WGS84 +units=m +no_defs +type=crs");
     auto obj = PROJStringParser().createFromPROJString(input);
@@ -9280,6 +9280,21 @@ TEST(io, projparse_ortho_spherical) {
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
               PROJ_WKT2_NAME_ORTHOGRAPHIC_SPHERICAL);
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        input);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_ortho_spherical_on_sphere) {
+    std::string input("+proj=ortho +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+                      "+R=6378137 +units=m +no_defs +type=crs");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(
         crs->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)

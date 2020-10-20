@@ -6332,6 +6332,27 @@ void Conversion::_exportToPROJString(
                     }
                     bAxisSpecFound = true;
                 }
+
+                // No need to add explicit f=0 if the ellipsoid is a sphere
+                if (strcmp(mapping->proj_name_aux, "f=0") == 0) {
+                    crs::CRS *horiz = l_sourceCRS.get();
+                    const auto compound =
+                        dynamic_cast<const crs::CompoundCRS *>(horiz);
+                    if (compound) {
+                        const auto &components =
+                            compound->componentReferenceSystems();
+                        if (!components.empty()) {
+                            horiz = components.front().get();
+                        }
+                    }
+
+                    auto geogCRS =
+                        dynamic_cast<const crs::GeographicCRS *>(horiz);
+                    if (geogCRS && geogCRS->ellipsoid()->isSphere()) {
+                        addAux = false;
+                    }
+                }
+
                 if (addAux) {
                     auto kv = split(mapping->proj_name_aux, '=');
                     if (kv.size() == 2) {
