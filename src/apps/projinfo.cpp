@@ -1145,8 +1145,10 @@ int main(int argc, char **argv) {
     }
 
     if (outputOpt.quiet &&
-        (outputOpt.PROJ5 + outputOpt.WKT2_2019 + outputOpt.WKT2_2015 +
-         outputOpt.WKT1_GDAL + outputOpt.PROJJSON) != 1) {
+        (outputOpt.PROJ5 + outputOpt.WKT2_2019 +
+         outputOpt.WKT2_2019_SIMPLIFIED + outputOpt.WKT2_2015 +
+         outputOpt.WKT2_2015_SIMPLIFIED + outputOpt.WKT1_GDAL +
+         outputOpt.WKT1_ESRI + outputOpt.PROJJSON) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
         usage();
