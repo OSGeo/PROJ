@@ -3593,7 +3593,7 @@ TEST(crs, verticalCRS_as_WKT1_GDAL) {
 
 TEST(crs, verticalCRS_as_WKT1_ESRI) {
     auto crs = createVerticalCRS();
-    auto expected = "VERTCS[\"ODN height\",VDATUM[\"Ordnance Datum Newlyn\"],"
+    auto expected = "VERTCS[\"ODN_height\",VDATUM[\"Ordnance_Datum_Newlyn\"],"
                     "PARAMETER[\"Vertical_Shift\",0.0],"
                     "PARAMETER[\"Direction\",1.0],"
                     "UNIT[\"Meter\",1.0]]";
@@ -3603,6 +3603,23 @@ TEST(crs, verticalCRS_as_WKT1_ESRI) {
             WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI).get()),
         expected);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, verticalCRS_as_WKT1_ESRI_context) {
+    auto crs = createVerticalCRS();
+    auto expected = "VERTCS[\"Newlyn\",VDATUM[\"Ordnance_Datum_Newlyn\"],"
+                    "PARAMETER[\"Vertical_Shift\",0.0],"
+                    "PARAMETER[\"Direction\",1.0],"
+                    "UNIT[\"Meter\",1.0]]";
+
+    EXPECT_EQ(crs->exportToWKT(
+                  WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI,
+                                       DatabaseContext::create())
+                      .get()),
+              expected);
+}
+
 // ---------------------------------------------------------------------------
 
 TEST(crs, verticalCRS_down_as_WKT1_ESRI) {
@@ -4057,6 +4074,42 @@ TEST(crs, compoundCRS_identify_db) {
         ASSERT_TRUE(crs != nullptr);
         // Just check we don't get an exception
         crs->identify(factory);
+    }
+    // Identify from ESRI WKT
+    {
+        auto sourceCRS = factory->createCompoundCRS("7405");
+        auto wkt = sourceCRS->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get());
+        auto obj =
+            WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 7405);
+        EXPECT_EQ(res.front().second, 100);
+    }
+    // Identify a CompoundCRS whose horizontal and vertical parts are known
+    // but not the composition.
+    {
+        auto obj = createFromUserInput("EPSG:4326+3855", dbContext);
+        auto sourceCRS = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(sourceCRS != nullptr);
+        auto wkt = sourceCRS->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get());
+        auto obj2 =
+            WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj2);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 0);
+        EXPECT_EQ(res.front().second, 100);
+        const auto &components = res.front().first->componentReferenceSystems();
+        EXPECT_EQ(components[0]->getEPSGCode(), 4326);
+        EXPECT_EQ(components[1]->getEPSGCode(), 3855);
     }
 }
 

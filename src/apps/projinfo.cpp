@@ -1198,26 +1198,48 @@ int main(int argc, char **argv) {
                                 std::cout << *ids[0]->codeSpace() << ":"
                                           << ids[0]->code() << ": "
                                           << pair.second << " %" << std::endl;
-                            } else {
-                                auto boundCRS = dynamic_cast<BoundCRS *>(
-                                    identifiedCRS.get());
-                                if (boundCRS &&
-                                    !boundCRS->baseCRS()
-                                         ->identifiers()
-                                         .empty()) {
-                                    const auto &idsBase =
-                                        boundCRS->baseCRS()->identifiers();
-                                    std::cout << "BoundCRS of "
-                                              << *idsBase[0]->codeSpace() << ":"
-                                              << idsBase[0]->code() << ": "
-                                              << pair.second << " %"
-                                              << std::endl;
-                                } else {
-                                    std::cout
-                                        << "un-identifier CRS: " << pair.second
-                                        << " %" << std::endl;
+                                continue;
+                            }
+
+                            auto boundCRS =
+                                dynamic_cast<BoundCRS *>(identifiedCRS.get());
+                            if (boundCRS &&
+                                !boundCRS->baseCRS()->identifiers().empty()) {
+                                const auto &idsBase =
+                                    boundCRS->baseCRS()->identifiers();
+                                std::cout << "BoundCRS of "
+                                          << *idsBase[0]->codeSpace() << ":"
+                                          << idsBase[0]->code() << ": "
+                                          << pair.second << " %" << std::endl;
+                                continue;
+                            }
+
+                            auto compoundCRS = dynamic_cast<CompoundCRS *>(
+                                identifiedCRS.get());
+                            if (compoundCRS) {
+                                const auto &components =
+                                    compoundCRS->componentReferenceSystems();
+                                if (components.size() == 2 &&
+                                    !components[0]->identifiers().empty() &&
+                                    !components[1]->identifiers().empty()) {
+                                    const auto &idH =
+                                        components[0]->identifiers().front();
+                                    const auto &idV =
+                                        components[1]->identifiers().front();
+                                    if (*idH->codeSpace() ==
+                                        *idV->codeSpace()) {
+                                        std::cout << *idH->codeSpace() << ":"
+                                                  << idH->code() << '+'
+                                                  << idV->code() << ": "
+                                                  << pair.second << " %"
+                                                  << std::endl;
+                                        continue;
+                                    }
                                 }
                             }
+
+                            std::cout << "un-identified CRS: " << pair.second
+                                      << " %" << std::endl;
                         }
                     } catch (const std::exception &e) {
                         std::cerr << "Identification failed: " << e.what()

@@ -4006,6 +4006,22 @@ VerticalReferenceFrameNNPtr WKTParser::Private::buildVerticalReferenceFrame(
     const auto *nodeP = node->GP();
     const std::string &name(nodeP->value());
     auto &props = buildProperties(node);
+
+    if (esriStyle_ && dbContext_) {
+        std::string outTableName;
+        std::string authNameFromAlias;
+        std::string codeFromAlias;
+        auto authFactory =
+            AuthorityFactory::create(NN_NO_CHECK(dbContext_), std::string());
+        const std::string datumName = stripQuotes(nodeP->children()[0]);
+        auto officialName = authFactory->getOfficialNameFromAlias(
+            datumName, "vertical_datum", "ESRI", false, outTableName,
+            authNameFromAlias, codeFromAlias);
+        if (!officialName.empty()) {
+            props.set(IdentifiedObject::NAME_KEY, officialName);
+        }
+    }
+
     if (ci_equal(name, WKTConstants::VERT_DATUM)) {
         const auto &children = nodeP->children();
         if (children.size() >= 2) {
@@ -4137,6 +4153,16 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
         throw ParsingException("Missing VDATUM or ENSEMBLE node");
     }
 
+    for (const auto &childNode : nodeP->children()) {
+        const auto &childNodeChildren = childNode->GP()->children();
+        if (childNodeChildren.size() == 2 &&
+            ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER) &&
+            childNodeChildren[0]->GP()->value() == "\"Vertical_Shift\"") {
+            esriStyle_ = true;
+            break;
+        }
+    }
+
     auto &dynamicNode = nodeP->lookForChild(WKTConstants::DYNAMIC);
     auto datum =
         !isNull(datumNode)
@@ -4161,6 +4187,21 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     }
 
     auto &props = buildProperties(node);
+
+    if (esriStyle_ && dbContext_) {
+        std::string outTableName;
+        std::string authNameFromAlias;
+        std::string codeFromAlias;
+        auto authFactory =
+            AuthorityFactory::create(NN_NO_CHECK(dbContext_), std::string());
+        const std::string vertCRSName = stripQuotes(nodeP->children()[0]);
+        auto officialName = authFactory->getOfficialNameFromAlias(
+            vertCRSName, "vertical_crs", "ESRI", false, outTableName,
+            authNameFromAlias, codeFromAlias);
+        if (!officialName.empty()) {
+            props.set(IdentifiedObject::NAME_KEY, officialName);
+        }
+    }
 
     // Deal with Lidar WKT1 VertCRS that embeds geoid model in CRS name,
     // following conventions from

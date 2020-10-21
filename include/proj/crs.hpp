@@ -154,6 +154,7 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
         const cs::CoordinateSystemAxisNNPtr &verticalAxisIfNotAlreadyPresent)
         const;
 
+    PROJ_INTERNAL bool hasImplicitCS() const;
     //! @endcond
 
   protected:
