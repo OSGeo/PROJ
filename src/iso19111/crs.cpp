@@ -1578,6 +1578,49 @@ GeodeticCRS::create(const util::PropertyMap &properties,
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+
+// Try to format a Geographic/ProjectedCRS 3D CRS as a
+// GEOGCS[]/PROJCS[],VERTCS[...,DATUM[],...] if we find corresponding objects
+static bool exportAsESRIWktCompoundCRSWithEllipsoidalHeight(
+    const CRS *self, const GeodeticCRS *geodCRS, io::WKTFormatter *formatter) {
+    const auto &dbContext = formatter->databaseContext();
+    if (!dbContext) {
+        return false;
+    }
+    const auto l_datum = geodCRS->datumNonNull(formatter->databaseContext());
+    auto l_alias = dbContext->getAliasFromOfficialName(
+        l_datum->nameStr(), "geodetic_datum", "ESRI");
+    if (l_alias.empty()) {
+        return false;
+    }
+    auto authFactory =
+        io::AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
+    auto list = authFactory->createObjectsFromName(
+        l_alias, {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
+        false /* approximate=false*/);
+    if (list.empty()) {
+        return false;
+    }
+    auto gdatum = util::nn_dynamic_pointer_cast<datum::Datum>(list.front());
+    if (gdatum == nullptr || gdatum->identifiers().empty()) {
+        return false;
+    }
+    const auto &gdatum_ids = gdatum->identifiers();
+    auto vertCRSList = authFactory->createVerticalCRSFromDatum(
+        "ESRI", "from_geogdatum_" + *gdatum_ids[0]->codeSpace() + '_' +
+                    gdatum_ids[0]->code());
+    if (vertCRSList.size() != 1) {
+        return false;
+    }
+    self->demoteTo2D(std::string(), dbContext)->_exportToWKT(formatter);
+    vertCRSList.front()->_exportToWKT(formatter);
+    return true;
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     const bool isGeographic =
@@ -1589,11 +1632,21 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     auto l_name = nameStr();
     const auto &dbContext = formatter->databaseContext();
 
-    if (formatter->useESRIDialect()) {
-        if (axisList.size() != 2) {
+    if (!isWKT2 && formatter->useESRIDialect() && axisList.size() == 3) {
+        if (!isGeographic) {
             io::FormattingException::Throw(
-                "Only export of Geographic 2D CRS is supported in WKT1_ESRI");
+                "Geocentric CRS not supported in WKT1_ESRI");
         }
+        // Try to format the Geographic 3D CRS as a GEOGCS[],VERTCS[...,DATUM[]]
+        // if we find corresponding objects
+        if (dbContext) {
+            if (exportAsESRIWktCompoundCRSWithEllipsoidalHeight(this, this,
+                                                                formatter)) {
+                return;
+            }
+        }
+        io::FormattingException::Throw(
+            "Cannot export this Geographic 3D CRS in WKT1_ESRI");
     }
 
     if (!isWKT2 && formatter->isStrict() && isGeographic &&
@@ -3521,6 +3574,16 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                 if (front.second == 100) {
                     projCRS2D = front.first;
                 }
+            }
+        }
+
+        if (formatter->useESRIDialect() && dbContext) {
+            // Try to format the ProjecteD 3D CRS as a
+            // PROJCS[],VERTCS[...,DATUM[]]
+            // if we find corresponding objects
+            if (exportAsESRIWktCompoundCRSWithEllipsoidalHeight(
+                    this, baseCRS().as_nullable().get(), formatter)) {
+                return;
             }
         }
 

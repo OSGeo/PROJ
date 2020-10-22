@@ -2764,7 +2764,7 @@ TEST(wkt_parse, VERTCS_with_ellipsoidal_height_ESRI) {
 
 // ---------------------------------------------------------------------------
 
-TEST(wkt_parse, implicit_compound_CRS_with_ellipsoidal_height_ESRI) {
+TEST(wkt_parse, implicit_compound_CRS_geographic_with_ellipsoidal_height_ESRI) {
     const char *wkt =
         "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\","
         "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
@@ -2778,6 +2778,45 @@ TEST(wkt_parse, implicit_compound_CRS_with_ellipsoidal_height_ESRI) {
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, implicit_compound_CRS_projected_with_ellipsoidal_height_ESRI) {
+    const char *wkt =
+        "PROJCS[\"WGS_1984_UTM_Zone_31N\",GEOGCS[\"GCS_WGS_1984\","
+        "DATUM[\"D_WGS_1984\","
+        "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Transverse_Mercator\"],"
+        "PARAMETER[\"False_Easting\",500000.0],"
+        "PARAMETER[\"False_Northing\",0.0],"
+        "PARAMETER[\"Central_Meridian\",3.0],"
+        "PARAMETER[\"Scale_Factor\",0.9996],"
+        "PARAMETER[\"Latitude_Of_Origin\",0.0],"
+        "UNIT[\"Meter\",1.0]],"
+        "VERTCS[\"WGS_1984\","
+        "DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+        "PARAMETER[\"Vertical_Shift\",0.0],"
+        "PARAMETER[\"Direction\",1.0],"
+        "UNIT[\"Meter\",1.0]]";
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
 }
 
 // ---------------------------------------------------------------------------
