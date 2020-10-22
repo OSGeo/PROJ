@@ -2597,11 +2597,12 @@ TEST(wkt_parse,
     EXPECT_EQ(baseCRS->nameStr(), "NAD83");
     EXPECT_EQ(baseCRS->coordinateSystem()->axisList().size(), 3U);
 
-    EXPECT_EQ(
-        crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
-                .get()),
-        wkt);
+    EXPECT_EQ(replaceAll(crs->exportToWKT(
+                             WKTFormatter::create(
+                                 WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                                 .get()),
+                         "ellipsoidal height", "Up"),
+              wkt);
 }
 
 // ---------------------------------------------------------------------------
@@ -2645,11 +2646,12 @@ TEST(wkt_parse,
     EXPECT_EQ(crs->nameStr(), "WGS 84 / UTM zone 31N");
     EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
 
-    EXPECT_EQ(
-        crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
-                .get()),
-        wkt);
+    EXPECT_EQ(replaceAll(crs->exportToWKT(
+                             WKTFormatter::create(
+                                 WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                                 .get()),
+                         "ellipsoidal height", "Up"),
+              wkt);
 }
 
 // ---------------------------------------------------------------------------
@@ -2683,11 +2685,12 @@ TEST(wkt_parse,
     EXPECT_NEAR(crs->coordinateSystem()->axisList()[2]->unit().conversionToSI(),
                 0.304800609601219, 1e-15);
 
-    EXPECT_EQ(
-        crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
-                .get()),
-        wkt);
+    EXPECT_EQ(replaceAll(crs->exportToWKT(
+                             WKTFormatter::create(
+                                 WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                                 .get()),
+                         "ellipsoidal height", "Up"),
+              wkt);
 }
 
 // ---------------------------------------------------------------------------
@@ -2720,6 +2723,49 @@ TEST(wkt_parse, implicit_compound_CRS_ESRI) {
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->nameStr(), "NAD83(2011) / Colorado Central (ftUS) + "
                               "CGVD2013(CGG2013) height");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, VERTCS_with_ellipsoidal_height_ESRI) {
+    const char *wkt = "VERTCS[\"WGS_1984\",DATUM[\"D_WGS_1984\","
+                      "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+                      "PARAMETER[\"Vertical_Shift\",0.0],"
+                      "PARAMETER[\"Direction\",1.0],UNIT[\"Meter\",1.0]]";
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    const char *expected_wkt1 =
+        "VERT_CS[\"WGS_1984\",\n"
+        "    VERT_DATUM[\"World Geodetic System 1984\",2002],\n"
+        "    UNIT[\"metre\",1,\n"
+        "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "    AXIS[\"ellipsoidal height\",UP]]";
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                .get()),
+        expected_wkt1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, implicit_compound_CRS_with_ellipsoidal_height_ESRI) {
+    const char *wkt =
+        "GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\","
+        "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "VERTCS[\"WGS_1984\",DATUM[\"D_WGS_1984\","
+        "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+        "PARAMETER[\"Vertical_Shift\",0.0],"
+        "PARAMETER[\"Direction\",1.0],UNIT[\"Meter\",1.0]]";
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
 }
 
 // ---------------------------------------------------------------------------

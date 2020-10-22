@@ -4145,11 +4145,19 @@ createBoundCRSSourceTransformationCRS(const crs::CRSPtr &sourceCRS,
 
 CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
-    auto &datumNode =
+    const auto &nodeValue = nodeP->value();
+    auto &vdatumNode =
         nodeP->lookForChild(WKTConstants::VDATUM, WKTConstants::VERT_DATUM,
                             WKTConstants::VERTICALDATUM, WKTConstants::VRF);
     auto &ensembleNode = nodeP->lookForChild(WKTConstants::ENSEMBLE);
-    if (isNull(datumNode) && isNull(ensembleNode)) {
+    // like in ESRI  VERTCS["WGS_1984",DATUM["D_WGS_1984",
+    //               SPHEROID["WGS_1984",6378137.0,298.257223563]],
+    //               PARAMETER["Vertical_Shift",0.0],
+    //               PARAMETER["Direction",1.0],UNIT["Meter",1.0]
+    auto &geogDatumNode = ci_equal(nodeValue, WKTConstants::VERTCS)
+                              ? nodeP->lookForChild(WKTConstants::DATUM)
+                              : null_node;
+    if (isNull(vdatumNode) && isNull(geogDatumNode) && isNull(ensembleNode)) {
         throw ParsingException("Missing VDATUM or ENSEMBLE node");
     }
 
@@ -4164,26 +4172,48 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     }
 
     auto &dynamicNode = nodeP->lookForChild(WKTConstants::DYNAMIC);
-    auto datum =
-        !isNull(datumNode)
-            ? buildVerticalReferenceFrame(datumNode, dynamicNode).as_nullable()
-            : nullptr;
+    auto vdatum =
+        !isNull(geogDatumNode)
+            ? VerticalReferenceFrame::create(
+                  PropertyMap()
+                      .set(IdentifiedObject::NAME_KEY,
+                           buildGeodeticReferenceFrame(geogDatumNode,
+                                                       PrimeMeridian::GREENWICH,
+                                                       null_node)
+                               ->nameStr())
+                      .set("VERT_DATUM_TYPE", "2002"))
+                  .as_nullable()
+            : !isNull(vdatumNode)
+                  ? buildVerticalReferenceFrame(vdatumNode, dynamicNode)
+                        .as_nullable()
+                  : nullptr;
     auto datumEnsemble =
         !isNull(ensembleNode)
             ? buildDatumEnsemble(ensembleNode, nullptr, false).as_nullable()
             : nullptr;
 
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
-    const auto &nodeValue = nodeP->value();
     if (isNull(csNode) && !ci_equal(nodeValue, WKTConstants::VERT_CS) &&
         !ci_equal(nodeValue, WKTConstants::VERTCS) &&
         !ci_equal(nodeValue, WKTConstants::BASEVERTCRS)) {
         ThrowMissing(WKTConstants::CS_);
     }
-    auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
-    auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(cs);
+    auto verticalCS = nn_dynamic_pointer_cast<VerticalCS>(
+        buildCS(csNode, node, UnitOfMeasure::NONE));
     if (!verticalCS) {
         ThrowNotExpectedCSType("vertical");
+    }
+
+    if (vdatum && vdatum->getWKT1DatumType() == "2002" &&
+        &(verticalCS->axisList()[0]->direction()) == &(AxisDirection::UP)) {
+        verticalCS =
+            VerticalCS::create(
+                util::PropertyMap(),
+                CoordinateSystemAxis::create(
+                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                            "ellipsoidal height"),
+                    "h", AxisDirection::UP, verticalCS->axisList()[0]->unit()))
+                .as_nullable();
     }
 
     auto &props = buildProperties(node);
@@ -4246,10 +4276,10 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
                                "North American Vertical Datum 1988");
                 propsDatum.set(Identifier::CODE_KEY, 5103);
                 propsDatum.set(Identifier::CODESPACE_KEY, Identifier::EPSG);
-                datum =
+                vdatum =
                     VerticalReferenceFrame::create(propsDatum).as_nullable();
                 const auto dummyCRS =
-                    VerticalCRS::create(PropertyMap(), datum, datumEnsemble,
+                    VerticalCRS::create(PropertyMap(), vdatum, datumEnsemble,
                                         NN_NO_CHECK(verticalCS));
                 const auto model(Transformation::create(
                     propsModel, dummyCRS, dummyCRS, nullptr,
@@ -4265,7 +4295,7 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     if (!isNull(geoidModelNode)) {
         auto &propsModel = buildProperties(geoidModelNode);
         const auto dummyCRS = VerticalCRS::create(
-            PropertyMap(), datum, datumEnsemble, NN_NO_CHECK(verticalCS));
+            PropertyMap(), vdatum, datumEnsemble, NN_NO_CHECK(verticalCS));
         const auto model(Transformation::create(
             propsModel, dummyCRS, dummyCRS, nullptr,
             OperationMethod::create(PropertyMap(),
@@ -4275,10 +4305,10 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
     }
 
     auto crs = nn_static_pointer_cast<CRS>(VerticalCRS::create(
-        props, datum, datumEnsemble, NN_NO_CHECK(verticalCS)));
+        props, vdatum, datumEnsemble, NN_NO_CHECK(verticalCS)));
 
-    if (!isNull(datumNode)) {
-        auto &extensionNode = datumNode->lookForChild(WKTConstants::EXTENSION);
+    if (!isNull(vdatumNode)) {
+        auto &extensionNode = vdatumNode->lookForChild(WKTConstants::EXTENSION);
         const auto &extensionChildren = extensionNode->GP()->children();
         if (extensionChildren.size() == 2) {
             if (ci_equal(stripQuotes(extensionChildren[0]), "PROJ4_GRIDS")) {
@@ -6524,12 +6554,13 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
                             auto vertCRS =
                                 d->buildVerticalCRS(WKTNode::createFrom(
                                     wkt, indexEnd, 0, indexEnd));
-                            return CompoundCRS::create(
+                            return CompoundCRS::createLax(
                                 util::PropertyMap().set(
                                     IdentifiedObject::NAME_KEY,
                                     horizCRS->nameStr() + " + " +
                                         vertCRS->nameStr()),
-                                {NN_NO_CHECK(horizCRS), vertCRS});
+                                {NN_NO_CHECK(horizCRS), vertCRS},
+                                d->dbContext_);
                         }
                     }
                 }

@@ -224,7 +224,7 @@ vert_cs:
     | esri_vert_cs
 
 esri_vert_cs:
-    T_VERTCS begin_node_name ',' vdatum ',' opt_parameter_list_linear_unit end_node
+    T_VERTCS begin_node_name ',' vdatum_or_datum ',' opt_parameter_list_linear_unit end_node
 
 opt_axis_authority:
     | ',' axis opt_authority
@@ -232,6 +232,8 @@ opt_axis_authority:
 
 vert_datum:
     T_VERT_DATUM begin_node_name ',' datum_type opt_extension_authority end_node
+
+vdatum_or_datum: vdatum | datum
 
 vdatum:
     T_VDATUM begin_node_name end_node
