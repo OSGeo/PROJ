@@ -2853,9 +2853,9 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                          !identifiers().empty());
 
     auto l_name = nameStr();
+    const auto &dbContext = formatter->databaseContext();
     if (formatter->useESRIDialect()) {
         bool aliasFound = false;
-        const auto &dbContext = formatter->databaseContext();
         if (dbContext) {
             auto l_alias = dbContext->getAliasFromOfficialName(
                 l_name, "vertical_crs", "ESRI");
@@ -2870,7 +2870,34 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     }
 
     formatter->addQuotedString(l_name);
-    exportDatumOrDatumEnsembleToWkt(formatter);
+
+    const auto l_datum = datum();
+    if (formatter->useESRIDialect() && l_datum &&
+        l_datum->getWKT1DatumType() == "2002") {
+        bool foundMatch = false;
+        if (dbContext) {
+            auto authFactory = io::AuthorityFactory::create(
+                NN_NO_CHECK(dbContext), std::string());
+            auto list = authFactory->createObjectsFromName(
+                l_datum->nameStr(),
+                {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
+                false /* approximate=false*/);
+            if (!list.empty()) {
+                auto gdatum =
+                    util::nn_dynamic_pointer_cast<datum::Datum>(list.front());
+                if (gdatum) {
+                    gdatum->_exportToWKT(formatter);
+                    foundMatch = true;
+                }
+            }
+        }
+        if (!foundMatch) {
+            // We should export a geodetic datum, but we cannot really do better
+            l_datum->_exportToWKT(formatter);
+        }
+    } else {
+        exportDatumOrDatumEnsembleToWkt(formatter);
+    }
     const auto &cs = SingleCRS::getPrivate()->coordinateSystem;
     const auto &axisList = cs->axisList();
 

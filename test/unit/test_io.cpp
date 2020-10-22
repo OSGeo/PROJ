@@ -2743,6 +2743,12 @@ TEST(wkt_parse, VERTCS_with_ellipsoidal_height_ESRI) {
     auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
 
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
+
     const char *expected_wkt1 =
         "VERT_CS[\"WGS_1984\",\n"
         "    VERT_DATUM[\"World Geodetic System 1984\",2002],\n"
