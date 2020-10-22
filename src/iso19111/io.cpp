@@ -6500,7 +6500,7 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
                         ci_starts_with(wkt.c_str() + indexEnd,
                                        WKTConstants::PRIMEM.c_str())) {
                         primeMeridian = d->buildPrimeMeridian(
-                            WKTNode::createFrom(wkt, indexEnd + 1, 0, indexEnd),
+                            WKTNode::createFrom(wkt, indexEnd, 0, indexEnd),
                             UnitOfMeasure::DEGREE);
                     }
                 }
