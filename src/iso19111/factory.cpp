@@ -2100,6 +2100,9 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
         if (!publication_date.empty()) {
             props.set("PUBLICATION_DATE", publication_date);
         }
+        if (d->authority() == "ESRI" && starts_with(code, "from_geogdatum_")) {
+            props.set("VERT_DATUM_TYPE", "2002");
+        }
         auto anchor = util::optional<std::string>();
         if (frame_reference_epoch.empty()) {
             return datum::VerticalReferenceFrame::create(props, anchor);
@@ -5719,9 +5722,12 @@ AuthorityFactory::createObjectsFromNameEx(
         "SELECT table_name, auth_name, code, name, deprecated, is_alias "
         "FROM (");
 
-    const auto getTableAndTypeConstraints = [&allowedObjectTypes]() {
+    const auto getTableAndTypeConstraints = [&allowedObjectTypes,
+                                             &searchedName]() {
         typedef std::pair<std::string, std::string> TableType;
         std::list<TableType> res;
+        // Hide ESRI D_ vertical datums
+        const bool startsWithDUnderscore = starts_with(searchedName, "D_");
         if (allowedObjectTypes.empty()) {
             for (const auto &tableName :
                  {"prime_meridian", "ellipsoid", "geodetic_datum",
@@ -5729,7 +5735,10 @@ AuthorityFactory::createObjectsFromNameEx(
                   "vertical_crs", "compound_crs", "conversion",
                   "helmert_transformation", "grid_transformation",
                   "other_transformation", "concatenated_operation"}) {
-                res.emplace_back(TableType(tableName, std::string()));
+                if (!(startsWithDUnderscore &&
+                      strcmp(tableName, "vertical_datum") == 0)) {
+                    res.emplace_back(TableType(tableName, std::string()));
+                }
             }
         } else {
             for (const auto type : allowedObjectTypes) {
@@ -5744,8 +5753,10 @@ AuthorityFactory::createObjectsFromNameEx(
                 case ObjectType::DATUM:
                     res.emplace_back(
                         TableType("geodetic_datum", std::string()));
-                    res.emplace_back(
-                        TableType("vertical_datum", std::string()));
+                    if (!startsWithDUnderscore) {
+                        res.emplace_back(
+                            TableType("vertical_datum", std::string()));
+                    }
                     break;
                 case ObjectType::GEODETIC_REFERENCE_FRAME:
                     res.emplace_back(
