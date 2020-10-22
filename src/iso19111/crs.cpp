@@ -4528,15 +4528,21 @@ CRSNNPtr CompoundCRS::createLax(const util::PropertyMap &properties,
 //! @cond Doxygen_Suppress
 void CompoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
-    formatter->startNode(isWKT2 ? io::WKTConstants::COMPOUNDCRS
-                                : io::WKTConstants::COMPD_CS,
-                         !identifiers().empty());
-    formatter->addQuotedString(nameStr());
-    for (const auto &crs : componentReferenceSystems()) {
-        crs->_exportToWKT(formatter);
+    const auto &l_components = componentReferenceSystems();
+    if (!isWKT2 && formatter->useESRIDialect() && l_components.size() == 2) {
+        l_components[0]->_exportToWKT(formatter);
+        l_components[1]->_exportToWKT(formatter);
+    } else {
+        formatter->startNode(isWKT2 ? io::WKTConstants::COMPOUNDCRS
+                                    : io::WKTConstants::COMPD_CS,
+                             !identifiers().empty());
+        formatter->addQuotedString(nameStr());
+        for (const auto &crs : l_components) {
+            crs->_exportToWKT(formatter);
+        }
+        ObjectUsage::baseExportToWKT(formatter);
+        formatter->endNode();
     }
-    ObjectUsage::baseExportToWKT(formatter);
-    formatter->endNode();
 }
 //! @endcond
 

@@ -2723,6 +2723,12 @@ TEST(wkt_parse, implicit_compound_CRS_ESRI) {
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->nameStr(), "NAD83(2011) / Colorado Central (ftUS) + "
                               "CGVD2013(CGG2013) height");
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        wkt);
 }
 
 // ---------------------------------------------------------------------------
