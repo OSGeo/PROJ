@@ -2692,6 +2692,38 @@ TEST(wkt_parse,
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, implicit_compound_CRS_ESRI) {
+    // See https://lists.osgeo.org/pipermail/gdal-dev/2020-October/052843.html
+    // and https://pro.arcgis.com/en/pro-app/arcpy/classes/spatialreference.htm
+    const char *wkt =
+        "PROJCS[\"NAD_1983_2011_StatePlane_Colorado_Central_FIPS_0502_Ft_US\","
+        "GEOGCS[\"GCS_NAD_1983_2011\",DATUM[\"D_NAD_1983_2011\","
+        "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+        "PRIMEM[\"Greenwich\",0.0],"
+        "UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Lambert_Conformal_Conic\"],"
+        "PARAMETER[\"False_Easting\",3000000.00031608],"
+        "PARAMETER[\"False_Northing\",999999.999996],"
+        "PARAMETER[\"Central_Meridian\",-105.5],"
+        "PARAMETER[\"Standard_Parallel_1\",38.45],"
+        "PARAMETER[\"Standard_Parallel_2\",39.75],"
+        "PARAMETER[\"Latitude_Of_Origin\",37.8333333333333],"
+        "UNIT[\"US survey foot\",0.304800609601219]],"
+        "VERTCS[\"CGVD2013_height\","
+        "VDATUM[\"Canadian_Geodetic_Vertical_Datum_of_2013\"],"
+        "PARAMETER[\"Vertical_Shift\",0.0],"
+        "PARAMETER[\"Direction\",1.0],"
+        "UNIT[\"Meter\",1.0]]";
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->nameStr(), "NAD83(2011) / Colorado Central (ftUS) + "
+                              "CGVD2013(CGG2013) height");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, COORDINATEOPERATION) {
 
     std::string src_wkt;

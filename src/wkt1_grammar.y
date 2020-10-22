@@ -128,7 +128,11 @@ integer:
 /* 7.2 Coordinate System WKT */
 
 coordinate_system:
-    horz_cs | geocentric_cs | vert_cs | compd_cs | fitted_cs | local_cs
+    horz_cs_with_opt_esri_vertcs | geocentric_cs | vert_cs | compd_cs | fitted_cs | local_cs
+
+horz_cs_with_opt_esri_vertcs:
+    horz_cs
+  | horz_cs ',' esri_vert_cs
 
 horz_cs:
     geographic_cs | projected_cs
@@ -217,7 +221,10 @@ authority:
 
 vert_cs:
     T_VERT_CS begin_node_name ',' vert_datum ',' linear_unit opt_axis_authority end_node
-    | T_VERTCS begin_node_name ',' vdatum ',' opt_parameter_list_linear_unit end_node
+    | esri_vert_cs
+
+esri_vert_cs:
+    T_VERTCS begin_node_name ',' vdatum ',' opt_parameter_list_linear_unit end_node
 
 opt_axis_authority:
     | ',' axis opt_authority
@@ -240,10 +247,12 @@ compd_cs:
     T_COMPD_CS begin_node_name ',' head_cs ',' tail_cs opt_extension_authority end_node
 
 head_cs:
-    coordinate_system
+    horz_cs
 
+// Accepting a geographic CRS as part of the second CRS of a COMPD_CS is horrible
+// but found in LAS WKT
 tail_cs:
-    coordinate_system
+    geographic_cs | vert_cs
 
 twin_axis: axis ',' axis
 

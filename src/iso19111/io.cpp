@@ -6507,6 +6507,33 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
             }
             return d->buildGeodeticReferenceFrame(root, primeMeridian,
                                                   null_node);
+        } else if (ci_equal(name, WKTConstants::GEOGCS) ||
+                   ci_equal(name, WKTConstants::PROJCS)) {
+            // Parse implicit compoundCRS from ESRI that is
+            // "PROJCS[...],VERTCS[...]" or "GEOGCS[...],VERTCS[...]"
+            if (indexEnd < wkt.size()) {
+                indexEnd = skipSpace(wkt, indexEnd);
+                if (indexEnd < wkt.size() && wkt[indexEnd] == ',') {
+                    ++indexEnd;
+                    indexEnd = skipSpace(wkt, indexEnd);
+                    if (indexEnd < wkt.size() &&
+                        ci_starts_with(wkt.c_str() + indexEnd,
+                                       WKTConstants::VERTCS.c_str())) {
+                        auto horizCRS = d->buildCRS(root);
+                        if (horizCRS) {
+                            auto vertCRS =
+                                d->buildVerticalCRS(WKTNode::createFrom(
+                                    wkt, indexEnd, 0, indexEnd));
+                            return CompoundCRS::create(
+                                util::PropertyMap().set(
+                                    IdentifiedObject::NAME_KEY,
+                                    horizCRS->nameStr() + " + " +
+                                        vertCRS->nameStr()),
+                                {NN_NO_CHECK(horizCRS), vertCRS});
+                        }
+                    }
+                }
+            }
         }
         return d->build(root);
     };
