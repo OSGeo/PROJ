@@ -5,6 +5,8 @@ Transverse Mercator
 ********************************************************************************
 
 The transverse Mercator projection in its various forms is the most widely used projected coordinate system for world topographical and offshore mapping.
+It is a conformal projection in which a chosen meridian projects to a
+straight line at constant scale.
 
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Transverse and oblique cylindrical                       |

@@ -6,9 +6,10 @@ Mercator
 
 The Mercator projection is a cylindrical map projection that origins from the 15th
 century. It is widely recognized as the first regularly used map projection.
-The projection has the property that a rhumb line, a course of constant
-heading, projects to a straight line.  This makes it suitable for
-navigational purposes.
+It is a conformal projection in which the equator projects to a straight
+line at constant scale.  The projection has the property that a rhumb
+line, a course of constant heading, projects to a straight line.  This
+makes it suitable for navigational purposes.
 
 
 +---------------------+----------------------------------------------------------+
@@ -99,7 +100,7 @@ Forward projection
 
 .. math::
 
-    \psi &= \log \tan \biggl(\frac{\pi}{4} + \frac{\phi}{2} \biggr)\\
+    \psi &= \ln \tan \biggl(\frac{\pi}{4} + \frac{\phi}{2} \biggr)\\
          &= \sinh^{-1}\tan\phi
 
 The quantity :math:`\psi` is the isometric latitude.
@@ -143,9 +144,9 @@ Forward projection
 
 .. math::
 
-    \psi &= \log\tan\biggl(\frac\pi4 + \frac{\phi}2\biggr)
+    \psi &= \ln\tan\biggl(\frac\pi4 + \frac{\phi}2\biggr)
             -\frac12 e
-            \log \biggl(\frac{1 + e \sin\phi}{1 - e \sin\phi}\biggr)\\
+            \ln \biggl(\frac{1 + e \sin\phi}{1 - e \sin\phi}\biggr)\\
          &= \sinh^{-1}\tan\phi - e \tanh^{-1}(e \sin\phi)
 
 
