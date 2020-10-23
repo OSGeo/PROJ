@@ -576,7 +576,7 @@ for node in root.iterfind('.//Transformation'):
                 #sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','%s','other_transformation');""" % custom_id
                 #all_sql.append(sql)
 
-                sql = """INSERT INTO "other_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9601','Longitude rotation','%s','%s','%s','%s',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);"""% (custom_id, name, src[0], src[1], target[0], target[1], operation_version)
+                sql = """INSERT INTO "other_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9601','Longitude rotation','%s','%s','%s','%s',0.0,'EPSG','8602','Longitude offset',2.5969213,'EPSG','9105',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);"""% (custom_id, name, src[0], src[1], target[0], target[1], operation_version)
                 all_sql.append(sql)
                 sql = """INSERT INTO "usage" VALUES('IGNF', '%s_USAGE','other_transformation','IGNF','%s','%s','%s','%s','%s');""" % (custom_id, custom_id, extent_auth_and_code[0], extent_auth_and_code[1], scope_auth_and_code[0], scope_auth_and_code[1])
                 all_sql.append(sql)
@@ -624,7 +624,7 @@ for node in root.iterfind('.//Transformation'):
         uom = paramValue.find('value').attrib['uom']
         assert uom == 'm'
 
-        sql = """INSERT INTO "other_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9616','Vertical Offset','%s','%s','%s','%s',NULL,'EPSG','8603','Vertical Offset',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);"""% (id, name, mapCrsId[sourceCRS][0], mapCrsId[sourceCRS][1], mapCrsId[targetCRS][0], mapCrsId[targetCRS][1], value, operation_version)
+        sql = """INSERT INTO "other_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG','9616','Vertical Offset','%s','%s','%s','%s',NULL,'EPSG','8603','Vertical Offset',%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);"""% (id, name, mapCrsId[sourceCRS][0], mapCrsId[sourceCRS][1], mapCrsId[targetCRS][0], mapCrsId[targetCRS][1], value, operation_version)
         all_sql.append(sql)
         sql = """INSERT INTO "usage" VALUES('IGNF', '%s_USAGE','other_transformation','IGNF','%s','%s','%s','%s','%s');""" % (id, id, extent_auth_and_code[0], extent_auth_and_code[1], scope_auth_and_code[0], scope_auth_and_code[1])
         all_sql.append(sql)

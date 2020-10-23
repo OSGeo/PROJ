@@ -1728,7 +1728,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             "offset',-17.4,'EPSG','9110',NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
             "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO usage VALUES('EPSG',"
@@ -2334,7 +2334,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_proj_based_transformation) {
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
         "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER',"
                         "'other_transformation_FOO_usage',"
@@ -2401,7 +2401,7 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_wkt_based_transformation) {
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER',"
                         "'other_transformation_FOO_usage',"
@@ -2442,7 +2442,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER',"
                         "'other_transformation_FOO_usage',"
@@ -2476,7 +2476,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER',"
                         "'other_transformation_FOO_usage',"
@@ -2976,7 +2976,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER', "
                         "'1','other_transformation','OTHER','PARTIAL_AREA_"
@@ -2992,7 +2992,7 @@ TEST_F(FactoryWithTmpDatabase,
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
                 "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
-                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+                "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);"))
         << last_error();
     ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER', "
                         "'2','other_transformation','OTHER','WHOLE_AREA_APPROX_"
