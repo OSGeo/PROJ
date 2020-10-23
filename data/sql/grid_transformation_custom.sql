@@ -147,3 +147,25 @@ INSERT INTO "usage" VALUES(
     'EPSG','1120', -- area of use: Iceland - onshore and offshore
     'EPSG','1024'  -- unknown
 );
+
+-- Japan
+
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_6667_TO_EPSG_6695','JDG2011 to JGD2011 height',
+    NULL,
+    'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',
+    'EPSG','6667', -- source CRS (JDG2011)
+    'EPSG','6695', -- target CRS (JDG2011 (vertical) height)
+    NULL,
+    'EPSG','8666','Geoid (height correction) model file','jp_gsi_gsigeo2011_mainland.tif',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'EPSG_6667_TO_EPSG_6695_USAGE',
+    'grid_transformation',
+    'PROJ',
+    'EPSG_6667_TO_EPSG_6695',
+    'EPSG','3263', -- area of use: Japan - onshore mainland
+    'EPSG','1024'  -- unknown
+);
