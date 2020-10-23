@@ -15264,6 +15264,9 @@ INSERT INTO alias_name VALUES('vertical_datum','EPSG','5212','IGN_1992_LD','ESRI
 INSERT INTO alias_name VALUES('vertical_datum','EPSG','5213','IGN_1988_SB','ESRI');
 INSERT INTO alias_name VALUES('vertical_datum','EPSG','5214','IGN_1988_SM','ESRI');
 INSERT INTO alias_name VALUES('vertical_datum','EPSG','5215','European_Vertical_Reference_Frame_2007','ESRI');
+-- vertical coordinate system for ellipsoidal height. Not really ISO 19111 valid...
+INSERT INTO "coordinate_system" VALUES('ESRI','ELLPS_HEIGHT_METRE','vertical',1);
+INSERT INTO "axis" VALUES('ESRI','ELLPS_HEIGHT_METRE','Ellipsoidal height','h','up','ESRI','ELLPS_HEIGHT_METRE',1,'EPSG','9001');
 INSERT INTO alias_name VALUES('vertical_crs','EPSG','3855','EGM2008_Geoid','ESRI');
 INSERT INTO alias_name VALUES('vertical_crs','EPSG','3886','Fao_1979','ESRI');
 INSERT INTO alias_name VALUES('vertical_crs','EPSG','3900','N2000_height','ESRI');
@@ -15548,113 +15551,428 @@ INSERT INTO "usage" VALUES('ESRI', '105294_USAGE','vertical_datum','ESRI','10529
 INSERT INTO "vertical_crs" VALUES('ESRI','105794','Dunedin_Bluff_1960_height',NULL,'EPSG','6499','ESRI','105294',1);
 INSERT INTO "usage" VALUES('ESRI', '105794_USAGE','vertical_crs','ESRI','105794','EPSG','3806','EPSG','1024');
 INSERT INTO "supersession" VALUES('vertical_crs','ESRI','105794','vertical_crs','EPSG','4458','ESRI',1);
--- Skipping WGS_1984. Should be a CompoundCRS
--- Skipping ETRS_1989. Should be a CompoundCRS
--- Skipping NAD_1983. Should be a CompoundCRS
--- Skipping Australian_Antarctic_1998. Should be a CompoundCRS
--- Skipping Cadastre_1997. Should be a CompoundCRS
--- Skipping China_Geodetic_Coordinate_System_2000. Should be a CompoundCRS
--- Skipping Swiss_TRF_1995. Should be a CompoundCRS
--- Skipping CIGD11. Should be a CompoundCRS
--- Skipping CR05. Should be a CompoundCRS
--- Skipping DB_REF. Should be a CompoundCRS
--- Skipping DGN_1995. Should be a CompoundCRS
--- Skipping DRUKREF_03. Should be a CompoundCRS
--- Skipping Estonia_1997. Should be a CompoundCRS
--- Skipping EUREF_FIN. Should be a CompoundCRS
--- Skipping FEH2010. Should be a CompoundCRS
--- Skipping GDA_1994. Should be a CompoundCRS
--- Skipping GDBD2009. Should be a CompoundCRS
--- Skipping GDM_2000. Should be a CompoundCRS
--- Skipping Greenland_1996. Should be a CompoundCRS
--- Skipping Hartebeesthoek_1994. Should be a CompoundCRS
--- Skipping IGD05. Should be a CompoundCRS
--- Skipping IG05_Intermediate_CRS. Should be a CompoundCRS
--- Skipping IGD05(2012). Should be a CompoundCRS
--- Skipping IG05(2012)_Intermediate_CRS. Should be a CompoundCRS
--- Skipping IGM_1995. Should be a CompoundCRS
--- Skipping IGRS. Should be a CompoundCRS
--- Skipping IRENET95. Should be a CompoundCRS
--- Skipping ISN_1993. Should be a CompoundCRS
--- Skipping ISN_2004. Should be a CompoundCRS
--- Skipping ITRF_1988. Should be a CompoundCRS
--- Skipping ITRF_1989. Should be a CompoundCRS
--- Skipping ITRF_1990. Should be a CompoundCRS
--- Skipping ITRF_1991. Should be a CompoundCRS
--- Skipping ITRF_1992. Should be a CompoundCRS
--- Skipping ITRF_1993. Should be a CompoundCRS
--- Skipping ITRF_1996. Should be a CompoundCRS
--- Skipping ITRF_1997. Should be a CompoundCRS
--- Skipping ITRF_2000. Should be a CompoundCRS
--- Skipping ITRF_2005. Should be a CompoundCRS
--- Skipping JAD_2001. Should be a CompoundCRS
--- Skipping JGD_2000. Should be a CompoundCRS
--- Skipping JGD_2011. Should be a CompoundCRS
--- Skipping Korea_2000. Should be a CompoundCRS
--- Skipping Lao_1997. Should be a CompoundCRS
--- Skipping LGD2006. Should be a CompoundCRS
--- Skipping LKS_1992. Should be a CompoundCRS
--- Skipping LKS_1994. Should be a CompoundCRS
--- Skipping MACAO_2008. Should be a CompoundCRS
--- Skipping MAGNA. Should be a CompoundCRS
--- Skipping MARCARIO_SOLIS. Should be a CompoundCRS
--- Skipping MARGEN. Should be a CompoundCRS
--- Skipping Mexico_ITRF2008. Should be a CompoundCRS
--- Skipping MOLDREF99. Should be a CompoundCRS
--- Skipping MONREF_1997. Should be a CompoundCRS
--- Skipping Moznet. Should be a CompoundCRS
--- Skipping NAD_1983_2011. Should be a CompoundCRS
--- Skipping NAD_1983_CORS96. Should be a CompoundCRS
--- Skipping North_American_1983_CSRS. Should be a CompoundCRS
--- Skipping North_American_1983_HARN. Should be a CompoundCRS
--- Skipping NAD_1983_MA11. Should be a CompoundCRS
--- Skipping NAD_1983_MARP00. Should be a CompoundCRS
--- Skipping NAD_1983_NSRS2007. Should be a CompoundCRS
--- Skipping NAD_1983_PA11. Should be a CompoundCRS
--- Skipping NAD_1983_PACP00. Should be a CompoundCRS
--- Skipping Nepal_Nagarkot. Should be a CompoundCRS
--- Skipping NZGD_2000. Should be a CompoundCRS
--- Skipping Peru96. Should be a CompoundCRS
--- Skipping PNG94. Should be a CompoundCRS
--- Skipping POSGAR. Should be a CompoundCRS
--- Skipping POSGAR_1994. Should be a CompoundCRS
--- Skipping POSGAR_1998. Should be a CompoundCRS
--- Skipping PRS_1992. Should be a CompoundCRS
--- Skipping PTRA08. Should be a CompoundCRS
--- Skipping PZ_1990. Should be a CompoundCRS
--- Skipping RDN2008. Should be a CompoundCRS
--- Skipping REGCAN95. Should be a CompoundCRS
--- Skipping REGVEN. Should be a CompoundCRS
--- Skipping RGAF09. Should be a CompoundCRS
--- Skipping RGF_1993. Should be a CompoundCRS
--- Skipping RGFG_1995. Should be a CompoundCRS
--- Skipping RGM_2004. Should be a CompoundCRS
--- Skipping RGNC_1991. Should be a CompoundCRS
--- Skipping RGNC_1991-93. Should be a CompoundCRS
--- Skipping RGPF. Should be a CompoundCRS
--- Skipping RGR_1992. Should be a CompoundCRS
--- Skipping RGRDC_2005. Should be a CompoundCRS
--- Skipping RGSPM_2006. Should be a CompoundCRS
--- Skipping RRAF_1991. Should be a CompoundCRS
--- Skipping RSRGD2000. Should be a CompoundCRS
--- Skipping SIRGAS_2000. Should be a CompoundCRS
--- Skipping SIRGAS-Chile. Should be a CompoundCRS
--- Skipping SIRGAS_ES2007.8. Should be a CompoundCRS
--- Skipping SIRGAS-ROU98. Should be a CompoundCRS
--- Skipping SLD99. Should be a CompoundCRS
--- Skipping Slovenia_1996. Should be a CompoundCRS
--- Skipping SREF98. Should be a CompoundCRS
--- Skipping S_JTSK/05. Should be a CompoundCRS
--- Skipping S_JTSK/05_Ferro. Should be a CompoundCRS
--- Skipping SWEREF99. Should be a CompoundCRS
--- Skipping TGD2005. Should be a CompoundCRS
--- Skipping TWD_1997. Should be a CompoundCRS
--- Skipping Ukraine_2000. Should be a CompoundCRS
--- Skipping Yemen_NGN_1996. Should be a CompoundCRS
--- Skipping ITRF_2008. Should be a CompoundCRS
--- Skipping TUREF. Should be a CompoundCRS
--- Skipping GDA2020. Should be a CompoundCRS
--- Skipping BGS2005. Should be a CompoundCRS
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6326','D_WGS_1984',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6326_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6326','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115700','WGS_1984',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6326',0);
+INSERT INTO "usage" VALUES('ESRI', '115700_USAGE','vertical_crs','ESRI','115700','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6258','D_ETRS_1989',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6258_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6258','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115701','ETRS_1989',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6258',0);
+INSERT INTO "usage" VALUES('ESRI', '115701_USAGE','vertical_crs','ESRI','115701','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6269','D_North_American_1983',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6269_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6269','EPSG','1350','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115702','NAD_1983',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6269',0);
+INSERT INTO "usage" VALUES('ESRI', '115702_USAGE','vertical_crs','ESRI','115702','EPSG','1350','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6176','D_Australian_Antarctic_1998',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6176_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6176','EPSG','1278','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115703','Australian_Antarctic_1998',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6176',0);
+INSERT INTO "usage" VALUES('ESRI', '115703_USAGE','vertical_crs','ESRI','115703','EPSG','1278','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106999','D_Cadastre_1997',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106999_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106999','EPSG','3340','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115704','Cadastre_1997',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106999',0);
+INSERT INTO "usage" VALUES('ESRI', '115704_USAGE','vertical_crs','ESRI','115704','EPSG','3340','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106980','D_China_2000',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106980_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106980','EPSG','1067','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115705','China_Geodetic_Coordinate_System_2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106980',0);
+INSERT INTO "usage" VALUES('ESRI', '115705_USAGE','vertical_crs','ESRI','115705','EPSG','1067','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6151','D_Swiss_TRF_1995',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6151_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6151','EPSG','1286','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115706','Swiss_TRF_1995',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6151',0);
+INSERT INTO "usage" VALUES('ESRI', '115706_USAGE','vertical_crs','ESRI','115706','EPSG','1286','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1100','D_Cayman_Islands_Geodetic_Datum_2011',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1100_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1100','EPSG','1063','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115707','CIGD11',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1100',0);
+INSERT INTO "usage" VALUES('ESRI', '115707_USAGE','vertical_crs','ESRI','115707','EPSG','1063','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106244','D_Costa_Rica_2005',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106244_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106244','EPSG','1074','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115708','CR05',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106244',0);
+INSERT INTO "usage" VALUES('ESRI', '115708_USAGE','vertical_crs','ESRI','115708','EPSG','1074','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1081','D_Deutsche_Bahn_Reference_System',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1081_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1081','EPSG','3339','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115709','DB_REF',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1081',0);
+INSERT INTO "usage" VALUES('ESRI', '115709_USAGE','vertical_crs','ESRI','115709','EPSG','3339','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6755','D_Datum_Geodesi_Nasional_1995',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6755_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6755','EPSG','1122','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115710','DGN_1995',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6755',0);
+INSERT INTO "usage" VALUES('ESRI', '115710_USAGE','vertical_crs','ESRI','115710','EPSG','1122','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1058','D_Bhutan_National_Geodetic_Datum',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1058_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1058','EPSG','1048','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115711','DRUKREF_03',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1058',0);
+INSERT INTO "usage" VALUES('ESRI', '115711_USAGE','vertical_crs','ESRI','115711','EPSG','1048','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6180','D_Estonia_1997',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6180_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6180','EPSG','1090','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115712','Estonia_1997',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6180',0);
+INSERT INTO "usage" VALUES('ESRI', '115712_USAGE','vertical_crs','ESRI','115712','EPSG','1090','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115713','EUREF_FIN',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6258',0);
+INSERT INTO "usage" VALUES('ESRI', '115713_USAGE','vertical_crs','ESRI','115713','EPSG','1095','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1078','D_Fehmarnbelt_Datum_2010',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1078_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1078','EPSG','3889','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115714','FEH2010',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1078',0);
+INSERT INTO "usage" VALUES('ESRI', '115714_USAGE','vertical_crs','ESRI','115714','EPSG','3889','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6283','D_GDA_1994',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6283_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6283','EPSG','4177','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115715','GDA_1994',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6283',0);
+INSERT INTO "usage" VALUES('ESRI', '115715_USAGE','vertical_crs','ESRI','115715','EPSG','4177','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106100','D_GDBD2009',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106100_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106100','EPSG','1055','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115716','GDBD2009',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106100',0);
+INSERT INTO "usage" VALUES('ESRI', '115716_USAGE','vertical_crs','ESRI','115716','EPSG','1055','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6742','D_GDM_2000',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6742_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6742','EPSG','1151','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115717','GDM_2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6742',0);
+INSERT INTO "usage" VALUES('ESRI', '115717_USAGE','vertical_crs','ESRI','115717','EPSG','1151','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6747','D_Greenland_1996',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6747_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6747','EPSG','1107','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115718','Greenland_1996',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6747',0);
+INSERT INTO "usage" VALUES('ESRI', '115718_USAGE','vertical_crs','ESRI','115718','EPSG','1107','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6148','D_Hartebeesthoek_1994',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6148_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6148','EPSG','1215','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115719','Hartebeesthoek_1994',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6148',0);
+INSERT INTO "usage" VALUES('ESRI', '115719_USAGE','vertical_crs','ESRI','115719','EPSG','1215','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1114','Israel_Geodetic_Datum_2005',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1114_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1114','EPSG','1126','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115720','IGD05',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1114',0);
+INSERT INTO "usage" VALUES('ESRI', '115720_USAGE','vertical_crs','ESRI','115720','EPSG','1126','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1142','IG05_Intermediate_Datum',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1142_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1142','EPSG','2603','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115721','IG05_Intermediate_CRS',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1142',0);
+INSERT INTO "usage" VALUES('ESRI', '115721_USAGE','vertical_crs','ESRI','115721','EPSG','2603','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1115','Israeli_Geodetic_Datum_2005(2012)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1115_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1115','EPSG','1126','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115722','IGD05(2012)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1115',0);
+INSERT INTO "usage" VALUES('ESRI', '115722_USAGE','vertical_crs','ESRI','115722','EPSG','1126','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1144','IG05(2012)_Intermediate_Datum',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1144_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1144','EPSG','2603','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115723','IG05(2012)_Intermediate_CRS',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1144',0);
+INSERT INTO "usage" VALUES('ESRI', '115723_USAGE','vertical_crs','ESRI','115723','EPSG','2603','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6670','D_IGM_1995',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6670_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6670','EPSG','3343','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115724','IGM_1995',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6670',0);
+INSERT INTO "usage" VALUES('ESRI', '115724_USAGE','vertical_crs','ESRI','115724','EPSG','3343','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106991','D_Iraqi_Geospatial_Reference_System',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106991_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106991','EPSG','1124','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115725','IGRS',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106991',0);
+INSERT INTO "usage" VALUES('ESRI', '115725_USAGE','vertical_crs','ESRI','115725','EPSG','1124','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6173','D_IRENET95',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6173_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6173','EPSG','1305','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115726','IRENET95',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6173',0);
+INSERT INTO "usage" VALUES('ESRI', '115726_USAGE','vertical_crs','ESRI','115726','EPSG','1305','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6659','D_Islands_Network_1993',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6659_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6659','EPSG','1120','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115727','ISN_1993',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6659',0);
+INSERT INTO "usage" VALUES('ESRI', '115727_USAGE','vertical_crs','ESRI','115727','EPSG','1120','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106144','D_Islands_Network_2004',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106144_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106144','EPSG','1120','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115728','ISN_2004',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106144',0);
+INSERT INTO "usage" VALUES('ESRI', '115728_USAGE','vertical_crs','ESRI','115728','EPSG','1120','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6647','D_ITRF_1988',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6647_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6647','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115729','ITRF_1988',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6647',0);
+INSERT INTO "usage" VALUES('ESRI', '115729_USAGE','vertical_crs','ESRI','115729','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6648','D_ITRF_1989',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6648_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6648','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115730','ITRF_1989',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6648',0);
+INSERT INTO "usage" VALUES('ESRI', '115730_USAGE','vertical_crs','ESRI','115730','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6649','D_ITRF_1990',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6649_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6649','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115731','ITRF_1990',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6649',0);
+INSERT INTO "usage" VALUES('ESRI', '115731_USAGE','vertical_crs','ESRI','115731','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6650','D_ITRF_1991',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6650_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6650','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115732','ITRF_1991',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6650',0);
+INSERT INTO "usage" VALUES('ESRI', '115732_USAGE','vertical_crs','ESRI','115732','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6651','D_ITRF_1992',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6651_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6651','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115733','ITRF_1992',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6651',0);
+INSERT INTO "usage" VALUES('ESRI', '115733_USAGE','vertical_crs','ESRI','115733','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6652','D_ITRF_1993',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6652_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6652','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115734','ITRF_1993',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6652',0);
+INSERT INTO "usage" VALUES('ESRI', '115734_USAGE','vertical_crs','ESRI','115734','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6654','D_ITRF_1996',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6654_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6654','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115735','ITRF_1996',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6654',0);
+INSERT INTO "usage" VALUES('ESRI', '115735_USAGE','vertical_crs','ESRI','115735','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6655','D_ITRF_1997',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6655_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6655','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115736','ITRF_1997',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6655',0);
+INSERT INTO "usage" VALUES('ESRI', '115736_USAGE','vertical_crs','ESRI','115736','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6656','D_ITRF_2000',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6656_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6656','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115737','ITRF_2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6656',0);
+INSERT INTO "usage" VALUES('ESRI', '115737_USAGE','vertical_crs','ESRI','115737','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6896','D_ITRF_2005',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6896_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6896','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115738','ITRF_2005',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6896',0);
+INSERT INTO "usage" VALUES('ESRI', '115738_USAGE','vertical_crs','ESRI','115738','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106280','D_Jamaica_2001',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106280_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106280','EPSG','1128','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115739','JAD_2001',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106280',0);
+INSERT INTO "usage" VALUES('ESRI', '115739_USAGE','vertical_crs','ESRI','115739','EPSG','1128','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106268','D_JGD_2000',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106268_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106268','EPSG','1129','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115740','JGD_2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106268',0);
+INSERT INTO "usage" VALUES('ESRI', '115740_USAGE','vertical_crs','ESRI','115740','EPSG','1129','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106020','D_JGD_2011',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106020_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106020','EPSG','1129','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115741','JGD_2011',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106020',0);
+INSERT INTO "usage" VALUES('ESRI', '115741_USAGE','vertical_crs','ESRI','115741','EPSG','1129','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6737','D_Korea_2000',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6737_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6737','EPSG','1135','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115742','Korea_2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6737',0);
+INSERT INTO "usage" VALUES('ESRI', '115742_USAGE','vertical_crs','ESRI','115742','EPSG','1135','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6678','D_Lao_National_Datum_1997',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6678_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6678','EPSG','1138','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115743','Lao_1997',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6678',0);
+INSERT INTO "usage" VALUES('ESRI', '115743_USAGE','vertical_crs','ESRI','115743','EPSG','1138','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6754','D_Libyan_Geodetic_Datum_2006',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6754_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6754','EPSG','1143','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115744','LGD2006',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6754',0);
+INSERT INTO "usage" VALUES('ESRI', '115744_USAGE','vertical_crs','ESRI','115744','EPSG','1143','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6661','D_Latvia_1992',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6661_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6661','EPSG','1139','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115745','LKS_1992',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6661',0);
+INSERT INTO "usage" VALUES('ESRI', '115745_USAGE','vertical_crs','ESRI','115745','EPSG','1139','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6126','D_Lithuania_1994',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6126_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6126','EPSG','1145','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115746','LKS_1994',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6126',0);
+INSERT INTO "usage" VALUES('ESRI', '115746_USAGE','vertical_crs','ESRI','115746','EPSG','1145','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106248','D_MACAO_2008',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106248_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106248','EPSG','1147','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115747','MACAO_2008',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106248',0);
+INSERT INTO "usage" VALUES('ESRI', '115747_USAGE','vertical_crs','ESRI','115747','EPSG','1147','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6686','D_MAGNA',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6686_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6686','EPSG','1070','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115748','MAGNA',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6686',0);
+INSERT INTO "usage" VALUES('ESRI', '115748_USAGE','vertical_crs','ESRI','115748','EPSG','1070','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1066','D_SGNP_MARCARIO_SOLIS',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1066_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1066','EPSG','1186','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115749','MARCARIO_SOLIS',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1066',0);
+INSERT INTO "usage" VALUES('ESRI', '115749_USAGE','vertical_crs','ESRI','115749','EPSG','1186','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1063','D_Marco_Geodesico_Nacional',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1063_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1063','EPSG','1049','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115750','MARGEN',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1063',0);
+INSERT INTO "usage" VALUES('ESRI', '115750_USAGE','vertical_crs','ESRI','115750','EPSG','1049','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1120','D_Mexico_ITRF2008',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1120_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1120','EPSG','1160','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115751','Mexico_ITRF2008',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1120',0);
+INSERT INTO "usage" VALUES('ESRI', '115751_USAGE','vertical_crs','ESRI','115751','EPSG','1160','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106993','D_MOLDREF99',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106993_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106993','EPSG','1162','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115752','MOLDREF99',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106993',0);
+INSERT INTO "usage" VALUES('ESRI', '115752_USAGE','vertical_crs','ESRI','115752','EPSG','1162','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115753','MONREF_1997',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6656',0);
+INSERT INTO "usage" VALUES('ESRI', '115753_USAGE','vertical_crs','ESRI','115753','EPSG','1164','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6130','D_Moznet',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6130_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6130','EPSG','1167','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115754','Moznet',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6130',0);
+INSERT INTO "usage" VALUES('ESRI', '115754_USAGE','vertical_crs','ESRI','115754','EPSG','1167','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106285','D_NAD_1983_2011',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106285_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106285','EPSG','1511','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115755','NAD_1983_2011',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106285',0);
+INSERT INTO "usage" VALUES('ESRI', '115755_USAGE','vertical_crs','ESRI','115755','EPSG','1511','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106223','D_NAD_1983_CORS96',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106223_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106223','EPSG','1511','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115756','NAD_1983_CORS96',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106223',0);
+INSERT INTO "usage" VALUES('ESRI', '115756_USAGE','vertical_crs','ESRI','115756','EPSG','1511','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6140','D_North_American_1983_CSRS',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6140_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6140','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115757','North_American_1983_CSRS',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6140',0);
+INSERT INTO "usage" VALUES('ESRI', '115757_USAGE','vertical_crs','ESRI','115757','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6152','D_North_American_1983_HARN',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6152_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6152','EPSG','1337','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115758','North_American_1983_HARN',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6152',0);
+INSERT INTO "usage" VALUES('ESRI', '115758_USAGE','vertical_crs','ESRI','115758','EPSG','1337','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106286','D_NAD_1983_MA11',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106286_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106286','EPSG','4167','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115759','NAD_1983_MA11',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106286',0);
+INSERT INTO "usage" VALUES('ESRI', '115759_USAGE','vertical_crs','ESRI','115759','EPSG','4167','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106210','D_NAD_1983_MARP00',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106210_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106210','EPSG','4167','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115760','NAD_1983_MARP00',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106210',0);
+INSERT INTO "usage" VALUES('ESRI', '115760_USAGE','vertical_crs','ESRI','115760','EPSG','4167','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6759','D_NAD_1983_NSRS2007',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6759_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6759','EPSG','1511','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115761','NAD_1983_NSRS2007',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6759',0);
+INSERT INTO "usage" VALUES('ESRI', '115761_USAGE','vertical_crs','ESRI','115761','EPSG','1511','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106287','D_NAD_1983_PA11',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106287_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106287','EPSG','4162','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115762','NAD_1983_PA11',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106287',0);
+INSERT INTO "usage" VALUES('ESRI', '115762_USAGE','vertical_crs','ESRI','115762','EPSG','4162','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106209','D_NAD_1983_PACP00',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106209_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106209','EPSG','4162','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115763','NAD_1983_PACP00',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106209',0);
+INSERT INTO "usage" VALUES('ESRI', '115763_USAGE','vertical_crs','ESRI','115763','EPSG','4162','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106256','D_Nepal_Nagarkot',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106256_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106256','EPSG','1171','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115764','Nepal_Nagarkot',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106256',0);
+INSERT INTO "usage" VALUES('ESRI', '115764_USAGE','vertical_crs','ESRI','115764','EPSG','1171','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106265','D_NZGD_2000',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106265_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106265','EPSG','1175','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115765','NZGD_2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106265',0);
+INSERT INTO "usage" VALUES('ESRI', '115765_USAGE','vertical_crs','ESRI','115765','EPSG','1175','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1067','D_Peru96',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1067_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1067','EPSG','1189','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115766','Peru96',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1067',0);
+INSERT INTO "usage" VALUES('ESRI', '115766_USAGE','vertical_crs','ESRI','115766','EPSG','1189','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1076','D_Papua_New_Guinea_Geodetic_Datum_1994',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1076_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1076','EPSG','1187','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115767','PNG94',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1076',0);
+INSERT INTO "usage" VALUES('ESRI', '115767_USAGE','vertical_crs','ESRI','115767','EPSG','1187','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6172','D_POSGAR',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6172_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6172','EPSG','1033','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115768','POSGAR',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6172',0);
+INSERT INTO "usage" VALUES('ESRI', '115768_USAGE','vertical_crs','ESRI','115768','EPSG','1033','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6694','D_POSGAR_1994',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6694_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6694','EPSG','1033','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115769','POSGAR_1994',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6694',0);
+INSERT INTO "usage" VALUES('ESRI', '115769_USAGE','vertical_crs','ESRI','115769','EPSG','1033','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6190','D_POSGAR_1998',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6190_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6190','EPSG','1033','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115770','POSGAR_1998',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6190',0);
+INSERT INTO "usage" VALUES('ESRI', '115770_USAGE','vertical_crs','ESRI','115770','EPSG','1033','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6683','D_Philippine_Reference_System_1992',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6683_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6683','EPSG','1190','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115771','PRS_1992',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6683',0);
+INSERT INTO "usage" VALUES('ESRI', '115771_USAGE','vertical_crs','ESRI','115771','EPSG','1190','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106236','D_PTRA08',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106236_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106236','EPSG','3670','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115772','PTRA08',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106236',0);
+INSERT INTO "usage" VALUES('ESRI', '115772_USAGE','vertical_crs','ESRI','115772','EPSG','3670','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6740','D_Parametrop_Zemp_1990',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6740_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6740','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115773','PZ_1990',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6740',0);
+INSERT INTO "usage" VALUES('ESRI', '115773_USAGE','vertical_crs','ESRI','115773','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1132','D_Rete_Dinamica_Nazionale_2008',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1132_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1132','EPSG','3343','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115774','RDN2008',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1132',0);
+INSERT INTO "usage" VALUES('ESRI', '115774_USAGE','vertical_crs','ESRI','115774','EPSG','3343','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106996','D_Red_Geodesica_de_Canarias_1995',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106996_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106996','EPSG','3199','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115775','REGCAN95',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106996',0);
+INSERT INTO "usage" VALUES('ESRI', '115775_USAGE','vertical_crs','ESRI','115775','EPSG','3199','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106267','D_REGVEN',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106267_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106267','EPSG','1251','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115776','REGVEN',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106267',0);
+INSERT INTO "usage" VALUES('ESRI', '115776_USAGE','vertical_crs','ESRI','115776','EPSG','1251','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1073','Reseau_Geodesique_des_Antilles_Francaises_2009',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1073_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1073','EPSG','2824','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115777','RGAF09',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1073',0);
+INSERT INTO "usage" VALUES('ESRI', '115777_USAGE','vertical_crs','ESRI','115777','EPSG','2824','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106264','D_RGF_1993',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106264_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106264','EPSG','1096','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115778','RGF_1993',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106264',0);
+INSERT INTO "usage" VALUES('ESRI', '115778_USAGE','vertical_crs','ESRI','115778','EPSG','1096','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6624','D_RGFG_1995',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6624_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6624','EPSG','1097','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115779','RGFG_1995',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6624',0);
+INSERT INTO "usage" VALUES('ESRI', '115779_USAGE','vertical_crs','ESRI','115779','EPSG','1097','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106998','D_Reseau_Geodesique_de_Mayotte_2004',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106998_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106998','EPSG','1159','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115780','RGM_2004',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106998',0);
+INSERT INTO "usage" VALUES('ESRI', '115780_USAGE','vertical_crs','ESRI','115780','EPSG','1159','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6645','D_RGNC_1991',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6645_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6645','EPSG','1174','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115781','RGNC_1991',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6645',0);
+INSERT INTO "usage" VALUES('ESRI', '115781_USAGE','vertical_crs','ESRI','115781','EPSG','1174','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6749','D_Reseau_Geodesique_de_Nouvelle_Caledonie_1991-93',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6749_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6749','EPSG','1174','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115782','RGNC_1991-93',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6749',0);
+INSERT INTO "usage" VALUES('ESRI', '115782_USAGE','vertical_crs','ESRI','115782','EPSG','1174','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6687','D_Reseau_Geodesique_de_la_Polynesie_Francaise',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6687_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6687','EPSG','1098','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115783','RGPF',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6687',0);
+INSERT INTO "usage" VALUES('ESRI', '115783_USAGE','vertical_crs','ESRI','115783','EPSG','1098','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6627','D_RGR_1992',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6627_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6627','EPSG','1196','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115784','RGR_1992',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6627',0);
+INSERT INTO "usage" VALUES('ESRI', '115784_USAGE','vertical_crs','ESRI','115784','EPSG','1196','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106994','D_Reseau_Geodesique_de_la_RDC_2005',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106994_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106994','EPSG','3613','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115785','RGRDC_2005',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106994',0);
+INSERT INTO "usage" VALUES('ESRI', '115785_USAGE','vertical_crs','ESRI','115785','EPSG','3613','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106997','D_Reseau_Geodesique_de_St_Pierre_et_Miquelon_2006',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106997_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106997','EPSG','1220','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115786','RGSPM_2006',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106997',0);
+INSERT INTO "usage" VALUES('ESRI', '115786_USAGE','vertical_crs','ESRI','115786','EPSG','1220','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1047','D_RRAF_1991',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1047_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1047','EPSG','2824','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115787','RRAF_1991',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1047',0);
+INSERT INTO "usage" VALUES('ESRI', '115787_USAGE','vertical_crs','ESRI','115787','EPSG','2824','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6764','D_Ross_Sea_Region_Geodetic_Datum_2000',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6764_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6764','EPSG','3558','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115788','RSRGD2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6764',0);
+INSERT INTO "usage" VALUES('ESRI', '115788_USAGE','vertical_crs','ESRI','115788','EPSG','3558','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6674','D_SIRGAS_2000',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6674_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6674','EPSG','3418','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115789','SIRGAS_2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6674',0);
+INSERT INTO "usage" VALUES('ESRI', '115789_USAGE','vertical_crs','ESRI','115789','EPSG','3418','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1064','D_SIRGAS-Chile',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1064_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1064','EPSG','1066','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115790','SIRGAS-Chile',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1064',0);
+INSERT INTO "usage" VALUES('ESRI', '115790_USAGE','vertical_crs','ESRI','115790','EPSG','1066','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1069','D_SIRGAS_ES2007.8',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1069_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1069','EPSG','1087','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115791','SIRGAS_ES2007.8',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1069',0);
+INSERT INTO "usage" VALUES('ESRI', '115791_USAGE','vertical_crs','ESRI','115791','EPSG','1087','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1068','D_SIRGAS-ROU98',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1068_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1068','EPSG','1247','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115792','SIRGAS-ROU98',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1068',0);
+INSERT INTO "usage" VALUES('ESRI', '115792_USAGE','vertical_crs','ESRI','115792','EPSG','1247','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1053','D_Sri_Lanka_Datum_1999',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1053_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1053','EPSG','3310','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115793','SLD99',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1053',0);
+INSERT INTO "usage" VALUES('ESRI', '115793_USAGE','vertical_crs','ESRI','115793','EPSG','3310','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6765','D_Slovenia_Geodetic_Datum_1996',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6765_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6765','EPSG','1212','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115794','Slovenia_1996',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6765',0);
+INSERT INTO "usage" VALUES('ESRI', '115794_USAGE','vertical_crs','ESRI','115794','EPSG','1212','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106995','D_Serbian_Reference_Network_1998',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106995_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106995','EPSG','3534','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115795','SREF98',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106995',0);
+INSERT INTO "usage" VALUES('ESRI', '115795_USAGE','vertical_crs','ESRI','115795','EPSG','3534','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1052','D_S_JTSK_05',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1052_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1052','EPSG','1079','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115796','S_JTSK/05',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1052',0);
+INSERT INTO "usage" VALUES('ESRI', '115796_USAGE','vertical_crs','ESRI','115796','EPSG','1079','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115797','S_JTSK/05_Ferro',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1052',0);
+INSERT INTO "usage" VALUES('ESRI', '115797_USAGE','vertical_crs','ESRI','115797','EPSG','1079','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6619','D_SWEREF99',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6619_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6619','EPSG','1225','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115798','SWEREF99',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6619',0);
+INSERT INTO "usage" VALUES('ESRI', '115798_USAGE','vertical_crs','ESRI','115798','EPSG','1225','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1095','D_Tonga_Geodetic_Datum_2005',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1095_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1095','EPSG','1234','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115799','TGD2005',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1095',0);
+INSERT INTO "usage" VALUES('ESRI', '115799_USAGE','vertical_crs','ESRI','115799','EPSG','1234','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106282','D_TWD_1997',NULL,NULL,NULL,NULL,1);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106282_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106282','EPSG','1228','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115800','TWD_1997',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106282',0);
+INSERT INTO "usage" VALUES('ESRI', '115800_USAGE','vertical_crs','ESRI','115800','EPSG','1228','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1077','D_Ukraine_2000',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1077_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1077','EPSG','1242','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115801','Ukraine_2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1077',0);
+INSERT INTO "usage" VALUES('ESRI', '115801_USAGE','vertical_crs','ESRI','115801','EPSG','1242','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_6163','D_Yemen_NGN_1996',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_6163_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_6163','EPSG','1257','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115802','Yemen_NGN_1996',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_6163',0);
+INSERT INTO "usage" VALUES('ESRI', '115802_USAGE','vertical_crs','ESRI','115802','EPSG','1257','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1061','D_ITRF_2008',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1061_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1061','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115803','ITRF_2008',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1061',0);
+INSERT INTO "usage" VALUES('ESRI', '115803_USAGE','vertical_crs','ESRI','115803','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1057','D_Turkish_National_Reference_Frame',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1057_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1057','EPSG','1237','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115804','TUREF',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1057',0);
+INSERT INTO "usage" VALUES('ESRI', '115804_USAGE','vertical_crs','ESRI','115804','EPSG','1237','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1168','GDA2020',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1168_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1168','EPSG','4177','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115805','GDA2020',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1168',0);
+INSERT INTO "usage" VALUES('ESRI', '115805_USAGE','vertical_crs','ESRI','115805','EPSG','4177','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1167','Bulgaria_Geodetic_System_2005',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1167_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1167','EPSG','1056','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115806','BGS2005',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1167',0);
+INSERT INTO "usage" VALUES('ESRI', '115806_USAGE','vertical_crs','ESRI','115806','EPSG','1056','EPSG','1024');
 INSERT INTO "vertical_datum" VALUES('ESRI','105110','Unknown_height_system_(meters)',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('ESRI', '105110_USAGE','vertical_datum','ESRI','105110','EPSG','1262','EPSG','1024');
 INSERT INTO "vertical_crs" VALUES('ESRI','115807','Unknown_height_system_(meters)',NULL,'EPSG','6499','ESRI','105110',0);
@@ -15667,71 +15985,266 @@ INSERT INTO "vertical_datum" VALUES('ESRI','105112','Unknown_height_system_(Intl
 INSERT INTO "usage" VALUES('ESRI', '105112_USAGE','vertical_datum','ESRI','105112','EPSG','1262','EPSG','1024');
 INSERT INTO "vertical_crs" VALUES('ESRI','115809','Unknown_height_system_(Intl_Feet)',NULL,'EPSG','1030','ESRI','105112',0);
 INSERT INTO "usage" VALUES('ESRI', '115809_USAGE','vertical_crs','ESRI','115809','EPSG','1262','EPSG','1024');
--- Skipping ITRF2014. Should be a CompoundCRS
--- Skipping SHGD2015. Should be a CompoundCRS
--- Skipping St_Helena_Tritan. Should be a CompoundCRS
--- Skipping GSK-2011. Should be a CompoundCRS
--- Skipping PZ-90.11. Should be a CompoundCRS
--- Skipping PZ-90.02. Should be a CompoundCRS
--- Skipping WGS_1984_(Transit). Should be a CompoundCRS
--- Skipping WGS_1984_(G1762). Should be a CompoundCRS
--- Skipping WGS_1984_(G1674). Should be a CompoundCRS
--- Skipping WGS_1984_(G1150). Should be a CompoundCRS
--- Skipping WGS_1984_(G873). Should be a CompoundCRS
--- Skipping WGS_1984_(G730). Should be a CompoundCRS
--- Skipping ETRF90. Should be a CompoundCRS
--- Skipping ETRF91. Should be a CompoundCRS
--- Skipping ETRF92. Should be a CompoundCRS
--- Skipping ETRF93. Should be a CompoundCRS
--- Skipping ETRF94. Should be a CompoundCRS
--- Skipping ETRF96. Should be a CompoundCRS
--- Skipping ETRF97. Should be a CompoundCRS
--- Skipping ETRF2000. Should be a CompoundCRS
--- Skipping NAD83(CSRS96). Should be a CompoundCRS
--- Skipping NAD83(CSRS)V2. Should be a CompoundCRS
--- Skipping NAD83(CSRS)V3. Should be a CompoundCRS
--- Skipping NAD83(CSRS)V4. Should be a CompoundCRS
--- Skipping NAD83(CSRS)V5. Should be a CompoundCRS
--- Skipping NAD83(CSRS)V6. Should be a CompoundCRS
--- Skipping NAD83(CSRS)V7. Should be a CompoundCRS
--- Skipping IGS14. Should be a CompoundCRS
--- Skipping ISN2016. Should be a CompoundCRS
--- Skipping Hong_Kong_Geodetic_CS. Should be a CompoundCRS
--- Skipping NAD_1983_(FBN). Should be a CompoundCRS
--- Skipping NAD_1983_(HARN_Corrected). Should be a CompoundCRS
--- Skipping SRB_ETRS89. Should be a CompoundCRS
--- Skipping MTRF-2000. Should be a CompoundCRS
--- Skipping California_SRS_Epoch_2017.50_(NAD83). Should be a CompoundCRS
--- Skipping GGD. Should be a CompoundCRS
--- Skipping ONGD14. Should be a CompoundCRS
--- Skipping ONGD17. Should be a CompoundCRS
--- Skipping S-JTSK_[JTSK03]. Should be a CompoundCRS
--- Skipping CR-SIRGAS. Should be a CompoundCRS
--- Skipping RGWF96. Should be a CompoundCRS
--- Skipping SIRGAS-CON_DGF00P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_DGF01P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_DGF01P02. Should be a CompoundCRS
--- Skipping SIRGAS-CON_DGF02P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_DGF04P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_DGF05P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_DGF06P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_DGF07P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_DGF08P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_SIR09P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_SIR10P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_SIR11P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_SIR13P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_SIR14P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_SIR15P01. Should be a CompoundCRS
--- Skipping SIRGAS-CON_SIR17P01. Should be a CompoundCRS
--- Skipping IGS97. Should be a CompoundCRS
--- Skipping IGS00. Should be a CompoundCRS
--- Skipping IGb00. Should be a CompoundCRS
--- Skipping IGS05. Should be a CompoundCRS
--- Skipping IGb08. Should be a CompoundCRS
--- Skipping KOSOVAREF01. Should be a CompoundCRS
--- Skipping ETRF2005. Should be a CompoundCRS
--- Skipping ETRF2014. Should be a CompoundCRS
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1165','International_Terrestrial_Reference_Frame_2014',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1165_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1165','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115810','ITRF2014',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1165',0);
+INSERT INTO "usage" VALUES('ESRI', '115810_USAGE','vertical_crs','ESRI','115810','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1174','St_Helena_Geodetic_Datum_2015',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1174_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1174','EPSG','3183','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115811','SHGD2015',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1174',0);
+INSERT INTO "usage" VALUES('ESRI', '115811_USAGE','vertical_crs','ESRI','115811','EPSG','3183','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1173','St_Helena_Tritan',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1173_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1173','EPSG','3183','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115812','St_Helena_Tritan',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1173',0);
+INSERT INTO "usage" VALUES('ESRI', '115812_USAGE','vertical_crs','ESRI','115812','EPSG','3183','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1159','Geodezicheskaya_Sistema_Koordinat_2011',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1159_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1159','EPSG','1198','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115813','GSK-2011',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1159',0);
+INSERT INTO "usage" VALUES('ESRI', '115813_USAGE','vertical_crs','ESRI','115813','EPSG','1198','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1158','Parametry_Zemli_1990.11',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1158_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1158','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115814','PZ-90.11',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1158',0);
+INSERT INTO "usage" VALUES('ESRI', '115814_USAGE','vertical_crs','ESRI','115814','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1157','Parametry_Zemli_1990.02',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1157_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1157','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115815','PZ-90.02',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1157',0);
+INSERT INTO "usage" VALUES('ESRI', '115815_USAGE','vertical_crs','ESRI','115815','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1166','World_Geodetic_System_1984_(Transit)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1166_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1166','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115816','WGS_1984_(Transit)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1166',0);
+INSERT INTO "usage" VALUES('ESRI', '115816_USAGE','vertical_crs','ESRI','115816','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1156','World_Geodetic_System_1984_(G1762)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1156_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1156','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115817','WGS_1984_(G1762)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1156',0);
+INSERT INTO "usage" VALUES('ESRI', '115817_USAGE','vertical_crs','ESRI','115817','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1155','World_Geodetic_System_1984_(G1674)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1155_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1155','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115818','WGS_1984_(G1674)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1155',0);
+INSERT INTO "usage" VALUES('ESRI', '115818_USAGE','vertical_crs','ESRI','115818','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1154','World_Geodetic_System_1984_(G1150)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1154_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1154','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115819','WGS_1984_(G1150)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1154',0);
+INSERT INTO "usage" VALUES('ESRI', '115819_USAGE','vertical_crs','ESRI','115819','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1153','World_Geodetic_System_1984_(G873)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1153_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1153','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115820','WGS_1984_(G873)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1153',0);
+INSERT INTO "usage" VALUES('ESRI', '115820_USAGE','vertical_crs','ESRI','115820','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1152','World_Geodetic_System_1984_(G730)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1152_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1152','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115821','WGS_1984_(G730)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1152',0);
+INSERT INTO "usage" VALUES('ESRI', '115821_USAGE','vertical_crs','ESRI','115821','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1179','European_Terrestrial_Reference_Frame_1990',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1179_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1179','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115822','ETRF90',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1179',0);
+INSERT INTO "usage" VALUES('ESRI', '115822_USAGE','vertical_crs','ESRI','115822','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1180','European_Terrestrial_Reference_Frame_1991',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1180_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1180','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115823','ETRF91',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1180',0);
+INSERT INTO "usage" VALUES('ESRI', '115823_USAGE','vertical_crs','ESRI','115823','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1181','European_Terrestrial_Reference_Frame_1992',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1181_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1181','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115824','ETRF92',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1181',0);
+INSERT INTO "usage" VALUES('ESRI', '115824_USAGE','vertical_crs','ESRI','115824','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1182','European_Terrestrial_Reference_Frame_1993',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1182_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1182','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115825','ETRF93',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1182',0);
+INSERT INTO "usage" VALUES('ESRI', '115825_USAGE','vertical_crs','ESRI','115825','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1183','European_Terrestrial_Reference_Frame_1994',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1183_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1183','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115826','ETRF94',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1183',0);
+INSERT INTO "usage" VALUES('ESRI', '115826_USAGE','vertical_crs','ESRI','115826','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1184','European_Terrestrial_Reference_Frame_1996',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1184_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1184','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115827','ETRF96',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1184',0);
+INSERT INTO "usage" VALUES('ESRI', '115827_USAGE','vertical_crs','ESRI','115827','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1185','European_Terrestrial_Reference_Frame_1997',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1185_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1185','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115828','ETRF97',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1185',0);
+INSERT INTO "usage" VALUES('ESRI', '115828_USAGE','vertical_crs','ESRI','115828','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1186','European_Terrestrial_Reference_Frame_2000',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1186_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1186','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115829','ETRF2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1186',0);
+INSERT INTO "usage" VALUES('ESRI', '115829_USAGE','vertical_crs','ESRI','115829','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1192','North_American_Datum_of_1983_(CSRS96)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1192_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1192','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115830','NAD83(CSRS96)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1192',0);
+INSERT INTO "usage" VALUES('ESRI', '115830_USAGE','vertical_crs','ESRI','115830','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1193','North_American_Datum_of_1983_(CSRS)_version_2',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1193_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1193','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115831','NAD83(CSRS)V2',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1193',0);
+INSERT INTO "usage" VALUES('ESRI', '115831_USAGE','vertical_crs','ESRI','115831','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1194','North_American_Datum_of_1983_(CSRS)_version_3',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1194_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1194','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115832','NAD83(CSRS)V3',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1194',0);
+INSERT INTO "usage" VALUES('ESRI', '115832_USAGE','vertical_crs','ESRI','115832','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1195','North_American_Datum_of_1983_(CSRS)_version_4',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1195_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1195','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115833','NAD83(CSRS)V4',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1195',0);
+INSERT INTO "usage" VALUES('ESRI', '115833_USAGE','vertical_crs','ESRI','115833','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1196','North_American_Datum_of_1983_(CSRS)_version_5',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1196_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1196','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115834','NAD83(CSRS)V5',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1196',0);
+INSERT INTO "usage" VALUES('ESRI', '115834_USAGE','vertical_crs','ESRI','115834','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1197','North_American_Datum_of_1983_(CSRS)_version_6',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1197_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1197','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115835','NAD83(CSRS)V6',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1197',0);
+INSERT INTO "usage" VALUES('ESRI', '115835_USAGE','vertical_crs','ESRI','115835','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1198','North_American_Datum_of_1983_(CSRS)_version_7',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1198_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1198','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115836','NAD83(CSRS)V7',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1198',0);
+INSERT INTO "usage" VALUES('ESRI', '115836_USAGE','vertical_crs','ESRI','115836','EPSG','1061','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1191','IGS14',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1191_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1191','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115837','IGS14',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1191',0);
+INSERT INTO "usage" VALUES('ESRI', '115837_USAGE','vertical_crs','ESRI','115837','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1187','Islands_Net_2016',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1187_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1187','EPSG','1120','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115838','ISN2016',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1187',0);
+INSERT INTO "usage" VALUES('ESRI', '115838_USAGE','vertical_crs','ESRI','115838','EPSG','1120','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1209','Hong_Kong_Geodetic',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1209_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1209','EPSG','1118','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115839','Hong_Kong_Geodetic_CS',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1209',0);
+INSERT INTO "usage" VALUES('ESRI', '115839_USAGE','vertical_crs','ESRI','115839','EPSG','1118','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1211','NAD_1983_(Federal_Base_Network)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1211_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1211','EPSG','4515','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115840','NAD_1983_(FBN)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1211',0);
+INSERT INTO "usage" VALUES('ESRI', '115840_USAGE','vertical_crs','ESRI','115840','EPSG','4515','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1212','NAD_1983_(High_Accuracy_Reference_Network-Corrected)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1212_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1212','EPSG','3634','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115841','NAD_1983_(HARN_Corrected)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1212',0);
+INSERT INTO "usage" VALUES('ESRI', '115841_USAGE','vertical_crs','ESRI','115841','EPSG','3634','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1214','Serbian_Spatial_Reference_System_2000',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1214_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1214','EPSG','3534','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115842','SRB_ETRS89',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1214',0);
+INSERT INTO "usage" VALUES('ESRI', '115842_USAGE','vertical_crs','ESRI','115842','EPSG','3534','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1218','MOMRA_Terrestrial_Reference_Frame_2000',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1218_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1218','EPSG','1206','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115843','MTRF-2000',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1218',0);
+INSERT INTO "usage" VALUES('ESRI', '115843_USAGE','vertical_crs','ESRI','115843','EPSG','1206','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106012','California_SRS_Epoch_2017.50_(NAD83)',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106012_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106012','ESRI','1','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115844','California_SRS_Epoch_2017.50_(NAD83)',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106012',0);
+INSERT INTO "usage" VALUES('ESRI', '115844_USAGE','vertical_crs','ESRI','115844','ESRI','1','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106010','Georgia_Geodetic_Datum',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106010_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106010','EPSG','3251','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115845','GGD',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106010',0);
+INSERT INTO "usage" VALUES('ESRI', '115845_USAGE','vertical_crs','ESRI','115845','EPSG','3251','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1147','Oman_National_Geodetic_Datum_2014',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1147_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1147','EPSG','1183','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115846','ONGD14',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1147',0);
+INSERT INTO "usage" VALUES('ESRI', '115846_USAGE','vertical_crs','ESRI','115846','EPSG','1183','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_ESRI_106027','Oman_National_Geodetic_Datum_2017',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_ESRI_106027_USAGE','vertical_datum','ESRI','from_geogdatum_ESRI_106027','EPSG','1183','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115847','ONGD17',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_ESRI_106027',0);
+INSERT INTO "usage" VALUES('ESRI', '115847_USAGE','vertical_crs','ESRI','115847','EPSG','1183','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1201','S-JTSK_[JTSK03]',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1201_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1201','EPSG','1211','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115848','S-JTSK_[JTSK03]',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1201',0);
+INSERT INTO "usage" VALUES('ESRI', '115848_USAGE','vertical_crs','ESRI','115848','EPSG','1211','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1225','CR-SIRGAS',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1225_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1225','EPSG','1074','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115849','CR-SIRGAS',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1225',0);
+INSERT INTO "usage" VALUES('ESRI', '115849_USAGE','vertical_crs','ESRI','115849','EPSG','1074','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1223','Reseau_Geodesique_de_Wallis_et_Futuna_1996',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1223_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1223','EPSG','1255','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115850','RGWF96',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1223',0);
+INSERT INTO "usage" VALUES('ESRI', '115850_USAGE','vertical_crs','ESRI','115850','EPSG','1255','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1227','SIRGAS_Continuously_Operating_Network_DGF00P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1227_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1227','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115851','SIRGAS-CON_DGF00P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1227',0);
+INSERT INTO "usage" VALUES('ESRI', '115851_USAGE','vertical_crs','ESRI','115851','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1228','SIRGAS_Continuously_Operating_Network_DGF01P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1228_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1228','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115852','SIRGAS-CON_DGF01P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1228',0);
+INSERT INTO "usage" VALUES('ESRI', '115852_USAGE','vertical_crs','ESRI','115852','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1229','SIRGAS_Continuously_Operating_Network_DGF01P02',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1229_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1229','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115853','SIRGAS-CON_DGF01P02',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1229',0);
+INSERT INTO "usage" VALUES('ESRI', '115853_USAGE','vertical_crs','ESRI','115853','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1230','SIRGAS_Continuously_Operating_Network_DGF02P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1230_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1230','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115854','SIRGAS-CON_DGF02P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1230',0);
+INSERT INTO "usage" VALUES('ESRI', '115854_USAGE','vertical_crs','ESRI','115854','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1231','SIRGAS_Continuously_Operating_Network_DGF04P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1231_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1231','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115855','SIRGAS-CON_DGF04P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1231',0);
+INSERT INTO "usage" VALUES('ESRI', '115855_USAGE','vertical_crs','ESRI','115855','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1232','SIRGAS_Continuously_Operating_Network_DGF05P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1232_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1232','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115856','SIRGAS-CON_DGF05P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1232',0);
+INSERT INTO "usage" VALUES('ESRI', '115856_USAGE','vertical_crs','ESRI','115856','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1233','SIRGAS_Continuously_Operating_Network_DGF06P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1233_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1233','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115857','SIRGAS-CON_DGF06P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1233',0);
+INSERT INTO "usage" VALUES('ESRI', '115857_USAGE','vertical_crs','ESRI','115857','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1234','SIRGAS_Continuously_Operating_Network_DGF07P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1234_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1234','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115858','SIRGAS-CON_DGF07P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1234',0);
+INSERT INTO "usage" VALUES('ESRI', '115858_USAGE','vertical_crs','ESRI','115858','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1235','SIRGAS_Continuously_Operating_Network_DGF08P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1235_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1235','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115859','SIRGAS-CON_DGF08P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1235',0);
+INSERT INTO "usage" VALUES('ESRI', '115859_USAGE','vertical_crs','ESRI','115859','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1236','SIRGAS_Continuously_Operating_Network_SIR09P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1236_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1236','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115860','SIRGAS-CON_SIR09P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1236',0);
+INSERT INTO "usage" VALUES('ESRI', '115860_USAGE','vertical_crs','ESRI','115860','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1237','SIRGAS_Continuously_Operating_Network_SIR10P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1237_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1237','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115861','SIRGAS-CON_SIR10P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1237',0);
+INSERT INTO "usage" VALUES('ESRI', '115861_USAGE','vertical_crs','ESRI','115861','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1238','SIRGAS_Continuously_Operating_Network_SIR11P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1238_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1238','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115862','SIRGAS-CON_SIR11P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1238',0);
+INSERT INTO "usage" VALUES('ESRI', '115862_USAGE','vertical_crs','ESRI','115862','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1239','SIRGAS_Continuously_Operating_Network_SIR13P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1239_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1239','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115863','SIRGAS-CON_SIR13P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1239',0);
+INSERT INTO "usage" VALUES('ESRI', '115863_USAGE','vertical_crs','ESRI','115863','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1240','SIRGAS_Continuously_Operating_Network_SIR14P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1240_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1240','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115864','SIRGAS-CON_SIR14P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1240',0);
+INSERT INTO "usage" VALUES('ESRI', '115864_USAGE','vertical_crs','ESRI','115864','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1241','SIRGAS_Continuously_Operating_Network_SIR15P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1241_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1241','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115865','SIRGAS-CON_SIR15P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1241',0);
+INSERT INTO "usage" VALUES('ESRI', '115865_USAGE','vertical_crs','ESRI','115865','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1242','SIRGAS_Continuously_Operating_Network_SIR17P01',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1242_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1242','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115866','SIRGAS-CON_SIR17P01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1242',0);
+INSERT INTO "usage" VALUES('ESRI', '115866_USAGE','vertical_crs','ESRI','115866','EPSG','4530','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1244','IGS97',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1244_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1244','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115867','IGS97',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1244',0);
+INSERT INTO "usage" VALUES('ESRI', '115867_USAGE','vertical_crs','ESRI','115867','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1245','IGS00',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1245_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1245','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115868','IGS00',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1245',0);
+INSERT INTO "usage" VALUES('ESRI', '115868_USAGE','vertical_crs','ESRI','115868','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1246','IGb00',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1246_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1246','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115869','IGb00',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1246',0);
+INSERT INTO "usage" VALUES('ESRI', '115869_USAGE','vertical_crs','ESRI','115869','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1247','IGS05',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1247_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1247','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115870','IGS05',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1247',0);
+INSERT INTO "usage" VALUES('ESRI', '115870_USAGE','vertical_crs','ESRI','115870','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1248','IGb08',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1248_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1248','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115871','IGb08',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1248',0);
+INSERT INTO "usage" VALUES('ESRI', '115871_USAGE','vertical_crs','ESRI','115871','EPSG','1262','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1251','Kosovo_Reference_System_2001',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1251_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1251','EPSG','4542','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115872','KOSOVAREF01',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1251',0);
+INSERT INTO "usage" VALUES('ESRI', '115872_USAGE','vertical_crs','ESRI','115872','EPSG','4542','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1204','European_Terrestrial_Reference_Frame_2005',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1204_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1204','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115873','ETRF2005',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1204',0);
+INSERT INTO "usage" VALUES('ESRI', '115873_USAGE','vertical_crs','ESRI','115873','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_datum" VALUES('ESRI','from_geogdatum_EPSG_1206','European_Terrestrial_Reference_Frame_2014',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('ESRI', 'from_geogdatum_EPSG_1206_USAGE','vertical_datum','ESRI','from_geogdatum_EPSG_1206','EPSG','1298','EPSG','1024');
+INSERT INTO "vertical_crs" VALUES('ESRI','115874','ETRF2014',NULL,'ESRI','ELLPS_HEIGHT_METRE','ESRI','from_geogdatum_EPSG_1206',0);
+INSERT INTO "usage" VALUES('ESRI', '115874_USAGE','vertical_crs','ESRI','115874','EPSG','1298','EPSG','1024');
 INSERT INTO alias_name VALUES('compound_crs','EPSG','5318','HVC_ETRS_1989_Faroe_TM_and_FVR09_height','ESRI');
 INSERT INTO alias_name VALUES('compound_crs','EPSG','5498','HVC_NAD_1983_and_NAVD88_height','ESRI');
 INSERT INTO alias_name VALUES('compound_crs','EPSG','5499','HVC_NAD_1983_HARN_and_NAVD88_height','ESRI');

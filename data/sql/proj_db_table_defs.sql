@@ -106,7 +106,7 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on usage violates constraint: extent must not be deprecated when object is not deprecated')
         WHERE EXISTS (
             SELECT 1 FROM extent JOIN object_view o WHERE
-                NOT (o.table_name IN ('projected_crs', 'conversion') AND o.auth_name = 'ESRI') AND
+                NOT (o.table_name IN ('projected_crs', 'vertical_crs', 'vertical_datum', 'conversion') AND o.auth_name = 'ESRI') AND
                 o.table_name = NEW.object_table_name AND
                 o.auth_name = NEW.object_auth_name AND
                 o.code = NEW.object_code AND

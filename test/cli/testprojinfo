@@ -175,6 +175,14 @@ echo 'Testing -k operation EPSG:8457 -o PROJ -q' >> ${OUT}
 $EXE -k operation EPSG:8457 -o PROJ -q >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo 'Testing D_WGS_1984' >> ${OUT}
+$EXE D_WGS_1984 >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -k datum D_WGS_1984' >> ${OUT}
+$EXE -k datum  D_WGS_1984 >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # Testing --searchpaths
 if ! $EXE --searchpaths > testprojinfo_out_searchpaths.txt; then
     echo "--searchpaths failed"

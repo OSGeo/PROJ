@@ -436,6 +436,16 @@ def import_datum():
                     sql = """INSERT INTO alias_name VALUES('geodetic_datum','EPSG','%s','%s','ESRI');""" % (
                         code, escape_literal(esri_name))
                     all_sql.append(sql)
+
+                description = row[idx_description]
+                deprecated = 1 if row[idx_deprecated] == 'yes' else 0
+
+                map_datum_esri_to_parameters[code] = {
+                    'esri_name': esri_name,
+                    'description': description,
+                    'deprecated': deprecated
+                }
+
             else:
                 assert authority.upper() == 'ESRI', row
 
@@ -1187,7 +1197,14 @@ def import_vertcs():
         idx_rlon = header.index('rlon')
         assert idx_rlon >= 0
 
-        datum_written = set()
+        vdatum_written = set()
+
+        sql = """-- vertical coordinate system for ellipsoidal height. Not really ISO 19111 valid..."""
+        all_sql.append(sql)
+        sql = """INSERT INTO "coordinate_system" VALUES('ESRI','ELLPS_HEIGHT_METRE','vertical',1);"""
+        all_sql.append(sql)
+        sql = """INSERT INTO "axis" VALUES('ESRI','ELLPS_HEIGHT_METRE','Ellipsoidal height','h','up','ESRI','ELLPS_HEIGHT_METRE',1,'EPSG','9001');"""
+        all_sql.append(sql)
 
         while True:
             try:
@@ -1221,51 +1238,81 @@ def import_vertcs():
 
                 wkt = row[idx_wkt]
 
-                if ',DATUM[' in wkt:
-                    # FIXME ??
-                    print('Skipping %s. Should be a CompoundCRS' % (esri_name))
-                    sql = """-- Skipping %s. Should be a CompoundCRS""" % (
-                        esri_name)
-                    all_sql.append(sql)
-                    continue
-
                 pos = wkt.find('VDATUM["')
-                assert pos >= 0
-                pos += len('VDATUM["')
-                end_pos = wkt[pos:].find('"')
-                assert end_pos >= 0
-                end_pos += pos
-                datum_name = wkt[pos:end_pos]
+                is_vdatum = True
+                if pos > 0:
+                    pos += len('VDATUM["')
+                    end_pos = wkt[pos:].find('"')
+                    assert end_pos >= 0
+                    end_pos += pos
+                    datum_name = wkt[pos:end_pos]
+                    if datum_name not in map_vdatum_esri_name_to_auth_code:
+                        print('Skipping vertcs %s. Cannot find vertical datum %s' % (
+                            str(row), datum_name))
+                        sql = """-- Skipping vertcs %s. Cannot find vertical datum %s""" % (
+                            esri_name, datum_name)
+                        all_sql.append(sql)
+                        continue
+                    datum_auth_name, datum_code = map_vdatum_esri_name_to_auth_code[datum_name]
+                else:
+                    pos = wkt.find(',DATUM[')
+                    assert pos > 0
+                    pos += len(',DATUM["')
+                    is_vdatum = False
+                    end_pos = wkt[pos:].find('"')
+                    assert end_pos >= 0
+                    end_pos += pos
+                    datum_name = wkt[pos:end_pos]
+                    if datum_name not in map_datum_esri_name_to_auth_code:
+                        print('Skipping vertcs %s. Cannot find geodetic datum %s' % (
+                            str(row), datum_name))
+                        sql = """-- Skipping vertcs %s. Cannot find geodetic datum %s""" % (
+                            esri_name, datum_name)
+                        all_sql.append(sql)
+                        continue
+                    datum_auth_name, datum_code = map_datum_esri_name_to_auth_code[datum_name]
 
                 assert 'PARAMETER["Vertical_Shift",0.0]' in wkt, row
-
-                if datum_name not in map_vdatum_esri_name_to_auth_code:
-                    print('Skipping vertcs %s. it expresses an ellipsoidal height regarding a horizontal datum' % (
-                        str(row)))
-                    sql = """-- Skipping vertcs %s. it expresses an ellipsoidal height regarding a horizontal datum""" % (
-                        esri_name, datum_name)
-                    all_sql.append(sql)
-                    continue
-
-                datum_auth_name, datum_code = map_vdatum_esri_name_to_auth_code[datum_name]
 
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
                 extent_auth_name, extent_code = find_extent(
                     row[idx_areaname], row[idx_slat], row[idx_nlat], row[idx_llon], row[idx_rlon])
 
-                if datum_auth_name == 'ESRI':
-                    if datum_code not in datum_written:
-                        datum_written.add(datum_code)
+                if not is_vdatum:
+                    new_datum_code = 'from_geogdatum_' + datum_auth_name + '_' + datum_code
+                    if new_datum_code not in vdatum_written:
+                        vdatum_written.add(new_datum_code)
 
-                        p = map_vdatum_esri_to_parameters[datum_code]
+                        p = map_datum_esri_to_parameters[datum_code]
+
+                        datum_code = new_datum_code
+
                         sql = """INSERT INTO "vertical_datum" VALUES('ESRI','%s','%s',NULL,NULL,NULL,NULL,%d);""" % (
                             datum_code, p['esri_name'], p['deprecated'])
                         all_sql.append(sql)
                         sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','vertical_datum','ESRI','%s','%s','%s','%s','%s');""" % (datum_code, datum_code, extent_auth_name, extent_code, 'EPSG', '1024')
                         all_sql.append(sql)
+                    else:
+                        datum_code = new_datum_code
+
+                    datum_auth_name = 'ESRI'
+
+                elif datum_auth_name == 'ESRI':
+                    assert datum_code not in vdatum_written
+
+                    vdatum_written.add(datum_code)
+
+                    p = map_vdatum_esri_to_parameters[datum_code]
+                    sql = """INSERT INTO "vertical_datum" VALUES('ESRI','%s','%s',NULL,NULL,NULL,NULL,%d);""" % (
+                        datum_code, p['esri_name'], p['deprecated'])
+                    all_sql.append(sql)
+                    sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','vertical_datum','ESRI','%s','%s','%s','%s','%s');""" % (datum_code, datum_code, extent_auth_name, extent_code, 'EPSG', '1024')
+                    all_sql.append(sql)
+
                 map_vertcs_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
+                cs_auth = 'EPSG'
                 if 'PARAMETER["Direction",1.0]' in wkt and 'UNIT["Meter"' in wkt:
                     cs_code = 6499
                 elif 'PARAMETER["Direction",1.0]' in wkt and 'UNIT["Foot"' in wkt:
@@ -1275,9 +1322,13 @@ def import_vertcs():
                 else:
                     assert False, ('unknown coordinate system for %s' %
                                    str(row))
+                if not is_vdatum:
+                    assert cs_code == 6499
+                    cs_auth = 'ESRI'
+                    cs_code = 'ELLPS_HEIGHT_METRE'
 
-                sql = """INSERT INTO "vertical_crs" VALUES('ESRI','%s','%s',NULL,'EPSG','%s','%s','%s',%d);""" % (
-                    code, esri_name, cs_code, datum_auth_name, datum_code, deprecated)
+                sql = """INSERT INTO "vertical_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s',%d);""" % (
+                    code, esri_name, cs_auth, cs_code, datum_auth_name, datum_code, deprecated)
                 all_sql.append(sql)
                 sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','vertical_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                 all_sql.append(sql)
