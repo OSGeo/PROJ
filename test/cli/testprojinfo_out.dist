@@ -1283,3 +1283,64 @@ Testing -s NZGD2000 -t ITRF2014 -o PROJ -q
   +step +proj=unitconvert +xy_in=rad +xy_out=deg
   +step +proj=axisswap +order=2,1
 
+Testing -s "KKJ / Finland Uniform Coordinate System" -t "ETRS89 / TM35FIN(E,N)" --grid-check none -o PROJ -q
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=tinshift +file=fi_nls_ykj_etrs35fin.json
+
+Testing -s KKJ -t ETRS89 -o PROJ --grid-check none -q
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl
+  +step +proj=tinshift +file=fi_nls_ykj_etrs35fin.json
+  +step +inv +proj=utm +zone=35 +ellps=GRS80
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
+
+Testing -s "KKJ + N43 height" -t "KKJ + N60 height" --grid-check none -o PROJ -q
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl
+  +step +proj=tinshift +file=fi_nls_n43_n60.json
+  +step +inv +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
+
+Testing -s "KKJ + N60 height" -t "KKJ + N2000 height" --grid-check none -o PROJ -q
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl
+  +step +proj=tinshift +file=fi_nls_n60_n2000.json
+  +step +inv +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
+
+Testing -s "KKJ + N43 height" -t "ETRS89 + N2000 height" --grid-check none -o PROJ -q
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=tmerc +lat_0=0 +lon_0=27 +k=1 +x_0=3500000 +y_0=0 +ellps=intl
+  +step +proj=tinshift +file=fi_nls_n43_n60.json
+  +step +proj=tinshift +file=fi_nls_n60_n2000.json
+  +step +proj=tinshift +file=fi_nls_ykj_etrs35fin.json
+  +step +inv +proj=utm +zone=35 +ellps=GRS80
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
+
+Testing -s "KKJ / Finland Uniform Coordinate System + N43 height" -t "ETRS89 / TM35FIN(E,N) + N2000 height" --grid-check none -o PROJ -q
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=tinshift +file=fi_nls_n43_n60.json
+  +step +proj=tinshift +file=fi_nls_n60_n2000.json
+  +step +proj=tinshift +file=fi_nls_ykj_etrs35fin.json
+
+Testing -s "ETRS89 / TM35FIN(E,N) + N2000 height" -t "KKJ / Finland Uniform Coordinate System + N43 height" --grid-check none -o PROJ -q
++proj=pipeline
+  +step +inv +proj=tinshift +file=fi_nls_ykj_etrs35fin.json
+  +step +inv +proj=tinshift +file=fi_nls_n60_n2000.json
+  +step +inv +proj=tinshift +file=fi_nls_n43_n60.json
+  +step +proj=axisswap +order=2,1
+

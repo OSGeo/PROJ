@@ -1088,8 +1088,8 @@ CREATE TABLE grid_alternatives(
     original_grid_name TEXT NOT NULL PRIMARY KEY,   -- original grid name (e.g. Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree.gz). For LOS/LAS format, the .las files
     proj_grid_name TEXT NOT NULL,                   -- PROJ >= 7 grid name (e.g us_nga_egm08_25.tif)
     old_proj_grid_name TEXT,                        -- PROJ < 7 grid name (e.g egm08_25.gtx)
-    proj_grid_format TEXT NOT NULL,                 -- 'GTiff', 'GTX', 'NTv2'
-    proj_method TEXT NOT NULL,                      -- hgridshift, vgridshift or geoid_like
+    proj_grid_format TEXT NOT NULL,                 -- 'GTiff', 'GTX', 'NTv2', JSON
+    proj_method TEXT NOT NULL,                      -- hgridshift, vgridshift, geoid_like, geocentricoffset or tinshift
     inverse_direction BOOLEAN NOT NULL CHECK (inverse_direction IN (0, 1)), -- whether the PROJ grid direction is reversed w.r.t to the authority one (TRUE in that case)
     package_name TEXT,                              -- no longer used. Must be NULL
     url TEXT,                                       -- optional URL where to download the PROJ grid
@@ -1098,13 +1098,14 @@ CREATE TABLE grid_alternatives(
     directory TEXT,                                 -- optional directory where the file might be located
 
     CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name),
-    CONSTRAINT check_grid_alternatives_grid_fromat CHECK (proj_grid_format IN ('GTiff', 'GTX', 'NTv2')),
-    CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift', 'geoid_like', 'geocentricoffset')),
+    CONSTRAINT check_grid_alternatives_grid_fromat CHECK (proj_grid_format IN ('GTiff', 'GTX', 'NTv2', 'JSON')),
+    CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift', 'geoid_like', 'geocentricoffset', 'tinshift')),
     CONSTRAINT check_grid_alternatives_inverse_direction CHECK (NOT(proj_method = 'geoid_like' AND inverse_direction = 1)),
     CONSTRAINT check_grid_alternatives_package_name CHECK (package_name IS NULL),
     CONSTRAINT check_grid_alternatives_direct_download_url CHECK (NOT(direct_download IS NULL AND url IS NOT NULL)),
     CONSTRAINT check_grid_alternatives_open_license_url CHECK (NOT(open_license IS NULL AND url IS NOT NULL)),
-    CONSTRAINT check_grid_alternatives_constraint_cdn CHECK (NOT(url LIKE 'https://cdn.proj.org/%' AND (direct_download = 0 OR open_license = 0 OR url != 'https://cdn.proj.org/' || proj_grid_name)))
+    CONSTRAINT check_grid_alternatives_constraint_cdn CHECK (NOT(url LIKE 'https://cdn.proj.org/%' AND (direct_download = 0 OR open_license = 0 OR url != 'https://cdn.proj.org/' || proj_grid_name))),
+    CONSTRAINT check_grid_alternatives_tinshift CHECK ((proj_grid_format != 'JSON' AND proj_method != 'tinshift') OR (proj_grid_format = 'JSON' AND proj_method = 'tinshift'))
 );
 
 CREATE INDEX idx_grid_alternatives_proj_grid_name ON grid_alternatives(proj_grid_name);
@@ -1113,8 +1114,14 @@ CREATE INDEX idx_grid_alternatives_old_proj_grid_name ON grid_alternatives(old_p
 CREATE TRIGGER grid_alternatives_insert_trigger
 BEFORE INSERT ON grid_alternatives
 FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: original_grid_name must be referenced in grid_transformation.grid_name')
-        WHERE NEW.original_grid_name NOT LIKE 'NOT-YET-IN-GRID-TRANSFORMATION-%' AND NEW.original_grid_name NOT IN (SELECT grid_name FROM grid_transformation);
+    SELECT RAISE(ABORT, 'insert on grid_alternatives violates constraint: original_grid_name must be referenced in grid_transformation.grid_name or in other_transformation.method_name')
+        WHERE NEW.original_grid_name NOT LIKE 'NOT-YET-IN-GRID-TRANSFORMATION-%' AND
+              NOT EXISTS (
+                SELECT 1 FROM grid_transformation WHERE grid_name = NEW.original_grid_name
+                UNION ALL
+                SELECT 1 FROM other_transformation WHERE
+                    method_auth_name = 'PROJ' AND
+                    method_name LIKE '%' || NEW.original_grid_name || '%');
 END;
 
 CREATE TABLE other_transformation(
@@ -1188,6 +1195,9 @@ CREATE TABLE other_transformation(
     param7_uom_auth_name TEXT,
     param7_uom_code TEXT,
 
+    interpolation_crs_auth_name TEXT,
+    interpolation_crs_code TEXT,
+
     operation_version TEXT, -- normally mandatory in OGC Topic 2 but optional here
 
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
@@ -1203,6 +1213,7 @@ CREATE TABLE other_transformation(
     CONSTRAINT fk_other_transformation_param5_uom FOREIGN KEY (param5_uom_auth_name, param5_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_other_transformation_param6_uom FOREIGN KEY (param6_uom_auth_name, param6_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_other_transformation_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT fk_other_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT check_other_transformation_method CHECK (NOT (method_auth_name = 'PROJ' AND method_code NOT IN ('PROJString', 'WKT')))
 );
 

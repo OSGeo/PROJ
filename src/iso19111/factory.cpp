@@ -3348,7 +3348,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                "method_auth_name, method_code, method_name, "
                "source_crs_auth_name, source_crs_code, target_crs_auth_name, "
                "target_crs_code, "
-               "accuracy";
+               "interpolation_crs_auth_name, interpolation_crs_code, "
+               "operation_version, accuracy, deprecated";
         constexpr int N_MAX_PARAMS = 7;
         for (int i = 1; i <= N_MAX_PARAMS; ++i) {
             buffer << ", param" << i << "_auth_name";
@@ -3358,7 +3359,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             buffer << ", param" << i << "_uom_auth_name";
             buffer << ", param" << i << "_uom_code";
         }
-        buffer << ", operation_version, deprecated FROM other_transformation "
+        buffer << " FROM other_transformation "
                   "WHERE auth_name = ? AND code = ?";
 
         auto res = d->runWithCodeParam(buffer.str(), code);
@@ -3379,7 +3380,12 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const auto &source_crs_code = row[idx++];
             const auto &target_crs_auth_name = row[idx++];
             const auto &target_crs_code = row[idx++];
+            const auto &interpolation_crs_auth_name = row[idx++];
+            const auto &interpolation_crs_code = row[idx++];
+            const auto &operation_version = row[idx++];
             const auto &accuracy = row[idx++];
+            const auto &deprecated_str = row[idx++];
+            const bool deprecated = deprecated_str == "1";
 
             const size_t base_param_idx = idx;
             std::vector<operation::OperationParameterNNPtr> parameters;
@@ -3410,10 +3416,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     common::Measure(normalized_value, uom)));
             }
             idx = base_param_idx + 6 * N_MAX_PARAMS;
-
-            const auto &operation_version = row[idx++];
-            const auto &deprecated_str = row[idx++];
-            const bool deprecated = deprecated_str == "1";
+            (void)idx;
             assert(idx == row.size());
 
             auto sourceCRS =
@@ -3422,6 +3425,13 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             auto targetCRS =
                 d->createFactory(target_crs_auth_name)
                     ->createCoordinateReferenceSystem(target_crs_code);
+            auto interpolationCRS =
+                interpolation_crs_auth_name.empty()
+                    ? nullptr
+                    : d->createFactory(interpolation_crs_auth_name)
+                          ->createCoordinateReferenceSystem(
+                              interpolation_crs_code)
+                          .as_nullable();
 
             auto props = d->createPropertiesSearchUsages(
                 type, code, name, deprecated, description);
@@ -3438,8 +3448,10 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
 
             if (method_auth_name == "PROJ") {
                 if (method_code == "PROJString") {
-                    return operation::SingleOperation::createPROJBased(
+                    auto op = operation::SingleOperation::createPROJBased(
                         props, method_name, sourceCRS, targetCRS, accuracies);
+                    op->setCRSs(sourceCRS, targetCRS, interpolationCRS);
+                    return op;
                 } else if (method_code == "WKT") {
                     auto op = util::nn_dynamic_pointer_cast<
                         operation::CoordinateOperation>(
@@ -3448,7 +3460,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                         throw FactoryException("WKT string does not express a "
                                                "coordinate operation");
                     }
-                    op->setCRSs(sourceCRS, targetCRS, nullptr);
+                    op->setCRSs(sourceCRS, targetCRS, interpolationCRS);
                     return NN_NO_CHECK(op);
                 }
             }
@@ -3466,13 +3478,13 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                     method_code_int == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
                     auto op = operation::Conversion::create(props, propsMethod,
                                                             parameters, values);
-                    op->setCRSs(sourceCRS, targetCRS, nullptr);
+                    op->setCRSs(sourceCRS, targetCRS, interpolationCRS);
                     return op;
                 }
             }
             return operation::Transformation::create(
-                props, sourceCRS, targetCRS, nullptr, propsMethod, parameters,
-                values, accuracies);
+                props, sourceCRS, targetCRS, interpolationCRS, propsMethod,
+                parameters, values, accuracies);
 
         } catch (const std::exception &ex) {
             throw buildFactoryException("transformation", code, ex);

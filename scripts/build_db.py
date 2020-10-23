@@ -619,6 +619,7 @@ def fill_other_transformation(proj_db_cursor):
                param_uom_auth_name[5], param_uom_code[5], param_auth_name[6],
                param_code[6], param_name[6], param_value[6],
                param_uom_auth_name[6], param_uom_code[6],
+               None, None, # interpolation CRS
                coord_tfm_version,
                deprecated)
 
@@ -626,7 +627,7 @@ def fill_other_transformation(proj_db_cursor):
         #print(arg)
         proj_db_cursor.execute('INSERT INTO other_transformation VALUES (' +
             '?,?,?, ?, ?,?,?, ?,?, ?,?,  ?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ' +
-            '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?)', arg)
+            '?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?,?, ?,?, ?,?)', arg)
 
 def fill_concatenated_operation(proj_db_cursor):
     proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'concatenated operation'")
