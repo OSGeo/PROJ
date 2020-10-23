@@ -31,6 +31,7 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/grid_transformation.sql \
 		sql/grid_transformation_custom.sql \
 		sql/other_transformation.sql \
+		sql/other_transformation_custom.sql \
 		sql/concatenated_operation.sql \
 		sql/concatenated_operation_step.sql \
 		sql/alias_name.sql \

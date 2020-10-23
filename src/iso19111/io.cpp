@@ -7912,7 +7912,7 @@ std::set<std::string> PROJStringFormatter::getUsedGridNames() const {
     std::set<std::string> res;
     for (const auto &step : d->steps_) {
         for (const auto &param : step.paramValues) {
-            if (param.keyEquals("grids")) {
+            if (param.keyEquals("grids") || param.keyEquals("file")) {
                 const auto gridNames = split(param.value, ",");
                 for (const auto &gridName : gridNames) {
                     res.insert(gridName);

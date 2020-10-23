@@ -236,6 +236,41 @@ echo 'Testing -s NZGD2000 -t ITRF2014 -o PROJ -q' >> ${OUT}
 $EXE -s NZGD2000 -t ITRF2014 -o PROJ -q >>${OUT} 2>&1
 echo "" >>${OUT}
 
+######################
+# Finland TINs
+######################
+
+echo 'Testing -s "KKJ / Finland Uniform Coordinate System" -t "ETRS89 / TM35FIN(E,N)" --grid-check none -o PROJ -q' >> ${OUT}
+$EXE -s "KKJ / Finland Uniform Coordinate System" -t "ETRS89 / TM35FIN(E,N)" --grid-check none -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s KKJ -t ETRS89 -o PROJ --grid-check none -q' >> ${OUT}
+$EXE -s KKJ -t ETRS89 -o PROJ --grid-check none -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s "KKJ + N43 height" -t "KKJ + N60 height" --grid-check none -o PROJ -q' >> ${OUT}
+$EXE -s "KKJ + N43 height" -t "KKJ + N60 height" --grid-check none -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo 'Testing -s "KKJ + N60 height" -t "KKJ + N2000 height" --grid-check none -o PROJ -q' >> ${OUT}
+$EXE -s "KKJ + N60 height" -t "KKJ + N2000 height" --grid-check none -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+# Advanced !
+echo 'Testing -s "KKJ + N43 height" -t "ETRS89 + N2000 height" --grid-check none -o PROJ -q' >> ${OUT}
+$EXE -s "KKJ + N43 height" -t "ETRS89 + N2000 height" --grid-check none -o PROJ -q >>${OUT} 2>&1
+echo "" >>${OUT}
+
+# Advanced !
+echo 'Testing -s "KKJ / Finland Uniform Coordinate System + N43 height" -t "ETRS89 / TM35FIN(E,N) + N2000 height" --grid-check none -o PROJ -q' >> ${OUT}
+$EXE -s "KKJ / Finland Uniform Coordinate System + N43 height" -t "ETRS89 / TM35FIN(E,N) + N2000 height" --grid-check none -o PROJ -q  >>${OUT} 2>&1
+echo "" >>${OUT}
+
+# Advanced !
+echo 'Testing -s "ETRS89 / TM35FIN(E,N) + N2000 height" -t "KKJ / Finland Uniform Coordinate System + N43 height" --grid-check none -o PROJ -q' >> ${OUT}
+$EXE -s "ETRS89 / TM35FIN(E,N) + N2000 height" -t "KKJ / Finland Uniform Coordinate System + N43 height" --grid-check none -o PROJ -q  >>${OUT} 2>&1
+echo "" >>${OUT}
+
 
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"

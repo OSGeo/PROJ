@@ -1753,11 +1753,12 @@ static SingleOperationNNPtr createPROJBased(
     const util::PropertyMap &properties,
     const io::IPROJStringExportableNNPtr &projExportable,
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    const crs::CRSPtr &interpolationCRS,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies,
     bool hasBallparkTransformation) {
     return util::nn_static_pointer_cast<SingleOperation>(
         PROJBasedOperation::create(properties, projExportable, false, sourceCRS,
-                                   targetCRS, accuracies,
+                                   targetCRS, interpolationCRS, accuracies,
                                    hasBallparkTransformation));
 }
 //! @endcond
@@ -10209,9 +10210,31 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
             "ConcatenatedOperation must have at least 2 operations");
     }
     crs::CRSPtr lastTargetCRS;
+
+    crs::CRSPtr interpolationCRS;
+    bool interpolationCRSValid = true;
     for (size_t i = 0; i < operationsIn.size(); i++) {
         auto l_sourceCRS = operationsIn[i]->sourceCRS();
         auto l_targetCRS = operationsIn[i]->targetCRS();
+
+        if (interpolationCRSValid) {
+            auto subOpInterpCRS = operationsIn[i]->interpolationCRS();
+            if (interpolationCRS == nullptr)
+                interpolationCRS = subOpInterpCRS;
+            else if ((subOpInterpCRS == nullptr &&
+                      interpolationCRS != nullptr) ||
+                     (subOpInterpCRS != nullptr &&
+                      interpolationCRS == nullptr) ||
+                     (subOpInterpCRS != nullptr &&
+                      interpolationCRS != nullptr &&
+                      !(subOpInterpCRS->isEquivalentTo(
+                          interpolationCRS.get(),
+                          util::IComparable::Criterion::EQUIVALENT)))) {
+                interpolationCRS = nullptr;
+                interpolationCRSValid = false;
+            }
+        }
+
         if (l_sourceCRS == nullptr || l_targetCRS == nullptr) {
             throw InvalidOperation("At least one of the operation lacks a "
                                    "source and/or target CRS");
@@ -10249,7 +10272,8 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
     op->assignSelf(op);
     op->setProperties(properties);
     op->setCRSs(NN_NO_CHECK(operationsIn[0]->sourceCRS()),
-                NN_NO_CHECK(operationsIn.back()->targetCRS()), nullptr);
+                NN_NO_CHECK(operationsIn.back()->targetCRS()),
+                interpolationCRS);
     op->setAccuracies(accuracies);
 #ifdef DEBUG_CONCATENATED_OPERATION
     {
@@ -10361,6 +10385,15 @@ void ConcatenatedOperation::fixStepsDirection(
             } else if (i >= 1) {
                 l_sourceCRS = operationsInOut[i - 1]->targetCRS();
                 if (l_sourceCRS) {
+                    derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
+                        l_sourceCRS.get());
+                    if (conv->isEquivalentTo(
+                            derivedCRS->derivingConversion().get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        op->setCRSs(concatOpTargetCRS, NN_NO_CHECK(l_sourceCRS),
+                                    nullptr);
+                        op = op->inverse();
+                    }
                     op->setCRSs(NN_NO_CHECK(l_sourceCRS), concatOpTargetCRS,
                                 nullptr);
                 }
@@ -12581,7 +12614,8 @@ createGeodToGeodPROJBased(const crs::CRSNNPtr &geodSrc,
     auto properties = util::PropertyMap().set(
         common::IdentifiedObject::NAME_KEY,
         buildTransfName(geodSrc->nameStr(), geodDst->nameStr()));
-    return createPROJBased(properties, exportable, geodSrc, geodDst, {}, false);
+    return createPROJBased(properties, exportable, geodSrc, geodDst, nullptr,
+                           {}, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -12612,7 +12646,7 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
                            NN_NO_CHECK(extent));
         }
         return createPROJBased(
-            properties, exportable, sourceCRS, targetCRS,
+            properties, exportable, sourceCRS, targetCRS, nullptr,
             verticalTransform->coordinateOperationAccuracies(),
             verticalTransform->hasBallparkTransformation());
     } else {
@@ -12643,7 +12677,7 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
         }
 
         return createPROJBased(
-            properties, exportable, sourceCRS, targetCRS, accuracies,
+            properties, exportable, sourceCRS, targetCRS, nullptr, accuracies,
             horizTransform->hasBallparkTransformation() ||
                 verticalTransform->hasBallparkTransformation());
     }
@@ -12703,7 +12737,7 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
     }
 
     return createPROJBased(properties, exportable, sourceCRS, targetCRS,
-                           accuracies, hasBallparkTransformation);
+                           nullptr, accuracies, hasBallparkTransformation);
 }
 
 //! @endcond
@@ -15303,19 +15337,14 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
 
     for (const auto &verticalTransform : verticalTransforms) {
         auto interpolationGeogCRS = NN_NO_CHECK(srcGeog);
-        auto transformationVerticalTransform =
-            dynamic_cast<const Transformation *>(verticalTransform.get());
-        if (transformationVerticalTransform) {
-            auto interpTransformCRS =
-                transformationVerticalTransform->interpolationCRS();
-            if (interpTransformCRS) {
-                auto nn_interpTransformCRS = NN_NO_CHECK(interpTransformCRS);
-                if (dynamic_cast<const crs::GeographicCRS *>(
-                        nn_interpTransformCRS.get())) {
-                    interpolationGeogCRS = NN_NO_CHECK(
-                        util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
-                            nn_interpTransformCRS));
-                }
+        auto interpTransformCRS = verticalTransform->interpolationCRS();
+        if (interpTransformCRS) {
+            auto nn_interpTransformCRS = NN_NO_CHECK(interpTransformCRS);
+            if (dynamic_cast<const crs::GeographicCRS *>(
+                    nn_interpTransformCRS.get())) {
+                interpolationGeogCRS = NN_NO_CHECK(
+                    util::nn_dynamic_pointer_cast<crs::GeographicCRS>(
+                        nn_interpTransformCRS));
             }
         } else {
             auto compSrc0BoundCrs =
@@ -15756,6 +15785,7 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     const util::PropertyMap &properties,
     const io::IPROJStringExportableNNPtr &projExportable, bool inverse,
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    const crs::CRSPtr &interpolationCRS,
     const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies,
     bool hasBallparkTransformation) {
 
@@ -15777,7 +15807,7 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
     auto op = PROJBasedOperation::nn_make_shared<PROJBasedOperation>(method);
     op->assignSelf(op);
     op->projString_ = projString;
-    op->setCRSs(sourceCRS, targetCRS, nullptr);
+    op->setCRSs(sourceCRS, targetCRS, interpolationCRS);
     op->setProperties(
         addDefaultNameIfNeeded(properties, "PROJ-based coordinate operation"));
     op->setAccuracies(accuracies);
@@ -15791,13 +15821,14 @@ PROJBasedOperationNNPtr PROJBasedOperation::create(
 
 CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
 
-    if (projStringExportable_) {
+    if (projStringExportable_ && sourceCRS() && targetCRS()) {
         return util::nn_static_pointer_cast<CoordinateOperation>(
             PROJBasedOperation::create(
                 createPropertiesForInverse(this, false, false),
                 NN_NO_CHECK(projStringExportable_), !inverse_,
                 NN_NO_CHECK(targetCRS()), NN_NO_CHECK(sourceCRS()),
-                coordinateOperationAccuracies(), hasBallparkTransformation()));
+                interpolationCRS(), coordinateOperationAccuracies(),
+                hasBallparkTransformation()));
     }
 
     auto formatter = io::PROJStringFormatter::create();
@@ -15813,6 +15844,10 @@ CoordinateOperationNNPtr PROJBasedOperation::inverse() const {
     auto op = PROJBasedOperation::create(
         createPropertiesForInverse(this, false, false), formatter->toString(),
         targetCRS(), sourceCRS(), coordinateOperationAccuracies());
+    if (sourceCRS() && targetCRS()) {
+        op->setCRSs(NN_NO_CHECK(targetCRS()), NN_NO_CHECK(sourceCRS()),
+                    interpolationCRS());
+    }
     op->setHasBallparkTransformation(hasBallparkTransformation());
     return util::nn_static_pointer_cast<CoordinateOperation>(op);
 }
