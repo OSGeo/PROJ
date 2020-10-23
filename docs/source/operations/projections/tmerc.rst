@@ -347,11 +347,11 @@ Forward projection
 
 .. math::
 
-  t = \tan(\phi)
+  t = \tan\phi
 
 .. math::
 
-  \eta = \frac{e^2}{1-e^2}cos^2\phi
+  \eta = \frac{e^2}{1-e^2} \cos^2\phi
 
 .. math::
 
@@ -363,10 +363,10 @@ Forward projection
 .. math::
 
   y &= M(\phi) \\
-    &+ \frac{k_0 \lambda^2 \sin(\phi) \cos \phi}{2!} \\
-    &+ \frac{k_0 \lambda^4 \sin(\phi) \cos^3\phi}{4!}(5-t^2+9\eta^2+4\eta^4) \\
-    &+ \frac{k_0 \lambda^6 \sin(\phi) \cos^5\phi}{6!}(61-58t^2+t^4+270\eta^2-330t^2\eta^2) \\
-    &+ \frac{k_0 \lambda^8 \sin(\phi) \cos^7\phi}{8!}(1385-3111t^2+543t^4-t^6)
+    &+ \frac{k_0 \lambda^2 \sin\phi \cos \phi}{2!} \\
+    &+ \frac{k_0 \lambda^4 \sin\phi \cos^3\phi}{4!}(5-t^2+9\eta^2+4\eta^4) \\
+    &+ \frac{k_0 \lambda^6 \sin\phi \cos^5\phi}{6!}(61-58t^2+t^4+270\eta^2-330t^2\eta^2) \\
+    &+ \frac{k_0 \lambda^8 \sin\phi \cos^7\phi}{8!}(1385-3111t^2+543t^4-t^6)
 
 Inverse projection
 ==================
@@ -389,7 +389,7 @@ Inverse projection
 
 .. math::
 
-  \eta_1 = \frac{e^2}{1-e^2}cos^2\phi_1
+  \eta_1 = \frac{e^2}{1-e^2} \cos^2\phi_1
 
 .. math::
 
