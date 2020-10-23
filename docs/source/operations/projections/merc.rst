@@ -4,12 +4,12 @@
 Mercator
 ********************************************************************************
 
-The Mercator projection is a cylindrical map projection that origins from the 15th
-century. It is widely recognized as the first regularly used map projection.
-It is a conformal projection in which the equator projects to a straight
-line at constant scale.  The projection has the property that a rhumb
-line, a course of constant heading, projects to a straight line.  This
-makes it suitable for navigational purposes.
+The Mercator projection is a cylindrical map projection that origins
+from the 16th century. It is widely recognized as the first regularly
+used map projection.  It is a conformal projection in which the equator
+projects to a straight line at constant scale.  The projection has the
+property that a rhumb line, a course of constant heading, projects to a
+straight line.  This makes it suitable for navigational purposes.
 
 
 +---------------------+----------------------------------------------------------+
