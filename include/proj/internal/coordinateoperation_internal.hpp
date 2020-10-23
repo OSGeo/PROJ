@@ -275,6 +275,7 @@ class PROJBasedOperation : public SingleOperation {
     create(const util::PropertyMap &properties,
            const io::IPROJStringExportableNNPtr &projExportable, bool inverse,
            const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+           const crs::CRSPtr &interpolationCRS,
            const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies,
            bool hasRoughTransformation);
 
