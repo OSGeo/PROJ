@@ -3556,6 +3556,12 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                             } else {
                                 totalAcc += acc;
                             }
+                        } else if (dynamic_cast<const operation::Conversion *>(
+                                       op.get())) {
+                            // A conversion is perfectly accurate.
+                            if (totalAcc < 0) {
+                                totalAcc = 0;
+                            }
                         } else {
                             totalAcc = -1;
                             break;
