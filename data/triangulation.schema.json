@@ -178,6 +178,10 @@
             "bbox"
           ]
         },
+        "name" : {
+          "type": "string",
+          "description": "Name of the extent (e.g. \"Finland - mainland south of 66°N\")"
+        },
         "parameters": {
           "type": "object",
           "properties": {
