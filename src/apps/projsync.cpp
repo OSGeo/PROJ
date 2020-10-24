@@ -238,7 +238,7 @@ int main(int argc, char *argv[]) {
         endpoint.resize(endpoint.size() - 1);
     }
 
-    if (!quiet) {
+    if (!quiet && !listFiles) {
         std::cout << "Downloading from " << endpoint << " into " << targetDir
                   << std::endl;
     }
@@ -342,12 +342,6 @@ int main(int argc, char *argv[]) {
                 if (j_file_size.type() == json::value_t::number_unsigned) {
                     file_size = j_file_size.get<unsigned long long>();
                 }
-            }
-
-            if (listFiles) {
-                std::cout << name << "," << area_of_use << "," << source_id
-                          << "," << file_size << std::endl;
-                continue;
             }
 
             const bool matchSourceId =
@@ -479,7 +473,14 @@ int main(int argc, char *argv[]) {
                 } while (false);
             }
 
-            if (matchFile & matchSourceId && matchAreaOfUse && matchBbox) {
+            if (matchFile && matchSourceId && matchAreaOfUse && matchBbox) {
+
+                if (listFiles) {
+                    std::cout << name << "," << area_of_use << "," << source_id
+                              << "," << file_size << std::endl;
+                    continue;
+                }
+
                 const std::string resource_url(endpoint + '/' + name);
                 if (proj_is_download_needed(ctx, resource_url.c_str(), false)) {
                     total_size_to_download += file_size;
@@ -493,7 +494,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        if (!quiet && total_size_to_download > 0) {
+        if (!quiet && !listFiles && total_size_to_download > 0) {
             if (total_size_to_download > 1024 * 1024)
                 std::cout << "Total size to download: "
                           << total_size_to_download / (1024 * 1024) << " MB"
