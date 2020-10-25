@@ -1032,7 +1032,7 @@ PJ_OBJ_LIST *proj_create_from_name(PJ_CONTEXT *ctx, const char *auth_name,
                                    size_t limitResultCount,
                                    const char *const *options) {
     SANITIZE_CTX(ctx);
-    if (!searchedName || (types != nullptr && typesCount <= 0) ||
+    if (!searchedName || (types != nullptr && typesCount == 0) ||
         (types == nullptr && typesCount > 0)) {
         proj_log_error(ctx, __FUNCTION__, "invalid input");
         return nullptr;
@@ -7871,6 +7871,7 @@ proj_create_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
  * @since 7.1
  */
 int proj_get_suggested_operation(PJ_CONTEXT *ctx, PJ_OBJ_LIST *operations,
+                                 // cppcheck-suppress passedByValue
                                  PJ_DIRECTION direction, PJ_COORD coord) {
     SANITIZE_CTX(ctx);
     auto opList = dynamic_cast<PJ_OPERATION_LIST *>(operations);

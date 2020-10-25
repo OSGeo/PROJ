@@ -10221,15 +10221,10 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
             auto subOpInterpCRS = operationsIn[i]->interpolationCRS();
             if (interpolationCRS == nullptr)
                 interpolationCRS = subOpInterpCRS;
-            else if ((subOpInterpCRS == nullptr &&
-                      interpolationCRS != nullptr) ||
-                     (subOpInterpCRS != nullptr &&
-                      interpolationCRS == nullptr) ||
-                     (subOpInterpCRS != nullptr &&
-                      interpolationCRS != nullptr &&
-                      !(subOpInterpCRS->isEquivalentTo(
-                          interpolationCRS.get(),
-                          util::IComparable::Criterion::EQUIVALENT)))) {
+            else if (subOpInterpCRS == nullptr ||
+                     !(subOpInterpCRS->isEquivalentTo(
+                         interpolationCRS.get(),
+                         util::IComparable::Criterion::EQUIVALENT))) {
                 interpolationCRS = nullptr;
                 interpolationCRSValid = false;
             }
@@ -10604,7 +10599,7 @@ void ConcatenatedOperation::_exportToWKT(io::WKTFormatter *formatter) const {
                          !identifiers().empty());
     formatter->addQuotedString(nameStr());
 
-    if (isWKT2 && formatter->use2019Keywords()) {
+    if (formatter->use2019Keywords()) {
         const auto &version = operationVersion();
         if (version.has_value()) {
             formatter->startNode(io::WKTConstants::VERSION, false);
@@ -14463,7 +14458,7 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                     hubSrcGeog->coordinateSystem()->axisList();
                 const auto &targetAxisList =
                     geogDst->coordinateSystem()->axisList();
-                if (hubAxisList.size() == 3 && hubAxisList.size() == 3 &&
+                if (hubAxisList.size() == 3 && targetAxisList.size() == 3 &&
                     !hubAxisList[2]->_isEquivalentTo(
                         targetAxisList[2].get(),
                         util::IComparable::Criterion::EQUIVALENT)) {

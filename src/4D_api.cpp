@@ -977,9 +977,7 @@ static void reproject_bbox(PJ* pjGeogToCrs,
         maxx = -maxx;
         maxy = -maxy;
 
-        std::vector<double> x, y;
-        x.resize(21 * 4);
-        y.resize(21 * 4);
+        std::vector<double> x(21 * 4), y(21 * 4);
         for( int j = 0; j <= 20; j++ )
         {
             x[j] = west_lon + j * (east_lon - west_lon) / 20;
