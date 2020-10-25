@@ -1003,6 +1003,12 @@ echo "2 49" > tmp.txt
 $EXE EPSG:4326 EPSG:4326 tmp.txt -E >> ${OUT}
 rm tmp.txt
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test Colombia Urban" >> ${OUT}
+$EXE -f %.3f EPSG:4686 EPSG:6247 -E >> ${OUT} <<EOF
+4.8 -74.25
+EOF
+
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"

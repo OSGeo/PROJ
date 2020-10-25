@@ -234,6 +234,9 @@
 
 #define PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION "Pole rotation (GRIB convention)"
 
+#define EPSG_CODE_METHOD_COLOMBIA_URBAN 1052
+#define EPSG_NAME_METHOD_COLOMBIA_URBAN "Colombia Urban"
+
 /* ------------------------------------------------------------------------ */
 
 /* Projection parameters */
@@ -334,6 +337,9 @@
 
 #define EPSG_NAME_PARAMETER_VIEWPOINT_HEIGHT "Viewpoint height"
 #define EPSG_CODE_PARAMETER_VIEWPOINT_HEIGHT 8840
+
+#define EPSG_NAME_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT "Projection plane origin height"
+#define EPSG_CODE_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT 1039
 
 /* ------------------------------------------------------------------------ */
 

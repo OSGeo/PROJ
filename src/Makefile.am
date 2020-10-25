@@ -180,6 +180,7 @@ libproj_la_SOURCES = \
 	projections/natearth2.cpp \
 	projections/calcofi.cpp \
 	projections/eqearth.cpp \
+	projections/col_urban.cpp \
 	\
 	conversions/axisswap.cpp \
 	conversions/cart.cpp \
