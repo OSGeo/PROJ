@@ -687,6 +687,16 @@ config_str = """
         - Scale_Factor: EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
         - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
 
+- IGAC_Plano_Cartesiano:
+    WKT2_name: Colombia Urban
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Longitude_Of_Center: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+        - Latitude_Of_Center: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
+        - Height: EPSG_NAME_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT
+
+
 # Missing/unclear mappings
 
 # Hammer_Aitoff: possibly hammer?
@@ -705,7 +715,6 @@ config_str = """
 # The following methods are not currently possible in PROJ:
 
 # Ney_Modified_Conic
-# IGAC_Plano_Cartesiano
 # Fuller
 # Berghaus_Star
 # Cube

@@ -920,6 +920,19 @@ static const ESRIParamMapping paramsESRI_Transverse_Cylindrical_Equal_Area[] = {
      EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
     {nullptr, nullptr, 0, "0.0", false}};
 
+static const ESRIParamMapping paramsESRI_IGAC_Plano_Cartesiano[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Longitude_Of_Center", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Latitude_Of_Center", EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Height", EPSG_NAME_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT,
+     EPSG_CODE_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
 static const ESRIMethodMapping esriMappings[] = {
     {"Plate_Carree", EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL,
      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL, paramsESRI_Plate_Carree},
@@ -1082,6 +1095,8 @@ static const ESRIMethodMapping esriMappings[] = {
      EPSG_CODE_METHOD_MERCATOR_VARIANT_B, paramsESRI_Mercator_Variant_C},
     {"Transverse_Cylindrical_Equal_Area", "Transverse Cylindrical Equal Area",
      0, paramsESRI_Transverse_Cylindrical_Equal_Area},
+    {"IGAC_Plano_Cartesiano", "Colombia Urban", 0,
+     paramsESRI_IGAC_Plano_Cartesiano},
 };
 
 // ---------------------------------------------------------------------------
