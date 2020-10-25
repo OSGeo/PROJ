@@ -710,7 +710,6 @@ config_str = """
 # Berghaus_Star
 # Cube
 # Robinson_ARC_INFO
-# Local
 # Equidistant_Cylindrical_Auxiliary_Sphere
 # Aspect_Adaptive_Cylindrical
 # Mollweide_Auxiliary_Sphere
