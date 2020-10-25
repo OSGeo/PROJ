@@ -688,7 +688,7 @@ config_str = """
         - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
 
 - IGAC_Plano_Cartesiano:
-    WKT2_name: Colombia Urban
+    WKT2_name: EPSG_NAME_METHOD_COLOMBIA_URBAN
     Params:
         - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING

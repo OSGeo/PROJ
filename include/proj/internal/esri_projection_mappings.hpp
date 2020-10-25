@@ -1095,8 +1095,8 @@ static const ESRIMethodMapping esriMappings[] = {
      EPSG_CODE_METHOD_MERCATOR_VARIANT_B, paramsESRI_Mercator_Variant_C},
     {"Transverse_Cylindrical_Equal_Area", "Transverse Cylindrical Equal Area",
      0, paramsESRI_Transverse_Cylindrical_Equal_Area},
-    {"IGAC_Plano_Cartesiano", "Colombia Urban", 0,
-     paramsESRI_IGAC_Plano_Cartesiano},
+    {"IGAC_Plano_Cartesiano", EPSG_NAME_METHOD_COLOMBIA_URBAN,
+     EPSG_CODE_METHOD_COLOMBIA_URBAN, paramsESRI_IGAC_Plano_Cartesiano},
 };
 
 // ---------------------------------------------------------------------------
