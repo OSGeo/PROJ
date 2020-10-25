@@ -11453,7 +11453,7 @@ struct SortFunction {
         // "Amersfoort to WGS 84 (3)", which is probably a better guess.
 
         // Except for French NTF (Paris) to NTF, where the (1) conversion
-        // should be preferred because in the remarks of (2), it is mentionned
+        // should be preferred because in the remarks of (2), it is mentioned
         // OGP prefers value from IGN Paris (code 1467)...
         if (a_name.find("NTF (Paris) to NTF (1)") != std::string::npos &&
             b_name.find("NTF (Paris) to NTF (2)") != std::string::npos) {

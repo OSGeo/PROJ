@@ -1232,7 +1232,7 @@ bool Evaluator<Grid, GridSet, EvaluatorIface>::inverse(
     constexpr bool forInverseComputation = true;
     for (int i = 0; i < 10; i++) {
 #ifdef DEBUG_DEFMODEL
-        iface.log("Iteration " + std::to_string(i) + ": before foward: x=" +
+        iface.log("Iteration " + std::to_string(i) + ": before forward: x=" +
                   toString(x_out) + ", y=" + toString(y_out));
 #endif
         double x_new;
@@ -1243,7 +1243,7 @@ bool Evaluator<Grid, GridSet, EvaluatorIface>::inverse(
             return false;
         }
 #ifdef DEBUG_DEFMODEL
-        iface.log("After foward: x=" + toString(x_new) + ", y=" +
+        iface.log("After forward: x=" + toString(x_new) + ", y=" +
                   toString(y_new));
 #endif
         const double dx = x_new - x;

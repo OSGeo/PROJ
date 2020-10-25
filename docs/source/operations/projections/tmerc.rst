@@ -122,7 +122,7 @@ to Krüger :cite:`Krueger1912` who gave the series expansions accurate to
 :math:`n^4`, where :math:`n = (a-b)/(a+b)` is the third flattening.
 These series were extended to sixth order by Engsager and Poder in
 :cite:`Poder1998` and :cite:`Engsager2007`.  This gives full
-double-precision accuracy withing 3900 km of the central meridian (about
+double-precision accuracy within 3900 km of the central meridian (about
 57% of the surface of the earth) :cite:`Karney2011tm`.  The error is
 less than 0.1 mm within 7000 km of the central meridian (about 89% of
 the surface of the earth).

@@ -182,7 +182,7 @@ single triangle:
         "authority": {
             "name": "Authority name",
             "url": "http://example.com",
-            "address": "Adress",
+            "address": "Address",
             "email": "test@example.com"
         },
         "links": [

@@ -5703,9 +5703,9 @@ AuthorityFactory::createObjectsFromName(
 //! @cond Doxygen_Suppress
 
 /** \brief Return a list of objects, identifier by their name, with the name
- * on which the match occured.
+ * on which the match occurred.
  *
- * The name on which the match occured might be different from the object name,
+ * The name on which the match occurred might be different from the object name,
  * if the match has been done on an alias name of that object.
  *
  * @param searchedName Searched name. Must be at least 2 character long.

@@ -239,7 +239,7 @@ class Evaluator {
   private:
     std::unique_ptr<TINShiftFile> mFile;
 
-    // Reused between invokations to save memory allocations
+    // Reused between invocations to save memory allocations
     std::vector<unsigned> mTriangleIndices{};
 
     std::unique_ptr<NS_PROJ::QuadTree::QuadTree<unsigned>> mQuadTreeForward{};

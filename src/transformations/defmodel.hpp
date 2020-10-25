@@ -181,7 +181,7 @@ class Component {
     /** Get the spatial model. */
     const SpatialModel &spatialModel() const { return mSpatialModel; }
 
-    /** Generic type for a type functon */
+    /** Generic type for a type function */
     struct TimeFunction {
         std::string type{};
 
@@ -369,13 +369,13 @@ class MasterFile {
      * models. Typically "EPSG:XXXX" */
     const std::string &definitionCRS() const { return mDefinitionCRS; }
 
-    /** Get the nominal reference epoch of the deformation model. Formated
+    /** Get the nominal reference epoch of the deformation model. Formatted
      * as a ISO-8601 date-time. This is not necessarily used to calculate
      * the deformation model - each component defines its own time function. */
     const std::string &referenceEpoch() const { return mReferenceEpoch; }
 
     /** Get the epoch at which the uncertainties of the deformation model
-     * are calculated. Formated as a ISO-8601 date-time. */
+     * are calculated. Formatted as a ISO-8601 date-time. */
     const std::string &uncertaintyReferenceEpoch() const {
         return mUncertaintyReferenceEpoch;
     }

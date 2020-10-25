@@ -223,7 +223,7 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
 
     // Using Q->sinph0 * sinphi + Q->cosph0 * cosphi * coslam == 0 (visibity
     // condition of the forward case) in the forward equations, and a lot of
-    // substition games...
+    // substitution games...
     PJ_XY xy_recentered;
     xy_recentered.x = xy.x;
     xy_recentered.y = (xy.y - Q->y_shift) / Q->y_scale;
