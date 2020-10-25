@@ -218,11 +218,11 @@ class Component {
     };
 
     struct PiecewiseTimeFunction : public TimeFunction {
-        /** One of "zero", "constant", and "linear", defines the behaviour of
+        /** One of "zero", "constant", and "linear", defines the behavior of
          * the function before the first defined epoch */
         std::string beforeFirst{};
 
-        /** One of "zero", "constant", and "linear", defines the behaviour of
+        /** One of "zero", "constant", and "linear", defines the behavior of
          * the function after the last defined epoch */
         std::string afterLast{};
 
