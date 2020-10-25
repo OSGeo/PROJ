@@ -164,6 +164,7 @@ set(SRC_LIBPROJ_PROJECTIONS
   projections/natearth2.cpp
   projections/calcofi.cpp
   projections/eqearth.cpp
+  projections/col_urban.cpp
 )
 
 set(SRC_LIBPROJ_CONVERSIONS
