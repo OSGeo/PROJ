@@ -111,7 +111,7 @@ message(STATUS "Configuring PROJ:")
 ################################################################################
 include(ProjVersion)
 proj_version(MAJOR 7 MINOR 2 PATCH 0)
-set(PROJ_API_VERSION "21")
+set(PROJ_API_VERSION "19")
 set(PROJ_BUILD_VERSION "21.0.2")
 
 ################################################################################
