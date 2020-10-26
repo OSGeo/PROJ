@@ -80,23 +80,29 @@ double pj_sinhpsi2tanphi(projCtx ctx, const double taup, const double e) {
 
   constexpr int numit = 5;
   // min iterations = 1, max iterations = 2; mean = 1.954
-  static const double tol = sqrt(std::numeric_limits<double>::epsilon()) / 10;
-  static const double tmax = 2 / sqrt(std::numeric_limits<double>::epsilon());
-  double
+  static const double
+    rooteps = sqrt(std::numeric_limits<double>::epsilon()),
+    tol = rooteps / 10,        // the convergence criterion for Newton's method
+    tmax = 2 / rooteps;        // the large arg limit is exact for tau > tmax
+  const double
     e2m = 1 - e * e,
-    tau = fabs(taup) > 70 ? taup * exp(e * atanh(e)) : taup / e2m,
     stol = tol * std::max(1.0, fabs(taup));
-  if (!(fabs(tau) < tmax)) return tau; // handles +/-inf and nan and e = 1
+  // The initial guess.  70 corresponds to chi = 89.18 deg (see above)
+  double tau = fabs(taup) > 70 ? taup * exp(e * atanh(e)) : taup / e2m;
+  if (!(fabs(tau) < tmax))      // handles +/-inf and nan and e = 1
+    return tau;
+  // If we need to deal with e > 1, then we could include:
   // if (e2m < 0) return std::numeric_limits<double>::quiet_NaN();
   int i = numit;
   for (; i; --i) {
-    double tau1 = sqrt(1 + tau * tau),
+    double
+      tau1 = sqrt(1 + tau * tau),
       sig = sinh( e * atanh(e * tau / tau1) ),
       taupa = sqrt(1 + sig * sig) * tau - sig * tau1,
-      dtau = (taup - taupa) * (1 + e2m * tau * tau) /
-      ( e2m * tau1 * sqrt(1 + taupa * taupa) );
+      dtau = ( (taup - taupa) * (1 + e2m * (tau * tau)) /
+               (e2m * tau1 * sqrt(1 + taupa * taupa)) );
     tau += dtau;
-    if (!(fabs(dtau) >= stol))
+    if (!(fabs(dtau) >= stol))  // backwards test to allow nans to succeed.
       break;
   }
   if (i == 0)
