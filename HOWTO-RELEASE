@@ -52,7 +52,7 @@ Update the following files with the new ABI version number:
 
     - `src/Makefile.am`     Update -version-info
     - `CMakeLists.txt`:     Update PROJ_BUILD_VERSION (cur:rev:age) and
-                            PROJ_API_VERSION (current)
+                            PROJ_API_VERSION (current-age)
 
 *Commit the changes to master.*
 
