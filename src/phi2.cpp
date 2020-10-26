@@ -7,9 +7,6 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-static const double TOL = 1.0e-10;
-static const int N_ITER = 15;
-
 double pj_sinhpsi2tanphi(projCtx ctx, const double taup, const double e) {
   /****************************************************************************
   * Convert tau' = sinh(psi) = tan(chi) to tau = tan(phi).  The code is taken
@@ -97,7 +94,7 @@ double pj_sinhpsi2tanphi(projCtx ctx, const double taup, const double e) {
       sig = sinh( e * atanh(e * tau / tau1) ),
       taupa = sqrt(1 + sig * sig) * tau - sig * tau1,
       dtau = (taup - taupa) * (1 + e2m * tau * tau) /
-      ( e2m * sqrt(1 + tau * tau) * sqrt(1 + taupa * taupa) );
+      ( e2m * tau1 * sqrt(1 + taupa * taupa) );
     tau += dtau;
     if (!(fabs(dtau) >= stol))
       break;
