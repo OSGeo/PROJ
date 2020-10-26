@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <limits>
+#include <algorithm>
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -82,8 +83,8 @@ double pj_sinhpsi2tanphi(projCtx ctx, const double taup, const double e) {
 
   constexpr int numit = 5;
   // min iterations = 1, max iterations = 2; mean = 1.954
-  constexpr double tol = sqrt(std::numeric_limits<double>::epsilon()) / 10;
-  constexpr double tmax = 2 / sqrt(std::numeric_limits<double>::epsilon());
+  static const double tol = sqrt(std::numeric_limits<double>::epsilon()) / 10;
+  static const double tmax = 2 / sqrt(std::numeric_limits<double>::epsilon());
   double
     e2m = 1 - e * e,
     tau = fabs(taup) > 70 ? taup * exp(e * atanh(e)) : taup / e2m,
