@@ -158,7 +158,35 @@ Inverse projection
     \lambda = \frac{x}{k_0 a}; \quad \psi = \frac{y}{k_0 a}
 
 The latitude :math:`\phi` is found by inverting the equation for
-:math:`\psi` iteratively.
+:math:`\psi`.  This follows the method given by :cite:`Karney2011tm`.
+Start by introducing the conformal latitude
+
+.. math::
+   \chi = \tan^{-1}\sinh\psi
+
+The tangents of the latitudes :math:`\tau = \tan\phi` and :math:`\tau' =
+\tan\chi = \sinh\psi` are related by
+
+.. math::
+   \tau' = \tau \sqrt{1 + \sigma^2} - \sigma \sqrt{1 + \tau^2}
+
+where
+
+.. math::
+   \sigma = \sinh\bigl(e \tanh^{-1}(e \tau/\sqrt{1 + \tau^2}) \bigr)
+
+This is obtained by taking the :math:`\sinh` of the equation for
+:math:`\psi` and using the multiple argument formula.  The equation for
+:math:`\tau'` can be solved to give :math:`\tau` using Newton's method
+using :math:`\tau = \tau'/(1 - e^2)` as an initial guess and with the
+needed derivative given by
+
+..math::
+    \frac{d\tau'}{d\tau} = \frac{1 - e^2}{1 + (1 - e^2)\tau^2}
+    \sqrt{1 + \tau'^2} \sqrt{1 + \tau^2}
+
+This converges after no more than 2 iterations.  Finally set
+:math:`\phi=\tan^{-1}\tau`.
 
 Further reading
 ###############
