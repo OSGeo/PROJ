@@ -21,7 +21,7 @@ double pj_tsfn(double phi, double sinphi, double e) {
     // exp(-asinh(tan(phi))) = 1 / (tan(phi) + sec(phi))
     //                       = cos(phi) / (1 + sin(phi)) good for phi > 0
     //                       = (1 - sin(phi)) / cos(phi) good for phi < 0
-     return exp(e * atanh(e * sinphi)) *
+    return exp(e * atanh(e * sinphi)) *
       ( sinphi > 0 ?
         cosphi / (1 + sinphi) :
         (1 - sinphi) / cosphi );

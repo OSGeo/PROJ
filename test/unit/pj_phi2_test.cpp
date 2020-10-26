@@ -43,8 +43,8 @@ TEST(PjPhi2Test, Basic) {
     // (and nan is here reckoned to be sane) are passed to pj_phi2.  Thus the
     // return value with other values of e is "implementation dependent".
 
-    const auto inf = std::numeric_limits<double>::infinity();
-    const auto nan = std::numeric_limits<double>::quiet_NaN();
+    constexpr auto inf = std::numeric_limits<double>::infinity();
+    constexpr auto nan = std::numeric_limits<double>::quiet_NaN();
 
     // Use EXPECT_EQ instead of EXPECT_DOUBLE_EQ.  Strict equality is demanded
     // here.
@@ -58,7 +58,7 @@ TEST(PjPhi2Test, Basic) {
     EXPECT_EQ(  0.0  , pj_phi2(ctx, -1.0, 0.0));
     EXPECT_EQ(+M_PI_2, pj_phi2(ctx, -inf, 0.0));
 
-    double e = 0.2;
+    constexpr double e = 0.2;
     EXPECT_EQ( M_PI_2, pj_phi2(ctx, +0.0, e));
     EXPECT_EQ(  0.0  , pj_phi2(ctx,  1.0, e));
     EXPECT_EQ(-M_PI_2, pj_phi2(ctx,  inf, e));
@@ -83,7 +83,7 @@ TEST(PjPhi2Test, Basic) {
     EXPECT_DOUBLE_EQ(-M_PI/4, pj_phi2(ctx,    sqrt(2.0)+1 , 0.0));
     EXPECT_DOUBLE_EQ(-M_PI/6, pj_phi2(ctx,    sqrt(3.0)   , 0.0));
 
-    // generate with exp(e * atanh(e * sin(phi))) / (tan(phi) + sec(phi))
+    // Generated with exp(e * atanh(e * sin(phi))) / (tan(phi) + sec(phi))
     EXPECT_DOUBLE_EQ( M_PI/3, pj_phi2(ctx, 0.27749174377027023413, e));
     EXPECT_DOUBLE_EQ( M_PI/4, pj_phi2(ctx, 0.42617788119104192995, e));
     EXPECT_DOUBLE_EQ( M_PI/6, pj_phi2(ctx, 0.58905302448626726064, e));
