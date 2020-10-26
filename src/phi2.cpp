@@ -127,7 +127,7 @@ double pj_phi2(projCtx ctx, const double ts0, const double e) {
    * OLD: This routine inverts this relation using the iterative scheme given
    * by Snyder (1987), Eqs. (7-9) - (7-11).
    *
-   * NEW: This routine writes converts t = exp(-psi) to
+   * NEW: This routine converts t = exp(-psi) to
    *
    *   tau' = sinh(psi) = (1/t - t)/2
    *
