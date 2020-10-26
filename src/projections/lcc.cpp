@@ -106,7 +106,7 @@ PJ *PROJECTION(lcc) {
         double ml1, m1;
 
         m1 = pj_msfn(sinphi, cosphi, P->es);
-        if( abs(Q->phi1) == M_HALFPI ) {
+        if( fabs(Q->phi1) == M_HALFPI ) {
             return pj_default_destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
         }
         ml1 = pj_tsfn(Q->phi1, sinphi, P->e);
@@ -117,7 +117,7 @@ PJ *PROJECTION(lcc) {
                 // Not quite, but es is very close to 1...
                 return pj_default_destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
             }
-            if( abs(Q->phi2) == M_HALFPI ) {
+            if( fabs(Q->phi2) == M_HALFPI ) {
               return pj_default_destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
             }
             const double ml2 = pj_tsfn(Q->phi2, sinphi, P->e);
