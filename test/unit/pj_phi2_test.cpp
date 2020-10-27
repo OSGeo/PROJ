@@ -39,15 +39,14 @@ namespace {
 TEST(PjPhi2Test, Basic) {
     projCtx ctx = pj_get_default_ctx();
 
-    // Remove tests with |e| >= 1.  Expectation is that only sane values of e
-    // (and nan is here reckoned to be sane) are passed to pj_phi2.  Thus the
-    // return value with other values of e is "implementation dependent".
+    // Expectation is that only sane values of e (and nan is here reckoned to
+    // be sane) are passed to pj_phi2.  Thus the return value with other values
+    // of e is "implementation dependent".
 
     constexpr auto inf = std::numeric_limits<double>::infinity();
     constexpr auto nan = std::numeric_limits<double>::quiet_NaN();
 
-    // Use EXPECT_EQ instead of EXPECT_DOUBLE_EQ.  Strict equality is demanded
-    // here.
+    // Strict equality is demanded here.
     EXPECT_EQ( M_PI_2, pj_phi2(ctx, +0.0, 0.0));
     EXPECT_EQ(  0.0  , pj_phi2(ctx,  1.0, 0.0));
     EXPECT_EQ(-M_PI_2, pj_phi2(ctx,  inf, 0.0));

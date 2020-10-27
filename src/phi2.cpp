@@ -116,6 +116,7 @@ double pj_phi2(projCtx ctx, const double ts0, const double e) {
    * Determine latitude angle phi-2.
    * Inputs:
    *   ts = exp(-psi) where psi is the isometric latitude (dimensionless)
+   *        this variable is defined in Snyder (1987), Eq. (7-10)
    *   e = eccentricity of the ellipsoid (dimensionless)
    * Output:
    *   phi = geographic latitude (radians)
@@ -123,13 +124,12 @@ double pj_phi2(projCtx ctx, const double ts0, const double e) {
    *   psi = log( tan(pi/4 + phi/2) *
    *              ( (1 - e*sin(phi)) / (1 + e*sin(phi)) )^(e/2) )
    *       = asinh(tan(phi)) - e * atanh(e * sin(phi))
+   *       = asinh(tan(chi))
+   *   chi = conformal latitude
    *
-   * OLD: This routine inverts this relation using the iterative scheme given
-   * by Snyder (1987), Eqs. (7-9) - (7-11).
+   * This routine converts t = exp(-psi) to
    *
-   * NEW: This routine converts t = exp(-psi) to
-   *
-   *   tau' = sinh(psi) = (1/t - t)/2
+   *   tau' = tan(chi) = sinh(psi) = (1/t - t)/2
    *
    * returns atan(sinpsi2tanphi(tau'))
    ***************************************************************************/

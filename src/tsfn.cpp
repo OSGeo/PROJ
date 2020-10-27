@@ -11,10 +11,13 @@ double pj_tsfn(double phi, double sinphi, double e) {
    *   e = eccentricity of the ellipsoid (dimensionless)
    * Output:
    *   ts = exp(-psi) where psi is the isometric latitude (dimensionless)
+   *      = 1 / (tan(chi) + sec(chi))
    * Here isometric latitude is defined by
    *   psi = log( tan(pi/4 + phi/2) *
    *              ( (1 - e*sin(phi)) / (1 + e*sin(phi)) )^(e/2) )
    *       = asinh(tan(phi)) - e * atanh(e * sin(phi))
+   *       = asinh(tan(chi))
+   *   chi = conformal latitude
    ***************************************************************************/
 
     double cosphi = cos(phi);
