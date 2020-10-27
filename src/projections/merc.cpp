@@ -15,7 +15,8 @@ static PJ_XY merc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
     xy.x = P->k0 * lp.lam;
     // Instead of calling tan and sin, call sin and cos which the compiler
     // optimizes to a single call to sincos.
-    double sphi = sin(lp.phi), cphi = cos(lp.phi);
+    double sphi = sin(lp.phi);
+    double cphi = cos(lp.phi);
     xy.y = P->k0 * (asinh(sphi/cphi) - P->e * atanh(P->e * sphi));
     return xy;
 }
