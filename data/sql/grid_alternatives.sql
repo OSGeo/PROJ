@@ -162,7 +162,7 @@ VALUES
 ('ISN2004_ISN2016.gsb','is_lmi_ISN2004_ISN2016.tif','ISN2004_ISN2016.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/is_lmi_ISN2004_ISN2016.tif',1,1,NULL),
 
 -- jp_gsi - Geospatial Information Authority of Japan
-('jp_gsi_gsigeo2011_mainland.tif','jp_gsi_gsigeo2011_mainland.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/jp_gsi_gsigeo2011_mainland.tif',1,1,NULL),
+('jp_gsi_gsigeo2011.tif','jp_gsi_gsigeo2011.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/jp_gsi_gsigeo2011.tif',1,1,NULL),
 
 -- nc_dittt - Gouvernement de Nouvelle Calédonie - DITTT
 ('Ranc08_Circe.mnt','nc_dittt_Ranc08_Circe.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nc_dittt_Ranc08_Circe.tif',1,1,NULL),

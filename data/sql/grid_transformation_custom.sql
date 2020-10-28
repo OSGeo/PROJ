@@ -157,7 +157,7 @@ INSERT INTO "grid_transformation" VALUES(
     'EPSG','6667', -- source CRS (JDG2011)
     'EPSG','6695', -- target CRS (JDG2011 (vertical) height)
     NULL,
-    'EPSG','8666','Geoid (height correction) model file','jp_gsi_gsigeo2011_mainland.tif',
+    'EPSG','8666','Geoid (height correction) model file','jp_gsi_gsigeo2011.tif',
     NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
 
 INSERT INTO "usage" VALUES(
