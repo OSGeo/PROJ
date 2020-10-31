@@ -8836,9 +8836,14 @@ createSimilarPropertiesTransformation(TransformationNNPtr obj) {
     // The domain(s) are unchanged
     addDomains(map, obj.get());
 
-    std::string forwardName = obj->nameStr();
+    const std::string &forwardName = obj->nameStr();
     if (!forwardName.empty()) {
         map.set(common::IdentifiedObject::NAME_KEY, forwardName);
+    }
+
+    const std::string &remarks = obj->remarks();
+    if (!remarks.empty()) {
+        map.set(common::IdentifiedObject::REMARKS_KEY, remarks);
     }
 
     addModifiedIdentifier(map, obj.get(), false, true);
