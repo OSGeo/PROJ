@@ -2050,6 +2050,8 @@ PJ *proj_get_ellipsoid(PJ_CONTEXT *ctx, const PJ *obj) {
 
 /** \brief Get the horizontal datum from a CRS
  *
+ * This function may return a Datum or DatumEnsemble object.
+ *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
  * It should be used by at most one thread at a time.
@@ -7992,6 +7994,9 @@ double proj_coordoperation_get_accuracy(PJ_CONTEXT *ctx,
 
 /** \brief Returns the datum of a SingleCRS.
  *
+ * If that function returns NULL, @see proj_crs_get_datum_ensemble() to
+ * potentially get a DatumEnsemble instead.
+ *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
  * It should be used by at most one thread at a time.
@@ -8022,6 +8027,9 @@ PJ *proj_crs_get_datum(PJ_CONTEXT *ctx, const PJ *crs) {
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the datum ensemble of a SingleCRS.
+ *
+ * If that function returns NULL, @see proj_crs_get_datum() to
+ * potentially get a Datum instead.
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
