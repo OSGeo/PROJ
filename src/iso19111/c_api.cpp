@@ -4438,8 +4438,9 @@ PJ *proj_create_cartesian_2D_cs(PJ_CONTEXT *ctx, PJ_CARTESIAN_CS_2D_TYPE type,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param type Coordinate system type.
- * @param unit_name Unit name.
- * @param unit_conv_factor Unit conversion factor to SI.
+ * @param unit_name Name of the angular units. Or NULL for Degree
+ * @param unit_conv_factor Conversion factor from the angular unit to radian.
+ * Or 0 for Degree if unit_name == NULL. Otherwise should be not NULL
  *
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
@@ -4478,13 +4479,17 @@ PJ *proj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param type Coordinate system type.
- * @param horizontal_angular_unit_name Horizontal angular unit name.
- * @param horizontal_angular_unit_conv_factor Horizontal angular unit conversion
- * factor to SI.
- * @param vertical_linear_unit_name Vertical linear unit name.
+ * @param horizontal_angular_unit_name Name of the angular units. Or NULL for
+ * Degree.
+ * @param horizontal_angular_unit_conv_factor Conversion factor from the angular
+ * unit to radian. Or 0 for Degree if horizontal_angular_unit_name == NULL.
+ * Otherwise should be not NULL
+ * @param vertical_linear_unit_name Vertical linear unit name. Or NULL for
+ * Metre.
  * @param vertical_linear_unit_conv_factor Vertical linear unit conversion
- * factor to SI.
- *
+ * factor to metre. Or 0 for Metre if vertical_linear_unit_name == NULL.
+ * Otherwise should be not NULL
+
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
  * @since 6.3
