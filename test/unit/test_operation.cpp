@@ -8734,6 +8734,14 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                   "+multiplier=1 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
+        EXPECT_EQ(list[0]->remarks(),
+                  "For NAD83(NSRS2007) to NAVD88 height (1) (EPSG:9173): Uses "
+                  "Geoid09 hybrid model. Replaced by 2012 model (CT code 6326)."
+                  "\n"
+                  "For NAD83(NSRS2007) to WGS 84 (1) (EPSG:15931): "
+                  "Approximation at the +/- 1m level assuming that "
+                  "NAD83(NSRS2007) is equivalent to WGS 84 within the accuracy "
+                  "of the transformation.");
     }
 
     // NAD83 + NAVD88 height --> WGS 84
