@@ -12620,6 +12620,55 @@ createGeodToGeodPROJBased(const crs::CRSNNPtr &geodSrc,
 
 // ---------------------------------------------------------------------------
 
+static std::string
+getRemarks(const std::vector<operation::CoordinateOperationNNPtr> &ops) {
+    std::string remarks;
+    for (const auto &op : ops) {
+        const auto &opRemarks = op->remarks();
+        if (!opRemarks.empty()) {
+            if (!remarks.empty()) {
+                remarks += '\n';
+            }
+
+            std::string opName(op->nameStr());
+            if (starts_with(opName, INVERSE_OF)) {
+                opName = opName.substr(INVERSE_OF.size());
+            }
+
+            remarks += "For ";
+            remarks += opName;
+
+            const auto &ids = op->identifiers();
+            if (!ids.empty()) {
+                std::string authority(*ids.front()->codeSpace());
+                if (starts_with(authority, "INVERSE(") &&
+                    authority.back() == ')') {
+                    authority = authority.substr(strlen("INVERSE("),
+                                                 authority.size() - 1 -
+                                                     strlen("INVERSE("));
+                }
+                if (starts_with(authority, "DERIVED_FROM(") &&
+                    authority.back() == ')') {
+                    authority = authority.substr(strlen("DERIVED_FROM("),
+                                                 authority.size() - 1 -
+                                                     strlen("DERIVED_FROM("));
+                }
+
+                remarks += " (";
+                remarks += authority;
+                remarks += ':';
+                remarks += ids.front()->code();
+                remarks += ')';
+            }
+            remarks += ": ";
+            remarks += opRemarks;
+        }
+    }
+    return remarks;
+}
+
+// ---------------------------------------------------------------------------
+
 static CoordinateOperationNNPtr createHorizVerticalPROJBased(
     const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
     const operation::CoordinateOperationNNPtr &horizTransform,
@@ -12645,6 +12694,10 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
             properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
                            NN_NO_CHECK(extent));
         }
+        const auto &remarks = verticalTransform->remarks();
+        if (!remarks.empty()) {
+            properties.set(common::IdentifiedObject::REMARKS_KEY, remarks);
+        }
         return createPROJBased(
             properties, exportable, sourceCRS, targetCRS, nullptr,
             verticalTransform->coordinateOperationAccuracies(),
@@ -12667,6 +12720,11 @@ static CoordinateOperationNNPtr createHorizVerticalPROJBased(
         if (extent) {
             properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
                            NN_NO_CHECK(extent));
+        }
+
+        const auto remarks = getRemarks(ops);
+        if (!remarks.empty()) {
+            properties.set(common::IdentifiedObject::REMARKS_KEY, remarks);
         }
 
         std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
@@ -12727,6 +12785,11 @@ static CoordinateOperationNNPtr createHorizVerticalHorizPROJBased(
     if (extent) {
         properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
                        NN_NO_CHECK(extent));
+    }
+
+    const auto remarks = getRemarks(ops);
+    if (!remarks.empty()) {
+        properties.set(common::IdentifiedObject::REMARKS_KEY, remarks);
     }
 
     std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
