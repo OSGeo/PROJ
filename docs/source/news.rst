@@ -3,6 +3,84 @@
 News
 ###############################################################################
 
+7.2.0 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*November 1st 2020*
+
+Updates
+-------
+
++ **Command line tools**
+
+  * Add multi-line PROJ string export capability, and use it by default in
+    :program:`projinfo` (unless ``--single-line`` is specified) (`#2381 <https://github.com/OSGeo/issues/2381>`_)
+
++ **Coordinate operations**
+
+   * :ref:`col_urban` projection, implementing a EPSG projection method
+     used by a number of projected CRS in Colombia (`#2395 <https://github.com/OSGeo/issues/2395>`_)
+
+   * :ref:`tinshift` for triangulation-based transformations (`#2344 <https://github.com/OSGeo/issues/2344>`_)
+
+   * Added ellipsoidal formulation of :ref:`ortho` (`#2361 <https://github.com/OSGeo/issues/2361>`_)
+
+
++ **Database**
+
+  * Update to EPSG 10.003 and make code base robust to dealing with
+    WKT CRS with DatumEnsemble (`#2370 <https://github.com/OSGeo/issues/2370>`_)
+
+  * Added Finland tinshift operations (`#2392 <https://github.com/OSGeo/issues/2392>`_)
+
+  * Added transformation from JGD2011 Geographic 3D to JGD2011
+    height using GSIGEO2011 (`#2393 <https://github.com/OSGeo/issues/2393>`_)
+
+  * Improve CompoundCRS identification and name morphing in VerticalCRS
+    with ESRI WKT1 (`#2386 <https://github.com/OSGeo/issues/2386>`_)
+
+  * Added OGC:CRS27 and OGC:CRS83 CRS entries for NAD27 and NAD83
+    in longitude, latitude order (`#2350 <https://github.com/OSGeo/issues/2350>`_)
+
++ **API**
+
+  * Added temporal, engineering, and parametric datum :c:type:`PJ_TYPE` enumerations (`#2274 <https://github.com/OSGeo/issues/2274>`_)
+
+  * Various improvements to context handling (#2329, #2331)
+
+  * :c:func:`proj_create_vertical_crs_ex()`: add a ``ACCURACY`` option to provide
+    an explicit accuracy, or derive it from the grid name if it is
+    known (`#2342 <https://github.com/OSGeo/issues/2342>`_)
+
+  * :c:func:`proj_crs_create_bound_crs_to_WGS84()`: make it work on
+    verticalCRS/compoundCRS such as EPSG:4326+5773 and
+    EPSG:4326+3855 (`#2365 <https://github.com/OSGeo/issues/2365>`_)
+
+  * :cpp:func:`promoteTo3D()`: add a remark with the original CRS identifier (`#2369 <https://github.com/OSGeo/issues/2369>`_)
+
+  * Added :c:func:`proj_context_clone` (`#2383 <https://github.com/OSGeo/issues/2383>`_)
+
+
+Bug fixes
+---------
+
+* Avoid core dumps when copying contexts in certain scenarios (`#2324 <https://github.com/OSGeo/issues/2324>`_)
+
+* :c:func:`proj_trans()`: reset errno before attemptying a retry with a new
+  coordinate operation (`#2353 <https://github.com/OSGeo/issues/2353>`_)
+
+* PROJJSON schema corrected to allow prime meridians values with
+  explicitly stating a unit (degrees assumed) (`#2354 <https://github.com/OSGeo/issues/2354>`_)
+
+* Adjust :cpp:func:`createBoundCRSToWGS84IfPossible()` and operation filtering
+  (for POSGAR 2007 to WGS84 issues) (`#2357 <https://github.com/OSGeo/issues/2357>`_)
+
+* :cpp:func:`createOperations()`: several fixes affecting NAD83 -> NAD83(2011) (`#2364 <https://github.com/OSGeo/issues/2364>`_)
+
+* WKT2:2019 import/export: handle DATUM (at top level object) with PRIMEM
+
+* WKT1_ESRI: fix import and export of CompoundCRS (`#2389 <https://github.com/OSGeo/issues/2389>`_)
+
+
 7.1.1 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *September 1st 2020*
