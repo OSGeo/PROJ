@@ -43,7 +43,6 @@
 // clang-format off
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_api.h"
 // clang-format on
 
 #include "proj_json_streaming_writer.hpp"
