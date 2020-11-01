@@ -27,7 +27,7 @@ pj_err_list[] = {
     "invalid x or y",                                                  /* -15 */
     "improperly formed DMS value",                                     /* -16 */
     "non-convergent inverse meridional dist",                          /* -17 */
-    "non-convergent inverse phi2",                                     /* -18 */
+    "non-convergent sinh(psi) to tan(phi)",                            /* -18 */
     "acos/asin: |arg| >1.+1e-14",                                      /* -19 */
     "tolerance condition error",                                       /* -20 */
     "conic lat_1 = -lat_2",                                            /* -21 */

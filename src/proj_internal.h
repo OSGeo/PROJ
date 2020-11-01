@@ -626,7 +626,7 @@ struct FACTORS {
 #define PJD_ERR_INVALID_X_OR_Y          -15
 #define PJD_ERR_WRONG_FORMAT_DMS_VALUE  -16
 #define PJD_ERR_NON_CONV_INV_MERI_DIST  -17
-#define PJD_ERR_NON_CON_INV_PHI2        -18
+#define PJD_ERR_NON_CONV_SINHPSI2TANPHI -18
 #define PJD_ERR_ACOS_ASIN_ARG_TOO_LARGE -19
 #define PJD_ERR_TOLERANCE_CONDITION     -20
 #define PJD_ERR_CONIC_LAT_EQUAL         -21
@@ -846,6 +846,7 @@ double  pj_qsfn(double, double, double);
 double  pj_tsfn(double, double, double);
 double  pj_msfn(double, double, double);
 double  PROJ_DLL pj_phi2(projCtx_t *, const double, const double);
+double  pj_sinhpsi2tanphi(projCtx_t *, const double, const double);
 double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double  pj_authlat(double, double *);

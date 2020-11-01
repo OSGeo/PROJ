@@ -1124,7 +1124,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_invalid_x_or_y"           ,  -15},
     {"pjd_err_wrong_format_dms_value"   ,  -16},
     {"pjd_err_non_conv_inv_meri_dist"   ,  -17},
-    {"pjd_err_non_con_inv_phi2"         ,  -18},
+    {"pjd_err_non_conv_sinhpsi2tanphi"  ,  -18},
     {"pjd_err_acos_asin_arg_too_large"  ,  -19},
     {"pjd_err_tolerance_condition"      ,  -20},
     {"pjd_err_conic_lat_equal"          ,  -21},
