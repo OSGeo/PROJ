@@ -2110,6 +2110,10 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
             name = "World Geodetic System 1984";
             authNameFromAlias = Identifier::EPSG;
             codeFromAlias = "6326";
+        } else if (name == "D_ETRS_1989") {
+            name = "European Terrestrial Reference System 1989";
+            authNameFromAlias = Identifier::EPSG;
+            codeFromAlias = "6258";
         } else {
             tableNameForAlias = "geodetic_datum";
         }
@@ -6263,6 +6267,9 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         if (type == "datum") {
             return factory->createDatum(code);
         }
+        if (type == "ensemble") {
+            return factory->createDatumEnsemble(code);
+        }
         if (type == "ellipsoid") {
             return factory->createEllipsoid(code);
         }
@@ -6380,6 +6387,8 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                                   ELLIPSOID,
                                               AuthorityFactory::ObjectType::
                                                   DATUM,
+                                              AuthorityFactory::ObjectType::
+                                                  DATUM_ENSEMBLE,
                                               AuthorityFactory::ObjectType::
                                                   COORDINATE_OPERATION},
                     goOn);

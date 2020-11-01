@@ -675,6 +675,9 @@ PJ *proj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                           codeStr, usePROJAlternativeGridNames != 0)
                       .as_nullable();
             break;
+        case PJ_CATEGORY_DATUM_ENSEMBLE:
+            obj = factory->createDatumEnsemble(codeStr).as_nullable();
+            break;
         }
         return pj_obj_create(ctx, NN_NO_CHECK(obj));
     } catch (const std::exception &e) {
@@ -916,7 +919,7 @@ convertPJObjectTypeToObjectType(PJ_TYPE type, bool &valid) {
         break;
 
     case PJ_TYPE_DATUM_ENSEMBLE:
-        cppType = AuthorityFactory::ObjectType::DATUM;
+        cppType = AuthorityFactory::ObjectType::DATUM_ENSEMBLE;
         break;
 
     case PJ_TYPE_TEMPORAL_DATUM:

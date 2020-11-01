@@ -192,6 +192,13 @@ struct DatabaseContext::Private {
     void cache(const std::string &code,
                const datum::GeodeticReferenceFrameNNPtr &datum);
 
+    datum::DatumEnsemblePtr
+        // cppcheck-suppress functionStatic
+        getDatumEnsembleFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
+    void cache(const std::string &code,
+               const datum::DatumEnsembleNNPtr &datumEnsemble);
+
     datum::EllipsoidPtr
         // cppcheck-suppress functionStatic
         getEllipsoidFromCache(const std::string &code);
@@ -258,6 +265,7 @@ struct DatabaseContext::Private {
     LRUCacheOfObjects cacheCRS_{CACHE_SIZE};
     LRUCacheOfObjects cacheEllipsoid_{CACHE_SIZE};
     LRUCacheOfObjects cacheGeodeticDatum_{CACHE_SIZE};
+    LRUCacheOfObjects cacheDatumEnsemble_{CACHE_SIZE};
     LRUCacheOfObjects cachePrimeMeridian_{CACHE_SIZE};
     LRUCacheOfObjects cacheCS_{CACHE_SIZE};
     LRUCacheOfObjects cacheExtent_{CACHE_SIZE};
@@ -413,6 +421,22 @@ DatabaseContext::Private::getGeodeticDatumFromCache(const std::string &code) {
 void DatabaseContext::Private::cache(
     const std::string &code, const datum::GeodeticReferenceFrameNNPtr &datum) {
     insertIntoCache(cacheGeodeticDatum_, code, datum.as_nullable());
+}
+
+// ---------------------------------------------------------------------------
+
+datum::DatumEnsemblePtr
+DatabaseContext::Private::getDatumEnsembleFromCache(const std::string &code) {
+    util::BaseObjectPtr obj;
+    getFromCache(cacheDatumEnsemble_, code, obj);
+    return std::static_pointer_cast<datum::DatumEnsemble>(obj);
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::cache(
+    const std::string &code, const datum::DatumEnsembleNNPtr &datumEnsemble) {
+    insertIntoCache(cacheDatumEnsemble_, code, datumEnsemble.as_nullable());
 }
 
 // ---------------------------------------------------------------------------
@@ -1060,18 +1084,6 @@ std::string DatabaseContext::getOldProjGridName(const std::string &gridName) {
         return std::string();
     }
     return res.front()[0];
-}
-
-// ---------------------------------------------------------------------------
-
-// FIXME: as we don't support datum ensemble yet, add it from name
-static std::string removeEnsembleSuffix(const std::string &name) {
-    if (name == "World Geodetic System 1984 ensemble") {
-        return "World Geodetic System 1984";
-    } else if (name == "European Terrestrial Reference System 1989 ensemble") {
-        return "European Terrestrial Reference System 1989";
-    }
-    return name;
 }
 
 // ---------------------------------------------------------------------------
@@ -2012,18 +2024,38 @@ AuthorityFactory::createEllipsoid(const std::string &code) const {
 
 datum::GeodeticReferenceFrameNNPtr
 AuthorityFactory::createGeodeticDatum(const std::string &code) const {
+
+    datum::GeodeticReferenceFramePtr datum;
+    datum::DatumEnsemblePtr datumEnsemble;
+    constexpr bool turnEnsembleAsDatum = true;
+    createGeodeticDatumOrEnsemble(code, datum, datumEnsemble,
+                                  turnEnsembleAsDatum);
+    return NN_NO_CHECK(datum);
+}
+
+// ---------------------------------------------------------------------------
+
+void AuthorityFactory::createGeodeticDatumOrEnsemble(
+    const std::string &code, datum::GeodeticReferenceFramePtr &outDatum,
+    datum::DatumEnsemblePtr &outDatumEnsemble, bool turnEnsembleAsDatum) const {
     const auto cacheKey(d->authority() + code);
     {
-        auto datum = d->context()->d->getGeodeticDatumFromCache(cacheKey);
-        if (datum) {
-            return NN_NO_CHECK(datum);
+        outDatumEnsemble = d->context()->d->getDatumEnsembleFromCache(cacheKey);
+        if (outDatumEnsemble) {
+            if (!turnEnsembleAsDatum)
+                return;
+            outDatumEnsemble = nullptr;
+        }
+        outDatum = d->context()->d->getGeodeticDatumFromCache(cacheKey);
+        if (outDatum) {
+            return;
         }
     }
     auto res =
         d->runWithCodeParam("SELECT name, ellipsoid_auth_name, ellipsoid_code, "
                             "prime_meridian_auth_name, prime_meridian_code, "
                             "publication_date, frame_reference_epoch, "
-                            "deprecated FROM geodetic_datum "
+                            "ensemble_accuracy, deprecated FROM geodetic_datum "
                             "WHERE "
                             "auth_name = ? AND code = ?",
                             code);
@@ -2040,29 +2072,63 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
         const auto &prime_meridian_code = row[4];
         const auto &publication_date = row[5];
         const auto &frame_reference_epoch = row[6];
-        const bool deprecated = row[7] == "1";
-        auto ellipsoid = d->createFactory(ellipsoid_auth_name)
-                             ->createEllipsoid(ellipsoid_code);
-        auto pm = d->createFactory(prime_meridian_auth_name)
-                      ->createPrimeMeridian(prime_meridian_code);
-        auto props = d->createPropertiesSearchUsages(
-            "geodetic_datum", code, removeEnsembleSuffix(name), deprecated);
-        auto anchor = util::optional<std::string>();
-        if (!publication_date.empty()) {
-            props.set("PUBLICATION_DATE", publication_date);
+        const auto &ensemble_accuracy = row[7];
+        const bool deprecated = row[8] == "1";
+
+        std::string massagedName = name;
+        if (turnEnsembleAsDatum) {
+            if (name == "World Geodetic System 1984 ensemble") {
+                massagedName = "World Geodetic System 1984";
+            } else if (name ==
+                       "European Terrestrial Reference System 1989 ensemble") {
+                massagedName = "European Terrestrial Reference System 1989";
+            }
         }
-        auto datum =
-            frame_reference_epoch.empty()
-                ? datum::GeodeticReferenceFrame::create(props, ellipsoid,
-                                                        anchor, pm)
-                : util::nn_static_pointer_cast<datum::GeodeticReferenceFrame>(
-                      datum::DynamicGeodeticReferenceFrame::create(
-                          props, ellipsoid, anchor, pm,
-                          common::Measure(c_locale_stod(frame_reference_epoch),
-                                          common::UnitOfMeasure::YEAR),
-                          util::optional<std::string>()));
-        d->context()->d->cache(cacheKey, datum);
-        return datum;
+        auto props = d->createPropertiesSearchUsages("geodetic_datum", code,
+                                                     massagedName, deprecated);
+
+        if (!turnEnsembleAsDatum && !ensemble_accuracy.empty()) {
+            auto resMembers =
+                d->run("SELECT member_auth_name, member_code FROM "
+                       "geodetic_datum_ensemble_member WHERE "
+                       "ensemble_auth_name = ? AND ensemble_code = ? "
+                       "ORDER BY sequence",
+                       {d->authority(), code});
+
+            std::vector<datum::DatumNNPtr> members;
+            for (const auto &memberRow : resMembers) {
+                members.push_back(
+                    d->createFactory(memberRow[0])->createDatum(memberRow[1]));
+            }
+            auto datumEnsemble = datum::DatumEnsemble::create(
+                props, std::move(members),
+                metadata::PositionalAccuracy::create(ensemble_accuracy));
+            d->context()->d->cache(cacheKey, datumEnsemble);
+            outDatumEnsemble = datumEnsemble.as_nullable();
+        } else {
+            auto ellipsoid = d->createFactory(ellipsoid_auth_name)
+                                 ->createEllipsoid(ellipsoid_code);
+            auto pm = d->createFactory(prime_meridian_auth_name)
+                          ->createPrimeMeridian(prime_meridian_code);
+
+            auto anchor = util::optional<std::string>();
+            if (!publication_date.empty()) {
+                props.set("PUBLICATION_DATE", publication_date);
+            }
+            auto datum = frame_reference_epoch.empty()
+                             ? datum::GeodeticReferenceFrame::create(
+                                   props, ellipsoid, anchor, pm)
+                             : util::nn_static_pointer_cast<
+                                   datum::GeodeticReferenceFrame>(
+                                   datum::DynamicGeodeticReferenceFrame::create(
+                                       props, ellipsoid, anchor, pm,
+                                       common::Measure(
+                                           c_locale_stod(frame_reference_epoch),
+                                           common::UnitOfMeasure::YEAR),
+                                       util::optional<std::string>()));
+            d->context()->d->cache(cacheKey, datum);
+            outDatum = datum.as_nullable();
+        }
     } catch (const std::exception &ex) {
         throw buildFactoryException("geodetic reference frame", code, ex);
     }
@@ -2080,9 +2146,23 @@ AuthorityFactory::createGeodeticDatum(const std::string &code) const {
 
 datum::VerticalReferenceFrameNNPtr
 AuthorityFactory::createVerticalDatum(const std::string &code) const {
+    datum::VerticalReferenceFramePtr datum;
+    datum::DatumEnsemblePtr datumEnsemble;
+    constexpr bool turnEnsembleAsDatum = true;
+    createVerticalDatumOrEnsemble(code, datum, datumEnsemble,
+                                  turnEnsembleAsDatum);
+    return NN_NO_CHECK(datum);
+}
+
+// ---------------------------------------------------------------------------
+
+void AuthorityFactory::createVerticalDatumOrEnsemble(
+    const std::string &code, datum::VerticalReferenceFramePtr &outDatum,
+    datum::DatumEnsemblePtr &outDatumEnsemble, bool turnEnsembleAsDatum) const {
     auto res =
         d->runWithCodeParam("SELECT name, publication_date, "
-                            "frame_reference_epoch, deprecated FROM "
+                            "frame_reference_epoch, ensemble_accuracy, "
+                            "deprecated FROM "
                             "vertical_datum WHERE auth_name = ? AND code = ?",
                             code);
     if (res.empty()) {
@@ -2094,24 +2174,49 @@ AuthorityFactory::createVerticalDatum(const std::string &code) const {
         const auto &name = row[0];
         const auto &publication_date = row[1];
         const auto &frame_reference_epoch = row[2];
-        const bool deprecated = row[3] == "1";
+        const auto &ensemble_accuracy = row[3];
+        const bool deprecated = row[4] == "1";
         auto props = d->createPropertiesSearchUsages("vertical_datum", code,
                                                      name, deprecated);
-        if (!publication_date.empty()) {
-            props.set("PUBLICATION_DATE", publication_date);
-        }
-        if (d->authority() == "ESRI" && starts_with(code, "from_geogdatum_")) {
-            props.set("VERT_DATUM_TYPE", "2002");
-        }
-        auto anchor = util::optional<std::string>();
-        if (frame_reference_epoch.empty()) {
-            return datum::VerticalReferenceFrame::create(props, anchor);
+        if (!turnEnsembleAsDatum && !ensemble_accuracy.empty()) {
+            auto resMembers =
+                d->run("SELECT member_auth_name, member_code FROM "
+                       "vertical_datum_ensemble_member WHERE "
+                       "ensemble_auth_name = ? AND ensemble_code = ? "
+                       "ORDER BY sequence",
+                       {d->authority(), code});
+
+            std::vector<datum::DatumNNPtr> members;
+            for (const auto &memberRow : resMembers) {
+                members.push_back(
+                    d->createFactory(memberRow[0])->createDatum(memberRow[1]));
+            }
+            auto datumEnsemble = datum::DatumEnsemble::create(
+                props, std::move(members),
+                metadata::PositionalAccuracy::create(ensemble_accuracy));
+            outDatumEnsemble = datumEnsemble.as_nullable();
         } else {
-            return datum::DynamicVerticalReferenceFrame::create(
-                props, anchor, util::optional<datum::RealizationMethod>(),
-                common::Measure(c_locale_stod(frame_reference_epoch),
-                                common::UnitOfMeasure::YEAR),
-                util::optional<std::string>());
+            if (!publication_date.empty()) {
+                props.set("PUBLICATION_DATE", publication_date);
+            }
+            if (d->authority() == "ESRI" &&
+                starts_with(code, "from_geogdatum_")) {
+                props.set("VERT_DATUM_TYPE", "2002");
+            }
+            auto anchor = util::optional<std::string>();
+            if (frame_reference_epoch.empty()) {
+                outDatum = datum::VerticalReferenceFrame::create(props, anchor)
+                               .as_nullable();
+            } else {
+                outDatum =
+                    datum::DynamicVerticalReferenceFrame::create(
+                        props, anchor,
+                        util::optional<datum::RealizationMethod>(),
+                        common::Measure(c_locale_stod(frame_reference_epoch),
+                                        common::UnitOfMeasure::YEAR),
+                        util::optional<std::string>())
+                        .as_nullable();
+            }
         }
     } catch (const std::exception &ex) {
         throw buildFactoryException("vertical reference frame", code, ex);
@@ -2472,20 +2577,24 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
 
         auto cs =
             d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
-        auto datum =
-            d->createFactory(datum_auth_name)->createGeodeticDatum(datum_code);
+        datum::GeodeticReferenceFramePtr datum;
+        datum::DatumEnsemblePtr datumEnsemble;
+        constexpr bool turnEnsembleAsDatum = false;
+        d->createFactory(datum_auth_name)
+            ->createGeodeticDatumOrEnsemble(datum_code, datum, datumEnsemble,
+                                            turnEnsembleAsDatum);
 
         auto ellipsoidalCS =
             util::nn_dynamic_pointer_cast<cs::EllipsoidalCS>(cs);
         if ((type == GEOG_2D || type == GEOG_3D) && ellipsoidalCS) {
             auto crsRet = crs::GeographicCRS::create(
-                props, datum, NN_NO_CHECK(ellipsoidalCS));
+                props, datum, datumEnsemble, NN_NO_CHECK(ellipsoidalCS));
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
         auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (type == GEOCENTRIC && geocentricCS) {
-            auto crsRet = crs::GeodeticCRS::create(props, datum,
+            auto crsRet = crs::GeodeticCRS::create(props, datum, datumEnsemble,
                                                    NN_NO_CHECK(geocentricCS));
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
@@ -2539,16 +2648,19 @@ AuthorityFactory::createVerticalCRS(const std::string &code) const {
         const bool deprecated = row[5] == "1";
         auto cs =
             d->createFactory(cs_auth_name)->createCoordinateSystem(cs_code);
-        auto datum =
-            d->createFactory(datum_auth_name)->createVerticalDatum(datum_code);
-
+        datum::VerticalReferenceFramePtr datum;
+        datum::DatumEnsemblePtr datumEnsemble;
+        constexpr bool turnEnsembleAsDatum = false;
+        d->createFactory(datum_auth_name)
+            ->createVerticalDatumOrEnsemble(datum_code, datum, datumEnsemble,
+                                            turnEnsembleAsDatum);
         auto props = d->createPropertiesSearchUsages("vertical_crs", code, name,
                                                      deprecated);
 
         auto verticalCS = util::nn_dynamic_pointer_cast<cs::VerticalCS>(cs);
         if (verticalCS) {
-            auto crsRet =
-                crs::VerticalCRS::create(props, datum, NN_NO_CHECK(verticalCS));
+            auto crsRet = crs::VerticalCRS::create(props, datum, datumEnsemble,
+                                                   NN_NO_CHECK(verticalCS));
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
@@ -5340,6 +5452,11 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
     case ObjectType::CONCATENATED_OPERATION:
         sql = "SELECT code FROM concatenated_operation WHERE ";
         break;
+    case ObjectType::DATUM_ENSEMBLE:
+        sql = "SELECT code FROM object_view WHERE table_name IN "
+              "('geodetic_datum', 'vertical_datum') AND "
+              "type = 'ensemble' AND ";
+        break;
     }
 
     sql += "auth_name = ?";
@@ -5617,7 +5734,7 @@ std::string AuthorityFactory::getOfficialNameFromAlias(
                 if (res.empty()) { // shouldn't happen normally
                     return std::string();
                 }
-                return removeEnsembleSuffix(res.front()[0]);
+                return res.front()[0];
             }
         }
         return std::string();
@@ -5667,7 +5784,7 @@ std::string AuthorityFactory::getOfficialNameFromAlias(
         outTableName = row[1];
         outAuthName = row[2];
         outCode = row[3];
-        return removeEnsembleSuffix(row[0]);
+        return row[0];
     }
 }
 
@@ -5849,11 +5966,27 @@ AuthorityFactory::createObjectsFromNameEx(
                     res.emplace_back(
                         TableType("concatenated_operation", std::string()));
                     break;
+                case ObjectType::DATUM_ENSEMBLE:
+                    res.emplace_back(TableType("geodetic_datum", "ensemble"));
+                    res.emplace_back(TableType("vertical_datum", "ensemble"));
+                    break;
                 }
             }
         }
         return res;
     };
+
+    bool datumEnsembleAllowed = false;
+    if (allowedObjectTypes.empty()) {
+        datumEnsembleAllowed = true;
+    } else {
+        for (const auto type : allowedObjectTypes) {
+            if (type == ObjectType::DATUM_ENSEMBLE) {
+                datumEnsembleAllowed = true;
+                break;
+            }
+        }
+    }
 
     const auto listTableNameType = getTableAndTypeConstraints();
     bool first = true;
@@ -5872,6 +6005,8 @@ AuthorityFactory::createObjectsFromNameEx(
         if (!tableNameTypePair.second.empty()) {
             if (tableNameTypePair.second == "frame_reference_epoch") {
                 sql += "AND frame_reference_epoch IS NOT NULL ";
+            } else if (tableNameTypePair.second == "ensemble") {
+                sql += "AND ensemble_accuracy IS NOT NULL ";
             } else {
                 sql += "AND type = '";
                 sql += tableNameTypePair.second;
@@ -5906,6 +6041,8 @@ AuthorityFactory::createObjectsFromNameEx(
         if (!tableNameTypePair.second.empty()) {
             if (tableNameTypePair.second == "frame_reference_epoch") {
                 sql += "AND ov.frame_reference_epoch IS NOT NULL ";
+            } else if (tableNameTypePair.second == "ensemble") {
+                sql += "AND ov.ensemble_accuracy IS NOT NULL ";
             } else {
                 sql += "AND ov.type = '";
                 sql += tableNameTypePair.second;
@@ -6053,7 +6190,7 @@ AuthorityFactory::createObjectsFromNameEx(
                 break;
             }
             auto factory = d->createFactory(auth_name);
-            auto getObject = [&factory](
+            auto getObject = [&factory, datumEnsembleAllowed](
                 const std::string &l_table_name,
                 const std::string &l_code) -> common::IdentifiedObjectNNPtr {
                 if (l_table_name == "prime_meridian") {
@@ -6061,8 +6198,32 @@ AuthorityFactory::createObjectsFromNameEx(
                 } else if (l_table_name == "ellipsoid") {
                     return factory->createEllipsoid(l_code);
                 } else if (l_table_name == "geodetic_datum") {
+                    if (datumEnsembleAllowed) {
+                        datum::GeodeticReferenceFramePtr datum;
+                        datum::DatumEnsemblePtr datumEnsemble;
+                        constexpr bool turnEnsembleAsDatum = false;
+                        factory->createGeodeticDatumOrEnsemble(
+                            l_code, datum, datumEnsemble, turnEnsembleAsDatum);
+                        if (datum) {
+                            return NN_NO_CHECK(datum);
+                        }
+                        assert(datumEnsemble);
+                        return NN_NO_CHECK(datumEnsemble);
+                    }
                     return factory->createGeodeticDatum(l_code);
                 } else if (l_table_name == "vertical_datum") {
+                    if (datumEnsembleAllowed) {
+                        datum::VerticalReferenceFramePtr datum;
+                        datum::DatumEnsemblePtr datumEnsemble;
+                        constexpr bool turnEnsembleAsDatum = false;
+                        factory->createVerticalDatumOrEnsemble(
+                            l_code, datum, datumEnsemble, turnEnsembleAsDatum);
+                        if (datum) {
+                            return NN_NO_CHECK(datum);
+                        }
+                        assert(datumEnsemble);
+                        return NN_NO_CHECK(datumEnsemble);
+                    }
                     return factory->createVerticalDatum(l_code);
                 } else if (l_table_name == "geodetic_crs") {
                     return factory->createGeodeticCRS(l_code);

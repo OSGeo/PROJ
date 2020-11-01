@@ -845,6 +845,13 @@ TEST_F(CApi, proj_create_from_database) {
         EXPECT_EQ(proj_get_type(datum), PJ_TYPE_GEODETIC_REFERENCE_FRAME);
     }
     {
+        auto ensemble = proj_create_from_database(
+            m_ctxt, "EPSG", "6326", PJ_CATEGORY_DATUM_ENSEMBLE, false, nullptr);
+        ASSERT_NE(ensemble, nullptr);
+        ObjectKeeper keeper(ensemble);
+        EXPECT_EQ(proj_get_type(ensemble), PJ_TYPE_DATUM_ENSEMBLE);
+    }
+    {
         // International Terrestrial Reference Frame 2008
         auto datum = proj_create_from_database(
             m_ctxt, "EPSG", "1061", PJ_CATEGORY_DATUM, false, nullptr);
@@ -4841,9 +4848,16 @@ TEST_F(CApi, proj_create_derived_geographic_crs) {
     const char *expected_wkt =
         "GEOGCRS[\"my rotated CRS\",\n"
         "    BASEGEOGCRS[\"WGS 84\",\n"
-        "        DATUM[\"World Geodetic System 1984\",\n"
+        "        ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+        "            MEMBER[\"World Geodetic System 1984 (Transit)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
         "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ENSEMBLEACCURACY[2.0]],\n"
         "        PRIMEM[\"Greenwich\",0,\n"
         "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
         "    DERIVINGCONVERSION[\"Pole rotation (GRIB convention)\",\n"
