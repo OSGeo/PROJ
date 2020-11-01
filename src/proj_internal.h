@@ -33,10 +33,6 @@
 #error "proj_internal.h can only be included from a C++ file"
 #endif
 
-#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#endif
-
 #ifdef _MSC_VER
 #  ifndef _CRT_SECURE_NO_DEPRECATE
 #    define _CRT_SECURE_NO_DEPRECATE

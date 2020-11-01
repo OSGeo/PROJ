@@ -34,7 +34,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #include "proj.h"
 #include "proj_internal.h"
 
