@@ -52,7 +52,7 @@ geodtest_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 20:0:1
+libproj_la_LDFLAGS = -no-undefined -version-info 21:0:2
 libproj_la_LIBADD = @SQLITE3_LIBS@ @TIFF_LIBS@ @CURL_LIBS@
 
 libproj_la_SOURCES = \
@@ -180,6 +180,7 @@ libproj_la_SOURCES = \
 	projections/natearth2.cpp \
 	projections/calcofi.cpp \
 	projections/eqearth.cpp \
+	projections/col_urban.cpp \
 	\
 	conversions/axisswap.cpp \
 	conversions/cart.cpp \
@@ -201,6 +202,10 @@ libproj_la_SOURCES = \
 	transformations/defmodel.hpp \
 	transformations/defmodel_exceptions.hpp \
 	transformations/defmodel_impl.hpp \
+	transformations/tinshift.cpp \
+	transformations/tinshift.hpp \
+	transformations/tinshift_exceptions.hpp \
+	transformations/tinshift_impl.hpp \
 	\
 	aasincos.cpp adjlon.cpp \
 	dmstor.cpp auth.cpp \
@@ -213,6 +218,7 @@ libproj_la_SOURCES = \
 	release.cpp gauss.cpp \
 	fileapi.cpp \
 	generic_inverse.cpp \
+	quadtree.hpp \
 	\
 	datums.cpp datum_set.cpp transform.cpp \
 	utils.cpp \

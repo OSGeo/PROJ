@@ -52,7 +52,7 @@ Update the following files with the new ABI version number:
 
     - `src/Makefile.am`     Update -version-info
     - `CMakeLists.txt`:     Update PROJ_BUILD_VERSION (cur:rev:age) and
-                            PROJ_API_VERSION (current)
+                            PROJ_API_VERSION (current-age)
 
 *Commit the changes to master.*
 
@@ -179,7 +179,7 @@ See step 1.6 above. Do not rename the archives with RC postfixes.
 
     These vim substitutions are helpfull when converting NEWS to rst:
 
-    :s!(\#\(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/issues/\1>`_)!
+    :s!(\#\(\d\{4}\))!(`\#\1 <https://github.com/OSGeo/PROJ/issues/\1>`_)!
     :s/^o/*/
 
   - Update download links in `docs/source/download.rst`

@@ -17,6 +17,7 @@ proj_add_gie_test("adams_ws2" "gie/adams_ws2.gie")
 proj_add_gie_test("guyou" "gie/guyou.gie")
 proj_add_gie_test("peirce_q" "gie/peirce_q.gie")
 proj_add_gie_test("defmodel" "gie/defmodel.gie")
+proj_add_gie_test("tinshift" "gie/tinshift.gie")
 
 # GIGS tests. Uncommented tests are expected to fail due to issues with
 # various projections. Should be investigated further and fixed.
@@ -31,7 +32,7 @@ proj_add_gie_test("GIGS-5102.1" "gigs/5102.1.gie")
 proj_add_gie_test("GIGS-5103.1" "gigs/5103.1.gie")
 proj_add_gie_test("GIGS-5103.2" "gigs/5103.2.gie")
 proj_add_gie_test("GIGS-5103.3" "gigs/5103.3.gie")
-#proj_add_gie_test("GIGS-5104" "gigs/5104.gie")
+proj_add_gie_test("GIGS-5104" "gigs/5104.gie")
 #proj_add_gie_test("GIGS-5105.1" "gigs/5105.1.gie")
 proj_add_gie_test("GIGS-5105.2" "gigs/5105.2.gie")
 proj_add_gie_test("GIGS-5106" "gigs/5106.gie")

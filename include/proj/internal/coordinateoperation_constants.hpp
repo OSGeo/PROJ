@@ -519,6 +519,19 @@ static const ParamMapping *const paramsVerticalPerspective[] = {
     &paramFalseNorthing, // PROJ addition
     nullptr};
 
+static const ParamMapping paramProjectionPlaneOriginHeight = {
+    EPSG_NAME_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT,
+    EPSG_CODE_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, "h_0"};
+
+static const ParamMapping *const paramsColombiaUrban[] = {
+    &paramLatitudeNatOrigin,
+    &paramLongitudeNatOrigin,
+    &paramFalseEasting,
+    &paramFalseNorthing,
+    &paramProjectionPlaneOriginHeight,
+    nullptr};
+
 static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
      "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScaleK},
@@ -729,6 +742,9 @@ static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_ORTHOGRAPHIC, EPSG_CODE_METHOD_ORTHOGRAPHIC,
      "Orthographic", "ortho", nullptr, paramsNatOrigin},
 
+    {PROJ_WKT2_NAME_ORTHOGRAPHIC_SPHERICAL, 0, "Orthographic", "ortho", "f=0",
+     paramsNatOrigin},
+
     {PROJ_WKT2_NAME_METHOD_PATTERSON, 0, "Patterson", "patterson", nullptr,
      paramsLonNatOrigin},
 
@@ -817,6 +833,9 @@ static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_VERTICAL_PERSPECTIVE,
      EPSG_CODE_METHOD_VERTICAL_PERSPECTIVE, nullptr, "nsper", nullptr,
      paramsVerticalPerspective},
+
+    {EPSG_NAME_METHOD_COLOMBIA_URBAN, EPSG_CODE_METHOD_COLOMBIA_URBAN, nullptr,
+     "col_urban", nullptr, paramsColombiaUrban},
 };
 
 #define METHOD_NAME_CODE(method)                                               \
@@ -852,7 +871,7 @@ static const struct MethodNameCode {
     METHOD_NAME_CODE(POLAR_STEREOGRAPHIC_VARIANT_A),
     METHOD_NAME_CODE(POLAR_STEREOGRAPHIC_VARIANT_B),
     METHOD_NAME_CODE(EQUAL_EARTH), METHOD_NAME_CODE(LABORDE_OBLIQUE_MERCATOR),
-    METHOD_NAME_CODE(VERTICAL_PERSPECTIVE),
+    METHOD_NAME_CODE(VERTICAL_PERSPECTIVE), METHOD_NAME_CODE(COLOMBIA_URBAN),
     // Other conversions
     METHOD_NAME_CODE(CHANGE_VERTICAL_UNIT),
     METHOD_NAME_CODE(HEIGHT_DEPTH_REVERSAL),
@@ -923,6 +942,7 @@ static const struct ParamNameCode {
     PARAM_NAME_CODE(LATITUDE_STD_PARALLEL),
     PARAM_NAME_CODE(LONGITUDE_OF_ORIGIN),
     PARAM_NAME_CODE(ELLIPSOID_SCALE_FACTOR),
+    PARAM_NAME_CODE(PROJECTION_PLANE_ORIGIN_HEIGHT),
     // Parameters of transformations
     PARAM_NAME_CODE(SEMI_MAJOR_AXIS_DIFFERENCE),
     PARAM_NAME_CODE(FLATTENING_DIFFERENCE),

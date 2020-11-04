@@ -1423,9 +1423,9 @@ expect  -0.001790143 -0.000895247
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=etmerc   +ellps=GRS80 +zone=30
+operation +proj=etmerc   +ellps=GRS80
 -------------------------------------------------------------------------------
-tolerance 0.1 mm
+tolerance 50 nm
 accept  2 1
 expect  222650.796797586 110642.229411933
 accept  2 -1
@@ -1434,17 +1434,28 @@ accept  -2 1
 expect  -222650.796797586 110642.229411933
 accept  -2 -1
 expect  -222650.796797586 -110642.229411933
+# near pole
+accept  30 89.9999
+expect  5.584698978 10001956.056248082
+# 3900 km from central meridian
+accept  44.69 35.37
+expect  4168136.489446198 4985511.302287407
 
 direction inverse
 accept  200 100
-expect  0.001796631 0.000904369
+expect  0.00179663056816 0.00090436947663
 accept  200 -100
-expect  0.001796631 -0.000904369
+expect  0.00179663056816 -0.00090436947663
 accept  -200 100
-expect  -0.001796631 0.000904369
+expect  -0.00179663056816 0.00090436947663
 accept  -200 -100
-expect  -0.001796631 -0.000904369
-
+expect  -0.00179663056816 -0.00090436947663
+# near pole
+accept  6 1.0001e7
+expect  0.35596960759234 89.99135362646302
+# 3900 km from central meridian
+accept  4168136.489446198 4985511.302287407
+expect  44.69 35.37
 
 ===============================================================================
 # Fahey
@@ -3355,30 +3366,54 @@ expect  -0.001953415 -0.000820580
 -------------------------------------------------------------------------------
 operation +proj=merc   +ellps=GRS80
 -------------------------------------------------------------------------------
-tolerance 0.1 mm
+tolerance 0 m
+accept  0 0
+expect  0 0
+tolerance 50 nm
 accept  2 1
-expect  222638.981586547 110579.965218250
+expect  222638.981586547 110579.965218249
 accept  2 -1
 expect  222638.981586547 -110579.965218249
 accept  -2 1
-expect  -222638.981586547 110579.965218250
+expect  -222638.981586547 110579.965218249
 accept  -2 -1
 expect  -222638.981586547 -110579.965218249
+# inflate tolerance by scale (k = 5.7e15)
+tolerance 3e8
+accept  0 89.99999999999999
+expect  0 235805185.015130176
+accept  0 -89.99999999999999
+expect  0 -235805185.015130176
 
 direction inverse
+tolerance 0 m
+accept  0 0
+expect  0 0
+tolerance 50 nm
 accept  200 100
-expect  0.001796631 0.000904369
+expect  0.00179663056824 0.00090436947704
 accept  200 -100
-expect  0.001796631 -0.000904369
+expect  0.00179663056824 -0.00090436947704
 accept  -200 100
-expect  -0.001796631 0.000904369
+expect  -0.00179663056824 0.00090436947704
 accept  -200 -100
-expect  -0.001796631 -0.000904369
+expect  -0.00179663056824 -0.00090436947704
+accept  0 235805185.015130176
+expect  0 89.99999999999999
+accept  0 -235805185.015130176
+expect  0 -89.99999999999999
+accept  0 1e10
+expect  0 90
+accept  0 -1e10
+expect  0 -90
 
 -------------------------------------------------------------------------------
 operation +proj=merc   +R=6400000
 -------------------------------------------------------------------------------
-tolerance 0.1 mm
+tolerance 0 m
+accept  0 0
+expect  0 0
+tolerance 50 nm
 accept  2 1
 expect  223402.144255274 111706.743574944
 accept  2 -1
@@ -3389,24 +3424,31 @@ accept  -2 -1
 expect  -223402.144255274 -111706.743574944
 
 direction inverse
+tolerance 0 m
+accept  0 0
+expect  0 0
+tolerance 50 nm
 accept  200 100
-expect  0.001790493 0.000895247
+expect  0.00179049310978 0.00089524655486
 accept  200 -100
-expect  0.001790493 -0.000895247
+expect  0.00179049310978 -0.00089524655486
 accept  -200 100
-expect  -0.001790493 0.000895247
+expect  -0.00179049310978 0.00089524655486
 accept  -200 -100
-expect  -0.001790493 -0.000895247
-
+expect  -0.00179049310978 -0.00089524655486
 
 -------------------------------------------------------------------------------
 operation +proj=merc +R=1
 -------------------------------------------------------------------------------
 # Test the numerical stability of the inverse spherical Mercator
 -------------------------------------------------------------------------------
-tolerance   1e-15 m
-accept  0   1e-15
+tolerance   1e-17 m
+accept  0   57.295779513e-15
 expect  0   1e-15
+
+direction inverse
+accept  0   1e-15
+expect  0   57.295779513e-15
 
 
 ===============================================================================
@@ -4266,11 +4308,11 @@ expect  -223374.577355253 -111701.072127637
 
 ===============================================================================
 # Orthographic
-# 	Azi, Sph.
+# 	Azi, Sph&Ell.
 ===============================================================================
 
 -------------------------------------------------------------------------------
-# Test the equatorial aspect of the Orthopgraphic projection.
+# Test the equatorial aspect of the Orthographic projection.
 
 # Test data from Snyder (1987), table 22, p. 151.
 -------------------------------------------------------------------------------
@@ -4322,7 +4364,7 @@ expect      failure errno tolerance_condition
 
 
 -------------------------------------------------------------------------------
-# Test the oblique aspect of the Orthopgraphic projection.
+# Test the oblique aspect of the Orthographic projection.
 
 # Test data from Snyder (1987), table 23, pp. 152-153.
 -------------------------------------------------------------------------------
@@ -4356,7 +4398,7 @@ expect      failure errno tolerance_condition
 
 
 -------------------------------------------------------------------------------
-# Test the north polar aspect of the Orthopgraphic projection.
+# Test the north polar aspect of the Orthographic projection.
 -------------------------------------------------------------------------------
 operation   +proj=ortho +R=1 +lat_0=90 +lon_0=0
 -------------------------------------------------------------------------------
@@ -4386,7 +4428,7 @@ accept      2   2
 expect      failure errno tolerance_condition
 
 -------------------------------------------------------------------------------
-# Test the south polar aspect of the Orthopgraphic projection.
+# Test the south polar aspect of the Orthographic projection.
 -------------------------------------------------------------------------------
 operation   +proj=ortho +R=1 +lat_0=-90 +lon_0=0
 -------------------------------------------------------------------------------
@@ -4420,6 +4462,200 @@ expect      failure errno tolerance_condition
 # it should still results in a correct coordinate.
 accept      0.70710678118 0.7071067812
 expect      45  0
+
+
+-------------------------------------------------------------------------------
+# Test the ellipsoidal formulation
+
+# Test data from Guidance Note 7 part 2, March 2020,  p. 90
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=55 +lon_0=5
+-------------------------------------------------------------------------------
+tolerance   1 mm
+accept      2.12955      53.80939444444444
+expect      -189011.711  -128640.567
+roundtrip   1
+
+-------------------------------------------------------------------------------
+# Oblique
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=30
+
+# On boundary of visibility domain.
+direction   forward
+tolerance   0.1 mm
+accept      -90             0
+expect      -6378137        18504.1253
+
+# This test is fragile. Note the slightly important tolerance
+# direction   inverse
+# tolerance   100 mm
+# accept      -6378137        18504.125313223721605027
+# expect      -90             0
+
+# Slightly outside
+direction   inverse
+accept      -6378137.001    18504.1253
+expect      failure errno tolerance_condition
+
+# On boundary of visibility domain
+direction   forward
+tolerance   0.1 mm
+accept      0               -60
+expect      0               -6343601.0991
+
+# Just on it, but fails to converge. This test might be fragile
+direction   inverse
+accept      0               -6343601.099075031466782093
+expect      failure errno non_convergent
+
+# Slightly inside
+direction   inverse
+tolerance   0.1 mm
+accept      0               -6343600
+expect      0               -59.966377950099655436
+
+
+-------------------------------------------------------------------------------
+# Equatorial
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84
+tolerance   0.1 mm
+accept      0               0
+expect      0               0
+roundtrip   1
+
+accept      1               1
+expect      111296.9991     110568.7748
+roundtrip   1
+
+accept      1               -1
+expect      111296.9991     -110568.7748
+roundtrip   1
+
+accept      -1              1
+expect      -111296.9991    110568.7748
+roundtrip   1
+
+accept      -1              -1
+expect      -111296.9991    -110568.7748
+roundtrip   1
+
+accept      89.99           0
+expect      6378136.9029    0
+roundtrip   1
+
+accept      -89.99          0
+expect      -6378136.9029   0
+roundtrip   1
+
+accept      0               89.99
+expect      0               6356752.2167
+roundtrip   1
+
+accept      0               -89.99
+expect      0               -6356752.2167
+roundtrip   1
+
+# Point not visible from the projection plane
+accept      90.00001        0
+expect      failure         errno tolerance_condition
+
+# Point not visible from the projection plane
+accept      -90.00001       0
+expect      failure         errno tolerance_condition
+
+# Consistent with WGS84 semi-major axis
+accept      90              0
+expect      6378137         0
+roundtrip   1
+
+accept      -90             0
+expect      -6378137        0
+roundtrip   1
+
+# Consistent with WGS84 semi-minor axis
+accept      0               90
+expect      0               6356752.3142
+roundtrip   1
+
+accept      0               -90
+expect      0               -6356752.3142
+roundtrip   1
+
+# Point not visible from the projection plane
+direction   inverse
+accept      0               6356752.3143
+expect      failure         errno tolerance_condition
+
+# Point not visible from the projection plane
+direction   inverse
+accept      1000            6356752.314
+expect      failure         errno tolerance_condition
+
+# Point not visible from the projection plane
+direction   inverse
+accept      6378137.0001    0
+expect      failure         errno tolerance_condition
+
+-------------------------------------------------------------------------------
+# North pole tests
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=90
+tolerance   0.1 mm
+accept      0               90
+expect      0               0
+roundtrip   1
+
+accept      30              45
+expect      2258795.4394   -3912348.4650
+roundtrip   1
+
+accept      135             89.999999873385
+expect      0.01            0.01
+roundtrip   1
+
+# Point not visible from the projection plane
+accept      0               -0.0000001
+expect      failure         errno tolerance_condition
+
+# Consistent with WGS84 semi-major axis
+accept      0               0
+expect      0               -6378137
+roundtrip   1
+
+# Point not visible from the projection plane
+direction   inverse
+accept      0               -6378137.1
+expect      failure         errno tolerance_condition
+
+-------------------------------------------------------------------------------
+# South pole tests
+-------------------------------------------------------------------------------
+operation   +proj=ortho +ellps=WGS84 +lat_0=-90
+tolerance   0.1 mm
+accept      0               -90
+expect      0               0
+roundtrip   1
+
+accept      135             -89.999999873385
+expect      0.01            -0.01
+roundtrip   1
+
+# Point not visible from the projection plane
+accept      0               0.0000001
+expect      failure         errno tolerance_condition
+
+# Consistent with WGS84 semi-major axis
+accept      0               0
+expect      0               6378137
+roundtrip   1
+
+# Point not visible from the projection plane
+direction   inverse
+accept      0               6378137.1
+expect      failure         errno tolerance_condition
+
 
 ===============================================================================
 # Perspective Conic
@@ -5464,25 +5700,37 @@ expect  -0.001790143 0.511651393
 -------------------------------------------------------------------------------
 operation +proj=tmerc   +ellps=GRS80
 -------------------------------------------------------------------------------
-tolerance 0.1 mm
+tolerance 50 nm
 accept  2 1
-expect  222650.796795778 110642.229411927
+expect  222650.796797586 110642.229411933
 accept  2 -1
-expect  222650.796795778 -110642.229411927
+expect  222650.796797586 -110642.229411933
 accept  -2 1
-expect  -222650.796795778 110642.229411927
+expect  -222650.796797586 110642.229411933
 accept  -2 -1
-expect  -222650.796795778 -110642.229411927
+expect  -222650.796797586 -110642.229411933
+# near pole
+accept  30 89.9999
+expect  5.584698978 10001956.056248082
+# 3900 km from central meridian
+accept  44.69 35.37
+expect  4168136.489446198 4985511.302287407
 
 direction inverse
 accept  200 100
-expect  0.001796631 0.000904369
+expect  0.00179663056816 0.00090436947663
 accept  200 -100
-expect  0.001796631 -0.000904369
+expect  0.00179663056816 -0.00090436947663
 accept  -200 100
-expect  -0.001796631 0.000904369
+expect  -0.00179663056816 0.00090436947663
 accept  -200 -100
-expect  -0.001796631 -0.000904369
+expect  -0.00179663056816 -0.00090436947663
+# near pole
+accept  6 1.0001e7
+expect  0.35596960759234 89.99135362646302
+# 3900 km from central meridian
+accept  4168136.489446198 4985511.302287407
+expect  44.69 35.37
 
 -------------------------------------------------------------------------------
 operation +proj=tmerc   +R=6400000
@@ -6392,5 +6640,19 @@ accept  -200 100
 expect  -0.001790493 0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
+
+
+===============================================================================
+# Colombia Urbian
+# Test point from IOGP Publication 373-7-2 - Geomatics Guidance Note number 7, part 2 - March 2020
+===============================================================================
+
+-------------------------------------------------------------------------------
+operation +proj=col_urban +lat_0=4.68048611111111 +lon_0=-74.1465916666667 +x_0=92334.879 +y_0=109320.965 +h_0=2550 +ellps=GRS80
+-------------------------------------------------------------------------------
+tolerance 1 mm
+accept    -74.25    4.8
+expect    80859.033 122543.174
+roundtrip 1
 
 </gie-strict>

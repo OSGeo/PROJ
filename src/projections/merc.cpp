@@ -10,45 +10,29 @@
 PROJ_HEAD(merc, "Mercator") "\n\tCyl, Sph&Ell\n\tlat_ts=";
 PROJ_HEAD(webmerc, "Web Mercator / Pseudo Mercator") "\n\tCyl, Ell\n\t";
 
-#define EPS10 1.e-10
-static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
-    if (fabs(x) <= DBL_EPSILON) {
-        /* tan(M_FORTPI + .5 * x) can be approximated by  1.0 + x */
-        return log1p(x);
-    }
-    return log(tan(M_FORTPI + .5 * x));
-}
-
 static PJ_XY merc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
-    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-        return xy;
-    }
     xy.x = P->k0 * lp.lam;
-    xy.y = - P->k0 * log(pj_tsfn(lp.phi, sin(lp.phi), P->e));
+    // Instead of calling tan and sin, call sin and cos which the compiler
+    // optimizes to a single call to sincos.
+    double sphi = sin(lp.phi);
+    double cphi = cos(lp.phi);
+    xy.y = P->k0 * (asinh(sphi/cphi) - P->e * atanh(P->e * sphi));
     return xy;
 }
 
 
 static PJ_XY merc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
-    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-        return xy;
-}
     xy.x = P->k0 * lp.lam;
-    xy.y = P->k0 * logtanpfpim1(lp.phi);
+    xy.y = P->k0 * asinh(tan(lp.phi));
     return xy;
 }
 
 
 static PJ_LP merc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
-    if ((lp.phi = pj_phi2(P->ctx, exp(- xy.y / P->k0), P->e)) == HUGE_VAL) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
-        return lp;
-}
+    lp.phi = atan(pj_sinhpsi2tanphi(P->ctx, sinh(xy.y / P->k0), P->e));
     lp.lam = xy.x / P->k0;
     return lp;
 }

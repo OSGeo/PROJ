@@ -134,3 +134,5 @@ INSERT INTO "coordinate_system" VALUES('EPSG','6509','Cartesian',2);
 INSERT INTO "coordinate_system" VALUES('EPSG','6510','Cartesian',2);
 INSERT INTO "coordinate_system" VALUES('EPSG','6511','Cartesian',2);
 INSERT INTO "coordinate_system" VALUES('EPSG','6512','Cartesian',3);
+INSERT INTO "coordinate_system" VALUES('EPSG','32760','ordinal',2);
+INSERT INTO "coordinate_system" VALUES('EPSG','32761','ordinal',2);

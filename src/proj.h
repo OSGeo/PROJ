@@ -170,8 +170,8 @@ extern "C" {
 #endif
 
 /* The version numbers should be updated with every release! **/
-#define PROJ_VERSION_MAJOR 7
-#define PROJ_VERSION_MINOR 2
+#define PROJ_VERSION_MAJOR 8
+#define PROJ_VERSION_MINOR 0
 #define PROJ_VERSION_PATCH 0
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
@@ -361,6 +361,7 @@ typedef struct projCtx_t PJ_CONTEXT;
 #endif
 PJ_CONTEXT PROJ_DLL *proj_context_create (void);
 PJ_CONTEXT PROJ_DLL *proj_context_destroy (PJ_CONTEXT *ctx);
+PJ_CONTEXT PROJ_DLL *proj_context_clone (PJ_CONTEXT *ctx);
 
 /** Callback to resolve a filename to a full path */
 typedef const char* (*proj_file_finder) (PJ_CONTEXT *ctx, const char*, void* user_data);
@@ -693,7 +694,8 @@ typedef enum
     PJ_CATEGORY_PRIME_MERIDIAN,
     PJ_CATEGORY_DATUM,
     PJ_CATEGORY_CRS,
-    PJ_CATEGORY_COORDINATE_OPERATION
+    PJ_CATEGORY_COORDINATE_OPERATION,
+    PJ_CATEGORY_DATUM_ENSEMBLE
 } PJ_CATEGORY;
 
 /** \brief Object type. */
@@ -1248,6 +1250,23 @@ PJ PROJ_DLL *proj_crs_get_horizontal_datum(PJ_CONTEXT *ctx, const PJ *crs);
 PJ PROJ_DLL *proj_crs_get_sub_crs(PJ_CONTEXT *ctx, const PJ *crs, int index);
 
 PJ PROJ_DLL *proj_crs_get_datum(PJ_CONTEXT *ctx, const PJ *crs);
+
+PJ PROJ_DLL *proj_crs_get_datum_ensemble(PJ_CONTEXT *ctx, const PJ *crs);
+
+PJ PROJ_DLL *proj_crs_get_datum_forced(PJ_CONTEXT *ctx, const PJ *crs);
+
+int PROJ_DLL proj_datum_ensemble_get_member_count(PJ_CONTEXT *ctx,
+                                                  const PJ *datum_ensemble);
+
+double PROJ_DLL proj_datum_ensemble_get_accuracy(PJ_CONTEXT *ctx,
+                                                 const PJ *datum_ensemble);
+
+PJ PROJ_DLL *proj_datum_ensemble_get_member(PJ_CONTEXT *ctx,
+                                            const PJ *datum_ensemble,
+                                            int member_index);
+
+double PROJ_DLL proj_dynamic_datum_get_frame_reference_epoch(PJ_CONTEXT *ctx,
+                                                     const PJ *datum);
 
 PJ PROJ_DLL *proj_crs_get_coordinate_system(PJ_CONTEXT *ctx, const PJ *crs);
 

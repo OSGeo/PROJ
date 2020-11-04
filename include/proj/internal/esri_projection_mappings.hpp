@@ -600,6 +600,19 @@ static const ESRIParamMapping paramsESRI_Orthographic[] = {
      EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
     {nullptr, nullptr, 0, "0.0", false}};
 
+static const ESRIParamMapping paramsESRI_Local[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Scale_Factor", nullptr, 0, "1.0", false},
+    {"Azimuth", nullptr, 0, "0.0", false},
+    {"Longitude_Of_Center", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Latitude_Of_Center", EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
 static const ESRIParamMapping paramsESRI_Winkel_Tripel[] = {
     {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
      EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
@@ -907,6 +920,19 @@ static const ESRIParamMapping paramsESRI_Transverse_Cylindrical_Equal_Area[] = {
      EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
     {nullptr, nullptr, 0, "0.0", false}};
 
+static const ESRIParamMapping paramsESRI_IGAC_Plano_Cartesiano[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Longitude_Of_Center", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Latitude_Of_Center", EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Height", EPSG_NAME_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT,
+     EPSG_CODE_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
 static const ESRIMethodMapping esriMappings[] = {
     {"Plate_Carree", EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL,
      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL, paramsESRI_Plate_Carree},
@@ -1004,8 +1030,10 @@ static const ESRIMethodMapping esriMappings[] = {
      EPSG_CODE_METHOD_KROVAK_NORTH_ORIENTED, paramsESRI_Krovak_alt2},
     {"New_Zealand_Map_Grid", EPSG_NAME_METHOD_NZMG, EPSG_CODE_METHOD_NZMG,
      paramsESRI_New_Zealand_Map_Grid},
-    {"Orthographic", EPSG_NAME_METHOD_ORTHOGRAPHIC,
-     EPSG_CODE_METHOD_ORTHOGRAPHIC, paramsESRI_Orthographic},
+    {"Orthographic", PROJ_WKT2_NAME_ORTHOGRAPHIC_SPHERICAL, 0,
+     paramsESRI_Orthographic},
+    {"Local", EPSG_NAME_METHOD_ORTHOGRAPHIC, EPSG_CODE_METHOD_ORTHOGRAPHIC,
+     paramsESRI_Local},
     {"Winkel_Tripel", "Winkel Tripel", 0, paramsESRI_Winkel_Tripel},
     {"Aitoff", "Aitoff", 0, paramsESRI_Aitoff},
     {"Flat_Polar_Quartic", PROJ_WKT2_NAME_METHOD_FLAT_POLAR_QUARTIC, 0,
@@ -1067,6 +1095,8 @@ static const ESRIMethodMapping esriMappings[] = {
      EPSG_CODE_METHOD_MERCATOR_VARIANT_B, paramsESRI_Mercator_Variant_C},
     {"Transverse_Cylindrical_Equal_Area", "Transverse Cylindrical Equal Area",
      0, paramsESRI_Transverse_Cylindrical_Equal_Area},
+    {"IGAC_Plano_Cartesiano", EPSG_NAME_METHOD_COLOMBIA_URBAN,
+     EPSG_CODE_METHOD_COLOMBIA_URBAN, paramsESRI_IGAC_Plano_Cartesiano},
 };
 
 // ---------------------------------------------------------------------------

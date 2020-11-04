@@ -1,3 +1,97 @@
+7.2.0 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ + Command line tools:
+
+   o Add multi-line PROJ string export capability, and use it by default in
+     projinfo (unless --single-line is specified) (#2381)
+
+ + Coordinate operations:
+
+    o +proj=col_urban projection, implementing a EPSG projection method
+      used by a number of projected CRS in Colombia (#2395)
+
+    o +proj=tinshift for triangulation-based transformations (#2344)
+
+    o Added ellipsoidal formulation of +proj=ortho (#2361)
+
+
+ + Database
+
+   o Update to EPSG 10.003 and make code base robust to dealing with
+     WKT CRS with DatumEnsemble (#2370)
+
+   o Added Finland tinshift operations (#2392)
+
+   o Added transformation from JGD2011 Geographic 3D to JGD2011
+     height using GSIGEO2011 (#2393)
+
+   o Improve CompoundCRS identification and name morphing in VerticalCRS
+     with ESRI WKT1 (#2386)
+
+   o Added OGC:CRS27 and OGC:CRS83 CRS entries for NAD27 and NAD83
+     in longitude, latitude order (#2350)
+
+ + API
+
+ o Added temporal, engineering, and parametric datum
+   PJ_TYPE enumerations (#2274)
+
+  o Various improvements to context handling (#2329, #2331)
+
+  o proj_create_vertical_crs_ex(): add a ACCURACY option to provide
+     an explicit accuracy, or derive it from the grid name if it is
+     known (#2342)
+
+   o proj_crs_create_bound_crs_to_WGS84(): make it work on
+     verticalCRS/compoundCRS such as EPSG:4326+5773 and
+     EPSG:4326+3855 (#2365)
+
+   o promoteTo3D(): add a remark with the original CRS identifier (#2369)
+
+   o Added proj_context_clone (#2383)
+
+
+ Bug fixes
+ ---------
+
+ o Avoid core dumps when copying contexts in certain scenarios (#2324)
+
+ o proj_trans(): reset errno before attemptying a retry with a new
+   coordinate operation (#2353)
+
+ o PROJJSON schema corrected to allow prime meridians values with
+   explicitly stating a unit (degrees assumed) (#2354)
+
+ o Adjust createBoundCRSToWGS84IfPossible() and operation filtering
+   (for POSGAR 2007 to WGS84 issues) (#2357)
+
+ o createOperations(): several fixes affecting NAD83 -> NAD83(2011) (#2364)
+
+ o WKT2:2019 import/export: handle DATUM (at top level object) with PRIMEM
+
+ o WKT1_ESRI: fix import and export of CompoundCRS (#2389)
+
+
+ THANKS TO
+ ---------
+
+ Alexander Saprykin
+ Jeff McKenna
+ Nyall Dawson
+ Kai Pastor
+ Juan Hernando
+ Javier Jimenez Shaw
+ Howard Butler
+ Alan D. Snow
+ Charles Karney
+ Kristian Evers
+ Even Rouault
+
+
 7.1.1 Release Notes
 -------------------
 

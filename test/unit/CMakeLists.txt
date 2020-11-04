@@ -181,3 +181,14 @@ target_link_libraries(test_defmodel
 add_test(NAME test_defmodel COMMAND test_defmodel)
 set_property(TEST test_defmodel
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+
+
+add_executable(test_tinshift
+  main.cpp
+  test_tinshift.cpp)
+target_link_libraries(test_tinshift
+  GTest::gtest
+  ${PROJ_LIBRARIES})
+add_test(NAME test_tinshift COMMAND test_tinshift)
+set_property(TEST test_tinshift
+  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})

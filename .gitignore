@@ -134,6 +134,7 @@ m4/lt~obsolete.m4
 /test/unit/proj_errno_string_test
 /test/unit/test_defmodel
 /test/unit/test_network
+/test/unit/test_tinshift
 /tmp_alias/
 
 # jniwrap

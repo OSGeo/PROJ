@@ -30,7 +30,6 @@
 ###############################################################################
 
 import argparse
-import csv
 import fnmatch
 import os
 import sqlite3
@@ -38,8 +37,8 @@ import sqlite3
 parser = argparse.ArgumentParser(description='Check database and PROJ-data consistency.')
 parser.add_argument('path_to_proj_db',
                     help='Full pathname to proj.db')
-parser.add_argument('path_to_proj_datumgrid',
-                    help='Full pathname to the root of the proj_datumgrid_geotiff git repository')
+parser.add_argument('path_to_proj_data',
+                    help='Full pathname to the root of the proj_data_geotiff git repository')
 
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('--not-in-grid-alternatives', dest='not_in_grid_alternatives', action='store_true',
@@ -52,7 +51,7 @@ group.add_argument('--not-in-db', dest='not_in_db', action='store_true',
 args = parser.parse_args()
 
 dbname = args.path_to_proj_db
-proj_datumgrid = args.path_to_proj_datumgrid
+proj_data = args.path_to_proj_data
 
 if args.not_in_grid_alternatives:
     conn = sqlite3.connect(dbname)
@@ -67,7 +66,7 @@ if args.not_in_grid_alternatives:
 elif args.not_in_proj_data:
 
     set_grids = set()
-    for root, dirnames, filenames in os.walk(proj_datumgrid):
+    for root, dirnames, filenames in os.walk(proj_data):
         for filename in fnmatch.filter(filenames, '*'):
             set_grids.add(filename)
 
@@ -80,7 +79,7 @@ elif args.not_in_proj_data:
 elif args.not_in_db:
 
     set_grids = set()
-    for root, dirnames, filenames in os.walk(proj_datumgrid):
+    for root, dirnames, filenames in os.walk(proj_data):
         if '.git' in root:
             continue
         for filename in fnmatch.filter(filenames, '*'):

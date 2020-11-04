@@ -79,7 +79,8 @@ struct OutputOptions {
 
 static void usage() {
     std::cerr
-        << "usage: projinfo [-o formats] [-k crs|operation|datum|ellipsoid] "
+        << "usage: projinfo [-o formats] "
+           "[-k crs|operation|datum|ensemble|ellipsoid] "
            "[--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
@@ -99,9 +100,9 @@ static void usage() {
         << std::endl
         << "                [--identify] [--3d]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
-        << "                --searchpaths | --remote-data | "
-           "{object_definition} |"
-        << "                (-s {srs_def} -t {srs_def})" << std::endl;
+        << "                --searchpaths | --remote-data |" << std::endl
+        << "                {object_definition} | (-s {srs_def} -t {srs_def})"
+        << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
                  "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
@@ -184,11 +185,11 @@ static BaseObjectNNPtr buildObject(
             auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
                        tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
-        } else if (kind == "ellipsoid" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" + tokens[1];
-            obj = createFromUserInput(urn, dbContext).as_nullable();
-        } else if (kind == "datum" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:datum:" + tokens[0] + "::" + tokens[1];
+        } else if ((kind == "ellipsoid" || kind == "datum" ||
+                    kind == "ensemble") &&
+                   tokens.size() == 2) {
+            auto urn =
+                "urn:ogc:def:" + kind + ":" + tokens[0] + "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
             // Convenience to be able to use C escaped strings...
@@ -222,6 +223,9 @@ static BaseObjectNNPtr buildObject(
                         AuthorityFactory::ObjectType::ELLIPSOID);
                 else if (kind == "datum")
                     allowedTypes.push_back(AuthorityFactory::ObjectType::DATUM);
+                else if (kind == "ensemble")
+                    allowedTypes.push_back(
+                        AuthorityFactory::ObjectType::DATUM_ENSEMBLE);
                 constexpr size_t limitResultCount = 10;
                 auto factory = AuthorityFactory::create(NN_NO_CHECK(dbContext),
                                                         std::string());
@@ -350,11 +354,11 @@ static void outputObject(
                     objToExport = projStringExportable;
                 }
 
-                std::cout << objToExport->exportToPROJString(
-                                 PROJStringFormatter::create(
-                                     PROJStringFormatter::Convention::PROJ_5,
-                                     dbContext)
-                                     .get())
+                auto formatter = PROJStringFormatter::create(
+                    PROJStringFormatter::Convention::PROJ_5, dbContext);
+                formatter->setMultiLine(!outputOpt.singleLine &&
+                                        crs == nullptr);
+                std::cout << objToExport->exportToPROJString(formatter.get())
                           << std::endl;
             } catch (const std::exception &e) {
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
@@ -376,9 +380,7 @@ static void outputObject(
                 }
                 auto formatter =
                     WKTFormatter::create(WKTFormatter::Convention::WKT2_2015);
-                if (outputOpt.singleLine) {
-                    formatter->setMultiLine(false);
-                }
+                formatter->setMultiLine(!outputOpt.singleLine);
                 formatter->setStrict(outputOpt.strict);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
@@ -931,6 +933,8 @@ int main(int argc, char **argv) {
                 objectKind = "ellipsoid";
             } else if (ci_equal(kind, "datum")) {
                 objectKind = "datum";
+            } else if (ci_equal(kind, "ensemble")) {
+                objectKind = "ensemble";
             } else {
                 std::cerr << "Unrecognized value for option -k: " << kind
                           << std::endl;
@@ -1147,8 +1151,10 @@ int main(int argc, char **argv) {
     }
 
     if (outputOpt.quiet &&
-        (outputOpt.PROJ5 + outputOpt.WKT2_2019 + outputOpt.WKT2_2015 +
-         outputOpt.WKT1_GDAL + outputOpt.PROJJSON) != 1) {
+        (outputOpt.PROJ5 + outputOpt.WKT2_2019 +
+         outputOpt.WKT2_2019_SIMPLIFIED + outputOpt.WKT2_2015 +
+         outputOpt.WKT2_2015_SIMPLIFIED + outputOpt.WKT1_GDAL +
+         outputOpt.WKT1_ESRI + outputOpt.PROJJSON) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
         usage();
@@ -1198,26 +1204,48 @@ int main(int argc, char **argv) {
                                 std::cout << *ids[0]->codeSpace() << ":"
                                           << ids[0]->code() << ": "
                                           << pair.second << " %" << std::endl;
-                            } else {
-                                auto boundCRS = dynamic_cast<BoundCRS *>(
-                                    identifiedCRS.get());
-                                if (boundCRS &&
-                                    !boundCRS->baseCRS()
-                                         ->identifiers()
-                                         .empty()) {
-                                    const auto &idsBase =
-                                        boundCRS->baseCRS()->identifiers();
-                                    std::cout << "BoundCRS of "
-                                              << *idsBase[0]->codeSpace() << ":"
-                                              << idsBase[0]->code() << ": "
-                                              << pair.second << " %"
-                                              << std::endl;
-                                } else {
-                                    std::cout
-                                        << "un-identifier CRS: " << pair.second
-                                        << " %" << std::endl;
+                                continue;
+                            }
+
+                            auto boundCRS =
+                                dynamic_cast<BoundCRS *>(identifiedCRS.get());
+                            if (boundCRS &&
+                                !boundCRS->baseCRS()->identifiers().empty()) {
+                                const auto &idsBase =
+                                    boundCRS->baseCRS()->identifiers();
+                                std::cout << "BoundCRS of "
+                                          << *idsBase[0]->codeSpace() << ":"
+                                          << idsBase[0]->code() << ": "
+                                          << pair.second << " %" << std::endl;
+                                continue;
+                            }
+
+                            auto compoundCRS = dynamic_cast<CompoundCRS *>(
+                                identifiedCRS.get());
+                            if (compoundCRS) {
+                                const auto &components =
+                                    compoundCRS->componentReferenceSystems();
+                                if (components.size() == 2 &&
+                                    !components[0]->identifiers().empty() &&
+                                    !components[1]->identifiers().empty()) {
+                                    const auto &idH =
+                                        components[0]->identifiers().front();
+                                    const auto &idV =
+                                        components[1]->identifiers().front();
+                                    if (*idH->codeSpace() ==
+                                        *idV->codeSpace()) {
+                                        std::cout << *idH->codeSpace() << ":"
+                                                  << idH->code() << '+'
+                                                  << idV->code() << ": "
+                                                  << pair.second << " %"
+                                                  << std::endl;
+                                        continue;
+                                    }
                                 }
                             }
+
+                            std::cout << "un-identified CRS: " << pair.second
+                                      << " %" << std::endl;
                         }
                     } catch (const std::exception &e) {
                         std::cerr << "Identification failed: " << e.what()

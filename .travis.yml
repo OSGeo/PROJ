@@ -66,13 +66,21 @@ matrix:
         - BUILD_NAME=linux_clang
         - DETAILS="linux, clang"
 
-#    - os: linux
-#      dist: bionic
-#      compiler: gcc
-#      arch: s390x
-#      env:
-#        - BUILD_NAME=linux_s390x
-#        - DETAILS="linux, s390x"
+    - os: linux
+      dist: bionic
+      compiler: gcc
+      arch: s390x
+      env:
+        - BUILD_NAME=linux_generic
+        - DETAILS="linux, s390x"
+
+    - os: linux
+      dist: bionic
+      compiler: gcc
+      arch: arm64
+      env:
+        - BUILD_NAME=linux_generic
+        - DETAILS="linux, arm64"
 
     - os: osx
       env:

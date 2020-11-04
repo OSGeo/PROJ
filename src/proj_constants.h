@@ -183,6 +183,9 @@
 #define EPSG_NAME_METHOD_ORTHOGRAPHIC "Orthographic"
 #define EPSG_CODE_METHOD_ORTHOGRAPHIC 9840
 
+#define PROJ_WKT2_NAME_ORTHOGRAPHIC_SPHERICAL \
+    "Orthographic (Spherical)"
+
 #define PROJ_WKT2_NAME_METHOD_PATTERSON "Patterson"
 
 #define EPSG_NAME_METHOD_AMERICAN_POLYCONIC "American Polyconic"
@@ -230,6 +233,9 @@
 #define EPSG_CODE_METHOD_VERTICAL_PERSPECTIVE 9838
 
 #define PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION "Pole rotation (GRIB convention)"
+
+#define EPSG_CODE_METHOD_COLOMBIA_URBAN 1052
+#define EPSG_NAME_METHOD_COLOMBIA_URBAN "Colombia Urban"
 
 /* ------------------------------------------------------------------------ */
 
@@ -331,6 +337,9 @@
 
 #define EPSG_NAME_PARAMETER_VIEWPOINT_HEIGHT "Viewpoint height"
 #define EPSG_CODE_PARAMETER_VIEWPOINT_HEIGHT 8840
+
+#define EPSG_NAME_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT "Projection plane origin height"
+#define EPSG_CODE_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT 1039
 
 /* ------------------------------------------------------------------------ */
 

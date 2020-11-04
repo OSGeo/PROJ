@@ -4,9 +4,12 @@
 Mercator
 ********************************************************************************
 
-The Mercator projection is a cylindrical map projection that origins from the 15th
-century. It is widely recognized as the first regularly used map projection.
-The projection is conformal which makes it suitable for navigational purposes.
+The Mercator projection is a cylindrical map projection that origins
+from the 16th century. It is widely recognized as the first regularly
+used map projection.  It is a conformal projection in which the equator
+projects to a straight line at constant scale.  The projection has the
+property that a rhumb line, a course of constant heading, projects to a
+straight line.  This makes it suitable for navigational purposes.
 
 
 +---------------------+----------------------------------------------------------+
@@ -38,8 +41,10 @@ Usage
 Applications should be limited to equatorial regions, but is frequently
 used for navigational charts with latitude of true scale (:option:`+lat_ts`) specified within
 or near chart's boundaries.
-Often inappropriately used for world maps since the regions near the poles
-cannot be shown :cite:`Evenden1995`.
+It is considered to be inappropriate for world maps because of the gross
+distortions in area; for example the projected area of Greenland is
+larger than that of South America, despite the fact that Greenland's
+area is :math:`\frac18` that of South America :cite:`Snyder1987`.
 
 
 Example using latitude of true scale::
@@ -78,8 +83,6 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Mercator projection are all taken from G. Evenden's libproj manuals :cite:`Evenden2005`.
-
 Spherical form
 **************
 For the spherical form of the projection we introduce the scaling factor:
@@ -93,11 +96,14 @@ Forward projection
 
 .. math::
 
-    x = k_0 \lambda
+    x = k_0R \lambda; \qquad y = k_0R \psi
 
 .. math::
 
-    y = k_0 \ln \left[ \tan \left(\frac{\pi}{4} + \frac{\phi}{2} \right) \right]
+    \psi &= \ln \tan \biggl(\frac{\pi}{4} + \frac{\phi}{2} \biggr)\\
+         &= \sinh^{-1}\tan\phi
+
+The quantity :math:`\psi` is the isometric latitude.
 
 
 Inverse projection
@@ -105,38 +111,43 @@ Inverse projection
 
 .. math::
 
-    \lambda = \frac{x}{k_0}
+    \lambda = \frac{x}{k_0R}; \qquad \psi = \frac{y}{k_0R}
 
 .. math::
 
-    \phi = \frac{\pi}{2} - 2 \arctan \left[ e^{-y/k_0} \right]
+    \phi &= \frac{\pi}{2} - 2 \tan^{-1} \exp(-\psi)\\
+         &= \tan^{-1}\sinh\psi
 
 
-Ellisoidal form
-***************
+Ellipsoidal form
+****************
 
 For the ellipsoidal form of the projection we introduce the scaling factor:
 
 .. math::
 
-    k_0 = m\left( \phi_{ts} \right)
+    k_0 = m( \phi_{ts} )
 
-where :math:`m\left(\phi\right)` is the parallel radius at latitude :math:`\phi`.
+where
 
-We also use the Isometric Latitude kernel function :math:`t()`.
+.. math::
 
-.. note::
-    m() and t() should be described properly on a separate page about the theory of projections on the ellipsoid.
+   m(\phi) = \frac{\cos\phi}{\sqrt{1 - e^2\sin^2\phi}}
+
+:math:`a\,m(\phi)` is the radius of the circle of latitude :math:`\phi`.
 
 Forward projection
 ==================
 .. math::
 
-    x = k_0 \lambda
+    x = k_0 a \lambda; \qquad y = k_0 a \psi
 
 .. math::
 
-    y = k_0 \ln t \left( \phi \right)
+    \psi &= \ln\tan\biggl(\frac\pi4 + \frac{\phi}2\biggr)
+            -\frac12 e
+            \ln \biggl(\frac{1 + e \sin\phi}{1 - e \sin\phi}\biggr)\\
+         &= \sinh^{-1}\tan\phi - e \tanh^{-1}(e \sin\phi)
 
 
 Inverse projection
@@ -144,11 +155,38 @@ Inverse projection
 
 .. math::
 
-    \lambda = \frac{x}{k_0}
+    \lambda = \frac{x}{k_0 a}; \quad \psi = \frac{y}{k_0 a}
+
+The latitude :math:`\phi` is found by inverting the equation for
+:math:`\psi`.  This follows the method given by :cite:`Karney2011tm`.
+Start by introducing the conformal latitude
 
 .. math::
+   \chi = \tan^{-1}\sinh\psi
 
-    \phi = t^{-1}\left[ e^{ -y/k_0 } \right]
+The tangents of the latitudes :math:`\tau = \tan\phi` and :math:`\tau' =
+\tan\chi = \sinh\psi` are related by
+
+.. math::
+   \tau' = \tau \sqrt{1 + \sigma^2} - \sigma \sqrt{1 + \tau^2}
+
+where
+
+.. math::
+   \sigma = \sinh\bigl(e \tanh^{-1}(e \tau/\sqrt{1 + \tau^2}) \bigr)
+
+This is obtained by taking the :math:`\sinh` of the equation for
+:math:`\psi` and using the multiple argument formula.  The equation for
+:math:`\tau'` can be solved to give :math:`\tau` using Newton's method
+using :math:`\tau = \tau'/(1 - e^2)` as an initial guess and with the
+needed derivative given by
+
+..math::
+    \frac{d\tau'}{d\tau} = \frac{1 - e^2}{1 + (1 - e^2)\tau^2}
+    \sqrt{1 + \tau'^2} \sqrt{1 + \tau^2}
+
+This converges after no more than 2 iterations.  Finally set
+:math:`\phi=\tan^{-1}\tau`.
 
 Further reading
 ###############

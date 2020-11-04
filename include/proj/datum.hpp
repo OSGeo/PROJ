@@ -125,7 +125,7 @@ using DatumEnsembleNNPtr = util::nn<DatumEnsemblePtr>;
  *
  * \remark Implements DatumEnsemble from \ref ISO_19111_2019
  */
-class PROJ_GCC_DLL DatumEnsemble final : public common::IdentifiedObject,
+class PROJ_GCC_DLL DatumEnsemble final : public common::ObjectUsage,
                                          public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
@@ -147,7 +147,10 @@ class PROJ_GCC_DLL DatumEnsemble final : public common::IdentifiedObject,
 
     PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(io::FormattingException)
-                        //! @endcond
+
+    PROJ_FOR_TEST DatumNNPtr
+    asDatum(const io::DatabaseContextPtr &dbContext) const;
+    //! @endcond
 
   protected:
 #ifdef DOXYGEN_ENABLED
