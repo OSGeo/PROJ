@@ -533,8 +533,12 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
             auto authFactory = io::AuthorityFactory::create(
                 NN_NO_CHECK(dbContext),
                 authority == "any" ? std::string() : authority);
+            metadata::ExtentPtr extentResolved(extent);
+            if (!extent) {
+                getResolvedCRS(thisAsCRS, authFactory, extentResolved);
+            }
             auto ctxt = operation::CoordinateOperationContext::create(
-                authFactory, extent, 0.0);
+                authFactory, extentResolved, 0.0);
             ctxt->setAllowUseIntermediateCRS(allowIntermediateCRSUse);
             // ctxt->setSpatialCriterion(
             //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);

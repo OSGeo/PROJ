@@ -15545,149 +15545,6 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
 
 // ---------------------------------------------------------------------------
 
-static crs::CRSNNPtr
-getResolvedCRS(const crs::CRSNNPtr &crs,
-               const CoordinateOperationContextNNPtr &context,
-               metadata::ExtentPtr &extentOut) {
-    const auto &authFactory = context->getAuthorityFactory();
-    const auto &ids = crs->identifiers();
-    const auto &name = crs->nameStr();
-
-    bool approxExtent;
-    extentOut = getExtentPossiblySynthetized(crs, approxExtent);
-
-    // We try to "identify" the provided CRS with the ones of the database,
-    // but in a more restricted way that what identify() does.
-    // If we get a match from id in priority, and from name as a fallback, and
-    // that they are equivalent to the input CRS, then use the identified CRS.
-    // Even if they aren't equivalent, we update extentOut with the one of the
-    // identified CRS if our input one is absent/not reliable.
-
-    const auto tryToIdentifyByName = [&crs, &name, &authFactory, approxExtent,
-                                      &extentOut](
-        io::AuthorityFactory::ObjectType objectType) {
-        if (name != "unknown" && name != "unnamed") {
-            auto matches = authFactory->createObjectsFromName(
-                name, {objectType}, false, 2);
-            if (matches.size() == 1) {
-                const auto match =
-                    util::nn_static_pointer_cast<crs::CRS>(matches.front());
-                if (approxExtent || !extentOut) {
-                    extentOut = getExtent(match);
-                }
-                if (match->isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
-                    return match;
-                }
-            }
-        }
-        return crs;
-    };
-
-    auto geogCRS = dynamic_cast<crs::GeographicCRS *>(crs.get());
-    if (geogCRS && authFactory) {
-        if (!ids.empty()) {
-            const auto tmpAuthFactory = io::AuthorityFactory::create(
-                authFactory->databaseContext(), *ids.front()->codeSpace());
-            try {
-                auto resolvedCrs(
-                    tmpAuthFactory->createGeographicCRS(ids.front()->code()));
-                if (approxExtent || !extentOut) {
-                    extentOut = getExtent(resolvedCrs);
-                }
-                if (resolvedCrs->isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
-                    return util::nn_static_pointer_cast<crs::CRS>(resolvedCrs);
-                }
-            } catch (const std::exception &) {
-            }
-        } else {
-            return tryToIdentifyByName(
-                geogCRS->coordinateSystem()->axisList().size() == 2
-                    ? io::AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS
-                    : io::AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
-        }
-    }
-
-    auto projectedCrs = dynamic_cast<crs::ProjectedCRS *>(crs.get());
-    if (projectedCrs && authFactory) {
-        if (!ids.empty()) {
-            const auto tmpAuthFactory = io::AuthorityFactory::create(
-                authFactory->databaseContext(), *ids.front()->codeSpace());
-            try {
-                auto resolvedCrs(
-                    tmpAuthFactory->createProjectedCRS(ids.front()->code()));
-                if (approxExtent || !extentOut) {
-                    extentOut = getExtent(resolvedCrs);
-                }
-                if (resolvedCrs->isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
-                    return util::nn_static_pointer_cast<crs::CRS>(resolvedCrs);
-                }
-            } catch (const std::exception &) {
-            }
-        } else {
-            return tryToIdentifyByName(
-                io::AuthorityFactory::ObjectType::PROJECTED_CRS);
-        }
-    }
-
-    auto compoundCrs = dynamic_cast<crs::CompoundCRS *>(crs.get());
-    if (compoundCrs && authFactory) {
-        if (!ids.empty()) {
-            const auto tmpAuthFactory = io::AuthorityFactory::create(
-                authFactory->databaseContext(), *ids.front()->codeSpace());
-            try {
-                auto resolvedCrs(
-                    tmpAuthFactory->createCompoundCRS(ids.front()->code()));
-                if (approxExtent || !extentOut) {
-                    extentOut = getExtent(resolvedCrs);
-                }
-                if (resolvedCrs->isEquivalentTo(
-                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
-                    return util::nn_static_pointer_cast<crs::CRS>(resolvedCrs);
-                }
-            } catch (const std::exception &) {
-            }
-        } else {
-            auto outCrs = tryToIdentifyByName(
-                io::AuthorityFactory::ObjectType::COMPOUND_CRS);
-            const auto &components = compoundCrs->componentReferenceSystems();
-            if (outCrs.get() != crs.get()) {
-                bool hasGeoid = false;
-                if (components.size() == 2) {
-                    auto vertCRS =
-                        dynamic_cast<crs::VerticalCRS *>(components[1].get());
-                    if (vertCRS && !vertCRS->geoidModel().empty()) {
-                        hasGeoid = true;
-                    }
-                }
-                if (!hasGeoid) {
-                    return outCrs;
-                }
-            }
-            if (approxExtent || !extentOut) {
-                // If we still did not get a reliable extent, then try to
-                // resolve the components of the compoundCRS, and take the
-                // intersection of their extent.
-                extentOut = metadata::ExtentPtr();
-                for (const auto &component : components) {
-                    metadata::ExtentPtr componentExtent;
-                    getResolvedCRS(component, context, componentExtent);
-                    if (extentOut && componentExtent)
-                        extentOut = extentOut->intersection(
-                            NN_NO_CHECK(componentExtent));
-                    else if (componentExtent)
-                        extentOut = componentExtent;
-                }
-            }
-        }
-    }
-    return crs;
-}
-
-// ---------------------------------------------------------------------------
-
 /** \brief Find a list of CoordinateOperation from sourceCRS to targetCRS.
  *
  * The operations are sorted with the most relevant ones first: by
@@ -15723,13 +15580,14 @@ CoordinateOperationFactory::createOperations(
     const auto &targetBoundCRS = targetCRS->canonicalBoundCRS();
     auto l_sourceCRS = srcBoundCRS ? NN_NO_CHECK(srcBoundCRS) : sourceCRS;
     auto l_targetCRS = targetBoundCRS ? NN_NO_CHECK(targetBoundCRS) : targetCRS;
+    const auto &authFactory = context->getAuthorityFactory();
 
     metadata::ExtentPtr sourceCRSExtent;
     auto l_resolvedSourceCRS =
-        getResolvedCRS(l_sourceCRS, context, sourceCRSExtent);
+        crs::CRS::getResolvedCRS(l_sourceCRS, authFactory, sourceCRSExtent);
     metadata::ExtentPtr targetCRSExtent;
     auto l_resolvedTargetCRS =
-        getResolvedCRS(l_targetCRS, context, targetCRSExtent);
+        crs::CRS::getResolvedCRS(l_targetCRS, authFactory, targetCRSExtent);
     Private::Context contextPrivate(sourceCRSExtent, targetCRSExtent, context);
 
     if (context->getSourceAndTargetCRSExtentUse() ==
@@ -16054,4 +15912,152 @@ PROJBasedOperation::gridsNeeded(const io::DatabaseContextPtr &databaseContext,
 // ---------------------------------------------------------------------------
 
 } // namespace operation
+
+namespace crs {
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
+crs::CRSNNPtr CRS::getResolvedCRS(const crs::CRSNNPtr &crs,
+                                  const io::AuthorityFactoryPtr &authFactory,
+                                  metadata::ExtentPtr &extentOut) {
+    const auto &ids = crs->identifiers();
+    const auto &name = crs->nameStr();
+
+    bool approxExtent;
+    extentOut = getExtentPossiblySynthetized(crs, approxExtent);
+
+    // We try to "identify" the provided CRS with the ones of the database,
+    // but in a more restricted way that what identify() does.
+    // If we get a match from id in priority, and from name as a fallback, and
+    // that they are equivalent to the input CRS, then use the identified CRS.
+    // Even if they aren't equivalent, we update extentOut with the one of the
+    // identified CRS if our input one is absent/not reliable.
+
+    const auto tryToIdentifyByName = [&crs, &name, &authFactory, approxExtent,
+                                      &extentOut](
+        io::AuthorityFactory::ObjectType objectType) {
+        if (name != "unknown" && name != "unnamed") {
+            auto matches = authFactory->createObjectsFromName(
+                name, {objectType}, false, 2);
+            if (matches.size() == 1) {
+                const auto match =
+                    util::nn_static_pointer_cast<crs::CRS>(matches.front());
+                if (approxExtent || !extentOut) {
+                    extentOut = getExtent(match);
+                }
+                if (match->isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
+                    return match;
+                }
+            }
+        }
+        return crs;
+    };
+
+    auto geogCRS = dynamic_cast<crs::GeographicCRS *>(crs.get());
+    if (geogCRS && authFactory) {
+        if (!ids.empty()) {
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(), *ids.front()->codeSpace());
+            try {
+                auto resolvedCrs(
+                    tmpAuthFactory->createGeographicCRS(ids.front()->code()));
+                if (approxExtent || !extentOut) {
+                    extentOut = getExtent(resolvedCrs);
+                }
+                if (resolvedCrs->isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
+                    return util::nn_static_pointer_cast<crs::CRS>(resolvedCrs);
+                }
+            } catch (const std::exception &) {
+            }
+        } else {
+            return tryToIdentifyByName(
+                geogCRS->coordinateSystem()->axisList().size() == 2
+                    ? io::AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS
+                    : io::AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
+        }
+    }
+
+    auto projectedCrs = dynamic_cast<crs::ProjectedCRS *>(crs.get());
+    if (projectedCrs && authFactory) {
+        if (!ids.empty()) {
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(), *ids.front()->codeSpace());
+            try {
+                auto resolvedCrs(
+                    tmpAuthFactory->createProjectedCRS(ids.front()->code()));
+                if (approxExtent || !extentOut) {
+                    extentOut = getExtent(resolvedCrs);
+                }
+                if (resolvedCrs->isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
+                    return util::nn_static_pointer_cast<crs::CRS>(resolvedCrs);
+                }
+            } catch (const std::exception &) {
+            }
+        } else {
+            return tryToIdentifyByName(
+                io::AuthorityFactory::ObjectType::PROJECTED_CRS);
+        }
+    }
+
+    auto compoundCrs = dynamic_cast<crs::CompoundCRS *>(crs.get());
+    if (compoundCrs && authFactory) {
+        if (!ids.empty()) {
+            const auto tmpAuthFactory = io::AuthorityFactory::create(
+                authFactory->databaseContext(), *ids.front()->codeSpace());
+            try {
+                auto resolvedCrs(
+                    tmpAuthFactory->createCompoundCRS(ids.front()->code()));
+                if (approxExtent || !extentOut) {
+                    extentOut = getExtent(resolvedCrs);
+                }
+                if (resolvedCrs->isEquivalentTo(
+                        crs.get(), util::IComparable::Criterion::EQUIVALENT)) {
+                    return util::nn_static_pointer_cast<crs::CRS>(resolvedCrs);
+                }
+            } catch (const std::exception &) {
+            }
+        } else {
+            auto outCrs = tryToIdentifyByName(
+                io::AuthorityFactory::ObjectType::COMPOUND_CRS);
+            const auto &components = compoundCrs->componentReferenceSystems();
+            if (outCrs.get() != crs.get()) {
+                bool hasGeoid = false;
+                if (components.size() == 2) {
+                    auto vertCRS =
+                        dynamic_cast<crs::VerticalCRS *>(components[1].get());
+                    if (vertCRS && !vertCRS->geoidModel().empty()) {
+                        hasGeoid = true;
+                    }
+                }
+                if (!hasGeoid) {
+                    return outCrs;
+                }
+            }
+            if (approxExtent || !extentOut) {
+                // If we still did not get a reliable extent, then try to
+                // resolve the components of the compoundCRS, and take the
+                // intersection of their extent.
+                extentOut = metadata::ExtentPtr();
+                for (const auto &component : components) {
+                    metadata::ExtentPtr componentExtent;
+                    getResolvedCRS(component, authFactory, componentExtent);
+                    if (extentOut && componentExtent)
+                        extentOut = extentOut->intersection(
+                            NN_NO_CHECK(componentExtent));
+                    else if (componentExtent)
+                        extentOut = componentExtent;
+                }
+            }
+        }
+    }
+    return crs;
+}
+
+//! @endcond
+
+} // namespace crs
 NS_PROJ_END

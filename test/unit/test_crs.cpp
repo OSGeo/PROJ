@@ -5796,6 +5796,31 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                       CoordinateOperationContext::IntermediateCRSUse::NEVER),
                   crs_5340);
     }
+
+    // Check that we get the same result from an EPSG code and a CRS created
+    // from its WKT1 representation.
+    {
+        // Pulkovo 1942 / CS63 zone A2
+        auto crs = factory->createCoordinateReferenceSystem("2936");
+
+        // Two candidate transformations found, so not picking up any
+        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(
+                      dbContext,
+                      CoordinateOperationContext::IntermediateCRSUse::NEVER),
+                  crs);
+
+        auto wkt = crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                .get());
+        auto obj =
+            WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+        auto crs_from_wkt = nn_dynamic_pointer_cast<CRS>(obj);
+        ASSERT_TRUE(crs_from_wkt != nullptr);
+        EXPECT_EQ(crs_from_wkt->createBoundCRSToWGS84IfPossible(
+                      dbContext,
+                      CoordinateOperationContext::IntermediateCRSUse::NEVER),
+                  crs_from_wkt);
+    }
 }
 
 // ---------------------------------------------------------------------------
