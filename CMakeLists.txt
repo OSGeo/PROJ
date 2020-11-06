@@ -277,3 +277,7 @@ add_subdirectory(cmake)
 if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
+
+set(docfiles COPYING NEWS AUTHORS)
+install(FILES ${docfiles}
+        DESTINATION "${DOCDIR}")
