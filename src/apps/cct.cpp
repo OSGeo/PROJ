@@ -192,7 +192,15 @@ static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...) {
     va_end( args );
     free( msg_buf );
 }
-
+static bool startswith(const char *pre, const char *str) {
+/* Modified from Stackoverflow:
+ *
+ * https://stackoverflow.com/questions/4770985/how-to-check-if-a-string-starts-with-another-string-in-c
+ * */
+        size_t lenpre = strlen(pre);
+        size_t lenstr = strlen(str);
+        return lenstr < lenpre ? false : memcmp(pre, str, lenpre) == 0;
+}
 
 int main(int argc, char **argv) {
     PJ *P;
@@ -292,8 +300,24 @@ int main(int argc, char **argv) {
     }
 
     /* Setup transformation */
-    P = proj_create_argv (nullptr, o->pargc, o->pargv);
-    if ((nullptr==P) || (0==o->pargc)) {
+    bool with_urn = false;
+    if (o->fargc > 0 && startswith("urn:ogc:def:coordinateOperation:", o->fargv[0])) {
+        with_urn = true;
+        P = proj_create(nullptr, o->fargv[0]);
+
+        /* if instantiating operation with a URN optargpm thinks the URN is a file, */
+        /* hence we move all o->fargv entries one place closer to the start of the  */
+        /* array. This effectively overwrites the URN and only leaves a list of     */
+        /* files in o->fargv.                                                       */
+        o->fargc = o->fargc-1;
+        for (int j=0; j < o->fargc; j++) {
+            o->fargv[j] = o->fargv[j+1];
+        }
+    } else {
+        P = proj_create_argv (nullptr, o->pargc, o->pargv);
+    }
+
+    if ((nullptr==P) || (0==o->pargc && !with_urn) ) {
         print (PJ_LOG_ERROR, "%s: Bad transformation arguments - (%s)\n    '%s -h' for help",
                  o->progname, pj_strerrno (proj_errno(P)), o->progname);
         free (o);
