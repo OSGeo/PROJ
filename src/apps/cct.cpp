@@ -302,7 +302,8 @@ int main(int argc, char **argv) {
             P = proj_create_from_database(
                     nullptr, auth.c_str(), code.c_str(), PJ_CATEGORY_COORDINATE_OPERATION, 0, nullptr
             );
-        } else {
+        }
+        if( P == nullptr ) {
             /* if we didn't get a auth:code combo we try to see if the input matches */
             /* anything else */
             P = proj_create(nullptr, o->fargv[0]);
