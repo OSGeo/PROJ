@@ -36,7 +36,7 @@ by :c:func:`proj_create`, provided it expresses a coordinate operation
     .. note::
 
         Before version 8.0.0 only proj-strings could be used to instantiate
-        operations in :prog:`cct`.
+        operations in :program:`cct`.
 
 
 
