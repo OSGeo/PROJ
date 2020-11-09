@@ -295,7 +295,7 @@ int main(int argc, char **argv) {
     if (o-> pargc == 0 && o->fargc > 0) {
         /* Assume we got a auth:code combination */
         std::string input(o->fargv[0]);
-        int n = input.find(":");
+        auto n = input.find(":");
         if (n > 0) {
             std::string auth = input.substr(0,n);
             std::string code = input.substr(n+1, input.length());
