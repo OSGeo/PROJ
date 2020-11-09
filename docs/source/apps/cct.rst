@@ -15,6 +15,33 @@ Synopsis
 
     **cct** [**-cIostvz** [args]] *+opt[=arg]* ... file ...
 
+or
+
+    **cct** [**-cIostvz** [args]] {operation_reference} file ...
+
+Where {operation_reference} is one of the possibilities accepted
+by :c:func:`proj_create`, provided it expresses a coordinate operation
+
+- a proj-string,
+    - a WKT string,
+    - an object code (like "EPSG:1671" "urn:ogc:def:coordinateOperation:EPSG::1671"),
+    - an object name. e.g "ITRF2014 to ETRF2014 (1)". In that case as
+      uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
+    - a OGC URN combining references for concatenated operations
+      (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
+    - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.2/projjson.schema.json
+
+    .. versionadded:: 8.0.0
+
+    .. note::
+
+        Before version 8.0.0 only proj-strings could be used to instantiate
+        operations in :prog:`cct`.
+
+
+
+
+
 Description
 ***********
 
