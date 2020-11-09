@@ -195,7 +195,7 @@ static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...) {
 }
 
 int main(int argc, char **argv) {
-    PJ *P;
+    PJ *P = nullptr;
     PJ_COORD point;
     PJ_PROJ_INFO info;
     OPTARGS *o;
