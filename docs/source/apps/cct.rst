@@ -17,9 +17,9 @@ Synopsis
 
 or
 
-    **cct** [**-cIostvz** [args]] {operation_reference} file ...
+    **cct** [**-cIostvz** [args]] {object_definition} file ...
 
-Where {operation_reference} is one of the possibilities accepted
+Where {object_definition} is one of the possibilities accepted
 by :c:func:`proj_create`, provided it expresses a coordinate operation
 
     - a proj-string,
@@ -39,6 +39,15 @@ by :c:func:`proj_create`, provided it expresses a coordinate operation
         operations in :program:`cct`.
 
 
+or
+
+    **cct** [**-cIostvz** [args]] {object_reference} file ...
+
+where {object_reference} is a filename preceded by the '@' character.  The
+file referenced by the {object_reference} must contain a valid
+{object_definition}.
+
+    .. versionadded:: 8.0.0
 
 
 
@@ -184,6 +193,20 @@ Should give results comparable to the classic :program:`proj` command
 
     $ echo 12 56 100 2018.0 auxiliary data | cct +proj=merc
     1335833.8895   7522963.2411      100.0000     2018.0000 auxiliary data
+
+7. Coordinate operation referenced through its code
+
+.. code-block:: console
+
+    $ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct EPSG:8366
+    3541657.9112    948983.7503  5201383.2482     2020.5000
+
+8. Coordinate operation referenced through its name
+
+.. code-block:: console
+
+    $ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct "ITRF2014 to ETRF2014 (1)"
+    3541657.9112    948983.7503  5201383.2482     2020.5000
 
 Background
 **********

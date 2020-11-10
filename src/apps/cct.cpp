@@ -77,6 +77,8 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+
+#include <fstream> // std::ifstream
 #include <iostream>
 
 #include "proj.h"
@@ -293,20 +295,55 @@ int main(int argc, char **argv) {
 
     /* Setup transformation */
     if (o-> pargc == 0 && o->fargc > 0) {
-        /* Assume we got a auth:code combination */
         std::string input(o->fargv[0]);
+
+        if (!input.empty() && input[0] == '@') {
+            std::ifstream fs;
+            auto filename = input.substr(1);
+            fs.open(filename, std::fstream::in | std::fstream::binary);
+            if (!fs.is_open()) {
+                std::cerr << "cannot open " << filename << std::endl;
+                std::exit(1);
+            }
+            input.clear();
+            while (!fs.eof()) {
+                char buffer[256];
+                fs.read(buffer, sizeof(buffer));
+                input.append(buffer, static_cast<size_t>(fs.gcount()));
+                if (input.size() > 100 * 1000) {
+                    fs.close();
+                    std::cerr << "too big file " << filename << std::endl;
+                    std::exit(1);
+                }
+            }
+            fs.close();
+        }
+
+        /* Assume we got a auth:code combination */
         auto n = input.find(":");
         if (n > 0) {
             std::string auth = input.substr(0,n);
             std::string code = input.substr(n+1, input.length());
-            P = proj_create_from_database(
-                    nullptr, auth.c_str(), code.c_str(), PJ_CATEGORY_COORDINATE_OPERATION, 0, nullptr
-            );
+            // Check that the authority matches one of the known ones
+            auto authorityList = proj_get_authorities_from_database(nullptr);
+            if( authorityList )
+            {
+                for( auto iter = authorityList; *iter; iter++ )
+                {
+                    if( *iter == auth ) {
+                        P = proj_create_from_database(
+                                nullptr, auth.c_str(), code.c_str(),
+                                PJ_CATEGORY_COORDINATE_OPERATION, 0, nullptr);
+                        break;
+                    }
+                }
+                proj_string_list_destroy(authorityList);
+            }
         }
         if( P == nullptr ) {
             /* if we didn't get a auth:code combo we try to see if the input matches */
             /* anything else */
-            P = proj_create(nullptr, o->fargv[0]);
+            P = proj_create(nullptr, input.c_str());
         }
 
         /* If instantiating operation without +-options optargpm thinks the input is  */
