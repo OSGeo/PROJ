@@ -22,7 +22,7 @@ or
 Where {operation_reference} is one of the possibilities accepted
 by :c:func:`proj_create`, provided it expresses a coordinate operation
 
-- a proj-string,
+    - a proj-string,
     - a WKT string,
     - an object code (like "EPSG:1671" "urn:ogc:def:coordinateOperation:EPSG::1671"),
     - an object name. e.g "ITRF2014 to ETRF2014 (1)". In that case as
