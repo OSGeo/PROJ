@@ -32,6 +32,18 @@ echo "Testing cct -d 8 +proj=merc +R=1" >> ${OUT}
 echo "90 45" 0 | $EXE -d 8 +proj=merc +R=1 >>${OUT}
 echo "" >>${OUT}
 
+echo "Test cct with object code initialization" >> ${OUT}
+echo "3541657.3778 948984.2343 5201383.5231 2020.5" | $EXE EPSG:8366 >>${OUT}
+
+echo "Test cct with object name initialization" >> ${OUT}
+echo "3541657.3778 948984.2343 5201383.5231 2020.5" | $EXE "ITRF2014 to ETRF2014 (1)"  >>${OUT}
+
+echo "Test cct with object code initialization and file input" >> ${OUT}
+echo "3541657.3778 948984.2343 5201383.5231 2020.5" >> a
+echo "3541658.0000 948985.0000 5201384.0000 2020.5" >> b
+$EXE EPSG:8366 a b >>${OUT}
+/bin/rm a b
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testcct_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testcct_out.dist

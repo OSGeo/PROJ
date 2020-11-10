@@ -1,3 +1,10 @@
 Testing cct -d 8 +proj=merc +R=1
    1.57079633     0.88137359    0.00000000           inf
 
+Test cct with object code initialization
+ 3541657.9112    948983.7503  5201383.2482     2020.5000
+Test cct with object name initialization
+ 3541657.9112    948983.7503  5201383.2482     2020.5000
+Test cct with object code initialization and file input
+ 3541657.9112    948983.7503  5201383.2482     2020.5000
+ 3541658.5334    948984.5160  5201383.7251     2020.5000

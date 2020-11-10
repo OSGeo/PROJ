@@ -77,6 +77,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <iostream>
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -193,9 +194,8 @@ static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...) {
     free( msg_buf );
 }
 
-
 int main(int argc, char **argv) {
-    PJ *P;
+    PJ *P = nullptr;
     PJ_COORD point;
     PJ_PROJ_INFO info;
     OPTARGS *o;
@@ -292,8 +292,36 @@ int main(int argc, char **argv) {
     }
 
     /* Setup transformation */
-    P = proj_create_argv (nullptr, o->pargc, o->pargv);
-    if ((nullptr==P) || (0==o->pargc)) {
+    if (o-> pargc == 0 && o->fargc > 0) {
+        /* Assume we got a auth:code combination */
+        std::string input(o->fargv[0]);
+        auto n = input.find(":");
+        if (n > 0) {
+            std::string auth = input.substr(0,n);
+            std::string code = input.substr(n+1, input.length());
+            P = proj_create_from_database(
+                    nullptr, auth.c_str(), code.c_str(), PJ_CATEGORY_COORDINATE_OPERATION, 0, nullptr
+            );
+        }
+        if( P == nullptr ) {
+            /* if we didn't get a auth:code combo we try to see if the input matches */
+            /* anything else */
+            P = proj_create(nullptr, o->fargv[0]);
+        }
+
+        /* If instantiating operation without +-options optargpm thinks the input is  */
+        /* a file, hence we move all o->fargv entries one place closer to the start   */
+        /* of the array. This effectively overwrites the input and only leaves a list */
+        /* of files in o->fargv.                                                      */
+        o->fargc = o->fargc-1;
+        for (int j=0; j < o->fargc; j++) {
+            o->fargv[j] = o->fargv[j+1];
+        }
+    } else {
+        P = proj_create_argv (nullptr, o->pargc, o->pargv);
+    }
+
+    if (nullptr==P) {
         print (PJ_LOG_ERROR, "%s: Bad transformation arguments - (%s)\n    '%s -h' for help",
                  o->progname, pj_strerrno (proj_errno(P)), o->progname);
         free (o);
