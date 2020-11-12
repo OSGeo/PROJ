@@ -86,7 +86,10 @@ static PJ_XY stere_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
         sinphi = -sinphi;
         /*-fallthrough*/
     case N_POLE:
-        xy.x = Q->akm1 * pj_tsfn (lp.phi, sinphi, P->e);
+        if( fabs(lp.phi - M_HALFPI) < 1e-15 )
+            xy.x = 0;
+        else
+            xy.x = Q->akm1 * pj_tsfn (lp.phi, sinphi, P->e);
         xy.y = - xy.x * coslam;
         break;
     }
