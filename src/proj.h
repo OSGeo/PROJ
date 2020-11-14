@@ -119,6 +119,10 @@
 
 #include <stddef.h>  /* For size_t */
 
+#ifdef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+  #error "The proj_api.h header has been removed from PROJ with version 8.0.0"
+#endif
+
 #ifdef PROJ_RENAME_SYMBOLS
 #include "proj_symbol_rename.h"
 #endif
