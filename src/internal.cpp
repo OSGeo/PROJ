@@ -417,7 +417,7 @@ to that context.
 /*  logging  */
 
 /* pj_vlog resides in pj_log.c and relates to pj_log as vsprintf relates to sprintf */
-void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args );
+void pj_vlog( PJ_CONTEXT *ctx, int level, const char *fmt, va_list args );
 
 
 /***************************************************************************************/

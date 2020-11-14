@@ -240,8 +240,6 @@ struct PJ_AREA {
     double  north_lat_degree;
 };
 
-struct projCtx_t;
-typedef struct projCtx_t projCtx_t;
 
 /*****************************************************************************
 
@@ -352,7 +350,7 @@ struct PJconsts {
 
     **************************************************************************************/
 
-    projCtx_t *ctx = nullptr;
+    PJ_CONTEXT *ctx = nullptr;
     const char *descr = nullptr;   /* From pj_list.h or individual PJ_*.c file */
     paralist *params = nullptr;    /* Parameter list */
     char *def_full = nullptr;      /* Full textual definition (usually 0 - set by proj_pj_info) */
@@ -393,7 +391,7 @@ struct PJconsts {
     PJ_OPERATOR inv4d = nullptr;
 
     PJ_DESTRUCTOR destructor = nullptr;
-    void   (*reassign_context)(PJ*, projCtx_t *) = nullptr;
+    void   (*reassign_context)(PJ*, PJ_CONTEXT*) = nullptr;
 
 
     /*************************************************************************************
@@ -708,7 +706,7 @@ struct projFileApiCallbackAndData
 };
 
 /* proj thread context */
-struct projCtx_t {
+struct pj_ctx{
     int     last_errno = 0;
     int     debug_level = 0;
     void    (*logger)(void *, int, const char *) = nullptr;
@@ -745,18 +743,18 @@ struct projCtx_t {
     int pipelineInitRecursiongCounter = 0; // to avoid potential infinite recursion in pipeline.cpp
 
 
-    projCtx_t() = default;
-    projCtx_t(const projCtx_t&);
-    ~projCtx_t();
+    pj_ctx() = default;
+    pj_ctx(const pj_ctx&);
+    ~pj_ctx();
 
-    projCtx_t& operator= (const projCtx_t&) = delete;
+    pj_ctx& operator= (const pj_ctx&) = delete;
 
     projCppContext* get_cpp_context();
     void safeAutoCloseDbIfNeeded();
     void set_search_paths(const std::vector<std::string>& search_paths_in);
     void set_ca_bundle_path(const std::string& ca_bundle_path_in);
 
-    static projCtx_t createDefault();
+    static pj_ctx createDefault();
 };
 
 /* Generate pj_list external or make list from include file */
@@ -804,41 +802,41 @@ PJ *pj_projection_specific_setup_##name (PJ *P)
 
 /* procedure prototypes */
 double PROJ_DLL dmstor(const char *, char **);
-double dmstor_ctx(projCtx_t *ctx, const char *, char **);
+double dmstor_ctx(PJ_CONTEXT *ctx, const char *, char **);
 void   PROJ_DLL set_rtodms(int, int);
 char  PROJ_DLL *rtodms(char *, double, int, int);
 double PROJ_DLL adjlon(double);
-double aacos(projCtx_t *,double);
-double aasin(projCtx_t *,double);
+double aacos(PJ_CONTEXT *,double);
+double aasin(PJ_CONTEXT *,double);
 double asqrt(double);
 double aatan2(double, double);
 
-PROJVALUE PROJ_DLL pj_param(projCtx_t *ctx, paralist *, const char *);
+PROJVALUE PROJ_DLL pj_param(PJ_CONTEXT *ctx, paralist *, const char *);
 paralist PROJ_DLL *pj_param_exists (paralist *list, const char *parameter);
 paralist PROJ_DLL *pj_mkparam(const char *);
 paralist *pj_mkparam_ws (const char *str, const char **next_str);
 
 
-int PROJ_DLL pj_ell_set(projCtx_t *ctx, paralist *, double *, double *);
-int pj_datum_set(projCtx_t *,paralist *, PJ *);
+int PROJ_DLL pj_ell_set(PJ_CONTEXT *ctx, paralist *, double *, double *);
+int pj_datum_set(PJ_CONTEXT *,paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
 
 paralist *pj_clone_paralist( const paralist* );
 paralist *pj_search_initcache( const char *filekey );
 void      pj_insert_initcache( const char *filekey, const paralist *list);
-paralist *pj_expand_init(projCtx_t *ctx, paralist *init);
+paralist *pj_expand_init(PJ_CONTEXT *ctx, paralist *init);
 
-void     *pj_dealloc_params (projCtx_t *ctx, paralist *start, int errlev);
+void     *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev);
 
 
 double *pj_enfn(double);
 double  pj_mlfn(double, double, double, const double *);
-double  pj_inv_mlfn(projCtx_t *, double, double, const double *);
+double  pj_inv_mlfn(PJ_CONTEXT *, double, double, const double *);
 double  pj_qsfn(double, double, double);
 double  pj_tsfn(double, double, double);
 double  pj_msfn(double, double, double);
-double  PROJ_DLL pj_phi2(projCtx_t *, const double, const double);
-double  pj_sinhpsi2tanphi(projCtx_t *, const double, const double);
+double  PROJ_DLL pj_phi2(PJ_CONTEXT *, const double, const double);
+double  pj_sinhpsi2tanphi(PJ_CONTEXT *, const double, const double);
 double  pj_qsfn_(double, PJ *);
 double *pj_authset(double);
 double  pj_authlat(double, double *);
@@ -851,10 +849,10 @@ int pj_factors(PJ_LP, const PJ *, double, struct FACTORS *);
 
 void  *proj_mdist_ini(double);
 double proj_mdist(double, double, double, const void *);
-double proj_inv_mdist(projCtx_t *ctx, double, const void *);
+double proj_inv_mdist(PJ_CONTEXT *ctx, double, const void *);
 void  *pj_gauss_ini(double, double, double *,double *);
-PJ_LP     pj_gauss(projCtx_t *, PJ_LP, const void *);
-PJ_LP     pj_inv_gauss(projCtx_t *, PJ_LP, const void *);
+PJ_LP     pj_gauss(PJ_CONTEXT *, PJ_LP, const void *);
+PJ_LP     pj_inv_gauss(PJ_CONTEXT *, PJ_LP, const void *);
 
 struct PJ_DATUMS           PROJ_DLL *pj_get_datums_ref( void );
 
@@ -865,7 +863,7 @@ double PROJ_DLL pj_atof( const char* nptr );
 double pj_strtod( const char *nptr, char **endptr );
 void   pj_freeup_plain (PJ *P);
 
-PJ* pj_init_ctx_with_allow_init_epsg( projCtx_t *ctx, int argc, char **argv, int allow_init_epsg );
+PJ* pj_init_ctx_with_allow_init_epsg( PJ_CONTEXT *ctx, int argc, char **argv, int allow_init_epsg );
 
 std::string PROJ_DLL pj_add_type_crs_if_needed(const std::string& str);
 std::string pj_double_quote_string_param_if_needed(const std::string& str);
@@ -921,10 +919,6 @@ PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial);
 #define DEG_TO_RAD   .017453292519943296
 
 
-#if defined(PROJ_H)
-#define PROJ_API_H_NOT_INVOKED_AS_PRIMARY_API
-#endif
-
 
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
@@ -938,33 +932,12 @@ PROJ_DLL extern int pj_errno;    /* global error return code */
 #define PJ_LOG_DEBUG_MINOR 3
 #endif
 
-#ifdef PROJ_API_H_NOT_INVOKED_AS_PRIMARY_API
-    /* These make the function declarations below conform with classic proj */
-    typedef PJ *projPJ;          /* projPJ is a pointer to PJ */
-    typedef struct projCtx_t *projCtx;  /* projCtx is a pointer to projCtx_t */
-#   define projXY       PJ_XY
-#   define projLP       PJ_LP
-#   define projXYZ      PJ_XYZ
-#   define projLPZ      PJ_LPZ
-
-#else
-    /* i.e. proj_api invoked as primary API */
-    typedef struct { double u, v; } projUV;
-    typedef struct { double u, v, w; } projUVW;
-    typedef void *projPJ;
-    #define projXY projUV
-    #define projLP projUV
-    #define projXYZ projUVW
-    #define projLPZ projUVW
-    typedef void *projCtx;
-#endif
-
 
 /* If included *after* proj.h finishes, we have alternative names */
 /* file reading api, like stdio */
 typedef int *PAFile;
 typedef struct projFileAPI_t {
-    PAFile  (*FOpen)(projCtx ctx, const char *filename, const char *access);
+    PAFile  (*FOpen)(PJ_CONTEXT * ctx, const char *filename, const char *access);
     size_t  (*FRead)(void *buffer, size_t size, size_t nmemb, PAFile file);
     int     (*FSeek)(PAFile file, long offset, int whence);
     long    (*FTell)(PAFile file);
@@ -975,34 +948,34 @@ typedef struct projFileAPI_t {
 
 /* procedure prototypes */
 
-projCtx PROJ_DLL pj_get_default_ctx(void);
-projCtx PROJ_DLL pj_get_ctx( projPJ );
+PJ_CONTEXT PROJ_DLL *pj_get_default_ctx(void);
+PJ_CONTEXT PROJ_DLL *pj_get_ctx( PJ *);
 
-projXY PROJ_DLL pj_fwd(projLP, projPJ);
-projLP PROJ_DLL pj_inv(projXY, projPJ);
+PJ_XY PROJ_DLL pj_fwd(PJ_LP, PJ *);
+PJ_LP PROJ_DLL pj_inv(PJ_XY, PJ *);
 
-projXYZ PROJ_DLL pj_fwd3d(projLPZ, projPJ);
-projLPZ PROJ_DLL pj_inv3d(projXYZ, projPJ);
+PJ_XYZ PROJ_DLL pj_fwd3d(PJ_LPZ, PJ *);
+PJ_LPZ PROJ_DLL pj_inv3d(PJ_XYZ, PJ *);
 
 
-int PROJ_DLL pj_apply_gridshift( projCtx, const char *, int,
+int PROJ_DLL pj_apply_gridshift( PJ_CONTEXT *, const char *, int,
                         long point_count, int point_offset,
                         double *x, double *y, double *z );
 void PROJ_DLL pj_clear_initcache(void);
-int PROJ_DLL pj_is_latlong(projPJ);
-int PROJ_DLL pj_is_geocent(projPJ);
-void PROJ_DLL pj_get_spheroid_defn(projPJ defn, double *major_axis, double *eccentricity_squared);
-void PROJ_DLL pj_pr_list(projPJ);
-void PROJ_DLL pj_free(projPJ);
+int PROJ_DLL pj_is_latlong(PJ *);
+int PROJ_DLL pj_is_geocent(PJ *);
+void PROJ_DLL pj_get_spheroid_defn(PJ *defn, double *major_axis, double *eccentricity_squared);
+void PROJ_DLL pj_pr_list(PJ *);
+void PROJ_DLL pj_free(PJ *);
 void PROJ_DLL pj_set_finder( const char *(*)(const char *) );
 void PROJ_DLL pj_set_searchpath ( int count, const char **path );
-projPJ PROJ_DLL pj_init(int, char **);
-projPJ PROJ_DLL pj_init_plus(const char *);
-projPJ PROJ_DLL pj_init_ctx( projCtx, int, char ** );
-projPJ PROJ_DLL pj_init_plus_ctx( projCtx, const char * );
-char PROJ_DLL *pj_get_def(projPJ, int);
-projPJ PROJ_DLL pj_latlong_from_proj( projPJ );
-int PROJ_DLL pj_has_inverse(projPJ);
+PJ PROJ_DLL *pj_init(int, char **);
+PJ PROJ_DLL *pj_init_plus(const char *);
+PJ PROJ_DLL *pj_init_ctx( PJ_CONTEXT *, int, char ** );
+PJ PROJ_DLL *pj_init_plus_ctx( PJ_CONTEXT *, const char * );
+char PROJ_DLL *pj_get_def(PJ *, int);
+PJ PROJ_DLL *pj_latlong_from_proj( PJ *);
+int PROJ_DLL pj_has_inverse(PJ *);
 
 
 void PROJ_DLL *pj_malloc(size_t);
@@ -1017,33 +990,33 @@ void PROJ_DLL pj_acquire_lock(void);
 void PROJ_DLL pj_release_lock(void);
 void PROJ_DLL pj_cleanup_lock(void);
 
-void PROJ_DLL pj_set_ctx( projPJ, projCtx );
-projCtx PROJ_DLL pj_ctx_alloc(void);
-void    PROJ_DLL pj_ctx_free( projCtx );
-int PROJ_DLL pj_ctx_get_errno( projCtx );
-void PROJ_DLL pj_ctx_set_errno( projCtx, int );
-void PROJ_DLL pj_ctx_set_debug( projCtx, int );
-void PROJ_DLL pj_ctx_set_logger( projCtx, void (*)(void *, int, const char *) );
-void PROJ_DLL pj_ctx_set_app_data( projCtx, void * );
-void PROJ_DLL *pj_ctx_get_app_data( projCtx );
-void PROJ_DLL pj_ctx_set_fileapi( projCtx, projFileAPI *);
-projFileAPI PROJ_DLL  *pj_ctx_get_fileapi( projCtx );
+void PROJ_DLL pj_set_ctx( PJ *, PJ_CONTEXT * );
+PJ_CONTEXT PROJ_DLL *pj_ctx_alloc(void);
+void    PROJ_DLL pj_ctx_free( PJ_CONTEXT * );
+int PROJ_DLL pj_ctx_get_errno( PJ_CONTEXT * );
+void PROJ_DLL pj_ctx_set_errno( PJ_CONTEXT *, int );
+void PROJ_DLL pj_ctx_set_debug( PJ_CONTEXT *, int );
+void PROJ_DLL pj_ctx_set_logger( PJ_CONTEXT *, void (*)(void *, int, const char *) );
+void PROJ_DLL pj_ctx_set_app_data( PJ_CONTEXT *, void * );
+void PROJ_DLL *pj_ctx_get_app_data( PJ_CONTEXT * );
+void PROJ_DLL pj_ctx_set_fileapi( PJ_CONTEXT *, projFileAPI *);
+projFileAPI PROJ_DLL  *pj_ctx_get_fileapi( PJ_CONTEXT * );
 
-void PROJ_DLL pj_log( projCtx ctx, int level, const char *fmt, ... );
+void PROJ_DLL pj_log( PJ_CONTEXT * ctx, int level, const char *fmt, ... );
 void PROJ_DLL pj_stderr_logger( void *, int, const char * );
 
 /* file api */
 projFileAPI PROJ_DLL  *pj_get_default_fileapi(void);
 
-PAFile PROJ_DLL pj_ctx_fopen(projCtx ctx, const char *filename, const char *access);
-size_t PROJ_DLL pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile file);
-int    PROJ_DLL pj_ctx_fseek(projCtx ctx, PAFile file, long offset, int whence);
-long   PROJ_DLL pj_ctx_ftell(projCtx ctx, PAFile file);
-void   PROJ_DLL pj_ctx_fclose(projCtx ctx, PAFile file);
-char  PROJ_DLL *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file);
+PAFile PROJ_DLL pj_ctx_fopen(PJ_CONTEXT * ctx, const char *filename, const char *access);
+size_t PROJ_DLL pj_ctx_fread(PJ_CONTEXT * ctx, void *buffer, size_t size, size_t nmemb, PAFile file);
+int    PROJ_DLL pj_ctx_fseek(PJ_CONTEXT * ctx, PAFile file, long offset, int whence);
+long   PROJ_DLL pj_ctx_ftell(PJ_CONTEXT * ctx, PAFile file);
+void   PROJ_DLL pj_ctx_fclose(PJ_CONTEXT * ctx, PAFile file);
+char  PROJ_DLL *pj_ctx_fgets(PJ_CONTEXT * ctx, char *line, int size, PAFile file);
 
-PAFile PROJ_DLL pj_open_lib(projCtx, const char *, const char *);
-int PROJ_DLL pj_find_file(projCtx ctx, const char *short_filename,
+PAFile PROJ_DLL pj_open_lib(PJ_CONTEXT *, const char *, const char *);
+int PROJ_DLL pj_find_file(PJ_CONTEXT * ctx, const char *short_filename,
                  char* out_full_filename, size_t out_full_filename_size);
 
 

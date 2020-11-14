@@ -15,7 +15,7 @@ inline static double inline_pj_mlfn(double phi, double sphi, double cphi, const 
 }
 
 inline static double
-inline_pj_inv_mlfn(projCtx ctx, double arg, double es, const double *en,
+inline_pj_inv_mlfn(PJ_CONTEXT *ctx, double arg, double es, const double *en,
                    double* sinphi, double* cosphi) {
     const double k = 1./(1.-es);
     constexpr double INV_MLFN_EPS = 1e-11;

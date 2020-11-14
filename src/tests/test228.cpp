@@ -50,9 +50,9 @@ static volatile int started = 0;
 
 static void* thread_main(void* unused)
 {
-    projCtx p_proj_ctxt;
-    projPJ p_WGS84_proj;
-    projPJ p_OSGB36_proj;
+    PJ_CONTEXT *p_proj_ctxt;
+    PJ *p_WGS84_proj;
+    PJ * p_OSGB36_proj;
     (void)unused;
 
     __sync_add_and_fetch(&started, 1);

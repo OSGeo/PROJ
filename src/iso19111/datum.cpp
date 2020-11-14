@@ -417,7 +417,7 @@ std::string
 PrimeMeridian::getPROJStringWellKnownName(const common::Angle &angle) {
     const double valRad = angle.getSIValue();
     std::string projPMName;
-    projCtx ctxt = pj_ctx_alloc();
+    PJ_CONTEXT *ctxt = pj_ctx_alloc();
     auto proj_pm = proj_list_prime_meridians();
     for (int i = 0; proj_pm[i].id != nullptr; ++i) {
         double valRefRad = dmstor_ctx(ctxt, proj_pm[i].defn, nullptr);

@@ -172,7 +172,7 @@ static TestItem test_list[] = {
 
 static volatile int active_thread_count = 0;
 
-static projPJ custom_pj_init_plus_ctx(projCtx ctx, const char* def)
+static PJ *custom_pj_init_plus_ctx(PJ_CONTEXT *ctx, const char* def)
 {
     return pj_init_plus_ctx(ctx, def);
 }
@@ -191,11 +191,12 @@ static void TestThread()
 /* -------------------------------------------------------------------- */
 /*      Initialize coordinate system definitions.                       */
 /* -------------------------------------------------------------------- */
-    projPJ *src_pj_list, *dst_pj_list;
-    projCtx ctx = pj_ctx_alloc();
+    PJ **src_pj_list;
+    PJ **dst_pj_list;
+    PJ_CONTEXT *ctx = pj_ctx_alloc();
 
-    src_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
-    dst_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
+    src_pj_list = (PJ **) calloc(test_count,sizeof(PJ));
+    dst_pj_list = (PJ **) calloc(test_count,sizeof(PJ));
 
     if(!reinit_every_iteration)
     {
@@ -345,7 +346,8 @@ static int do_main(void)
     {
         TestItem *test = test_list + i;
 
-        projPJ src_pj, dst_pj;
+        PJ *src_pj;
+        PJ *dst_pj;
 
         src_pj = custom_pj_init_plus_ctx( pj_get_default_ctx(), test->src_def );
         dst_pj = custom_pj_init_plus_ctx( pj_get_default_ctx(), test->dst_def );

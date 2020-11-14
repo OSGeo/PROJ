@@ -415,7 +415,7 @@ pj_init_plus( const char *definition )
 }
 
 PJ *
-pj_init_plus_ctx( projCtx ctx, const char *definition )
+pj_init_plus_ctx( PJ_CONTEXT *ctx, const char *definition )
 {
 #define MAX_ARG 200
     char	*argv[MAX_ARG];
@@ -511,7 +511,7 @@ static PJ_CONSTRUCTOR locate_constructor (const char *name) {
 
 
 PJ *
-pj_init_ctx(projCtx ctx, int argc, char **argv) {
+pj_init_ctx(PJ_CONTEXT *ctx, int argc, char **argv) {
     /* Legacy interface: allow init=epsg:XXXX syntax by default */
     int allow_init_epsg = proj_context_get_use_proj4_init_rules(ctx, TRUE);
     return pj_init_ctx_with_allow_init_epsg(ctx, argc, argv, allow_init_epsg);
@@ -519,7 +519,7 @@ pj_init_ctx(projCtx ctx, int argc, char **argv) {
 
 
 PJ *
-pj_init_ctx_with_allow_init_epsg(projCtx ctx, int argc, char **argv, int allow_init_epsg) {
+pj_init_ctx_with_allow_init_epsg(PJ_CONTEXT *ctx, int argc, char **argv, int allow_init_epsg) {
     const char *s;
     char *name;
     PJ_CONSTRUCTOR proj;

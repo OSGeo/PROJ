@@ -2948,7 +2948,7 @@ static PJ_LP pj_hgrid_interpolate(PJ_LP t, const HorizontalShiftGrid *grid,
 #define MAX_ITERATIONS 10
 #define TOL 1e-12
 
-static PJ_LP pj_hgrid_apply_internal(projCtx ctx, PJ_LP in,
+static PJ_LP pj_hgrid_apply_internal(PJ_CONTEXT *ctx, PJ_LP in,
                                      PJ_DIRECTION direction,
                                      const HorizontalShiftGrid *grid,
                                      HorizontalShiftGridSet *gridset,
@@ -3452,7 +3452,7 @@ NS_PROJ_END
 /*      it to honour our public api.                                    */
 /************************************************************************/
 
-int pj_apply_gridshift(projCtx ctx, const char *nadgrids, int inverse,
+int pj_apply_gridshift(PJ_CONTEXT *ctx, const char *nadgrids, int inverse,
                        long point_count, int point_offset, double *x, double *y,
                        double * /*z */)
 

@@ -151,7 +151,7 @@ paralist *pj_param_exists (paralist *list, const char *parameter) {
 /*                                                                      */
 /************************************************************************/
 
-PROJVALUE pj_param (projCtx ctx, paralist *pl, const char *opt) {
+PROJVALUE pj_param (PJ_CONTEXT *ctx, paralist *pl, const char *opt) {
 
     int type;
     unsigned l;

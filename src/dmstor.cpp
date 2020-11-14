@@ -26,7 +26,7 @@ dmstor(const char *is, char **rs) {
 }
 
 	double
-dmstor_ctx(projCtx ctx, const char *is, char **rs) {
+dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 	int sign, n, nl;
 	char *s, work[MAX_WORK];
         const char* p;

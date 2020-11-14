@@ -94,13 +94,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
     }
     second_newline[0] = 0;
     char* third_line = second_newline + 1;
-    projPJ pj_src = pj_init_plus(first_line);
+    PJ *pj_src = pj_init_plus(first_line);
     if( !pj_src )
     {
         free(buf_dup);
         return 0;
     }
-    projPJ pj_dst = pj_init_plus(second_line);
+    PJ *pj_dst = pj_init_plus(second_line);
     if( !pj_dst )
     {
         free(buf_dup);

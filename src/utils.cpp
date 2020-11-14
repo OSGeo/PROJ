@@ -172,7 +172,7 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
 /*      b = a * sqrt(1 - es)                                            */
 /************************************************************************/
 
-void pj_get_spheroid_defn(projPJ defn, double *major_axis, double *eccentricity_squared)
+void pj_get_spheroid_defn(PJ * defn, double *major_axis, double *eccentricity_squared)
 {
 	if ( major_axis )
 		*major_axis = defn->a;

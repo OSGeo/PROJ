@@ -36,7 +36,7 @@
 #include "proj_internal.h"
 #include "filemanager.hpp"
 
-static PAFile stdio_fopen(projCtx ctx, const char *filename,
+static PAFile stdio_fopen(PJ_CONTEXT *ctx, const char *filename,
                              const char *access);
 static size_t stdio_fread(void *buffer, size_t size, size_t nmemb,
                              PAFile file);
@@ -53,7 +53,7 @@ static projFileAPI default_fileapi = {
 };
 
 typedef struct {
-    projCtx ctx;
+    PJ_CONTEXT *ctx;
     FILE *fp;
 } stdio_pafile;
 
@@ -70,7 +70,7 @@ projFileAPI *pj_get_default_fileapi(void)
 /*                           stdio_fopen()                           */
 /************************************************************************/
 
-static PAFile stdio_fopen(projCtx ctx, const char *filename,
+static PAFile stdio_fopen(PJ_CONTEXT *ctx, const char *filename,
                              const char *access)
 {
     stdio_pafile *pafile;
@@ -140,7 +140,7 @@ static void stdio_fclose(PAFile file)
 /*      Open a file using the provided file io hooks.                   */
 /************************************************************************/
 
-PAFile pj_ctx_fopen(projCtx ctx, const char *filename, const char *access)
+PAFile pj_ctx_fopen(PJ_CONTEXT *ctx, const char *filename, const char *access)
 {
     return ctx->fileapi_legacy->FOpen(ctx, filename, access);
 }
@@ -148,7 +148,7 @@ PAFile pj_ctx_fopen(projCtx ctx, const char *filename, const char *access)
 /************************************************************************/
 /*                            pj_ctx_fread()                            */
 /************************************************************************/
-size_t pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile file)
+size_t pj_ctx_fread(PJ_CONTEXT *ctx, void *buffer, size_t size, size_t nmemb, PAFile file)
 {
     return ctx->fileapi_legacy->FRead(buffer, size, nmemb, file);
 }
@@ -156,7 +156,7 @@ size_t pj_ctx_fread(projCtx ctx, void *buffer, size_t size, size_t nmemb, PAFile
 /************************************************************************/
 /*                            pj_ctx_fseek()                            */
 /************************************************************************/
-int    pj_ctx_fseek(projCtx ctx, PAFile file, long offset, int whence)
+int    pj_ctx_fseek(PJ_CONTEXT *ctx, PAFile file, long offset, int whence)
 {
     return ctx->fileapi_legacy->FSeek(file, offset, whence);
 }
@@ -164,7 +164,7 @@ int    pj_ctx_fseek(projCtx ctx, PAFile file, long offset, int whence)
 /************************************************************************/
 /*                            pj_ctx_ftell()                            */
 /************************************************************************/
-long   pj_ctx_ftell(projCtx ctx, PAFile file)
+long   pj_ctx_ftell(PJ_CONTEXT *ctx, PAFile file)
 {
     return ctx->fileapi_legacy->FTell(file);
 }
@@ -172,7 +172,7 @@ long   pj_ctx_ftell(projCtx ctx, PAFile file)
 /************************************************************************/
 /*                           pj_ctx_fclose()                            */
 /************************************************************************/
-void   pj_ctx_fclose(projCtx ctx, PAFile file)
+void   pj_ctx_fclose(PJ_CONTEXT *ctx, PAFile file)
 {
     ctx->fileapi_legacy->FClose(file);
 }
@@ -185,7 +185,7 @@ void   pj_ctx_fclose(projCtx ctx, PAFile file)
 /*      taken.                                                          */
 /************************************************************************/
 
-char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
+char *pj_ctx_fgets(PJ_CONTEXT *ctx, char *line, int size, PAFile file)
 {
     long start = pj_ctx_ftell(ctx, file);
     size_t bytes_read;
@@ -218,7 +218,7 @@ char *pj_ctx_fgets(projCtx ctx, char *line, int size, PAFile file)
 /*                         pj_ctx_set_fileapi()                         */
 /************************************************************************/
 
-void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
+void pj_ctx_set_fileapi( PJ_CONTEXT *ctx, projFileAPI *fileapi )
 
 {
     if (nullptr==ctx)
@@ -230,7 +230,7 @@ void pj_ctx_set_fileapi( projCtx ctx, projFileAPI *fileapi )
 /*                         pj_ctx_get_fileapi()                         */
 /************************************************************************/
 
-projFileAPI *pj_ctx_get_fileapi( projCtx ctx )
+projFileAPI *pj_ctx_get_fileapi( PJ_CONTEXT *ctx )
 
 {
     if (nullptr==ctx)

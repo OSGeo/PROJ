@@ -340,9 +340,9 @@ typedef enum PJ_LOG_LEVEL {
 typedef void (*PJ_LOG_FUNCTION)(void *, int, const char *);
 
 
-/* The context type - properly namespaced synonym for projCtx */
-struct projCtx_t;
-typedef struct projCtx_t PJ_CONTEXT;
+/* The context type - properly namespaced synonym for pj_ctx */
+struct pj_ctx;
+typedef struct pj_ctx PJ_CONTEXT;
 
 /* A P I */
 

@@ -609,7 +609,7 @@ int pj_ell_set (PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
 
 
 /**************************************************************************************/
-int pj_ell_set (projCtx ctx, paralist *pl, double *a, double *es) {
+int pj_ell_set (PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
 /***************************************************************************************
     Initialize ellipsoidal parameters: This is the original ellipsoid setup
     function by Gerald Evenden - significantly more compact than pj_ellipsoid and

@@ -38,7 +38,7 @@
 /*                            pj_datum_set()                            */
 /************************************************************************/
 
-int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
+int pj_datum_set(PJ_CONTEXT *ctx, paralist *pl, PJ *projdef)
 
 {
     const char *name, *towgs84, *nadgrids;

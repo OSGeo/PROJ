@@ -1445,8 +1445,8 @@ static bool dontReadUserWritableDirectory() {
 }
 
 static void *
-pj_open_lib_internal(projCtx ctx, const char *name, const char *mode,
-                     void *(*open_file)(projCtx, const char *, const char *),
+pj_open_lib_internal(PJ_CONTEXT *ctx, const char *name, const char *mode,
+                     void *(*open_file)(PJ_CONTEXT *, const char *, const char *),
                      char *out_full_filename, size_t out_full_filename_size) {
     try {
         std::string fname;
@@ -1617,7 +1617,7 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
 /*                  pj_open_file_with_manager()                         */
 /************************************************************************/
 
-static void *pj_open_file_with_manager(projCtx ctx, const char *name,
+static void *pj_open_file_with_manager(PJ_CONTEXT *ctx, const char *name,
                                        const char * /* mode */) {
     return NS_PROJ::FileManager::open(ctx, name, NS_PROJ::FileAccess::READ_ONLY)
         .release();
@@ -1639,7 +1639,7 @@ static NS_PROJ::io::DatabaseContextPtr getDBcontext(PJ_CONTEXT *ctx) {
 /************************************************************************/
 
 std::unique_ptr<NS_PROJ::File>
-NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
+NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
 
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
@@ -1735,13 +1735,13 @@ NS_PROJ::FileManager::open_resource_file(projCtx ctx, const char *name) {
 #ifndef REMOVE_LEGACY_SUPPORT
 
 // Used by following legacy function
-static void *pj_ctx_fopen_adapter(projCtx ctx, const char *name,
+static void *pj_ctx_fopen_adapter(PJ_CONTEXT *ctx, const char *name,
                                   const char *mode) {
     return pj_ctx_fopen(ctx, name, mode);
 }
 
 // Legacy function
-PAFile pj_open_lib(projCtx ctx, const char *name, const char *mode) {
+PAFile pj_open_lib(PJ_CONTEXT *ctx, const char *name, const char *mode) {
     return (PAFile)pj_open_lib_internal(ctx, name, mode, pj_ctx_fopen_adapter,
                                         nullptr, 0);
 }
@@ -1764,7 +1764,7 @@ PAFile pj_open_lib(projCtx ctx, const char *name, const char *mode) {
  * @param out_full_filename_size size of out_full_filename.
  * @return 1 if the file was found, 0 otherwise.
  */
-int pj_find_file(projCtx ctx, const char *short_filename,
+int pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
                  char *out_full_filename, size_t out_full_filename_size) {
     auto file = std::unique_ptr<NS_PROJ::File>(
         reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
@@ -1812,7 +1812,7 @@ static std::string trim(const std::string &s) {
 /*                            pj_load_ini()                             */
 /************************************************************************/
 
-void pj_load_ini(projCtx ctx) {
+void pj_load_ini(PJ_CONTEXT *ctx) {
     if (ctx->iniFileLoaded)
         return;
 
