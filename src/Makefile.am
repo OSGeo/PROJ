@@ -220,7 +220,7 @@ libproj_la_SOURCES = \
 	generic_inverse.cpp \
 	quadtree.hpp \
 	\
-	datums.cpp datum_set.cpp transform.cpp \
+	datums.cpp datum_set.cpp \
 	utils.cpp \
 	mutex.cpp initcache.cpp geodesic.c \
 	strtod.cpp \

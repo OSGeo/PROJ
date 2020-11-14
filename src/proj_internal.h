@@ -985,21 +985,9 @@ projXYZ PROJ_DLL pj_fwd3d(projLPZ, projPJ);
 projLPZ PROJ_DLL pj_inv3d(projXYZ, projPJ);
 
 
-int PROJ_DLL pj_transform( projPJ src, projPJ dst, long point_count, int point_offset,
-                  double *x, double *y, double *z );
-int PROJ_DLL pj_datum_transform( projPJ src, projPJ dst, long point_count, int point_offset,
-                        double *x, double *y, double *z );
-int PROJ_DLL pj_geocentric_to_geodetic( double a, double es,
-                               long point_count, int point_offset,
-                               double *x, double *y, double *z );
-int PROJ_DLL pj_geodetic_to_geocentric( double a, double es,
-                               long point_count, int point_offset,
-                               double *x, double *y, double *z );
-int PROJ_DLL pj_compare_datums( projPJ srcdefn, projPJ dstdefn );
 int PROJ_DLL pj_apply_gridshift( projCtx, const char *, int,
                         long point_count, int point_offset,
                         double *x, double *y, double *z );
-void PROJ_DLL pj_deallocate_grids(void);
 void PROJ_DLL pj_clear_initcache(void);
 int PROJ_DLL pj_is_latlong(projPJ);
 int PROJ_DLL pj_is_geocent(projPJ);

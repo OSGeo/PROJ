@@ -9,8 +9,7 @@ AM_CXXFLAGS = @CXX_WFLAGS@ @NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG@
 
 PROJ_LIB ?= ../../data/for_tests
 
-noinst_PROGRAMS = pj_transform_test
-noinst_PROGRAMS += pj_phi2_test
+noinst_PROGRAMS = pj_phi2_test
 noinst_PROGRAMS += proj_errno_string_test
 noinst_PROGRAMS += proj_angular_io_test
 noinst_PROGRAMS += proj_context_test
@@ -21,11 +20,6 @@ noinst_PROGRAMS += test_network
 noinst_PROGRAMS += test_defmodel
 noinst_PROGRAMS += test_tinshift
 
-pj_transform_test_SOURCES = pj_transform_test.cpp main.cpp
-pj_transform_test_LDADD = ../../src/libproj.la @GTEST_LIBS@
-
-pj_transform_test-check: pj_transform_test
-	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) ./pj_transform_test
 
 pj_phi2_test_SOURCES = pj_phi2_test.cpp main.cpp
 pj_phi2_test_LDADD = ../../src/libproj.la @GTEST_LIBS@
@@ -84,6 +78,6 @@ test_tinshift_LDADD = ../../src/libproj.la @GTEST_LIBS@
 test_tinshift-check: test_tinshift
 	PROJ_LIB=$(PROJ_LIB) ./test_tinshift
 
-check-local: pj_transform_test-check pj_phi2_test-check proj_errno_string_test-check \
+check-local: pj_phi2_test-check proj_errno_string_test-check \
 		proj_angular_io_test-check proj_context_test-check test_cpp_api-check \
 		gie_self_tests-check test_network-check test_defmodel-check test_tinshift-check

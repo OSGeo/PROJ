@@ -246,7 +246,6 @@ set(SRC_LIBPROJ_CORE
   rtodms.cpp
   strerrno.cpp
   strtod.cpp
-  transform.cpp
   tsfn.cpp
   units.cpp
   utils.cpp
