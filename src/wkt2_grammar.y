@@ -1073,6 +1073,7 @@ map_projection_parameter: parameter_keyword left_delimiter parameter_name
                           right_delimiter
 
 opt_separator_param_unit_identifier_list:
+  | wkt_separator identifier opt_separator_identifier_list
   | wkt_separator map_projection_parameter_unit opt_separator_identifier_list
 
 parameter_keyword: T_PARAMETER
