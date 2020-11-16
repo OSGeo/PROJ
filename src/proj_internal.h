@@ -711,7 +711,6 @@ struct pj_ctx{
     int     debug_level = 0;
     void    (*logger)(void *, int, const char *) = nullptr;
     void    *logger_app_data = nullptr;
-    struct projFileAPI_t *fileapi_legacy = nullptr; // for proj_api.h legacy API
     struct projCppContext* cpp_context = nullptr; /* internal context for C++ code */
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
@@ -933,19 +932,6 @@ PROJ_DLL extern int pj_errno;    /* global error return code */
 #endif
 
 
-/* If included *after* proj.h finishes, we have alternative names */
-/* file reading api, like stdio */
-typedef int *PAFile;
-typedef struct projFileAPI_t {
-    PAFile  (*FOpen)(PJ_CONTEXT * ctx, const char *filename, const char *access);
-    size_t  (*FRead)(void *buffer, size_t size, size_t nmemb, PAFile file);
-    int     (*FSeek)(PAFile file, long offset, int whence);
-    long    (*FTell)(PAFile file);
-    void    (*FClose)(PAFile);
-} projFileAPI;
-
-
-
 /* procedure prototypes */
 
 PJ_CONTEXT PROJ_DLL *pj_get_default_ctx(void);
@@ -999,23 +985,10 @@ void PROJ_DLL pj_ctx_set_debug( PJ_CONTEXT *, int );
 void PROJ_DLL pj_ctx_set_logger( PJ_CONTEXT *, void (*)(void *, int, const char *) );
 void PROJ_DLL pj_ctx_set_app_data( PJ_CONTEXT *, void * );
 void PROJ_DLL *pj_ctx_get_app_data( PJ_CONTEXT * );
-void PROJ_DLL pj_ctx_set_fileapi( PJ_CONTEXT *, projFileAPI *);
-projFileAPI PROJ_DLL  *pj_ctx_get_fileapi( PJ_CONTEXT * );
 
 void PROJ_DLL pj_log( PJ_CONTEXT * ctx, int level, const char *fmt, ... );
 void PROJ_DLL pj_stderr_logger( void *, int, const char * );
 
-/* file api */
-projFileAPI PROJ_DLL  *pj_get_default_fileapi(void);
-
-PAFile PROJ_DLL pj_ctx_fopen(PJ_CONTEXT * ctx, const char *filename, const char *access);
-size_t PROJ_DLL pj_ctx_fread(PJ_CONTEXT * ctx, void *buffer, size_t size, size_t nmemb, PAFile file);
-int    PROJ_DLL pj_ctx_fseek(PJ_CONTEXT * ctx, PAFile file, long offset, int whence);
-long   PROJ_DLL pj_ctx_ftell(PJ_CONTEXT * ctx, PAFile file);
-void   PROJ_DLL pj_ctx_fclose(PJ_CONTEXT * ctx, PAFile file);
-char  PROJ_DLL *pj_ctx_fgets(PJ_CONTEXT * ctx, char *line, int size, PAFile file);
-
-PAFile PROJ_DLL pj_open_lib(PJ_CONTEXT *, const char *, const char *);
 int PROJ_DLL pj_find_file(PJ_CONTEXT * ctx, const char *short_filename,
                  char* out_full_filename, size_t out_full_filename_size);
 

@@ -216,7 +216,6 @@ libproj_la_SOURCES = \
 	qsfn.cpp strerrno.cpp \
 	tsfn.cpp units.cpp ctx.cpp log.cpp zpoly1.cpp rtodms.cpp \
 	release.cpp gauss.cpp \
-	fileapi.cpp \
 	generic_inverse.cpp \
 	quadtree.hpp \
 	\

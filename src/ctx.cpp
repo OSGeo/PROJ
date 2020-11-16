@@ -100,7 +100,6 @@ pj_ctx pj_ctx::createDefault()
     pj_ctx ctx;
     ctx.debug_level = PJ_LOG_NONE;
     ctx.logger = pj_stderr_logger;
-    ctx.fileapi_legacy = pj_get_default_fileapi();
     NS_PROJ::FileManager::fillDefaultNetworkInterface(&ctx);
 
     if( getenv("PROJ_DEBUG") != nullptr )
@@ -170,7 +169,6 @@ pj_ctx::pj_ctx(const pj_ctx& other) :
     debug_level(other.debug_level),
     logger(other.logger),
     logger_app_data(other.logger_app_data),
-    fileapi_legacy(other.fileapi_legacy),
     cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),
     use_proj4_init_rules(other.use_proj4_init_rules),
     epsg_file_exists(other.epsg_file_exists),

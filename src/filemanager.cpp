@@ -786,75 +786,6 @@ std::unique_ptr<File> FileStdio::open(PJ_CONTEXT *ctx, const char *filename,
 
 // ---------------------------------------------------------------------------
 
-#ifndef REMOVE_LEGACY_SUPPORT
-
-class FileLegacyAdapter : public File {
-    PJ_CONTEXT *m_ctx;
-    PAFile m_fp;
-
-    FileLegacyAdapter(const FileLegacyAdapter &) = delete;
-    FileLegacyAdapter &operator=(const FileLegacyAdapter &) = delete;
-
-  protected:
-    FileLegacyAdapter(const std::string &filename, PJ_CONTEXT *ctx, PAFile fp)
-        : File(filename), m_ctx(ctx), m_fp(fp) {}
-
-  public:
-    ~FileLegacyAdapter() override;
-
-    size_t read(void *buffer, size_t sizeBytes) override;
-    size_t write(const void *, size_t) override { return 0; }
-    bool seek(unsigned long long offset, int whence = SEEK_SET) override;
-    unsigned long long tell() override;
-    void reassign_context(PJ_CONTEXT *ctx) override { m_ctx = ctx; }
-
-    // We may lie, but the real use case is only for network files
-    bool hasChanged() const override { return false; }
-
-    static std::unique_ptr<File> open(PJ_CONTEXT *ctx, const char *filename,
-                                      FileAccess access);
-};
-
-// ---------------------------------------------------------------------------
-
-FileLegacyAdapter::~FileLegacyAdapter() { pj_ctx_fclose(m_ctx, m_fp); }
-
-// ---------------------------------------------------------------------------
-
-size_t FileLegacyAdapter::read(void *buffer, size_t sizeBytes) {
-    return pj_ctx_fread(m_ctx, buffer, 1, sizeBytes, m_fp);
-}
-
-// ---------------------------------------------------------------------------
-
-bool FileLegacyAdapter::seek(unsigned long long offset, int whence) {
-    if (offset != static_cast<unsigned long long>(static_cast<long>(offset))) {
-        pj_log(m_ctx, PJ_LOG_ERROR,
-               "Attempt at seeking to a 64 bit offset. Not supported yet");
-        return false;
-    }
-    return pj_ctx_fseek(m_ctx, m_fp, static_cast<long>(offset), whence) == 0;
-}
-
-// ---------------------------------------------------------------------------
-
-unsigned long long FileLegacyAdapter::tell() {
-    return pj_ctx_ftell(m_ctx, m_fp);
-}
-
-// ---------------------------------------------------------------------------
-
-std::unique_ptr<File>
-FileLegacyAdapter::open(PJ_CONTEXT *ctx, const char *filename, FileAccess) {
-    auto fid = pj_ctx_fopen(ctx, filename, "rb");
-    return std::unique_ptr<File>(fid ? new FileLegacyAdapter(filename, ctx, fid)
-                                     : nullptr);
-}
-
-#endif // REMOVE_LEGACY_SUPPORT
-
-// ---------------------------------------------------------------------------
-
 class FileApiAdapter : public File {
     PJ_CONTEXT *m_ctx;
     PROJ_FILE_HANDLE *m_fp;
@@ -954,12 +885,6 @@ std::unique_ptr<File> FileManager::open(PJ_CONTEXT *ctx, const char *filename,
         }
         return pj_network_file_open(ctx, filename);
     }
-#ifndef REMOVE_LEGACY_SUPPORT
-    // If the user has specified a legacy fileapi, use it
-    if (ctx->fileapi_legacy != pj_get_default_fileapi()) {
-        return FileLegacyAdapter::open(ctx, filename, access);
-    }
-#endif
     if (ctx->fileApi.open_cbk != nullptr) {
         return FileApiAdapter::open(ctx, filename, access);
     }
@@ -1727,26 +1652,6 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
     }
     return file;
 }
-
-/************************************************************************/
-/*                            pj_open_lib()                             */
-/************************************************************************/
-
-#ifndef REMOVE_LEGACY_SUPPORT
-
-// Used by following legacy function
-static void *pj_ctx_fopen_adapter(PJ_CONTEXT *ctx, const char *name,
-                                  const char *mode) {
-    return pj_ctx_fopen(ctx, name, mode);
-}
-
-// Legacy function
-PAFile pj_open_lib(PJ_CONTEXT *ctx, const char *name, const char *mode) {
-    return (PAFile)pj_open_lib_internal(ctx, name, mode, pj_ctx_fopen_adapter,
-                                        nullptr, 0);
-}
-
-#endif // REMOVE_LEGACY_SUPPORT
 
 /************************************************************************/
 /*                           pj_find_file()                             */
