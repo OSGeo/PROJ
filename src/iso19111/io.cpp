@@ -2944,7 +2944,8 @@ UnitOfMeasure WKTParser::Private::guessUnitForParameter(
     const UnitOfMeasure &defaultAngularUnit) {
     UnitOfMeasure unit;
     // scale must be first because of 'Scale factor on pseudo standard parallel'
-    if (ci_find(paramName, "scale") != std::string::npos) {
+    if (ci_find(paramName, "scale") != std::string::npos ||
+        ci_find(paramName, "scaling factor") != std::string::npos) {
         unit = UnitOfMeasure::SCALE_UNITY;
     } else if (ci_find(paramName, "latitude") != std::string::npos ||
                ci_find(paramName, "longitude") != std::string::npos ||
@@ -3876,8 +3877,16 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         return createPseudoMercator(props, NN_NO_CHECK(cartesianCS));
     }
 
-    auto linearUnit = buildUnitInSubNode(node, UnitOfMeasure::Type::LINEAR);
-    auto angularUnit = baseGeodCRS->coordinateSystem()->axisList()[0]->unit();
+    // For WKT2, if there is no explicit parameter unit, use metre for linear
+    // units and degree for angular units
+    auto linearUnit =
+        !isNull(conversionNode)
+            ? UnitOfMeasure::METRE
+            : buildUnitInSubNode(node, UnitOfMeasure::Type::LINEAR);
+    auto angularUnit =
+        !isNull(conversionNode)
+            ? UnitOfMeasure::DEGREE
+            : baseGeodCRS->coordinateSystem()->axisList()[0]->unit();
 
     auto conversion =
         !isNull(conversionNode)

@@ -1658,16 +1658,21 @@ TEST(wkt_parse, wkt2_projected) {
                "                ID[\"EPSG\",9122]],\n"
                "            ID[\"EPSG\",8801]],\n"
                "        PARAMETER[\"Longitude of natural origin\",3,\n"
-               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-               "                ID[\"EPSG\",9122]],\n"
+               // Volontary omit LENGTHUNIT to check the WKT grammar accepts
+               // Check that we default to degree
+               //"            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               //"                ID[\"EPSG\",9122]],\n"
                "            ID[\"EPSG\",8802]],\n"
                "        PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
-               "            SCALEUNIT[\"unity\",1,\n"
-               "                ID[\"EPSG\",9201]],\n"
+               // Check that we default to unity
+               //"            SCALEUNIT[\"unity\",1,\n"
+               //"                ID[\"EPSG\",9201]],\n"
                "            ID[\"EPSG\",8805]],\n"
                "        PARAMETER[\"False easting\",500000,\n"
-               "            LENGTHUNIT[\"metre\",1,\n"
-               "                ID[\"EPSG\",9001]],\n"
+               // Volontary omit LENGTHUNIT to check the WKT grammar accepts
+               // Check that we default to metre
+               //"            LENGTHUNIT[\"metre\",1,\n"
+               //"                ID[\"EPSG\",9001]],\n"
                "            ID[\"EPSG\",8806]],\n"
                "        PARAMETER[\"False northing\",0,\n"
                "            LENGTHUNIT[\"metre\",1,\n"
