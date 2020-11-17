@@ -468,10 +468,23 @@ int main(int argc, char **argv) {
                     reverseout = 1;
                     continue;
                 case 'D': /* set debug level */
+                {
                     if (--argc <= 0)
                         goto noargument;
-                    pj_ctx_set_debug(pj_get_default_ctx(), atoi(*++argv));
+                    int log_level = atoi(*++argv);
+                    if (log_level <= 0) {
+                        proj_log_level(pj_get_default_ctx(), PJ_LOG_NONE);
+                    } else if (log_level == 1) {
+                        proj_log_level(pj_get_default_ctx(), PJ_LOG_ERROR);
+                    } else if (log_level == 2) {
+                        proj_log_level(pj_get_default_ctx(), PJ_LOG_DEBUG);
+                    } else if (log_level == 3) {
+                        proj_log_level(pj_get_default_ctx(), PJ_LOG_TRACE);
+                    } else {
+                        proj_log_level(pj_get_default_ctx(), PJ_LOG_TELL);
+                    }
                     continue;
+                }
                 case 'd':
                     if (--argc <= 0)
                         goto noargument;

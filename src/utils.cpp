@@ -117,7 +117,7 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
     }
     else
     {
-        pj_ctx_set_errno( pj_in->ctx, PJD_ERR_MAJOR_AXIS_NOT_GIVEN );
+        proj_context_errno_set( pj_in->ctx, PJD_ERR_MAJOR_AXIS_NOT_GIVEN );
 
         return nullptr;
     }

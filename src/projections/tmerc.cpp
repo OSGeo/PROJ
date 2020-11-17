@@ -89,7 +89,7 @@ static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
     if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
         xy.x = HUGE_VAL;
         xy.y = HUGE_VAL;
-        pj_ctx_set_errno( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
+        proj_context_errno_set( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
         return xy;
     }
 
@@ -130,7 +130,7 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
     if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
         xy.x = HUGE_VAL;
         xy.y = HUGE_VAL;
-        pj_ctx_set_errno( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
+        proj_context_errno_set( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
         return xy;
     }
 
@@ -679,7 +679,7 @@ static bool getAlgoFromParams(PJ* P, TMercAlgo& algo)
     else
     {
         pj_load_ini(P->ctx); // if not already done
-        pj_ctx_set_errno(P->ctx, 0); // reset error in case proj.ini couldn't be found
+        proj_context_errno_set(P->ctx, 0); // reset error in case proj.ini couldn't be found
         algo = P->ctx->defaultTmercAlgo;
     }
 

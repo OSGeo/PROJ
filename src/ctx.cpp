@@ -54,28 +54,6 @@ PJ_CONTEXT* pj_get_ctx( PJ *pj )
 }
 
 /************************************************************************/
-/*                             pj_set_ctx()                             */
-/*                                                                      */
-/*      Note we do not deallocate the old context!                      */
-/************************************************************************/
-
-void pj_set_ctx( PJ *pj, PJ_CONTEXT *ctx )
-
-{
-    if (pj==nullptr)
-        return;
-    pj->ctx = ctx;
-    if( pj->reassign_context )
-    {
-        pj->reassign_context(pj, ctx);
-    }
-    for( const auto &alt: pj->alternativeCoordinateOperations )
-    {
-        pj_set_ctx(alt.pj, ctx);
-    }
-}
-
-/************************************************************************/
 /*                        proj_assign_context()                         */
 /************************************************************************/
 
@@ -88,7 +66,18 @@ void pj_set_ctx( PJ *pj, PJ_CONTEXT *ctx )
  */
 void proj_assign_context( PJ* pj, PJ_CONTEXT *ctx )
 {
-    pj_set_ctx( pj, ctx );
+    if (pj==nullptr)
+        return;
+    pj->ctx = ctx;
+    if( pj->reassign_context )
+    {
+        pj->reassign_context(pj, ctx);
+    }
+    for( const auto &alt: pj->alternativeCoordinateOperations )
+    {
+        proj_assign_context(alt.pj, ctx);
+    }
+
 }
 
 /************************************************************************/
@@ -213,16 +202,6 @@ pj_ctx::~pj_ctx()
 }
 
 /************************************************************************/
-/*                            pj_ctx_alloc()                            */
-/************************************************************************/
-
-PJ_CONTEXT* pj_ctx_alloc()
-
-{
-    return new (std::nothrow) pj_ctx(*pj_get_default_ctx());
-}
-
-/************************************************************************/
 /*                            proj_context_clone()                      */
 /*           Create a new context based on a custom context             */
 /************************************************************************/
@@ -230,93 +209,9 @@ PJ_CONTEXT* pj_ctx_alloc()
 PJ_CONTEXT* proj_context_clone (PJ_CONTEXT *ctx)
 {
     if (nullptr==ctx)
-        return pj_ctx_alloc ();
+        return proj_context_create();
 
     return new (std::nothrow) pj_ctx(*ctx);
 }
 
-/************************************************************************/
-/*                            pj_ctx_free()                             */
-/************************************************************************/
 
-void pj_ctx_free( PJ_CONTEXT *ctx )
-
-{
-    delete ctx;
-}
-
-/************************************************************************/
-/*                          pj_ctx_get_errno()                          */
-/************************************************************************/
-
-int pj_ctx_get_errno( PJ_CONTEXT *ctx )
-
-{
-    if (nullptr==ctx)
-        return pj_get_default_ctx ()->last_errno;
-    return ctx->last_errno;
-}
-
-/************************************************************************/
-/*                          pj_ctx_set_errno()                          */
-/*                                                                      */
-/*                      Also sets the global errno                      */
-/************************************************************************/
-
-void pj_ctx_set_errno( PJ_CONTEXT *ctx, int new_errno )
-
-{
-    ctx->last_errno = new_errno;
-    if( new_errno == 0 )
-        return;
-    errno = new_errno;
-    pj_errno = new_errno;
-}
-
-/************************************************************************/
-/*                          pj_ctx_set_debug()                          */
-/************************************************************************/
-
-void pj_ctx_set_debug( PJ_CONTEXT *ctx, int new_debug )
-
-{
-    if (nullptr==ctx)
-        return;
-    ctx->debug_level = new_debug;
-}
-
-/************************************************************************/
-/*                         pj_ctx_set_logger()                          */
-/************************************************************************/
-
-void pj_ctx_set_logger( PJ_CONTEXT *ctx, void (*new_logger)(void*,int,const char*) )
-
-{
-    if (nullptr==ctx)
-        return;
-    ctx->logger = new_logger;
-}
-
-/************************************************************************/
-/*                        pj_ctx_set_app_data()                         */
-/************************************************************************/
-
-void pj_ctx_set_app_data( PJ_CONTEXT *ctx, void *new_app_data )
-
-{
-    if (nullptr==ctx)
-        return;
-    ctx->logger_app_data = new_app_data;
-}
-
-/************************************************************************/
-/*                        pj_ctx_get_app_data()                         */
-/************************************************************************/
-
-void *pj_ctx_get_app_data( PJ_CONTEXT *ctx )
-
-{
-    if (nullptr==ctx)
-        return nullptr;
-    return ctx->logger_app_data;
-}

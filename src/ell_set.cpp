@@ -552,7 +552,7 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es) {
     if (0==P->f)
         P->f  = 1 - cos (P->alpha);   /* = 1 - sqrt (1 - PIN->es); */
     if (P->f == 1.0) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_INVALID_ECCENTRICITY);
+        proj_context_errno_set( P->ctx, PJD_ERR_INVALID_ECCENTRICITY);
         return PJD_ERR_INVALID_ECCENTRICITY;
     }
     P->rf = P->f != 0.0 ? 1.0/P->f: HUGE_VAL;
@@ -573,7 +573,7 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es) {
 
     P->one_es = 1. - P->es;
     if (P->one_es == 0.) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_INVALID_ECCENTRICITY);
+        proj_context_errno_set( P->ctx, PJD_ERR_INVALID_ECCENTRICITY);
         return PJD_ERR_INVALID_ECCENTRICITY;
     }
 
@@ -630,7 +630,7 @@ int pj_ell_set (PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
     paralist *start = 0;
 
     /* clear any previous error */
-    pj_ctx_set_errno(ctx,0);
+    proj_context_errno_set(ctx,0);
 
     /* check for varying forms of ellipsoid input */
     *a = *es = 0.;
@@ -648,7 +648,7 @@ int pj_ell_set (PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
             for (start = pl; start && start->next ; start = start->next) ;
             for (i = 0; (s = pj_ellps[i].id) && strcmp(name, s) ; ++i) ;
             if (!s) {
-                pj_ctx_set_errno( ctx, PJD_ERR_UNKNOWN_ELLP_PARAM);
+                proj_context_errno_set( ctx, PJD_ERR_UNKNOWN_ELLP_PARAM);
                 return 1;
             }
             start->next = pj_mkparam(pj_ellps[i].major);
@@ -662,14 +662,14 @@ int pj_ell_set (PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
         else if (pj_param(ctx,pl, "te").i) { /* eccentricity */
             e = pj_param(ctx,pl, "de").f;
             if (e < 0) {
-                pj_ctx_set_errno(ctx, PJD_ERR_INVALID_ECCENTRICITY);
+                proj_context_errno_set(ctx, PJD_ERR_INVALID_ECCENTRICITY);
                 return 1;
             }
             *es = e * e;
         } else if (pj_param(ctx,pl, "trf").i) { /* recip flattening */
             *es = pj_param(ctx,pl, "drf").f;
             if (*es == 0.0) {
-                pj_ctx_set_errno(ctx, PJD_ERR_REV_FLATTENING_IS_ZERO);
+                proj_context_errno_set(ctx, PJD_ERR_REV_FLATTENING_IS_ZERO);
                 goto bomb;
             }
             *es = 1./ *es;
@@ -700,7 +700,7 @@ int pj_ell_set (PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
             *es = 0.;
         } else if (pj_param(ctx,pl, "bR_h").i) { /* sphere--harmonic mean */
             if ( (*a + b) == 0.0) {
-                pj_ctx_set_errno(ctx, PJD_ERR_TOLERANCE_CONDITION);
+                proj_context_errno_set(ctx, PJD_ERR_TOLERANCE_CONDITION);
                 goto bomb;
             }
             *a = 2. * *a * b / (*a + b);
@@ -711,7 +711,7 @@ int pj_ell_set (PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
 
             tmp = sin(pj_param(ctx,pl, i ? "rR_lat_a" : "rR_lat_g").f);
             if (fabs(tmp) > M_HALFPI) {
-                pj_ctx_set_errno(ctx, PJD_ERR_REF_RAD_LARGER_THAN_90);
+                proj_context_errno_set(ctx, PJD_ERR_REF_RAD_LARGER_THAN_90);
                 goto bomb;
             }
             tmp = 1. - *es * tmp * tmp;
@@ -730,15 +730,15 @@ bomb:
     }
     /* some remaining checks */
     if (*es < 0.) {
-        pj_ctx_set_errno(ctx, PJD_ERR_ES_LESS_THAN_ZERO);
+        proj_context_errno_set(ctx, PJD_ERR_ES_LESS_THAN_ZERO);
         return 1;
     }
     if (*es >= 1.) {
-        pj_ctx_set_errno(ctx, PJD_ERR_INVALID_ECCENTRICITY);
+        proj_context_errno_set(ctx, PJD_ERR_INVALID_ECCENTRICITY);
         return 1;
     }
     if (*a <= 0.) {
-        pj_ctx_set_errno(ctx, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+        proj_context_errno_set(ctx, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
         return 1;
     }
     return 0;

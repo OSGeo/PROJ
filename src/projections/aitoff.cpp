@@ -170,7 +170,7 @@ static PJ_LP aitoff_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
 
     if (iter == MAXITER && round == MAXROUND)
     {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        proj_context_errno_set( P->ctx, PJD_ERR_NON_CONVERGENT );
         /* fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl); */
     }
 

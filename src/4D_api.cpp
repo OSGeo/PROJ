@@ -1363,7 +1363,7 @@ int proj_errno (const PJ *P) {
 /******************************************************************************
     Read an error level from the context of a PJ.
 ******************************************************************************/
-    return pj_ctx_get_errno (pj_get_ctx ((PJ *) P));
+    return proj_context_errno (pj_get_ctx ((PJ *) P));
 }
 
 /*****************************************************************************/
@@ -1374,7 +1374,7 @@ int proj_context_errno (PJ_CONTEXT *ctx) {
 ******************************************************************************/
     if (nullptr==ctx)
         ctx = pj_get_default_ctx();
-    return pj_ctx_get_errno (ctx);
+    return ctx->last_errno;
 }
 
 /*****************************************************************************/
@@ -1389,6 +1389,7 @@ int proj_errno_set (const PJ *P, int err) {
     /* For P==0 err goes to the default context */
     proj_context_errno_set (pj_get_ctx ((PJ *) P), err);
     errno = err;
+
     return err;
 }
 
@@ -1439,7 +1440,7 @@ int proj_errno_reset (const PJ *P) {
     int last_errno;
     last_errno = proj_errno (P);
 
-    pj_ctx_set_errno (pj_get_ctx ((PJ *) P), 0);
+    proj_context_errno_set (pj_get_ctx ((PJ *) P), 0);
     errno = 0;
     pj_errno = 0;
     return last_errno;
@@ -1448,7 +1449,7 @@ int proj_errno_reset (const PJ *P) {
 
 /* Create a new context based on the default context */
 PJ_CONTEXT *proj_context_create (void) {
-    return pj_ctx_alloc ();
+    return new (std::nothrow) pj_ctx(*pj_get_default_ctx());
 }
 
 
@@ -1460,7 +1461,7 @@ PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx) {
     if (pj_get_default_ctx ()==ctx)
         return nullptr;
 
-    pj_ctx_free (ctx);
+    delete ctx;
     return nullptr;
 }
 
@@ -1746,7 +1747,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
         if( strcmp(initname, "epsg") == 0 || strcmp(initname, "EPSG") == 0 ) {
             const char* val;
 
-            pj_ctx_set_errno( ctx, 0 );
+            proj_context_errno_set( ctx, 0 );
 
             strncpy (ininfo.name, initname, sizeof(ininfo.name) - 1);
             strcpy(ininfo.origin, "EPSG");
@@ -1764,7 +1765,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
         if( strcmp(initname, "IGNF") == 0 ) {
             const char* val;
 
-            pj_ctx_set_errno( ctx, 0 );
+            proj_context_errno_set( ctx, 0 );
 
             strncpy (ininfo.name, initname, sizeof(ininfo.name) - 1);
             strcpy(ininfo.origin, "IGNF");

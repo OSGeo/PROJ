@@ -110,7 +110,7 @@ static PJ_LP eqearth_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal/sphe
     }
 
     if( i == 0 ) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        proj_context_errno_set( P->ctx, PJD_ERR_NON_CONVERGENT );
         return lp;
     }
 

@@ -257,7 +257,7 @@ Expand key from buffer or (if not in buffer) from init file
             PJ* src;
             const char* proj_string;
 
-            pj_ctx_set_errno( ctx, 0 );
+            proj_context_errno_set( ctx, 0 );
 
             if( !allow_init_epsg ) {
                 pj_log (ctx, PJ_LOG_TRACE, "%s expansion disallowed", xkey);
@@ -448,7 +448,7 @@ pj_init_plus_ctx( PJ_CONTEXT *ctx, const char *definition )
                 if( argc+1 == MAX_ARG )
                 {
                     pj_dalloc( defn_copy );
-                    pj_ctx_set_errno( ctx, PJD_ERR_UNPARSEABLE_CS_DEF );
+                    proj_context_errno_set( ctx, PJD_ERR_UNPARSEABLE_CS_DEF );
                     return nullptr;
                 }
 
@@ -538,7 +538,7 @@ pj_init_ctx_with_allow_init_epsg(PJ_CONTEXT *ctx, int argc, char **argv, int all
     ctx->last_errno = 0;
 
     if (argc <= 0) {
-        pj_ctx_set_errno (ctx, PJD_ERR_NO_ARGS);
+        proj_context_errno_set (ctx, PJD_ERR_NO_ARGS);
         return nullptr;
     }
 
@@ -552,13 +552,13 @@ pj_init_ctx_with_allow_init_epsg(PJ_CONTEXT *ctx, int argc, char **argv, int all
 
     /* can't have nested pipelines directly */
     if (n_pipelines > 1) {
-        pj_ctx_set_errno (ctx, PJD_ERR_MALFORMED_PIPELINE);
+        proj_context_errno_set (ctx, PJD_ERR_MALFORMED_PIPELINE);
         return nullptr;
     }
 
     /* don't allow more than one +init in non-pipeline operations */
     if (n_pipelines == 0 && n_inits > 1) {
-        pj_ctx_set_errno (ctx, PJD_ERR_TOO_MANY_INITS);
+        proj_context_errno_set (ctx, PJD_ERR_TOO_MANY_INITS);
         return nullptr;
     }
 

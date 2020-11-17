@@ -220,7 +220,7 @@ PROJVALUE pj_param (PJ_CONTEXT *ctx, paralist *pl, const char *opt) {
             value.i = 1;
             break;
         default:
-            pj_ctx_set_errno (ctx, PJD_ERR_INVALID_BOOLEAN_PARAM);
+            proj_context_errno_set (ctx, PJD_ERR_INVALID_BOOLEAN_PARAM);
             value.i = 0;
             break;
         }

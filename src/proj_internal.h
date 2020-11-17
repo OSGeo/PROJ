@@ -976,16 +976,6 @@ void PROJ_DLL pj_acquire_lock(void);
 void PROJ_DLL pj_release_lock(void);
 void PROJ_DLL pj_cleanup_lock(void);
 
-void PROJ_DLL pj_set_ctx( PJ *, PJ_CONTEXT * );
-PJ_CONTEXT PROJ_DLL *pj_ctx_alloc(void);
-void    PROJ_DLL pj_ctx_free( PJ_CONTEXT * );
-int PROJ_DLL pj_ctx_get_errno( PJ_CONTEXT * );
-void PROJ_DLL pj_ctx_set_errno( PJ_CONTEXT *, int );
-void PROJ_DLL pj_ctx_set_debug( PJ_CONTEXT *, int );
-void PROJ_DLL pj_ctx_set_logger( PJ_CONTEXT *, void (*)(void *, int, const char *) );
-void PROJ_DLL pj_ctx_set_app_data( PJ_CONTEXT *, void * );
-void PROJ_DLL *pj_ctx_get_app_data( PJ_CONTEXT * );
-
 void PROJ_DLL pj_log( PJ_CONTEXT * ctx, int level, const char *fmt, ... );
 void PROJ_DLL pj_stderr_logger( void *, int, const char * );
 

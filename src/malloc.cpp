@@ -166,7 +166,7 @@ void *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
         n = t->next;
         pj_dealloc(t);
     }
-    pj_ctx_set_errno (ctx, errlev);
+    proj_context_errno_set (ctx, errlev);
     return (void *) nullptr;
 }
 
@@ -218,7 +218,7 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     /* Note that both, in the multithreaded case, may then contain undefined */
     /* values. This is expected behavior. For MT have one ctx per thread    */
     if (0!=errlev)
-        pj_ctx_set_errno (pj_get_ctx(P), errlev);
+        proj_context_errno_set (pj_get_ctx(P), errlev);
 
     if (nullptr==P)
         return nullptr;

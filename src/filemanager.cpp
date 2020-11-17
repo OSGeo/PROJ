@@ -1491,7 +1491,7 @@ pj_open_lib_internal(PJ_CONTEXT *ctx, const char *name, const char *mode,
         }
 
         if (ctx->last_errno == 0 && errno != 0)
-            pj_ctx_set_errno(ctx, errno);
+            proj_context_errno_set(ctx, errno);
 
         pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "pj_open_lib(%s): call fopen(%s) - %s",
                name, sysname, fid == nullptr ? "failed" : "succeeded");
@@ -1591,7 +1591,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
                                              pj_open_file_with_manager, nullptr,
                                              0)));
                     if (file) {
-                        pj_ctx_set_errno(ctx, 0);
+                        proj_context_errno_set(ctx, 0);
                     } else {
                         // For final network access attempt, use the new
                         // name.
@@ -1621,7 +1621,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
                                              pj_open_file_with_manager, nullptr,
                                              0)));
                     if (file) {
-                        pj_ctx_set_errno(ctx, 0);
+                        proj_context_errno_set(ctx, 0);
                     }
                 }
             } catch (const std::exception &e) {
@@ -1646,7 +1646,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
             if (file) {
                 pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Using %s",
                        remote_file.c_str());
-                pj_ctx_set_errno(ctx, 0);
+                proj_context_errno_set(ctx, 0);
             }
         }
     }

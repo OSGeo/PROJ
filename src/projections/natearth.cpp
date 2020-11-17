@@ -82,7 +82,7 @@ static PJ_LP natearth_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inv
         }
     }
     if( i == 0 )
-        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        proj_context_errno_set( P->ctx, PJD_ERR_NON_CONVERGENT );
     lp.phi = yc;
 
     /* longitude */

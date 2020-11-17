@@ -141,15 +141,15 @@ Check if a a PJ has an inverse.
 void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
     if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
-    pj_set_ctx (P, ctx);
+    proj_assign_context (P, ctx);
 }
 
 
 void proj_context_inherit (PJ *parent, PJ *child) {
     if (nullptr==parent)
-        pj_set_ctx (child, pj_get_default_ctx());
+        proj_assign_context (child, pj_get_default_ctx());
     else
-        pj_set_ctx (child, pj_get_ctx(parent));
+        proj_assign_context (child, pj_get_ctx(parent));
 }
 
 
@@ -411,7 +411,11 @@ to that context.
 ******************************************************************************/
     if (nullptr==ctx)
         ctx = pj_get_default_ctx();
-    pj_ctx_set_errno (ctx, err);
+    ctx->last_errno = err;
+    if( err == 0 )
+        return;
+    errno = err;
+    pj_errno = err;
 }
 
 /*  logging  */
