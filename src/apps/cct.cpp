@@ -470,6 +470,8 @@ int main(int argc, char **argv) {
                    decimals_distances, point.xyzt.z,
                    point.xyzt.t, comment_delimiter, comment
             );
+        if( fout == stdout )
+            fflush(stdout);
     }
 
     proj_destroy(P);

@@ -171,6 +171,7 @@ static void process(FILE *fid) {
                 (void)fputs("\t<* * * * * *>", stdout);
         }
         (void)fputs(bin_in ? "\n" : s, stdout);
+        fflush(stdout);
     }
 }
 
@@ -286,6 +287,8 @@ static void vprocess(FILE *fid) {
         (void)fputs(proj_rtodms(pline, facs.meridian_convergence, 0, 0), stdout);
         (void)printf(" [ %.8f ]\n", facs.meridian_convergence * RAD_TO_DEG);
         (void)printf("Max-min (Tissot axis a-b) scale error: %.5f %.5f\n\n", facs.tissot_semimajor, facs.tissot_semiminor);
+
+        fflush(stdout);
     }
 }
 
