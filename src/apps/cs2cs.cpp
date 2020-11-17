@@ -217,6 +217,7 @@ static void process(FILE *fid)
             printf("%s", s);
         else
             printf("\n");
+        fflush(stdout);
     }
 }
 
