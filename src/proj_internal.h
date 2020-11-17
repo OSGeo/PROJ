@@ -948,9 +948,6 @@ int PROJ_DLL pj_apply_gridshift( PJ_CONTEXT *, const char *, int,
                         long point_count, int point_offset,
                         double *x, double *y, double *z );
 void PROJ_DLL pj_clear_initcache(void);
-int PROJ_DLL pj_is_latlong(PJ *);
-int PROJ_DLL pj_is_geocent(PJ *);
-void PROJ_DLL pj_get_spheroid_defn(PJ *defn, double *major_axis, double *eccentricity_squared);
 void PROJ_DLL pj_pr_list(PJ *);
 void PROJ_DLL pj_free(PJ *);
 void PROJ_DLL pj_set_finder( const char *(*)(const char *) );
@@ -960,7 +957,6 @@ PJ PROJ_DLL *pj_init_plus(const char *);
 PJ PROJ_DLL *pj_init_ctx( PJ_CONTEXT *, int, char ** );
 PJ PROJ_DLL *pj_init_plus_ctx( PJ_CONTEXT *, const char * );
 char PROJ_DLL *pj_get_def(PJ *, int);
-PJ PROJ_DLL *pj_latlong_from_proj( PJ *);
 int PROJ_DLL pj_has_inverse(PJ *);
 
 

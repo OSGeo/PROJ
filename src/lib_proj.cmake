@@ -247,7 +247,6 @@ set(SRC_LIBPROJ_CORE
   strtod.cpp
   tsfn.cpp
   units.cpp
-  utils.cpp
   wkt1_generated_parser.c
   wkt1_generated_parser.h
   wkt1_parser.cpp
