@@ -54,8 +54,8 @@ static PJ *destructor (PJ *P, int errlev) {              /* Destructor */
         return nullptr;
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
-    pj_free (static_cast<struct pj_opaque*>(P->opaque)->sinu);
-    pj_free (static_cast<struct pj_opaque*>(P->opaque)->moll);
+    proj_destroy (static_cast<struct pj_opaque*>(P->opaque)->sinu);
+    proj_destroy (static_cast<struct pj_opaque*>(P->opaque)->moll);
     return pj_default_destructor (P, errlev);
 }
 

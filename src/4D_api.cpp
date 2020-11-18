@@ -1353,10 +1353,6 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     return P;
 }
 
-PJ *proj_destroy (PJ *P) {
-    pj_free (P);
-    return nullptr;
-}
 
 /*****************************************************************************/
 int proj_errno (const PJ *P) {
@@ -1636,7 +1632,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
         pjinfo.definition = empty;
     else
         pjinfo.definition = pj_shrink (def);
-    /* Make pj_free clean this up eventually */
+    /* Make proj_destroy clean this up eventually */
     P->def_full = def;
 
     pjinfo.has_inverse = pj_has_inverse(P);

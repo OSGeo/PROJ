@@ -562,7 +562,7 @@ int main(int argc, char **argv) {
     }
 
     if( Proj )
-        pj_free(Proj);
+        proj_destroy(Proj);
 
     exit(0); /* normal completion */
 }

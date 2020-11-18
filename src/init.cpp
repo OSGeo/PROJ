@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project:  PROJ.4
  * Purpose:  Initialize projection object from string definition.  Includes
- *           pj_init(), pj_init_plus() and pj_free() function.
+ *           pj_init(), and pj_init_plus() function.
  * Author:   Gerald Evenden, Frank Warmerdam <warmerdam@pobox.com>
  *
  ******************************************************************************
@@ -829,7 +829,7 @@ pj_init_ctx_with_allow_init_epsg(PJ_CONTEXT *ctx, int argc, char **argv, int all
     err = proj_errno_reset (PIN);
     PIN = proj(PIN);
     if (proj_errno (PIN)) {
-        pj_free(PIN);
+        proj_destroy(PIN);
         return nullptr;
     }
     proj_errno_restore (PIN, err);

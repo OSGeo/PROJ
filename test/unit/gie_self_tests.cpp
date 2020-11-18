@@ -548,7 +548,7 @@ static void test_time(const char *args, double tol, double t_in, double t_exp) {
     out = proj_trans(P, PJ_INV, out);
     EXPECT_NEAR(out.xyzt.t, t_in, tol);
 
-    pj_free(P);
+    proj_destroy(P);
 
     proj_log_level(NULL, PJ_LOG_NONE);
 }

@@ -387,7 +387,7 @@ int main(int argc, char **argv) {
     buf = static_cast<char*>(calloc (1, 10000));
     if (nullptr==buf) {
         print (PJ_LOG_ERROR, "%s: Out of memory", o->progname);
-        pj_free (P);
+        proj_destroy (P);
         free (o);
         if (stdout != fout)
             fclose (fout);
