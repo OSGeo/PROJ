@@ -944,9 +944,6 @@ PJ_XYZ PROJ_DLL pj_fwd3d(PJ_LPZ, PJ *);
 PJ_LPZ PROJ_DLL pj_inv3d(PJ_XYZ, PJ *);
 
 
-int PROJ_DLL pj_apply_gridshift( PJ_CONTEXT *, const char *, int,
-                        long point_count, int point_offset,
-                        double *x, double *y, double *z );
 void PROJ_DLL pj_clear_initcache(void);
 void PROJ_DLL pj_pr_list(PJ *);
 void PROJ_DLL pj_free(PJ *);
