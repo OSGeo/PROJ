@@ -415,7 +415,6 @@ to that context.
     if( err == 0 )
         return;
     errno = err;
-    pj_errno = err;
 }
 
 /*  logging  */

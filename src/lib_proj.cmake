@@ -217,7 +217,6 @@ set(SRC_LIBPROJ_CORE
   dmstor.cpp
   ell_set.cpp
   ellps.cpp
-  errno.cpp
   factors.cpp
   fwd.cpp
   gauss.cpp

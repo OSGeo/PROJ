@@ -921,7 +921,6 @@ PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial);
 
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
-PROJ_DLL extern int pj_errno;    /* global error return code */
 
 #ifndef PROJ_INTERNAL_H
 /* replaced by enum proj_log_level in proj_internal.h */
@@ -959,8 +958,6 @@ void PROJ_DLL pj_dalloc(void *);
 void PROJ_DLL *pj_calloc (size_t n, size_t size);
 void PROJ_DLL *pj_dealloc (void *ptr);
 char PROJ_DLL *pj_strdup(const char *str);
-char PROJ_DLL *pj_strerrno(int);
-int PROJ_DLL *pj_get_errno_ref(void);
 const char PROJ_DLL *pj_get_release(void);
 void PROJ_DLL pj_acquire_lock(void);
 void PROJ_DLL pj_release_lock(void);

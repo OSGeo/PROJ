@@ -250,10 +250,8 @@ static void vprocess(FILE *fid) {
             if (postscale) { dat_xy.x *= fscale; dat_xy.y *= fscale; }
         }
 
-        /* For some reason pj_errno does not work as expected in some   */
-        /* versions of Visual Studio, so using pj_get_errno_ref instead */
-        if (*pj_get_errno_ref()) {
-            emess(-1, pj_strerrno(*pj_get_errno_ref()));
+        if (proj_context_errno(nullptr)) {
+            emess(-1, proj_errno_string(proj_context_errno(nullptr)));
             continue;
         }
 
@@ -477,7 +475,7 @@ int main(int argc, char **argv) {
     }
     if (!(Proj = pj_init(pargc, pargv)))
         emess(3,"projection initialization failure\ncause: %s",
-              pj_strerrno(pj_errno));
+              proj_errno_string(proj_context_errno(nullptr)));
 
     if (!proj_angular_input(Proj, PJ_FWD)) {
         emess(3, "can't initialize operations that take non-angular input coordinates");

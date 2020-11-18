@@ -360,7 +360,7 @@ int main(int argc, char **argv) {
 
     if (nullptr==P) {
         print (PJ_LOG_ERROR, "%s: Bad transformation arguments - (%s)\n    '%s -h' for help",
-                 o->progname, pj_strerrno (proj_errno(P)), o->progname);
+                 o->progname, proj_errno_string (proj_errno(P)), o->progname);
         free (o);
         if (stdout != fout)
             fclose (fout);
@@ -435,7 +435,7 @@ int main(int argc, char **argv) {
         if (HUGE_VAL==point.xyzt.x) {
             /* transformation error */
             print (PJ_LOG_NONE, "# Record %d TRANSFORMATION ERROR: %s (%s)",
-                   (int) o->record_index, buf, pj_strerrno (proj_errno(P)));
+                   (int) o->record_index, buf, proj_errno_string (proj_errno(P)));
             proj_errno_restore (P, err);
             continue;
         }

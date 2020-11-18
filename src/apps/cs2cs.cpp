@@ -624,7 +624,7 @@ int main(int argc, char **argv) {
 
     if (!transformation) {
         emess(3, "cannot initialize transformation\ncause: %s",
-              pj_strerrno(pj_errno));
+              proj_errno_string(proj_context_errno(nullptr)));
     }
 
     if (use_env_locale) {

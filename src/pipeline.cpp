@@ -533,7 +533,7 @@ PJ *OPERATION(pipeline,0) {
             int err_to_report = proj_errno(P);
             if (0==err_to_report)
                 err_to_report = PJD_ERR_MALFORMED_PIPELINE;
-            proj_log_error (P, "Pipeline: Bad step definition: %s (%s)", current_argv[0], pj_strerrno (err_to_report));
+            proj_log_error (P, "Pipeline: Bad step definition: %s (%s)", current_argv[0], proj_errno_string (err_to_report));
             return destructor (P, err_to_report); /* ERROR: bad pipeline def */
         }
         next_step->parent = P;

@@ -209,7 +209,7 @@ libproj_la_SOURCES = \
 	\
 	aasincos.cpp adjlon.cpp \
 	dmstor.cpp auth.cpp \
-	deriv.cpp ell_set.cpp ellps.cpp errno.cpp \
+	deriv.cpp ell_set.cpp ellps.cpp \
 	factors.cpp fwd.cpp init.cpp inv.cpp \
 	list.cpp malloc.cpp mlfn.cpp mlfn.hpp msfn.cpp proj_mdist.cpp \
 	param.cpp phi2.cpp pr_list.cpp \
