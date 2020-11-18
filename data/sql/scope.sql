@@ -107,6 +107,7 @@ INSERT INTO "scope" VALUES('EPSG','1127','Geodesy. Defines ETRF2000.',0);
 INSERT INTO "scope" VALUES('EPSG','1128','Geodesy. Defines ETRF2005.',0);
 INSERT INTO "scope" VALUES('EPSG','1129','Geodesy. Defines ETRF2014.',0);
 INSERT INTO "scope" VALUES('EPSG','1130','EEZ delimitation.',0);
+INSERT INTO "scope" VALUES('EPSG','1131','Change of coordinate epoch for points referenced to NAD83(CSRS)v7.',0);
 INSERT INTO "scope" VALUES('EPSG','1132','Derivation of approximate gravity-related heights from GNSS observations.',0);
 INSERT INTO "scope" VALUES('EPSG','1133','Derivation of gravity-related heights from GNSS observations.',0);
 INSERT INTO "scope" VALUES('EPSG','1134','Description of the use or purpose of the CRS.',0);

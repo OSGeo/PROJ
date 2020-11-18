@@ -274,12 +274,6 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6277','OSGB36','PROJ');
 -- to the EPSG:4326 CRS, as this is a common use case (https://github.com/OSGeo/PROJ/issues/2216)
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4326','WGS84','PROJ');
 
----- Aliases from old datum names to new datum ensemble names -----
-
--- Those have been reported to IOGP and will hopefully be integrated in a later EPSG release
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6326','World Geodetic System 1984','PROJ');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6258','European Terrestrial Reference System 1989','PROJ');
-
 ---- PROJ unit short names -----
 
 -- Linear units
