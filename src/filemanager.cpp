@@ -1418,10 +1418,6 @@ pj_open_lib_internal(PJ_CONTEXT *ctx, const char *name, const char *mode,
                       ctx, name, ctx->file_finder_user_data)) != nullptr)
             ;
 
-        else if (ctx->file_finder_legacy != nullptr &&
-                 (sysname = ctx->file_finder_legacy(name)) != nullptr)
-            ;
-
         /* The user has search paths set */
         else if (!ctx->search_paths.empty()) {
             for (const auto &path : ctx->search_paths) {
@@ -1796,19 +1792,6 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
 //! @endcond
 
 /************************************************************************/
-/*                           pj_set_finder()                            */
-/************************************************************************/
-
-void pj_set_finder(const char *(*new_finder)(const char *))
-
-{
-    auto ctx = pj_get_default_ctx();
-    if (ctx) {
-        ctx->file_finder_legacy = new_finder;
-    }
-}
-
-/************************************************************************/
 /*                   proj_context_set_file_finder()                     */
 /************************************************************************/
 
@@ -1876,19 +1859,6 @@ void proj_context_set_search_paths(PJ_CONTEXT *ctx, int count_paths,
         ctx->set_search_paths(vector_of_paths);
     } catch (const std::exception &) {
     }
-}
-
-/************************************************************************/
-/*                         pj_set_searchpath()                          */
-/*                                                                      */
-/*      Path control for callers that can't practically provide         */
-/*      pj_set_finder() style callbacks.  Call with (0,NULL) as args    */
-/*      to clear the searchpath set.                                    */
-/************************************************************************/
-
-void pj_set_searchpath(int count, const char **path) {
-    proj_context_set_search_paths(nullptr, count,
-                                  const_cast<const char *const *>(path));
 }
 
 /************************************************************************/

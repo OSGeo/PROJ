@@ -163,7 +163,6 @@ pj_ctx::pj_ctx(const pj_ctx& other) :
     epsg_file_exists(other.epsg_file_exists),
     ca_bundle_path(other.ca_bundle_path),
     env_var_proj_lib(other.env_var_proj_lib),
-    file_finder_legacy(other.file_finder_legacy),
     file_finder(other.file_finder),
     file_finder_user_data(other.file_finder_user_data),
     custom_sqlite3_vfs_name(other.custom_sqlite3_vfs_name),

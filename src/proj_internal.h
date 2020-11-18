@@ -947,8 +947,6 @@ PJ_LPZ PROJ_DLL pj_inv3d(PJ_XYZ, PJ *);
 void PROJ_DLL pj_clear_initcache(void);
 void PROJ_DLL pj_pr_list(PJ *);
 void PROJ_DLL pj_free(PJ *);
-void PROJ_DLL pj_set_finder( const char *(*)(const char *) );
-void PROJ_DLL pj_set_searchpath ( int count, const char **path );
 PJ PROJ_DLL *pj_init(int, char **);
 PJ PROJ_DLL *pj_init_plus(const char *);
 PJ PROJ_DLL *pj_init_ctx( PJ_CONTEXT *, int, char ** );
