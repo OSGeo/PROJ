@@ -401,6 +401,9 @@ def fill_helmert_transformation(proj_db_cursor):
             assert param_code[6] == 8611
             assert param_uom_code[3] == param_uom_code[4]
             assert param_uom_code[3] == param_uom_code[5]
+            for i in range(7):
+                assert param_uom_code[i] is not None
+
         if n_params == 8: # Time-specific transformation
             assert param_code[7] == 1049, (code, name, param_code[7])
             param_value[14] = param_value[7]
@@ -438,6 +441,8 @@ def fill_helmert_transformation(proj_db_cursor):
             assert param_uom_code[7] == param_uom_code[9]
             assert param_uom_code[10] == param_uom_code[11]
             assert param_uom_code[10] == param_uom_code[12]
+            for i in range(15):
+                assert param_uom_code[i] is not None, (code, name, i, param_name[i])
 
         arg = (EPSG_AUTHORITY, code, name,
                remarks,
