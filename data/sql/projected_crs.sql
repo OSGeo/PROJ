@@ -7302,6 +7302,8 @@ INSERT INTO "projected_crs" VALUES('EPSG','9493','SRGI2013 / UTM zone 53S',NULL,
 INSERT INTO "usage" VALUES('EPSG','14171','projected_crs','EPSG','9493','EPSG','1662','EPSG','1266');
 INSERT INTO "projected_crs" VALUES('EPSG','9494','SRGI2013 / UTM zone 54S',NULL,'EPSG','4400','EPSG','9470','EPSG','16154',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14172','projected_crs','EPSG','9494','EPSG','1663','EPSG','1266');
+INSERT INTO "projected_crs" VALUES('EPSG','9498','POSGAR 2007 / CABA 2019',NULL,'EPSG','4500','EPSG','5340','EPSG','9497',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14243','projected_crs','EPSG','9498','EPSG','4610','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','20004','Pulkovo 1995 / Gauss-Kruger zone 4',NULL,'EPSG','4530','EPSG','4200','EPSG','16204',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6177','projected_crs','EPSG','20004','EPSG','1763','EPSG','1211');
 INSERT INTO "projected_crs" VALUES('EPSG','20005','Pulkovo 1995 / Gauss-Kruger zone 5',NULL,'EPSG','4530','EPSG','4200','EPSG','16205',NULL,0);
