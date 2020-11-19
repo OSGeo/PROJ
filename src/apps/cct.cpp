@@ -450,6 +450,11 @@ int main(int argc, char **argv) {
                 colmax = MAX(colmax, columns_xyzt[i]);
             comment = column(buf, colmax+1);
         }
+        /* remove the line feed from comment, as logger() above, invoked
+           by print() below (output), will add one */
+        size_t len = strlen(comment);
+        if (len >= 1)
+            comment[len - 1] = '\0';
         comment_delimiter = (comment && *comment) ? whitespace : blank_comment;
 
         /* Time to print the result */
