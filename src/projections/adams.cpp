@@ -205,7 +205,7 @@ static PJ_LP adams_inverse(PJ_XY xy, PJ *P)
 
 static PJ *setup(PJ *P, projection_type mode) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(
-            pj_calloc (1, sizeof (struct pj_opaque)));
+            calloc (1, sizeof (struct pj_opaque)));
 
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);

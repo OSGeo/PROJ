@@ -222,7 +222,7 @@ static bool setup_zone(PJ *P, struct pj_opaque *Q, int n,
 PJ *PROJECTION(igh_o) {
     PJ_XY xy1, xy4;
     PJ_LP lp = { 0, phi_boundary };
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;

@@ -221,7 +221,7 @@ static PJ *destructor(PJ *P, int errlev) {
     if (nullptr==P->opaque)
         return pj_default_destructor(P, errlev);
 
-    pj_dealloc (static_cast<struct tmerc_data*>(P->opaque)->approx.en);
+    free (static_cast<struct tmerc_data*>(P->opaque)->approx.en);
     return pj_default_destructor(P, errlev);
 }
 
@@ -592,7 +592,7 @@ static PJ_LP auto_e_inv (PJ_XY xy, PJ *P) {
 
 static PJ *setup(PJ *P, TMercAlgo eAlg) {
 
-    struct tmerc_data *Q = static_cast<struct tmerc_data*>(pj_calloc (1, sizeof (struct tmerc_data)));
+    struct tmerc_data *Q = static_cast<struct tmerc_data*>(calloc (1, sizeof (struct tmerc_data)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;

@@ -53,99 +53,13 @@
 
 using namespace NS_PROJ;
 
-/**********************************************************************/
-void *pj_malloc(size_t size) {
-/***********************************************************************
-Currently, pj_malloc is a hack to solve an errno problem.
-The problem is described in more details at
-https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=86420.
-It seems, that pj_init and similar functions incorrectly
-(under debian/glibs-2.3.2) assume that pj_malloc resets
-errno after success. pj_malloc tries to mimic this.
-
-NOTE (2017-09-29): The problem described at the bugzilla page
-referred to above, is most likely a case of someone not
-understanding the proper usage of errno. We should review
-whether "the problem is actually a problem" in PROJ.4 code.
-
-Library specific allocators can be useful, and improve
-interoperability, if properly used. That is, by making them
-run/initialization time switchable, somewhat like the file i/o
-interface.
-
-But as things stand, we are more likely to get benefit
-from reviewing the code for proper errno usage, which is hard,
-due to the presence of context local and global pj_errnos.
-
-Probably, these were introduced in order to support incomplete
-implementations of thread local errnos at an early phase of the
-implementation of multithreading support in PROJ.4).
-
-It is likely too late to get rid of contexts, but we can still
-benefit from a better usage of errno.
-***********************************************************************/
-    int old_errno = errno;
-    void *res = malloc(size);
-    if ( res && !old_errno )
-            errno = 0;
-    return res;
-}
-
-
-/**********************************************************************/
-void *pj_calloc (size_t n, size_t size) {
-/***********************************************************************
-pj_calloc is the pj-equivalent of calloc().
-
-It allocates space for an array of <n> elements of size <size>.
-The array is initialized to zeros.
-***********************************************************************/
-    void *res = pj_malloc (n*size);
-    if (nullptr==res)
-        return nullptr;
-    memset (res, 0, n*size);
-    return res;
-}
-
-
-/**********************************************************************/
-void pj_dalloc(void *ptr) {
-/**********************************************************************/
-    free(ptr);
-}
-
-
-/**********************************************************************/
-void *pj_dealloc (void *ptr) {
-/***********************************************************************
-pj_dealloc supports the common use case of "clean up and return a null
-pointer" to signal an error in a multi level allocation:
-
-    struct foo { int bar; int *baz; };
-
-    struct foo *p = pj_calloc (1, sizeof (struct foo));
-    if (0==p)
-        return 0;
-
-    p->baz = pj_calloc (10, sizeof(int));
-    if (0==p->baz)
-        return pj_dealloc (p); // clean up + signal error by 0-return
-
-    return p;  // success
-
-***********************************************************************/
-    if (nullptr==ptr)
-        return nullptr;
-    pj_dalloc (ptr);
-    return nullptr;
-}
 
 /**********************************************************************/
 char *pj_strdup(const char *str)
 /**********************************************************************/
 {
     size_t len = strlen(str) + 1;
-    char *dup = static_cast<char*>(pj_malloc(len));
+    char *dup = static_cast<char*>(malloc(len));
     if (dup)
         memcpy(dup, str, len);
     return dup;
@@ -153,7 +67,7 @@ char *pj_strdup(const char *str)
 
 
 /*****************************************************************************/
-void *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
+void *free_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
 /*****************************************************************************
     Companion to pj_default_destructor (below). Deallocates a linked list
     of "+proj=xxx" initialization parameters.
@@ -164,7 +78,7 @@ void *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev) {
     paralist *t, *n;
     for (t = start; t; t = n) {
         n = t->next;
-        pj_dealloc(t);
+        free(t);
     }
     proj_context_errno_set (ctx, errlev);
     return (void *) nullptr;
@@ -225,26 +139,26 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
         return nullptr;
 
 
-    pj_dealloc(P->def_size);
-    pj_dealloc(P->def_shape);
-    pj_dealloc(P->def_spherification);
-    pj_dealloc(P->def_ellps);
+    free(P->def_size);
+    free(P->def_shape);
+    free(P->def_spherification);
+    free(P->def_ellps);
 
     delete static_cast<ListOfHGrids*>(P->hgrids_legacy);
     delete static_cast<ListOfVGrids*>(P->vgrids_legacy);
 
-    /* We used to call pj_dalloc( P->catalog ), but this will leak */
+    /* We used to call free( P->catalog ), but this will leak */
     /* memory. The safe way to clear catalog and grid is to call */
-    /* pj_gc_unloadall(pj_get_default_ctx()); and pj_deallocate_grids(); */
+    /* pj_gc_unloadall(pj_get_default_ctx()); and freeate_grids(); */
     /* TODO: we should probably have a public pj_cleanup() method to do all */
     /* that */
 
     /* free the interface to Charles Karney's geodesic library */
-    pj_dealloc( P->geod );
+    free( P->geod );
 
     /* free parameter list elements */
-    pj_dealloc_params (pj_get_ctx(P), P->params, errlev);
-    pj_dealloc (P->def_full);
+    free_params (pj_get_ctx(P), P->params, errlev);
+    free (P->def_full);
 
     /* free the cs2cs emulation elements */
     proj_destroy (P->axisswap);
@@ -254,7 +168,7 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
     proj_destroy (P->hgridshift);
     proj_destroy (P->vgridshift);
 
-    pj_dealloc (static_cast<struct pj_opaque*>(P->opaque));
+    free (static_cast<struct pj_opaque*>(P->opaque));
     delete P;
     return nullptr;
 }

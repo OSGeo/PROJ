@@ -825,7 +825,7 @@ paralist *pj_search_initcache( const char *filekey );
 void      pj_insert_initcache( const char *filekey, const paralist *list);
 paralist *pj_expand_init(PJ_CONTEXT *ctx, paralist *init);
 
-void     *pj_dealloc_params (PJ_CONTEXT *ctx, paralist *start, int errlev);
+void     *free_params (PJ_CONTEXT *ctx, paralist *start, int errlev);
 
 
 double *pj_enfn(double);
@@ -953,10 +953,6 @@ char PROJ_DLL *pj_get_def(PJ *, int);
 int PROJ_DLL pj_has_inverse(PJ *);
 
 
-void PROJ_DLL *pj_malloc(size_t);
-void PROJ_DLL pj_dalloc(void *);
-void PROJ_DLL *pj_calloc (size_t n, size_t size);
-void PROJ_DLL *pj_dealloc (void *ptr);
 char PROJ_DLL *pj_strdup(const char *str);
 const char PROJ_DLL *pj_get_release(void);
 void PROJ_DLL pj_acquire_lock(void);

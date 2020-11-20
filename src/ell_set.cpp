@@ -77,13 +77,13 @@ int pj_ellipsoid (PJ *P) {
     int err = proj_errno_reset (P);
     const char *empty = {""};
 
-    pj_dealloc(P->def_size);
+    free(P->def_size);
     P->def_size = nullptr;
-    pj_dealloc(P->def_shape);
+    free(P->def_shape);
     P->def_shape = nullptr;
-    pj_dealloc(P->def_spherification);
+    free(P->def_spherification);
     P->def_spherification = nullptr;
-    pj_dealloc(P->def_ellps);
+    free(P->def_ellps);
     P->def_ellps = nullptr;
 
     /* Specifying R overrules everything */
@@ -162,7 +162,7 @@ static int ellps_ellps (PJ *P) {
     new_params->next = pj_mkparam (ellps->ell);
     if (nullptr == new_params->next)
     {
-        pj_dealloc(new_params);
+        free(new_params);
         return proj_errno_set (P, ENOMEM);
     }
     paralist* old_params = P->params;
@@ -176,8 +176,8 @@ static int ellps_ellps (PJ *P) {
     ellps_shape (P);
 
     P->params = old_params;
-    pj_dealloc (new_params->next);
-    pj_dealloc (new_params);
+    free (new_params->next);
+    free (new_params);
     if (proj_errno (P))
         return proj_errno (P);
 
@@ -195,7 +195,7 @@ static int ellps_size (PJ *P) {
     paralist *par = nullptr;
     int a_was_set = 0;
 
-    pj_dealloc(P->def_size);
+    free(P->def_size);
     P->def_size = nullptr;
 
     /* A size parameter *must* be given, but may have been given as ellps prior */
@@ -235,7 +235,7 @@ static int ellps_shape (PJ *P) {
     par = nullptr;
     len = sizeof (keys) / sizeof (char *);
 
-    pj_dealloc(P->def_shape);
+    free(P->def_shape);
     P->def_shape = nullptr;
 
     /* Check which shape key is specified */
@@ -721,8 +721,8 @@ int pj_ell_set (PJ_CONTEXT *ctx, paralist *pl, double *a, double *es) {
         }
 bomb:
         if (start) { /* clean up temporary extension of list */
-            pj_dalloc(start->next->next);
-            pj_dalloc(start->next);
+            free(start->next->next);
+            free(start->next);
             start->next = 0;
         }
         if (ctx->last_errno)

@@ -9778,7 +9778,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         paralist *list = pj_expand_init(ctx, init);
         ctx->projStringParserCreateFromPROJStringRecursionCounter--;
         if (!list) {
-            pj_dealloc(init);
+            free(init);
             throw ParsingException("cannot expand " + projString);
         }
         std::string expanded;
@@ -9801,7 +9801,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             }
 
             auto n = t->next;
-            pj_dealloc(t);
+            free(t);
             t = n;
         }
         for (const auto &pair : d->steps_[0].paramValues) {

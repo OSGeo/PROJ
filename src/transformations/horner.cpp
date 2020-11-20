@@ -89,8 +89,8 @@
 PROJ_HEAD(horner, "Horner polynomial evaluation");
 
 /* make horner.h interface with proj's memory management */
-#define horner_dealloc(x) pj_dealloc(x)
-#define horner_calloc(n,x) pj_calloc(n,x)
+#define horner_dealloc(x) free(x)
+#define horner_calloc(n,x) calloc(n,x)
 
 namespace { // anonymous namespace
 struct horner {
@@ -412,7 +412,7 @@ static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
     char *buf, *init, *next = nullptr;
     int i;
 
-    buf = static_cast<char*>(pj_calloc (strlen (param) + 2, sizeof(char)));
+    buf = static_cast<char*>(calloc (strlen (param) + 2, sizeof(char)));
     if (nullptr==buf) {
         proj_log_error (P, "Horner: No memory left");
         return 0;
@@ -420,12 +420,12 @@ static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
 
     sprintf (buf, "t%s", param);
     if (0==pj_param (P->ctx, P->params, buf).i) {
-        pj_dealloc (buf);
+        free (buf);
         return 0;
     }
     sprintf (buf, "s%s", param);
     init = pj_param(P->ctx, P->params, buf).s;
-    pj_dealloc (buf);
+    free (buf);
 
     for (i = 0; i < ncoefs; i++) {
         if (i > 0) {

@@ -2690,11 +2690,11 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 void proj_crs_info_list_destroy(PROJ_CRS_INFO **list) {
     if (list) {
         for (int i = 0; list[i] != nullptr; i++) {
-            pj_dalloc(list[i]->auth_name);
-            pj_dalloc(list[i]->code);
-            pj_dalloc(list[i]->name);
-            pj_dalloc(list[i]->area_name);
-            pj_dalloc(list[i]->projection_method_name);
+            free(list[i]->auth_name);
+            free(list[i]->code);
+            free(list[i]->name);
+            free(list[i]->area_name);
+            free(list[i]->projection_method_name);
             delete list[i];
         }
         delete[] list;
@@ -2784,11 +2784,11 @@ PROJ_UNIT_INFO **proj_get_units_from_database(PJ_CONTEXT *ctx,
 void proj_unit_list_destroy(PROJ_UNIT_INFO **list) {
     if (list) {
         for (int i = 0; list[i] != nullptr; i++) {
-            pj_dalloc(list[i]->auth_name);
-            pj_dalloc(list[i]->code);
-            pj_dalloc(list[i]->name);
-            pj_dalloc(list[i]->category);
-            pj_dalloc(list[i]->proj_short_name);
+            free(list[i]->auth_name);
+            free(list[i]->code);
+            free(list[i]->name);
+            free(list[i]->category);
+            free(list[i]->proj_short_name);
             delete list[i];
         }
         delete[] list;

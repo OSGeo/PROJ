@@ -778,14 +778,14 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
 
     argc = pj_trim_argc (args);
     if (argc==0) {
-        pj_dealloc (args);
+        free (args);
         proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
         return nullptr;
     }
 
     argv = pj_trim_argv (argc, args);
     if (!argv) {
-        pj_dealloc(args);
+        free(args);
         proj_context_errno_set(ctx, ENOMEM);
         return nullptr;
     }
@@ -795,8 +795,8 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
     allow_init_epsg = proj_context_get_use_proj4_init_rules(ctx, FALSE);
     P = pj_init_ctx_with_allow_init_epsg (ctx, (int) argc, argv, allow_init_epsg);
 
-    pj_dealloc (argv);
-    pj_dealloc (args);
+    free (argv);
+    free (args);
 
     /* Support cs2cs-style modifiers */
     ret = cs2cs_emulation_setup  (P);
@@ -834,7 +834,7 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
 
     P = proj_create (ctx, c);
 
-    pj_dealloc ((char *) c);
+    free ((char *) c);
     return P;
 }
 
@@ -862,13 +862,13 @@ Same as proj_create_argv() but calls pj_create_internal() instead of proj_create
 
     P = pj_create_internal (ctx, c);
 
-    pj_dealloc ((char *) c);
+    free ((char *) c);
     return P;
 }
 
 /** Create an area of use */
 PJ_AREA * proj_area_create(void) {
-    return static_cast<PJ_AREA*>(pj_calloc(1, sizeof(PJ_AREA)));
+    return static_cast<PJ_AREA*>(calloc(1, sizeof(PJ_AREA)));
 }
 
 /** Assign a bounding box to an area of use. */
@@ -886,7 +886,7 @@ void proj_area_set_bbox(PJ_AREA *area,
 
 /** Free an area of use */
 void proj_area_destroy(PJ_AREA* area) {
-    pj_dealloc(area);
+    free(area);
 }
 
 /************************************************************************/
@@ -1495,15 +1495,15 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
 
     /* "pj_realloc", so to speak */
     if (*buf_size < len) {
-        p = static_cast<char*>(pj_calloc (2 * len, sizeof (char)));
+        p = static_cast<char*>(calloc (2 * len, sizeof (char)));
         if (nullptr==p) {
-            pj_dealloc (buf);
+            free (buf);
             return nullptr;
         }
         *buf_size = 2 * len;
         if (buf != nullptr)
             strcpy (p, buf);
-        pj_dealloc (buf);
+        free (buf);
         buf = p;
     }
     assert(buf);
@@ -1556,7 +1556,7 @@ PJ_INFO proj_info (void) {
         }
     }
 
-    pj_dalloc(const_cast<char*>(info.searchpath));
+    free(const_cast<char*>(info.searchpath));
     info.searchpath = buf ? buf : empty;
 
     info.paths = ctx ? ctx->c_compat_paths : nullptr;
@@ -1805,7 +1805,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 
     for ( ; start; start = next) {
         next = start->next;
-        pj_dalloc(start);
+        free(start);
     }
 
    return ininfo;

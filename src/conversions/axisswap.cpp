@@ -169,7 +169,7 @@ static PJ_COORD reverse_4d(PJ_COORD coo, PJ *P) {
 /***********************************************************************/
 PJ *CONVERSION(axisswap,0) {
 /***********************************************************************/
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     char *s;
     unsigned int i, j, n = 0;
 
