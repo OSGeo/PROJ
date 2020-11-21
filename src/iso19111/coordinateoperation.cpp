@@ -64,6 +64,30 @@
 // #define DEBUG_CONCATENATED_OPERATION
 #if defined(DEBUG_SORT) || defined(DEBUG_CONCATENATED_OPERATION)
 #include <iostream>
+
+void dumpWKT(const NS_PROJ::crs::CRS *crs);
+void dumpWKT(const NS_PROJ::crs::CRS *crs) {
+    auto f(NS_PROJ::io::WKTFormatter::create(
+        NS_PROJ::io::WKTFormatter::Convention::WKT2_2019));
+    std::cerr << crs->exportToWKT(f.get()) << std::endl;
+}
+
+void dumpWKT(const NS_PROJ::crs::CRSPtr &crs);
+void dumpWKT(const NS_PROJ::crs::CRSPtr &crs) { dumpWKT(crs.get()); }
+
+void dumpWKT(const NS_PROJ::crs::CRSNNPtr &crs);
+void dumpWKT(const NS_PROJ::crs::CRSNNPtr &crs) {
+    dumpWKT(crs.as_nullable().get());
+}
+
+void dumpWKT(const NS_PROJ::crs::GeographicCRSPtr &crs);
+void dumpWKT(const NS_PROJ::crs::GeographicCRSPtr &crs) { dumpWKT(crs.get()); }
+
+void dumpWKT(const NS_PROJ::crs::GeographicCRSNNPtr &crs);
+void dumpWKT(const NS_PROJ::crs::GeographicCRSNNPtr &crs) {
+    dumpWKT(crs.as_nullable().get());
+}
+
 #endif
 
 using namespace NS_PROJ::internal;
@@ -9184,6 +9208,14 @@ static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
         formatter->startInversion();
         sourceCRSGeog->_exportToPROJString(formatter);
         formatter->stopInversion();
+        if (util::isOfExactType<crs::DerivedGeographicCRS>(
+                *(sourceCRSGeog.get()))) {
+            // The export of a DerivedGeographicCRS in non-CRS mode adds
+            // unit conversion and axis swapping. We must compensate for that
+            formatter->startInversion();
+            sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+            formatter->stopInversion();
+        }
 
         if (addPushV3) {
             formatter->addStep("push");
@@ -9217,7 +9249,12 @@ static void setupPROJGeodeticTargetCRS(io::PROJStringFormatter *formatter,
             formatter->addStep("pop");
             formatter->addParam("v_3");
         }
-
+        if (util::isOfExactType<crs::DerivedGeographicCRS>(
+                *(targetCRSGeog.get()))) {
+            // The export of a DerivedGeographicCRS in non-CRS mode adds
+            // unit conversion and axis swapping. We must compensate for that
+            targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+        }
         targetCRSGeog->_exportToPROJString(formatter);
     } else {
         auto targetCRSGeod = dynamic_cast<const crs::GeodeticCRS *>(crs.get());
@@ -14290,6 +14327,20 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
     const auto &hubSrc = boundSrc->hubCRS();
     auto hubSrcGeog = dynamic_cast<const crs::GeographicCRS *>(hubSrc.get());
     auto geogCRSOfBaseOfBoundSrc = boundSrc->baseCRS()->extractGeographicCRS();
+    {
+        // If geogCRSOfBaseOfBoundSrc is a DerivedGeographicCRS, use its base
+        // instead (if it is a GeographicCRS)
+        auto derivedGeogCRS =
+            std::dynamic_pointer_cast<crs::DerivedGeographicCRS>(
+                geogCRSOfBaseOfBoundSrc);
+        if (derivedGeogCRS) {
+            auto baseCRS = std::dynamic_pointer_cast<crs::GeographicCRS>(
+                derivedGeogCRS->baseCRS().as_nullable());
+            if (baseCRS) {
+                geogCRSOfBaseOfBoundSrc = baseCRS;
+            }
+        }
+    }
 
     const auto &authFactory = context.context->getAuthorityFactory();
     const auto dbContext =
