@@ -1926,11 +1926,19 @@ getStandardCriterion(util::IComparable::Criterion criterion) {
 bool GeodeticCRS::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
+    if (other == nullptr || !util::isOfExactType<GeodeticCRS>(*other)) {
+        return false;
+    }
+    return _isEquivalentToNoTypeCheck(other, criterion, dbContext);
+}
+
+bool GeodeticCRS::_isEquivalentToNoTypeCheck(
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     const auto standardCriterion = getStandardCriterion(criterion);
-    auto otherGeodCRS = dynamic_cast<const GeodeticCRS *>(other);
+
     // TODO test velocityModel
-    return otherGeodCRS != nullptr &&
-           SingleCRS::baseIsEquivalentTo(other, standardCriterion, dbContext);
+    return SingleCRS::baseIsEquivalentTo(other, standardCriterion, dbContext);
 }
 //! @endcond
 
@@ -2486,12 +2494,13 @@ bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other,
 bool GeographicCRS::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
-    auto otherGeogCRS = dynamic_cast<const GeographicCRS *>(other);
-    if (otherGeogCRS == nullptr) {
+    if (other == nullptr || !util::isOfExactType<GeographicCRS>(*other)) {
         return false;
     }
+
     const auto standardCriterion = getStandardCriterion(criterion);
-    if (GeodeticCRS::_isEquivalentTo(other, standardCriterion, dbContext)) {
+    if (GeodeticCRS::_isEquivalentToNoTypeCheck(other, standardCriterion,
+                                                dbContext)) {
         return true;
     }
     if (criterion !=
@@ -2510,7 +2519,8 @@ bool GeographicCRS::_isEquivalentTo(
                            cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH
                        ? cs::EllipsoidalCS::createLatitudeLongitude(unit)
                        : cs::EllipsoidalCS::createLongitudeLatitude(unit))
-            ->GeodeticCRS::_isEquivalentTo(other, standardCriterion, dbContext);
+            ->GeodeticCRS::_isEquivalentToNoTypeCheck(other, standardCriterion,
+                                                      dbContext);
     }
     return false;
 }
@@ -3889,8 +3899,7 @@ ProjectedCRS::create(const util::PropertyMap &properties,
 bool ProjectedCRS::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
-    auto otherProjCRS = dynamic_cast<const ProjectedCRS *>(other);
-    return otherProjCRS != nullptr &&
+    return other != nullptr && util::isOfExactType<ProjectedCRS>(*other) &&
            DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
 }
 

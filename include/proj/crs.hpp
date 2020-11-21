@@ -340,6 +340,11 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
 
+    PROJ_INTERNAL bool
+    _isEquivalentToNoTypeCheck(const util::IComparable *other,
+                               util::IComparable::Criterion criterion,
+                               const io::DatabaseContextPtr &dbContext) const;
+
     INLINED_MAKE_SHARED
 
   private:
