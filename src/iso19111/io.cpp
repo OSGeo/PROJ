@@ -9478,8 +9478,8 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         std::string methodName = "PROJ " + step.name;
         for (const auto &param : step.paramValues) {
             if (is_in_stringlist(param.key,
-                                 "wktext,no_defs,datum,ellps,a,b,R,towgs84,"
-                                 "nadgrids,geoidgrids,"
+                                 "wktext,no_defs,datum,ellps,a,b,R,f,rf,"
+                                 "towgs84,nadgrids,geoidgrids,"
                                  "units,to_meter,vunits,vto_meter,type")) {
                 continue;
             }

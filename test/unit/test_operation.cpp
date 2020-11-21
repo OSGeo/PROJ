@@ -10033,6 +10033,71 @@ TEST(operation, createOperation_ossfuzz_18587) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, derivedGeographicCRS_with_to_wgs84_to_geographicCRS) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 +o_lat_p=18.0 "
+        "+o_lon_p=-200.0 +ellps=WGS84 +towgs84=1,2,3 +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=longlat +datum=WGS84 +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+        ASSERT_TRUE(op != nullptr);
+        std::string pipeline(
+            "+proj=pipeline "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +inv +proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 "
+            "+o_lat_p=18 +o_lon_p=-200 +ellps=WGS84 "
+            "+step +proj=push +v_3 "
+            "+step +proj=cart +ellps=WGS84 "
+            "+step +proj=helmert +x=1 +y=2 +z=3 "
+            "+step +inv +proj=cart +ellps=WGS84 "
+            "+step +proj=pop +v_3 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  pipeline);
+
+        auto op2 = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(src),
+            nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326));
+        ASSERT_TRUE(op2 != nullptr);
+        EXPECT_EQ(op2->exportToPROJString(PROJStringFormatter::create().get()),
+                  pipeline + " +step +proj=axisswap +order=2,1");
+    }
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(dst), NN_CHECK_ASSERT(src));
+        ASSERT_TRUE(op != nullptr);
+        std::string pipeline(
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=push +v_3 "
+            "+step +proj=cart +ellps=WGS84 "
+            "+step +proj=helmert +x=-1 +y=-2 +z=-3 "
+            "+step +inv +proj=cart +ellps=WGS84 "
+            "+step +proj=pop +v_3 "
+            "+step +proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 "
+            "+o_lat_p=18 +o_lon_p=-200 +ellps=WGS84 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline " + pipeline);
+
+        auto op2 = CoordinateOperationFactory::create()->createOperation(
+            nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326),
+            NN_CHECK_ASSERT(src));
+        ASSERT_TRUE(op2 != nullptr);
+        EXPECT_EQ(op2->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 " + pipeline);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, mercator_variant_A_to_variant_B) {
     auto projCRS = ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,
