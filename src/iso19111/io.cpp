@@ -2794,6 +2794,32 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
                   .as_nullable()
             : nullptr;
     auto cs = buildCS(csNode, node, angularUnit);
+
+    // If there's no CS[] node, typically for a BASEGEODCRS of a projected CRS,
+    // in a few rare cases, this might be a Geocentric CRS, and thus a
+    // Cartesian CS, and not the ellipsoidalCS we assumed above. The only way
+    // to figure that is to resolve the CRS from its code...
+    if (isNull(csNode) && dbContext_ &&
+        ci_equal(nodeName, WKTConstants::BASEGEODCRS)) {
+        const auto &nodeChildren = nodeP->children();
+        for (const auto &subNode : nodeChildren) {
+            const auto &subNodeName(subNode->GP()->value());
+            if (ci_equal(subNodeName, WKTConstants::ID) ||
+                ci_equal(subNodeName, WKTConstants::AUTHORITY)) {
+                auto id = buildId(subNode, true, false);
+                if (id) {
+                    try {
+                        auto authFactory = AuthorityFactory::create(
+                            NN_NO_CHECK(dbContext_), *id->codeSpace());
+                        auto dbCRS = authFactory->createGeodeticCRS(id->code());
+                        cs = dbCRS->coordinateSystem();
+                    } catch (const util::Exception &) {
+                    }
+                }
+            }
+        }
+    }
+
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
         if (ci_equal(nodeName, WKTConstants::GEOCCS)) {
