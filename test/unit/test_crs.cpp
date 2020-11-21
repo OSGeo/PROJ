@@ -4750,6 +4750,18 @@ static DerivedGeographicCRSNNPtr createDerivedGeographicCRS() {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, derivedGeographicCRS_basic) {
+
+    auto derivedCRS = createDerivedGeographicCRS();
+    EXPECT_TRUE(derivedCRS->isEquivalentTo(derivedCRS.get()));
+    EXPECT_FALSE(derivedCRS->isEquivalentTo(
+        derivedCRS->baseCRS().get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(derivedCRS->baseCRS()->isEquivalentTo(
+        derivedCRS.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, derivedGeographicCRS_WKT2) {
 
     auto expected = "GEODCRS[\"WMO Atlantic Pole\",\n"
@@ -4946,6 +4958,18 @@ static DerivedGeodeticCRSNNPtr createDerivedGeodeticCRS() {
         PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived geodetic CRS"),
         GeographicCRS::EPSG_4326, derivingConversion,
         CartesianCS::createGeocentric(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedGeodeticCRS_basic) {
+
+    auto derivedCRS = createDerivedGeodeticCRS();
+    EXPECT_TRUE(derivedCRS->isEquivalentTo(derivedCRS.get()));
+    EXPECT_FALSE(derivedCRS->isEquivalentTo(
+        derivedCRS->baseCRS().get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(derivedCRS->baseCRS()->isEquivalentTo(
+        derivedCRS.get(), IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
