@@ -2794,6 +2794,32 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
                   .as_nullable()
             : nullptr;
     auto cs = buildCS(csNode, node, angularUnit);
+
+    // If there's no CS[] node, typically for a BASEGEODCRS of a projected CRS,
+    // in a few rare cases, this might be a Geocentric CRS, and thus a
+    // Cartesian CS, and not the ellipsoidalCS we assumed above. The only way
+    // to figure that is to resolve the CRS from its code...
+    if (isNull(csNode) && dbContext_ &&
+        ci_equal(nodeName, WKTConstants::BASEGEODCRS)) {
+        const auto &nodeChildren = nodeP->children();
+        for (const auto &subNode : nodeChildren) {
+            const auto &subNodeName(subNode->GP()->value());
+            if (ci_equal(subNodeName, WKTConstants::ID) ||
+                ci_equal(subNodeName, WKTConstants::AUTHORITY)) {
+                auto id = buildId(subNode, true, false);
+                if (id) {
+                    try {
+                        auto authFactory = AuthorityFactory::create(
+                            NN_NO_CHECK(dbContext_), *id->codeSpace());
+                        auto dbCRS = authFactory->createGeodeticCRS(id->code());
+                        cs = dbCRS->coordinateSystem();
+                    } catch (const util::Exception &) {
+                    }
+                }
+            }
+        }
+    }
+
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
         if (ci_equal(nodeName, WKTConstants::GEOCCS)) {
@@ -4954,6 +4980,10 @@ class JSONParser {
     TransformationNNPtr buildTransformation(const json &j);
     ConcatenatedOperationNNPtr buildConcatenatedOperation(const json &j);
 
+    void buildGeodeticDatumOrDatumEnsemble(const json &j,
+                                           GeodeticReferenceFramePtr &datum,
+                                           DatumEnsemblePtr &datumEnsemble);
+
     static util::optional<std::string> getAnchor(const json &j) {
         util::optional<std::string> anchor;
         if (j.contains("anchor")) {
@@ -5413,9 +5443,9 @@ BaseObjectNNPtr JSONParser::create(const json &j)
 
 // ---------------------------------------------------------------------------
 
-GeographicCRSNNPtr JSONParser::buildGeographicCRS(const json &j) {
-    GeodeticReferenceFramePtr datum;
-    DatumEnsemblePtr datumEnsemble;
+void JSONParser::buildGeodeticDatumOrDatumEnsemble(
+    const json &j, GeodeticReferenceFramePtr &datum,
+    DatumEnsemblePtr &datumEnsemble) {
     if (j.contains("datum")) {
         auto datumJ = getObject(j, "datum");
         datum = util::nn_dynamic_pointer_cast<GeodeticReferenceFrame>(
@@ -5428,6 +5458,14 @@ GeographicCRSNNPtr JSONParser::buildGeographicCRS(const json &j) {
         datumEnsemble =
             buildDatumEnsemble(getObject(j, "datum_ensemble")).as_nullable();
     }
+}
+
+// ---------------------------------------------------------------------------
+
+GeographicCRSNNPtr JSONParser::buildGeographicCRS(const json &j) {
+    GeodeticReferenceFramePtr datum;
+    DatumEnsemblePtr datumEnsemble;
+    buildGeodeticDatumOrDatumEnsemble(j, datum, datumEnsemble);
     auto csJ = getObject(j, "coordinate_system");
     auto ellipsoidalCS =
         util::nn_dynamic_pointer_cast<EllipsoidalCS>(buildCS(csJ));
@@ -5441,12 +5479,9 @@ GeographicCRSNNPtr JSONParser::buildGeographicCRS(const json &j) {
 // ---------------------------------------------------------------------------
 
 GeodeticCRSNNPtr JSONParser::buildGeodeticCRS(const json &j) {
-    auto datumJ = getObject(j, "datum");
-    if (getType(datumJ) != "GeodeticReferenceFrame") {
-        throw ParsingException("Unsupported type for datum.");
-    }
-    auto datum = buildGeodeticReferenceFrame(datumJ);
+    GeodeticReferenceFramePtr datum;
     DatumEnsemblePtr datumEnsemble;
+    buildGeodeticDatumOrDatumEnsemble(j, datum, datumEnsemble);
     auto csJ = getObject(j, "coordinate_system");
     auto cs = buildCS(csJ);
     auto props = buildProperties(j);
@@ -5481,7 +5516,13 @@ GeodeticCRSNNPtr JSONParser::buildGeodeticCRS(const json &j) {
 // ---------------------------------------------------------------------------
 
 ProjectedCRSNNPtr JSONParser::buildProjectedCRS(const json &j) {
-    auto baseCRS = buildGeographicCRS(getObject(j, "base_crs"));
+    auto jBaseCRS = getObject(j, "base_crs");
+    auto jBaseCS = getObject(jBaseCRS, "coordinate_system");
+    auto baseCS = buildCS(jBaseCS);
+    auto baseCRS = dynamic_cast<EllipsoidalCS *>(baseCS.get()) != nullptr
+                       ? util::nn_static_pointer_cast<GeodeticCRS>(
+                             buildGeographicCRS(jBaseCRS))
+                       : buildGeodeticCRS(jBaseCRS);
     auto csJ = getObject(j, "coordinate_system");
     auto cartesianCS = util::nn_dynamic_pointer_cast<CartesianCS>(buildCS(csJ));
     if (!cartesianCS) {
