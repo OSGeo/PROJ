@@ -6034,28 +6034,39 @@ void Conversion::_exportToPROJString(
         !isHeightDepthReversal;
     bool applyTargetCRSModifiers = applySourceCRSModifiers;
 
+    if (formatter->getCRSExport()) {
+        if (methodEPSGCode == EPSG_CODE_METHOD_GEOCENTRIC_TOPOCENTRIC ||
+            methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_TOPOCENTRIC) {
+            throw io::FormattingException("Transformation cannot be exported "
+                                          "as a PROJ.4 string (but can be part "
+                                          "of a PROJ pipeline)");
+        }
+    }
+
     auto l_sourceCRS = sourceCRS();
+    crs::GeographicCRSPtr srcGeogCRS;
     if (!formatter->getCRSExport() && l_sourceCRS && applySourceCRSModifiers) {
 
-        crs::CRS *horiz = l_sourceCRS.get();
-        const auto compound = dynamic_cast<const crs::CompoundCRS *>(horiz);
+        crs::CRSPtr horiz = l_sourceCRS;
+        const auto compound =
+            dynamic_cast<const crs::CompoundCRS *>(l_sourceCRS.get());
         if (compound) {
             const auto &components = compound->componentReferenceSystems();
             if (!components.empty()) {
-                horiz = components.front().get();
+                horiz = components.front().as_nullable();
             }
         }
 
-        auto geogCRS = dynamic_cast<const crs::GeographicCRS *>(horiz);
-        if (geogCRS) {
+        srcGeogCRS = std::dynamic_pointer_cast<crs::GeographicCRS>(horiz);
+        if (srcGeogCRS) {
             formatter->setOmitProjLongLatIfPossible(true);
             formatter->startInversion();
-            geogCRS->_exportToPROJString(formatter);
+            srcGeogCRS->_exportToPROJString(formatter);
             formatter->stopInversion();
             formatter->setOmitProjLongLatIfPossible(false);
         }
 
-        auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(horiz);
+        auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(horiz.get());
         if (projCRS) {
             formatter->startInversion();
             formatter->pushOmitZUnitConversion();
@@ -6325,6 +6336,30 @@ void Conversion::_exportToPROJString(
         }
         bConversionDone = true;
         bEllipsoidParametersDone = true;
+    } else if (methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_TOPOCENTRIC) {
+        if (!srcGeogCRS) {
+            throw io::FormattingException(
+                "Export of Geographic/Topocentric conversion to a PROJ string "
+                "requires an input geographic CRS");
+        }
+
+        formatter->addStep("cart");
+        srcGeogCRS->ellipsoid()->_exportToPROJString(formatter);
+
+        formatter->addStep("topocentric");
+        const auto latOrigin = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LATITUDE_TOPOGRAPHIC_ORIGIN,
+            common::UnitOfMeasure::DEGREE);
+        const auto lonOrigin = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_LONGITUDE_TOPOGRAPHIC_ORIGIN,
+            common::UnitOfMeasure::DEGREE);
+        const auto heightOrigin = parameterValueNumeric(
+            EPSG_CODE_PARAMETER_ELLIPSOIDAL_HEIGHT_TOPOCENTRIC_ORIGIN,
+            common::UnitOfMeasure::METRE);
+        formatter->addParam("lat_0", latOrigin);
+        formatter->addParam("lon_0", lonOrigin);
+        formatter->addParam("h_0", heightOrigin);
+        bConversionDone = true;
     }
 
     auto l_targetCRS = targetCRS();
@@ -6449,7 +6484,9 @@ void Conversion::_exportToPROJString(
         }
 
         if (!bEllipsoidParametersDone) {
-            auto targetGeogCRS = horiz->extractGeographicCRS();
+            auto targetGeodCRS = horiz->extractGeodeticCRS();
+            auto targetGeogCRS =
+                std::dynamic_pointer_cast<crs::GeographicCRS>(targetGeodCRS);
             if (targetGeogCRS) {
                 if (formatter->getCRSExport()) {
                     targetGeogCRS->addDatumInfoToPROJString(formatter);
@@ -6458,6 +6495,8 @@ void Conversion::_exportToPROJString(
                     targetGeogCRS->primeMeridian()->_exportToPROJString(
                         formatter);
                 }
+            } else if (targetGeodCRS) {
+                targetGeodCRS->ellipsoid()->_exportToPROJString(formatter);
             }
         }
 

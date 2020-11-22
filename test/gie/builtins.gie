@@ -6681,4 +6681,46 @@ accept    -74.25    4.8
 expect    80859.033 122543.174
 roundtrip 1
 
+===============================================================================
+# Geocentric/topocentric conversion
+===============================================================================
+
+# Test parameter and point from IOGP Publication 373-7-2 - Geomatics Guidance Note number 7, part 2 - October 2020
+operation +proj=topocentric +ellps=WGS84 +X_0=3652755.3058 +Y_0=319574.6799 +Z_0=5201547.3536
+tolerance 1 mm
+accept    3771793.968  140253.342         5124304.349
+expect    -189013.869  -128642.040        -4220.171
+roundtrip 1
+
+===============================================================================
+# Geographic/topocentric conversion
+===============================================================================
+
+# Test parameter and point from IOGP Publication 373-7-2 - Geomatics Guidance Note number 7, part 2 - October 2020
+operation +proj=pipeline +step +proj=cart +ellps=WGS84 +step +proj=topocentric +ellps=WGS84 +lon_0=5 +lat_0=55 +h_0=200
+tolerance 1 mm
+accept    2.12955      53.80939444444444  73
+expect    -189013.869  -128642.040        -4220.171
+roundtrip 1
+
+===============================================================================
+# Error cases of topocentric
+===============================================================================
+
+# missing X_0,Y_0,Z_0 or lon_0,lat_0
+operation +proj=topocentric +ellps=WGS84
+expect failure errno missing_args
+
+# missing Z_0
+operation +proj=topocentric +ellps=WGS84 +X_0=0 +Y_0=0
+expect failure errno missing_args
+
+# missing lat_0
+operation +proj=topocentric +ellps=WGS84 +lon_0=0
+expect failure errno missing_args
+
+# X_0 and lon_0 are mutually exclusive
+operation +proj=topocentric +ellps=WGS84 +X_0=0 +lon_0=0
+expect failure errno mutually_exclusive_args
+
 </gie-strict>

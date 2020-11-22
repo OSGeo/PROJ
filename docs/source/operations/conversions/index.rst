@@ -19,4 +19,5 @@ conversions.
    pop
    push
    set
+   topocentric
    unitconvert

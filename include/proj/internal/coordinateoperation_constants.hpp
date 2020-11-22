@@ -532,6 +532,34 @@ static const ParamMapping *const paramsColombiaUrban[] = {
     &paramProjectionPlaneOriginHeight,
     nullptr};
 
+static const ParamMapping paramGeocentricXTopocentricOrigin = {
+    EPSG_NAME_PARAMETER_GEOCENTRIC_X_TOPOCENTRIC_ORIGIN,
+    EPSG_CODE_PARAMETER_GEOCENTRIC_X_TOPOCENTRIC_ORIGIN, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, "X_0"};
+
+static const ParamMapping paramGeocentricYTopocentricOrigin = {
+    EPSG_NAME_PARAMETER_GEOCENTRIC_Y_TOPOCENTRIC_ORIGIN,
+    EPSG_CODE_PARAMETER_GEOCENTRIC_Y_TOPOCENTRIC_ORIGIN, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, "Y_0"};
+
+static const ParamMapping paramGeocentricZTopocentricOrigin = {
+    EPSG_NAME_PARAMETER_GEOCENTRIC_Z_TOPOCENTRIC_ORIGIN,
+    EPSG_CODE_PARAMETER_GEOCENTRIC_Z_TOPOCENTRIC_ORIGIN, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, "Z_0"};
+
+static const ParamMapping *const paramsGeocentricTopocentric[] = {
+    &paramGeocentricXTopocentricOrigin, &paramGeocentricYTopocentricOrigin,
+    &paramGeocentricZTopocentricOrigin, nullptr};
+
+static const ParamMapping paramHeightTopoOriginWithH0 = {
+    EPSG_NAME_PARAMETER_ELLIPSOIDAL_HEIGHT_TOPOCENTRIC_ORIGIN,
+    EPSG_CODE_PARAMETER_ELLIPSOIDAL_HEIGHT_TOPOCENTRIC_ORIGIN, nullptr,
+    common::UnitOfMeasure::Type::LINEAR, "h_0"};
+
+static const ParamMapping *const paramsGeographicTopocentric[] = {
+    &paramLatTopoOrigin, &paramLonTopoOrigin, &paramHeightTopoOriginWithH0,
+    nullptr};
+
 static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
      "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScaleK},
@@ -836,6 +864,14 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {EPSG_NAME_METHOD_COLOMBIA_URBAN, EPSG_CODE_METHOD_COLOMBIA_URBAN, nullptr,
      "col_urban", nullptr, paramsColombiaUrban},
+
+    {EPSG_NAME_METHOD_GEOCENTRIC_TOPOCENTRIC,
+     EPSG_CODE_METHOD_GEOCENTRIC_TOPOCENTRIC, nullptr, "topocentric", nullptr,
+     paramsGeocentricTopocentric},
+
+    {EPSG_NAME_METHOD_GEOGRAPHIC_TOPOCENTRIC,
+     EPSG_CODE_METHOD_GEOGRAPHIC_TOPOCENTRIC, nullptr, nullptr, nullptr,
+     paramsGeographicTopocentric},
 };
 
 #define METHOD_NAME_CODE(method)                                               \
@@ -878,6 +914,8 @@ static const struct MethodNameCode {
     METHOD_NAME_CODE(AXIS_ORDER_REVERSAL_2D),
     METHOD_NAME_CODE(AXIS_ORDER_REVERSAL_3D),
     METHOD_NAME_CODE(GEOGRAPHIC_GEOCENTRIC),
+    METHOD_NAME_CODE(GEOCENTRIC_TOPOCENTRIC),
+    METHOD_NAME_CODE(GEOGRAPHIC_TOPOCENTRIC),
     // Transformations
     METHOD_NAME_CODE(LONGITUDE_ROTATION),
     METHOD_NAME_CODE(AFFINE_PARAMETRIC_TRANSFORMATION),
@@ -943,6 +981,9 @@ static const struct ParamNameCode {
     PARAM_NAME_CODE(LONGITUDE_OF_ORIGIN),
     PARAM_NAME_CODE(ELLIPSOID_SCALE_FACTOR),
     PARAM_NAME_CODE(PROJECTION_PLANE_ORIGIN_HEIGHT),
+    PARAM_NAME_CODE(GEOCENTRIC_X_TOPOCENTRIC_ORIGIN),
+    PARAM_NAME_CODE(GEOCENTRIC_Y_TOPOCENTRIC_ORIGIN),
+    PARAM_NAME_CODE(GEOCENTRIC_Z_TOPOCENTRIC_ORIGIN),
     // Parameters of transformations
     PARAM_NAME_CODE(SEMI_MAJOR_AXIS_DIFFERENCE),
     PARAM_NAME_CODE(FLATTENING_DIFFERENCE),
