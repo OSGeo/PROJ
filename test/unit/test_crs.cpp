@@ -2107,6 +2107,53 @@ TEST(crs, projectedCRS_as_PROJ_string) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_3D_is_WKT1_equivalent_to_WKT2) {
+    auto dbContext = DatabaseContext::create();
+
+    // "Illegal" WKT1 with a Projected 3D CRS
+    auto wkt1 = "PROJCS[\"WGS 84 / UTM zone 16N [EGM08-1]\","
+                "GEOGCS[\"WGS 84 / UTM zone 16N [EGM08-1]\","
+                "DATUM[\"WGS84\",SPHEROID[\"WGS84\",6378137.000,298.257223563,"
+                "AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],"
+                "PRIMEM[\"Greenwich\",0.0000000000000000,"
+                "AUTHORITY[\"EPSG\",\"8901\"]],"
+                "UNIT[\"Degree\",0.01745329251994329547,"
+                "AUTHORITY[\"EPSG\",\"9102\"]],AUTHORITY[\"EPSG\",\"32616\"]],"
+                "UNIT[\"Meter\",1.00000000000000000000,"
+                "AUTHORITY[\"EPSG\",\"9001\"]],"
+                "PROJECTION[\"Transverse_Mercator\"],"
+                "PARAMETER[\"latitude_of_origin\",0.0000000000000000],"
+                "PARAMETER[\"central_meridian\",-87.0000000002777938],"
+                "PARAMETER[\"scale_factor\",0.9996000000000000],"
+                "PARAMETER[\"false_easting\",500000.000],"
+                "PARAMETER[\"false_northing\",0.000],"
+                "AXIS[\"Easting\",EAST],"
+                "AXIS[\"Northing\",NORTH],"
+                "AXIS[\"Height\",UP],"
+                "AUTHORITY[\"EPSG\",\"32616\"]]";
+
+    auto obj = WKTParser()
+                   .setStrict(false)
+                   .attachDatabaseContext(dbContext)
+                   .createFromWKT(wkt1);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
+    auto wkt2 = crs->exportToWKT(f.get());
+    auto obj2 =
+        WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt2);
+    auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj2);
+    ASSERT_TRUE(crs2 != nullptr);
+
+    EXPECT_TRUE(crs->isEquivalentTo(
+        crs2.get(),
+        IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_Krovak_EPSG_5221_as_PROJ_string) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto crs = factory->createProjectedCRS("5221");
