@@ -82,11 +82,6 @@ matrix:
         - BUILD_NAME=linux_generic
         - DETAILS="linux, arm64"
 
-    - os: osx
-      env:
-        - BUILD_NAME=osx
-        - DETAILS="osx"
-
     - os: linux
       dist: xenial
       compiler: gcc
