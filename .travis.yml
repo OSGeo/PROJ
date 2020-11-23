@@ -83,13 +83,6 @@ matrix:
         - DETAILS="linux, arm64"
 
     - os: linux
-      dist: xenial
-      compiler: gcc
-      env:
-        - BUILD_NAME=mingw32
-        - DETAILS="mingw32"
-
-    - os: linux
       compiler: gcc
       dist: xenial
       env:
