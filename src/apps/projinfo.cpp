@@ -693,6 +693,7 @@ static void outputOperations(
 
     std::vector<CoordinateOperationNNPtr> list;
     size_t spatialCriterionPartialIntersectionResultCount = 0;
+    bool spatialCriterionPartialIntersectionMoreRelevant = false;
     try {
         auto authFactory =
             dbContext
@@ -718,10 +719,15 @@ static void outputOperations(
                 ctxt->setSpatialCriterion(
                     CoordinateOperationContext::SpatialCriterion::
                         PARTIAL_INTERSECTION);
-                spatialCriterionPartialIntersectionResultCount =
-                    CoordinateOperationFactory::create()
-                        ->createOperations(nnSourceCRS, nnTargetCRS, ctxt)
-                        .size();
+                auto list2 =
+                    CoordinateOperationFactory::create()->createOperations(
+                        nnSourceCRS, nnTargetCRS, ctxt);
+                spatialCriterionPartialIntersectionResultCount = list2.size();
+                if (spatialCriterionPartialIntersectionResultCount == 1 &&
+                    list.size() == 1 &&
+                    list2[0]->nameStr() != list[0]->nameStr()) {
+                    spatialCriterionPartialIntersectionMoreRelevant = true;
+                }
             } catch (const std::exception &) {
             }
         }
@@ -739,6 +745,10 @@ static void outputOperations(
         std::cout << "Note: using '--spatial-test intersects' would bring "
                      "more results ("
                   << spatialCriterionPartialIntersectionResultCount << ")"
+                  << std::endl;
+    } else if (spatialCriterionPartialIntersectionMoreRelevant) {
+        std::cout << "Note: using '--spatial-test intersects' would bring "
+                     "more relevant results."
                   << std::endl;
     }
     if (summary) {

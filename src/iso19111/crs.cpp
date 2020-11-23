@@ -2522,6 +2522,27 @@ bool GeographicCRS::_isEquivalentTo(
             ->GeodeticCRS::_isEquivalentToNoTypeCheck(other, standardCriterion,
                                                       dbContext);
     }
+    if (axisOrder ==
+            cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH_HEIGHT_UP ||
+        axisOrder ==
+            cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST_HEIGHT_UP) {
+        const auto &angularUnit = coordinateSystem()->axisList()[0]->unit();
+        const auto &linearUnit = coordinateSystem()->axisList()[2]->unit();
+        return GeographicCRS::create(
+                   util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                           nameStr()),
+                   datum(), datumEnsemble(),
+                   axisOrder == cs::EllipsoidalCS::AxisOrder::
+                                    LONG_EAST_LAT_NORTH_HEIGHT_UP
+                       ? cs::EllipsoidalCS::
+                             createLatitudeLongitudeEllipsoidalHeight(
+                                 angularUnit, linearUnit)
+                       : cs::EllipsoidalCS::
+                             createLongitudeLatitudeEllipsoidalHeight(
+                                 angularUnit, linearUnit))
+            ->GeodeticCRS::_isEquivalentToNoTypeCheck(other, standardCriterion,
+                                                      dbContext);
+    }
     return false;
 }
 //! @endcond
