@@ -18,7 +18,7 @@
  *
  * See the comments in geodesic.h for documentation.
  *
- * Copyright (c) Charles Karney (2012-2019) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2012-2020) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
  */
@@ -27,15 +27,6 @@
 #include <math.h>
 #include <limits.h>
 #include <float.h>
-
-#if !defined(HAVE_C99_MATH)
-#if defined(PROJ_LIB)
-/* PROJ requires C99 so HAVE_C99_MATH is implicit */
-#define HAVE_C99_MATH 1
-#else
-#define HAVE_C99_MATH 0
-#endif
-#endif
 
 #if !defined(__cplusplus)
 #define nullptr 0
@@ -88,19 +79,7 @@ static void Init() {
     tolb = tol0 * tol2;
     xthresh = 1000 * tol2;
     degree = pi/180;
-#if defined(NAN)
-    NaN = NAN;                  /* NAN is defined in C99 */
-#else
-#if HAVE_C99_MATH
     NaN = nan("0");
-#else
-    {
-      real minus1 = -1;
-      /* cppcheck-suppress wrongmathcall */
-      NaN = sqrt(minus1);
-    }
-#endif
-#endif
     init = 1;
   }
 }
@@ -115,95 +94,6 @@ enum captype {
   CAP_ALL  = 0x1FU,
   OUT_ALL  = 0x7F80U
 };
-
-#if HAVE_C99_MATH
-#define hypotx hypot
-/* no need to redirect log1px, since it's only used by atanhx */
-#define atanhx atanh
-#define copysignx copysign
-#define cbrtx cbrt
-#define remainderx remainder
-#define remquox remquo
-#else
-/* Replacements for C99 math functions */
-
-static real hypotx(real x, real y) {
-  x = fabs(x); y = fabs(y);
-  if (x < y) {
-    x /= y;                     /* y is nonzero */
-    return y * sqrt(1 + x * x);
-  } else {
-    y /= (x != 0 ? x : 1);
-    return x * sqrt(1 + y * y);
-  }
-}
-
-static real log1px(real x) {
-  volatile real
-    y = 1 + x,
-    z = y - 1;
-  /* Here's the explanation for this magic: y = 1 + z, exactly, and z
-   * approx x, thus log(y)/z (which is nearly constant near z = 0) returns
-   * a good approximation to the true log(1 + x)/x.  The multiplication x *
-   * (log(y)/z) introduces little additional error. */
-  return z == 0 ? x : x * log(y) / z;
-}
-
-static real atanhx(real x) {
-  real y = fabs(x);             /* Enforce odd parity */
-  y = log1px(2 * y/(1 - y))/2;
-  return x > 0 ? y : (x < 0 ? -y : x); /* atanh(-0.0) = -0.0 */
-}
-
-static real copysignx(real x, real y) {
-  /* 1/y trick to get the sign of -0.0 */
-  return fabs(x) * (y < 0 || (y == 0 && 1/y < 0) ? -1 : 1);
-}
-
-static real cbrtx(real x) {
-  real y = pow(fabs(x), 1/(real)(3));  /* Return the real cube root */
-  return x > 0 ? y : (x < 0 ? -y : x); /* cbrt(-0.0) = -0.0 */
-}
-
-static real remainderx(real x, real y) {
-  real z;
-  y = fabs(y);                 /* The result doesn't depend on the sign of y */
-  z = fmod(x, y);
-  if (z == 0)
-    /* This shouldn't be necessary.  However, before version 14 (2015),
-     * Visual Studio had problems dealing with -0.0.  Specifically
-     *   VC 10,11,12 and 32-bit compile: fmod(-0.0, 360.0) -> +0.0
-     * python 2.7 on Windows 32-bit machines has the same problem. */
-    z = copysignx(z, x);
-  else if (2 * fabs(z) == y)
-    z -= fmod(x, 2 * y) - z;    /* Implement ties to even */
-  else if (2 * fabs(z) > y)
-    z += (z < 0 ? y : -y);      /* Fold remaining cases to (-y/2, y/2) */
-  return z;
-}
-
-static real remquox(real x, real y, int* n) {
-  real z = remainderx(x, y);
-  if (n) {
-    real
-      a = remainderx(x, 2 * y),
-      b = remainderx(x, 4 * y),
-      c = remainderx(x, 8 * y);
-    *n  = (a > z ? 1 : (a < z ? -1 : 0));
-    *n += (b > a ? 2 : (b < a ? -2 : 0));
-    *n += (c > b ? 4 : (c < b ? -4 : 0));
-    if (y < 0) *n *= -1;
-    if (y != 0) {
-      if (x/y > 0 && *n <= 0)
-        *n += 8;
-      else if (x/y < 0 && *n >= 0)
-        *n -= 8;
-    }
-  }
-  return z;
-}
-
-#endif
 
 static real sq(real x) { return x * x; }
 
@@ -237,13 +127,13 @@ static void swapx(real* x, real* y)
 { real t = *x; *x = *y; *y = t; }
 
 static void norm2(real* sinx, real* cosx) {
-  real r = hypotx(*sinx, *cosx);
+  real r = hypot(*sinx, *cosx);
   *sinx /= r;
   *cosx /= r;
 }
 
 static real AngNormalize(real x) {
-  x = remainderx(x, (real)(360));
+  x = remainder(x, (real)(360));
   return x != -180 ? x : 180;
 }
 
@@ -275,7 +165,7 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   /* In order to minimize round-off errors, this function exactly reduces
    * the argument to the range [-45, 45] before converting it to radians. */
   real r, s, c; int q;
-  r = remquox(x, (real)(90), &q);
+  r = remquo(x, (real)(90), &q);
   /* now abs(r) <= 45 */
   r *= degree;
   /* Possibly could call the gnu extension sincos */
@@ -396,7 +286,7 @@ void geod_init(struct geod_geodesic* g, real a, real f) {
   g->b = g->a * g->f1;
   g->c2 = (sq(g->a) + sq(g->b) *
            (g->e2 == 0 ? 1 :
-            (g->e2 > 0 ? atanhx(sqrt(g->e2)) : atan(sqrt(-g->e2))) /
+            (g->e2 > 0 ? atanh(sqrt(g->e2)) : atan(sqrt(-g->e2))) /
             sqrt(fabs(g->e2))))/2; /* authalic radius squared */
   /* The sig12 threshold for "really short".  Using the auxiliary sphere
    * solution with dnm computed at (bet1 + bet2) / 2, the relative error in the
@@ -446,7 +336,7 @@ static void geod_lineinit_int(struct geod_geodesicline* l,
   l->salp0 = l->salp1 * cbet1; /* alp0 in [0, pi/2 - |bet1|] */
   /* Alt: calp0 = hypot(sbet1, calp1 * cbet1).  The following
    * is slightly better (consider the case salp1 = 0). */
-  l->calp0 = hypotx(l->calp1, l->salp1 * sbet1);
+  l->calp0 = hypot(l->calp1, l->salp1 * sbet1);
   /* Evaluate sig with tan(bet1) = tan(sig1) * cos(alp1).
    * sig = 0 is nearest northward crossing of equator.
    * With bet1 = 0, alp1 = pi/2, we have sig1 = 0 (equatorial line).
@@ -550,9 +440,8 @@ real geod_genposition(const struct geod_geodesicline* l,
     (pS12 ? GEOD_AREA : GEOD_NONE);
 
   outmask &= l->caps & OUT_ALL;
-  if (!( /*Init() &&*/
-         (flags & GEOD_ARCMODE || (l->caps & (GEOD_DISTANCE_IN & OUT_ALL))) ))
-    /* Uninitialized or impossible distance calculation requested */
+  if (!( (flags & GEOD_ARCMODE || (l->caps & (GEOD_DISTANCE_IN & OUT_ALL))) ))
+    /* Impossible distance calculation requested */
     return NaN;
 
   if (flags & GEOD_ARCMODE) {
@@ -617,7 +506,7 @@ real geod_genposition(const struct geod_geodesicline* l,
   /* sin(bet2) = cos(alp0) * sin(sig2) */
   sbet2 = l->calp0 * ssig2;
   /* Alt: cbet2 = hypot(csig2, salp0 * ssig2); */
-  cbet2 = hypotx(l->salp0, l->calp0 * csig2);
+  cbet2 = hypot(l->salp0, l->calp0 * csig2);
   if (cbet2 == 0)
     /* I.e., salp0 = 0, csig2 = 0.  Break the degeneracy in this case */
     cbet2 = csig2 = tiny;
@@ -630,7 +519,7 @@ real geod_genposition(const struct geod_geodesicline* l,
       s12_a12;
 
   if (outmask & GEOD_LONGITUDE) {
-    real E = copysignx(1, l->salp0); /* east or west going? */
+    real E = copysign(1, l->salp0); /* east or west going? */
     /* tan(omg2) = sin(alp0) * tan(sig2) */
     somg2 = l->salp0 * ssig2; comg2 = csig2;  /* No need to normalize */
     /* omg12 = omg2 - omg1 */
@@ -1045,7 +934,7 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
     real
       /* From Lambda12: sin(alp1) * cos(bet1) = sin(alp0) */
       salp0 = salp1 * cbet1,
-      calp0 = hypotx(calp1, salp1 * sbet1); /* calp0 > 0 */
+      calp0 = hypot(calp1, salp1 * sbet1); /* calp0 > 0 */
     real alp12;
     if (calp0 != 0 && salp0 != 0) {
       real
@@ -1279,8 +1168,8 @@ real Astroid(real x, real y) {
        * of precision due to cancellation.  The result is unchanged because
        * of the way the T is used in definition of u. */
       T3 += T3 < 0 ? -sqrt(disc) : sqrt(disc); /* T3 = (r * t)^3 */
-      /* N.B. cbrtx always returns the real root.  cbrtx(-8) = -2. */
-      T = cbrtx(T3);            /* T = r * t */
+      /* N.B. cbrt always returns the real root.  cbrt(-8) = -2. */
+      T = cbrt(T3);            /* T = r * t */
       /* T can be zero; but then r2 / T -> 0. */
       u += T + (T != 0 ? r2 / T : 0);
     } else {
@@ -1348,7 +1237,7 @@ real InverseStart(const struct geod_geodesic* g,
     sbet12 + cbet2 * sbet1 * sq(somg12) / (1 + comg12) :
     sbet12a - cbet2 * sbet1 * sq(somg12) / (1 - comg12);
 
-  ssig12 = hypotx(salp1, calp1);
+  ssig12 = hypot(salp1, calp1);
   csig12 = sbet1 * sbet2 + cbet1 * cbet2 * comg12;
 
   if (shortline && ssig12 < g->etol2) {
@@ -1500,7 +1389,7 @@ real Lambda12(const struct geod_geodesic* g,
 
   /* sin(alp1) * cos(bet1) = sin(alp0) */
   salp0 = salp1 * cbet1;
-  calp0 = hypotx(calp1, salp1 * sbet1); /* calp0 > 0 */
+  calp0 = hypot(calp1, salp1 * sbet1); /* calp0 > 0 */
 
   /* tan(bet1) = tan(sig1) * cos(alp1)
    * tan(omg1) = sin(alp0) * tan(sig1) = tan(omg1)=tan(alp1)*sin(bet1) */
@@ -1850,8 +1739,8 @@ int transit(real lon1, real lon2) {
 int transitdirect(real lon1, real lon2) {
   /* Compute exactly the parity of
      int(ceil(lon2 / 360)) - int(ceil(lon1 / 360)) */
-  lon1 = remainderx(lon1, (real)(720));
-  lon2 = remainderx(lon2, (real)(720));
+  lon1 = remainder(lon1, (real)(720));
+  lon2 = remainder(lon2, (real)(720));
   return ( (lon2 <= 0 && lon2 > -360 ? 1 : 0) -
            (lon1 <= 0 && lon1 > -360 ? 1 : 0) );
 }
@@ -1891,7 +1780,7 @@ void accneg(real s[]) {
 
 void accrem(real s[], real y) {
   /* Reduce to [-y/2, y/2]. */
-  s[0] = remainderx(s[0], y);
+  s[0] = remainder(s[0], y);
   accadd(s, (real)(0));
 }
 
@@ -2093,7 +1982,7 @@ real areareduceA(real area[], real area0,
 
 real areareduceB(real area, real area0,
                  int crossings, boolx reverse, boolx sign) {
-  area = remainderx(area, area0);
+  area = remainder(area, area0);
     if (crossings & 1)
     area += (area < 0 ? 1 : -1) * area0/2;
   /* area is with the clockwise sense.  If !reverse convert to
