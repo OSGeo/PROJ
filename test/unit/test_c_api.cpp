@@ -4650,10 +4650,21 @@ TEST_F(CApi, proj_create_vertical_crs_ex) {
     ObjectKeeper keeper_geog_crs(geog_crs);
     ASSERT_NE(geog_crs, nullptr);
 
-    auto P = proj_create_crs_to_crs_from_pj(m_ctxt, compound, geog_crs, nullptr,
-                                            nullptr);
-    ObjectKeeper keeper_P(P);
-    ASSERT_NE(P, nullptr);
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt =
+        proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+    PJ_OBJ_LIST *operations =
+        proj_create_operations(m_ctxt, compound, geog_crs, ctxt);
+    ASSERT_NE(operations, nullptr);
+    ObjListKeeper keeper_operations(operations);
+    EXPECT_GE(proj_list_get_count(operations), 1);
+    auto P = proj_list_get(m_ctxt, operations, 0);
+    ObjectKeeper keeper_transform(P);
 
     auto name = proj_get_name(P);
     ASSERT_TRUE(name != nullptr);
@@ -4706,10 +4717,21 @@ TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
     ObjectKeeper keeper_geog_crs(geog_crs);
     ASSERT_NE(geog_crs, nullptr);
 
-    auto P = proj_create_crs_to_crs_from_pj(m_ctxt, compound, geog_crs, nullptr,
-                                            nullptr);
-    ObjectKeeper keeper_P(P);
-    ASSERT_NE(P, nullptr);
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt =
+        proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+    PJ_OBJ_LIST *operations =
+        proj_create_operations(m_ctxt, compound, geog_crs, ctxt);
+    ASSERT_NE(operations, nullptr);
+    ObjListKeeper keeper_operations(operations);
+    EXPECT_GE(proj_list_get_count(operations), 1);
+    auto P = proj_list_get(m_ctxt, operations, 0);
+    ObjectKeeper keeper_transform(P);
 
     auto name = proj_get_name(P);
     ASSERT_TRUE(name != nullptr);
@@ -4739,10 +4761,13 @@ TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
     ObjectKeeper keeper_compound_from_projjson(compound_from_projjson);
     ASSERT_NE(compound_from_projjson, nullptr);
 
-    auto P2 = proj_create_crs_to_crs_from_pj(m_ctxt, compound_from_projjson,
-                                             geog_crs, nullptr, nullptr);
-    ObjectKeeper keeper_P2(P2);
-    ASSERT_NE(P2, nullptr);
+    PJ_OBJ_LIST *operations2 =
+        proj_create_operations(m_ctxt, compound_from_projjson, geog_crs, ctxt);
+    ASSERT_NE(operations2, nullptr);
+    ObjListKeeper keeper_operations2(operations2);
+    EXPECT_GE(proj_list_get_count(operations2), 1);
+    auto P2 = proj_list_get(m_ctxt, operations2, 0);
+    ObjectKeeper keeper_transform2(P2);
 
     auto name_bis = proj_get_name(P2);
     ASSERT_TRUE(name_bis != nullptr);

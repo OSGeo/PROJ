@@ -4867,7 +4867,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
                 "3855"), // EGM2008 height
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
-        ASSERT_EQ(list.size(), 2U);
+        ASSERT_EQ(list.size(), 3U);
         EXPECT_EQ(
             list[1]->exportToPROJString(
                 PROJStringFormatter::create(
@@ -4889,7 +4889,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
                 "3855"), // EGM2008 height
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
-        ASSERT_EQ(list.size(), 2U);
+        ASSERT_EQ(list.size(), 3U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
@@ -4938,7 +4938,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("7839"),
             // NZGD2000
             authFactory->createCoordinateReferenceSystem("4959"), ctxt);
-        ASSERT_EQ(list.size(), 1U);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
@@ -4964,7 +4964,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("8357"),
             // ETRS89
             authFactory->createCoordinateReferenceSystem("4937"), ctxt);
-        ASSERT_EQ(list.size(), 1U);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
@@ -8912,7 +8912,7 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
                                                                ctxt);
     // The checked value is not that important, but in case this changes,
     // likely due to a EPSG upgrade, worth checking
-    EXPECT_EQ(listCompoundToGeog2D.size(), 141U);
+    EXPECT_EQ(listCompoundToGeog2D.size(), 142U);
 
     auto listGeog2DToCompound =
         CoordinateOperationFactory::create()->createOperations(dst, nnSrc,
@@ -11169,7 +11169,7 @@ TEST(operation, normalizeForVisualization) {
             src,
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84 3D
             ctxt);
-        ASSERT_EQ(list.size(), 2U);
+        ASSERT_EQ(list.size(), 3U);
         auto op = list[1];
         auto opNormalized = op->normalizeForVisualization();
         EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));
