@@ -1620,6 +1620,34 @@ static bool exportAsESRIWktCompoundCRSWithEllipsoidalHeight(
     vertCRSList.front()->_exportToWKT(formatter);
     return true;
 }
+
+// ---------------------------------------------------------------------------
+
+// Try to format a Geographic/ProjectedCRS 3D CRS as a
+// GEOGCS[]/PROJCS[],VERTCS["Ellipsoid (metre)",DATUM["Ellipsoid",2002],...]
+static bool exportAsWKT1CompoundCRSWithEllipsoidalHeight(
+    const CRSNNPtr &base2DCRS,
+    const cs::CoordinateSystemAxisNNPtr &verticalAxis,
+    io::WKTFormatter *formatter) {
+    std::string verticalCRSName = "Ellipsoid (";
+    verticalCRSName += verticalAxis->unit().name();
+    verticalCRSName += ')';
+    auto vertDatum = datum::VerticalReferenceFrame::create(
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY, "Ellipsoid")
+            .set("VERT_DATUM_TYPE", "2002"));
+    auto vertCRS = VerticalCRS::create(
+        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                verticalCRSName),
+        vertDatum.as_nullable(), nullptr,
+        cs::VerticalCS::create(util::PropertyMap(), verticalAxis));
+    formatter->startNode(io::WKTConstants::COMPD_CS, false);
+    formatter->addQuotedString(base2DCRS->nameStr() + " + " + verticalCRSName);
+    base2DCRS->_exportToWKT(formatter);
+    vertCRS->_exportToWKT(formatter);
+    formatter->endNode();
+    return true;
+}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -1685,6 +1713,13 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         if (originalCompoundCRS) {
             originalCompoundCRS->_exportToWKT(formatter);
             return;
+        }
+
+        if (formatter->isAllowedEllipsoidalHeightAsVerticalCRS()) {
+            if (exportAsWKT1CompoundCRSWithEllipsoidalHeight(
+                    geogCRS2D, axisList[2], formatter)) {
+                return;
+            }
         }
 
         io::FormattingException::Throw(
@@ -3638,6 +3673,14 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         if (!formatter->useESRIDialect() && originalCompoundCRS) {
             originalCompoundCRS->_exportToWKT(formatter);
             return;
+        }
+
+        if (!formatter->useESRIDialect() &&
+            formatter->isAllowedEllipsoidalHeightAsVerticalCRS()) {
+            if (exportAsWKT1CompoundCRSWithEllipsoidalHeight(
+                    projCRS2D, axisList[2], formatter)) {
+                return;
+            }
         }
 
         io::FormattingException::Throw(

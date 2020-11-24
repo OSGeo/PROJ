@@ -243,6 +243,10 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_DLL WKTFormatter &setStrict(bool strict) noexcept;
     PROJ_DLL bool isStrict() const noexcept;
 
+    PROJ_DLL WKTFormatter &
+    setAllowEllipsoidalHeightAsVerticalCRS(bool allow) noexcept;
+    PROJ_DLL bool isAllowedEllipsoidalHeightAsVerticalCRS() const noexcept;
+
     PROJ_DLL const std::string &toString() const;
 
     PROJ_PRIVATE :

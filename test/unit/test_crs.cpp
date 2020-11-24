@@ -513,6 +513,34 @@ TEST(crs, EPSG_4979_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4979_as_WKT1_GDAL_with_ellipsoidal_height_as_vertical_crs) {
+    auto crs = GeographicCRS::EPSG_4979;
+    auto wkt = crs->exportToWKT(
+        &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL,
+                               DatabaseContext::create())
+              ->setAllowEllipsoidalHeightAsVerticalCRS(true)));
+
+    // For LAS 1.4 WKT1...
+    EXPECT_EQ(wkt, "COMPD_CS[\"WGS 84 + Ellipsoid (metre)\",\n"
+                   "    GEOGCS[\"WGS 84\",\n"
+                   "        DATUM[\"WGS_1984\",\n"
+                   "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+                   "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+                   "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+                   "        PRIMEM[\"Greenwich\",0,\n"
+                   "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+                   "        UNIT[\"degree\",0.0174532925199433,\n"
+                   "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+                   "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
+                   "    VERT_CS[\"Ellipsoid (metre)\",\n"
+                   "        VERT_DATUM[\"Ellipsoid\",2002],\n"
+                   "        UNIT[\"metre\",1,\n"
+                   "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+                   "        AXIS[\"Ellipsoidal height\",UP]]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_4979_as_WKT1_ESRI) {
     auto crs = GeographicCRS::EPSG_4979;
     WKTFormatterNNPtr f(
@@ -2033,6 +2061,50 @@ TEST(crs, projectedCRS_as_WKT1_ESRI) {
                                        DatabaseContext::create())
                       .get()),
               expected);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs,
+     projectedCRS_3D_as_WKT1_GDAL_with_ellipsoidal_height_as_vertical_crs) {
+    auto dbContext = DatabaseContext::create();
+    auto crs = AuthorityFactory::create(dbContext, "EPSG")
+                   ->createProjectedCRS("32631")
+                   ->promoteTo3D(std::string(), dbContext);
+    auto wkt = crs->exportToWKT(
+        &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
+              ->setAllowEllipsoidalHeightAsVerticalCRS(true)));
+
+    // For LAS 1.4 WKT1...
+    EXPECT_EQ(wkt,
+              "COMPD_CS[\"WGS 84 / UTM zone 31N + Ellipsoid (metre)\",\n"
+              "    PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+              "        GEOGCS[\"WGS 84\",\n"
+              "            DATUM[\"WGS_1984\",\n"
+              "                SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+              "                    AUTHORITY[\"EPSG\",\"7030\"]],\n"
+              "                AUTHORITY[\"EPSG\",\"6326\"]],\n"
+              "            PRIMEM[\"Greenwich\",0,\n"
+              "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
+              "            UNIT[\"degree\",0.0174532925199433,\n"
+              "                AUTHORITY[\"EPSG\",\"9122\"]],\n"
+              "            AUTHORITY[\"EPSG\",\"4326\"]],\n"
+              "        PROJECTION[\"Transverse_Mercator\"],\n"
+              "        PARAMETER[\"latitude_of_origin\",0],\n"
+              "        PARAMETER[\"central_meridian\",3],\n"
+              "        PARAMETER[\"scale_factor\",0.9996],\n"
+              "        PARAMETER[\"false_easting\",500000],\n"
+              "        PARAMETER[\"false_northing\",0],\n"
+              "        UNIT[\"metre\",1,\n"
+              "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+              "        AXIS[\"Easting\",EAST],\n"
+              "        AXIS[\"Northing\",NORTH],\n"
+              "        AUTHORITY[\"EPSG\",\"32631\"]],\n"
+              "    VERT_CS[\"Ellipsoid (metre)\",\n"
+              "        VERT_DATUM[\"Ellipsoid\",2002],\n"
+              "        UNIT[\"metre\",1,\n"
+              "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+              "        AXIS[\"Ellipsoidal height\",UP]]]");
 }
 
 // ---------------------------------------------------------------------------
