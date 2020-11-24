@@ -11233,6 +11233,12 @@ struct CoordinateOperationFactory::Private {
         const crs::GeographicCRS *geogDst,
         std::vector<CoordinateOperationNNPtr> &res);
 
+    static void createOperationsVertToGeogBallpark(
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        Private::Context &context, const crs::VerticalCRS *vertSrc,
+        const crs::GeographicCRS *geogDst,
+        std::vector<CoordinateOperationNNPtr> &res);
+
     static void createOperationsBoundToBound(
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
         Private::Context &context, const crs::BoundCRS *boundSrc,
@@ -11334,6 +11340,7 @@ struct PrecomputedOpCharacteristics {
     bool gridsKnown_ = false;
     size_t stepCount_ = 0;
     bool isApprox_ = false;
+    bool hasBallparkVertical_ = false;
     bool isNullTransformation_ = false;
 
     PrecomputedOpCharacteristics() = default;
@@ -11341,10 +11348,12 @@ struct PrecomputedOpCharacteristics {
                                  bool isPROJExportable, bool hasGrids,
                                  bool gridsAvailable, bool gridsKnown,
                                  size_t stepCount, bool isApprox,
+                                 bool hasBallparkVertical,
                                  bool isNullTransformation)
         : area_(area), accuracy_(accuracy), isPROJExportable_(isPROJExportable),
           hasGrids_(hasGrids), gridsAvailable_(gridsAvailable),
           gridsKnown_(gridsKnown), stepCount_(stepCount), isApprox_(isApprox),
+          hasBallparkVertical_(hasBallparkVertical),
           isNullTransformation_(isNullTransformation) {}
 };
 
@@ -11385,6 +11394,15 @@ struct SortFunction {
             return true;
         }
         if (iterA->second.isApprox_ && !iterB->second.isApprox_) {
+            return false;
+        }
+
+        if (!iterA->second.hasBallparkVertical_ &&
+            iterB->second.hasBallparkVertical_) {
+            return true;
+        }
+        if (iterA->second.hasBallparkVertical_ &&
+            !iterB->second.hasBallparkVertical_) {
             return false;
         }
 
@@ -11654,7 +11672,9 @@ struct FilterResults {
                 ? CoordinateOperationContext::SpatialCriterion::
                       STRICT_CONTAINMENT
                 : context->getSpatialCriterion();
-        bool hasFoundOpWithExtent = false;
+        bool hasOnlyBallpark = true;
+        bool hasNonBallparkWithoutExtent = false;
+        bool hasNonBallparkOpWithExtent = false;
         const bool allowBallpark = context->getAllowBallparkTransformations();
         for (const auto &op : sourceList) {
             if (desiredAccuracy != 0) {
@@ -11669,9 +11689,15 @@ struct FilterResults {
             if (areaOfInterest) {
                 bool emptyIntersection = false;
                 auto extent = getExtent(op, true, emptyIntersection);
-                if (!extent)
+                if (!extent) {
+                    if (!op->hasBallparkTransformation()) {
+                        hasNonBallparkWithoutExtent = true;
+                    }
                     continue;
-                hasFoundOpWithExtent = true;
+                }
+                if (!op->hasBallparkTransformation()) {
+                    hasNonBallparkOpWithExtent = true;
+                }
                 bool extentContains =
                     extent->contains(NN_NO_CHECK(areaOfInterest));
                 if (!hasOpThatContainsAreaOfInterestAndNoGrid &&
@@ -11698,9 +11724,15 @@ struct FilterResults {
                            BOTH) {
                 bool emptyIntersection = false;
                 auto extent = getExtent(op, true, emptyIntersection);
-                if (!extent)
+                if (!extent) {
+                    if (!op->hasBallparkTransformation()) {
+                        hasNonBallparkWithoutExtent = true;
+                    }
                     continue;
-                hasFoundOpWithExtent = true;
+                }
+                if (!op->hasBallparkTransformation()) {
+                    hasNonBallparkOpWithExtent = true;
+                }
                 bool extentContainsExtent1 =
                     !extent1 || extent->contains(NN_NO_CHECK(extent1));
                 bool extentContainsExtent2 =
@@ -11730,12 +11762,16 @@ struct FilterResults {
                     }
                 }
             }
+            if (!op->hasBallparkTransformation()) {
+                hasOnlyBallpark = false;
+            }
             res.emplace_back(op);
         }
 
         // In case no operation has an extent and no result is found,
         // retain all initial operations that match accuracy criterion.
-        if (res.empty() && !hasFoundOpWithExtent) {
+        if ((res.empty() && !hasNonBallparkOpWithExtent) ||
+            (hasOnlyBallpark && hasNonBallparkWithoutExtent)) {
             for (const auto &op : sourceList) {
                 if (desiredAccuracy != 0) {
                     const double accuracy = getAccuracy(op);
@@ -11839,6 +11875,8 @@ struct FilterResults {
                 area, getAccuracy(op), isPROJExportable, hasGrids,
                 gridsAvailable, gridsKnown, stepCount,
                 op->hasBallparkTransformation(),
+                op->nameStr().find("ballpark vertical transformation") !=
+                    std::string::npos,
                 isNullTransformation(op->nameStr()));
         }
 
@@ -13647,11 +13685,17 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
     ENTER_FUNCTION();
 
     if (geogSrc && vertDst) {
-        res = createOperationsGeogToVertFromGeoid(sourceCRS, targetCRS, vertDst,
-                                                  context);
+        createOperationsFromDatabase(targetCRS, sourceCRS, context, geodDst,
+                                     geodSrc, geogDst, geogSrc, vertDst,
+                                     vertSrc, res);
+        res = applyInverse(res);
     } else if (geogDst && vertSrc) {
         res = applyInverse(createOperationsGeogToVertFromGeoid(
             targetCRS, sourceCRS, vertSrc, context));
+        if (!res.empty()) {
+            createOperationsVertToGeogBallpark(sourceCRS, targetCRS, context,
+                                               vertSrc, geogDst, res);
+        }
     }
 
     if (!res.empty()) {
@@ -14762,16 +14806,31 @@ void CoordinateOperationFactory::Private::createOperationsVertToGeog(
                         match.get(),
                         util::IComparable::Criterion::EQUIVALENT) &&
                     !match->identifiers().empty()) {
-                    res = createOperations(
+                    auto resTmp = createOperations(
                         NN_NO_CHECK(
                             util::nn_dynamic_pointer_cast<crs::VerticalCRS>(
                                 match)),
                         targetCRS, context);
+                    res.insert(res.end(), resTmp.begin(), resTmp.end());
                     return;
                 }
             }
         }
     }
+
+    createOperationsVertToGeogBallpark(sourceCRS, targetCRS, context, vertSrc,
+                                       geogDst, res);
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperationFactory::Private::createOperationsVertToGeogBallpark(
+    const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+    Private::Context &, const crs::VerticalCRS *vertSrc,
+    const crs::GeographicCRS *geogDst,
+    std::vector<CoordinateOperationNNPtr> &res) {
+
+    ENTER_FUNCTION();
 
     const auto &srcAxis = vertSrc->coordinateSystem()->axisList()[0];
     const double convSrc = srcAxis->unit().conversionToSI();
@@ -14791,12 +14850,24 @@ void CoordinateOperationFactory::Private::createOperationsVertToGeog(
         ((srcIsUp && dstIsDown) || (srcIsDown && dstIsUp));
 
     const double factor = convSrc / convDst;
-    auto conv = Transformation::createChangeVerticalUnit(
-        util::PropertyMap().set(
-            common::IdentifiedObject::NAME_KEY,
+
+    const auto &sourceCRSExtent = getExtent(sourceCRS);
+    const auto &targetCRSExtent = getExtent(targetCRS);
+    const bool sameExtent =
+        sourceCRSExtent && targetCRSExtent &&
+        sourceCRSExtent->_isEquivalentTo(
+            targetCRSExtent.get(), util::IComparable::Criterion::EQUIVALENT);
+
+    util::PropertyMap map;
+    map.set(common::IdentifiedObject::NAME_KEY,
             buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr()) +
-                BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT),
-        sourceCRS, targetCRS,
+                BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT)
+        .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+             sameExtent ? NN_NO_CHECK(sourceCRSExtent)
+                        : metadata::Extent::WORLD);
+
+    auto conv = Transformation::createChangeVerticalUnit(
+        map, sourceCRS, targetCRS,
         common::Scale(heightDepthReversal ? -factor : factor), {});
     conv->setHasBallparkTransformation(true);
     res.push_back(conv);
