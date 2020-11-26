@@ -41,8 +41,9 @@ make >/dev/null
 if [ "$(uname)" == "Linux" -a -f src/.libs/libproj.so ]; then
 if objdump -TC "src/.libs/libproj.so" | grep "elf64-x86-64">/dev/null; then
     echo "Checking exported symbols..."
-    $TRAVIS_BUILD_DIR/scripts/dump_exported_symbols.sh src/.libs/libproj.so > /tmp/got_symbols.txt
-    diff -u $TRAVIS_BUILD_DIR/scripts/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
+    cat $TRAVIS_BUILD_DIR/scripts/reference_exported_symbols.txt | sort > /tmp/reference_exported_symbols.txt
+    $TRAVIS_BUILD_DIR/scripts/dump_exported_symbols.sh src/.libs/libproj.so | sort > /tmp/got_symbols.txt
+    diff -u /tmp/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
 fi
 fi
 
