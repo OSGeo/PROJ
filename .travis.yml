@@ -58,15 +58,6 @@ matrix:
             - automake
 
     - os: linux
-      dist: xenial
-      compiler: clang
-      services:
-        - docker
-      env:
-        - BUILD_NAME=linux_clang
-        - DETAILS="linux, clang"
-
-    - os: linux
       dist: bionic
       compiler: gcc
       arch: s390x
