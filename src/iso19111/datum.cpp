@@ -351,6 +351,23 @@ void PrimeMeridian::_exportToWKT(
     if (!(isWKT2 && formatter->primeMeridianOmittedIfGreenwich() &&
           l_name == "Greenwich")) {
         formatter->startNode(io::WKTConstants::PRIMEM, !identifiers().empty());
+
+        if (formatter->useESRIDialect()) {
+            bool aliasFound = false;
+            const auto &dbContext = formatter->databaseContext();
+            if (dbContext) {
+                auto l_alias = dbContext->getAliasFromOfficialName(
+                    l_name, "prime_meridian", "ESRI");
+                if (!l_alias.empty()) {
+                    l_name = l_alias;
+                    aliasFound = true;
+                }
+            }
+            if (!aliasFound) {
+                l_name = io::WKTFormatter::morphNameToESRI(l_name);
+            }
+        }
+
         formatter->addQuotedString(l_name);
         const auto &l_long = longitude();
         if (formatter->primeMeridianInDegree()) {

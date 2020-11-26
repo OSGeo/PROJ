@@ -414,6 +414,20 @@ TEST(crs, EPSG_4326_as_WKT1_ESRI_with_database) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4901_as_WKT1_ESRI_with_PRIMEM_unit_name_morphing) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("4901");
+    WKTFormatterNNPtr f(WKTFormatter::create(
+        WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+    EXPECT_EQ(crs->exportToWKT(f.get()),
+              "GEOGCS[\"GCS_ATF_Paris\",DATUM[\"D_ATF\","
+              "SPHEROID[\"Plessis_1817\",6376523.0,308.64]],"
+              "PRIMEM[\"Paris_RGS\",2.33720833333333],"
+              "UNIT[\"Grad\",0.0157079632679489]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_4326_as_WKT1_ESRI_without_database) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(

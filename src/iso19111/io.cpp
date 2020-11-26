@@ -1978,14 +1978,80 @@ PrimeMeridianNNPtr WKTParser::Private::buildPrimeMeridian(
     try {
         double angleValue = asDouble(children[1]);
 
-        // Correct for GDAL WKT1 departure
+        // Correct for GDAL WKT1 and WKT1-ESRI departure
         if (name == "Paris" && std::fabs(angleValue - 2.33722917) < 1e-8 &&
-            unit == UnitOfMeasure::GRAD) {
+            unit._isEquivalentTo(UnitOfMeasure::GRAD,
+                                 util::IComparable::Criterion::EQUIVALENT)) {
             angleValue = 2.5969213;
+        } else {
+            static const struct {
+                const char *name;
+                int deg;
+                int min;
+                double sec;
+            } primeMeridiansDMS[] = {
+                {"Lisbon", -9, 7, 54.862},  {"Bogota", -74, 4, 51.3},
+                {"Madrid", -3, 41, 14.55},  {"Rome", 12, 27, 8.4},
+                {"Bern", 7, 26, 22.5},      {"Jakarta", 106, 48, 27.79},
+                {"Ferro", -17, 40, 0},      {"Brussels", 4, 22, 4.71},
+                {"Stockholm", 18, 3, 29.8}, {"Athens", 23, 42, 58.815},
+                {"Oslo", 10, 43, 22.5},     {"Paris RGS", 2, 20, 13.95},
+                {"Paris_RGS", 2, 20, 13.95}};
+
+            // Current epsg.org output may use the EPSG:9110 "sexagesimal DMS"
+            // unit and a DD.MMSSsss value, but this will likely be changed to
+            // use decimal degree.
+            // Or WKT1 may for example use the Paris RGS decimal degree value
+            // but with a GEOGCS with UNIT["Grad"]
+            for (const auto &pmDef : primeMeridiansDMS) {
+                if (name == pmDef.name) {
+                    double dmsAsDecimalValue =
+                        (pmDef.deg >= 0 ? 1 : -1) *
+                        (std::abs(pmDef.deg) + pmDef.min / 100. +
+                         pmDef.sec / 10000.);
+                    double dmsAsDecimalDegreeValue =
+                        (pmDef.deg >= 0 ? 1 : -1) *
+                        (std::abs(pmDef.deg) + pmDef.min / 60. +
+                         pmDef.sec / 3600.);
+                    if (std::fabs(angleValue - dmsAsDecimalValue) < 1e-8 ||
+                        std::fabs(angleValue - dmsAsDecimalDegreeValue) <
+                            1e-8) {
+                        angleValue = dmsAsDecimalDegreeValue;
+                        unit = UnitOfMeasure::DEGREE;
+                    }
+                    break;
+                }
+            }
+        }
+
+        auto &properties = buildProperties(node);
+        if (dbContext_ && esriStyle_) {
+            std::string outTableName;
+            std::string codeFromAlias;
+            std::string authNameFromAlias;
+            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
+                                                        std::string());
+            auto officialName = authFactory->getOfficialNameFromAlias(
+                name, "prime_meridian", "ESRI", false, outTableName,
+                authNameFromAlias, codeFromAlias);
+            if (!officialName.empty()) {
+                properties.set(IdentifiedObject::NAME_KEY, officialName);
+                if (!authNameFromAlias.empty()) {
+                    auto identifiers = ArrayOfBaseObject::create();
+                    identifiers->add(Identifier::create(
+                        codeFromAlias,
+                        PropertyMap()
+                            .set(Identifier::CODESPACE_KEY, authNameFromAlias)
+                            .set(Identifier::AUTHORITY_KEY,
+                                 authNameFromAlias)));
+                    properties.set(IdentifiedObject::IDENTIFIERS_KEY,
+                                   identifiers);
+                }
+            }
         }
 
         Angle angle(angleValue, unit);
-        return PrimeMeridian::create(buildProperties(node), angle);
+        return PrimeMeridian::create(properties, angle);
     } catch (const std::exception &e) {
         throw buildRethrow(__FUNCTION__, e);
     }
@@ -2737,6 +2803,9 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
         throw ParsingException("Missing DATUM or ENSEMBLE node");
     }
 
+    // Do that now so that esriStyle_ can be set before buildPrimeMeridian()
+    auto props = buildProperties(node);
+
     auto &dynamicNode = nodeP->lookForChild(WKTConstants::DYNAMIC);
 
     auto &csNode = nodeP->lookForChild(WKTConstants::CS_);
@@ -2774,7 +2843,6 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
         angularUnit = primeMeridian->longitude().unit();
     }
 
-    auto props = buildProperties(node);
     addExtensionProj4ToProp(nodeP, props);
 
     // No explicit AXIS node ? (WKT1)
