@@ -9,7 +9,7 @@ AM_CPPFLAGS =	-DPROJ_LIB=\"$(pkgdatadir)\" \
 		-DMUTEX_@MUTEX_SETTING@ -I$(top_srcdir)/include @SQLITE3_CFLAGS@ @TIFF_CFLAGS@ @TIFF_ENABLED_FLAGS@ @CURL_CFLAGS@ @CURL_ENABLED_FLAGS@
 AM_CXXFLAGS =    @CXX_WFLAGS@ @FLTO_FLAG@
 
-include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesic.h \
+include_HEADERS = proj.h proj_experimental.h proj_constants.h geodesic.h \
 	 proj_symbol_rename.h
 
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
@@ -209,19 +209,17 @@ libproj_la_SOURCES = \
 	\
 	aasincos.cpp adjlon.cpp \
 	dmstor.cpp auth.cpp \
-	deriv.cpp ell_set.cpp ellps.cpp errno.cpp \
+	deriv.cpp ell_set.cpp ellps.cpp \
 	factors.cpp fwd.cpp init.cpp inv.cpp \
 	list.cpp malloc.cpp mlfn.cpp mlfn.hpp msfn.cpp proj_mdist.cpp \
 	param.cpp phi2.cpp pr_list.cpp \
 	qsfn.cpp strerrno.cpp \
 	tsfn.cpp units.cpp ctx.cpp log.cpp zpoly1.cpp rtodms.cpp \
 	release.cpp gauss.cpp \
-	fileapi.cpp \
 	generic_inverse.cpp \
 	quadtree.hpp \
 	\
-	datums.cpp datum_set.cpp transform.cpp \
-	utils.cpp \
+	datums.cpp datum_set.cpp \
 	mutex.cpp initcache.cpp geodesic.c \
 	strtod.cpp \
 	\

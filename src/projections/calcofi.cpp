@@ -4,7 +4,6 @@
 
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_api.h"
 
 PROJ_HEAD(calcofi,
     "Cal Coop Ocean Fish Invest Lines/Stations") "\n\tCyl, Sph&Ell";

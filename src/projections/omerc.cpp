@@ -126,7 +126,7 @@ PJ *PROJECTION(omerc) {
         gamma0, lamc=0, lam1=0, lam2=0, phi1=0, phi2=0, alpha_c=0;
     int alp, gam, no_off = 0;
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;

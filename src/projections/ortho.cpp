@@ -273,13 +273,13 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
             return lp;
         }
     }
-    pj_ctx_set_errno(P->ctx, PJD_ERR_NON_CONVERGENT);
+    proj_context_errno_set(P->ctx, PJD_ERR_NON_CONVERGENT);
     return lp;
 }
 
 
 PJ *PROJECTION(ortho) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;

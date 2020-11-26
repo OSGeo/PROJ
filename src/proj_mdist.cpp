@@ -107,7 +107,7 @@ proj_mdist(double phi, double sphi, double cphi, const void *data) {
 	return(D + sc * sum);
 }
 	double
-proj_inv_mdist(projCtx ctx, double dist, const void *data) {
+proj_inv_mdist(PJ_CONTEXT *ctx, double dist, const void *data) {
 	const struct MDIST *b = (const struct MDIST *)data;
 	double s, t, phi, k;
 	int i;
@@ -124,6 +124,6 @@ proj_inv_mdist(projCtx ctx, double dist, const void *data) {
 			return phi;
 	}
 		/* convergence failed */
-	pj_ctx_set_errno(ctx, PJD_ERR_NON_CONV_INV_MERI_DIST);
+	proj_context_errno_set(ctx, PJD_ERR_NON_CONV_INV_MERI_DIST);
 	return phi;
 }

@@ -81,7 +81,7 @@ void *pj_gauss_ini(double e, double phi0, double *chi, double *rc) {
     return ((void *)en);
 }
 
-PJ_LP pj_gauss(projCtx ctx, PJ_LP elp, const void *data) {
+PJ_LP pj_gauss(PJ_CONTEXT *ctx, PJ_LP elp, const void *data) {
     const struct GAUSS *en = (const struct GAUSS *)data;
     PJ_LP slp;
     (void) ctx;
@@ -93,7 +93,7 @@ PJ_LP pj_gauss(projCtx ctx, PJ_LP elp, const void *data) {
     return(slp);
 }
 
-PJ_LP pj_inv_gauss(projCtx ctx, PJ_LP slp, const void *data) {
+PJ_LP pj_inv_gauss(PJ_CONTEXT *ctx, PJ_LP slp, const void *data) {
     const struct GAUSS *en = (const struct GAUSS *)data;
     PJ_LP elp;
     double num;
@@ -109,6 +109,6 @@ PJ_LP pj_inv_gauss(projCtx ctx, PJ_LP slp, const void *data) {
     }
     /* convergence failed */
     if (!i)
-        pj_ctx_set_errno(ctx, PJD_ERR_NON_CONV_INV_MERI_DIST);
+        proj_context_errno_set(ctx, PJD_ERR_NON_CONV_INV_MERI_DIST);
     return (elp);
 }

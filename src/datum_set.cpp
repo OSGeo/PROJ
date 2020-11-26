@@ -38,7 +38,7 @@
 /*                            pj_datum_set()                            */
 /************************************************************************/
 
-int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
+int pj_datum_set(PJ_CONTEXT *ctx, paralist *pl, PJ *projdef)
 
 {
     const char *name, *towgs84, *nadgrids;
@@ -71,7 +71,7 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
         for (i = 0; (s = pj_datums[i].id) && strcmp(name, s) ; ++i) {}
 
         if (!s) {
-            pj_ctx_set_errno(ctx, PJD_ERR_UNKNOWN_ELLP_PARAM);
+            proj_context_errno_set(ctx, PJD_ERR_UNKNOWN_ELLP_PARAM);
             return 1;
         }
 
@@ -87,7 +87,7 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
             curr = curr->next = pj_mkparam(entry);
             if (nullptr == curr)
             {
-                pj_ctx_set_errno(ctx, ENOMEM);
+                proj_context_errno_set(ctx, ENOMEM);
                 return 1;
             }
         }
@@ -97,7 +97,7 @@ int pj_datum_set(projCtx ctx, paralist *pl, PJ *projdef)
             curr = curr->next = pj_mkparam(pj_datums[i].defn);
             if (nullptr == curr)
             {
-                pj_ctx_set_errno(ctx, ENOMEM);
+                proj_context_errno_set(ctx, ENOMEM);
                 return 1;
             }
         }

@@ -142,7 +142,7 @@ static ARGS ob_tran_target_params (paralist *params) {
         return args;
 
     /* all args except the proj_ob_tran */
-    args.argv = static_cast<char**>(pj_calloc (argc - 1, sizeof (char *)));
+    args.argv = static_cast<char**>(calloc (argc - 1, sizeof (char *)));
     if (nullptr==args.argv)
         return args;
 
@@ -160,7 +160,7 @@ static ARGS ob_tran_target_params (paralist *params) {
             continue;
         args.argv[i] += 2;
         if (strcmp(args.argv[i], "proj=ob_tran") == 0 ) {
-            pj_dealloc (args.argv);
+            free (args.argv);
             args.argc = 0;
             args.argv = nullptr;
         }
@@ -177,7 +177,7 @@ PJ *PROJECTION(ob_tran) {
     ARGS args;
     PJ *R; /* projection to rotate */
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return destructor(P, ENOMEM);
 
@@ -195,7 +195,7 @@ PJ *PROJECTION(ob_tran) {
         return destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
     }
     R = pj_init_ctx (pj_get_ctx(P), args.argc, args.argv);
-    pj_dealloc (args.argv);
+    free (args.argv);
 
     if (nullptr==R)
         return destructor (P, PJD_ERR_UNKNOWN_PROJECTION_ID);

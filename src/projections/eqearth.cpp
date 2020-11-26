@@ -110,7 +110,7 @@ static PJ_LP eqearth_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal/sphe
     }
 
     if( i == 0 ) {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        proj_context_errno_set( P->ctx, PJD_ERR_NON_CONVERGENT );
         return lp;
     }
 
@@ -137,13 +137,13 @@ static PJ *destructor (PJ *P, int errlev) { /* Destructor */
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->apa);
+    free (static_cast<struct pj_opaque*>(P->opaque)->apa);
     return pj_default_destructor (P, errlev);
 }
 
 
 PJ *PROJECTION(eqearth) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;

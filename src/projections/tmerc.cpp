@@ -89,7 +89,7 @@ static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
     if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
         xy.x = HUGE_VAL;
         xy.y = HUGE_VAL;
-        pj_ctx_set_errno( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
+        proj_context_errno_set( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
         return xy;
     }
 
@@ -130,7 +130,7 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
     if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
         xy.x = HUGE_VAL;
         xy.y = HUGE_VAL;
-        pj_ctx_set_errno( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
+        proj_context_errno_set( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
         return xy;
     }
 
@@ -221,7 +221,7 @@ static PJ *destructor(PJ *P, int errlev) {
     if (nullptr==P->opaque)
         return pj_default_destructor(P, errlev);
 
-    pj_dealloc (static_cast<struct tmerc_data*>(P->opaque)->approx.en);
+    free (static_cast<struct tmerc_data*>(P->opaque)->approx.en);
     return pj_default_destructor(P, errlev);
 }
 
@@ -592,7 +592,7 @@ static PJ_LP auto_e_inv (PJ_XY xy, PJ *P) {
 
 static PJ *setup(PJ *P, TMercAlgo eAlg) {
 
-    struct tmerc_data *Q = static_cast<struct tmerc_data*>(pj_calloc (1, sizeof (struct tmerc_data)));
+    struct tmerc_data *Q = static_cast<struct tmerc_data*>(calloc (1, sizeof (struct tmerc_data)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
@@ -679,7 +679,7 @@ static bool getAlgoFromParams(PJ* P, TMercAlgo& algo)
     else
     {
         pj_load_ini(P->ctx); // if not already done
-        pj_ctx_set_errno(P->ctx, 0); // reset error in case proj.ini couldn't be found
+        proj_context_errno_set(P->ctx, 0); // reset error in case proj.ini couldn't be found
         algo = P->ctx->defaultTmercAlgo;
     }
 

@@ -37,7 +37,7 @@
 namespace {
 
 TEST(PjPhi2Test, Basic) {
-    projCtx ctx = pj_get_default_ctx();
+    PJ_CONTEXT *ctx = pj_get_default_ctx();
 
     // Expectation is that only sane values of e (and nan is here reckoned to
     // be sane) are passed to pj_phi2.  Thus the return value with other values

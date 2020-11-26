@@ -38,7 +38,7 @@ static void unquote_string(char* param_str) {
 paralist *pj_mkparam(const char *str) {
     paralist *newitem;
 
-    if((newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) != nullptr) {
+    if((newitem = (paralist *)malloc(sizeof(paralist) + strlen(str))) != nullptr) {
         newitem->used = 0;
         newitem->next = nullptr;
         if (*str == '+')
@@ -82,7 +82,7 @@ paralist *pj_mkparam_ws (const char *str, const char **next_str) {
         *next_str = str + len;
 
     /* Use calloc to automagically 0-terminate the copy */
-    newitem = (paralist *) pj_calloc (1, sizeof(paralist) + len + 1);
+    newitem = (paralist *) calloc (1, sizeof(paralist) + len + 1);
     if (nullptr==newitem)
         return nullptr;
     memcpy(newitem->param, str, len);
@@ -151,7 +151,7 @@ paralist *pj_param_exists (paralist *list, const char *parameter) {
 /*                                                                      */
 /************************************************************************/
 
-PROJVALUE pj_param (projCtx ctx, paralist *pl, const char *opt) {
+PROJVALUE pj_param (PJ_CONTEXT *ctx, paralist *pl, const char *opt) {
 
     int type;
     unsigned l;
@@ -220,7 +220,7 @@ PROJVALUE pj_param (projCtx ctx, paralist *pl, const char *opt) {
             value.i = 1;
             break;
         default:
-            pj_ctx_set_errno (ctx, PJD_ERR_INVALID_BOOLEAN_PARAM);
+            proj_context_errno_set (ctx, PJD_ERR_INVALID_BOOLEAN_PARAM);
             value.i = 0;
             break;
         }

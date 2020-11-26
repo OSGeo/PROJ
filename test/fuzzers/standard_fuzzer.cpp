@@ -34,9 +34,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
 #include "proj.h"
-#include "proj_api.h"
+#include "proj_internal.h"
 
 /* Standalone build:
 g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -fvisibility=hidden -DSTANDALONE ../../src/.libs/libproj.a -lpthread -lsqlite3 -I../../src -I../../include
@@ -95,13 +94,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
     }
     second_newline[0] = 0;
     char* third_line = second_newline + 1;
-    projPJ pj_src = pj_init_plus(first_line);
+    PJ *pj_src = pj_init_plus(first_line);
     if( !pj_src )
     {
         free(buf_dup);
         return 0;
     }
-    projPJ pj_dst = pj_init_plus(second_line);
+    PJ *pj_dst = pj_init_plus(second_line);
     if( !pj_dst )
     {
         free(buf_dup);

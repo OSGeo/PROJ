@@ -217,9 +217,7 @@ set(SRC_LIBPROJ_CORE
   dmstor.cpp
   ell_set.cpp
   ellps.cpp
-  errno.cpp
   factors.cpp
-  fileapi.cpp
   fwd.cpp
   gauss.cpp
   generic_inverse.cpp
@@ -246,10 +244,8 @@ set(SRC_LIBPROJ_CORE
   rtodms.cpp
   strerrno.cpp
   strtod.cpp
-  transform.cpp
   tsfn.cpp
   units.cpp
-  utils.cpp
   wkt1_generated_parser.c
   wkt1_generated_parser.h
   wkt1_parser.cpp
@@ -275,7 +271,6 @@ set(SRC_LIBPROJ_CORE
 )
 
 set(HEADERS_LIBPROJ
-  proj_api.h
   proj.h
   proj_experimental.h
   proj_constants.h

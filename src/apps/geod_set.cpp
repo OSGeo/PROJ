@@ -75,6 +75,6 @@ geod_set(int argc, char **argv) {
 	/* free up linked list */
 	for ( ; start; start = curr) {
 		curr = start->next;
-		pj_dalloc(start);
+		free(start);
 	}
 }

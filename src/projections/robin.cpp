@@ -138,7 +138,7 @@ static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
                 break;
         }
         if( iters == 0 )
-            pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+            proj_context_errno_set( P->ctx, PJD_ERR_NON_CONVERGENT );
         lp.phi = (5 * i + t) * DEG_TO_RAD;
         if (xy.y < 0.) lp.phi = -lp.phi;
         lp.lam /= V(X[i], t);

@@ -79,10 +79,10 @@ static void PROJ_NO_INLINE proj_log_error(PJ_CONTEXT *ctx, const char *function,
     msg += ": ";
     msg += text;
     ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
-    auto previous_errno = pj_ctx_get_errno(ctx);
+    auto previous_errno = proj_context_errno(ctx);
     if (previous_errno == 0) {
         // only set errno if it wasn't set deeper down the call stack
-        pj_ctx_set_errno(ctx, PJD_ERR_GENERIC_ERROR);
+        proj_context_errno_set(ctx, PJD_ERR_GENERIC_ERROR);
     }
 }
 
@@ -2690,11 +2690,11 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 void proj_crs_info_list_destroy(PROJ_CRS_INFO **list) {
     if (list) {
         for (int i = 0; list[i] != nullptr; i++) {
-            pj_dalloc(list[i]->auth_name);
-            pj_dalloc(list[i]->code);
-            pj_dalloc(list[i]->name);
-            pj_dalloc(list[i]->area_name);
-            pj_dalloc(list[i]->projection_method_name);
+            free(list[i]->auth_name);
+            free(list[i]->code);
+            free(list[i]->name);
+            free(list[i]->area_name);
+            free(list[i]->projection_method_name);
             delete list[i];
         }
         delete[] list;
@@ -2784,11 +2784,11 @@ PROJ_UNIT_INFO **proj_get_units_from_database(PJ_CONTEXT *ctx,
 void proj_unit_list_destroy(PROJ_UNIT_INFO **list) {
     if (list) {
         for (int i = 0; list[i] != nullptr; i++) {
-            pj_dalloc(list[i]->auth_name);
-            pj_dalloc(list[i]->code);
-            pj_dalloc(list[i]->name);
-            pj_dalloc(list[i]->category);
-            pj_dalloc(list[i]->proj_short_name);
+            free(list[i]->auth_name);
+            free(list[i]->code);
+            free(list[i]->name);
+            free(list[i]->category);
+            free(list[i]->proj_short_name);
             delete list[i];
         }
         delete[] list;
