@@ -2790,7 +2790,8 @@ ListOfGenericGrids pj_generic_grid_init(PJ *P, const char *gridkey) {
                 }
                 return {};
             }
-            proj_context_errno_set(P->ctx, 0); // don't treat as a persistent error
+            proj_context_errno_set(P->ctx,
+                                   0); // don't treat as a persistent error
         } else {
             grids.emplace_back(std::move(gridSet));
         }
@@ -3313,7 +3314,8 @@ ListOfVGrids pj_vgrid_init(PJ *P, const char *gridkey) {
                 }
                 return {};
             }
-            proj_context_errno_set(P->ctx, 0); // don't treat as a persistent error
+            proj_context_errno_set(P->ctx,
+                                   0); // don't treat as a persistent error
         } else {
             grids.emplace_back(std::move(gridSet));
         }
@@ -3442,4 +3444,3 @@ bool pj_bilinear_interpolation_three_samples(
 }
 
 NS_PROJ_END
-

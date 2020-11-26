@@ -1369,10 +1369,10 @@ static bool dontReadUserWritableDirectory() {
     return envVar != nullptr && envVar[0] != '\0';
 }
 
-static void *
-pj_open_lib_internal(PJ_CONTEXT *ctx, const char *name, const char *mode,
-                     void *(*open_file)(PJ_CONTEXT *, const char *, const char *),
-                     char *out_full_filename, size_t out_full_filename_size) {
+static void *pj_open_lib_internal(
+    PJ_CONTEXT *ctx, const char *name, const char *mode,
+    void *(*open_file)(PJ_CONTEXT *, const char *, const char *),
+    char *out_full_filename, size_t out_full_filename_size) {
     try {
         std::string fname;
         const char *sysname = nullptr;
