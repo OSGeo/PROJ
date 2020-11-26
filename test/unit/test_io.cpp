@@ -488,6 +488,62 @@ TEST(wkt_parse, wkt1_EPSG_4807_grad_mess) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_esri_EPSG_4901_grad) {
+    auto obj =
+        WKTParser()
+            .attachDatabaseContext(DatabaseContext::create())
+            .createFromWKT("GEOGCS[\"GCS_ATF_Paris\",DATUM[\"D_ATF\","
+                           "SPHEROID[\"Plessis_1817\",6376523.0,308.64]],"
+                           "PRIMEM[\"Paris_RGS\",2.33720833333333],"
+                           "UNIT[\"Grad\",0.0157079632679489]]");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->datum();
+    auto primem = datum->primeMeridian();
+    EXPECT_EQ(primem->nameStr(), "Paris RGS");
+    // The PRIMEM is really in degree
+    EXPECT_EQ(primem->longitude().unit(), UnitOfMeasure::DEGREE);
+    EXPECT_NEAR(primem->longitude().value(), 2.33720833333333, 1e-14);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt2_epsg_org_EPSG_4901_PRIMEM_weird_sexagesimal_DMS) {
+    // Current epsg.org output may use the EPSG:9110 "sexagesimal DMS"
+    // unit and a DD.MMSSsss value, but this will likely be changed to
+    // use decimal degree.
+    auto obj = WKTParser().createFromWKT(
+        "GEOGCRS[\"ATF (Paris)\","
+        "  DATUM[\"Ancienne Triangulation Francaise (Paris)\","
+        "    ELLIPSOID[\"Plessis 1817\",6376523,308.64,"
+        "      LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]],"
+        "      ID[\"EPSG\",7027]],"
+        "    ID[\"EPSG\",6901]],"
+        "  PRIMEM[\"Paris RGS\",2.201395,"
+        "    ANGLEUNIT[\"sexagesimal DMS\",1,ID[\"EPSG\",9110]],"
+        "    ID[\"EPSG\",8914]],"
+        "  CS[ellipsoidal,2,"
+        "    ID[\"EPSG\",6403]],"
+        "  AXIS[\"Geodetic latitude (Lat)\",north,"
+        "    ORDER[1]],"
+        "  AXIS[\"Geodetic longitude (Lon)\",east,"
+        "    ORDER[2]],"
+        "  ANGLEUNIT[\"grad\",0.015707963267949,ID[\"EPSG\",9105]],"
+        "  USAGE[SCOPE[\"Geodesy.\"],AREA[\"France - mainland onshore.\"],"
+        "  BBOX[42.33,-4.87,51.14,8.23]],"
+        "ID[\"EPSG\",4901]]");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->datum();
+    auto primem = datum->primeMeridian();
+    EXPECT_EQ(primem->longitude().unit(), UnitOfMeasure::DEGREE);
+    EXPECT_NEAR(primem->longitude().value(), 2.33720833333333, 1e-14);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt1_geographic_old_datum_name_from_EPSG_code) {
     auto wkt =
         "GEOGCS[\"S-JTSK (Ferro)\",\n"
