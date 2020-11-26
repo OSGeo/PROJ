@@ -82,13 +82,6 @@ matrix:
         - BUILD_NAME=linux_generic
         - DETAILS="linux, arm64"
 
-    - os: linux
-      compiler: gcc
-      dist: xenial
-      env:
-        - BUILD_NAME=csa
-        - DETAILS="CLang Static Analyzer"
-
   allow_failures:
       - env: BUILD_NAME=mingw32
 
