@@ -33,8 +33,8 @@
 #include "proj.h"
 #ifndef _WIN32
 #include "proj_config.h"
-#include "proj_internal.h"
 #endif
+#include "proj_internal.h"
 
 /* on win32 we always use win32 mutexes, even if pthreads are available */
 #if defined(_WIN32) && !defined(MUTEX_stub)
