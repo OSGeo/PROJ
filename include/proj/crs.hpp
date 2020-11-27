@@ -1410,6 +1410,7 @@ class PROJ_GCC_DLL DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
     DerivedCRSTemplate(const BaseNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const CSNNPtr &csIn);
+    // cppcheck-suppress noExplicitConstructor
     PROJ_INTERNAL DerivedCRSTemplate(const DerivedCRSTemplate &other);
 
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
