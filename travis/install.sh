@@ -99,7 +99,7 @@ if [ $TRAVIS_OS_NAME != "osx" ]; then
     fi
 fi
 
-if [ "$BUILD_NAME" != "linux_gcc8" ]; then
+if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
 
     # cmake build from generated tarball
     mkdir build_cmake
