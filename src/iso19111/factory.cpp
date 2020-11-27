@@ -6019,6 +6019,8 @@ AuthorityFactory::createObjectsFromNameEx(
         auto sqlRes = d->run(sql, params);
         bool isFirst = true;
         bool firstIsDeprecated = false;
+        bool foundExactMatch = false;
+        std::size_t hashCodeFirstMatch = 0;
         for (const auto &row : sqlRes) {
             const auto &name = row[3];
             if (approximateMatch) {
@@ -6082,10 +6084,37 @@ AuthorityFactory::createObjectsFromNameEx(
                 }
                 throw std::runtime_error("Unsupported table_name");
             };
-            res.emplace_back(PairObjectName(getObject(table_name, code), name));
+            const auto obj = getObject(table_name, code);
+            if (metadata::Identifier::canonicalizeName(obj->nameStr()) ==
+                canonicalizedSearchedName) {
+                foundExactMatch = true;
+            }
+
+            const auto objPtr = obj.get();
+            if (res.empty()) {
+                hashCodeFirstMatch = typeid(*objPtr).hash_code();
+            } else if (hashCodeFirstMatch != typeid(*objPtr).hash_code()) {
+                hashCodeFirstMatch = 0;
+            }
+
+            res.emplace_back(PairObjectName(obj, name));
             if (limitResultCount > 0 && res.size() == limitResultCount) {
                 break;
             }
+        }
+
+        // If we found a name that is an exact match, and all objects have the
+        // same type, and we are not in approximate mode, only keep the objet(s)
+        // with the exact name match.
+        if (foundExactMatch && hashCodeFirstMatch != 0 && !approximateMatch) {
+            std::list<PairObjectName> resTmp;
+            for (const auto &pair : res) {
+                if (metadata::Identifier::canonicalizeName(
+                        pair.first->nameStr()) == canonicalizedSearchedName) {
+                    resTmp.emplace_back(pair);
+                }
+            }
+            res = std::move(resTmp);
         }
     }
 

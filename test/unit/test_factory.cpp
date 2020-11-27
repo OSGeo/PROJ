@@ -3062,6 +3062,12 @@ TEST(factory, createObjectsFromName) {
                   .size(),
               1U);
 
+    // Exact name, but with other CRS that have an aliases to it ==> should
+    // match only the CRS with the given name, not those other CRS.
+    EXPECT_EQ(factory->createObjectsFromName("ETRS89 / UTM zone 32N", {}, false)
+                  .size(),
+              1U);
+
     // Prime meridian
     EXPECT_EQ(factoryEPSG->createObjectsFromName("Paris", {}, false, 2).size(),
               1U);
