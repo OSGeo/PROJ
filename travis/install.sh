@@ -141,12 +141,4 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     fi
     make >/dev/null
     make check
-
-    if [ "$BUILD_NAME" != "linux_clang" ]; then
-        mv src/.libs/*.gc* src
-        mv src/conversions/.libs/*.gc* src/conversions
-        mv src/iso19111/.libs/*.gc* src/iso19111
-        mv src/projections/.libs/*.gc* src/projections
-        mv src/transformations/.libs/*.gc* src/transformations
-    fi
 fi

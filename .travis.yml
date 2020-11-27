@@ -20,14 +20,8 @@ matrix:
       services:
         - docker
       env:
-        - BUILD_NAME=linux_gcc
-        - DETAILS="linux, gcc-4.8"
-        - CC=gcc-4.8
-        - CXX=g++-4.8
-      addons:
-        apt:
-          packages:
-            - g++-4.8
+        - BUILD_NAME=publish_doc
+        - DETAILS="publish_doc"
 
     - os: linux
       dist: bionic
