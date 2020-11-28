@@ -14837,7 +14837,7 @@ void CoordinateOperationFactory::Private::createOperationsVertToGeogBallpark(
     double convDst = 1.0;
     const auto &geogAxis = geogDst->coordinateSystem()->axisList();
     bool dstIsUp = true;
-    bool dstIsDown = true;
+    bool dstIsDown = false;
     if (geogAxis.size() == 3) {
         const auto &dstAxis = geogAxis[2];
         convDst = dstAxis->unit().conversionToSI();
