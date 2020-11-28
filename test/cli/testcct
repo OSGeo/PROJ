@@ -32,6 +32,28 @@ echo "Testing cct -d 8 +proj=merc +R=1" >> ${OUT}
 echo "90 45" 0 | $EXE -d 8 +proj=merc +R=1 >>${OUT}
 echo "" >>${OUT}
 
+# tests without specifying the number of decimals (by default: 10 for radians and degrees, 4 for meters)
+echo "Testing echo 0.5 2 | cct -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad" >> ${OUT}
+echo 0.5 2 | $EXE -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad >> ${OUT}
+
+echo "Testing echo 0.5 2 | cct -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg" >> ${OUT}
+echo 0.5 2 | $EXE -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg >> ${OUT}
+
+echo "Testing echo 0.5 2 | cct -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km" >> ${OUT}
+echo 0.5 2 | $EXE -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km >> ${OUT}
+echo "" >> ${OUT}
+
+# tests for which the number of decimals has been specified (-d 6)
+echo "Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad" >> ${OUT}
+echo 0.5 2 | $EXE -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad >> ${OUT}
+
+echo "Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg" >> ${OUT}
+echo 0.5 2 | $EXE -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg >> ${OUT}
+
+echo "Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km" >> ${OUT}
+echo 0.5 2 | $EXE -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km >> ${OUT}
+echo "" >> ${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testcct_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testcct_out.dist
