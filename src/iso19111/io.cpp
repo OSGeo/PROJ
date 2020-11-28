@@ -2164,9 +2164,15 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
         return false;
     };
 
-    if (name == "WGS_1984") {
+    // Remap GDAL WGS_1984 to EPSG v9 "World Geodetic System 1984" official
+    // name.
+    // Also remap EPSG v10 datum ensemble names to non-ensemble EPSG v9
+    if (name == "WGS_1984" || name == "World Geodetic System 1984 ensemble") {
         properties.set(IdentifiedObject::NAME_KEY,
                        GeodeticReferenceFrame::EPSG_6326->nameStr());
+    } else if (name == "European Terrestrial Reference System 1989 ensemble") {
+        properties.set(IdentifiedObject::NAME_KEY,
+                       "European Terrestrial Reference System 1989");
     } else if (starts_with(name, "D_")) {
         esriStyle_ = true;
         const char *tableNameForAlias = nullptr;
