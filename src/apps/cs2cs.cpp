@@ -36,7 +36,12 @@
 #include <string.h>
 
 #include <cassert>
+#include <iostream>
 #include <string>
+
+#include <proj/io.hpp>
+#include <proj/metadata.hpp>
+#include <proj/util.hpp>
 
 #include <proj/internal/internal.hpp>
 
@@ -70,11 +75,17 @@ static const char *oform =
 static char oform_buffer[16]; /* buffer for oform when using -d */
 static const char *oterr = "*\t*"; /* output line for unprojectable input */
 static const char *usage =
-    "%s\nusage: %s [-dDeEfIlrstvwW [args]] [+opt[=arg] ...]\n"
-    "                   [+to +opt[=arg] ...] [file ...]\n";
+    "%s\nusage: %s [-dDeEfIlrstvwW [args]]\n"
+    "              [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]\n"
+    "              [+opt[=arg] ...] [+to +opt[=arg] ...] [file ...]\n";
 
 static double (*informat)(const char *,
                           char **); /* input data deformatter function */
+
+using namespace NS_PROJ::io;
+using namespace NS_PROJ::metadata;
+using namespace NS_PROJ::util;
+using namespace NS_PROJ::internal;
 
 /************************************************************************/
 /*                              process()                               */
@@ -359,9 +370,47 @@ int main(int argc, char **argv) {
         }
     }
 
+    ExtentPtr bboxFilter;
+    std::string area;
+
     /* process run line arguments */
     while (--argc > 0) { /* collect run line arguments */
-        if (**++argv == '-') {
+        ++argv;
+        if (strcmp(*argv, "--area") == 0 ) {
+            ++argv;
+            --argc;
+            if( argc == 0 ) {
+                emess(1, "missing argument for --area");
+                std::exit(1);
+            }
+            area = *argv;
+        }
+        else if (strcmp(*argv, "--bbox") == 0) {
+            ++argv;
+            --argc;
+            if( argc == 0 ) {
+                emess(1, "missing argument for --bbox");
+                std::exit(1);
+            }
+            auto bboxStr(*argv);
+            auto bbox(split(bboxStr, ','));
+            if (bbox.size() != 4) {
+                std::cerr << "Incorrect number of values for option --bbox: "
+                          << bboxStr << std::endl;
+                std::exit(1);
+            }
+            try {
+                bboxFilter = Extent::createFromBBOX(
+                                 c_locale_stod(bbox[0]), c_locale_stod(bbox[1]),
+                                 c_locale_stod(bbox[2]), c_locale_stod(bbox[3]))
+                                 .as_nullable();
+            } catch (const std::exception &e) {
+                std::cerr << "Invalid value for option --bbox: " << bboxStr
+                          << ", " << e.what() << std::endl;
+                std::exit(1);
+            }
+        }
+        else if (**argv == '-') {
             for (arg = *argv;;) {
                 switch (*++arg) {
                 case '\0': /* position of "stdin" */
@@ -536,6 +585,102 @@ int main(int argc, char **argv) {
         }
     }
 
+    if (bboxFilter && !area.empty()) {
+        std::cerr << "ERROR: --bbox and --area are exclusive" << std::endl;
+        std::exit(1);
+    }
+
+    PJ_AREA* pj_area = nullptr;
+    if (!area.empty()) {
+
+        DatabaseContextPtr dbContext;
+        try {
+            dbContext =
+                DatabaseContext::create().as_nullable();
+        } catch (const std::exception &e) {
+            std::cerr << "ERROR: Cannot create database connection: "
+                    << e.what() << std::endl;
+            std::exit(1);
+        }
+
+        // Process area of use
+        try {
+            if (area.find(' ') == std::string::npos &&
+                area.find(':') != std::string::npos) {
+                auto tokens = split(area, ':');
+                if (tokens.size() == 2) {
+                    const std::string &areaAuth = tokens[0];
+                    const std::string &areaCode = tokens[1];
+                    bboxFilter = AuthorityFactory::create(
+                                        NN_NO_CHECK(dbContext), areaAuth)
+                                        ->createExtent(areaCode)
+                                        .as_nullable();
+                }
+            }
+            if (!bboxFilter) {
+                auto authFactory = AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), std::string());
+                auto res = authFactory->listAreaOfUseFromName(area, false);
+                if (res.size() == 1) {
+                    bboxFilter =
+                        AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                    res.front().first)
+                            ->createExtent(res.front().second)
+                            .as_nullable();
+                } else {
+                    res = authFactory->listAreaOfUseFromName(area, true);
+                    if (res.size() == 1) {
+                        bboxFilter =
+                            AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                        res.front().first)
+                                ->createExtent(res.front().second)
+                                .as_nullable();
+                    } else if (res.empty()) {
+                        std::cerr << "No area of use matching provided name"
+                                    << std::endl;
+                        std::exit(1);
+                    } else {
+                        std::cerr << "Several candidates area of use "
+                                        "matching provided name :"
+                                    << std::endl;
+                        for (const auto &candidate : res) {
+                            auto obj =
+                                AuthorityFactory::create(
+                                    NN_NO_CHECK(dbContext), candidate.first)
+                                    ->createExtent(candidate.second);
+                            std::cerr << "  " << candidate.first << ":"
+                                        << candidate.second << " : "
+                                        << *obj->description() << std::endl;
+                        }
+                        std::exit(1);
+                    }
+                }
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "Area of use retrieval failed: " << e.what()
+                        << std::endl;
+            std::exit(1);
+        }
+    }
+
+    if (bboxFilter) {
+        auto geogElts = bboxFilter->geographicElements();
+        if (geogElts.size() == 1)
+        {
+            auto bbox = std::dynamic_pointer_cast<GeographicBoundingBox>(
+                geogElts[0].as_nullable());
+            if (bbox)
+            {
+                pj_area = proj_area_create();
+                proj_area_set_bbox(pj_area,
+                                   bbox->westBoundLongitude(),
+                                   bbox->southBoundLatitude(),
+                                   bbox->eastBoundLongitude(),
+                                   bbox->northBoundLatitude());
+            }
+        }
+    }
+
     /*
      * If the user has requested inverse, then just reverse the
      * coordinate systems.
@@ -617,10 +762,11 @@ int main(int argc, char **argv) {
     }
 
     transformation = proj_create_crs_to_crs_from_pj(nullptr, src, dst,
-                                                    nullptr, nullptr);
+                                                    pj_area, nullptr);
 
     proj_destroy(src);
     proj_destroy(dst);
+    proj_area_destroy(pj_area);
 
     if (!transformation) {
         emess(3, "cannot initialize transformation\ncause: %s",
