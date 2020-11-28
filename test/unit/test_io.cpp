@@ -675,6 +675,53 @@ TEST(wkt_parse, wkt1_geographic_with_PROJ4_extension) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_geographic_epsg_org_api_4326) {
+    // Output from
+    // https://apps.epsg.org/api/v1/CoordRefSystem/4326/export/?format=wkt&formatVersion=1
+    // using a datum ensemble name
+    auto wkt =
+        "GEOGCS[\"WGS 84\",DATUM[\"World Geodetic System 1984 ensemble\","
+        "SPHEROID[\"WGS 84\",6378137,298.257223563,"
+        "AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],"
+        "PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],"
+        "UNIT[\"degree (supplier to define representation)\","
+        "0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],"
+        "AXIS[\"Lat\",north],AXIS[\"Lon\",east],"
+        "AUTHORITY[\"EPSG\",\"4326\"]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->datum();
+    EXPECT_EQ(datum->nameStr(), "World Geodetic System 1984");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_geographic_epsg_org_api_4258) {
+    // Output from
+    // https://apps.epsg.org/api/v1/CoordRefSystem/4258/export/?format=wkt&formatVersion=1
+    // using a datum ensemble name
+    auto wkt =
+        "GEOGCS[\"ETRS89\","
+        "DATUM[\"European Terrestrial Reference System 1989 ensemble\","
+        "SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+        "AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6258\"]],"
+        "PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],"
+        "UNIT[\"degree (supplier to define representation)\","
+        "0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],"
+        "AXIS[\"Lat\",north],AXIS[\"Lon\",east],"
+        "AUTHORITY[\"EPSG\",\"4258\"]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->datum();
+    EXPECT_EQ(datum->nameStr(), "European Terrestrial Reference System 1989");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt1_geocentric_with_PROJ4_extension) {
     auto wkt = "GEOCCS[\"WGS 84\",\n"
                "    DATUM[\"unknown\",\n"
