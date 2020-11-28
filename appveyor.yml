@@ -11,9 +11,9 @@ environment:
     BUILD_SHARED_LIBS: OFF
 
 # VS 2017
-  - platform: x64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    BUILD_SHARED_LIBS: ON
+#  - platform: x64
+#    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+#    BUILD_SHARED_LIBS: ON
 
 shallow_clone: true
 
