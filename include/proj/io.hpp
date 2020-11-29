@@ -342,6 +342,10 @@ class PROJ_GCC_DLL WKTFormatter {
 
     PROJ_INTERNAL void ingestWKTNode(const WKTNodeNNPtr &node);
 
+    PROJ_INTERNAL WKTFormatter &
+    setAllowEllipsoidalHeightAsVerticalCRS(bool allow) noexcept;
+    PROJ_INTERNAL bool isAllowedEllipsoidalHeightAsVerticalCRS() const noexcept;
+
     //! @endcond
 
   protected:

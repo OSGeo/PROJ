@@ -433,14 +433,25 @@ TEST_F(CApi, proj_as_wkt) {
     ObjectKeeper keeper_crs4979(crs4979);
     ASSERT_NE(crs4979, nullptr);
 
+    EXPECT_EQ(proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, nullptr), nullptr);
+
     // STRICT=NO
     {
-        EXPECT_EQ(proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, nullptr), nullptr);
-
         const char *const options[] = {"STRICT=NO", nullptr};
         auto wkt = proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, options);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEOGCS[\"WGS 84\"") == 0) << wkt;
+    }
+
+    // ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES
+    {
+        const char *const options[] = {
+            "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES", nullptr};
+        auto wkt = proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, options);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find(
+                        "COMPD_CS[\"WGS 84 + Ellipsoid (metre)\"") == 0)
+            << wkt;
     }
 
     // unsupported option

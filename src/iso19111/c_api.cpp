@@ -1418,6 +1418,13 @@ const char *proj_get_id_code(const PJ *obj, int index) {
  * variants, for WKT1_GDAL for ProjectedCRS with easting/northing ordering
  * (otherwise stripped), but not for WKT1_ESRI. Setting to YES will output
  * them unconditionally, and to NO will omit them unconditionally.</li>
+ * <li>STRICT=YES/NO. Default is YES. If NO, a Geographic 3D CRS can be for
+ * example exported as WKT1_GDAL with 3 axes, whereas this is normally not
+ * allowed.</li>
+ * <li>ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES/NO. Default is NO. If set
+ * to YES and type == PJ_WKT1_GDAL, a Geographic 3D CRS or a Projected 3D CRS
+ * will be exported as a compound CRS whose vertical part represents an
+ * ellipsoidal height (for example for use with LAS 1.4 WKT1).</li>
  * </ul>
  * @return a string, or NULL in case of error.
  */
@@ -1468,6 +1475,11 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
                 }
             } else if ((value = getOptionValue(*iter, "STRICT="))) {
                 formatter->setStrict(ci_equal(value, "YES"));
+            } else if ((value = getOptionValue(
+                            *iter,
+                            "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS="))) {
+                formatter->setAllowEllipsoidalHeightAsVerticalCRS(
+                    ci_equal(value, "YES"));
             } else {
                 std::string msg("Unknown option :");
                 msg += *iter;
