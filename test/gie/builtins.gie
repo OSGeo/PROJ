@@ -5771,6 +5771,74 @@ expect  -223413.466406322 111769.145040597
 accept  -2 -1
 expect  -223413.466406322 -111769.145040597
 
+accept    0      0
+expect    0      0
+roundtrip 1
+
+accept    0      90
+expect    0      10053096.491487337276
+roundtrip 1
+
+accept    0      -90
+expect    0      -10053096.491487337276
+roundtrip 1
+
+accept    170                       60
+expect    557076.820490954560       13361866.764138307422
+roundtrip 1
+
+accept    89                        0.01
+expect    30344312.098578717560     64001.116414904580
+roundtrip 1
+
+accept    91                        0.01
+expect    30344312.098578717560     20042191.866555366665
+roundtrip 1
+
+accept    179.999                   0.01
+expect    111.701070433669          20105075.972255337983
+roundtrip 1
+
+accept    -89                       0.01
+expect    -30344312.098578717560    64001.116414904580
+roundtrip 1
+
+accept    -91                       0.01
+expect    -30344312.098578717560    20042191.866555366665
+roundtrip 1
+
+accept    -179.999                  0.01
+expect    -111.701070433669         20105075.972255337983
+roundtrip 1
+
+accept    89                       -0.01
+expect    30344312.098578717560    -64001.116414904580
+roundtrip 1
+
+accept    91                       -0.01
+expect    30344312.098578717560    -20042191.866555366665
+roundtrip 1
+
+accept    179.999                  -0.01
+expect    111.701070433669         -20105075.972255337983
+roundtrip 1
+
+accept    -89                      -0.01
+expect    -30344312.098578717560   -64001.116414904580
+roundtrip 1
+
+accept    -91                       -0.01
+expect    -30344312.098578717560    -20042191.866555366665
+roundtrip 1
+
+accept    -179.999                  -0.01
+expect    -111.701070433669         -20105075.972255337983
+roundtrip 1
+
+accept    150                       0
+expect    3515559.323737951461      20106192.982974674553
+roundtrip 1
+
 direction inverse
 accept  200 100
 expect  0.001790493 0.000895247

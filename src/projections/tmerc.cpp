@@ -115,24 +115,10 @@ static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
     return (xy);
 }
 
-static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
+static PJ_XY tmerc_spherical_fwd (PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0,0.0};
     double b, cosphi;
     const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
-
-    /*
-     * Fail if our longitude is more than 90 degrees from the
-     * central meridian since the results are essentially garbage.
-     * Is error -20 really an appropriate return value?
-     *
-     *  http://trac.osgeo.org/proj/ticket/5
-     */
-    if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
-        xy.x = HUGE_VAL;
-        xy.y = HUGE_VAL;
-        proj_context_errno_set( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
-        return xy;
-    }
 
     cosphi = cos(lp.phi);
     b = cosphi * sin (lp.lam);
@@ -145,7 +131,12 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
     xy.y = cosphi * cos (lp.lam) / sqrt (1. - b * b);
 
     b = fabs ( xy.y );
-    if (b >= 1.) {
+    if (cosphi == 1 && (lp.lam < -M_HALFPI || lp.lam > M_HALFPI) ) {
+        /* Helps to be able to roundtrip |longitudes| > 90 at lat=0 */
+        /* We could also map to -M_PI ... */
+        xy.y = M_PI;
+    }
+    else if (b >= 1.) {
         if ((b - 1.) > EPS10) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return xy;
@@ -192,7 +183,7 @@ static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
     return lp;
 }
 
-static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
+static PJ_LP tmerc_spherical_inv (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0, 0.0};
     double h, g;
     const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
@@ -611,8 +602,8 @@ static PJ *setup(PJ *P, TMercAlgo eAlg) {
                 return nullptr;
             if( P->es == 0 )
             {
-                P->inv = approx_s_inv;
-                P->fwd = approx_s_fwd;
+                P->inv = tmerc_spherical_inv;
+                P->fwd = tmerc_spherical_fwd;
             }
             else
             {
