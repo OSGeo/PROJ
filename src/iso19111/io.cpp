@@ -139,6 +139,7 @@ struct WKTFormatter::Private {
         bool primeMeridianInDegree_ = false;
         bool use2019Keywords_ = false;
         bool useESRIDialect_ = false;
+        bool allowEllipsoidalHeightAsVerticalCRS_ = false;
         OutputAxisRule outputAxis_ = WKTFormatter::OutputAxisRule::YES;
     };
     Params params_{};
@@ -250,6 +251,8 @@ WKTFormatter::setOutputAxis(OutputAxisRule outputAxisIn) noexcept {
  *
  * The default is strict mode, in which case a FormattingException can be
  * thrown.
+ * In non-strict mode, a Geographic 3D CRS can be for example exported as
+ * WKT1_GDAL with 3 axes, whereas this is normally not allowed.
  */
 WKTFormatter &WKTFormatter::setStrict(bool strictIn) noexcept {
     d->params_.strict_ = strictIn;
@@ -260,6 +263,28 @@ WKTFormatter &WKTFormatter::setStrict(bool strictIn) noexcept {
 
 /** \brief Returns whether the formatter is in strict mode. */
 bool WKTFormatter::isStrict() const noexcept { return d->params_.strict_; }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set whether the formatter should export, in WKT1, a Geographic or
+ * Projected 3D CRS as a compound CRS whose vertical part represents an
+ * ellipsoidal height.
+ */
+WKTFormatter &
+WKTFormatter::setAllowEllipsoidalHeightAsVerticalCRS(bool allow) noexcept {
+    d->params_.allowEllipsoidalHeightAsVerticalCRS_ = allow;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether the formatter should export, in WKT1, a Geographic or
+ * Projected 3D CRS as a compound CRS whose vertical part represents an
+ * ellipsoidal height.
+ */
+bool WKTFormatter::isAllowedEllipsoidalHeightAsVerticalCRS() const noexcept {
+    return d->params_.allowEllipsoidalHeightAsVerticalCRS_;
+}
 
 // ---------------------------------------------------------------------------
 
