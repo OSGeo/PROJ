@@ -203,11 +203,13 @@ static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
         return proj_coord_error().lp;
     }
     g = .5 * (h - 1. / h);
-    h = cos (P->phi0 + xy.y / Q->esp);
+    /* D, as in equation 8-8 of USGS "Map Projections - A Working Manual" */
+    const double D = P->phi0 + xy.y / Q->esp;
+    h = cos (D);
     lp.phi = asin(sqrt((1. - h * h) / (1. + g * g)));
 
     /* Make sure that phi is on the correct hemisphere when false northing is used */
-    if (xy.y < 0. && -lp.phi+P->phi0 < 0.0) lp.phi = -lp.phi;
+    lp.phi = copysign(lp.phi, D);
 
     lp.lam = (g != 0.0 || h != 0.0) ? atan2 (g, h) : 0.;
     return lp;
