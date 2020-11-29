@@ -5702,6 +5702,130 @@ accept  -200 -100
 expect  -0.001790493 -0.000895247
 
 -------------------------------------------------------------------------------
+# Approx tmerc on a almost spherical ellipsoid, lat_0 north hemisphere
+
+operation +proj=tmerc   +a=6400000 +rf=1e12 +k=0.9 +lat_0=40 +approx
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    0             -30
+expect    0             -7037167.5440
+roundtrip 1
+
+accept    1             -30
+expect    87064.5795    -7037547.4590
+roundtrip 1
+
+accept    -1            -30
+expect    -87064.5795   -7037547.4590
+roundtrip 1
+
+accept    0             30
+expect    0             -1005309.6491
+roundtrip 1
+
+accept    0             40
+expect    0             0
+roundtrip 1
+
+accept    1             41
+expect    75872.2182    100965.3718
+roundtrip 1
+
+-------------------------------------------------------------------------------
+# Approx tmerc on a sphere, lat_0 north hemisphere
+
+operation +proj=tmerc   +R=6400000 +k=0.9 +lat_0=40
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    0             -30
+expect    0             -7037167.5440
+roundtrip 1
+
+accept    1             -30
+expect    87064.5795    -7037547.4590
+roundtrip 1
+
+accept    -1            -30
+expect    -87064.5795   -7037547.4590
+roundtrip 1
+
+accept    0             30
+expect    0             -1005309.6491
+roundtrip 1
+
+accept    0             40
+expect    0             0
+roundtrip 1
+
+accept    1             41
+expect    75872.2182    100965.3718
+roundtrip 1
+
+-------------------------------------------------------------------------------
+# Approx tmerc on a almost spherical ellipsoid, lat_0 south hemisphere
+
+operation +proj=tmerc   +a=6400000 +rf=1e12 +k=0.9 +lat_0=-40 +approx
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    0             -30
+expect    0             1005309.6491
+roundtrip 1
+
+accept    1             -30
+expect    87064.5795    1004929.7341
+roundtrip 1
+
+accept    -1            -30
+expect    -87064.5795   1004929.7341
+roundtrip 1
+
+accept    0             30
+expect    0             7037167.5440
+roundtrip 1
+
+accept    0             -40
+expect    0             0
+roundtrip 1
+
+accept    1             -41
+expect    75872.2182    -100965.3718
+roundtrip 1
+
+-------------------------------------------------------------------------------
+# Approx tmerc on a sphere, lat_0 south hemisphere
+
+operation +proj=tmerc   +R=6400000 +k=0.9 +lat_0=-40
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    0             -30
+expect    0             1005309.6491
+roundtrip 1
+
+accept    1             -30
+expect    87064.5795    1004929.7341
+roundtrip 1
+
+accept    -1            -30
+expect    -87064.5795   1004929.7341
+roundtrip 1
+
+accept    0             30
+expect    0             7037167.5440
+roundtrip 1
+
+accept    0             -40
+expect    0             0
+roundtrip 1
+
+accept    1             -41
+expect    75872.2182    -100965.3718
+roundtrip 1
+
+-------------------------------------------------------------------------------
 operation +proj=tmerc   +R=1
 -------------------------------------------------------------------------------
 direction inverse
