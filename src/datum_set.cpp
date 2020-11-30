@@ -84,25 +84,27 @@ int pj_datum_set(PJ_CONTEXT *ctx, paralist *pl, PJ *projdef)
                      sizeof(entry) - 1 - strlen(entry) );
             entry[ sizeof(entry) - 1 ] = '\0';
 
-            curr = curr->next = pj_mkparam(entry);
-            if (nullptr == curr)
+            auto param = pj_mkparam(entry);
+            if (nullptr == param)
             {
                 proj_context_errno_set(ctx, ENOMEM);
                 return 1;
             }
+            curr->next = param;
+            curr = param;
         }
         
         if( pj_datums[i].defn && strlen(pj_datums[i].defn) > 0 )
         {
-            curr = curr->next = pj_mkparam(pj_datums[i].defn);
-            if (nullptr == curr)
+            auto param = pj_mkparam(pj_datums[i].defn);
+            if (nullptr == param)
             {
                 proj_context_errno_set(ctx, ENOMEM);
                 return 1;
             }
+            curr->next = param;
+            /* curr = param; */
         }
-
-        (void)curr; /* make clang static analyzer happy */
     }
 
 /* -------------------------------------------------------------------- */
