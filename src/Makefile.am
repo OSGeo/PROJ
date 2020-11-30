@@ -1,6 +1,6 @@
 AM_CFLAGS = @C_WFLAGS@
 
-EXTRA_PROGRAMS = multistresstest test228
+EXTRA_PROGRAMS = multistresstest
 
 TESTS = geodtest
 check_PROGRAMS = geodtest
@@ -36,7 +36,6 @@ bin_PROGRAMS =	proj geod cs2cs gie cct projinfo $(PROJSYNC_BIN)
 
 gie_SOURCES = apps/gie.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
 multistresstest_SOURCES = tests/multistresstest.cpp
-test228_SOURCES = tests/test228.cpp
 geodtest_SOURCES = tests/geodtest.cpp
 
 cct_LDADD = libproj.la
@@ -47,7 +46,6 @@ projinfo_LDADD = libproj.la
 
 gie_LDADD = libproj.la
 multistresstest_LDADD = libproj.la @THREAD_LIB@
-test228_LDADD = libproj.la @THREAD_LIB@
 geodtest_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
