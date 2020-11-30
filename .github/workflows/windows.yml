@@ -1,0 +1,62 @@
+name: Windows build
+
+on: [push, pull_request]
+
+jobs:
+
+  MSVC:
+    runs-on: windows-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+
+    env:
+        ARCH: x64
+        BUILD_SHARED_LIBS: ON
+
+    steps:
+
+      - uses: actions/checkout@v2
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Cache vcpkg packages
+        uses: actions/cache@v2
+        id: cache
+        with:
+            path: c:\vcpkg\installed
+            key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/windows.yml') }}
+
+      - name: Install build requirements
+        shell: cmd
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+            vcpkg install sqlite3[core,tool]:${{ env.ARCH }}-windows
+            vcpkg install tiff:${{ env.ARCH }}-windows
+            vcpkg install curl:${{ env.ARCH }}-windows
+
+      - name: Build
+        shell: cmd
+        run: |
+            set VCPKG_INSTALLED=c:\vcpkg\installed\${{ env.ARCH }}-windows
+            dir %VCPKG_INSTALLED%\bin
+            set PATH=%VCPKG_INSTALLED%\bin;%PATH%
+            set PROJ_BUILD=%GITHUB_WORKSPACE%\build
+            mkdir %PROJ_BUILD%
+            cd %PROJ_BUILD%
+            set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
+            cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS="{{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
+            ninja -v
+            ninja install
+            dir %PROJ_DIR%\bin
+
+      - name: Run tests
+        shell: cmd
+        run: |
+            set VCPKG_INSTALLED=c:\vcpkg\installed\${{ env.ARCH }}-windows
+            set PATH=%VCPKG_INSTALLED%\bin;%PATH%
+            set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
+            set PROJ_LIB=%PROJ_DIR%\share\proj
+            set PROJ_BUILD=%GITHUB_WORKSPACE%\build
+            cd %PROJ_BUILD%
+            ctest -V -C Release
+            set PATH=%PROJ_DIR%\bin;%PATH%
+            call %GITHUB_WORKSPACE%\test\postinstall\test_cmake.bat %PROJ_DIR%
+            proj
