@@ -400,90 +400,6 @@ paralist *pj_expand_init(PJ_CONTEXT *ctx, paralist *init) {
 
 
 /************************************************************************/
-/*                            pj_init_plus()                            */
-/*                                                                      */
-/*      Same as pj_init() except it takes one argument string with      */
-/*      individual arguments preceded by '+', such as "+proj=utm        */
-/*      +zone=11 +ellps=WGS84".                                         */
-/************************************************************************/
-
-PJ *
-pj_init_plus( const char *definition )
-
-{
-    return pj_init_plus_ctx( pj_get_default_ctx(), definition );
-}
-
-PJ *
-pj_init_plus_ctx( PJ_CONTEXT *ctx, const char *definition )
-{
-#define MAX_ARG 200
-    char	*argv[MAX_ARG];
-    char	*defn_copy;
-    int		argc = 0, i, blank_count = 0;
-    PJ	    *result = nullptr;
-
-    /* make a copy that we can manipulate */
-    defn_copy = (char *) malloc( strlen(definition)+1 );
-    if (!defn_copy)
-        return nullptr;
-    strcpy( defn_copy, definition );
-
-    /* split into arguments based on '+' and trim white space */
-
-    for( i = 0; defn_copy[i] != '\0'; i++ )
-    {
-        switch( defn_copy[i] )
-        {
-          case '+':
-            if( i == 0 || defn_copy[i-1] == '\0' || blank_count > 0 )
-            {
-                /* trim trailing spaces from the previous param */
-                if( blank_count > 0 )
-                {
-                    defn_copy[i - blank_count] = '\0';
-                    blank_count = 0;
-                }
-
-                if( argc+1 == MAX_ARG )
-                {
-                    free( defn_copy );
-                    proj_context_errno_set( ctx, PJD_ERR_UNPARSEABLE_CS_DEF );
-                    return nullptr;
-                }
-
-                argv[argc++] = defn_copy + i + 1;
-            }
-            break;
-
-          case ' ':
-          case '\t':
-          case '\n':
-            /* trim leading spaces from the current param */
-            if( i == 0 || defn_copy[i-1] == '\0' || argc == 0 || argv[argc-1] == defn_copy + i )
-                defn_copy[i] = '\0';
-            else
-                blank_count++;
-            break;
-
-          default:
-            /* reset blank_count */
-            blank_count = 0;
-        }
-    }
-    /* trim trailing spaces from the last param */
-    defn_copy[i - blank_count] = '\0';
-
-    /* perform actual initialization */
-    result = pj_init_ctx( ctx, argc, argv );
-
-    free( defn_copy );
-    return result;
-}
-
-
-
-/************************************************************************/
 /*                              pj_init()                               */
 /*                                                                      */
 /*      Main entry point for initialing a PJ projections                */
@@ -491,11 +407,6 @@ pj_init_plus_ctx( PJ_CONTEXT *ctx, const char *definition )
 /*      called to do the initial allocation so it can be created        */
 /*      large enough to hold projection specific parameters.            */
 /************************************************************************/
-
-PJ *
-pj_init(int argc, char **argv) {
-    return pj_init_ctx( pj_get_default_ctx(), argc, argv );
-}
 
 
 static PJ_CONSTRUCTOR locate_constructor (const char *name) {
@@ -507,14 +418,6 @@ static PJ_CONSTRUCTOR locate_constructor (const char *name) {
     if (nullptr==s)
         return nullptr;
     return (PJ_CONSTRUCTOR) operations[i].proj;
-}
-
-
-PJ *
-pj_init_ctx(PJ_CONTEXT *ctx, int argc, char **argv) {
-    /* Legacy interface: allow init=epsg:XXXX syntax by default */
-    int allow_init_epsg = proj_context_get_use_proj4_init_rules(ctx, TRUE);
-    return pj_init_ctx_with_allow_init_epsg(ctx, argc, argv, allow_init_epsg);
 }
 
 

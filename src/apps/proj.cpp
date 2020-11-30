@@ -9,6 +9,8 @@
 #include "emess.h"
 #include "utils.h"
 
+#include <vector>
+
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__WIN32__)
 #  include <fcntl.h>
 #  include <io.h>
@@ -292,10 +294,10 @@ static void vprocess(FILE *fid) {
 
 int main(int argc, char **argv) {
     char *arg;
-    char *pargv[MAX_PARGS] = {};
+    std::vector<char*> argvVector;
     char **eargv = argv;
     FILE *fid;
-    int pargc = 0, eargc = 0, mon = 0;
+    int eargc = 0, mon = 0;
 
     if ( (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != nullptr)
         ++emess_dat.Prog_name;
@@ -450,10 +452,7 @@ int main(int argc, char **argv) {
             }
             break;
         } else if (**argv == '+') { /* + argument */
-            if (pargc < MAX_PARGS)
-                pargv[pargc++] = *argv + 1;
-            else
-                emess(1,"overflowed + argument table");
+            argvVector.push_back(*argv + 1);
         } else /* assumed to be input file name(s) */
             eargv[eargc++] = *argv;
     }
@@ -473,7 +472,12 @@ int main(int argc, char **argv) {
         postscale = 0;
         fscale = 1./fscale;
     }
-    if (!(Proj = pj_init(pargc, pargv)))
+    proj_context_use_proj4_init_rules(nullptr, true);
+
+    // proj historically ignores any datum shift specifier, like nadgrids, towgs84, etc
+    argvVector.push_back(const_cast<char*>("break_cs2cs_recursion"));
+
+    if (!(Proj = proj_create_argv(nullptr, static_cast<int>(argvVector.size()), argvVector.data())))
         emess(3,"projection initialization failure\ncause: %s",
               proj_errno_string(proj_context_errno(nullptr)));
 

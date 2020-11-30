@@ -141,14 +141,15 @@ static ARGS ob_tran_target_params (paralist *params) {
     if (argc < 2)
         return args;
 
-    /* all args except the proj_ob_tran */
+    /* all args except the proj=ob_tran */
     args.argv = static_cast<char**>(calloc (argc - 1, sizeof (char *)));
     if (nullptr==args.argv)
         return args;
 
-    /* Copy all args *except* the proj=ob_tran arg to the argv array */
+    /* Copy all args *except* the proj=ob_tran or inv arg to the argv array */
     for (i = 0;  params != nullptr;  params = params->next) {
-        if (0==strcmp (params->param, "proj=ob_tran"))
+        if (0==strcmp (params->param, "proj=ob_tran") ||
+            0==strcmp (params->param, "inv") )
             continue;
         args.argv[i++] = params->param;
     }
@@ -194,7 +195,7 @@ PJ *PROJECTION(ob_tran) {
     if (args.argv == nullptr ) {
         return destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
     }
-    R = pj_init_ctx (pj_get_ctx(P), args.argc, args.argv);
+    R = proj_create_argv (P->ctx, args.argc, args.argv);
     free (args.argv);
 
     if (nullptr==R)

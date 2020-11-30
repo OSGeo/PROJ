@@ -934,35 +934,31 @@ extern char const PROJ_DLL pj_release[]; /* global release id string */
 /* procedure prototypes */
 
 PJ_CONTEXT PROJ_DLL *pj_get_default_ctx(void);
-PJ_CONTEXT PROJ_DLL *pj_get_ctx( PJ *);
+PJ_CONTEXT *pj_get_ctx( PJ *);
 
 PJ_XY PROJ_DLL pj_fwd(PJ_LP, PJ *);
 PJ_LP PROJ_DLL pj_inv(PJ_XY, PJ *);
 
-PJ_XYZ PROJ_DLL pj_fwd3d(PJ_LPZ, PJ *);
-PJ_LPZ PROJ_DLL pj_inv3d(PJ_XYZ, PJ *);
+PJ_XYZ pj_fwd3d(PJ_LPZ, PJ *);
+PJ_LPZ pj_inv3d(PJ_XYZ, PJ *);
 
 
-void PROJ_DLL pj_clear_initcache(void);
-void PROJ_DLL pj_pr_list(PJ *);
-PJ PROJ_DLL *pj_init(int, char **);
-PJ PROJ_DLL *pj_init_plus(const char *);
-PJ PROJ_DLL *pj_init_ctx( PJ_CONTEXT *, int, char ** );
-PJ PROJ_DLL *pj_init_plus_ctx( PJ_CONTEXT *, const char * );
-char PROJ_DLL *pj_get_def(PJ *, int);
-int PROJ_DLL pj_has_inverse(PJ *);
+void pj_clear_initcache(void);
+void PROJ_DLL pj_pr_list(PJ *); /* used by proj.cpp */
+char *pj_get_def(PJ *, int);
+int pj_has_inverse(PJ *);
 
 
-char PROJ_DLL *pj_strdup(const char *str);
+char *pj_strdup(const char *str);
 const char PROJ_DLL *pj_get_release(void);
-void PROJ_DLL pj_acquire_lock(void);
-void PROJ_DLL pj_release_lock(void);
-void PROJ_DLL pj_cleanup_lock(void);
+void pj_acquire_lock(void);
+void pj_release_lock(void);
+void pj_cleanup_lock(void);
 
-void PROJ_DLL pj_log( PJ_CONTEXT * ctx, int level, const char *fmt, ... );
-void PROJ_DLL pj_stderr_logger( void *, int, const char * );
+void pj_log( PJ_CONTEXT * ctx, int level, const char *fmt, ... );
+void pj_stderr_logger( void *, int, const char * );
 
-int PROJ_DLL pj_find_file(PJ_CONTEXT * ctx, const char *short_filename,
+int pj_find_file(PJ_CONTEXT * ctx, const char *short_filename,
                  char* out_full_filename, size_t out_full_filename_size);
 
 
