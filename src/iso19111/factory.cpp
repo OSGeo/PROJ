@@ -94,6 +94,12 @@ namespace io {
 #define GEOG_3D_SINGLE_QUOTED "'geographic 3D'"
 #define GEOCENTRIC_SINGLE_QUOTED "'geocentric'"
 
+// See data/sql/metadata.sql for the semantics of those constants
+constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
+// If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
+// must be incremented.
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 0;
+
 // ---------------------------------------------------------------------------
 
 struct SQLValues {
@@ -269,6 +275,8 @@ struct DatabaseContext::Private {
 
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
+
+    void checkDatabaseLayout();
 
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
@@ -544,6 +552,61 @@ void DatabaseContext::Private::open(const std::string &databasePath,
 
     databasePath_ = path;
     registerFunctions();
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::checkDatabaseLayout() {
+    auto res = run("SELECT key, value FROM metadata WHERE key IN "
+                   "('DATABASE.LAYOUT.VERSION.MAJOR', "
+                   "'DATABASE.LAYOUT.VERSION.MINOR')");
+    if (res.size() != 2) {
+        // The database layout of PROJ 7.2 that shipped with EPSG v10.003 is
+        // at the time of writing still compatible of the one we support.
+        static_assert(
+            // cppcheck-suppress knownConditionTrueFalse
+            DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
+                // cppcheck-suppress knownConditionTrueFalse
+                DATABASE_LAYOUT_VERSION_MINOR == 0,
+            "remove that assertion and below lines next time we upgrade "
+            "database structure");
+        res = run("SELECT 1 FROM metadata WHERE key = 'EPSG.VERSION' AND "
+                  "value = 'v10.003'");
+        if (!res.empty()) {
+            return;
+        }
+
+        throw FactoryException(
+            databasePath_ +
+            " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
+            "DATABASE.LAYOUT.VERSION.MINOR "
+            "metadata. It comes from another PROJ installation.");
+    }
+    int nMajor = 0;
+    int nMinor = 0;
+    for (const auto &row : res) {
+        if (row[0] == "DATABASE.LAYOUT.VERSION.MAJOR") {
+            nMajor = atoi(row[1].c_str());
+        } else if (row[0] == "DATABASE.LAYOUT.VERSION.MINOR") {
+            nMinor = atoi(row[1].c_str());
+        }
+    }
+    if (nMajor != DATABASE_LAYOUT_VERSION_MAJOR) {
+        throw FactoryException(databasePath_ +
+                               " contains DATABASE.LAYOUT.VERSION.MAJOR = " +
+                               toString(nMajor) + " whereas " +
+                               toString(DATABASE_LAYOUT_VERSION_MAJOR) +
+                               " is expected. "
+                               "It comes from another PROJ installation.");
+    }
+    if (nMinor < DATABASE_LAYOUT_VERSION_MINOR) {
+        throw FactoryException(databasePath_ +
+                               " contains DATABASE.LAYOUT.VERSION.MINOR = " +
+                               toString(nMinor) + " whereas a number >= " +
+                               toString(DATABASE_LAYOUT_VERSION_MINOR) +
+                               " is expected. "
+                               "It comes from another PROJ installation.");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -865,6 +928,7 @@ DatabaseContext::create(const std::string &databasePath,
     if (!auxiliaryDatabasePaths.empty()) {
         dbCtx->getPrivate()->attachExtraDatabases(auxiliaryDatabasePaths);
     }
+    dbCtx->getPrivate()->checkDatabaseLayout();
     return dbCtx;
 }
 
