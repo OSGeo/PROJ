@@ -77,6 +77,7 @@ static const char *oterr = "*\t*"; /* output line for unprojectable input */
 static const char *usage =
     "%s\nusage: %s [-dDeEfIlrstvwW [args]]\n"
     "              [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]\n"
+    "              [--authority {name}]\n"
     "              [+opt[=arg] ...] [+to +opt[=arg] ...] [file ...]\n";
 
 static double (*informat)(const char *,
@@ -372,6 +373,7 @@ int main(int argc, char **argv) {
 
     ExtentPtr bboxFilter;
     std::string area;
+    const char* authority = nullptr;
 
     /* process run line arguments */
     while (--argc > 0) { /* collect run line arguments */
@@ -409,6 +411,15 @@ int main(int argc, char **argv) {
                           << ", " << e.what() << std::endl;
                 std::exit(1);
             }
+        }
+        else if (strcmp(*argv, "--authority") == 0 ) {
+            ++argv;
+            --argc;
+            if( argc == 0 ) {
+                emess(1, "missing argument for --authority");
+                std::exit(1);
+            }
+            authority = *argv;
         }
         else if (**argv == '-') {
             for (arg = *argv;;) {
@@ -761,8 +772,15 @@ int main(int argc, char **argv) {
         }
     }
 
+    std::string authorityOption; /* keep this variable in this outer scope ! */
+    const char* options[2] = { nullptr, nullptr };
+    if( authority ) {
+        authorityOption = "AUTHORITY=";
+        authorityOption += authority;
+        options[0] = authorityOption.data();
+    }
     transformation = proj_create_crs_to_crs_from_pj(nullptr, src, dst,
-                                                    pj_area, nullptr);
+                                                    pj_area, options);
 
     proj_destroy(src);
     proj_destroy(dst);
