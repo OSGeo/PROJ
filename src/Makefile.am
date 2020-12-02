@@ -185,6 +185,7 @@ libproj_la_SOURCES = \
 	conversions/geoc.cpp \
 	conversions/geocent.cpp \
 	conversions/noop.cpp \
+	conversions/topocentric.cpp \
 	conversions/set.cpp \
 	conversions/unitconvert.cpp \
 	\

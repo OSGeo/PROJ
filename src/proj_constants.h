@@ -651,4 +651,24 @@
 #define EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL 1068
 #define EPSG_NAME_METHOD_HEIGHT_DEPTH_REVERSAL "Height Depth Reversal"
 
+/* ------------------------------------------------------------------------ */
+
+#define EPSG_NAME_METHOD_GEOCENTRIC_TOPOCENTRIC "Geocentric/topocentric conversions"
+#define EPSG_CODE_METHOD_GEOCENTRIC_TOPOCENTRIC 9836
+
+#define EPSG_NAME_PARAMETER_GEOCENTRIC_X_TOPOCENTRIC_ORIGIN "Geocentric X of topocentric origin"
+#define EPSG_CODE_PARAMETER_GEOCENTRIC_X_TOPOCENTRIC_ORIGIN 8837
+
+#define EPSG_NAME_PARAMETER_GEOCENTRIC_Y_TOPOCENTRIC_ORIGIN "Geocentric Y of topocentric origin"
+#define EPSG_CODE_PARAMETER_GEOCENTRIC_Y_TOPOCENTRIC_ORIGIN 8838
+
+#define EPSG_NAME_PARAMETER_GEOCENTRIC_Z_TOPOCENTRIC_ORIGIN "Geocentric Z of topocentric origin"
+#define EPSG_CODE_PARAMETER_GEOCENTRIC_Z_TOPOCENTRIC_ORIGIN 8839
+
+/* ------------------------------------------------------------------------ */
+
+#define EPSG_NAME_METHOD_GEOGRAPHIC_TOPOCENTRIC "Geographic/topocentric conversions"
+#define EPSG_CODE_METHOD_GEOGRAPHIC_TOPOCENTRIC 9837
+
+
 #endif /* PROJ_CONSTANTS_INCLUDED */

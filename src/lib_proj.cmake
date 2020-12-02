@@ -173,6 +173,7 @@ set(SRC_LIBPROJ_CONVERSIONS
   conversions/geoc.cpp
   conversions/geocent.cpp
   conversions/noop.cpp
+  conversions/topocentric.cpp
   conversions/set.cpp
   conversions/unitconvert.cpp
 )
