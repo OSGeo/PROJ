@@ -1362,6 +1362,12 @@ static const char *proj_lib_name =
     nullptr;
 #endif
 
+#ifdef PROJ_LIB_ENV_VAR_TRIED_LAST
+static bool gbPROJ_LIB_ENV_VAR_TRIED_LAST = true;
+#else
+static bool gbPROJ_LIB_ENV_VAR_TRIED_LAST = false;
+#endif
+
 static bool dontReadUserWritableDirectory() {
     // Env var mostly for testing purposes and being independent from
     // an existing installation
@@ -1448,8 +1454,10 @@ static void *pj_open_lib_internal(
             sysname = fname.c_str();
         }
 
-        /* if is environment PROJ_LIB defined */
-        else if (!(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
+        /* if the environment PROJ_LIB defined, and *not* tried as last
+           possibility */
+        else if (!gbPROJ_LIB_ENV_VAR_TRIED_LAST &&
+                 !(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
                       .empty()) {
             auto paths = NS_PROJ::internal::split(projLib, dirSeparator);
             for (const auto &path : paths) {
@@ -1461,17 +1469,42 @@ static void *pj_open_lib_internal(
                 if (fid)
                     break;
             }
+        }
+
+        else if ((sysname = get_path_from_relative_share_proj(
+                      ctx, name, fname)) != nullptr) {
             /* check if it lives in a ../share/proj dir of the proj dll */
-        } else if ((sysname = get_path_from_relative_share_proj(
-                        ctx, name, fname)) != nullptr) {
+        } else if (proj_lib_name != nullptr &&
+                   (fid = open_file(
+                        ctx,
+                        (std::string(proj_lib_name) + DIR_CHAR + name).c_str(),
+                        mode)) != nullptr) {
+
             /* or hardcoded path */
-        } else if ((sysname = proj_lib_name) != nullptr) {
-            fname = sysname;
+            fname = proj_lib_name;
             fname += DIR_CHAR;
             fname += name;
             sysname = fname.c_str();
+        }
+
+        /* if the environment PROJ_LIB defined, and tried as last possibility */
+        else if (gbPROJ_LIB_ENV_VAR_TRIED_LAST &&
+                 !(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
+                      .empty()) {
+            auto paths = NS_PROJ::internal::split(projLib, dirSeparator);
+            for (const auto &path : paths) {
+                fname = path;
+                fname += DIR_CHAR;
+                fname += name;
+                sysname = fname.c_str();
+                fid = open_file(ctx, sysname, mode);
+                if (fid)
+                    break;
+            }
+        }
+
+        else {
             /* just try it bare bones */
-        } else {
             sysname = name;
         }
 
@@ -1516,21 +1549,35 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
         ignoreUserWritableDirectory[0] == '\0') {
         ret.push_back(proj_context_get_user_writable_directory(ctx, false));
     }
+
     const std::string envPROJ_LIB = NS_PROJ::FileManager::getProjLibEnvVar(ctx);
-    if (!envPROJ_LIB.empty()) {
-        ret.push_back(envPROJ_LIB);
-    }
-    if (envPROJ_LIB.empty()) {
-        const std::string relativeSharedProj = pj_get_relative_share_proj(ctx);
+    const std::string relativeSharedProj = pj_get_relative_share_proj(ctx);
+
+    if (gbPROJ_LIB_ENV_VAR_TRIED_LAST) {
+/* Situation where PROJ_LIB environment variable is tried in last */
+#ifdef PROJ_LIB
+        ret.push_back(PROJ_LIB);
+#endif
         if (!relativeSharedProj.empty()) {
             ret.push_back(relativeSharedProj);
         }
-    }
+        if (!envPROJ_LIB.empty()) {
+            ret.push_back(envPROJ_LIB);
+        }
+    } else {
+        /* Situation where PROJ_LIB environment variable is used if defined */
+        if (!envPROJ_LIB.empty()) {
+            ret.push_back(envPROJ_LIB);
+        } else {
+            if (!relativeSharedProj.empty()) {
+                ret.push_back(relativeSharedProj);
+            }
 #ifdef PROJ_LIB
-    if (envPROJ_LIB.empty()) {
-        ret.push_back(PROJ_LIB);
-    }
+            ret.push_back(PROJ_LIB);
 #endif
+        }
+    }
+
     return ret;
 }
 

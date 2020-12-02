@@ -60,6 +60,11 @@ The following paths are checked in order:
   that since this is a hard-wired path setting, it only works if the whole
   PROJ installation is not moved somewhere else.
 
+  .. note:: if PROJ is built with the PROJ_LIB_ENV_VAR_TRIED_LAST CMake option /
+            --enable-proj-lib-env-var-tried-last configure switch, then this
+            hard-wired path will be tried before looking at the environment
+            variable :envvar:`PROJ_LIB`.
+
 - The current directory
 
 When networking capabilities are enabled, either by API with the

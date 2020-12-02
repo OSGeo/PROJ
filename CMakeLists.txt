@@ -177,6 +177,13 @@ if(ENABLE_CURL)
 endif()
 
 ################################################################################
+
+option(PROJ_LIB_ENV_VAR_TRIED_LAST "Whether the PROJ_LIB environment variable should be tried after the hardcoded location" OFF)
+if(PROJ_LIB_ENV_VAR_TRIED_LAST)
+    add_definitions(-DPROJ_LIB_ENV_VAR_TRIED_LAST)
+endif()
+
+################################################################################
 # threading configuration
 ################################################################################
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
