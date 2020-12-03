@@ -265,7 +265,6 @@ static double az_adjustment(int triangle)
 static struct isea_pt isea_triangle_xy(int triangle)
 {
     struct isea_pt  c;
-    const double Rprime = 0.91038328153090290025;
 
     triangle = (triangle - 1) % 20;
 
