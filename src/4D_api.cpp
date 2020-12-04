@@ -1260,8 +1260,20 @@ std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
     }
 }
 
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+static const char *getOptionValue(const char *option,
+                                  const char *keyWithEqual) noexcept {
+    if (ci_starts_with(option, keyWithEqual)) {
+        return option + strlen(keyWithEqual);
+    }
+    return nullptr;
+}
+//! @endcond
+
 /*****************************************************************************/
-PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, const PJ *target_crs, PJ_AREA *area, const char* const *) {
+PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, const PJ *target_crs, PJ_AREA *area, const char* const * options) {
 /******************************************************************************
     Create a transformation pipeline between two known coordinate reference
     systems.
@@ -1273,7 +1285,20 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         ctx = pj_get_default_ctx();
     }
 
-    auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
+    const char* authority = nullptr;
+    for (auto iter = options; iter && iter[0]; ++iter) {
+        const char *value;
+        if ((value = getOptionValue(*iter, "AUTHORITY="))) {
+            authority = value;
+        } else {
+            std::string msg("Unknown option :");
+            msg += *iter;
+            ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
+            return nullptr;
+        }
+    }
+
+    auto operation_ctx = proj_create_operation_factory_context(ctx, authority);
     if( !operation_ctx ) {
         return nullptr;
     }

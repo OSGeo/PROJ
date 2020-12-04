@@ -11,15 +11,11 @@ cs2cs
 Synopsis
 ********
 
-    **cs2cs** [**-eEfIlrstvwW** [args]]
-              [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]
-              [*+opt[=arg]* ...] [+to *+opt[=arg]* ...] file ...
-
-or
-
-    **cs2cs** [**-eEfIlrstvwW** [args]] [--area name_or_code]
-              [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]
-              {source_crs} {target_crs} file ...
+    | **cs2cs** [**-eEfIlrstvwW** [args]]
+    |           [[--area <name_or_code>] | [--bbox <west_long,south_lat,east_long,north_lat>]]
+    |           [--authority <name>]
+    |           ([*+opt[=arg]* ...] [+to *+opt[=arg]* ...] | {source_crs} {target_crs})
+    |           file ...
 
     where {source_crs} or {target_crs} is one of the possibilities accepted
     by :c:func:`proj_create`, provided it expresses a CRS
@@ -148,7 +144,7 @@ The following control parameters can appear in any order:
     Causes a listing of cartographic control parameters tested for and used by
     the program to be printed prior to input data.
 
-.. option:: --area name_or_code
+.. option:: --area <name_or_code>
 
     .. versionadded:: 8.0.0
 
@@ -158,7 +154,7 @@ The following control parameters can appear in any order:
 
     This option is mutually exclusive with :option:`--bbox`.
 
-.. option:: --bbox west_long,south_lat,east_long,north_lat
+.. option:: --bbox <west_long,south_lat,east_long,north_lat>
 
     .. versionadded:: 8.0.0
 
@@ -169,6 +165,21 @@ The following control parameters can appear in any order:
     `west_long` and `east_long` should be in the [-180,180] range, and
     `south_lat` and `north_lat` in the [-90,90]. `west_long` is generally lower than
     `east_long`, except in the case where the area of interest crosses the antimeridian.
+
+.. option:: --authority <name>
+
+    .. versionadded:: 8.0.0
+
+    This option can be used to restrict the authority of coordinate operations
+    looked up in the database. When not specified, coordinate
+    operations from any authority will be searched, with the restrictions set
+    in the ``authority_to_authority_preference`` database table related to the authority
+    of the source/target CRS themselves.
+    If authority is set to ``any``, then coordinate operations from any authority will be searched
+    If authority is a non-empty string different of ``any``, then coordinate operations
+    will be searched only in that authority namespace (e.g ``EPSG``).
+
+    This option is mutually exclusive with :option:`--bbox`.
 
 .. only:: man
 
