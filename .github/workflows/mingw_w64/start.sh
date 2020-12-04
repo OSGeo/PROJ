@@ -88,10 +88,11 @@ tar xzf tiff-4.1.0.tar.gz
 ln -s /usr/$MINGW_ARCH/bin/libtiff-5.dll $WINE_SYSDIR
 
 # build sqlite3
-wget https://sqlite.org/2018/sqlite-autoconf-3250100.tar.gz
-tar xzf sqlite-autoconf-3250100.tar.gz
-(cd sqlite-autoconf-3250100 && 
-./configure --host=$MINGW_ARCH --prefix=/usr/$MINGW_ARCH && make && sudo make install)
+wget https://sqlite.org/2020/sqlite-autoconf-3330000.tar.gz
+tar xzf sqlite-autoconf-3330000.tar.gz
+# Build with SQLITE_DQS=0 to ensure we properly use single quotes and double quotes (cf issue #2480)
+(cd sqlite-autoconf-3330000 &&
+CFLAGS="-DSQLITE_DQS=0" ./configure --host=$MINGW_ARCH --prefix=/usr/$MINGW_ARCH && make && sudo make install)
 ln -s /usr/$MINGW_ARCH/bin/libsqlite3-0.dll $WINE_SYSDIR
 
 # prepare build files
