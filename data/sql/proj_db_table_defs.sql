@@ -1460,9 +1460,9 @@ CREATE VIEW object_view AS
     UNION ALL
     SELECT 'prime_meridian', auth_name, code, name, NULL, deprecated FROM prime_meridian
     UNION ALL
-    SELECT 'geodetic_datum', auth_name, code, name, CASE WHEN ensemble_accuracy IS NOT NULL THEN "ensemble" ELSE "datum" END, deprecated FROM geodetic_datum
+    SELECT 'geodetic_datum', auth_name, code, name, CASE WHEN ensemble_accuracy IS NOT NULL THEN 'ensemble' ELSE 'datum' END, deprecated FROM geodetic_datum
     UNION ALL
-    SELECT 'vertical_datum', auth_name, code, name, CASE WHEN ensemble_accuracy IS NOT NULL THEN "ensemble" ELSE "datum" END, deprecated FROM vertical_datum
+    SELECT 'vertical_datum', auth_name, code, name, CASE WHEN ensemble_accuracy IS NOT NULL THEN 'ensemble' ELSE 'datum' END, deprecated FROM vertical_datum
     UNION ALL
     SELECT 'axis', auth_name, code, name, NULL, 0 as deprecated FROM axis
     UNION ALL
