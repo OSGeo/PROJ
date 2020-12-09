@@ -364,7 +364,7 @@ Coordinate transformation
 
 
 
-.. c:function:: size_t proj_trans_array(PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord)
+.. c:function:: int proj_trans_array(PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord)
 
     Batch transform an array of :c:type:`PJ_COORD`.
 
@@ -374,7 +374,7 @@ Coordinate transformation
     :type `direction`: PJ_DIRECTION
     :param n: Number of coordinates in :c:data:`coord`
     :type n: `size_t`
-    :returns: :c:type:`size_t` 0 if all observations are transformed without error, otherwise returns error number
+    :returns: :c:type:`int` 0 if all observations are transformed without error, otherwise returns error number
 
 
 Error reporting
