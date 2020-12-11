@@ -362,7 +362,7 @@ Coordinate transformation
     :type `direction`: PJ_DIRECTION
     :param n: Number of coordinates in :c:data:`coord`
     :type n: `size_t`
-    :returns: :c:type:`int` 0 if all observations are transformed without error, otherwise returns error number
+    :returns: `int` 0 if all observations are transformed without error, otherwise returns error number
 
 
 Error reporting
