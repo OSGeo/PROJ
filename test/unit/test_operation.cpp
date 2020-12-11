@@ -10209,7 +10209,6 @@ TEST(operation, geocentric_topocentric) {
     ASSERT_TRUE(dst != nullptr);
     auto f(NS_PROJ::io::WKTFormatter::create(
         NS_PROJ::io::WKTFormatter::Convention::WKT2_2019));
-    std::cerr << GeodeticCRS::EPSG_4978->exportToWKT(f.get()) << std::endl;
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeodeticCRS::EPSG_4978, NN_CHECK_ASSERT(dst));
     ASSERT_TRUE(op != nullptr);
