@@ -2,6 +2,8 @@
 
 set -e
 
+sudo apt update
+
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends \
     autoconf automake libtool g++ make sqlite3 libsqlite3-dev libtiff-dev libcurl4-openssl-dev jq
 
