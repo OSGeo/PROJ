@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     name: Conda ${{ matrix.platform }}
+    if: github.repository == 'OSGeo/PROJ'
 
     runs-on: ${{ matrix.platform }}
     strategy:
