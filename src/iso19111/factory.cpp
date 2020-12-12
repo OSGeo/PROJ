@@ -39,11 +39,13 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
-#include "proj/internal/coordinateoperation_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 #include "proj/internal/lru_cache.hpp"
 #include "proj/internal/tracing.hpp"
+
+#include "operation/coordinateoperation_internal.hpp"
+#include "operation/parammappings.hpp"
 
 #include "sqlite3_utils.hpp"
 
