@@ -433,14 +433,25 @@ TEST_F(CApi, proj_as_wkt) {
     ObjectKeeper keeper_crs4979(crs4979);
     ASSERT_NE(crs4979, nullptr);
 
+    EXPECT_EQ(proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, nullptr), nullptr);
+
     // STRICT=NO
     {
-        EXPECT_EQ(proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, nullptr), nullptr);
-
         const char *const options[] = {"STRICT=NO", nullptr};
         auto wkt = proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, options);
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find("GEOGCS[\"WGS 84\"") == 0) << wkt;
+    }
+
+    // ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES
+    {
+        const char *const options[] = {
+            "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES", nullptr};
+        auto wkt = proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_GDAL, options);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find(
+                        "COMPD_CS[\"WGS 84 + Ellipsoid (metre)\"") == 0)
+            << wkt;
     }
 
     // unsupported option
@@ -843,6 +854,13 @@ TEST_F(CApi, proj_create_from_database) {
         ASSERT_NE(datum, nullptr);
         ObjectKeeper keeper(datum);
         EXPECT_EQ(proj_get_type(datum), PJ_TYPE_GEODETIC_REFERENCE_FRAME);
+    }
+    {
+        auto ensemble = proj_create_from_database(
+            m_ctxt, "EPSG", "6326", PJ_CATEGORY_DATUM_ENSEMBLE, false, nullptr);
+        ASSERT_NE(ensemble, nullptr);
+        ObjectKeeper keeper(ensemble);
+        EXPECT_EQ(proj_get_type(ensemble), PJ_TYPE_DATUM_ENSEMBLE);
     }
     {
         // International Terrestrial Reference Frame 2008
@@ -4643,10 +4661,21 @@ TEST_F(CApi, proj_create_vertical_crs_ex) {
     ObjectKeeper keeper_geog_crs(geog_crs);
     ASSERT_NE(geog_crs, nullptr);
 
-    auto P = proj_create_crs_to_crs_from_pj(m_ctxt, compound, geog_crs, nullptr,
-                                            nullptr);
-    ObjectKeeper keeper_P(P);
-    ASSERT_NE(P, nullptr);
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt =
+        proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+    PJ_OBJ_LIST *operations =
+        proj_create_operations(m_ctxt, compound, geog_crs, ctxt);
+    ASSERT_NE(operations, nullptr);
+    ObjListKeeper keeper_operations(operations);
+    EXPECT_GE(proj_list_get_count(operations), 1);
+    auto P = proj_list_get(m_ctxt, operations, 0);
+    ObjectKeeper keeper_transform(P);
 
     auto name = proj_get_name(P);
     ASSERT_TRUE(name != nullptr);
@@ -4699,10 +4728,21 @@ TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
     ObjectKeeper keeper_geog_crs(geog_crs);
     ASSERT_NE(geog_crs, nullptr);
 
-    auto P = proj_create_crs_to_crs_from_pj(m_ctxt, compound, geog_crs, nullptr,
-                                            nullptr);
-    ObjectKeeper keeper_P(P);
-    ASSERT_NE(P, nullptr);
+    PJ_OPERATION_FACTORY_CONTEXT *ctxt =
+        proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+    PJ_OBJ_LIST *operations =
+        proj_create_operations(m_ctxt, compound, geog_crs, ctxt);
+    ASSERT_NE(operations, nullptr);
+    ObjListKeeper keeper_operations(operations);
+    EXPECT_GE(proj_list_get_count(operations), 1);
+    auto P = proj_list_get(m_ctxt, operations, 0);
+    ObjectKeeper keeper_transform(P);
 
     auto name = proj_get_name(P);
     ASSERT_TRUE(name != nullptr);
@@ -4732,10 +4772,13 @@ TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
     ObjectKeeper keeper_compound_from_projjson(compound_from_projjson);
     ASSERT_NE(compound_from_projjson, nullptr);
 
-    auto P2 = proj_create_crs_to_crs_from_pj(m_ctxt, compound_from_projjson,
-                                             geog_crs, nullptr, nullptr);
-    ObjectKeeper keeper_P2(P2);
-    ASSERT_NE(P2, nullptr);
+    PJ_OBJ_LIST *operations2 =
+        proj_create_operations(m_ctxt, compound_from_projjson, geog_crs, ctxt);
+    ASSERT_NE(operations2, nullptr);
+    ObjListKeeper keeper_operations2(operations2);
+    EXPECT_GE(proj_list_get_count(operations2), 1);
+    auto P2 = proj_list_get(m_ctxt, operations2, 0);
+    ObjectKeeper keeper_transform2(P2);
 
     auto name_bis = proj_get_name(P2);
     ASSERT_TRUE(name_bis != nullptr);
@@ -4841,9 +4884,16 @@ TEST_F(CApi, proj_create_derived_geographic_crs) {
     const char *expected_wkt =
         "GEOGCRS[\"my rotated CRS\",\n"
         "    BASEGEOGCRS[\"WGS 84\",\n"
-        "        DATUM[\"World Geodetic System 1984\",\n"
+        "        ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+        "            MEMBER[\"World Geodetic System 1984 (Transit)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
         "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
-        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ENSEMBLEACCURACY[2.0]],\n"
         "        PRIMEM[\"Greenwich\",0,\n"
         "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
         "    DERIVINGCONVERSION[\"Pole rotation (GRIB convention)\",\n"

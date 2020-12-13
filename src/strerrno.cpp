@@ -1,4 +1,4 @@
-/* list of projection system pj_errno values */
+/* list of projection system errno values */
 
 #include <stddef.h>
 #include <stdio.h>
@@ -27,7 +27,7 @@ pj_err_list[] = {
     "invalid x or y",                                                  /* -15 */
     "improperly formed DMS value",                                     /* -16 */
     "non-convergent inverse meridional dist",                          /* -17 */
-    "non-convergent inverse phi2",                                     /* -18 */
+    "non-convergent sinh(psi) to tan(phi)",                            /* -18 */
     "acos/asin: |arg| >1.+1e-14",                                      /* -19 */
     "tolerance condition error",                                       /* -20 */
     "conic lat_1 = -lat_2",                                            /* -21 */
@@ -74,10 +74,11 @@ pj_err_list[] = {
     "network error",                                                   /* -62 */
 
     /* When adding error messages, remember to update ID defines in
-       projects.h, and transient_error array in pj_transform                  */
+       src/proj_internal.h and src/apps/gie.cpp */
 };
 
-char *pj_strerrno(int err) {
+
+const char* proj_errno_string(int err) {
     const int max_error = 9999;
     static char note[50];
     size_t adjusted_err;
@@ -98,7 +99,7 @@ char *pj_strerrno(int err) {
 #endif
     }
 
-    /* PROJ.4 error codes are negative: -1 to -9999 */
+    /* PROJ error codes are negative: -1 to -9999 */
     adjusted_err = err < -max_error ? max_error : -err - 1;
     if (adjusted_err < (sizeof(pj_err_list) / sizeof(char *)))
         return (char *)pj_err_list[adjusted_err];
@@ -106,8 +107,4 @@ char *pj_strerrno(int err) {
     sprintf(note, "invalid projection system error (%d)",
             (err > -max_error) ? err: -max_error);
     return note;
-}
-
-const char* proj_errno_string(int err) {
-    return pj_strerrno(err);
 }

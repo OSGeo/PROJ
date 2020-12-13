@@ -1,0 +1,39 @@
+name: MacOS build
+
+on: [push, pull_request]
+
+jobs:
+
+  macos_build:
+    runs-on: macos-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+            channels: conda-forge
+            auto-update-conda: true
+
+      - name: Cache
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-cache-mac-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-cache-mac-
+
+      - name: Install Requirements
+        shell: bash -l {0}
+        run: |
+          source .github/workflows/mac/before_install.sh
+
+      - name: Build
+        shell: bash -l {0}
+        run: |
+          export TRAVIS_BUILD_DIR=$PWD
+          source .github/workflows/mac/install.sh
+        env:
+            TRAVIS_OS_NAME: osx
+            BUILD_NAME: osx

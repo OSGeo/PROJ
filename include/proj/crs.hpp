@@ -155,6 +155,11 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
         const;
 
     PROJ_INTERNAL bool hasImplicitCS() const;
+
+    PROJ_INTERNAL static CRSNNPtr
+    getResolvedCRS(const CRSNNPtr &crs,
+                   const io::AuthorityFactoryPtr &authFactory,
+                   metadata::ExtentPtr &extentOut);
     //! @endcond
 
   protected:
@@ -334,6 +339,11 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
 
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
+
+    PROJ_INTERNAL bool
+    _isEquivalentToNoTypeCheck(const util::IComparable *other,
+                               util::IComparable::Criterion criterion,
+                               const io::DatabaseContextPtr &dbContext) const;
 
     INLINED_MAKE_SHARED
 
@@ -1400,6 +1410,7 @@ class PROJ_GCC_DLL DerivedCRSTemplate final : public DerivedCRSTraits::BaseType,
     DerivedCRSTemplate(const BaseNNPtr &baseCRSIn,
                        const operation::ConversionNNPtr &derivingConversionIn,
                        const CSNNPtr &csIn);
+    // cppcheck-suppress noExplicitConstructor
     PROJ_INTERNAL DerivedCRSTemplate(const DerivedCRSTemplate &other);
 
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;

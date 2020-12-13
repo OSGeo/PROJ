@@ -170,7 +170,7 @@ static PJ_LP aitoff_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
 
     if (iter == MAXITER && round == MAXROUND)
     {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        proj_context_errno_set( P->ctx, PJD_ERR_NON_CONVERGENT );
         /* fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl); */
     }
 
@@ -187,7 +187,7 @@ static PJ *setup(PJ *P) {
 
 
 PJ *PROJECTION(aitoff) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;
@@ -198,7 +198,7 @@ PJ *PROJECTION(aitoff) {
 
 
 PJ *PROJECTION(wintri) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor(P, ENOMEM);
     P->opaque = Q;

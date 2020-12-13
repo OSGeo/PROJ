@@ -72,6 +72,7 @@ struct OutputOptions {
     bool singleLine = false;
     bool strict = true;
     bool ballparkAllowed = true;
+    bool allowEllipsoidalHeightAsVerticalCRS = false;
 };
 } // anonymous namespace
 
@@ -79,7 +80,8 @@ struct OutputOptions {
 
 static void usage() {
     std::cerr
-        << "usage: projinfo [-o formats] [-k crs|operation|datum|ellipsoid] "
+        << "usage: projinfo [-o formats] "
+           "[-k crs|operation|datum|ensemble|ellipsoid] "
            "[--summary] [-q]"
         << std::endl
         << "                ([--area name_or_code] | "
@@ -94,6 +96,8 @@ static void usage() {
         << "                [--pivot-crs always|if_no_direct_transformation|"
         << "never|{auth:code[,auth:code]*}]" << std::endl
         << "                [--show-superseded] [--hide-ballpark]" << std::endl
+        << "                [--allow-ellipsoidal-height-as-vertical-crs]"
+        << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
@@ -184,11 +188,11 @@ static BaseObjectNNPtr buildObject(
             auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
                        tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
-        } else if (kind == "ellipsoid" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:ellipsoid:" + tokens[0] + "::" + tokens[1];
-            obj = createFromUserInput(urn, dbContext).as_nullable();
-        } else if (kind == "datum" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:datum:" + tokens[0] + "::" + tokens[1];
+        } else if ((kind == "ellipsoid" || kind == "datum" ||
+                    kind == "ensemble") &&
+                   tokens.size() == 2) {
+            auto urn =
+                "urn:ogc:def:" + kind + ":" + tokens[0] + "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else {
             // Convenience to be able to use C escaped strings...
@@ -222,6 +226,9 @@ static BaseObjectNNPtr buildObject(
                         AuthorityFactory::ObjectType::ELLIPSOID);
                 else if (kind == "datum")
                     allowedTypes.push_back(AuthorityFactory::ObjectType::DATUM);
+                else if (kind == "ensemble")
+                    allowedTypes.push_back(
+                        AuthorityFactory::ObjectType::DATUM_ENSEMBLE);
                 constexpr size_t limitResultCount = 10;
                 auto factory = AuthorityFactory::create(NN_NO_CHECK(dbContext),
                                                         std::string());
@@ -483,6 +490,8 @@ static void outputObject(
                     formatter->setMultiLine(false);
                 }
                 formatter->setStrict(outputOpt.strict);
+                formatter->setAllowEllipsoidalHeightAsVerticalCRS(
+                    outputOpt.allowEllipsoidalHeightAsVerticalCRS);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
@@ -689,6 +698,7 @@ static void outputOperations(
 
     std::vector<CoordinateOperationNNPtr> list;
     size_t spatialCriterionPartialIntersectionResultCount = 0;
+    bool spatialCriterionPartialIntersectionMoreRelevant = false;
     try {
         auto authFactory =
             dbContext
@@ -714,10 +724,15 @@ static void outputOperations(
                 ctxt->setSpatialCriterion(
                     CoordinateOperationContext::SpatialCriterion::
                         PARTIAL_INTERSECTION);
-                spatialCriterionPartialIntersectionResultCount =
-                    CoordinateOperationFactory::create()
-                        ->createOperations(nnSourceCRS, nnTargetCRS, ctxt)
-                        .size();
+                auto list2 =
+                    CoordinateOperationFactory::create()->createOperations(
+                        nnSourceCRS, nnTargetCRS, ctxt);
+                spatialCriterionPartialIntersectionResultCount = list2.size();
+                if (spatialCriterionPartialIntersectionResultCount == 1 &&
+                    list.size() == 1 &&
+                    list2[0]->nameStr() != list[0]->nameStr()) {
+                    spatialCriterionPartialIntersectionMoreRelevant = true;
+                }
             } catch (const std::exception &) {
             }
         }
@@ -735,6 +750,10 @@ static void outputOperations(
         std::cout << "Note: using '--spatial-test intersects' would bring "
                      "more results ("
                   << spatialCriterionPartialIntersectionResultCount << ")"
+                  << std::endl;
+    } else if (spatialCriterionPartialIntersectionMoreRelevant) {
+        std::cout << "Note: using '--spatial-test intersects' would bring "
+                     "more relevant results."
                   << std::endl;
     }
     if (summary) {
@@ -929,6 +948,8 @@ int main(int argc, char **argv) {
                 objectKind = "ellipsoid";
             } else if (ci_equal(kind, "datum")) {
                 objectKind = "datum";
+            } else if (ci_equal(kind, "ensemble")) {
+                objectKind = "ensemble";
             } else {
                 std::cerr << "Unrecognized value for option -k: " << kind
                           << std::endl;
@@ -1054,6 +1075,8 @@ int main(int argc, char **argv) {
             showSuperseded = true;
         } else if (arg == "--lax") {
             outputOpt.strict = false;
+        } else if (arg == "--allow-ellipsoidal-height-as-vertical-crs") {
+            outputOpt.allowEllipsoidalHeightAsVerticalCRS = true;
         } else if (arg == "--hide-ballpark") {
             outputOpt.ballparkAllowed = false;
         } else if (ci_equal(arg, "--3d")) {

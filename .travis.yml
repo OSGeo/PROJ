@@ -20,51 +20,8 @@ matrix:
       services:
         - docker
       env:
-        - BUILD_NAME=linux_gcc
-        - DETAILS="linux, gcc-4.8"
-        - CC=gcc-4.8
-        - CXX=g++-4.8
-      addons:
-        apt:
-          packages:
-            - g++-4.8
-
-    - os: linux
-      dist: bionic
-      compiler: gcc
-      services:
-        - docker
-      env:
-        - BUILD_NAME=linux_gcc8
-        - DETAILS="linux, gcc8"
-        - DETAILS="linux, gcc8, i386"
-        - ARCH=i386
-        - CC=gcc-8
-        - CXX=g++-8
-        - CXXFLAGS='-g -O2 -m32 -D_GLIBCXX_ASSERTIONS'
-        - CFLAGS='-g -O2 -m32'
-        - TIFF_CFLAGS=-I/usr/include/i386-linux-gnu
-        - TIFF_LIBS="-L/usr/lib/i386-linux-gnu -ltiff"
-        - SQLITE3_CFLAGS=-I/usr/include/i386-linux-gnu
-        - SQLITE3_LIBS="-L/usr/lib/i386-linux-gnu -lsqlite3"
-      addons:
-        apt:
-          sources:
-            - sourceline: 'ppa:ubuntu-toolchain-r/test'
-          packages:
-            - g++-8-multilib
-            - make
-            - autoconf
-            - automake
-
-    - os: linux
-      dist: xenial
-      compiler: clang
-      services:
-        - docker
-      env:
-        - BUILD_NAME=linux_clang
-        - DETAILS="linux, clang"
+        - BUILD_NAME=publish_doc
+        - DETAILS="publish_doc"
 
     - os: linux
       dist: bionic
@@ -81,25 +38,6 @@ matrix:
       env:
         - BUILD_NAME=linux_generic
         - DETAILS="linux, arm64"
-
-    - os: osx
-      env:
-        - BUILD_NAME=osx
-        - DETAILS="osx"
-
-    - os: linux
-      dist: xenial
-      compiler: gcc
-      env:
-        - BUILD_NAME=mingw32
-        - DETAILS="mingw32"
-
-    - os: linux
-      compiler: gcc
-      dist: xenial
-      env:
-        - BUILD_NAME=csa
-        - DETAILS="CLang Static Analyzer"
 
   allow_failures:
       - env: BUILD_NAME=mingw32

@@ -171,6 +171,10 @@ echo 'Testing -k datum EPSG:6326' >> ${OUT}
 $EXE -k datum EPSG:6326 >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo 'Testing -k ensemble WGS84' >> ${OUT}
+$EXE -k ensemble WGS84 >>${OUT} 2>&1
+echo "" >>${OUT}
+
 echo 'Testing -k operation EPSG:8457 -o PROJ -q' >> ${OUT}
 $EXE -k operation EPSG:8457 -o PROJ -q >>${OUT} 2>&1
 echo "" >>${OUT}

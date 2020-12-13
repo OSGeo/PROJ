@@ -15,7 +15,7 @@ inline static double inline_pj_mlfn(double phi, double sphi, double cphi, const 
 }
 
 inline static double
-inline_pj_inv_mlfn(projCtx ctx, double arg, double es, const double *en,
+inline_pj_inv_mlfn(PJ_CONTEXT *ctx, double arg, double es, const double *en,
                    double* sinphi, double* cosphi) {
     const double k = 1./(1.-es);
     constexpr double INV_MLFN_EPS = 1e-11;
@@ -66,7 +66,7 @@ inline_pj_inv_mlfn(projCtx ctx, double arg, double es, const double *en,
     }
     *sinphi = s;
     *cosphi = c;
-    pj_ctx_set_errno( ctx, PJD_ERR_NON_CONV_INV_MERI_DIST );
+    proj_context_errno_set( ctx, PJD_ERR_NON_CONV_INV_MERI_DIST );
     return phi;
 }
 

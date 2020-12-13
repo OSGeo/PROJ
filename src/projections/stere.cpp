@@ -86,7 +86,10 @@ static PJ_XY stere_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
         sinphi = -sinphi;
         /*-fallthrough*/
     case N_POLE:
-        xy.x = Q->akm1 * pj_tsfn (lp.phi, sinphi, P->e);
+        if( fabs(lp.phi - M_HALFPI) < 1e-15 )
+            xy.x = 0;
+        else
+            xy.x = Q->akm1 * pj_tsfn (lp.phi, sinphi, P->e);
         xy.y = - xy.x * coslam;
         break;
     }
@@ -299,7 +302,7 @@ static PJ *setup(PJ *P) {                   /* general initialization */
 
 
 PJ *PROJECTION(stere) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
@@ -312,7 +315,7 @@ PJ *PROJECTION(stere) {
 
 
 PJ *PROJECTION(ups) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;

@@ -16,13 +16,14 @@ Synopsis
 ********
 
     | **projinfo**
-    |    [-o formats] [-k crs|operation|datum|ellipsoid] [--summary] [-q]
+    |    [-o formats] [-k crs|operation|datum|ensemble|ellipsoid] [--summary] [-q]
     |    [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]
     |    [--spatial-test contains|intersects]
     |    [--crs-extent-use none|both|intersection|smallest]
     |    [--grid-check none|discard_missing|sort|known_available]
     |    [--pivot-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
     |    [--show-superseded] [--hide-ballpark]
+    |    [--allow-ellipsoidal-height-as-vertical-crs]
     |    [--boundcrs-to-wgs84]
     |    [--main-db-path path] [--aux-db-path path]*
     |    [--identify] [--3d]
@@ -86,7 +87,7 @@ The following control parameters can appear in any order:
     .. note:: Before PROJ 6.3.0, WKT1:GDAL was implicitly calling --boundcrs-to-wgs84.
               This is no longer the case.
 
-.. option:: -k crs|operation|datum|ellipsoid
+.. option:: -k crs|operation|datum|ensemble|ellipsoid
 
     When used to query a single object with a AUTHORITY:CODE, determines the (k)ind of the object
     in case there are CRS, coordinate operations or ellipsoids with the same CODE.
@@ -211,6 +212,15 @@ The following control parameters can appear in any order:
     :term:`Ballpark transformation`
 
     .. note:: only used for coordinate operation computation
+
+.. option:: --allow-ellipsoidal-height-as-vertical-crs
+
+    .. versionadded:: 8.0
+
+    Allow to export a geographic or projected 3D CRS as a compound CRS whose
+    vertical CRS represents the ellipsoidal height.
+
+    .. note:: only used for CRS, and with WKT1:GDAL output format
 
 .. option:: --boundcrs-to-wgs84
 

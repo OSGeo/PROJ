@@ -778,14 +778,14 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
 
     argc = pj_trim_argc (args);
     if (argc==0) {
-        pj_dealloc (args);
+        free (args);
         proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
         return nullptr;
     }
 
     argv = pj_trim_argv (argc, args);
     if (!argv) {
-        pj_dealloc(args);
+        free(args);
         proj_context_errno_set(ctx, ENOMEM);
         return nullptr;
     }
@@ -795,8 +795,8 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
     allow_init_epsg = proj_context_get_use_proj4_init_rules(ctx, FALSE);
     P = pj_init_ctx_with_allow_init_epsg (ctx, (int) argc, argv, allow_init_epsg);
 
-    pj_dealloc (argv);
-    pj_dealloc (args);
+    free (argv);
+    free (args);
 
     /* Support cs2cs-style modifiers */
     ret = cs2cs_emulation_setup  (P);
@@ -834,7 +834,7 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
 
     P = proj_create (ctx, c);
 
-    pj_dealloc ((char *) c);
+    free ((char *) c);
     return P;
 }
 
@@ -862,13 +862,13 @@ Same as proj_create_argv() but calls pj_create_internal() instead of proj_create
 
     P = pj_create_internal (ctx, c);
 
-    pj_dealloc ((char *) c);
+    free ((char *) c);
     return P;
 }
 
 /** Create an area of use */
 PJ_AREA * proj_area_create(void) {
-    return static_cast<PJ_AREA*>(pj_calloc(1, sizeof(PJ_AREA)));
+    return static_cast<PJ_AREA*>(calloc(1, sizeof(PJ_AREA)));
 }
 
 /** Assign a bounding box to an area of use. */
@@ -886,7 +886,7 @@ void proj_area_set_bbox(PJ_AREA *area,
 
 /** Free an area of use */
 void proj_area_destroy(PJ_AREA* area) {
-    pj_dealloc(area);
+    free(area);
 }
 
 /************************************************************************/
@@ -1260,8 +1260,20 @@ std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
     }
 }
 
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+static const char *getOptionValue(const char *option,
+                                  const char *keyWithEqual) noexcept {
+    if (ci_starts_with(option, keyWithEqual)) {
+        return option + strlen(keyWithEqual);
+    }
+    return nullptr;
+}
+//! @endcond
+
 /*****************************************************************************/
-PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, const PJ *target_crs, PJ_AREA *area, const char* const *) {
+PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, const PJ *target_crs, PJ_AREA *area, const char* const * options) {
 /******************************************************************************
     Create a transformation pipeline between two known coordinate reference
     systems.
@@ -1273,7 +1285,20 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         ctx = pj_get_default_ctx();
     }
 
-    auto operation_ctx = proj_create_operation_factory_context(ctx, nullptr);
+    const char* authority = nullptr;
+    for (auto iter = options; iter && iter[0]; ++iter) {
+        const char *value;
+        if ((value = getOptionValue(*iter, "AUTHORITY="))) {
+            authority = value;
+        } else {
+            std::string msg("Unknown option :");
+            msg += *iter;
+            ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
+            return nullptr;
+        }
+    }
+
+    auto operation_ctx = proj_create_operation_factory_context(ctx, authority);
     if( !operation_ctx ) {
         return nullptr;
     }
@@ -1287,9 +1312,11 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
                                             area->east_lon_degree,
                                             area->north_lat_degree);
     }
+    else {
+        proj_operation_factory_context_set_spatial_criterion(
+            ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+    }
 
-    proj_operation_factory_context_set_spatial_criterion(
-        ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx,
         proj_context_is_network_enabled(ctx) ?
@@ -1353,17 +1380,13 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     return P;
 }
 
-PJ *proj_destroy (PJ *P) {
-    pj_free (P);
-    return nullptr;
-}
 
 /*****************************************************************************/
 int proj_errno (const PJ *P) {
 /******************************************************************************
     Read an error level from the context of a PJ.
 ******************************************************************************/
-    return pj_ctx_get_errno (pj_get_ctx ((PJ *) P));
+    return proj_context_errno (pj_get_ctx ((PJ *) P));
 }
 
 /*****************************************************************************/
@@ -1374,7 +1397,7 @@ int proj_context_errno (PJ_CONTEXT *ctx) {
 ******************************************************************************/
     if (nullptr==ctx)
         ctx = pj_get_default_ctx();
-    return pj_ctx_get_errno (ctx);
+    return ctx->last_errno;
 }
 
 /*****************************************************************************/
@@ -1389,6 +1412,7 @@ int proj_errno_set (const PJ *P, int err) {
     /* For P==0 err goes to the default context */
     proj_context_errno_set (pj_get_ctx ((PJ *) P), err);
     errno = err;
+
     return err;
 }
 
@@ -1439,16 +1463,15 @@ int proj_errno_reset (const PJ *P) {
     int last_errno;
     last_errno = proj_errno (P);
 
-    pj_ctx_set_errno (pj_get_ctx ((PJ *) P), 0);
+    proj_context_errno_set (pj_get_ctx ((PJ *) P), 0);
     errno = 0;
-    pj_errno = 0;
     return last_errno;
 }
 
 
 /* Create a new context based on the default context */
 PJ_CONTEXT *proj_context_create (void) {
-    return pj_ctx_alloc ();
+    return new (std::nothrow) pj_ctx(*pj_get_default_ctx());
 }
 
 
@@ -1460,7 +1483,7 @@ PJ_CONTEXT *proj_context_destroy (PJ_CONTEXT *ctx) {
     if (pj_get_default_ctx ()==ctx)
         return nullptr;
 
-    pj_ctx_free (ctx);
+    delete ctx;
     return nullptr;
 }
 
@@ -1499,15 +1522,15 @@ static char *path_append (char *buf, const char *app, size_t *buf_size) {
 
     /* "pj_realloc", so to speak */
     if (*buf_size < len) {
-        p = static_cast<char*>(pj_calloc (2 * len, sizeof (char)));
+        p = static_cast<char*>(calloc (2 * len, sizeof (char)));
         if (nullptr==p) {
-            pj_dealloc (buf);
+            free (buf);
             return nullptr;
         }
         *buf_size = 2 * len;
         if (buf != nullptr)
             strcpy (p, buf);
-        pj_dealloc (buf);
+        free (buf);
         buf = p;
     }
     assert(buf);
@@ -1560,7 +1583,7 @@ PJ_INFO proj_info (void) {
         }
     }
 
-    pj_dalloc(const_cast<char*>(info.searchpath));
+    free(const_cast<char*>(info.searchpath));
     info.searchpath = buf ? buf : empty;
 
     info.paths = ctx ? ctx->c_compat_paths : nullptr;
@@ -1635,7 +1658,7 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
         pjinfo.definition = empty;
     else
         pjinfo.definition = pj_shrink (def);
-    /* Make pj_free clean this up eventually */
+    /* Make proj_destroy clean this up eventually */
     P->def_full = def;
 
     pjinfo.has_inverse = pj_has_inverse(P);
@@ -1746,7 +1769,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
         if( strcmp(initname, "epsg") == 0 || strcmp(initname, "EPSG") == 0 ) {
             const char* val;
 
-            pj_ctx_set_errno( ctx, 0 );
+            proj_context_errno_set( ctx, 0 );
 
             strncpy (ininfo.name, initname, sizeof(ininfo.name) - 1);
             strcpy(ininfo.origin, "EPSG");
@@ -1764,7 +1787,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
         if( strcmp(initname, "IGNF") == 0 ) {
             const char* val;
 
-            pj_ctx_set_errno( ctx, 0 );
+            proj_context_errno_set( ctx, 0 );
 
             strncpy (ininfo.name, initname, sizeof(ininfo.name) - 1);
             strcpy(ininfo.origin, "IGNF");
@@ -1809,7 +1832,7 @@ PJ_INIT_INFO proj_init_info(const char *initname){
 
     for ( ; start; start = next) {
         next = start->next;
-        pj_dalloc(start);
+        free(start);
     }
 
    return ininfo;

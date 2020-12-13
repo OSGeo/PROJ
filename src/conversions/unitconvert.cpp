@@ -433,7 +433,7 @@ static double get_unit_conversion_factor(const char* name,
 /***********************************************************************/
 PJ *CONVERSION(unitconvert,0) {
 /***********************************************************************/
-    struct pj_opaque_unitconvert *Q = static_cast<struct pj_opaque_unitconvert*>(pj_calloc (1, sizeof (struct pj_opaque_unitconvert)));
+    struct pj_opaque_unitconvert *Q = static_cast<struct pj_opaque_unitconvert*>(calloc (1, sizeof (struct pj_opaque_unitconvert)));
     const char *s, *name;
     int i;
     double f;

@@ -6,7 +6,7 @@ Universal Transverse Mercator (UTM)
 
 The Universal Transverse Mercator is a system of map projections divided into
 sixty zones across the globe, with each zone corresponding to 6 degrees of
-longigude.
+longitude.
 
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Transverse cylindrical, conformal                        |

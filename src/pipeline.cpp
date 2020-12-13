@@ -294,8 +294,8 @@ static PJ *destructor (PJ *P, int errlev) {
 
     auto pipeline = static_cast<struct Pipeline*>(P->opaque);
 
-    pj_dealloc (pipeline->argv);
-    pj_dealloc (pipeline->current_argv);
+    free (pipeline->argv);
+    free (pipeline->current_argv);
 
     delete pipeline;
     P->opaque = nullptr;
@@ -321,7 +321,7 @@ static const char *argv_sentinel = "step";
 static char **argv_params (paralist *params, size_t argc) {
     char **argv;
     size_t i = 0;
-    argv = static_cast<char**>(pj_calloc (argc, sizeof (char *)));
+    argv = static_cast<char**>(calloc (argc, sizeof (char *)));
     if (nullptr==argv)
         return nullptr;
     for (; params != nullptr; params = params->next)
@@ -461,7 +461,7 @@ PJ *OPERATION(pipeline,0) {
     if (nullptr==argv)
         return destructor (P, ENOMEM);
 
-    pipeline->current_argv = current_argv = static_cast<char**>(pj_calloc (argc, sizeof (char *)));
+    pipeline->current_argv = current_argv = static_cast<char**>(calloc (argc, sizeof (char *)));
     if (nullptr==current_argv)
         return destructor (P, ENOMEM);
 
@@ -533,7 +533,7 @@ PJ *OPERATION(pipeline,0) {
             int err_to_report = proj_errno(P);
             if (0==err_to_report)
                 err_to_report = PJD_ERR_MALFORMED_PIPELINE;
-            proj_log_error (P, "Pipeline: Bad step definition: %s (%s)", current_argv[0], pj_strerrno (err_to_report));
+            proj_log_error (P, "Pipeline: Bad step definition: %s (%s)", current_argv[0], proj_errno_string (err_to_report));
             return destructor (P, err_to_report); /* ERROR: bad pipeline def */
         }
         next_step->parent = P;
@@ -679,7 +679,7 @@ static PJ_COORD pop(PJ_COORD point, PJ *P) {
 
 
 static PJ *setup_pushpop(PJ *P) {
-    auto pushpop = static_cast<struct PushPop*>(pj_calloc (1, sizeof(struct PushPop)));
+    auto pushpop = static_cast<struct PushPop*>(calloc (1, sizeof(struct PushPop)));
     P->opaque = pushpop;
     if (nullptr==P->opaque)
         return destructor(P, ENOMEM);

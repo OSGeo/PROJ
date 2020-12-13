@@ -4867,7 +4867,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
                 "3855"), // EGM2008 height
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
-        ASSERT_EQ(list.size(), 2U);
+        ASSERT_EQ(list.size(), 3U);
         EXPECT_EQ(
             list[1]->exportToPROJString(
                 PROJStringFormatter::create(
@@ -4889,7 +4889,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
                 "3855"), // EGM2008 height
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
             ctxt);
-        ASSERT_EQ(list.size(), 2U);
+        ASSERT_EQ(list.size(), 3U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
@@ -4938,7 +4938,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("7839"),
             // NZGD2000
             authFactory->createCoordinateReferenceSystem("4959"), ctxt);
-        ASSERT_EQ(list.size(), 1U);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
@@ -4964,7 +4964,7 @@ TEST(operation, vertCRS_to_geogCRS_context) {
             authFactory->createCoordinateReferenceSystem("8357"),
             // ETRS89
             authFactory->createCoordinateReferenceSystem("4937"), ctxt);
-        ASSERT_EQ(list.size(), 1U);
+        ASSERT_EQ(list.size(), 2U);
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
@@ -8734,6 +8734,14 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                   "+multiplier=1 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
+        EXPECT_EQ(list[0]->remarks(),
+                  "For NAD83(NSRS2007) to NAVD88 height (1) (EPSG:9173): Uses "
+                  "Geoid09 hybrid model. Replaced by 2012 model (CT code 6326)."
+                  "\n"
+                  "For NAD83(NSRS2007) to WGS 84 (1) (EPSG:15931): "
+                  "Approximation at the +/- 1m level assuming that "
+                  "NAD83(NSRS2007) is equivalent to WGS 84 within the accuracy "
+                  "of the transformation.");
     }
 
     // NAD83 + NAVD88 height --> WGS 84
@@ -8904,7 +8912,7 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
                                                                ctxt);
     // The checked value is not that important, but in case this changes,
     // likely due to a EPSG upgrade, worth checking
-    EXPECT_EQ(listCompoundToGeog2D.size(), 141U);
+    EXPECT_EQ(listCompoundToGeog2D.size(), 142U);
 
     auto listGeog2DToCompound =
         CoordinateOperationFactory::create()->createOperations(dst, nnSrc,
@@ -10025,6 +10033,192 @@ TEST(operation, createOperation_ossfuzz_18587) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, derivedGeographicCRS_with_to_wgs84_to_geographicCRS) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 +o_lat_p=18.0 "
+        "+o_lon_p=-200.0 +ellps=WGS84 +towgs84=1,2,3 +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=longlat +datum=WGS84 +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+        ASSERT_TRUE(op != nullptr);
+        std::string pipeline(
+            "+proj=pipeline "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +inv +proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 "
+            "+o_lat_p=18 +o_lon_p=-200 +ellps=WGS84 "
+            "+step +proj=push +v_3 "
+            "+step +proj=cart +ellps=WGS84 "
+            "+step +proj=helmert +x=1 +y=2 +z=3 "
+            "+step +inv +proj=cart +ellps=WGS84 "
+            "+step +proj=pop +v_3 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  pipeline);
+
+        auto op2 = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(src),
+            nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326));
+        ASSERT_TRUE(op2 != nullptr);
+        EXPECT_EQ(op2->exportToPROJString(PROJStringFormatter::create().get()),
+                  pipeline + " +step +proj=axisswap +order=2,1");
+    }
+
+    {
+        auto op = CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(dst), NN_CHECK_ASSERT(src));
+        ASSERT_TRUE(op != nullptr);
+        std::string pipeline(
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=push +v_3 "
+            "+step +proj=cart +ellps=WGS84 "
+            "+step +proj=helmert +x=-1 +y=-2 +z=-3 "
+            "+step +inv +proj=cart +ellps=WGS84 "
+            "+step +proj=pop +v_3 "
+            "+step +proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 "
+            "+o_lat_p=18 +o_lon_p=-200 +ellps=WGS84 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+        EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline " + pipeline);
+
+        auto op2 = CoordinateOperationFactory::create()->createOperation(
+            nn_static_pointer_cast<CRS>(GeographicCRS::EPSG_4326),
+            NN_CHECK_ASSERT(src));
+        ASSERT_TRUE(op2 != nullptr);
+        EXPECT_EQ(op2->exportToPROJString(PROJStringFormatter::create().get()),
+                  "+proj=pipeline +step +proj=axisswap +order=2,1 " + pipeline);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geographic_topocentric) {
+    auto wkt =
+        "PROJCRS[\"EPSG topocentric example A\",\n"
+        "    BASEGEOGCRS[\"WGS 84\",\n"
+        "        ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+        "            MEMBER[\"World Geodetic System 1984 (Transit)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ENSEMBLEACCURACY[2.0]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",4979]],\n"
+        "    CONVERSION[\"EPSG topocentric example A\",\n"
+        "        METHOD[\"Geographic/topocentric conversions\",\n"
+        "            ID[\"EPSG\",9837]],\n"
+        "        PARAMETER[\"Latitude of topocentric origin\",55,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8834]],\n"
+        "        PARAMETER[\"Longitude of topocentric origin\",5,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8835]],\n"
+        "        PARAMETER[\"Ellipsoidal height of topocentric origin\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8836]]],\n"
+        "    CS[Cartesian,3],\n"
+        "        AXIS[\"topocentric East (U)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"topocentric North (V)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"topocentric height (W)\",up,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"Example only (fictitious).\"],\n"
+        "        AREA[\"Description of the extent of the CRS.\"],\n"
+        "        BBOX[-90,-180,90,180]],\n"
+        "    ID[\"EPSG\",5819]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto dst = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(dst != nullptr);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4979, NN_CHECK_ASSERT(dst));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +proj=topocentric +lat_0=55 +lon_0=5 +h_0=0 +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geocentric_topocentric) {
+    auto wkt =
+        "PROJCRS[\"EPSG topocentric example B\",\n"
+        "    BASEGEODCRS[\"WGS 84\",\n"
+        "        ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+        "            MEMBER[\"World Geodetic System 1984 (Transit)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ENSEMBLEACCURACY[2.0]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",4978]],\n"
+        "    CONVERSION[\"EPSG topocentric example B\",\n"
+        "        METHOD[\"Geocentric/topocentric conversions\",\n"
+        "            ID[\"EPSG\",9836]],\n"
+        "        PARAMETER[\"Geocentric X of topocentric origin\",3771793.97,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8837]],\n"
+        "        PARAMETER[\"Geocentric Y of topocentric origin\",140253.34,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8838]],\n"
+        "        PARAMETER[\"Geocentric Z of topocentric origin\",5124304.35,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8839]]],\n"
+        "    CS[Cartesian,3],\n"
+        "        AXIS[\"topocentric East (U)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"topocentric North (V)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"topocentric height (W)\",up,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"Example only (fictitious).\"],\n"
+        "        AREA[\"Description of the extent of the CRS.\"],\n"
+        "        BBOX[-90,-180,90,180]],\n"
+        "    ID[\"EPSG\",5820]]";
+    auto dbContext = DatabaseContext::create();
+    // Need a database so that EPSG:4978 is resolved
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto dst = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(dst != nullptr);
+    auto f(NS_PROJ::io::WKTFormatter::create(
+        NS_PROJ::io::WKTFormatter::Convention::WKT2_2019));
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        GeodeticCRS::EPSG_4978, NN_CHECK_ASSERT(dst));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=topocentric +X_0=3771793.97 +Y_0=140253.34 "
+              "+Z_0=5124304.35 +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, mercator_variant_A_to_variant_B) {
     auto projCRS = ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,
@@ -11096,7 +11290,7 @@ TEST(operation, normalizeForVisualization) {
             src,
             authFactory->createCoordinateReferenceSystem("4979"), // WGS 84 3D
             ctxt);
-        ASSERT_EQ(list.size(), 2U);
+        ASSERT_EQ(list.size(), 3U);
         auto op = list[1];
         auto opNormalized = op->normalizeForVisualization();
         EXPECT_FALSE(opNormalized->_isEquivalentTo(op.get()));

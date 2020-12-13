@@ -609,6 +609,8 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1130','JGD2000 (vertica
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1129','JSLD72','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1132','RDN2008','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1288','BI','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6258','European Terrestrial Reference System 1989','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6326','World Geodetic System 1984','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -720,7 +722,6 @@ INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5701','Newlyn height','EP
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5702','National Geodetic Vertical Datum of 1929 height (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5703','North American Vertical Datum of 1988 height (m)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5709','Normaal Amsterdams Peil height','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','Australian Height Datum height','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5712','Australian Height Datum (Tasmania) height','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5713','Canadian Geodetic Vertical Datum of 1928 height','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5714','mean sea level height','EPSG');
@@ -4244,8 +4245,6 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3088','NAD83 / KY1Z (m)'
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9379','726','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3857','WGS 84 / Popular Visualisation Pseudo-Mercator','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9379','IGb14 - LatLonEHt','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9380','725','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9380','IGb14 - LatLon','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','3886','National Elevation Network height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3893','ED50 / Iraq Nat. Grid','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4743','Karbala 1979 (Polservice)','EPSG');
@@ -5086,8 +5085,6 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8383','NCRS Las Vegas (m
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8387','NCRS Las Vegas high (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','8433','Macao 1920 Grid System','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','5514','S-JTSK [JTSK] / Krovak East North','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','AHD71 height','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','AHD-TAS83 height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4414','GGN93 / Guam Map Grid','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4414','Guam Geodetic Network 1993 / Guam Map Grid','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','4414','NAD83 / Guam Map Grid','EPSG');
@@ -5608,8 +5605,6 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4202','298','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4202','AGD66 - LatLon','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4203','350','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4203','AGD84 - LatLon','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','339','EPSG');
-INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','AHD - NOHt','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','7844','284','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','7844','GDA2020 - LatLon','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','7843','329','EPSG');
@@ -7194,3 +7189,11 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6708','RDN2008 / TM33','
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6709','RDN2008 / TM34','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2062','Madrid (Madrid) / Spain LCC','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2062','Madrid - LCC','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9380','725','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9380','IGb14 - LatLon','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','Australian Height Datum height','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','AHD71 height','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','AHD-TAS83 height','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','339','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','AHD - NOHt','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9498','CABA-P07','EPSG');

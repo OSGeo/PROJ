@@ -69,11 +69,7 @@ build_fuzzer()
         $LIB_FUZZING_ENGINE src/.libs/libproj.a $EXTRA_LIBS
 }
 
-build_fuzzer standard_fuzzer test/fuzzers/standard_fuzzer.cpp
 build_fuzzer proj_crs_to_crs_fuzzer test/fuzzers/proj_crs_to_crs_fuzzer.cpp
-
-echo "[libfuzzer]" > $OUT/standard_fuzzer.options
-echo "max_len = 10000" >> $OUT/standard_fuzzer.options
 
 echo "[libfuzzer]" > $OUT/proj_crs_to_crs_fuzzer.options
 echo "max_len = 10000" >> $OUT/proj_crs_to_crs_fuzzer.options

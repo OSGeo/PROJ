@@ -213,6 +213,14 @@ template <typename T> using nn_shared_ptr = nn<std::shared_ptr<T>>;
 // To avoid formatting differences between clang-format 3.8 and 7
 #define PROJ_NOEXCEPT noexcept
 
+//! @cond Doxygen_Suppress
+// isOfExactType<MyType>(*p) checks that the type of *p is exactly MyType
+template <typename TemplateT, typename ObjectT>
+inline bool isOfExactType(const ObjectT &o) {
+    return typeid(TemplateT).hash_code() == typeid(o).hash_code();
+}
+//! @endcond
+
 /** \brief Loose transposition of [std::optional]
  * (https://en.cppreference.com/w/cpp/utility/optional) available from C++17. */
 template <class T> class optional {

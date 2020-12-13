@@ -880,8 +880,8 @@ static int expect_failure_with_errno_message (int expected, int got) {
         banner (T.operation);
     fprintf (T.fout, "%s", T.op_ko? "     -----\n": delim);
     fprintf (T.fout, "     FAILURE in %s(%d):\n",    opt_strip_path (T.curr_file), (int) F->lineno);
-    fprintf (T.fout, "     got errno %s (%d): %s\n", err_const_from_errno(got), got,  pj_strerrno (got));
-    fprintf (T.fout, "     expected %s (%d):  %s",   err_const_from_errno(expected), expected, pj_strerrno (expected));
+    fprintf (T.fout, "     got errno %s (%d): %s\n", err_const_from_errno(got), got,  proj_errno_string (got));
+    fprintf (T.fout, "     expected %s (%d):  %s",   err_const_from_errno(expected), expected, proj_errno_string (expected));
     fprintf (T.fout, "\n");
     return 1;
 }
@@ -934,7 +934,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         /* Otherwise, it's a true failure */
         banner (T.operation);
         errmsg (3, "%sInvalid operation definition in line no. %d:\n       %s (errno=%s/%d)\n",
-            delim, (int) T.operation_lineno, pj_strerrno(proj_errno(T.P)),
+            delim, (int) T.operation_lineno, proj_errno_string (proj_errno(T.P)),
             err_const_from_errno (proj_errno(T.P)), proj_errno(T.P)
         );
         return another_failing_failure ();
@@ -1124,7 +1124,7 @@ static const struct errno_vs_err_const lookup[] = {
     {"pjd_err_invalid_x_or_y"           ,  -15},
     {"pjd_err_wrong_format_dms_value"   ,  -16},
     {"pjd_err_non_conv_inv_meri_dist"   ,  -17},
-    {"pjd_err_non_con_inv_phi2"         ,  -18},
+    {"pjd_err_non_conv_sinhpsi2tanphi"  ,  -18},
     {"pjd_err_acos_asin_arg_too_large"  ,  -19},
     {"pjd_err_tolerance_condition"      ,  -20},
     {"pjd_err_conic_lat_equal"          ,  -21},
@@ -1186,7 +1186,7 @@ static int list_err_codes (void) {
         if (9999==lookup[i].the_errno)
             break;
         fprintf (T.fout, "%25s  (%2.2d):  %s\n", lookup[i].the_err_const + 8,
-                 lookup[i].the_errno, pj_strerrno(lookup[i].the_errno));
+                 lookup[i].the_errno, proj_errno_string (lookup[i].the_errno));
     }
     return 0;
 }

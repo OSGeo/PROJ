@@ -4,9 +4,16 @@ PROJ.4 string:
 
 WKT2:2019 string:
 GEOGCRS["WGS 84",
-    DATUM["World Geodetic System 1984",
+    ENSEMBLE["World Geodetic System 1984 ensemble",
+        MEMBER["World Geodetic System 1984 (Transit)"],
+        MEMBER["World Geodetic System 1984 (G730)"],
+        MEMBER["World Geodetic System 1984 (G873)"],
+        MEMBER["World Geodetic System 1984 (G1150)"],
+        MEMBER["World Geodetic System 1984 (G1674)"],
+        MEMBER["World Geodetic System 1984 (G1762)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
-            LENGTHUNIT["metre",1]]],
+            LENGTHUNIT["metre",1]],
+        ENSEMBLEACCURACY[2.0]],
     PRIMEM["Greenwich",0,
         ANGLEUNIT["degree",0.0174532925199433]],
     CS[ellipsoidal,2],
@@ -59,9 +66,16 @@ GEODCRS["WGS 84",
 Testing projinfo -o WKT2_2019 EPSG:4326
 WKT2:2019 string:
 GEOGCRS["WGS 84",
-    DATUM["World Geodetic System 1984",
+    ENSEMBLE["World Geodetic System 1984 ensemble",
+        MEMBER["World Geodetic System 1984 (Transit)"],
+        MEMBER["World Geodetic System 1984 (G730)"],
+        MEMBER["World Geodetic System 1984 (G873)"],
+        MEMBER["World Geodetic System 1984 (G1150)"],
+        MEMBER["World Geodetic System 1984 (G1674)"],
+        MEMBER["World Geodetic System 1984 (G1762)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
-            LENGTHUNIT["metre",1]]],
+            LENGTHUNIT["metre",1]],
+        ENSEMBLEACCURACY[2.0]],
     PRIMEM["Greenwich",0,
         ANGLEUNIT["degree",0.0174532925199433]],
     CS[ellipsoidal,2],
@@ -102,9 +116,16 @@ GEODCRS["WGS 84",
 
 WKT2:2019 string:
 GEOGCRS["WGS 84",
-    DATUM["World Geodetic System 1984",
+    ENSEMBLE["World Geodetic System 1984 ensemble",
+        MEMBER["World Geodetic System 1984 (Transit)"],
+        MEMBER["World Geodetic System 1984 (G730)"],
+        MEMBER["World Geodetic System 1984 (G873)"],
+        MEMBER["World Geodetic System 1984 (G1150)"],
+        MEMBER["World Geodetic System 1984 (G1674)"],
+        MEMBER["World Geodetic System 1984 (G1762)"],
         ELLIPSOID["WGS 84",6378137,298.257223563,
-            LENGTHUNIT["metre",1]]],
+            LENGTHUNIT["metre",1]],
+        ENSEMBLEACCURACY[2.0]],
     PRIMEM["Greenwich",0,
         ANGLEUNIT["degree",0.0174532925199433]],
     CS[ellipsoidal,2],
@@ -142,13 +163,61 @@ PROJJSON:
   "$schema": "https://proj.org/schemas/v0.2/projjson.schema.json",
   "type": "GeographicCRS",
   "name": "WGS 84",
-  "datum": {
-    "type": "GeodeticReferenceFrame",
-    "name": "World Geodetic System 1984",
+  "datum_ensemble": {
+    "name": "World Geodetic System 1984 ensemble",
+    "members": [
+      {
+        "name": "World Geodetic System 1984 (Transit)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1166
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G730)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1152
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G873)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1153
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G1150)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1154
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G1674)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1155
+        }
+      },
+      {
+        "name": "World Geodetic System 1984 (G1762)",
+        "id": {
+          "authority": "EPSG",
+          "code": 1156
+        }
+      }
+    ],
     "ellipsoid": {
       "name": "WGS 84",
       "semi_major_axis": 6378137,
       "inverse_flattening": 298.257223563
+    },
+    "accuracy": "2.0",
+    "id": {
+      "authority": "EPSG",
+      "code": 6326
     }
   },
   "coordinate_system": {
@@ -317,7 +386,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (3)",
         SCOPE["Historic record only - now superseded - see remarks."],
         AREA["Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon."],
         BBOX[40.04,-141.01,86.46,-47.74]],
-    ID["DERIVED_FROM(EPSG)",1312]]
+    ID["DERIVED_FROM(EPSG)",1312],
+    REMARK["Uses NTv1 method. Replaced in Quebec by code 1462 and elsewhere in 1997 by NTv2 (transformation code 1313). Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 
 -------------------------------------
 Operation No. 2:
@@ -371,7 +441,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (4)",
         SCOPE["Transformation of coordinates at 1m to 2m level of accuracy."],
         AREA["Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast."],
         BBOX[40.04,-141.01,83.17,-47.74]],
-    ID["DERIVED_FROM(EPSG)",1313]]
+    ID["DERIVED_FROM(EPSG)",1313],
+    REMARK["Uses NTv2 data files. Replaces NTv1 (transformation code 1312) except in Quebec. Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and (code 4269) have longitudes positive east. May be used as tfm to WGS 84 - see code 1693."]]
 
 -------------------------------------
 Operation No. 3:
@@ -425,7 +496,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (1)",
         SCOPE["Transformation of coordinates at 0.2m level of accuracy."],
         AREA["United States (USA) - CONUS including EEZ -onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS."],
         BBOX[23.81,-129.17,49.38,-65.69]],
-    ID["DERIVED_FROM(EPSG)",1241]]
+    ID["DERIVED_FROM(EPSG)",1241],
+    REMARK["Uses NADCON method which expects longitudes positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 
 -------------------------------------
 Operation No. 4:
@@ -479,7 +551,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (2)",
         SCOPE["Geodesy."],
         AREA["United States (USA) - Alaska including EEZ."],
         BBOX[47.88,167.65,74.71,-129.99]],
-    ID["DERIVED_FROM(EPSG)",1243]]
+    ID["DERIVED_FROM(EPSG)",1243],
+    REMARK["Uses NADCON method which expects longitudes positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east. May be used as transformation to WGS 84 - see NAD27 to WGS 84 (85) (code 15864)."]]
 
 -------------------------------------
 Operation No. 5:
@@ -533,7 +606,8 @@ COORDINATEOPERATION["NAD27 to NAD83 (6)",
         SCOPE["Transformation of coordinates at 1m to 2m level of accuracy."],
         AREA["Canada - Quebec."],
         BBOX[44.99,-79.85,62.62,-57.1]],
-    ID["DERIVED_FROM(EPSG)",1573]]
+    ID["DERIVED_FROM(EPSG)",1573],
+    REMARK["Also distributed with file name QUE27-83.gsb. Replaces NAD27 to NAD83 (5) (code 1462). Uses NT method which expects longitudes positive west; EPSG GeogCRSs NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 
 -------------------------------------
 Operation No. 6:
@@ -916,7 +990,7 @@ PROJ.4 string:
 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs
 
 Testing RH2000 height to SWEREF99: projinfo -s EPSG:5613 -t EPSG:4977
-Candidate operations found: 1
+Candidate operations found: 2
 -------------------------------------
 Operation No. 1:
 
@@ -968,8 +1042,55 @@ COORDINATEOPERATION["Inverse of SWEREF99 to RH2000 height",
         BBOX[55.28,10.93,69.07,24.17]],
     ID["INVERSE(DERIVED_FROM(PROJ))","EPSG_4977_TO_EPSG_5613"]]
 
+-------------------------------------
+Operation No. 2:
+
+unknown id, Transformation from RH2000 height to SWEREF99 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
+
+PROJ string:
++proj=noop
+
+WKT2:2019 string:
+COORDINATEOPERATION["Transformation from RH2000 height to SWEREF99 (ballpark vertical transformation, without ellipsoid height to vertical height correction)",
+    SOURCECRS[
+        VERTCRS["RH2000 height",
+            DYNAMIC[
+                FRAMEEPOCH[2000]],
+            VDATUM["Rikets hojdsystem 2000"],
+            CS[vertical,1],
+                AXIS["gravity-related height (H)",up,
+                    LENGTHUNIT["metre",1]],
+            ID["EPSG",5613]]],
+    TARGETCRS[
+        GEOGCRS["SWEREF99",
+            DATUM["SWEREF99",
+                ELLIPSOID["GRS 1980",6378137,298.257222101,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,3],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["ellipsoidal height (h)",up,
+                    ORDER[3],
+                    LENGTHUNIT["metre",1]],
+            ID["EPSG",4977]]],
+    METHOD["Change of Vertical Unit",
+        ID["EPSG",1069]],
+    PARAMETER["Unit conversion scalar",1,
+        SCALEUNIT["unity",1],
+        ID["EPSG",1051]],
+    USAGE[
+        SCOPE["unknown"],
+        AREA["World"],
+        BBOX[-90,-180,90,180]]]
+
 Testing NAD83(2011) + NAVD88 height -> NAD83(2011) : projinfo -s EPSG:6349 -t EPSG:6319 --spatial-test intersects -o PROJ
-Candidate operations found: 2
+Candidate operations found: 3
 -------------------------------------
 Operation No. 1:
 
@@ -996,8 +1117,16 @@ PROJ string:
   +step +proj=unitconvert +xy_in=rad +xy_out=deg
   +step +proj=axisswap +order=2,1
 
+-------------------------------------
+Operation No. 3:
+
+unknown id, Transformation from NAVD88 height to NAD83(2011) (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
+
+PROJ string:
++proj=noop
+
 Testing NGF IGN69 height to RGF93: projinfo -s EPSG:5720 -t EPSG:4965 -o PROJ
-Candidate operations found: 1
+Candidate operations found: 2
 -------------------------------------
 Operation No. 1:
 
@@ -1011,6 +1140,14 @@ PROJ string:
   +step +proj=unitconvert +xy_in=rad +xy_out=deg
   +step +proj=axisswap +order=2,1
 
+-------------------------------------
+Operation No. 2:
+
+unknown id, Transformation from NGF-IGN69 height to RGF93 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
+
+PROJ string:
++proj=noop
+
 Testing EPSG:32631 --3d
 PROJ.4 string:
 +proj=utm +zone=31 +datum=WGS84 +units=m +no_defs +type=crs
@@ -1018,9 +1155,16 @@ PROJ.4 string:
 WKT2:2019 string:
 PROJCRS["WGS 84 / UTM zone 31N",
     BASEGEOGCRS["WGS 84",
-        DATUM["World Geodetic System 1984",
+        ENSEMBLE["World Geodetic System 1984 ensemble",
+            MEMBER["World Geodetic System 1984 (Transit)"],
+            MEMBER["World Geodetic System 1984 (G730)"],
+            MEMBER["World Geodetic System 1984 (G873)"],
+            MEMBER["World Geodetic System 1984 (G1150)"],
+            MEMBER["World Geodetic System 1984 (G1674)"],
+            MEMBER["World Geodetic System 1984 (G1762)"],
             ELLIPSOID["WGS 84",6378137,298.257223563,
-                LENGTHUNIT["metre",1]]],
+                LENGTHUNIT["metre",1]],
+            ENSEMBLEACCURACY[2.0]],
         PRIMEM["Greenwich",0,
             ANGLEUNIT["degree",0.0174532925199433]],
         ID["EPSG",4979]],
@@ -1179,6 +1323,27 @@ DATUM["World Geodetic System 1984",
         LENGTHUNIT["metre",1]],
     ID["EPSG",6326]]
 
+Testing -k ensemble WGS84
+WKT2:2019 string:
+ENSEMBLE["World Geodetic System 1984 ensemble",
+    MEMBER["World Geodetic System 1984 (Transit)",
+        ID["EPSG",1166]],
+    MEMBER["World Geodetic System 1984 (G730)",
+        ID["EPSG",1152]],
+    MEMBER["World Geodetic System 1984 (G873)",
+        ID["EPSG",1153]],
+    MEMBER["World Geodetic System 1984 (G1150)",
+        ID["EPSG",1154]],
+    MEMBER["World Geodetic System 1984 (G1674)",
+        ID["EPSG",1155]],
+    MEMBER["World Geodetic System 1984 (G1762)",
+        ID["EPSG",1156]],
+    ELLIPSOID["WGS 84",6378137,298.257223563,
+        LENGTHUNIT["metre",1],
+        ID["EPSG",7030]],
+    ENSEMBLEACCURACY[2.0],
+    ID["EPSG",6326]]
+
 Testing -k operation EPSG:8457 -o PROJ -q
 +proj=pipeline
   +step +proj=axisswap +order=2,1
@@ -1193,9 +1358,23 @@ Testing -k operation EPSG:8457 -o PROJ -q
 
 Testing D_WGS_1984
 WKT2:2019 string:
-DATUM["World Geodetic System 1984",
+ENSEMBLE["World Geodetic System 1984 ensemble",
+    MEMBER["World Geodetic System 1984 (Transit)",
+        ID["EPSG",1166]],
+    MEMBER["World Geodetic System 1984 (G730)",
+        ID["EPSG",1152]],
+    MEMBER["World Geodetic System 1984 (G873)",
+        ID["EPSG",1153]],
+    MEMBER["World Geodetic System 1984 (G1150)",
+        ID["EPSG",1154]],
+    MEMBER["World Geodetic System 1984 (G1674)",
+        ID["EPSG",1155]],
+    MEMBER["World Geodetic System 1984 (G1762)",
+        ID["EPSG",1156]],
     ELLIPSOID["WGS 84",6378137,298.257223563,
-        LENGTHUNIT["metre",1]],
+        LENGTHUNIT["metre",1],
+        ID["EPSG",7030]],
+    ENSEMBLEACCURACY[2.0],
     ID["EPSG",6326]]
 
 Testing -k datum D_WGS_1984

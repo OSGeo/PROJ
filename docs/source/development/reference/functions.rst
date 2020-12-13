@@ -182,7 +182,19 @@ paragraph for more details.
     This is the same as :c:func:`proj_create_crs_to_crs` except that the source and
     target CRS are passed as PJ* objects which must of the CRS variety.
 
-    :param `options`: should be set to NULL currently.
+    :param `options`: a list of NUL terminated options, or NULL.
+
+    The list of supported options is:
+
+    - AUTHORITY=name: to restrict the authority of coordinate operations
+      looked up in the database. When not specified, coordinate
+      ``operations from any authority`` will be searched, with the restrictions set
+      in the authority_to_authority_preference database table related to the authority
+      of the source/target CRS themselves.
+      If authority is set to "any", then coordinate operations from any authority will be searched
+      If authority is a non-empty string different of ``any``, then coordinate operations
+      will be searched only in that authority namespace (e.g ``EPSG``).
+
 
 .. doxygenfunction:: proj_normalize_for_visualization
    :project: doxygen_api
@@ -352,7 +364,7 @@ Coordinate transformation
 
 
 
-.. c:function:: size_t proj_trans_array(PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord)
+.. c:function:: int proj_trans_array(PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord)
 
     Batch transform an array of :c:type:`PJ_COORD`.
 
@@ -362,7 +374,7 @@ Coordinate transformation
     :type `direction`: PJ_DIRECTION
     :param n: Number of coordinates in :c:data:`coord`
     :type n: `size_t`
-    :returns: :c:type:`size_t` 0 if all observations are transformed without error, otherwise returns error number
+    :returns: `int` 0 if all observations are transformed without error, otherwise returns error number
 
 
 Error reporting

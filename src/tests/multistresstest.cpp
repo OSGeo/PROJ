@@ -30,11 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#endif
-
-#include "proj_api.h"
+#include "proj.h"
 
 #ifdef _WIN32
     #include <windows.h>
@@ -51,8 +47,8 @@ typedef struct {
     const char *src_def;
     const char *dst_def;
 
-    double  src_x, src_y, src_z;
-    double  dst_x, dst_y, dst_z;
+    PJ_COORD src;
+    PJ_COORD dst;
 
     int     dst_error;
     int     skip;
@@ -62,124 +58,119 @@ static TestItem test_list[] = {
     {
         "+proj=utm +zone=11 +datum=WGS84",
         "+proj=latlong +datum=WGS84",
-        150000.0, 3000000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 3000000.0, 0.0, 0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=utm +zone=11 +datum=NAD83",
         "+proj=latlong +datum=NAD27",
-        150000.0, 3000000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 3000000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=utm +zone=11 +datum=NAD83",
         "+proj=latlong +nadgrids=@null +ellps=WGS84",
-        150000.0, 3000000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 3000000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=utm +zone=11 +datum=WGS84",
         "+proj=merc +datum=potsdam",
-        150000.0, 3000000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 3000000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=latlong +nadgrids=nzgd2kgrid0005.gsb",
         "+proj=latlong +datum=WGS84",
-        150000.0, 3000000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 3000000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=latlong +nadgrids=nzgd2kgrid0005.gsb",
         "+proj=latlong +datum=WGS84",
-        170 * DEG_TO_RAD, -40 * DEG_TO_RAD, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(170, -40, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=latlong +ellps=GRS80 +towgs84=2,3,5",
         "+proj=latlong +ellps=intl +towgs84=10,12,15",
-        170 * DEG_TO_RAD, -40 * DEG_TO_RAD, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(170, -40, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=eqc +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
         "+proj=stere +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
-        150000.0, 250000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 250000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=cea +lat_ts=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=merc +lon_0=12 +k=0.999 +x_0=100000 +y_0=200000 +datum=WGS84 ",
-        150000.0, 250000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 250000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=bonne +lat_1=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=cass +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
-        150000.0, 250000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 250000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=nzmg +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=gnom +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
-        150000.0, 250000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 250000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=ortho +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=laea +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
-        150000.0, 250000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 250000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=aeqd +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=eqdc +lat_1=20 +lat_2=5 +lat_0=11 +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
-        150000.0, 250000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 250000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+proj=mill +lat_0=11 +lon_0=12 +y_0=200000 +datum=WGS84 ",
         "+proj=moll +lon_0=12 +x_0=100000 +y_0=200000 +datum=WGS84 ",
-        150000.0, 250000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 250000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         "+init=epsg:3309",
         "+init=epsg:4326",
-        150000.0, 30000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 30000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     },
     {
         /* Bad projection (invalid ellipsoid parameter +R_A=0) */
         "+proj=utm +zone=11 +datum=WGS84",
         "+proj=merc +datum=potsdam +R_A=0",
-        150000.0, 3000000.0, 0.0,
-        0.0, 0.0, 0.0,
+        proj_coord(150000.0, 3000000.0, 0.0, 0.0),
+        proj_coord(0.0, 0.0, 0.0, 0.0),
         0, 0
     }
 };
 
 static volatile int active_thread_count = 0;
-
-static projPJ custom_pj_init_plus_ctx(projCtx ctx, const char* def)
-{
-    return pj_init_plus_ctx(ctx, def);
-}
 
 /************************************************************************/
 /*                             TestThread()                             */
@@ -195,11 +186,10 @@ static void TestThread()
 /* -------------------------------------------------------------------- */
 /*      Initialize coordinate system definitions.                       */
 /* -------------------------------------------------------------------- */
-    projPJ *src_pj_list, *dst_pj_list;
-    projCtx ctx = pj_ctx_alloc();
+    PJ **pj_list;
+    PJ_CONTEXT *ctx = proj_context_create();
 
-    src_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
-    dst_pj_list = (projPJ *) calloc(test_count,sizeof(projPJ));
+    pj_list = (PJ **) calloc(test_count,sizeof(PJ*));
 
     if(!reinit_every_iteration)
     {
@@ -207,8 +197,9 @@ static void TestThread()
         {
             TestItem *test = test_list + i;
 
-            src_pj_list[i] = custom_pj_init_plus_ctx( ctx, test->src_def );
-            dst_pj_list[i] = custom_pj_init_plus_ctx( ctx, test->dst_def );
+            pj_list[i] = proj_create_crs_to_crs(
+                ctx, test->src_def, test->dst_def, nullptr
+            );
         }
     }
 
@@ -221,28 +212,23 @@ static void TestThread()
         for( i = 0; i < test_count; i++ )
         {
             TestItem *test = test_list + i;
-            double x, y, z;
-            int error;
-
-            x = test->src_x;
-            y = test->src_y;
-            z = test->src_z;
 
             if( reinit_every_iteration )
             {
-                src_pj_list[i] = custom_pj_init_plus_ctx( ctx, test->src_def );
-                dst_pj_list[i] = custom_pj_init_plus_ctx( ctx, test->dst_def );
+                proj_context_use_proj4_init_rules(nullptr, true);
+                pj_list[i] = proj_create_crs_to_crs(
+                    ctx, test->src_def, test->dst_def, nullptr
+                );
 
                 {
-                    int skipTest = (src_pj_list[i] == nullptr || dst_pj_list[i] == nullptr);
+                    int skipTest = (pj_list[i] == nullptr);
 
                     if ( skipTest != test->skip )
                         fprintf( stderr, "Threaded projection initialization does not match unthreaded initialization\n" );
 
                     if (skipTest)
                     {
-                        pj_free( src_pj_list[i] );
-                        pj_free( dst_pj_list[i] );
+                        proj_destroy( pj_list[i] );
                         continue;
                     }
                 }
@@ -251,31 +237,32 @@ static void TestThread()
             if ( test->skip )
                 continue;
 
-            error = pj_transform( src_pj_list[i], dst_pj_list[i], 1, 0,
-                                  &x, &y, &z );
+            PJ_COORD out = proj_trans(pj_list[i], PJ_FWD, test->src);
 
+            int error = proj_errno(pj_list[i]);
 
             if( error != test->dst_error )
             {
                 fprintf( stderr, "Got error %d, expected %d\n",
                          error, test->dst_error );
             }
+            proj_errno_reset(pj_list[i]);
 
-            if( x != test->dst_x || y != test->dst_y || z != test->dst_z )
+            if ( out.xyz.x != test->dst.xyz.x || out.xyz.y != test->dst.xyz.y || out.xyz.z != test->dst.xyz.z)
+            //if( x != test->dst_x || y != test->dst_y || z != test->dst_z )
             {
                 fprintf( stderr,
                          "Got %.15g,%.15g,%.15g\n"
                          "Expected %.15g,%.15g,%.15g\n"
                          "Diff %.15g,%.15g,%.15g\n",
-                         x, y, z,
-                         test->dst_x, test->dst_y, test->dst_z,
-                         x-test->dst_x, y-test->dst_y, z-test->dst_z);
+                         out.xyz.x, out.xyz.y, out.xyz.z,
+                         test->dst.xyz.x, test->dst.xyz.y, test->dst.xyz.z,
+                         out.xyz.x-test->dst.xyz.x, out.xyz.y-test->dst.xyz.y, out.xyz.z-test->dst.xyz.z);
             }
 
             if( reinit_every_iteration )
             {
-                pj_free( src_pj_list[i] );
-                pj_free( dst_pj_list[i] );
+                proj_destroy( pj_list[i] );
             }
         }
     }
@@ -287,15 +274,13 @@ static void TestThread()
     {
         for( i = 0; i < test_count; i++ )
         {
-            pj_free( src_pj_list[i] );
-            pj_free( dst_pj_list[i] );
+            proj_destroy( pj_list[i] );
         }
     }
 
-    free( src_pj_list );
-    free( dst_pj_list );
+    free( pj_list );
 
-    pj_ctx_free( ctx );
+    proj_context_destroy( ctx );
 
     printf( "%d iterations of the %d tests complete in thread X\n",
             repeat_count, test_count );
@@ -349,43 +334,32 @@ static int do_main(void)
     {
         TestItem *test = test_list + i;
 
-        projPJ src_pj, dst_pj;
+        PJ *pj;
 
-        src_pj = custom_pj_init_plus_ctx( pj_get_default_ctx(), test->src_def );
-        dst_pj = custom_pj_init_plus_ctx( pj_get_default_ctx(), test->dst_def );
+        proj_context_use_proj4_init_rules(nullptr, true);
+        pj = proj_create_crs_to_crs(
+            nullptr, test->src_def, test->dst_def, nullptr
+        );
 
-        if( src_pj == nullptr )
+        if( pj == nullptr )
         {
-            printf( "Unable to translate:\n%s\n", test->src_def );
+            printf( "Unable to translate:\n%s\n  or\n%s\n", test->src_def, test->dst_def );
             test->skip = 1;
-            pj_free (dst_pj);
+            proj_destroy(pj);
             continue;
         }
 
-        if( dst_pj == nullptr )
-        {
-            printf( "Unable to translate:\n%s\n", test->dst_def );
-            test->skip = 1;
-            pj_free (src_pj);
-            continue;
-        }
 
-        test->dst_x = test->src_x;
-        test->dst_y = test->src_y;
-        test->dst_z = test->src_z;
+        PJ_COORD out = proj_trans(pj, PJ_FWD, test->src);
+        test->dst = out;
+        test->dst_error  = proj_errno(pj);
 
-        test->dst_error = pj_transform( src_pj, dst_pj, 1, 0,
-                                        &(test->dst_x),
-                                        &(test->dst_y),
-                                        &(test->dst_z) );
-
-        pj_free( src_pj );
-        pj_free( dst_pj );
+        proj_destroy(pj);
 
         test->skip = 0;
 
-#ifdef notdef
-        printf( "Test %d - output %.14g,%.14g,%g\n", i, test->dst_x, test->dst_y, test->dst_z );
+#ifdef nodef
+        printf( "Test %d - output %.14g,%.14g,%g\n", i, test->dst.xyz.x, test->dst.xyz.y, test->dst.xyz.z );
 #endif
     }
 

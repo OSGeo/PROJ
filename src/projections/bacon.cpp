@@ -43,7 +43,7 @@ static PJ_XY bacon_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
 
 
 PJ *PROJECTION(bacon) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
@@ -57,7 +57,7 @@ PJ *PROJECTION(bacon) {
 
 
 PJ *PROJECTION(apian) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
@@ -70,7 +70,7 @@ PJ *PROJECTION(apian) {
 
 
 PJ *PROJECTION(ortel) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;

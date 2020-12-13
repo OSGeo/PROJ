@@ -37,49 +37,58 @@
 namespace {
 
 TEST(PjPhi2Test, Basic) {
-    projCtx ctx = pj_get_default_ctx();
+    PJ_CONTEXT *ctx = pj_get_default_ctx();
 
-    EXPECT_DOUBLE_EQ(M_PI_2, pj_phi2(ctx, 0.0, 0.0));
+    // Expectation is that only sane values of e (and nan is here reckoned to
+    // be sane) are passed to pj_phi2.  Thus the return value with other values
+    // of e is "implementation dependent".
 
-    EXPECT_NEAR(0.0, pj_phi2(ctx, 1.0, 0.0), 1e-16);
-    EXPECT_DOUBLE_EQ(M_PI_2, pj_phi2(ctx, 0.0, 1.0));
-    EXPECT_DOUBLE_EQ(M_PI, pj_phi2(ctx, -1.0, 0.0));
-    EXPECT_DOUBLE_EQ(M_PI_2, pj_phi2(ctx, 0.0, -1.0));
+    constexpr auto inf = std::numeric_limits<double>::infinity();
+    constexpr auto nan = std::numeric_limits<double>::quiet_NaN();
 
-    EXPECT_NEAR(0.0, pj_phi2(ctx, 1.0, 1.0), 1e-16);
-    EXPECT_DOUBLE_EQ(M_PI, pj_phi2(ctx, -1.0, -1.0));
+    // Strict equality is demanded here.
+    EXPECT_EQ(M_PI_2, pj_phi2(ctx, +0.0, 0.0));
+    EXPECT_EQ(0.0, pj_phi2(ctx, 1.0, 0.0));
+    EXPECT_EQ(-M_PI_2, pj_phi2(ctx, inf, 0.0));
+    // We don't expect pj_phi2 to be called with negative ts (since ts =
+    // exp(-psi)).  However, in the current implementation it is odd in ts.
+    // N.B. ts = +0.0 and ts = -0.0 return different results.
+    EXPECT_EQ(-M_PI_2, pj_phi2(ctx, -0.0, 0.0));
+    EXPECT_EQ(0.0, pj_phi2(ctx, -1.0, 0.0));
+    EXPECT_EQ(+M_PI_2, pj_phi2(ctx, -inf, 0.0));
 
-    // TODO(schwehr): M_PI_4, M_PI_2, M_PI, M_E
-    // https://www.gnu.org/software/libc/manual/html_node/Mathematical-Constants.html
+    constexpr double e = 0.2;
+    EXPECT_EQ(M_PI_2, pj_phi2(ctx, +0.0, e));
+    EXPECT_EQ(0.0, pj_phi2(ctx, 1.0, e));
+    EXPECT_EQ(-M_PI_2, pj_phi2(ctx, inf, e));
+    EXPECT_EQ(-M_PI_2, pj_phi2(ctx, -0.0, e));
+    EXPECT_EQ(0.0, pj_phi2(ctx, -1.0, e));
+    EXPECT_EQ(+M_PI_2, pj_phi2(ctx, -inf, e));
 
-    EXPECT_DOUBLE_EQ(-0.95445818456292697, pj_phi2(ctx, M_PI, 0.0));
-    EXPECT_TRUE(std::isnan(pj_phi2(ctx, 0.0, M_PI)));
-    EXPECT_DOUBLE_EQ(4.0960508381527205, pj_phi2(ctx, -M_PI, 0.0));
-    EXPECT_TRUE(std::isnan(pj_phi2(ctx, 0.0, -M_PI)));
-
-    EXPECT_TRUE(std::isnan(pj_phi2(ctx, M_PI, M_PI)));
-    EXPECT_TRUE(std::isnan(pj_phi2(ctx, -M_PI, -M_PI)));
-}
-
-TEST(PjPhi2Test, AvoidUndefinedBehavior) {
-    auto ctx = pj_get_default_ctx();
-
-    const auto nan = std::numeric_limits<double>::quiet_NaN();
     EXPECT_TRUE(std::isnan(pj_phi2(ctx, nan, 0.0)));
-    EXPECT_TRUE(std::isnan(pj_phi2(ctx, 0.0, nan)));
+    EXPECT_TRUE(std::isnan(pj_phi2(ctx, nan, e)));
+    EXPECT_TRUE(std::isnan(pj_phi2(ctx, +0.0, nan)));
+    EXPECT_TRUE(std::isnan(pj_phi2(ctx, 1.0, nan)));
+    EXPECT_TRUE(std::isnan(pj_phi2(ctx, inf, nan)));
+    EXPECT_TRUE(std::isnan(pj_phi2(ctx, -0.0, nan)));
+    EXPECT_TRUE(std::isnan(pj_phi2(ctx, -1.0, nan)));
+    EXPECT_TRUE(std::isnan(pj_phi2(ctx, -inf, nan)));
     EXPECT_TRUE(std::isnan(pj_phi2(ctx, nan, nan)));
 
-    // We do not really care about the values that follow.
-    const auto inf = std::numeric_limits<double>::infinity();
+    EXPECT_DOUBLE_EQ(M_PI / 3, pj_phi2(ctx, 1 / (sqrt(3.0) + 2), 0.0));
+    EXPECT_DOUBLE_EQ(M_PI / 4, pj_phi2(ctx, 1 / (sqrt(2.0) + 1), 0.0));
+    EXPECT_DOUBLE_EQ(M_PI / 6, pj_phi2(ctx, 1 / sqrt(3.0), 0.0));
+    EXPECT_DOUBLE_EQ(-M_PI / 3, pj_phi2(ctx, sqrt(3.0) + 2, 0.0));
+    EXPECT_DOUBLE_EQ(-M_PI / 4, pj_phi2(ctx, sqrt(2.0) + 1, 0.0));
+    EXPECT_DOUBLE_EQ(-M_PI / 6, pj_phi2(ctx, sqrt(3.0), 0.0));
 
-    EXPECT_DOUBLE_EQ(-M_PI_2, pj_phi2(ctx, inf, 0.0));
-    EXPECT_TRUE(std::isnan(pj_phi2(ctx, 0.0, inf)));
-
-    EXPECT_DOUBLE_EQ(4.7123889803846897, pj_phi2(ctx, -inf, 0.0));
-    EXPECT_TRUE(std::isnan(pj_phi2(ctx, 0.0, -inf)));
-
-    EXPECT_TRUE(std::isnan(pj_phi2(ctx, inf, inf)));
-    EXPECT_TRUE(std::isnan(pj_phi2(ctx, -inf, -inf)));
+    // Generated with exp(e * atanh(e * sin(phi))) / (tan(phi) + sec(phi))
+    EXPECT_DOUBLE_EQ(M_PI / 3, pj_phi2(ctx, 0.27749174377027023413, e));
+    EXPECT_DOUBLE_EQ(M_PI / 4, pj_phi2(ctx, 0.42617788119104192995, e));
+    EXPECT_DOUBLE_EQ(M_PI / 6, pj_phi2(ctx, 0.58905302448626726064, e));
+    EXPECT_DOUBLE_EQ(-M_PI / 3, pj_phi2(ctx, 3.6037108218537833089, e));
+    EXPECT_DOUBLE_EQ(-M_PI / 4, pj_phi2(ctx, 2.3464380582241712935, e));
+    EXPECT_DOUBLE_EQ(-M_PI / 6, pj_phi2(ctx, 1.6976400399134411849, e));
 }
 
 } // namespace

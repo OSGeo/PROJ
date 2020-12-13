@@ -119,8 +119,8 @@
 
 #include <stddef.h>  /* For size_t */
 
-#ifdef PROJ_API_H
-#error proj.h must be included before proj_api.h
+#ifdef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
+  #error "The proj_api.h header has been removed from PROJ with version 8.0.0"
 #endif
 
 #ifdef PROJ_RENAME_SYMBOLS
@@ -340,9 +340,9 @@ typedef enum PJ_LOG_LEVEL {
 typedef void (*PJ_LOG_FUNCTION)(void *, int, const char *);
 
 
-/* The context type - properly namespaced synonym for projCtx */
-struct projCtx_t;
-typedef struct projCtx_t PJ_CONTEXT;
+/* The context type - properly namespaced synonym for pj_ctx */
+struct pj_ctx;
+typedef struct pj_ctx PJ_CONTEXT;
 
 /* A P I */
 
@@ -694,7 +694,8 @@ typedef enum
     PJ_CATEGORY_PRIME_MERIDIAN,
     PJ_CATEGORY_DATUM,
     PJ_CATEGORY_CRS,
-    PJ_CATEGORY_COORDINATE_OPERATION
+    PJ_CATEGORY_COORDINATE_OPERATION,
+    PJ_CATEGORY_DATUM_ENSEMBLE
 } PJ_CATEGORY;
 
 /** \brief Object type. */

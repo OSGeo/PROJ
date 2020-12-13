@@ -79,10 +79,10 @@ static void PROJ_NO_INLINE proj_log_error(PJ_CONTEXT *ctx, const char *function,
     msg += ": ";
     msg += text;
     ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
-    auto previous_errno = pj_ctx_get_errno(ctx);
+    auto previous_errno = proj_context_errno(ctx);
     if (previous_errno == 0) {
         // only set errno if it wasn't set deeper down the call stack
-        pj_ctx_set_errno(ctx, PJD_ERR_GENERIC_ERROR);
+        proj_context_errno_set(ctx, PJD_ERR_GENERIC_ERROR);
     }
 }
 
@@ -675,6 +675,9 @@ PJ *proj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                           codeStr, usePROJAlternativeGridNames != 0)
                       .as_nullable();
             break;
+        case PJ_CATEGORY_DATUM_ENSEMBLE:
+            obj = factory->createDatumEnsemble(codeStr).as_nullable();
+            break;
         }
         return pj_obj_create(ctx, NN_NO_CHECK(obj));
     } catch (const std::exception &e) {
@@ -916,7 +919,7 @@ convertPJObjectTypeToObjectType(PJ_TYPE type, bool &valid) {
         break;
 
     case PJ_TYPE_DATUM_ENSEMBLE:
-        cppType = AuthorityFactory::ObjectType::DATUM;
+        cppType = AuthorityFactory::ObjectType::DATUM_ENSEMBLE;
         break;
 
     case PJ_TYPE_TEMPORAL_DATUM:
@@ -1418,6 +1421,13 @@ const char *proj_get_id_code(const PJ *obj, int index) {
  * variants, for WKT1_GDAL for ProjectedCRS with easting/northing ordering
  * (otherwise stripped), but not for WKT1_ESRI. Setting to YES will output
  * them unconditionally, and to NO will omit them unconditionally.</li>
+ * <li>STRICT=YES/NO. Default is YES. If NO, a Geographic 3D CRS can be for
+ * example exported as WKT1_GDAL with 3 axes, whereas this is normally not
+ * allowed.</li>
+ * <li>ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES/NO. Default is NO. If set
+ * to YES and type == PJ_WKT1_GDAL, a Geographic 3D CRS or a Projected 3D CRS
+ * will be exported as a compound CRS whose vertical part represents an
+ * ellipsoidal height (for example for use with LAS 1.4 WKT1).</li>
  * </ul>
  * @return a string, or NULL in case of error.
  */
@@ -1468,6 +1478,11 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
                 }
             } else if ((value = getOptionValue(*iter, "STRICT="))) {
                 formatter->setStrict(ci_equal(value, "YES"));
+            } else if ((value = getOptionValue(
+                            *iter,
+                            "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS="))) {
+                formatter->setAllowEllipsoidalHeightAsVerticalCRS(
+                    ci_equal(value, "YES"));
             } else {
                 std::string msg("Unknown option :");
                 msg += *iter;
@@ -2049,6 +2064,8 @@ PJ *proj_get_ellipsoid(PJ_CONTEXT *ctx, const PJ *obj) {
 // ---------------------------------------------------------------------------
 
 /** \brief Get the horizontal datum from a CRS
+ *
+ * This function may return a Datum or DatumEnsemble object.
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
@@ -2685,11 +2702,11 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 void proj_crs_info_list_destroy(PROJ_CRS_INFO **list) {
     if (list) {
         for (int i = 0; list[i] != nullptr; i++) {
-            pj_dalloc(list[i]->auth_name);
-            pj_dalloc(list[i]->code);
-            pj_dalloc(list[i]->name);
-            pj_dalloc(list[i]->area_name);
-            pj_dalloc(list[i]->projection_method_name);
+            free(list[i]->auth_name);
+            free(list[i]->code);
+            free(list[i]->name);
+            free(list[i]->area_name);
+            free(list[i]->projection_method_name);
             delete list[i];
         }
         delete[] list;
@@ -2779,11 +2796,11 @@ PROJ_UNIT_INFO **proj_get_units_from_database(PJ_CONTEXT *ctx,
 void proj_unit_list_destroy(PROJ_UNIT_INFO **list) {
     if (list) {
         for (int i = 0; list[i] != nullptr; i++) {
-            pj_dalloc(list[i]->auth_name);
-            pj_dalloc(list[i]->code);
-            pj_dalloc(list[i]->name);
-            pj_dalloc(list[i]->category);
-            pj_dalloc(list[i]->proj_short_name);
+            free(list[i]->auth_name);
+            free(list[i]->code);
+            free(list[i]->name);
+            free(list[i]->category);
+            free(list[i]->proj_short_name);
             delete list[i];
         }
         delete[] list;
@@ -4438,8 +4455,9 @@ PJ *proj_create_cartesian_2D_cs(PJ_CONTEXT *ctx, PJ_CARTESIAN_CS_2D_TYPE type,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param type Coordinate system type.
- * @param unit_name Unit name.
- * @param unit_conv_factor Unit conversion factor to SI.
+ * @param unit_name Name of the angular units. Or NULL for Degree
+ * @param unit_conv_factor Conversion factor from the angular unit to radian.
+ * Or 0 for Degree if unit_name == NULL. Otherwise should be not NULL
  *
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
@@ -4478,13 +4496,17 @@ PJ *proj_create_ellipsoidal_2D_cs(PJ_CONTEXT *ctx,
  *
  * @param ctx PROJ context, or NULL for default context
  * @param type Coordinate system type.
- * @param horizontal_angular_unit_name Horizontal angular unit name.
- * @param horizontal_angular_unit_conv_factor Horizontal angular unit conversion
- * factor to SI.
- * @param vertical_linear_unit_name Vertical linear unit name.
+ * @param horizontal_angular_unit_name Name of the angular units. Or NULL for
+ * Degree.
+ * @param horizontal_angular_unit_conv_factor Conversion factor from the angular
+ * unit to radian. Or 0 for Degree if horizontal_angular_unit_name == NULL.
+ * Otherwise should be not NULL
+ * @param vertical_linear_unit_name Vertical linear unit name. Or NULL for
+ * Metre.
  * @param vertical_linear_unit_conv_factor Vertical linear unit conversion
- * factor to SI.
- *
+ * factor to metre. Or 0 for Metre if vertical_linear_unit_name == NULL.
+ * Otherwise should be not NULL
+
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
  * @since 6.3
@@ -7987,6 +8009,9 @@ double proj_coordoperation_get_accuracy(PJ_CONTEXT *ctx,
 
 /** \brief Returns the datum of a SingleCRS.
  *
+ * If that function returns NULL, @see proj_crs_get_datum_ensemble() to
+ * potentially get a DatumEnsemble instead.
+ *
  * The returned object must be unreferenced with proj_destroy() after
  * use.
  * It should be used by at most one thread at a time.
@@ -8017,6 +8042,9 @@ PJ *proj_crs_get_datum(PJ_CONTEXT *ctx, const PJ *crs) {
 // ---------------------------------------------------------------------------
 
 /** \brief Returns the datum ensemble of a SingleCRS.
+ *
+ * If that function returns NULL, @see proj_crs_get_datum() to
+ * potentially get a Datum instead.
  *
  * The returned object must be unreferenced with proj_destroy() after
  * use.

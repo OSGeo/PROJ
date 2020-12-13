@@ -48,9 +48,9 @@ void pj_stderr_logger( void *app_data, int level, const char *msg )
 /************************************************************************/
 /*                               pj_vlog()                              */
 /************************************************************************/
-void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args );
+void pj_vlog( PJ_CONTEXT *ctx, int level, const char *fmt, va_list args );
 /* Workhorse for the log functions - relates to pj_log as vsprintf relates to sprintf */
-void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args )
+void pj_vlog( PJ_CONTEXT *ctx, int level, const char *fmt, va_list args )
 
 {
     char *msg_buf;
@@ -84,7 +84,7 @@ void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args )
 /*                               pj_log()                               */
 /************************************************************************/
 
-void pj_log( projCtx ctx, int level, const char *fmt, ... )
+void pj_log( PJ_CONTEXT *ctx, int level, const char *fmt, ... )
 
 {
     va_list args;

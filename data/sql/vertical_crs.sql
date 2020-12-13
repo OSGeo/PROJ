@@ -85,7 +85,7 @@ INSERT INTO "usage" VALUES('EPSG','4152','vertical_crs','EPSG','5709','EPSG','11
 INSERT INTO "vertical_crs" VALUES('EPSG','5710','Ostend height',NULL,'EPSG','6499','EPSG','5110',0);
 INSERT INTO "usage" VALUES('EPSG','4153','vertical_crs','EPSG','5710','EPSG','1347','EPSG','1179');
 INSERT INTO "vertical_crs" VALUES('EPSG','5711','AHD height',NULL,'EPSG','6499','EPSG','5111',0);
-INSERT INTO "usage" VALUES('EPSG','4154','vertical_crs','EPSG','5711','EPSG','4493','EPSG','1263');
+INSERT INTO "usage" VALUES('EPSG','14230','vertical_crs','EPSG','5711','EPSG','4493','EPSG','1263');
 INSERT INTO "vertical_crs" VALUES('EPSG','5712','AHD (Tasmania) height',NULL,'EPSG','6499','EPSG','5112',0);
 INSERT INTO "usage" VALUES('EPSG','4155','vertical_crs','EPSG','5712','EPSG','2947','EPSG','1179');
 INSERT INTO "vertical_crs" VALUES('EPSG','5713','CGVD28 height',NULL,'EPSG','6499','EPSG','5114',0);
@@ -481,6 +481,6 @@ INSERT INTO "usage" VALUES('EPSG','14041','vertical_crs','EPSG','9402','EPSG','4
 INSERT INTO "vertical_crs" VALUES('EPSG','9451','BI height',NULL,'EPSG','6499','EPSG','1288',0);
 INSERT INTO "usage" VALUES('EPSG','14087','vertical_crs','EPSG','9451','EPSG','4606','EPSG','1026');
 INSERT INTO "vertical_crs" VALUES('EPSG','9458','AVWS height',NULL,'EPSG','6499','EPSG','1292',0);
-INSERT INTO "usage" VALUES('EPSG','14138','vertical_crs','EPSG','9458','EPSG','4177','EPSG','1264');
+INSERT INTO "usage" VALUES('EPSG','14231','vertical_crs','EPSG','9458','EPSG','4177','EPSG','1264');
 INSERT INTO "vertical_crs" VALUES('EPSG','9471','INAGeoid2020 height',NULL,'EPSG','6499','EPSG','1294',0);
 INSERT INTO "usage" VALUES('EPSG','14153','vertical_crs','EPSG','9471','EPSG','1122','EPSG','1178');

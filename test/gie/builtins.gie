@@ -1423,9 +1423,9 @@ expect  -0.001790143 -0.000895247
 ===============================================================================
 
 -------------------------------------------------------------------------------
-operation +proj=etmerc   +ellps=GRS80 +zone=30
+operation +proj=etmerc   +ellps=GRS80
 -------------------------------------------------------------------------------
-tolerance 0.1 mm
+tolerance 50 nm
 accept  2 1
 expect  222650.796797586 110642.229411933
 accept  2 -1
@@ -1434,17 +1434,28 @@ accept  -2 1
 expect  -222650.796797586 110642.229411933
 accept  -2 -1
 expect  -222650.796797586 -110642.229411933
+# near pole
+accept  30 89.9999
+expect  5.584698978 10001956.056248082
+# 3900 km from central meridian
+accept  44.69 35.37
+expect  4168136.489446198 4985511.302287407
 
 direction inverse
 accept  200 100
-expect  0.001796631 0.000904369
+expect  0.00179663056816 0.00090436947663
 accept  200 -100
-expect  0.001796631 -0.000904369
+expect  0.00179663056816 -0.00090436947663
 accept  -200 100
-expect  -0.001796631 0.000904369
+expect  -0.00179663056816 0.00090436947663
 accept  -200 -100
-expect  -0.001796631 -0.000904369
-
+expect  -0.00179663056816 -0.00090436947663
+# near pole
+accept  6 1.0001e7
+expect  0.35596960759234 89.99135362646302
+# 3900 km from central meridian
+accept  4168136.489446198 4985511.302287407
+expect  44.69 35.37
 
 ===============================================================================
 # Fahey
@@ -3355,30 +3366,54 @@ expect  -0.001953415 -0.000820580
 -------------------------------------------------------------------------------
 operation +proj=merc   +ellps=GRS80
 -------------------------------------------------------------------------------
-tolerance 0.1 mm
+tolerance 0 m
+accept  0 0
+expect  0 0
+tolerance 50 nm
 accept  2 1
-expect  222638.981586547 110579.965218250
+expect  222638.981586547 110579.965218249
 accept  2 -1
 expect  222638.981586547 -110579.965218249
 accept  -2 1
-expect  -222638.981586547 110579.965218250
+expect  -222638.981586547 110579.965218249
 accept  -2 -1
 expect  -222638.981586547 -110579.965218249
+# inflate tolerance by scale (k = 5.7e15)
+tolerance 3e8
+accept  0 89.99999999999999
+expect  0 235805185.015130176
+accept  0 -89.99999999999999
+expect  0 -235805185.015130176
 
 direction inverse
+tolerance 0 m
+accept  0 0
+expect  0 0
+tolerance 50 nm
 accept  200 100
-expect  0.001796631 0.000904369
+expect  0.00179663056824 0.00090436947704
 accept  200 -100
-expect  0.001796631 -0.000904369
+expect  0.00179663056824 -0.00090436947704
 accept  -200 100
-expect  -0.001796631 0.000904369
+expect  -0.00179663056824 0.00090436947704
 accept  -200 -100
-expect  -0.001796631 -0.000904369
+expect  -0.00179663056824 -0.00090436947704
+accept  0 235805185.015130176
+expect  0 89.99999999999999
+accept  0 -235805185.015130176
+expect  0 -89.99999999999999
+accept  0 1e10
+expect  0 90
+accept  0 -1e10
+expect  0 -90
 
 -------------------------------------------------------------------------------
 operation +proj=merc   +R=6400000
 -------------------------------------------------------------------------------
-tolerance 0.1 mm
+tolerance 0 m
+accept  0 0
+expect  0 0
+tolerance 50 nm
 accept  2 1
 expect  223402.144255274 111706.743574944
 accept  2 -1
@@ -3389,24 +3424,31 @@ accept  -2 -1
 expect  -223402.144255274 -111706.743574944
 
 direction inverse
+tolerance 0 m
+accept  0 0
+expect  0 0
+tolerance 50 nm
 accept  200 100
-expect  0.001790493 0.000895247
+expect  0.00179049310978 0.00089524655486
 accept  200 -100
-expect  0.001790493 -0.000895247
+expect  0.00179049310978 -0.00089524655486
 accept  -200 100
-expect  -0.001790493 0.000895247
+expect  -0.00179049310978 0.00089524655486
 accept  -200 -100
-expect  -0.001790493 -0.000895247
-
+expect  -0.00179049310978 -0.00089524655486
 
 -------------------------------------------------------------------------------
 operation +proj=merc +R=1
 -------------------------------------------------------------------------------
 # Test the numerical stability of the inverse spherical Mercator
 -------------------------------------------------------------------------------
-tolerance   1e-15 m
-accept  0   1e-15
+tolerance   1e-17 m
+accept  0   57.295779513e-15
 expect  0   1e-15
+
+direction inverse
+accept  0   1e-15
+expect  0   57.295779513e-15
 
 
 ===============================================================================
@@ -5377,6 +5419,32 @@ accept  -200 -100
 expect  -0.001790493 -0.000895247
 
 
+-------------------------------------------------------------------------------
+operation +proj=stere   +ellps=GRS80        +lat_0=90  +lat_ts=70
+-------------------------------------------------------------------------------
+tolerance 1e-15m
+accept    0 90
+expect    0 0
+roundtrip 1
+
+tolerance 0.1 mm
+accept    20            70
+expect    748315.3282   -2055979.4669
+roundtrip 1
+
+-------------------------------------------------------------------------------
+operation +proj=stere   +ellps=GRS80        +lat_0=-90  +lat_ts=-70
+-------------------------------------------------------------------------------
+tolerance 1e-15m
+accept    0 -90
+expect    0 0
+roundtrip 1
+
+tolerance 0.1 mm
+accept    20            -70
+expect    748315.3282   2055979.4669
+roundtrip 1
+
 ===============================================================================
 # Oblique Stereographic Alternative
 # 	Azimuthal, Sph&Ell
@@ -5658,25 +5726,37 @@ expect  -0.001790143 0.511651393
 -------------------------------------------------------------------------------
 operation +proj=tmerc   +ellps=GRS80
 -------------------------------------------------------------------------------
-tolerance 0.1 mm
+tolerance 50 nm
 accept  2 1
-expect  222650.796795778 110642.229411927
+expect  222650.796797586 110642.229411933
 accept  2 -1
-expect  222650.796795778 -110642.229411927
+expect  222650.796797586 -110642.229411933
 accept  -2 1
-expect  -222650.796795778 110642.229411927
+expect  -222650.796797586 110642.229411933
 accept  -2 -1
-expect  -222650.796795778 -110642.229411927
+expect  -222650.796797586 -110642.229411933
+# near pole
+accept  30 89.9999
+expect  5.584698978 10001956.056248082
+# 3900 km from central meridian
+accept  44.69 35.37
+expect  4168136.489446198 4985511.302287407
 
 direction inverse
 accept  200 100
-expect  0.001796631 0.000904369
+expect  0.00179663056816 0.00090436947663
 accept  200 -100
-expect  0.001796631 -0.000904369
+expect  0.00179663056816 -0.00090436947663
 accept  -200 100
-expect  -0.001796631 0.000904369
+expect  -0.00179663056816 0.00090436947663
 accept  -200 -100
-expect  -0.001796631 -0.000904369
+expect  -0.00179663056816 -0.00090436947663
+# near pole
+accept  6 1.0001e7
+expect  0.35596960759234 89.99135362646302
+# 3900 km from central meridian
+accept  4168136.489446198 4985511.302287407
+expect  44.69 35.37
 
 -------------------------------------------------------------------------------
 operation +proj=tmerc   +R=6400000
@@ -5691,6 +5771,74 @@ expect  -223413.466406322 111769.145040597
 accept  -2 -1
 expect  -223413.466406322 -111769.145040597
 
+accept    0      0
+expect    0      0
+roundtrip 1
+
+accept    0      90
+expect    0      10053096.491487337276
+roundtrip 1
+
+accept    0      -90
+expect    0      -10053096.491487337276
+roundtrip 1
+
+accept    170                       60
+expect    557076.820490954560       13361866.764138307422
+roundtrip 1
+
+accept    89                        0.01
+expect    30344312.098578717560     64001.116414904580
+roundtrip 1
+
+accept    91                        0.01
+expect    30344312.098578717560     20042191.866555366665
+roundtrip 1
+
+accept    179.999                   0.01
+expect    111.701070433669          20105075.972255337983
+roundtrip 1
+
+accept    -89                       0.01
+expect    -30344312.098578717560    64001.116414904580
+roundtrip 1
+
+accept    -91                       0.01
+expect    -30344312.098578717560    20042191.866555366665
+roundtrip 1
+
+accept    -179.999                  0.01
+expect    -111.701070433669         20105075.972255337983
+roundtrip 1
+
+accept    89                       -0.01
+expect    30344312.098578717560    -64001.116414904580
+roundtrip 1
+
+accept    91                       -0.01
+expect    30344312.098578717560    -20042191.866555366665
+roundtrip 1
+
+accept    179.999                  -0.01
+expect    111.701070433669         -20105075.972255337983
+roundtrip 1
+
+accept    -89                      -0.01
+expect    -30344312.098578717560   -64001.116414904580
+roundtrip 1
+
+accept    -91                       -0.01
+expect    -30344312.098578717560    -20042191.866555366665
+roundtrip 1
+
+accept    -179.999                  -0.01
+expect    -111.701070433669         -20105075.972255337983
+roundtrip 1
+
+accept    150                       0
+expect    3515559.323737951461      20106192.982974674553
+roundtrip 1
+
 direction inverse
 accept  200 100
 expect  0.001790493 0.000895247
@@ -5700,6 +5848,130 @@ accept  -200 100
 expect  -0.001790493 0.000895247
 accept  -200 -100
 expect  -0.001790493 -0.000895247
+
+-------------------------------------------------------------------------------
+# Approx tmerc on a almost spherical ellipsoid, lat_0 north hemisphere
+
+operation +proj=tmerc   +a=6400000 +rf=1e12 +k=0.9 +lat_0=40 +approx
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    0             -30
+expect    0             -7037167.5440
+roundtrip 1
+
+accept    1             -30
+expect    87064.5795    -7037547.4590
+roundtrip 1
+
+accept    -1            -30
+expect    -87064.5795   -7037547.4590
+roundtrip 1
+
+accept    0             30
+expect    0             -1005309.6491
+roundtrip 1
+
+accept    0             40
+expect    0             0
+roundtrip 1
+
+accept    1             41
+expect    75872.2182    100965.3718
+roundtrip 1
+
+-------------------------------------------------------------------------------
+# Approx tmerc on a sphere, lat_0 north hemisphere
+
+operation +proj=tmerc   +R=6400000 +k=0.9 +lat_0=40
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    0             -30
+expect    0             -7037167.5440
+roundtrip 1
+
+accept    1             -30
+expect    87064.5795    -7037547.4590
+roundtrip 1
+
+accept    -1            -30
+expect    -87064.5795   -7037547.4590
+roundtrip 1
+
+accept    0             30
+expect    0             -1005309.6491
+roundtrip 1
+
+accept    0             40
+expect    0             0
+roundtrip 1
+
+accept    1             41
+expect    75872.2182    100965.3718
+roundtrip 1
+
+-------------------------------------------------------------------------------
+# Approx tmerc on a almost spherical ellipsoid, lat_0 south hemisphere
+
+operation +proj=tmerc   +a=6400000 +rf=1e12 +k=0.9 +lat_0=-40 +approx
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    0             -30
+expect    0             1005309.6491
+roundtrip 1
+
+accept    1             -30
+expect    87064.5795    1004929.7341
+roundtrip 1
+
+accept    -1            -30
+expect    -87064.5795   1004929.7341
+roundtrip 1
+
+accept    0             30
+expect    0             7037167.5440
+roundtrip 1
+
+accept    0             -40
+expect    0             0
+roundtrip 1
+
+accept    1             -41
+expect    75872.2182    -100965.3718
+roundtrip 1
+
+-------------------------------------------------------------------------------
+# Approx tmerc on a sphere, lat_0 south hemisphere
+
+operation +proj=tmerc   +R=6400000 +k=0.9 +lat_0=-40
+-------------------------------------------------------------------------------
+tolerance 0.1 mm
+
+accept    0             -30
+expect    0             1005309.6491
+roundtrip 1
+
+accept    1             -30
+expect    87064.5795    1004929.7341
+roundtrip 1
+
+accept    -1            -30
+expect    -87064.5795   1004929.7341
+roundtrip 1
+
+accept    0             30
+expect    0             7037167.5440
+roundtrip 1
+
+accept    0             -40
+expect    0             0
+roundtrip 1
+
+accept    1             -41
+expect    75872.2182    -100965.3718
+roundtrip 1
 
 -------------------------------------------------------------------------------
 operation +proj=tmerc   +R=1
@@ -6600,5 +6872,47 @@ tolerance 1 mm
 accept    -74.25    4.8
 expect    80859.033 122543.174
 roundtrip 1
+
+===============================================================================
+# Geocentric/topocentric conversion
+===============================================================================
+
+# Test parameter and point from IOGP Publication 373-7-2 - Geomatics Guidance Note number 7, part 2 - October 2020
+operation +proj=topocentric +ellps=WGS84 +X_0=3652755.3058 +Y_0=319574.6799 +Z_0=5201547.3536
+tolerance 1 mm
+accept    3771793.968  140253.342         5124304.349
+expect    -189013.869  -128642.040        -4220.171
+roundtrip 1
+
+===============================================================================
+# Geographic/topocentric conversion
+===============================================================================
+
+# Test parameter and point from IOGP Publication 373-7-2 - Geomatics Guidance Note number 7, part 2 - October 2020
+operation +proj=pipeline +step +proj=cart +ellps=WGS84 +step +proj=topocentric +ellps=WGS84 +lon_0=5 +lat_0=55 +h_0=200
+tolerance 1 mm
+accept    2.12955      53.80939444444444  73
+expect    -189013.869  -128642.040        -4220.171
+roundtrip 1
+
+===============================================================================
+# Error cases of topocentric
+===============================================================================
+
+# missing X_0,Y_0,Z_0 or lon_0,lat_0
+operation +proj=topocentric +ellps=WGS84
+expect failure errno missing_args
+
+# missing Z_0
+operation +proj=topocentric +ellps=WGS84 +X_0=0 +Y_0=0
+expect failure errno missing_args
+
+# missing lat_0
+operation +proj=topocentric +ellps=WGS84 +lon_0=0
+expect failure errno missing_args
+
+# X_0 and lon_0 are mutually exclusive
+operation +proj=topocentric +ellps=WGS84 +X_0=0 +lon_0=0
+expect failure errno mutually_exclusive_args
 
 </gie-strict>

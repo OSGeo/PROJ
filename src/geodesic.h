@@ -107,12 +107,12 @@
  * twice about restructuring the internals of the C code since this may make
  * porting fixes from the C++ code more difficult.
  *
- * Copyright (c) Charles Karney (2012-2019) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2012-2020) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
  *
  * This library was distributed with
- * <a href="../index.html">GeographicLib</a> 1.50.
+ * <a href="../index.html">GeographicLib</a> 1.51.
  **********************************************************************/
 
 #if !defined(GEODESIC_H)
@@ -127,7 +127,7 @@
  * The minor version of the geodesic library.  (This tracks the version of
  * GeographicLib.)
  **********************************************************************/
-#define GEODESIC_VERSION_MINOR 50
+#define GEODESIC_VERSION_MINOR 51
 /**
  * The patch level of the geodesic library.  (This tracks the version of
  * GeographicLib.)

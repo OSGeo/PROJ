@@ -1177,6 +1177,6 @@ INSERT INTO "usage" VALUES('EPSG','13848','geodetic_datum','EPSG','6903','EPSG',
 INSERT INTO "geodetic_datum" VALUES('EPSG','6904','Lisbon 1890 (Lisbon)',NULL,'EPSG','7004','EPSG','8902','1937-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13849','geodetic_datum','EPSG','6904','EPSG','1294','EPSG','1153');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6258','European Terrestrial Reference System 1989 ensemble',NULL,'EPSG','7019','EPSG','8901',NULL,NULL,0.1,0);
-INSERT INTO "usage" VALUES('EPSG','13599','geodetic_datum','EPSG','6258','EPSG','1298','EPSG','1026');
+INSERT INTO "usage" VALUES('EPSG','14235','geodetic_datum','EPSG','6258','EPSG','1298','EPSG','1026');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6326','World Geodetic System 1984 ensemble',NULL,'EPSG','7030','EPSG','8901',NULL,NULL,2.0,0);
-INSERT INTO "usage" VALUES('EPSG','13661','geodetic_datum','EPSG','6326','EPSG','1262','EPSG','1245');
+INSERT INTO "usage" VALUES('EPSG','14343','geodetic_datum','EPSG','6326','EPSG','1262','EPSG','1245');

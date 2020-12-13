@@ -9,27 +9,24 @@
 
 PROJ_HEAD(tobmerc, "Tobler-Mercator") "\n\tCyl, Sph";
 
-#define EPS10 1.e-10
-static double logtanpfpim1(double x) {       /* log(tan(x/2 + M_FORTPI)) */
-    if (fabs(x) <= DBL_EPSILON) {
-        /* tan(M_FORTPI + .5 * x) can be approximated by  1.0 + x */
-        return log1p(x);
-    }
-    return log(tan(M_FORTPI + .5 * x));
-}
-
 static PJ_XY tobmerc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0, 0.0};
     double cosphi;
 
-    if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10) {
+    if (fabs(lp.phi) >= M_HALFPI) {
+      // builtins.gie tests "Test expected failure at the poles:".  However
+      // given that M_HALFPI is strictly less than pi/2 in double precision,
+      // it's not clear why shouldn't just return a large result for xy.y (and
+      // it's not even that large, merely 38.025...).  Even if the logic was
+      // such that phi was strictly equal to pi/2, allowing xy.y = inf would be
+      // a reasonable result.
         proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
         return xy;
     }
 
     cosphi = cos(lp.phi);
     xy.x = P->k0 * lp.lam * cosphi * cosphi;
-    xy.y = P->k0 * logtanpfpim1(lp.phi);
+    xy.y = P->k0 * asinh(tan(lp.phi));
     return xy;
 }
 

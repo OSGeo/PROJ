@@ -89,7 +89,7 @@ static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
     if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
         xy.x = HUGE_VAL;
         xy.y = HUGE_VAL;
-        pj_ctx_set_errno( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
+        proj_context_errno_set( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
         return xy;
     }
 
@@ -115,24 +115,10 @@ static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
     return (xy);
 }
 
-static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
+static PJ_XY tmerc_spherical_fwd (PJ_LP lp, PJ *P) {
     PJ_XY xy = {0.0,0.0};
     double b, cosphi;
     const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
-
-    /*
-     * Fail if our longitude is more than 90 degrees from the
-     * central meridian since the results are essentially garbage.
-     * Is error -20 really an appropriate return value?
-     *
-     *  http://trac.osgeo.org/proj/ticket/5
-     */
-    if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
-        xy.x = HUGE_VAL;
-        xy.y = HUGE_VAL;
-        pj_ctx_set_errno( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
-        return xy;
-    }
 
     cosphi = cos(lp.phi);
     b = cosphi * sin (lp.lam);
@@ -145,7 +131,12 @@ static PJ_XY approx_s_fwd (PJ_LP lp, PJ *P) {
     xy.y = cosphi * cos (lp.lam) / sqrt (1. - b * b);
 
     b = fabs ( xy.y );
-    if (b >= 1.) {
+    if (cosphi == 1 && (lp.lam < -M_HALFPI || lp.lam > M_HALFPI) ) {
+        /* Helps to be able to roundtrip |longitudes| > 90 at lat=0 */
+        /* We could also map to -M_PI ... */
+        xy.y = M_PI;
+    }
+    else if (b >= 1.) {
         if ((b - 1.) > EPS10) {
             proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
             return xy;
@@ -192,7 +183,7 @@ static PJ_LP approx_e_inv (PJ_XY xy, PJ *P) {
     return lp;
 }
 
-static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
+static PJ_LP tmerc_spherical_inv (PJ_XY xy, PJ *P) {
     PJ_LP lp = {0.0, 0.0};
     double h, g;
     const auto *Q = &(static_cast<struct tmerc_data*>(P->opaque)->approx);
@@ -203,11 +194,13 @@ static PJ_LP approx_s_inv (PJ_XY xy, PJ *P) {
         return proj_coord_error().lp;
     }
     g = .5 * (h - 1. / h);
-    h = cos (P->phi0 + xy.y / Q->esp);
+    /* D, as in equation 8-8 of USGS "Map Projections - A Working Manual" */
+    const double D = P->phi0 + xy.y / Q->esp;
+    h = cos (D);
     lp.phi = asin(sqrt((1. - h * h) / (1. + g * g)));
 
     /* Make sure that phi is on the correct hemisphere when false northing is used */
-    if (xy.y < 0. && -lp.phi+P->phi0 < 0.0) lp.phi = -lp.phi;
+    lp.phi = copysign(lp.phi, D);
 
     lp.lam = (g != 0.0 || h != 0.0) ? atan2 (g, h) : 0.;
     return lp;
@@ -221,7 +214,7 @@ static PJ *destructor(PJ *P, int errlev) {
     if (nullptr==P->opaque)
         return pj_default_destructor(P, errlev);
 
-    pj_dealloc (static_cast<struct tmerc_data*>(P->opaque)->approx.en);
+    free (static_cast<struct tmerc_data*>(P->opaque)->approx.en);
     return pj_default_destructor(P, errlev);
 }
 
@@ -592,7 +585,7 @@ static PJ_LP auto_e_inv (PJ_XY xy, PJ *P) {
 
 static PJ *setup(PJ *P, TMercAlgo eAlg) {
 
-    struct tmerc_data *Q = static_cast<struct tmerc_data*>(pj_calloc (1, sizeof (struct tmerc_data)));
+    struct tmerc_data *Q = static_cast<struct tmerc_data*>(calloc (1, sizeof (struct tmerc_data)));
     if (nullptr==Q)
         return pj_default_destructor (P, ENOMEM);
     P->opaque = Q;
@@ -609,8 +602,8 @@ static PJ *setup(PJ *P, TMercAlgo eAlg) {
                 return nullptr;
             if( P->es == 0 )
             {
-                P->inv = approx_s_inv;
-                P->fwd = approx_s_fwd;
+                P->inv = tmerc_spherical_inv;
+                P->fwd = tmerc_spherical_fwd;
             }
             else
             {
@@ -679,7 +672,7 @@ static bool getAlgoFromParams(PJ* P, TMercAlgo& algo)
     else
     {
         pj_load_ini(P->ctx); // if not already done
-        pj_ctx_set_errno(P->ctx, 0); // reset error in case proj.ini couldn't be found
+        proj_context_errno_set(P->ctx, 0); // reset error in case proj.ini couldn't be found
         algo = P->ctx->defaultTmercAlgo;
     }
 

@@ -10,4 +10,3 @@ Reference
    datatypes
    functions
    cpp/index.rst
-   deprecated
