@@ -103,7 +103,7 @@ double pj_sinhpsi2tanphi(PJ_CONTEXT *ctx, const double taup, const double e) {
       break;
   }
   if (i == 0)
-    proj_context_errno_set(ctx, PJD_ERR_NON_CONV_SINHPSI2TANPHI);
+    proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
   return tau;
 }
 

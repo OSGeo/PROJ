@@ -75,11 +75,11 @@ roundtrip 1
 -------------------------------------------------------------------------------
 # No arguments
 operation  proj=molodensky a=6378160 rf=298.25
-expect     failure   errno no_args
+expect     failure   errno invalid_op_missing_arg
 
 # Missing arguments
 operation  proj=molodensky a=6378160 rf=298.25 dx=0
-expect     failure   errno missing_arg
+expect     failure   errno invalid_op_missing_arg
 
 
 -------------------------------------------------------------------------------
@@ -267,11 +267,11 @@ roundtrip 100 1 nm
 -------------------------------------------------------------------------------
 # Fail on purpose: +grids parameter is mandatory
 operation proj=vgridshift
-expect    failure errno no_args
+expect    failure errno invalid_op_missing_arg
 
 # Fail on purpose: open non-existing grid
 operation proj=vgridshift grids=nonexistinggrid.gtx
-expect    failure errno failed_to_load_grid
+expect    failure errno invalid_op_file_not_found_or_invalid
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -298,11 +298,11 @@ expect    2.250704350387       46.500051597273
 -------------------------------------------------------------------------------
 # Fail on purpose: open non-existing grid:
 operation proj=hgridshift grids=@nonexistinggrid.gsb,anothernonexistinggrid.gsb
-expect    failure errno failed_to_load_grid
+expect    failure errno invalid_op_file_not_found_or_invalid
 
 # Fail on purpose: +grids parameter is mandatory:
 operation proj=hgridshift
-expect    failure errno no_args
+expect    failure errno invalid_op_missing_arg
 -------------------------------------------------------------------------------
 
 
@@ -434,27 +434,27 @@ expect     3513638.1999  778956.4533  5248216.4535  2008.75
 -------------------------------------------------------------------------------
 # A rotational term implies an explicit convention to be specified
 operation  proj=helmert rx=1
-expect     failure   errno missing_arg
+expect     failure   errno invalid_op_missing_arg
 
 operation  proj=helmert rx=1 convention=foo
-expect     failure   errno invalid_arg
+expect     failure   errno invalid_op_illegal_arg_value
 
 operation  proj=helmert rx=1 convention=1
-expect     failure   errno invalid_arg
+expect     failure   errno invalid_op_illegal_arg_value
 
 # towgs84 in helmert context should always be position_vector
 operation  proj=helmert towgs84=1,2,3,4,5,6,7 convention=coordinate_frame
-expect     failure   errno invalid_arg
+expect     failure   errno invalid_op_illegal_arg_value
 
 # Transpose no longer accepted
 operation  proj=helmert transpose
-expect     failure   errno invalid_arg
+expect     failure   errno invalid_op_illegal_arg_value
 
 # Use of 2D Helmert interface with 3D Helmert setup
 operation  +proj=ob_tran +o_proj=helmert +o_lat_p=0
 direction  inverse
 accept     0 0
-expect     failure   errno 22
+expect     failure   errno no_inverse_op
 
 -------------------------------------------------------------------------------
 # Molodensky-Badekas from IOGP Guidance 7.2, Transformation from La Canoa to REGVEN
@@ -477,7 +477,7 @@ expect     2550138.45 -5749799.87 1054530.82
 
 # Missing convention
 operation  proj=molobadekas
-expect     failure   errno missing_arg
+expect     failure   errno invalid_op_missing_arg
 
 
 -------------------------------------------------------------------------------
@@ -513,14 +513,14 @@ roundtrip  1
 # some less used options
 -------------------------------------------------------------------------------
 operation  proj=utm  ellps=GRS80  zone=32  to_meter=0
-expect     failure   errno unit_factor_less_than_0
+expect     failure   errno invalid_op_illegal_arg_value
 
 operation  proj=utm  ellps=GRS80  zone=32  to_meter=10
 accept     12   55
 expect        69187.5632    609890.7825
 
 operation  proj=utm  ellps=GRS80  zone=32  to_meter=1/0
-expect     failure   errno unit_factor_less_than_0
+expect     failure   errno invalid_op_illegal_arg_value
 
 operation  proj=utm  ellps=GRS80  zone=32  to_meter=2.0/0.2
 accept     12   55
@@ -791,7 +791,7 @@ expect  25  25  25  25
 
 # Test invalid lat_0
 operation +proj=aeqd +R=1 +lat_0=91
-expect  failure errno lat_larger_than_90
+expect  failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 # cart

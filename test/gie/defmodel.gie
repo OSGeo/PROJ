@@ -8,15 +8,15 @@ Test +proj=defmodel
 
 # Missing +model
 operation   +proj=defmodel
-expect failure errno no_args
+expect failure errno invalid_op_missing_arg
 
 # +model doesn't point to an existing file
 operation   +proj=defmodel +model=i_do_not_exist
-expect failure errno invalid_arg
+expect failure errno invalid_op_file_not_found_or_invalid
 
 # Not a JSON file
 operation   +proj=defmodel +model=proj.ini
-expect failure errno invalid_arg
+expect failure errno invalid_op_file_not_found_or_invalid
 
 # Horizontal deformation with horizontal unit = degree
 operation   +proj=defmodel +model=tests/simple_model_degree_horizontal.json

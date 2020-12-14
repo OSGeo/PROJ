@@ -460,12 +460,12 @@ PJ *PROJECTION(horner) {
         degree = pj_param(P->ctx, P->params, "ideg").i;
         if (degree < 0 || degree > 10000) {
             /* What are reasonable minimum and maximums for degree? */
-            proj_log_debug (P, "Horner: Degree is unreasonable: %d", degree);
-            return horner_freeup (P, PJD_ERR_INVALID_ARG);
+            proj_log_error (P, _("Horner: Degree is unreasonable: %d"), degree);
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     } else {
-        proj_log_debug (P, "Horner: Must specify polynomial degree, (+deg=n)");
-        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        proj_log_error (P, _("Horner: Must specify polynomial degree, (+deg=n)"));
+        return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     if (pj_param (P->ctx, P->params, "tfwd_c").i || pj_param (P->ctx, P->params, "tinv_c").i) /* complex polynomium? */
@@ -473,7 +473,7 @@ PJ *PROJECTION(horner) {
 
     Q = horner_alloc (degree, complex_polynomia);
     if (Q == nullptr)
-        return horner_freeup (P, ENOMEM);
+        return horner_freeup (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = Q;
 
     if (complex_polynomia) {
@@ -483,9 +483,15 @@ PJ *PROJECTION(horner) {
 
         n = 2*degree + 2;
         if (0==parse_coefs (P, Q->fwd_c, "fwd_c", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("Horner: missing fwd_c"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         if (0==parse_coefs (P, Q->inv_c, "inv_c", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("Horner: missing inv_c"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         P->fwd4d = complex_horner_forward_4d;
         P->inv4d = complex_horner_reverse_4d;
     }
@@ -493,19 +499,37 @@ PJ *PROJECTION(horner) {
     else {
         n = horner_number_of_coefficients (degree);
         if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("Horner: missing fwd_u"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         if (0==parse_coefs (P, Q->fwd_v, "fwd_v", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("Horner: missing fwd_v"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         if (0==parse_coefs (P, Q->inv_u, "inv_u", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("Horner: missing inv_u"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         if (0==parse_coefs (P, Q->inv_v, "inv_v", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("Horner: missing inv_v"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
     }
 
     if (0==parse_coefs (P, (double *)(Q->fwd_origin), "fwd_origin", 2))
-        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+    {
+        proj_log_error (P, _("Horner: missing fwd_origin"));
+        return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
     if (0==parse_coefs (P, (double *)(Q->inv_origin), "inv_origin", 2))
-        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+    {
+        proj_log_error (P, _("Horner: missing inv_origin"));
+        return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
     if (0==parse_coefs (P, &Q->range, "range", 1))
         Q->range = 500000;
 

@@ -113,12 +113,12 @@ PJ *PROJECTION(cass) {
     /* otherwise it's ellipsoidal */
     P->opaque = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==P->opaque)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->destructor = destructor;
 
     static_cast<struct pj_opaque*>(P->opaque)->en = pj_enfn (P->es);
     if (nullptr==static_cast<struct pj_opaque*>(P->opaque)->en)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
 
     static_cast<struct pj_opaque*>(P->opaque)->m0 = pj_mlfn (P->phi0,  sin (P->phi0),  cos (P->phi0),  static_cast<struct pj_opaque*>(P->opaque)->en);
     P->inv = cass_e_inverse;

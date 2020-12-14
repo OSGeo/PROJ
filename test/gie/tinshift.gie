@@ -8,15 +8,15 @@ Test +proj=tinshift
 
 # Missing +file
 operation   +proj=tinshift
-expect failure errno no_args
+expect failure errno invalid_op_missing_arg
 
 # +file doesn't point to an existing file
 operation   +proj=tinshift +file=i_do_not_exist
-expect failure errno invalid_arg
+expect failure errno invalid_op_file_not_found_or_invalid
 
 # Not a JSON file
 operation   +proj=tinshift +file=proj.ini
-expect failure errno invalid_arg
+expect failure errno invalid_op_file_not_found_or_invalid
 
 
 # Tests on a file without explicit CRS

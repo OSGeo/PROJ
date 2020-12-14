@@ -189,7 +189,10 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P);
 PJ_COORD PROJ_DLL pj_approx_2D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 PJ_COORD PROJ_DLL pj_approx_3D_trans (PJ *P, PJ_DIRECTION direction, PJ_COORD coo);
 
-void PROJ_DLL proj_log_error (PJ *P, const char *fmt, ...);
+/* Provision for gettext translatable strings */
+#define _(str) (str)
+
+void PROJ_DLL proj_log_error (const PJ *P, const char *fmt, ...);
 void proj_log_debug (PJ *P, const char *fmt, ...);
 void proj_log_trace (PJ *P, const char *fmt, ...);
 
@@ -598,72 +601,6 @@ struct FACTORS {
     int    code;           /* always 0 */
 };
 
-/* library errors */
-#define PJD_ERR_NO_ARGS                  -1
-#define PJD_ERR_NO_OPTION_IN_INIT_FILE   -2
-#define PJD_ERR_NO_COLON_IN_INIT_STRING  -3
-#define PJD_ERR_PROJ_NOT_NAMED           -4
-#define PJD_ERR_UNKNOWN_PROJECTION_ID    -5
-#define PJD_ERR_INVALID_ECCENTRICITY     -6
-#define PJD_ERR_UNKNOWN_UNIT_ID          -7
-#define PJD_ERR_INVALID_BOOLEAN_PARAM    -8
-#define PJD_ERR_UNKNOWN_ELLP_PARAM       -9
-#define PJD_ERR_REV_FLATTENING_IS_ZERO  -10
-#define PJD_ERR_REF_RAD_LARGER_THAN_90  -11
-#define PJD_ERR_ES_LESS_THAN_ZERO       -12
-#define PJD_ERR_MAJOR_AXIS_NOT_GIVEN    -13
-#define PJD_ERR_LAT_OR_LON_EXCEED_LIMIT -14
-#define PJD_ERR_INVALID_X_OR_Y          -15
-#define PJD_ERR_WRONG_FORMAT_DMS_VALUE  -16
-#define PJD_ERR_NON_CONV_INV_MERI_DIST  -17
-#define PJD_ERR_NON_CONV_SINHPSI2TANPHI -18
-#define PJD_ERR_ACOS_ASIN_ARG_TOO_LARGE -19
-#define PJD_ERR_TOLERANCE_CONDITION     -20
-#define PJD_ERR_CONIC_LAT_EQUAL         -21
-#define PJD_ERR_LAT_LARGER_THAN_90      -22
-#define PJD_ERR_LAT1_IS_ZERO            -23
-#define PJD_ERR_LAT_TS_LARGER_THAN_90   -24
-#define PJD_ERR_CONTROL_POINT_NO_DIST   -25
-#define PJD_ERR_NO_ROTATION_PROJ        -26
-#define PJD_ERR_W_OR_M_ZERO_OR_LESS     -27
-#define PJD_ERR_LSAT_NOT_IN_RANGE       -28
-#define PJD_ERR_PATH_NOT_IN_RANGE       -29
-#define PJD_ERR_INVALID_H               -30
-#define PJD_ERR_K_LESS_THAN_ZERO        -31
-#define PJD_ERR_LAT_1_OR_2_ZERO_OR_90   -32
-#define PJD_ERR_LAT_0_OR_ALPHA_EQ_90    -33
-#define PJD_ERR_ELLIPSOID_USE_REQUIRED  -34
-#define PJD_ERR_INVALID_UTM_ZONE        -35
-/* -36 no longer used */
-#define PJD_ERR_FAILED_TO_FIND_PROJ     -37
-#define PJD_ERR_FAILED_TO_LOAD_GRID     -38
-#define PJD_ERR_INVALID_M_OR_N          -39
-#define PJD_ERR_N_OUT_OF_RANGE          -40
-#define PJD_ERR_LAT_1_2_UNSPECIFIED     -41
-#define PJD_ERR_ABS_LAT1_EQ_ABS_LAT2    -42
-#define PJD_ERR_LAT_0_HALF_PI_FROM_MEAN -43
-#define PJD_ERR_UNPARSEABLE_CS_DEF      -44
-#define PJD_ERR_GEOCENTRIC              -45
-#define PJD_ERR_UNKNOWN_PRIME_MERIDIAN  -46
-#define PJD_ERR_AXIS                    -47
-#define PJD_ERR_GRID_AREA               -48
-#define PJD_ERR_INVALID_SWEEP_AXIS      -49
-#define PJD_ERR_MALFORMED_PIPELINE      -50
-#define PJD_ERR_UNIT_FACTOR_LESS_THAN_0 -51
-#define PJD_ERR_INVALID_SCALE           -52
-#define PJD_ERR_NON_CONVERGENT          -53
-#define PJD_ERR_MISSING_ARGS            -54
-#define PJD_ERR_LAT_0_IS_ZERO           -55
-#define PJD_ERR_ELLIPSOIDAL_UNSUPPORTED -56
-#define PJD_ERR_TOO_MANY_INITS          -57
-#define PJD_ERR_INVALID_ARG             -58
-#define PJD_ERR_INCONSISTENT_UNIT       -59
-#define PJD_ERR_MUTUALLY_EXCLUSIVE_ARGS -60
-#define PJD_ERR_GENERIC_ERROR           -61
-#define PJD_ERR_NETWORK_ERROR           -62
-/* NOTE: Remember to update src/strerrno.cpp, src/apps/gie.cpp and transient_error in */
-/* src/transform.cpp when adding new value */
-
 // Legacy
 struct projFileAPI_t;
 
@@ -707,6 +644,7 @@ struct projFileApiCallbackAndData
 
 /* proj thread context */
 struct pj_ctx{
+    std::string lastFullErrorMessage{}; // used by proj_context_errno_string
     int     last_errno = 0;
     int     debug_level = 0;
     void    (*logger)(void *, int, const char *) = nullptr;

@@ -176,7 +176,7 @@ static void computeReverseParameters(PJ* P)
 PJ *TRANSFORMATION(affine,0 /* no need for ellipsoid */) {
     struct pj_opaque_affine *Q = initQ();
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = (void *) Q;
 
     P->fwd4d = forward_4d;
@@ -227,7 +227,7 @@ PJ *TRANSFORMATION(affine,0 /* no need for ellipsoid */) {
 PJ *TRANSFORMATION(geogoffset,0 /* no need for ellipsoid */) {
     struct pj_opaque_affine *Q = initQ();
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = (void *) Q;
 
     P->fwd4d = forward_4d;

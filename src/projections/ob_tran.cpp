@@ -180,26 +180,33 @@ PJ *PROJECTION(ob_tran) {
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return destructor(P, ENOMEM);
+        return destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
 
     P->opaque = Q;
     P->destructor = destructor;
 
     /* get name of projection to be translated */
     if (pj_param(P->ctx, P->params, "so_proj").s == nullptr)
-        return destructor(P, PJD_ERR_NO_ROTATION_PROJ);
+    {
+        proj_log_error(P, _("Missing parameter: o_proj"));
+        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
 
     /* Create the target projection object to rotate */
     args = ob_tran_target_params (P->params);
     /* avoid endless recursion */
     if (args.argv == nullptr ) {
-        return destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+        proj_log_error(P, _("Failed to find projection to be rotated"));
+        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     R = proj_create_argv (P->ctx, args.argc, args.argv);
     free (args.argv);
 
     if (nullptr==R)
-        return destructor (P, PJD_ERR_UNKNOWN_PROJECTION_ID);
+    {
+        proj_log_error(P, _("Projection to be rotated is unknown"));
+        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     Q->link = R;
 
     if (pj_param(P->ctx, P->params, "to_alpha").i) {
@@ -210,7 +217,10 @@ PJ *PROJECTION(ob_tran) {
         alpha   = pj_param(P->ctx, P->params, "ro_alpha").f;
 
         if (fabs(fabs(phic) - M_HALFPI) <= TOL)
-            return destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+        {
+            proj_log_error(P, _("Invalid value for lat_c: |lat_c| should be < 90°"));
+            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
 
         Q->lamp = lamc + aatan2(-cos(alpha), -sin(alpha) * sin(phic));
         phip = aasin(P->ctx,cos(phic) * sin(alpha));
@@ -225,9 +235,27 @@ PJ *PROJECTION(ob_tran) {
         lam2 = pj_param(P->ctx, P->params, "ro_lon_2").f;
         phi2 = pj_param(P->ctx, P->params, "ro_lat_2").f;
         con = fabs(phi1);
-        if (fabs(phi1 - phi2) <= TOL || con <= TOL ||
-            fabs(con - M_HALFPI) <= TOL || fabs(fabs(phi2) - M_HALFPI) <= TOL)
-                return destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
+
+        if (fabs(phi1) > M_HALFPI - TOL)
+        {
+            proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be < 90°"));
+            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+        if (fabs(phi2) > M_HALFPI - TOL)
+        {
+            proj_log_error(P, _("Invalid value for lat_2: |lat_2| should be < 90°"));
+            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+        if (fabs(phi1 - phi2) < TOL)
+        {
+            proj_log_error(P, _("Invalid value for lat_1 and lat_2: lat_1 should be different from lat_2"));
+            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+        if (con < TOL)
+        {
+            proj_log_error(P, _("Invalid value for lat_1: lat_1 should be different from zero"));
+            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
 
         Q->lamp = atan2(cos(phi1) * sin(phi2) * cos(lam1) -
             sin(phi1) * cos(phi2) * cos(lam2),

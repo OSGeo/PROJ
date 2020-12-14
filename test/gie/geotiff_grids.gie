@@ -151,13 +151,13 @@ expect      4.05        52.1        10
 -------------------------------------------------------------------------------
 operation   +proj=vgridshift +grids=tests/test_vgrid_invalid_channel_type.tif +multiplier=1
 -------------------------------------------------------------------------------
-expect      failure errno failed_to_load_grid
+expect      failure errno invalid_op_file_not_found_or_invalid
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 operation   +proj=vgridshift +grids=tests/test_vgrid_unsupported_byte.tif +multiplier=1
 -------------------------------------------------------------------------------
-expect      failure errno failed_to_load_grid
+expect      failure errno invalid_op_file_not_found_or_invalid
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ accept      179.8           54.5        0
 expect      179.8           54.5        -0.7011
 
 accept      179.799         54.5        0
-expect      failure errno grid_area
+expect      failure errno coord_transfm_outside_grid
 
 accept      180.1833333     54.5        0
 expect      -179.8166667    54.5        -3.1933
@@ -190,10 +190,10 @@ accept      -179.8166667    54.5        0
 expect      -179.8166667    54.5        -3.1933
 
 accept      180.184         54.5        0
-expect      failure errno grid_area
+expect      failure errno coord_transfm_outside_grid
 
 accept      -179.816        54.5        0
-expect      failure errno grid_area
+expect      failure errno coord_transfm_outside_grid
 
 -------------------------------------------------------------------------------
 operation   +proj=hgridshift +grids=tests/test_hgrid.tif
@@ -327,7 +327,7 @@ accept      -45.0              22.5             5
 -------------------------------------------------------------------------------
 operation   +proj=hgridshift +grids=tests/test_vgrid.tif
 -------------------------------------------------------------------------------
-expect      failure errno failed_to_load_grid
+expect      failure errno invalid_op_file_not_found_or_invalid
 -------------------------------------------------------------------------------
 
 

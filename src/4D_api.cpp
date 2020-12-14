@@ -176,7 +176,8 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
         return HUGE_VAL;
 
     if (n < 1) {
-        proj_errno_set (P, EINVAL);
+        proj_log_error(P, _("n should be >= 1"));
+        proj_errno_set (P, PROJ_ERR_OTHER_API_MISUSE);
         return HUGE_VAL;
     }
 
@@ -294,7 +295,7 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             if( iRetry > 0 ) {
                 const int oldErrno = proj_errno_reset(P);
                 if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
-                    pj_log(P->ctx, PJ_LOG_DEBUG, proj_errno_string(oldErrno));
+                    pj_log(P->ctx, PJ_LOG_DEBUG, proj_context_errno_string(P->ctx, oldErrno));
                 }
                 pj_log(P->ctx, PJ_LOG_DEBUG,
                     "Did not result in valid result. "
@@ -312,7 +313,7 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             }
             PJ_COORD res = direction == PJ_FWD ?
                         pj_fwd4d( coord, alt.pj ) : pj_inv4d( coord, alt.pj );
-            if( proj_errno(alt.pj) == PJD_ERR_NETWORK_ERROR ) {
+            if( proj_errno(alt.pj) == PROJ_ERR_OTHER_NETWORK_ERROR ) {
                 return proj_coord_error ();
             }
             if( res.xyzt.x != HUGE_VAL ) {
@@ -359,21 +360,14 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
             }
         }
 
-        proj_errno_set (P, EINVAL);
+        proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_NO_OPERATION);
         return proj_coord_error ();
     }
 
-    switch (direction) {
-        case PJ_FWD:
-            return pj_fwd4d (coord, P);
-        case PJ_INV:
-            return  pj_inv4d (coord, P);
-        default:
-            break;
-    }
-
-    proj_errno_set (P, EINVAL);
-    return proj_coord_error ();
+    if (direction == PJ_FWD)
+        return pj_fwd4d (coord, P);
+    else
+        return pj_inv4d (coord, P);
 }
 
 
@@ -500,9 +494,6 @@ size_t proj_trans_generic (
             break;
         case PJ_IDENT:
             return nmin;
-        default:
-            proj_errno_set (P, EINVAL);
-            return 0;
     }
 
     /* Arrays of length==0 are broadcast as the constant 0               */
@@ -771,7 +762,7 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
     n = strlen (definition);
     args = (char *) malloc (n + 1);
     if (nullptr==args) {
-        proj_context_errno_set(ctx, ENOMEM);
+        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP /*ENOMEM*/);
         return nullptr;
     }
     strcpy (args, definition);
@@ -779,14 +770,14 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
     argc = pj_trim_argc (args);
     if (argc==0) {
         free (args);
-        proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
+        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_MISSING_ARG);
         return nullptr;
     }
 
     argv = pj_trim_argv (argc, args);
     if (!argv) {
         free(args);
-        proj_context_errno_set(ctx, ENOMEM);
+        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP /*ENOMEM*/);
         return nullptr;
     }
 
@@ -821,14 +812,14 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
     if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
     if (nullptr==argv) {
-        proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
+        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_MISSING_ARG);
         return nullptr;
     }
 
     /* We assume that free format is used, and build a full proj_create compatible string */
     c = pj_make_args (argc, argv);
     if (nullptr==c) {
-        proj_context_errno_set(ctx, ENOMEM);
+        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP /* ENOMEM */);
         return nullptr;
     }
 
@@ -849,14 +840,14 @@ Same as proj_create_argv() but calls pj_create_internal() instead of proj_create
     if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
     if (nullptr==argv) {
-        proj_context_errno_set(ctx, PJD_ERR_NO_ARGS);
+        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_MISSING_ARG);
         return nullptr;
     }
 
     /* We assume that free format is used, and build a full proj_create compatible string */
     c = pj_make_args (argc, argv);
     if (nullptr==c) {
-        proj_context_errno_set(ctx, ENOMEM);
+        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP /*ENOMEM*/);
         return nullptr;
     }
 

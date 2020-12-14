@@ -64,7 +64,7 @@ static PJ *destructor (PJ *P, int errlev) {              /* Destructor */
 PJ *PROJECTION(goode) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -72,14 +72,14 @@ PJ *PROJECTION(goode) {
     Q->sinu = pj_sinu(nullptr);
     Q->moll = pj_moll(nullptr);
     if (Q->sinu == nullptr || Q->moll == nullptr)
-        return destructor (P, ENOMEM);
+        return destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     Q->sinu->es = 0.;
     Q->sinu->ctx = P->ctx;
     Q->moll->ctx = P->ctx;
     Q->sinu = pj_sinu(Q->sinu);
     Q->moll = pj_moll(Q->moll);
     if (Q->sinu == nullptr || Q->moll == nullptr)
-        return destructor (P, ENOMEM);
+        return destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
 
     P->fwd = goode_s_forward;
     P->inv = goode_s_inverse;

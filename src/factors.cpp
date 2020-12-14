@@ -36,8 +36,15 @@ int pj_factors(PJ_LP lp, const PJ *P, double h, struct FACTORS *fac) {
     fac->code = 0;
 
     /* Check for latitude or longitude overange */
-    if ((fabs (lp.phi)-M_HALFPI) > EPS || fabs (lp.lam) > 10.) {
-        proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
+    if ((fabs (lp.phi)-M_HALFPI) > EPS )
+    {
+        proj_log_error(P, _("Invalid latitude"));
+        proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_INVALID_COORD);
+        return 1;
+    }
+    if( fabs (lp.lam) > 10.) {
+        proj_log_error(P, _("Invalid longitude"));
+        proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_INVALID_COORD);
         return 1;
     }
 
@@ -62,7 +69,8 @@ int pj_factors(PJ_LP lp, const PJ *P, double h, struct FACTORS *fac) {
 
     /* Derivatives */
     if (pj_deriv (lp, h, P, &(fac->der))) {
-        proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
+        proj_log_error(P, _("Invalid latitude or longitude"));
+        proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_INVALID_COORD);
         return 1;
     }
 

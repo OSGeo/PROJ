@@ -495,7 +495,7 @@ expect      0 0 1
 roundtrip   1
 
 operation  +proj=longlat +a=1 +b=1 +vto_meter=1/0
-expect     failure   errno unit_factor_less_than_0
+expect     failure   errno invalid_op_illegal_arg_value
 
 operation   +proj=longlat +a=1 +b=1 +vto_meter=1000 +geoc
 accept      0 0 1000
@@ -522,7 +522,7 @@ roundtrip   1
 # in the creation of a PJ object.
 -------------------------------------------------------------------------------
 operation   this is a bogus CRS meant to trigger a generic error in proj_create()
-expect      failure   errno generic error
+expect      failure   errno other
 
 -------------------------------------------------------------------------------
 # Test proj=set

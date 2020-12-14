@@ -48,7 +48,6 @@ TEST(gie, cart_selftest) {
     PJ_COORD a, b, obs[2];
     PJ_COORD coord[2];
 
-    int err;
     size_t n, sz;
     double dist, h, t;
     const char *const args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
@@ -87,16 +86,6 @@ TEST(gie, cart_selftest) {
     ASSERT_LE(dist, 2e-9);
 
     /* Clear any previous error */
-    proj_errno_reset(P);
-
-    /* Invalid projection */
-    a = proj_trans(P, static_cast<PJ_DIRECTION>(42), a);
-    ASSERT_EQ(a.lpz.lam, HUGE_VAL);
-
-    err = proj_errno(P);
-    ASSERT_NE(err, 0);
-
-    /* Clear error again */
     proj_errno_reset(P);
 
     /* Clean up */

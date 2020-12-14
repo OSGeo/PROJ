@@ -118,13 +118,13 @@ PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level) {
 
 
 /*****************************************************************************/
-void proj_log_error (PJ *P, const char *fmt, ...) {
+void proj_log_error (const PJ *P, const char *fmt, ...) {
 /******************************************************************************
    For reporting the most severe events.
 ******************************************************************************/
     va_list args;
     va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_ERROR , fmt, args);
+    pj_vlog (pj_get_ctx ((PJ*)P), PJ_LOG_ERROR , fmt, args);
     va_end( args );
 }
 

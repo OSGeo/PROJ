@@ -47,7 +47,7 @@ static PJ_LP hatano_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
     th = xy.y * ( xy.y < 0. ? RYCS : RYCN);
     if (fabs(th) > 1.) {
         if (fabs(th) > ONETOL) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         } else {
             th = th > 0. ? M_HALFPI : - M_HALFPI;
@@ -61,7 +61,7 @@ static PJ_LP hatano_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
     lp.phi = (th + sin(th)) * (xy.y < 0. ? RCS : RCN);
     if (fabs(lp.phi) > 1.) {
         if (fabs(lp.phi) > ONETOL) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         } else {
             lp.phi = lp.phi > 0. ? M_HALFPI : - M_HALFPI;

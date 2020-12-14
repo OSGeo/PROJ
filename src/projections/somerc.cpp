@@ -62,7 +62,7 @@ static PJ_LP somerc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inver
         lp.phi = phip;
         lp.lam = lamp / Q->c;
     } else {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     return (lp);
@@ -73,7 +73,7 @@ PJ *PROJECTION(somerc) {
     double cp, phip0, sp;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = Q;
 
 

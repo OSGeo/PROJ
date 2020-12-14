@@ -37,7 +37,7 @@ static PJ_XY mod_ster_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, for
     cchi = cos(chi);
     const double denom = 1. + Q->schio * schi + Q->cchio * cchi * coslon;
     if( denom == 0 ) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
     s = 2. / denom;
@@ -136,7 +136,7 @@ PJ *PROJECTION(mil_os) {
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 2;
@@ -159,7 +159,7 @@ PJ *PROJECTION(lee_os) {
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 2;
@@ -184,7 +184,7 @@ PJ *PROJECTION(gs48) {
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 4;
@@ -219,7 +219,7 @@ PJ *PROJECTION(alsk) {
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 5;
@@ -267,7 +267,7 @@ PJ *PROJECTION(gs50) {
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = 9;

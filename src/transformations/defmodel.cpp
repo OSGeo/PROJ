@@ -390,7 +390,7 @@ PJ *TRANSFORMATION(defmodel, 1) {
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     auto cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (cart == nullptr)
-        return destructor(P, ENOMEM);
+        return destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def(P, cart);
@@ -402,14 +402,14 @@ PJ *TRANSFORMATION(defmodel, 1) {
 
     const char *model = pj_param(P->ctx, P->params, "smodel").s;
     if (!model) {
-        proj_log_error(P, "defmodel: +model= should be specified.");
-        return destructor(P, PJD_ERR_NO_ARGS);
+        proj_log_error(P, _("defmodel: +model= should be specified."));
+        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     auto file = NS_PROJ::FileManager::open_resource_file(P->ctx, model);
     if (nullptr == file) {
-        proj_log_error(P, "defmodel: Cannot open %s", model);
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("defmodel: Cannot open %s"), model);
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
     file->seek(0, SEEK_END);
     unsigned long long size = file->tell();
@@ -417,23 +417,23 @@ PJ *TRANSFORMATION(defmodel, 1) {
     // that could be a denial of service risk. 10 MB should be sufficiently
     // large for any valid use !
     if (size > 10 * 1024 * 1024) {
-        proj_log_error(P, "defmodel: File %s too large", model);
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("defmodel: File %s too large"), model);
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
     file->seek(0);
     std::string jsonStr;
     jsonStr.resize(static_cast<size_t>(size));
     if (file->read(&jsonStr[0], jsonStr.size()) != jsonStr.size()) {
-        proj_log_error(P, "defmodel: Cannot read %s", model);
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("defmodel: Cannot read %s"), model);
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
 
     try {
         Q->evaluator.reset(new Evaluator<Grid, GridSet, EvaluatorIface>(
             MasterFile::parse(jsonStr), Q->evaluatorIface, P->a, P->b));
     } catch (const std::exception &e) {
-        proj_log_error(P, "defmodel: invalid model: %s", e.what());
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("defmodel: invalid model: %s"), e.what());
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
 
     P->fwd4d = forward_4d;

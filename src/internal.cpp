@@ -89,12 +89,9 @@ chained calls starting out with a call to its 2D interface.
             coo.lp = pj_inv (coo.xy, P);
             return coo;
         case PJ_IDENT:
-            return coo;
-        default:
             break;
     }
-    proj_errno_set (P, EINVAL);
-    return proj_coord_error ();
+    return coo;
 }
 
 
@@ -119,12 +116,9 @@ chained calls starting out with a call to its 3D interface.
             coo.lpz = pj_inv3d (coo.xyz, P);
             return coo;
         case PJ_IDENT:
-            return coo;
-        default:
             break;
     }
-    proj_errno_set (P, EINVAL);
-    return proj_coord_error ();
+    return coo;
 }
 
 /**************************************************************************************/

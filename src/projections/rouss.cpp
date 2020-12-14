@@ -95,7 +95,7 @@ static PJ *destructor (PJ *P, int errlev) {
     if (static_cast<struct pj_opaque*>(P->opaque)->en)
         free (static_cast<struct pj_opaque*>(P->opaque)->en);
 
-    return pj_default_destructor (P, ENOMEM);
+    return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
 }
 
 
@@ -104,11 +104,11 @@ PJ *PROJECTION(rouss) {
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = Q;
 
     if (!((Q->en = proj_mdist_ini(P->es))))
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
 
     es2 = sin(P->phi0);
     Q->s0 = proj_mdist(P->phi0, es2, cos(P->phi0), Q->en);

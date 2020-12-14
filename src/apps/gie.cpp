@@ -951,7 +951,15 @@ Tell GIE what to expect, when transforming the ACCEPTed input
         if (expect_failure_with_errno) {
             if (proj_errno (T.P)==expect_failure_with_errno)
                 return another_succeeding_failure ();
-            fprintf (T.fout, "errno=%d, expected=%d\n", proj_errno (T.P), expect_failure_with_errno);
+            //fprintf (T.fout, "errno=%d, expected=%d\n", proj_errno (T.P), expect_failure_with_errno);
+            banner (T.operation);
+            errmsg (3, "%serrno=%s (%d), expected=%d at line %d\n",
+                delim,
+                err_const_from_errno(proj_errno(T.P)),
+                proj_errno (T.P),
+                expect_failure_with_errno,
+                F->lineno
+            );
             return another_failing_failure ();
         }
 
@@ -1107,85 +1115,32 @@ static int dispatch (const char *cmnd, const char *args) {
 namespace { // anonymous namespace
 struct errno_vs_err_const {const char *the_err_const; int the_errno;};
 static const struct errno_vs_err_const lookup[] = {
-    {"pjd_err_no_args"                  ,  -1},
-    {"pjd_err_no_option_in_init_file"   ,  -2},
-    {"pjd_err_no_colon_in_init_string"  ,  -3},
-    {"pjd_err_proj_not_named"           ,  -4},
-    {"pjd_err_unknown_projection_id"    ,  -5},
-    {"pjd_err_invalid_eccentricity"      ,  -6},
-    {"pjd_err_unknown_unit_id"          ,  -7},
-    {"pjd_err_invalid_boolean_param"    ,  -8},
-    {"pjd_err_unknown_ellp_param"       ,  -9},
-    {"pjd_err_rev_flattening_is_zero"   ,  -10},
-    {"pjd_err_ref_rad_larger_than_90"   ,  -11},
-    {"pjd_err_es_less_than_zero"        ,  -12},
-    {"pjd_err_major_axis_not_given"     ,  -13},
-    {"pjd_err_lat_or_lon_exceed_limit"  ,  -14},
-    {"pjd_err_invalid_x_or_y"           ,  -15},
-    {"pjd_err_wrong_format_dms_value"   ,  -16},
-    {"pjd_err_non_conv_inv_meri_dist"   ,  -17},
-    {"pjd_err_non_conv_sinhpsi2tanphi"  ,  -18},
-    {"pjd_err_acos_asin_arg_too_large"  ,  -19},
-    {"pjd_err_tolerance_condition"      ,  -20},
-    {"pjd_err_conic_lat_equal"          ,  -21},
-    {"pjd_err_lat_larger_than_90"       ,  -22},
-    {"pjd_err_lat1_is_zero"             ,  -23},
-    {"pjd_err_lat_ts_larger_than_90"    ,  -24},
-    {"pjd_err_control_point_no_dist"    ,  -25},
-    {"pjd_err_no_rotation_proj"         ,  -26},
-    {"pjd_err_w_or_m_zero_or_less"      ,  -27},
-    {"pjd_err_lsat_not_in_range"        ,  -28},
-    {"pjd_err_path_not_in_range"        ,  -29},
-    {"pjd_err_invalid_h"                ,  -30},
-    {"pjd_err_k_less_than_zero"         ,  -31},
-    {"pjd_err_lat_1_or_2_zero_or_90"    ,  -32},
-    {"pjd_err_lat_0_or_alpha_eq_90"     ,  -33},
-    {"pjd_err_ellipsoid_use_required"   ,  -34},
-    {"pjd_err_invalid_utm_zone"         ,  -35},
-    {""                                 ,  -36}, /* no longer used */
-    {"pjd_err_failed_to_find_proj"      ,  -37},
-    {"pjd_err_failed_to_load_grid"      ,  -38},
-    {"pjd_err_invalid_m_or_n"           ,  -39},
-    {"pjd_err_n_out_of_range"           ,  -40},
-    {"pjd_err_lat_1_2_unspecified"      ,  -41},
-    {"pjd_err_abs_lat1_eq_abs_lat2"     ,  -42},
-    {"pjd_err_lat_0_half_pi_from_mean"  ,  -43},
-    {"pjd_err_unparseable_cs_def"       ,  -44},
-    {"pjd_err_geocentric"               ,  -45},
-    {"pjd_err_unknown_prime_meridian"   ,  -46},
-    {"pjd_err_axis"                     ,  -47},
-    {"pjd_err_grid_area"                ,  -48},
-    {"pjd_err_invalid_sweep_axis"       ,  -49},
-    {"pjd_err_malformed_pipeline"       ,  -50},
-    {"pjd_err_unit_factor_less_than_0"  ,  -51},
-    {"pjd_err_invalid_scale"            ,  -52},
-    {"pjd_err_non_convergent"           ,  -53},
-    {"pjd_err_missing_args"             ,  -54},
-    {"pjd_err_lat_0_is_zero"            ,  -55},
-    {"pjd_err_ellipsoidal_unsupported"  ,  -56},
-    {"pjd_err_too_many_inits"           ,  -57},
-    {"pjd_err_invalid_arg"              ,  -58},
-    {"pjd_err_inconsistent_unit"        ,  -59},
-    {"pjd_err_mutually_exclusive_args"  ,  -60},
-    {"pjd_err_generic_error"            ,  -61},
-    {"pjd_err_network_error"            ,  -62},
-    {"pjd_err_dont_skip"                ,  5555},
-    {"pjd_err_unknown"                  ,  9999},
-    {"pjd_err_enomem"                   ,  ENOMEM},
+
+    { "invalid_op",                              PROJ_ERR_INVALID_OP },
+    { "invalid_op_wrong_syntax",                 PROJ_ERR_INVALID_OP_WRONG_SYNTAX },
+    { "invalid_op_missing_arg",                  PROJ_ERR_INVALID_OP_MISSING_ARG },
+    { "invalid_op_illegal_arg_value",            PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE },
+    { "invalid_op_mutually_exclusive_args",      PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS },
+    { "invalid_op_file_not_found_or_invalid",    PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID },
+    { "coord_transfm",                           PROJ_ERR_COORD_TRANSFM },
+    { "coord_transfm_invalid_coord",             PROJ_ERR_COORD_TRANSFM_INVALID_COORD },
+    { "coord_transfm_outside_projection_domain", PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN },
+    { "coord_transfm_no_operation",              PROJ_ERR_COORD_TRANSFM_NO_OPERATION },
+    { "coord_transfm_outside_grid",              PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID },
+    { "coord_transfm_grid_at_nodata",            PROJ_ERR_COORD_TRANSFM_GRID_AT_NODATA },
+    { "other",                                   PROJ_ERR_OTHER },
+    { "api_misuse",                              PROJ_ERR_OTHER_API_MISUSE },
+    { "no_inverse_op",                           PROJ_ERR_OTHER_NO_INVERSE_OP },
+    { "network_error",                           PROJ_ERR_OTHER_NETWORK_ERROR },
 };
 } // anonymous namespace
-
-static const struct errno_vs_err_const unknown = {"PJD_ERR_UNKNOWN", 9999};
-
 
 static int list_err_codes (void) {
     int i;
     const int n = sizeof lookup / sizeof lookup[0];
 
     for (i = 0;  i < n;  i++) {
-        if (9999==lookup[i].the_errno)
-            break;
-        fprintf (T.fout, "%25s  (%2.2d):  %s\n", lookup[i].the_err_const + 8,
+        fprintf (T.fout, "%25s  (%2.2d):  %s\n", lookup[i].the_err_const,
                  lookup[i].the_errno, proj_errno_string (lookup[i].the_errno));
     }
     return 0;
@@ -1198,9 +1153,9 @@ static const char *err_const_from_errno (int err) {
 
     for (i = 0;  i < n;  i++) {
         if (err==lookup[i].the_errno)
-            return lookup[i].the_err_const + 8;
+            return lookup[i].the_err_const;
     }
-    return unknown.the_err_const;
+    return "unknown";
 }
 
 
@@ -1226,14 +1181,6 @@ static int errno_from_err_const (const char *err_const) {
     /* Else try to find a matching identifier */
     len = strlen (tolower_err_const);
 
-    /* First try to find a match excluding the PJD_ERR_ prefix */
-    for (i = 0;  i < n;  i++) {
-        if (strlen(lookup[i].the_err_const) > 8 &&
-            0==strncmp (lookup[i].the_err_const + 8, err_const, len))
-            return lookup[i].the_errno;
-    }
-
-    /* If that did not work, try with the full name */
     for (i = 0;  i < n;  i++) {
         if (0==strncmp (lookup[i].the_err_const, err_const, len))
             return lookup[i].the_errno;

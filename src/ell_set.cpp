@@ -1,6 +1,5 @@
 /* set ellipsoid parameters a and es */
 
-#include <errno.h>
 #include <math.h>
 #include <stddef.h>
 #include <string.h>
@@ -147,23 +146,29 @@ static int ellps_ellps (PJ *P) {
 
     /* Then look up the right size and shape parameters from the builtin list */
     if (strlen (par->param) < 7)
-        return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+    {
+        proj_log_error(P, _("Invalid value for +ellps"));
+        return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     name = par->param + 6;
     ellps = pj_find_ellps (name);
     if (nullptr==ellps)
-        return proj_errno_set (P, PJD_ERR_UNKNOWN_ELLP_PARAM);
+    {
+        proj_log_error(P, _("Unrecognized value for +ellps"));
+        return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
 
     /* Now, get things ready for ellps_size/ellps_shape, make them do their thing */
     err = proj_errno_reset (P);
 
     paralist* new_params = pj_mkparam (ellps->major);
     if (nullptr == new_params)
-        return proj_errno_set (P, ENOMEM);
+        return proj_errno_set (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     new_params->next = pj_mkparam (ellps->ell);
     if (nullptr == new_params->next)
     {
         free(new_params);
-        return proj_errno_set (P, ENOMEM);
+        return proj_errno_set (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     }
     paralist* old_params = P->params;
     P->params = new_params;
@@ -207,15 +212,26 @@ static int ellps_size (PJ *P) {
     if (nullptr==par)
         par = pj_get_param (P->params, "a");
     if (nullptr==par)
-        return a_was_set? 0: proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+    {
+        if( a_was_set )
+            return 0;
+        proj_log_error(P, _("Major axis not given"));
+        return proj_errno_set (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
 
     P->def_size = pj_strdup(par->param);
     par->used = 1;
     P->a = pj_atof (pj_param_value (par));
     if (P->a <= 0)
-        return proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+    {
+        proj_log_error(P, _("Invalid value for major axis"));
+        return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     if (HUGE_VAL==P->a)
-        return proj_errno_set (P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+    {
+        proj_log_error(P, _("Invalid value for major axis"));
+        return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
 
     if ('R'==par->param[0]) {
         P->es = P->f = P->e = P->rf = 0;
@@ -264,10 +280,11 @@ static int ellps_shape (PJ *P) {
     /* reverse flattening, rf */
     case 0:
          P->rf = pj_atof (pj_param_value (par));
-         if (HUGE_VAL==P->rf)
-             return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-         if (0==P->rf)
-             return proj_errno_set (P, PJD_ERR_REV_FLATTENING_IS_ZERO);
+         if (HUGE_VAL==P->rf || P->rf <= 0)
+         {
+            proj_log_error(P, _("Invalid value for rf. Should be > 0"));
+            return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+         }
          P->f = 1 / P->rf;
          P->es = 2*P->f - P->f*P->f;
          break;
@@ -275,8 +292,11 @@ static int ellps_shape (PJ *P) {
     /* flattening, f */
     case 1:
         P->f = pj_atof (pj_param_value (par));
-        if (HUGE_VAL==P->f)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
+        if (HUGE_VAL==P->f || P->f < 0)
+        {
+            proj_log_error(P, _("Invalid value for f. Should be >= 0"));
+            return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
 
         P->rf = P->f != 0.0 ? 1.0/P->f: HUGE_VAL;
         P->es = 2*P->f - P->f*P->f;
@@ -285,42 +305,49 @@ static int ellps_shape (PJ *P) {
     /* eccentricity squared, es */
     case 2:
         P->es = pj_atof (pj_param_value (par));
-        if (HUGE_VAL==P->es)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (P->es >= 1)
-            return proj_errno_set (P, PJD_ERR_INVALID_ECCENTRICITY);
+        if (HUGE_VAL==P->es || P->es < 0 || P->es >= 1)
+        {
+            proj_log_error(P, _("Invalid value for es. Should be in [0,1[ range"));
+            return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
         break;
 
     /* eccentricity, e */
     case 3:
         P->e = pj_atof (pj_param_value (par));
-        if (HUGE_VAL==P->e)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (P->e < 0 || P->e >= 1)
-             return proj_errno_set (P, PJD_ERR_INVALID_ECCENTRICITY);
+        if (HUGE_VAL==P->e || P->e < 0 || P->e >= 1)
+        {
+            proj_log_error(P, _("Invalid value for e. Should be in [0,1[ range"));
+            return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
         P->es = P->e * P->e;
         break;
 
     /* semiminor axis, b */
     case 4:
         P->b = pj_atof (pj_param_value (par));
-        if (HUGE_VAL==P->b)
-            return proj_errno_set (P, PJD_ERR_INVALID_ARG);
-        if (P->b <= 0)
-            return proj_errno_set (P, PJD_ERR_INVALID_ECCENTRICITY);
+        if (HUGE_VAL==P->b || P->b <= 0)
+        {
+            proj_log_error(P, _("Invalid value for b. Should be > 0"));
+            return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
         if (P->b==P->a)
             break;
         P->f = (P->a - P->b) / P->a;
         P->es = 2*P->f - P->f*P->f;
         break;
     default:
-        return PJD_ERR_INVALID_ARG;
+        // shouldn't happen
+        return PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE;
 
     }
 
     // Written that way to catch NaN
     if (!(P->es >= 0))
-        return proj_errno_set (P, PJD_ERR_ES_LESS_THAN_ZERO);
+    {
+        proj_log_error(P, _("Invalid eccentricity"));
+        return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     return 0;
 }
 
@@ -384,7 +411,7 @@ static int ellps_spherification (PJ *P) {
     /* R_h - a sphere with R = the harmonic mean of the ellipsoid */
     case 4:
         if (P->a + P->b == 0)
-            return proj_errno_set (P, PJD_ERR_TOLERANCE_CONDITION);
+            return proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         P->a = (2*P->a * P->b) / (P->a + P->b);
         break;
 
@@ -395,11 +422,15 @@ static int ellps_spherification (PJ *P) {
         v = pj_param_value (par);
         t = proj_dmstor (v, &endp);
         if (fabs (t) > M_HALFPI)
-            return proj_errno_set (P, PJD_ERR_REF_RAD_LARGER_THAN_90);
+        {
+            proj_log_error(P, _("Invalid value for lat_g. |lat_g| should be <= 90°"));
+            return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
         t = sin (t);
         t = 1 - P->es * t * t;
         if (t == 0.) {
-            return proj_errno_set(P, PJD_ERR_INVALID_ECCENTRICITY);
+            proj_log_error(P, _("Invalid eccentricity"));
+            return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
         if (i==5)   /* arithmetic */
             P->a *= (1. - P->es + t) / (2 * t * sqrt(t));
@@ -409,7 +440,8 @@ static int ellps_spherification (PJ *P) {
     }
 
     if (P->a <= 0.) {
-        return proj_errno_set(P, PJD_ERR_MAJOR_AXIS_NOT_GIVEN);
+        proj_log_error(P, _("Invalid or missing major axis"));
+        return proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     /* Clean up the ellipsoidal parameters to reflect the sphere */
@@ -552,8 +584,9 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es) {
     if (0==P->f)
         P->f  = 1 - cos (P->alpha);   /* = 1 - sqrt (1 - PIN->es); */
     if (P->f == 1.0) {
-        proj_context_errno_set( P->ctx, PJD_ERR_INVALID_ECCENTRICITY);
-        return PJD_ERR_INVALID_ECCENTRICITY;
+        proj_log_error(P, _("Invalid eccentricity"));
+        proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE;
     }
     P->rf = P->f != 0.0 ? 1.0/P->f: HUGE_VAL;
 
@@ -573,8 +606,9 @@ int pj_calc_ellipsoid_params (PJ *P, double a, double es) {
 
     P->one_es = 1. - P->es;
     if (P->one_es == 0.) {
-        proj_context_errno_set( P->ctx, PJD_ERR_INVALID_ECCENTRICITY);
-        return PJD_ERR_INVALID_ECCENTRICITY;
+        proj_log_error(P, _("Invalid eccentricity"));
+        proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE;
     }
 
     P->rone_es = 1./P->one_es;

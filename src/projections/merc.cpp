@@ -53,7 +53,10 @@ PJ *PROJECTION(merc) {
     if( (is_phits = pj_param(P->ctx, P->params, "tlat_ts").i) ) {
         phits = fabs(pj_param(P->ctx, P->params, "rlat_ts").f);
         if (phits >= M_HALFPI)
-            return pj_default_destructor(P, PJD_ERR_LAT_TS_LARGER_THAN_90);
+        {
+            proj_log_error(P, _("Invalid value for lat_ts: |lat_ts| should be <= 90°"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
     }
 
     if (P->es != 0.0) { /* ellipsoid */

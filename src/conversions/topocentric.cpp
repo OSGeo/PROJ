@@ -78,7 +78,7 @@ PJ *CONVERSION(topocentric,1) {
 /*********************************************************************/
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     P->opaque = static_cast<void *>(Q);
 
     // The topocentric origin can be specified either in geocentric coordinates
@@ -97,26 +97,30 @@ PJ *CONVERSION(topocentric,1) {
     const auto hash0 = pj_param_exists(P->params, "h_0");
     if( !hasX0 && !hasLon0 )
     {
-        return pj_default_destructor(P, PJD_ERR_MISSING_ARGS);
+        proj_log_error(P, _("topocentric: missing X_0 or lon_0"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     if ( (hasX0 || hasY0 || hasZ0) &&
          (hasLon0 || hasLat0 || hash0) )
     {
-        return pj_default_destructor(P, PJD_ERR_MUTUALLY_EXCLUSIVE_ARGS);
+        proj_log_error(P, _("topocentric: (X_0,Y_0,Z_0) and (lon_0,lat_0,h_0) are mutually exclusive"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
     }
     if( hasX0 && (!hasY0 || !hasZ0) )
     {
-        return pj_default_destructor(P, PJD_ERR_MISSING_ARGS);
+        proj_log_error(P, _("topocentric: missing Y_0 and/or Z_0"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     if( hasLon0 && !hasLat0 ) // allow missing h_0
     {
-        return pj_default_destructor(P, PJD_ERR_MISSING_ARGS);
+        proj_log_error(P, _("topocentric: missing lat_0"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     PJ* cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (cart == nullptr)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
     /* inherit ellipsoid definition from P to cart */
     pj_inherit_ellipsoid_def (P, cart);
 

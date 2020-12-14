@@ -47,7 +47,6 @@ operation   +proj=deformation +xy_grids=alaska +z_grids=egm96_15.gtx \
             +ellps=GRS80 +dt=16.0 # 2016.0 - 2000.0
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
-ignore      pjd_err_failed_to_load_grid
 accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457
 expect      -3004295.7000       -1093474.2097       5500477.3397
 roundtrip   5
@@ -55,9 +54,9 @@ roundtrip   5
 # Test that errors are reported for coordinates outside the grid.
 # Here we test 120W 40N which is well outside the alaska grid.
 accept      -2446353.8001  -4237209.0750  4077985.572
-expect      failure errno grid_area
+expect      failure errno coord_transfm_outside_grid
 accept      -2446353.8001  -4237209.0750  4077985.572
-expect      failure errno grid_area
+expect      failure errno coord_transfm_outside_grid
 
 
 -------------------------------------------------------------------------------
@@ -68,34 +67,32 @@ operation   +proj=deformation \
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
 direction   inverse
-ignore      pjd_err_failed_to_load_grid
 accept      -3004295.5882503074 -1093474.1690603832 5500477.1338251457 2000.0
 expect      -3004295.7000       -1093474.2097       5500477.3397       2000.0
 roundtrip   5
 
 -------------------------------------------------------------------------------
 operation   proj=deformation xy_grids=alaska +dt=1.0 ellps=GRS80
-expect      failure pjd_err_no_args
+expect      failure errno invalid_op_missing_arg
 
 operation   proj=deformation z_grids=egm96_15.gtx +dt=1.0 ellps=GRS80
-expect      failure pjd_err_no_args
+expect      failure errno invalid_op_missing_arg
 
 operation   proj=deformation xy_grids=nonexisting z_grids=egm96_15.gtx \
             +dt=1.0 ellps=GRS80
-expect      failure pjd_err_failed_to_load_grid
+expect      failure errno invalid_op_file_not_found_or_invalid
 
 operation   proj=deformation xy_grids=alaska z_grids=nonexisting \
             +dt=1.0 ellps=GRS80
-expect      failure pjd_err_failed_to_load_grid
+expect      failure errno invalid_op_file_not_found_or_invalid
 
 operation   proj=deformation xy_grids=alaska z_grids=nonexisting ellps=GRS80
-expect      failure pjd_err_missing_args
+expect      failure errno invalid_op_file_not_found_or_invalid
 
 -------------------------------------------------------------------------------
 operation   +proj=vgridshift +grids=egm96_15.gtx +t_epoch=2010.0 +t_final=2018.0
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
-ignore      pjd_err_failed_to_load_grid
 
 accept      12 56  0.0        2000.0
 expect      12 56 -36.9960    2000.0
@@ -118,7 +115,6 @@ roundtrip   100
 operation   +proj=vgridshift +grids=egm96_15.gtx +t_epoch=2010.0 +t_final=now
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
-ignore      pjd_err_failed_to_load_grid
 
 accept      12 56  0.0        2000.0
 expect      12 56 -36.9960    2000.0
@@ -137,7 +133,6 @@ roundtrip   100
 operation +proj=hgridshift +grids=alaska +t_epoch=2010.0 +t_final=2018.0
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
-ignore      pjd_err_failed_to_load_grid
 
 accept      -147.0              64.0                0.0     2000.0
 expect      -147.0023233121     63.9995792119       0.0     2000.0
@@ -155,7 +150,6 @@ roundtrip   100
 operation +proj=hgridshift +grids=alaska +t_epoch=2010.0 +t_final=now
 -------------------------------------------------------------------------------
 tolerance   0.1 mm
-ignore      pjd_err_failed_to_load_grid
 
 accept      -147.0              64.0                0.0     2000.0
 expect      -147.0023233121     63.9995792119       0.0     2000.0
