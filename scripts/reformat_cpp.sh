@@ -16,7 +16,10 @@ esac
 TOPDIR="$SCRIPT_DIR/.."
 
 for i in "$TOPDIR"/include/proj/*.hpp "$TOPDIR"/include/proj/internal/*.hpp \
-         "$TOPDIR"/src/iso19111/*.cpp "$TOPDIR"/test/unit/*.cpp \
+         "$TOPDIR"/src/iso19111/*.cpp \
+         "$TOPDIR"/src/iso19111/operation/*.cpp \
+         "$TOPDIR"/src/iso19111/operation/*.hpp \
+         "$TOPDIR"/test/unit/*.cpp \
          "$TOPDIR"/src/apps/projinfo.cpp "$TOPDIR"/src/apps/projsync.cpp \
          "$TOPDIR"/src/tracing.cpp "$TOPDIR"/src/grids.hpp "$TOPDIR"/src/grids.cpp \
          "$TOPDIR"/src/filemanager.hpp "$TOPDIR"/src/filemanager.cpp \
