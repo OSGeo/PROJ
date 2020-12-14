@@ -53,7 +53,11 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
-#include "proj/internal/coordinateoperation_internal.hpp"
+#include "operation/coordinateoperation_internal.hpp"
+#include "operation/esriparammappings.hpp"
+#include "operation/oputils.hpp"
+#include "operation/parammappings.hpp"
+
 #include "proj/internal/coordinatesystem_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"

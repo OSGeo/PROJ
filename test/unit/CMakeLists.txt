@@ -121,6 +121,7 @@ add_executable(proj_test_cpp_api
   test_metadata.cpp
   test_io.cpp
   test_operation.cpp
+  test_operationfactory.cpp
   test_datum.cpp
   test_factory.cpp
   test_c_api.cpp

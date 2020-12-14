@@ -26,36 +26,31 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef FROM_COORDINATE_OPERATION_CPP
-#error This file should only be included from coordinateoperation.cpp
-#endif
-
-#ifndef COORDINATEOPERATION_CONSTANTS_HH_INCLUDED
-#define COORDINATEOPERATION_CONSTANTS_HH_INCLUDED
-
-#include "coordinateoperation_internal.hpp"
+#include "parammappings.hpp"
+#include "oputils.hpp"
 #include "proj_constants.h"
 
+#include "proj/internal/internal.hpp"
+
+NS_PROJ_START
+
+using namespace internal;
+
+namespace operation {
+
 //! @cond Doxygen_Suppress
-// ---------------------------------------------------------------------------
 
-// anonymous namespace
-namespace {
-
-using namespace ::NS_PROJ;
-using namespace ::NS_PROJ::operation;
-
-static const char *WKT1_LATITUDE_OF_ORIGIN = "latitude_of_origin";
-static const char *WKT1_CENTRAL_MERIDIAN = "central_meridian";
-static const char *WKT1_SCALE_FACTOR = "scale_factor";
-static const char *WKT1_FALSE_EASTING = "false_easting";
-static const char *WKT1_FALSE_NORTHING = "false_northing";
-static const char *WKT1_STANDARD_PARALLEL_1 = "standard_parallel_1";
-static const char *WKT1_STANDARD_PARALLEL_2 = "standard_parallel_2";
-static const char *WKT1_LATITUDE_OF_CENTER = "latitude_of_center";
-static const char *WKT1_LONGITUDE_OF_CENTER = "longitude_of_center";
-static const char *WKT1_AZIMUTH = "azimuth";
-static const char *WKT1_RECTIFIED_GRID_ANGLE = "rectified_grid_angle";
+const char *WKT1_LATITUDE_OF_ORIGIN = "latitude_of_origin";
+const char *WKT1_CENTRAL_MERIDIAN = "central_meridian";
+const char *WKT1_SCALE_FACTOR = "scale_factor";
+const char *WKT1_FALSE_EASTING = "false_easting";
+const char *WKT1_FALSE_NORTHING = "false_northing";
+const char *WKT1_STANDARD_PARALLEL_1 = "standard_parallel_1";
+const char *WKT1_STANDARD_PARALLEL_2 = "standard_parallel_2";
+const char *WKT1_LATITUDE_OF_CENTER = "latitude_of_center";
+const char *WKT1_LONGITUDE_OF_CENTER = "longitude_of_center";
+const char *WKT1_AZIMUTH = "azimuth";
+const char *WKT1_RECTIFIED_GRID_ANGLE = "rectified_grid_angle";
 
 static const char *lat_0 = "lat_0";
 static const char *lat_1 = "lat_1";
@@ -73,7 +68,9 @@ static const char *x_0 = "x_0";
 static const char *y_0 = "y_0";
 static const char *h = "h";
 
-static const ParamMapping paramLatitudeNatOrigin = {
+// ---------------------------------------------------------------------------
+
+const ParamMapping paramLatitudeNatOrigin = {
     EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, WKT1_LATITUDE_OF_ORIGIN,
     common::UnitOfMeasure::Type::ANGULAR, lat_0};
@@ -874,13 +871,16 @@ static const MethodMapping projectionMethodMappings[] = {
      paramsGeographicTopocentric},
 };
 
+const MethodMapping *getProjectionMethodMappings(size_t &nElts) {
+    nElts =
+        sizeof(projectionMethodMappings) / sizeof(projectionMethodMappings[0]);
+    return projectionMethodMappings;
+}
+
 #define METHOD_NAME_CODE(method)                                               \
     { EPSG_NAME_METHOD_##method, EPSG_CODE_METHOD_##method }
 
-static const struct MethodNameCode {
-    const char *name;
-    int epsg_code;
-} methodNameCodes[] = {
+const struct MethodNameCode methodNameCodes[] = {
     // Projection methods
     METHOD_NAME_CODE(TRANSVERSE_MERCATOR),
     METHOD_NAME_CODE(TRANSVERSE_MERCATOR_SOUTH_ORIENTATED),
@@ -949,13 +949,15 @@ static const struct MethodNameCode {
     METHOD_NAME_CODE(GEOCENTRIC_TRANSLATION_BY_GRID_INTERPOLATION_IGN),
 };
 
+const MethodNameCode *getMethodNameCodes(size_t &nElts) {
+    nElts = sizeof(methodNameCodes) / sizeof(methodNameCodes[0]);
+    return methodNameCodes;
+}
+
 #define PARAM_NAME_CODE(method)                                                \
     { EPSG_NAME_PARAMETER_##method, EPSG_CODE_PARAMETER_##method }
 
-static const struct ParamNameCode {
-    const char *name;
-    int epsg_code;
-} paramNameCodes[] = {
+const struct ParamNameCode paramNameCodes[] = {
     // Parameters of projection methods
     PARAM_NAME_CODE(COLATITUDE_CONE_AXIS),
     PARAM_NAME_CODE(LATITUDE_OF_NATURAL_ORIGIN),
@@ -1013,6 +1015,11 @@ static const struct ParamNameCode {
     PARAM_NAME_CODE(ORDINATE_3_EVAL_POINT),
     PARAM_NAME_CODE(GEOCENTRIC_TRANSLATION_FILE),
 };
+
+const ParamNameCode *getParamNameCodes(size_t &nElts) {
+    nElts = sizeof(paramNameCodes) / sizeof(paramNameCodes[0]);
+    return paramNameCodes;
+}
 
 static const ParamMapping paramUnitConversionScalar = {
     EPSG_NAME_PARAMETER_UNIT_CONVERSION_SCALAR,
@@ -1402,11 +1409,143 @@ static const MethodMapping otherMethodMappings[] = {
      nullptr, nullptr, paramsVERTCON},
 };
 
-// end of anonymous namespace
-} // namespace
+const MethodMapping *getOtherMethodMappings(size_t &nElts) {
+    nElts = sizeof(otherMethodMappings) / sizeof(otherMethodMappings[0]);
+    return otherMethodMappings;
+}
 
 // ---------------------------------------------------------------------------
 
+PROJ_NO_INLINE const MethodMapping *getMapping(int epsg_code) noexcept {
+    for (const auto &mapping : projectionMethodMappings) {
+        if (mapping.epsg_code == epsg_code) {
+            return &mapping;
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+const MethodMapping *getMapping(const OperationMethod *method) noexcept {
+    const std::string &name(method->nameStr());
+    const int epsg_code = method->getEPSGCode();
+    for (const auto &mapping : projectionMethodMappings) {
+        if ((epsg_code != 0 && mapping.epsg_code == epsg_code) ||
+            metadata::Identifier::isEquivalentName(mapping.wkt2_name,
+                                                   name.c_str())) {
+            return &mapping;
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+const MethodMapping *getMappingFromWKT1(const std::string &wkt1_name) noexcept {
+    // Unusual for a WKT1 projection name, but mentioned in OGC 12-063r5 C.4.2
+    if (ci_starts_with(wkt1_name, "UTM zone")) {
+        return getMapping(EPSG_CODE_METHOD_TRANSVERSE_MERCATOR);
+    }
+
+    for (const auto &mapping : projectionMethodMappings) {
+        if (mapping.wkt1_name && metadata::Identifier::isEquivalentName(
+                                     mapping.wkt1_name, wkt1_name.c_str())) {
+            return &mapping;
+        }
+    }
+    return nullptr;
+}
+// ---------------------------------------------------------------------------
+
+const MethodMapping *getMapping(const char *wkt2_name) noexcept {
+    for (const auto &mapping : projectionMethodMappings) {
+        if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
+                                                   wkt2_name)) {
+            return &mapping;
+        }
+    }
+    for (const auto &mapping : otherMethodMappings) {
+        if (metadata::Identifier::isEquivalentName(mapping.wkt2_name,
+                                                   wkt2_name)) {
+            return &mapping;
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<const MethodMapping *>
+getMappingsFromPROJName(const std::string &projName) {
+    std::vector<const MethodMapping *> res;
+    for (const auto &mapping : projectionMethodMappings) {
+        if (mapping.proj_name_main && projName == mapping.proj_name_main) {
+            res.push_back(&mapping);
+        }
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+const ParamMapping *getMapping(const MethodMapping *mapping,
+                               const OperationParameterNNPtr &param) {
+    if (mapping->params == nullptr) {
+        return nullptr;
+    }
+
+    // First try with id
+    const int epsg_code = param->getEPSGCode();
+    if (epsg_code) {
+        for (int i = 0; mapping->params[i] != nullptr; ++i) {
+            const auto *paramMapping = mapping->params[i];
+            if (paramMapping->epsg_code == epsg_code) {
+                return paramMapping;
+            }
+        }
+    }
+
+    // then equivalent name
+    const std::string &name = param->nameStr();
+    for (int i = 0; mapping->params[i] != nullptr; ++i) {
+        const auto *paramMapping = mapping->params[i];
+        if (metadata::Identifier::isEquivalentName(paramMapping->wkt2_name,
+                                                   name.c_str())) {
+            return paramMapping;
+        }
+    }
+
+    // and finally different name, but equivalent parameter
+    for (int i = 0; mapping->params[i] != nullptr; ++i) {
+        const auto *paramMapping = mapping->params[i];
+        if (areEquivalentParameters(paramMapping->wkt2_name, name)) {
+            return paramMapping;
+        }
+    }
+
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+const ParamMapping *getMappingFromWKT1(const MethodMapping *mapping,
+                                       const std::string &wkt1_name) {
+    for (int i = 0; mapping->params[i] != nullptr; ++i) {
+        const auto *paramMapping = mapping->params[i];
+        if (paramMapping->wkt1_name &&
+            (metadata::Identifier::isEquivalentName(paramMapping->wkt1_name,
+                                                    wkt1_name.c_str()) ||
+             areEquivalentParameters(paramMapping->wkt1_name, wkt1_name))) {
+            return paramMapping;
+        }
+    }
+    return nullptr;
+}
+
 //! @endcond
 
-#endif // COORDINATEOPERATION_CONSTANTS_HH_INCLUDED
+// ---------------------------------------------------------------------------
+
+} // namespace operation
+NS_PROJ_END
