@@ -2501,6 +2501,45 @@ TEST(operation, boundCRS_of_projCRS_towgs84_to_boundCRS_of_projCRS_nadgrids) {
 
 // ---------------------------------------------------------------------------
 
+static CRSNNPtr buildCRSFromProjStrThroughWKT(const std::string &projStr) {
+    auto crsFromProj = nn_dynamic_pointer_cast<CRS>(
+        PROJStringParser().createFromPROJString(projStr));
+    if (crsFromProj == nullptr) {
+        throw "crsFromProj == nullptr";
+    }
+    auto crsFromWkt = nn_dynamic_pointer_cast<CRS>(
+        WKTParser().createFromWKT(crsFromProj->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get())));
+    if (crsFromWkt == nullptr) {
+        throw "crsFromWkt == nullptr";
+    }
+    return NN_NO_CHECK(crsFromWkt);
+}
+
+TEST(operation,
+     boundCRS_to_boundCRS_with_base_geog_crs_different_from_source_of_transf) {
+
+    auto src = buildCRSFromProjStrThroughWKT(
+        "+proj=lcc +lat_1=49 +lat_0=49 +lon_0=0 +k_0=0.999877499 +x_0=600000 "
+        "+y_0=200000 +ellps=clrk80ign +pm=paris +towgs84=-168,-60,320,0,0,0,0 "
+        "+units=m +no_defs +type=crs");
+    auto dst = buildCRSFromProjStrThroughWKT(
+        "+proj=longlat +ellps=clrk80ign +pm=paris "
+        "+towgs84=-168,-60,320,0,0,0,0 +no_defs +type=crs");
+
+    auto op = CoordinateOperationFactory::create()->createOperation(src, dst);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=lcc +lat_1=49 +lat_0=49 +lon_0=0 "
+              "+k_0=0.999877499 +x_0=600000 +y_0=200000 +ellps=clrk80ign "
+              "+pm=paris "
+              "+step +proj=longlat +ellps=clrk80ign +pm=paris "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, boundCRS_with_basecrs_with_extent_to_geogCRS) {
 
     auto wkt =

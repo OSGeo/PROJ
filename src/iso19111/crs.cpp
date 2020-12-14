@@ -5188,7 +5188,8 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
                         " (with Greenwich prime meridian)"),
                 sourceGeographicCRS->datumNonNull(nullptr)->ellipsoid(),
                 util::optional<std::string>(), datum::PrimeMeridian::GREENWICH),
-            sourceGeographicCRS->coordinateSystem());
+            cs::EllipsoidalCS::createLatitudeLongitude(
+                common::UnitOfMeasure::DEGREE));
     }
     std::string transformationName = transformationSourceCRS->nameStr();
     transformationName += " to WGS84";
