@@ -446,6 +446,41 @@ CoordinateOperationNNPtr ConcatenatedOperation::createComputeMetadata(
             flattenOps.emplace_back(subOp);
         }
     }
+
+    // Remove consecutive inverse operations
+    if (flattenOps.size() > 2) {
+        std::vector<size_t> indices;
+        for (size_t i = 0; i < flattenOps.size(); ++i)
+            indices.push_back(i);
+        while (true) {
+            bool bHasChanged = false;
+            for (size_t i = 0; i + 1 < indices.size(); ++i) {
+                if (flattenOps[indices[i]]->_isEquivalentTo(
+                        flattenOps[indices[i + 1]]->inverse().get(),
+                        util::IComparable::Criterion::EQUIVALENT) &&
+                    flattenOps[indices[i]]->sourceCRS()->_isEquivalentTo(
+                        flattenOps[indices[i + 1]]->targetCRS().get(),
+                        util::IComparable::Criterion::EQUIVALENT)) {
+                    indices.erase(indices.begin() + i, indices.begin() + i + 2);
+                    bHasChanged = true;
+                    break;
+                }
+            }
+            // We bail out if indices.size() == 2, because potentially
+            // the last 2 remaining ones could auto-cancel, and we would have
+            // to have a special case for that (and this happens in practice).
+            if (!bHasChanged || indices.size() <= 2)
+                break;
+        }
+        if (indices.size() < flattenOps.size()) {
+            std::vector<CoordinateOperationNNPtr> flattenOpsNew;
+            for (size_t i = 0; i < indices.size(); ++i) {
+                flattenOpsNew.emplace_back(flattenOps[indices[i]]);
+            }
+            flattenOps = std::move(flattenOpsNew);
+        }
+    }
+
     if (flattenOps.size() == 1) {
         return flattenOps[0];
     }
