@@ -377,18 +377,43 @@ int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) 
 /******************************************************************************
     Batch transform an array of PJ_COORD.
 
+    Performs transformation on all points, even if errors occur on some points.
+
+    Individual points that fail to transform will have their components set to
+    HUGE_VAL
+
     Returns 0 if all coordinates are transformed without error, otherwise
-    returns error number.
+    returns a precise error number if all coordinates that fail to transform
+    for the same reason, or a generic error code if they fail for different
+    reasons.
 ******************************************************************************/
     size_t i;
+    int retErrno = 0;
+    bool hasSetRetErrno = false;
+    bool sameRetErrno = true;
 
     for (i = 0;  i < n;  i++) {
+        proj_context_errno_set(P->ctx, 0);
         coord[i] = proj_trans (P, direction, coord[i]);
-        if (proj_errno(P))
-            return proj_errno (P);
-    }
+        int thisErrno = proj_errno(P);
+        if( thisErrno != 0 )
+        {
+            if( !hasSetRetErrno )
+            {
+                retErrno = thisErrno;
+                hasSetRetErrno = true;
+            }
+            else if( sameRetErrno && retErrno != thisErrno )
+            {
+                sameRetErrno = false;
+                retErrno = PROJ_ERR_COORD_TRANSFM;
+            }
+        }
+   }
 
-   return 0;
+   proj_context_errno_set(P->ctx, retErrno);
+
+   return retErrno;
 }
 
 
