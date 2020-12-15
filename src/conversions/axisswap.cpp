@@ -199,7 +199,7 @@ PJ *CONVERSION(axisswap,0) {
         /* check that all characters are valid */
         for (i=0; i<strlen(order); i++)
             if (strchr("1234-,", order[i]) == nullptr) {
-                proj_log_error(P, _("axisswap: unknown axis '%c'"), order[i]);
+                proj_log_error(P, _("unknown axis '%c'"), order[i]);
                 return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
 
@@ -209,7 +209,7 @@ PJ *CONVERSION(axisswap,0) {
         while ( *s != '\0' && n < 4 ) {
             Q->axis[n] = abs(atoi(s))-1;
             if (Q->axis[n] > 3) {
-                proj_log_error(P, _("axisswap: invalid axis '%d'"), Q->axis[n]);
+                proj_log_error(P, _("invalid axis '%d'"), Q->axis[n]);
                 return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
             Q->sign[n++] = sign(atoi(s));
@@ -250,7 +250,7 @@ PJ *CONVERSION(axisswap,0) {
                     Q->axis[i] = 2;
                     break;
                 default:
-                    proj_log_error(P, _("axisswap: unknown axis '%c'"), P->axis[i]);
+                    proj_log_error(P, _("unknown axis '%c'"), P->axis[i]);
                     return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }

@@ -154,7 +154,7 @@ static void computeReverseParameters(PJ* P)
     const double det = a * A + b * B + c * C;
     if( det == 0.0 || Q->forward.tscale == 0.0 ) {
         if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
-            proj_log_debug(P, "Affine: matrix non invertible");
+            proj_log_debug(P, "matrix non invertible");
         }
         P->inv4d = nullptr;
         P->inv3d = nullptr;

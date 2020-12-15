@@ -315,35 +315,35 @@ PJ *TRANSFORMATION(molodensky,1) {
     /* read args */
     if (!pj_param(P->ctx, P->params, "tdx").i)
     {
-        proj_log_error (P, _("molodensky: missing dx"));
+        proj_log_error (P, _("missing dx"));
         return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->dx = pj_param(P->ctx, P->params, "ddx").f;
 
     if (!pj_param(P->ctx, P->params, "tdy").i)
     {
-        proj_log_error (P, _("molodensky: missing dy"));
+        proj_log_error (P, _("missing dy"));
         return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->dy = pj_param(P->ctx, P->params, "ddy").f;
 
     if (!pj_param(P->ctx, P->params, "tdz").i)
     {
-        proj_log_error (P, _("molodensky: missing dz"));
+        proj_log_error (P, _("missing dz"));
         return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->dz = pj_param(P->ctx, P->params, "ddz").f;
 
     if (!pj_param(P->ctx, P->params, "tda").i)
     {
-        proj_log_error (P, _("molodensky: missing da"));
+        proj_log_error (P, _("missing da"));
         return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->da = pj_param(P->ctx, P->params, "dda").f;
 
     if (!pj_param(P->ctx, P->params, "tdf").i)
     {
-        proj_log_error (P, _("molodensky: missing df"));
+        proj_log_error (P, _("missing df"));
         return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     Q->df = pj_param(P->ctx, P->params, "ddf").f;

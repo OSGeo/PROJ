@@ -474,7 +474,7 @@ PJ *CONVERSION(unitconvert,0) {
             f = pj_param (P->ctx, P->params, "dxy_in").f;
             if (f == 0.0 || 1.0 / f == 0.0)
             {
-                proj_log_error(P, _("unitconvert: unknown xy_in unit"));
+                proj_log_error(P, _("unknown xy_in unit"));
                 return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
@@ -496,7 +496,7 @@ PJ *CONVERSION(unitconvert,0) {
             f = pj_param (P->ctx, P->params, "dxy_out").f;
             if (f == 0.0 || 1.0 / f == 0.0)
             {
-                proj_log_error(P, _("unitconvert: unknown xy_out unit"));
+                proj_log_error(P, _("unknown xy_out unit"));
                 return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
@@ -511,7 +511,7 @@ PJ *CONVERSION(unitconvert,0) {
 
     if( xy_in_is_linear >= 0 && xy_out_is_linear >= 0 &&
         xy_in_is_linear != xy_out_is_linear ) {
-        proj_log_error(P, _("unitconvert: inconsistent unit type between xy_in and xy_out"));
+        proj_log_error(P, _("inconsistent unit type between xy_in and xy_out"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
@@ -524,7 +524,7 @@ PJ *CONVERSION(unitconvert,0) {
             f = pj_param (P->ctx, P->params, "dz_in").f;
             if (f == 0.0 || 1.0 / f == 0.0)
             {
-                proj_log_error(P, _("unitconvert: unknown z_in unit"));
+                proj_log_error(P, _("unknown z_in unit"));
                 return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
@@ -540,7 +540,7 @@ PJ *CONVERSION(unitconvert,0) {
             f = pj_param (P->ctx, P->params, "dz_out").f;
             if (f == 0.0 || 1.0 / f == 0.0)
             {
-                proj_log_error(P, _("unitconvert: unknown z_out unit"));
+                proj_log_error(P, _("unknown z_out unit"));
                 return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
@@ -549,7 +549,7 @@ PJ *CONVERSION(unitconvert,0) {
 
     if( z_in_is_linear >= 0 && z_out_is_linear >= 0 &&
         z_in_is_linear != z_out_is_linear ) {
-        proj_log_error(P, _("unitconvert: inconsistent unit type between z_in and z_out"));
+        proj_log_error(P, _("inconsistent unit type between z_in and z_out"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
@@ -558,7 +558,7 @@ PJ *CONVERSION(unitconvert,0) {
 
         if (!s)
         {
-            proj_log_error(P, _("unitconvert: unknown t_in unit"));
+            proj_log_error(P, _("unknown t_in unit"));
             return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
 
@@ -572,7 +572,7 @@ PJ *CONVERSION(unitconvert,0) {
 
         if (!s)
         {
-            proj_log_error(P, _("unitconvert: unknown t_out unit"));
+            proj_log_error(P, _("unknown t_out unit"));
             return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
 

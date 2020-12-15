@@ -97,23 +97,23 @@ PJ *CONVERSION(topocentric,1) {
     const auto hash0 = pj_param_exists(P->params, "h_0");
     if( !hasX0 && !hasLon0 )
     {
-        proj_log_error(P, _("topocentric: missing X_0 or lon_0"));
+        proj_log_error(P, _("missing X_0 or lon_0"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     if ( (hasX0 || hasY0 || hasZ0) &&
          (hasLon0 || hasLat0 || hash0) )
     {
-        proj_log_error(P, _("topocentric: (X_0,Y_0,Z_0) and (lon_0,lat_0,h_0) are mutually exclusive"));
+        proj_log_error(P, _("(X_0,Y_0,Z_0) and (lon_0,lat_0,h_0) are mutually exclusive"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
     }
     if( hasX0 && (!hasY0 || !hasZ0) )
     {
-        proj_log_error(P, _("topocentric: missing Y_0 and/or Z_0"));
+        proj_log_error(P, _("missing Y_0 and/or Z_0"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     if( hasLon0 && !hasLat0 ) // allow missing h_0
     {
-        proj_log_error(P, _("topocentric: missing lat_0"));
+        proj_log_error(P, _("missing lat_0"));
         return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
