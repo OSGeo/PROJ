@@ -237,7 +237,7 @@ GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx,
         xorigin -= 360.0;
 
     if (xorigin >= 0.0 && xorigin + xstep * columns > 180.0) {
-        pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+        pj_log(ctx, PJ_LOG_DEBUG,
                "This GTX spans the dateline!  This will cause problems.");
     }
 
@@ -941,7 +941,7 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
     extent.isGeographic = true;
 
     if (!TIFFGetField(m_hTIFF, TIFFTAG_GEOKEYDIRECTORY, &count, &geokeys)) {
-        pj_log(m_ctx, PJ_LOG_DEBUG_MINOR, "No GeoKeys tag");
+        pj_log(m_ctx, PJ_LOG_TRACE, "No GeoKeys tag");
     } else {
         if (count < 4 || (count % 4) != 0) {
             pj_log(m_ctx, PJ_LOG_ERROR,
@@ -955,9 +955,8 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
         }
         // We only know that we support GeoTIFF 1.0 and 1.1 at that time
         if (geokeys[1] != 1 || geokeys[2] > 1) {
-            pj_log(m_ctx, PJ_LOG_DEBUG_MINOR,
-                   "GeoTIFF %d.%d possibly not handled", geokeys[1],
-                   geokeys[2]);
+            pj_log(m_ctx, PJ_LOG_TRACE, "GeoTIFF %d.%d possibly not handled",
+                   geokeys[1], geokeys[2]);
         }
 
         for (unsigned int i = 4; i + 3 < count; i += 4) {
@@ -1100,7 +1099,7 @@ class GTiffVGridShiftSet : public VerticalShiftGridSet {
     }
 
     bool reopen(PJ_CONTEXT *ctx) override {
-        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+        pj_log(ctx, PJ_LOG_DEBUG, "Grid %s has changed. Re-loading it",
                m_name.c_str());
         m_grids.clear();
         m_GTiffDataset.reset();
@@ -1133,7 +1132,7 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
     // the names to recreate the hierarchy
     if (!gridName.empty()) {
         if (mapGrids.find(gridName) != mapGrids.end()) {
-            pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Several grids called %s found!",
+            pj_log(ctx, PJ_LOG_DEBUG, "Several grids called %s found!",
                    gridName.c_str());
         }
         mapGrids[gridName] = grid.get();
@@ -1142,7 +1141,7 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
     if (!parentName.empty()) {
         auto iter = mapGrids.find(parentName);
         if (iter == mapGrids.end()) {
-            pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+            pj_log(ctx, PJ_LOG_DEBUG,
                    "Grid %s refers to non-existing parent %s. "
                    "Using bounding-box method.",
                    gridName.c_str(), parentName.c_str());
@@ -1151,7 +1150,7 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
                 iter->second->m_children.emplace_back(std::move(grid));
                 gridInserted = true;
             } else {
-                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                pj_log(ctx, PJ_LOG_DEBUG,
                        "Grid %s refers to parent %s, but its extent is "
                        "not included in it. Using bounding-box method.",
                        gridName.c_str(), parentName.c_str());
@@ -1172,7 +1171,7 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
                 gridInserted = true;
                 break;
             } else if (candidateParentExtent.intersects(extent)) {
-                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                pj_log(ctx, PJ_LOG_DEBUG,
                        "Partially intersecting grids found!");
             }
         }
@@ -1246,8 +1245,7 @@ void GTiffVGrid::insertGrid(PJ_CONTEXT *ctx,
             gridInserted = true;
             break;
         } else if (candidateParentExtent.intersects(extent)) {
-            pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
-                   "Partially intersecting grids found!");
+            pj_log(ctx, PJ_LOG_DEBUG, "Partially intersecting grids found!");
         }
     }
     if (!gridInserted) {
@@ -1285,7 +1283,7 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                 pj_log(ctx, PJ_LOG_ERROR, _("Invalid subfileType"));
                 return nullptr;
             } else {
-                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                pj_log(ctx, PJ_LOG_DEBUG,
                        "Ignoring IFD %d as it has a unsupported subfileType",
                        ifd);
                 continue;
@@ -1313,13 +1311,13 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                     // can be ignored
                     // One could imagine to put the accuracy values in separate
                     // IFD for example
-                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                    pj_log(ctx, PJ_LOG_DEBUG,
                            "Ignoring IFD %d as it has no "
                            "geoid_undulation/vertical_offset channel",
                            ifd);
                     continue;
                 } else {
-                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                    pj_log(ctx, PJ_LOG_DEBUG,
                            "IFD 0 has channel descriptions, but no "
                            "geoid_undulation/vertical_offset channel");
                     return nullptr;
@@ -1409,7 +1407,7 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 // ---------------------------------------------------------------------------
 
 bool VerticalShiftGridSet::reopen(PJ_CONTEXT *ctx) {
-    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+    pj_log(ctx, PJ_LOG_DEBUG, "Grid %s has changed. Re-loading it",
            m_name.c_str());
     auto newGS = open(ctx, m_name);
     m_grids.clear();
@@ -1972,7 +1970,7 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
         const int rows = static_cast<int>(
             fabs((extent.north - extent.south) / extent.resY + 0.5) + 1);
 
-        pj_log(ctx, PJ_LOG_DEBUG_MINOR,
+        pj_log(ctx, PJ_LOG_TRACE,
                "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)", gridName.c_str(),
                columns, rows, extent.west * RAD_TO_DEG,
                extent.south * RAD_TO_DEG, extent.east * RAD_TO_DEG,
@@ -2037,7 +2035,7 @@ class GTiffHGridShiftSet : public HorizontalShiftGridSet {
     }
 
     bool reopen(PJ_CONTEXT *ctx) override {
-        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+        pj_log(ctx, PJ_LOG_DEBUG, "Grid %s has changed. Re-loading it",
                m_name.c_str());
         m_grids.clear();
         m_GTiffDataset.reset();
@@ -2138,8 +2136,7 @@ void GTiffHGrid::insertGrid(PJ_CONTEXT *ctx,
             gridInserted = true;
             break;
         } else if (candidateParentExtent.intersects(extent)) {
-            pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
-                   "Partially intersecting grids found!");
+            pj_log(ctx, PJ_LOG_DEBUG, "Partially intersecting grids found!");
         }
     }
     if (!gridInserted) {
@@ -2183,7 +2180,7 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                 pj_log(ctx, PJ_LOG_ERROR, _("Invalid subfileType"));
                 return nullptr;
             } else {
-                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                pj_log(ctx, PJ_LOG_DEBUG,
                        _("Ignoring IFD %d as it has a unsupported subfileType"),
                        ifd);
                 continue;
@@ -2196,7 +2193,7 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                        _("At least 2 samples per pixel needed"));
                 return nullptr;
             } else {
-                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                pj_log(ctx, PJ_LOG_DEBUG,
                        _("Ignoring IFD %d as it has not at least 2 samples"),
                        ifd);
                 continue;
@@ -2229,13 +2226,13 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                     // longitude_offset/latitude_offset can be ignored
                     // One could imagine to put the accuracy values in separate
                     // IFD for example
-                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                    pj_log(ctx, PJ_LOG_DEBUG,
                            "Ignoring IFD %d as it has no "
                            "longitude_offset/latitude_offset channel",
                            ifd);
                     continue;
                 } else {
-                    pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                    pj_log(ctx, PJ_LOG_DEBUG,
                            "IFD 0 has channel descriptions, but no "
                            "longitude_offset/latitude_offset channel");
                     return nullptr;
@@ -2346,7 +2343,7 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
     if (header_size != sizeof(header)) {
         /* some files may be smaller that sizeof(header), eg 160, so */
         ctx->last_errno = 0; /* don't treat as a persistent error */
-        pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+        pj_log(ctx, PJ_LOG_DEBUG,
                "pj_gridinfo_init: short header read of %d bytes",
                (int)header_size);
     }
@@ -2406,7 +2403,7 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 // ---------------------------------------------------------------------------
 
 bool HorizontalShiftGridSet::reopen(PJ_CONTEXT *ctx) {
-    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+    pj_log(ctx, PJ_LOG_DEBUG, "Grid %s has changed. Re-loading it",
            m_name.c_str());
     auto newGS = open(ctx, m_name);
     m_grids.clear();
@@ -2483,7 +2480,7 @@ class GTiffGenericGridShiftSet : public GenericShiftGridSet {
     }
 
     bool reopen(PJ_CONTEXT *ctx) override {
-        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+        pj_log(ctx, PJ_LOG_DEBUG, "Grid %s has changed. Re-loading it",
                m_name.c_str());
         m_grids.clear();
         m_GTiffDataset.reset();
@@ -2581,8 +2578,7 @@ void GTiffGenericGrid::insertGrid(PJ_CONTEXT *ctx,
             gridInserted = true;
             break;
         } else if (candidateParentExtent.intersects(extent)) {
-            pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
-                   "Partially intersecting grids found!");
+            pj_log(ctx, PJ_LOG_DEBUG, "Partially intersecting grids found!");
         }
     }
     if (!gridInserted) {
@@ -2654,7 +2650,7 @@ GTiffGenericGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                 pj_log(ctx, PJ_LOG_ERROR, _("Invalid subfileType"));
                 return nullptr;
             } else {
-                pj_log(ctx, PJ_LOG_DEBUG_MAJOR,
+                pj_log(ctx, PJ_LOG_DEBUG,
                        _("Ignoring IFD %d as it has a unsupported subfileType"),
                        ifd);
                 continue;
@@ -2743,7 +2739,7 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 // ---------------------------------------------------------------------------
 
 bool GenericShiftGridSet::reopen(PJ_CONTEXT *ctx) {
-    pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Grid %s has changed. Re-loading it",
+    pj_log(ctx, PJ_LOG_DEBUG, "Grid %s has changed. Re-loading it",
            m_name.c_str());
     auto newGS = open(ctx, m_name);
     m_grids.clear();
@@ -2809,7 +2805,8 @@ ListOfGenericGrids pj_generic_grid_init(PJ *P, const char *gridkey) {
         auto gridSet = GenericShiftGridSet::open(P->ctx, gridname);
         if (!gridSet) {
             if (!canFail) {
-                if (proj_context_errno(P->ctx) != PROJ_ERR_OTHER_NETWORK_ERROR) {
+                if (proj_context_errno(P->ctx) !=
+                    PROJ_ERR_OTHER_NETWORK_ERROR) {
                     proj_context_errno_set(
                         P->ctx, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
                 }
@@ -3034,7 +3031,7 @@ static PJ_LP pj_hgrid_apply_internal(PJ_CONTEXT *ctx, PJ_LP in,
             auto newGrid = findGrid(grids, lp, gridset);
             if (newGrid == nullptr || newGrid == grid || newGrid->isNullGrid())
                 break;
-            pj_log(ctx, PJ_LOG_DEBUG_MINOR, "Switching from grid %s to grid %s",
+            pj_log(ctx, PJ_LOG_TRACE, "Switching from grid %s to grid %s",
                    grid->name().c_str(), newGrid->name().c_str());
             grid = newGrid;
             extent = &(grid->extentAndRes());
@@ -3338,7 +3335,8 @@ ListOfVGrids pj_vgrid_init(PJ *P, const char *gridkey) {
         auto gridSet = VerticalShiftGridSet::open(P->ctx, gridname);
         if (!gridSet) {
             if (!canFail) {
-                if (proj_context_errno(P->ctx) != PROJ_ERR_OTHER_NETWORK_ERROR) {
+                if (proj_context_errno(P->ctx) !=
+                    PROJ_ERR_OTHER_NETWORK_ERROR) {
                     proj_context_errno_set(
                         P->ctx, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
                 }

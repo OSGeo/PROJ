@@ -862,15 +862,6 @@ PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial);
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
 
-#ifndef PROJ_INTERNAL_H
-/* replaced by enum proj_log_level in proj_internal.h */
-#define PJ_LOG_NONE        0
-#define PJ_LOG_ERROR       1
-#define PJ_LOG_DEBUG_MAJOR 2
-#define PJ_LOG_DEBUG_MINOR 3
-#endif
-
-
 /* procedure prototypes */
 
 PJ_CONTEXT PROJ_DLL *pj_get_default_ctx(void);

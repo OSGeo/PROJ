@@ -147,7 +147,7 @@ void proj_log_debug (PJ *P, const char *fmt, ...) {
 ******************************************************************************/
     va_list args;
     va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MAJOR , add_short_name_prefix(P, fmt).c_str(), args);
+    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG , add_short_name_prefix(P, fmt).c_str(), args);
     va_end( args );
 }
 
@@ -158,7 +158,7 @@ void proj_context_log_debug (PJ_CONTEXT *ctx, const char *fmt, ...) {
 ******************************************************************************/
     va_list args;
     va_start( args, fmt );
-    pj_vlog (ctx, PJ_LOG_DEBUG_MAJOR , fmt, args);
+    pj_vlog (ctx, PJ_LOG_DEBUG , fmt, args);
     va_end( args );
 }
 
@@ -169,7 +169,7 @@ void proj_log_trace (PJ *P, const char *fmt, ...) {
 ******************************************************************************/
     va_list args;
     va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MINOR , add_short_name_prefix(P, fmt).c_str(), args);
+    pj_vlog (pj_get_ctx (P), PJ_LOG_TRACE , add_short_name_prefix(P, fmt).c_str(), args);
     va_end( args );
 }
 
