@@ -116,6 +116,17 @@ PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level) {
     return previous;
 }
 
+/*****************************************************************************/
+static std::string add_short_name_prefix(const PJ* P, const char* fmt)
+/*****************************************************************************/
+{
+    if( P->short_name == nullptr )
+        return fmt;
+    std::string ret(P->short_name);
+    ret += ": ";
+    ret += fmt;
+    return ret;
+}
 
 /*****************************************************************************/
 void proj_log_error (const PJ *P, const char *fmt, ...) {
@@ -124,7 +135,7 @@ void proj_log_error (const PJ *P, const char *fmt, ...) {
 ******************************************************************************/
     va_list args;
     va_start( args, fmt );
-    pj_vlog (pj_get_ctx ((PJ*)P), PJ_LOG_ERROR , fmt, args);
+    pj_vlog (pj_get_ctx ((PJ*)P), PJ_LOG_ERROR , add_short_name_prefix(P, fmt).c_str(), args);
     va_end( args );
 }
 
@@ -136,7 +147,7 @@ void proj_log_debug (PJ *P, const char *fmt, ...) {
 ******************************************************************************/
     va_list args;
     va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MAJOR , fmt, args);
+    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MAJOR , add_short_name_prefix(P, fmt).c_str(), args);
     va_end( args );
 }
 
@@ -158,7 +169,7 @@ void proj_log_trace (PJ *P, const char *fmt, ...) {
 ******************************************************************************/
     va_list args;
     va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MINOR , fmt, args);
+    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MINOR , add_short_name_prefix(P, fmt).c_str(), args);
     va_end( args );
 }
 
