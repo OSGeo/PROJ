@@ -402,8 +402,10 @@ static PJ_XY exact_e_fwd (PJ_LP lp, PJ *P) {
     if (fabs (Ce) <= 2.623395162778) {
         xy.y  = Q->Qn * Cn + Q->Zb;  /* Northing */
         xy.x  = Q->Qn * Ce;          /* Easting  */
-    } else
+    } else {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         xy.x = xy.y = HUGE_VAL;
+    }
     return xy;
 }
 
@@ -476,8 +478,10 @@ static PJ_LP exact_e_inv (PJ_XY xy, PJ *P) {
         lp.phi = gatg (Q->cgb,  PROJ_ETMERC_ORDER, Cn, cos_2_Cn, sin_2_Cn);
         lp.lam = Ce;
     }
-    else
+    else {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         lp.phi = lp.lam = HUGE_VAL;
+    }
     return lp;
 }
 
