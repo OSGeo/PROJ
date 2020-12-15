@@ -4196,6 +4196,64 @@ TEST_F(CApi, proj_create_crs_to_crs_from_pj) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_create_crs_to_crs_from_pj_accuracy_filter) {
+
+    auto src = proj_create(m_ctxt, "EPSG:4326"); // WGS 84
+    ObjectKeeper keeper_src(src);
+    ASSERT_NE(src, nullptr);
+
+    auto dst = proj_create(m_ctxt, "EPSG:4258"); // ETRS89
+    ObjectKeeper keeper_dst(dst);
+    ASSERT_NE(dst, nullptr);
+
+    // No options
+    {
+        auto P =
+            proj_create_crs_to_crs_from_pj(m_ctxt, src, dst, nullptr, nullptr);
+        ObjectKeeper keeper_P(P);
+        ASSERT_NE(P, nullptr);
+    }
+
+    {
+        const char *const options[] = {"ACCURACY=0.05", nullptr};
+        auto P =
+            proj_create_crs_to_crs_from_pj(m_ctxt, src, dst, nullptr, options);
+        ObjectKeeper keeper_P(P);
+        ASSERT_EQ(P, nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_crs_to_crs_from_pj_ballpark_filter) {
+
+    auto src = proj_create(m_ctxt, "EPSG:4267"); // NAD 27
+    ObjectKeeper keeper_src(src);
+    ASSERT_NE(src, nullptr);
+
+    auto dst = proj_create(m_ctxt, "EPSG:4258"); // ETRS89
+    ObjectKeeper keeper_dst(dst);
+    ASSERT_NE(dst, nullptr);
+
+    // No options
+    {
+        auto P =
+            proj_create_crs_to_crs_from_pj(m_ctxt, src, dst, nullptr, nullptr);
+        ObjectKeeper keeper_P(P);
+        ASSERT_NE(P, nullptr);
+    }
+
+    {
+        const char *const options[] = {"ALLOW_BALLPARK=NO", nullptr};
+        auto P =
+            proj_create_crs_to_crs_from_pj(m_ctxt, src, dst, nullptr, options);
+        ObjectKeeper keeper_P(P);
+        ASSERT_EQ(P, nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 static void
 check_axis_is_latitude(PJ_CONTEXT *ctx, PJ *cs, int axis_number,
                        const char *unit_name = "degree",

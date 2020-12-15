@@ -195,6 +195,11 @@ paragraph for more details.
       If authority is a non-empty string different of ``any``, then coordinate operations
       will be searched only in that authority namespace (e.g ``EPSG``).
 
+    - ACCURACY=value: to set the minimum desired accuracy (in metres) of the
+      candidate coordinate operations.
+
+    - ALLOW_BALLPARK=YES/NO: can be set to NO to disallow the use of
+      :term:`Ballpark transformation` in the candidate coordinate operations.
 
 .. doxygenfunction:: proj_normalize_for_visualization
    :project: doxygen_api
