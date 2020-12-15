@@ -478,7 +478,7 @@ static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
 static PJ* init_helmert_six_parameters(PJ* P) {
     struct pj_opaque_helmert *Q = static_cast<struct pj_opaque_helmert*>(calloc (1, sizeof (struct pj_opaque_helmert)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = (void *) Q;
 
     /* In most cases, we work on 3D cartesian coordinates */

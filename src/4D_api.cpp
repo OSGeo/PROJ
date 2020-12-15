@@ -787,7 +787,7 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
     n = strlen (definition);
     args = (char *) malloc (n + 1);
     if (nullptr==args) {
-        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
         return nullptr;
     }
     strcpy (args, definition);
@@ -802,7 +802,7 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
     argv = pj_trim_argv (argc, args);
     if (!argv) {
         free(args);
-        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
         return nullptr;
     }
 
@@ -872,7 +872,7 @@ Same as proj_create_argv() but calls pj_create_internal() instead of proj_create
     /* We assume that free format is used, and build a full proj_create compatible string */
     c = pj_make_args (argc, argv);
     if (nullptr==c) {
-        proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
         return nullptr;
     }
 

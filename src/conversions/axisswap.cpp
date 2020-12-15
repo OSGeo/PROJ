@@ -174,7 +174,7 @@ PJ *CONVERSION(axisswap,0) {
     unsigned int i, j, n = 0;
 
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = (void *) Q;
 
 

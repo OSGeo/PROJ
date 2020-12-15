@@ -156,14 +156,14 @@ static PJ *destructor(PJ *P, int errlev) {
 PJ *PROJECTION(poly) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     P->opaque = Q;
     P->destructor = destructor;
 
     if (P->es != 0.0) {
         if (!(Q->en = pj_enfn(P->es)))
-            return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+            return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
         P->inv = poly_e_inverse;
         P->fwd = poly_e_forward;

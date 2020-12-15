@@ -79,7 +79,7 @@ PJ *PROJECTION(eqdc) {
 
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -104,7 +104,7 @@ PJ *PROJECTION(eqdc) {
     }
 
     if (!(Q->en = pj_enfn(P->es)))
-        return destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     sinphi = sin(Q->phi1);
     Q->n = sinphi;

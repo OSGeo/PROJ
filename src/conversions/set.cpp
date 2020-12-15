@@ -42,7 +42,7 @@ PJ *OPERATION(set, 0) {
     auto set = static_cast<struct Set*>(calloc (1, sizeof(struct Set)));
     P->opaque = set;
     if (nullptr==P->opaque)
-        return pj_default_destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     if (pj_param_exists(P->params, "v_1"))
     {

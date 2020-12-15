@@ -615,7 +615,7 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
 PJ *PROJECTION(healpix) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -625,7 +625,7 @@ PJ *PROJECTION(healpix) {
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es);             /* For auth_lat(). */
         if (nullptr==Q->apa)
-            return destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+            return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->qp = pj_qsfn(1.0, P->e, P->one_es);  /* For auth_lat(). */
         P->a = P->a*sqrt(0.5*Q->qp);            /* Set P->a to authalic radius. */
         pj_calc_ellipsoid_params (P, P->a, P->es);  /* Ensure we have a consistent parameter set */
@@ -643,7 +643,7 @@ PJ *PROJECTION(healpix) {
 PJ *PROJECTION(rhealpix) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -664,7 +664,7 @@ PJ *PROJECTION(rhealpix) {
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es); /* For auth_lat(). */
         if (nullptr==Q->apa)
-            return destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+            return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
         P->a = P->a*sqrt(0.5*Q->qp); /* Set P->a to authalic radius. */
         P->ra = 1.0/P->a;

@@ -299,7 +299,7 @@ static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
 PJ *TRANSFORMATION(molodensky,1) {
     struct pj_opaque_molodensky *Q = static_cast<struct pj_opaque_molodensky*>(calloc(1, sizeof(struct pj_opaque_molodensky)));
     if (nullptr==Q)
-        return pj_default_destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = (void *) Q;
 
     P->fwd4d = forward_4d;

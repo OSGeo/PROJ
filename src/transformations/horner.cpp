@@ -471,7 +471,7 @@ PJ *PROJECTION(horner) {
 
     Q = horner_alloc (degree, complex_polynomia);
     if (Q == nullptr)
-        return horner_freeup (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return horner_freeup (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if (complex_polynomia) {

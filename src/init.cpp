@@ -54,7 +54,7 @@ static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
         /* Keep a handle to the start of the list, so we have something to return */
         auto param = pj_mkparam_ws (c, &c);
         if (nullptr==param) {
-            free_params (ctx, first, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+            free_params (ctx, first, PROJ_ERR_OTHER /*ENOMEM*/);
             return nullptr;
         }
         if (nullptr==last) {
@@ -474,14 +474,14 @@ pj_init_ctx_with_allow_init_epsg(PJ_CONTEXT *ctx, int argc, char **argv, int all
     /* put arguments into internal linked list */
     start = curr = pj_mkparam(argv[0]);
     if (!curr) {
-        free_params (ctx, start, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        free_params (ctx, start, PROJ_ERR_OTHER /*ENOMEM*/);
         return nullptr;
     }
 
     for (i = 1; i < argc; ++i) {
         curr->next = pj_mkparam(argv[i]);
         if (!curr->next) {
-            free_params (ctx, start, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+            free_params (ctx, start, PROJ_ERR_OTHER /*ENOMEM*/);
             return nullptr;
         }
         curr = curr->next;
@@ -532,7 +532,7 @@ pj_init_ctx_with_allow_init_epsg(PJ_CONTEXT *ctx, int argc, char **argv, int all
     /* Allocate projection structure */
     PIN = proj(nullptr);
     if (nullptr==PIN) {
-        free_params (ctx, start, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        free_params (ctx, start, PROJ_ERR_OTHER /*ENOMEM*/);
         return nullptr;
     }
 
@@ -769,7 +769,7 @@ pj_init_ctx_with_allow_init_epsg(PJ_CONTEXT *ctx, int argc, char **argv, int all
     /* Private object for the geodesic functions */
     PIN->geod = static_cast<struct geod_geodesic*>(calloc (1, sizeof (struct geod_geodesic)));
     if (nullptr==PIN->geod)
-        return pj_default_destructor (PIN, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (PIN, PROJ_ERR_OTHER /*ENOMEM*/);
     geod_init(PIN->geod, PIN->a,  (1 - sqrt (1 - PIN->es)));
 
     /* Projection specific initialization */

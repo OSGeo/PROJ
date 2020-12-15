@@ -103,12 +103,12 @@ PJ *PROJECTION(sterea) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
 
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->en = pj_gauss_ini(P->e, P->phi0, &(Q->phic0), &R);
     if (nullptr==Q->en)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     Q->sinc0 = sin (Q->phic0);
     Q->cosc0 = cos (Q->phic0);

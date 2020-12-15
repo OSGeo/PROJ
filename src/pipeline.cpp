@@ -462,7 +462,7 @@ PJ *OPERATION(pipeline,0) {
 
     pipeline->current_argv = current_argv = static_cast<char**>(calloc (argc, sizeof (char *)));
     if (nullptr==current_argv)
-        return destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* Do some syntactical sanity checking */
     for (i = 0;  i < argc;  i++) {
@@ -681,7 +681,7 @@ static PJ *setup_pushpop(PJ *P) {
     auto pushpop = static_cast<struct PushPop*>(calloc (1, sizeof(struct PushPop)));
     P->opaque = pushpop;
     if (nullptr==P->opaque)
-        return destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     if (pj_param_exists(P->params, "v_1"))
         pushpop->v1 = true;

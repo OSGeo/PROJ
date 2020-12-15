@@ -57,7 +57,7 @@ static PJ_LP fouc_s_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
 PJ *PROJECTION(fouc_s) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->n = pj_param(P->ctx, P->params, "dn").f;

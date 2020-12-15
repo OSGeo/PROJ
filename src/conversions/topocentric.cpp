@@ -78,7 +78,7 @@ PJ *CONVERSION(topocentric,1) {
 /*********************************************************************/
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = static_cast<void *>(Q);
 
     // The topocentric origin can be specified either in geocentric coordinates
@@ -120,7 +120,7 @@ PJ *CONVERSION(topocentric,1) {
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     PJ* cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (cart == nullptr)
-        return pj_default_destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     /* inherit ellipsoid definition from P to cart */
     pj_inherit_ellipsoid_def (P, cart);
 

@@ -59,7 +59,7 @@ static PJ_LP hammer_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
 PJ *PROJECTION(hammer) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if (pj_param(P->ctx, P->params, "tW").i) {

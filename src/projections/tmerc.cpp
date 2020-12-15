@@ -224,7 +224,7 @@ static PJ *setup_approx(PJ *P) {
 
     if (P->es != 0.0) {
         if (!(Q->en = pj_enfn(P->es)))
-            return pj_default_destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+            return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
         Q->esp = P->es / (1. - P->es);
@@ -591,7 +591,7 @@ static PJ *setup(PJ *P, TMercAlgo eAlg) {
 
     struct tmerc_data *Q = static_cast<struct tmerc_data*>(calloc (1, sizeof (struct tmerc_data)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if( P->es == 0 )

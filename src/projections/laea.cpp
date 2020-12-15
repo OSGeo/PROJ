@@ -244,7 +244,7 @@ PJ *PROJECTION(laea) {
     double t;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -267,7 +267,7 @@ PJ *PROJECTION(laea) {
         Q->mmf = .5 / (1. - P->es);
         Q->apa = pj_authset(P->es);
         if (nullptr==Q->apa)
-            return destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+            return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         switch (Q->mode) {
         case N_POLE:
         case S_POLE:

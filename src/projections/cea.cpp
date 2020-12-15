@@ -75,7 +75,7 @@ PJ *PROJECTION(cea) {
     double t = 0.0;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -95,7 +95,7 @@ PJ *PROJECTION(cea) {
         P->e = sqrt(P->es);
         Q->apa = pj_authset(P->es);
         if (!(Q->apa))
-            return pj_default_destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+            return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
         Q->qp = pj_qsfn(1., P->e, P->one_es);
         P->inv = cea_e_inverse;

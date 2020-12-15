@@ -163,12 +163,12 @@ static int ellps_ellps (PJ *P) {
 
     paralist* new_params = pj_mkparam (ellps->major);
     if (nullptr == new_params)
-        return proj_errno_set (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return proj_errno_set (P, PROJ_ERR_OTHER /*ENOMEM*/);
     new_params->next = pj_mkparam (ellps->ell);
     if (nullptr == new_params->next)
     {
         free(new_params);
-        return proj_errno_set (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return proj_errno_set (P, PROJ_ERR_OTHER /*ENOMEM*/);
     }
     paralist* old_params = P->params;
     P->params = new_params;

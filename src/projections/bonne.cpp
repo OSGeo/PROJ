@@ -115,7 +115,7 @@ PJ *PROJECTION(bonne) {
     double c;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -129,7 +129,7 @@ PJ *PROJECTION(bonne) {
     if (P->es != 0.0) {
         Q->en = pj_enfn(P->es);
         if (nullptr==Q->en)
-            return destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+            return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->am1 = sin(Q->phi1);
         c = cos(Q->phi1);
         Q->m1 = pj_mlfn(Q->phi1, Q->am1, c, Q->en);

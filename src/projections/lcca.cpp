@@ -137,12 +137,12 @@ PJ *PROJECTION(lcca) {
     double s2p0, N0, R0, tan0;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     (Q->en = pj_enfn(P->es));
     if (!Q->en)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     if (P->phi0 == 0.) {
         proj_log_error(P, _("Invalid value for lat_0: it should be different from 0."));

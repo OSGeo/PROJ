@@ -358,7 +358,7 @@ PJ *TRANSFORMATION(deformation,1) {
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart == nullptr)
-        return destructor(P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def (P, Q->cart);

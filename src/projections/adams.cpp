@@ -208,7 +208,7 @@ static PJ *setup(PJ *P, projection_type mode) {
             calloc (1, sizeof (struct pj_opaque)));
 
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     P->es = 0;

@@ -47,7 +47,7 @@ static PJ_LP putp4p_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
 PJ *PROJECTION(putp4p) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->C_x = 0.874038744;
@@ -64,7 +64,7 @@ PJ *PROJECTION(putp4p) {
 PJ *PROJECTION(weren) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_INVALID_OP /*ENOMEM*/);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->C_x = 1.;
