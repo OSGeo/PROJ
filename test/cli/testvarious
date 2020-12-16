@@ -1021,6 +1021,18 @@ $EXE --authority EPSG -E +proj=latlong +datum=WGS84 +no_defs +to +init=epsg:6342
 -105 40
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test effect of --accuracy" >> ${OUT}
+$EXE -E --accuracy 0.05 EPSG:4326 EPSG:4258 >> ${OUT} <<EOF
+49 2
+EOF
+
+echo  "##############################################################" >> ${OUT}
+echo  "Test effect of --no-ballpark" >> ${OUT}
+$EXE -E --no-ballpark EPSG:4267 EPSG:4258 >> ${OUT} <<EOF
+49 2
+EOF
+
 
 # Done!
 # do 'diff' with distribution results

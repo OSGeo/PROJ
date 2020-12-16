@@ -1384,6 +1384,9 @@ DATUM["World Geodetic System 1984",
         LENGTHUNIT["metre",1]],
     ID["EPSG",6326]]
 
+Testing --accuracy 0.05 -s EPSG:4326 -t EPSG:4258
+Candidate operations found: 0
+
 Testing -s NZGD2000 -t ITRF96 -o PROJ -q
 +proj=pipeline
   +step +proj=unitconvert +xy_in=deg +xy_out=rad

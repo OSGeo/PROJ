@@ -22,7 +22,7 @@ Synopsis
     |    [--crs-extent-use none|both|intersection|smallest]
     |    [--grid-check none|discard_missing|sort|known_available]
     |    [--pivot-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
-    |    [--show-superseded] [--hide-ballpark]
+    |    [--show-superseded] [--hide-ballpark] [--accuracy {accuracy}]
     |    [--allow-ellipsoidal-height-as-vertical-crs]
     |    [--boundcrs-to-wgs84]
     |    [--main-db-path path] [--aux-db-path path]*
@@ -210,6 +210,14 @@ The following control parameters can appear in any order:
 
     Hides any coordinate operation that is, or contains, a
     :term:`Ballpark transformation`
+
+    .. note:: only used for coordinate operation computation
+
+.. option:: --accuracy {accuracy}
+
+    .. versionadded:: 8.0
+
+    Sets the minimum desired accuracy for returned coordinate operations.
 
     .. note:: only used for coordinate operation computation
 

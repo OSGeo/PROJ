@@ -13,7 +13,7 @@ Synopsis
 
     | **cs2cs** [**-eEfIlrstvwW** [args]]
     |           [[--area <name_or_code>] | [--bbox <west_long,south_lat,east_long,north_lat>]]
-    |           [--authority <name>]
+    |           [--authority <name>] [--no-ballpark] [--accuracy <accuracy>]
     |           ([*+opt[=arg]* ...] [+to *+opt[=arg]* ...] | {source_crs} {target_crs})
     |           file ...
 
@@ -165,6 +165,19 @@ The following control parameters can appear in any order:
     `west_long` and `east_long` should be in the [-180,180] range, and
     `south_lat` and `north_lat` in the [-90,90]. `west_long` is generally lower than
     `east_long`, except in the case where the area of interest crosses the antimeridian.
+
+.. option:: --no-ballpark
+
+    .. versionadded:: 8.0.0
+
+    Disallow any coordinate operation that is, or contains, a
+    :term:`Ballpark transformation`
+
+.. option:: --accuracy <accuracy>
+
+    .. versionadded:: 8.0.0
+
+    Sets the minimum desired accuracy for candidate coordinate operations.
 
 .. option:: --authority <name>
 
