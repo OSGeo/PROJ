@@ -492,3 +492,7 @@ The first result should use the 'WGS_1984_(ITRF08)_To_NAD_1983_2011' (ESRI:10836
 and the second one a no-op
 -105 40	500000.86	4427756.50 0.00
 -105 40	500000.00	4427757.22 0.00
+##############################################################
+Test effect of --accuracy
+##############################################################
+Test effect of --no-ballpark

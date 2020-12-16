@@ -38,6 +38,7 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <proj/io.hpp>
 #include <proj/metadata.hpp>
@@ -77,7 +78,7 @@ static const char *oterr = "*\t*"; /* output line for unprojectable input */
 static const char *usage =
     "%s\nusage: %s [-dDeEfIlrstvwW [args]]\n"
     "              [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]\n"
-    "              [--authority {name}]\n"
+    "              [--authority {name}] [--accuracy {accuracy}] [--no-ballpark]\n"
     "              [+opt[=arg] ...] [+to +opt[=arg] ...] [file ...]\n";
 
 static double (*informat)(const char *,
@@ -374,6 +375,8 @@ int main(int argc, char **argv) {
     ExtentPtr bboxFilter;
     std::string area;
     const char* authority = nullptr;
+    double accuracy = -1;
+    bool allowBallpark = true;
 
     /* process run line arguments */
     while (--argc > 0) { /* collect run line arguments */
@@ -412,6 +415,15 @@ int main(int argc, char **argv) {
                 std::exit(1);
             }
         }
+        else if (strcmp(*argv, "--accuracy") == 0 ) {
+            ++argv;
+            --argc;
+            if( argc == 0 ) {
+                emess(1, "missing argument for --accuracy");
+                std::exit(1);
+            }
+            accuracy = c_locale_stod(*argv);
+        }
         else if (strcmp(*argv, "--authority") == 0 ) {
             ++argv;
             --argc;
@@ -420,6 +432,9 @@ int main(int argc, char **argv) {
                 std::exit(1);
             }
             authority = *argv;
+        }
+        else if (strcmp(*argv, "--no-ballpark") == 0 ) {
+            allowBallpark = false;
         }
         else if (**argv == '-') {
             for (arg = *argv;;) {
@@ -773,14 +788,24 @@ int main(int argc, char **argv) {
     }
 
     std::string authorityOption; /* keep this variable in this outer scope ! */
-    const char* options[2] = { nullptr, nullptr };
+    std::string accuracyOption; /* keep this variable in this outer scope ! */
+    std::vector<const char*> options;
     if( authority ) {
         authorityOption = "AUTHORITY=";
         authorityOption += authority;
-        options[0] = authorityOption.data();
+        options.push_back(authorityOption.data());
     }
+    if( accuracy >= 0 ) {
+        accuracyOption = "ACCURACY=";
+        accuracyOption += toString(accuracy);
+        options.push_back(accuracyOption.data());
+    }
+    if( !allowBallpark ) {
+        options.push_back("ALLOW_BALLPARK=NO");
+    }
+    options.push_back(nullptr);
     transformation = proj_create_crs_to_crs_from_pj(nullptr, src, dst,
-                                                    pj_area, options);
+                                                    pj_area, options.data());
 
     proj_destroy(src);
     proj_destroy(dst);
