@@ -1489,13 +1489,13 @@ static void *pj_open_lib_internal(
         if (ctx->last_errno == 0 && errno != 0)
             proj_context_errno_set(ctx, errno);
 
-        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "pj_open_lib(%s): call fopen(%s) - %s",
-               name, sysname, fid == nullptr ? "failed" : "succeeded");
+        pj_log(ctx, PJ_LOG_DEBUG, "pj_open_lib(%s): call fopen(%s) - %s", name,
+               sysname, fid == nullptr ? "failed" : "succeeded");
 
         return (fid);
     } catch (const std::exception &) {
 
-        pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "pj_open_lib(%s): out of memory", name);
+        pj_log(ctx, PJ_LOG_DEBUG, "pj_open_lib(%s): out of memory", name);
 
         return nullptr;
     }
@@ -1640,8 +1640,7 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
             file =
                 open(ctx, remote_file.c_str(), NS_PROJ::FileAccess::READ_ONLY);
             if (file) {
-                pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Using %s",
-                       remote_file.c_str());
+                pj_log(ctx, PJ_LOG_DEBUG, "Using %s", remote_file.c_str());
                 proj_context_errno_set(ctx, 0);
             }
         }

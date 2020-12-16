@@ -66,7 +66,7 @@ inline_pj_inv_mlfn(PJ_CONTEXT *ctx, double arg, double es, const double *en,
     }
     *sinphi = s;
     *cosphi = c;
-    proj_context_errno_set( ctx, PJD_ERR_NON_CONV_INV_MERI_DIST );
+    proj_context_errno_set( ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
     return phi;
 }
 

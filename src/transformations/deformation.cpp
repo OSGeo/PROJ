@@ -100,7 +100,7 @@ static bool get_grid_values(PJ* P,
     }
     const auto samplesPerPixel = grid->samplesPerPixel();
     if( samplesPerPixel < 3 ) {
-        proj_log_error(P, "deformation: grid has not enough samples");
+        proj_log_error(P, "grid has not enough samples");
         return false;
     }
     int sampleE = 0;
@@ -119,7 +119,7 @@ static bool get_grid_values(PJ* P,
     }
     const auto unit = grid->unit(sampleE);
     if( !unit.empty() && unit != "millimetres per year" ) {
-        proj_log_error(P, "deformation: Only unit=millimetres per year currently handled");
+        proj_log_error(P, "Only unit=millimetres per year currently handled");
         return false;
     }
 
@@ -179,8 +179,8 @@ static PJ_XYZ get_grid_shift(PJ* P, const PJ_XYZ& cartesian) {
         shift.lp    = pj_hgrid_value(P, Q->hgrids, geodetic.lp);
         shift.enu.u = pj_vgrid_value(P, Q->vgrids, geodetic.lp, 1.0);
 
-        if (proj_errno(P) == PJD_ERR_GRID_AREA)
-            proj_log_debug(P, "deformation: coordinate (%.3f, %.3f) outside deformation model",
+        if (proj_errno(P) == PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID)
+            proj_log_debug(P, "coordinate (%.3f, %.3f) outside deformation model",
                         proj_todeg(geodetic.lpz.lam), proj_todeg(geodetic.lpz.phi));
 
         /* grid values are stored as mm/yr, we need m/yr */
@@ -261,7 +261,7 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
     if (Q->dt == HUGE_VAL) {
         out = proj_coord_error(); /* in the 3D case +t_obs must be specified */
-        proj_log_debug(P, "deformation: +dt must be specified");
+        proj_log_debug(P, "+dt must be specified");
         return out.xyz;
     }
 
@@ -308,7 +308,7 @@ static PJ_LPZ reverse_3d(PJ_XYZ in, PJ *P) {
 
     if (Q->dt == HUGE_VAL) {
         out = proj_coord_error(); /* in the 3D case +t_obs must be specified */
-        proj_log_debug(P, "deformation: +dt must be specified");
+        proj_log_debug(P, "+dt must be specified");
         return out.lpz;
     }
 
@@ -358,7 +358,7 @@ PJ *TRANSFORMATION(deformation,1) {
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart == nullptr)
-        return destructor(P, ENOMEM);
+        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def (P, Q->cart);
@@ -369,8 +369,8 @@ PJ *TRANSFORMATION(deformation,1) {
 
     /* Build gridlists. Both horizontal and vertical grids are mandatory. */
     if ( !has_grids && (!has_xy_grids || !has_z_grids)) {
-        proj_log_error(P, "deformation: Either +grids or (+xy_grids and +z_grids) should be specified.");
-        return destructor(P, PJD_ERR_NO_ARGS );
+        proj_log_error(P, _("Either +grids or (+xy_grids and +z_grids) should be specified."));
+        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG );
     }
 
     if( has_grids )
@@ -378,22 +378,22 @@ PJ *TRANSFORMATION(deformation,1) {
         Q->grids = pj_generic_grid_init(P, "grids");
         /* Was gridlist compiled properly? */
         if ( proj_errno(P) ) {
-            proj_log_error(P, "deformation: could not find required grid(s).");
-            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+            proj_log_error(P, _("could not find required grid(s).)"));
+            return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
         }
     }
     else
     {
         Q->hgrids = pj_hgrid_init(P, "xy_grids");
         if (proj_errno(P)) {
-            proj_log_error(P, "deformation: could not find requested xy_grid(s).");
-            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+            proj_log_error(P, _("could not find requested xy_grid(s)."));
+            return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
         }
 
         Q->vgrids = pj_vgrid_init(P, "z_grids");
         if (proj_errno(P)) {
-            proj_log_error(P, "deformation: could not find requested z_grid(s).");
-            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+            proj_log_error(P, _("could not find requested z_grid(s)."));
+            return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
         }
     }
 
@@ -403,8 +403,8 @@ PJ *TRANSFORMATION(deformation,1) {
     }
 
     if (pj_param_exists(P->params, "t_obs")) {
-        proj_log_error(P, "deformation: +t_obs parameter is deprecated. Use +dt instead.");
-        return destructor(P, PJD_ERR_MISSING_ARGS);
+        proj_log_error(P, _("+t_obs parameter is deprecated. Use +dt instead."));
+        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     Q->t_epoch = HUGE_VAL;
@@ -413,13 +413,13 @@ PJ *TRANSFORMATION(deformation,1) {
     }
 
     if (Q->dt == HUGE_VAL && Q->t_epoch == HUGE_VAL) {
-        proj_log_error(P, "deformation: either +dt or +t_epoch needs to be set.");
-        return destructor(P, PJD_ERR_MISSING_ARGS);
+        proj_log_error(P, _("either +dt or +t_epoch needs to be set."));
+        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     if (Q->dt != HUGE_VALL && Q->t_epoch != HUGE_VALL) {
-        proj_log_error(P, "deformation: +dt or +t_epoch are mutually exclusive.");
-        return destructor(P, PJD_ERR_MUTUALLY_EXCLUSIVE_ARGS);
+        proj_log_error(P, _("+dt or +t_epoch are mutually exclusive."));
+        return destructor(P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
     }
 
     P->fwd4d = forward_4d;

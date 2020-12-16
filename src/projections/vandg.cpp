@@ -19,7 +19,7 @@ static PJ_XY vandg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     // Comments tie this formulation to Snyder (1987), p. 241.
     p2 = fabs(lp.phi / M_HALFPI); // sin(theta) from (29-6)
     if ((p2 - TOL) > 1.) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
     if (p2 > 1.)
@@ -56,7 +56,7 @@ static PJ_XY vandg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         // y from (29-2) has been expressed in terms of x here
         xy.y = 1. - xy.y * (xy.y + 2. * al);
         if (xy.y < -TOL) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
         if (xy.y < 0.)
@@ -95,7 +95,7 @@ static PJ_LP vandg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     d = C2_27 * c2 * c2 * c2 + (c0 * c0 - THIRD * c2 * c1) / c3; // d (29-14)
     const double al_mul_m = al * m;                              // a1*m1
     if( fabs(al_mul_m) < 1e-16 ) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().lp;
     }
     d = 3. * d /al_mul_m;       // cos(3*theta1) (29-17)
@@ -109,7 +109,7 @@ static PJ_LP vandg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         lp.lam = fabs(xy.x) <= TOL ? 0. :
            .5 * (r - PISQ + (t <= 0. ? 0. : sqrt(t))) / xy.x;
     } else {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
 

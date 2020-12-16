@@ -20,7 +20,7 @@ static PJ_XY tobmerc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forw
       // it's not even that large, merely 38.025...).  Even if the logic was
       // such that phi was strictly equal to pi/2, allowing xy.y = inf would be
       // a reasonable result.
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
 

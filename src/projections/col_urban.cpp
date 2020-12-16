@@ -56,7 +56,7 @@ static PJ_LP col_urban_inverse (PJ_XY xy, PJ *P) {
 PJ *PROJECTION(col_urban) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     const double h0_unscaled = pj_param(P->ctx, P->params, "dh_0").f;

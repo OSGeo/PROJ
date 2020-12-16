@@ -368,13 +368,22 @@ Coordinate transformation
 
     Batch transform an array of :c:type:`PJ_COORD`.
 
+    Performs transformation on all points, even if errors occur on some points
+    (new to 8.0. Previous versions would exit early in case of failure on a given point)
+
+    Individual points that fail to transform will have their components set to
+    ``HUGE_VAL``
+
     :param P: Transformation object
     :type P: :c:type:`PJ` *
     :param `direction`: Transformation direction.
     :type `direction`: PJ_DIRECTION
     :param n: Number of coordinates in :c:data:`coord`
     :type n: `size_t`
-    :returns: `int` 0 if all observations are transformed without error, otherwise returns error number
+    :returns: `int` 0 if all observations are transformed without error, otherwise returns error number.
+              This error number will be a precise error number if all coordinates that fail to transform
+              for the same reason, or a generic error code if they fail for different
+              reasons.
 
 
 Error reporting
@@ -388,6 +397,8 @@ Error reporting
     context is read. A text representation of the error number can be retrieved
     with :c:func:`proj_errno_string`.
 
+    Consult :ref:`error_codes` for the list of error codes (PROJ >= 8.0)
+
     :param P: Transformation object
     :type P: :c:type:`PJ` *
 
@@ -399,6 +410,8 @@ Error reporting
     codes indicates an error either with the transformation setup or during a
     transformation. A text representation of the error number can be retrieved
     with :c:func:`proj_errno_string`.
+
+    Consult :ref:`error_codes` for the list of error codes (PROJ >= 8.0)
 
     :param ctx: threading context.
     :type ctx: :c:type:`PJ_CONTEXT` *
@@ -463,6 +476,22 @@ Error reporting
     .. versionadded:: 5.1.0
 
     Get a text representation of an error number.
+
+    .. deprecated:: This function is potentially thread-unsafe, replaced by :c:func:`proj_context_errno_string`.
+
+    :param err: Error number.
+    :type err: `int`
+
+    :returns: `const char*` String with description of error.
+
+.. c:function:: const char* proj_context_errno_string(PJ_CONTEXT* ctx, int err)
+
+    .. versionadded:: 8.0.0
+
+    Get a text representation of an error number.
+
+    :param ctx: threading context.
+    :type ctx: :c:type:`PJ_CONTEXT` *
 
     :param err: Error number.
     :type err: `int`

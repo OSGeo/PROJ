@@ -96,3 +96,93 @@ void pj_log( PJ_CONTEXT *ctx, int level, const char *fmt, ... )
     pj_vlog( ctx, level, fmt, args );
     va_end( args );
 }
+
+
+
+/***************************************************************************************/
+PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level) {
+/****************************************************************************************
+   Set logging level 0-3. Higher number means more debug info. 0 turns it off
+****************************************************************************************/
+    PJ_LOG_LEVEL previous;
+    if (nullptr==ctx)
+        ctx = pj_get_default_ctx();
+    if (nullptr==ctx)
+        return PJ_LOG_TELL;
+    previous = static_cast<PJ_LOG_LEVEL>(abs (ctx->debug_level));
+    if (PJ_LOG_TELL==log_level)
+        return previous;
+    ctx->debug_level = log_level;
+    return previous;
+}
+
+/*****************************************************************************/
+static std::string add_short_name_prefix(const PJ* P, const char* fmt)
+/*****************************************************************************/
+{
+    if( P->short_name == nullptr )
+        return fmt;
+    std::string ret(P->short_name);
+    ret += ": ";
+    ret += fmt;
+    return ret;
+}
+
+/*****************************************************************************/
+void proj_log_error (const PJ *P, const char *fmt, ...) {
+/******************************************************************************
+   For reporting the most severe events.
+******************************************************************************/
+    va_list args;
+    va_start( args, fmt );
+    pj_vlog (pj_get_ctx ((PJ*)P), PJ_LOG_ERROR , add_short_name_prefix(P, fmt).c_str(), args);
+    va_end( args );
+}
+
+
+/*****************************************************************************/
+void proj_log_debug (PJ *P, const char *fmt, ...) {
+/******************************************************************************
+   For reporting debugging information.
+******************************************************************************/
+    va_list args;
+    va_start( args, fmt );
+    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG , add_short_name_prefix(P, fmt).c_str(), args);
+    va_end( args );
+}
+
+/*****************************************************************************/
+void proj_context_log_debug (PJ_CONTEXT *ctx, const char *fmt, ...) {
+/******************************************************************************
+   For reporting debugging information.
+******************************************************************************/
+    va_list args;
+    va_start( args, fmt );
+    pj_vlog (ctx, PJ_LOG_DEBUG , fmt, args);
+    va_end( args );
+}
+
+/*****************************************************************************/
+void proj_log_trace (PJ *P, const char *fmt, ...) {
+/******************************************************************************
+   For reporting embarrassingly detailed debugging information.
+******************************************************************************/
+    va_list args;
+    va_start( args, fmt );
+    pj_vlog (pj_get_ctx (P), PJ_LOG_TRACE , add_short_name_prefix(P, fmt).c_str(), args);
+    va_end( args );
+}
+
+
+/*****************************************************************************/
+void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf) {
+/******************************************************************************
+    Put a new logging function into P's context. The opaque object app_data is
+    passed as first arg at each call to the logger
+******************************************************************************/
+    if (nullptr==ctx)
+        ctx = pj_get_default_ctx ();
+    ctx->logger_app_data = app_data;
+    if (nullptr!=logf)
+        ctx->logger = logf;
+}

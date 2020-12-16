@@ -68,8 +68,7 @@ struct Grid : public GridPrototype {
         if (!checkedHorizontal) {
             const auto samplesPerPixel = realGrid->samplesPerPixel();
             if (samplesPerPixel < 2) {
-                pj_log(ctx, PJ_LOG_ERROR,
-                       "defmodel: grid %s has not enough samples",
+                pj_log(ctx, PJ_LOG_ERROR, "grid %s has not enough samples",
                        realGrid->name().c_str());
                 return false;
             }
@@ -90,15 +89,14 @@ struct Grid : public GridPrototype {
                 }
             }
             if (foundDesc && (!foundDescX || !foundDescY)) {
-                pj_log(ctx, PJ_LOG_ERROR,
-                       "defmodel: grid %s : Found band description, "
-                       "but not the ones expected",
+                pj_log(ctx, PJ_LOG_ERROR, "grid %s : Found band description, "
+                                          "but not the ones expected",
                        realGrid->name().c_str());
                 return false;
             }
             const auto unit = realGrid->unit(sampleX);
             if (!unit.empty() && unit != expectedUnit) {
-                pj_log(ctx, PJ_LOG_ERROR, "defmodel: grid %s : Only unit=%s "
+                pj_log(ctx, PJ_LOG_ERROR, "grid %s : Only unit=%s "
                                           "currently handled for this mode",
                        realGrid->name().c_str(), expectedUnit.c_str());
                 return false;
@@ -130,8 +128,7 @@ struct Grid : public GridPrototype {
             if (samplesPerPixel == 1) {
                 sampleZ = 0;
             } else if (samplesPerPixel < 3) {
-                pj_log(ctx, PJ_LOG_ERROR,
-                       "defmodel: grid %s has not enough samples",
+                pj_log(ctx, PJ_LOG_ERROR, "grid %s has not enough samples",
                        realGrid->name().c_str());
                 return false;
             }
@@ -148,17 +145,15 @@ struct Grid : public GridPrototype {
                 }
             }
             if (foundDesc && !foundDescZ) {
-                pj_log(ctx, PJ_LOG_ERROR,
-                       "defmodel: grid %s : Found band description, "
-                       "but not the ones expected",
+                pj_log(ctx, PJ_LOG_ERROR, "grid %s : Found band description, "
+                                          "but not the ones expected",
                        realGrid->name().c_str());
                 return false;
             }
             const auto unit = realGrid->unit(sampleZ);
             if (!unit.empty() && unit != STR_METRE) {
-                pj_log(ctx, PJ_LOG_ERROR,
-                       "defmodel: grid %s : Only unit=metre currently "
-                       "handled for this mode",
+                pj_log(ctx, PJ_LOG_ERROR, "grid %s : Only unit=metre currently "
+                                          "handled for this mode",
                        realGrid->name().c_str());
                 return false;
             }
@@ -256,8 +251,7 @@ struct EvaluatorIface : public EvaluatorIfacePrototype<Grid, GridSet> {
     std::unique_ptr<GridSet> open(const std::string &filename) {
         auto realGridSet = NS_PROJ::GenericShiftGridSet::open(ctx, filename);
         if (!realGridSet) {
-            pj_log(ctx, PJ_LOG_ERROR, "defmodel: cannot open %s",
-                   filename.c_str());
+            pj_log(ctx, PJ_LOG_ERROR, "cannot open %s", filename.c_str());
             return nullptr;
         }
         return std::unique_ptr<GridSet>(
@@ -390,7 +384,7 @@ PJ *TRANSFORMATION(defmodel, 1) {
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     auto cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (cart == nullptr)
-        return destructor(P, ENOMEM);
+        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def(P, cart);
@@ -402,14 +396,14 @@ PJ *TRANSFORMATION(defmodel, 1) {
 
     const char *model = pj_param(P->ctx, P->params, "smodel").s;
     if (!model) {
-        proj_log_error(P, "defmodel: +model= should be specified.");
-        return destructor(P, PJD_ERR_NO_ARGS);
+        proj_log_error(P, _("+model= should be specified."));
+        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     auto file = NS_PROJ::FileManager::open_resource_file(P->ctx, model);
     if (nullptr == file) {
-        proj_log_error(P, "defmodel: Cannot open %s", model);
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("Cannot open %s"), model);
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
     file->seek(0, SEEK_END);
     unsigned long long size = file->tell();
@@ -417,23 +411,23 @@ PJ *TRANSFORMATION(defmodel, 1) {
     // that could be a denial of service risk. 10 MB should be sufficiently
     // large for any valid use !
     if (size > 10 * 1024 * 1024) {
-        proj_log_error(P, "defmodel: File %s too large", model);
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("File %s too large"), model);
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
     file->seek(0);
     std::string jsonStr;
     jsonStr.resize(static_cast<size_t>(size));
     if (file->read(&jsonStr[0], jsonStr.size()) != jsonStr.size()) {
-        proj_log_error(P, "defmodel: Cannot read %s", model);
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("Cannot read %s"), model);
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
 
     try {
         Q->evaluator.reset(new Evaluator<Grid, GridSet, EvaluatorIface>(
             MasterFile::parse(jsonStr), Q->evaluatorIface, P->a, P->b));
     } catch (const std::exception &e) {
-        proj_log_error(P, "defmodel: invalid model: %s", e.what());
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("invalid model: %s"), e.what());
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
 
     P->fwd4d = forward_4d;

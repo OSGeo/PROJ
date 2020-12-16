@@ -179,8 +179,8 @@ PJ *TRANSFORMATION(vgridshift,0) {
     P->reassign_context = reassign_context;
 
    if (!pj_param(P->ctx, P->params, "tgrids").i) {
-        proj_log_error(P, "vgridshift: +grids parameter missing.");
-        return destructor(P, PJD_ERR_NO_ARGS);
+        proj_log_error(P, _("+grids parameter missing."));
+        return destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
    /* TODO: Refactor into shared function that can be used  */
@@ -227,8 +227,8 @@ PJ *TRANSFORMATION(vgridshift,0) {
 
             /* Was gridlist compiled properly? */
             if ( proj_errno(P) ) {
-                proj_log_error(P, "vgridshift: could not find required grid(s).");
-                return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+                proj_log_error(P, _("could not find required grid(s)."));
+                return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
             }
 
             gMutex.lock();

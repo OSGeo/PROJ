@@ -25,7 +25,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-#include <errno.h>
 #include <string.h>
 
 #include "proj.h"
@@ -71,7 +70,8 @@ int pj_datum_set(PJ_CONTEXT *ctx, paralist *pl, PJ *projdef)
         for (i = 0; (s = pj_datums[i].id) && strcmp(name, s) ; ++i) {}
 
         if (!s) {
-            proj_context_errno_set(ctx, PJD_ERR_UNKNOWN_ELLP_PARAM);
+            pj_log (ctx, PJ_LOG_ERROR, _("Unknown value for datum"));
+            proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             return 1;
         }
 
@@ -87,7 +87,7 @@ int pj_datum_set(PJ_CONTEXT *ctx, paralist *pl, PJ *projdef)
             auto param = pj_mkparam(entry);
             if (nullptr == param)
             {
-                proj_context_errno_set(ctx, ENOMEM);
+                proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
                 return 1;
             }
             curr->next = param;
@@ -99,7 +99,7 @@ int pj_datum_set(PJ_CONTEXT *ctx, paralist *pl, PJ *projdef)
             auto param = pj_mkparam(pj_datums[i].defn);
             if (nullptr == param)
             {
-                proj_context_errno_set(ctx, ENOMEM);
+                proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
                 return 1;
             }
             curr->next = param;

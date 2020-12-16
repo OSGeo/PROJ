@@ -46,9 +46,8 @@ TEST(gie, cart_selftest) {
     PJ_CONTEXT *ctx;
     PJ *P;
     PJ_COORD a, b, obs[2];
-    PJ_COORD coord[2];
+    PJ_COORD coord[3];
 
-    int err;
     size_t n, sz;
     double dist, h, t;
     const char *const args[3] = {"proj=utm", "zone=32", "ellps=GRS80"};
@@ -87,16 +86,6 @@ TEST(gie, cart_selftest) {
     ASSERT_LE(dist, 2e-9);
 
     /* Clear any previous error */
-    proj_errno_reset(P);
-
-    /* Invalid projection */
-    a = proj_trans(P, static_cast<PJ_DIRECTION>(42), a);
-    ASSERT_EQ(a.lpz.lam, HUGE_VAL);
-
-    err = proj_errno(P);
-    ASSERT_NE(err, 0);
-
-    /* Clear error again */
     proj_errno_reset(P);
 
     /* Clean up */
@@ -211,7 +200,7 @@ TEST(gie, cart_selftest) {
 
     coord[0] = proj_coord(proj_torad(12), proj_torad(55), 45, 0);
     coord[1] = proj_coord(proj_torad(12), proj_torad(56), 50, 0);
-    ASSERT_FALSE(proj_trans_array(P, PJ_FWD, 2, coord));
+    ASSERT_EQ(proj_trans_array(P, PJ_FWD, 2, coord), 0);
 
     ASSERT_EQ(a.lpz.lam, coord[0].lpz.lam);
     ASSERT_EQ(a.lpz.phi, coord[0].lpz.phi);
@@ -219,6 +208,35 @@ TEST(gie, cart_selftest) {
     ASSERT_EQ(b.lpz.lam, coord[1].lpz.lam);
     ASSERT_EQ(b.lpz.phi, coord[1].lpz.phi);
     ASSERT_EQ(b.lpz.z, coord[1].lpz.z);
+
+    /* test proj_trans_array () with two failed points for the same reason */
+
+    coord[0] =
+        proj_coord(proj_torad(12), proj_torad(95), 45, 0); // invalid latitude
+    coord[1] = proj_coord(proj_torad(12), proj_torad(56), 50, 0);
+    coord[2] =
+        proj_coord(proj_torad(12), proj_torad(95), 45, 0); // invalid latitude
+    ASSERT_EQ(proj_trans_array(P, PJ_FWD, 3, coord),
+              PROJ_ERR_COORD_TRANSFM_INVALID_COORD);
+
+    ASSERT_EQ(HUGE_VAL, coord[0].lpz.lam);
+    ASSERT_EQ(HUGE_VAL, coord[0].lpz.phi);
+    ASSERT_EQ(HUGE_VAL, coord[0].lpz.z);
+    ASSERT_EQ(b.lpz.lam, coord[1].lpz.lam);
+    ASSERT_EQ(b.lpz.phi, coord[1].lpz.phi);
+    ASSERT_EQ(b.lpz.z, coord[1].lpz.z);
+    ASSERT_EQ(HUGE_VAL, coord[2].lpz.lam);
+    ASSERT_EQ(HUGE_VAL, coord[2].lpz.phi);
+    ASSERT_EQ(HUGE_VAL, coord[2].lpz.z);
+
+    /* test proj_trans_array () with two failed points for different reasons */
+
+    coord[0] =
+        proj_coord(proj_torad(12), proj_torad(95), 45, 0); // invalid latitude
+    coord[1] =
+        proj_coord(proj_torad(105), proj_torad(0), 45,
+                   0); // in the equatorial axis, at 90° of the central meridian
+    ASSERT_EQ(proj_trans_array(P, PJ_FWD, 2, coord), PROJ_ERR_COORD_TRANSFM);
 
     /* Clean up  after proj_trans_* tests */
     proj_destroy(P);

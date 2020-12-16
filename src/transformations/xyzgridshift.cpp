@@ -257,7 +257,7 @@ PJ *TRANSFORMATION(xyzgridshift,0) {
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart == nullptr)
-        return destructor(P, ENOMEM);
+        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def (P, Q->cart);
@@ -272,14 +272,14 @@ PJ *TRANSFORMATION(xyzgridshift,0) {
             // in RGF93
             Q->grid_ref_is_input = false;
         } else {
-            proj_log_error(P, "xyzgridshift: unusupported value for grid_ref");
-            return destructor (P, PJD_ERR_NO_ARGS);
+            proj_log_error(P, _("unusupported value for grid_ref"));
+            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     }
 
     if (0==pj_param(P->ctx, P->params, "tgrids").i) {
-        proj_log_error(P, "xyzgridshift: +grids parameter missing.");
-        return destructor (P, PJD_ERR_NO_ARGS);
+        proj_log_error(P, _("+grids parameter missing."));
+        return destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     /* multiplier for delta x,y,z */
@@ -294,8 +294,8 @@ PJ *TRANSFORMATION(xyzgridshift,0) {
         Q->grids = pj_generic_grid_init(P, "grids");
         /* Was gridlist compiled properly? */
         if ( proj_errno(P) ) {
-            proj_log_error(P, "xyzgridshift: could not find required grid(s).");
-            return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+            proj_log_error(P, _("could not find required grid(s)."));
+            return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
         }
     }
 

@@ -12,7 +12,7 @@ PROJ_HEAD(cc, "Central Cylindrical") "\n\tCyl, Sph";
 static PJ_XY cc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
     PJ_XY xy = {0.0,0.0};
     if (fabs (fabs(lp.phi) - M_HALFPI) <= EPS10) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
     xy.x = lp.lam;

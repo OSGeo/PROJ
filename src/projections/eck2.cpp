@@ -34,7 +34,7 @@ static PJ_LP eck2_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
     lp.phi = (4. - lp.phi * lp.phi) * C13;
     if (fabs(lp.phi) >= 1.) {
         if (fabs(lp.phi) > ONEEPS) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         } else {
             lp.phi = lp.phi < 0. ? -M_HALFPI : M_HALFPI;

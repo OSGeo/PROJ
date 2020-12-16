@@ -99,7 +99,7 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     switch (Q->mode) {
     case GUYOU:
         if ((fabs(lp.lam) - TOL) > M_PI_2) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return proj_coord_error().xy;
         }
 
@@ -119,7 +119,7 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
         break;
     case PEIRCE_Q: {
             if( lp.phi < -TOL ) {
-                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return proj_coord_error().xy;
             }
             const double sl = sin(lp.lam);
@@ -134,7 +134,7 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     case ADAMS_HEMI: {
             const double sp = sin(lp.phi);
             if ((fabs(lp.lam) - TOL) > M_PI_2) {
-                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return proj_coord_error().xy;
             }
             a = cos(lp.phi) * sin(lp.lam);
@@ -208,7 +208,7 @@ static PJ *setup(PJ *P, projection_type mode) {
             calloc (1, sizeof (struct pj_opaque)));
 
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     P->es = 0;

@@ -14,7 +14,7 @@ aasin(PJ_CONTEXT *ctx,double v) {
 
         if ((av = fabs(v)) >= 1.) {
                 if (av > ONE_TOL)
-                        proj_context_errno_set( ctx, PJD_ERR_ACOS_ASIN_ARG_TOO_LARGE );
+                        proj_context_errno_set( ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
                 return (v < 0. ? -M_HALFPI : M_HALFPI);
         }
         return asin(v);
@@ -26,7 +26,7 @@ aacos(PJ_CONTEXT *ctx, double v) {
 
         if ((av = fabs(v)) >= 1.) {
                 if (av > ONE_TOL)
-                        proj_context_errno_set( ctx, PJD_ERR_ACOS_ASIN_ARG_TOO_LARGE );
+                        proj_context_errno_set( ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
                 return (v < 0. ? M_PI : 0.);
         }
         return acos(v);
