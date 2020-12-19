@@ -2806,6 +2806,7 @@ TEST(factory, attachExtraDatabases_none) {
     auto factory = AuthorityFactory::create(ctxt, "EPSG");
     auto crs = factory->createGeodeticCRS("4979");
     auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+    EXPECT_TRUE(gcrs != nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -2877,12 +2878,14 @@ TEST(factory, attachExtraDatabases_auxiliary) {
                 auto factory = AuthorityFactory::create(ctxt, "EPSG");
                 auto crs = factory->createGeodeticCRS("4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
             // Look for object located in auxiliary DB
             {
                 auto factory = AuthorityFactory::create(ctxt, "OTHER");
                 auto crs = factory->createGeodeticCRS("OTHER_4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
         }
 
@@ -2894,12 +2897,14 @@ TEST(factory, attachExtraDatabases_auxiliary) {
                 auto factory = AuthorityFactory::create(ctxt, "EPSG");
                 auto crs = factory->createGeodeticCRS("4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
             // Look for object located in auxiliary DB
             {
                 auto factory = AuthorityFactory::create(ctxt, "OTHER");
                 auto crs = factory->createGeodeticCRS("OTHER_4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
         }
 
@@ -2910,6 +2915,7 @@ TEST(factory, attachExtraDatabases_auxiliary) {
                 auto factory = AuthorityFactory::create(ctxt, "EPSG");
                 auto crs = factory->createGeodeticCRS("4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
             // Look for object located in auxiliary DB
             {
