@@ -95,7 +95,9 @@ static void usage() {
         << std::endl
         << "                [--pivot-crs always|if_no_direct_transformation|"
         << "never|{auth:code[,auth:code]*}]" << std::endl
-        << "                [--show-superseded] [--hide-ballpark]" << std::endl
+        << "                [--show-superseded] [--hide-ballpark] "
+           "[--accuracy {accuracy}]"
+        << std::endl
         << "                [--allow-ellipsoidal-height-as-vertical-crs]"
         << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
@@ -672,8 +674,8 @@ static void outputOperations(
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
-    bool showSuperseded, bool promoteTo3D, const OutputOptions &outputOpt,
-    bool summary) {
+    bool showSuperseded, bool promoteTo3D, double minimumAccuracy,
+    const OutputOptions &outputOpt, bool summary) {
     auto sourceObj =
         buildObject(dbContext, sourceCRSStr, "crs", "source CRS", false,
                     CoordinateOperationContext::IntermediateCRSUse::NEVER,
@@ -715,6 +717,9 @@ static void outputOperations(
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         ctxt->setDiscardSuperseded(!showSuperseded);
         ctxt->setAllowBallparkTransformations(outputOpt.ballparkAllowed);
+        if (minimumAccuracy >= 0) {
+            ctxt->setDesiredAccuracy(minimumAccuracy);
+        }
         list = CoordinateOperationFactory::create()->createOperations(
             nnSourceCRS, nnTargetCRS, ctxt);
         if (!spatialCriterionExplicitlySpecified &&
@@ -819,6 +824,7 @@ int main(int argc, char **argv) {
     bool identify = false;
     bool showSuperseded = false;
     bool promoteTo3D = false;
+    double minimumAccuracy = -1;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -934,6 +940,9 @@ int main(int argc, char **argv) {
                           << ", " << e.what() << std::endl;
                 usage();
             }
+        } else if (arg == "--accuracy" && i + 1 < argc) {
+            i++;
+            minimumAccuracy = c_locale_stod(argv[i]);
         } else if (arg == "--area" && i + 1 < argc) {
             i++;
             area = argv[i];
@@ -1338,12 +1347,12 @@ int main(int argc, char **argv) {
         }
 
         try {
-            outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
-                             spatialCriterion,
-                             spatialCriterionExplicitlySpecified, crsExtentUse,
-                             gridAvailabilityUse, allowUseIntermediateCRS,
-                             pivots, authority, usePROJGridAlternatives,
-                             showSuperseded, promoteTo3D, outputOpt, summary);
+            outputOperations(
+                dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
+                spatialCriterion, spatialCriterionExplicitlySpecified,
+                crsExtentUse, gridAvailabilityUse, allowUseIntermediateCRS,
+                pivots, authority, usePROJGridAlternatives, showSuperseded,
+                promoteTo3D, minimumAccuracy, outputOpt, summary);
         } catch (const std::exception &e) {
             std::cerr << "outputOperations() failed with: " << e.what()
                       << std::endl;

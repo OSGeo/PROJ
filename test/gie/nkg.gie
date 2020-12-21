@@ -1,0 +1,240 @@
+<gie-strict>
+
+# -------------------------------------------------------------------------------
+#                                      NKG
+# -------------------------------------------------------------------------------
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_NKG_ETRF00
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.9311 948983.7980 5201383.2227 2020.5
+
+
+#-------------------------------------------------------------------------------
+#                                    DENMARK
+#-------------------------------------------------------------------------------
+
+# 2008 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_DK
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.9362 948983.7825 5201383.2292 2020.5
+
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_DK
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.3829 948984.2188 5201383.5296 2020.5
+
+
+# 2020 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_DK
+tolerance   0.1 mm
+
+# BUDD
+accept      3513638.0964    778956.5470   5248216.5248  2015.0
+expect      3513638.5607    778956.1875   5248216.2477  2015.0
+
+#ESBC
+accept      3582104.8458    532590.0946   5232755.0863 2015.0
+expect      3582105.2916    532589.7310   5232754.8057 2015.0
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_NKG_ETRF14
+tolerance   0.1 mm
+
+# BUDD
+accept      3513638.0964    778956.5470   5248216.5248  2015.0
+expect      3513638.5071    778956.1528   5248216.2870  2015.0
+
+# ESBC
+accept      3582104.8458    532590.0946   5232755.0863 2015.0
+expect      3582105.2401    532589.6950   5232754.8507 2015.0
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF14_TO_DK
+tolerance   0.1 mm
+
+# BUDD
+accept      3513638.5071    778956.1528   5248216.2870  2015.0
+expect      3513638.5607    778956.1875   5248216.2477  2015.0
+
+# ESBC
+accept      3582105.2401    532589.6950   5232754.8507 2015.0
+expect      3582105.2916    532589.7310   5232754.8057 2015.0
+
+# -------------------------------------------------------------------------------
+#                                   ESTONIA
+# -------------------------------------------------------------------------------
+
+# 2008 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_EE
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.9395 948983.8006 5201383.2242 2020.5
+
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_EE
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.3862 948984.2370 5201383.5246 2020.5
+
+
+# 2020 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_EE
+tolerance   0.1 mm
+
+# AJOE
+accept      2922027.7409   1516183.8589   5444680.6502  2015.0
+expect      2922028.2730   1516183.5457   5444680.4094  2015.0
+
+# -------------------------------------------------------------------------------
+#                                  FINLAND
+# -------------------------------------------------------------------------------
+
+# 2008 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_FI
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.9522 948983.7911 5201383.2230 2020.5
+
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_FI
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.3989 948984.2274 5201383.5235 2020.5
+
+
+# 2020 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_FI
+tolerance   0.1 mm
+
+# DEGE
+accept      2994012.0569   1112559.9272   5502272.0863 2015.0
+expect      2994012.5170   1112559.5902   5502271.7683 2015.0
+
+
+# -------------------------------------------------------------------------------
+#                                   LATVIA
+# -------------------------------------------------------------------------------
+
+# 2008 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_LV
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.9806 948983.8606 5201383.3118 2020.5
+
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_LV
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.4273 948984.2970 5201383.6122 2020.5
+
+# 2020 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_LV
+tolerance   0.1 mm
+
+# BAUS
+accept      3226814.4746   1449250.4615   5289639.6134 2015.0
+expect      3226814.9950   1449250.1841   5289639.3779 2015.0
+
+
+# -------------------------------------------------------------------------------
+#                                  LITHUANIA
+# -------------------------------------------------------------------------------
+
+# 2008 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_LT
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.9358 948983.8042 5201383.2294 2020.5
+
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_LT
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.3826 948984.2405 5201383.5299 2020.5
+
+# 2020 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_LT
+tolerance   0.1 mm
+
+# VLNS
+accept      3343600.4221   1580417.8797   5179337.3696 2015.0
+expect      3343600.9945   1580417.5661   5179337.1637 2015.0
+
+
+# -------------------------------------------------------------------------------
+#                                    NORWAY
+# -------------------------------------------------------------------------------
+
+# 2008 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_NO
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.9204 948983.8049 5201383.2054 2020.5
+
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_NO
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.3671 948984.2412 5201383.5058 2020.5
+
+
+# -------------------------------------------------------------------------------
+#                                   SWEDEN
+# -------------------------------------------------------------------------------
+
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_SE
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.9223 948983.7912 5201383.2025 2020.5
+
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_SE
+tolerance   1 mm
+
+accept      3541657.3778 948984.2343 5201383.5231 2020.5
+expect      3541657.3690 948984.2275 5201383.5030 2020.5
+
+# 2020 Transformations
+
+operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_SE
+tolerance   0.1 mm
+
+# ARJ0
+accept      2441774.9791    799268.3078   5818729.4941 2015.0
+expect      2441775.4338    799268.0336   5818729.1635 2015.0
+
+# BOD3
+accept      2391774.0738    615615.1324   5860966.0796 2015.0
+expect      2391774.5409    615614.8770   5860965.8078 2015.0
+
+# KIR0
+accept      2248123.0276    865686.7906   5886425.8928 2015.0
+expect      2248123.5028    865686.5301   5886425.5928 2015.0
+
+</gie-strict>

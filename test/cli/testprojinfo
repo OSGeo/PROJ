@@ -213,6 +213,10 @@ fi
 rm testprojinfo_out_remotedata.txt
 unset PROJ_NETWORK
 
+echo 'Testing --accuracy 0.05 -s EPSG:4326 -t EPSG:4258' >> ${OUT}
+$EXE --accuracy 0.05 -s EPSG:4326 -t EPSG:4258 >>${OUT} 2>&1
+echo "" >>${OUT}
+
 ######################
 # NZGD2000 -> ITRFxx #
 ######################

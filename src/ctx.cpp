@@ -93,10 +93,10 @@ pj_ctx pj_ctx::createDefault()
 
     if( getenv("PROJ_DEBUG") != nullptr )
     {
-        if( atoi(getenv("PROJ_DEBUG")) >= -PJ_LOG_DEBUG_MINOR )
+        if( atoi(getenv("PROJ_DEBUG")) >= -PJ_LOG_TRACE )
             ctx.debug_level = atoi(getenv("PROJ_DEBUG"));
         else
-            ctx.debug_level = PJ_LOG_DEBUG_MINOR;
+            ctx.debug_level = PJ_LOG_TRACE;
     }
     return ctx;
 }

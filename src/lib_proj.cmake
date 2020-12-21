@@ -199,11 +199,20 @@ set(SRC_LIBPROJ_ISO19111
   iso19111/crs.cpp
   iso19111/datum.cpp
   iso19111/coordinatesystem.cpp
-  iso19111/coordinateoperation.cpp
   iso19111/io.cpp
   iso19111/internal.cpp
   iso19111/factory.cpp
   iso19111/c_api.cpp
+  iso19111/operation/concatenatedoperation.cpp
+  iso19111/operation/coordinateoperationfactory.cpp
+  iso19111/operation/conversion.cpp
+  iso19111/operation/esriparammappings.cpp
+  iso19111/operation/oputils.cpp
+  iso19111/operation/parammappings.cpp
+  iso19111/operation/projbasedoperation.cpp
+  iso19111/operation/singleoperation.cpp
+  iso19111/operation/transformation.cpp
+  iso19111/operation/vectorofvaluesparams.cpp
 )
 
 set(SRC_LIBPROJ_CORE

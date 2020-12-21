@@ -751,7 +751,19 @@ def generate_mapping(WKT2_name, esri_proj_name, Params, suffix=''):
             all_projs.append([esri_proj_name, WKT2_name_s, c_name])
     else:
         all_projs.append([esri_proj_name, WKT2_name, c_name])
-    print('static const ESRIParamMapping %s[] = { ' % c_name)
+
+    qualifier = 'static '
+    if c_name in ('paramsESRI_Plate_Carree',
+                  'paramsESRI_Equidistant_Cylindrical',
+                  'paramsESRI_Gauss_Kruger',
+                  'paramsESRI_Transverse_Mercator',
+                  'paramsESRI_Hotine_Oblique_Mercator_Azimuth_Natural_Origin',
+                  'paramsESRI_Rectified_Skew_Orthomorphic_Natural_Origin',
+                  'paramsESRI_Hotine_Oblique_Mercator_Azimuth_Center',
+                  'paramsESRI_Rectified_Skew_Orthomorphic_Center'):
+        qualifier = ''
+
+    print(qualifier + 'const ESRIParamMapping %s[] = { ' % c_name)
     for param in Params:
         for param_name in param:
             param_value = param[param_name]
@@ -803,24 +815,22 @@ print("""
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#ifndef FROM_COORDINATE_OPERATION_CPP
-#error This file should only be included from coordinateoperation.cpp
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
 #endif
 
-#ifndef ESRI_PROJECTION_MAPPINGS_HH_INCLUDED
-#define ESRI_PROJECTION_MAPPINGS_HH_INCLUDED
+#include "esriparammappings.hpp"
+#include "proj_constants.h"
 
-#include "coordinateoperation_internal.hpp"
+#include "proj/internal/internal.hpp"
+
+NS_PROJ_START
+
+using namespace internal;
+
+namespace operation {
 
 //! @cond Doxygen_Suppress
-
-// ---------------------------------------------------------------------------
-
-// anonymous namespace
-namespace {
-
-using namespace ::NS_PROJ;
-using namespace ::NS_PROJ::operation;
 
 """)
 
@@ -841,6 +851,7 @@ for item in config:
                 count += 1
     print('')
 
+
 print('static const ESRIMethodMapping esriMappings[] = {')
 for esri_proj_name, WKT2_name, c_name in all_projs:
     if WKT2_name.startswith('EPSG_'):
@@ -852,11 +863,32 @@ for esri_proj_name, WKT2_name, c_name in all_projs:
 print('};')
 
 print("""
+
 // ---------------------------------------------------------------------------
 
-} // namespace {
+const ESRIMethodMapping *getEsriMappings(size_t &nElts) {
+    nElts = sizeof(esriMappings) / sizeof(esriMappings[0]);
+    return esriMappings;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<const ESRIMethodMapping *>
+getMappingsFromESRI(const std::string &esri_name) {
+    std::vector<const ESRIMethodMapping *> res;
+    for (const auto &mapping : esriMappings) {
+        if (ci_equal(esri_name, mapping.esri_name)) {
+            res.push_back(&mapping);
+        }
+    }
+    return res;
+}
 
 //! @endcond
 
-#endif // ESRI_PROJECTION_MAPPINGS_HH_INCLUDED
+// ---------------------------------------------------------------------------
+
+} // namespace operation
+NS_PROJ_END
+
 """)

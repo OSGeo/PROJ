@@ -89,7 +89,7 @@ static PJ_XY approx_e_fwd (PJ_LP lp, PJ *P)
     if( lp.lam < -M_HALFPI || lp.lam > M_HALFPI ) {
         xy.x = HUGE_VAL;
         xy.y = HUGE_VAL;
-        proj_context_errno_set( P->ctx, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT );
+        proj_context_errno_set( P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
         return xy;
     }
 
@@ -123,7 +123,7 @@ static PJ_XY tmerc_spherical_fwd (PJ_LP lp, PJ *P) {
     cosphi = cos(lp.phi);
     b = cosphi * sin (lp.lam);
     if (fabs (fabs (b) - 1.) <= EPS10) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
 
@@ -138,7 +138,7 @@ static PJ_XY tmerc_spherical_fwd (PJ_LP lp, PJ *P) {
     }
     else if (b >= 1.) {
         if ((b - 1.) > EPS10) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
         else xy.y = 0.;
@@ -190,7 +190,7 @@ static PJ_LP tmerc_spherical_inv (PJ_XY xy, PJ *P) {
 
     h = exp(xy.x / Q->esp);
     if( h == 0 ) {
-        proj_errno_set(P, PJD_ERR_INVALID_X_OR_Y);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().lp;
     }
     g = .5 * (h - 1. / h);
@@ -224,7 +224,7 @@ static PJ *setup_approx(PJ *P) {
 
     if (P->es != 0.0) {
         if (!(Q->en = pj_enfn(P->es)))
-            return pj_default_destructor(P, ENOMEM);
+            return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
         Q->esp = P->es / (1. - P->es);
@@ -402,8 +402,10 @@ static PJ_XY exact_e_fwd (PJ_LP lp, PJ *P) {
     if (fabs (Ce) <= 2.623395162778) {
         xy.y  = Q->Qn * Cn + Q->Zb;  /* Northing */
         xy.x  = Q->Qn * Ce;          /* Easting  */
-    } else
+    } else {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         xy.x = xy.y = HUGE_VAL;
+    }
     return xy;
 }
 
@@ -476,8 +478,10 @@ static PJ_LP exact_e_inv (PJ_XY xy, PJ *P) {
         lp.phi = gatg (Q->cgb,  PROJ_ETMERC_ORDER, Cn, cos_2_Cn, sin_2_Cn);
         lp.lam = Ce;
     }
-    else
+    else {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         lp.phi = lp.lam = HUGE_VAL;
+    }
     return lp;
 }
 
@@ -587,7 +591,7 @@ static PJ *setup(PJ *P, TMercAlgo eAlg) {
 
     struct tmerc_data *Q = static_cast<struct tmerc_data*>(calloc (1, sizeof (struct tmerc_data)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if( P->es == 0 )
@@ -701,14 +705,18 @@ PJ *PROJECTION(tmerc) {
 
     TMercAlgo algo;
     if( !getAlgoFromParams(P, algo) )
-        return pj_default_destructor(P, PJD_ERR_INVALID_ARG);
+    {
+        proj_log_error(P, _("Invalid value for algo"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     return setup(P, algo);
 }
 
 
 PJ *PROJECTION(etmerc) {
     if (P->es == 0.0) {
-        return pj_default_destructor(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+        proj_log_error(P, _("Invalid value for eccentricity: it should not be zero"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
    return setup (P, TMercAlgo::PODER_ENGSAGER);
@@ -720,10 +728,12 @@ PJ *PROJECTION(etmerc) {
 PJ *PROJECTION(utm) {
     long zone;
     if (P->es == 0.0) {
-        return pj_default_destructor(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+        proj_log_error(P, _("Invalid value for eccentricity: it should not be zero"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     if (P->lam0 < -1000.0 || P->lam0 > 1000.0) {
-        return pj_default_destructor(P, PJD_ERR_INVALID_UTM_ZONE);
+        proj_log_error(P, _("Invalid value for lon_0"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     P->y0 = pj_param (P->ctx, P->params, "bsouth").i ? 10000000. : 0.;
@@ -734,7 +744,8 @@ PJ *PROJECTION(utm) {
         if (zone > 0 && zone <= 60)
             --zone;
         else {
-            return pj_default_destructor(P, PJD_ERR_INVALID_UTM_ZONE);
+            proj_log_error(P, _("Invalid value for zone"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     }
     else /* nearest central meridian input */
@@ -751,6 +762,9 @@ PJ *PROJECTION(utm) {
 
     TMercAlgo algo;
     if( !getAlgoFromParams(P, algo) )
-        return pj_default_destructor(P, PJD_ERR_INVALID_ARG);
+    {
+        proj_log_error(P, _("Invalid value for algo"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     return setup(P, algo);
 }

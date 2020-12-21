@@ -52,10 +52,19 @@ static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
 
         /* check for latitude or longitude over-range */
         t = (coo.lp.phi < 0  ?  -coo.lp.phi  :  coo.lp.phi) - M_HALFPI;
-        if (t > PJ_EPS_LAT  ||  coo.lp.lam > 10  ||  coo.lp.lam < -10) {
-            proj_errno_set (P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
+        if (t > PJ_EPS_LAT)
+        {
+            proj_log_error(P, _("Invalid latitude"));
+            proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_INVALID_COORD);
             return proj_coord_error ();
         }
+        if (coo.lp.lam > 10  ||  coo.lp.lam < -10)
+        {
+            proj_log_error(P, _("Invalid longitude"));
+            proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_INVALID_COORD);
+            return proj_coord_error ();
+        }
+
 
         /* Clamp latitude to -90..90 degree range */
         if (coo.lp.phi > M_HALFPI)
@@ -186,7 +195,7 @@ PJ_XY pj_fwd(PJ_LP lp, PJ *P) {
     else if (P->fwd4d)
         coo = P->fwd4d (coo, P);
     else {
-        proj_errno_set (P, EINVAL);
+        proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ().xy;
     }
     if (HUGE_VAL==coo.v[0])
@@ -220,7 +229,7 @@ PJ_XYZ pj_fwd3d(PJ_LPZ lpz, PJ *P) {
     else if (P->fwd)
         coo.xy = P->fwd (coo.lp, P);
     else {
-        proj_errno_set (P, EINVAL);
+        proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ().xyz;
     }
     if (HUGE_VAL==coo.v[0])
@@ -250,7 +259,7 @@ PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
     else if (P->fwd)
         coo.xy  =  P->fwd (coo.lp, P);
     else {
-        proj_errno_set (P, EINVAL);
+        proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ();
     }
     if (HUGE_VAL==coo.v[0])

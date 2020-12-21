@@ -151,7 +151,7 @@ proj-datumgrid
     series of packages are not maintained anymore and are only kept available for
     legacy purposes.
 
-For a functioning builds of PROJ prior to version 7, installation of the
+For a functioning build of PROJ prior to version 7, installation of the
 `proj-datumgrid <https://github.com/OSGeo/proj-datumgrid>`_ is needed. If you
 have installed PROJ from a package system chances are that this will already be
 done for you. The *proj-datumgrid* package provides transformation grids that
@@ -197,7 +197,7 @@ includes grids that have global extent, e.g. the global geoid model EGM08.
 
 All packages above come in different versions, e.g proj-datumgrid-1.8 or
 proj-datumgrid-europe-1.4. The `-latest` packages are symbolic links to the
-latest version of a given packages. That means that the link
+latest version of a given package. That means that the link
 https://download.osgeo.org/proj/proj-datumgrid-north-america-latest.zip is
 equivalent to https://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip
 (as of the time of writing this).
@@ -278,7 +278,7 @@ than one foot over the last two decades).
 Getting and building HTDP
 ................................................................................
 
-The HTDP modelling program is in written FORTRAN.  The source and documentation
+The HTDP modelling program is written in FORTRAN.  The source and documentation
 can be found on the HTDP page at http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml
 
 On linux systems it will be necessary to install `gfortran` or some FORTRAN
@@ -322,10 +322,10 @@ Usage
             [-htdp <path_to_exe>] [-wrkdir <dirpath>] [-kwf]
             -o <output_grid_name>
 
- -griddef: by default the following values for roughly the continental USA
-           at a six minute step size are used:
-           -127 50 -66 25 251 611
- -kwf: keep working files in the working directory for review.
+     -griddef: by default the following values for roughly the continental USA
+               at a six minute step size are used:
+               -127 50 -66 25 251 611
+     -kwf: keep working files in the working directory for review.
 
 ::
 

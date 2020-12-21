@@ -79,18 +79,18 @@ accept  -200 -100
 expect  -0.001790493 -0.000895247
 
 operation +proj=aea +ellps=GRS80 +lat_1=900
-expect  failure errno lat_larger_than_90
+expect  failure errno invalid_op_illegal_arg_value
 
 operation +proj=aea +ellps=GRS80 +lat_2=900
-expect  failure errno lat_larger_than_90
+expect  failure errno invalid_op_illegal_arg_value
 
 operation +proj=aea   +R=6400000    +lat_1=1 +lat_2=-1
-expect failure errno conic_lat_equal
+expect failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=aea +a=9999999 +b=.9 +lat_2=1
 -------------------------------------------------------------------------
-expect     failure errno invalid_eccentricity
+expect     failure errno invalid_op_illegal_arg_value
 
 ===============================================================================
 # Azimuthal Equidistant
@@ -126,7 +126,7 @@ roundtrip   100
 
 # point opposite projection center is undefined
 accept  180     0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # Test equatorial aspect of the ellipsoidal azimuthal equidistant. Test data from
@@ -269,11 +269,11 @@ roundtrip   100
 
 #point opposite of projection center is undefined
 accept  0   -90
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 direction inverse
 accept  0   5
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 accept  0   3.14159265359
 expect  180 -90
@@ -302,7 +302,7 @@ roundtrip   100
 
 #point opposite of projection center is undefined
 accept  0   90
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 
 -------------------------------------------------------------------------------
@@ -385,7 +385,7 @@ expect  0   -1.3863
 accept  0   90
 expect  0   0
 accept  0   -90
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 
 -------------------------------------------------------------------------------
@@ -399,7 +399,7 @@ expect  0   1.3863
 accept  0   -90
 expect  0   0
 accept  0   90
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # Test oblique aspect
@@ -412,7 +412,7 @@ expect  0       0
 accept  0       0
 expect  -0.7336 -0.5187
 accept  -45     -45
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # Test that coordinates on the opposing hemisphere are projected when using
@@ -446,7 +446,7 @@ expect  0.3821  0.4216
 operation +proj=airy +R=1 +no_cut
 -------------------------------------------------------------------------------
 accept  -180 0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 ===============================================================================
 # Aitoff
@@ -1351,16 +1351,16 @@ operation +proj=eqdc +a=9999999 +b=.9 +lat_2=1
 expect    failure
 
 operation +proj=eqdc   +R=6400000    +lat_1=1 +lat_2=-1
-expect    failure errno conic_lat_equal
+expect    failure errno invalid_op_illegal_arg_value
 
 operation +proj=eqdc   +R=6400000    +lat_1=91
-expect    failure errno lat_larger_than_90
+expect    failure errno invalid_op_illegal_arg_value
 
 operation +proj=eqdc   +R=6400000    +lat_2=91
-expect    failure errno lat_larger_than_90
+expect    failure errno invalid_op_illegal_arg_value
 
 operation +proj=eqdc   +R=1 +lat_1=1e-9
-expect    failure errno conic_lat_equal
+expect    failure errno invalid_op_illegal_arg_value
 
 ===============================================================================
 # Euler
@@ -1679,12 +1679,12 @@ expect  -0.001790493 -0.000895247
 -------------------------------------------------------------------------------
 operation +proj=geos +R=1 +h=0
 -------------------------------------------------------------------------------
-expect  failure errno invalid_h
+expect  failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=geos +R=1 +h=1e11
 -------------------------------------------------------------------------------
-expect  failure errno invalid_h
+expect  failure errno invalid_op_illegal_arg_value
 
 
 
@@ -1780,7 +1780,7 @@ accept  80      80
 expect  5.6713  32.6596
 roundtrip   100
 accept  0   90
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 # test that extreme northings are mapped to the sphere
 direction   inverse
@@ -1801,9 +1801,9 @@ accept  45      45
 expect  0.7071  -0.7071
 roundtrip   100
 accept  0       0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 accept  90      0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # Test the southern polar aspect of the gnonomic projection
@@ -1818,9 +1818,9 @@ accept  45      -45
 expect  0.7071  0.7071
 roundtrip   100
 accept  0       0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 accept  90      0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # Test the oblique aspect of the gnonomic projection
@@ -1838,7 +1838,7 @@ accept  0       90
 expect  0       1
 roundtrip   100
 accept  0       -45
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 ===============================================================================
 # Goode Homolosine
@@ -1918,7 +1918,7 @@ expect  3450764.261536101 -175619.041820732
 
 # For some reason, does not fail on MacOSX
 #accept  60 -45
-#expect  failure errno tolerance_condition
+#expect  failure errno coord_transfm_outside_projection_domain
 
 direction inverse
 accept  -1800000.000000000 2600000.000000000
@@ -1988,7 +1988,7 @@ expect  -0.001790493 -0.000895247
 operation +proj=hammer   +a=6400000 +W=1
 -------------------------------------------------------------------------------
 accept  -180 0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 ===============================================================================
 # Hatano Asymmetrical Equal Area
@@ -2502,7 +2502,7 @@ expect  24.833333333333   59.757598563058
 -------------------------------------------------------------------------------
 operation +proj=krovak +lat_0=-90
 -------------------------------------------------------------------------------
-expect     failure errno invalid_arg
+expect     failure errno invalid_op_illegal_arg_value
 
 ===============================================================================
 # Laborde
@@ -2536,7 +2536,7 @@ expect  0.498202283 1.999095641
 -------------------------------------------------------------------------------
 operation +proj=labrd   +ellps=GRS80 +lat_0=0
 accept  0 0
-expect  failure errno lat_0_is_zero
+expect  failure errno invalid_op_illegal_arg_value
 
 ===============================================================================
 # Lambert Azimuthal Equal Area
@@ -2557,7 +2557,7 @@ accept  -2 -1
 expect  -222602.471450095 -110589.827224409
 
 accept  180 0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 direction inverse
 accept  200 100
@@ -2583,7 +2583,7 @@ accept  -2 -1
 expect  -223365.281370125 -111716.668072916
 
 accept  180 0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 direction inverse
 accept  200 100
@@ -2619,7 +2619,7 @@ roundtrip   100
 # error when waaay outside the sphere
 direction inverse
 accept  0   10
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # Test oblique aspect of the ellipsoidal form
@@ -2662,7 +2662,7 @@ expect  0   0.7654
 accept  0   45
 expect  0   1.8478
 accept  0   90
-expect failure errno tolerance_condition
+expect failure errno coord_transfm_outside_projection_domain
 
 tolerance 0.1 mm
 accept  45  45
@@ -2683,7 +2683,7 @@ expect  0   4889334.8030
 accept  0   45
 expect  0   11766619.5307
 accept  0   90
-expect failure errno tolerance_condition
+expect failure errno coord_transfm_outside_projection_domain
 
 tolerance 10 cm
 accept  45  45
@@ -2709,7 +2709,7 @@ expect  0   -0.7654
 accept  0   -45
 expect  0   -1.8478
 accept  0   -90
-expect failure errno tolerance_condition
+expect failure errno coord_transfm_outside_projection_domain
 
 tolerance 0.1 mm
 accept  45  45
@@ -2730,7 +2730,7 @@ expect  0   -4889334.8030
 accept  0   -45
 expect  0   -11766619.5307
 accept  0   -90
-expect failure errno tolerance_condition
+expect failure errno coord_transfm_outside_projection_domain
 
 tolerance 10 cm
 accept 45   45
@@ -2740,7 +2740,7 @@ roundtrip   100
 # Test error in projection setup
 -------------------------------------------------------------------------------
 operation +proj=laea +ellps=GRS80 +lat_0=91
-expect  failure errno lat_larger_than_90
+expect  failure errno invalid_op_illegal_arg_value
 
 ===============================================================================
 # Lagrange
@@ -2782,22 +2782,22 @@ expect      0.10    0.0
 -------------------------------------------------------------------------------
 operation +proj=lagrng +R=1 +W=-1
 -------------------------------------------------------------------------------
-expect      failure errno w_or_m_zero_or_less
+expect      failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=lagrng +R=1 +lat_1=90.00001
 -------------------------------------------------------------------------------
-expect      failure errno lat_larger_than_90
+expect      failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=lagrng +R=1 +W=0.5
 -------------------------------------------------------------------------------
 accept      90 0 0
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 direction   inverse
 accept      2 0 0
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 operation +proj=lagrng +R=1
@@ -2966,7 +2966,7 @@ expect 1 2
 -------------------------------------------------------------------------------
 operation +proj=lcc +a=9999999 +b=.9 +lat_2=1
 -------------------------------------------------------------------------------
-expect     failure errno invalid_eccentricity
+expect     failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 # This case is incredible. ossfuzz has found the exact value of lat_1 that
@@ -2975,42 +2975,42 @@ operation +proj=lcc +lat_1=2D32 +lat_2=0 +a=6378137 +b=0.2
 -------------------------------------------------------------------------------
 expect     failure
 # For some reason fails on MacOSX with a different error
-# errno invalid_eccentricity
+# errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +ellps=GRS80 +lat_1=0 +lat_2=90
 -------------------------------------------------------------------------------
-expect     failure errno lat_1_or_2_zero_or_90
+expect     failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +ellps=GRS80 +lat_1=90 +lat_2=0
 -------------------------------------------------------------------------------
-expect     failure errno lat_1_or_2_zero_or_90
+expect     failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +ellps=GRS80 +lat_1=90 +lat_2=90
 -------------------------------------------------------------------------------
-expect     failure errno lat_1_or_2_zero_or_90
+expect     failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +ellps=sphere +lat_1=0 +lat_2=90
 -------------------------------------------------------------------------------
-expect     failure errno lat_1_or_2_zero_or_90
+expect     failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +ellps=sphere +lat_1=90 +lat_2=0
 -------------------------------------------------------------------------------
-expect     failure errno lat_1_or_2_zero_or_90
+expect     failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +ellps=sphere +lat_1=91
 -------------------------------------------------------------------------------
-expect     failure errno lat_larger_than_90
+expect     failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=lcc +ellps=sphere +lat_2=91
 -------------------------------------------------------------------------------
-expect     failure errno lat_larger_than_90
+expect     failure errno invalid_op_illegal_arg_value
 
 ===============================================================================
 # Lambert Conformal Conic Alternative
@@ -3187,7 +3187,7 @@ operation +proj=lsat +path=1 +lsat=5 +ellps=sphere
 -------------------------------------------------------------------------------
 direction inverse
 accept  0 1e10
-expect  failure errno invalid_x_or_y
+expect  failure errno coord_transfm_outside_projection_domain
 
 ===============================================================================
 # McBryde-Thomas Flat-Polar Sine (No. 1)
@@ -3930,13 +3930,13 @@ accept  45      45
 expect  0.4555 -0.4555
 roundtrip   100
 accept  0       0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 direction inverse
 accept  0       0
 expect  0       90
 accept  0       2   # projected coordinate is outside the sphere
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # Test south polar aspect
@@ -3950,7 +3950,7 @@ accept  -45      -45
 expect  -0.4555 0.4555
 roundtrip   100
 accept  0       0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 operation +proj=nsper +R=1 +h=3 +lat_0=45
@@ -3970,12 +3970,12 @@ roundtrip   100
 -------------------------------------------------------------------------------
 operation +proj=nsper +R=1 +h=0
 -------------------------------------------------------------------------------
-expect  failure errno invalid_h
+expect  failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=nsper +R=1 +h=1e11
 -------------------------------------------------------------------------------
-expect  failure errno invalid_h
+expect  failure errno invalid_op_illegal_arg_value
 
 
 ===============================================================================
@@ -4042,7 +4042,7 @@ expect  -65.862385599 51.830295078
 -------------------------------------------------------------------------------
 operation +proj=ob_tran +R=6400000 +o_proj +o_proj=ob_tran
 -------------------------------------------------------------------------------
-expect  failure errno pjd_err_failed_to_find_proj
+expect  failure errno invalid_op_missing_arg
 
 ===============================================================================
 # Oblique Cylindrical Equal Area
@@ -4241,7 +4241,7 @@ operation +proj=omerc   +R=1 +lat_0=1 +lat_1=2 +no_rot
 -------------------------------------------------------------------------------
 direction inverse
 accept  0 1e200
-expect  failure errno invalid_x_or_y
+expect  failure errno coord_transfm_outside_projection_domain
 
 
 
@@ -4263,28 +4263,28 @@ expect  -3569.825230822232   -5093592.310871849768
 -------------------------------------------------------------------------------
 operation +proj=omerc   +R=1  +alpha=0 +lat_0=90
 -------------------------------------------------------------------------------
-expect  failure errno lat_0_or_alpha_eq_90
+expect  failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=omerc   +lat_1=0.1 +a=6400000 +b=1
 -------------------------------------------------------------------------------
 # Disabled since fails on i386. Not so important. Edge condition found by ossfuzz
-#expect  failure errno invalid_eccentricity
+#expect  failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=omerc    +lat_1=0.8 +a=6400000 +b=.4
 -------------------------------------------------------------------------------
-expect     failure errno invalid_eccentricity
+expect     failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=omerc    +lat_1=91
 -------------------------------------------------------------------------------
-expect     failure errno lat_larger_than_90
+expect     failure errno invalid_op_illegal_arg_value
 
 -------------------------------------------------------------------------------
 operation +proj=omerc    +lat_2=91
 -------------------------------------------------------------------------------
-expect     failure errno lat_larger_than_90
+expect     failure errno invalid_op_illegal_arg_value
 
 
 ===============================================================================
@@ -4356,11 +4356,11 @@ accept      90      90
 expect      0       1
 roundtrip   100
 accept      120     0
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 direction   inverse
 accept      2   2
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 
 -------------------------------------------------------------------------------
@@ -4390,11 +4390,11 @@ accept      170     60
 expect      0.0868  0.9799
 roundtrip   100
 accept      140     20
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 direction   inverse
 accept      2   2
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 
 -------------------------------------------------------------------------------
@@ -4419,13 +4419,13 @@ accept      90  0
 expect      1   0
 roundtrip   100
 accept      180 -90
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 accept      0   -45
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 direction   inverse
 accept      2   2
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # Test the south polar aspect of the Orthographic projection.
@@ -4449,13 +4449,13 @@ accept      90  0
 expect      1   0
 roundtrip   100
 accept      180 90
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 accept      0   45
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 direction   inverse
 accept      2   2
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 # Put a point a tiny tiny bit outside the radius of the sphere.
 # Since we are right at the numerical limit of floating point representation
@@ -4496,7 +4496,7 @@ expect      -6378137        18504.1253
 # Slightly outside
 direction   inverse
 accept      -6378137.001    18504.1253
-expect      failure errno tolerance_condition
+expect      failure errno coord_transfm_outside_projection_domain
 
 # On boundary of visibility domain
 direction   forward
@@ -4507,7 +4507,7 @@ expect      0               -6343601.0991
 # Just on it, but fails to converge. This test might be fragile
 direction   inverse
 accept      0               -6343601.099075031466782093
-expect      failure errno non_convergent
+expect      failure errno coord_transfm_outside_projection_domain
 
 # Slightly inside
 direction   inverse
@@ -4559,11 +4559,11 @@ roundtrip   1
 
 # Point not visible from the projection plane
 accept      90.00001        0
-expect      failure         errno tolerance_condition
+expect      failure         errno coord_transfm_outside_projection_domain
 
 # Point not visible from the projection plane
 accept      -90.00001       0
-expect      failure         errno tolerance_condition
+expect      failure         errno coord_transfm_outside_projection_domain
 
 # Consistent with WGS84 semi-major axis
 accept      90              0
@@ -4586,17 +4586,17 @@ roundtrip   1
 # Point not visible from the projection plane
 direction   inverse
 accept      0               6356752.3143
-expect      failure         errno tolerance_condition
+expect      failure         errno coord_transfm_outside_projection_domain
 
 # Point not visible from the projection plane
 direction   inverse
 accept      1000            6356752.314
-expect      failure         errno tolerance_condition
+expect      failure         errno coord_transfm_outside_projection_domain
 
 # Point not visible from the projection plane
 direction   inverse
 accept      6378137.0001    0
-expect      failure         errno tolerance_condition
+expect      failure         errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # North pole tests
@@ -4617,7 +4617,7 @@ roundtrip   1
 
 # Point not visible from the projection plane
 accept      0               -0.0000001
-expect      failure         errno tolerance_condition
+expect      failure         errno coord_transfm_outside_projection_domain
 
 # Consistent with WGS84 semi-major axis
 accept      0               0
@@ -4627,7 +4627,7 @@ roundtrip   1
 # Point not visible from the projection plane
 direction   inverse
 accept      0               -6378137.1
-expect      failure         errno tolerance_condition
+expect      failure         errno coord_transfm_outside_projection_domain
 
 -------------------------------------------------------------------------------
 # South pole tests
@@ -4644,7 +4644,7 @@ roundtrip   1
 
 # Point not visible from the projection plane
 accept      0               0.0000001
-expect      failure         errno tolerance_condition
+expect      failure         errno coord_transfm_outside_projection_domain
 
 # Consistent with WGS84 semi-major axis
 accept      0               0
@@ -4654,7 +4654,7 @@ roundtrip   1
 # Point not visible from the projection plane
 direction   inverse
 accept      0               6378137.1
-expect      failure         errno tolerance_condition
+expect      failure         errno coord_transfm_outside_projection_domain
 
 
 ===============================================================================
@@ -5209,7 +5209,7 @@ accept  0.000000000000   -8654720.000000000000
 expect  0 -90
 
 accept 17250000 100000
-expect failure errno lat_or_lon_exceed_limit
+expect failure errno coord_transfm_outside_projection_domain
 
 
 ===============================================================================
@@ -5486,7 +5486,7 @@ expect  -223407.810259507 111737.938996443
 accept  -2 -1
 expect  -223407.810259507 -111737.938996443
 accept  180 0
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 direction inverse
 accept  200 100
@@ -5978,7 +5978,7 @@ operation +proj=tmerc   +R=1
 -------------------------------------------------------------------------------
 direction inverse
 accept -1e200 0
-expect  failure errno invalid_x_or_y
+expect  failure errno coord_transfm_outside_projection_domain
 
 
 ===============================================================================
@@ -6137,10 +6137,10 @@ operation +proj=tobmerc +ellps=sphere
 # Test expected failure at the poles:
 -------------------------------------------------------------------------------
 accept  0 90
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 accept  0 -90
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 
 ===============================================================================
@@ -6287,7 +6287,8 @@ expect  -45.001432287 64.914588378
 -------------------------------------------------------------------------------
 operation +proj=ups   +a=6400000
 -------------------------------------------------------------------------------
-expect failure errno ellipsoid_use_required
+# ups not possible on sphere
+expect failure errno invalid_op_illegal_arg_value
 
 ===============================================================================
 # Urmaev V
@@ -6309,7 +6310,7 @@ accept  -2 -1
 expect  -223393.638433964 -111696.818785117
 
 operation +proj=urm5   +a=6400000    +n=1 +alpha=90
-expect  failure errno lat_0_or_alpha_eq_90
+expect  failure errno invalid_op_illegal_arg_value
 
 ===============================================================================
 # Urmaev Flat-Polar Sinusoidal
@@ -6385,7 +6386,8 @@ expect  687071.43911000  6210141.32675053    0.00000000     2000.0000
 -------------------------------------------------------------------------------
 operation +proj=utm   +a=6400000 +zone=30
 -------------------------------------------------------------------------------
-expect failure errno ellipsoid_use_required
+# utm not possible on sphere
+expect failure errno invalid_op_illegal_arg_value
 
 ===============================================================================
 # van der Grinten (I)
@@ -6421,7 +6423,7 @@ operation +proj=vandg   +R=1
 -------------------------------------------------------------------------------
 direction inverse
 accept  0 -1e100
-expect  failure errno tolerance_condition
+expect  failure errno coord_transfm_outside_projection_domain
 
 
 ===============================================================================
@@ -6901,18 +6903,18 @@ roundtrip 1
 
 # missing X_0,Y_0,Z_0 or lon_0,lat_0
 operation +proj=topocentric +ellps=WGS84
-expect failure errno missing_args
+expect failure errno invalid_op_missing_arg
 
 # missing Z_0
 operation +proj=topocentric +ellps=WGS84 +X_0=0 +Y_0=0
-expect failure errno missing_args
+expect failure errno invalid_op_missing_arg
 
 # missing lat_0
 operation +proj=topocentric +ellps=WGS84 +lon_0=0
-expect failure errno missing_args
+expect failure errno invalid_op_missing_arg
 
 # X_0 and lon_0 are mutually exclusive
 operation +proj=topocentric +ellps=WGS84 +X_0=0 +lon_0=0
-expect failure errno mutually_exclusive_args
+expect failure errno invalid_op_mutually_exclusive_args
 
 </gie-strict>

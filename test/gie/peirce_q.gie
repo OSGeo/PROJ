@@ -9,10 +9,10 @@ operation  +proj=peirce_q +R=6370997
 tolerance  1 mm
 ------------------------------------------------------------
 accept    -179.6126302052  -90.2440064745
-expect    failure errno lat_or_lon_exceed_limit
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -169.8486692749  -89.5742075028
-expect    failure errno tolerance_condition
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept      0.8029310185    0.0770204080
 expect        126271.599   -11800190.331
@@ -1026,159 +1026,159 @@ accept     30.5303411995   89.7622494101
 expect         13429.693      -22771.512
 
 accept     40.0593735791   90.6542378643
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     50.0020623503   91.1469954761
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     60.8522213793   91.6903429214
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     70.7535252886   92.4836618501
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     80.1051275124   92.9389937571
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     90.4124853570   93.5341249190
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     100.7024119502   93.5550590372
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     110.8115837786   93.7909664255
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     120.6013207533   93.8492870154
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     130.7349056594   94.3767135242
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     140.9588399299   94.8671896725
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     150.0262851842   95.3534968784
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     160.4280397748   95.5380581127
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     170.7651411492   95.6370520364
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     180.0448345846   96.2732937318
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -179.8257499571   89.6174371357
 expect          -129.372       42538.994
 
 accept    -169.2875892301   90.5843674190
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -159.8023916584   91.1545744228
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -149.1639625275   92.0870993705
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -139.8013904331   92.8786158281
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -129.1637359401   92.9919538772
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -119.8393027005   93.1739711428
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -109.3406602631   94.1639584700
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -99.0695417625   95.1551429476
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -89.0610247556   95.6178466298
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -79.4516859556   96.0205106534
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -69.8082104896   96.1879870093
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -59.8296737152   96.7698954045
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -49.8769972300   97.2097042960
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -39.9274760034   97.5295561660
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -29.8470989427   97.6781116960
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -19.4625703588   98.0419802761
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     -9.0210837473   98.0868081244
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept      0.9799321756   98.5464017880
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     10.0429624590   98.7459055217
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     20.2792585617   99.0223555196
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     30.0602725080   100.0053623620
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     40.2383571525   100.9390147017
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     50.7977119707   101.0770157329
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     60.1464549470   101.4743886273
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     70.3854313326   101.6912083253
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     80.4259639014   102.1177916319
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     90.8059360471   102.5951916979
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     100.0616865688   102.7748252495
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     110.4583416539   103.6248728355
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     120.9751205255   103.7983620507
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     130.7919815186   104.0148850515
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     140.6325380833   104.1792511999
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     150.5737064232   105.0050682525
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     160.8571448065   105.0125232729
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     170.6832502669   105.0174505020
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     180.7137917600   105.8174218935
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 </gie-strict>

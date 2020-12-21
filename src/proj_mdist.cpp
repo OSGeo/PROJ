@@ -124,6 +124,6 @@ proj_inv_mdist(PJ_CONTEXT *ctx, double dist, const void *data) {
 			return phi;
 	}
 		/* convergence failed */
-	proj_context_errno_set(ctx, PJD_ERR_NON_CONV_INV_MERI_DIST);
+	proj_context_errno_set(ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
 	return phi;
 }

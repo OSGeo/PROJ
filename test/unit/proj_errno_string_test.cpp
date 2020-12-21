@@ -35,37 +35,26 @@
 
 namespace {
 
-TEST(ProjErrnoStringTest, NoError) { EXPECT_EQ(0, proj_errno_string(0)); }
+TEST(ProjErrnoStringTest, NoError) { EXPECT_EQ(nullptr, proj_errno_string(0)); }
 
 TEST(ProjErrnoStringTest, ProjErrnos) {
-    EXPECT_STREQ("no arguments in initialization list", proj_errno_string(-1));
-    EXPECT_STREQ("invalid projection system error (-1000)",
-                 proj_errno_string(-1000));
-    EXPECT_STREQ("invalid projection system error (-9999)",
-                 proj_errno_string(-9999));
-    // for errnos < -9999, -9999 is always returned
-    const int min = std::numeric_limits<int>::min();
-    EXPECT_STREQ("invalid projection system error (-9999)",
-                 proj_errno_string(min));
-    EXPECT_STREQ("invalid projection system error (-9999)",
-                 proj_errno_string(-10000));
+    EXPECT_STREQ("Unknown error (code -1)", proj_errno_string(-1));
+    EXPECT_STREQ("Invalid PROJ string syntax",
+                 proj_errno_string(PROJ_ERR_INVALID_OP_WRONG_SYNTAX));
+    EXPECT_STREQ(
+        "Unspecified error related to coordinate operation initialization",
+        proj_errno_string(PROJ_ERR_INVALID_OP));
+    EXPECT_STREQ("Unspecified error related to coordinate transformation",
+                 proj_errno_string(PROJ_ERR_COORD_TRANSFM));
 }
 
-TEST(ProjErrnoStringTest, SystemErrnos) {
-    const int max = std::numeric_limits<int>::max();
-
-#ifdef HAVE_STRERROR
-    EXPECT_STREQ(strerror(5), proj_errno_string(5));
-    EXPECT_STREQ(strerror(9999), proj_errno_string(9999));
-    EXPECT_STREQ(strerror(10000), proj_errno_string(10000));
-    EXPECT_STREQ(strerror(max), proj_errno_string(max));
-#else
-    EXPECT_STREQ("no system list, errno: 5\n", proj_errno_string(5));
-    EXPECT_STREQ("no system list, errno: 9999\n", proj_errno_string(9999));
-    // for errnos > 9999, 9999 is always returned
-    EXPECT_STREQ("no system list, errno: 9999\n", proj_errno_string(10000));
-    EXPECT_STREQ("no system list, errno: 9999\n", proj_errno_string(max));
-#endif
+TEST(ProjErrnoStringTest, proj_context_errno_string) {
+    EXPECT_STREQ("Unknown error (code -1)",
+                 proj_context_errno_string(nullptr, -1));
+    PJ_CONTEXT *ctx = proj_context_create();
+    EXPECT_STREQ("Unknown error (code -999)",
+                 proj_context_errno_string(ctx, -999));
+    proj_context_destroy(ctx);
 }
 
 } // namespace

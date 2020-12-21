@@ -86,14 +86,14 @@ PJ *TRANSFORMATION(tinshift, 1) {
 
     const char *filename = pj_param(P->ctx, P->params, "sfile").s;
     if (!filename) {
-        proj_log_error(P, "tinshift: +file= should be specified.");
-        return destructor(P, PJD_ERR_NO_ARGS);
+        proj_log_error(P, _("+file= should be specified."));
+        return destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     auto file = NS_PROJ::FileManager::open_resource_file(P->ctx, filename);
     if (nullptr == file) {
-        proj_log_error(P, "tinshift: Cannot open %s", filename);
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("Cannot open %s"), filename);
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
     file->seek(0, SEEK_END);
     unsigned long long size = file->tell();
@@ -101,15 +101,15 @@ PJ *TRANSFORMATION(tinshift, 1) {
     // that could be a denial of service risk. 10 MB should be sufficiently
     // large for any valid use !
     if (size > 10 * 1024 * 1024) {
-        proj_log_error(P, "tinshift: File %s too large", filename);
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("File %s too large"), filename);
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
     file->seek(0);
     std::string jsonStr;
     jsonStr.resize(static_cast<size_t>(size));
     if (file->read(&jsonStr[0], jsonStr.size()) != jsonStr.size()) {
-        proj_log_error(P, "tinshift: Cannot read %s", filename);
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("Cannot read %s"), filename);
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
 
     auto Q = new tinshiftData();
@@ -119,8 +119,8 @@ PJ *TRANSFORMATION(tinshift, 1) {
     try {
         Q->evaluator.reset(new Evaluator(TINShiftFile::parse(jsonStr)));
     } catch (const std::exception &e) {
-        proj_log_error(P, "tinshift: invalid model: %s", e.what());
-        return destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("invalid model: %s"), e.what());
+        return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
     }
 
     P->destructor = destructor;

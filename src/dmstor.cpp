@@ -61,7 +61,7 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 			n = 2; break;
 		case 'r': case 'R':
 			if (nl) {
-				proj_context_errno_set( ctx, PJD_ERR_WRONG_FORMAT_DMS_VALUE );
+				proj_context_errno_set( ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE );
 				return HUGE_VAL;
 			}
 			++s;
@@ -73,7 +73,7 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 			continue;
 		}
 		if (n < nl) {
-			proj_context_errno_set( ctx, PJD_ERR_WRONG_FORMAT_DMS_VALUE );
+			proj_context_errno_set( ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE );
 			return HUGE_VAL;
 		}
 		v += tv * vm[n];

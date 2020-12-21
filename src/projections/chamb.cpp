@@ -105,7 +105,7 @@ PJ *PROJECTION(chamb) {
     char line[10];
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
 
@@ -123,7 +123,10 @@ PJ *PROJECTION(chamb) {
         Q->c[i].v = vect(P->ctx,Q->c[j].phi - Q->c[i].phi, Q->c[i].cosphi, Q->c[i].sinphi,
             Q->c[j].cosphi, Q->c[j].sinphi, Q->c[j].lam - Q->c[i].lam);
         if (Q->c[i].v.r == 0.0)
-            return pj_default_destructor (P, PJD_ERR_CONTROL_POINT_NO_DIST);
+        {
+            proj_log_error(P, _("Invalid value for control points: they should be distinct"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
         /* co-linearity problem ignored for now */
     }
     Q->beta_0 = lc(P->ctx,Q->c[0].v.r, Q->c[2].v.r, Q->c[1].v.r);

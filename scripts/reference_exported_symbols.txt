@@ -784,6 +784,7 @@ proj_context_create
 proj_context_delete_cpp_context(projCppContext*)
 proj_context_destroy
 proj_context_errno
+proj_context_errno_string
 proj_context_get_database_metadata
 proj_context_get_database_path
 proj_context_get_url_endpoint
@@ -992,7 +993,7 @@ proj_list_get_count
 proj_list_operations
 proj_list_prime_meridians
 proj_list_units
-proj_log_error(PJconsts*, char const*, ...)
+proj_log_error(PJconsts const*, char const*, ...)
 proj_log_func
 proj_log_level
 proj_lp_dist

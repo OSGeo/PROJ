@@ -9,31 +9,31 @@ operation  +proj=adams_hemi +R=6370997
 tolerance  1 mm
 ------------------------------------------------------------
 accept    -179.0512914938  -90.1445918836
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -169.5842217825  -89.1738195765
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.8126151474  -88.9303357409
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.8486678837  -88.7598088570
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.3978823413  -88.5424937255
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.4584139907  -88.3017941113
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.6382190434  -88.1579367749
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.1571755829  -87.4911657719
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.4449870732  -87.1707570236
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.9433443609  -87.0825895518
 expect      -2032451.307   -14670658.595
@@ -90,61 +90,61 @@ accept     80.5231675121  -77.0660588617
 expect       3923735.969   -12068158.388
 
 accept     90.0066580543  -76.6161050638
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.5350349572  -76.3746207928
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.7544963160  -76.2761103137
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.0734970456  -75.8866598636
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.5824490023  -75.8761529489
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.8041765005  -75.3058724059
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.3183273801  -74.4580538960
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.0892519416  -73.7178034782
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.3366715442  -72.7342346131
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.6302993811  -72.6551561090
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.1498353863  -79.8617775679
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.6126454375  -78.9973036997
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.5376706591  -78.3099466224
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.7206409942  -77.9762123582
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.5308439004  -77.1568269429
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.5655598613  -76.3111768828
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.7726048543  -75.3290637518
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.6962230001  -74.3833782562
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.6722260401  -73.9288741111
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.0043085338  -73.3335214021
 expect      -4844180.674   -11775270.656
@@ -201,61 +201,61 @@ accept     80.1994904845  -64.1621304539
 expect       5574892.739   -10059995.184
 
 accept     90.4107676644  -63.6583206132
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.7435829266  -62.9292855324
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.6722999581  -62.8950940661
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.8104324458  -62.4946649855
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.0315355771  -61.8657176607
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.7842333846  -61.7278379595
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.5202047210  -61.0467237730
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.7596965102  -60.2885251988
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.1658638654  -60.0997063537
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.2502374139  -59.7318603713
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.9256771826  -69.2161805164
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.2003519382  -68.5724302106
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.5787597594  -67.9857475830
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.8429607974  -67.2794853256
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.5406690392  -67.1131557084
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.7848559822  -66.2388824806
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.1305416029  -65.8739932573
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.5840686978  -65.1388713461
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.0639263051  -65.0873010186
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.1823111373  -64.6956687932
 expect      -6023804.986   -10592902.952
@@ -312,61 +312,61 @@ accept     80.4614530617  -58.9769415123
 expect       6157836.688    -9386832.221
 
 accept     90.1145386062  -58.4070158299
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.7207579758  -58.0174867644
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.5210303471  -57.2190055708
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.6967482820  -56.4709263993
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.0815389060  -55.4932687347
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.1058922487  -54.7233777967
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.7972249220  -54.0392541094
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.4001197642  -53.4894321537
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.7522870277  -52.8073510172
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.9552557119  -51.9628267761
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.8457680307  -59.7627027888
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.9866964666  -59.3961476674
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.7470584020  -58.4027994525
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.6934351691  -57.7899236032
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.8251656458  -57.1675573730
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.7548669173  -56.7627741202
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.8194582121  -56.1851853006
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.9910713909  -55.2204505294
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.5100607596  -54.5311736441
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.8644038896  -53.9245170355
 expect      -7342928.224    -9343992.584
@@ -423,61 +423,61 @@ accept     80.9191136756  -48.5703968561
 expect       7251379.374    -8116860.291
 
 accept     90.3784337844  -48.2622816670
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.0644440138  -47.5531771971
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.4395693884  -47.1020565364
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.8787420308  -46.5648775386
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.8192016133  -45.7254461234
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.6056889736  -45.1737240013
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.1175388463  -44.6690953878
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.6179845473  -44.6641530409
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.3909883495  -43.8609446159
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.3536945715  -43.4346766235
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.6728016921  -49.7927741248
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.8899091213  -49.5948095572
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.7193834386  -48.9692766397
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.3161804706  -48.3900540417
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.3059860307  -47.5443099911
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.2607005772  -47.3426945690
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.0464442962  -46.3637609990
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.3006137776  -46.2470536112
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.1086587357  -45.3788313212
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.6418391342  -44.9558227898
 expect      -8329227.919    -8319528.025
@@ -534,61 +534,61 @@ accept     80.6995146991  -37.6252342058
 expect       8295075.544    -6755019.382
 
 accept     90.0888221682  -36.9847575823
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.7780137471  -36.6711774624
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.5677826175  -36.0072187827
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.4571639125  -35.5987514678
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.4994689409  -35.0078880309
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.4973246226  -34.7603698284
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.2185553402  -33.7827115000
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.0049830768  -33.6576606654
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.1113538332  -32.7218296414
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.0413323536  -32.6458132046
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.7614880705  -39.3083971924
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.2195161001  -38.8120777840
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.8162149104  -38.0579151517
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.1975646236  -38.0219346503
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.4875552064  -37.4333640809
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.3174577073  -37.3101077795
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.3659376731  -37.0018039210
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.4951561921  -36.7266176768
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.0146344791  -36.1766584469
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.4535006021  -35.4158065520
 expect      -9377248.574    -7225961.706
@@ -645,61 +645,61 @@ accept     80.7902728211  -26.9566814760
 expect       9340735.895    -5359874.908
 
 accept     90.7774660604  -26.3781900961
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.9677349413  -25.6947295847
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.4045415377  -24.8858012124
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.9106581244  -24.6760450197
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.1070741983  -24.3713625355
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.5983717849  -23.4696540641
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.9695044815  -23.2859623288
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.2904693231  -22.4177486612
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.9786886104  -22.3889418243
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.4135817841  -21.4141834167
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.1529257481  -29.4728615966
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.2570543721  -28.7440325834
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.4124846191  -27.8743740104
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.9984258738  -27.2290510016
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.4767743694  -27.0546870326
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.5641039139  -26.6837015309
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.3705764793  -25.8611684419
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.5378587803  -25.4624789903
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.3734787689  -24.9304945684
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.3465946697  -24.1700440971
 expect     -10704395.428    -5847361.236
@@ -756,61 +756,61 @@ accept     80.8671865869  -16.2424776439
 expect      10422654.067    -3712280.432
 
 accept     90.2461291404  -15.5645924718
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.9711143384  -14.9057684714
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.5061775944  -13.9999376124
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.6646869394  -13.8762395278
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.4786384854  -13.6641917166
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.4992250881  -12.7990197875
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.0366235813  -12.4696803942
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.5278707110  -12.2720940753
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.3484529579  -12.2138862792
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.2280212650  -11.3213090122
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.9887698836  -19.8434403334
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.6164294546  -19.0221825561
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.5308654294  -18.1879041212
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.8050966059  -17.4019446265
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.1612469827  -16.6625595025
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.4619391187  -16.4594418864
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.8383311004  -16.1675065524
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.3335459376  -15.6868347454
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.7976668059  -15.6854972046
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.7267294244  -14.8632370454
 expect     -12053401.390    -4568307.176
@@ -867,61 +867,61 @@ accept     80.6138637845   -4.9732504580
 expect      11379290.973    -1327935.989
 
 accept     90.6032354861   -4.1370495786
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.1644532030   -3.7428216159
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.6488410247   -3.6483998900
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.4200133401   -3.5679026480
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.4611248753   -2.8417810196
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.5117693002   -2.1994039429
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.8812291858   -1.4289441365
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.7607399916   -1.4071810906
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.8773135555   -1.0552787291
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.0261501820   -0.4477561568
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.6651296552   -9.8752237332
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.8040567331   -9.5090347854
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.2369236977   -8.7812050100
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.4668694945   -8.7411685014
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.4921425087   -8.4838585832
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.0489643890   -8.3165131291
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.2267713387   -8.2419396541
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.8259504273   -7.2718622518
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.9614377002   -7.1037710855
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.8090238071   -6.4232987368
 expect     -13640751.484    -2974873.944
@@ -978,61 +978,61 @@ accept     80.6476764259    3.6310845229
 expect      11462634.636      984489.812
 
 accept     90.5849650699    4.1063917523
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.6238525596    4.1230600723
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.6594697851    5.0495381196
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.0930076215    5.2661796574
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.5000547754    5.3939702157
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.4751452989    5.8876297478
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.7452375246    6.3021488806
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.1359677924    6.9173640629
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.0302177328    7.6378853558
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.8170157951    8.3472735471
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.1943150364    0.7596010223
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.6391212860    1.0795717122
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.2152700578    1.5596096157
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.3566080854    2.3935395760
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.6411690265    2.8792042895
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.0884027419    3.3736512451
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.6412398776    3.5609941446
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.8410023851    4.3613065976
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.5554211656    5.1657533479
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.3773565828    5.9157121060
 expect     -13652078.995     2749284.275
@@ -1089,61 +1089,61 @@ accept     80.2140199400   13.5624272700
 expect      10571534.837     3165721.762
 
 accept     90.4576635954   13.9718076506
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.6449925924   14.8800104945
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.2075367326   15.0521133300
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.4913041985   15.0889224537
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.1088876084   15.6744717063
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.6091054692   15.9789322360
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.8827038395   16.1118935785
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.8584892232   16.9655055987
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.7081605352   17.1424915281
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.4875952646   17.7286920734
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.2192819040   10.8569245931
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.0657035958   11.2213297367
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.1659774291   11.5431930234
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.9545173238   12.5029285949
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.3117413904   12.6753804804
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.3194639426   13.3306225335
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.8562785026   13.8682936931
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.1061461002   14.0130001331
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.6079217864   14.7921669533
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.3223757109   14.9467935082
 expect     -11977848.908     4521084.682
@@ -1200,61 +1200,61 @@ accept     80.7948402736   23.3693033859
 expect       9696270.644     4844753.993
 
 accept     90.9423588456   23.9305098127
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.5427479545   24.6568371578
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.6483359564   25.2988879331
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.6254581560   25.7897168715
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.6198305384   26.5579713234
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.5223099495   27.4665102983
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.1770507578   27.9150551786
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.8757513817   28.5236724280
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.8877826460   29.0924417375
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.6425321330   29.5764205068
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.9444701529   20.8756448666
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.6232517758   21.6942653703
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.5830169036   22.4130383475
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.4619550763   22.6339632787
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.7058201004   23.2553831478
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.7766004320   23.8189681109
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.3228272091   24.7032636217
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.5551540716   24.7745254301
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.9135718461   25.5385802763
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.1841069049   26.2083957447
 expect     -10431143.612     6091127.422
@@ -1311,61 +1311,61 @@ accept     80.9991967787   34.8943272959
 expect       8589604.803     6432883.803
 
 accept     90.5925677009   35.3510670805
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.0148954666   36.2711932097
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.4283207815   36.6017613088
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.6777960225   37.3666811945
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.2891249681   37.8530786142
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.8212942434   38.5395736955
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.7430926180   38.7113483726
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.9509577553   39.6821505727
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.3061167023   40.4192356875
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.9886935244   41.3233715669
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.3343647471   30.6447124879
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.9318029695   30.8088173910
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.9351347433   31.4030041187
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.1603401895   31.7370508292
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.8411358400   31.9883214220
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.6487283950   32.2540792459
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.3377596938   32.5474903700
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.4052121056   32.6499740509
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.9645719240   33.2634048792
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.3430796801   33.3255757200
 expect      -9605176.890     6972552.471
@@ -1422,61 +1422,61 @@ accept     80.6903986951   43.0741360152
 expect       7768806.954     7429525.503
 
 accept     90.6634321726   43.5837411887
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.8304968356   44.3478015738
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.2734219112   44.4218804789
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.7981801963   44.9674252843
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.6206535666   45.4286113875
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.3730391283   46.0714239353
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.9426457881   46.5091534230
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.6115790352   47.4101077572
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.3277640796   48.0638373590
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.8477425796   48.8442357472
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.2598149320   40.1705017627
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.6056153255   40.1727881259
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.3396275493   41.0355246248
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.3430287138   41.0573932198
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.3972998819   41.0866734660
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.2347342883   41.3220478306
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.9384666450   41.9087201484
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.1765297705   42.5137977627
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.7425660165   43.1240737964
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.3631524858   43.6013437171
 expect      -8456598.089     8145902.918
@@ -1533,61 +1533,61 @@ accept     80.1015409967   53.6234824949
 expect       6684866.077     8688618.853
 
 accept     90.9390534980   54.4032676618
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.2275975816   54.6540829630
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.2799875321   55.5050863665
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.5746083149   55.8365526658
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.5493283922   55.8603600954
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.1036826064   56.0703761781
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.2683487285   56.7530037053
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.2871251380   57.2145257183
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.1375706366   57.2304506879
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.2551410057   57.5449642224
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.4163113130   50.3425538005
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.9733110986   50.4458299488
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.7576358296   50.9581504113
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.3417213155   51.6042289093
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.0195163151   51.8452436385
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.9037457234   52.0925641350
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.8773360504   52.9710431510
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.3390467545   53.2106639106
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.5444768748   53.6966176349
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.1508332331   54.2933793206
 expect      -7253089.374     9338825.070
@@ -1644,61 +1644,61 @@ accept     80.2667195466   63.4462194528
 expect       5659364.075     9965995.331
 
 accept     90.1958404963   64.0831209279
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.5787966151   64.7750993019
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.5253826702   65.0311314831
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.1812962078   65.3475412110
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.6287227669   65.6970336106
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.0181654960   66.0623612621
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.7856466511   66.3591210923
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.9724593003   66.6162174492
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.0946608724   66.6386212957
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.4742461481   67.2758505348
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.3409209668   60.7971917835
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.8189576120   61.1637771517
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.5389911401   61.2887975834
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.8226015684   61.6437737052
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.2361655032   62.2457658007
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.4677006422   63.0421916813
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.2765495979   63.0575080285
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.6674914716   63.2917945558
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.7670971881   63.3834861911
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.8162159435   64.1409584458
 expect      -6128005.443    10556995.120
@@ -1755,61 +1755,61 @@ accept     80.1791569395   72.7183017021
 expect       4529430.842    11315638.668
 
 accept     90.8791736411   72.9059905421
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.0478827489   73.6259975169
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.4087249466   74.2803681973
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.3401612468   74.8365621394
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.1826062634   75.5694271641
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.9483568214   75.9187393924
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.4892277622   76.6692051191
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.6382868956   77.4573927636
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.7717121538   77.8061856572
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.3573673565   78.0660690876
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -179.6675977383   70.0957203052
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.7405185971   70.8584256587
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.5167125707   71.8322204655
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.0042143904   72.1158106531
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.0329602286   72.2542294354
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.7801336775   73.2077231869
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.3119539671   73.8550759705
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.4758176356   74.3266149256
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.6607202273   75.0169362990
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.4753530769   75.9617981968
 expect      -4457168.999    12206697.987
@@ -1866,61 +1866,61 @@ accept     80.9787521274   84.9230149078
 expect       2463890.570    13818835.453
 
 accept     90.9143604315   85.3871192550
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     100.4734880731   86.0042464514
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     110.9680822795   86.3859461851
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     120.8622100732   87.2340544489
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     130.2558456040   87.3620502284
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     140.2081210889   87.9608446770
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     150.4963196965   88.3752399281
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     160.1141812758   89.1315428504
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     170.8037412086   89.6150717843
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept     180.1602592915   90.5979873573
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -179.4988010038   80.2382292021
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.7323895837   80.2920174872
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.9503807693   80.8196927273
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.0925061081   81.4663152862
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -139.5716369758   82.4286410234
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -129.8787197288   82.8456226975
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -119.4793423714   83.5516191256
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -109.2664761985   84.4756117750
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -99.3415573570   85.3222226381
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -89.5621686999   86.1477384313
 expect      -2328002.776    14359252.241
@@ -1950,171 +1950,171 @@ accept     -9.7223365758   89.3832521756
 expect       -112026.906    15387878.248
 
 accept      0.6641448256   90.0106423220
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     10.1860723801   90.3688642972
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     20.9490167192   90.7173958262
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     30.5649867370   90.9925163187
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     40.4458702150   91.4734308311
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     50.5856921606   91.9158720484
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     60.1363202035   92.2767051552
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     70.0710227099   93.2758942081
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     80.2222434482   93.6733349750
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     90.0483434140   94.4740404396
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     100.6823676393   95.0641687155
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     110.6403276588   95.6156935259
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     120.2581625576   96.0431766104
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     130.4609264126   96.4854267472
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     140.6441294534   96.7262713213
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     150.3252472008   97.1420609214
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     160.7668616164   97.4790143988
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     170.7465062128   97.6550567817
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     180.7542323137   98.2872938097
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -179.4933532172   89.0462961156
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -169.8505428520   89.8903183246
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -159.6997771019   89.9583403191
-expect    failure errno -20
+expect    failure errno coord_transfm_outside_projection_domain
 
 accept    -149.2613507188   90.8395350848
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -139.1842997548   91.1573946186
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -129.6568991775   91.9446769249
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -119.3115606256   92.6597043587
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -109.6274703609   93.6500222571
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -99.3955363318   93.6790731121
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -89.4902277654   93.7101118679
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -79.2055095189   93.8973426839
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -69.2694919752   94.5715889948
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -59.2096313695   94.8767204910
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -49.3346426547   95.7619370286
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -39.2940192313   95.9177686800
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -29.1265263906   96.4025342806
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept    -19.8149677195   96.5067828223
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     -9.2806942519   96.8402148749
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept      0.9337491530   97.5569468760
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     10.2800898790   97.9514714385
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     20.9290209494   98.9284832763
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     30.3939457169   99.5719752144
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     40.6958590705   100.0328567981
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     50.1473239826   100.6776574030
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     60.6429472168   100.7044060498
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     70.8017862719   101.2635238404
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     80.3144473172   101.9663622692
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     90.7459660200   102.3134423218
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     100.1161002435   103.1947683448
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     110.1928396624   104.0579352787
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     120.2928981698   104.8100792607
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     130.4257286255   105.4176918707
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     140.8110132830   105.4248870814
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     150.8802025406   106.2350153626
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     160.3540927190   106.6211948814
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     170.1006211763   106.7429949781
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 accept     180.9080349563   107.0582862622
-expect    failure errno -14
+expect    failure errno coord_transfm_invalid_coord
 
 </gie-strict>
