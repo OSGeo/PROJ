@@ -42,6 +42,7 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/grid_alternatives.sql \
 		sql/grid_alternatives_generated_noaa.sql \
 		sql/customizations.sql \
+		sql/nkg.sql \
 		sql/commit.sql
 
 EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
