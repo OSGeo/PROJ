@@ -1271,6 +1271,8 @@ int PROJ_DLL proj_get_suggested_operation(PJ_CONTEXT *ctx,
 
 /* ------------------------------------------------------------------------- */
 
+int PROJ_DLL proj_crs_is_derived(PJ_CONTEXT *ctx, const PJ *crs);
+
 PJ PROJ_DLL *proj_crs_get_geodetic_crs(PJ_CONTEXT *ctx, const PJ *crs);
 
 PJ PROJ_DLL *proj_crs_get_horizontal_datum(PJ_CONTEXT *ctx, const PJ *crs);
