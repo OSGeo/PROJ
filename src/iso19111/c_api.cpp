@@ -1840,6 +1840,29 @@ PJ *proj_crs_get_geodetic_crs(PJ_CONTEXT *ctx, const PJ *crs) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns whether a CRS is a derived CRS.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs Object of type CRS (must not be NULL)
+ * @return TRUE if the CRS is a derived CRS.
+ * @since 8.0
+ */
+int proj_crs_is_derived(PJ_CONTEXT *ctx, const PJ *crs) {
+    if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return false;
+    }
+    auto l_crs = dynamic_cast<const CRS *>(crs->iso_obj.get());
+    if (!l_crs) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CRS");
+        return false;
+    }
+    return dynamic_cast<const DerivedCRS *>(l_crs) != nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Get a CRS component from a CompoundCRS
  *
  * The returned object must be unreferenced with proj_destroy() after

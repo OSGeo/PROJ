@@ -5183,4 +5183,30 @@ TEST_F(CApi, datum_ensemble) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_crs_is_derived) {
+    {
+        auto wkt =
+            createProjectedCRS()->exportToWKT(WKTFormatter::create().get());
+        auto obj = proj_create_from_wkt(m_ctxt, wkt.c_str(), nullptr, nullptr,
+                                        nullptr);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr) << wkt;
+
+        EXPECT_TRUE(proj_crs_is_derived(m_ctxt, obj));
+    }
+
+    {
+        auto wkt = createProjectedCRS()->baseCRS()->exportToWKT(
+            WKTFormatter::create().get());
+        auto obj = proj_create_from_wkt(m_ctxt, wkt.c_str(), nullptr, nullptr,
+                                        nullptr);
+        ObjectKeeper keeper(obj);
+        ASSERT_NE(obj, nullptr) << wkt;
+
+        EXPECT_FALSE(proj_crs_is_derived(m_ctxt, obj));
+    }
+}
+
 } // namespace

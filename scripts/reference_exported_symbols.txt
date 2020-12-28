@@ -928,6 +928,7 @@ proj_crs_get_geodetic_crs
 proj_crs_get_horizontal_datum
 proj_crs_get_sub_crs
 proj_crs_info_list_destroy
+proj_crs_is_derived
 proj_crs_promote_to_3D
 proj_cs_get_axis_count
 proj_cs_get_axis_info
