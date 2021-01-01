@@ -3,6 +3,63 @@
 News
 ###############################################################################
 
+7.2.1 Release Notes
+-------------------
+*January 1st 2021*
+
+Updates
+-------
+
+* Add metadata with the version number of the database layout (`#2474 <https://github.com/OSGeo/PROJ/issues/2474>`_)
+
+* Split ``coordinateoperation.cpp`` and ``test_operation.cpp`` in several parts (`#2484 <https://github.com/OSGeo/PROJ/issues/2484>`_)
+
+* Update to EPSG v10.008 (`#2490 <https://github.com/OSGeo/PROJ/issues/2490>`_)
+
+* Added the NKG 2008 and 2020 transformations in ``proj.db`` (`#2495 <https://github.com/OSGeo/PROJ/issues/2495>`_)
+
+Bug fixes
+---------
+
+* Set ``CURL_ENABLED`` definition on projinfo build (`#2405 <https://github.com/OSGeo/PROJ/issues/2405>`_)
+
+* :c:func:`createBoundCRSToWGS84IfPossible()`: make it return same result with a CRS
+  built from EPSG code or WKT1 (`#2412 <https://github.com/OSGeo/PROJ/issues/2412>`_)
+
+* WKT2 parsing: several fixes related to map projection parameter units (`#2428 <https://github.com/OSGeo/PROJ/issues/2428>`_)
+
+* :c:func:`createOperation()`: make it work properly when one of the CRS is a BoundCRS of
+  a DerivedGeographicCRS (``+proj=ob_tran +o_proj=lonlat +towgs84=....``) (`#2441 <https://github.com/OSGeo/PROJ/issues/2441>`_)
+
+* WKT parsing: fix ingestion of WKT with a Geocentric CRS as the base of the
+  projected CRS (`#2443 <https://github.com/OSGeo/PROJ/issues/2443>`_)
+
+* ``GeographicCRS::_isEquivalentTo(EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS)``:
+  make it work when comparing easting,northing,up and northing,easting,up (`#2446 <https://github.com/OSGeo/PROJ/issues/2446>`_)
+
+* :c:func:`createOperation()`: add a ballpark vertical transformation when dealing
+  with ``GEOIDMODEL[]`` (`#2449 <https://github.com/OSGeo/PROJ/issues/2449>`_)
+
+* Use same arguments to printf format string for both radians and degrees in
+  output by cct (`#2453 <https://github.com/OSGeo/PROJ/issues/2453>`_)
+
+* PRIMEM WKT handling: fixes on import for 'sexagesimal DMS' or from WKT1:GDAL/ESRI
+  when GEOGCS UNIT != Degree; morph to ESRI the PRIMEM name on export (`#2455 <https://github.com/OSGeo/PROJ/issues/2455>`_)
+
+* :c:func:`createObjectsFromName()`: in exact match, make looking for 'ETRS89 / UTM zone 32N'
+  return only the exact match (`#2462 <https://github.com/OSGeo/PROJ/issues/2462>`_)
+
+* Inverse tmerc spherical: fix wrong sign of latitude when lat_0 is used (`#2469 <https://github.com/OSGeo/PROJ/issues/2469>`_)
+
+* Add option to allow export of Geographic/Projected 3D CRS in WKT1_GDAL (`#2470 <https://github.com/OSGeo/PROJ/issues/2470>`_)
+
+* Fix building ``proj.db`` with SQLite built with ``-DSQLITE_DQS=0`` (`#2480 <https://github.com/OSGeo/PROJ/issues/2480>`_)
+
+* Include JSON Schema files in CMake builds (`#2485 <https://github.com/OSGeo/PROJ/issues/2485>`_)
+
+* :c:func:`createOperations()`: fix inconsistent chaining exception when transforming from BoundCRS of projected CRS based on NTF Paris to BoundCRS of geog CRS NTF Paris (`#2486 <https://github.com/OSGeo/PROJ/issues/2486>`_)
+
+
 7.2.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *November 1st 2020*
