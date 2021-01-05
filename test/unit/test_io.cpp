@@ -10543,7 +10543,7 @@ TEST(io, createFromUserInput) {
                   "MGI (Ferro) to MGI (1) + MGI to WGS 84 (3)");
     }
     EXPECT_NO_THROW(createFromUserInput(
-        "GEOGCRS[\"WGS 84\",\n"
+        " \n\t\rGEOGCRS[\"WGS 84\",\n"
         "    DATUM[\"World Geodetic System 1984\",\n"
         "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
         "    CS[ellipsoidal,3],\n"

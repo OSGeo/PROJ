@@ -6133,6 +6133,12 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                            const DatabaseContextPtr &dbContext,
                                            bool usePROJ4InitRules,
                                            PJ_CONTEXT *ctx) {
+    std::size_t idxFirstCharNotSpace = text.find_first_not_of(" \t\r\n");
+    if (idxFirstCharNotSpace > 0 && idxFirstCharNotSpace != std::string::npos) {
+        return createFromUserInput(text.substr(idxFirstCharNotSpace), dbContext,
+                                   usePROJ4InitRules, ctx);
+    }
+
     if (!text.empty() && text[0] == '{') {
         json j;
         try {
