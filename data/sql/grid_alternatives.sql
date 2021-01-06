@@ -180,6 +180,11 @@ VALUES
 ('naptrans2008.gtx','','naptrans2008.gtx','GTX','geoid_like',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/naptrans2008.gtx',1,0,NULL),
 ('rdtrans2008.gsb','','rdtrans2008.gsb','NTv2','hgridshift',0,NULL,'https://salsa.debian.org/debian-gis-team/proj-rdnap/raw/upstream/2008/rdtrans2008.gsb',1,0,NULL),
 
+-- no_kv - Kartverket
+-- Norwegian grids
+('HREF2018B_NN2000_EUREF89.gtx','no_kv_HREF2018B_NN2000_EUREF89.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/no_kv_HREF2018B_NN2000_EUREF89.tif',1,1,NULL),
+('href2008a.gtx','no_kv_href2008a.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/no_kv_href2008a.tif',1,1,NULL),
+
 -- nz_linz - New Zealand
 ('nzgd2kgrid0005.gsb','nz_linz_nzgd2kgrid0005.tif','nzgd2kgrid0005.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2kgrid0005.tif',1,1,NULL),
 ('nzgeoid2016.gtx','nz_linz_nzgeoid2016.tif','nzgeoid2016.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/nz_linz_nzgeoid2016.tif',1,1,NULL),
