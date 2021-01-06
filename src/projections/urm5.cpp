@@ -30,24 +30,31 @@ static PJ_XY urm5_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
 
 PJ *PROJECTION(urm5) {
     double alpha, t;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    if (pj_param(P->ctx, P->params, "tn").i) {
-        Q->n = pj_param(P->ctx, P->params, "dn").f;
-        if (Q->n <= 0. || Q->n > 1.)
-            return pj_default_destructor(P, PJD_ERR_N_OUT_OF_RANGE);
-    } else {
-            return pj_default_destructor(P, PJD_ERR_N_OUT_OF_RANGE);
+    if (!pj_param(P->ctx, P->params, "tn").i )
+    {
+        proj_log_error(P, _("Missing parameter n."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
+
+    Q->n = pj_param(P->ctx, P->params, "dn").f;
+    if (Q->n <= 0. || Q->n > 1.)
+    {
+        proj_log_error(P, _("Invalid value for n: it should be in ]0,1] range."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
     Q->q3 = pj_param(P->ctx, P->params, "dq").f / 3.;
     alpha = pj_param(P->ctx, P->params, "ralpha").f;
     t = Q->n * sin (alpha);
     const double denom = sqrt (1. - t * t);
     if( denom == 0 ) {
-        return pj_default_destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+        proj_log_error(P, _("Invalid value for n / alpha: n * sin(|alpha|) should be < 1."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     Q->m = cos (alpha) / denom;
     Q->rmn = 1. / (Q->m * Q->n);

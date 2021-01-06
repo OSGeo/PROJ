@@ -66,7 +66,7 @@ static PJ_XY nsper_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         break;
     }
     if (xy.y < Q->rp) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
     xy.y = Q->pn1 / (Q->p - xy.y);
@@ -120,7 +120,7 @@ static PJ_LP nsper_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         double cosz, sinz;
         sinz = 1. - rh * rh * Q->pfact;
         if (sinz < 0.) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         }
         sinz = (Q->p - sqrt(sinz)) / (Q->pn1 / rh + rh / Q->pn1);
@@ -166,7 +166,10 @@ static PJ *setup(PJ *P) {
     }
     Q->pn1 = Q->height / P->a; /* normalize by radius */
     if ( Q->pn1 <= 0 || Q->pn1 > 1e10 )
-        return pj_default_destructor (P, PJD_ERR_INVALID_H);
+    {
+        proj_log_error(P, _("Invalid value for h"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     Q->p = 1. + Q->pn1;
     Q->rp = 1. / Q->p;
     Q->h = 1. / Q->pn1;
@@ -180,9 +183,9 @@ static PJ *setup(PJ *P) {
 
 
 PJ *PROJECTION(nsper) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->tilt = 0;
@@ -194,9 +197,9 @@ PJ *PROJECTION(nsper) {
 PJ *PROJECTION(tpers) {
     double omega, gamma;
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     omega = pj_param(P->ctx, P->params, "rtilt").f;

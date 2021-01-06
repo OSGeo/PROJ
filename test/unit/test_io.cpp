@@ -488,6 +488,62 @@ TEST(wkt_parse, wkt1_EPSG_4807_grad_mess) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_esri_EPSG_4901_grad) {
+    auto obj =
+        WKTParser()
+            .attachDatabaseContext(DatabaseContext::create())
+            .createFromWKT("GEOGCS[\"GCS_ATF_Paris\",DATUM[\"D_ATF\","
+                           "SPHEROID[\"Plessis_1817\",6376523.0,308.64]],"
+                           "PRIMEM[\"Paris_RGS\",2.33720833333333],"
+                           "UNIT[\"Grad\",0.0157079632679489]]");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->datum();
+    auto primem = datum->primeMeridian();
+    EXPECT_EQ(primem->nameStr(), "Paris RGS");
+    // The PRIMEM is really in degree
+    EXPECT_EQ(primem->longitude().unit(), UnitOfMeasure::DEGREE);
+    EXPECT_NEAR(primem->longitude().value(), 2.33720833333333, 1e-14);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt2_epsg_org_EPSG_4901_PRIMEM_weird_sexagesimal_DMS) {
+    // Current epsg.org output may use the EPSG:9110 "sexagesimal DMS"
+    // unit and a DD.MMSSsss value, but this will likely be changed to
+    // use decimal degree.
+    auto obj = WKTParser().createFromWKT(
+        "GEOGCRS[\"ATF (Paris)\","
+        "  DATUM[\"Ancienne Triangulation Francaise (Paris)\","
+        "    ELLIPSOID[\"Plessis 1817\",6376523,308.64,"
+        "      LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]],"
+        "      ID[\"EPSG\",7027]],"
+        "    ID[\"EPSG\",6901]],"
+        "  PRIMEM[\"Paris RGS\",2.201395,"
+        "    ANGLEUNIT[\"sexagesimal DMS\",1,ID[\"EPSG\",9110]],"
+        "    ID[\"EPSG\",8914]],"
+        "  CS[ellipsoidal,2,"
+        "    ID[\"EPSG\",6403]],"
+        "  AXIS[\"Geodetic latitude (Lat)\",north,"
+        "    ORDER[1]],"
+        "  AXIS[\"Geodetic longitude (Lon)\",east,"
+        "    ORDER[2]],"
+        "  ANGLEUNIT[\"grad\",0.015707963267949,ID[\"EPSG\",9105]],"
+        "  USAGE[SCOPE[\"Geodesy.\"],AREA[\"France - mainland onshore.\"],"
+        "  BBOX[42.33,-4.87,51.14,8.23]],"
+        "ID[\"EPSG\",4901]]");
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->datum();
+    auto primem = datum->primeMeridian();
+    EXPECT_EQ(primem->longitude().unit(), UnitOfMeasure::DEGREE);
+    EXPECT_NEAR(primem->longitude().value(), 2.33720833333333, 1e-14);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt1_geographic_old_datum_name_from_EPSG_code) {
     auto wkt =
         "GEOGCS[\"S-JTSK (Ferro)\",\n"
@@ -615,6 +671,52 @@ TEST(wkt_parse, wkt1_geographic_with_PROJ4_extension) {
         crs->exportToWKT(
                WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI).get())
             .find("EXTENSION") == std::string::npos);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_geographic_epsg_org_api_4326) {
+    // Output from
+    // https://apps.epsg.org/api/v1/CoordRefSystem/4326/export/?format=wkt&formatVersion=1
+    // using a datum ensemble name
+    auto wkt =
+        "GEOGCS[\"WGS 84\",DATUM[\"World Geodetic System 1984 ensemble\","
+        "SPHEROID[\"WGS 84\",6378137,298.257223563,"
+        "AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],"
+        "PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],"
+        "UNIT[\"degree (supplier to define representation)\","
+        "0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],"
+        "AXIS[\"Lat\",north],AXIS[\"Lon\",east],"
+        "AUTHORITY[\"EPSG\",\"4326\"]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->datum();
+    EXPECT_EQ(datum->nameStr(), "World Geodetic System 1984");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_geographic_epsg_org_api_4258) {
+    // Output from
+    // https://apps.epsg.org/api/v1/CoordRefSystem/4258/export/?format=wkt&formatVersion=1
+    // using a datum ensemble name
+    auto wkt = "GEOGCS[\"ETRS89\","
+               "DATUM[\"European Terrestrial Reference System 1989 ensemble\","
+               "SPHEROID[\"GRS 1980\",6378137,298.257222101,"
+               "AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6258\"]],"
+               "PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],"
+               "UNIT[\"degree (supplier to define representation)\","
+               "0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],"
+               "AXIS[\"Lat\",north],AXIS[\"Lon\",east],"
+               "AUTHORITY[\"EPSG\",\"4258\"]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto datum = crs->datum();
+    EXPECT_EQ(datum->nameStr(), "European Terrestrial Reference System 1989");
 }
 
 // ---------------------------------------------------------------------------
@@ -1658,16 +1760,21 @@ TEST(wkt_parse, wkt2_projected) {
                "                ID[\"EPSG\",9122]],\n"
                "            ID[\"EPSG\",8801]],\n"
                "        PARAMETER[\"Longitude of natural origin\",3,\n"
-               "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
-               "                ID[\"EPSG\",9122]],\n"
+               // Volontary omit LENGTHUNIT to check the WKT grammar accepts
+               // Check that we default to degree
+               //"            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+               //"                ID[\"EPSG\",9122]],\n"
                "            ID[\"EPSG\",8802]],\n"
                "        PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
-               "            SCALEUNIT[\"unity\",1,\n"
-               "                ID[\"EPSG\",9201]],\n"
+               // Check that we default to unity
+               //"            SCALEUNIT[\"unity\",1,\n"
+               //"                ID[\"EPSG\",9201]],\n"
                "            ID[\"EPSG\",8805]],\n"
                "        PARAMETER[\"False easting\",500000,\n"
-               "            LENGTHUNIT[\"metre\",1,\n"
-               "                ID[\"EPSG\",9001]],\n"
+               // Volontary omit LENGTHUNIT to check the WKT grammar accepts
+               // Check that we default to metre
+               //"            LENGTHUNIT[\"metre\",1,\n"
+               //"                ID[\"EPSG\",9001]],\n"
                "            ID[\"EPSG\",8806]],\n"
                "        PARAMETER[\"False northing\",0,\n"
                "            LENGTHUNIT[\"metre\",1,\n"
@@ -1875,6 +1982,60 @@ TEST(wkt_parse, wkt2_2019_projected_utm_3D) {
 
     EXPECT_NO_THROW(crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt2_2019_projected_with_base_geocentric) {
+    auto wkt =
+        "PROJCRS[\"EPSG topocentric example B\",\n"
+        "    BASEGEODCRS[\"WGS 84\",\n"
+        "        ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+        "            MEMBER[\"World Geodetic System 1984 (Transit)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+        "            MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ENSEMBLEACCURACY[2.0]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",4978]],\n"
+        "    CONVERSION[\"EPSG topocentric example B\",\n"
+        "        METHOD[\"Geocentric/topocentric conversions\",\n"
+        "            ID[\"EPSG\",9836]],\n"
+        "        PARAMETER[\"Geocentric X of topocentric origin\",3771793.97,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8837]],\n"
+        "        PARAMETER[\"Geocentric Y of topocentric origin\",140253.34,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8838]],\n"
+        "        PARAMETER[\"Geocentric Z of topocentric origin\",5124304.35,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8839]]],\n"
+        "    CS[Cartesian,3],\n"
+        "        AXIS[\"topocentric East (U)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"topocentric North (V)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        AXIS[\"topocentric height (W)\",up,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"Example only (fictitious).\"],\n"
+        "        AREA[\"Description of the extent of the CRS.\"],\n"
+        "        BBOX[-90,-180,90,180]],\n"
+        "    ID[\"EPSG\",5820]]";
+    auto dbContext = DatabaseContext::create();
+    // Need a database so that EPSG:4978 is resolved
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_TRUE(crs->baseCRS()->isGeocentric());
 }
 
 // ---------------------------------------------------------------------------
@@ -10382,7 +10543,7 @@ TEST(io, createFromUserInput) {
                   "MGI (Ferro) to MGI (1) + MGI to WGS 84 (3)");
     }
     EXPECT_NO_THROW(createFromUserInput(
-        "GEOGCRS[\"WGS 84\",\n"
+        " \n\t\rGEOGCRS[\"WGS 84\",\n"
         "    DATUM[\"World Geodetic System 1984\",\n"
         "        ELLIPSOID[\"WGS 84\",6378137,298.257223563]],\n"
         "    CS[ellipsoidal,3],\n"
@@ -11141,6 +11302,155 @@ TEST(json_import, projected_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto pcrs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
     ASSERT_TRUE(pcrs != nullptr);
+    EXPECT_EQ(pcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, projected_crs_with_geocentric_base) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"ProjectedCRS\",\n"
+                "  \"name\": \"EPSG topocentric example B\",\n"
+                "  \"base_crs\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"datum_ensemble\": {\n"
+                "      \"name\": \"World Geodetic System 1984 ensemble\",\n"
+                "      \"members\": [\n"
+                "        {\n"
+                "          \"name\": \"World Geodetic System 1984 (Transit)\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"World Geodetic System 1984 (G730)\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"World Geodetic System 1984 (G873)\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"World Geodetic System 1984 (G1150)\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"World Geodetic System 1984 (G1674)\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"World Geodetic System 1984 (G1762)\"\n"
+                "        }\n"
+                "      ],\n"
+                "      \"ellipsoid\": {\n"
+                "        \"name\": \"WGS 84\",\n"
+                "        \"semi_major_axis\": 6378137,\n"
+                "        \"inverse_flattening\": 298.257223563\n"
+                "      },\n"
+                "      \"accuracy\": \"2.0\"\n"
+                "    },\n"
+                "    \"coordinate_system\": {\n"
+                "      \"subtype\": \"Cartesian\",\n"
+                "      \"axis\": [\n"
+                "        {\n"
+                "          \"name\": \"Geocentric X\",\n"
+                "          \"abbreviation\": \"X\",\n"
+                "          \"direction\": \"geocentricX\",\n"
+                "          \"unit\": \"metre\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"Geocentric Y\",\n"
+                "          \"abbreviation\": \"Y\",\n"
+                "          \"direction\": \"geocentricY\",\n"
+                "          \"unit\": \"metre\"\n"
+                "        },\n"
+                "        {\n"
+                "          \"name\": \"Geocentric Z\",\n"
+                "          \"abbreviation\": \"Z\",\n"
+                "          \"direction\": \"geocentricZ\",\n"
+                "          \"unit\": \"metre\"\n"
+                "        }\n"
+                "      ]\n"
+                "    },\n"
+                "    \"id\": {\n"
+                "      \"authority\": \"EPSG\",\n"
+                "      \"code\": 4978\n"
+                "    }\n"
+                "  },\n"
+                "  \"conversion\": {\n"
+                "    \"name\": \"EPSG topocentric example B\",\n"
+                "    \"method\": {\n"
+                "      \"name\": \"Geocentric/topocentric conversions\",\n"
+                "      \"id\": {\n"
+                "        \"authority\": \"EPSG\",\n"
+                "        \"code\": 9836\n"
+                "      }\n"
+                "    },\n"
+                "    \"parameters\": [\n"
+                "      {\n"
+                "        \"name\": \"Geocentric X of topocentric origin\",\n"
+                "        \"value\": 3771793.97,\n"
+                "        \"unit\": \"metre\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 8837\n"
+                "        }\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geocentric Y of topocentric origin\",\n"
+                "        \"value\": 140253.34,\n"
+                "        \"unit\": \"metre\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 8838\n"
+                "        }\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geocentric Z of topocentric origin\",\n"
+                "        \"value\": 5124304.35,\n"
+                "        \"unit\": \"metre\",\n"
+                "        \"id\": {\n"
+                "          \"authority\": \"EPSG\",\n"
+                "          \"code\": 8839\n"
+                "        }\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"Cartesian\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Topocentric East\",\n"
+                "        \"abbreviation\": \"U\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Topocentric North\",\n"
+                "        \"abbreviation\": \"V\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Topocentric height\",\n"
+                "        \"abbreviation\": \"W\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"scope\": \"Example only (fictitious).\",\n"
+                "  \"area\": \"Description of the extent of the CRS.\",\n"
+                "  \"bbox\": {\n"
+                "    \"south_latitude\": -90,\n"
+                "    \"west_longitude\": -180,\n"
+                "    \"north_latitude\": 90,\n"
+                "    \"east_longitude\": 180\n"
+                "  },\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": 5820\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto pcrs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(pcrs != nullptr);
+    EXPECT_TRUE(pcrs->baseCRS()->isGeocentric());
     EXPECT_EQ(pcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
 }

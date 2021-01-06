@@ -155,8 +155,8 @@ PJ *TRANSFORMATION(hgridshift,0) {
     P->right = PJ_IO_UNITS_RADIANS;
 
     if (0==pj_param(P->ctx, P->params, "tgrids").i) {
-        proj_log_error(P, "hgridshift: +grids parameter missing.");
-        return destructor (P, PJD_ERR_NO_ARGS);
+        proj_log_error(P, _("+grids parameter missing."));
+        return destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     /* TODO: Refactor into shared function that can be used  */
@@ -194,8 +194,8 @@ PJ *TRANSFORMATION(hgridshift,0) {
             Q->grids = pj_hgrid_init(P, "grids");
             /* Was gridlist compiled properly? */
             if ( proj_errno(P) ) {
-                proj_log_error(P, "hgridshift: could not find required grid(s).");
-                return destructor(P, PJD_ERR_FAILED_TO_LOAD_GRID);
+                proj_log_error(P, _("could not find required grid(s)."));
+                return destructor(P, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
             }
 
             gMutex.lock();

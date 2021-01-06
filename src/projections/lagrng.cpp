@@ -35,7 +35,7 @@ static PJ_XY lagrng_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
         lp.lam *= Q->rw;
         c = 0.5 * (v + 1./v) + cos(lp.lam);
         if (c < TOL) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
         xy.x = 2. * sin(lp.lam) / c;
@@ -59,7 +59,7 @@ static PJ_LP lagrng_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
         y2m = 2. - xy.y;
         c = y2p * y2m - x2;
         if (fabs(c) < TOL) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         }
         lp.phi = 2. * atan(pow((y2p * y2p + x2) / (Q->a2 * (y2m * y2m + x2)), Q->hw)) - M_HALFPI;
@@ -71,9 +71,9 @@ static PJ_LP lagrng_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
 
 PJ *PROJECTION(lagrng) {
     double sin_phi1;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if( pj_param(P->ctx, P->params, "tW").i )
@@ -81,13 +81,19 @@ PJ *PROJECTION(lagrng) {
     else
         Q->w = 2;
     if (Q->w <= 0)
-        return pj_default_destructor(P, PJD_ERR_W_OR_M_ZERO_OR_LESS);
+    {
+        proj_log_error(P, _("Invalid value for W: it should be > 0"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     Q->hw = 0.5 * Q->w;
     Q->rw = 1. / Q->w;
     Q->hrw = 0.5 * Q->rw;
     sin_phi1 = sin(pj_param(P->ctx, P->params, "rlat_1").f);
     if (fabs(fabs(sin_phi1) - 1.) < TOL)
-        return pj_default_destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
+    {
+        proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be < 90°"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
 
     Q->a1 = pow((1. - sin_phi1)/(1. + sin_phi1), Q->hrw);
     Q->a2 = Q->a1 * Q->a1;

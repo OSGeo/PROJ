@@ -29,7 +29,7 @@ PROJ_HEAD(chamb, "Chamberlin Trimetric") "\n\tMisc Sph, no inv"
 #define TOL 1e-9
 
 /* distance and azimuth from point 1 to point 2 */
-static VECT vect(projCtx ctx, double dphi, double c1, double s1, double c2, double s2, double dlam) {
+static VECT vect(PJ_CONTEXT *ctx, double dphi, double c1, double s1, double c2, double s2, double dlam) {
     VECT v;
     double cdl, dp, dl;
 
@@ -49,7 +49,7 @@ static VECT vect(projCtx ctx, double dphi, double c1, double s1, double c2, doub
 }
 
 /* law of cosines */
-static double lc(projCtx ctx, double b,double c,double a) {
+static double lc(PJ_CONTEXT *ctx, double b,double c,double a) {
     return aacos(ctx, .5 * (b * b + c * c - a * a) / (b * c));
 }
 
@@ -103,9 +103,9 @@ static PJ_XY chamb_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
 PJ *PROJECTION(chamb) {
     int i, j;
     char line[10];
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
 
@@ -123,7 +123,10 @@ PJ *PROJECTION(chamb) {
         Q->c[i].v = vect(P->ctx,Q->c[j].phi - Q->c[i].phi, Q->c[i].cosphi, Q->c[i].sinphi,
             Q->c[j].cosphi, Q->c[j].sinphi, Q->c[j].lam - Q->c[i].lam);
         if (Q->c[i].v.r == 0.0)
-            return pj_default_destructor (P, PJD_ERR_CONTROL_POINT_NO_DIST);
+        {
+            proj_log_error(P, _("Invalid value for control points: they should be distinct"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
         /* co-linearity problem ignored for now */
     }
     Q->beta_0 = lc(P->ctx,Q->c[0].v.r, Q->c[2].v.r, Q->c[1].v.r);

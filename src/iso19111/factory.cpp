@@ -39,11 +39,13 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
-#include "proj/internal/coordinateoperation_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 #include "proj/internal/lru_cache.hpp"
 #include "proj/internal/tracing.hpp"
+
+#include "operation/coordinateoperation_internal.hpp"
+#include "operation/parammappings.hpp"
 
 #include "sqlite3_utils.hpp"
 
@@ -65,7 +67,6 @@
 // clang-format off
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_api.h"
 // clang-format on
 
 #include <sqlite3.h>
@@ -93,6 +94,12 @@ namespace io {
 #define GEOG_2D_SINGLE_QUOTED "'geographic 2D'"
 #define GEOG_3D_SINGLE_QUOTED "'geographic 3D'"
 #define GEOCENTRIC_SINGLE_QUOTED "'geocentric'"
+
+// See data/sql/metadata.sql for the semantics of those constants
+constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
+// If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
+// must be incremented.
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 0;
 
 // ---------------------------------------------------------------------------
 
@@ -277,6 +284,8 @@ struct DatabaseContext::Private {
 
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
+
+    void checkDatabaseLayout();
 
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
@@ -568,6 +577,61 @@ void DatabaseContext::Private::open(const std::string &databasePath,
 
     databasePath_ = path;
     registerFunctions();
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::checkDatabaseLayout() {
+    auto res = run("SELECT key, value FROM metadata WHERE key IN "
+                   "('DATABASE.LAYOUT.VERSION.MAJOR', "
+                   "'DATABASE.LAYOUT.VERSION.MINOR')");
+    if (res.size() != 2) {
+        // The database layout of PROJ 7.2 that shipped with EPSG v10.003 is
+        // at the time of writing still compatible of the one we support.
+        static_assert(
+            // cppcheck-suppress knownConditionTrueFalse
+            DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
+                // cppcheck-suppress knownConditionTrueFalse
+                DATABASE_LAYOUT_VERSION_MINOR == 0,
+            "remove that assertion and below lines next time we upgrade "
+            "database structure");
+        res = run("SELECT 1 FROM metadata WHERE key = 'EPSG.VERSION' AND "
+                  "value = 'v10.003'");
+        if (!res.empty()) {
+            return;
+        }
+
+        throw FactoryException(
+            databasePath_ +
+            " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
+            "DATABASE.LAYOUT.VERSION.MINOR "
+            "metadata. It comes from another PROJ installation.");
+    }
+    int nMajor = 0;
+    int nMinor = 0;
+    for (const auto &row : res) {
+        if (row[0] == "DATABASE.LAYOUT.VERSION.MAJOR") {
+            nMajor = atoi(row[1].c_str());
+        } else if (row[0] == "DATABASE.LAYOUT.VERSION.MINOR") {
+            nMinor = atoi(row[1].c_str());
+        }
+    }
+    if (nMajor != DATABASE_LAYOUT_VERSION_MAJOR) {
+        throw FactoryException(databasePath_ +
+                               " contains DATABASE.LAYOUT.VERSION.MAJOR = " +
+                               toString(nMajor) + " whereas " +
+                               toString(DATABASE_LAYOUT_VERSION_MAJOR) +
+                               " is expected. "
+                               "It comes from another PROJ installation.");
+    }
+    if (nMinor < DATABASE_LAYOUT_VERSION_MINOR) {
+        throw FactoryException(databasePath_ +
+                               " contains DATABASE.LAYOUT.VERSION.MINOR = " +
+                               toString(nMinor) + " whereas a number >= " +
+                               toString(DATABASE_LAYOUT_VERSION_MINOR) +
+                               " is expected. "
+                               "It comes from another PROJ installation.");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -889,6 +953,7 @@ DatabaseContext::create(const std::string &databasePath,
     if (!auxiliaryDatabasePaths.empty()) {
         dbCtx->getPrivate()->attachExtraDatabases(auxiliaryDatabasePaths);
     }
+    dbCtx->getPrivate()->checkDatabaseLayout();
     return dbCtx;
 }
 
@@ -6156,6 +6221,8 @@ AuthorityFactory::createObjectsFromNameEx(
         auto sqlRes = d->run(sql, params);
         bool isFirst = true;
         bool firstIsDeprecated = false;
+        bool foundExactMatch = false;
+        std::size_t hashCodeFirstMatch = 0;
         for (const auto &row : sqlRes) {
             const auto &name = row[3];
             if (approximateMatch) {
@@ -6243,10 +6310,37 @@ AuthorityFactory::createObjectsFromNameEx(
                 }
                 throw std::runtime_error("Unsupported table_name");
             };
-            res.emplace_back(PairObjectName(getObject(table_name, code), name));
+            const auto obj = getObject(table_name, code);
+            if (metadata::Identifier::canonicalizeName(obj->nameStr()) ==
+                canonicalizedSearchedName) {
+                foundExactMatch = true;
+            }
+
+            const auto objPtr = obj.get();
+            if (res.empty()) {
+                hashCodeFirstMatch = typeid(*objPtr).hash_code();
+            } else if (hashCodeFirstMatch != typeid(*objPtr).hash_code()) {
+                hashCodeFirstMatch = 0;
+            }
+
+            res.emplace_back(PairObjectName(obj, name));
             if (limitResultCount > 0 && res.size() == limitResultCount) {
                 break;
             }
+        }
+
+        // If we found a name that is an exact match, and all objects have the
+        // same type, and we are not in approximate mode, only keep the objet(s)
+        // with the exact name match.
+        if (foundExactMatch && hashCodeFirstMatch != 0 && !approximateMatch) {
+            std::list<PairObjectName> resTmp;
+            for (const auto &pair : res) {
+                if (metadata::Identifier::canonicalizeName(
+                        pair.first->nameStr()) == canonicalizedSearchedName) {
+                    resTmp.emplace_back(pair);
+                }
+            }
+            res = std::move(resTmp);
         }
     }
 

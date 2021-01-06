@@ -54,7 +54,7 @@ static PJ_XY gnom_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
     }
 
     if (xy.y <= EPS10) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
 
@@ -124,9 +124,9 @@ static PJ_LP gnom_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
 
 
 PJ *PROJECTION(gnom) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if (fabs(fabs(P->phi0) - M_HALFPI) < EPS10) {

@@ -43,7 +43,9 @@ Parameters
 
 .. option:: +orient=<string>
 
-    Can be set to either ``isea`` or ``pole``.
+    Can be set to either ``isea`` or ``pole``.  See Snyder's Figure 12 for pole orientation :cite:`Snyder1992`.
+    
+    *Defaults to isea*
 
 .. option:: +azi=<value>
 
@@ -62,6 +64,8 @@ Parameters
 .. option:: +mode=<string>
 
     Can be either ``plane``, ``di``, ``dd`` or ``hex``.
+    
+    *Defaults to plane*
 
 .. include:: ../options/lon_0.rst
 

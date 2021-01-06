@@ -65,7 +65,7 @@ static PJ_LP bonne_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     rh = hypot(xy.x, xy.y);
     lp.phi = Q->cphi1 + Q->phi1 - rh;
     if (fabs(lp.phi) > M_HALFPI) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     if (fabs(fabs(lp.phi) - M_HALFPI) <= EPS10)
@@ -91,7 +91,7 @@ static PJ_LP bonne_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
     } else if (fabs(s - M_HALFPI) <= EPS10)
         lp.lam = 0.;
     else {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     return lp;
@@ -106,27 +106,30 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
+    free (static_cast<struct pj_opaque*>(P->opaque)->en);
     return pj_default_destructor (P, errlev);
 }
 
 
 PJ *PROJECTION(bonne) {
     double c;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     if (fabs(Q->phi1) < EPS10)
-        return destructor (P, PJD_ERR_LAT1_IS_ZERO);
+    {
+        proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be > 0"));
+        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
 
     if (P->es != 0.0) {
         Q->en = pj_enfn(P->es);
         if (nullptr==Q->en)
-            return destructor(P, ENOMEM);
+            return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->am1 = sin(Q->phi1);
         c = cos(Q->phi1);
         Q->m1 = pj_mlfn(Q->phi1, Q->am1, c, Q->en);

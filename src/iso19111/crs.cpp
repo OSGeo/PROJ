@@ -533,8 +533,12 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
             auto authFactory = io::AuthorityFactory::create(
                 NN_NO_CHECK(dbContext),
                 authority == "any" ? std::string() : authority);
+            metadata::ExtentPtr extentResolved(extent);
+            if (!extent) {
+                getResolvedCRS(thisAsCRS, authFactory, extentResolved);
+            }
             auto ctxt = operation::CoordinateOperationContext::create(
-                authFactory, extent, 0.0);
+                authFactory, extentResolved, 0.0);
             ctxt->setAllowUseIntermediateCRS(allowIntermediateCRSUse);
             // ctxt->setSpatialCriterion(
             //    operation::CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
@@ -1616,6 +1620,34 @@ static bool exportAsESRIWktCompoundCRSWithEllipsoidalHeight(
     vertCRSList.front()->_exportToWKT(formatter);
     return true;
 }
+
+// ---------------------------------------------------------------------------
+
+// Try to format a Geographic/ProjectedCRS 3D CRS as a
+// GEOGCS[]/PROJCS[],VERTCS["Ellipsoid (metre)",DATUM["Ellipsoid",2002],...]
+static bool exportAsWKT1CompoundCRSWithEllipsoidalHeight(
+    const CRSNNPtr &base2DCRS,
+    const cs::CoordinateSystemAxisNNPtr &verticalAxis,
+    io::WKTFormatter *formatter) {
+    std::string verticalCRSName = "Ellipsoid (";
+    verticalCRSName += verticalAxis->unit().name();
+    verticalCRSName += ')';
+    auto vertDatum = datum::VerticalReferenceFrame::create(
+        util::PropertyMap()
+            .set(common::IdentifiedObject::NAME_KEY, "Ellipsoid")
+            .set("VERT_DATUM_TYPE", "2002"));
+    auto vertCRS = VerticalCRS::create(
+        util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                verticalCRSName),
+        vertDatum.as_nullable(), nullptr,
+        cs::VerticalCS::create(util::PropertyMap(), verticalAxis));
+    formatter->startNode(io::WKTConstants::COMPD_CS, false);
+    formatter->addQuotedString(base2DCRS->nameStr() + " + " + verticalCRSName);
+    base2DCRS->_exportToWKT(formatter);
+    vertCRS->_exportToWKT(formatter);
+    formatter->endNode();
+    return true;
+}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -1681,6 +1713,13 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         if (originalCompoundCRS) {
             originalCompoundCRS->_exportToWKT(formatter);
             return;
+        }
+
+        if (formatter->isAllowedEllipsoidalHeightAsVerticalCRS()) {
+            if (exportAsWKT1CompoundCRSWithEllipsoidalHeight(
+                    geogCRS2D, axisList[2], formatter)) {
+                return;
+            }
         }
 
         io::FormattingException::Throw(
@@ -1922,11 +1961,19 @@ getStandardCriterion(util::IComparable::Criterion criterion) {
 bool GeodeticCRS::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
+    if (other == nullptr || !util::isOfExactType<GeodeticCRS>(*other)) {
+        return false;
+    }
+    return _isEquivalentToNoTypeCheck(other, criterion, dbContext);
+}
+
+bool GeodeticCRS::_isEquivalentToNoTypeCheck(
+    const util::IComparable *other, util::IComparable::Criterion criterion,
+    const io::DatabaseContextPtr &dbContext) const {
     const auto standardCriterion = getStandardCriterion(criterion);
-    auto otherGeodCRS = dynamic_cast<const GeodeticCRS *>(other);
+
     // TODO test velocityModel
-    return otherGeodCRS != nullptr &&
-           SingleCRS::baseIsEquivalentTo(other, standardCriterion, dbContext);
+    return SingleCRS::baseIsEquivalentTo(other, standardCriterion, dbContext);
 }
 //! @endcond
 
@@ -2482,12 +2529,13 @@ bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other,
 bool GeographicCRS::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
-    auto otherGeogCRS = dynamic_cast<const GeographicCRS *>(other);
-    if (otherGeogCRS == nullptr) {
+    if (other == nullptr || !util::isOfExactType<GeographicCRS>(*other)) {
         return false;
     }
+
     const auto standardCriterion = getStandardCriterion(criterion);
-    if (GeodeticCRS::_isEquivalentTo(other, standardCriterion, dbContext)) {
+    if (GeodeticCRS::_isEquivalentToNoTypeCheck(other, standardCriterion,
+                                                dbContext)) {
         return true;
     }
     if (criterion !=
@@ -2506,7 +2554,29 @@ bool GeographicCRS::_isEquivalentTo(
                            cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH
                        ? cs::EllipsoidalCS::createLatitudeLongitude(unit)
                        : cs::EllipsoidalCS::createLongitudeLatitude(unit))
-            ->GeodeticCRS::_isEquivalentTo(other, standardCriterion, dbContext);
+            ->GeodeticCRS::_isEquivalentToNoTypeCheck(other, standardCriterion,
+                                                      dbContext);
+    }
+    if (axisOrder ==
+            cs::EllipsoidalCS::AxisOrder::LONG_EAST_LAT_NORTH_HEIGHT_UP ||
+        axisOrder ==
+            cs::EllipsoidalCS::AxisOrder::LAT_NORTH_LONG_EAST_HEIGHT_UP) {
+        const auto &angularUnit = coordinateSystem()->axisList()[0]->unit();
+        const auto &linearUnit = coordinateSystem()->axisList()[2]->unit();
+        return GeographicCRS::create(
+                   util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                           nameStr()),
+                   datum(), datumEnsemble(),
+                   axisOrder == cs::EllipsoidalCS::AxisOrder::
+                                    LONG_EAST_LAT_NORTH_HEIGHT_UP
+                       ? cs::EllipsoidalCS::
+                             createLatitudeLongitudeEllipsoidalHeight(
+                                 angularUnit, linearUnit)
+                       : cs::EllipsoidalCS::
+                             createLongitudeLatitudeEllipsoidalHeight(
+                                 angularUnit, linearUnit))
+            ->GeodeticCRS::_isEquivalentToNoTypeCheck(other, standardCriterion,
+                                                      dbContext);
     }
     return false;
 }
@@ -3605,6 +3675,14 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             return;
         }
 
+        if (!formatter->useESRIDialect() &&
+            formatter->isAllowedEllipsoidalHeightAsVerticalCRS()) {
+            if (exportAsWKT1CompoundCRSWithEllipsoidalHeight(
+                    projCRS2D, axisList[2], formatter)) {
+                return;
+            }
+        }
+
         io::FormattingException::Throw(
             "Projected 3D CRS can only be exported since WKT2:2019");
     }
@@ -3885,8 +3963,7 @@ ProjectedCRS::create(const util::PropertyMap &properties,
 bool ProjectedCRS::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
-    auto otherProjCRS = dynamic_cast<const ProjectedCRS *>(other);
-    return otherProjCRS != nullptr &&
+    return other != nullptr && util::isOfExactType<ProjectedCRS>(*other) &&
            DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
 }
 
@@ -5111,7 +5188,8 @@ BoundCRSNNPtr BoundCRS::createFromNadgrids(const CRSNNPtr &baseCRSIn,
                         " (with Greenwich prime meridian)"),
                 sourceGeographicCRS->datumNonNull(nullptr)->ellipsoid(),
                 util::optional<std::string>(), datum::PrimeMeridian::GREENWICH),
-            sourceGeographicCRS->coordinateSystem());
+            cs::EllipsoidalCS::createLatitudeLongitude(
+                common::UnitOfMeasure::DEGREE));
     }
     std::string transformationName = transformationSourceCRS->nameStr();
     transformationName += " to WGS84";

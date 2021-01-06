@@ -29,7 +29,7 @@ struct pj_opaque {
 #define EPS10 1.e-10
 
 static PJ_XY forward_error(PJ *P, PJ_LP lp, PJ_XY xy) {
-    proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+    proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
     proj_log_trace(P, "Coordinate (%.3f, %.3f) is on the unprojected hemisphere",
                    proj_todeg(lp.lam), proj_todeg(lp.phi));
     return xy;
@@ -88,7 +88,7 @@ static PJ_LP ortho_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     sinc = rh;
     if (sinc > 1.) {
         if ((sinc - 1.) > EPS10) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             proj_log_trace(P, "Point (%.3f, %.3f) is outside the projection boundary");
             return lp;
         }
@@ -176,7 +176,7 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
         const double rh2 = SQ(xy.x) + SQ(xy.y);
         if (rh2 >= 1. - 1e-15) {
             if ((rh2 - 1.) > EPS10) {
-                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 proj_log_trace(P, "Point (%.3f, %.3f) is outside the projection boundary");
                 lp.lam = HUGE_VAL; lp.phi = HUGE_VAL;
                 return lp;
@@ -200,7 +200,7 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
 
         // Equation of the ellipse
         if( SQ(xy.x) + SQ(xy.y * (P->a / P->b)) > 1 + 1e-11 ) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             proj_log_trace(P, "Point (%.3f, %.3f) is outside the projection boundary");
             lp.lam = HUGE_VAL; lp.phi = HUGE_VAL;
             return lp;
@@ -228,7 +228,7 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
     xy_recentered.x = xy.x;
     xy_recentered.y = (xy.y - Q->y_shift) / Q->y_scale;
     if( SQ(xy.x) + SQ(xy_recentered.y) > 1 + 1e-11 ) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         proj_log_trace(P, "Point (%.3f, %.3f) is outside the projection boundary");
         lp.lam = HUGE_VAL; lp.phi = HUGE_VAL;
         return lp;
@@ -273,15 +273,15 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
             return lp;
         }
     }
-    pj_ctx_set_errno(P->ctx, PJD_ERR_NON_CONVERGENT);
+    proj_context_errno_set(P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
     return lp;
 }
 
 
 PJ *PROJECTION(ortho) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->sinph0 = sin(P->phi0);

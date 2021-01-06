@@ -58,28 +58,35 @@ static PJ_LP oea_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse 
 
 
 PJ *PROJECTION(oea) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    if (((Q->n = pj_param(P->ctx, P->params, "dn").f) <= 0.) ||
-        ((Q->m = pj_param(P->ctx, P->params, "dm").f) <= 0.)) {
-            return pj_default_destructor(P, PJD_ERR_INVALID_M_OR_N);
-    } else {
-        Q->theta = pj_param(P->ctx, P->params, "rtheta").f;
-        Q->sp0 = sin(P->phi0);
-        Q->cp0 = cos(P->phi0);
-        Q->rn = 1./ Q->n;
-        Q->rm = 1./ Q->m;
-        Q->two_r_n = 2. * Q->rn;
-        Q->two_r_m = 2. * Q->rm;
-        Q->hm = 0.5 * Q->m;
-        Q->hn = 0.5 * Q->n;
-        P->fwd = oea_s_forward;
-        P->inv = oea_s_inverse;
-        P->es = 0.;
+    if (((Q->n = pj_param(P->ctx, P->params, "dn").f) <= 0.) )
+    {
+        proj_log_error(P, _("Invalid value for n: it should be > 0"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
+
+    if (((Q->m = pj_param(P->ctx, P->params, "dm").f) <= 0.) )
+    {
+        proj_log_error(P, _("Invalid value for m: it should be > 0"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    Q->theta = pj_param(P->ctx, P->params, "rtheta").f;
+    Q->sp0 = sin(P->phi0);
+    Q->cp0 = cos(P->phi0);
+    Q->rn = 1./ Q->n;
+    Q->rm = 1./ Q->m;
+    Q->two_r_n = 2. * Q->rn;
+    Q->two_r_m = 2. * Q->rm;
+    Q->hm = 0.5 * Q->m;
+    Q->hn = 0.5 * Q->n;
+    P->fwd = oea_s_forward;
+    P->inv = oea_s_inverse;
+    P->es = 0.;
 
     return P;
 }

@@ -55,7 +55,7 @@ static PJ_XY sterea_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwa
     cosl = cos(lp.lam);
     const double denom = 1. + Q->sinc0 * sinc + Q->cosc0 * cosc * cosl;
     if( denom == 0.0 ) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().xy;
     }
     k = P->k0 * Q->R2 / denom;
@@ -93,22 +93,22 @@ static PJ *destructor (PJ *P, int errlev) {
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
+    free (static_cast<struct pj_opaque*>(P->opaque)->en);
     return pj_default_destructor (P, errlev);
 }
 
 
 PJ *PROJECTION(sterea) {
     double R;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
 
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->en = pj_gauss_ini(P->e, P->phi0, &(Q->phic0), &R);
     if (nullptr==Q->en)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     Q->sinc0 = sin (Q->phic0);
     Q->cosc0 = cos (Q->phic0);

@@ -32,6 +32,133 @@ echo "Testing cct -d 8 +proj=merc +R=1" >> ${OUT}
 echo "90 45" 0 | $EXE -d 8 +proj=merc +R=1 >>${OUT}
 echo "" >>${OUT}
 
+# tests without specifying the number of decimals (by default: 10 for radians and degrees, 4 for meters)
+echo "Testing echo 0.5 2 | cct -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad" >> ${OUT}
+echo 0.5 2 | $EXE -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad >> ${OUT}
+
+echo "Testing echo 0.5 2 | cct -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg" >> ${OUT}
+echo 0.5 2 | $EXE -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg >> ${OUT}
+
+echo "Testing echo 0.5 2 | cct -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km" >> ${OUT}
+echo 0.5 2 | $EXE -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km >> ${OUT}
+echo "" >> ${OUT}
+
+# tests for which the number of decimals has been specified (-d 6)
+echo "Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad" >> ${OUT}
+echo 0.5 2 | $EXE -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad >> ${OUT}
+
+echo "Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg" >> ${OUT}
+echo 0.5 2 | $EXE -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg >> ${OUT}
+
+echo "Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km" >> ${OUT}
+echo 0.5 2 | $EXE -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km >> ${OUT}
+echo "" >> ${OUT}
+
+echo "Test cct with object code initialization" >> ${OUT}
+echo "3541657.3778 948984.2343 5201383.5231 2020.5" | $EXE EPSG:8366 >>${OUT}
+
+echo "Test cct with object name initialization" >> ${OUT}
+echo "3541657.3778 948984.2343 5201383.5231 2020.5" | $EXE "ITRF2014 to ETRF2014 (1)"  >>${OUT}
+
+echo "Test cct with object code initialization and file input" >> ${OUT}
+echo "3541657.3778 948984.2343 5201383.5231 2020.5" > a
+echo "3541658.0000 948985.0000 5201384.0000 2020.5" > b
+$EXE EPSG:8366 a b >>${OUT}
+/bin/rm a b
+
+cat > in.wkt <<EOF
+COORDINATEOPERATION["ITRF2014 to ETRF2014 (1)",
+    VERSION["EUREF-Eur"],
+    SOURCECRS[
+        GEODCRS["ITRF2014",
+            DYNAMIC[
+                FRAMEEPOCH[2010]],
+            DATUM["International Terrestrial Reference Frame 2014",
+                ELLIPSOID["GRS 1980",6378137,298.257222101,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[Cartesian,3],
+                AXIS["(X)",geocentricX,
+                    ORDER[1],
+                    LENGTHUNIT["metre",1]],
+                AXIS["(Y)",geocentricY,
+                    ORDER[2],
+                    LENGTHUNIT["metre",1]],
+                AXIS["(Z)",geocentricZ,
+                    ORDER[3],
+                    LENGTHUNIT["metre",1]],
+            ID["EPSG",7789]]],
+    TARGETCRS[
+        GEODCRS["ETRF2014",
+            DATUM["European Terrestrial Reference Frame 2014",
+                ELLIPSOID["GRS 1980",6378137,298.257222101,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[Cartesian,3],
+                AXIS["(X)",geocentricX,
+                    ORDER[1],
+                    LENGTHUNIT["metre",1]],
+                AXIS["(Y)",geocentricY,
+                    ORDER[2],
+                    LENGTHUNIT["metre",1]],
+                AXIS["(Z)",geocentricZ,
+                    ORDER[3],
+                    LENGTHUNIT["metre",1]],
+            ID["EPSG",8401]]],
+    METHOD["Time-dependent Position Vector tfm (geocentric)",
+        ID["EPSG",1053]],
+    PARAMETER["X-axis translation",0,
+        LENGTHUNIT["millimetre",0.001],
+        ID["EPSG",8605]],
+    PARAMETER["Y-axis translation",0,
+        LENGTHUNIT["millimetre",0.001],
+        ID["EPSG",8606]],
+    PARAMETER["Z-axis translation",0,
+        LENGTHUNIT["millimetre",0.001],
+        ID["EPSG",8607]],
+    PARAMETER["X-axis rotation",0,
+        ANGLEUNIT["milliarc-second",4.84813681109536E-09],
+        ID["EPSG",8608]],
+    PARAMETER["Y-axis rotation",0,
+        ANGLEUNIT["milliarc-second",4.84813681109536E-09],
+        ID["EPSG",8609]],
+    PARAMETER["Z-axis rotation",0,
+        ANGLEUNIT["milliarc-second",4.84813681109536E-09],
+        ID["EPSG",8610]],
+    PARAMETER["Scale difference",0,
+        SCALEUNIT["parts per billion",1E-09],
+        ID["EPSG",8611]],
+    PARAMETER["Rate of change of X-axis translation",0,
+        LENGTHUNIT["millimetres per year",3.16887651727315E-11],
+        ID["EPSG",1040]],
+    PARAMETER["Rate of change of Y-axis translation",0,
+        LENGTHUNIT["millimetres per year",3.16887651727315E-11],
+        ID["EPSG",1041]],
+    PARAMETER["Rate of change of Z-axis translation",0,
+        LENGTHUNIT["millimetres per year",3.16887651727315E-11],
+        ID["EPSG",1042]],
+    PARAMETER["Rate of change of X-axis rotation",0.085,
+        ANGLEUNIT["milliarc-seconds per year",1.53631468932076E-16],
+        ID["EPSG",1043]],
+    PARAMETER["Rate of change of Y-axis rotation",0.531,
+        ANGLEUNIT["milliarc-seconds per year",1.53631468932076E-16],
+        ID["EPSG",1044]],
+    PARAMETER["Rate of change of Z-axis rotation",-0.77,
+        ANGLEUNIT["milliarc-seconds per year",1.53631468932076E-16],
+        ID["EPSG",1045]],
+    PARAMETER["Rate of change of Scale difference",0,
+        SCALEUNIT["parts per billion per year",3.16887651727315E-17],
+        ID["EPSG",1046]],
+    PARAMETER["Parameter reference epoch",1989,
+        TIMEUNIT["year",31556925.445],
+        ID["EPSG",1047]]]
+EOF
+echo "Test cct with WKT in a file" >> ${OUT}
+echo "3541657.3778 948984.2343 5201383.5231 2020.5" | $EXE @in.wkt >>${OUT}
+rm in.wkt
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testcct_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testcct_out.dist

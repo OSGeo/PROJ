@@ -46,7 +46,7 @@ static PJ_LP gn_sinu_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inve
     } else if ((s - EPS10) < M_HALFPI) {
         lp.lam = 0.;
     } else {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
     }
 
     return lp;
@@ -71,7 +71,7 @@ static PJ_XY gn_sinu_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forw
                 break;
         }
         if (!i) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
 
@@ -102,7 +102,7 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
+    free (static_cast<struct pj_opaque*>(P->opaque)->en);
     return pj_default_destructor (P, errlev);
 }
 
@@ -121,14 +121,14 @@ static void setup(PJ *P) {
 
 
 PJ *PROJECTION(sinu) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
     if (!(Q->en = pj_enfn(P->es)))
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     if (P->es != 0.0) {
         P->inv = gn_sinu_e_inverse;
@@ -143,9 +143,9 @@ PJ *PROJECTION(sinu) {
 
 
 PJ *PROJECTION(eck6) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -158,9 +158,9 @@ PJ *PROJECTION(eck6) {
 
 
 PJ *PROJECTION(mbtfps) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -173,19 +173,35 @@ PJ *PROJECTION(mbtfps) {
 
 
 PJ *PROJECTION(gn_sinu) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
-    if (pj_param(P->ctx, P->params, "tn").i && pj_param(P->ctx, P->params, "tm").i) {
-        Q->n = pj_param(P->ctx, P->params, "dn").f;
-        Q->m = pj_param(P->ctx, P->params, "dm").f;
-        if (Q->n <= 0 || Q->m < 0)
-            return destructor (P, PJD_ERR_INVALID_M_OR_N);
-    } else
-        return destructor (P, PJD_ERR_INVALID_M_OR_N);
+    if (!pj_param(P->ctx, P->params, "tn").i )
+    {
+        proj_log_error(P, _("Missing parameter n."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
+    if (!pj_param(P->ctx, P->params, "tm").i )
+    {
+        proj_log_error(P, _("Missing parameter m."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
+
+    Q->n = pj_param(P->ctx, P->params, "dn").f;
+    Q->m = pj_param(P->ctx, P->params, "dm").f;
+    if (Q->n <= 0)
+    {
+        proj_log_error(P, _("Invalid value for n: it should be > 0."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+    if (Q->m < 0)
+    {
+        proj_log_error(P, _("Invalid value for m: it should be >= 0."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
 
     setup(P);
 

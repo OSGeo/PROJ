@@ -2806,6 +2806,7 @@ TEST(factory, attachExtraDatabases_none) {
     auto factory = AuthorityFactory::create(ctxt, "EPSG");
     auto crs = factory->createGeodeticCRS("4979");
     auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+    EXPECT_TRUE(gcrs != nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -2877,12 +2878,14 @@ TEST(factory, attachExtraDatabases_auxiliary) {
                 auto factory = AuthorityFactory::create(ctxt, "EPSG");
                 auto crs = factory->createGeodeticCRS("4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
             // Look for object located in auxiliary DB
             {
                 auto factory = AuthorityFactory::create(ctxt, "OTHER");
                 auto crs = factory->createGeodeticCRS("OTHER_4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
         }
 
@@ -2894,12 +2897,14 @@ TEST(factory, attachExtraDatabases_auxiliary) {
                 auto factory = AuthorityFactory::create(ctxt, "EPSG");
                 auto crs = factory->createGeodeticCRS("4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
             // Look for object located in auxiliary DB
             {
                 auto factory = AuthorityFactory::create(ctxt, "OTHER");
                 auto crs = factory->createGeodeticCRS("OTHER_4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
         }
 
@@ -2910,6 +2915,7 @@ TEST(factory, attachExtraDatabases_auxiliary) {
                 auto factory = AuthorityFactory::create(ctxt, "EPSG");
                 auto crs = factory->createGeodeticCRS("4326");
                 auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
+                EXPECT_TRUE(gcrs != nullptr);
             }
             // Look for object located in auxiliary DB
             {
@@ -3079,6 +3085,12 @@ TEST(factory, createObjectsFromName) {
     // Exact name, but just not the official case ==> should match with exact
     // match
     EXPECT_EQ(factory->createObjectsFromName("WGS 84 / utm zone 31n", {}, false)
+                  .size(),
+              1U);
+
+    // Exact name, but with other CRS that have an aliases to it ==> should
+    // match only the CRS with the given name, not those other CRS.
+    EXPECT_EQ(factory->createObjectsFromName("ETRS89 / UTM zone 32N", {}, false)
                   .size(),
               1U);
 

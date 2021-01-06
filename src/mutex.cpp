@@ -33,13 +33,8 @@
 #include "proj.h"
 #ifndef _WIN32
 #include "proj_config.h"
+#endif
 #include "proj_internal.h"
-#else
-#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#endif
-#include "proj_api.h"
-#endif
 
 /* on win32 we always use win32 mutexes, even if pthreads are available */
 #if defined(_WIN32) && !defined(MUTEX_stub)
@@ -184,7 +179,7 @@ void pj_cleanup_lock()
 
 #include <windows.h>
 
-static HANDLE mutex_lock = NULL;
+static HANDLE mutex_lock = nullptr;
 
 #if _WIN32_WINNT >= 0x0600
 
@@ -199,7 +194,7 @@ static BOOL CALLBACK pj_create_lock(PINIT_ONCE InitOnce,
     (void)InitOnce;
     (void)Parameter;
     (void)Context;
-    mutex_lock = CreateMutex( NULL, FALSE, NULL );
+    mutex_lock = CreateMutex( nullptr, FALSE, nullptr );
     return TRUE;
 }
 #endif
@@ -213,10 +208,10 @@ static void pj_init_lock()
 {
 #if _WIN32_WINNT >= 0x0600
     static INIT_ONCE sInitOnce = INIT_ONCE_STATIC_INIT;
-    InitOnceExecuteOnce( &sInitOnce, pj_create_lock, NULL, NULL );
+    InitOnceExecuteOnce( &sInitOnce, pj_create_lock, nullptr, nullptr );
 #else
-    if( mutex_lock == NULL )
-        mutex_lock = CreateMutex( NULL, FALSE, NULL );
+    if( mutex_lock == nullptr )
+        mutex_lock = CreateMutex( nullptr, FALSE, nullptr );
 #endif
 }
 
@@ -228,7 +223,7 @@ static void pj_init_lock()
 
 void pj_acquire_lock()
 {
-    if( mutex_lock == NULL )
+    if( mutex_lock == nullptr )
         pj_init_lock();
 
     WaitForSingleObject( mutex_lock, INFINITE );
@@ -242,7 +237,7 @@ void pj_acquire_lock()
 
 void pj_release_lock()
 {
-    if( mutex_lock == NULL )
+    if( mutex_lock == nullptr )
         pj_init_lock();
     else
         ReleaseMutex( mutex_lock );
@@ -253,10 +248,10 @@ void pj_release_lock()
 /************************************************************************/
 void pj_cleanup_lock()
 {
-    if( mutex_lock != NULL )
+    if( mutex_lock != nullptr )
     {
         CloseHandle( mutex_lock );
-        mutex_lock = NULL;
+        mutex_lock = nullptr;
     }
 }
 

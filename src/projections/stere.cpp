@@ -60,7 +60,7 @@ static PJ_XY stere_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
         const double denom = Q->cosX1 * (1. + Q->sinX1 * sinX +
            Q->cosX1 * cosX * coslam);
         if( denom == 0 ) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return proj_coord_error().xy;
         }
         A = Q->akm1 / denom;
@@ -86,7 +86,10 @@ static PJ_XY stere_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
         sinphi = -sinphi;
         /*-fallthrough*/
     case N_POLE:
-        xy.x = Q->akm1 * pj_tsfn (lp.phi, sinphi, P->e);
+        if( fabs(lp.phi - M_HALFPI) < 1e-15 )
+            xy.x = 0;
+        else
+            xy.x = Q->akm1 * pj_tsfn (lp.phi, sinphi, P->e);
         xy.y = - xy.x * coslam;
         break;
     }
@@ -114,7 +117,7 @@ static PJ_XY stere_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         xy.y = 1. + sinph0 * sinphi + cosph0 * cosphi * coslam;
 oblcon:
         if (xy.y <= EPS10) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
         xy.y = Q->akm1 / xy.y;
@@ -128,7 +131,7 @@ oblcon:
         /*-fallthrough*/
     case S_POLE:
         if (fabs (lp.phi - M_HALFPI) < TOL) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
         xy.y = Q->akm1 * tan (M_FORTPI + .5 * lp.phi);
@@ -187,7 +190,7 @@ static PJ_LP stere_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
         phi_l = lp.phi;
     }
 
-    proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+    proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
     return lp;
 }
 
@@ -299,9 +302,9 @@ static PJ *setup(PJ *P) {                   /* general initialization */
 
 
 PJ *PROJECTION(stere) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->phits = pj_param (P->ctx, P->params, "tlat_ts").i ?
@@ -312,15 +315,16 @@ PJ *PROJECTION(stere) {
 
 
 PJ *PROJECTION(ups) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     /* International Ellipsoid */
     P->phi0 = pj_param(P->ctx, P->params, "bsouth").i ? - M_HALFPI: M_HALFPI;
     if (P->es == 0.0) {
-        return pj_default_destructor (P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+        proj_log_error(P, _("Invalid value for es: only ellipsoidal formulation supported"));
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     P->k0 = .994;
     P->x0 = 2000000.;

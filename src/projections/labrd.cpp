@@ -105,13 +105,14 @@ static PJ_LP labrd_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
 
 PJ *PROJECTION(labrd) {
     double Az, sinp, R, N, t;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if (P->phi0 == 0.) {
-        return pj_default_destructor(P, PJD_ERR_LAT_0_IS_ZERO);
+        proj_log_error(P, _("Invalid value for lat_0: lat_0 should be different from 0"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     Az = pj_param(P->ctx, P->params, "razi").f;

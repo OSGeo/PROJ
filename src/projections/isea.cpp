@@ -1026,7 +1026,7 @@ static PJ_XY isea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
     try {
         out = isea_forward(&Q->dgg, &in);
     } catch( const char* ) {
-        proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().xy;
     }
 
@@ -1039,9 +1039,9 @@ static PJ_XY isea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
 
 PJ *PROJECTION(isea) {
     char *opt;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
 
@@ -1059,7 +1059,8 @@ PJ *PROJECTION(isea) {
         } else if (!strcmp(opt, "pole")) {
             isea_orient_pole(&Q->dgg);
         } else {
-            return pj_default_destructor(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+            proj_log_error(P, _("Invalid value for orient: only isea or pole are supported"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     }
 
@@ -1089,8 +1090,8 @@ PJ *PROJECTION(isea) {
             Q->dgg.output = ISEA_HEX;
         }
         else {
-            /* TODO verify error code.  Possibly eliminate magic */
-            return pj_default_destructor(P, PJD_ERR_ELLIPSOID_USE_REQUIRED);
+            proj_log_error(P, _("Invalid value for mode: only plane, di, dd or hex are supported"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     }
 

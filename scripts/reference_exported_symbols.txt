@@ -284,8 +284,8 @@ osgeo::proj::datum::VerticalReferenceFrame::create(osgeo::proj::util::PropertyMa
 osgeo::proj::datum::VerticalReferenceFrame::realizationMethod() const
 osgeo::proj::datum::VerticalReferenceFrame::~VerticalReferenceFrame()
 osgeo::proj::File::~File()
-osgeo::proj::FileManager::exists(projCtx_t*, char const*)
-osgeo::proj::FileManager::open(projCtx_t*, char const*, osgeo::proj::FileAccess)
+osgeo::proj::FileManager::exists(pj_ctx*, char const*)
+osgeo::proj::FileManager::open(pj_ctx*, char const*, osgeo::proj::FileAccess)
 osgeo::proj::File::read_line(unsigned long, bool&, bool&)
 osgeo::proj::GenericShiftGrid::~GenericShiftGrid()
 osgeo::proj::GenericShiftGrid::GenericShiftGrid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
@@ -293,9 +293,9 @@ osgeo::proj::GenericShiftGrid::gridAt(double, double) const
 osgeo::proj::GenericShiftGridSet::~GenericShiftGridSet()
 osgeo::proj::GenericShiftGridSet::GenericShiftGridSet()
 osgeo::proj::GenericShiftGridSet::gridAt(double, double) const
-osgeo::proj::GenericShiftGridSet::open(projCtx_t*, std::string const&)
-osgeo::proj::GenericShiftGridSet::reassign_context(projCtx_t*)
-osgeo::proj::GenericShiftGridSet::reopen(projCtx_t*)
+osgeo::proj::GenericShiftGridSet::open(pj_ctx*, std::string const&)
+osgeo::proj::GenericShiftGridSet::reassign_context(pj_ctx*)
+osgeo::proj::GenericShiftGridSet::reopen(pj_ctx*)
 osgeo::proj::Grid::~Grid()
 osgeo::proj::Grid::Grid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
 osgeo::proj::HorizontalShiftGrid::gridAt(double, double) const
@@ -304,9 +304,9 @@ osgeo::proj::HorizontalShiftGrid::HorizontalShiftGrid(std::string const&, int, i
 osgeo::proj::HorizontalShiftGridSet::gridAt(double, double) const
 osgeo::proj::HorizontalShiftGridSet::~HorizontalShiftGridSet()
 osgeo::proj::HorizontalShiftGridSet::HorizontalShiftGridSet()
-osgeo::proj::HorizontalShiftGridSet::open(projCtx_t*, std::string const&)
-osgeo::proj::HorizontalShiftGridSet::reassign_context(projCtx_t*)
-osgeo::proj::HorizontalShiftGridSet::reopen(projCtx_t*)
+osgeo::proj::HorizontalShiftGridSet::open(pj_ctx*, std::string const&)
+osgeo::proj::HorizontalShiftGridSet::reassign_context(pj_ctx*)
+osgeo::proj::HorizontalShiftGridSet::reopen(pj_ctx*)
 osgeo::proj::internal::ci_equal(std::string const&, char const*)
 osgeo::proj::internal::ci_equal(std::string const&, std::string const&)
 osgeo::proj::internal::ci_find(std::string const&, char const*)
@@ -351,9 +351,9 @@ osgeo::proj::io::AuthorityFactory::getUnitList() const
 osgeo::proj::io::AuthorityFactory::identifyBodyFromSemiMajorAxis(double, double) const
 osgeo::proj::io::AuthorityFactory::listAreaOfUseFromName(std::string const&, bool) const
 osgeo::proj::io::AuthorityFactory::UnitInfo::UnitInfo()
-osgeo::proj::io::createFromUserInput(std::string const&, projCtx_t*)
+osgeo::proj::io::createFromUserInput(std::string const&, pj_ctx*)
 osgeo::proj::io::createFromUserInput(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&, bool)
-osgeo::proj::io::DatabaseContext::create(std::string const&, std::vector<std::string, std::allocator<std::string> > const&, projCtx_t*)
+osgeo::proj::io::DatabaseContext::create(std::string const&, std::vector<std::string, std::allocator<std::string> > const&, pj_ctx*)
 osgeo::proj::io::DatabaseContext::create(void*)
 osgeo::proj::io::DatabaseContext::~DatabaseContext()
 osgeo::proj::io::DatabaseContext::getAuthorities() const
@@ -413,7 +413,7 @@ osgeo::proj::io::PROJStringFormatter::setUseApproxTMerc(bool)
 osgeo::proj::io::PROJStringFormatter::startInversion()
 osgeo::proj::io::PROJStringFormatter::stopInversion()
 osgeo::proj::io::PROJStringFormatter::toString() const
-osgeo::proj::io::PROJStringParser::attachContext(projCtx_t*)
+osgeo::proj::io::PROJStringParser::attachContext(pj_ctx*)
 osgeo::proj::io::PROJStringParser::attachDatabaseContext(std::shared_ptr<osgeo::proj::io::DatabaseContext> const&)
 osgeo::proj::io::PROJStringParser::createFromPROJString(std::string const&)
 osgeo::proj::io::PROJStringParser::~PROJStringParser()
@@ -422,7 +422,9 @@ osgeo::proj::io::PROJStringParser::setUsePROJ4InitRules(bool)
 osgeo::proj::io::PROJStringParser::warningList() const
 osgeo::proj::io::WKTFormatter::create(dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::io::WKTFormatter, std::default_delete<osgeo::proj::io::WKTFormatter> > > const&)
 osgeo::proj::io::WKTFormatter::create(osgeo::proj::io::WKTFormatter::Convention, std::shared_ptr<osgeo::proj::io::DatabaseContext>)
+osgeo::proj::io::WKTFormatter::isAllowedEllipsoidalHeightAsVerticalCRS() const
 osgeo::proj::io::WKTFormatter::isStrict() const
+osgeo::proj::io::WKTFormatter::setAllowEllipsoidalHeightAsVerticalCRS(bool)
 osgeo::proj::io::WKTFormatter::setIndentationWidth(int)
 osgeo::proj::io::WKTFormatter::setMultiLine(bool)
 osgeo::proj::io::WKTFormatter::setOutputAxis(osgeo::proj::io::WKTFormatter::OutputAxisRule)
@@ -734,90 +736,34 @@ osgeo::proj::util::UnsupportedOperationException::~UnsupportedOperationException
 osgeo::proj::util::UnsupportedOperationException::UnsupportedOperationException(osgeo::proj::util::UnsupportedOperationException const&)
 osgeo::proj::VerticalShiftGrid::gridAt(double, double) const
 osgeo::proj::VerticalShiftGridSet::gridAt(double, double) const
-osgeo::proj::VerticalShiftGridSet::open(projCtx_t*, std::string const&)
-osgeo::proj::VerticalShiftGridSet::reassign_context(projCtx_t*)
-osgeo::proj::VerticalShiftGridSet::reopen(projCtx_t*)
+osgeo::proj::VerticalShiftGridSet::open(pj_ctx*, std::string const&)
+osgeo::proj::VerticalShiftGridSet::reassign_context(pj_ctx*)
+osgeo::proj::VerticalShiftGridSet::reopen(pj_ctx*)
 osgeo::proj::VerticalShiftGridSet::~VerticalShiftGridSet()
 osgeo::proj::VerticalShiftGridSet::VerticalShiftGridSet()
 osgeo::proj::VerticalShiftGrid::~VerticalShiftGrid()
 osgeo::proj::VerticalShiftGrid::VerticalShiftGrid(std::string const&, int, int, osgeo::proj::ExtentAndRes const&)
-pj_acquire_lock
 pj_add_type_crs_if_needed(std::string const&)
-pj_apply_gridshift
 pj_approx_2D_trans(PJconsts*, PJ_DIRECTION, PJ_COORD)
 pj_approx_3D_trans(PJconsts*, PJ_DIRECTION, PJ_COORD)
 pj_atof(char const*)
-pj_calloc
 pj_chomp(char*)
-pj_cleanup_lock
-pj_clear_initcache
-pj_compare_datums
-pj_context_get_grid_cache_filename(projCtx_t*)
-pj_context_set_user_writable_directory(projCtx_t*, std::string const&)
-pj_ctx_alloc
-pj_ctx_fclose
-pj_ctx_fgets
-pj_ctx_fopen
-pj_ctx_fread
-pj_ctx_free
-pj_ctx_fseek
-pj_ctx_ftell
-pj_ctx_get_app_data
-pj_ctx_get_errno
-pj_ctx_get_fileapi
-pj_ctx_set_app_data
-pj_ctx_set_debug
-pj_ctx_set_errno
-pj_ctx_set_fileapi
-pj_ctx_set_logger
-pj_dalloc
-pj_datum_transform
-pj_dealloc
-pj_deallocate_grids
-pj_ell_set(projCtx_t*, ARG_list*, double*, double*)
-pj_find_file
-pj_free
-pj_fwd
-pj_fwd3d
-pj_geocentric_to_geodetic
-pj_geodetic_to_geocentric
-pj_get_ctx
+pj_context_get_grid_cache_filename(pj_ctx*)
+pj_context_set_user_writable_directory(pj_ctx*, std::string const&)
+pj_ell_set(pj_ctx*, ARG_list*, double*, double*)
+pj_fwd(PJ_LP, PJconsts*)
 pj_get_datums_ref()
-pj_get_def
-pj_get_default_ctx
-pj_get_default_fileapi
-pj_get_default_searchpaths(projCtx_t*)
-pj_get_errno_ref
-pj_get_relative_share_proj(projCtx_t*)
-pj_get_release
-pj_get_spheroid_defn
-pj_has_inverse
-pj_init
-pj_init_ctx
-pj_init_plus
-pj_init_plus_ctx
-pj_inv
-pj_inv3d
-pj_is_geocent
-pj_is_latlong
-pj_latlong_from_proj
-pj_log
-pj_malloc
+pj_get_default_ctx()
+pj_get_default_searchpaths(pj_ctx*)
+pj_get_relative_share_proj(pj_ctx*)
+pj_get_release()
+pj_inv(PJ_XY, PJconsts*)
 pj_mkparam(char const*)
-pj_open_lib
 pj_param_exists(ARG_list*, char const*)
-pj_param(projCtx_t*, ARG_list*, char const*)
-pj_phi2(projCtx_t*, double, double)
-pj_pr_list
-pj_release_lock
-pj_set_ctx
-pj_set_finder
-pj_set_searchpath
+pj_param(pj_ctx*, ARG_list*, char const*)
+pj_phi2(pj_ctx*, double, double)
+pj_pr_list(PJconsts*)
 pj_shrink(char*)
-pj_stderr_logger
-pj_strdup
-pj_strerrno
-pj_transform
 proj_alter_id
 proj_alter_name
 proj_angular_input
@@ -838,6 +784,7 @@ proj_context_create
 proj_context_delete_cpp_context(projCppContext*)
 proj_context_destroy
 proj_context_errno
+proj_context_errno_string
 proj_context_get_database_metadata
 proj_context_get_database_path
 proj_context_get_url_endpoint
@@ -852,7 +799,7 @@ proj_context_set_enable_network
 proj_context_set_fileapi
 proj_context_set_file_finder
 proj_context_set_network_callbacks
-proj_context_set(PJconsts*, projCtx_t*)
+proj_context_set(PJconsts*, pj_ctx*)
 proj_context_set_search_paths
 proj_context_set_sqlite3_vfs_name
 proj_context_set_url_endpoint
@@ -981,6 +928,7 @@ proj_crs_get_geodetic_crs
 proj_crs_get_horizontal_datum
 proj_crs_get_sub_crs
 proj_crs_info_list_destroy
+proj_crs_is_derived
 proj_crs_promote_to_3D
 proj_cs_get_axis_count
 proj_cs_get_axis_info
@@ -1046,7 +994,7 @@ proj_list_get_count
 proj_list_operations
 proj_list_prime_meridians
 proj_list_units
-proj_log_error(PJconsts*, char const*, ...)
+proj_log_error(PJconsts const*, char const*, ...)
 proj_log_func
 proj_log_level
 proj_lp_dist

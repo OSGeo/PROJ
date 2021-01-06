@@ -18,7 +18,7 @@
 pj_authset(double es) {
 	double t, *APA;
 
-	if ((APA = (double *)pj_malloc(APA_SIZE * sizeof(double))) != nullptr) {
+	if ((APA = (double *)malloc(APA_SIZE * sizeof(double))) != nullptr) {
 		APA[0] = es * P00;
 		t = es * es;
 		APA[0] += t * P01;

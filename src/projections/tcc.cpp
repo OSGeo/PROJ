@@ -16,7 +16,7 @@ static PJ_XY tcc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward 
     const double b = cos (lp.phi) * sin (lp.lam);
     const double bt = 1. - b * b;
     if (bt < EPS10) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
     xy.x = b / sqrt(bt);

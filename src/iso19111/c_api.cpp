@@ -79,10 +79,10 @@ static void PROJ_NO_INLINE proj_log_error(PJ_CONTEXT *ctx, const char *function,
     msg += ": ";
     msg += text;
     ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
-    auto previous_errno = pj_ctx_get_errno(ctx);
+    auto previous_errno = proj_context_errno(ctx);
     if (previous_errno == 0) {
         // only set errno if it wasn't set deeper down the call stack
-        pj_ctx_set_errno(ctx, PJD_ERR_GENERIC_ERROR);
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER);
     }
 }
 
@@ -344,6 +344,7 @@ const char *proj_context_get_database_metadata(PJ_CONTEXT *ctx,
                                                const char *key) {
     SANITIZE_CTX(ctx);
     if (!key) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -375,6 +376,7 @@ PJ_GUESSED_WKT_DIALECT proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
                                                       const char *wkt) {
     (void)ctx;
     if (!wkt) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return PJ_GUESSED_NOT_WKT;
     }
@@ -423,6 +425,7 @@ static const char *getOptionValue(const char *option,
 PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -458,6 +461,7 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
 PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
     SANITIZE_CTX(ctx);
     if (!text) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -534,6 +538,7 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
                          PROJ_STRING_LIST *out_grammar_errors) {
     SANITIZE_CTX(ctx);
     if (!wkt) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -647,6 +652,7 @@ PJ *proj_create_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                               const char *const *options) {
     SANITIZE_CTX(ctx);
     if (!auth_name || !code) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -752,6 +758,7 @@ int proj_uom_get_info_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 
     SANITIZE_CTX(ctx);
     if (!auth_name || !code) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -804,6 +811,7 @@ int PROJ_DLL proj_grid_get_info_from_database(
     int *out_direct_download, int *out_open_license, int *out_available) {
     SANITIZE_CTX(ctx);
     if (!grid_name) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -863,6 +871,7 @@ PJ_OBJ_LIST *proj_query_geodetic_crs_from_datum(PJ_CONTEXT *ctx,
                                                 const char *crs_type) {
     SANITIZE_CTX(ctx);
     if (!datum_auth_name || !datum_code) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -1200,6 +1209,7 @@ int proj_is_deprecated(const PJ *obj) {
 PJ_OBJ_LIST *proj_get_non_deprecated(PJ_CONTEXT *ctx, const PJ *obj) {
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -1230,6 +1240,7 @@ static int proj_is_equivalent_to_internal(PJ_CONTEXT *ctx, const PJ *obj,
 
     if (!obj || !other) {
         if (ctx) {
+            proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
             proj_log_error(ctx, __FUNCTION__, "missing required input");
         }
         return false;
@@ -1421,6 +1432,13 @@ const char *proj_get_id_code(const PJ *obj, int index) {
  * variants, for WKT1_GDAL for ProjectedCRS with easting/northing ordering
  * (otherwise stripped), but not for WKT1_ESRI. Setting to YES will output
  * them unconditionally, and to NO will omit them unconditionally.</li>
+ * <li>STRICT=YES/NO. Default is YES. If NO, a Geographic 3D CRS can be for
+ * example exported as WKT1_GDAL with 3 axes, whereas this is normally not
+ * allowed.</li>
+ * <li>ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS=YES/NO. Default is NO. If set
+ * to YES and type == PJ_WKT1_GDAL, a Geographic 3D CRS or a Projected 3D CRS
+ * will be exported as a compound CRS whose vertical part represents an
+ * ellipsoidal height (for example for use with LAS 1.4 WKT1).</li>
  * </ul>
  * @return a string, or NULL in case of error.
  */
@@ -1428,6 +1446,7 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
                         const char *const *options) {
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -1471,6 +1490,11 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
                 }
             } else if ((value = getOptionValue(*iter, "STRICT="))) {
                 formatter->setStrict(ci_equal(value, "YES"));
+            } else if ((value = getOptionValue(
+                            *iter,
+                            "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS="))) {
+                formatter->setAllowEllipsoidalHeightAsVerticalCRS(
+                    ci_equal(value, "YES"));
             } else {
                 std::string msg("Unknown option :");
                 msg += *iter;
@@ -1524,6 +1548,7 @@ const char *proj_as_proj_string(PJ_CONTEXT *ctx, const PJ *obj,
                                 const char *const *options) {
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -1613,6 +1638,7 @@ const char *proj_as_projjson(PJ_CONTEXT *ctx, const PJ *obj,
                              const char *const *options) {
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -1772,6 +1798,7 @@ int proj_get_area_of_use(PJ_CONTEXT *ctx, const PJ *obj,
 static const GeodeticCRS *extractGeodeticCRS(PJ_CONTEXT *ctx, const PJ *crs,
                                              const char *fname) {
     if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, fname, "missing required input");
         return nullptr;
     }
@@ -1813,6 +1840,29 @@ PJ *proj_crs_get_geodetic_crs(PJ_CONTEXT *ctx, const PJ *crs) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns whether a CRS is a derived CRS.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param crs Object of type CRS (must not be NULL)
+ * @return TRUE if the CRS is a derived CRS.
+ * @since 8.0
+ */
+int proj_crs_is_derived(PJ_CONTEXT *ctx, const PJ *crs) {
+    if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return false;
+    }
+    auto l_crs = dynamic_cast<const CRS *>(crs->iso_obj.get());
+    if (!l_crs) {
+        proj_log_error(ctx, __FUNCTION__, "Object is not a CRS");
+        return false;
+    }
+    return dynamic_cast<const DerivedCRS *>(l_crs) != nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Get a CRS component from a CompoundCRS
  *
  * The returned object must be unreferenced with proj_destroy() after
@@ -1829,6 +1879,7 @@ PJ *proj_crs_get_geodetic_crs(PJ_CONTEXT *ctx, const PJ *crs) {
 PJ *proj_crs_get_sub_crs(PJ_CONTEXT *ctx, const PJ *crs, int index) {
     SANITIZE_CTX(ctx);
     if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -1863,6 +1914,7 @@ PJ *proj_crs_create_bound_crs(PJ_CONTEXT *ctx, const PJ *base_crs,
                               const PJ *hub_crs, const PJ *transformation) {
     SANITIZE_CTX(ctx);
     if (!base_crs || !hub_crs || !transformation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -1922,6 +1974,7 @@ PJ *proj_crs_create_bound_crs_to_WGS84(PJ_CONTEXT *ctx, const PJ *crs,
                                        const char *const *options) {
     SANITIZE_CTX(ctx);
     if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -1984,6 +2037,7 @@ PJ *proj_crs_create_bound_vertical_crs(PJ_CONTEXT *ctx, const PJ *vert_crs,
                                        const char *grid_name) {
     SANITIZE_CTX(ctx);
     if (!vert_crs || !hub_geographic_3D_crs || !grid_name) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -2110,6 +2164,7 @@ int proj_ellipsoid_get_parameters(PJ_CONTEXT *ctx, const PJ *ellipsoid,
                                   double *out_inv_flattening) {
     SANITIZE_CTX(ctx);
     if (!ellipsoid) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return FALSE;
     }
@@ -2191,6 +2246,7 @@ int proj_prime_meridian_get_parameters(PJ_CONTEXT *ctx,
                                        const char **out_unit_name) {
     SANITIZE_CTX(ctx);
     if (!prime_meridian) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -2276,6 +2332,7 @@ PJ *proj_get_source_crs(PJ_CONTEXT *ctx, const PJ *obj) {
 PJ *proj_get_target_crs(PJ_CONTEXT *ctx, const PJ *obj) {
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -2360,6 +2417,7 @@ PJ_OBJ_LIST *proj_identify(PJ_CONTEXT *ctx, const PJ *obj,
                            int **out_confidence) {
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -2456,6 +2514,7 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                               int allow_deprecated) {
     SANITIZE_CTX(ctx);
     if (!auth_name) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -2690,11 +2749,11 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
 void proj_crs_info_list_destroy(PROJ_CRS_INFO **list) {
     if (list) {
         for (int i = 0; list[i] != nullptr; i++) {
-            pj_dalloc(list[i]->auth_name);
-            pj_dalloc(list[i]->code);
-            pj_dalloc(list[i]->name);
-            pj_dalloc(list[i]->area_name);
-            pj_dalloc(list[i]->projection_method_name);
+            free(list[i]->auth_name);
+            free(list[i]->code);
+            free(list[i]->name);
+            free(list[i]->area_name);
+            free(list[i]->projection_method_name);
             delete list[i];
         }
         delete[] list;
@@ -2784,11 +2843,11 @@ PROJ_UNIT_INFO **proj_get_units_from_database(PJ_CONTEXT *ctx,
 void proj_unit_list_destroy(PROJ_UNIT_INFO **list) {
     if (list) {
         for (int i = 0; list[i] != nullptr; i++) {
-            pj_dalloc(list[i]->auth_name);
-            pj_dalloc(list[i]->code);
-            pj_dalloc(list[i]->name);
-            pj_dalloc(list[i]->category);
-            pj_dalloc(list[i]->proj_short_name);
+            free(list[i]->auth_name);
+            free(list[i]->code);
+            free(list[i]->name);
+            free(list[i]->category);
+            free(list[i]->proj_short_name);
             delete list[i];
         }
         delete[] list;
@@ -2812,6 +2871,7 @@ void proj_unit_list_destroy(PROJ_UNIT_INFO **list) {
 PJ *proj_crs_get_coordoperation(PJ_CONTEXT *ctx, const PJ *crs) {
     SANITIZE_CTX(ctx);
     if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -2856,6 +2916,7 @@ int proj_coordoperation_get_method_info(PJ_CONTEXT *ctx,
                                         const char **out_method_code) {
     SANITIZE_CTX(ctx);
     if (!coordoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -3404,6 +3465,7 @@ PJ *proj_create_compound_crs(PJ_CONTEXT *ctx, const char *crs_name,
 
     SANITIZE_CTX(ctx);
     if (!horiz_crs || !vert_crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -3446,6 +3508,7 @@ PJ *proj_create_compound_crs(PJ_CONTEXT *ctx, const char *crs_name,
 PJ PROJ_DLL *proj_alter_name(PJ_CONTEXT *ctx, const PJ *obj, const char *name) {
     SANITIZE_CTX(ctx);
     if (!obj || !name) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -3483,6 +3546,7 @@ PJ PROJ_DLL *proj_alter_id(PJ_CONTEXT *ctx, const PJ *obj,
                            const char *auth_name, const char *code) {
     SANITIZE_CTX(ctx);
     if (!obj || !auth_name || !code) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -3523,6 +3587,7 @@ PJ *proj_crs_alter_geodetic_crs(PJ_CONTEXT *ctx, const PJ *obj,
                                 const PJ *new_geod_crs) {
     SANITIZE_CTX(ctx);
     if (!obj || !new_geod_crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -3636,6 +3701,7 @@ PJ *proj_crs_alter_cs_linear_unit(PJ_CONTEXT *ctx, const PJ *obj,
                                   const char *unit_code) {
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -3688,6 +3754,7 @@ PJ *proj_crs_alter_parameters_linear_unit(PJ_CONTEXT *ctx, const PJ *obj,
                                           int convert_to_new_unit) {
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -3733,6 +3800,7 @@ PJ *proj_crs_promote_to_3D(PJ_CONTEXT *ctx, const char *crs_3D_name,
                            const PJ *crs_2D) {
     SANITIZE_CTX(ctx);
     if (!crs_2D) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -3792,6 +3860,7 @@ PJ *proj_crs_create_projected_3D_crs_from_2D(PJ_CONTEXT *ctx,
                                              const PJ *geog_3D_crs) {
     SANITIZE_CTX(ctx);
     if (!projected_2D_crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -3877,6 +3946,7 @@ PJ *proj_crs_demote_to_2D(PJ_CONTEXT *ctx, const char *crs_2D_name,
                           const PJ *crs_3D) {
     SANITIZE_CTX(ctx);
     if (!crs_3D) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -4085,6 +4155,7 @@ PJ *proj_create_transformation(PJ_CONTEXT *ctx, const char *name,
                                double accuracy) {
     SANITIZE_CTX(ctx);
     if (!source_crs || !target_crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -4170,6 +4241,7 @@ PJ *proj_convert_conversion_to_other_method(PJ_CONTEXT *ctx,
                                             const char *new_method_name) {
     SANITIZE_CTX(ctx);
     if (!conversion) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -4554,6 +4626,7 @@ PJ *proj_create_projected_crs(PJ_CONTEXT *ctx, const char *crs_name,
                               const PJ *coordinate_system) {
     SANITIZE_CTX(ctx);
     if (!geodetic_crs || !conversion || !coordinate_system) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -6885,6 +6958,7 @@ int proj_coordoperation_is_instantiable(PJ_CONTEXT *ctx,
                                         const PJ *coordoperation) {
     SANITIZE_CTX(ctx);
     if (!coordoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -6930,6 +7004,7 @@ int proj_coordoperation_has_ballpark_transformation(PJ_CONTEXT *ctx,
                                                     const PJ *coordoperation) {
     SANITIZE_CTX(ctx);
     if (!coordoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -6956,6 +7031,7 @@ int proj_coordoperation_get_param_count(PJ_CONTEXT *ctx,
                                         const PJ *coordoperation) {
     SANITIZE_CTX(ctx);
     if (!coordoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -6984,6 +7060,7 @@ int proj_coordoperation_get_param_index(PJ_CONTEXT *ctx,
                                         const char *name) {
     SANITIZE_CTX(ctx);
     if (!coordoperation || !name) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return -1;
     }
@@ -7045,6 +7122,7 @@ int proj_coordoperation_get_param(
     const char **out_unit_code, const char **out_unit_category) {
     SANITIZE_CTX(ctx);
     if (!coordoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -7174,6 +7252,7 @@ int proj_coordoperation_get_towgs84_values(PJ_CONTEXT *ctx,
                                            int emit_error_if_incompatible) {
     SANITIZE_CTX(ctx);
     if (!coordoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -7213,6 +7292,7 @@ int proj_coordoperation_get_grid_used_count(PJ_CONTEXT *ctx,
                                             const PJ *coordoperation) {
     SANITIZE_CTX(ctx);
     if (!coordoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -7406,6 +7486,7 @@ void proj_operation_factory_context_set_desired_accuracy(
     double accuracy) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7437,6 +7518,7 @@ void proj_operation_factory_context_set_area_of_interest(
     double north_lat_degree) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7466,6 +7548,7 @@ void proj_operation_factory_context_set_crs_extent_use(
     PROJ_CRS_EXTENT_USE use) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7515,6 +7598,7 @@ void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
     PROJ_SPATIAL_CRITERION criterion) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7552,6 +7636,7 @@ void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
     PROJ_GRID_AVAILABILITY_USE use) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7602,6 +7687,7 @@ void proj_operation_factory_context_set_use_proj_alternative_grid_names(
     int usePROJNames) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7638,6 +7724,7 @@ void proj_operation_factory_context_set_allow_use_intermediate_crs(
     PROJ_INTERMEDIATE_CRS_USE use) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7679,6 +7766,7 @@ void proj_operation_factory_context_set_allowed_intermediate_crs(
     const char *const *list_of_auth_name_codes) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7708,6 +7796,7 @@ void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
     PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx, int discard) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7731,6 +7820,7 @@ void PROJ_DLL proj_operation_factory_context_set_allow_ballpark_transformations(
     PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx, int allow) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return;
     }
@@ -7828,6 +7918,7 @@ proj_create_operations(PJ_CONTEXT *ctx, const PJ *source_crs,
                        const PJ_OPERATION_FACTORY_CONTEXT *operationContext) {
     SANITIZE_CTX(ctx);
     if (!source_crs || !target_crs || !operationContext) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -7939,6 +8030,7 @@ int proj_list_get_count(const PJ_OBJ_LIST *result) {
 PJ *proj_list_get(PJ_CONTEXT *ctx, const PJ_OBJ_LIST *result, int index) {
     SANITIZE_CTX(ctx);
     if (!result) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -7972,6 +8064,7 @@ double proj_coordoperation_get_accuracy(PJ_CONTEXT *ctx,
                                         const PJ *coordoperation) {
     SANITIZE_CTX(ctx);
     if (!coordoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return -1;
     }
@@ -8012,6 +8105,7 @@ double proj_coordoperation_get_accuracy(PJ_CONTEXT *ctx,
 PJ *proj_crs_get_datum(PJ_CONTEXT *ctx, const PJ *crs) {
     SANITIZE_CTX(ctx);
     if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -8048,6 +8142,7 @@ PJ *proj_crs_get_datum(PJ_CONTEXT *ctx, const PJ *crs) {
 PJ *proj_crs_get_datum_ensemble(PJ_CONTEXT *ctx, const PJ *crs) {
     SANITIZE_CTX(ctx);
     if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -8076,6 +8171,7 @@ int proj_datum_ensemble_get_member_count(PJ_CONTEXT *ctx,
                                          const PJ *datum_ensemble) {
     SANITIZE_CTX(ctx);
     if (!datum_ensemble) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return 0;
     }
@@ -8102,6 +8198,7 @@ double proj_datum_ensemble_get_accuracy(PJ_CONTEXT *ctx,
                                         const PJ *datum_ensemble) {
     SANITIZE_CTX(ctx);
     if (!datum_ensemble) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return -1;
     }
@@ -8140,6 +8237,7 @@ PJ *proj_datum_ensemble_get_member(PJ_CONTEXT *ctx, const PJ *datum_ensemble,
                                    int member_index) {
     SANITIZE_CTX(ctx);
     if (!datum_ensemble) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -8179,6 +8277,7 @@ PJ *proj_datum_ensemble_get_member(PJ_CONTEXT *ctx, const PJ *datum_ensemble,
 PJ *proj_crs_get_datum_forced(PJ_CONTEXT *ctx, const PJ *crs) {
     SANITIZE_CTX(ctx);
     if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -8213,6 +8312,7 @@ double proj_dynamic_datum_get_frame_reference_epoch(PJ_CONTEXT *ctx,
                                                     const PJ *datum) {
     SANITIZE_CTX(ctx);
     if (!datum) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return -1;
     }
@@ -8247,6 +8347,7 @@ double proj_dynamic_datum_get_frame_reference_epoch(PJ_CONTEXT *ctx,
 PJ *proj_crs_get_coordinate_system(PJ_CONTEXT *ctx, const PJ *crs) {
     SANITIZE_CTX(ctx);
     if (!crs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -8269,6 +8370,7 @@ PJ *proj_crs_get_coordinate_system(PJ_CONTEXT *ctx, const PJ *crs) {
 PJ_COORDINATE_SYSTEM_TYPE proj_cs_get_type(PJ_CONTEXT *ctx, const PJ *cs) {
     SANITIZE_CTX(ctx);
     if (!cs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return PJ_CS_TYPE_UNKNOWN;
     }
@@ -8318,6 +8420,7 @@ PJ_COORDINATE_SYSTEM_TYPE proj_cs_get_type(PJ_CONTEXT *ctx, const PJ *cs) {
 int proj_cs_get_axis_count(PJ_CONTEXT *ctx, const PJ *cs) {
     SANITIZE_CTX(ctx);
     if (!cs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return -1;
     }
@@ -8361,6 +8464,7 @@ int proj_cs_get_axis_info(PJ_CONTEXT *ctx, const PJ *cs, int index,
                           const char **out_unit_code) {
     SANITIZE_CTX(ctx);
     if (!cs) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -8514,6 +8618,7 @@ PJ *proj_coordoperation_create_inverse(PJ_CONTEXT *ctx, const PJ *obj) {
 
     SANITIZE_CTX(ctx);
     if (!obj) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }
@@ -8545,6 +8650,7 @@ int proj_concatoperation_get_step_count(PJ_CONTEXT *ctx,
                                         const PJ *concatoperation) {
     SANITIZE_CTX(ctx);
     if (!concatoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return false;
     }
@@ -8578,6 +8684,7 @@ PJ *proj_concatoperation_get_step(PJ_CONTEXT *ctx, const PJ *concatoperation,
                                   int i_step) {
     SANITIZE_CTX(ctx);
     if (!concatoperation) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
         proj_log_error(ctx, __FUNCTION__, "missing required input");
         return nullptr;
     }

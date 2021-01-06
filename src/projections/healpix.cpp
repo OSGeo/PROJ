@@ -524,7 +524,7 @@ static PJ_LP s_healpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
         PJ_LP lp;
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
-        pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
+        proj_context_errno_set(P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     return healpix_spherhealpix_e_inverse(xy);
@@ -540,7 +540,7 @@ static PJ_LP e_healpix_inverse(PJ_XY xy, PJ *P) { /* ellipsoid */
     if (in_image(xy.x, xy.y, 0, 0, 0) == 0) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
-        pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
+        proj_context_errno_set(P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     lp = healpix_spherhealpix_e_inverse(xy);
@@ -574,7 +574,7 @@ static PJ_LP s_rhealpix_inverse(PJ_XY xy, PJ *P) { /* sphere */
         PJ_LP lp;
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
-        pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
+        proj_context_errno_set(P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     xy = combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 1);
@@ -590,7 +590,7 @@ static PJ_LP e_rhealpix_inverse(PJ_XY xy, PJ *P) { /* ellipsoid */
     if (in_image(xy.x, xy.y, 1, Q->north_square, Q->south_square) == 0) {
         lp.lam = HUGE_VAL;
         lp.phi = HUGE_VAL;
-        pj_ctx_set_errno(P->ctx, PJD_ERR_INVALID_X_OR_Y);
+        proj_context_errno_set(P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     xy = combine_caps(xy.x, xy.y, Q->north_square, Q->south_square, 1);
@@ -607,15 +607,15 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->apa);
+    free (static_cast<struct pj_opaque*>(P->opaque)->apa);
     return pj_default_destructor (P, errlev);
 }
 
 
 PJ *PROJECTION(healpix) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -625,7 +625,7 @@ PJ *PROJECTION(healpix) {
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es);             /* For auth_lat(). */
         if (nullptr==Q->apa)
-            return destructor(P, ENOMEM);
+            return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->qp = pj_qsfn(1.0, P->e, P->one_es);  /* For auth_lat(). */
         P->a = P->a*sqrt(0.5*Q->qp);            /* Set P->a to authalic radius. */
         pj_calc_ellipsoid_params (P, P->a, P->es);  /* Ensure we have a consistent parameter set */
@@ -641,9 +641,9 @@ PJ *PROJECTION(healpix) {
 
 
 PJ *PROJECTION(rhealpix) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -652,13 +652,19 @@ PJ *PROJECTION(rhealpix) {
 
     /* Check for valid north_square and south_square inputs. */
     if (Q->north_square < 0 || Q->north_square > 3)
-        return destructor (P, PJD_ERR_AXIS);
+    {
+        proj_log_error(P, _("Invalid value for north_square: it should be in [0,3] range."));
+        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     if (Q->south_square < 0 || Q->south_square > 3)
-        return destructor (P, PJD_ERR_AXIS);
+    {
+        proj_log_error(P, _("Invalid value for south_square: it should be in [0,3] range."));
+        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     if (P->es != 0.0) {
         Q->apa = pj_authset(P->es); /* For auth_lat(). */
         if (nullptr==Q->apa)
-            return destructor(P, ENOMEM);
+            return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->qp = pj_qsfn(1.0, P->e, P->one_es); /* For auth_lat(). */
         P->a = P->a*sqrt(0.5*Q->qp); /* Set P->a to authalic radius. */
         P->ra = 1.0/P->a;

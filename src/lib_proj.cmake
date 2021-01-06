@@ -173,6 +173,7 @@ set(SRC_LIBPROJ_CONVERSIONS
   conversions/geoc.cpp
   conversions/geocent.cpp
   conversions/noop.cpp
+  conversions/topocentric.cpp
   conversions/set.cpp
   conversions/unitconvert.cpp
 )
@@ -198,11 +199,20 @@ set(SRC_LIBPROJ_ISO19111
   iso19111/crs.cpp
   iso19111/datum.cpp
   iso19111/coordinatesystem.cpp
-  iso19111/coordinateoperation.cpp
   iso19111/io.cpp
   iso19111/internal.cpp
   iso19111/factory.cpp
   iso19111/c_api.cpp
+  iso19111/operation/concatenatedoperation.cpp
+  iso19111/operation/coordinateoperationfactory.cpp
+  iso19111/operation/conversion.cpp
+  iso19111/operation/esriparammappings.cpp
+  iso19111/operation/oputils.cpp
+  iso19111/operation/parammappings.cpp
+  iso19111/operation/projbasedoperation.cpp
+  iso19111/operation/singleoperation.cpp
+  iso19111/operation/transformation.cpp
+  iso19111/operation/vectorofvaluesparams.cpp
 )
 
 set(SRC_LIBPROJ_CORE
@@ -217,9 +227,7 @@ set(SRC_LIBPROJ_CORE
   dmstor.cpp
   ell_set.cpp
   ellps.cpp
-  errno.cpp
   factors.cpp
-  fileapi.cpp
   fwd.cpp
   gauss.cpp
   generic_inverse.cpp
@@ -246,10 +254,8 @@ set(SRC_LIBPROJ_CORE
   rtodms.cpp
   strerrno.cpp
   strtod.cpp
-  transform.cpp
   tsfn.cpp
   units.cpp
-  utils.cpp
   wkt1_generated_parser.c
   wkt1_generated_parser.h
   wkt1_parser.cpp
@@ -275,7 +281,6 @@ set(SRC_LIBPROJ_CORE
 )
 
 set(HEADERS_LIBPROJ
-  proj_api.h
   proj.h
   proj_experimental.h
   proj_constants.h

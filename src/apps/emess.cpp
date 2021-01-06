@@ -9,17 +9,13 @@
 #  endif
 #endif
 
-#ifndef ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#endif
-
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "proj_api.h"
+#include "proj_internal.h"
 #include "proj_config.h"
 #define EMESS_ROUTINE
 #include "emess.h"

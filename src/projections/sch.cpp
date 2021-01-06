@@ -131,7 +131,7 @@ static PJ *setup(PJ *P) { /* general initialization */
     // Pass a dummy ellipsoid definition that will be overridden just afterwards
     Q->cart = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart == nullptr)
-        return destructor(P, ENOMEM);
+        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* inherit ellipsoid definition from P to Q->cart */
     pj_inherit_ellipsoid_def (P, Q->cart);
@@ -154,7 +154,7 @@ static PJ *setup(PJ *P) { /* general initialization */
     /* Set up local sphere at the given peg point */
     Q->cart_sph = proj_create(P->ctx, "+proj=cart +a=1");
     if (Q->cart_sph == nullptr)
-        return destructor(P, ENOMEM);
+        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     pj_calc_ellipsoid_params(Q->cart_sph, Q->rcurv, 0);
 
     /* Set up the transformation matrices */
@@ -184,9 +184,9 @@ static PJ *setup(PJ *P) { /* general initialization */
 
 
 PJ *PROJECTION(sch) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
@@ -196,21 +196,24 @@ PJ *PROJECTION(sch) {
     if (pj_param(P->ctx, P->params, "tplat_0").i)
         Q->plat = pj_param(P->ctx, P->params, "rplat_0").f;
     else {
-        return pj_default_destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+        proj_log_error(P, _("Missing parameter plat_0."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     /* Check if peg longitude was defined */
     if (pj_param(P->ctx, P->params, "tplon_0").i)
         Q->plon = pj_param(P->ctx, P->params, "rplon_0").f;
     else {
-        return pj_default_destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+        proj_log_error(P, _("Missing parameter plon_0."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     /* Check if peg heading is defined */
     if (pj_param(P->ctx, P->params, "tphdg_0").i)
         Q->phdg = pj_param(P->ctx, P->params, "rphdg_0").f;
     else {
-        return pj_default_destructor(P, PJD_ERR_FAILED_TO_FIND_PROJ);
+        proj_log_error(P, _("Missing parameter phdg_0."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
 

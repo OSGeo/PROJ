@@ -58,7 +58,7 @@ static PJ_XY omerc_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
         const double V = sin(Q->B * lp.lam);
         const double U = (S * Q->singam - V * Q->cosgam) / T;
         if (fabs(fabs(U) - 1.0) < EPS) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
         v = 0.5 * Q->ArB * log((1. - U)/(1. + U));
@@ -98,7 +98,7 @@ static PJ_LP omerc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
     }
     Qp = exp(- Q->BrA * v);
     if( Qp == 0 ) {
-        proj_errno_set(P, PJD_ERR_INVALID_X_OR_Y);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().lp;
     }
     Sp = .5 * (Qp - 1. / Qp);
@@ -111,7 +111,7 @@ static PJ_LP omerc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
     } else {
         lp.phi = Q->E / sqrt((1. + Up) / (1. - Up));
         if ((lp.phi = pj_phi2(P->ctx, pow(lp.phi, 1. / Q->B), P->e)) == HUGE_VAL) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         }
         lp.lam = - Q->rB * atan2((Sp * Q->cosgam -
@@ -126,9 +126,9 @@ PJ *PROJECTION(omerc) {
         gamma0, lamc=0, lam1=0, lam2=0, phi1=0, phi2=0, alpha_c=0;
     int alp, gam, no_off = 0;
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->no_rot = pj_param(P->ctx, P->params, "bno_rot").i;
@@ -154,14 +154,36 @@ PJ *PROJECTION(omerc) {
         phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
         lam2 = pj_param(P->ctx, P->params, "rlon_2").f;
         phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
-        if (fabs(phi1) > M_HALFPI || fabs(phi2) > M_HALFPI)
-            return pj_default_destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
-        if (fabs(phi1 - phi2) <= TOL ||
-            (con = fabs(phi1)) <= TOL ||
-            fabs(con - M_HALFPI) <= TOL ||
-            fabs(fabs(P->phi0) - M_HALFPI) <= TOL ||
-            fabs(fabs(phi2) - M_HALFPI) <= TOL)
-                return pj_default_destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+        con = fabs(phi1);
+
+        if (fabs(phi1) > M_HALFPI - TOL)
+        {
+            proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be < 90°"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+        if (fabs(phi2) > M_HALFPI - TOL)
+        {
+            proj_log_error(P, _("Invalid value for lat_2: |lat_2| should be < 90°"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+
+        if (fabs(phi1 - phi2) <= TOL )
+        {
+            proj_log_error(P, _("Invalid value for lat_1/lat_2: lat_1 should be different from lat_2"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+
+        if (con <= TOL )
+        {
+            proj_log_error(P, _("Invalid value for lat_1: lat_1 should be different from 0"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
+
+        if (fabs(fabs(P->phi0) - M_HALFPI) <= TOL)
+        {
+            proj_log_error(P, _("Invalid value for lat_01: |lat_0| should be < 90°"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
     }
     com = sqrt(P->one_es);
     if (fabs(P->phi0) > EPS) {
@@ -193,9 +215,13 @@ PJ *PROJECTION(omerc) {
                 gamma = alpha_c;
         } else
             alpha_c = aasin(P->ctx, D*sin(gamma0 = gamma));
-        if( fabs(fabs(P->phi0) - M_HALFPI) <= TOL ) {
-            return pj_default_destructor(P, PJD_ERR_LAT_0_OR_ALPHA_EQ_90);
+
+        if (fabs(fabs(P->phi0) - M_HALFPI) <= TOL)
+        {
+            proj_log_error(P, _("Invalid value for lat_01: |lat_0| should be < 90°"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
+
         P->lam0 = lamc - aasin(P->ctx, .5 * (F - 1. / F) *
            tan(gamma0)) / Q->B;
     } else {
@@ -205,7 +231,8 @@ PJ *PROJECTION(omerc) {
         p = (L - H) / (L + H);
         if( p == 0 ) {
             // Not quite, but es is very close to 1...
-            return pj_default_destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+            proj_log_error(P, _("Invalid value for eccentricity"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
         J = Q->E * Q->E;
         J = (J - L * H) / (J + L * H);
@@ -217,7 +244,8 @@ PJ *PROJECTION(omerc) {
            J * tan(.5 * Q->B * (lam1 - lam2)) / p) / Q->B);
         const double denom = F - 1. / F;
         if( denom == 0 ) {
-            return pj_default_destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+            proj_log_error(P, _("Invalid value for eccentricity"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
         gamma0 = atan(2. * sin(Q->B * adjlon(lam1 - P->lam0)) / denom);
         gamma = alpha_c = aasin(P->ctx, D * sin(gamma0));

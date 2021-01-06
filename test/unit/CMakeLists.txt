@@ -69,17 +69,6 @@ set(PROJ_TEST_ENVIRONMENT
   "PROJ_SOURCE_DATA=${PROJ_SOURCE_DIR}/data"
 )
 
-add_executable(proj_pj_transform_test
-  main.cpp
-  pj_transform_test.cpp)
-target_link_libraries(proj_pj_transform_test
-  GTest::gtest
-  ${PROJ_LIBRARIES})
-add_test(NAME proj_pj_transform_test COMMAND proj_pj_transform_test)
-set_property(TEST proj_pj_transform_test
-  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
-
-
 add_executable(proj_errno_string_test
   main.cpp
   proj_errno_string_test.cpp)
@@ -132,6 +121,7 @@ add_executable(proj_test_cpp_api
   test_metadata.cpp
   test_io.cpp
   test_operation.cpp
+  test_operationfactory.cpp
   test_datum.cpp
   test_factory.cpp
   test_c_api.cpp

@@ -15,6 +15,42 @@ Synopsis
 
     **cct** [**-cIostvz** [args]] *+opt[=arg]* ... file ...
 
+or
+
+    **cct** [**-cIostvz** [args]] {object_definition} file ...
+
+Where {object_definition} is one of the possibilities accepted
+by :c:func:`proj_create`, provided it expresses a coordinate operation
+
+    - a proj-string,
+    - a WKT string,
+    - an object code (like "EPSG:1671" "urn:ogc:def:coordinateOperation:EPSG::1671"),
+    - an object name. e.g "ITRF2014 to ETRF2014 (1)". In that case as
+      uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
+    - a OGC URN combining references for concatenated operations
+      (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
+    - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.2/projjson.schema.json
+
+    .. versionadded:: 8.0.0
+
+    .. note::
+
+        Before version 8.0.0 only proj-strings could be used to instantiate
+        operations in :program:`cct`.
+
+
+or
+
+    **cct** [**-cIostvz** [args]] {object_reference} file ...
+
+where {object_reference} is a filename preceded by the '@' character.  The
+file referenced by the {object_reference} must contain a valid
+{object_definition}.
+
+    .. versionadded:: 8.0.0
+
+
+
 Description
 ***********
 
@@ -157,6 +193,20 @@ Should give results comparable to the classic :program:`proj` command
 
     $ echo 12 56 100 2018.0 auxiliary data | cct +proj=merc
     1335833.8895   7522963.2411      100.0000     2018.0000 auxiliary data
+
+7. Coordinate operation referenced through its code
+
+.. code-block:: console
+
+    $ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct EPSG:8366
+    3541657.9112    948983.7503  5201383.2482     2020.5000
+
+8. Coordinate operation referenced through its name
+
+.. code-block:: console
+
+    $ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct "ITRF2014 to ETRF2014 (1)"
+    3541657.9112    948983.7503  5201383.2482     2020.5000
 
 Background
 **********

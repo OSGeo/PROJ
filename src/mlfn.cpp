@@ -26,7 +26,7 @@
 double *pj_enfn(double es) {
     double t, *en;
 
-    en = (double *) pj_malloc(EN_SIZE * sizeof (double));
+    en = (double *) malloc(EN_SIZE * sizeof (double));
     if (nullptr==en)
         return nullptr;
 
@@ -45,7 +45,7 @@ pj_mlfn(double phi, double sphi, double cphi, const double *en) {
 }
 
 double
-pj_inv_mlfn(projCtx ctx, double arg, double es, const double *en) {
+pj_inv_mlfn(PJ_CONTEXT *ctx, double arg, double es, const double *en) {
     double sinphi_ignored;
     double cosphi_ignored;
     return inline_pj_inv_mlfn(ctx, arg, es, en, &sinphi_ignored, &cosphi_ignored);

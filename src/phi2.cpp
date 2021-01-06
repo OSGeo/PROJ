@@ -7,7 +7,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-double pj_sinhpsi2tanphi(projCtx ctx, const double taup, const double e) {
+double pj_sinhpsi2tanphi(PJ_CONTEXT *ctx, const double taup, const double e) {
   /****************************************************************************
   * Convert tau' = sinh(psi) = tan(chi) to tau = tan(phi).  The code is taken
   * from GeographicLib::Math::tauf(taup, e).
@@ -103,12 +103,12 @@ double pj_sinhpsi2tanphi(projCtx ctx, const double taup, const double e) {
       break;
   }
   if (i == 0)
-    pj_ctx_set_errno(ctx, PJD_ERR_NON_CONV_SINHPSI2TANPHI);
+    proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
   return tau;
 }
 
 /*****************************************************************************/
-double pj_phi2(projCtx ctx, const double ts0, const double e) {
+double pj_phi2(PJ_CONTEXT *ctx, const double ts0, const double e) {
   /****************************************************************************
    * Determine latitude angle phi-2.
    * Inputs:

@@ -485,3 +485,14 @@ Test EPSG:xxxx EPSG:yyyy filename
 ##############################################################
 Test Colombia Urban
 4.8 -74.25	122543.174	80859.033 0.000
+##############################################################
+Test effect of --authority (https://github.com/OSGeo/PROJ/issues/2442)
+This test might be a bit fragile if proj.db content changes
+The first result should use the 'WGS_1984_(ITRF08)_To_NAD_1983_2011' (ESRI:108363) operation
+and the second one a no-op
+-105 40	500000.86	4427756.50 0.00
+-105 40	500000.00	4427757.22 0.00
+##############################################################
+Test effect of --accuracy
+##############################################################
+Test effect of --no-ballpark

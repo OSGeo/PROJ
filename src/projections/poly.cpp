@@ -80,7 +80,7 @@ static PJ_LP poly_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
             const double cp = cos(lp.phi);
             const double s2ph = sp * cp;
             if (fabs(cp) < ITOL) {
-                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return lp;
             }
             double mlp = sqrt(1. - P->es * sp * sp);
@@ -97,7 +97,7 @@ static PJ_LP poly_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
                 break;
         }
         if (!i) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         }
         const double c = sin(lp.phi);
@@ -128,7 +128,7 @@ static PJ_LP poly_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
                 break;
             --i;
             if( i == 0 ) {
-                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return lp;
             }
         }
@@ -147,23 +147,23 @@ static PJ *destructor(PJ *P, int errlev) {
         return pj_default_destructor (P, errlev);
 
     if (static_cast<struct pj_opaque*>(P->opaque)->en)
-        pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
+        free (static_cast<struct pj_opaque*>(P->opaque)->en);
 
     return pj_default_destructor(P, errlev);
 }
 
 
 PJ *PROJECTION(poly) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     P->opaque = Q;
     P->destructor = destructor;
 
     if (P->es != 0.0) {
         if (!(Q->en = pj_enfn(P->es)))
-            return pj_default_destructor (P, ENOMEM);
+            return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
         Q->ml0 = pj_mlfn(P->phi0, sin(P->phi0), cos(P->phi0), Q->en);
         P->inv = poly_e_inverse;
         P->fwd = poly_e_forward;

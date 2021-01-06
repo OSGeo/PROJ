@@ -155,7 +155,7 @@ static PJ_LP misrsom_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inve
     sppsq = spp * spp;
     const double denom = 1. - sppsq * (1. + Q->u);
     if( denom == 0.0 ) {
-        proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().lp;
     }
     lamt = atan(((1. - sppsq * P->rone_es) * tan(lamdp) *
@@ -178,14 +178,17 @@ PJ *PROJECTION(misrsom) {
     int path;
     double lam, alf, esc, ess;
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     path = pj_param(P->ctx, P->params, "ipath").i;
     if (path <= 0 || path > 233)
-        return pj_default_destructor(P, PJD_ERR_PATH_NOT_IN_RANGE);
+    {
+        proj_log_error(P, _("Invalid value for path: path should be in [1, 233] range"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
 
     P->lam0 = DEG_TO_RAD * 129.3056 - M_TWOPI / 233. * path;
     alf = 98.30382 * DEG_TO_RAD;

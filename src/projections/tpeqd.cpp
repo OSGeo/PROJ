@@ -64,9 +64,9 @@ static PJ_LP tpeqd_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
 
 PJ *PROJECTION(tpeqd) {
     double lam_1, lam_2, phi_1, phi_2, A12;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
 
@@ -77,7 +77,10 @@ PJ *PROJECTION(tpeqd) {
     lam_2 = pj_param(P->ctx, P->params, "rlon_2").f;
 
     if (phi_1 == phi_2 && lam_1 == lam_2)
-        return pj_default_destructor(P, PJD_ERR_CONTROL_POINT_NO_DIST);
+    {
+        proj_log_error(P, _("Invalid value for lat_1/lon_1/lat_2/lon_2: the 2 points should be distinct."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
 
     P->lam0  = adjlon (0.5 * (lam_1 + lam_2));
     Q->dlam2 = adjlon (lam_2 - lam_1);
@@ -92,7 +95,8 @@ PJ *PROJECTION(tpeqd) {
     Q->z02 = aacos(P->ctx, Q->sp1 * Q->sp2 + Q->cp1 * Q->cp2 * cos (Q->dlam2));
     if( Q->z02 == 0.0 ) {
         // Actually happens when both lat_1 = lat_2 and |lat_1| = 90
-        return pj_default_destructor(P, PJD_ERR_LAT_1_OR_2_ZERO_OR_90);
+        proj_log_error(P, _("Invalid value for lat_1 and lat_2: their absolute value should be < 90°."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     Q->hz0 = .5 * Q->z02;
     A12 = atan2(Q->cp2 * sin (Q->dlam2),

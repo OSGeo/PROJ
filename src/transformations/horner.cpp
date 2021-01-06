@@ -89,8 +89,8 @@
 PROJ_HEAD(horner, "Horner polynomial evaluation");
 
 /* make horner.h interface with proj's memory management */
-#define horner_dealloc(x) pj_dealloc(x)
-#define horner_calloc(n,x) pj_calloc(n,x)
+#define horner_dealloc(x) free(x)
+#define horner_calloc(n,x) calloc(n,x)
 
 namespace { // anonymous namespace
 struct horner {
@@ -115,7 +115,7 @@ struct horner {
 } // anonymous namespace
 
 typedef struct horner HORNER;
-static PJ_UV   horner_func (const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position);
+static PJ_UV   horner_func (PJ* P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position);
 static HORNER *horner_alloc (size_t order, int complex_polynomia);
 static void    horner_free (HORNER *h);
 
@@ -181,7 +181,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
 
 
 /**********************************************************************/
-static PJ_UV horner_func (const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
+static PJ_UV horner_func (PJ* P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -237,7 +237,6 @@ summing the tiny high order elements first.
         case PJ_INV:   /* inverse */
             break;
         default:   /* invalid */
-            errno = EINVAL;
             return uv_error;
     }
 
@@ -259,7 +258,7 @@ summing the tiny high order elements first.
     }
 
     if ((fabs(n) > range) || (fabs(e) > range)) {
-        errno = EDOM;
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return uv_error;
     }
 
@@ -297,12 +296,12 @@ summing the tiny high order elements first.
 
 
 static PJ_COORD horner_forward_4d (PJ_COORD point, PJ *P) {
-    point.uv = horner_func ((HORNER *) P->opaque, PJ_FWD, point.uv);
+    point.uv = horner_func (P, (HORNER *) P->opaque, PJ_FWD, point.uv);
     return point;
 }
 
 static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
-    point.uv = horner_func ((HORNER *) P->opaque, PJ_INV, point.uv);
+    point.uv = horner_func (P, (HORNER *) P->opaque, PJ_INV, point.uv);
     return point;
 }
 
@@ -310,7 +309,7 @@ static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
 
 
 /**********************************************************************/
-static PJ_UV complex_horner (const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
+static PJ_UV complex_horner (PJ *P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex
@@ -337,7 +336,6 @@ polynomial evaluation engine.
         case PJ_INV:   /* inverse */
             break;
         default:   /* invalid */
-            errno = EINVAL;
             return uv_error;
     }
 
@@ -366,7 +364,7 @@ polynomial evaluation engine.
     }
 
     if ((fabs(n) > range) || (fabs(e) > range)) {
-        errno = EDOM;
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return uv_error;
     }
 
@@ -387,12 +385,12 @@ polynomial evaluation engine.
 
 
 static PJ_COORD complex_horner_forward_4d (PJ_COORD point, PJ *P) {
-    point.uv = complex_horner ((HORNER *) P->opaque, PJ_FWD, point.uv);
+    point.uv = complex_horner (P, (HORNER *) P->opaque, PJ_FWD, point.uv);
     return point;
 }
 
 static PJ_COORD complex_horner_reverse_4d (PJ_COORD point, PJ *P) {
-    point.uv = complex_horner ((HORNER *) P->opaque, PJ_INV, point.uv);
+    point.uv = complex_horner (P, (HORNER *) P->opaque, PJ_INV, point.uv);
     return point;
 }
 
@@ -412,25 +410,25 @@ static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
     char *buf, *init, *next = nullptr;
     int i;
 
-    buf = static_cast<char*>(pj_calloc (strlen (param) + 2, sizeof(char)));
+    buf = static_cast<char*>(calloc (strlen (param) + 2, sizeof(char)));
     if (nullptr==buf) {
-        proj_log_error (P, "Horner: No memory left");
+        proj_log_error (P, "No memory left");
         return 0;
     }
 
     sprintf (buf, "t%s", param);
     if (0==pj_param (P->ctx, P->params, buf).i) {
-        pj_dealloc (buf);
+        free (buf);
         return 0;
     }
     sprintf (buf, "s%s", param);
     init = pj_param(P->ctx, P->params, buf).s;
-    pj_dealloc (buf);
+    free (buf);
 
     for (i = 0; i < ncoefs; i++) {
         if (i > 0) {
             if ( next == nullptr || ','!=*next) {
-                proj_log_error (P, "Horner: Malformed polynomium set %s. need %d coefs", param, ncoefs);
+                proj_log_error (P, "Malformed polynomium set %s. need %d coefs", param, ncoefs);
                 return 0;
             }
             init = ++next;
@@ -460,12 +458,12 @@ PJ *PROJECTION(horner) {
         degree = pj_param(P->ctx, P->params, "ideg").i;
         if (degree < 0 || degree > 10000) {
             /* What are reasonable minimum and maximums for degree? */
-            proj_log_debug (P, "Horner: Degree is unreasonable: %d", degree);
-            return horner_freeup (P, PJD_ERR_INVALID_ARG);
+            proj_log_error (P, _("Degree is unreasonable: %d"), degree);
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
     } else {
-        proj_log_debug (P, "Horner: Must specify polynomial degree, (+deg=n)");
-        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        proj_log_error (P, _("Must specify polynomial degree, (+deg=n)"));
+        return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
     if (pj_param (P->ctx, P->params, "tfwd_c").i || pj_param (P->ctx, P->params, "tinv_c").i) /* complex polynomium? */
@@ -473,7 +471,7 @@ PJ *PROJECTION(horner) {
 
     Q = horner_alloc (degree, complex_polynomia);
     if (Q == nullptr)
-        return horner_freeup (P, ENOMEM);
+        return horner_freeup (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     if (complex_polynomia) {
@@ -483,9 +481,15 @@ PJ *PROJECTION(horner) {
 
         n = 2*degree + 2;
         if (0==parse_coefs (P, Q->fwd_c, "fwd_c", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("missing fwd_c"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         if (0==parse_coefs (P, Q->inv_c, "inv_c", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("missing inv_c"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         P->fwd4d = complex_horner_forward_4d;
         P->inv4d = complex_horner_reverse_4d;
     }
@@ -493,19 +497,37 @@ PJ *PROJECTION(horner) {
     else {
         n = horner_number_of_coefficients (degree);
         if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("missing fwd_u"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         if (0==parse_coefs (P, Q->fwd_v, "fwd_v", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("missing fwd_v"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         if (0==parse_coefs (P, Q->inv_u, "inv_u", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("missing inv_u"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
         if (0==parse_coefs (P, Q->inv_v, "inv_v", n))
-            return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+        {
+            proj_log_error (P, _("missing inv_v"));
+            return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+        }
     }
 
     if (0==parse_coefs (P, (double *)(Q->fwd_origin), "fwd_origin", 2))
-        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+    {
+        proj_log_error (P, _("missing fwd_origin"));
+        return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
     if (0==parse_coefs (P, (double *)(Q->inv_origin), "inv_origin", 2))
-        return horner_freeup (P, PJD_ERR_MISSING_ARGS);
+    {
+        proj_log_error (P, _("missing inv_origin"));
+        return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
     if (0==parse_coefs (P, &Q->range, "range", 1))
         Q->range = 500000;
 

@@ -48,7 +48,7 @@ paralist *pj_clone_paralist( const paralist *list)
   for( ; list != nullptr; list = list->next )
     {
       paralist *newitem = (paralist *)
-	pj_malloc(sizeof(paralist) + strlen(list->param));
+	malloc(sizeof(paralist) + strlen(list->param));
 
       newitem->used = 0;
       newitem->next = nullptr;
@@ -83,17 +83,17 @@ void pj_clear_initcache()
         {
             paralist *n, *t = cache_paralist[i];
 		
-            pj_dalloc( cache_key[i] );
+            free( cache_key[i] );
 
             /* free parameter list elements */
             for (; t != nullptr; t = n) {
                 n = t->next;
-                pj_dalloc(t);
+                free(t);
             }
         }
 
-        pj_dalloc( cache_key );
-        pj_dalloc( cache_paralist );
+        free( cache_key );
+        free( cache_paralist );
         cache_count = 0;
         cache_alloc= 0;
         cache_key = nullptr;
@@ -151,29 +151,29 @@ void pj_insert_initcache( const char *filekey, const paralist *list )
 
         cache_alloc = cache_alloc * 2 + 15;
 
-        cache_key_new = (char **) pj_malloc(sizeof(char*) * cache_alloc);
+        cache_key_new = (char **) malloc(sizeof(char*) * cache_alloc);
         if( cache_key && cache_count )
         {
             memcpy( cache_key_new, cache_key, sizeof(char*) * cache_count);
         }
-        pj_dalloc( cache_key );
+        free( cache_key );
         cache_key = cache_key_new;
 
         cache_paralist_new = (paralist **) 
-            pj_malloc(sizeof(paralist*) * cache_alloc);
+            malloc(sizeof(paralist*) * cache_alloc);
         if( cache_paralist && cache_count )
         {
             memcpy( cache_paralist_new, cache_paralist,
                     sizeof(paralist*) * cache_count );
         }
-        pj_dalloc( cache_paralist );
+        free( cache_paralist );
         cache_paralist = cache_paralist_new;
     }
 
     /*
     ** Duplicate the filekey and paralist, and insert in cache.
     */
-    cache_key[cache_count] = (char *) pj_malloc(strlen(filekey)+1);
+    cache_key[cache_count] = (char *) malloc(strlen(filekey)+1);
     strcpy( cache_key[cache_count], filekey );
 
     cache_paralist[cache_count] = pj_clone_paralist( list );

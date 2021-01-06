@@ -68,7 +68,7 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
+    free (static_cast<struct pj_opaque*>(P->opaque)->en);
     return pj_default_destructor (P, errlev);
 }
 
@@ -77,22 +77,34 @@ PJ *PROJECTION(eqdc) {
     double cosphi, sinphi;
     int secant;
 
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->phi2 = pj_param(P->ctx, P->params, "rlat_2").f;
-    if (fabs(Q->phi1) > M_HALFPI || fabs(Q->phi2) > M_HALFPI)
-        return destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
 
+    if (fabs(Q->phi1) > M_HALFPI)
+    {
+        proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be <= 90°"));
+        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    if (fabs(Q->phi2) > M_HALFPI)
+    {
+        proj_log_error(P, _("Invalid value for lat_2: |lat_2| should be <= 90°"));
+        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     if (fabs(Q->phi1 + Q->phi2) < EPS10)
-        return destructor (P, PJD_ERR_CONIC_LAT_EQUAL);
+    {
+        proj_log_error(P, _("Invalid value for lat_1 and lat_2: |lat_1 + lat_2| should be > 0"));
+        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
 
     if (!(Q->en = pj_enfn(P->es)))
-        return destructor(P, ENOMEM);
+        return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     sinphi = sin(Q->phi1);
     Q->n = sinphi;
@@ -111,7 +123,8 @@ PJ *PROJECTION(eqdc) {
                 (pj_mlfn(Q->phi2, sinphi, cosphi, Q->en) - ml1);
             if (Q->n == 0) {
                 // Not quite, but es is very close to 1...
-                return destructor(P, PJD_ERR_INVALID_ECCENTRICITY);
+                proj_log_error(P, _("Invalid value for eccentricity"));
+                return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
         Q->c = ml1 + m1 / Q->n;
@@ -121,7 +134,10 @@ PJ *PROJECTION(eqdc) {
         if (secant)
             Q->n = (cosphi - cos(Q->phi2)) / (Q->phi2 - Q->phi1);
         if (Q->n == 0)
-            return destructor (P, PJD_ERR_CONIC_LAT_EQUAL);
+        {
+            proj_log_error(P, _("Invalid value for lat_1 and lat_2: lat_1 + lat_2 should be > 0"));
+            return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
         Q->c = Q->phi1 + cos(Q->phi1) / Q->n;
         Q->rho0 = Q->c - P->phi0;
     }

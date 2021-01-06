@@ -72,6 +72,7 @@ struct OutputOptions {
     bool singleLine = false;
     bool strict = true;
     bool ballparkAllowed = true;
+    bool allowEllipsoidalHeightAsVerticalCRS = false;
 };
 } // anonymous namespace
 
@@ -94,7 +95,11 @@ static void usage() {
         << std::endl
         << "                [--pivot-crs always|if_no_direct_transformation|"
         << "never|{auth:code[,auth:code]*}]" << std::endl
-        << "                [--show-superseded] [--hide-ballpark]" << std::endl
+        << "                [--show-superseded] [--hide-ballpark] "
+           "[--accuracy {accuracy}]"
+        << std::endl
+        << "                [--allow-ellipsoidal-height-as-vertical-crs]"
+        << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
@@ -487,6 +492,8 @@ static void outputObject(
                     formatter->setMultiLine(false);
                 }
                 formatter->setStrict(outputOpt.strict);
+                formatter->setAllowEllipsoidalHeightAsVerticalCRS(
+                    outputOpt.allowEllipsoidalHeightAsVerticalCRS);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
                 if (outputOpt.c_ify) {
                     wkt = c_ify_string(wkt);
@@ -667,8 +674,8 @@ static void outputOperations(
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
-    bool showSuperseded, bool promoteTo3D, const OutputOptions &outputOpt,
-    bool summary) {
+    bool showSuperseded, bool promoteTo3D, double minimumAccuracy,
+    const OutputOptions &outputOpt, bool summary) {
     auto sourceObj =
         buildObject(dbContext, sourceCRSStr, "crs", "source CRS", false,
                     CoordinateOperationContext::IntermediateCRSUse::NEVER,
@@ -693,6 +700,7 @@ static void outputOperations(
 
     std::vector<CoordinateOperationNNPtr> list;
     size_t spatialCriterionPartialIntersectionResultCount = 0;
+    bool spatialCriterionPartialIntersectionMoreRelevant = false;
     try {
         auto authFactory =
             dbContext
@@ -709,6 +717,9 @@ static void outputOperations(
         ctxt->setUsePROJAlternativeGridNames(usePROJGridAlternatives);
         ctxt->setDiscardSuperseded(!showSuperseded);
         ctxt->setAllowBallparkTransformations(outputOpt.ballparkAllowed);
+        if (minimumAccuracy >= 0) {
+            ctxt->setDesiredAccuracy(minimumAccuracy);
+        }
         list = CoordinateOperationFactory::create()->createOperations(
             nnSourceCRS, nnTargetCRS, ctxt);
         if (!spatialCriterionExplicitlySpecified &&
@@ -718,10 +729,15 @@ static void outputOperations(
                 ctxt->setSpatialCriterion(
                     CoordinateOperationContext::SpatialCriterion::
                         PARTIAL_INTERSECTION);
-                spatialCriterionPartialIntersectionResultCount =
-                    CoordinateOperationFactory::create()
-                        ->createOperations(nnSourceCRS, nnTargetCRS, ctxt)
-                        .size();
+                auto list2 =
+                    CoordinateOperationFactory::create()->createOperations(
+                        nnSourceCRS, nnTargetCRS, ctxt);
+                spatialCriterionPartialIntersectionResultCount = list2.size();
+                if (spatialCriterionPartialIntersectionResultCount == 1 &&
+                    list.size() == 1 &&
+                    list2[0]->nameStr() != list[0]->nameStr()) {
+                    spatialCriterionPartialIntersectionMoreRelevant = true;
+                }
             } catch (const std::exception &) {
             }
         }
@@ -739,6 +755,10 @@ static void outputOperations(
         std::cout << "Note: using '--spatial-test intersects' would bring "
                      "more results ("
                   << spatialCriterionPartialIntersectionResultCount << ")"
+                  << std::endl;
+    } else if (spatialCriterionPartialIntersectionMoreRelevant) {
+        std::cout << "Note: using '--spatial-test intersects' would bring "
+                     "more relevant results."
                   << std::endl;
     }
     if (summary) {
@@ -804,6 +824,7 @@ int main(int argc, char **argv) {
     bool identify = false;
     bool showSuperseded = false;
     bool promoteTo3D = false;
+    double minimumAccuracy = -1;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -919,6 +940,9 @@ int main(int argc, char **argv) {
                           << ", " << e.what() << std::endl;
                 usage();
             }
+        } else if (arg == "--accuracy" && i + 1 < argc) {
+            i++;
+            minimumAccuracy = c_locale_stod(argv[i]);
         } else if (arg == "--area" && i + 1 < argc) {
             i++;
             area = argv[i];
@@ -1060,6 +1084,8 @@ int main(int argc, char **argv) {
             showSuperseded = true;
         } else if (arg == "--lax") {
             outputOpt.strict = false;
+        } else if (arg == "--allow-ellipsoidal-height-as-vertical-crs") {
+            outputOpt.allowEllipsoidalHeightAsVerticalCRS = true;
         } else if (arg == "--hide-ballpark") {
             outputOpt.ballparkAllowed = false;
         } else if (ci_equal(arg, "--3d")) {
@@ -1321,12 +1347,12 @@ int main(int argc, char **argv) {
         }
 
         try {
-            outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
-                             spatialCriterion,
-                             spatialCriterionExplicitlySpecified, crsExtentUse,
-                             gridAvailabilityUse, allowUseIntermediateCRS,
-                             pivots, authority, usePROJGridAlternatives,
-                             showSuperseded, promoteTo3D, outputOpt, summary);
+            outputOperations(
+                dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
+                spatialCriterion, spatialCriterionExplicitlySpecified,
+                crsExtentUse, gridAvailabilityUse, allowUseIntermediateCRS,
+                pivots, authority, usePROJGridAlternatives, showSuperseded,
+                promoteTo3D, minimumAccuracy, outputOpt, summary);
         } catch (const std::exception &e) {
             std::cerr << "outputOperations() failed with: " << e.what()
                       << std::endl;

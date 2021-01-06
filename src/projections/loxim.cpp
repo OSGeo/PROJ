@@ -56,16 +56,18 @@ static PJ_LP loxim_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
 
 
 PJ *PROJECTION(loxim) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
     Q->cosphi1 = cos(Q->phi1);
     if (Q->cosphi1 < EPS)
-        return pj_default_destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
-
+    {
+        proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be < 90°"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
 
     Q->tanphi1 = tan(M_FORTPI + 0.5 * Q->phi1);
 

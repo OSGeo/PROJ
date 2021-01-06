@@ -78,6 +78,9 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-25/2017-10-26
 #include <string.h>
 #include <stdarg.h>
 
+#include <fstream> // std::ifstream
+#include <iostream>
+
 #include "proj.h"
 #include "proj_internal.h"
 #include "proj_strtod.h"
@@ -193,9 +196,8 @@ static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...) {
     free( msg_buf );
 }
 
-
 int main(int argc, char **argv) {
-    PJ *P;
+    PJ *P = nullptr;
     PJ_COORD point;
     PJ_PROJ_INFO info;
     OPTARGS *o;
@@ -292,10 +294,73 @@ int main(int argc, char **argv) {
     }
 
     /* Setup transformation */
-    P = proj_create_argv (nullptr, o->pargc, o->pargv);
-    if ((nullptr==P) || (0==o->pargc)) {
+    if (o-> pargc == 0 && o->fargc > 0) {
+        std::string input(o->fargv[0]);
+
+        if (!input.empty() && input[0] == '@') {
+            std::ifstream fs;
+            auto filename = input.substr(1);
+            fs.open(filename, std::fstream::in | std::fstream::binary);
+            if (!fs.is_open()) {
+                std::cerr << "cannot open " << filename << std::endl;
+                std::exit(1);
+            }
+            input.clear();
+            while (!fs.eof()) {
+                char buffer[256];
+                fs.read(buffer, sizeof(buffer));
+                input.append(buffer, static_cast<size_t>(fs.gcount()));
+                if (input.size() > 100 * 1000) {
+                    fs.close();
+                    std::cerr << "too big file " << filename << std::endl;
+                    std::exit(1);
+                }
+            }
+            fs.close();
+        }
+
+        /* Assume we got a auth:code combination */
+        auto n = input.find(":");
+        if (n > 0) {
+            std::string auth = input.substr(0,n);
+            std::string code = input.substr(n+1, input.length());
+            // Check that the authority matches one of the known ones
+            auto authorityList = proj_get_authorities_from_database(nullptr);
+            if( authorityList )
+            {
+                for( auto iter = authorityList; *iter; iter++ )
+                {
+                    if( *iter == auth ) {
+                        P = proj_create_from_database(
+                                nullptr, auth.c_str(), code.c_str(),
+                                PJ_CATEGORY_COORDINATE_OPERATION, 0, nullptr);
+                        break;
+                    }
+                }
+                proj_string_list_destroy(authorityList);
+            }
+        }
+        if( P == nullptr ) {
+            /* if we didn't get a auth:code combo we try to see if the input matches */
+            /* anything else */
+            P = proj_create(nullptr, input.c_str());
+        }
+
+        /* If instantiating operation without +-options optargpm thinks the input is  */
+        /* a file, hence we move all o->fargv entries one place closer to the start   */
+        /* of the array. This effectively overwrites the input and only leaves a list */
+        /* of files in o->fargv.                                                      */
+        o->fargc = o->fargc-1;
+        for (int j=0; j < o->fargc; j++) {
+            o->fargv[j] = o->fargv[j+1];
+        }
+    } else {
+        P = proj_create_argv (nullptr, o->pargc, o->pargv);
+    }
+
+    if (nullptr==P) {
         print (PJ_LOG_ERROR, "%s: Bad transformation arguments - (%s)\n    '%s -h' for help",
-                 o->progname, pj_strerrno (proj_errno(P)), o->progname);
+                 o->progname, proj_errno_string (proj_errno(P)), o->progname);
         free (o);
         if (stdout != fout)
             fclose (fout);
@@ -322,7 +387,7 @@ int main(int argc, char **argv) {
     buf = static_cast<char*>(calloc (1, 10000));
     if (nullptr==buf) {
         print (PJ_LOG_ERROR, "%s: Out of memory", o->progname);
-        pj_free (P);
+        proj_destroy (P);
         free (o);
         if (stdout != fout)
             fclose (fout);
@@ -370,7 +435,7 @@ int main(int argc, char **argv) {
         if (HUGE_VAL==point.xyzt.x) {
             /* transformation error */
             print (PJ_LOG_NONE, "# Record %d TRANSFORMATION ERROR: %s (%s)",
-                   (int) o->record_index, buf, pj_strerrno (proj_errno(P)));
+                   (int) o->record_index, buf, proj_errno_string (proj_errno(P)));
             proj_errno_restore (P, err);
             continue;
         }
@@ -385,12 +450,22 @@ int main(int argc, char **argv) {
                 colmax = MAX(colmax, columns_xyzt[i]);
             comment = column(buf, colmax+1);
         }
+        /* remove the line feed from comment, as logger() above, invoked
+           by print() below (output), will add one */
+        size_t len = strlen(comment);
+        if (len >= 1)
+            comment[len - 1] = '\0';
         comment_delimiter = (comment && *comment) ? whitespace : blank_comment;
 
         /* Time to print the result */
-        if (proj_angular_output (P, direction)) {
-            point.lpzt.lam = proj_todeg (point.lpzt.lam);
-            point.lpzt.phi = proj_todeg (point.lpzt.phi);
+        /* use same arguments to printf format string for both radians and
+           degrees; convert radians to degrees before printing */
+        if (proj_angular_output (P, direction) ||
+            proj_degree_output (P, direction)) {
+            if (proj_angular_output (P, direction)) {
+                point.lpzt.lam = proj_todeg (point.lpzt.lam);
+                point.lpzt.phi = proj_todeg (point.lpzt.phi);
+            }
             print (PJ_LOG_NONE, "%14.*f  %14.*f  %12.*f  %12.4f%s%s",
                    decimals_angles, point.xyzt.x,
                    decimals_angles, point.xyzt.y,
@@ -405,6 +480,8 @@ int main(int argc, char **argv) {
                    decimals_distances, point.xyzt.z,
                    point.xyzt.t, comment_delimiter, comment
             );
+        if( fout == stdout )
+            fflush(stdout);
     }
 
     proj_destroy(P);

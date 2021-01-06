@@ -1,3 +1,69 @@
+7.2.1 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Add metadata with the version number of the database layout (#2474)
+
+ o Split coordinateoperation.cpp and test_operation.cpp in several parts (#2484)
+
+ o Update to EPSG v10.008 (#2490)
+
+ o Added the NKG 2008 and 2020 transformations in proj.db (#2495)
+
+ Bug fixes
+ ---------
+
+ o Set CURL_ENABLED definition on projinfo build (#2405)
+
+ o createBoundCRSToWGS84IfPossible(): make it return same result with a CRS
+   built from EPSG code or WKT1 (#2412)
+
+ o WKT2 parsing: several fixes related to map projection parameter units (#2428)
+
+ o createOperation(): make it work properly when one of the CRS is a BoundCRS of
+   a DerivedGeographicCRS (+proj=ob_tran +o_proj=lonlat +towgs84=....) (#2441)
+
+ o WKT parsing: fix ingestion of WKT with a Geocentric CRS as the base of the
+   projected CRS (#2443)
+
+ o GeographicCRS::_isEquivalentTo(EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS):
+   make it work when comparing easting,northing,up and northing,easting,up (#2446)
+
+ o createOperation(): add a ballpark vertical transformation when dealing
+   with GEOIDMODEL[] (#2449)
+
+ o Use same arguments to printf format string for both radians and degrees in
+   output by cct (#2453)
+
+ o PRIMEM WKT handling: fixes on import for 'sexagesimal DMS' or from WKT1:GDAL/ESRI
+   when GEOGCS UNIT != Degree; morph to ESRI the PRIMEM name on export (#2455)
+
+ o createObjectsFromName(): in exact match, make looking for 'ETRS89 / UTM zone 32N'
+   return only the exact match (#2462)
+
+ o Inverse tmerc spherical: fix wrong sign of latitude when lat_0 is used (#2469)
+
+ o Add option to allow export of Geographic/Projected 3D CRS in WKT1_GDAL (#2470)
+
+ o Fix building proj.db with SQLite built with -DSQLITE_DQS=0 (#2480)
+
+ o Include JSON Schema files in CMake builds (#2485)
+
+ o createOperations(): fix inconsistent chaining exception when transforming from BoundCRS of projected CRS based on NTF Paris to BoundCRS of geog CRS NTF Paris (#2486)
+
+ THANKS TO
+ ---------
+
+ Zac Miller
+ Nomit Rawat
+ Guillaume Lostis
+ J.H. van de Water
+ Kristian Evers
+ Even Rouault
+
+
 7.2.0 Release Notes
 -------------------
 

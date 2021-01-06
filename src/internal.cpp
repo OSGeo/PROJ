@@ -89,12 +89,9 @@ chained calls starting out with a call to its 2D interface.
             coo.lp = pj_inv (coo.xy, P);
             return coo;
         case PJ_IDENT:
-            return coo;
-        default:
             break;
     }
-    proj_errno_set (P, EINVAL);
-    return proj_coord_error ();
+    return coo;
 }
 
 
@@ -119,12 +116,9 @@ chained calls starting out with a call to its 3D interface.
             coo.lpz = pj_inv3d (coo.xyz, P);
             return coo;
         case PJ_IDENT:
-            return coo;
-        default:
             break;
     }
-    proj_errno_set (P, EINVAL);
-    return proj_coord_error ();
+    return coo;
 }
 
 /**************************************************************************************/
@@ -141,15 +135,15 @@ Check if a a PJ has an inverse.
 void proj_context_set (PJ *P, PJ_CONTEXT *ctx) {
     if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
-    pj_set_ctx (P, ctx);
+    proj_assign_context (P, ctx);
 }
 
 
 void proj_context_inherit (PJ *parent, PJ *child) {
     if (nullptr==parent)
-        pj_set_ctx (child, pj_get_default_ctx());
+        proj_assign_context (child, pj_get_default_ctx());
     else
-        pj_set_ctx (child, pj_get_ctx(parent));
+        proj_assign_context (child, pj_get_ctx(parent));
 }
 
 
@@ -411,88 +405,8 @@ to that context.
 ******************************************************************************/
     if (nullptr==ctx)
         ctx = pj_get_default_ctx();
-    pj_ctx_set_errno (ctx, err);
-}
-
-/*  logging  */
-
-/* pj_vlog resides in pj_log.c and relates to pj_log as vsprintf relates to sprintf */
-void pj_vlog( projCtx ctx, int level, const char *fmt, va_list args );
-
-
-/***************************************************************************************/
-PJ_LOG_LEVEL proj_log_level (PJ_CONTEXT *ctx, PJ_LOG_LEVEL log_level) {
-/****************************************************************************************
-   Set logging level 0-3. Higher number means more debug info. 0 turns it off
-****************************************************************************************/
-    PJ_LOG_LEVEL previous;
-    if (nullptr==ctx)
-        ctx = pj_get_default_ctx();
-    if (nullptr==ctx)
-        return PJ_LOG_TELL;
-    previous = static_cast<PJ_LOG_LEVEL>(abs (ctx->debug_level));
-    if (PJ_LOG_TELL==log_level)
-        return previous;
-    ctx->debug_level = log_level;
-    return previous;
-}
-
-
-/*****************************************************************************/
-void proj_log_error (PJ *P, const char *fmt, ...) {
-/******************************************************************************
-   For reporting the most severe events.
-******************************************************************************/
-    va_list args;
-    va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_ERROR , fmt, args);
-    va_end( args );
-}
-
-
-/*****************************************************************************/
-void proj_log_debug (PJ *P, const char *fmt, ...) {
-/******************************************************************************
-   For reporting debugging information.
-******************************************************************************/
-    va_list args;
-    va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MAJOR , fmt, args);
-    va_end( args );
-}
-
-/*****************************************************************************/
-void proj_context_log_debug (PJ_CONTEXT *ctx, const char *fmt, ...) {
-/******************************************************************************
-   For reporting debugging information.
-******************************************************************************/
-    va_list args;
-    va_start( args, fmt );
-    pj_vlog (ctx, PJ_LOG_DEBUG_MAJOR , fmt, args);
-    va_end( args );
-}
-
-/*****************************************************************************/
-void proj_log_trace (PJ *P, const char *fmt, ...) {
-/******************************************************************************
-   For reporting embarrassingly detailed debugging information.
-******************************************************************************/
-    va_list args;
-    va_start( args, fmt );
-    pj_vlog (pj_get_ctx (P), PJ_LOG_DEBUG_MINOR , fmt, args);
-    va_end( args );
-}
-
-
-/*****************************************************************************/
-void proj_log_func (PJ_CONTEXT *ctx, void *app_data, PJ_LOG_FUNCTION logf) {
-/******************************************************************************
-    Put a new logging function into P's context. The opaque object app_data is
-    passed as first arg at each call to the logger
-******************************************************************************/
-    if (nullptr==ctx)
-        ctx = pj_get_default_ctx ();
-    ctx->logger_app_data = app_data;
-    if (nullptr!=logf)
-        ctx->logger = logf;
+    ctx->last_errno = err;
+    if( err == 0 )
+        return;
+    errno = err;
 }

@@ -208,9 +208,9 @@ static bool setup_zone(PJ *P, struct pj_opaque *Q, int n,
 PJ *PROJECTION(igh) {
     PJ_XY xy1, xy3;
     PJ_LP lp = { 0, phi_boundary };
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
 
@@ -222,7 +222,7 @@ PJ *PROJECTION(igh) {
         !setup_zone(P, Q, 7, pj_sinu,   d20, 0,   d20) ||
         !setup_zone(P, Q, 8, pj_sinu,  d140, 0,  d140))
     {
-       return destructor(P, ENOMEM);
+       return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     }
 
     /* mollweide zones */
@@ -243,7 +243,7 @@ PJ *PROJECTION(igh) {
         !setup_zone(P, Q,11, pj_moll,   d20, -Q->dy0,   d20) ||
         !setup_zone(P, Q,12, pj_moll,  d140, -Q->dy0,  d140))
     {
-       return destructor(P, ENOMEM);
+       return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     }
 
     P->inv = igh_s_inverse;

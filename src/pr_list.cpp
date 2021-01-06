@@ -66,7 +66,7 @@ char *pj_get_def( PJ *P, int options )
     size_t def_max = 10;
     (void) options;
 
-    definition = (char *) pj_malloc(def_max);
+    definition = (char *) malloc(def_max);
     if (!definition)
         return nullptr;
     definition[0] = '\0';
@@ -84,14 +84,14 @@ char *pj_get_def( PJ *P, int options )
             char *def2;
 
             def_max = def_max * 2 + l + 5;
-            def2 = (char *) pj_malloc(def_max);
+            def2 = (char *) malloc(def_max);
             if (def2) {
                 strcpy( def2, definition );
-                pj_dalloc( definition );
+                free( definition );
                 definition = def2;
             }
             else {
-                pj_dalloc( definition );
+                free( definition );
                 return nullptr;
             }
         }

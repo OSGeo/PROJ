@@ -181,7 +181,7 @@ static PJ_LP krovak_e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal,
         fi1 = lp.phi;
     }
     if( i == 0 )
-        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        proj_context_errno_set( P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
 
    lp.lam -= P->lam0;
 
@@ -191,9 +191,9 @@ static PJ_LP krovak_e_inverse (PJ_XY xy, PJ *P) {                /* Ellipsoidal,
 
 PJ *PROJECTION(krovak) {
     double u0, n0, g;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     /* we want Bessel as fixed ellipsoid */
@@ -225,7 +225,8 @@ PJ *PROJECTION(krovak) {
     g = pow( (1. + P->e * sin(P->phi0)) / (1. - P->e * sin(P->phi0)) , Q->alpha * P->e / 2. );
     double tan_half_phi0_plus_pi_4 = tan(P->phi0 / 2. + M_PI_4);
     if( tan_half_phi0_plus_pi_4 == 0.0 ) {
-        return pj_default_destructor(P, PJD_ERR_INVALID_ARG);
+        proj_log_error(P, _("Invalid value for lat_0: lat_0 + PI/4 should be different from 0"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     Q->k = tan( u0 / 2. + M_PI_4) / pow  (tan_half_phi0_plus_pi_4 , Q->alpha) * g;
     n0 = sqrt(1. - P->es) / (1. - P->es * pow(sin(P->phi0), 2));

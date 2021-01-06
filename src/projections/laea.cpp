@@ -65,7 +65,7 @@ static PJ_XY laea_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
         break;
     }
     if (fabs(b) < EPS10) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
 
@@ -111,7 +111,7 @@ static PJ_XY laea_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
         xy.y = 1. + Q->sinb1 * sinphi + Q->cosb1 * cosphi * coslam;
 oblcon:
         if (xy.y <= EPS10) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
         xy.y = sqrt(2. / xy.y);
@@ -124,7 +124,7 @@ oblcon:
         /*-fallthrough*/
     case S_POLE:
         if (fabs(lp.phi + P->phi0) < EPS10) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
         xy.y = M_FORTPI - lp.phi * .5;
@@ -193,7 +193,7 @@ static PJ_LP laea_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
 
     rh = hypot(xy.x, xy.y);
     if ((lp.phi = rh * .5 ) > 1.) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     lp.phi = 2. * asin(lp.phi);
@@ -234,7 +234,7 @@ static PJ *destructor (PJ *P, int errlev) {
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->apa);
+    free (static_cast<struct pj_opaque*>(P->opaque)->apa);
 
     return pj_default_destructor(P, errlev);
 }
@@ -242,15 +242,16 @@ static PJ *destructor (PJ *P, int errlev) {
 
 PJ *PROJECTION(laea) {
     double t;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
     P->destructor = destructor;
 
     t = fabs(P->phi0);
     if (t > M_HALFPI + EPS10 ) {
-        return destructor(P, PJD_ERR_LAT_LARGER_THAN_90);
+        proj_log_error(P, _("Invalid value for lat_0: |lat_0| should be <= 90°"));
+        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     if (fabs(t - M_HALFPI) < EPS10)
         Q->mode = P->phi0 < 0. ? S_POLE : N_POLE;
@@ -266,7 +267,7 @@ PJ *PROJECTION(laea) {
         Q->mmf = .5 / (1. - P->es);
         Q->apa = pj_authset(P->es);
         if (nullptr==Q->apa)
-            return destructor(P, ENOMEM);
+            return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
         switch (Q->mode) {
         case N_POLE:
         case S_POLE:

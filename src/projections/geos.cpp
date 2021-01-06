@@ -99,7 +99,7 @@ static PJ_XY geos_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
 
     /* Check visibility. */
     if (((Q->radius_g - Vx) * Vx - Vy * Vy - Vz * Vz * Q->radius_p_inv2) < 0.) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
 
@@ -138,7 +138,7 @@ static PJ_LP geos_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
     b = 2 * Q->radius_g * Vx;
     const double det = (b * b) - 4 * a * Q->C;
     if (det < 0.) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
 
@@ -178,7 +178,7 @@ static PJ_LP geos_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
     b   = 2 * Q->radius_g * Vx;
     const double det = (b * b) - 4 * a * Q->C;
     if (det < 0.) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
 
@@ -199,9 +199,9 @@ static PJ_LP geos_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
 
 PJ *PROJECTION(geos) {
     char *sweep_axis;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->h = pj_param(P->ctx, P->params, "dh").f;
@@ -212,7 +212,10 @@ PJ *PROJECTION(geos) {
     else {
         if ((sweep_axis[0] != 'x' && sweep_axis[0] != 'y') ||
             sweep_axis[1] != '\0')
-            return pj_default_destructor (P, PJD_ERR_INVALID_SWEEP_AXIS);
+        {
+            proj_log_error(P, _("Invalid value for sweep: it should be equal to x or y."));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
 
         if (sweep_axis[0] == 'x')
           Q->flip_axis = 1;
@@ -222,7 +225,10 @@ PJ *PROJECTION(geos) {
 
     Q->radius_g_1 = Q->h / P->a;
     if ( Q->radius_g_1 <= 0 || Q->radius_g_1 > 1e10 )
-        return pj_default_destructor (P, PJD_ERR_INVALID_H);
+    {
+        proj_log_error(P, _("Invalid value for h."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
     Q->radius_g = 1. + Q->radius_g_1;
     Q->C  = Q->radius_g * Q->radius_g - 1.0;
     if (P->es != 0.0) {

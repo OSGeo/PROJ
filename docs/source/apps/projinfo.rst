@@ -22,7 +22,8 @@ Synopsis
     |    [--crs-extent-use none|both|intersection|smallest]
     |    [--grid-check none|discard_missing|sort|known_available]
     |    [--pivot-crs always|if_no_direct_transformation|never|{auth:code[,auth:code]*}]
-    |    [--show-superseded] [--hide-ballpark]
+    |    [--show-superseded] [--hide-ballpark] [--accuracy {accuracy}]
+    |    [--allow-ellipsoidal-height-as-vertical-crs]
     |    [--boundcrs-to-wgs84]
     |    [--main-db-path path] [--aux-db-path path]*
     |    [--identify] [--3d]
@@ -211,6 +212,23 @@ The following control parameters can appear in any order:
     :term:`Ballpark transformation`
 
     .. note:: only used for coordinate operation computation
+
+.. option:: --accuracy {accuracy}
+
+    .. versionadded:: 8.0
+
+    Sets the minimum desired accuracy for returned coordinate operations.
+
+    .. note:: only used for coordinate operation computation
+
+.. option:: --allow-ellipsoidal-height-as-vertical-crs
+
+    .. versionadded:: 8.0
+
+    Allow to export a geographic or projected 3D CRS as a compound CRS whose
+    vertical CRS represents the ellipsoidal height.
+
+    .. note:: only used for CRS, and with WKT1:GDAL output format
 
 .. option:: --boundcrs-to-wgs84
 

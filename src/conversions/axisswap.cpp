@@ -169,18 +169,21 @@ static PJ_COORD reverse_4d(PJ_COORD coo, PJ *P) {
 /***********************************************************************/
 PJ *CONVERSION(axisswap,0) {
 /***********************************************************************/
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     char *s;
     unsigned int i, j, n = 0;
 
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = (void *) Q;
 
 
     /* +order and +axis are mutually exclusive */
     if ( !pj_param_exists(P->params, "order") == !pj_param_exists(P->params, "axis") )
-        return pj_default_destructor(P, PJD_ERR_AXIS);
+    {
+        proj_log_error(P, _("order and axis parameters are mutually exclusive."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS);
+    }
 
     /* fill axis list with indices from 4-7 to simplify duplicate search further down */
     for (i=0; i<4; i++) {
@@ -196,8 +199,8 @@ PJ *CONVERSION(axisswap,0) {
         /* check that all characters are valid */
         for (i=0; i<strlen(order); i++)
             if (strchr("1234-,", order[i]) == nullptr) {
-                proj_log_error(P, "axisswap: unknown axis '%c'", order[i]);
-                return pj_default_destructor(P, PJD_ERR_AXIS);
+                proj_log_error(P, _("unknown axis '%c'"), order[i]);
+                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
 
         /* read axes numbers and signs */
@@ -206,8 +209,8 @@ PJ *CONVERSION(axisswap,0) {
         while ( *s != '\0' && n < 4 ) {
             Q->axis[n] = abs(atoi(s))-1;
             if (Q->axis[n] > 3) {
-                proj_log_error(P, "axisswap: invalid axis '%d'", Q->axis[n]);
-                return pj_default_destructor(P, PJD_ERR_AXIS);
+                proj_log_error(P, _("invalid axis '%d'"), Q->axis[n]);
+                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
             Q->sign[n++] = sign(atoi(s));
             while ( *s != '\0' && *s != ',' )
@@ -247,8 +250,8 @@ PJ *CONVERSION(axisswap,0) {
                     Q->axis[i] = 2;
                     break;
                 default:
-                    proj_log_error(P, "axisswap: unknown axis '%c'", P->axis[i]);
-                    return pj_default_destructor(P, PJD_ERR_AXIS);
+                    proj_log_error(P, _("unknown axis '%c'"), P->axis[i]);
+                    return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
         n = 3;
@@ -260,8 +263,8 @@ PJ *CONVERSION(axisswap,0) {
             if (i==j)
                 continue;
             if (Q->axis[i] == Q->axis[j]) {
-                proj_log_error(P, "swapaxis: duplicate axes specified");
-                return pj_default_destructor(P, PJD_ERR_AXIS);
+                proj_log_error(P, _("swapaxis: duplicate axes specified"));
+                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
 
@@ -282,8 +285,8 @@ PJ *CONVERSION(axisswap,0) {
 
 
     if (P->fwd4d == nullptr && P->fwd3d == nullptr && P->fwd == nullptr) {
-        proj_log_error(P, "swapaxis: bad axis order");
-        return pj_default_destructor(P, PJD_ERR_AXIS);
+        proj_log_error(P, _("swapaxis: bad axis order"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     if (pj_param(P->ctx, P->params, "tangularunits").i) {

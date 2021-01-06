@@ -124,6 +124,7 @@ process(FILE *fid) {
 				(void)fputs(rtodms(pline, al21, 0, 0), stdout);
 		}
 		(void)fputs(s, stdout);
+                fflush(stdout);
 	}
 }
 

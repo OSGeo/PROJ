@@ -38,7 +38,7 @@
 
 static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
     if (coo.v[0] == HUGE_VAL || coo.v[1] == HUGE_VAL || coo.v[2] == HUGE_VAL) {
-        proj_errno_set (P, PJD_ERR_INVALID_X_OR_Y);
+        proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error ();
     }
 
@@ -97,7 +97,7 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
 
 static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
     if (coo.xyz.x == HUGE_VAL) {
-        proj_errno_set (P, PJD_ERR_INVALID_X_OR_Y);
+        proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error ();
     }
 
@@ -163,7 +163,7 @@ PJ_LP pj_inv(PJ_XY xy, PJ *P) {
     else if (P->inv4d)
         coo = P->inv4d (coo, P);
     else {
-        proj_errno_set (P, EINVAL);
+        proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ().lp;
     }
     if (HUGE_VAL==coo.v[0])
@@ -197,7 +197,7 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
     else if (P->inv)
         coo.lp = P->inv (coo.xy, P);
     else {
-        proj_errno_set (P, EINVAL);
+        proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ().lpz;
     }
     if (HUGE_VAL==coo.v[0])
@@ -227,7 +227,7 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
     else if (P->inv)
         coo.lp = P->inv (coo.xy, P);
     else {
-        proj_errno_set (P, EINVAL);
+        proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ();
     }
     if (HUGE_VAL==coo.v[0])

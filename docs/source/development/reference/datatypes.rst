@@ -804,6 +804,102 @@ Info structures
         Date of last update of the init-file.
 
 
+.. _error_codes:
+
+Error codes
+-----------
+
+.. versionadded:: 8.0.0
+
+Three classes of errors are defined below. The belonging of a given error
+code to a class can bit tested with a binary and test. The error class itself
+can be used as an error value in some rare cases where the error does not
+fit into a more precise error value.
+
+Those error codes are still quite generic for a number of them. Details on the
+actual errors will be typically logged with the PJ_LOG_ERROR level.
+
+Errors in class PROJ_ERR_INVALID_OP
++++++++++++++++++++++++++++++++++++
+
+.. c:macro:: PROJ_ERR_INVALID_OP
+
+    Class of error codes typically related to coordinate operation initalization,
+    typically when creating a PJ* object from a PROJ string.
+
+    .. note:: some of them can also be emitted during coordinate transformation,
+              like PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID in case the resource loading
+              is differed until it is really needed.
+
+.. c:macro:: PROJ_ERR_INVALID_OP_WRONG_SYNTAX
+
+    Invalid pipeline structure, missing +proj argument, etc.
+
+.. c:macro:: PROJ_ERR_INVALID_OP_MISSING_ARG
+
+    Missing required operation parameter
+
+.. c:macro:: PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE
+
+    One of the operation parameter has an illegal value.
+
+.. c:macro:: PROJ_ERR_INVALID_OP_MUTUALLY_EXCLUSIVE_ARGS
+
+    Mutually exclusive arguments
+
+.. c:macro:: PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID
+
+    File not found or with invalid content (particular case of PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE)
+
+Errors in class PROJ_ERR_COORD_TRANSFM
+++++++++++++++++++++++++++++++++++++++
+
+.. c:macro:: PROJ_ERR_COORD_TRANSFM
+
+    Class of error codes related to transformation on a specific coordinate.
+
+.. c:macro:: PROJ_ERR_COORD_TRANSFM_INVALID_COORD
+
+    Invalid input coordinate. e.g a latitude > 90°.
+
+.. c:macro:: PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN
+
+    Coordinate is outside of the projection domain. e.g approximate mercator with \|longitude - lon_0\| > 90°,
+    or iterative convergence method failed.
+
+.. c:macro:: PROJ_ERR_COORD_TRANSFM_NO_OPERATION
+
+    No operation found, e.g if no match the required accuracy, or if ballpark transformations
+    were asked to not be used and they would be only such candidate.
+
+.. c:macro:: PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID
+
+    Point to transform falls outside grid/subgrid/TIN.
+
+.. c:macro:: PROJ_ERR_COORD_TRANSFM_GRID_AT_NODATA
+
+    Point to transform falls in a grid cell that evaluates to nodata.
+
+Errors in class PROJ_ERR_OTHER
+++++++++++++++++++++++++++++++
+
+.. c:macro:: PROJ_ERR_OTHER
+
+    Class of error codes that do not fit into one of the above class.
+
+.. c:macro:: PROJ_ERR_OTHER_API_MISUSE
+
+    Error related to a misuse of PROJ API.
+
+.. c:macro:: PROJ_ERR_OTHER_NO_INVERSE_OP
+
+    No inverse method available
+
+.. c:macro:: PROJ_ERR_OTHER_NETWORK_ERROR
+
+    Failure when accessing a network resource.
+
+
 Logging
 -------------------------------------------------------------------------------
 

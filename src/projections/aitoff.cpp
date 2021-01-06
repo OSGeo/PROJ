@@ -123,7 +123,7 @@ static PJ_LP aitoff_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
             C = 1. - D * D;
             const double denom = pow(C, 1.5);
             if( denom == 0 ) {
-                proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return lp;
             }
             D = acos(D) / denom;
@@ -170,7 +170,7 @@ static PJ_LP aitoff_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inver
 
     if (iter == MAXITER && round == MAXROUND)
     {
-        pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+        proj_context_errno_set( P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
         /* fprintf(stderr, "Warning: Accuracy of 1e-12 not reached. Last increments: dlat=%e and dlon=%e\n", dp, dl); */
     }
 
@@ -187,9 +187,9 @@ static PJ *setup(PJ *P) {
 
 
 PJ *PROJECTION(aitoff) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->mode = AITOFF;
@@ -198,15 +198,18 @@ PJ *PROJECTION(aitoff) {
 
 
 PJ *PROJECTION(wintri) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->mode = WINKEL_TRIPEL;
     if (pj_param(P->ctx, P->params, "tlat_1").i) {
         if ((Q->cosphi1 = cos(pj_param(P->ctx, P->params, "rlat_1").f)) == 0.)
-            return pj_default_destructor (P, PJD_ERR_LAT_LARGER_THAN_90);
+        {
+            proj_log_error(P, _("Invalid value for lat_1: |lat_1| should be < 90°"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
     }
     else /* 50d28' or acos(2/pi) */
         Q->cosphi1 = 0.636619772367581343;

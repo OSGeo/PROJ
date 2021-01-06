@@ -1009,6 +1009,31 @@ $EXE -f %.3f EPSG:4686 EPSG:6247 -E >> ${OUT} <<EOF
 4.8 -74.25
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test effect of --authority (https://github.com/OSGeo/PROJ/issues/2442)" >> ${OUT}
+echo  "This test might be a bit fragile if proj.db content changes" >> ${OUT}
+echo  "The first result should use the 'WGS_1984_(ITRF08)_To_NAD_1983_2011' (ESRI:108363) operation" >> ${OUT}
+echo  "and the second one a no-op" >> ${OUT}
+$EXE -E +proj=latlong +datum=WGS84 +no_defs +to +init=epsg:6342 >> ${OUT} <<EOF
+-105 40
+EOF
+$EXE --authority EPSG -E +proj=latlong +datum=WGS84 +no_defs +to +init=epsg:6342 >> ${OUT} <<EOF
+-105 40
+EOF
+
+echo  "##############################################################" >> ${OUT}
+echo  "Test effect of --accuracy" >> ${OUT}
+$EXE -E --accuracy 0.05 EPSG:4326 EPSG:4258 >> ${OUT} <<EOF
+49 2
+EOF
+
+echo  "##############################################################" >> ${OUT}
+echo  "Test effect of --no-ballpark" >> ${OUT}
+$EXE -E --no-ballpark EPSG:4267 EPSG:4258 >> ${OUT} <<EOF
+49 2
+EOF
+
+
 # Done!
 # do 'diff' with distribution results
 echo "diff ${OUT} with ${OUT}.dist"

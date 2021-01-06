@@ -86,7 +86,7 @@ static PJ_XY robin_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
     dphi = fabs(lp.phi);
     i = isnan(lp.phi) ? -1 : lround(floor(dphi * C1 + 1e-15));
     if( i < 0 ){
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
     if (i >= NODES) i = NODES;
@@ -109,7 +109,7 @@ static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     lp.phi = fabs(xy.y / FYC);
     if (lp.phi >= 1.) { /* simple pathologic cases */
         if (lp.phi > ONEEPS) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         }
         else {
@@ -120,7 +120,7 @@ static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
         /* in Y space, reduce to table interval */
         long i = isnan(lp.phi) ? -1 : lround(floor(lp.phi * NODES));
         if( i < 0 || i >= NODES ) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return lp;
         }
         for (;;) {
@@ -138,12 +138,12 @@ static PJ_LP robin_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
                 break;
         }
         if( iters == 0 )
-            pj_ctx_set_errno( P->ctx, PJD_ERR_NON_CONVERGENT );
+            proj_context_errno_set( P->ctx, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN );
         lp.phi = (5 * i + t) * DEG_TO_RAD;
         if (xy.y < 0.) lp.phi = -lp.phi;
         lp.lam /= V(X[i], t);
         if( fabs(lp.lam) > M_PI ) {
-            proj_errno_set(P, PJD_ERR_LAT_OR_LON_EXCEED_LIMIT);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             lp = proj_coord_error().lp;
         }
     }

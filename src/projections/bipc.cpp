@@ -60,7 +60,7 @@ static PJ_XY bipc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
         z = S20 * sphi + C20 * cphi * cdlam;
         if (fabs(z) > 1.) {
             if (fabs(z) > ONEEPS) {
-                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return xy;
             }
             else z = z < 0. ? -1. : 1.;
@@ -74,7 +74,7 @@ static PJ_XY bipc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
         z = S45 * (sphi + cphi * cdlam);
         if (fabs(z) > 1.) {
             if (fabs(z) > ONEEPS) {
-                proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return xy;
             }
             else z = z < 0. ? -1. : 1.;
@@ -84,19 +84,19 @@ static PJ_XY bipc_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
         xy.y = -rhoc;
     }
     if (z < 0.) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
     t = pow(tan(.5 * z), n);
     r = F * t;
     if ((al = .5 * (R104 - z)) < 0.) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
     al = (t + pow(al, n)) / T;
     if (fabs(al) > 1.) {
         if (fabs(al) > ONEEPS) {
-            proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
             return xy;
         }
         else al = al < 0. ? -1. : 1.;
@@ -153,7 +153,7 @@ static PJ_LP bipc_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
         rl = r;
     }
     if (! i) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     Az = Av - Az / n;
@@ -168,9 +168,9 @@ static PJ_LP bipc_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, inverse
 
 
 PJ *PROJECTION(bipc) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     Q->noskew = pj_param(P->ctx, P->params, "bns").i;

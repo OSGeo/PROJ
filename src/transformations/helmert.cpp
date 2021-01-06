@@ -476,9 +476,9 @@ static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
 
 
 static PJ* init_helmert_six_parameters(PJ* P) {
-    struct pj_opaque_helmert *Q = static_cast<struct pj_opaque_helmert*>(pj_calloc (1, sizeof (struct pj_opaque_helmert)));
+    struct pj_opaque_helmert *Q = static_cast<struct pj_opaque_helmert*>(calloc (1, sizeof (struct pj_opaque_helmert)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = (void *) Q;
 
     /* In most cases, we work on 3D cartesian coordinates */
@@ -522,8 +522,8 @@ static PJ* read_convention(PJ* P) {
     if (!Q->no_rotation) {
         const char* convention = pj_param (P->ctx, P->params, "sconvention").s;
         if( !convention ) {
-            proj_log_error (P, "helmert: missing 'convention' argument");
-            return pj_default_destructor (P, PJD_ERR_MISSING_ARGS);
+            proj_log_error (P, _("helmert: missing 'convention' argument"));
+            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
         if( strcmp(convention, "position_vector") == 0 ) {
             Q->is_position_vector = 1;
@@ -532,17 +532,17 @@ static PJ* read_convention(PJ* P) {
             Q->is_position_vector = 0;
         }
         else {
-            proj_log_error (P, "helmert: invalid value for 'convention' argument");
-            return pj_default_destructor (P, PJD_ERR_INVALID_ARG);
+            proj_log_error (P, _("helmert: invalid value for 'convention' argument"));
+            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         }
 
         /* historically towgs84 in PROJ has always been using position_vector
          * convention. Accepting coordinate_frame would be confusing. */
         if (pj_param_exists (P->params, "towgs84")) {
             if( !Q->is_position_vector ) {
-                proj_log_error (P, "helmert: towgs84 should only be used with "
-                                "convention=position_vector");
-                return pj_default_destructor (P, PJD_ERR_INVALID_ARG);
+                proj_log_error (P, _("helmert: towgs84 should only be used with "
+                                "convention=position_vector"));
+                return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
             }
         }
     }
@@ -578,9 +578,9 @@ PJ *TRANSFORMATION(helmert, 0) {
 
     /* Detect obsolete transpose flag and error out if found */
     if (pj_param (P->ctx, P->params, "ttranspose").i) {
-        proj_log_error (P, "helmert: 'transpose' argument is no longer valid. "
-                        "Use convention=position_vector/coordinate_frame");
-        return pj_default_destructor (P, PJD_ERR_INVALID_ARG);
+        proj_log_error (P, _("helmert: 'transpose' argument is no longer valid. "
+                        "Use convention=position_vector/coordinate_frame"));
+        return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     /* Support the classic PROJ towgs84 parameter, but allow later overrides.*/
@@ -612,9 +612,15 @@ PJ *TRANSFORMATION(helmert, 0) {
     if (pj_param (P->ctx, P->params, "ts").i) {
         Q->scale_0 = pj_param (P->ctx, P->params, "ds").f;
         if( Q->scale_0 <= -1.0e6 )
-            return pj_default_destructor (P, PJD_ERR_INVALID_SCALE);
+        {
+            proj_log_error (P, _("helmert: invalid value for s."));
+            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
         if (pj_param (P->ctx, P->params, "ttheta").i && Q->scale_0 == 0.0)
-            return pj_default_destructor (P, PJD_ERR_INVALID_SCALE);
+        {
+            proj_log_error (P, _("helmert: invalid value for s."));
+            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
     }
 
     /* Translation rates */

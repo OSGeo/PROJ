@@ -47,18 +47,23 @@ static PJ *setup(PJ *P) {
 
 
 PJ *PROJECTION(urmfps) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     P->opaque = Q;
 
-    if (pj_param(P->ctx, P->params, "tn").i) {
-        static_cast<struct pj_opaque*>(P->opaque)->n = pj_param(P->ctx, P->params, "dn").f;
-        if (static_cast<struct pj_opaque*>(P->opaque)->n <= 0. || static_cast<struct pj_opaque*>(P->opaque)->n > 1.)
-            return pj_default_destructor(P, PJD_ERR_N_OUT_OF_RANGE);
-    } else {
-        return pj_default_destructor(P, PJD_ERR_N_OUT_OF_RANGE);
+    if (!pj_param(P->ctx, P->params, "tn").i )
+    {
+        proj_log_error(P, _("Missing parameter n."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_MISSING_ARG);
+    }
+
+    Q->n = pj_param(P->ctx, P->params, "dn").f;
+    if (Q->n <= 0. || Q->n > 1.)
+    {
+        proj_log_error(P, _("Invalid value for n: it should be in ]0,1] range."));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     return setup(P);
@@ -66,9 +71,9 @@ PJ *PROJECTION(urmfps) {
 
 
 PJ *PROJECTION(wag1) {
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     static_cast<struct pj_opaque*>(P->opaque)->n = 0.8660254037844386467637231707;

@@ -39,10 +39,10 @@ PJ *OPERATION(set, 0) {
     P->inv4d = set_fwd_inv;
     P->fwd4d = set_fwd_inv;
 
-    auto set = static_cast<struct Set*>(pj_calloc (1, sizeof(struct Set)));
+    auto set = static_cast<struct Set*>(calloc (1, sizeof(struct Set)));
     P->opaque = set;
     if (nullptr==P->opaque)
-        return pj_default_destructor(P, ENOMEM);
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     if (pj_param_exists(P->params, "v_1"))
     {

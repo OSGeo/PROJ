@@ -109,6 +109,7 @@ PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial) {
                 lp.phi = M_HALFPI;
         }
     }
-    pj_ctx_set_errno(P->ctx, PJD_ERR_NON_CONVERGENT);
+    proj_context_errno_set(P->ctx,
+                           PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
     return lp;
 }

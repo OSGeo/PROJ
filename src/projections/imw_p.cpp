@@ -34,15 +34,27 @@ static int phi12(PJ *P, double *del, double *sig) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int err = 0;
 
-    if (!pj_param(P->ctx, P->params, "tlat_1").i ||
-        !pj_param(P->ctx, P->params, "tlat_2").i) {
-        err = PJD_ERR_LAT_1_2_UNSPECIFIED;
-    } else {
+    if (!pj_param(P->ctx, P->params, "tlat_1").i )
+    {
+        proj_log_error(P, _("Missing parameter: lat_1 should be specified"));
+        err = PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE;
+    }
+    else if ( !pj_param(P->ctx, P->params, "tlat_2").i)
+    {
+        proj_log_error(P, _("Missing parameter: lat_2 should be specified"));
+        err = PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE;
+    }
+    else
+    {
         Q->phi_1 = pj_param(P->ctx, P->params, "rlat_1").f;
         Q->phi_2 = pj_param(P->ctx, P->params, "rlat_2").f;
         *del = 0.5 * (Q->phi_2 - Q->phi_1);
         *sig = 0.5 * (Q->phi_2 + Q->phi_1);
-        err = (fabs(*del) < EPS || fabs(*sig) < EPS) ? PJD_ERR_ABS_LAT1_EQ_ABS_LAT2 : 0;
+        err = (fabs(*del) < EPS || fabs(*sig) < EPS) ? PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE : 0;
+        if( err )
+        {
+            proj_log_error(P, _("Illegal value for lat_1 and lat_2: |lat_1 - lat_2| and |lat_1 + lat_2| should be > 0"));
+        }
     }
     return err;
 }
@@ -120,7 +132,7 @@ static PJ_LP imw_p_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
         if( denom != 0 || fabs(t.y - xy.y) > TOL )
         {
             if( denom == 0 ) {
-                proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return proj_coord_error().lp;
             }
             lp.phi = ((lp.phi - Q->phi_1) * (xy.y - yc) / denom) + Q->phi_1;
@@ -133,7 +145,7 @@ static PJ_LP imw_p_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, invers
 
     if( i == N_MAX_ITER )
     {
-        proj_errno_set(P, PJD_ERR_NON_CONVERGENT);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return proj_coord_error().lp;
     }
 
@@ -160,7 +172,7 @@ static PJ *destructor (PJ *P, int errlev) {
         return pj_default_destructor (P, errlev);
 
     if( static_cast<struct pj_opaque*>(P->opaque)->en )
-        pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
+        free (static_cast<struct pj_opaque*>(P->opaque)->en);
 
     return pj_default_destructor(P, errlev);
 }
@@ -169,12 +181,12 @@ static PJ *destructor (PJ *P, int errlev) {
 PJ *PROJECTION(imw_p) {
     double del, sig, s, t, x1, x2, T2, y1, m1, m2, y2;
     int err;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    if (!(Q->en = pj_enfn(P->es))) return pj_default_destructor (P, ENOMEM);
+    if (!(Q->en = pj_enfn(P->es))) return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     if( (err = phi12(P, &del, &sig)) != 0) {
         return destructor(P, err);
     }

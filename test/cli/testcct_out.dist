@@ -1,3 +1,26 @@
 Testing cct -d 8 +proj=merc +R=1
    1.57079633     0.88137359    0.00000000           inf
 
+Testing echo 0.5 2 | cct -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  0.5000000000    2.0000000000        0.0000        0.0000
+Testing echo 0.5 2 | cct -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg
+  0.5000000000    2.0000000000        0.0000        0.0000
+Testing echo 0.5 2 | cct -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km
+       0.0005         0.0020        0.0000        0.0000
+
+Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad
+      0.500000        2.000000      0.000000        0.0000
+Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=deg
+      0.500000        2.000000      0.000000        0.0000
+Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +xy_in=m +xy_out=km
+     0.000500       0.002000      0.000000        0.0000
+
+Test cct with object code initialization
+ 3541657.9112    948983.7503  5201383.2482     2020.5000
+Test cct with object name initialization
+ 3541657.9112    948983.7503  5201383.2482     2020.5000
+Test cct with object code initialization and file input
+ 3541657.9112    948983.7503  5201383.2482     2020.5000
+ 3541658.5334    948984.5160  5201383.7251     2020.5000
+Test cct with WKT in a file
+ 3541657.9112    948983.7503  5201383.2482     2020.5000

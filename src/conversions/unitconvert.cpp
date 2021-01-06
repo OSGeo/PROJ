@@ -433,7 +433,7 @@ static double get_unit_conversion_factor(const char* name,
 /***********************************************************************/
 PJ *CONVERSION(unitconvert,0) {
 /***********************************************************************/
-    struct pj_opaque_unitconvert *Q = static_cast<struct pj_opaque_unitconvert*>(pj_calloc (1, sizeof (struct pj_opaque_unitconvert)));
+    struct pj_opaque_unitconvert *Q = static_cast<struct pj_opaque_unitconvert*>(calloc (1, sizeof (struct pj_opaque_unitconvert)));
     const char *s, *name;
     int i;
     double f;
@@ -443,7 +443,7 @@ PJ *CONVERSION(unitconvert,0) {
     int z_out_is_linear = -1; /* unknown */
 
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = (void *) Q;
 
     P->fwd4d  = forward_4d;
@@ -473,7 +473,10 @@ PJ *CONVERSION(unitconvert,0) {
         } else {
             f = pj_param (P->ctx, P->params, "dxy_in").f;
             if (f == 0.0 || 1.0 / f == 0.0)
-                return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
+            {
+                proj_log_error(P, _("unknown xy_in unit"));
+                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            }
         }
         Q->xy_factor = f;
         if (normalized_name != nullptr) {
@@ -492,7 +495,10 @@ PJ *CONVERSION(unitconvert,0) {
         } else {
             f = pj_param (P->ctx, P->params, "dxy_out").f;
             if (f == 0.0 || 1.0 / f == 0.0)
-                return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
+            {
+                proj_log_error(P, _("unknown xy_out unit"));
+                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            }
         }
         Q->xy_factor /= f;
         if (normalized_name != nullptr) {
@@ -505,8 +511,8 @@ PJ *CONVERSION(unitconvert,0) {
 
     if( xy_in_is_linear >= 0 && xy_out_is_linear >= 0 &&
         xy_in_is_linear != xy_out_is_linear ) {
-        proj_log_debug(P, "inconsistent unit type between xy_in and xy_out");
-        return pj_default_destructor(P, PJD_ERR_INCONSISTENT_UNIT);
+        proj_log_error(P, _("inconsistent unit type between xy_in and xy_out"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     if ((name = pj_param (P->ctx, P->params, "sz_in").s) != nullptr) {
@@ -517,7 +523,10 @@ PJ *CONVERSION(unitconvert,0) {
         } else {
             f = pj_param (P->ctx, P->params, "dz_in").f;
             if (f == 0.0 || 1.0 / f == 0.0)
-                return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
+            {
+                proj_log_error(P, _("unknown z_in unit"));
+                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            }
         }
         Q->z_factor = f;
     }
@@ -530,21 +539,28 @@ PJ *CONVERSION(unitconvert,0) {
         } else {
             f = pj_param (P->ctx, P->params, "dz_out").f;
             if (f == 0.0 || 1.0 / f == 0.0)
-                return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID);
+            {
+                proj_log_error(P, _("unknown z_out unit"));
+                return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            }
         }
         Q->z_factor /= f;
     }
 
     if( z_in_is_linear >= 0 && z_out_is_linear >= 0 &&
         z_in_is_linear != z_out_is_linear ) {
-        proj_log_debug(P, "inconsistent unit type between z_in and z_out");
-        return pj_default_destructor(P, PJD_ERR_INCONSISTENT_UNIT);
+        proj_log_error(P, _("inconsistent unit type between z_in and z_out"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
 
     if ((name = pj_param (P->ctx, P->params, "st_in").s) != nullptr) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID); /* unknown unit conversion id */
+        if (!s)
+        {
+            proj_log_error(P, _("unknown t_in unit"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
 
         Q->t_in_id = i;
         proj_log_trace(P, "t_in unit: %s", time_units[i].name);
@@ -554,7 +570,11 @@ PJ *CONVERSION(unitconvert,0) {
     if ((name = pj_param (P->ctx, P->params, "st_out").s) != nullptr) {
         for (i = 0; (s = time_units[i].id) && strcmp(name, s) ; ++i);
 
-        if (!s) return pj_default_destructor(P, PJD_ERR_UNKNOWN_UNIT_ID); /* unknown unit conversion id */
+        if (!s)
+        {
+            proj_log_error(P, _("unknown t_out unit"));
+            return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        }
 
         Q->t_out_id = i;
         proj_log_trace(P, "t_out unit: %s", time_units[i].name);

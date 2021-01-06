@@ -112,7 +112,7 @@ static PJ_LP lcca_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
         if (fabs(dif) < DEL_TOL) break;
     }
     if (!i) {
-        proj_errno_set(P, PJD_ERR_TOLERANCE_CONDITION);
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return lp;
     }
     lp.phi = pj_inv_mlfn(P->ctx, S + Q->M0, P->es, Q->en);
@@ -128,24 +128,25 @@ static PJ *destructor (PJ *P, int errlev) {
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    pj_dealloc (static_cast<struct pj_opaque*>(P->opaque)->en);
+    free (static_cast<struct pj_opaque*>(P->opaque)->en);
     return pj_default_destructor (P, errlev);
 }
 
 
 PJ *PROJECTION(lcca) {
     double s2p0, N0, R0, tan0;
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(pj_calloc (1, sizeof (struct pj_opaque)));
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
     (Q->en = pj_enfn(P->es));
     if (!Q->en)
-        return pj_default_destructor (P, ENOMEM);
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     if (P->phi0 == 0.) {
-        return destructor(P, PJD_ERR_LAT_0_IS_ZERO);
+        proj_log_error(P, _("Invalid value for lat_0: it should be different from 0."));
+        return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
     }
     Q->l = sin(P->phi0);
     Q->M0 = pj_mlfn(P->phi0, Q->l, cos(P->phi0), Q->en);

@@ -414,6 +414,20 @@ TEST(crs, EPSG_4326_as_WKT1_ESRI_with_database) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, EPSG_4901_as_WKT1_ESRI_with_PRIMEM_unit_name_morphing) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("4901");
+    WKTFormatterNNPtr f(WKTFormatter::create(
+        WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+    EXPECT_EQ(crs->exportToWKT(f.get()),
+              "GEOGCS[\"GCS_ATF_Paris\",DATUM[\"D_ATF\","
+              "SPHEROID[\"Plessis_1817\",6376523.0,308.64]],"
+              "PRIMEM[\"Paris_RGS\",2.33720833333333],"
+              "UNIT[\"Grad\",0.0157079632679489]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_4326_as_WKT1_ESRI_without_database) {
     auto crs = GeographicCRS::EPSG_4326;
     WKTFormatterNNPtr f(
@@ -509,6 +523,34 @@ TEST(crs, EPSG_4979_as_WKT1_GDAL) {
         crs->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         FormattingException);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, EPSG_4979_as_WKT1_GDAL_with_ellipsoidal_height_as_vertical_crs) {
+    auto crs = GeographicCRS::EPSG_4979;
+    auto wkt = crs->exportToWKT(
+        &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL,
+                               DatabaseContext::create())
+              ->setAllowEllipsoidalHeightAsVerticalCRS(true)));
+
+    // For LAS 1.4 WKT1...
+    EXPECT_EQ(wkt, "COMPD_CS[\"WGS 84 + Ellipsoid (metre)\",\n"
+                   "    GEOGCS[\"WGS 84\",\n"
+                   "        DATUM[\"WGS_1984\",\n"
+                   "            SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+                   "                AUTHORITY[\"EPSG\",\"7030\"]],\n"
+                   "            AUTHORITY[\"EPSG\",\"6326\"]],\n"
+                   "        PRIMEM[\"Greenwich\",0,\n"
+                   "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+                   "        UNIT[\"degree\",0.0174532925199433,\n"
+                   "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+                   "        AUTHORITY[\"EPSG\",\"4326\"]],\n"
+                   "    VERT_CS[\"Ellipsoid (metre)\",\n"
+                   "        VERT_DATUM[\"Ellipsoid\",2002],\n"
+                   "        UNIT[\"metre\",1,\n"
+                   "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+                   "        AXIS[\"Ellipsoidal height\",UP]]]");
 }
 
 // ---------------------------------------------------------------------------
@@ -2037,6 +2079,50 @@ TEST(crs, projectedCRS_as_WKT1_ESRI) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs,
+     projectedCRS_3D_as_WKT1_GDAL_with_ellipsoidal_height_as_vertical_crs) {
+    auto dbContext = DatabaseContext::create();
+    auto crs = AuthorityFactory::create(dbContext, "EPSG")
+                   ->createProjectedCRS("32631")
+                   ->promoteTo3D(std::string(), dbContext);
+    auto wkt = crs->exportToWKT(
+        &(WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
+              ->setAllowEllipsoidalHeightAsVerticalCRS(true)));
+
+    // For LAS 1.4 WKT1...
+    EXPECT_EQ(wkt,
+              "COMPD_CS[\"WGS 84 / UTM zone 31N + Ellipsoid (metre)\",\n"
+              "    PROJCS[\"WGS 84 / UTM zone 31N\",\n"
+              "        GEOGCS[\"WGS 84\",\n"
+              "            DATUM[\"WGS_1984\",\n"
+              "                SPHEROID[\"WGS 84\",6378137,298.257223563,\n"
+              "                    AUTHORITY[\"EPSG\",\"7030\"]],\n"
+              "                AUTHORITY[\"EPSG\",\"6326\"]],\n"
+              "            PRIMEM[\"Greenwich\",0,\n"
+              "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
+              "            UNIT[\"degree\",0.0174532925199433,\n"
+              "                AUTHORITY[\"EPSG\",\"9122\"]],\n"
+              "            AUTHORITY[\"EPSG\",\"4326\"]],\n"
+              "        PROJECTION[\"Transverse_Mercator\"],\n"
+              "        PARAMETER[\"latitude_of_origin\",0],\n"
+              "        PARAMETER[\"central_meridian\",3],\n"
+              "        PARAMETER[\"scale_factor\",0.9996],\n"
+              "        PARAMETER[\"false_easting\",500000],\n"
+              "        PARAMETER[\"false_northing\",0],\n"
+              "        UNIT[\"metre\",1,\n"
+              "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+              "        AXIS[\"Easting\",EAST],\n"
+              "        AXIS[\"Northing\",NORTH],\n"
+              "        AUTHORITY[\"EPSG\",\"32631\"]],\n"
+              "    VERT_CS[\"Ellipsoid (metre)\",\n"
+              "        VERT_DATUM[\"Ellipsoid\",2002],\n"
+              "        UNIT[\"metre\",1,\n"
+              "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+              "        AXIS[\"Ellipsoidal height\",UP]]]");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_with_ESRI_code_as_WKT1_ESRI) {
     auto dbContext = DatabaseContext::create();
     auto crs = AuthorityFactory::create(dbContext, "ESRI")
@@ -2103,6 +2189,53 @@ TEST(crs, projectedCRS_as_PROJ_string) {
               "+zone=31 +ellps=WGS84");
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=utm +zone=31 +datum=WGS84 +units=m +no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_3D_is_WKT1_equivalent_to_WKT2) {
+    auto dbContext = DatabaseContext::create();
+
+    // "Illegal" WKT1 with a Projected 3D CRS
+    auto wkt1 = "PROJCS[\"WGS 84 / UTM zone 16N [EGM08-1]\","
+                "GEOGCS[\"WGS 84 / UTM zone 16N [EGM08-1]\","
+                "DATUM[\"WGS84\",SPHEROID[\"WGS84\",6378137.000,298.257223563,"
+                "AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],"
+                "PRIMEM[\"Greenwich\",0.0000000000000000,"
+                "AUTHORITY[\"EPSG\",\"8901\"]],"
+                "UNIT[\"Degree\",0.01745329251994329547,"
+                "AUTHORITY[\"EPSG\",\"9102\"]],AUTHORITY[\"EPSG\",\"32616\"]],"
+                "UNIT[\"Meter\",1.00000000000000000000,"
+                "AUTHORITY[\"EPSG\",\"9001\"]],"
+                "PROJECTION[\"Transverse_Mercator\"],"
+                "PARAMETER[\"latitude_of_origin\",0.0000000000000000],"
+                "PARAMETER[\"central_meridian\",-87.0000000002777938],"
+                "PARAMETER[\"scale_factor\",0.9996000000000000],"
+                "PARAMETER[\"false_easting\",500000.000],"
+                "PARAMETER[\"false_northing\",0.000],"
+                "AXIS[\"Easting\",EAST],"
+                "AXIS[\"Northing\",NORTH],"
+                "AXIS[\"Height\",UP],"
+                "AUTHORITY[\"EPSG\",\"32616\"]]";
+
+    auto obj = WKTParser()
+                   .setStrict(false)
+                   .attachDatabaseContext(dbContext)
+                   .createFromWKT(wkt1);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019));
+    auto wkt2 = crs->exportToWKT(f.get());
+    auto obj2 =
+        WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt2);
+    auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj2);
+    ASSERT_TRUE(crs2 != nullptr);
+
+    EXPECT_TRUE(crs->isEquivalentTo(
+        crs2.get(),
+        IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS));
 }
 
 // ---------------------------------------------------------------------------
@@ -4750,6 +4883,18 @@ static DerivedGeographicCRSNNPtr createDerivedGeographicCRS() {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, derivedGeographicCRS_basic) {
+
+    auto derivedCRS = createDerivedGeographicCRS();
+    EXPECT_TRUE(derivedCRS->isEquivalentTo(derivedCRS.get()));
+    EXPECT_FALSE(derivedCRS->isEquivalentTo(
+        derivedCRS->baseCRS().get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(derivedCRS->baseCRS()->isEquivalentTo(
+        derivedCRS.get(), IComparable::Criterion::EQUIVALENT));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, derivedGeographicCRS_WKT2) {
 
     auto expected = "GEODCRS[\"WMO Atlantic Pole\",\n"
@@ -4946,6 +5091,18 @@ static DerivedGeodeticCRSNNPtr createDerivedGeodeticCRS() {
         PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived geodetic CRS"),
         GeographicCRS::EPSG_4326, derivingConversion,
         CartesianCS::createGeocentric(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, derivedGeodeticCRS_basic) {
+
+    auto derivedCRS = createDerivedGeodeticCRS();
+    EXPECT_TRUE(derivedCRS->isEquivalentTo(derivedCRS.get()));
+    EXPECT_FALSE(derivedCRS->isEquivalentTo(
+        derivedCRS->baseCRS().get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(derivedCRS->baseCRS()->isEquivalentTo(
+        derivedCRS.get(), IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
@@ -5795,6 +5952,31 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                       dbContext,
                       CoordinateOperationContext::IntermediateCRSUse::NEVER),
                   crs_5340);
+    }
+
+    // Check that we get the same result from an EPSG code and a CRS created
+    // from its WKT1 representation.
+    {
+        // Pulkovo 1942 / CS63 zone A2
+        auto crs = factory->createCoordinateReferenceSystem("2936");
+
+        // Two candidate transformations found, so not picking up any
+        EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(
+                      dbContext,
+                      CoordinateOperationContext::IntermediateCRSUse::NEVER),
+                  crs);
+
+        auto wkt = crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL, dbContext)
+                .get());
+        auto obj =
+            WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+        auto crs_from_wkt = nn_dynamic_pointer_cast<CRS>(obj);
+        ASSERT_TRUE(crs_from_wkt != nullptr);
+        EXPECT_EQ(crs_from_wkt->createBoundCRSToWGS84IfPossible(
+                      dbContext,
+                      CoordinateOperationContext::IntermediateCRSUse::NEVER),
+                  crs_from_wkt);
     }
 }
 

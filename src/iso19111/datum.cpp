@@ -43,7 +43,6 @@
 // clang-format off
 #include "proj.h"
 #include "proj_internal.h"
-#include "proj_api.h"
 // clang-format on
 
 #include "proj_json_streaming_writer.hpp"
@@ -352,6 +351,23 @@ void PrimeMeridian::_exportToWKT(
     if (!(isWKT2 && formatter->primeMeridianOmittedIfGreenwich() &&
           l_name == "Greenwich")) {
         formatter->startNode(io::WKTConstants::PRIMEM, !identifiers().empty());
+
+        if (formatter->useESRIDialect()) {
+            bool aliasFound = false;
+            const auto &dbContext = formatter->databaseContext();
+            if (dbContext) {
+                auto l_alias = dbContext->getAliasFromOfficialName(
+                    l_name, "prime_meridian", "ESRI");
+                if (!l_alias.empty()) {
+                    l_name = l_alias;
+                    aliasFound = true;
+                }
+            }
+            if (!aliasFound) {
+                l_name = io::WKTFormatter::morphNameToESRI(l_name);
+            }
+        }
+
         formatter->addQuotedString(l_name);
         const auto &l_long = longitude();
         if (formatter->primeMeridianInDegree()) {
@@ -418,7 +434,7 @@ std::string
 PrimeMeridian::getPROJStringWellKnownName(const common::Angle &angle) {
     const double valRad = angle.getSIValue();
     std::string projPMName;
-    projCtx ctxt = pj_ctx_alloc();
+    PJ_CONTEXT *ctxt = proj_context_create();
     auto proj_pm = proj_list_prime_meridians();
     for (int i = 0; proj_pm[i].id != nullptr; ++i) {
         double valRefRad = dmstor_ctx(ctxt, proj_pm[i].defn, nullptr);
@@ -427,7 +443,7 @@ PrimeMeridian::getPROJStringWellKnownName(const common::Angle &angle) {
             break;
         }
     }
-    pj_ctx_free(ctxt);
+    proj_context_destroy(ctxt);
     return projPMName;
 }
 //! @endcond
