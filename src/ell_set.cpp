@@ -215,7 +215,8 @@ static int ellps_size (PJ *P) {
     {
         if( a_was_set )
             return 0;
-        proj_log_error(P, _("Major axis not given"));
+        if( P->need_ellps )
+            proj_log_error(P, _("Major axis not given"));
         return proj_errno_set (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
