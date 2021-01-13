@@ -3476,8 +3476,8 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
 
 std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
     createOperationsGeogToVertWithAlternativeGeog(
-        const crs::CRSNNPtr & /*sourceCRS*/, // geographic CRS
-        const crs::CRSNNPtr &targetCRS,      // vertical CRS
+        const crs::CRSNNPtr &sourceCRS, // geographic CRS
+        const crs::CRSNNPtr &targetCRS, // vertical CRS
         Private::Context &context) {
 
     ENTER_FUNCTION();
@@ -3501,10 +3501,39 @@ std::vector<CoordinateOperationNNPtr> CoordinateOperationFactory::Private::
     // Generally EPSG has operations from GeogCrs to VertCRS
     auto ops = findOpsInRegistryDirectTo(targetCRS, context);
 
+    const auto geogCRS =
+        dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
+    assert(geogCRS);
+    const auto &srcAxisList = geogCRS->coordinateSystem()->axisList();
     for (const auto &op : ops) {
-        const auto tmpCRS = op->sourceCRS();
-        if (tmpCRS && dynamic_cast<const crs::GeographicCRS *>(tmpCRS.get())) {
-            res.emplace_back(op);
+        const auto tmpCRS =
+            dynamic_cast<const crs::GeographicCRS *>(op->sourceCRS().get());
+        if (tmpCRS) {
+            if (srcAxisList.size() == 3 &&
+                srcAxisList[2]->unit().conversionToSI() != 1) {
+
+                const auto &authFactory =
+                    context.context->getAuthorityFactory();
+                const auto dbContext =
+                    authFactory->databaseContext().as_nullable();
+                auto tmpCRSWithSrcZ =
+                    tmpCRS->demoteTo2D(std::string(), dbContext)
+                        ->promoteTo3D(std::string(), dbContext, srcAxisList[2]);
+
+                std::vector<CoordinateOperationNNPtr> opsUnitConvert;
+                createOperationsGeogToGeog(
+                    opsUnitConvert, tmpCRSWithSrcZ,
+                    NN_NO_CHECK(op->sourceCRS()), context,
+                    dynamic_cast<const crs::GeographicCRS *>(
+                        tmpCRSWithSrcZ.get()),
+                    tmpCRS);
+                assert(opsUnitConvert.size() == 1);
+                auto concat = ConcatenatedOperation::createComputeMetadata(
+                    {opsUnitConvert.front(), op}, disallowEmptyIntersection);
+                res.emplace_back(concat);
+            } else {
+                res.emplace_back(op);
+            }
         }
     }
 
@@ -4564,11 +4593,18 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                 !srcGeogCRS->_isEquivalentTo(
                     geogDst, util::IComparable::Criterion::EQUIVALENT) &&
                 !srcGeogCRS->is2DPartOf3D(NN_NO_CHECK(geogDst), dbContext)) {
-                auto verticalTransformsTmp = createOperations(
-                    componentsSrc[1],
+                auto geogCRSTmp =
                     NN_NO_CHECK(srcGeogCRS)
-                        ->promoteTo3D(std::string(), dbContext),
-                    context);
+                        ->demoteTo2D(std::string(), dbContext)
+                        ->promoteTo3D(
+                            std::string(), dbContext,
+                            geogDst->coordinateSystem()->axisList().size() == 3
+                                ? geogDst->coordinateSystem()->axisList()[2]
+                                : cs::VerticalCS::createGravityRelatedHeight(
+                                      common::UnitOfMeasure::METRE)
+                                      ->axisList()[0]);
+                auto verticalTransformsTmp =
+                    createOperations(componentsSrc[1], geogCRSTmp, context);
                 bool foundRegisteredTransform = false;
                 foundRegisteredTransformWithAllGridsAvailable = false;
                 for (const auto &op : verticalTransformsTmp) {
