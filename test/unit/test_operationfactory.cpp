@@ -5867,6 +5867,38 @@ TEST(operation, createOperation_on_crs_with_bound_crs_and_wktext) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_proj_string_with_non_metre_height) {
+    auto objSrc =
+        createFromUserInput("EPSG:6318+5703", DatabaseContext::create(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +vunits=us-ft +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list =
+        CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+    ASSERT_GT(list.size(), 1U);
+    // What is important to check here is the vertical unit conversion
+    EXPECT_EQ(
+        list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=vgridshift +grids=us_noaa_g2018u0.tif +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=us-ft");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, createOperation_ossfuzz_18587) {
     auto objSrc =
         createFromUserInput("EPSG:4326", DatabaseContext::create(), false);
