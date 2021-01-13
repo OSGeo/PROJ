@@ -11,7 +11,7 @@ ARCH=i386
 dpkg --add-architecture i386
 apt update -y
 
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends  -o APT::Immediate-Configure=0  \
     autoconf automake libtool gcc-multilib g++-multilib g++ sqlite3 \
     python3-pip \
     make cmake ccache pkg-config tar zip \
