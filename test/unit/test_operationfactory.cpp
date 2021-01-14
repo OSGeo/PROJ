@@ -5883,9 +5883,8 @@ TEST(operation, compoundCRS_to_proj_string_with_non_metre_height) {
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     ctxt->setSpatialCriterion(
         CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
-    auto list =
-        CoordinateOperationFactory::create()->createOperations(
-            NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
     ASSERT_GT(list.size(), 1U);
     // What is important to check here is the vertical unit conversion
     EXPECT_EQ(
