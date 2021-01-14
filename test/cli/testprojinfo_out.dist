@@ -322,8 +322,8 @@ COORDINATEOPERATION["Ballpark geographic offset from NAD27 to NAD83",
 
 Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary --hide-ballpark
 Candidate operations found: 9
-DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.
 DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
+DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
 DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, United States (USA) - CONUS including EEZ -onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS.
 DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, United States (USA) - Alaska including EEZ.
 DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec.
@@ -336,61 +336,6 @@ Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects
 Candidate operations found: 10
 -------------------------------------
 Operation No. 1:
-
-DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.
-
-PROJ string:
-+proj=pipeline
-  +step +proj=axisswap +order=2,1
-  +step +proj=unitconvert +xy_in=deg +xy_out=rad
-  +step +proj=hgridshift +grids=ca_nrc_ntv1_can.tif
-  +step +proj=unitconvert +xy_in=rad +xy_out=deg
-  +step +proj=axisswap +order=2,1
-
-WKT2:2019 string:
-COORDINATEOPERATION["NAD27 to NAD83 (3)",
-    SOURCECRS[
-        GEOGCRS["NAD27",
-            DATUM["North American Datum 1927",
-                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-            ID["EPSG",4267]]],
-    TARGETCRS[
-        GEOGCRS["NAD83",
-            DATUM["North American Datum 1983",
-                ELLIPSOID["GRS 1980",6378137,298.257222101,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-            ID["EPSG",4269]]],
-    METHOD["HORIZONTAL_SHIFT_GTIFF"],
-    PARAMETERFILE["Latitude and longitude difference file","ca_nrc_ntv1_can.tif"],
-    OPERATIONACCURACY[2.0],
-    USAGE[
-        SCOPE["Historic record only - now superseded - see remarks."],
-        AREA["Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon."],
-        BBOX[40.04,-141.01,86.46,-47.74]],
-    ID["DERIVED_FROM(EPSG)",1312],
-    REMARK["Uses NTv1 method. Replaced in Quebec by code 1462 and elsewhere in 1997 by NTv2 (transformation code 1313). Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
-
--------------------------------------
-Operation No. 2:
 
 DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
 
@@ -443,6 +388,61 @@ COORDINATEOPERATION["NAD27 to NAD83 (4)",
         BBOX[40.04,-141.01,83.17,-47.74]],
     ID["DERIVED_FROM(EPSG)",1313],
     REMARK["Uses NTv2 data files. Replaces NTv1 (transformation code 1312) except in Quebec. Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and (code 4269) have longitudes positive east. May be used as tfm to WGS 84 - see code 1693."]]
+
+-------------------------------------
+Operation No. 2:
+
+DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
+
+PROJ string:
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=hgridshift +grids=ca_nrc_ntv1_can.tif
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
+
+WKT2:2019 string:
+COORDINATEOPERATION["NAD27 to NAD83 (3)",
+    SOURCECRS[
+        GEOGCRS["NAD27",
+            DATUM["North American Datum 1927",
+                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            ID["EPSG",4267]]],
+    TARGETCRS[
+        GEOGCRS["NAD83",
+            DATUM["North American Datum 1983",
+                ELLIPSOID["GRS 1980",6378137,298.257222101,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            ID["EPSG",4269]]],
+    METHOD["HORIZONTAL_SHIFT_GTIFF"],
+    PARAMETERFILE["Latitude and longitude difference file","ca_nrc_ntv1_can.tif"],
+    OPERATIONACCURACY[2.0],
+    USAGE[
+        SCOPE["Historic record only - now superseded - see remarks."],
+        AREA["Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast."],
+        BBOX[40.04,-141.01,83.17,-47.74]],
+    ID["DERIVED_FROM(EPSG)",1312],
+    REMARK["Uses NTv1 method. Replaced in Quebec by code 1462 and elsewhere in 1997 by NTv2 (transformation code 1313). Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 
 -------------------------------------
 Operation No. 3:

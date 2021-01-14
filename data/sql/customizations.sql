@@ -306,7 +306,7 @@ INSERT INTO "unit_of_measure" VALUES('PROJ','US_IN','US survey inch','length',0.
 INSERT INTO "unit_of_measure" VALUES('PROJ','US_YD','US survey yard','length',0.914401828803658,'us-yd',0);
 INSERT INTO "unit_of_measure" VALUES('PROJ','IND_CH','Indian chain','length',20.11669506,'ind-ch',0);
 
--- Deal with grid_transformation using EPSG:9635 'Geog3D to Geog2D+GravityRelatedHeight (US .gtx)' method
+-- Deal with grid_transformation using EPSG:1088 'Geog3D to Geog2D+GravityRelatedHeight (gtx)' method
 -- We derive records using the more classic 'Geographic3D to GravityRelatedHeight' method
 -- We could probably do that at runtime too, but more simple and efficient to create records
 
@@ -340,7 +340,7 @@ FROM grid_transformation gt
 JOIN compound_crs c ON gt.target_crs_code = c.code AND gt.target_crs_auth_name = c.auth_name
 JOIN geodetic_crs gcrs ON gt.source_crs_auth_name = gcrs.auth_name AND gt.source_crs_code = gcrs.code
 JOIN vertical_crs vcrs on vcrs.auth_name = c.vertical_crs_auth_name AND vcrs.code = c.vertical_crs_code
-WHERE method_auth_name = 'EPSG' AND method_code = '9635' AND gt.deprecated = 0;
+WHERE method_auth_name = 'EPSG' AND method_code = '1088' AND gt.deprecated = 0;
 
 INSERT INTO "usage"
 SELECT
@@ -355,4 +355,4 @@ SELECT
     u.scope_code
 FROM grid_transformation gt
 JOIN usage u ON u.object_auth_name = gt.auth_name AND u.object_code = gt.code AND u.object_table_name = 'grid_transformation'
-WHERE method_auth_name = 'EPSG' AND method_code = '9635' AND gt.deprecated = 0;
+WHERE method_auth_name = 'EPSG' AND method_code = '1088' AND gt.deprecated = 0;

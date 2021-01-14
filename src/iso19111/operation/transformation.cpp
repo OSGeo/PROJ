@@ -1992,6 +1992,7 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
         "1048", // Geographic3D to GravityRelatedHeight (Ausgeoid v2)
         "1050", // Geographic3D to GravityRelatedHeight (CI)
         "1059", // Geographic3D to GravityRelatedHeight (PNG)
+        "1088", // Geog3D to Geog2D+GravityRelatedHeight (gtx)
         "1060", // Geographic3D to GravityRelatedHeight (CGG2013)
         "1072", // Geographic3D to GravityRelatedHeight (OSGM15-Ire)
         "1073", // Geographic3D to GravityRelatedHeight (IGN2009)
