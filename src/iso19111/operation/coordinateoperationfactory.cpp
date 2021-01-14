@@ -3285,21 +3285,62 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
 
     ENTER_FUNCTION();
 
-    const auto useTransf = [&targetCRS, &context,
+    const auto useTransf = [&sourceCRS, &targetCRS, &context,
                             vertDst](const CoordinateOperationNNPtr &op) {
+
+        // If the source geographic CRS has a non-metre vertical unit, we need
+        // to create an intermediate and operation to do the vertical unit
+        // conversion from that vertical unit to the one of the geographic CRS
+        // of the source of the operation
+        const auto geogCRS =
+            dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
+        assert(geogCRS);
+        const auto &srcAxisList = geogCRS->coordinateSystem()->axisList();
+        CoordinateOperationPtr opPtr;
+        const auto opSourceCRSGeog =
+            dynamic_cast<const crs::GeographicCRS *>(op->sourceCRS().get());
+        // I assume opSourceCRSGeog should always be null in practice...
+        if (opSourceCRSGeog && srcAxisList.size() == 3 &&
+            srcAxisList[2]->unit().conversionToSI() != 1) {
+            const auto &authFactory = context.context->getAuthorityFactory();
+            const auto dbContext =
+                authFactory ? authFactory->databaseContext().as_nullable()
+                            : nullptr;
+            auto tmpCRSWithSrcZ =
+                opSourceCRSGeog->demoteTo2D(std::string(), dbContext)
+                    ->promoteTo3D(std::string(), dbContext, srcAxisList[2]);
+
+            std::vector<CoordinateOperationNNPtr> opsUnitConvert;
+            createOperationsGeogToGeog(
+                opsUnitConvert, tmpCRSWithSrcZ, NN_NO_CHECK(op->sourceCRS()),
+                context,
+                dynamic_cast<const crs::GeographicCRS *>(tmpCRSWithSrcZ.get()),
+                opSourceCRSGeog);
+            assert(opsUnitConvert.size() == 1);
+            opPtr = opsUnitConvert.front().as_nullable();
+        }
+
+        std::vector<CoordinateOperationNNPtr> ops;
+        if (opPtr)
+            ops.emplace_back(NN_NO_CHECK(opPtr));
+        ops.emplace_back(op);
+
         const auto targetOp =
             dynamic_cast<const crs::VerticalCRS *>(op->targetCRS().get());
         assert(targetOp);
         if (targetOp->_isEquivalentTo(
                 vertDst, util::IComparable::Criterion::EQUIVALENT)) {
-            return op;
+            auto ret = ConcatenatedOperation::createComputeMetadata(
+                ops, disallowEmptyIntersection);
+            return ret;
         }
         std::vector<CoordinateOperationNNPtr> tmp;
         createOperationsVertToVert(NN_NO_CHECK(op->targetCRS()), targetCRS,
                                    context, targetOp, vertDst, tmp);
         assert(!tmp.empty());
+        ops.emplace_back(tmp.front());
         auto ret = ConcatenatedOperation::createComputeMetadata(
-            {op, tmp.front()}, disallowEmptyIntersection);
+            ops, disallowEmptyIntersection);
         return ret;
     };
 
@@ -3331,10 +3372,16 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
         };
 
         const auto &axis = vertDst->coordinateSystem()->axisList()[0];
+        const auto &authFactory = context.context->getAuthorityFactory();
+        const auto dbContext =
+            authFactory ? authFactory->databaseContext().as_nullable()
+                        : nullptr;
+
         const auto geogSrcCRS =
             dynamic_cast<crs::GeographicCRS *>(model->interpolationCRS().get())
                 ? NN_NO_CHECK(model->interpolationCRS())
-                : sourceCRS;
+                : sourceCRS->demoteTo2D(std::string(), dbContext)
+                      ->promoteTo3D(std::string(), dbContext);
         const auto vertCRSMetre =
             axis->unit() == common::UnitOfMeasure::METRE &&
                     axis->direction() == cs::AxisDirection::UP
@@ -3356,7 +3403,6 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
         std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
         const auto &modelAccuracies = model->coordinateOperationAccuracies();
         if (modelAccuracies.empty()) {
-            const auto &authFactory = context.context->getAuthorityFactory();
             if (authFactory) {
                 const auto transformationsForGrid =
                     io::DatabaseContext::getTransformationsForGridName(
