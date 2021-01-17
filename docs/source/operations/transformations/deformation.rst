@@ -167,7 +167,7 @@ represented as a grid of velocities in three dimensions. Coordinate corrections 
 applied in cartesian space. For a given coordinate, :math:`(X, Y, Z)`, velocities
 :math:`(V_X, V_Y, V_Z)` can be interpolated from the gridded model. The time span
 between :math:`t_{obs}` and :math:`t_c` determine the magnitude of the coordinate
-correcton as seen in eq. :eq:`apply_velocity` below.
+correction as seen in eq. :eq:`apply_velocity` below.
 
 .. math::
     :label: apply_velocity

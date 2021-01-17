@@ -21,7 +21,7 @@ Convert geodetic coordinates to cartesian coordinates (in the forward path).
 This conversion converts geodetic coordinate values (longitude, latitude,
 elevation above ellipsoid) to their geocentric (X, Y, Z) representation, where
 the first axis (X) points from the Earth centre to the point of longitude=0,
-latitude=0, the second axis (Y) points from the Earth centrer to the point of
+latitude=0, the second axis (Y) points from the Earth centre to the point of
 longitude=90, latitude=0 and the third axis (Z) points to the North pole.
 
 Usage

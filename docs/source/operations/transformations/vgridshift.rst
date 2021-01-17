@@ -126,7 +126,7 @@ Optional
         Z_{target} = Z_{source} + multiplier \times gridvalue
 
     The multiplier can be used to control whether the gridvalue should be added
-    or sustracted, and if unit conversion must be done (the multiplied gridvalue
+    or subtracted, and if unit conversion must be done (the multiplied gridvalue
     must be expressed in metre).
 
     Note that the default is `-1.0` for historical reasons.

@@ -824,7 +824,7 @@ Errors in class PROJ_ERR_INVALID_OP
 
 .. c:macro:: PROJ_ERR_INVALID_OP
 
-    Class of error codes typically related to coordinate operation initalization,
+    Class of error codes typically related to coordinate operation initialization,
     typically when creating a PJ* object from a PROJ string.
 
     .. note:: some of them can also be emitted during coordinate transformation,
