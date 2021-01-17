@@ -7,7 +7,7 @@ Affine transformation
 .. versionadded:: 6.0.0
 
 The affine transformation applies translation and scaling/rotation terms on the
-x,y,z coordinates, and translation and scaling on the temporal cordinate.
+x,y,z coordinates, and translation and scaling on the temporal coordinate.
 
 +---------------------+----------------------------------------------------------+
 | **Alias**           | affine                                                   |

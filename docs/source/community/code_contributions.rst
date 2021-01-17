@@ -60,7 +60,7 @@ Coding style
 ^^^^^^^^^^^^
 
 The parts of the code base that has started its life as C++ is formatted with
-``clang-format`` using the sript ``scripts/reformat_cpp.sh``. This is mostly
+``clang-format`` using the script ``scripts/reformat_cpp.sh``. This is mostly
 contained to the code in `src/iso19111/` but a few other `.cpp`-files are
 covered as well.
 

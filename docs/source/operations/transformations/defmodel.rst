@@ -56,7 +56,7 @@ Required
 Example
 -------------------------------------------------------------------------------
 
-Transformating a point with the LINZ NZGD2000 deformation model:
+Transforming a point with the LINZ NZGD2000 deformation model:
 
 ::
 
