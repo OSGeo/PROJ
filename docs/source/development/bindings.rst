@@ -30,8 +30,8 @@ Go bindings and idiomatic wrapper for PROJ
 
 Julia
 =====
-`Proj4.jl <https://github.com/JuliaGeo/Proj4.jl>`_"
-Low-level bindings and a Julian API over PROJ.
+`Proj4.jl <https://github.com/JuliaGeo/Proj4.jl>`_:
+Julia bindings and idiomatic wrapper for PROJ.
 
 TCL
 ========

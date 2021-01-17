@@ -17,7 +17,7 @@ Horner polynomial evaluation
 +-----------------+-------------------------------------------------------------------+
 
 The Horner polynomial evaluation scheme is used for transformations between reference
-frames where one or both are inhomogenous or internally distorted. This will typically
+frames where one or both are inhomogeneous or internally distorted. This will typically
 be reference frames created before the introduction of space geodetic techniques such
 as GPS.
 

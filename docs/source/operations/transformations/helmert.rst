@@ -349,7 +349,7 @@ For :math:`\mathbf{R}`, this yields:
      \end{bmatrix}
 
 
-Using the small angle approxition the rotation matrix can be simplified to
+Using the small angle approximation the rotation matrix can be simplified to
 
 .. math::
     :label: rot_approx

@@ -43,7 +43,7 @@ Required
 Example
 -------------------------------------------------------------------------------
 
-Transformating a point with the Finland EPSG:2393 ("KKJ / Finland Uniform
+Transforming a point with the Finland EPSG:2393 ("KKJ / Finland Uniform
 Coordinate System") projected CRS to EPSG:3067 ("ETRS89 / TM35FIN(E,N)")
 
 ::
