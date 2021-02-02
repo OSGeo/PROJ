@@ -252,12 +252,6 @@ set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}"
 ################################################################################
 include(CTest)
 
-# Support older option, to be removed by PROJ 8.0
-if(DEFINED PROJ_TESTS)
-  message(DEPRECATION "PROJ_TESTS has been replaced with BUILD_TESTING")
-  set(BUILD_TESTING ${PROJ_TESTS})
-endif()
-
 if(BUILD_TESTING)
   include(ProjTest)
 else()
