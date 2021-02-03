@@ -409,7 +409,14 @@ endif()
 if(CURL_ENABLED)
   target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DCURL_ENABLED)
   target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${CURL_INCLUDE_DIR})
-  target_link_libraries(${PROJ_CORE_TARGET} PRIVATE ${CURL_LIBRARY})
+  target_link_libraries(${PROJ_CORE_TARGET}
+    PRIVATE
+      ${CURL_LIBRARY}
+      $<$<CXX_COMPILER_ID:MSVC>:ws2_32>
+      $<$<CXX_COMPILER_ID:MSVC>:wldap32>
+      $<$<CXX_COMPILER_ID:MSVC>:advapi32>
+      $<$<CXX_COMPILER_ID:MSVC>:crypt32>
+      $<$<CXX_COMPILER_ID:MSVC>:normaliz>)
 endif()
 
 if(MSVC AND BUILD_SHARED_LIBS)
