@@ -4,13 +4,6 @@ message(STATUS "Configuring proj library:")
 ### SWITCH BETWEEN STATIC OR SHARED LIBRARY###
 ##############################################
 
-# Support older option, to be removed by PROJ 8.0
-if(DEFINED BUILD_LIBPROJ_SHARED)
-  message(DEPRECATION
-    "BUILD_LIBPROJ_SHARED has been replaced with BUILD_SHARED_LIBS")
-  set(BUILD_SHARED_LIBS ${BUILD_LIBPROJ_SHARED})
-endif()
-
 # default config is shared, except static on Windows
 set(BUILD_SHARED_LIBS_DEFAULT ON)
 if(WIN32)
@@ -32,12 +25,6 @@ elseif(USE_THREAD AND NOT Threads_FOUND)
   message(FATAL_ERROR
     "No thread library found and thread/mutex support is "
     "required by USE_THREAD option")
-endif()
-
-# Support older option, to be removed by PROJ 8.0
-if(DEFINED ENABLE_LTO)
-  message(DEPRECATION "ENABLE_LTO has been replaced with ENABLE_IPO")
-  set(ENABLE_IPO ${ENABLE_LTO})
 endif()
 
 option(ENABLE_IPO
