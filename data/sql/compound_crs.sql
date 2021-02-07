@@ -252,7 +252,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','6700','Tokyo + JSLD72 height',NULL,'EP
 INSERT INTO "usage" VALUES('EPSG','4917','compound_crs','EPSG','6700','EPSG','4168','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','6871','WGS 84 / Pseudo-Mercator +  EGM2008 geoid height',NULL,'EPSG','3857','EPSG','3855',1);
 INSERT INTO "usage" VALUES('EPSG','5023','compound_crs','EPSG','6871','EPSG','1262','EPSG','1229');
-INSERT INTO "compound_crs" VALUES('EPSG','6893','WGS 84 / World Mercator +  EGM2008 height',NULL,'EPSG','3395','EPSG','3855',0);
+INSERT INTO "compound_crs" VALUES('EPSG','6893','WGS 84 / World Mercator + EGM2008 height',NULL,'EPSG','3395','EPSG','3855',0);
 INSERT INTO "usage" VALUES('EPSG','5036','compound_crs','EPSG','6893','EPSG','1262','EPSG','1229');
 INSERT INTO "compound_crs" VALUES('EPSG','6917','SVY21 + SHD height',NULL,'EPSG','4757','EPSG','6916',0);
 INSERT INTO "usage" VALUES('EPSG','5040','compound_crs','EPSG','6917','EPSG','1210','EPSG','1144');
@@ -308,9 +308,9 @@ INSERT INTO "compound_crs" VALUES('EPSG','7423','ETRS89 + EVRF2007 height',NULL,
 INSERT INTO "usage" VALUES('EPSG','5288','compound_crs','EPSG','7423','EPSG','3594','EPSG','1161');
 INSERT INTO "compound_crs" VALUES('EPSG','7954','Astro DOS 71 / UTM zone 30S + Jamestown 1971 height',NULL,'EPSG','7878','EPSG','7888',0);
 INSERT INTO "usage" VALUES('EPSG','5565','compound_crs','EPSG','7954','EPSG','3183','EPSG','1153');
-INSERT INTO "compound_crs" VALUES('EPSG','7955','St. Helena Tritan / UTM zone 30S +  Tritan 2011 height',NULL,'EPSG','7883','EPSG','7889',0);
+INSERT INTO "compound_crs" VALUES('EPSG','7955','St. Helena Tritan / UTM zone 30S + Tritan 2011 height',NULL,'EPSG','7883','EPSG','7889',0);
 INSERT INTO "usage" VALUES('EPSG','5566','compound_crs','EPSG','7955','EPSG','3183','EPSG','1146');
-INSERT INTO "compound_crs" VALUES('EPSG','7956','SHMG2015 +  SHVD2015 height',NULL,'EPSG','7887','EPSG','7890',0);
+INSERT INTO "compound_crs" VALUES('EPSG','7956','SHMG2015 + SHVD2015 height',NULL,'EPSG','7887','EPSG','7890',0);
 INSERT INTO "usage" VALUES('EPSG','5567','compound_crs','EPSG','7956','EPSG','3183','EPSG','1153');
 INSERT INTO "compound_crs" VALUES('EPSG','8349','GR96 + GVR2000 height',NULL,'EPSG','4747','EPSG','8266',0);
 INSERT INTO "usage" VALUES('EPSG','5798','compound_crs','EPSG','8349','EPSG','4461','EPSG','1153');

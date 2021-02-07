@@ -2197,8 +2197,9 @@ INSERT INTO "projected_crs" VALUES('EPSG','3104','Mauritania 1999 / UTM zone 29N
 INSERT INTO "usage" VALUES('EPSG','2122','projected_crs','EPSG','3104','EPSG','2970','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','3105','Mauritania 1999 / UTM zone 30N',NULL,'EPSG','4400','EPSG','4681','EPSG','16030',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','2123','projected_crs','EPSG','3105','EPSG','2969','EPSG','1142');
-INSERT INTO "projected_crs" VALUES('EPSG','3106','Gulshan 303 / Bangladesh Transverse Mercator',NULL,'EPSG','4400','EPSG','4682','EPSG','16490',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','2124','projected_crs','EPSG','3106','EPSG','1041','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','3106','Gulshan 303 / TM 90 NE',NULL,'EPSG','4400','EPSG','4682','EPSG','16490',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','2124','projected_crs','EPSG','3106','EPSG','3217','EPSG','1142');
+INSERT INTO "usage" VALUES('EPSG','14846','projected_crs','EPSG','3106','EPSG','1041','EPSG','1136');
 INSERT INTO "projected_crs" VALUES('EPSG','3107','GDA94 / SA Lambert',NULL,'EPSG','4400','EPSG','4283','EPSG','17359',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','2125','projected_crs','EPSG','3107','EPSG','2986','EPSG','1135');
 INSERT INTO "projected_crs" VALUES('EPSG','3108','ETRS89 / Guernsey Grid',NULL,'EPSG','4400','EPSG','4258','EPSG','19998',NULL,0);
@@ -4732,10 +4733,6 @@ INSERT INTO "projected_crs" VALUES('EPSG','5685','DB_REF / 3-degree Gauss-Kruger
 INSERT INTO "usage" VALUES('EPSG','4140','projected_crs','EPSG','5685','EPSG','3998','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','5700','NZGD2000 / UTM zone 1S',NULL,'EPSG','4400','EPSG','4167','EPSG','16101',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','4143','projected_crs','EPSG','5700','EPSG','3992','EPSG','1153');
-INSERT INTO "projected_crs" VALUES('EPSG','5819','EPSG topocentric example A',NULL,'EPSG','4461','EPSG','4979','EPSG','15594',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','4262','projected_crs','EPSG','5819','EPSG','4393','EPSG','1030');
-INSERT INTO "projected_crs" VALUES('EPSG','5820','EPSG topocentric example B',NULL,'EPSG','4461','EPSG','4978','EPSG','15595',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','4263','projected_crs','EPSG','5820','EPSG','4393','EPSG','1030');
 INSERT INTO "projected_crs" VALUES('EPSG','5825','AGD66 / ACT Standard Grid',NULL,'EPSG','4400','EPSG','4202','EPSG','5824',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','4265','projected_crs','EPSG','5825','EPSG','2283','EPSG','1054');
 INSERT INTO "projected_crs" VALUES('EPSG','5836','Yemen NGN96 / UTM zone 37N',NULL,'EPSG','4400','EPSG','4163','EPSG','16037',NULL,0);
@@ -7306,6 +7303,10 @@ INSERT INTO "projected_crs" VALUES('EPSG','9498','POSGAR 2007 / CABA 2019',NULL,
 INSERT INTO "usage" VALUES('EPSG','14513','projected_crs','EPSG','9498','EPSG','4610','EPSG','1056');
 INSERT INTO "projected_crs" VALUES('EPSG','9674','NAD83 / USFS R6 Albers',NULL,'EPSG','4400','EPSG','4269','EPSG','9673',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14787','projected_crs','EPSG','9674','EPSG','2381','EPSG','1165');
+INSERT INTO "projected_crs" VALUES('EPSG','9678','Gulshan 303 / Bangladesh Transverse Mercator',NULL,'EPSG','4400','EPSG','4682','EPSG','9677',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14849','projected_crs','EPSG','9678','EPSG','3217','EPSG','1274');
+INSERT INTO "projected_crs" VALUES('EPSG','9680','WGS 84 / TM 90 NE',NULL,'EPSG','4400','EPSG','4326','EPSG','16490',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14880','projected_crs','EPSG','9680','EPSG','1041','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','20004','Pulkovo 1995 / Gauss-Kruger zone 4',NULL,'EPSG','4530','EPSG','4200','EPSG','16204',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6177','projected_crs','EPSG','20004','EPSG','1763','EPSG','1211');
 INSERT INTO "projected_crs" VALUES('EPSG','20005','Pulkovo 1995 / Gauss-Kruger zone 5',NULL,'EPSG','4530','EPSG','4200','EPSG','16205',NULL,0);

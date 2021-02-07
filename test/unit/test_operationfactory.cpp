@@ -346,12 +346,12 @@ TEST(operation, geogCRS_to_geogCRS_context_ntv1_ntv2_ctable2) {
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
-              "+grids=ca_nrc_ntv1_can.tif +step +proj=unitconvert +xy_in=rad "
+              "+grids=ca_nrc_ntv2_0.tif +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift "
-              "+grids=ca_nrc_ntv2_0.tif +step +proj=unitconvert +xy_in=rad "
+              "+grids=ca_nrc_ntv1_can.tif +step +proj=unitconvert +xy_in=rad "
               "+xy_out=deg +step +proj=axisswap +order=2,1");
     EXPECT_EQ(list[2]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
@@ -730,8 +730,8 @@ TEST(operation, vertCRS_to_geogCRS_context) {
     {
         // Test actually the database where we derive records using the more
         // classic 'Geographic3D to GravityRelatedHeight' method from
-        // records using EPSG:9635
-        //'Geog3D to Geog2D+GravityRelatedHeight (US .gtx)' method
+        // records using EPSG:1088
+        //'Geog3D to Geog2D+GravityRelatedHeight (gtx)' method
         auto ctxt = CoordinateOperationContext::create(
             AuthorityFactory::create(DatabaseContext::create(), std::string()),
             nullptr, 0.0);

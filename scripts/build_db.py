@@ -91,8 +91,26 @@ def fill_ellipsoid(proj_db_cursor):
 
 
 def fill_extent(proj_db_cursor):
+    #proj_db_cursor.execute(
+    #    "INSERT INTO extent SELECT ?, extent_code, extent_name, extent_description, bbox_south_bound_lat, bbox_north_bound_lat, bbox_west_bound_lon, bbox_east_bound_lon, deprecatedFROM epsg.epsg_extent", (EPSG_AUTHORITY,))
     proj_db_cursor.execute(
-        "INSERT INTO extent SELECT ?, extent_code, extent_name, extent_description, bbox_south_bound_lat, bbox_north_bound_lat, bbox_west_bound_lon, bbox_east_bound_lon, deprecated FROM epsg.epsg_extent", (EPSG_AUTHORITY,))
+        "SELECT extent_code, extent_name, extent_description, bbox_south_bound_lat, bbox_north_bound_lat, bbox_west_bound_lon, bbox_east_bound_lon, deprecated FROM epsg.epsg_extent")
+    res = proj_db_cursor.fetchall()
+    for (extent_code, extent_name, extent_description, bbox_south_bound_lat, bbox_north_bound_lat, bbox_west_bound_lon, bbox_east_bound_lon, deprecated) in res:
+        try:
+            # Some new records have longitudes outside [-180,180]
+            if bbox_west_bound_lon and bbox_west_bound_lon < -180:
+                # print( extent_code, extent_name, extent_description, bbox_south_bound_lat, bbox_north_bound_lat, bbox_west_bound_lon, bbox_east_bound_lon, deprecated)
+                bbox_west_bound_lon += 360
+            if bbox_east_bound_lon and bbox_east_bound_lon > 180:
+                # print( extent_code, extent_name, extent_description, bbox_south_bound_lat, bbox_north_bound_lat, bbox_west_bound_lon, bbox_east_bound_lon, deprecated)
+                bbox_east_bound_lon -= 360
+            proj_db_cursor.execute(
+                "INSERT INTO extent VALUES (?,?,?,?,?,?,?,?,?)", (EPSG_AUTHORITY, extent_code, extent_name, extent_description, bbox_south_bound_lat, bbox_north_bound_lat, bbox_west_bound_lon, bbox_east_bound_lon, deprecated))
+        except sqlite3.IntegrityError as e:
+            print(e)
+            print(extent_code, extent_name, extent_description, bbox_south_bound_lat, bbox_north_bound_lat, bbox_west_bound_lon, bbox_east_bound_lon, deprecated)
+            raise
 
 
 def fill_scope(proj_db_cursor):
@@ -258,7 +276,8 @@ BEGIN
     # the source/target CRS names from the transformation name.
     # Method EPSG:9666 'P6 I=J+90 seismic bin grid coordinate operation' requires more than 7 parameters. Not supported by PROJ for now
     # Idem for EPSG:1049 'P6 I=J-90 seismic bin grid coordinate operation'
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH' AND (coord_op_method_code NOT IN (1068, 1069, 9666, 1049) OR coord_op_code IN (7812,7813))")
+    # EPSG:1102 is "Lambert Conic Conformal (1SP variant B)" and is only used at time of writing for specialized CRS EPSG:9548, "Lyon Turin Ferroviaire 2004 (C)"
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_type = 'conversion' AND coord_op_name NOT LIKE '%to DMSH' AND (coord_op_method_code NOT IN (1068, 1069, 9666, 1049, 1102) OR coord_op_code IN (7812,7813))")
     for (code, name, method_code, method_name, deprecated, remarks) in proj_db_cursor.fetchall():
         expected_order = 1
         max_n_params = 7
@@ -276,7 +295,7 @@ BEGIN
             if order == max_n_params + 1 and method_code in (1042, 1043):
                 break
             assert order <= max_n_params, (method_code, method_name, order)
-            assert order == expected_order
+            assert order == expected_order, (code, name, method_code, method_name)
             param_auth_name[order - 1] = EPSG_AUTHORITY
             param_code[order - 1] = parameter_code
             param_name[order - 1] = parameter_name
@@ -341,10 +360,18 @@ def fill_projected_crs(proj_db_cursor):
     proj_db_cursor.execute("SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, ?, coord_sys_code, ?, base_crs_code, ?, projection_conv_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('projected')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
     for row in proj_db_cursor.fetchall():
         (auth_name, code, name, description, coordinate_system_auth_name, coordinate_system_code, geodetic_crs_auth_name, geodetic_crs_code, conversion_auth_name, conversion_code, deprecated) = row
+        if code == 9549: # "LTF2004(C)"
+            print('Skipping EPSG:9549 LTF2004(C) as we do not handle yet projection method EPSG:1102 is "Lambert Conic Conformal (1SP variant B)"')
+            continue
         proj_db_cursor.execute("SELECT 1 FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_code = ? AND coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric')", (geodetic_crs_code,))
         if proj_db_cursor.fetchone():
             #proj_db_cursor.execute("INSERT INTO crs VALUES (?, ?, 'projected')", (EPSG_AUTHORITY, code))
-            proj_db_cursor.execute("INSERT INTO projected_crs VALUES (?,?,?,?,?,?,?,?,?,?,NULL,?)", row)
+            try:
+                proj_db_cursor.execute("INSERT INTO projected_crs VALUES (?,?,?,?,?,?,?,?,?,?,NULL,?)", row)
+            except sqlite3.IntegrityError as e:
+                print(e)
+                print(row)
+                raise
 
 def fill_compound_crs(proj_db_cursor):
     #proj_db_cursor.execute(
@@ -478,9 +505,17 @@ def fill_grid_transformation(proj_db_cursor):
         param_uom_code = [None for i in range(max_n_params)]
 
         iterator = proj_db_cursor.execute("SELECT sort_order, cop.parameter_code, parameter_name, parameter_value, param_value_file_ref, uom_code from epsg_coordoperationparam cop LEFT JOIN epsg_coordoperationparamvalue copv LEFT JOIN epsg_coordoperationparamusage copu ON cop.parameter_code = copv.parameter_code AND copu.parameter_code = copv.parameter_code WHERE copu.coord_op_method_code = copv.coord_op_method_code AND coord_op_code = ? AND copv.coord_op_method_code = ? ORDER BY sort_order", (code, method_code))
+        first = True
+        order_inc = 0
         for (order, parameter_code, parameter_name, parameter_value, param_value_file_ref, uom_code) in iterator:
+            if first and order == 0:
+                # Some new records have sort_order starting at 0 rather than 1
+                # print(code, name, method_code, method_name, param_code, param_name, order)
+                order_inc = 1
+            order += order_inc
+            first = False
             assert order <= max_n_params
-            assert order == expected_order
+            assert order == expected_order, (code, name, method_code, method_name, param_code, param_name, order)
             if parameter_value is not None:
                 assert param_value_file_ref is None or len(param_value_file_ref) == 0, (order, parameter_code, parameter_name, parameter_value, param_value_file_ref, uom_code)
             if param_value_file_ref is not None and len(param_value_file_ref) != 0:
@@ -493,7 +528,7 @@ def fill_grid_transformation(proj_db_cursor):
             expected_order += 1
         n_params = expected_order - 1
 
-        assert param_code[0] in (1050, 8656, 8657, 8666, 8732, 8727), (code, param_code[0])
+        assert param_code[0] in (1048, 1050, 8656, 8657, 8666, 8732, 8727), (code, param_code[0])
 
         grid2_param_auth_name = None
         grid2_param_code = None
@@ -520,7 +555,7 @@ def fill_grid_transformation(proj_db_cursor):
         # 1083: Geog3D to Geog2D+Vertical (AUSGeoid v2)
         # 1084: Vertical Offset by Grid Interpolation (gtx)
         # 1085: Vertical Offset by Grid Interpolation (asc)
-        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085) and n_params == 2:
+        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088) and n_params == 2:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
