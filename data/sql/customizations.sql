@@ -18,7 +18,7 @@ INSERT INTO grid_alternatives(original_grid_name,
            0,
            NULL,
            'https://cdn.proj.org/au_ga_AUSGeoid98.tif', 1, 1, NULL FROM grid_transformation WHERE
-                grid_name LIKE '%DAT.htm' AND name LIKE 'GDA94 to AHD height%';
+                grid_name LIKE '%DAT.htm' AND name LIKE 'GDA94 to AHD %height%';
 
 -- OGC CRS84, CRS27 and CRS83 longitude/latitude ordered CRS
 
