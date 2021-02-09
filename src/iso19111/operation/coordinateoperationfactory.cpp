@@ -3196,26 +3196,6 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
                    CoordinateOperationContext::IntermediateCRSUse::NEVER) {
 
         bool tryWithGeodeticDatumIntermediate = res.empty();
-        if (!tryWithGeodeticDatumIntermediate) {
-            // This is in particular for the GDA94 to WGS 84 (G1762) case
-            // As we have a WGS 84 -> WGS 84 (G1762) null-transformation in the
-            // PROJ authority, previous steps might have use that WGS 84
-            // intermediate directly. They might also have generated a path
-            // through ITRF2008, as there is a path
-            // GDA94 (geoc.) -> ITRF2008 (geoc.) -> WGS84 (G1762) (geoc.)
-            // But there's a better path using
-            // GDA94 (geog.) --> GDA2020 (geog.) and
-            // GDA2020 (geoc.) -> WGS84 (G1762) (geoc.) that requires to
-            // explore intermediates through their datum, and not directly
-            // trough the CRS code.
-            // Do that only if the number of results we got through other
-            // algorithms is small, or if all results we have go through an
-            // operation in the PROJ authority.
-            constexpr size_t ARBITRARY_SMALL_NUMBER = 5U;
-            tryWithGeodeticDatumIntermediate =
-                res.size() < ARBITRARY_SMALL_NUMBER ||
-                hasResultSetOnlyResultsWithPROJStep(res);
-        }
         if (tryWithGeodeticDatumIntermediate) {
             auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
                 sourceCRS, targetCRS, context, true);
