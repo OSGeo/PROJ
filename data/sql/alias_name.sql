@@ -612,10 +612,14 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1295','LTF2004','EPSG')
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5215','EVRF2007','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1274','EVRF2019','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1287','EVRF2019mean','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1298','EH2000','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1299','LAS07','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1300','BGS2005','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1302','Pago Pago 2020','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1303','NVD 1992','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1301','CD Norway','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1199','Greenland  Vertical Reference 2000','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1304','REDGEOMIN','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7191,6 +7195,8 @@ INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','AHD71 height','EPS
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','AHD-TAS83 height','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','339','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5711','AHD - NOHt','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9502','CIGD11 + CBVD61 height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9504','CIGD11 + LCVD61 height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','29873','Timbalai / Borneo (m)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','29873','BT68 / RSO Borneo (m)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','29873','Timbalai 1968 / RSO Borneo (m)','EPSG');
@@ -7208,6 +7214,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6875','RDN2008 / Fuso It
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6875','ETRF2000 epoca 2008.0 fuso Italia','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6876','RDN2008 / Fuso 12 (N-E)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','6876','ETRF2000 epoca 2008.0 fuso 12','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9503','CIGD11 + GCVD54 height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9498','CABA-P07','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','9389','EVRF2019_AMST / NH','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','9390','EVRF2019mean_AMST / NH','EPSG');
@@ -7221,3 +7228,10 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9680','WGS 84 / BUTM 201
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6893','WGS 84 / World Mercator +  EGM2008 height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','7955','St. Helena Tritan / UTM zone 30S +  Tritan 2011 height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','7956','SHMG2015 +  SHVD2015 height','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8401','748','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8401','ETRF2014 - XYZ','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8403','747','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','8403','ETRF2014 - LatLonEHt','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9069','746','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9069','ETRF2014- LatLon','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','9672','CD Norway','EPSG');

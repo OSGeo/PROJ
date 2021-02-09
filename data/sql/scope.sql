@@ -246,6 +246,7 @@ INSERT INTO "scope" VALUES('EPSG','1266','Engineering survey, topographic mappin
 INSERT INTO "scope" VALUES('EPSG','1267','Location-based services, Intelligent Transport Services, navigation, positioning.',0);
 INSERT INTO "scope" VALUES('EPSG','1268','Geodesy, location based services, intelligent transport services.',0);
 INSERT INTO "scope" VALUES('EPSG','1269','Intermediate CRS in transformation to and from projected CRS.',0);
+INSERT INTO "scope" VALUES('EPSG','1270','Reversible geoid model transformation.',0);
 INSERT INTO "scope" VALUES('EPSG','1271','Engineering survey and mapping for the Trans-Europe Lyon-Turin (TELT) railway project.',0);
 INSERT INTO "scope" VALUES('EPSG','1273','Transformation of coordinates at 0.03m level of accuracy.',0);
 INSERT INTO "scope" VALUES('EPSG','1274','Spatial referencing including water resource management.',0);

@@ -326,6 +326,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1293','Sistem Referensi Geospasial I
 INSERT INTO "usage" VALUES('EPSG','14148','geodetic_datum','EPSG','1293','EPSG','1122','EPSG','1266');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1295','Lyon Turin Ferroviaire 2004',NULL,'EPSG','7019','EPSG','8901','2005-07-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14538','geodetic_datum','EPSG','1295','EPSG','4613','EPSG','1271');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1304','Red Geodesica Para Mineria en Chile',NULL,'EPSG','7019','EPSG','8901','2019-01-01',2019.0,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','15025','geodetic_datum','EPSG','1304','EPSG','1066','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,0);

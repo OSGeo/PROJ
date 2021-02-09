@@ -7307,6 +7307,12 @@ INSERT INTO "projected_crs" VALUES('EPSG','9678','Gulshan 303 / Bangladesh Trans
 INSERT INTO "usage" VALUES('EPSG','14849','projected_crs','EPSG','9678','EPSG','3217','EPSG','1274');
 INSERT INTO "projected_crs" VALUES('EPSG','9680','WGS 84 / TM 90 NE',NULL,'EPSG','4400','EPSG','4326','EPSG','16490',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14880','projected_crs','EPSG','9680','EPSG','1041','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','9697','REDGEOMIN / UTM zone 12S',NULL,'EPSG','4400','EPSG','9696','EPSG','16112',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','15026','projected_crs','EPSG','9697','EPSG','3188','EPSG','1181');
+INSERT INTO "projected_crs" VALUES('EPSG','9698','REDGEOMIN / UTM zone 18S',NULL,'EPSG','4400','EPSG','9696','EPSG','16118',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14943','projected_crs','EPSG','9698','EPSG','3829','EPSG','1181');
+INSERT INTO "projected_crs" VALUES('EPSG','9699','REDGEOMIN / UTM zone 19S',NULL,'EPSG','4400','EPSG','9696','EPSG','16119',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14945','projected_crs','EPSG','9699','EPSG','3811','EPSG','1181');
 INSERT INTO "projected_crs" VALUES('EPSG','20004','Pulkovo 1995 / Gauss-Kruger zone 4',NULL,'EPSG','4530','EPSG','4200','EPSG','16204',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6177','projected_crs','EPSG','20004','EPSG','1763','EPSG','1211');
 INSERT INTO "projected_crs" VALUES('EPSG','20005','Pulkovo 1995 / Gauss-Kruger zone 5',NULL,'EPSG','4530','EPSG','4200','EPSG','16205',NULL,0);
