@@ -75,14 +75,14 @@ FOR EACH ROW BEGIN
                       AND g1.source_crs_code = g2.source_crs_code
                       AND g1.target_crs_auth_name = g2.target_crs_auth_name
                       AND g1.target_crs_code = g2.target_crs_code
-                      WHERE g1.auth_name = 'PROJ' AND g2.auth_name = 'EPSG')
+                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG')
         OR EXISTS (SELECT 1 FROM grid_transformation g1
                       JOIN grid_transformation g2
                       ON g1.source_crs_auth_name = g2.target_crs_auth_name
                       AND g1.source_crs_code = g2.target_crs_code
                       AND g1.target_crs_auth_name = g1.source_crs_auth_name
                       AND g1.target_crs_code = g1.source_crs_code
-                      WHERE g1.auth_name = 'PROJ' AND g2.auth_name = 'EPSG');
+                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG');
 
     SELECT RAISE(ABORT, 'Arg! there is now a EPSG:102100 object. Hack in createFromUserInput() will no longer work')
         WHERE EXISTS(SELECT 1 FROM crs_view WHERE auth_name = 'EPSG' AND code = '102100');
@@ -183,6 +183,15 @@ FOR EACH ROW BEGIN
     -- check presence of au_ga_AUSGeoid98.tif
     SELECT RAISE(ABORT, 'missing au_ga_AUSGeoid98.tif')
         WHERE NOT EXISTS(SELECT 1 FROM grid_alternatives WHERE proj_grid_name = 'au_ga_AUSGeoid98.tif');
+
+    -- clause because of buggy entries in EPSG 10.013
+    SELECT RAISE(ABORT, 'invalid Geog3D to Geog2D + GravityRelatedHeight (foo) entries: target CRS is not a compound CRS')
+        WHERE EXISTS (SELECT 1 FROM grid_transformation gt WHERE
+            method_auth_name = 'EPSG' AND method_code IN ('1088', '1089', '1090', '1091', '1092', '1093', '1094', '1095', '1096', '1097', '1098', '1103') AND
+            gt.deprecated = 0 AND
+            NOT EXISTS (SELECT 1 FROM compound_crs c WHERE gt.target_crs_code = c.code AND gt.target_crs_auth_name = c.auth_name) AND
+            NOT (gt.auth_name = 'EPSG' AND gt.code IN ('9610', '9613', '9619', '9633'))
+        );
 
 END;
 INSERT INTO dummy DEFAULT VALUES;

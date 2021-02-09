@@ -528,6 +528,59 @@ def fill_grid_transformation(proj_db_cursor):
             expected_order += 1
         n_params = expected_order - 1
 
+        # TODO: remove below hacks once EPSG has fixed its blunder
+        if param_code[0] is None and code == 9593:
+            print('Bogus ETRS89 to ETRS89 + NN2000 height (1) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9594:
+            print('Bogus ETRS89 to ETRS89 + NN54 height (1) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9595:
+            print('Bogus NAD83(2011) to NAD83(2011) + NAVD88 height (3) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9596:
+            print('Bogus NAD83(2011) to NAD83(2011) + NAVD88 height (2) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9597:
+            print('Bogus ETRS89 to ETRS89 + NAP height (2) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9622:
+            print('Bogus NAD83(2011) to NAD83(2011) + PRVD02 height (2) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9623:
+            print('Bogus NAD83(2011) to NAD83(2011) + VIVD09 height (2) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9624:
+            print('Bogus NAD83(MA11) to NAD83(MA11) + GUVD04 height (1) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9625:
+            print('Bogus NAD83(MA11) to NAD83(MA11) + NMVD03 height (1) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9626:
+            print('Bogus NAD83(PA11) to NAD83(PA11) + ASVD02 height (1) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9627:
+            print('Bogus NZGD2000 to NZGD2000 + NZVD2009 height (2) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9628:
+            print('Bogus NZGD2000 to NZGD2000 + NZVD2016 height (2) transformation in EPSG 10.013. Missing grid')
+            continue
+
+        if param_code[0] is None and code == 9629:
+            print('Bogus SRGI2013 to SRGI2013 + INAGeoid2020 height (1) transformation in EPSG 10.013. Missing grid')
+            continue
+
         assert param_code[0] in (1048, 1050, 8656, 8657, 8666, 8732, 8727), (code, param_code[0])
 
         grid2_param_auth_name = None
@@ -555,7 +608,19 @@ def fill_grid_transformation(proj_db_cursor):
         # 1083: Geog3D to Geog2D+Vertical (AUSGeoid v2)
         # 1084: Vertical Offset by Grid Interpolation (gtx)
         # 1085: Vertical Offset by Grid Interpolation (asc)
-        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088) and n_params == 2:
+        # 1088: Geog3D to Geog2D+GravityRelatedHeight (gtx)
+        # 1089: Geog3D to Geog2D+GravityRelatedHeight (BEV AT)
+        # 1090: Geog3D to Geog2D+GravityRelatedHeight (CGG 2013)
+        # 1091: Geog3D to Geog2D+GravityRelatedHeight (CI)
+        # 1092: Geog3D to Geog2D+GravityRelatedHeight (EGM2008)
+        # 1093: Geog3D to Geog2D+GravityRelatedHeight (Gravsoft)
+        # 1094: Geog3D to Geog2D+GravityRelatedHeight (IGN1997)
+        # 1095: Geog3D to Geog2D+GravityRelatedHeight (IGN2009)
+        # 1096: Geog3D to Geog2D+GravityRelatedHeight (OSGM15-Ire)
+        # 1097: Geog3D to Geog2D+GravityRelatedHeight (OSGM-GB)
+        # 1098: Geog3D to Geog2D+GravityRelatedHeight (SA 2010)
+        # 1103: Geog3D to Geog2D+GravityRelatedHeight (EGM)
+        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1103) and n_params == 2:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
