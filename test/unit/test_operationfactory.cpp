@@ -6336,7 +6336,7 @@ TEST(operation, createOperation_ossfuzz_18587) {
 TEST(operation, derivedGeographicCRS_with_to_wgs84_to_geographicCRS) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 +o_lat_p=18.0 "
-        "+o_lon_p=-200.0 +ellps=WGS84 +towgs84=1,2,3 +type=crs");
+        "+o_lon_p=-200.0 +ellps=WGS84 +towgs84=1,2,3 +over +type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
@@ -6351,7 +6351,7 @@ TEST(operation, derivedGeographicCRS_with_to_wgs84_to_geographicCRS) {
         std::string pipeline(
             "+proj=pipeline "
             "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-            "+step +inv +proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 "
+            "+step +inv +proj=ob_tran +o_proj=latlon +over +lat_0=0 +lon_0=180 "
             "+o_lat_p=18 +o_lon_p=-200 +ellps=WGS84 "
             "+step +proj=push +v_3 "
             "+step +proj=cart +ellps=WGS84 "
@@ -6381,7 +6381,7 @@ TEST(operation, derivedGeographicCRS_with_to_wgs84_to_geographicCRS) {
             "+step +proj=helmert +x=-1 +y=-2 +z=-3 "
             "+step +inv +proj=cart +ellps=WGS84 "
             "+step +proj=pop +v_3 "
-            "+step +proj=ob_tran +o_proj=latlon +lat_0=0 +lon_0=180 "
+            "+step +proj=ob_tran +o_proj=latlon +over +lat_0=0 +lon_0=180 "
             "+o_lat_p=18 +o_lon_p=-200 +ellps=WGS84 "
             "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
         EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
