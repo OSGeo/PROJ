@@ -18,7 +18,7 @@ task:
   #  folder: $HOME/.ccache
 
   pkginstall_script:
-    - pkg install -y autoconf automake libtool pkgconf sqlite3 tiff ccache gmake
+    - pkg install -y autoconf automake m4 libtool pkgconf sqlite3 tiff ccache gmake
   configure_script:
     - ./autogen.sh
     - ./configure --disable-static
