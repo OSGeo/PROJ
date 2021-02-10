@@ -5564,3 +5564,67 @@ TEST(operation,
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, export_of_boundCRS_with_proj_string_method) {
+
+    auto wkt =
+        "BOUNDCRS[\n"
+        "    SOURCECRS[\n"
+        "        GEOGCRS[\"unknown\",\n"
+        "            DATUM[\"Unknown based on GRS80 ellipsoid\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1],\n"
+        "                    ID[\"EPSG\",7019]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                ID[\"EPSG\",8901]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"longitude\",east,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                        ID[\"EPSG\",9122]]],\n"
+        "                AXIS[\"latitude\",north,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                        ID[\"EPSG\",9122]]]]],\n"
+        "    TARGETCRS[\n"
+        "        GEOGCRS[\"WGS 84\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",4326]]],\n"
+        "    ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",\n"
+        "        METHOD[\"PROJ-based operation method: +proj=pipeline +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=axisswap "
+        "+order=2,1 "
+        "+step +proj=cart +ellps=GRS80 +step +proj=helmert "
+        "+convention=coordinate_frame +exact +step +inv +proj=cart "
+        "+ellps=WGS84 "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg\"]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(boundCRS != nullptr);
+    EXPECT_EQ(boundCRS->transformation()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=helmert +convention=coordinate_frame +exact "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+}
