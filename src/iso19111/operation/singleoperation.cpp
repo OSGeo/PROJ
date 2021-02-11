@@ -2144,6 +2144,18 @@ bool SingleOperation::exportToPROJStringGeneric(
         return true;
     }
 
+    const char *prefix = "PROJ-based operation method: ";
+    if (starts_with(method()->nameStr(), prefix)) {
+        auto projString = method()->nameStr().substr(strlen(prefix));
+        try {
+            formatter->ingestPROJString(projString);
+            return true;
+        } catch (const io::ParsingException &e) {
+            throw io::FormattingException(
+                std::string("ingestPROJString() failed: ") + e.what());
+        }
+    }
+
     return false;
 }
 
