@@ -528,59 +528,6 @@ def fill_grid_transformation(proj_db_cursor):
             expected_order += 1
         n_params = expected_order - 1
 
-        # TODO: remove below hacks once EPSG has fixed its blunder
-        if param_code[0] is None and code == 9593:
-            print('Bogus ETRS89 to ETRS89 + NN2000 height (1) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9594:
-            print('Bogus ETRS89 to ETRS89 + NN54 height (1) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9595:
-            print('Bogus NAD83(2011) to NAD83(2011) + NAVD88 height (3) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9596:
-            print('Bogus NAD83(2011) to NAD83(2011) + NAVD88 height (2) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9597:
-            print('Bogus ETRS89 to ETRS89 + NAP height (2) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9622:
-            print('Bogus NAD83(2011) to NAD83(2011) + PRVD02 height (2) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9623:
-            print('Bogus NAD83(2011) to NAD83(2011) + VIVD09 height (2) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9624:
-            print('Bogus NAD83(MA11) to NAD83(MA11) + GUVD04 height (1) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9625:
-            print('Bogus NAD83(MA11) to NAD83(MA11) + NMVD03 height (1) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9626:
-            print('Bogus NAD83(PA11) to NAD83(PA11) + ASVD02 height (1) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9627:
-            print('Bogus NZGD2000 to NZGD2000 + NZVD2009 height (2) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9628:
-            print('Bogus NZGD2000 to NZGD2000 + NZVD2016 height (2) transformation in EPSG 10.013. Missing grid')
-            continue
-
-        if param_code[0] is None and code == 9629:
-            print('Bogus SRGI2013 to SRGI2013 + INAGeoid2020 height (1) transformation in EPSG 10.013. Missing grid')
-            continue
-
         assert param_code[0] in (1048, 1050, 8656, 8657, 8666, 8732, 8727), (code, param_code[0])
 
         grid2_param_auth_name = None

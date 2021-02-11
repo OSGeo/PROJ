@@ -357,5 +357,5 @@ SELECT
 FROM grid_transformation gt
 JOIN usage u ON u.object_auth_name = gt.auth_name AND u.object_code = gt.code AND u.object_table_name = 'grid_transformation'
 WHERE method_auth_name = 'EPSG' AND method_code IN ('1088', '1089', '1090', '1091', '1092', '1093', '1094', '1095', '1096', '1097', '1098', '1103') AND gt.deprecated = 0
-      AND EXISTS (SELECT 1 FROM compound_crs c WHERE target_crs_code = c.code AND target_crs_auth_name = c.auth_name) -- clause because of buggy entries in EPSG 10.013
+      AND EXISTS (SELECT 1 FROM compound_crs c WHERE target_crs_code = c.code AND target_crs_auth_name = c.auth_name) -- clause because of buggy entries in EPSG 10.014
       ;
