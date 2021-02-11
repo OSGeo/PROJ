@@ -184,13 +184,13 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'missing au_ga_AUSGeoid98.tif')
         WHERE NOT EXISTS(SELECT 1 FROM grid_alternatives WHERE proj_grid_name = 'au_ga_AUSGeoid98.tif');
 
-    -- clause because of buggy entries in EPSG 10.013
+    -- clause because of buggy entries in EPSG 10.014
     SELECT RAISE(ABORT, 'invalid Geog3D to Geog2D + GravityRelatedHeight (foo) entries: target CRS is not a compound CRS')
         WHERE EXISTS (SELECT 1 FROM grid_transformation gt WHERE
             method_auth_name = 'EPSG' AND method_code IN ('1088', '1089', '1090', '1091', '1092', '1093', '1094', '1095', '1096', '1097', '1098', '1103') AND
             gt.deprecated = 0 AND
             NOT EXISTS (SELECT 1 FROM compound_crs c WHERE gt.target_crs_code = c.code AND gt.target_crs_auth_name = c.auth_name) AND
-            NOT (gt.auth_name = 'EPSG' AND gt.code IN ('9610', '9613', '9619', '9633'))
+            NOT (gt.auth_name = 'EPSG' AND gt.code IN ('9627'))
         );
 
 END;
