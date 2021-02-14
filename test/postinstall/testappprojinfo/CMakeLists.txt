@@ -17,7 +17,7 @@ foreach(_variableName ${_variableNames})
 endforeach()
 
 add_executable(testappprojinfo testappprojinfo.c)
-target_link_libraries(testappprojinfo ${${USE_PROJ_NAME}_LIBRARIES})
+target_link_libraries(testappprojinfo PRIVATE ${${USE_PROJ_NAME}_LIBRARIES})
 
 include(CTest)
 

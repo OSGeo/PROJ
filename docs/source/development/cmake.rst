@@ -12,7 +12,7 @@ the CMake configuration which comes with the library. Typical usage is:
 
     find_package(PROJ)
 
-    target_link_libraries(MyApp ${PROJ_LIBRARIES})
+    target_link_libraries(MyApp PRIVATE ${PROJ_LIBRARIES})
 
 By adding the imported library target ``${PROJ_LIBRARIES}`` to the
 target link libraries, CMake will also pass the include directories to
@@ -36,7 +36,7 @@ package to work with pre-7.0 versions of PROJ, you will need to use
 .. code::
 
     find_package(PROJ4)
-    target_link_libraries(MyApp ${PROJ4_LIBRARIES})
+    target_link_libraries(MyApp PRIVATE ${PROJ4_LIBRARIES})
     include_directories(${PROJ4_INCLUDE_DIRS})
 
 This will also find version 7.0.  This use of the PROJ4 name will be
