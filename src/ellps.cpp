@@ -38,7 +38,7 @@ pj_ellps[] = {
 {"fschr68",	"a=6378150.",		"rf=298.3",		"Fischer 1968"},
 {"helmert",	"a=6378200.",		"rf=298.3",		"Helmert 1906"},
 {"hough",	"a=6378270.0",		"rf=297.",		"Hough"},
-{"intl",	"a=6378388.0",		"rf=297.",		"International 1909 (Hayford)"},
+{"intl",	"a=6378388.0",		"rf=297.",		"International 1924 (Hayford 1909, 1910)"},
 {"krass",	"a=6378245.0",		"rf=298.3",		"Krassovsky, 1942"},
 {"kaula",	"a=6378163.",		"rf=298.24",		"Kaula 1961"},
 {"lerch",	"a=6378139.",		"rf=298.257",		"Lerch 1979"},
