@@ -309,24 +309,21 @@ set(ALL_LIBPROJ_SOURCES
 )
 set(ALL_LIBPROJ_HEADERS ${HEADERS_LIBPROJ})
 
-# Core targets configuration
-string(TOLOWER "${PROJECT_NAME}" PROJECTNAMEL)
-set(PROJ_CORE_TARGET ${PROJECTNAMEL})
-proj_target_output_name(${PROJ_CORE_TARGET} PROJ_CORE_TARGET_OUTPUT_NAME)
+# Configuration for the core target "proj"
+proj_target_output_name(proj PROJ_CORE_TARGET_OUTPUT_NAME)
 
-add_library(
-  ${PROJ_CORE_TARGET}
+add_library(proj
   ${ALL_LIBPROJ_SOURCES}
   ${ALL_LIBPROJ_HEADERS}
   ${PROJ_RESOURCES}
 )
-target_compile_options(${PROJ_CORE_TARGET}
+target_compile_options(proj
   PRIVATE $<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>
   PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
 )
 
 if(MSVC OR MINGW)
-    target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DNOMINMAX)
+    target_compile_definitions(proj PRIVATE -DNOMINMAX)
 endif()
 
 # Tell Intel compiler to do arithmetic accurately.  This is needed to stop the
@@ -345,71 +342,71 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
 endif()
 
 if(ENABLE_IPO)
-  set_property(TARGET ${PROJ_CORE_TARGET}
+  set_property(TARGET proj
     PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-target_include_directories(${PROJ_CORE_TARGET} INTERFACE
+target_include_directories(proj INTERFACE
   $<INSTALL_INTERFACE:${INCLUDEDIR}>)
 
 if(WIN32)
-  set_target_properties(${PROJ_CORE_TARGET}
+  set_target_properties(proj
     PROPERTIES
     VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
     OUTPUT_NAME "${PROJ_CORE_TARGET_OUTPUT_NAME}"
-    ARCHIVE_OUTPUT_NAME "${PROJ_CORE_TARGET}"
+    ARCHIVE_OUTPUT_NAME proj
     CLEAN_DIRECT_OUTPUT 1)
 elseif(BUILD_FRAMEWORKS_AND_BUNDLE)
-  set_target_properties(${PROJ_CORE_TARGET}
+  set_target_properties(proj
     PROPERTIES
     VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
     INSTALL_NAME_DIR ${PROJ_INSTALL_NAME_DIR}
     CLEAN_DIRECT_OUTPUT 1)
 else()
-  set_target_properties(${PROJ_CORE_TARGET}
+  set_target_properties(proj
     PROPERTIES
     VERSION "${${PROJECT_NAME}_BUILD_VERSION}"
     SOVERSION "${${PROJECT_NAME}_API_VERSION}"
     CLEAN_DIRECT_OUTPUT 1)
 endif()
 
-set_target_properties(${PROJ_CORE_TARGET}
+set_target_properties(proj
   PROPERTIES
   LINKER_LANGUAGE CXX)
 
 ##############################################
 # Link properties
 ##############################################
-set(PROJ_LIBRARIES ${PROJ_CORE_TARGET})
+set(PROJ_LIBRARIES proj)
 # hack, required for test/unit
 set(PROJ_LIBRARIES ${PROJ_LIBRARIES} PARENT_SCOPE)
 if(UNIX)
   find_library(M_LIB m)
   if(M_LIB)
-    target_link_libraries(${PROJ_CORE_TARGET} PRIVATE -lm)
+    target_link_libraries(proj PRIVATE -lm)
   endif()
   find_library(DL_LIB dl)
   if(M_LIB)
-    target_link_libraries(${PROJ_CORE_TARGET} PRIVATE -ldl)
+    target_link_libraries(proj PRIVATE -ldl)
   endif()
 endif()
 if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
-  target_link_libraries(${PROJ_CORE_TARGET} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${SQLITE3_INCLUDE_DIR})
-target_link_libraries(${PROJ_CORE_TARGET} PRIVATE ${SQLITE3_LIBRARY})
+target_include_directories(proj PRIVATE ${SQLITE3_INCLUDE_DIR})
+target_link_libraries(proj PRIVATE ${SQLITE3_LIBRARY})
 
 if(TIFF_ENABLED)
-  target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DTIFF_ENABLED)
-  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${TIFF_INCLUDE_DIR})
-  target_link_libraries(${PROJ_CORE_TARGET} PRIVATE ${TIFF_LIBRARY})
+  target_compile_definitions(proj PRIVATE -DTIFF_ENABLED)
+  target_include_directories(proj PRIVATE ${TIFF_INCLUDE_DIR})
+  target_link_libraries(proj PRIVATE ${TIFF_LIBRARY})
 endif()
 
 if(CURL_ENABLED)
-  target_compile_definitions(${PROJ_CORE_TARGET} PRIVATE -DCURL_ENABLED)
-  target_include_directories(${PROJ_CORE_TARGET} PRIVATE ${CURL_INCLUDE_DIR})
-  target_link_libraries(${PROJ_CORE_TARGET}
+  target_compile_definitions(proj PRIVATE -DCURL_ENABLED)
+  target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIR})
+  target_link_libraries(proj
     PRIVATE
       ${CURL_LIBRARY}
       $<$<CXX_COMPILER_ID:MSVC>:ws2_32>
@@ -420,14 +417,14 @@ if(CURL_ENABLED)
 endif()
 
 if(MSVC AND BUILD_SHARED_LIBS)
-  target_compile_definitions(${PROJ_CORE_TARGET}
+  target_compile_definitions(proj
     PRIVATE PROJ_MSVC_DLL_EXPORT=1)
 endif()
 
 ##############################################
 # install
 ##############################################
-install(TARGETS ${PROJ_CORE_TARGET}
+install(TARGETS proj
   EXPORT targets
   RUNTIME DESTINATION ${BINDIR}
   LIBRARY DESTINATION ${LIBDIR}
@@ -442,7 +439,6 @@ endif()
 ##############################################
 # Core configuration summary
 ##############################################
-print_variable(PROJ_CORE_TARGET)
 print_variable(PROJ_CORE_TARGET_OUTPUT_NAME)
 print_variable(BUILD_SHARED_LIBS)
 print_variable(PROJ_LIBRARIES)
