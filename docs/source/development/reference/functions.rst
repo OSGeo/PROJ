@@ -783,6 +783,17 @@ Setting custom I/O functions
 
 .. doxygenfunction:: proj_context_set_sqlite3_vfs_name
    :project: doxygen_api
+   
+.. c:function:: void proj_context_set_search_paths (PJ_CONTEXT *ctx , int count_paths, const char* const* paths)
+
+    Sets the resource files search paths.
+
+    :param ctx: Threading context.
+    :type ctx: :c:type:`PJ_CONTEXT` *
+    :param `count_paths`: Number of paths.
+    :type `count_paths`: `int`
+    :param `paths`: Array of paths.
+    :type `paths`: `const char* const*`
 
 
 Network related functionality
