@@ -225,7 +225,7 @@ The following control parameters can appear in any order:
 
     .. versionadded:: 8.0
 
-    Allow to export a geographic or projected 3D CRS as a compound CRS whose
+    Allows exporting a geographic or projected 3D CRS as a compound CRS whose
     vertical CRS represents the ellipsoidal height.
 
     .. note:: only used for CRS, and with WKT1:GDAL output format
