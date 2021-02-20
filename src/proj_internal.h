@@ -647,7 +647,7 @@ struct projFileApiCallbackAndData
 struct pj_ctx{
     std::string lastFullErrorMessage{}; // used by proj_context_errno_string
     int     last_errno = 0;
-    int     debug_level = static_cast<int>(PJ_LOG_ERROR);
+    int     debug_level = 1; //PJ_LOG_ERROR
     void    (*logger)(void *, int, const char *) = nullptr;
     void    *logger_app_data = nullptr;
     struct projCppContext* cpp_context = nullptr; /* internal context for C++ code */
