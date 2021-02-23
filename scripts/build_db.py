@@ -555,7 +555,19 @@ def fill_grid_transformation(proj_db_cursor):
         # 1083: Geog3D to Geog2D+Vertical (AUSGeoid v2)
         # 1084: Vertical Offset by Grid Interpolation (gtx)
         # 1085: Vertical Offset by Grid Interpolation (asc)
-        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088) and n_params == 2:
+        # 1088: Geog3D to Geog2D+GravityRelatedHeight (gtx)
+        # 1089: Geog3D to Geog2D+GravityRelatedHeight (BEV AT)
+        # 1090: Geog3D to Geog2D+GravityRelatedHeight (CGG 2013)
+        # 1091: Geog3D to Geog2D+GravityRelatedHeight (CI)
+        # 1092: Geog3D to Geog2D+GravityRelatedHeight (EGM2008)
+        # 1093: Geog3D to Geog2D+GravityRelatedHeight (Gravsoft)
+        # 1094: Geog3D to Geog2D+GravityRelatedHeight (IGN1997)
+        # 1095: Geog3D to Geog2D+GravityRelatedHeight (IGN2009)
+        # 1096: Geog3D to Geog2D+GravityRelatedHeight (OSGM15-Ire)
+        # 1097: Geog3D to Geog2D+GravityRelatedHeight (OSGM-GB)
+        # 1098: Geog3D to Geog2D+GravityRelatedHeight (SA 2010)
+        # 1103: Geog3D to Geog2D+GravityRelatedHeight (EGM)
+        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1103) and n_params == 2:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0

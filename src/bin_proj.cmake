@@ -10,7 +10,7 @@ add_executable(binproj ${PROJ_SRC})
 set_target_properties(binproj
   PROPERTIES
   RUNTIME_OUTPUT_NAME proj)
-target_link_libraries(binproj ${PROJ_LIBRARIES})
+target_link_libraries(binproj PRIVATE ${PROJ_LIBRARIES})
 target_compile_options(binproj PRIVATE ${PROJ_CXX_WARN_FLAGS})
 
 install(TARGETS binproj

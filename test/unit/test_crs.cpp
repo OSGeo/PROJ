@@ -4226,7 +4226,7 @@ TEST(crs, compoundCRS_identify_db) {
     // Identify a CompoundCRS whose horizontal and vertical parts are known
     // but not the composition.
     {
-        auto obj = createFromUserInput("EPSG:4326+3855", dbContext);
+        auto obj = createFromUserInput("EPSG:4326+5703", dbContext);
         auto sourceCRS = nn_dynamic_pointer_cast<CompoundCRS>(obj);
         ASSERT_TRUE(sourceCRS != nullptr);
         auto wkt = sourceCRS->exportToWKT(
@@ -4242,7 +4242,7 @@ TEST(crs, compoundCRS_identify_db) {
         EXPECT_EQ(res.front().second, 100);
         const auto &components = res.front().first->componentReferenceSystems();
         EXPECT_EQ(components[0]->getEPSGCode(), 4326);
-        EXPECT_EQ(components[1]->getEPSGCode(), 3855);
+        EXPECT_EQ(components[1]->getEPSGCode(), 5703);
     }
 }
 
