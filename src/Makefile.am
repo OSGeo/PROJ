@@ -50,7 +50,7 @@ geodtest_LDADD = libproj.la
 
 lib_LTLIBRARIES = libproj.la
 
-libproj_la_LDFLAGS = -no-undefined -version-info 22:0:0
+libproj_la_LDFLAGS = -no-undefined -version-info 21:0:2
 libproj_la_LIBADD = @SQLITE3_LIBS@ @TIFF_LIBS@ @CURL_LIBS@
 
 libproj_la_SOURCES = \
@@ -116,6 +116,7 @@ libproj_la_SOURCES = \
 	projections/labrd.cpp \
 	projections/lsat.cpp \
 	projections/misrsom.cpp \
+	projections/gtoc.cpp \
 	projections/merc.cpp \
 	projections/mill.cpp \
 	projections/ocea.cpp \

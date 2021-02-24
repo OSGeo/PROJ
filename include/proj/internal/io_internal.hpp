@@ -201,10 +201,7 @@ struct projCppContext {
         return auxDbPaths_;
     }
 
-    void setAutoCloseDb(bool autoClose) {
-        autoCloseDb_ = autoClose;
-        autoCloseDbIfNeeded();
-    }
+    void setAutoCloseDb(bool autoClose) { autoCloseDb_ = autoClose; }
     inline bool getAutoCloseDb() const { return autoCloseDb_; }
 
     // cppcheck-suppress functionStatic

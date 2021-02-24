@@ -5185,6 +5185,108 @@ TEST_F(CApi, datum_ensemble) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, check_gtoc_projection) {
+
+    {
+        // Create our projection from regular lat/long coords to GTOC:
+        auto P =
+            proj_create_crs_to_crs(m_ctxt, "EPSG:4326", "+proj=gtoc", nullptr);
+        ASSERT_NE(P, nullptr);
+        auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
+        ASSERT_NE(Pnormalized, nullptr);
+        proj_destroy(P);
+        P = Pnormalized;
+
+        PJ_COORD a;
+        a.lpz.lam = 12.5;
+        a.lpz.phi = 42;
+        a.lpz.z = 0;
+
+        PJ_COORD b = proj_trans(P, PJ_FWD, a);
+
+        // We expect to receive the map coords: (-4654122.96312137413770,
+        // 1391493.63491591950879)
+        EXPECT_NEAR(b.xy.x, -4654122.96312137413770, 1e-8);
+        EXPECT_NEAR(b.xy.y, 1391493.63491591950879, 1e-8);
+
+        PJ_COORD c = proj_trans(P, PJ_INV, b);
+
+        // Should be close to the input coords:
+        EXPECT_NEAR(c.lp.lam, 12.5, 1e-8);
+        EXPECT_NEAR(c.lp.phi, 42.0, 1e-8);
+
+        proj_destroy(P);
+    }
+
+    {
+        // Create our projection from regular lat/long coords to GTOC:
+        auto P = proj_create_crs_to_crs(
+            m_ctxt, "EPSG:4326",
+            "+proj=gtoc +lon_0=0.0 +lat_0=0.0 +az_0=34.5 +theta_0=45.6",
+            nullptr);
+        ASSERT_NE(P, nullptr);
+        auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
+        ASSERT_NE(Pnormalized, nullptr);
+        proj_destroy(P);
+        P = Pnormalized;
+
+        PJ_COORD a;
+        a.lpz.lam = 12.5;
+        a.lpz.phi = 42;
+        a.lpz.z = 0;
+
+        PJ_COORD b = proj_trans(P, PJ_FWD, a);
+
+        // We expect to receive the map coords: (-3795364.35540272854269,
+        // 2445665.40907734911889)
+        EXPECT_NEAR(b.xy.x, -3795364.35540272854269, 1e-8);
+        EXPECT_NEAR(b.xy.y, 2445665.40907734911889, 1e-8);
+
+        PJ_COORD c = proj_trans(P, PJ_INV, b);
+
+        // Should be close to the input coords:
+        EXPECT_NEAR(c.lp.lam, 12.5, 1e-8);
+        EXPECT_NEAR(c.lp.phi, 42.0, 1e-8);
+
+        proj_destroy(P);
+    }
+
+    {
+        // Create our projection from regular lat/long coords to GTOC:
+        auto P = proj_create_crs_to_crs(
+            m_ctxt, "EPSG:4326",
+            "+proj=gtoc +lon_0=12.3 +lat_0=23.4 +az_0=34.5 +theta_0=45.6",
+            nullptr);
+        ASSERT_NE(P, nullptr);
+        auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
+        ASSERT_NE(Pnormalized, nullptr);
+        proj_destroy(P);
+        P = Pnormalized;
+
+        PJ_COORD a;
+        a.lpz.lam = 12.5;
+        a.lpz.phi = 42;
+        a.lpz.z = 0;
+
+        PJ_COORD b = proj_trans(P, PJ_FWD, a);
+
+        // We expect to receive the map coords: (-1772708.31731208483689,
+        // 942892.34530669334345)
+        EXPECT_NEAR(b.xy.x, -1772708.31731208483689, 1e-8);
+        EXPECT_NEAR(b.xy.y, 942892.34530669334345, 1e-8);
+
+        PJ_COORD c = proj_trans(P, PJ_INV, b);
+
+        // Should be close to the input coords:
+        EXPECT_NEAR(c.lp.lam, 12.5, 1e-8);
+        EXPECT_NEAR(c.lp.phi, 42.0, 1e-8);
+
+        proj_destroy(P);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_crs_is_derived) {
     {
         auto wkt =

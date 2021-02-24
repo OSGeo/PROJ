@@ -87,7 +87,7 @@ void proj_assign_context( PJ* pj, PJ_CONTEXT *ctx )
 pj_ctx pj_ctx::createDefault()
 {
     pj_ctx ctx;
-    ctx.debug_level = PJ_LOG_ERROR;
+    ctx.debug_level = PJ_LOG_NONE;
     ctx.logger = pj_stderr_logger;
     NS_PROJ::FileManager::fillDefaultNetworkInterface(&ctx);
 
