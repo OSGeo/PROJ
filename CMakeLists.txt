@@ -301,5 +301,5 @@ if(UNIX)
 
   install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
-    DESTINATION lib/pkgconfig)
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
