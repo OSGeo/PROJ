@@ -282,3 +282,14 @@ endif()
 set(docfiles COPYING NEWS AUTHORS)
 install(FILES ${docfiles}
         DESTINATION "${DOCDIR}")
+
+################################################################################
+# pkg-config support
+################################################################################
+if(UNIX OR MINGW)
+  configure_proj_pc()
+
+  install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+endif()
