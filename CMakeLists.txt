@@ -286,18 +286,8 @@ install(FILES ${docfiles}
 ################################################################################
 # pkg-config support
 ################################################################################
-if(UNIX)
-  set(SQLITE3_LIBS -lsqlite3)
-  if(TIFF_ENABLED)
-    set(TIFF_LIBS -ltiff)
-  endif()
-  if(CURL_ENABLED)
-    set(CURL_LIBS -lcurl)
-  endif()
-  configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/proj.pc.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
-    @ONLY)
+if(UNIX OR MINGW)
+  configure_proj_pc()
 
   install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
