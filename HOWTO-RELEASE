@@ -235,7 +235,6 @@ version numbers in the files.
   - configure.ac:         Update the version number in AC_INIT().
   - src/proj.h:           Update PROJ_VERSION_MAJOR, PROJ_VERSION_MINOR and
                           PROJ_VERSION_PATCH.
-  - src/proj_api.h:       Update PJ_VERSION.
   - src/release.cpp:      Update date to the scheduled release date.
   - CMakeLists.txt:       Update proj_version()
   - docs/source/conf.py:   Update version number
