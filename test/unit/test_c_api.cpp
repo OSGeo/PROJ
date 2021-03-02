@@ -1440,7 +1440,7 @@ TEST_F(CApi, proj_create_operations) {
         ObjectKeeper keeper_op(op);
         EXPECT_FALSE(
             proj_coordoperation_has_ballpark_transformation(m_ctxt, op));
-        EXPECT_EQ(proj_get_name(op), std::string("NAD27 to NAD83 (3)"));
+        EXPECT_EQ(proj_get_name(op), std::string("NAD27 to NAD83 (4)"));
     }
 
     {

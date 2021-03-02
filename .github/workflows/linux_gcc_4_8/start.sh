@@ -15,11 +15,11 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     libsqlite3-dev libtiff-dev libcurl4-openssl-dev \
     jq lcov
 
-pip3 install --user --upgrade pip
-echo `pip3 --version`
-pip3 config --user set global.progress_bar off
-pip3 install --user jsonschema
-pip3 install --user cmake==3.9.6
+python3 -m pip install --user --upgrade "pip < 21.0"
+echo `python3 -m pip --version`
+python3 -m pip config --user set global.progress_bar off
+python3 -m pip install --user jsonschema
+python3 -m pip install --user cmake==3.9.6
 
 export PATH=$HOME/.local/bin:$PATH
 

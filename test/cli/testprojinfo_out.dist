@@ -322,8 +322,8 @@ COORDINATEOPERATION["Ballpark geographic offset from NAD27 to NAD83",
 
 Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects --summary --hide-ballpark
 Candidate operations found: 9
-DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.
 DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
+DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
 DERIVED_FROM(EPSG):1241, NAD27 to NAD83 (1), 0.15 m, United States (USA) - CONUS including EEZ -onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS.
 DERIVED_FROM(EPSG):1243, NAD27 to NAD83 (2), 0.5 m, United States (USA) - Alaska including EEZ.
 DERIVED_FROM(EPSG):1573, NAD27 to NAD83 (6), 1.5 m, Canada - Quebec.
@@ -336,61 +336,6 @@ Testing projinfo -s NAD27 -t NAD83 --grid-check none --spatial-test intersects
 Candidate operations found: 10
 -------------------------------------
 Operation No. 1:
-
-DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.
-
-PROJ string:
-+proj=pipeline
-  +step +proj=axisswap +order=2,1
-  +step +proj=unitconvert +xy_in=deg +xy_out=rad
-  +step +proj=hgridshift +grids=ca_nrc_ntv1_can.tif
-  +step +proj=unitconvert +xy_in=rad +xy_out=deg
-  +step +proj=axisswap +order=2,1
-
-WKT2:2019 string:
-COORDINATEOPERATION["NAD27 to NAD83 (3)",
-    SOURCECRS[
-        GEOGCRS["NAD27",
-            DATUM["North American Datum 1927",
-                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-            ID["EPSG",4267]]],
-    TARGETCRS[
-        GEOGCRS["NAD83",
-            DATUM["North American Datum 1983",
-                ELLIPSOID["GRS 1980",6378137,298.257222101,
-                    LENGTHUNIT["metre",1]]],
-            PRIMEM["Greenwich",0,
-                ANGLEUNIT["degree",0.0174532925199433]],
-            CS[ellipsoidal,2],
-                AXIS["geodetic latitude (Lat)",north,
-                    ORDER[1],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-                AXIS["geodetic longitude (Lon)",east,
-                    ORDER[2],
-                    ANGLEUNIT["degree",0.0174532925199433]],
-            ID["EPSG",4269]]],
-    METHOD["HORIZONTAL_SHIFT_GTIFF"],
-    PARAMETERFILE["Latitude and longitude difference file","ca_nrc_ntv1_can.tif"],
-    OPERATIONACCURACY[2.0],
-    USAGE[
-        SCOPE["Historic record only - now superseded - see remarks."],
-        AREA["Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon."],
-        BBOX[40.04,-141.01,86.46,-47.74]],
-    ID["DERIVED_FROM(EPSG)",1312],
-    REMARK["Uses NTv1 method. Replaced in Quebec by code 1462 and elsewhere in 1997 by NTv2 (transformation code 1313). Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
-
--------------------------------------
-Operation No. 2:
 
 DERIVED_FROM(EPSG):1313, NAD27 to NAD83 (4), 1.5 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
 
@@ -443,6 +388,61 @@ COORDINATEOPERATION["NAD27 to NAD83 (4)",
         BBOX[40.04,-141.01,83.17,-47.74]],
     ID["DERIVED_FROM(EPSG)",1313],
     REMARK["Uses NTv2 data files. Replaces NTv1 (transformation code 1312) except in Quebec. Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and (code 4269) have longitudes positive east. May be used as tfm to WGS 84 - see code 1693."]]
+
+-------------------------------------
+Operation No. 2:
+
+DERIVED_FROM(EPSG):1312, NAD27 to NAD83 (3), 2.0 m, Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast.
+
+PROJ string:
++proj=pipeline
+  +step +proj=axisswap +order=2,1
+  +step +proj=unitconvert +xy_in=deg +xy_out=rad
+  +step +proj=hgridshift +grids=ca_nrc_ntv1_can.tif
+  +step +proj=unitconvert +xy_in=rad +xy_out=deg
+  +step +proj=axisswap +order=2,1
+
+WKT2:2019 string:
+COORDINATEOPERATION["NAD27 to NAD83 (3)",
+    SOURCECRS[
+        GEOGCRS["NAD27",
+            DATUM["North American Datum 1927",
+                ELLIPSOID["Clarke 1866",6378206.4,294.978698213898,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            ID["EPSG",4267]]],
+    TARGETCRS[
+        GEOGCRS["NAD83",
+            DATUM["North American Datum 1983",
+                ELLIPSOID["GRS 1980",6378137,298.257222101,
+                    LENGTHUNIT["metre",1]]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            CS[ellipsoidal,2],
+                AXIS["geodetic latitude (Lat)",north,
+                    ORDER[1],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+                AXIS["geodetic longitude (Lon)",east,
+                    ORDER[2],
+                    ANGLEUNIT["degree",0.0174532925199433]],
+            ID["EPSG",4269]]],
+    METHOD["HORIZONTAL_SHIFT_GTIFF"],
+    PARAMETERFILE["Latitude and longitude difference file","ca_nrc_ntv1_can.tif"],
+    OPERATIONACCURACY[2.0],
+    USAGE[
+        SCOPE["Historic record only - now superseded - see remarks."],
+        AREA["Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast."],
+        BBOX[40.04,-141.01,83.17,-47.74]],
+    ID["DERIVED_FROM(EPSG)",1312],
+    REMARK["Uses NTv1 method. Replaced in Quebec by code 1462 and elsewhere in 1997 by NTv2 (transformation code 1313). Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 
 -------------------------------------
 Operation No. 3:
@@ -1226,31 +1226,26 @@ Testing -s +proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs -t EPSG:432
   +step +proj=unitconvert +xy_in=rad +xy_out=deg
   +step +proj=axisswap +order=2,1
 
-Testing -s "GDA94" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include transformations through ITRF2008 and GDA2020
-Candidate operations found: 7
-unknown id, GDA94 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.21 m, Australia including Lord Howe Island, Macquarie Islands, Ashmore and Cartier Islands, Christmas Island, Cocos (Keeling) Islands, Norfolk Island. All onshore and offshore.
-unknown id, GDA94 to WGS 84 (1) + WGS 84 to WGS 84 (G1762), 5 m, Australia including Lord Howe Island, Macquarie Islands, Ashmore and Cartier Islands, Christmas Island, Cocos (Keeling) Islands, Norfolk Island. All onshore and offshore.
-unknown id, Conversion from GDA94 (geog2D) to GDA94 (geocentric) + Inverse of ITRF2008 to GDA94 (1) + Inverse of WGS 84 (G1762) to ITRF2008 (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.04 m, Australia - onshore and offshore to 200 nautical mile EEZ boundary. Includes Lord Howe Island, Ashmore and Cartier Islands.
-unknown id, GDA94 to GDA2020 (3) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
-unknown id, GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
-unknown id, GDA94 to GDA2020 (5) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Cocos (Keeling) Islands - onshore.
-unknown id, GDA94 to GDA2020 (4) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Christmas Island - onshore.
-
 Testing -s "AGD66" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include a transformation through GDA2020
-Candidate operations found: 14
+Candidate operations found: 19
 unknown id, AGD66 to WGS 84 (18) + WGS 84 to WGS 84 (G1762), 5 m, Australia - offshore including EEZ.
 unknown id, AGD66 to WGS 84 (16) + WGS 84 to WGS 84 (G1762), 7 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
 unknown id, AGD66 to WGS 84 (20) + WGS 84 to WGS 84 (G1762), 11 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
-unknown id, AGD66 to WGS 84 (15) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Northern Territory.
-unknown id, AGD66 to WGS 84 (13) + WGS 84 to WGS 84 (G1762), 3 m, Australia - New South Wales and Victoria.
+unknown id, AGD66 to WGS 84 (15) + WGS 84 to WGS 84 (G1762), 5 m, Australia - Northern Territory.
+unknown id, AGD66 to WGS 84 (13) + WGS 84 to WGS 84 (G1762), 5 m, Australia - New South Wales and Victoria.
 unknown id, AGD66 to WGS 84 (21) + WGS 84 to WGS 84 (G1762), 7 m, Papua New Guinea - mainland onshore.
-unknown id, AGD66 to WGS 84 (14) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Tasmania including islands - onshore.
+unknown id, AGD66 to WGS 84 (14) + WGS 84 to WGS 84 (G1762), 5 m, Australia - Tasmania including islands - onshore.
 unknown id, AGD66 to WGS 84 (19) + WGS 84 to WGS 84 (G1762), 4 m, Papua New Guinea - Papuan fold and thrust belt.
 unknown id, AGD66 to WGS 84 (22) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - Papuan fold and thrust belt.
 unknown id, AGD66 to WGS 84 (23) + WGS 84 to WGS 84 (G1762), 6 m, Papua New Guinea - North Fly area (between 5°04'S and 6°36'S and west of 141°32'E).
-unknown id, AGD66 to GDA2020 (1) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.25 m, Australia - Australian Capital Territory.
-unknown id, AGD66 to WGS 84 (12) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Australian Capital Territory.
-unknown id, AGD66 to WGS 84 (17) + WGS 84 to WGS 84 (G1762), 3 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
+unknown id, AGD66 to WGS 84 (12) + WGS 84 to WGS 84 (G1762), 5 m, Australia - Australian Capital Territory.
+unknown id, AGD66 to GDA94 (11) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.75 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
+unknown id, AGD66 to GDA94 (12) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 3.25 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
+unknown id, AGD66 to WGS 84 (17) + WGS 84 to WGS 84 (G1762), 4.9 m, Australia - Australian Capital Territory; New South Wales; Northern Territory; Queensland; South Australia; Tasmania; Western Australia; Victoria.
+unknown id, AGD66 to GDA94 (9) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 1.25 m, Australia - Northern Territory.
+unknown id, AGD66 to GDA94 (4) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 1.25 m, Australia - New South Wales and Victoria.
+unknown id, AGD66 to GDA94 (8) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 1.25 m, Australia - Tasmania including islands - onshore.
+unknown id, AGD66 to GDA94 (19) + GDA94 to GDA2020 (2) + Conversion from GDA2020 (geog2D) to GDA2020 (geocentric) + GDA2020 to WGS 84 (G1762) (1) + Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D), 0.75 m, Australia - Australian Capital Territory.
 unknown id, Ballpark geographic offset from AGD66 to WGS 84 (G1762), unknown accuracy, World, has ballpark transformation
 
 Testing -s EPSG:31467 -t ETRS89 --spatial-test intersects --grid-check none --bbox 8,48,9,49 --summary. Should include both DHDN to ETRS89 (8) and DHDN to ETRS89 (BWTA2017)

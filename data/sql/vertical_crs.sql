@@ -484,5 +484,15 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9458','AVWS height',NULL,'EPSG','6499'
 INSERT INTO "usage" VALUES('EPSG','14231','vertical_crs','EPSG','9458','EPSG','4177','EPSG','1264');
 INSERT INTO "vertical_crs" VALUES('EPSG','9471','INAGeoid2020 height',NULL,'EPSG','6499','EPSG','1294',0);
 INSERT INTO "usage" VALUES('EPSG','14153','vertical_crs','EPSG','9471','EPSG','1122','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','9663','EH2000 height',NULL,'EPSG','6499','EPSG','1298',0);
+INSERT INTO "usage" VALUES('EPSG','14747','vertical_crs','EPSG','9663','EPSG','3246','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','9666','LAS07 height',NULL,'EPSG','6499','EPSG','1299',0);
+INSERT INTO "usage" VALUES('EPSG','14754','vertical_crs','EPSG','9666','EPSG','3272','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','9669','BGS2005 height',NULL,'EPSG','6499','EPSG','1300',0);
+INSERT INTO "usage" VALUES('EPSG','14770','vertical_crs','EPSG','9669','EPSG','3224','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','9672','CD Norway depth',NULL,'EPSG','6498','EPSG','1301',0);
+INSERT INTO "usage" VALUES('EPSG','14776','vertical_crs','EPSG','9672','EPSG','4615','EPSG','1198');
 INSERT INTO "vertical_crs" VALUES('EPSG','9675','Pago Pago 2020 height',NULL,'EPSG','6499','EPSG','1302',0);
 INSERT INTO "usage" VALUES('EPSG','14793','vertical_crs','EPSG','9675','EPSG','2288','EPSG','1026');
+INSERT INTO "vertical_crs" VALUES('EPSG','9681','NVD 1992 height',NULL,'EPSG','6499','EPSG','1303',0);
+INSERT INTO "usage" VALUES('EPSG','14851','vertical_crs','EPSG','9681','EPSG','3217','EPSG','1181');

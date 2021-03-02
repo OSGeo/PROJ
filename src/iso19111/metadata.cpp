@@ -1124,7 +1124,7 @@ void Identifier::_exportToJSON(JSONFormatter *formatter) const {
 //! @cond Doxygen_Suppress
 static bool isIgnoredChar(char ch) {
     return ch == ' ' || ch == '_' || ch == '-' || ch == '/' || ch == '(' ||
-           ch == ')' || ch == '.' || ch == '&';
+           ch == ')' || ch == '.' || ch == '&' || ch == ',';
 }
 //! @endcond
 

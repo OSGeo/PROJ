@@ -134,7 +134,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1177','St. Helena Vertical Datum 201
 INSERT INTO "usage" VALUES('EPSG','13229','vertical_datum','EPSG','1177','EPSG','3183','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1190','Landshaedarkerfi Islands 2004',NULL,'2004-08-07',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13242','vertical_datum','EPSG','1190','EPSG','3262','EPSG','1180');
-INSERT INTO "vertical_datum" VALUES('EPSG','1199','Greenland  Vertical Reference 2000',NULL,'2000-01-01',NULL,NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1199','Greenland Vertical Reference 2000',NULL,'2000-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13251','vertical_datum','EPSG','1199','EPSG','4461','EPSG','1153');
 INSERT INTO "vertical_datum" VALUES('EPSG','1200','Greenland Vertical Reference 2016',NULL,'2016-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13252','vertical_datum','EPSG','1200','EPSG','4454','EPSG','1153');
@@ -208,8 +208,18 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1292','Australian Vertical Working S
 INSERT INTO "usage" VALUES('EPSG','14134','vertical_datum','EPSG','1292','EPSG','4177','EPSG','1264');
 INSERT INTO "vertical_datum" VALUES('EPSG','1294','Indonesian Geoid 2020',NULL,'2020-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14149','vertical_datum','EPSG','1294','EPSG','1122','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1298','Estonian Height System 2000',NULL,'2005-07-01',NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14743','vertical_datum','EPSG','1298','EPSG','3246','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1299','Lithuanian Height System 2007',NULL,'2005-07-01',NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14758','vertical_datum','EPSG','1299','EPSG','3272','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1300','Bulgarian Height System 2005',NULL,'2005-07-01',NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14768','vertical_datum','EPSG','1300','EPSG','3224','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1301','Norwegian Chart Datum',NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14864','vertical_datum','EPSG','1301','EPSG','4615','EPSG','1198');
 INSERT INTO "vertical_datum" VALUES('EPSG','1302','Local Tidal Datum at Pago Pago 2020',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14795','vertical_datum','EPSG','1302','EPSG','2288','EPSG','1026');
+INSERT INTO "vertical_datum" VALUES('EPSG','1303','National Vertical Datum 1992',NULL,'1994-01-01',NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14852','vertical_datum','EPSG','1303','EPSG','3217','EPSG','1181');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,0);

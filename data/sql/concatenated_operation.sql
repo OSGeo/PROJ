@@ -425,3 +425,11 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','9336','NAD27 to NAD83(CSRS)v
 INSERT INTO "usage" VALUES('EPSG','14011','concatenated_operation','EPSG','9336','EPSG','2376','EPSG','1151');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9337','NTF (Paris) to RGF93 (1)','See transformation code 7811 for an alternative which uses the NTv2 method as an emulation of the geocentric interpolation in the second step.','EPSG','4807','EPSG','4171',1.0,'IOGP-Fra',0);
 INSERT INTO "usage" VALUES('EPSG','14012','concatenated_operation','EPSG','9337','EPSG','3694','EPSG','1041');
+INSERT INTO "concatenated_operation" VALUES('EPSG','9499','ETRS89 to GHA height (2)','This concatenated operation gives the same result as the HoehenGrid-plus offset from ETRS89 to GHA height. HoehenGrid-plus is implemented in BEV-Transformator using MGI (CRS 4312) as the interpolation CRS for the grid','EPSG','4937','EPSG','5778',0.07,'BEV-Aut',0);
+INSERT INTO "usage" VALUES('EPSG','14958','concatenated_operation','EPSG','9499','EPSG','1037','EPSG','1133');
+INSERT INTO "concatenated_operation" VALUES('EPSG','9683','ITRF2014 to GDA94 (2)','See ITRF2014 to GDA94 (1) (CT 9682) for conformal-only alternative (i.e. without distortion modelling).','EPSG','9000','EPSG','4283',0.06,'ICSM-Aus Conf+Dist',0);
+INSERT INTO "usage" VALUES('EPSG','14962','concatenated_operation','EPSG','9683','EPSG','2575','EPSG','1234');
+INSERT INTO "concatenated_operation" VALUES('EPSG','9685','ATRF2014 to GDA94 (2)','See ATRF2014 to GDA94 (1) (CT 9684) for conformal-only alternative (i.e. without distortion modelling).','EPSG','9309','EPSG','4283',0.06,'ICSM-Aus Conf+Dist',0);
+INSERT INTO "usage" VALUES('EPSG','14963','concatenated_operation','EPSG','9685','EPSG','2575','EPSG','1234');
+INSERT INTO "concatenated_operation" VALUES('EPSG','9687','GDA94 to WGS 84 (G1762) (2)','See GDA94 to WGS 84 (G1762) (1) (CT code 9686) for conformal-only alternative (i.e. without distortion modelling).','EPSG','4283','EPSG','9057',0.25,'ICSM-Aus Conf+Dist',0);
+INSERT INTO "usage" VALUES('EPSG','14964','concatenated_operation','EPSG','9687','EPSG','2575','EPSG','1234');

@@ -60,24 +60,16 @@ $EXE +proj=latlong +ellps=clrk66 '+nadgrids="./dir with "" space/myconus"' \
 EOF
 
 echo "##############################################################" >> ${OUT}
-echo "Test --area Canada NAD27 NAD83 (using ntv1_can)" >> ${OUT}
-$EXE --area Canada NAD27 NAD83 >>${OUT} <<EOF
-44 -111
-39 -111
-EOF
-
-echo "##############################################################" >> ${OUT}
-echo "Test --bbox -141.01,40.04,-47.74,86.46 NAD27 NAD83 (using ntv1_can)" >> ${OUT}
-$EXE --bbox -141.01,40.04,-47.74,86.46 NAD27 NAD83 >>${OUT} <<EOF
-44 -111
-39 -111
+echo "Test --bbox -141.01,40.04,-47.74,83.17 NAD27 NAD83 (using NTv2)" >> ${OUT}
+$EXE --bbox -141.01,40.04,-47.74,83.17 NAD27 NAD83 >>${OUT} <<EOF
+40.5 -60
 EOF
 
 echo "##############################################################" >> ${OUT}
 echo "Test --area \"USA - CONUS - onshore\" NAD27 NAD83 (using conus)" >> ${OUT}
 $EXE --area "USA - CONUS - onshore" NAD27 NAD83 >>${OUT} <<EOF
 44 -111
-39 -111
+40.5 -60
 EOF
 
 echo "##############################################################" >> ${OUT}

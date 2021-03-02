@@ -1602,12 +1602,12 @@ abridged_coordinate_transformation_next:
 
 abridged_coordinate_transformation_end:
                                     wkt_separator operation_method
-                                    wkt_separator
-                                    abridged_parameter_or_parameter_file
+// At least one parameter required by WKT2. But relax that to allow things like METHOD["PROJ-based operation method: +proj=...."]
+//                                  wkt_separator abridged_parameter_or_parameter_file
                                     opt_end_abridged_coordinate_transformation
                                     right_delimiter
 
-abridged_parameter_or_parameter_file: abridged_transformation_parameter | operation_parameter_file
+//abridged_parameter_or_parameter_file: abridged_transformation_parameter | operation_parameter_file
 
 opt_end_abridged_coordinate_transformation:
    | wkt_separator abridged_transformation_parameter opt_end_abridged_coordinate_transformation

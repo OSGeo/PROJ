@@ -2108,3 +2108,15 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','9474','PZ-90.02',NULL,'geographic 2D',
 INSERT INTO "usage" VALUES('EPSG','14195','geodetic_crs','EPSG','9474','EPSG','1262','EPSG','1183');
 INSERT INTO "geodetic_crs" VALUES('EPSG','9475','PZ-90.11',NULL,'geographic 2D','EPSG','6422','EPSG','1158',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14194','geodetic_crs','EPSG','9475','EPSG','1262','EPSG','1183');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9545','LTF2004(G)',NULL,'geocentric','EPSG','6500','EPSG','1295',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14547','geodetic_crs','EPSG','9545','EPSG','4613','EPSG','1271');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9546','LTF2004(G)',NULL,'geographic 3D','EPSG','6423','EPSG','1295',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14539','geodetic_crs','EPSG','9546','EPSG','4613','EPSG','1271');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9547','LTF2004(G)',NULL,'geographic 2D','EPSG','6422','EPSG','1295',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14546','geodetic_crs','EPSG','9547','EPSG','4613','EPSG','1183');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9694','REDGEOMIN',NULL,'geocentric','EPSG','6500','EPSG','1304',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14939','geodetic_crs','EPSG','9694','EPSG','1066','EPSG','1181');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9695','REDGEOMIN',NULL,'geographic 3D','EPSG','6423','EPSG','1304',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14947','geodetic_crs','EPSG','9695','EPSG','1066','EPSG','1181');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9696','REDGEOMIN',NULL,'geographic 2D','EPSG','6422','EPSG','1304',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','14949','geodetic_crs','EPSG','9696','EPSG','1066','EPSG','1183');

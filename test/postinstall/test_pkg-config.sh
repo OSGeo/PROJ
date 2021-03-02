@@ -47,10 +47,13 @@ ERRORS=0
 
 LDD_OUTPUT=$(ldd ./$PROGRAM | grep proj)
 LDD_SUBSTR=$LD_LIBRARY_PATH/libproj.
+LDD_RPATH_SUBSTR=@rpath/libproj.
 printf "Testing expected ldd output ... "
 case "$LDD_OUTPUT" in
   *$LDD_SUBSTR*)
-    echo "passed" ;;
+    echo "passed (using path)" ;;
+  *$LDD_RPATH_SUBSTR*)
+    echo "passed (using rpath)" ;;
   *)
     ERRORS=$(($ERRORS + 1))
     echo "failed: ldd output '$LDD_OUTPUT' does not contain '$LDD_SUBSTR'" ;;

@@ -10586,10 +10586,10 @@ TEST(io, createFromUserInput) {
 
     {
         // Approximate match on each piece of the compound CRS
-        auto obj = createFromUserInput("WGS84 + EGM96", dbContext);
+        auto obj = createFromUserInput("WGS84 + NAVD88 height", dbContext);
         auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
-        EXPECT_EQ(crs->nameStr(), "WGS 84 + EGM96 height");
+        EXPECT_EQ(crs->nameStr(), "WGS 84 + NAVD88 height");
     }
 
     {

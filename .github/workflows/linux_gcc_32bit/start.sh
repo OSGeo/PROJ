@@ -18,7 +18,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends  -o AP
     libsqlite3-dev:$ARCH libtiff-dev:$ARCH libcurl4-openssl-dev:$ARCH \
     jq
 
-pip3 install --user jsonschema
+python3 -m pip install --user jsonschema
 export PATH=$HOME/.local/bin:$PATH
 
 export CXXFLAGS='-g -O2 -m32 -D_GLIBCXX_ASSERTIONS'

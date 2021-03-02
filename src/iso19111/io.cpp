@@ -9674,14 +9674,15 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                    parameters, values)
                    .as_nullable();
 
-        if (is_in_stringlist(methodName, "PROJ ob_tran o_proj=longlat,"
-                                         "PROJ ob_tran o_proj=lonlat,"
-                                         "PROJ ob_tran o_proj=latlon,"
-                                         "PROJ ob_tran o_proj=latlong")) {
-            return DerivedGeographicCRS::create(
-                PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
-                geogCRS, NN_NO_CHECK(conv),
-                buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, false));
+        for (const char *substr :
+             {"PROJ ob_tran o_proj=longlat", "PROJ ob_tran o_proj=lonlat",
+              "PROJ ob_tran o_proj=latlon", "PROJ ob_tran o_proj=latlong"}) {
+            if (starts_with(methodName, substr)) {
+                return DerivedGeographicCRS::create(
+                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+                    geogCRS, NN_NO_CHECK(conv),
+                    buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, false));
+            }
         }
     }
 

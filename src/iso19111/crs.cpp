@@ -5757,11 +5757,17 @@ void DerivedGeographicCRS::_exportToPROJString(
 {
     const auto &l_conv = derivingConversionRef();
     const auto &methodName = l_conv->method()->nameStr();
-    if (methodName == "PROJ ob_tran o_proj=longlat" ||
-        methodName == "PROJ ob_tran o_proj=lonlat" ||
-        methodName == "PROJ ob_tran o_proj=latlong" ||
-        methodName == "PROJ ob_tran o_proj=latlon" ||
-        ci_equal(methodName,
+
+    for (const char *substr :
+         {"PROJ ob_tran o_proj=longlat", "PROJ ob_tran o_proj=lonlat",
+          "PROJ ob_tran o_proj=latlon", "PROJ ob_tran o_proj=latlong"}) {
+        if (starts_with(methodName, substr)) {
+            l_conv->_exportToPROJString(formatter);
+            return;
+        }
+    }
+
+    if (ci_equal(methodName,
                  PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION)) {
         l_conv->_exportToPROJString(formatter);
         return;
