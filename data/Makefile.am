@@ -124,6 +124,7 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		tests/simple_model_wrap_west.tif \
 		tests/simple_model_projected.json \
 		tests/tinshift_crs_implicit.json \
+		tests/tinshift_simplified_etrs89_ngo48.json \
 		tests/tinshift_simplified_kkj_etrs.json \
 		tests/tinshift_simplified_n60_n2000.json \
 		generate_all_sql_in.cmake sql_filelist.cmake \
