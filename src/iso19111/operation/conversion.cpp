@@ -2238,15 +2238,16 @@ ConversionNNPtr Conversion::createPoleRotationGRIBConvention(
 ConversionNNPtr
 Conversion::createChangeVerticalUnit(const util::PropertyMap &properties,
                                      const common::Scale &factor) {
-    return create(properties, createMethodMapNameEPSGCode(
-                                  EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT),
-                  VectorOfParameters{
-                      createOpParamNameEPSGCode(
-                          EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR),
-                  },
-                  VectorOfValues{
-                      factor,
-                  });
+    return create(
+        properties,
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT),
+        VectorOfParameters{
+            createOpParamNameEPSGCode(
+                EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR),
+        },
+        VectorOfValues{
+            factor,
+        });
 }
 
 // ---------------------------------------------------------------------------
@@ -2264,9 +2265,10 @@ Conversion::createChangeVerticalUnit(const util::PropertyMap &properties,
  */
 ConversionNNPtr
 Conversion::createHeightDepthReversal(const util::PropertyMap &properties) {
-    return create(properties, createMethodMapNameEPSGCode(
-                                  EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL),
-                  {}, {});
+    return create(
+        properties,
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL), {},
+        {});
 }
 
 // ---------------------------------------------------------------------------
@@ -2310,9 +2312,10 @@ ConversionNNPtr Conversion::createAxisOrderReversal(bool is3D) {
  */
 ConversionNNPtr
 Conversion::createGeographicGeocentric(const util::PropertyMap &properties) {
-    return create(properties, createMethodMapNameEPSGCode(
-                                  EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC),
-                  {}, {});
+    return create(
+        properties,
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC), {},
+        {});
 }
 
 // ---------------------------------------------------------------------------
@@ -2458,9 +2461,10 @@ static double lcc_1sp_to_2sp_f(double sinphi, double K, double ec, double n) {
     const double x = sinphi;
     const double ecx = ec * x;
     return (1 - x * x) / (1 - ecx * ecx) -
-           K * K * std::pow((1.0 - x) / (1.0 + x) *
-                                std::pow((1.0 + ecx) / (1.0 - ecx), ec),
-                            n);
+           K * K *
+               std::pow((1.0 - x) / (1.0 + x) *
+                            std::pow((1.0 + ecx) / (1.0 - ecx), ec),
+                        n);
 }
 
 // ---------------------------------------------------------------------------
@@ -2748,8 +2752,9 @@ ConversionPtr Conversion::convertToOtherMethod(int targetEPSGCode) const {
             common::Angle(phi0Deg, common::UnitOfMeasure::DEGREE),
             common::Angle(parameterValueMeasure(
                 EPSG_CODE_PARAMETER_LONGITUDE_FALSE_ORIGIN)),
-            common::Scale(k0), common::Length(parameterValueMeasure(
-                                   EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN)),
+            common::Scale(k0),
+            common::Length(parameterValueMeasure(
+                EPSG_CODE_PARAMETER_EASTING_FALSE_ORIGIN)),
             common::Length(
                 parameterValueNumericAsSI(
                     EPSG_CODE_PARAMETER_NORTHING_FALSE_ORIGIN) +

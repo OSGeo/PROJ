@@ -89,15 +89,17 @@ struct Grid : public GridPrototype {
                 }
             }
             if (foundDesc && (!foundDescX || !foundDescY)) {
-                pj_log(ctx, PJ_LOG_ERROR, "grid %s : Found band description, "
-                                          "but not the ones expected",
+                pj_log(ctx, PJ_LOG_ERROR,
+                       "grid %s : Found band description, "
+                       "but not the ones expected",
                        realGrid->name().c_str());
                 return false;
             }
             const auto unit = realGrid->unit(sampleX);
             if (!unit.empty() && unit != expectedUnit) {
-                pj_log(ctx, PJ_LOG_ERROR, "grid %s : Only unit=%s "
-                                          "currently handled for this mode",
+                pj_log(ctx, PJ_LOG_ERROR,
+                       "grid %s : Only unit=%s "
+                       "currently handled for this mode",
                        realGrid->name().c_str(), expectedUnit.c_str());
                 return false;
             }
@@ -145,15 +147,17 @@ struct Grid : public GridPrototype {
                 }
             }
             if (foundDesc && !foundDescZ) {
-                pj_log(ctx, PJ_LOG_ERROR, "grid %s : Found band description, "
-                                          "but not the ones expected",
+                pj_log(ctx, PJ_LOG_ERROR,
+                       "grid %s : Found band description, "
+                       "but not the ones expected",
                        realGrid->name().c_str());
                 return false;
             }
             const auto unit = realGrid->unit(sampleZ);
             if (!unit.empty() && unit != STR_METRE) {
-                pj_log(ctx, PJ_LOG_ERROR, "grid %s : Only unit=metre currently "
-                                          "handled for this mode",
+                pj_log(ctx, PJ_LOG_ERROR,
+                       "grid %s : Only unit=metre currently "
+                       "handled for this mode",
                        realGrid->name().c_str());
                 return false;
             }

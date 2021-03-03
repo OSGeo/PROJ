@@ -49,4 +49,4 @@ const char *ParsingException::what() const noexcept { return msg_.c_str(); }
 
 // ---------------------------------------------------------------------------
 
-} // namespace DEFORMATON_MODEL_NAMESPACE
+} // namespace TINSHIFT_NAMESPACE

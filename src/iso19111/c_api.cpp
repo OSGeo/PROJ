@@ -8323,9 +8323,10 @@ double proj_dynamic_datum_get_frame_reference_epoch(PJ_CONTEXT *ctx,
     auto dvrf = dynamic_cast<const DynamicVerticalReferenceFrame *>(
         datum->iso_obj.get());
     if (!dgrf && !dvrf) {
-        proj_log_error(ctx, __FUNCTION__, "Object is not a "
-                                          "DynamicGeodeticReferenceFrame or "
-                                          "DynamicVerticalReferenceFrame");
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a "
+                       "DynamicGeodeticReferenceFrame or "
+                       "DynamicVerticalReferenceFrame");
         return -1;
     }
     const auto &frameReferenceEpoch =
@@ -8592,9 +8593,10 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
 
     auto co = dynamic_cast<const CoordinateOperation *>(obj->iso_obj.get());
     if (!co) {
-        proj_log_error(ctx, __FUNCTION__, "Object is not a CoordinateOperation "
-                                          "created with "
-                                          "proj_create_crs_to_crs");
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a CoordinateOperation "
+                       "created with "
+                       "proj_create_crs_to_crs");
         return nullptr;
     }
     try {

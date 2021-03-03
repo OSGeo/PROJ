@@ -583,18 +583,18 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
     PROJ_DLL const OperationMethodNNPtr &method() PROJ_PURE_DECL;
 
     PROJ_DLL const ParameterValuePtr &
-    parameterValue(const std::string &paramName, int epsg_code = 0) const
-        noexcept;
+    parameterValue(const std::string &paramName,
+                   int epsg_code = 0) const noexcept;
 
-    PROJ_DLL const ParameterValuePtr &parameterValue(int epsg_code) const
-        noexcept;
+    PROJ_DLL const ParameterValuePtr &
+    parameterValue(int epsg_code) const noexcept;
 
     PROJ_DLL const common::Measure &
-    parameterValueMeasure(const std::string &paramName, int epsg_code = 0) const
-        noexcept;
+    parameterValueMeasure(const std::string &paramName,
+                          int epsg_code = 0) const noexcept;
 
-    PROJ_DLL const common::Measure &parameterValueMeasure(int epsg_code) const
-        noexcept;
+    PROJ_DLL const common::Measure &
+    parameterValueMeasure(int epsg_code) const noexcept;
 
     PROJ_DLL static SingleOperationNNPtr createPROJBased(
         const util::PropertyMap &properties, const std::string &PROJString,
@@ -612,17 +612,16 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
         //! @cond Doxygen_Suppress
 
         PROJ_DLL double
-        parameterValueNumeric(int epsg_code,
-                              const common::UnitOfMeasure &targetUnit) const
-        noexcept;
+        parameterValueNumeric(
+            int epsg_code,
+            const common::UnitOfMeasure &targetUnit) const noexcept;
+
+    PROJ_INTERNAL double parameterValueNumeric(
+        const char *param_name,
+        const common::UnitOfMeasure &targetUnit) const noexcept;
 
     PROJ_INTERNAL double
-    parameterValueNumeric(const char *param_name,
-                          const common::UnitOfMeasure &targetUnit) const
-        noexcept;
-
-    PROJ_INTERNAL double parameterValueNumericAsSI(int epsg_code) const
-        noexcept;
+    parameterValueNumericAsSI(int epsg_code) const noexcept;
 
     PROJ_INTERNAL bool _isEquivalentTo(
         const util::IComparable *other,
@@ -1828,9 +1827,9 @@ class PROJ_GCC_DLL CoordinateOperationContext {
         IGNORE_GRID_AVAILABILITY,
 
         /** Results will be presented as if grids known to PROJ (that is
-        * registered in the grid_alternatives table of its database) were
-        * available. Used typically when networking is enabled.
-        */
+         * registered in the grid_alternatives table of its database) were
+         * available. Used typically when networking is enabled.
+         */
         KNOWN_AVAILABLE,
     };
 

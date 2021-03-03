@@ -711,8 +711,8 @@ class PROJ_GCC_DLL WKTNode {
     PROJ_DLL void addChild(WKTNodeNNPtr &&child);
     PROJ_DLL const WKTNodePtr &lookForChild(const std::string &childName,
                                             int occurrence = 0) const noexcept;
-    PROJ_DLL int countChildrenOfName(const std::string &childName) const
-        noexcept;
+    PROJ_DLL int
+    countChildrenOfName(const std::string &childName) const noexcept;
 
     PROJ_DLL std::string toString() const;
 

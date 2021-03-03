@@ -344,8 +344,9 @@ class PROJ_GCC_DLL IdentifiedObject : public util::BaseObject,
         const io::DatabaseContextPtr &dbContext = nullptr) const override;
 
     PROJ_INTERNAL bool _isEquivalentTo(
-        const IdentifiedObject *other, util::IComparable::Criterion criterion =
-                                           util::IComparable::Criterion::STRICT,
+        const IdentifiedObject *other,
+        util::IComparable::Criterion criterion =
+            util::IComparable::Criterion::STRICT,
         const io::DatabaseContextPtr &dbContext = nullptr) PROJ_PURE_DECL;
     //! @endcond
 
