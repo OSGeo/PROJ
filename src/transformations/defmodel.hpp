@@ -66,9 +66,9 @@ using json = nlohmann::json;
 class SpatialExtent {
   public:
     /** Parse the provided object as an extent.
-    *
-    * @throws ParsingException
-    */
+     *
+     * @throws ParsingException
+     */
     static SpatialExtent parse(const json &j);
 
     double minx() const { return mMinx; }
@@ -130,9 +130,9 @@ class Epoch {
 class Component {
   public:
     /** Parse the provided object as a component.
-    *
-    * @throws ParsingException
-    */
+     *
+     * @throws ParsingException
+     */
     static Component parse(const json &j);
 
     /** Get a text description of the component. */
@@ -630,7 +630,7 @@ class Evaluator {
 
 // ---------------------------------------------------------------------------
 
-} // namespace DeformationModel
+} // namespace DEFORMATON_MODEL_NAMESPACE
 
 // ---------------------------------------------------------------------------
 

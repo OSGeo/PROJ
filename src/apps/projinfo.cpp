@@ -187,8 +187,8 @@ static BaseObjectNNPtr buildObject(
     try {
         auto tokens = split(l_user_string, ':');
         if (kind == "operation" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
-                       tokens[1];
+            auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] +
+                       "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else if ((kind == "ellipsoid" || kind == "datum" ||
                     kind == "ensemble") &&
@@ -1214,11 +1214,10 @@ int main(int argc, char **argv) {
                 if (crs) {
                     try {
                         auto res = crs->identify(
-                            dbContext
-                                ? AuthorityFactory::create(
-                                      NN_NO_CHECK(dbContext), authority)
-                                      .as_nullable()
-                                : nullptr);
+                            dbContext ? AuthorityFactory::create(
+                                            NN_NO_CHECK(dbContext), authority)
+                                            .as_nullable()
+                                      : nullptr);
                         std::cout << std::endl;
                         std::cout
                             << "Identification match count: " << res.size()

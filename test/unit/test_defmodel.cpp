@@ -63,8 +63,8 @@ static json getMinValidContent() {
     j["target_crs"] = "EPSG:7907";
     j["definition_crs"] = "EPSG:4959";
     j["extent"]["type"] = "bbox";
-    j["extent"]
-     ["parameters"] = {{"bbox", {modelMinX, modelMinY, modelMaxX, modelMaxY}}};
+    j["extent"]["parameters"] = {
+        {"bbox", {modelMinX, modelMinY, modelMaxX, modelMaxY}}};
     j["time_extent"]["first"] = "1900-01-01T00:00:00Z";
     j["time_extent"]["last"] = "2050-01-01T00:00:00Z";
     j["components"] = json::array();
@@ -124,7 +124,8 @@ static json getFullValidContent() {
          }},
         {"time_function",
          {
-             {"type", "constant"}, {"parameters", json::object()},
+             {"type", "constant"},
+             {"parameters", json::object()},
          }},
     }};
 
@@ -848,15 +849,13 @@ TEST(defmodel, evaluator_horizontal_unit_degree) {
                                  tValid, newLon, newLat, newZ));
         EXPECT_NEAR(
             RadToDeg(newLon),
-            lon +
-                tFactor * (lonOffsetQueriedX +
-                           alphaX * (lonOffsetQueriedXp1 - lonOffsetQueriedX)),
+            lon + tFactor * (lonOffsetQueriedX + alphaX * (lonOffsetQueriedXp1 -
+                                                           lonOffsetQueriedX)),
             EPS);
         EXPECT_NEAR(
             RadToDeg(newLat),
-            lat +
-                tFactor * (latOffsetQueriedY +
-                           alphaY * (latOffsetQueriedYp1 - latOffsetQueriedY)),
+            lat + tFactor * (latOffsetQueriedY + alphaY * (latOffsetQueriedYp1 -
+                                                           latOffsetQueriedY)),
             EPS);
         EXPECT_EQ(newZ, zVal);
     }
@@ -1002,15 +1001,13 @@ TEST(defmodel, evaluator_horizontal_unit_degree) {
                                    tValid, newLon, newLat, newZ));
         EXPECT_NEAR(
             RadToDeg(newLon),
-            lon +
-                tFactor * (lonOffsetQueriedX +
-                           alphaX * (lonOffsetQueriedXp1 - lonOffsetQueriedX)),
+            lon + tFactor * (lonOffsetQueriedX + alphaX * (lonOffsetQueriedXp1 -
+                                                           lonOffsetQueriedX)),
             EPS);
         EXPECT_NEAR(
             RadToDeg(newLat),
-            lat +
-                tFactor * (latOffsetQueriedY +
-                           alphaY * (latOffsetQueriedYp1 - latOffsetQueriedY)),
+            lat + tFactor * (latOffsetQueriedY + alphaY * (latOffsetQueriedYp1 -
+                                                           latOffsetQueriedY)),
             EPS);
 
         const double zBottom =
@@ -1391,8 +1388,8 @@ TEST(defmodel, evaluator_projected_crs) {
     constexpr double gridResX = gridMaxX - gridMinX;
     constexpr double gridResY = gridMaxY - gridMinY;
 
-    j["extent"]
-     ["parameters"] = {{"bbox", {gridMinX, gridMinY, gridMaxX, gridMaxY}}};
+    j["extent"]["parameters"] = {
+        {"bbox", {gridMinX, gridMinY, gridMaxX, gridMaxY}}};
     j["components"] = {
         {{"displacement_type", "horizontal"},
          {"uncertainty_type", "none"},

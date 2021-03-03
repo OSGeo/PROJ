@@ -101,7 +101,7 @@ template <class Feature> class QuadTree {
 
   public:
     /** Construct a new quadtree with the global bounds of all objects to be
-    * inserted */
+     * inserted */
     explicit QuadTree(const RectObj &globalBounds) : root(globalBounds) {}
 
     /** Add a new feature, with its bounds specified in featureBounds */
