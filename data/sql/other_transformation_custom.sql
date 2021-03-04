@@ -3,7 +3,7 @@
 -- Norway triangulated files
  
 INSERT INTO other_transformation VALUES(
-    'PROJ','ETRS89NO_TO_NGO48','NGO 1948 to ETRS89 (2)',
+    'PROJ','NGO48_TO_ETRS89NO','NGO 1948 to ETRS89 (2)',
     'Transformation based on a triangulated irregular network',
     'PROJ','PROJString',
     '+proj=pipeline ' ||
