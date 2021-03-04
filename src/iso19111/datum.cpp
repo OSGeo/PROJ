@@ -835,9 +835,8 @@ void Ellipsoid::_exportToWKT(
         }
         formatter->add(computedInverseFlattening());
         const auto &unit = semiMajor.unit();
-        if (isWKT2 &&
-            !(formatter->ellipsoidUnitOmittedIfMetre() &&
-              unit == common::UnitOfMeasure::METRE)) {
+        if (isWKT2 && !(formatter->ellipsoidUnitOmittedIfMetre() &&
+                        unit == common::UnitOfMeasure::METRE)) {
             unit._exportToWKT(formatter, io::WKTConstants::LENGTHUNIT);
         }
         if (formatter->outputId()) {
@@ -1269,8 +1268,9 @@ void GeodeticReferenceFrame::_exportToWKT(
                     // as to trigger the caching done in createObjectsFromName()
                     // in that case.
                     auto matches = factory->createObjectsFromName(
-                        l_name, {io::AuthorityFactory::ObjectType::
-                                     GEODETIC_REFERENCE_FRAME},
+                        l_name,
+                        {io::AuthorityFactory::ObjectType::
+                             GEODETIC_REFERENCE_FRAME},
                         true, 2);
                     if (matches.size() == 1) {
                         const auto &match = matches.front();
@@ -1870,8 +1870,8 @@ RealizationMethod::RealizationMethod(const std::string &nameIn)
 
 // ---------------------------------------------------------------------------
 
-RealizationMethod &RealizationMethod::
-operator=(const RealizationMethod &other) {
+RealizationMethod &
+RealizationMethod::operator=(const RealizationMethod &other) {
     CodeList::operator=(other);
     return *this;
 }

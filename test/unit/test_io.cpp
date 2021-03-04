@@ -3009,8 +3009,9 @@ TEST(wkt_parse, COORDINATEOPERATION) {
     auto wkt =
         "COORDINATEOPERATION[\"transformationName\",\n"
         "    SOURCECRS[" +
-        src_wkt + "],\n"
-                  "    TARGETCRS[" +
+        src_wkt +
+        "],\n"
+        "    TARGETCRS[" +
         dst_wkt +
         "],\n"
         "    METHOD[\"operationMethodName\",\n"
@@ -3083,8 +3084,9 @@ TEST(wkt_parse, COORDINATEOPERATION_wkt2_2019) {
         "COORDINATEOPERATION[\"transformationName\",\n"
         "    VERSION[\"my version\"],\n"
         "    SOURCECRS[" +
-        src_wkt + "],\n"
-                  "    TARGETCRS[" +
+        src_wkt +
+        "],\n"
+        "    TARGETCRS[" +
         dst_wkt +
         "],\n"
         "    METHOD[\"operationMethodName\",\n"
@@ -6836,11 +6838,13 @@ TEST(wkt_parse, invalid_COORDINATEOPERATION) {
     {
         auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
                    "    SOURCECRS[" +
-                   src_wkt + "],\n"
-                             "    TARGETCRS[" +
-                   dst_wkt + "],\n"
-                             "    METHOD[\"operationMethodName\"],\n"
-                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+                   src_wkt +
+                   "],\n"
+                   "    TARGETCRS[" +
+                   dst_wkt +
+                   "],\n"
+                   "    METHOD[\"operationMethodName\"],\n"
+                   "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
 
         EXPECT_NO_THROW(WKTParser().createFromWKT(wkt));
     }
@@ -6849,9 +6853,10 @@ TEST(wkt_parse, invalid_COORDINATEOPERATION) {
     {
         auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
                    "    TARGETCRS[" +
-                   dst_wkt + "],\n"
-                             "    METHOD[\"operationMethodName\"],\n"
-                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+                   dst_wkt +
+                   "],\n"
+                   "    METHOD[\"operationMethodName\"],\n"
+                   "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
 
         EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
     }
@@ -6861,9 +6866,10 @@ TEST(wkt_parse, invalid_COORDINATEOPERATION) {
         auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
                    "    SOURCECRS[FOO],\n"
                    "    TARGETCRS[" +
-                   dst_wkt + "],\n"
-                             "    METHOD[\"operationMethodName\"],\n"
-                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+                   dst_wkt +
+                   "],\n"
+                   "    METHOD[\"operationMethodName\"],\n"
+                   "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
 
         EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
     }
@@ -6872,9 +6878,10 @@ TEST(wkt_parse, invalid_COORDINATEOPERATION) {
     {
         auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
                    "    SOURCECRS[" +
-                   src_wkt + "],\n"
-                             "    METHOD[\"operationMethodName\"],\n"
-                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+                   src_wkt +
+                   "],\n"
+                   "    METHOD[\"operationMethodName\"],\n"
+                   "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
 
         EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
     }
@@ -6883,10 +6890,11 @@ TEST(wkt_parse, invalid_COORDINATEOPERATION) {
     {
         auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
                    "    SOURCECRS[" +
-                   src_wkt + "],\n"
-                             "    TARGETCRS[FOO],\n"
-                             "    METHOD[\"operationMethodName\"],\n"
-                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+                   src_wkt +
+                   "],\n"
+                   "    TARGETCRS[FOO],\n"
+                   "    METHOD[\"operationMethodName\"],\n"
+                   "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
 
         EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
     }
@@ -6895,8 +6903,9 @@ TEST(wkt_parse, invalid_COORDINATEOPERATION) {
     {
         auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
                    "    SOURCECRS[" +
-                   src_wkt + "],\n"
-                             "    TARGETCRS[" +
+                   src_wkt +
+                   "],\n"
+                   "    TARGETCRS[" +
                    dst_wkt + "]]";
 
         EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
@@ -6906,11 +6915,13 @@ TEST(wkt_parse, invalid_COORDINATEOPERATION) {
     {
         auto wkt = "COORDINATEOPERATION[\"transformationName\",\n"
                    "    SOURCECRS[" +
-                   src_wkt + "],\n"
-                             "    TARGETCRS[" +
-                   dst_wkt + "],\n"
-                             "    METHOD[],\n"
-                             "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
+                   src_wkt +
+                   "],\n"
+                   "    TARGETCRS[" +
+                   dst_wkt +
+                   "],\n"
+                   "    METHOD[],\n"
+                   "    PARAMETERFILE[\"paramName\",\"foo.bin\"]]";
 
         EXPECT_THROW(WKTParser().createFromWKT(wkt), ParsingException);
     }

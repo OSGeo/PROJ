@@ -180,7 +180,7 @@ NS_PROJ_START
 namespace io {
 class DatabaseContext;
 using DatabaseContextPtr = std::shared_ptr<DatabaseContext>;
-}
+} // namespace io
 //! @endcond
 
 /** osgeo.proj.util namespace.

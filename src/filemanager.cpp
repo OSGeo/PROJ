@@ -1110,7 +1110,7 @@ void proj_context_set_sqlite3_vfs_name(PJ_CONTEXT *ctx, const char *name) {
  * already.
  * @return The path to the PROJ user writable directory.
  * @since 7.1
-*/
+ */
 
 const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
                                                      int create) {
@@ -1181,12 +1181,12 @@ const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
 }
 
 /** Get the URL endpoint to query for remote grids.
-*
-* @param ctx PROJ context, or NULL
-* @return Endpoint URL. The returned pointer would be invalidated
-* by a later call to proj_context_set_url_endpoint()
-* @since 7.1
-*/
+ *
+ * @param ctx PROJ context, or NULL
+ * @return Endpoint URL. The returned pointer would be invalidated
+ * by a later call to proj_context_set_url_endpoint()
+ * @since 7.1
+ */
 const char *proj_context_get_url_endpoint(PJ_CONTEXT *ctx) {
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
