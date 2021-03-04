@@ -897,8 +897,9 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
     else if (sampleFormat == SAMPLEFORMAT_IEEEFP && bitsPerSample == 64)
         dt = TIFFDataType::Float64;
     else {
-        pj_log(m_ctx, PJ_LOG_ERROR, _("Unsupported combination of SampleFormat "
-                                      "and BitsPerSample values"));
+        pj_log(m_ctx, PJ_LOG_ERROR,
+               _("Unsupported combination of SampleFormat "
+                 "and BitsPerSample values"));
         return nullptr;
     }
 
@@ -998,8 +999,9 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
         // a GeoTransformationMatrix, since negative values in GeoPixelScale
         // have historically been implementation bugs.
         if (matrix[1] != 0 || matrix[4] != 0) {
-            pj_log(m_ctx, PJ_LOG_ERROR, _("Rotational terms not supported in "
-                                          "GeoTransformationMatrix tag"));
+            pj_log(m_ctx, PJ_LOG_ERROR,
+                   _("Rotational terms not supported in "
+                     "GeoTransformationMatrix tag"));
             return nullptr;
         }
 
@@ -1833,10 +1835,9 @@ bool NTv2Grid::valueAt(int x, int y, bool compensateNTConvention,
     float two_float[2];
     // NTv2 is organized from east to west !
     // there are 4 components: lat shift, lon shift, lat error, lon error
-    m_fp->seek(
-        m_offset +
-        4 * sizeof(float) *
-            (static_cast<unsigned long long>(y) * m_width + m_width - 1 - x));
+    m_fp->seek(m_offset + 4 * sizeof(float) *
+                              (static_cast<unsigned long long>(y) * m_width +
+                               m_width - 1 - x));
     if (m_fp->read(&two_float[0], sizeof(two_float)) != sizeof(two_float)) {
         proj_context_errno_set(m_ctx,
                                PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
@@ -2893,7 +2894,9 @@ ListOfHGrids pj_hgrid_init(PJ *P, const char *gridkey) {
 
 // ---------------------------------------------------------------------------
 
-typedef struct { pj_int32 lam, phi; } ILP;
+typedef struct {
+    pj_int32 lam, phi;
+} ILP;
 
 // Apply bilinear interpolation for horizontal shift grids
 static PJ_LP pj_hgrid_interpolate(PJ_LP t, const HorizontalShiftGrid *grid,

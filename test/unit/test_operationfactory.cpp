@@ -211,8 +211,9 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
     }
     {
         auto ctxt = CoordinateOperationContext::create(
-            authFactory, Extent::createFromBBOX(20.26 + .1, 43.44 + .1,
-                                                31.41 - .1, 48.27 - .1),
+            authFactory,
+            Extent::createFromBBOX(20.26 + .1, 43.44 + .1, 31.41 - .1,
+                                   48.27 - .1),
             0.0);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
@@ -222,8 +223,9 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
     }
     {
         auto ctxt = CoordinateOperationContext::create(
-            authFactory, Extent::createFromBBOX(20.26 - .1, 43.44 - .1,
-                                                31.41 + .1, 48.27 + .1),
+            authFactory,
+            Extent::createFromBBOX(20.26 - .1, 43.44 - .1, 31.41 + .1,
+                                   48.27 + .1),
             0.0);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
@@ -2953,14 +2955,16 @@ TEST(operation, transformation_BEV_AT_to_PROJ_string) {
 TEST(operation, transformation_longitude_rotation_to_PROJ_string) {
 
     auto src = GeographicCRS::create(
-        PropertyMap(), GeodeticReferenceFrame::create(
-                           PropertyMap(), Ellipsoid::WGS84,
-                           optional<std::string>(), PrimeMeridian::GREENWICH),
+        PropertyMap(),
+        GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                       optional<std::string>(),
+                                       PrimeMeridian::GREENWICH),
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
     auto dest = GeographicCRS::create(
-        PropertyMap(), GeodeticReferenceFrame::create(
-                           PropertyMap(), Ellipsoid::WGS84,
-                           optional<std::string>(), PrimeMeridian::PARIS),
+        PropertyMap(),
+        GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                       optional<std::string>(),
+                                       PrimeMeridian::PARIS),
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
     auto transformation = Transformation::createLongitudeRotation(
         PropertyMap(), src, dest, Angle(10));
@@ -3090,9 +3094,10 @@ TEST(operation, compoundCRS_with_boundVerticalCRS_to_geogCRS) {
 TEST(operation, compoundCRS_with_boundGeogCRS_to_geogCRS) {
 
     auto geogCRS = GeographicCRS::create(
-        PropertyMap(), GeodeticReferenceFrame::create(
-                           PropertyMap(), Ellipsoid::WGS84,
-                           optional<std::string>(), PrimeMeridian::GREENWICH),
+        PropertyMap(),
+        GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                       optional<std::string>(),
+                                       PrimeMeridian::GREENWICH),
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
     auto horizBoundCRS = BoundCRS::createFromTOWGS84(
         geogCRS, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
@@ -5391,8 +5396,8 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
             op->exportToPROJString(PROJStringFormatter::create().get());
         auto op2_proj =
             op2->exportToPROJString(PROJStringFormatter::create().get());
-        EXPECT_EQ(op_proj, op2_proj) << "op=" << op->nameStr()
-                                     << " op2=" << op2->nameStr();
+        EXPECT_EQ(op_proj, op2_proj)
+            << "op=" << op->nameStr() << " op2=" << op2->nameStr();
     }
 }
 
@@ -5469,7 +5474,7 @@ TEST(operation, compoundCRS_with_non_meter_horiz_and_vertical_to_geog) {
         "                LENGTHUNIT[\"US survey foot\",0.304800609601219,\n"
         "                    ID[\"EPSG\",9003]]]]]"
 
-        );
+    );
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto authFactory =
@@ -5627,8 +5632,9 @@ TEST(operation, isPROJInstantiable) {
     {
         auto transformation = Transformation::create(
             PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326,
-            nullptr, OperationMethod::create(
-                         PropertyMap(), std::vector<OperationParameterNNPtr>{}),
+            nullptr,
+            OperationMethod::create(PropertyMap(),
+                                    std::vector<OperationParameterNNPtr>{}),
             std::vector<GeneralParameterValueNNPtr>{},
             std::vector<PositionalAccuracyNNPtr>{});
         EXPECT_FALSE(transformation->isPROJInstantiable(

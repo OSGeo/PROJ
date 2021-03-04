@@ -193,28 +193,28 @@ struct DatabaseContext::Private {
     void cache(const std::string &code, const crs::CRSNNPtr &crs);
 
     datum::GeodeticReferenceFramePtr
-        // cppcheck-suppress functionStatic
-        getGeodeticDatumFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
+    getGeodeticDatumFromCache(const std::string &code);
     // cppcheck-suppress functionStatic
     void cache(const std::string &code,
                const datum::GeodeticReferenceFrameNNPtr &datum);
 
     datum::DatumEnsemblePtr
-        // cppcheck-suppress functionStatic
-        getDatumEnsembleFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
+    getDatumEnsembleFromCache(const std::string &code);
     // cppcheck-suppress functionStatic
     void cache(const std::string &code,
                const datum::DatumEnsembleNNPtr &datumEnsemble);
 
     datum::EllipsoidPtr
-        // cppcheck-suppress functionStatic
-        getEllipsoidFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
+    getEllipsoidFromCache(const std::string &code);
     // cppcheck-suppress functionStatic
     void cache(const std::string &code, const datum::EllipsoidNNPtr &ellipsoid);
 
     datum::PrimeMeridianPtr
-        // cppcheck-suppress functionStatic
-        getPrimeMeridianFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
+    getPrimeMeridianFromCache(const std::string &code);
     // cppcheck-suppress functionStatic
     void cache(const std::string &code, const datum::PrimeMeridianNNPtr &pm);
 
@@ -617,20 +617,20 @@ void DatabaseContext::Private::checkDatabaseLayout() {
         }
     }
     if (nMajor != DATABASE_LAYOUT_VERSION_MAJOR) {
-        throw FactoryException(databasePath_ +
-                               " contains DATABASE.LAYOUT.VERSION.MAJOR = " +
-                               toString(nMajor) + " whereas " +
-                               toString(DATABASE_LAYOUT_VERSION_MAJOR) +
-                               " is expected. "
-                               "It comes from another PROJ installation.");
+        throw FactoryException(
+            databasePath_ +
+            " contains DATABASE.LAYOUT.VERSION.MAJOR = " + toString(nMajor) +
+            " whereas " + toString(DATABASE_LAYOUT_VERSION_MAJOR) +
+            " is expected. "
+            "It comes from another PROJ installation.");
     }
     if (nMinor < DATABASE_LAYOUT_VERSION_MINOR) {
-        throw FactoryException(databasePath_ +
-                               " contains DATABASE.LAYOUT.VERSION.MINOR = " +
-                               toString(nMinor) + " whereas a number >= " +
-                               toString(DATABASE_LAYOUT_VERSION_MINOR) +
-                               " is expected. "
-                               "It comes from another PROJ installation.");
+        throw FactoryException(
+            databasePath_ +
+            " contains DATABASE.LAYOUT.VERSION.MINOR = " + toString(nMinor) +
+            " whereas a number >= " + toString(DATABASE_LAYOUT_VERSION_MINOR) +
+            " is expected. "
+            "It comes from another PROJ installation.");
     }
 }
 
@@ -4322,8 +4322,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
     // Case (source->intermediate) and (intermediate->target)
     std::string sql(
-        sqlProlog + "ON v1.target_crs_auth_name = v2.source_crs_auth_name "
-                    "AND v1.target_crs_code = v2.source_crs_code " +
+        sqlProlog +
+        "ON v1.target_crs_auth_name = v2.source_crs_auth_name "
+        "AND v1.target_crs_code = v2.source_crs_code " +
         joinArea +
         "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
         "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ");
@@ -4432,24 +4433,25 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         }
     }
 
-    const auto buildIntermediateWhere = [&intermediateCRSAuthCodes](
-        const std::string &first_field, const std::string &second_field) {
-        if (intermediateCRSAuthCodes.empty()) {
-            return std::string();
-        }
-        std::string l_sql(" AND (");
-        for (size_t i = 0; i < intermediateCRSAuthCodes.size(); ++i) {
-            if (i > 0) {
-                l_sql += " OR";
+    const auto buildIntermediateWhere =
+        [&intermediateCRSAuthCodes](const std::string &first_field,
+                                    const std::string &second_field) {
+            if (intermediateCRSAuthCodes.empty()) {
+                return std::string();
             }
-            l_sql += "(v1." + first_field + "_crs_auth_name = ? AND ";
-            l_sql += "v1." + first_field + "_crs_code = ? AND ";
-            l_sql += "v2." + second_field + "_crs_auth_name = ? AND ";
-            l_sql += "v2." + second_field + "_crs_code = ?) ";
-        }
-        l_sql += ')';
-        return l_sql;
-    };
+            std::string l_sql(" AND (");
+            for (size_t i = 0; i < intermediateCRSAuthCodes.size(); ++i) {
+                if (i > 0) {
+                    l_sql += " OR";
+                }
+                l_sql += "(v1." + first_field + "_crs_auth_name = ? AND ";
+                l_sql += "v1." + first_field + "_crs_code = ? AND ";
+                l_sql += "v2." + second_field + "_crs_auth_name = ? AND ";
+                l_sql += "v2." + second_field + "_crs_code = ?) ";
+            }
+            l_sql += ')';
+            return l_sql;
+        };
 
     std::string intermediateWhere = buildIntermediateWhere("target", "source");
     for (const auto &pair : intermediateCRSAuthCodes) {
@@ -4537,8 +4539,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     }
 
     // Case (source->intermediate) and (target->intermediate)
-    sql = sqlProlog + "ON v1.target_crs_auth_name = v2.target_crs_auth_name "
-                      "AND v1.target_crs_code = v2.target_crs_code " +
+    sql = sqlProlog +
+          "ON v1.target_crs_auth_name = v2.target_crs_auth_name "
+          "AND v1.target_crs_code = v2.target_crs_code " +
           joinArea +
           "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
@@ -4580,8 +4583,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     }
 
     // Case (intermediate->source) and (intermediate->target)
-    sql = sqlProlog + "ON v1.source_crs_auth_name = v2.source_crs_auth_name "
-                      "AND v1.source_crs_code = v2.source_crs_code " +
+    sql = sqlProlog +
+          "ON v1.source_crs_auth_name = v2.source_crs_auth_name "
+          "AND v1.source_crs_code = v2.source_crs_code " +
           joinArea +
           "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
           "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ";
@@ -4644,8 +4648,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     }
 
     // Case (intermediate->source) and (target->intermediate)
-    sql = sqlProlog + "ON v1.source_crs_auth_name = v2.target_crs_auth_name "
-                      "AND v1.source_crs_code = v2.target_crs_code " +
+    sql = sqlProlog +
+          "ON v1.source_crs_auth_name = v2.target_crs_auth_name "
+          "AND v1.source_crs_code = v2.target_crs_code " +
           joinArea +
           "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
@@ -4871,7 +4876,6 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
 
     const auto filterDeprecatedAndNotMatchingAuth =
         [&](SQLResultSet &&resultSet) {
-
             SQLResultSet filteredResultSet;
             for (const auto &row : resultSet) {
                 const auto &deprecated1 = row[3];
@@ -4930,9 +4934,11 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         ListOfParams findSupersededParams;
 
         std::set<std::string> setAlreadyAsked;
-        const auto keyMapSupersession = [](
-            const std::string &table_name, const std::string &auth_name,
-            const std::string &code) { return table_name + auth_name + code; };
+        const auto keyMapSupersession = [](const std::string &table_name,
+                                           const std::string &auth_name,
+                                           const std::string &code) {
+            return table_name + auth_name + code;
+        };
 
         for (const auto &row : resultSet) {
             const auto &table1 = row[0];
@@ -5588,12 +5594,13 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     const auto getSqlArea = [](const std::string &table_name) {
         return "JOIN usage u ON "
                "u.object_table_name = '" +
-               table_name + "' AND "
-                            "u.object_auth_name = c.auth_name AND "
-                            "u.object_code = c.code "
-                            "JOIN extent a "
-                            "ON a.auth_name = u.extent_auth_name AND "
-                            "a.code = u.extent_code ";
+               table_name +
+               "' AND "
+               "u.object_auth_name = c.auth_name AND "
+               "u.object_code = c.code "
+               "JOIN extent a "
+               "ON a.auth_name = u.extent_auth_name AND "
+               "a.code = u.extent_code ";
     };
 
     std::string sql = "SELECT c.auth_name, c.code, c.name, c.type, "
@@ -6258,8 +6265,9 @@ AuthorityFactory::createObjectsFromNameEx(
             }
             auto factory = d->createFactory(auth_name);
             auto getObject = [&factory, datumEnsembleAllowed](
-                const std::string &l_table_name,
-                const std::string &l_code) -> common::IdentifiedObjectNNPtr {
+                                 const std::string &l_table_name,
+                                 const std::string &l_code)
+                -> common::IdentifiedObjectNNPtr {
                 if (l_table_name == "prime_meridian") {
                     return factory->createPrimeMeridian(l_code);
                 } else if (l_table_name == "ellipsoid") {

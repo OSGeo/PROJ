@@ -370,8 +370,9 @@ TEST(operation, transformation_to_wkt) {
     auto expected =
         "COORDINATEOPERATION[\"transformationName\",\n"
         "    SOURCECRS[" +
-        src_wkt + "],\n"
-                  "    TARGETCRS[" +
+        src_wkt +
+        "],\n"
+        "    TARGETCRS[" +
         dst_wkt +
         "],\n"
         "    METHOD[\"operationMethodName\",\n"
@@ -472,15 +473,19 @@ TEST(operation, concatenated_operation) {
 
     auto expected = "CONCATENATEDOPERATION[\"name\",\n"
                     "    SOURCECRS[" +
-                    src_wkt + "],\n"
-                              "    TARGETCRS[" +
-                    dst_wkt + "],\n"
-                              "    STEP[" +
-                    step1_wkt + "],\n"
-                                "    STEP[" +
-                    step2_wkt + "],\n"
-                                "    ID[\"codeSpace\",\"code\"],\n"
-                                "    REMARK[\"my remarks\"]]";
+                    src_wkt +
+                    "],\n"
+                    "    TARGETCRS[" +
+                    dst_wkt +
+                    "],\n"
+                    "    STEP[" +
+                    step1_wkt +
+                    "],\n"
+                    "    STEP[" +
+                    step2_wkt +
+                    "],\n"
+                    "    ID[\"codeSpace\",\"code\"],\n"
+                    "    REMARK[\"my remarks\"]]";
 
     EXPECT_EQ(replaceAll(replaceAll(concat->exportToWKT(
                                         WKTFormatter::create(
@@ -663,8 +668,9 @@ TEST(operation, transformation_createPositionVector) {
 
     auto transf = Transformation::createPositionVector(
         PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326, 1.0,
-        2.0, 3.0, 4.0, 5.0, 6.0, 7.0, std::vector<PositionalAccuracyNNPtr>{
-                                          PositionalAccuracy::create("100")});
+        2.0, 3.0, 4.0, 5.0, 6.0, 7.0,
+        std::vector<PositionalAccuracyNNPtr>{
+            PositionalAccuracy::create("100")});
     EXPECT_TRUE(transf->validateParameters().empty());
 
     ASSERT_EQ(transf->coordinateOperationAccuracies().size(), 1U);
@@ -4494,8 +4500,9 @@ static GeographicCRSNNPtr geographicCRSInvalidEccentricity() {
     return GeographicCRS::create(
         PropertyMap(),
         GeodeticReferenceFrame::create(
-            PropertyMap(), Ellipsoid::createFlattenedSphere(
-                               PropertyMap(), Length(6378137), Scale(0.1)),
+            PropertyMap(),
+            Ellipsoid::createFlattenedSphere(PropertyMap(), Length(6378137),
+                                             Scale(0.1)),
             optional<std::string>(), PrimeMeridian::GREENWICH),
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
 }
@@ -5300,10 +5307,11 @@ TEST(operation, validateParameters) {
     }
 
     {
-        auto conv = Conversion::create(
-            PropertyMap(), PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                             "change of vertical unit"),
-            {}, {});
+        auto conv =
+            Conversion::create(PropertyMap(),
+                               PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                                 "change of vertical unit"),
+                               {}, {});
         auto validation = conv->validateParameters();
         auto expected = std::list<std::string>{
             "Method name change of vertical unit is equivalent to official "
@@ -5314,11 +5322,12 @@ TEST(operation, validateParameters) {
 
     {
         auto conv = Conversion::create(
-            PropertyMap(), PropertyMap()
-                               .set(IdentifiedObject::NAME_KEY,
-                                    EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT)
-                               .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
-                               .set(Identifier::CODE_KEY, "1234"),
+            PropertyMap(),
+            PropertyMap()
+                .set(IdentifiedObject::NAME_KEY,
+                     EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT)
+                .set(Identifier::CODESPACE_KEY, Identifier::EPSG)
+                .set(Identifier::CODE_KEY, "1234"),
             {}, {});
         auto validation = conv->validateParameters();
         auto expected = std::list<std::string>{

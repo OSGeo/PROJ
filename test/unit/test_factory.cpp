@@ -1794,11 +1794,13 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                 << last_error();
             ASSERT_TRUE(execute("INSERT INTO usage VALUES('FOO',"
                                 "'geodetic_datum_" +
-                                val + "_usage',"
-                                      "'geodetic_datum',"
-                                      "'FOO','" +
-                                val + "',"
-                                      "'EPSG','1262','EPSG','1024');"))
+                                val +
+                                "_usage',"
+                                "'geodetic_datum',"
+                                "'FOO','" +
+                                val +
+                                "',"
+                                "'EPSG','1262','EPSG','1024');"))
                 << last_error();
 
             ASSERT_TRUE(execute("INSERT INTO geodetic_crs "
@@ -1810,9 +1812,10 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                 << last_error();
             ASSERT_TRUE(execute("INSERT INTO usage VALUES('FOO',"
                                 "'geodetic_crs_" +
-                                val + "_usage',"
-                                      "'geodetic_crs',"
-                                      "'NS_" +
+                                val +
+                                "_usage',"
+                                "'geodetic_crs',"
+                                "'NS_" +
                                 val + "','" + val +
                                 "','EPSG','1262','EPSG','1024');"))
                 << last_error();
@@ -1835,11 +1838,13 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             << last_error();
         ASSERT_TRUE(execute("INSERT INTO usage VALUES('OTHER',"
                             "'helmert_transformation" +
-                            src + '_' + dst + "_usage',"
-                                              "'helmert_transformation',"
-                                              "'OTHER','" +
-                            src + "_" + dst + "',"
-                                              "'EPSG','1262','EPSG','1024');"))
+                            src + '_' + dst +
+                            "_usage',"
+                            "'helmert_transformation',"
+                            "'OTHER','" +
+                            src + "_" + dst +
+                            "',"
+                            "'EPSG','1262','EPSG','1024');"))
             << last_error();
     }
 
@@ -1856,16 +1861,18 @@ class FactoryWithTmpDatabase : public ::testing::Test {
 
             res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
-                false, false, {std::make_pair(std::string("NS_PIVOT"),
-                                              std::string("PIVOT"))});
+                false, false,
+                {std::make_pair(std::string("NS_PIVOT"),
+                                std::string("PIVOT"))});
             EXPECT_EQ(res.size(), 1U);
             EXPECT_TRUE(res.empty() ||
                         nn_dynamic_pointer_cast<ConcatenatedOperation>(res[0]));
 
             res = factoryOTHER->createFromCRSCodesWithIntermediates(
                 "NS_SOURCE", "SOURCE", "NS_TARGET", "TARGET", false, false,
-                false, false, {std::make_pair(std::string("NS_PIVOT"),
-                                              std::string("NOT_EXISTING"))});
+                false, false,
+                {std::make_pair(std::string("NS_PIVOT"),
+                                std::string("NOT_EXISTING"))});
             EXPECT_EQ(res.size(), 0U);
 
             res = factoryOTHER->createFromCRSCodesWithIntermediates(

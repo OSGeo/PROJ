@@ -55,7 +55,7 @@ class ParsingException : public std::exception {
     explicit ParsingException(const char *msg) : msg_(msg) {}
     const char *what() const noexcept override { return msg_.c_str(); }
 };
-}
+} // namespace
 
 // ---------------------------------------------------------------------------
 
@@ -514,9 +514,8 @@ int main(int argc, char *argv[]) {
                 std::cout << url << "... (" << i + 1 << " / "
                           << to_download.size() << ")" << std::endl;
             }
-            if (!dryRun &&
-                !proj_download_file(ctx, url.c_str(), false, nullptr,
-                                    nullptr)) {
+            if (!dryRun && !proj_download_file(ctx, url.c_str(), false, nullptr,
+                                               nullptr)) {
                 std::cerr << "Cannot download " << url << std::endl;
                 std::exit(1);
             }

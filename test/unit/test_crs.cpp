@@ -5511,8 +5511,9 @@ static ParametricCSNNPtr createParametricCS() {
         PropertyMap(),
         CoordinateSystemAxis::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "pressure"), "hPa",
-            AxisDirection::UP, UnitOfMeasure("HectoPascal", 100,
-                                             UnitOfMeasure::Type::PARAMETRIC)));
+            AxisDirection::UP,
+            UnitOfMeasure("HectoPascal", 100,
+                          UnitOfMeasure::Type::PARAMETRIC)));
 }
 
 // ---------------------------------------------------------------------------
