@@ -47,16 +47,4 @@ accept      3210000.0000 6700000.0000   10.0
 expect      3210000.0000 6700000.0000   10.2886
 roundtrip   1
 
-# Test of Norwegian ETRS89 to NGO1948 transformation
-# Verified with https://www.kartverket.no/til-lands/posisjon/transformere-koordinater-enkeltvis with EPSG:4258 to EPSG:27393
-operation   +proj=pipeline \
-            +step +proj=unitconvert +xy_in=rad +xy_out=deg \
-            +step +proj=tinshift +file=tests/tinshift_simplified_etrs89_ngo48.json \
-            +step +proj=unitconvert +xy_in=deg +xy_out=rad \
-            +step +proj=tmerc +lat_0=58.0 +lon_0=10.72291666666666667 +a=6377492.0176 +rf=299.15281285
-tolerance   10 mm
-accept         10.6000     59.9000
-expect      -6609.7077 211545.7872
-roundtrip   1
-
 </gie-strict>
