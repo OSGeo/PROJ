@@ -2614,9 +2614,13 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                                      bool isNullFirst) {
         const auto opsSecond =
             createOperations(candidateSrcGeod, candidateDstGeod, context);
-        const auto opsThird =
-            createOperations(candidateDstGeod, targetCRS, context);
+        const auto opsThird = createOperations(
+            sourceAndTargetAre3D
+                ? candidateDstGeod->promoteTo3D(std::string(), dbContext)
+                : candidateDstGeod,
+            targetCRS, context);
         assert(!opsThird.empty());
+        const CoordinateOperationNNPtr &opThird(opsThird[0]);
 
         for (auto &opSecond : opsSecond) {
             // Check that it is not a transformation synthetized by
@@ -2632,8 +2636,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
             }
 
             std::vector<CoordinateOperationNNPtr> subOps;
-            const bool isNullThird =
-                isNullTransformation(opsThird[0]->nameStr());
+            const bool isNullThird = isNullTransformation(opThird->nameStr());
             CoordinateOperationNNPtr opSecondCloned(
                 (isNullFirst || isNullThird || sourceAndTargetAre3D)
                     ? opSecond->shallowClone()
@@ -2665,12 +2668,31 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                 }
             }
             if (sourceAndTargetAre3D) {
-                opSecondCloned->getPrivate()->use3DHelmert_ = true;
-                auto invCO = dynamic_cast<InverseCoordinateOperation *>(
-                    opSecondCloned.get());
-                if (invCO) {
-                    auto invCOForward = invCO->forwardOperation().get();
-                    invCOForward->getPrivate()->use3DHelmert_ = true;
+
+                // Force Helmert operations to use the 3D domain, even if the
+                // ones we found in EPSG are advertized for the 2D domain.
+                auto concat =
+                    dynamic_cast<ConcatenatedOperation *>(opSecondCloned.get());
+                if (concat) {
+                    std::vector<CoordinateOperationNNPtr> newSteps;
+                    for (const auto &step : concat->operations()) {
+                        auto newStep = step->shallowClone();
+                        setCRSs(newStep.get(),
+                                newStep->sourceCRS()->promoteTo3D(std::string(),
+                                                                  dbContext),
+                                newStep->targetCRS()->promoteTo3D(std::string(),
+                                                                  dbContext));
+                        newSteps.emplace_back(newStep);
+                    }
+                    opSecondCloned =
+                        ConcatenatedOperation::createComputeMetadata(
+                            newSteps, disallowEmptyIntersection);
+                } else {
+                    setCRSs(opSecondCloned.get(),
+                            opSecondCloned->sourceCRS()->promoteTo3D(
+                                std::string(), dbContext),
+                            opSecondCloned->targetCRS()->promoteTo3D(
+                                std::string(), dbContext));
                 }
             }
             if (isNullFirst) {
@@ -2685,7 +2707,7 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                 subOps.emplace_back(opSecondCloned);
             } else {
                 subOps.emplace_back(opSecondCloned);
-                subOps.emplace_back(opsThird[0]);
+                subOps.emplace_back(opThird);
             }
 #ifdef TRACE_CREATE_OPERATIONS
             std::string debugStr;
@@ -2726,6 +2748,10 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 
     for (const auto &candidateSrcGeod : candidatesSrcGeod) {
         if (candidateSrcGeod->nameStr() == sourceCRS->nameStr()) {
+            auto sourceSrcGeodModified(
+                sourceAndTargetAre3D
+                    ? candidateSrcGeod->promoteTo3D(std::string(), dbContext)
+                    : candidateSrcGeod);
             for (const auto &candidateDstGeod : candidatesDstGeod) {
                 if (candidateDstGeod->nameStr() == targetCRS->nameStr()) {
 #ifdef TRACE_CREATE_OPERATIONS
@@ -2734,8 +2760,8 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
                                 objectAsStr(candidateDstGeod.get()) + "->" +
                                 objectAsStr(targetCRS.get()) + ")");
 #endif
-                    const auto opsFirst =
-                        createOperations(sourceCRS, candidateSrcGeod, context);
+                    const auto opsFirst = createOperations(
+                        sourceCRS, sourceSrcGeodModified, context);
                     assert(!opsFirst.empty());
                     const bool isNullFirst =
                         isNullTransformation(opsFirst[0]->nameStr());
@@ -2758,8 +2784,12 @@ void CoordinateOperationFactory::Private::createOperationsWithDatumPivot(
 #ifdef TRACE_CREATE_OPERATIONS
         ENTER_BLOCK("");
 #endif
+        auto sourceSrcGeodModified(
+            sourceAndTargetAre3D
+                ? candidateSrcGeod->promoteTo3D(std::string(), dbContext)
+                : candidateSrcGeod);
         const auto opsFirst =
-            createOperations(sourceCRS, candidateSrcGeod, context);
+            createOperations(sourceCRS, sourceSrcGeodModified, context);
         assert(!opsFirst.empty());
         const bool isNullFirst = isNullTransformation(opsFirst[0]->nameStr());
 
