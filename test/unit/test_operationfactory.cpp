@@ -1453,6 +1453,84 @@ TEST(operation, geocentricCRS_to_geogCRS_different_datum_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_3D_to_geogCRS_3D_different_datum_context) {
+    // Test for https://github.com/OSGeo/PROJ/issues/2541
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // RGF93 (3D)
+        authFactory->createCoordinateReferenceSystem("4965"),
+        // CH1903+ promoted to 3D
+        authFactory->createCoordinateReferenceSystem("4150")->promoteTo3D(
+            std::string(), dbContext),
+        ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "RGF93 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
+    // Check that there is no +push +v_3
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=helmert +x=-674.374 +y=-15.056 +z=-405.346 "
+              "+step +inv +proj=cart +ellps=bessel "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+    EXPECT_EQ(list[0]->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=bessel "
+              "+step +proj=helmert +x=674.374 +y=15.056 +z=405.346 "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geocentric_to_geogCRS_3D_different_datum_context) {
+    // Test variant of https://github.com/OSGeo/PROJ/issues/2541
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // RGF93 (geocentric)
+        authFactory->createCoordinateReferenceSystem("4964"),
+        // CH1903+ promoted to 3D
+        authFactory->createCoordinateReferenceSystem("4150")->promoteTo3D(
+            std::string(), dbContext),
+        ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Conversion from RGF93 (geocentric) to RGF93 (geog3D) + "
+              "RGF93 to ETRS89 (1) + "
+              "Inverse of CH1903+ to ETRS89 (1)");
+    // Check that there is no +push +v_3
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=helmert +x=-674.374 +y=-15.056 +z=-405.346 "
+              "+step +inv +proj=cart +ellps=bessel "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+    EXPECT_EQ(list[0]->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=bessel "
+              "+step +proj=helmert +x=674.374 +y=15.056 +z=405.346");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, esri_projectedCRS_to_geogCRS_with_ITRF_intermediate_context) {
     auto dbContext = DatabaseContext::create();
     auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");

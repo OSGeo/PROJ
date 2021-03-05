@@ -50,7 +50,6 @@ struct CoordinateOperation::Private {
     util::optional<common::DataEpoch> sourceCoordinateEpoch_{};
     util::optional<common::DataEpoch> targetCoordinateEpoch_{};
     bool hasBallparkTransformation_ = false;
-    bool use3DHelmert_ = false;
 
     // do not set this for a ProjectedCRS.definingConversion
     struct CRSStrongRef {

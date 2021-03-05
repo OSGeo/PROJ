@@ -2595,7 +2595,6 @@ void Transformation::_exportToPROJString(
         auto targetCRSGeog =
             dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
         const bool addPushPopV3 =
-            !CoordinateOperation::getPrivate()->use3DHelmert_ &&
             ((sourceCRSGeog &&
               sourceCRSGeog->coordinateSystem()->axisList().size() == 2) ||
              (targetCRSGeog &&
