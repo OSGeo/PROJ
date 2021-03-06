@@ -310,33 +310,33 @@ enum class TIFFDataType { Int16, UInt16, Int32, UInt32, Float32, Float64 };
 
 // ---------------------------------------------------------------------------
 
-constexpr uint16 TIFFTAG_GEOPIXELSCALE = 33550;
-constexpr uint16 TIFFTAG_GEOTIEPOINTS = 33922;
-constexpr uint16 TIFFTAG_GEOTRANSMATRIX = 34264;
-constexpr uint16 TIFFTAG_GEOKEYDIRECTORY = 34735;
-constexpr uint16 TIFFTAG_GEODOUBLEPARAMS = 34736;
-constexpr uint16 TIFFTAG_GEOASCIIPARAMS = 34737;
+constexpr uint16_t TIFFTAG_GEOPIXELSCALE = 33550;
+constexpr uint16_t TIFFTAG_GEOTIEPOINTS = 33922;
+constexpr uint16_t TIFFTAG_GEOTRANSMATRIX = 34264;
+constexpr uint16_t TIFFTAG_GEOKEYDIRECTORY = 34735;
+constexpr uint16_t TIFFTAG_GEODOUBLEPARAMS = 34736;
+constexpr uint16_t TIFFTAG_GEOASCIIPARAMS = 34737;
 #ifndef TIFFTAG_GDAL_METADATA
 // Starting with libtiff > 4.1.0, those symbolic names are #define in tiff.h
-constexpr uint16 TIFFTAG_GDAL_METADATA = 42112;
-constexpr uint16 TIFFTAG_GDAL_NODATA = 42113;
+constexpr uint16_t TIFFTAG_GDAL_METADATA = 42112;
+constexpr uint16_t TIFFTAG_GDAL_NODATA = 42113;
 #endif
 
 // ---------------------------------------------------------------------------
 
 class BlockCache {
   public:
-    void insert(uint32 ifdIdx, uint32 blockNumber,
+    void insert(uint32_t ifdIdx, uint32_t blockNumber,
                 const std::vector<unsigned char> &data);
-    std::shared_ptr<std::vector<unsigned char>> get(uint32 ifdIdx,
-                                                    uint32 blockNumber);
+    std::shared_ptr<std::vector<unsigned char>> get(uint32_t ifdIdx,
+                                                    uint32_t blockNumber);
 
   private:
     struct Key {
-        uint32 ifdIdx;
-        uint32 blockNumber;
+        uint32_t ifdIdx;
+        uint32_t blockNumber;
 
-        Key(uint32 ifdIdxIn, uint32 blockNumberIn)
+        Key(uint32_t ifdIdxIn, uint32_t blockNumberIn)
             : ifdIdx(ifdIdxIn), blockNumber(blockNumberIn) {}
         bool operator==(const Key &other) const {
             return ifdIdx == other.ifdIdx && blockNumber == other.blockNumber;
@@ -363,7 +363,7 @@ class BlockCache {
 
 // ---------------------------------------------------------------------------
 
-void BlockCache::insert(uint32 ifdIdx, uint32 blockNumber,
+void BlockCache::insert(uint32_t ifdIdx, uint32_t blockNumber,
                         const std::vector<unsigned char> &data) {
     cache_.insert(Key(ifdIdx, blockNumber),
                   std::make_shared<std::vector<unsigned char>>(data));
@@ -372,7 +372,7 @@ void BlockCache::insert(uint32 ifdIdx, uint32 blockNumber,
 // ---------------------------------------------------------------------------
 
 std::shared_ptr<std::vector<unsigned char>>
-BlockCache::get(uint32 ifdIdx, uint32 blockNumber) {
+BlockCache::get(uint32_t ifdIdx, uint32_t blockNumber) {
     std::shared_ptr<std::vector<unsigned char>> ret;
     cache_.tryGet(Key(ifdIdx, blockNumber), ret);
     return ret;
@@ -385,15 +385,15 @@ class GTiffGrid : public Grid {
     TIFF *m_hTIFF;       // owned by the belonging GTiffDataset
     BlockCache &m_cache; // owned by the belonging GTiffDataset
     File *m_fp;          // owned by the belonging GTiffDataset
-    uint32 m_ifdIdx;
+    uint32_t m_ifdIdx;
     TIFFDataType m_dt;
-    uint16 m_samplesPerPixel;
-    uint16 m_planarConfig;
+    uint16_t m_samplesPerPixel;
+    uint16_t m_planarConfig;
     bool m_bottomUp;
     toff_t m_dirOffset;
     bool m_tiled;
-    uint32 m_blockWidth = 0;
-    uint32 m_blockHeight = 0;
+    uint32_t m_blockWidth = 0;
+    uint32_t m_blockHeight = 0;
     mutable std::vector<unsigned char> m_buffer{};
     unsigned m_blocksPerRow = 0;
     unsigned m_blocksPerCol = 0;
@@ -402,34 +402,35 @@ class GTiffGrid : public Grid {
     std::map<std::pair<int, std::string>, std::string> m_metadata{};
     bool m_hasNodata = false;
     float m_noData = 0.0f;
-    uint32 m_subfileType = 0;
+    uint32_t m_subfileType = 0;
 
     GTiffGrid(const GTiffGrid &) = delete;
     GTiffGrid &operator=(const GTiffGrid &) = delete;
 
-    void getScaleOffset(double &scale, double &offset, uint16 sample) const;
+    void getScaleOffset(double &scale, double &offset, uint16_t sample) const;
 
     template <class T>
     float readValue(const std::vector<unsigned char> &buffer,
-                    uint32 offsetInBlock, uint16 sample) const;
+                    uint32_t offsetInBlock, uint16_t sample) const;
 
   public:
     GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
-              uint32 ifdIdx, const std::string &nameIn, int widthIn,
+              uint32_t ifdIdx, const std::string &nameIn, int widthIn,
               int heightIn, const ExtentAndRes &extentIn, TIFFDataType dtIn,
-              uint16 samplesPerPixelIn, uint16 planarConfig, bool bottomUpIn);
+              uint16_t samplesPerPixelIn, uint16_t planarConfig,
+              bool bottomUpIn);
 
     ~GTiffGrid() override;
 
-    uint16 samplesPerPixel() const { return m_samplesPerPixel; }
+    uint16_t samplesPerPixel() const { return m_samplesPerPixel; }
 
-    bool valueAt(uint16 sample, int x, int y, float &out) const;
+    bool valueAt(uint16_t sample, int x, int y, float &out) const;
 
     bool isNodata(float val) const;
 
     std::string metadataItem(const std::string &key, int sample = -1) const;
 
-    uint32 subfileType() const { return m_subfileType; }
+    uint32_t subfileType() const { return m_subfileType; }
 
     void reassign_context(PJ_CONTEXT *ctx) { m_ctx = ctx; }
 
@@ -439,10 +440,10 @@ class GTiffGrid : public Grid {
 // ---------------------------------------------------------------------------
 
 GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
-                     uint32 ifdIdx, const std::string &nameIn, int widthIn,
+                     uint32_t ifdIdx, const std::string &nameIn, int widthIn,
                      int heightIn, const ExtentAndRes &extentIn,
-                     TIFFDataType dtIn, uint16 samplesPerPixelIn,
-                     uint16 planarConfig, bool bottomUpIn)
+                     TIFFDataType dtIn, uint16_t samplesPerPixelIn,
+                     uint16_t planarConfig, bool bottomUpIn)
     : Grid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx), m_hTIFF(hTIFF),
       m_cache(cache), m_fp(fp), m_ifdIdx(ifdIdx), m_dt(dtIn),
       m_samplesPerPixel(samplesPerPixelIn), m_planarConfig(planarConfig),
@@ -555,7 +556,7 @@ GTiffGrid::~GTiffGrid() = default;
 // ---------------------------------------------------------------------------
 
 void GTiffGrid::getScaleOffset(double &scale, double &offset,
-                               uint16 sample) const {
+                               uint16_t sample) const {
     {
         auto iter = m_mapScale.find(sample);
         if (iter != m_mapScale.end())
@@ -573,7 +574,7 @@ void GTiffGrid::getScaleOffset(double &scale, double &offset,
 
 template <class T>
 float GTiffGrid::readValue(const std::vector<unsigned char> &buffer,
-                           uint32 offsetInBlock, uint16 sample) const {
+                           uint32_t offsetInBlock, uint16_t sample) const {
     const auto ptr = reinterpret_cast<const T *>(buffer.data());
     assert(offsetInBlock < buffer.size() / sizeof(T));
     const auto val = ptr[offsetInBlock];
@@ -589,7 +590,7 @@ float GTiffGrid::readValue(const std::vector<unsigned char> &buffer,
 
 // ---------------------------------------------------------------------------
 
-bool GTiffGrid::valueAt(uint16 sample, int x, int yFromBottom,
+bool GTiffGrid::valueAt(uint16_t sample, int x, int yFromBottom,
                         float &out) const {
     assert(x >= 0 && yFromBottom >= 0 && x < m_width && yFromBottom < m_height);
     assert(sample < m_samplesPerPixel);
@@ -604,7 +605,7 @@ bool GTiffGrid::valueAt(uint16 sample, int x, int yFromBottom,
     const int yTIFF = m_bottomUp ? yFromBottom : m_height - 1 - yFromBottom;
     const int blockY = yTIFF / m_blockHeight;
 
-    uint32 blockId = blockY * m_blocksPerRow + blockX;
+    uint32_t blockId = blockY * m_blocksPerRow + blockX;
     if (m_planarConfig == PLANARCONFIG_SEPARATE) {
         blockId += sample * m_blocksPerCol * m_blocksPerRow;
     }
@@ -650,7 +651,7 @@ bool GTiffGrid::valueAt(uint16 sample, int x, int yFromBottom,
         }
     }
 
-    uint32 offsetInBlock =
+    uint32_t offsetInBlock =
         (x % m_blockWidth) + (yTIFF % m_blockHeight) * m_blockWidth;
     if (m_planarConfig == PLANARCONFIG_CONTIG)
         offsetInBlock = offsetInBlock * m_samplesPerPixel + sample;
@@ -707,7 +708,7 @@ class GTiffDataset {
     std::unique_ptr<File> m_fp;
     TIFF *m_hTIFF = nullptr;
     bool m_hasNextGrid = false;
-    uint32 m_ifdIdx = 0;
+    uint32_t m_ifdIdx = 0;
     toff_t m_nextDirOffset = 0;
     std::string m_filename{};
     BlockCache m_cache{};
@@ -846,8 +847,8 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
         TIFFSetSubDirectory(m_hTIFF, m_nextDirOffset);
     }
 
-    uint32 width = 0;
-    uint32 height = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
     TIFFGetField(m_hTIFF, TIFFTAG_IMAGEWIDTH, &width);
     TIFFGetField(m_hTIFF, TIFFTAG_IMAGELENGTH, &height);
     if (width == 0 || height == 0 || width > INT_MAX || height > INT_MAX) {
@@ -855,7 +856,7 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
         return nullptr;
     }
 
-    uint16 samplesPerPixel = 0;
+    uint16_t samplesPerPixel = 0;
     if (!TIFFGetField(m_hTIFF, TIFFTAG_SAMPLESPERPIXEL, &samplesPerPixel)) {
         pj_log(m_ctx, PJ_LOG_ERROR, _("Missing SamplesPerPixel tag"));
         return nullptr;
@@ -865,19 +866,19 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
         return nullptr;
     }
 
-    uint16 bitsPerSample = 0;
+    uint16_t bitsPerSample = 0;
     if (!TIFFGetField(m_hTIFF, TIFFTAG_BITSPERSAMPLE, &bitsPerSample)) {
         pj_log(m_ctx, PJ_LOG_ERROR, _("Missing BitsPerSample tag"));
         return nullptr;
     }
 
-    uint16 planarConfig = 0;
+    uint16_t planarConfig = 0;
     if (!TIFFGetField(m_hTIFF, TIFFTAG_PLANARCONFIG, &planarConfig)) {
         pj_log(m_ctx, PJ_LOG_ERROR, _("Missing PlanarConfig tag"));
         return nullptr;
     }
 
-    uint16 sampleFormat = 0;
+    uint16_t sampleFormat = 0;
     if (!TIFFGetField(m_hTIFF, TIFFTAG_SAMPLEFORMAT, &sampleFormat)) {
         pj_log(m_ctx, PJ_LOG_ERROR, _("Missing SampleFormat tag"));
         return nullptr;
@@ -903,7 +904,7 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
         return nullptr;
     }
 
-    uint16 photometric = PHOTOMETRIC_MINISBLACK;
+    uint16_t photometric = PHOTOMETRIC_MINISBLACK;
     if (!TIFFGetField(m_hTIFF, TIFFTAG_PHOTOMETRIC, &photometric))
         photometric = PHOTOMETRIC_MINISBLACK;
     if (photometric != PHOTOMETRIC_MINISBLACK) {
@@ -911,7 +912,7 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
         return nullptr;
     }
 
-    uint16 compression = COMPRESSION_NONE;
+    uint16_t compression = COMPRESSION_NONE;
     if (!TIFFGetField(m_hTIFF, TIFFTAG_COMPRESSION, &compression))
         compression = COMPRESSION_NONE;
 
@@ -1194,10 +1195,10 @@ class GTiffVGrid : public VerticalShiftGrid {
         std::map<std::string, GTiffVGrid *> &mapGrids);
 
     std::unique_ptr<GTiffGrid> m_grid;
-    uint16 m_idxSample;
+    uint16_t m_idxSample;
 
   public:
-    GTiffVGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxSample);
+    GTiffVGrid(std::unique_ptr<GTiffGrid> &&grid, uint16_t idxSample);
 
     ~GTiffVGrid() override;
 
@@ -1224,7 +1225,7 @@ GTiffVGridShiftSet::~GTiffVGridShiftSet() = default;
 
 // ---------------------------------------------------------------------------
 
-GTiffVGrid::GTiffVGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxSample)
+GTiffVGrid::GTiffVGrid(std::unique_ptr<GTiffGrid> &&grid, uint16_t idxSample)
     : VerticalShiftGrid(grid->name(), grid->width(), grid->height(),
                         grid->extentAndRes()),
       m_grid(std::move(grid)), m_idxSample(idxSample) {}
@@ -1267,7 +1268,7 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
     if (!set->m_GTiffDataset->openTIFF(filename)) {
         return nullptr;
     }
-    uint16 idxSample = 0;
+    uint16_t idxSample = 0;
 
     std::map<std::string, GTiffVGrid *> mapGrids;
     for (int ifd = 0;; ++ifd) {
@@ -1301,7 +1302,7 @@ GTiffVGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                 foundDescriptionForAtLeastOneSample = true;
             }
             if (desc == "geoid_undulation" || desc == "vertical_offset") {
-                idxSample = static_cast<uint16>(i);
+                idxSample = static_cast<uint16_t>(i);
                 foundDescriptionForShift = true;
             }
         }
@@ -2063,14 +2064,14 @@ class GTiffHGrid : public HorizontalShiftGrid {
         std::map<std::string, GTiffHGrid *> &mapGrids);
 
     std::unique_ptr<GTiffGrid> m_grid;
-    uint16 m_idxLatShift;
-    uint16 m_idxLonShift;
+    uint16_t m_idxLatShift;
+    uint16_t m_idxLonShift;
     double m_convFactorToRadian;
     bool m_positiveEast;
 
   public:
-    GTiffHGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxLatShift,
-               uint16 idxLonShift, double convFactorToRadian,
+    GTiffHGrid(std::unique_ptr<GTiffGrid> &&grid, uint16_t idxLatShift,
+               uint16_t idxLonShift, double convFactorToRadian,
                bool positiveEast);
 
     ~GTiffHGrid() override;
@@ -2093,8 +2094,8 @@ GTiffHGridShiftSet::~GTiffHGridShiftSet() = default;
 
 // ---------------------------------------------------------------------------
 
-GTiffHGrid::GTiffHGrid(std::unique_ptr<GTiffGrid> &&grid, uint16 idxLatShift,
-                       uint16 idxLonShift, double convFactorToRadian,
+GTiffHGrid::GTiffHGrid(std::unique_ptr<GTiffGrid> &&grid, uint16_t idxLatShift,
+                       uint16_t idxLonShift, double convFactorToRadian,
                        bool positiveEast)
     : HorizontalShiftGrid(grid->name(), grid->width(), grid->height(),
                           grid->extentAndRes()),
@@ -2159,8 +2160,8 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
     }
 
     // Defaults inspired from NTv2
-    uint16 idxLatShift = 0;
-    uint16 idxLonShift = 1;
+    uint16_t idxLatShift = 0;
+    uint16_t idxLonShift = 1;
     constexpr double ARC_SECOND_TO_RADIAN = (M_PI / 180.0) / 3600.0;
     double convFactorToRadian = ARC_SECOND_TO_RADIAN;
     bool positiveEast = true;
@@ -2211,10 +2212,10 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                 foundDescriptionForAtLeastOneSample = true;
             }
             if (desc == "latitude_offset") {
-                idxLatShift = static_cast<uint16>(i);
+                idxLatShift = static_cast<uint16_t>(i);
                 foundDescriptionForLatOffset = true;
             } else if (desc == "longitude_offset") {
-                idxLonShift = static_cast<uint16>(i);
+                idxLonShift = static_cast<uint16_t>(i);
                 foundDescriptionForLonOffset = true;
             }
         }
@@ -2562,7 +2563,7 @@ bool GTiffGenericGrid::valueAt(int x, int y, int sample, float &out) const {
     if (sample < 0 ||
         static_cast<unsigned>(sample) >= m_grid->samplesPerPixel())
         return false;
-    return m_grid->valueAt(static_cast<uint16>(sample), x, y, out);
+    return m_grid->valueAt(static_cast<uint16_t>(sample), x, y, out);
 }
 
 // ---------------------------------------------------------------------------
