@@ -958,7 +958,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
                 err_const_from_errno(proj_errno(T.P)),
                 proj_errno (T.P),
                 expect_failure_with_errno,
-                F->lineno
+                static_cast<int>(F->lineno)
             );
             return another_failing_failure ();
         }
