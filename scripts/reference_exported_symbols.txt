@@ -84,9 +84,10 @@ osgeo::proj::common::UnitOfMeasure::code() const
 osgeo::proj::common::UnitOfMeasure::codeSpace() const
 osgeo::proj::common::UnitOfMeasure::conversionToSI() const
 osgeo::proj::common::UnitOfMeasure::name() const
+osgeo::proj::common::UnitOfMeasure::operator=(osgeo::proj::common::UnitOfMeasure&&)
 osgeo::proj::common::UnitOfMeasure::operator=(osgeo::proj::common::UnitOfMeasure const&)
-osgeo::proj::common::UnitOfMeasure::operator==(osgeo::proj::common::UnitOfMeasure const&) const
 osgeo::proj::common::UnitOfMeasure::operator!=(osgeo::proj::common::UnitOfMeasure const&) const
+osgeo::proj::common::UnitOfMeasure::operator==(osgeo::proj::common::UnitOfMeasure const&) const
 osgeo::proj::common::UnitOfMeasure::type() const
 osgeo::proj::common::UnitOfMeasure::~UnitOfMeasure()
 osgeo::proj::common::UnitOfMeasure::UnitOfMeasure(osgeo::proj::common::UnitOfMeasure const&)

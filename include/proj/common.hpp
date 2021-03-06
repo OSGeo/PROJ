@@ -86,6 +86,7 @@ class PROJ_GCC_DLL UnitOfMeasure : public util::BaseObject {
     PROJ_DLL UnitOfMeasure(const UnitOfMeasure &other);
     PROJ_DLL ~UnitOfMeasure() override;
     PROJ_DLL UnitOfMeasure &operator=(const UnitOfMeasure &other);
+    PROJ_DLL UnitOfMeasure &operator=(UnitOfMeasure &&other);
     PROJ_INTERNAL static UnitOfMeasureNNPtr create(const UnitOfMeasure &other);
     //! @endcond
 
