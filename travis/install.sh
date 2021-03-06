@@ -3,13 +3,15 @@
 set -e
 
 UNAME="$(uname)" || UNAME=""
-if test "${UNAME}" = "Linux" ; then
-    NPROC=$(nproc);
-elif test "${UNAME}" = "Darwin" ; then
-    NPROC=$(sysctl -n hw.ncpu);
-fi
 if test "x${NPROC}" = "x"; then
-    NPROC=2;
+    if test "${UNAME}" = "Linux" ; then
+        NPROC=$(nproc);
+    elif test "${UNAME}" = "Darwin" ; then
+        NPROC=$(sysctl -n hw.ncpu);
+    fi
+    if test "x${NPROC}" = "x"; then
+        NPROC=2;
+    fi
 fi
 echo "NPROC=${NPROC}"
 export MAKEFLAGS="-j ${NPROC}"
