@@ -1799,7 +1799,6 @@ class NTv2GridSet : public HorizontalShiftGridSet {
 class NTv2Grid : public HorizontalShiftGrid {
     friend class NTv2GridSet;
 
-    std::string m_name;
     PJ_CONTEXT *m_ctx; // owned by the parent NTv2GridSet
     File *m_fp;        // owned by the parent NTv2GridSet
     unsigned long long m_offset;
@@ -1812,9 +1811,8 @@ class NTv2Grid : public HorizontalShiftGrid {
     NTv2Grid(const std::string &nameIn, PJ_CONTEXT *ctx, File *fp,
              unsigned long long offsetIn, bool mustSwapIn, int widthIn,
              int heightIn, const ExtentAndRes &extentIn)
-        : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn),
-          m_name(nameIn), m_ctx(ctx), m_fp(fp), m_offset(offsetIn),
-          m_mustSwap(mustSwapIn) {}
+        : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
+          m_fp(fp), m_offset(offsetIn), m_mustSwap(mustSwapIn) {}
 
     bool valueAt(int, int, bool, float &lonShift,
                  float &latShift) const override;
