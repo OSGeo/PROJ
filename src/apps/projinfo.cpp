@@ -942,7 +942,13 @@ int main(int argc, char **argv) {
             }
         } else if (arg == "--accuracy" && i + 1 < argc) {
             i++;
-            minimumAccuracy = c_locale_stod(argv[i]);
+            try {
+                minimumAccuracy = c_locale_stod(argv[i]);
+            } catch (const std::exception &e) {
+                std::cerr << "Invalid value for option --accuracy: " << e.what()
+                          << std::endl;
+                usage();
+            }
         } else if (arg == "--area" && i + 1 < argc) {
             i++;
             area = argv[i];
