@@ -4723,12 +4723,17 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         sourceCRSCode == targetCRSCode) {
         return listTmp;
     }
+    const auto sourceGeodCRS =
+        dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get());
+    const auto targetGeodCRS =
+        dynamic_cast<crs::GeodeticCRS *>(targetCRS.get());
+    if (!sourceGeodCRS || !targetGeodCRS) {
+        return listTmp;
+    }
 
     std::string minDate;
-    const auto &sourceDatum =
-        dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get())->datum();
-    const auto &targetDatum =
-        dynamic_cast<crs::GeodeticCRS *>(targetCRS.get())->datum();
+    const auto &sourceDatum = sourceGeodCRS->datum();
+    const auto &targetDatum = targetGeodCRS->datum();
     if (sourceDatum && sourceDatum->publicationDate().has_value() &&
         targetDatum && targetDatum->publicationDate().has_value()) {
         const auto sourceDate(sourceDatum->publicationDate()->toString());
