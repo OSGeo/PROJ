@@ -226,7 +226,10 @@ PJ *PROJECTION(igh) {
     }
 
     /* mollweide zones */
-    setup_zone(P, Q, 1, pj_moll, -d100, 0, -d100);
+    if( !setup_zone(P, Q, 1, pj_moll, -d100, 0, -d100))
+    {
+       return destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    }
 
     /* y0 ? */
     xy1 = Q->pj[0]->fwd(lp, Q->pj[0]); /* zone 1 */
