@@ -1856,14 +1856,14 @@ createBallparkGeographicOffset(const crs::CRSNNPtr &sourceCRS,
         accuracies.emplace_back(metadata::PositionalAccuracy::create("0"));
     }
 
-    if (dynamic_cast<const crs::SingleCRS *>(sourceCRS.get())
-                ->coordinateSystem()
-                ->axisList()
-                .size() == 3 ||
-        dynamic_cast<const crs::SingleCRS *>(targetCRS.get())
-                ->coordinateSystem()
-                ->axisList()
-                .size() == 3) {
+    const auto singleSourceCRS =
+        dynamic_cast<const crs::SingleCRS *>(sourceCRS.get());
+    const auto singleTargetCRS =
+        dynamic_cast<const crs::SingleCRS *>(targetCRS.get());
+    if ((singleSourceCRS &&
+         singleSourceCRS->coordinateSystem()->axisList().size() == 3) ||
+        (singleTargetCRS &&
+         singleTargetCRS->coordinateSystem()->axisList().size() == 3)) {
         return Transformation::createGeographic3DOffsets(
             map, sourceCRS, targetCRS, angle0, angle0, common::Length(0),
             accuracies);
