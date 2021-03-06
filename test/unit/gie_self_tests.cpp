@@ -268,8 +268,10 @@ TEST_F(gieTest, proj_create_crs_to_crs) {
     ASSERT_TRUE(P != nullptr);
     PJ_COORD a, b;
 
-    a.xy.x = 700000.0;
-    a.xy.y = 6000000.0;
+    a.xyzt.x = 700000.0;
+    a.xyzt.y = 6000000.0;
+    a.xyzt.z = 0;
+    a.xyzt.t = HUGE_VAL;
     b.xy.x = 307788.8761171057;
     b.xy.y = 5999669.3036037628;
 
@@ -306,8 +308,10 @@ TEST_F(gieTest, proj_create_crs_to_crs_EPSG_4326) {
     PJ_COORD a, b;
 
     // Lat, long degrees
-    a.xy.x = 0.0;
-    a.xy.y = 3.0;
+    a.xyzt.x = 0.0;
+    a.xyzt.y = 3.0;
+    a.xyzt.z = 0;
+    a.xyzt.t = HUGE_VAL;
 
     b.xy.x = 500000.0;
     b.xy.y = 0.0;
@@ -328,8 +332,10 @@ TEST_F(gieTest, proj_create_crs_to_crs_proj_longlat) {
     PJ_COORD a, b;
 
     // Long, lat degrees
-    a.xy.x = 3.0;
-    a.xy.y = 0;
+    a.xyzt.x = 3.0;
+    a.xyzt.y = 0;
+    a.xyzt.z = 0;
+    a.xyzt.t = HUGE_VAL;
 
     b.xy.x = 500000.0;
     b.xy.y = 0.0;
@@ -718,9 +724,10 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     proj_destroy(target_crs);
 
     // Romania
-    c.xyz.x = 45; // Lat
-    c.xyz.y = 25; // Long
-    c.xyz.z = 0;
+    c.xyzt.x = 45; // Lat
+    c.xyzt.y = 25; // Long
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
     c = proj_trans(P, PJ_FWD, c);
     EXPECT_NEAR(c.xy.x, 44.999701238, 1e-9);
     EXPECT_NEAR(c.xy.y, 24.998474948, 1e-9);
@@ -740,9 +747,10 @@ TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
     EXPECT_NEAR(c.xy.x, 45, 1e-8);
     EXPECT_NEAR(c.xy.y, 25, 1e-8);
 
-    c.xyz.x = 45; // Lat
-    c.xyz.y = 25; // Long
-    c.xyz.z = 0;
+    c.xyzt.x = 45; // Lat
+    c.xyzt.y = 25; // Long
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
     proj_trans_generic(P, PJ_FWD, &(c.xyz.x), sizeof(double), 1, &(c.xyz.y),
                        sizeof(double), 1, &(c.xyz.z), sizeof(double), 1,
                        nullptr, 0, 0);
@@ -783,9 +791,10 @@ TEST(gie, proj_create_crs_to_crs_outside_area_of_use) {
     EXPECT_EQ(P->fwd, nullptr);
 
     // Test point outside area of use of both candidate coordinate operations
-    c.xyz.x = 58; // Lat in deg
-    c.xyz.y = 5;  // Long in deg
-    c.xyz.z = 0;
+    c.xyzt.x = 58; // Lat in deg
+    c.xyzt.y = 5;  // Long in deg
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
     c = proj_trans(P, PJ_FWD, c);
     EXPECT_NEAR(c.xy.x, 64.44444444444444, 1e-9); // Lat in grad
     EXPECT_NEAR(c.xy.y, 2.958634259259258, 1e-9); // Long in grad
