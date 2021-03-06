@@ -2517,10 +2517,17 @@ bool GeographicCRS::is2DPartOf3D(util::nn<const GeographicCRS *> other,
               util::IComparable::Criterion::EQUIVALENT))) {
         return false;
     }
-    const auto thisDatum = datumNonNull(dbContext);
-    const auto otherDatum = other->datumNonNull(dbContext);
-    return thisDatum->_isEquivalentTo(otherDatum.get(),
-                                      util::IComparable::Criterion::EQUIVALENT);
+    try {
+        const auto thisDatum = datumNonNull(dbContext);
+        const auto otherDatum = other->datumNonNull(dbContext);
+        return thisDatum->_isEquivalentTo(
+            otherDatum.get(), util::IComparable::Criterion::EQUIVALENT);
+    } catch (const util::InvalidValueTypeException &) {
+        // should not happen really, but potentially thrown by
+        // Identifier::Private::setProperties()
+        assert(false);
+        return false;
+    }
 }
 
 //! @endcond
