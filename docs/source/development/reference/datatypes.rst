@@ -829,7 +829,7 @@ Errors in class PROJ_ERR_INVALID_OP
 
     .. note:: some of them can also be emitted during coordinate transformation,
               like PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID in case the resource loading
-              is differed until it is really needed.
+              is deferred until it is really needed.
 
 .. c:macro:: PROJ_ERR_INVALID_OP_WRONG_SYNTAX
 

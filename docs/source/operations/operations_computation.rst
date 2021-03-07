@@ -480,7 +480,7 @@ conversions between geographic and geocentric CRS to have a consistent concatena
 operation, like the following:
 1. GDA94 to GDA2020 (1): from EPSG
 2. Conversion from GDA2020 (geog2D) to GDA2020 (geocentric): synthetized by PROJ
-3. GDA2020 to WGS 84 (G1762) (1): frmo EPSG
+3. GDA2020 to WGS 84 (G1762) (1): from EPSG
 4. Conversion from WGS 84 (G1762) (geocentric) to WGS 84 (G1762) (geog2D): synthetized by PROJ
 
 Projected CRS to any target CRS
