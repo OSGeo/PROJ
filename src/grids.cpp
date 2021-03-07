@@ -1140,7 +1140,7 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
         }
         mapGrids[gridName] = grid.get();
     }
-    bool gridInserted = false;
+
     if (!parentName.empty()) {
         auto iter = mapGrids.find(parentName);
         if (iter == mapGrids.end()) {
@@ -1151,7 +1151,7 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
         } else {
             if (iter->second->extentAndRes().contains(extent)) {
                 iter->second->m_children.emplace_back(std::move(grid));
-                gridInserted = true;
+                return;
             } else {
                 pj_log(ctx, PJ_LOG_DEBUG,
                        "Grid %s refers to parent %s, but its extent is "
@@ -1161,27 +1161,22 @@ insertIntoHierarchy(PJ_CONTEXT *ctx, std::unique_ptr<GridType> &&grid,
         }
     } else if (!gridName.empty()) {
         topGrids.emplace_back(std::move(grid));
-        gridInserted = true;
+        return;
     }
 
     // Fallback to analyzing spatial extents
-    if (!gridInserted) {
-        for (const auto &candidateParent : topGrids) {
-            const auto &candidateParentExtent = candidateParent->extentAndRes();
-            if (candidateParentExtent.contains(extent)) {
-                static_cast<GridType *>(candidateParent.get())
-                    ->insertGrid(ctx, std::move(grid));
-                gridInserted = true;
-                break;
-            } else if (candidateParentExtent.intersects(extent)) {
-                pj_log(ctx, PJ_LOG_DEBUG,
-                       "Partially intersecting grids found!");
-            }
-        }
-        if (!gridInserted) {
-            topGrids.emplace_back(std::move(grid));
+    for (const auto &candidateParent : topGrids) {
+        const auto &candidateParentExtent = candidateParent->extentAndRes();
+        if (candidateParentExtent.contains(extent)) {
+            static_cast<GridType *>(candidateParent.get())
+                ->insertGrid(ctx, std::move(grid));
+            return;
+        } else if (candidateParentExtent.intersects(extent)) {
+            pj_log(ctx, PJ_LOG_DEBUG, "Partially intersecting grids found!");
         }
     }
+
+    topGrids.emplace_back(std::move(grid));
 }
 
 #ifdef TIFF_ENABLED
@@ -1799,7 +1794,6 @@ class NTv2GridSet : public HorizontalShiftGridSet {
 class NTv2Grid : public HorizontalShiftGrid {
     friend class NTv2GridSet;
 
-    std::string m_name;
     PJ_CONTEXT *m_ctx; // owned by the parent NTv2GridSet
     File *m_fp;        // owned by the parent NTv2GridSet
     unsigned long long m_offset;
@@ -1812,9 +1806,8 @@ class NTv2Grid : public HorizontalShiftGrid {
     NTv2Grid(const std::string &nameIn, PJ_CONTEXT *ctx, File *fp,
              unsigned long long offsetIn, bool mustSwapIn, int widthIn,
              int heightIn, const ExtentAndRes &extentIn)
-        : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn),
-          m_name(nameIn), m_ctx(ctx), m_fp(fp), m_offset(offsetIn),
-          m_mustSwap(mustSwapIn) {}
+        : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
+          m_fp(fp), m_offset(offsetIn), m_mustSwap(mustSwapIn) {}
 
     bool valueAt(int, int, bool, float &lonShift,
                  float &latShift) const override;
