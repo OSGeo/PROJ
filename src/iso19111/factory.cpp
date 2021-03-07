@@ -3827,7 +3827,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  * missing grids should be removed from the result set.
  * @param considerKnownGridsAsAvailable Whether known grids should be considered
  * as available (typically when network is enabled).
- * @param discardSuperseded Whether cordinate operations that are superseded
+ * @param discardSuperseded Whether coordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param tryReverseOrder whether to search in the reverse order too (and thus
  * inverse results found that way)
@@ -4200,7 +4200,7 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  * missing grids should be removed from the result set.
  * @param considerKnownGridsAsAvailable Whether known grids should be considered
  * as available (typically when network is enabled).
- * @param discardSuperseded Whether cordinate operations that are superseded
+ * @param discardSuperseded Whether coordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param intermediateCRSAuthCodes List of (auth_name, code) of CRS that can be
  * used as potential intermediate CRS. If the list is empty, the database will
@@ -5587,7 +5587,7 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
 
 /** \brief Return a list of information on CRS objects
  *
- * This is functionnaly equivalent of listing the codes from an authority,
+ * This is functionally equivalent of listing the codes from an authority,
  * instantiating
  * a CRS object for each of them and getting the information from this CRS
  * object, but this implementation has much less overhead.
@@ -6343,8 +6343,8 @@ AuthorityFactory::createObjectsFromNameEx(
         }
 
         // If we found a name that is an exact match, and all objects have the
-        // same type, and we are not in approximate mode, only keep the objet(s)
-        // with the exact name match.
+        // same type, and we are not in approximate mode, only keep the
+        // object(s) with the exact name match.
         if (foundExactMatch && hashCodeFirstMatch != 0 && !approximateMatch) {
             std::list<PairObjectName> resTmp;
             for (const auto &pair : res) {

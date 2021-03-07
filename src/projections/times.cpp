@@ -24,7 +24,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************
- * Based on describtion of the Times Projection in
+ * Based on description of the Times Projection in
  *
  * Flattening the Earth, Snyder, J.P., 1993, p.213-214.
  *****************************************************************************/

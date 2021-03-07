@@ -292,7 +292,7 @@ using IdentifiedObjectPtr = std::shared_ptr<IdentifiedObject>;
 /** Non-null shared pointer of IdentifiedObject. */
 using IdentifiedObjectNNPtr = util::nn<IdentifiedObjectPtr>;
 
-/** \brief Abstract class representating a CRS-related object that has an
+/** \brief Abstract class representing a CRS-related object that has an
  * identification.
  *
  * \remark Implements IdentifiedObject from \ref ISO_19111_2019

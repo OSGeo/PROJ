@@ -6213,7 +6213,7 @@ TEST(operation, compoundCRS_to_PROJJSON_with_non_metre_height) {
 
     // The untypical potentially a bit buggy thing (and what caused a bug)
     // is the US-ft unit for the vertical axis of the base CRS ...
-    // When outputing that to WKT, and
+    // When outputting that to WKT, and
     // re-exporting to PROJJSON, one gets metre, which conforms more to the
     // official definition of NAD83(2011) 3D.
     // The vertical unit of the base CRS shouldn't matter much anyway, so this

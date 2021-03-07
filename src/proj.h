@@ -612,10 +612,10 @@ PJ_COORD PROJ_DLL proj_geod (const PJ *P, PJ_COORD a, PJ_COORD b);
 
 /* PROJ error codes */
 
-/** Error codes typically related to coordinate operation initalization
+/** Error codes typically related to coordinate operation initialization
  * Note: some of them can also be emitted during coordinate transformation,
  * like PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID in case the resource loading
- * is differed until it is really needed.
+ * is deferred until it is really needed.
  */
 #define PROJ_ERR_INVALID_OP                           1024                        /* other/unspecified error related to coordinate operation initialization */
 #define PROJ_ERR_INVALID_OP_WRONG_SYNTAX              (PROJ_ERR_INVALID_OP+1)     /* invalid pipeline structure, missing +proj argument, etc */

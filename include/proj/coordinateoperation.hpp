@@ -740,7 +740,7 @@ projection grid at the natural origin.
 
 EPSG:8807
 
-\subsection latitude_projection_centre Latitute of projection centre
+\subsection latitude_projection_centre Latitude of projection centre
 
 For an oblique projection, this is the latitude of the point at which the
 azimuth of the central line is defined.

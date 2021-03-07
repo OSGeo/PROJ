@@ -221,7 +221,7 @@ static PJ_XYZ reverse_shift(PJ *P, PJ_XYZ input, double dt) {
         return delta;
     }
 
-    /* Store the origial z shift for later application */
+    /* Store the original z shift for later application */
     z0 = delta.z;
 
     /* When iterating to find the best horizontal coordinate we also carry   */

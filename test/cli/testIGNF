@@ -1,6 +1,6 @@
 :
 # Script to test some points in IGNF managed SRS.
-# The expected coordinates have been calculed by
+# The expected coordinates have been calculated by
 # other means.
 # Real points locations are found in proj_outIGNF.dist-real
 # while distribution results are found in proj_outIGNF.dist

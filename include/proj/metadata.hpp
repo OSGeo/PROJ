@@ -141,7 +141,7 @@ using GeographicBoundingBoxNNPtr = util::nn<GeographicBoundingBoxPtr>;
 
 /** \brief Geographic position of the dataset.
  *
- * This is only an approximate so specifying the co-ordinate reference system is
+ * This is only an approximate so specifying the coordinate reference system is
  * unnecessary.
  *
  * \remark Implements [GeographicBoundingBox]

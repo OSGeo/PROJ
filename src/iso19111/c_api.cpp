@@ -2589,7 +2589,7 @@ void proj_get_crs_list_parameters_destroy(PROJ_CRS_LIST_PARAMETERS *params) {
  * The returned object is an array of PROJ_CRS_INFO* pointers, whose last
  * entry is NULL. This array should be freed with proj_crs_info_list_destroy()
  *
- * When no filter parameters are set, this is functionnaly equivalent to
+ * When no filter parameters are set, this is functionally equivalent to
  * proj_get_codes_from_database(), instantiating a PJ* object for each
  * of the codes with proj_create_from_database() and retrieving information
  * with the various getters. However this function will be much faster.
@@ -7593,7 +7593,7 @@ void proj_operation_factory_context_set_crs_extent_use(
  *
  * @param ctx PROJ context, or NULL for default context
  * @param factory_ctx Operation factory context. must not be NULL
- * @param criterion patial criterion to use
+ * @param criterion spatial criterion to use
  */
 void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
     PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,

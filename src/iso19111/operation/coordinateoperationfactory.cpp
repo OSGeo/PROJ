@@ -4917,13 +4917,13 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
             createOperations(sourceCRS, intermGeogSrc, context);
         const auto opsGeogToTarget =
             createOperations(intermGeogDst, targetCRS, context);
-        const bool hasNonTrivalSrcTransf =
+        const bool hasNonTrivialSrcTransf =
             !opsSrcToGeog.empty() &&
             !opsSrcToGeog.front()->hasBallparkTransformation();
         const bool hasNonTrivialTargetTransf =
             !opsGeogToTarget.empty() &&
             !opsGeogToTarget.front()->hasBallparkTransformation();
-        if (hasNonTrivalSrcTransf && hasNonTrivialTargetTransf) {
+        if (hasNonTrivialSrcTransf && hasNonTrivialTargetTransf) {
             const auto opsGeogSrcToGeogDst =
                 createOperations(intermGeogSrc, intermGeogDst, context);
             for (const auto &op1 : opsSrcToGeog) {

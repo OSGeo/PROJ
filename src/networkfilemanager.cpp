@@ -2235,7 +2235,7 @@ void proj_grid_cache_clear(PJ_CONTEXT *ctx) {
  *                           the delay between the last time it has been
  *                           verified and the current time exceeds the TTL
  *                           setting. This can save network accesses.
- *                           If set to TRUE, PROJ will unconditionnally
+ *                           If set to TRUE, PROJ will unconditionally
  *                           check from the server the recentness of the file.
  * @return TRUE if the file must be downloaded with proj_download_file()
  * @since 7.0
@@ -2364,7 +2364,7 @@ int proj_is_download_needed(PJ_CONTEXT *ctx, const char *url_or_filename,
  *                           the delay between the last time it has been
  *                           verified and the current time exceeds the TTL
  *                           setting. This can save network accesses.
- *                           If set to TRUE, PROJ will unconditionnally
+ *                           If set to TRUE, PROJ will unconditionally
  *                           check from the server the recentness of the file.
  * @param progress_cbk Progress callback, or NULL.
  *                     The passed percentage is in the [0, 1] range.

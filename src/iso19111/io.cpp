@@ -1504,15 +1504,15 @@ double WKTParser::Private::asDouble(const WKTNodeNNPtr &node) {
 IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
                                           bool tolerant, bool removeInverseOf) {
     const auto *nodeP = node->GP();
-    const auto &nodeChidren = nodeP->children();
-    if (nodeChidren.size() >= 2) {
-        auto codeSpace = stripQuotes(nodeChidren[0]);
+    const auto &nodeChildren = nodeP->children();
+    if (nodeChildren.size() >= 2) {
+        auto codeSpace = stripQuotes(nodeChildren[0]);
         if (removeInverseOf && starts_with(codeSpace, "INVERSE(") &&
             codeSpace.back() == ')') {
             codeSpace = codeSpace.substr(strlen("INVERSE("));
             codeSpace.resize(codeSpace.size() - 1);
         }
-        auto code = stripQuotes(nodeChidren[1]);
+        auto code = stripQuotes(nodeChildren[1]);
         auto &citationNode = nodeP->lookForChild(WKTConstants::CITATION);
         auto &uriNode = nodeP->lookForChild(WKTConstants::URI);
         PropertyMap propertiesId;
@@ -1536,9 +1536,9 @@ IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
                                  stripQuotes(uriNodeP->children()[0]));
             }
         }
-        if (nodeChidren.size() >= 3 &&
-            nodeChidren[2]->GP()->childrenSize() == 0) {
-            auto version = stripQuotes(nodeChidren[2]);
+        if (nodeChildren.size() >= 3 &&
+            nodeChildren[2]->GP()->childrenSize() == 0) {
+            auto version = stripQuotes(nodeChildren[2]);
             propertiesId.set(Identifier::VERSION_KEY, version);
         }
         return Identifier::create(code, propertiesId);
@@ -3944,7 +3944,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
         // It is likely that the ESRI definition of EPSG:32661 (UPS North) &
         // EPSG:32761 (UPS South) uses the easting-northing order, instead
         // of the EPSG northing-easting order
-        // so don't substitue names to avoid confusion.
+        // so don't substitute names to avoid confusion.
         if (projCRSName == "UPS_North") {
             props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS North (E,N)");
         } else if (projCRSName == "UPS_South") {
@@ -6607,7 +6607,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * order and will expect/output coordinates in radians. ProjectedCRS will have
  * easting, northing axis order (except the ones with Transverse Mercator South
  * Orientated projection). In that mode, the epsg:XXXX syntax will be also
- * interprated the same way.
+ * interpreted the same way.
  * @throw ParsingException
  */
 BaseObjectNNPtr createFromUserInput(const std::string &text,

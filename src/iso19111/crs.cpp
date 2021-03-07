@@ -2208,11 +2208,11 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
         };
 
-        const bool unsignificantName = thisName.empty() ||
+        const bool insignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
                                        ci_equal(thisName, "unnamed");
 
-        if (unsignificantName) {
+        if (insignificantName) {
             searchByDatumOrEllipsoid();
         } else if (hasCodeCompatibleOfAuthorityFactory(this,
                                                        authorityFactory)) {
@@ -3277,7 +3277,7 @@ VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const io::DatabaseContextNNPtr &dbContext =
             authorityFactory->databaseContext();
 
-        const bool unsignificantName = thisName.empty() ||
+        const bool insignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
                                        ci_equal(thisName, "unnamed");
         if (hasCodeCompatibleOfAuthorityFactory(this, authorityFactory)) {
@@ -3298,7 +3298,7 @@ VerticalCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     }
                 }
             }
-        } else if (!unsignificantName) {
+        } else if (!insignificantName) {
             for (int ipass = 0; ipass < 2; ipass++) {
                 const bool approximateMatch = ipass == 1;
                 auto objects = authorityFactory->createObjectsFromName(
@@ -4278,7 +4278,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
 
     if (authorityFactory) {
 
-        const bool unsignificantName = thisName.empty() ||
+        const bool insignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
                                        ci_equal(thisName, "unnamed");
         bool foundEquivalentName = false;
@@ -4304,7 +4304,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     }
                 }
             }
-        } else if (!unsignificantName) {
+        } else if (!insignificantName) {
             for (int ipass = 0; ipass < 2; ipass++) {
                 const bool approximateMatch = ipass == 1;
                 auto objects = authorityFactory->createObjectsFromNameEx(
@@ -4379,7 +4379,7 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     continue;
                 }
 
-                addCRS(crs, unsignificantName);
+                addCRS(crs, insignificantName);
             }
 
             res.sort(lambdaSort);
@@ -4839,7 +4839,7 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         const io::DatabaseContextNNPtr &dbContext =
             authorityFactory->databaseContext();
 
-        const bool unsignificantName = thisName.empty() ||
+        const bool insignificantName = thisName.empty() ||
                                        ci_equal(thisName, "unknown") ||
                                        ci_equal(thisName, "unnamed");
         bool foundEquivalentName = false;
@@ -4861,7 +4861,7 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     }
                 }
             }
-        } else if (!unsignificantName) {
+        } else if (!insignificantName) {
             for (int ipass = 0; ipass < 2; ipass++) {
                 const bool approximateMatch = ipass == 1;
                 auto objects = authorityFactory->createObjectsFromName(
@@ -4942,7 +4942,7 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                 }
 
                 if (_isEquivalentTo(crs.get(), crsCriterion, dbContext)) {
-                    res.emplace_back(crs, unsignificantName ? 90 : 70);
+                    res.emplace_back(crs, insignificantName ? 90 : 70);
                 } else {
                     res.emplace_back(crs, 25);
                 }
