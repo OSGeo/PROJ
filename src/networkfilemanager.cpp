@@ -1523,7 +1523,7 @@ struct CurlFileHandle {
     CurlFileHandle(const CurlFileHandle &) = delete;
     CurlFileHandle &operator=(const CurlFileHandle &) = delete;
 
-    explicit CurlFileHandle(const char *url, CURL *handle,
+    explicit CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle,
                             const char *ca_bundle_path);
     ~CurlFileHandle();
 
@@ -1596,26 +1596,37 @@ static std::string GetExecutableName() {
 
 // ---------------------------------------------------------------------------
 
-CurlFileHandle::CurlFileHandle(const char *url, CURL *handle,
+static void checkRet(PJ_CONTEXT *ctx, CURLcode code, int line) {
+    if (code != CURLE_OK) {
+        pj_log(ctx, PJ_LOG_ERROR, "curl_easy_setopt at line %d failed", line);
+    }
+}
+
+#define CHECK_RET(ctx, code) checkRet(ctx, code, __LINE__)
+
+// ---------------------------------------------------------------------------
+
+CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle,
                                const char *ca_bundle_path)
     : m_url(url), m_handle(handle) {
-    curl_easy_setopt(handle, CURLOPT_URL, m_url.c_str());
+    CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_URL, m_url.c_str()));
 
     if (getenv("PROJ_CURL_VERBOSE"))
-        curl_easy_setopt(handle, CURLOPT_VERBOSE, 1);
+        CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_VERBOSE, 1));
 
 // CURLOPT_SUPPRESS_CONNECT_HEADERS is defined in curl 7.54.0 or newer.
 #if LIBCURL_VERSION_NUM >= 0x073600
-    curl_easy_setopt(handle, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
+    CHECK_RET(ctx,
+              curl_easy_setopt(handle, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L));
 #endif
 
     // Enable following redirections.  Requires libcurl 7.10.1 at least.
-    curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1);
-    curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 10);
+    CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1));
+    CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 10));
 
     if (getenv("PROJ_UNSAFE_SSL")) {
-        curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, 0L);
+        CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L));
+        CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, 0L));
     }
 
     // Custom path to SSL certificates.
@@ -1632,10 +1643,12 @@ CurlFileHandle::CurlFileHandle(const char *url, CURL *handle,
         ca_bundle_path = getenv("SSL_CERT_FILE");
     }
     if (ca_bundle_path != nullptr) {
-        curl_easy_setopt(handle, CURLOPT_CAINFO, ca_bundle_path);
+        CHECK_RET(ctx,
+                  curl_easy_setopt(handle, CURLOPT_CAINFO, ca_bundle_path));
     }
 
-    curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, m_szCurlErrBuf);
+    CHECK_RET(ctx,
+              curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, m_szCurlErrBuf));
 
     if (getenv("PROJ_NO_USERAGENT") == nullptr) {
         m_useragent = "PROJ " STR(PROJ_VERSION_MAJOR) "." STR(
@@ -1644,7 +1657,8 @@ CurlFileHandle::CurlFileHandle(const char *url, CURL *handle,
         if (!exeName.empty()) {
             m_useragent = exeName + " using " + m_useragent;
         }
-        curl_easy_setopt(handle, CURLOPT_USERAGENT, m_useragent.data());
+        CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_USERAGENT,
+                                        m_useragent.data()));
     }
 }
 
@@ -1703,7 +1717,7 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
         return nullptr;
 
     auto file = std::unique_ptr<CurlFileHandle>(new CurlFileHandle(
-        url, hCurlHandle,
+        ctx, url, hCurlHandle,
         ctx->ca_bundle_path.empty() ? nullptr : ctx->ca_bundle_path.c_str()));
 
     double oldDelay = MIN_RETRY_DELAY_MS;
@@ -1715,19 +1729,20 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
                      offset + size_to_read - 1);
 
     while (true) {
-        curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
+        CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer));
 
         headers.clear();
         headers.reserve(16 * 1024);
-        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, &headers);
-        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION,
-                         pj_curl_write_func);
+        CHECK_RET(ctx,
+                  curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, &headers));
+        CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION,
+                                        pj_curl_write_func));
 
         body.clear();
         body.reserve(size_to_read);
-        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
-        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION,
-                         pj_curl_write_func);
+        CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body));
+        CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION,
+                                        pj_curl_write_func));
 
         file->m_szCurlErrBuf[0] = '\0';
 
@@ -1736,11 +1751,15 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
         long response_code = 0;
         curl_easy_getinfo(hCurlHandle, CURLINFO_HTTP_CODE, &response_code);
 
-        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, nullptr);
-        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION, nullptr);
+        CHECK_RET(ctx,
+                  curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, nullptr));
+        CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION,
+                                        nullptr));
 
-        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
-        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
+        CHECK_RET(ctx,
+                  curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr));
+        CHECK_RET(
+            ctx, curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr));
 
         if (response_code == 0 || response_code >= 300) {
             const double delay =
@@ -1809,19 +1828,20 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
                      offset + size_to_read - 1);
 
     while (true) {
-        curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer);
+        CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_RANGE, szBuffer));
 
         headers.clear();
         headers.reserve(16 * 1024);
-        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, &headers);
-        curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION,
-                         pj_curl_write_func);
+        CHECK_RET(ctx,
+                  curl_easy_setopt(hCurlHandle, CURLOPT_HEADERDATA, &headers));
+        CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_HEADERFUNCTION,
+                                        pj_curl_write_func));
 
         body.clear();
         body.reserve(size_to_read);
-        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body);
-        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION,
-                         pj_curl_write_func);
+        CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, &body));
+        CHECK_RET(ctx, curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION,
+                                        pj_curl_write_func));
 
         handle->m_szCurlErrBuf[0] = '\0';
 
@@ -1830,8 +1850,10 @@ static size_t pj_curl_read_range(PJ_CONTEXT *ctx,
         long response_code = 0;
         curl_easy_getinfo(hCurlHandle, CURLINFO_HTTP_CODE, &response_code);
 
-        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr);
-        curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr);
+        CHECK_RET(ctx,
+                  curl_easy_setopt(hCurlHandle, CURLOPT_WRITEDATA, nullptr));
+        CHECK_RET(
+            ctx, curl_easy_setopt(hCurlHandle, CURLOPT_WRITEFUNCTION, nullptr));
 
         if (response_code == 0 || response_code >= 300) {
             const double delay =

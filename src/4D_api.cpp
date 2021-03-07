@@ -1610,7 +1610,7 @@ PJ_INFO proj_info (void) {
 
     /* build search path string */
     auto ctx = pj_get_default_ctx();
-    if (!ctx || ctx->search_paths.empty()) {
+    if (ctx->search_paths.empty()) {
         const auto searchpaths = pj_get_default_searchpaths(ctx);
         for( const auto& path: searchpaths ) {
             buf = path_append(buf, path.c_str(), &buf_size);
@@ -1624,8 +1624,8 @@ PJ_INFO proj_info (void) {
     free(const_cast<char*>(info.searchpath));
     info.searchpath = buf ? buf : empty;
 
-    info.paths = ctx ? ctx->c_compat_paths : nullptr;
-    info.path_count = ctx ? static_cast<int>(ctx->search_paths.size()) : 0;
+    info.paths = ctx->c_compat_paths;
+    info.path_count = static_cast<int>(ctx->search_paths.size());
 
     pj_release_lock ();
     return info;

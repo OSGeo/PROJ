@@ -81,6 +81,17 @@ BaseObjectNNPtr::~BaseObjectNNPtr() = default;
 
 // ---------------------------------------------------------------------------
 
+//! @cond Doxygen_Suppress
+// cppcheck-suppress operatorEqVarError
+BaseObject &BaseObject::operator=(BaseObject &&) {
+    d->self_.reset();
+    return *this;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
 /** Keep a reference to ourselves as an internal weak pointer. So that
  * extractGeographicBaseObject() can later return a shared pointer on itself.
  */

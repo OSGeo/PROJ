@@ -422,7 +422,13 @@ int main(int argc, char **argv) {
                 emess(1, "missing argument for --accuracy");
                 std::exit(1);
             }
-            accuracy = c_locale_stod(*argv);
+            try {
+                accuracy = c_locale_stod(*argv);
+            } catch (const std::exception &e) {
+                std::cerr << "Invalid value for option --accuracy: "
+                          << e.what() << std::endl;
+                std::exit(1);
+            }
         }
         else if (strcmp(*argv, "--authority") == 0 ) {
             ++argv;

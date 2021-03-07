@@ -455,7 +455,7 @@ int main(int argc, char **argv) {
         size_t len = strlen(comment);
         if (len >= 1)
             comment[len - 1] = '\0';
-        comment_delimiter = (comment && *comment) ? whitespace : blank_comment;
+        comment_delimiter = *comment ? whitespace : blank_comment;
 
         /* Time to print the result */
         /* use same arguments to printf format string for both radians and
