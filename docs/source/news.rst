@@ -221,7 +221,7 @@ Bug fixes
 Updates
 -------
 
-* Added various Brazillian grids to the database (`#2277 <https://github.com/OSGeo/PROJ/issues/2277>`_)
+* Added various Brazilian grids to the database (`#2277 <https://github.com/OSGeo/PROJ/issues/2277>`_)
 
 * Added geoid file for Canary Islands to the database (`#2312 <https://github.com/OSGeo/PROJ/issues/2312>`_)
 
@@ -790,7 +790,7 @@ Bug fixes
 * Database: add an auxiliary concatenated_operation_step table to allow
   arbitrary number of steps (`#1696 <https://github.com/OSGeo/PROJ/issues/1696>`_)
 
-* Fix errors running gie-based tests in Debug mode on Windo (`#1688 <https://github.com/OSGeo/PROJ/issues/1688>`_)
+* Fix errors running gie-based tests in Debug mode on Window (`#1688 <https://github.com/OSGeo/PROJ/issues/1688>`_)
 
 6.2.1 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
@@ -1089,7 +1089,7 @@ UPDATES
   by adding ``+approx``
   (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)
 
-* Chaged behavior: Default ellipsoid now set to GRS80 (was WGS84) (`#1210 <https://github.com/OSGeo/proj.4/issues/1210>`_)
+* Changed behavior: Default ellipsoid now set to GRS80 (was WGS84) (`#1210 <https://github.com/OSGeo/proj.4/issues/1210>`_)
 
 * Allow multiple directories in :envvar:`PROJ_LIB` environment variable (`#1281 <https://github.com/OSGeo/proj.4/issues/1281>`_)
 

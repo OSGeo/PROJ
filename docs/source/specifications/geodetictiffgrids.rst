@@ -151,12 +151,12 @@ is an easy way to inspect such grid files:
 - The `ImageDescription <https://www.awaresystems.be/imaging/tiff/tifftags/imagedescription.html>`_
   tag may be used to convey extra information about the name, provenance, version
   and last updated date of the grid.
-  Will be set when possible fo files hosted on the CDN.
+  Will be set when possible for files hosted on the CDN.
   Ignored by PROJ.
 
 - The `Copyright <https://www.awaresystems.be/imaging/tiff/tifftags/copyright.html>`_
   tag may be used to convey extra information about the copyright and license of the grid.
-  Will be set when possible fo files hosted on the CDN.
+  Will be set when possible for files hosted on the CDN.
   Ignored by PROJ.
 
 - The `DateTime <https://www.awaresystems.be/imaging/tiff/tifftags/datetime.html>`_
@@ -164,7 +164,7 @@ is an easy way to inspect such grid files:
   converted. In case of a file conversion, for example from NTv2, this will be
   the date at which the conversion has been performed. The ``ImageDescription``
   tag however will contain the latest of the CREATED or UPDATED fields from the NTv2 file.
-  Will be set when possible fo files hosted on the CDN.
+  Will be set when possible for files hosted on the CDN.
   Ignored by PROJ.
 
 - Files hosted on the CDN will use the `GDAL_NODATA
