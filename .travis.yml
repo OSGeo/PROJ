@@ -38,6 +38,7 @@ matrix:
       env:
         - BUILD_NAME=linux_generic
         - DETAILS="linux, arm64"
+        - NPROC=4
 
   allow_failures:
       - env: BUILD_NAME=mingw32
