@@ -116,6 +116,10 @@ VALUES
 ('EGM08_REDNAP.txt','es_ign_egm08-rednap.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/es_ign_egm08-rednap.tif',1,1,NULL),
 ('EGM08_REDNAP_Canarias.txt','es_ign_egm08-rednap-canarias.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/es_ign_egm08-rednap-canarias.tif',1,1,NULL),
 
+-- eur_nkg - Nordic Geodetic Commission
+('NOT-YET-IN-GRID-TRANSFORMATION-eur_nkg_nkgrf03vel_realigned.tif','eur_nkg_nkgrf03vel_realigned.tif',NULL,'GTiff','velocity_grid',0,NULL,'https://cdn.proj.org/eur_nkg_nkgrf03vel_realigned.tif',1,1,NULL),
+('NOT-YET-IN-GRID-TRANSFORMATION-eur_nkg_nkgrf17vel.tif','eur_nkg_nkgrf17vel.tif',NULL,'GTiff','velocity_grid',0,NULL,'https://cdn.proj.org/eur_nkg_nkgrf17vel.tif',1,1,NULL),
+
 -- fi_nls - National Land Survey of Finland (MML)
 ('fi_nls_n43_n60.json','fi_nls_n43_n60.json',NULL,'JSON','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_n43_n60.json',1,1,NULL),
 ('fi_nls_n60_n2000.json','fi_nls_n60_n2000.json',NULL,'JSON','tinshift',0,NULL,'https://cdn.proj.org/fi_nls_n60_n2000.json',1,1,NULL),
