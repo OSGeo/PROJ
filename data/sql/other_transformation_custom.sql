@@ -1,5 +1,21 @@
 -- This file is hand generated.
 
+-- Norway triangulated files
+ 
+INSERT INTO other_transformation VALUES(
+    'PROJ','NGO48_TO_ETRS89NO','NGO 1948 to ETRS89 (2)',
+    'Transformation based on a triangulated irregular network',
+    'PROJ','PROJString',
+    '+proj=pipeline ' ||
+        '+step +proj=axisswap +order=2,1 ' ||
+        '+step +proj=tinshift +file=no_kv_ETRS89NO_NGO48_TIN.json +inv ' ||
+        '+step +proj=axisswap +order=2,1',
+    'EPSG','4273',
+    'EPSG','4258',
+    0.1,
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('PROJ','NGO48_TO_ETRS89NO_USAGE','other_transformation','PROJ','NGO48_TO_ETRS89NO','EPSG','1352','EPSG','1031');
+
 -- Finland triangulated files
 
 INSERT INTO other_transformation VALUES(
