@@ -357,7 +357,7 @@ expect      896633.0226 6000000 0   2020
 
 # Datum shift in cartesian space but keeping the height
 # (simulates a datum-shift with affin since ISO19111 code
-# currrently obfuscates proj-strings using cart/helmert/invcart)
+# currently obfuscates proj-strings using cart/helmert/invcart)
 operation   +proj=pipeline +ellps=GRS80 \
             +step +proj=push +v_3 \
             +step +proj=cart \

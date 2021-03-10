@@ -98,7 +98,7 @@ PROJ_HEAD(cart,    "Geodetic/cartesian conversions");
     (WP2, below)
 
     These routines are probably not as robust at those in
-    geocent.c, at least thay haven't been through as heavy
+    geocent.c, at least they haven't been through as heavy
     use as their geocent sisters. Some care has been taken
     to avoid singularities, but extreme cases (e.g. setting
     es, the squared eccentricity, to 1), will cause havoc.

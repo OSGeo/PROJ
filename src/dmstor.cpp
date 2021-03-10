@@ -27,7 +27,7 @@ dmstor(const char *is, char **rs) {
 
 	double
 dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
-	int sign, n, nl;
+	int n, nl;
 	char *s, work[MAX_WORK];
         const char* p;
 	double v, tv;
@@ -35,7 +35,7 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 	if (rs)
 		*rs = (char *)is;
 	/* copy sting into work space */
-	while (isspace(sign = *is)) ++is;
+	while (isspace(*is)) ++is;
 	n = MAX_WORK;
 	s = work;
 	p = (char *)is;
@@ -44,7 +44,7 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 	*s = '\0';
 	/* it is possible that a really odd input (like lots of leading
 		zeros) could be truncated in copying into work.  But ... */
-	sign = *(s = work);
+	int sign = *(s = work);
 	if (sign == '+' || sign == '-') s++;
 	else sign = '+';
 	v = 0.;

@@ -187,8 +187,8 @@ static BaseObjectNNPtr buildObject(
     try {
         auto tokens = split(l_user_string, ':');
         if (kind == "operation" && tokens.size() == 2) {
-            auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] + "::" +
-                       tokens[1];
+            auto urn = "urn:ogc:def:coordinateOperation:" + tokens[0] +
+                       "::" + tokens[1];
             obj = createFromUserInput(urn, dbContext).as_nullable();
         } else if ((kind == "ellipsoid" || kind == "datum" ||
                     kind == "ensemble") &&
@@ -335,7 +335,7 @@ static void outputObject(
 
     auto projStringExportable =
         nn_dynamic_pointer_cast<IPROJStringExportable>(obj);
-    bool alreadyOutputed = false;
+    bool alreadyOutputted = false;
     if (projStringExportable) {
         if (outputOpt.PROJ5) {
             try {
@@ -369,7 +369,7 @@ static void outputObject(
                 std::cerr << "Error when exporting to PROJ string: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
     }
 
@@ -377,7 +377,7 @@ static void outputObject(
     if (wktExportable) {
         if (outputOpt.WKT2_2015) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -396,12 +396,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT2:2015: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT2_2015_SIMPLIFIED) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -422,12 +422,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT2:2015_SIMPLIFIED: "
                           << e.what() << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT2_2019) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -448,12 +448,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT2:2019: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT2_2019_SIMPLIFIED) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -474,12 +474,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT2:2019_SIMPLIFIED: "
                           << e.what() << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT1_GDAL && !nn_dynamic_pointer_cast<Conversion>(obj)) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -504,12 +504,12 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT1:GDAL: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
 
         if (outputOpt.WKT1_ESRI && !nn_dynamic_pointer_cast<Conversion>(obj)) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -529,7 +529,7 @@ static void outputObject(
                 std::cerr << "Error when exporting to WKT1:ESRI: " << e.what()
                           << std::endl;
             }
-            alreadyOutputed = true;
+            alreadyOutputted = true;
         }
     }
 
@@ -537,7 +537,7 @@ static void outputObject(
     if (JSONExportable) {
         if (outputOpt.PROJJSON) {
             try {
-                if (alreadyOutputed) {
+                if (alreadyOutputted) {
                     std::cout << std::endl;
                 }
                 if (!outputOpt.quiet) {
@@ -556,7 +556,7 @@ static void outputObject(
                 std::cerr << "Error when exporting to PROJJSON: " << e.what()
                           << std::endl;
             }
-            // alreadyOutputed = true;
+            // alreadyOutputted = true;
         }
     }
 
@@ -796,7 +796,7 @@ int main(int argc, char **argv) {
     bool user_string_specified = false;
     std::string sourceCRSStr;
     std::string targetCRSStr;
-    bool outputSwithSpecified = false;
+    bool outputSwitchSpecified = false;
     OutputOptions outputOpt;
     std::string objectKind;
     bool summary = false;
@@ -829,7 +829,7 @@ int main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
         if (arg == "-o" && i + 1 < argc) {
-            outputSwithSpecified = true;
+            outputSwitchSpecified = true;
             i++;
             auto formats(split(argv[i], ','));
             for (auto format : formats) {
@@ -942,7 +942,13 @@ int main(int argc, char **argv) {
             }
         } else if (arg == "--accuracy" && i + 1 < argc) {
             i++;
-            minimumAccuracy = c_locale_stod(argv[i]);
+            try {
+                minimumAccuracy = c_locale_stod(argv[i]);
+            } catch (const std::exception &e) {
+                std::cerr << "Invalid value for option --accuracy: " << e.what()
+                          << std::endl;
+                usage();
+            }
         } else if (arg == "--area" && i + 1 < argc) {
             i++;
             area = argv[i];
@@ -1171,7 +1177,7 @@ int main(int argc, char **argv) {
         usage();
     }
 
-    if (!outputSwithSpecified) {
+    if (!outputSwitchSpecified) {
         outputOpt.PROJ5 = true;
         outputOpt.WKT2_2019 = true;
     }
@@ -1214,11 +1220,10 @@ int main(int argc, char **argv) {
                 if (crs) {
                     try {
                         auto res = crs->identify(
-                            dbContext
-                                ? AuthorityFactory::create(
-                                      NN_NO_CHECK(dbContext), authority)
-                                      .as_nullable()
-                                : nullptr);
+                            dbContext ? AuthorityFactory::create(
+                                            NN_NO_CHECK(dbContext), authority)
+                                            .as_nullable()
+                                      : nullptr);
                         std::cout << std::endl;
                         std::cout
                             << "Identification match count: " << res.size()

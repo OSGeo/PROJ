@@ -110,7 +110,7 @@ message(STATUS "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 8 MINOR 0 PATCH 0)
+proj_version(MAJOR 8 MINOR 1 PATCH 0)
 set(PROJ_API_VERSION "22")
 set(PROJ_BUILD_VERSION "22.0.0")
 
@@ -282,3 +282,14 @@ endif()
 set(docfiles COPYING NEWS AUTHORS)
 install(FILES ${docfiles}
         DESTINATION "${DOCDIR}")
+
+################################################################################
+# pkg-config support
+################################################################################
+if(UNIX OR MINGW)
+  configure_proj_pc()
+
+  install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+endif()

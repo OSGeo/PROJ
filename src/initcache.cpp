@@ -25,6 +25,7 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
+#include <assert.h>
 #include <string.h>
 
 #include "proj.h"
@@ -49,6 +50,7 @@ paralist *pj_clone_paralist( const paralist *list)
     {
       paralist *newitem = (paralist *)
 	malloc(sizeof(paralist) + strlen(list->param));
+      assert(newitem);
 
       newitem->used = 0;
       newitem->next = nullptr;
@@ -152,6 +154,7 @@ void pj_insert_initcache( const char *filekey, const paralist *list )
         cache_alloc = cache_alloc * 2 + 15;
 
         cache_key_new = (char **) malloc(sizeof(char*) * cache_alloc);
+        assert(cache_key_new);
         if( cache_key && cache_count )
         {
             memcpy( cache_key_new, cache_key, sizeof(char*) * cache_count);
@@ -161,6 +164,7 @@ void pj_insert_initcache( const char *filekey, const paralist *list )
 
         cache_paralist_new = (paralist **) 
             malloc(sizeof(paralist*) * cache_alloc);
+        assert(cache_paralist_new);
         if( cache_paralist && cache_count )
         {
             memcpy( cache_paralist_new, cache_paralist,
@@ -174,6 +178,7 @@ void pj_insert_initcache( const char *filekey, const paralist *list )
     ** Duplicate the filekey and paralist, and insert in cache.
     */
     cache_key[cache_count] = (char *) malloc(strlen(filekey)+1);
+    assert(cache_key[cache_count]);
     strcpy( cache_key[cache_count], filekey );
 
     cache_paralist[cache_count] = pj_clone_paralist( list );

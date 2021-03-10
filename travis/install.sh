@@ -3,13 +3,15 @@
 set -e
 
 UNAME="$(uname)" || UNAME=""
-if test "${UNAME}" = "Linux" ; then
-    NPROC=$(nproc);
-elif test "${UNAME}" = "Darwin" ; then
-    NPROC=$(sysctl -n hw.ncpu);
-fi
 if test "x${NPROC}" = "x"; then
-    NPROC=2;
+    if test "${UNAME}" = "Linux" ; then
+        NPROC=$(nproc);
+    elif test "${UNAME}" = "Darwin" ; then
+        NPROC=$(sysctl -n hw.ncpu);
+    fi
+    if test "x${NPROC}" = "x"; then
+        NPROC=2;
+    fi
 fi
 echo "NPROC=${NPROC}"
 export MAKEFLAGS="-j ${NPROC}"
@@ -112,6 +114,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     find /tmp/proj_cmake_install
     if [ $BUILD_NAME = "linux_gcc" ] || [ $BUILD_NAME = "osx" ]; then
         $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_cmake_install
+        $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_cmake_install
     else
         echo "Skipping test_cmake.sh test for $BUILD_NAME"
     fi

@@ -30,7 +30,7 @@ However, the parameters below can be used in a declarative manner when used with
 
 .. option:: +datum=<value>
 
-    Declare the datum used with the coordinates. See ``cs2cs -l`` for a
+    Declare the datum used with the coordinates. See ``cs2cs -ld`` for a
     list of available datums.
 
 .. option:: +towgs84=<list>

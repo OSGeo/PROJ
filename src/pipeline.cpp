@@ -465,8 +465,8 @@ PJ *OPERATION(pipeline,0) {
         return destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     /* Do some syntactical sanity checking */
-    for (i = 0;  i < argc;  i++) {
-        if (0==strcmp (argv_sentinel, argv[i])) {
+    for (i = 0;  i < argc && argv[i] != nullptr;  i++) {
+        if ( 0==strcmp (argv_sentinel, argv[i])) {
             if (-1==i_pipeline) {
                 proj_log_error (P, _("Pipeline: +step before +proj=pipeline"));
                 return destructor (P, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);

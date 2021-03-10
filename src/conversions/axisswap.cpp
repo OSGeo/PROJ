@@ -298,7 +298,7 @@ PJ *CONVERSION(axisswap,0) {
     }
 
 
-    /* Preparation and finalization steps are skipped, since the raison   */
+    /* Preparation and finalization steps are skipped, since the reason   */
     /* d'etre of axisswap is to bring input coordinates in line with the  */
     /* the internally expected order (ENU), such that handling of offsets */
     /* etc. can be done correctly in a later step of a pipeline */

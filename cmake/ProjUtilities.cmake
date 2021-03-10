@@ -14,7 +14,8 @@
 # Macros in this module:
 #
 #   print_variable
-#   proj_target_output_name:
+#   proj_target_output_name
+#   configure_proj_pc
 #
 ################################################################################
 
@@ -59,4 +60,32 @@ function(proj_target_output_name TARGET_NAME OUTPUT_NAME)
   endif()
 
   set(${OUTPUT_NAME} ${TARGET_NAME}${SUFFIX} PARENT_SCOPE)
+endfunction()
+
+#
+# Configure a pkg-config file proj.pc
+# See also ProjInstallPath.cmake
+#
+
+function(configure_proj_pc)
+  set(prefix "${CMAKE_INSTALL_PREFIX}")
+  set(exec_prefix "$\{prefix\}")
+  set(libdir "$\{exec_prefix\}/${PROJ_LIB_SUBDIR}")
+  set(includedir "$\{prefix\}/${PROJ_INCLUDE_SUBDIR}")
+  set(datarootdir "$\{prefix\}/${CMAKE_INSTALL_DATAROOTDIR}")
+  set(datadir "$\{datarootdir\}")
+  set(PACKAGE "proj")
+  set(VERSION ${PROJ_VERSION})
+  set(SQLITE3_LIBS -lsqlite3)
+  if(TIFF_ENABLED)
+    set(TIFF_LIBS -ltiff)
+  endif()
+  if(CURL_ENABLED)
+    set(CURL_LIBS -lcurl)
+  endif()
+
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/proj.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
+    @ONLY)
 endfunction()

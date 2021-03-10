@@ -57,6 +57,8 @@ tweaks in the underlying API.
 
  o Default log level set to PJ_LOG_ERROR (#2542)
 
+ o CMake installs a pkg-config file proj.pc, where supported (#2547)
+
  Bug fixes
  ---------
 

@@ -124,7 +124,7 @@ static int pnpoly(int nvert, double vert[][2], double testx, double testy) {
     double xinters;
     PJ_XY p1, p2;
 
-    /* Check for boundrary cases */
+    /* Check for boundary cases */
     for (i = 0; i < nvert; i++) {
         if (testx == vert[i][0] && testy == vert[i][1]) {
             return 1;

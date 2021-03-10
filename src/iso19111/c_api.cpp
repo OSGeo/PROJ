@@ -59,6 +59,7 @@
 #include "proj_experimental.h"
 // clang-format on
 #include "proj_constants.h"
+#include "geodesic.h"
 
 using namespace NS_PROJ::common;
 using namespace NS_PROJ::crs;
@@ -205,6 +206,26 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
         pj->ctx = ctx;
         pj->descr = "ISO-19111 object";
         pj->iso_obj = objIn;
+        try {
+            auto crs = dynamic_cast<const CRS *>(objIn.get());
+            if (crs) {
+                auto geodCRS = crs->extractGeodeticCRS();
+                if (geodCRS) {
+                    const auto &ellps = geodCRS->ellipsoid();
+                    const double a = ellps->semiMajorAxis().getSIValue();
+                    const double es = ellps->squaredEccentricity();
+                    pj_calc_ellipsoid_params(pj, a, es);
+                    assert(pj->geod == nullptr);
+                    pj->geod = static_cast<struct geod_geodesic *>(
+                        calloc(1, sizeof(struct geod_geodesic)));
+                    if (pj->geod) {
+                        geod_init(pj->geod, pj->a,
+                                  pj->es / (1 + sqrt(pj->one_es)));
+                    }
+                }
+            }
+        } catch (const std::exception &) {
+        }
     }
     ctx->safeAutoCloseDbIfNeeded();
     return pj;
@@ -2589,7 +2610,7 @@ void proj_get_crs_list_parameters_destroy(PROJ_CRS_LIST_PARAMETERS *params) {
  * The returned object is an array of PROJ_CRS_INFO* pointers, whose last
  * entry is NULL. This array should be freed with proj_crs_info_list_destroy()
  *
- * When no filter parameters are set, this is functionnaly equivalent to
+ * When no filter parameters are set, this is functionally equivalent to
  * proj_get_codes_from_database(), instantiating a PJ* object for each
  * of the codes with proj_create_from_database() and retrieving information
  * with the various getters. However this function will be much faster.
@@ -7593,7 +7614,7 @@ void proj_operation_factory_context_set_crs_extent_use(
  *
  * @param ctx PROJ context, or NULL for default context
  * @param factory_ctx Operation factory context. must not be NULL
- * @param criterion patial criterion to use
+ * @param criterion spatial criterion to use
  */
 void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
     PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
@@ -8323,9 +8344,10 @@ double proj_dynamic_datum_get_frame_reference_epoch(PJ_CONTEXT *ctx,
     auto dvrf = dynamic_cast<const DynamicVerticalReferenceFrame *>(
         datum->iso_obj.get());
     if (!dgrf && !dvrf) {
-        proj_log_error(ctx, __FUNCTION__, "Object is not a "
-                                          "DynamicGeodeticReferenceFrame or "
-                                          "DynamicVerticalReferenceFrame");
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a "
+                       "DynamicGeodeticReferenceFrame or "
+                       "DynamicVerticalReferenceFrame");
         return -1;
     }
     const auto &frameReferenceEpoch =
@@ -8592,9 +8614,10 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
 
     auto co = dynamic_cast<const CoordinateOperation *>(obj->iso_obj.get());
     if (!co) {
-        proj_log_error(ctx, __FUNCTION__, "Object is not a CoordinateOperation "
-                                          "created with "
-                                          "proj_create_crs_to_crs");
+        proj_log_error(ctx, __FUNCTION__,
+                       "Object is not a CoordinateOperation "
+                       "created with "
+                       "proj_create_crs_to_crs");
         return nullptr;
     }
     try {

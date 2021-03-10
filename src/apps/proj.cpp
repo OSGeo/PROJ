@@ -21,7 +21,7 @@
 
 #define MAX_LINE 1000
 #define MAX_PARGS 100
-#define PJ_INVERS(P) (P->inv ? 1 : 0)
+#define PJ_INVERSE(P) (P->inv ? 1 : 0)
 
 static PJ *Proj;
 static union {
@@ -219,7 +219,7 @@ static void vprocess(FILE *fid) {
             linvers = inverse;
 
         if (linvers) {
-            if (!PJ_INVERS(Proj)) {
+            if (!PJ_INVERSE(Proj)) {
                 emess(-1,"inverse for this projection not avail.\n");
                 continue;
             }

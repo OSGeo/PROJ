@@ -40,6 +40,8 @@ else()
   set(DEFAULT_INCLUDE_SUBDIR include)
   set(DEFAULT_DOC_SUBDIR share/doc/proj)
   set(DEFAULT_CMAKE_SUBDIR lib/cmake)
+  # Used for proj.pc
+  set(CMAKE_INSTALL_DATAROOTDIR share)
 endif()
 
 # Locations are changeable by user to customize layout of PROJ installation

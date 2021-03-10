@@ -193,28 +193,28 @@ struct DatabaseContext::Private {
     void cache(const std::string &code, const crs::CRSNNPtr &crs);
 
     datum::GeodeticReferenceFramePtr
-        // cppcheck-suppress functionStatic
-        getGeodeticDatumFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
+    getGeodeticDatumFromCache(const std::string &code);
     // cppcheck-suppress functionStatic
     void cache(const std::string &code,
                const datum::GeodeticReferenceFrameNNPtr &datum);
 
     datum::DatumEnsemblePtr
-        // cppcheck-suppress functionStatic
-        getDatumEnsembleFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
+    getDatumEnsembleFromCache(const std::string &code);
     // cppcheck-suppress functionStatic
     void cache(const std::string &code,
                const datum::DatumEnsembleNNPtr &datumEnsemble);
 
     datum::EllipsoidPtr
-        // cppcheck-suppress functionStatic
-        getEllipsoidFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
+    getEllipsoidFromCache(const std::string &code);
     // cppcheck-suppress functionStatic
     void cache(const std::string &code, const datum::EllipsoidNNPtr &ellipsoid);
 
     datum::PrimeMeridianPtr
-        // cppcheck-suppress functionStatic
-        getPrimeMeridianFromCache(const std::string &code);
+    // cppcheck-suppress functionStatic
+    getPrimeMeridianFromCache(const std::string &code);
     // cppcheck-suppress functionStatic
     void cache(const std::string &code, const datum::PrimeMeridianNNPtr &pm);
 
@@ -329,7 +329,7 @@ void DatabaseContext::Private::closeDB() noexcept {
         // due to possible wrong caching of key info.
         // The bug is specific to using a memory file with shared cache as an
         // auxiliary DB.
-        // The efinitive fix was likely in 3.8.8
+        // The fix was likely in 3.8.8
         // https://github.com/mackyle/sqlite/commit/d412d4b8731991ecbd8811874aa463d0821673eb
         // But just after 3.8.2,
         // https://github.com/mackyle/sqlite/commit/ccf328c4318eacedab9ed08c404bc4f402dcad19
@@ -617,20 +617,20 @@ void DatabaseContext::Private::checkDatabaseLayout() {
         }
     }
     if (nMajor != DATABASE_LAYOUT_VERSION_MAJOR) {
-        throw FactoryException(databasePath_ +
-                               " contains DATABASE.LAYOUT.VERSION.MAJOR = " +
-                               toString(nMajor) + " whereas " +
-                               toString(DATABASE_LAYOUT_VERSION_MAJOR) +
-                               " is expected. "
-                               "It comes from another PROJ installation.");
+        throw FactoryException(
+            databasePath_ +
+            " contains DATABASE.LAYOUT.VERSION.MAJOR = " + toString(nMajor) +
+            " whereas " + toString(DATABASE_LAYOUT_VERSION_MAJOR) +
+            " is expected. "
+            "It comes from another PROJ installation.");
     }
     if (nMinor < DATABASE_LAYOUT_VERSION_MINOR) {
-        throw FactoryException(databasePath_ +
-                               " contains DATABASE.LAYOUT.VERSION.MINOR = " +
-                               toString(nMinor) + " whereas a number >= " +
-                               toString(DATABASE_LAYOUT_VERSION_MINOR) +
-                               " is expected. "
-                               "It comes from another PROJ installation.");
+        throw FactoryException(
+            databasePath_ +
+            " contains DATABASE.LAYOUT.VERSION.MINOR = " + toString(nMinor) +
+            " whereas a number >= " + toString(DATABASE_LAYOUT_VERSION_MINOR) +
+            " is expected. "
+            "It comes from another PROJ installation.");
     }
 }
 
@@ -685,13 +685,9 @@ void DatabaseContext::Private::attachExtraDatabases(
 
     closeDB();
 
-    sqlite3_open_v2(":memory:", &sqlite_handle_,
-                    SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX
-#ifdef SQLITE_OPEN_URI
-                        | SQLITE_OPEN_URI
-#endif
-                    ,
-                    nullptr);
+    sqlite3_open_v2(
+        ":memory:", &sqlite_handle_,
+        SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_URI, nullptr);
     if (!sqlite_handle_) {
         throw FactoryException("cannot create in memory database");
     }
@@ -3827,7 +3823,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  * missing grids should be removed from the result set.
  * @param considerKnownGridsAsAvailable Whether known grids should be considered
  * as available (typically when network is enabled).
- * @param discardSuperseded Whether cordinate operations that are superseded
+ * @param discardSuperseded Whether coordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param tryReverseOrder whether to search in the reverse order too (and thus
  * inverse results found that way)
@@ -4200,7 +4196,7 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  * missing grids should be removed from the result set.
  * @param considerKnownGridsAsAvailable Whether known grids should be considered
  * as available (typically when network is enabled).
- * @param discardSuperseded Whether cordinate operations that are superseded
+ * @param discardSuperseded Whether coordinate operations that are superseded
  * (but not deprecated) should be removed from the result set.
  * @param intermediateCRSAuthCodes List of (auth_name, code) of CRS that can be
  * used as potential intermediate CRS. If the list is empty, the database will
@@ -4322,8 +4318,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
     // Case (source->intermediate) and (intermediate->target)
     std::string sql(
-        sqlProlog + "ON v1.target_crs_auth_name = v2.source_crs_auth_name "
-                    "AND v1.target_crs_code = v2.source_crs_code " +
+        sqlProlog +
+        "ON v1.target_crs_auth_name = v2.source_crs_auth_name "
+        "AND v1.target_crs_code = v2.source_crs_code " +
         joinArea +
         "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
         "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ");
@@ -4432,24 +4429,25 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         }
     }
 
-    const auto buildIntermediateWhere = [&intermediateCRSAuthCodes](
-        const std::string &first_field, const std::string &second_field) {
-        if (intermediateCRSAuthCodes.empty()) {
-            return std::string();
-        }
-        std::string l_sql(" AND (");
-        for (size_t i = 0; i < intermediateCRSAuthCodes.size(); ++i) {
-            if (i > 0) {
-                l_sql += " OR";
+    const auto buildIntermediateWhere =
+        [&intermediateCRSAuthCodes](const std::string &first_field,
+                                    const std::string &second_field) {
+            if (intermediateCRSAuthCodes.empty()) {
+                return std::string();
             }
-            l_sql += "(v1." + first_field + "_crs_auth_name = ? AND ";
-            l_sql += "v1." + first_field + "_crs_code = ? AND ";
-            l_sql += "v2." + second_field + "_crs_auth_name = ? AND ";
-            l_sql += "v2." + second_field + "_crs_code = ?) ";
-        }
-        l_sql += ')';
-        return l_sql;
-    };
+            std::string l_sql(" AND (");
+            for (size_t i = 0; i < intermediateCRSAuthCodes.size(); ++i) {
+                if (i > 0) {
+                    l_sql += " OR";
+                }
+                l_sql += "(v1." + first_field + "_crs_auth_name = ? AND ";
+                l_sql += "v1." + first_field + "_crs_code = ? AND ";
+                l_sql += "v2." + second_field + "_crs_auth_name = ? AND ";
+                l_sql += "v2." + second_field + "_crs_code = ?) ";
+            }
+            l_sql += ')';
+            return l_sql;
+        };
 
     std::string intermediateWhere = buildIntermediateWhere("target", "source");
     for (const auto &pair : intermediateCRSAuthCodes) {
@@ -4537,8 +4535,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     }
 
     // Case (source->intermediate) and (target->intermediate)
-    sql = sqlProlog + "ON v1.target_crs_auth_name = v2.target_crs_auth_name "
-                      "AND v1.target_crs_code = v2.target_crs_code " +
+    sql = sqlProlog +
+          "ON v1.target_crs_auth_name = v2.target_crs_auth_name "
+          "AND v1.target_crs_code = v2.target_crs_code " +
           joinArea +
           "WHERE v1.source_crs_auth_name = ? AND v1.source_crs_code = ? "
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
@@ -4580,8 +4579,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     }
 
     // Case (intermediate->source) and (intermediate->target)
-    sql = sqlProlog + "ON v1.source_crs_auth_name = v2.source_crs_auth_name "
-                      "AND v1.source_crs_code = v2.source_crs_code " +
+    sql = sqlProlog +
+          "ON v1.source_crs_auth_name = v2.source_crs_auth_name "
+          "AND v1.source_crs_code = v2.source_crs_code " +
           joinArea +
           "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
           "AND v2.target_crs_auth_name = ? AND v2.target_crs_code = ? ";
@@ -4644,8 +4644,9 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
     }
 
     // Case (intermediate->source) and (target->intermediate)
-    sql = sqlProlog + "ON v1.source_crs_auth_name = v2.target_crs_auth_name "
-                      "AND v1.source_crs_code = v2.target_crs_code " +
+    sql = sqlProlog +
+          "ON v1.source_crs_auth_name = v2.target_crs_auth_name "
+          "AND v1.source_crs_code = v2.target_crs_code " +
           joinArea +
           "WHERE v1.target_crs_auth_name = ? AND v1.target_crs_code = ? "
           "AND v2.source_crs_auth_name = ? AND v2.source_crs_code = ? ";
@@ -4718,12 +4719,17 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         sourceCRSCode == targetCRSCode) {
         return listTmp;
     }
+    const auto sourceGeodCRS =
+        dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get());
+    const auto targetGeodCRS =
+        dynamic_cast<crs::GeodeticCRS *>(targetCRS.get());
+    if (!sourceGeodCRS || !targetGeodCRS) {
+        return listTmp;
+    }
 
     std::string minDate;
-    const auto &sourceDatum =
-        dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get())->datum();
-    const auto &targetDatum =
-        dynamic_cast<crs::GeodeticCRS *>(targetCRS.get())->datum();
+    const auto &sourceDatum = sourceGeodCRS->datum();
+    const auto &targetDatum = targetGeodCRS->datum();
     if (sourceDatum && sourceDatum->publicationDate().has_value() &&
         targetDatum && targetDatum->publicationDate().has_value()) {
         const auto sourceDate(sourceDatum->publicationDate()->toString());
@@ -4871,7 +4877,6 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
 
     const auto filterDeprecatedAndNotMatchingAuth =
         [&](SQLResultSet &&resultSet) {
-
             SQLResultSet filteredResultSet;
             for (const auto &row : resultSet) {
                 const auto &deprecated1 = row[3];
@@ -4930,9 +4935,11 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         ListOfParams findSupersededParams;
 
         std::set<std::string> setAlreadyAsked;
-        const auto keyMapSupersession = [](
-            const std::string &table_name, const std::string &auth_name,
-            const std::string &code) { return table_name + auth_name + code; };
+        const auto keyMapSupersession = [](const std::string &table_name,
+                                           const std::string &auth_name,
+                                           const std::string &code) {
+            return table_name + auth_name + code;
+        };
 
         for (const auto &row : resultSet) {
             const auto &table1 = row[0];
@@ -5576,7 +5583,7 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
 
 /** \brief Return a list of information on CRS objects
  *
- * This is functionnaly equivalent of listing the codes from an authority,
+ * This is functionally equivalent of listing the codes from an authority,
  * instantiating
  * a CRS object for each of them and getting the information from this CRS
  * object, but this implementation has much less overhead.
@@ -5588,12 +5595,13 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     const auto getSqlArea = [](const std::string &table_name) {
         return "JOIN usage u ON "
                "u.object_table_name = '" +
-               table_name + "' AND "
-                            "u.object_auth_name = c.auth_name AND "
-                            "u.object_code = c.code "
-                            "JOIN extent a "
-                            "ON a.auth_name = u.extent_auth_name AND "
-                            "a.code = u.extent_code ";
+               table_name +
+               "' AND "
+               "u.object_auth_name = c.auth_name AND "
+               "u.object_code = c.code "
+               "JOIN extent a "
+               "ON a.auth_name = u.extent_auth_name AND "
+               "a.code = u.extent_code ";
     };
 
     std::string sql = "SELECT c.auth_name, c.code, c.name, c.type, "
@@ -6258,8 +6266,9 @@ AuthorityFactory::createObjectsFromNameEx(
             }
             auto factory = d->createFactory(auth_name);
             auto getObject = [&factory, datumEnsembleAllowed](
-                const std::string &l_table_name,
-                const std::string &l_code) -> common::IdentifiedObjectNNPtr {
+                                 const std::string &l_table_name,
+                                 const std::string &l_code)
+                -> common::IdentifiedObjectNNPtr {
                 if (l_table_name == "prime_meridian") {
                     return factory->createPrimeMeridian(l_code);
                 } else if (l_table_name == "ellipsoid") {
@@ -6330,8 +6339,8 @@ AuthorityFactory::createObjectsFromNameEx(
         }
 
         // If we found a name that is an exact match, and all objects have the
-        // same type, and we are not in approximate mode, only keep the objet(s)
-        // with the exact name match.
+        // same type, and we are not in approximate mode, only keep the
+        // object(s) with the exact name match.
         if (foundExactMatch && hashCodeFirstMatch != 0 && !approximateMatch) {
             std::list<PairObjectName> resTmp;
             for (const auto &pair : res) {

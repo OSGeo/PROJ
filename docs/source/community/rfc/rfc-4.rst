@@ -546,7 +546,7 @@ Strong points:
 
 * TIFF can be tiled.
 
-* TIFF can be compressed. Commonly found compression formats arre DEFLATE, LZW,
+* TIFF can be compressed. Commonly found compression formats are DEFLATE, LZW,
   combined with differential integer or floating point predictors
 
 * A TIFF image can contain a configurable number of channels/bands/samples.

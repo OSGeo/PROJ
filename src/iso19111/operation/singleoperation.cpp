@@ -103,10 +103,8 @@ GridDescription::GridDescription(const GridDescription &) = default;
 GridDescription::GridDescription(GridDescription &&other) noexcept
     : shortName(std::move(other.shortName)),
       fullName(std::move(other.fullName)),
-      packageName(std::move(other.packageName)),
-      url(std::move(other.url)),
-      directDownload(other.directDownload),
-      openLicense(other.openLicense),
+      packageName(std::move(other.packageName)), url(std::move(other.url)),
+      directDownload(other.directDownload), openLicense(other.openLicense),
       available(other.available) {}
 
 //! @endcond
@@ -1108,8 +1106,8 @@ SingleOperation::parameterValue(const std::string &paramName,
  * @param epsg_code the parameter EPSG code
  * @return the value, or nullptr if not found.
  */
-const ParameterValuePtr &SingleOperation::parameterValue(int epsg_code) const
-    noexcept {
+const ParameterValuePtr &
+SingleOperation::parameterValue(int epsg_code) const noexcept {
     for (const auto &genOpParamvalue : parameterValues()) {
         auto opParamvalue = dynamic_cast<const OperationParameterValue *>(
             genOpParamvalue.get());
@@ -1160,8 +1158,8 @@ SingleOperation::parameterValueMeasure(int epsg_code) const noexcept {
 
 //! @cond Doxygen_Suppress
 
-double SingleOperation::parameterValueNumericAsSI(int epsg_code) const
-    noexcept {
+double
+SingleOperation::parameterValueNumericAsSI(int epsg_code) const noexcept {
     const auto &val = parameterValue(epsg_code);
     if (val && val->type() == ParameterValue::Type::MEASURE) {
         return val->value().getSIValue();
@@ -1179,8 +1177,8 @@ double SingleOperation::parameterValueNumeric(
 }
 
 double SingleOperation::parameterValueNumeric(
-    const char *param_name, const common::UnitOfMeasure &targetUnit) const
-    noexcept {
+    const char *param_name,
+    const common::UnitOfMeasure &targetUnit) const noexcept {
     const auto &val = parameterValue(param_name, 0);
     if (val && val->type() == ParameterValue::Type::MEASURE) {
         return val->value().convertToUnit(targetUnit);

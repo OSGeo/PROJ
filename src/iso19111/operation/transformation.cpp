@@ -268,23 +268,20 @@ Transformation::getTOWGS84Parameters() const // throw(io::FormattingException)
                     } else if (epsg_code ==
                                EPSG_CODE_PARAMETER_X_AXIS_ROTATION) {
                         params[3] = fixNegativeZero(
-                            rotSign *
-                            measure.convertToUnit(
-                                common::UnitOfMeasure::ARC_SECOND));
+                            rotSign * measure.convertToUnit(
+                                          common::UnitOfMeasure::ARC_SECOND));
                         foundRotX = true;
                     } else if (epsg_code ==
                                EPSG_CODE_PARAMETER_Y_AXIS_ROTATION) {
                         params[4] = fixNegativeZero(
-                            rotSign *
-                            measure.convertToUnit(
-                                common::UnitOfMeasure::ARC_SECOND));
+                            rotSign * measure.convertToUnit(
+                                          common::UnitOfMeasure::ARC_SECOND));
                         foundRotY = true;
                     } else if (epsg_code ==
                                EPSG_CODE_PARAMETER_Z_AXIS_ROTATION) {
                         params[5] = fixNegativeZero(
-                            rotSign *
-                            measure.convertToUnit(
-                                common::UnitOfMeasure::ARC_SECOND));
+                            rotSign * measure.convertToUnit(
+                                          common::UnitOfMeasure::ARC_SECOND));
                         foundRotZ = true;
                     } else if (epsg_code ==
                                EPSG_CODE_PARAMETER_SCALE_DIFFERENCE) {
@@ -2178,14 +2175,13 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
         }
     }
     const auto &horizontalGridName =
-        !NTv1Filename.empty() ? NTv1Filename : !NTv2Filename.empty()
-                                                   ? NTv2Filename
-                                                   : lasFilename;
+        !NTv1Filename.empty()
+            ? NTv1Filename
+            : !NTv2Filename.empty() ? NTv2Filename : lasFilename;
 
-    if (!horizontalGridName.empty() &&
-        databaseContext->lookForGridAlternative(horizontalGridName,
-                                                projFilename, projGridFormat,
-                                                inverseDirection)) {
+    if (!horizontalGridName.empty() && databaseContext->lookForGridAlternative(
+                                           horizontalGridName, projFilename,
+                                           projGridFormat, inverseDirection)) {
 
         if (horizontalGridName == projFilename) {
             if (inverseDirection) {
@@ -2296,13 +2292,14 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
                         EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME)};
 #ifdef disabled_for_now
                 if (inverseDirection) {
-                    return create(createPropertiesForInverse(
-                                      self.as_nullable().get(), true, false),
-                                  targetCRS(), sourceCRS(), nullptr,
-                                  createSimilarPropertiesMethod(method()),
-                                  parameters, {ParameterValue::createFilename(
-                                                  projFilename)},
-                                  coordinateOperationAccuracies())
+                    return create(
+                               createPropertiesForInverse(
+                                   self.as_nullable().get(), true, false),
+                               targetCRS(), sourceCRS(), nullptr,
+                               createSimilarPropertiesMethod(method()),
+                               parameters,
+                               {ParameterValue::createFilename(projFilename)},
+                               coordinateOperationAccuracies())
                         ->inverseAsTransformation();
                 } else
 #endif
@@ -2373,13 +2370,14 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
                     createOpParamNameEPSGCode(
                         EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE)};
                 if (inverseDirection) {
-                    return create(createPropertiesForInverse(
-                                      self.as_nullable().get(), true, false),
-                                  targetCRS(), sourceCRS(), nullptr,
-                                  createSimilarPropertiesMethod(method()),
-                                  parameters, {ParameterValue::createFilename(
-                                                  projFilename)},
-                                  coordinateOperationAccuracies())
+                    return create(
+                               createPropertiesForInverse(
+                                   self.as_nullable().get(), true, false),
+                               targetCRS(), sourceCRS(), nullptr,
+                               createSimilarPropertiesMethod(method()),
+                               parameters,
+                               {ParameterValue::createFilename(projFilename)},
+                               coordinateOperationAccuracies())
                         ->inverseAsTransformation();
                 } else {
                     return create(
@@ -2597,7 +2595,6 @@ void Transformation::_exportToPROJString(
         auto targetCRSGeog =
             dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
         const bool addPushPopV3 =
-            !CoordinateOperation::getPrivate()->use3DHelmert_ &&
             ((sourceCRSGeog &&
               sourceCRSGeog->coordinateSystem()->axisList().size() == 2) ||
              (targetCRSGeog &&
@@ -2985,9 +2982,9 @@ void Transformation::_exportToPROJString(
     const auto &hGridShiftFilename =
         !HorizontalShiftGTIFFFilename.empty()
             ? HorizontalShiftGTIFFFilename
-            : !NTv1Filename.empty() ? NTv1Filename : !NTv2Filename.empty()
-                                                         ? NTv2Filename
-                                                         : CTABLE2Filename;
+            : !NTv1Filename.empty()
+                  ? NTv1Filename
+                  : !NTv2Filename.empty() ? NTv2Filename : CTABLE2Filename;
     if (!hGridShiftFilename.empty()) {
         auto sourceCRSGeog =
             extractGeographicCRSIfGeographicCRSOrEquivalent(sourceCRS());
@@ -3282,5 +3279,5 @@ void Transformation::_exportToPROJString(
     throw io::FormattingException("Unimplemented");
 }
 
-} // namespace crs
+} // namespace operation
 NS_PROJ_END

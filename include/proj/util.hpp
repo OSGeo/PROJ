@@ -180,7 +180,7 @@ NS_PROJ_START
 namespace io {
 class DatabaseContext;
 using DatabaseContextPtr = std::shared_ptr<DatabaseContext>;
-}
+} // namespace io
 //! @endcond
 
 /** osgeo.proj.util namespace.
@@ -331,6 +331,7 @@ class PROJ_GCC_DLL BaseObject {
   protected:
     PROJ_INTERNAL BaseObject();
     PROJ_INTERNAL void assignSelf(const BaseObjectNNPtr &self);
+    PROJ_INTERNAL BaseObject &operator=(BaseObject &&other);
 
   private:
     PROJ_OPAQUE_PRIVATE_DATA

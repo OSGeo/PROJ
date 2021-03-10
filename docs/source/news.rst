@@ -3,8 +3,83 @@
 News
 ###############################################################################
 
+8.0.0 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*March 1st 2021*
+
+With the release of PROJ 8 the ``proj_api.h`` API is finally removed. See
+:ref:`API_migration` for more info on how to migrate from the old to the
+``proj.h`` API.
+
+With the removal of ``proj_api.h`` it has been possible to simplify error codes
+and messages given by the software. The error codes are exposed in the API.
+
+Several improvements has been made to the command line utilities as well as
+tweaks in the underlying API.
+
+Updates
+-------
+
+* Public header file ``proj_api.h`` removed (`#837 <https://github.com/OSGeo/PROJ/issues/837>`_)
+
+* Improved accuracy of the Mercator projection (`#2397 <https://github.com/OSGeo/PROJ/issues/2397>`_)
+
+* Copyright statement wording updated (`#2417 <https://github.com/OSGeo/PROJ/issues/2417>`_)
+
+* Allow :program:`cct` to instantiate operations via object codes or names (`#2419 <https://github.com/OSGeo/PROJ/issues/2419>`_)
+
+* Allow ``@filename`` syntax in :program:`cct` (`#2420 <https://github.com/OSGeo/PROJ/issues/2420>`_)
+
+* Added :ref:`topocentric` (``+proj=topocentric``) (`#2444 <https://github.com/OSGeo/PROJ/issues/2444>`_)
+
+* Update GeographicLib to version 1.51 (`#2445 <https://github.com/OSGeo/PROJ/issues/2445>`_)
+
+* Added option to allow export of Geographic/Projected 3D CRS
+  in WKT1_GDAL (`#2450 <https://github.com/OSGeo/PROJ/issues/2450>`_)
+
+* Added ``--area`` and ``--bbox`` options in :program:`cs2cs` to restrict candidate
+  coordinate operations (`#2466 <https://github.com/OSGeo/PROJ/issues/2466>`_)
+
+* Added build time option to make :envvar:`PROJ_LIB` env var tested last (`#2476 <https://github.com/OSGeo/PROJ/issues/2476>`_)
+
+* Added ``--authority`` switch in :program:`cs2cs` to control where coordinate operations
+  are looked for. C API function :c:func:`proj_create_crs_to_crs_from_pj()` updated
+  accordingly (`#2477 <https://github.com/OSGeo/PROJ/issues/2477>`_)
+
+* Error codes revised and exposed in the public API (`#2487 <https://github.com/OSGeo/PROJ/issues/2487>`_)
+
+* Added ``--accuracy`` options to :program:`projinfo`. C API function
+  :c:func:`proj_create_crs_to_crs_from_pj()` updated accordingly (`#2488 <https://github.com/OSGeo/PROJ/issues/2488>`_)
+
+* Added :c:func:`proj_crs_is_derived()` function to C API (`#2496 <https://github.com/OSGeo/PROJ/issues/2496>`_)
+
+* Enabled linking against static cURL on Windows (`#2514 <https://github.com/OSGeo/PROJ/issues/2514>`_)
+
+* Updated ESRI CRS database to 12.7 (10.8.1/2.6) (`#2519 <https://github.com/OSGeo/PROJ/issues/2519>`_)
+
+* Allow a WKT BoundCRS to use a PROJ string transformation (`#2521 <https://github.com/OSGeo/PROJ/issues/2521>`_)
+
+* Update to EPSG v10.015 (`#2539 <https://github.com/OSGeo/PROJ/issues/2539>`_)
+
+* Default log level set to ``PJ_LOG_ERROR`` (`#2542 <https://github.com/OSGeo/PROJ/issues/2542>`_)
+
+* CMake installs a pkg-config file ``proj.pc``, where supported (`#2547 <https://github.com/OSGeo/PROJ/issues/2547>`_)
+
+Bug fixes
+---------
+
+* Do not restrict longitude to [-90;90] range in spherical transver Mercator
+  forward projection (`#2471 <https://github.com/OSGeo/PROJ/issues/2471>`_)
+
+* :cpp:func:`createOperations()`: fix Compound to Geog3D/Projected3D CRS with non-metre ellipsoidal height (`#2500 <https://github.com/OSGeo/PROJ/issues/2500>`_)
+
+* Avoid error messages to be emitted log level is set to ``PJ_LOG_NONE`` (`#2527 <https://github.com/OSGeo/PROJ/issues/2527>`_)
+
+* Close database connection when autoclose set to True (`#2532 <https://github.com/OSGeo/PROJ/issues/2532>`_)
+
+
 7.2.1 Release Notes
--------------------
+++++++++++++++++++++++++++++++++++++++++
 *January 1st 2021*
 
 Updates
@@ -146,7 +221,7 @@ Bug fixes
 Updates
 -------
 
-* Added various Brazillian grids to the database (`#2277 <https://github.com/OSGeo/PROJ/issues/2277>`_)
+* Added various Brazilian grids to the database (`#2277 <https://github.com/OSGeo/PROJ/issues/2277>`_)
 
 * Added geoid file for Canary Islands to the database (`#2312 <https://github.com/OSGeo/PROJ/issues/2312>`_)
 
@@ -715,7 +790,7 @@ Bug fixes
 * Database: add an auxiliary concatenated_operation_step table to allow
   arbitrary number of steps (`#1696 <https://github.com/OSGeo/PROJ/issues/1696>`_)
 
-* Fix errors running gie-based tests in Debug mode on Windo (`#1688 <https://github.com/OSGeo/PROJ/issues/1688>`_)
+* Fix errors running gie-based tests in Debug mode on Window (`#1688 <https://github.com/OSGeo/PROJ/issues/1688>`_)
 
 6.2.1 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
@@ -1014,7 +1089,7 @@ UPDATES
   by adding ``+approx``
   (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)
 
-* Chaged behavior: Default ellipsoid now set to GRS80 (was WGS84) (`#1210 <https://github.com/OSGeo/proj.4/issues/1210>`_)
+* Changed behavior: Default ellipsoid now set to GRS80 (was WGS84) (`#1210 <https://github.com/OSGeo/proj.4/issues/1210>`_)
 
 * Allow multiple directories in :envvar:`PROJ_LIB` environment variable (`#1281 <https://github.com/OSGeo/proj.4/issues/1281>`_)
 

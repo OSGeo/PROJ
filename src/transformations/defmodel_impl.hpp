@@ -246,9 +246,8 @@ static double ISO8601ToDecimalYear(const std::string &dt) {
         throw ParsingException("Wrong formatting / invalid date-time for " +
                                dt);
     }
-    return year +
-           (dayInYear * 86400 + hour * 3600 + min * 60 + sec) /
-               (isLeapYear ? 86400. * 366 : 86400. * 365);
+    return year + (dayInYear * 86400 + hour * 3600 + min * 60 + sec) /
+                      (isLeapYear ? 86400. * 366 : 86400. * 365);
 }
 
 // ---------------------------------------------------------------------------
@@ -1004,7 +1003,9 @@ bool Evaluator<Grid, GridSet, EvaluatorIface>::forward(
                     !grid->getLonLatOffset(ix1, iy1, dx11, dy11)) {
                     return false;
                 }
-            } else /* if (compEx->displacementType == DisplacementType::THREE_D) */ {
+            } else /* if (compEx->displacementType == DisplacementType::THREE_D)
+                    */
+            {
                 double dz00 = 0;
                 double dz01 = 0;
                 double dz10 = 0;
@@ -1051,7 +1052,9 @@ bool Evaluator<Grid, GridSet, EvaluatorIface>::forward(
                     !grid->getEastingNorthingOffset(ix1, iy1, de11, dn11)) {
                     return false;
                 }
-            } else /* if (compEx->displacementType == DisplacementType::THREE_D) */ {
+            } else /* if (compEx->displacementType == DisplacementType::THREE_D)
+                    */
+            {
                 double dz00 = 0;
                 double dz01 = 0;
                 double dz10 = 0;
@@ -1117,14 +1120,12 @@ bool Evaluator<Grid, GridSet, EvaluatorIface>::forward(
                 const double sinlam =
                     gridwithCacheRef.smallResx
                         ? lam_rel_to_cell_center *
-                              (1 -
-                               (1. / 6) * (lam_rel_to_cell_center *
-                                           lam_rel_to_cell_center))
+                              (1 - (1. / 6) * (lam_rel_to_cell_center *
+                                               lam_rel_to_cell_center))
                         : sin(lam_rel_to_cell_center);
                 const double coslam = gridwithCacheRef.smallResx
-                                          ? (1 -
-                                             0.5 * (lam_rel_to_cell_center *
-                                                    lam_rel_to_cell_center))
+                                          ? (1 - 0.5 * (lam_rel_to_cell_center *
+                                                        lam_rel_to_cell_center))
                                           : cos(lam_rel_to_cell_center);
 
                 // Convert back from geocentric deltas to easting, northing
@@ -1243,8 +1244,8 @@ bool Evaluator<Grid, GridSet, EvaluatorIface>::inverse(
             return false;
         }
 #ifdef DEBUG_DEFMODEL
-        iface.log("After forward: x=" + toString(x_new) + ", y=" +
-                  toString(y_new));
+        iface.log("After forward: x=" + toString(x_new) +
+                  ", y=" + toString(y_new));
 #endif
         const double dx = x_new - x;
         const double dy = y_new - y;

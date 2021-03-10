@@ -211,8 +211,9 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
     }
     {
         auto ctxt = CoordinateOperationContext::create(
-            authFactory, Extent::createFromBBOX(20.26 + .1, 43.44 + .1,
-                                                31.41 - .1, 48.27 - .1),
+            authFactory,
+            Extent::createFromBBOX(20.26 + .1, 43.44 + .1, 31.41 - .1,
+                                   48.27 - .1),
             0.0);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
@@ -222,8 +223,9 @@ TEST(operation, geogCRS_to_geogCRS_context_filter_bbox) {
     }
     {
         auto ctxt = CoordinateOperationContext::create(
-            authFactory, Extent::createFromBBOX(20.26 - .1, 43.44 - .1,
-                                                31.41 + .1, 48.27 + .1),
+            authFactory,
+            Extent::createFromBBOX(20.26 - .1, 43.44 - .1, 31.41 + .1,
+                                   48.27 + .1),
             0.0);
         auto list = CoordinateOperationFactory::create()->createOperations(
             authFactory->createCoordinateReferenceSystem("4179"),
@@ -1447,6 +1449,84 @@ TEST(operation, geocentricCRS_to_geogCRS_different_datum_context) {
         "+t_epoch=2000 +convention=position_vector +step +inv "
         "+proj=cart +ellps=GRS80 +step +proj=unitconvert +xy_in=rad "
         "+z_in=m +xy_out=deg +z_out=m +step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geogCRS_3D_to_geogCRS_3D_different_datum_context) {
+    // Test for https://github.com/OSGeo/PROJ/issues/2541
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // RGF93 (3D)
+        authFactory->createCoordinateReferenceSystem("4965"),
+        // CH1903+ promoted to 3D
+        authFactory->createCoordinateReferenceSystem("4150")->promoteTo3D(
+            std::string(), dbContext),
+        ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "RGF93 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
+    // Check that there is no +push +v_3
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=helmert +x=-674.374 +y=-15.056 +z=-405.346 "
+              "+step +inv +proj=cart +ellps=bessel "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+    EXPECT_EQ(list[0]->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=bessel "
+              "+step +proj=helmert +x=674.374 +y=15.056 +z=405.346 "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, geocentric_to_geogCRS_3D_different_datum_context) {
+    // Test variant of https://github.com/OSGeo/PROJ/issues/2541
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // RGF93 (geocentric)
+        authFactory->createCoordinateReferenceSystem("4964"),
+        // CH1903+ promoted to 3D
+        authFactory->createCoordinateReferenceSystem("4150")->promoteTo3D(
+            std::string(), dbContext),
+        ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Conversion from RGF93 (geocentric) to RGF93 (geog3D) + "
+              "RGF93 to ETRS89 (1) + "
+              "Inverse of CH1903+ to ETRS89 (1)");
+    // Check that there is no +push +v_3
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=helmert +x=-674.374 +y=-15.056 +z=-405.346 "
+              "+step +inv +proj=cart +ellps=bessel "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+    EXPECT_EQ(list[0]->inverse()->exportToPROJString(
+                  PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=bessel "
+              "+step +proj=helmert +x=674.374 +y=15.056 +z=405.346");
 }
 
 // ---------------------------------------------------------------------------
@@ -2953,14 +3033,16 @@ TEST(operation, transformation_BEV_AT_to_PROJ_string) {
 TEST(operation, transformation_longitude_rotation_to_PROJ_string) {
 
     auto src = GeographicCRS::create(
-        PropertyMap(), GeodeticReferenceFrame::create(
-                           PropertyMap(), Ellipsoid::WGS84,
-                           optional<std::string>(), PrimeMeridian::GREENWICH),
+        PropertyMap(),
+        GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                       optional<std::string>(),
+                                       PrimeMeridian::GREENWICH),
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
     auto dest = GeographicCRS::create(
-        PropertyMap(), GeodeticReferenceFrame::create(
-                           PropertyMap(), Ellipsoid::WGS84,
-                           optional<std::string>(), PrimeMeridian::PARIS),
+        PropertyMap(),
+        GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                       optional<std::string>(),
+                                       PrimeMeridian::PARIS),
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
     auto transformation = Transformation::createLongitudeRotation(
         PropertyMap(), src, dest, Angle(10));
@@ -3090,9 +3172,10 @@ TEST(operation, compoundCRS_with_boundVerticalCRS_to_geogCRS) {
 TEST(operation, compoundCRS_with_boundGeogCRS_to_geogCRS) {
 
     auto geogCRS = GeographicCRS::create(
-        PropertyMap(), GeodeticReferenceFrame::create(
-                           PropertyMap(), Ellipsoid::WGS84,
-                           optional<std::string>(), PrimeMeridian::GREENWICH),
+        PropertyMap(),
+        GeodeticReferenceFrame::create(PropertyMap(), Ellipsoid::WGS84,
+                                       optional<std::string>(),
+                                       PrimeMeridian::GREENWICH),
         EllipsoidalCS::createLatitudeLongitude(UnitOfMeasure::DEGREE));
     auto horizBoundCRS = BoundCRS::createFromTOWGS84(
         geogCRS, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
@@ -5391,8 +5474,8 @@ TEST(operation, compoundCRS_from_WKT2_no_id_to_geogCRS_3D_context) {
             op->exportToPROJString(PROJStringFormatter::create().get());
         auto op2_proj =
             op2->exportToPROJString(PROJStringFormatter::create().get());
-        EXPECT_EQ(op_proj, op2_proj) << "op=" << op->nameStr()
-                                     << " op2=" << op2->nameStr();
+        EXPECT_EQ(op_proj, op2_proj)
+            << "op=" << op->nameStr() << " op2=" << op2->nameStr();
     }
 }
 
@@ -5469,7 +5552,7 @@ TEST(operation, compoundCRS_with_non_meter_horiz_and_vertical_to_geog) {
         "                LENGTHUNIT[\"US survey foot\",0.304800609601219,\n"
         "                    ID[\"EPSG\",9003]]]]]"
 
-        );
+    );
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto authFactory =
@@ -5627,8 +5710,9 @@ TEST(operation, isPROJInstantiable) {
     {
         auto transformation = Transformation::create(
             PropertyMap(), GeographicCRS::EPSG_4269, GeographicCRS::EPSG_4326,
-            nullptr, OperationMethod::create(
-                         PropertyMap(), std::vector<OperationParameterNNPtr>{}),
+            nullptr,
+            OperationMethod::create(PropertyMap(),
+                                    std::vector<OperationParameterNNPtr>{}),
             std::vector<GeneralParameterValueNNPtr>{},
             std::vector<PositionalAccuracyNNPtr>{});
         EXPECT_FALSE(transformation->isPROJInstantiable(
@@ -6129,7 +6213,7 @@ TEST(operation, compoundCRS_to_PROJJSON_with_non_metre_height) {
 
     // The untypical potentially a bit buggy thing (and what caused a bug)
     // is the US-ft unit for the vertical axis of the base CRS ...
-    // When outputing that to WKT, and
+    // When outputting that to WKT, and
     // re-exporting to PROJJSON, one gets metre, which conforms more to the
     // official definition of NAD83(2011) 3D.
     // The vertical unit of the base CRS shouldn't matter much anyway, so this

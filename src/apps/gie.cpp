@@ -958,7 +958,7 @@ Tell GIE what to expect, when transforming the ACCEPTed input
                 err_const_from_errno(proj_errno(T.P)),
                 proj_errno (T.P),
                 expect_failure_with_errno,
-                F->lineno
+                static_cast<int>(F->lineno)
             );
             return another_failing_failure ();
         }
@@ -1266,7 +1266,7 @@ Constructor for the ffio object.
 /***************************************************************************************/
 static ffio *ffio_destroy (ffio *G) {
 /****************************************************************************************
-Free all allocated associated memory, then free G itself. For extra RAII compliancy,
+Free all allocated associated memory, then free G itself. For extra RAII compliance,
 the file object should also be closed if still open, but this will require additional
 control logic, and ffio is a gie tool specific package, so we fall back to asserting that
 fclose has been called prior to ffio_destroy.
