@@ -623,7 +623,13 @@ Distances
     Calculate geodesic distance between two points in geodetic coordinates. The
     calculated distance is between the two points located on the ellipsoid.
 
-    :param P: Transformation object
+    The coordinates in :c:data:`a` and :c:data:`b` needs to be given as longitude
+    and latitude in radians. Note that the axis order of the :c:data:`P` object
+    is not taken into account in this function, so even though a CRS object comes
+    with axis ordering latitude/longitude coordinates used in this function should
+    be reordered as longitude/latitude.
+
+    :param P: Transformation or CRS object
     :type P: const :c:type:`PJ` *
     :param PJ_COORD a: Coordinate of first point
     :param PJ_COORD b: Coordinate of second point
@@ -635,7 +641,13 @@ Distances
     Similar to :c:func:`proj_lp_dist` but also takes the height above the ellipsoid
     into account.
 
-    :param P: Transformation object
+    The coordinates in :c:data:`a` and :c:data:`b` needs to be given as longitude
+    and latitude in radians. Note that the axis order of the :c:data:`P` object
+    is not taken into account in this function, so even though a CRS object comes
+    with axis ordering latitude/longitude coordinates used in this function should
+    be reordered as longitude/latitude.
+
+    :param P: Transformation or CRS object
     :type P: const :c:type:`PJ` *
     :param PJ_COORD a: Coordinate of first point
     :param PJ_COORD b: Coordinate of second point
@@ -656,6 +668,27 @@ Distances
     :param PJ_COORD a: First coordinate
     :param PJ_COORD b: Second coordinate
     :returns: `double` Distance between :c:data:`a` and :c:data:`b` in meters.
+
+.. c:function:: PJ_COORD proj_geod(const PJ *P, PJ_COORD a, PJ_COORD b)
+
+    Calculate the geodesic distance as well as forward and reverse azimuth
+    between two points on the ellipsoid.
+
+    The coordinates in :c:data:`a` and :c:data:`b` needs to be given as longitude
+    and latitude in radians. Note that the axis order of the :c:data:`P` object
+    is not taken into account in this function, so even though a CRS object comes
+    with axis ordering latitude/longitude coordinates used in this function should
+    be reordered as longitude/latitude.
+
+    :param P: Transformation or CRS object
+    :type P: const :c:type:`PJ` *
+    :param PJ_COORD a: Coordinate of first point
+    :param PJ_COORD b: Coordinate of second point
+    :returns: `PJ_COORD` where the first value is the distance between :c:data:`a`
+              and :c:data:`b` in meters, the second value is the forward azimuth
+              and the thir value is the reverse azimuth. The fourth coordinate
+              value is unused.
+
 
 
 Various
