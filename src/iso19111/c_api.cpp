@@ -59,6 +59,7 @@
 #include "proj_experimental.h"
 // clang-format on
 #include "proj_constants.h"
+#include "geodesic.h"
 
 using namespace NS_PROJ::common;
 using namespace NS_PROJ::crs;
@@ -205,6 +206,26 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
         pj->ctx = ctx;
         pj->descr = "ISO-19111 object";
         pj->iso_obj = objIn;
+        try {
+            auto crs = dynamic_cast<const CRS *>(objIn.get());
+            if (crs) {
+                auto geodCRS = crs->extractGeodeticCRS();
+                if (geodCRS) {
+                    const auto &ellps = geodCRS->ellipsoid();
+                    const double a = ellps->semiMajorAxis().getSIValue();
+                    const double es = ellps->squaredEccentricity();
+                    pj_calc_ellipsoid_params(pj, a, es);
+                    assert(pj->geod == nullptr);
+                    pj->geod = static_cast<struct geod_geodesic *>(
+                        calloc(1, sizeof(struct geod_geodesic)));
+                    if (pj->geod) {
+                        geod_init(pj->geod, pj->a,
+                                  pj->es / (1 + sqrt(pj->one_es)));
+                    }
+                }
+            }
+        } catch (const std::exception &) {
+        }
     }
     ctx->safeAutoCloseDbIfNeeded();
     return pj;
