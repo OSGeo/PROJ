@@ -685,13 +685,9 @@ void DatabaseContext::Private::attachExtraDatabases(
 
     closeDB();
 
-    sqlite3_open_v2(":memory:", &sqlite_handle_,
-                    SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX
-#ifdef SQLITE_OPEN_URI
-                        | SQLITE_OPEN_URI
-#endif
-                    ,
-                    nullptr);
+    sqlite3_open_v2(
+        ":memory:", &sqlite_handle_,
+        SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_URI, nullptr);
     if (!sqlite_handle_) {
         throw FactoryException("cannot create in memory database");
     }
