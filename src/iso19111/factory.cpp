@@ -329,7 +329,7 @@ void DatabaseContext::Private::closeDB() noexcept {
         // due to possible wrong caching of key info.
         // The bug is specific to using a memory file with shared cache as an
         // auxiliary DB.
-        // The efinitive fix was likely in 3.8.8
+        // The fix was likely in 3.8.8
         // https://github.com/mackyle/sqlite/commit/d412d4b8731991ecbd8811874aa463d0821673eb
         // But just after 3.8.2,
         // https://github.com/mackyle/sqlite/commit/ccf328c4318eacedab9ed08c404bc4f402dcad19
