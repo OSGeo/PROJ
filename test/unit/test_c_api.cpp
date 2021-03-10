@@ -175,18 +175,23 @@ TEST_F(CApi, proj_create) {
         EXPECT_NE(obj, nullptr);
 
         // Check that functions that operate on 'non-C++' PJ don't crash
-        PJ_COORD coord;
-        coord.xyzt.x = 0;
-        coord.xyzt.y = 0;
-        coord.xyzt.z = 0;
-        coord.xyzt.t = 0;
-        EXPECT_EQ(proj_trans(obj, PJ_FWD, coord).xyzt.x,
+        constexpr double DEG_TO_RAD = .017453292519943296;
+        PJ_COORD coord1;
+        coord1.xyzt.x = 2 * DEG_TO_RAD;
+        coord1.xyzt.y = 49 * DEG_TO_RAD;
+        coord1.xyzt.z = 0;
+        coord1.xyzt.t = 0;
+        PJ_COORD coord2;
+        coord2.xyzt.x = 2 * DEG_TO_RAD;
+        coord2.xyzt.y = 50 * DEG_TO_RAD;
+        coord2.xyzt.z = 0;
+        coord2.xyzt.t = 0;
+        EXPECT_EQ(proj_trans(obj, PJ_FWD, coord1).xyzt.x,
                   std::numeric_limits<double>::infinity());
 
-        EXPECT_EQ(proj_geod(obj, coord, coord).xyzt.x,
-                  std::numeric_limits<double>::infinity());
-        EXPECT_EQ(proj_lp_dist(obj, coord, coord),
-                  std::numeric_limits<double>::infinity());
+        // and those ones actually work just fine
+        EXPECT_NEAR(proj_geod(obj, coord1, coord2).xyzt.x, 111219.409, 1e-3);
+        EXPECT_NEAR(proj_lp_dist(obj, coord1, coord2), 111219.409, 1e-3);
 
         auto info = proj_pj_info(obj);
         EXPECT_EQ(info.id, nullptr);
