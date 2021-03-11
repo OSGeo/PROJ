@@ -48,6 +48,8 @@ jobs:
       run: |
           python3 --version
           sphinx-build --version
+          python3 -m pip list --not-required --format=columns
+
     - uses: actions/download-artifact@v2
       name: Images
       with:
