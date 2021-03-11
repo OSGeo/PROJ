@@ -2,19 +2,6 @@ INSERT INTO "metadata" VALUES('NKG.SOURCE', 'https://github.com/NordicGeodesy/No
 INSERT INTO "metadata" VALUES('NKG.VERSION', '1.0.0');
 INSERT INTO "metadata" VALUES('NKG.DATE', '2020-12-21');
 
--- Append NKG to authority references
-UPDATE
-   authority_to_authority_preference
-SET
-   allowed_authorities = allowed_authorities || ',NKG'
-WHERE
-   source_auth_name = 'EPSG' AND target_auth_name = 'EPSG';
-
-INSERT INTO "authority_to_authority_preference"
-    (source_auth_name,target_auth_name, allowed_authorities)
-VALUES
-    ('NKG', 'EPSG', 'NKG,PROJ,EPSG');
-
 -- extent for NKG2008 transformations
 INSERT INTO "extent" VALUES(
     'NKG','EXTENT_2008',            -- extend auth+code
