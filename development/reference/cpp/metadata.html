@@ -1,0 +1,979 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>metadata namespace &mdash; PROJ 8.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+  
+  
+  
+    <link rel="canonical" href="https://proj.orgdevelopment/reference/cpp/metadata.html"/>
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="cs namespace" href="cs.html" />
+    <link rel="prev" title="util namespace" href="util.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #353130" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                8.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../news.html">News</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Using PROJ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../apps/index.html">Applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../operations/index.html">Coordinate operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../resource_files.html">Resource files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geodesic.html">Geodesic calculations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../quickstart.html">Quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../transformations.html">Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../errorhandling.html">Error handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../threads.html">Threads</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../datatypes.html">Data types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../functions.html">Functions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">C++ API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cpp_general.html">General documentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="common.html">common namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="util.html">util namespace</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">metadata namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cs.html">cs namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="datum.html">datum namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="crs.html">crs namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="operation.html">operation namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html">io namespace</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../cmake.html">Using PROJ in CMake projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bindings.html">Language bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../migration.html">Version 4 to 6 API Migration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../migration.html#version-4-to-5-api-migration">Version 4 to 5 API Migration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../specifications/index.html">Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community/index.html">Community</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../zreferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">PROJ</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Development</a> &raquo;</li>
+        
+          <li><a href="../index.html">Reference</a> &raquo;</li>
+        
+          <li><a href="index.html">C++ API</a> &raquo;</li>
+        
+      <li>metadata namespace</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/OSGeo/PROJ/edit//8.0/docs/source/development/reference/cpp/metadata.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="cs.html" class="btn btn-neutral float-right" title="cs namespace" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="util.html" class="btn btn-neutral float-left" title="util namespace" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="metadata-namespace">
+<span id="metadata"></span><h1>metadata namespace<a class="headerlink" href="#metadata-namespace" title="Permalink to this headline">¶</a></h1>
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadataE">
+<span id="_CPPv3N5osgeo4proj8metadataE"></span><span id="_CPPv2N5osgeo4proj8metadataE"></span><span id="osgeo::proj::metadata"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata"></span><em class="property">namespace </em><code class="sig-prename descclassname">osgeo::proj<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">metadata</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadataE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Common classes from <a class="reference internal" href="cpp_general.html#namespaceISO__19115"><span class="std std-ref">ISO_19115</span></a> standard. </p>
+<p><a class="reference internal" href="#namespaceosgeo_1_1proj_1_1metadata"><span class="std std-ref">osgeo.proj.metadata</span></a> namespace </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Typedefs</p>
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata9ExtentPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata9ExtentPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata9ExtentPtrE"></span><span id="osgeo::proj::metadata::ExtentPtr"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1a0d6b619c883f52d0e1f2b112c6f4dc96"></span><em class="property">typedef </em>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata6ExtentE" title="osgeo::proj::metadata::Extent">Extent</a>&gt; <code class="sig-name descname">ExtentPtr</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata9ExtentPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Extent"><span class="std std-ref">Extent</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata11ExtentNNPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata11ExtentNNPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata11ExtentNNPtrE"></span><span id="osgeo::proj::metadata::ExtentNNPtr"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1af1a3c8cdeaecefe3e24f6d6b88b084f3"></span><em class="property">typedef </em><a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::nn&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata9ExtentPtrE" title="osgeo::proj::metadata::ExtentPtr">ExtentPtr</a>&gt; <code class="sig-name descname">ExtentNNPtr</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata11ExtentNNPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Non-null shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Extent"><span class="std std-ref">Extent</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata19GeographicExtentPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata19GeographicExtentPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata19GeographicExtentPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1a2af0f341306925be5ae59967276bbeef"></span><em class="property">using </em><code class="sig-name descname">GeographicExtentPtr</code> = std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata16GeographicExtentE" title="osgeo::proj::metadata::GeographicExtent">GeographicExtent</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata19GeographicExtentPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicExtent"><span class="std std-ref">GeographicExtent</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata21GeographicExtentNNPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata21GeographicExtentNNPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1a6464c1736a2af44ef917a8888cb6d6fb"></span><em class="property">using </em><code class="sig-name descname">GeographicExtentNNPtr</code> = <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::nn&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19GeographicExtentPtrE" title="osgeo::proj::metadata::GeographicExtentPtr">GeographicExtentPtr</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Non-null shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicExtent"><span class="std std-ref">GeographicExtent</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata24GeographicBoundingBoxPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata24GeographicBoundingBoxPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata24GeographicBoundingBoxPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1a4a58e6c0007f2b5f103d9eef3bc3308a"></span><em class="property">using </em><code class="sig-name descname">GeographicBoundingBoxPtr</code> = std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21GeographicBoundingBoxE" title="osgeo::proj::metadata::GeographicBoundingBox">GeographicBoundingBox</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata24GeographicBoundingBoxPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox"><span class="std std-ref">GeographicBoundingBox</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata26GeographicBoundingBoxNNPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata26GeographicBoundingBoxNNPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata26GeographicBoundingBoxNNPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1adb2463f90b3a052b079941a26c20cd19"></span><em class="property">using </em><code class="sig-name descname">GeographicBoundingBoxNNPtr</code> = <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::nn&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata24GeographicBoundingBoxPtrE" title="osgeo::proj::metadata::GeographicBoundingBoxPtr">GeographicBoundingBoxPtr</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata26GeographicBoundingBoxNNPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Non-null shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox"><span class="std std-ref">GeographicBoundingBox</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata17TemporalExtentPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata17TemporalExtentPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata17TemporalExtentPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1aecd1e12a1563f016a235b69ac2f530b0"></span><em class="property">using </em><code class="sig-name descname">TemporalExtentPtr</code> = std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata14TemporalExtentE" title="osgeo::proj::metadata::TemporalExtent">TemporalExtent</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata17TemporalExtentPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1TemporalExtent"><span class="std std-ref">TemporalExtent</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata19TemporalExtentNNPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata19TemporalExtentNNPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata19TemporalExtentNNPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1a304153f91ed6d2063b7a066d453349ab"></span><em class="property">using </em><code class="sig-name descname">TemporalExtentNNPtr</code> = <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::nn&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata17TemporalExtentPtrE" title="osgeo::proj::metadata::TemporalExtentPtr">TemporalExtentPtr</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata19TemporalExtentNNPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Non-null shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1TemporalExtent"><span class="std std-ref">TemporalExtent</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata17VerticalExtentPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata17VerticalExtentPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata17VerticalExtentPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1a552909ae18763a39ecf5845f7e165307"></span><em class="property">using </em><code class="sig-name descname">VerticalExtentPtr</code> = std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata14VerticalExtentE" title="osgeo::proj::metadata::VerticalExtent">VerticalExtent</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata17VerticalExtentPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1VerticalExtent"><span class="std std-ref">VerticalExtent</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata19VerticalExtentNNPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata19VerticalExtentNNPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata19VerticalExtentNNPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1aac464d7cdc2ed6ff6e2df8d7defa33bc"></span><em class="property">using </em><code class="sig-name descname">VerticalExtentNNPtr</code> = <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::nn&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata17VerticalExtentPtrE" title="osgeo::proj::metadata::VerticalExtentPtr">VerticalExtentPtr</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata19VerticalExtentNNPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Non-null shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1VerticalExtent"><span class="std std-ref">VerticalExtent</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata13IdentifierPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata13IdentifierPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata13IdentifierPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1a76512bb8ca0cd79f0a2470cb679e5444"></span><em class="property">using </em><code class="sig-name descname">IdentifierPtr</code> = std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata10IdentifierE" title="osgeo::proj::metadata::Identifier">Identifier</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata13IdentifierPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">Identifier</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata15IdentifierNNPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata15IdentifierNNPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata15IdentifierNNPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1aa56f3dbff085fc0fceea708365b3f1be"></span><em class="property">using </em><code class="sig-name descname">IdentifierNNPtr</code> = <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::nn&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata13IdentifierPtrE" title="osgeo::proj::metadata::IdentifierPtr">IdentifierPtr</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata15IdentifierNNPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Non-null shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">Identifier</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata21PositionalAccuracyPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata21PositionalAccuracyPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata21PositionalAccuracyPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1a34d18f8ebb3c1228ea42cf2e55fccf15"></span><em class="property">using </em><code class="sig-name descname">PositionalAccuracyPtr</code> = std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata18PositionalAccuracyE" title="osgeo::proj::metadata::PositionalAccuracy">PositionalAccuracy</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata21PositionalAccuracyPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1PositionalAccuracy"><span class="std std-ref">PositionalAccuracy</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp type">
+<dt id="_CPPv4N5osgeo4proj8metadata23PositionalAccuracyNNPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata23PositionalAccuracyNNPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata23PositionalAccuracyNNPtrE"></span><span class="target" id="namespaceosgeo_1_1proj_1_1metadata_1aa6db70d5727fa78de9e1fdb523659823"></span><em class="property">using </em><code class="sig-name descname">PositionalAccuracyNNPtr</code> = <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::nn&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21PositionalAccuracyPtrE" title="osgeo::proj::metadata::PositionalAccuracyPtr">PositionalAccuracyPtr</a>&gt;<a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata23PositionalAccuracyNNPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Non-null shared pointer of <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1PositionalAccuracy"><span class="std std-ref">PositionalAccuracy</span></a>. </p>
+</dd></dl>
+
+</div>
+<dl class="cpp class">
+<dt id="_CPPv4N5osgeo4proj8metadata8CitationE">
+<span id="_CPPv3N5osgeo4proj8metadata8CitationE"></span><span id="_CPPv2N5osgeo4proj8metadata8CitationE"></span><span id="osgeo::proj::metadata::Citation"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Citation"></span><em class="property">class </em><code class="sig-name descname">Citation</code> : <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util10BaseObjectE" title="osgeo::proj::util::BaseObject">BaseObject</a><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata8CitationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><em>#include &lt;metadata.hpp&gt;</em><p>Standardized resource reference. </p>
+<p>A citation contains a title.</p>
+<p><dl class="simple">
+<dt><strong>Remark</strong></dt><dd><p>Simplified version of <a class="reference external" href="http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/citation/Citation.html">Citation</a> from <a class="reference internal" href="cpp_general.html#namespaceGeoAPI"><span class="std std-ref">GeoAPI</span></a> </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata8Citation8CitationERKNSt6stringE">
+<span id="_CPPv3N5osgeo4proj8metadata8Citation8CitationERKNSt6stringE"></span><span id="_CPPv2N5osgeo4proj8metadata8Citation8CitationERKNSt6stringE"></span><span id="osgeo::proj::metadata::Citation::Citation__ssCR"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Citation_1a92d735a3f216d1a84f59839488e76d5d"></span><code class="sig-name descname">Citation</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>titleIn</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata8Citation8CitationERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructs a citation by its title. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata8Citation5titleEv">
+<span id="_CPPv3N5osgeo4proj8metadata8Citation5titleEv"></span><span id="_CPPv2N5osgeo4proj8metadata8Citation5titleEv"></span><span id="osgeo::proj::metadata::Citation::title"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Citation_1a73cb223845b1d9608c94e74f1971e606"></span><em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;std::string&gt; &amp;<code class="sig-name descname">title</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata8Citation5titleEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the name by which the cited resource is known. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4N5osgeo4proj8metadata6ExtentE">
+<span id="_CPPv3N5osgeo4proj8metadata6ExtentE"></span><span id="_CPPv2N5osgeo4proj8metadata6ExtentE"></span><span id="osgeo::proj::metadata::Extent"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent"></span><em class="property">class </em><code class="sig-name descname">Extent</code> : <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util10BaseObjectE" title="osgeo::proj::util::BaseObject">BaseObject</a>, <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util11IComparableE" title="osgeo::proj::util::IComparable">IComparable</a><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata6ExtentE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><em>#include &lt;metadata.hpp&gt;</em><p>Information about spatial, vertical, and temporal extent. </p>
+<p><dl class="simple">
+<dt><strong>Remark</strong></dt><dd><p>Simplified version of <a class="reference external" href="http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/Extent.html">Extent</a> from <a class="reference internal" href="cpp_general.html#namespaceGeoAPI"><span class="std std-ref">GeoAPI</span></a> </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata6Extent11descriptionEv">
+<span id="_CPPv3N5osgeo4proj8metadata6Extent11descriptionEv"></span><span id="_CPPv2N5osgeo4proj8metadata6Extent11descriptionEv"></span><span id="osgeo::proj::metadata::Extent::description"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1aa25afe2c6353ab8af0c2cefd5a11fab4"></span><em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;std::string&gt; &amp;<code class="sig-name descname">description</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata6Extent11descriptionEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return a textual description of the extent.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the description, or empty. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata6Extent18geographicElementsEv">
+<span id="_CPPv3N5osgeo4proj8metadata6Extent18geographicElementsEv"></span><span id="_CPPv2N5osgeo4proj8metadata6Extent18geographicElementsEv"></span><span id="osgeo::proj::metadata::Extent::geographicElements"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1a1f9cda5cfdca9d588a82786a74319ac9"></span><em class="property">const</em> std::vector&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE" title="osgeo::proj::metadata::GeographicExtentNNPtr">GeographicExtentNNPtr</a>&gt; &amp;<code class="sig-name descname">geographicElements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata6Extent18geographicElementsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the geographic element(s) of the extent</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the geographic element(s), or empty. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata6Extent16temporalElementsEv">
+<span id="_CPPv3N5osgeo4proj8metadata6Extent16temporalElementsEv"></span><span id="_CPPv2N5osgeo4proj8metadata6Extent16temporalElementsEv"></span><span id="osgeo::proj::metadata::Extent::temporalElements"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1a3ebec9f135e2e791714d81398e8a402d"></span><em class="property">const</em> std::vector&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19TemporalExtentNNPtrE" title="osgeo::proj::metadata::TemporalExtentNNPtr">TemporalExtentNNPtr</a>&gt; &amp;<code class="sig-name descname">temporalElements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata6Extent16temporalElementsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the temporal element(s) of the extent</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the temporal element(s), or empty. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata6Extent16verticalElementsEv">
+<span id="_CPPv3N5osgeo4proj8metadata6Extent16verticalElementsEv"></span><span id="_CPPv2N5osgeo4proj8metadata6Extent16verticalElementsEv"></span><span id="osgeo::proj::metadata::Extent::verticalElements"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1aefce02059f3629983fa89bd9fab4624c"></span><em class="property">const</em> std::vector&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19VerticalExtentNNPtrE" title="osgeo::proj::metadata::VerticalExtentNNPtr">VerticalExtentNNPtr</a>&gt; &amp;<code class="sig-name descname">verticalElements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata6Extent16verticalElementsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the vertical element(s) of the extent</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the vertical element(s), or empty. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata6Extent8containsERK11ExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata6Extent8containsERK11ExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata6Extent8containsERK11ExtentNNPtr"></span><span id="osgeo::proj::metadata::Extent::contains__ExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1adf5481532f36b71f30565369e34aca2b"></span>bool <code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata11ExtentNNPtrE" title="osgeo::proj::metadata::ExtentNNPtr">ExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata6Extent8containsERK11ExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent contains the other one. </p>
+<p>Behavior only well specified if each sub-extent category as at most one element. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata6Extent10intersectsERK11ExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata6Extent10intersectsERK11ExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata6Extent10intersectsERK11ExtentNNPtr"></span><span id="osgeo::proj::metadata::Extent::intersects__ExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1a9ebd119cc24dd0cd60779b30313ed500"></span>bool <code class="sig-name descname">intersects</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata11ExtentNNPtrE" title="osgeo::proj::metadata::ExtentNNPtr">ExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata6Extent10intersectsERK11ExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent intersects the other one. </p>
+<p>Behavior only well specified if each sub-extent category as at most one element. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata6Extent12intersectionERK11ExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata6Extent12intersectionERK11ExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata6Extent12intersectionERK11ExtentNNPtr"></span><span id="osgeo::proj::metadata::Extent::intersection__ExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1ac4c29ae3191fd2e5c65d776faf1dcc2a"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata9ExtentPtrE" title="osgeo::proj::metadata::ExtentPtr">ExtentPtr</a> <code class="sig-name descname">intersection</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata11ExtentNNPtrE" title="osgeo::proj::metadata::ExtentNNPtr">ExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata6Extent12intersectionERK11ExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the intersection of this extent with another one. </p>
+<p>Behavior only well specified if there is one single <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicExtent"><span class="std std-ref">GeographicExtent</span></a> in each object. Returns nullptr otherwise. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Static Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata6Extent6createERKN4util8optionalINSt6stringEEERKNSt6vectorI21GeographicExtentNNPtrEERKNSt6vectorI19VerticalExtentNNPtrEERKNSt6vectorI19TemporalExtentNNPtrEE">
+<span id="_CPPv3N5osgeo4proj8metadata6Extent6createERKN4util8optionalINSt6stringEEERKNSt6vectorI21GeographicExtentNNPtrEERKNSt6vectorI19VerticalExtentNNPtrEERKNSt6vectorI19TemporalExtentNNPtrEE"></span><span id="_CPPv2N5osgeo4proj8metadata6Extent6createERKN4util8optionalINSt6stringEEERKNSt6vectorI21GeographicExtentNNPtrEERKNSt6vectorI19VerticalExtentNNPtrEERKNSt6vectorI19TemporalExtentNNPtrEE"></span><span id="osgeo::proj::metadata::Extent::create__util::optional:ss:CR.std::vector:GeographicExtentNNPtr:CR.std::vector:VerticalExtentNNPtr:CR.std::vector:TemporalExtentNNPtr:CR"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1a1b01874ebee29f493cb6b8fa314bd0d0"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata11ExtentNNPtrE" title="osgeo::proj::metadata::ExtentNNPtr">ExtentNNPtr</a> <code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;std::string&gt; &amp;<em>descriptionIn</em>, <em class="property">const</em> std::vector&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE" title="osgeo::proj::metadata::GeographicExtentNNPtr">GeographicExtentNNPtr</a>&gt; &amp;<em>geographicElementsIn</em>, <em class="property">const</em> std::vector&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19VerticalExtentNNPtrE" title="osgeo::proj::metadata::VerticalExtentNNPtr">VerticalExtentNNPtr</a>&gt; &amp;<em>verticalElementsIn</em>, <em class="property">const</em> std::vector&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19TemporalExtentNNPtrE" title="osgeo::proj::metadata::TemporalExtentNNPtr">TemporalExtentNNPtr</a>&gt; &amp;<em>temporalElementsIn</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata6Extent6createERKN4util8optionalINSt6stringEEERKNSt6vectorI21GeographicExtentNNPtrEERKNSt6vectorI19VerticalExtentNNPtrEERKNSt6vectorI19TemporalExtentNNPtrEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Instantiate a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Extent"><span class="std std-ref">Extent</span></a>. </p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>a new <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Extent"><span class="std std-ref">Extent</span></a>. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">descriptionIn</span></code>: Textual description, or empty. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">geographicElementsIn</span></code>: Geographic element(s), or empty. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">verticalElementsIn</span></code>: Vertical element(s), or empty. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">temporalElementsIn</span></code>: Temporal element(s), or empty. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata6Extent14createFromBBOXEddddRKN4util8optionalINSt6stringEEE">
+<span id="_CPPv3N5osgeo4proj8metadata6Extent14createFromBBOXEddddRKN4util8optionalINSt6stringEEE"></span><span id="_CPPv2N5osgeo4proj8metadata6Extent14createFromBBOXEddddRKN4util8optionalINSt6stringEEE"></span><span id="osgeo::proj::metadata::Extent::createFromBBOX__double.double.double.double.util::optional:ss:CR"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1ac248d18e05a12680128b819eca0b6e77"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata11ExtentNNPtrE" title="osgeo::proj::metadata::ExtentNNPtr">ExtentNNPtr</a> <code class="sig-name descname">createFromBBOX</code><span class="sig-paren">(</span>double <em>west</em>, double <em>south</em>, double <em>east</em>, double <em>north</em>, <em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;std::string&gt; &amp;<em>descriptionIn</em> = <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;std::string&gt;()<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata6Extent14createFromBBOXEddddRKN4util8optionalINSt6stringEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Instantiate a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Extent"><span class="std std-ref">Extent</span></a> from a bounding box. </p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>a new <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Extent"><span class="std std-ref">Extent</span></a>. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">west</span></code>: Western-most coordinate of the limit of the dataset extent (in degrees). </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">south</span></code>: Southern-most coordinate of the limit of the dataset extent (in degrees). </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">east</span></code>: Eastern-most coordinate of the limit of the dataset extent (in degrees). </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">north</span></code>: Northern-most coordinate of the limit of the dataset extent (in degrees). </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">descriptionIn</span></code>: Textual description, or empty. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Static Attributes</p>
+<dl class="cpp var">
+<dt id="_CPPv4N5osgeo4proj8metadata6Extent5WORLDE">
+<span id="_CPPv3N5osgeo4proj8metadata6Extent5WORLDE"></span><span id="_CPPv2N5osgeo4proj8metadata6Extent5WORLDE"></span><span id="osgeo::proj::metadata::Extent::WORLD__ExtentNNPtrC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Extent_1a2df22953a1ae181c19526b06fc3ae1ae"></span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata11ExtentNNPtrE" title="osgeo::proj::metadata::ExtentNNPtr">ExtentNNPtr</a> <code class="sig-name descname">WORLD</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata6Extent5WORLDE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>World extent. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4N5osgeo4proj8metadata21GeographicBoundingBoxE">
+<span id="_CPPv3N5osgeo4proj8metadata21GeographicBoundingBoxE"></span><span id="_CPPv2N5osgeo4proj8metadata21GeographicBoundingBoxE"></span><span id="osgeo::proj::metadata::GeographicBoundingBox"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox"></span><em class="property">class </em><code class="sig-name descname">GeographicBoundingBox</code> : <em class="property">public</em> osgeo::proj::<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadataE" title="osgeo::proj::metadata">metadata</a>::<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata16GeographicExtentE" title="osgeo::proj::metadata::GeographicExtent">GeographicExtent</a><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata21GeographicBoundingBoxE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><em>#include &lt;metadata.hpp&gt;</em><p>Geographic position of the dataset. </p>
+<p>This is only an approximate so specifying the co-ordinate reference system is unnecessary.</p>
+<p><dl class="simple">
+<dt><strong>Remark</strong></dt><dd><p>Implements <a class="reference external" href="http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/GeographicBoundingBox.html">GeographicBoundingBox</a> from <a class="reference internal" href="cpp_general.html#namespaceGeoAPI"><span class="std std-ref">GeoAPI</span></a> </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox18westBoundLongitudeEv">
+<span id="_CPPv3N5osgeo4proj8metadata21GeographicBoundingBox18westBoundLongitudeEv"></span><span id="_CPPv2N5osgeo4proj8metadata21GeographicBoundingBox18westBoundLongitudeEv"></span><span id="osgeo::proj::metadata::GeographicBoundingBox::westBoundLongitude"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1ad37e799fc5653d5e083769a4760db808"></span>double <code class="sig-name descname">westBoundLongitude</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox18westBoundLongitudeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the western-most coordinate of the limit of the dataset extent. </p>
+<p>The unit is degrees.</p>
+<p>If eastBoundLongitude &lt; <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1ad37e799fc5653d5e083769a4760db808"><span class="std std-ref">westBoundLongitude()</span></a>, then the bounding box crosses the anti-meridian. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox18southBoundLatitudeEv">
+<span id="_CPPv3N5osgeo4proj8metadata21GeographicBoundingBox18southBoundLatitudeEv"></span><span id="_CPPv2N5osgeo4proj8metadata21GeographicBoundingBox18southBoundLatitudeEv"></span><span id="osgeo::proj::metadata::GeographicBoundingBox::southBoundLatitude"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1afa973e9e9341c33fe224dad518cd39e0"></span>double <code class="sig-name descname">southBoundLatitude</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox18southBoundLatitudeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the southern-most coordinate of the limit of the dataset extent. </p>
+<p>The unit is degrees. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox18eastBoundLongitudeEv">
+<span id="_CPPv3N5osgeo4proj8metadata21GeographicBoundingBox18eastBoundLongitudeEv"></span><span id="_CPPv2N5osgeo4proj8metadata21GeographicBoundingBox18eastBoundLongitudeEv"></span><span id="osgeo::proj::metadata::GeographicBoundingBox::eastBoundLongitude"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1a7ca71ff3585a9ccaead49cf33f3e618b"></span>double <code class="sig-name descname">eastBoundLongitude</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox18eastBoundLongitudeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the eastern-most coordinate of the limit of the dataset extent. </p>
+<p>The unit is degrees.</p>
+<p>If eastBoundLongitude &lt; <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1ad37e799fc5653d5e083769a4760db808"><span class="std std-ref">westBoundLongitude()</span></a>, then the bounding box crosses the anti-meridian. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox18northBoundLatitudeEv">
+<span id="_CPPv3N5osgeo4proj8metadata21GeographicBoundingBox18northBoundLatitudeEv"></span><span id="_CPPv2N5osgeo4proj8metadata21GeographicBoundingBox18northBoundLatitudeEv"></span><span id="osgeo::proj::metadata::GeographicBoundingBox::northBoundLatitude"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1abe2ac7090978279fffbe20fc8ce83470"></span>double <code class="sig-name descname">northBoundLatitude</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox18northBoundLatitudeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the northern-most coordinate of the limit of the dataset extent. </p>
+<p>The unit is degrees. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata21GeographicBoundingBox8containsERK21GeographicExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata21GeographicBoundingBox8containsERK21GeographicExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata21GeographicBoundingBox8containsERK21GeographicExtentNNPtr"></span><span id="osgeo::proj::metadata::GeographicBoundingBox::contains__GeographicExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1a6c987976d3f25925024629f66aac3b4c"></span>bool <code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE" title="osgeo::proj::metadata::GeographicExtentNNPtr">GeographicExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">override</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata21GeographicBoundingBox8containsERK21GeographicExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent contains the other one. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata21GeographicBoundingBox10intersectsERK21GeographicExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata21GeographicBoundingBox10intersectsERK21GeographicExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata21GeographicBoundingBox10intersectsERK21GeographicExtentNNPtr"></span><span id="osgeo::proj::metadata::GeographicBoundingBox::intersects__GeographicExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1a1142819d48f59389fcb1421af0382c8b"></span>bool <code class="sig-name descname">intersects</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE" title="osgeo::proj::metadata::GeographicExtentNNPtr">GeographicExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">override</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata21GeographicBoundingBox10intersectsERK21GeographicExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent intersects the other one. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata21GeographicBoundingBox12intersectionERK21GeographicExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata21GeographicBoundingBox12intersectionERK21GeographicExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata21GeographicBoundingBox12intersectionERK21GeographicExtentNNPtr"></span><span id="osgeo::proj::metadata::GeographicBoundingBox::intersection__GeographicExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1a3412e56acd6ffc3275f0be454d1fd83b"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19GeographicExtentPtrE" title="osgeo::proj::metadata::GeographicExtentPtr">GeographicExtentPtr</a> <code class="sig-name descname">intersection</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE" title="osgeo::proj::metadata::GeographicExtentNNPtr">GeographicExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">override</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata21GeographicBoundingBox12intersectionERK21GeographicExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the intersection of this extent with another one. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Static Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox6createEdddd">
+<span id="_CPPv3N5osgeo4proj8metadata21GeographicBoundingBox6createEdddd"></span><span id="_CPPv2N5osgeo4proj8metadata21GeographicBoundingBox6createEdddd"></span><span id="osgeo::proj::metadata::GeographicBoundingBox::create__double.double.double.double"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox_1aa1fd95fe5d77301f6b2114262a8e1296"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata26GeographicBoundingBoxNNPtrE" title="osgeo::proj::metadata::GeographicBoundingBoxNNPtr">GeographicBoundingBoxNNPtr</a> <code class="sig-name descname">create</code><span class="sig-paren">(</span>double <em>west</em>, double <em>south</em>, double <em>east</em>, double <em>north</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata21GeographicBoundingBox6createEdddd" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Instantiate a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox"><span class="std std-ref">GeographicBoundingBox</span></a>. </p>
+<p>If east &lt; west, then the bounding box crosses the anti-meridian.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>a new <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox"><span class="std std-ref">GeographicBoundingBox</span></a>. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">west</span></code>: Western-most coordinate of the limit of the dataset extent (in degrees). </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">south</span></code>: Southern-most coordinate of the limit of the dataset extent (in degrees). </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">east</span></code>: Eastern-most coordinate of the limit of the dataset extent (in degrees). </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">north</span></code>: Northern-most coordinate of the limit of the dataset extent (in degrees). </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4N5osgeo4proj8metadata16GeographicExtentE">
+<span id="_CPPv3N5osgeo4proj8metadata16GeographicExtentE"></span><span id="_CPPv2N5osgeo4proj8metadata16GeographicExtentE"></span><span id="osgeo::proj::metadata::GeographicExtent"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicExtent"></span><em class="property">class </em><code class="sig-name descname">GeographicExtent</code> : <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util10BaseObjectE" title="osgeo::proj::util::BaseObject">BaseObject</a>, <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util11IComparableE" title="osgeo::proj::util::IComparable">IComparable</a><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata16GeographicExtentE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><em>#include &lt;metadata.hpp&gt;</em><p>Base interface for geographic area of the dataset. </p>
+<p><dl class="simple">
+<dt><strong>Remark</strong></dt><dd><p>Simplified version of <a class="reference external" href="http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/GeographicExtent.html">GeographicExtent</a> from <a class="reference internal" href="cpp_general.html#namespaceGeoAPI"><span class="std std-ref">GeoAPI</span></a> </p>
+</dd>
+</dl>
+</p>
+<p>Subclassed by <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1GeographicBoundingBox"><span class="std std-ref">osgeo::proj::metadata::GeographicBoundingBox</span></a></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata16GeographicExtent8containsERK21GeographicExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata16GeographicExtent8containsERK21GeographicExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata16GeographicExtent8containsERK21GeographicExtentNNPtr"></span><span id="osgeo::proj::metadata::GeographicExtent::contains__GeographicExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicExtent_1a79e85ffd16aa9523bdf24e6f9099b6be"></span>bool <code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE" title="osgeo::proj::metadata::GeographicExtentNNPtr">GeographicExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em> = 0<a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata16GeographicExtent8containsERK21GeographicExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent contains the other one. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata16GeographicExtent10intersectsERK21GeographicExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata16GeographicExtent10intersectsERK21GeographicExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata16GeographicExtent10intersectsERK21GeographicExtentNNPtr"></span><span id="osgeo::proj::metadata::GeographicExtent::intersects__GeographicExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicExtent_1a3a46090c2c63bb2b80879d3796c1d809"></span>bool <code class="sig-name descname">intersects</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE" title="osgeo::proj::metadata::GeographicExtentNNPtr">GeographicExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em> = 0<a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata16GeographicExtent10intersectsERK21GeographicExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent intersects the other one. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata16GeographicExtent12intersectionERK21GeographicExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata16GeographicExtent12intersectionERK21GeographicExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata16GeographicExtent12intersectionERK21GeographicExtentNNPtr"></span><span id="osgeo::proj::metadata::GeographicExtent::intersection__GeographicExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1GeographicExtent_1a8c123577aed7bfdd43c47bc183e2e60b"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19GeographicExtentPtrE" title="osgeo::proj::metadata::GeographicExtentPtr">GeographicExtentPtr</a> <code class="sig-name descname">intersection</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata21GeographicExtentNNPtrE" title="osgeo::proj::metadata::GeographicExtentNNPtr">GeographicExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em> = 0<a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata16GeographicExtent12intersectionERK21GeographicExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the intersection of this extent with another one. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4N5osgeo4proj8metadata10IdentifierE">
+<span id="_CPPv3N5osgeo4proj8metadata10IdentifierE"></span><span id="_CPPv2N5osgeo4proj8metadata10IdentifierE"></span><span id="osgeo::proj::metadata::Identifier"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier"></span><em class="property">class </em><code class="sig-name descname">Identifier</code> : <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util10BaseObjectE" title="osgeo::proj::util::BaseObject">BaseObject</a>, <em class="property">public</em> osgeo::proj::<a class="reference internal" href="io.html#_CPPv4N5osgeo4proj2ioE" title="osgeo::proj::io">io</a>::<a class="reference internal" href="io.html#_CPPv4N5osgeo4proj2io14IWKTExportableE" title="osgeo::proj::io::IWKTExportable">IWKTExportable</a>, <em class="property">public</em> osgeo::proj::<a class="reference internal" href="io.html#_CPPv4N5osgeo4proj2ioE" title="osgeo::proj::io">io</a>::<a class="reference internal" href="io.html#_CPPv4N5osgeo4proj2io15IJSONExportableE" title="osgeo::proj::io::IJSONExportable">IJSONExportable</a><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10IdentifierE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><em>#include &lt;metadata.hpp&gt;</em><p>Value uniquely identifying an object within a namespace. </p>
+<p><dl class="simple">
+<dt><strong>Remark</strong></dt><dd><p>Implements <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">Identifier</span></a> as described in <a class="reference internal" href="cpp_general.html#namespaceISO__19111__2019"><span class="std std-ref">ISO_19111_2019</span></a> but which originates from <a class="reference internal" href="cpp_general.html#namespaceISO__19115"><span class="std std-ref">ISO_19115</span></a> </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier9authorityEv">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier9authorityEv"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier9authorityEv"></span><span id="osgeo::proj::metadata::Identifier::authority"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1a26f8ab49d22fef8ba70ca77332f021da"></span><em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;<a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata8CitationE" title="osgeo::proj::metadata::Citation">Citation</a>&gt; &amp;<code class="sig-name descname">authority</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier9authorityEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return a citation for the organization responsible for definition and maintenance of the code. </p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the citation for the authority, or empty. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier4codeEv">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier4codeEv"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier4codeEv"></span><span id="osgeo::proj::metadata::Identifier::code"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1af2fbad18c50b5d272da5e4fee4aed918"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">code</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier4codeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the alphanumeric value identifying an instance in the codespace. </p>
+<p>e.g. “4326” (for EPSG:4326 WGS 84 GeographicCRS)</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the code. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier9codeSpaceEv">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier9codeSpaceEv"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier9codeSpaceEv"></span><span id="osgeo::proj::metadata::Identifier::codeSpace"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1ad650a359a65fe2da68e8f26c7402a51f"></span><em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;std::string&gt; &amp;<code class="sig-name descname">codeSpace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier9codeSpaceEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the organization responsible for definition and maintenance of the code. </p>
+<p>e.g “EPSG”</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the authority codespace, or empty. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier7versionEv">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier7versionEv"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier7versionEv"></span><span id="osgeo::proj::metadata::Identifier::version"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1ac158f8bb8eeeafb05a55a524e5ad5b9e"></span><em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;std::string&gt; &amp;<code class="sig-name descname">version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier7versionEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the version identifier for the namespace. </p>
+<p>When appropriate, the edition is identified by the effective date, coded using ISO 8601 date format.</p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the version or empty. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier11descriptionEv">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier11descriptionEv"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier11descriptionEv"></span><span id="osgeo::proj::metadata::Identifier::description"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1acd5eccca9f26e0f20b6c9fc8c0927390"></span><em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;std::string&gt; &amp;<code class="sig-name descname">description</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier11descriptionEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the natural language description of the meaning of the code value. </p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the description or empty. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier3uriEv">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier3uriEv"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier3uriEv"></span><span id="osgeo::proj::metadata::Identifier::uri"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1aaac9d7903f74e6add533cdcf8cc77c31"></span><em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4I0EN5osgeo4proj4util8optionalE" title="osgeo::proj::util::optional">optional</a>&lt;std::string&gt; &amp;<code class="sig-name descname">uri</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier3uriEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the URI of the identifier. </p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>the URI or empty. </p>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Static Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier6createERKNSt6stringERKN4util11PropertyMapE">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier6createERKNSt6stringERKN4util11PropertyMapE"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier6createERKNSt6stringERKN4util11PropertyMapE"></span><span id="osgeo::proj::metadata::Identifier::create__ssCR.util::PropertyMapCR"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1a0731ee21a8080ec3c502685c5db85fd2"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata15IdentifierNNPtrE" title="osgeo::proj::metadata::IdentifierNNPtr">IdentifierNNPtr</a> <code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>codeIn</em> = std::string(), <em class="property">const</em> <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util11PropertyMapE" title="osgeo::proj::util::PropertyMap">PropertyMap</a> &amp;<em>properties</em> = <a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util11PropertyMapE" title="osgeo::proj::util::PropertyMap">PropertyMap</a>()<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier6createERKNSt6stringERKN4util11PropertyMapE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Instantiate a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">Identifier</span></a>. </p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>a new <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">Identifier</span></a>. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">codeIn</span></code>: Alphanumeric value identifying an instance in the codespace </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">properties</span></code>: See <a class="reference internal" href="cpp_general.html#namespacegeneral__properties"><span class="std std-ref">general_properties</span></a>. Generally, the <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier_1ac565fad2dbc1f480cc31fa8a2ff9aba9"><span class="std std-ref">Identifier::CODESPACE_KEY</span></a> should be set. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier16isEquivalentNameEPKcPKc">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier16isEquivalentNameEPKcPKc"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier16isEquivalentNameEPKcPKc"></span><span id="osgeo::proj::metadata::Identifier::isEquivalentName__cCP.cCP"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1a20a63d4f7b5f073bd831c7d793973c21"></span>bool <code class="sig-name descname">isEquivalentName</code><span class="sig-paren">(</span><em class="property">const</em> char *<em>a</em>, <em class="property">const</em> char *<em>b</em><span class="sig-paren">)</span> <em class="property">noexcept</em><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier16isEquivalentNameEPKcPKc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether two names are considered equivalent. </p>
+<p>Two names are equivalent by removing any space, underscore, dash, slash, { or } character from them, and comparing in a case insensitive way. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Static Attributes</p>
+<dl class="cpp var">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier13AUTHORITY_KEYE">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier13AUTHORITY_KEYE"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier13AUTHORITY_KEYE"></span><span id="osgeo::proj::metadata::Identifier::AUTHORITY_KEY__ssC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1ae4b7ba00c3cc174db90ebcdcc083f202"></span><em class="property">const</em> std::string <code class="sig-name descname">AUTHORITY_KEY</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier13AUTHORITY_KEYE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Key to set the authority citation of a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">metadata::Identifier</span></a>. </p>
+<p>The value is to be provided as a string or a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Citation"><span class="std std-ref">metadata::Citation</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier8CODE_KEYE">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier8CODE_KEYE"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier8CODE_KEYE"></span><span id="osgeo::proj::metadata::Identifier::CODE_KEY__ssC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1adead8852011814afec16a03989ff14f7"></span><em class="property">const</em> std::string <code class="sig-name descname">CODE_KEY</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier8CODE_KEYE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Key to set the code of a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">metadata::Identifier</span></a>. </p>
+<p>The value is to be provided as a integer or a string. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier13CODESPACE_KEYE">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier13CODESPACE_KEYE"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier13CODESPACE_KEYE"></span><span id="osgeo::proj::metadata::Identifier::CODESPACE_KEY__ssC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1ac565fad2dbc1f480cc31fa8a2ff9aba9"></span><em class="property">const</em> std::string <code class="sig-name descname">CODESPACE_KEY</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier13CODESPACE_KEYE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Key to set the organization responsible for definition and maintenance of the code of a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">metadata::Identifier</span></a>. </p>
+<p>The value is to be provided as a string. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier11VERSION_KEYE">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier11VERSION_KEYE"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier11VERSION_KEYE"></span><span id="osgeo::proj::metadata::Identifier::VERSION_KEY__ssC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1ab5679044d62e16c447447f1b6000a55e"></span><em class="property">const</em> std::string <code class="sig-name descname">VERSION_KEY</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier11VERSION_KEYE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Key to set the version identifier for the namespace of a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">metadata::Identifier</span></a>. </p>
+<p>The value is to be provided as a string. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier15DESCRIPTION_KEYE">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier15DESCRIPTION_KEYE"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier15DESCRIPTION_KEYE"></span><span id="osgeo::proj::metadata::Identifier::DESCRIPTION_KEY__ssC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1af6dee2b9afdad9fba780a01cdde4f39a"></span><em class="property">const</em> std::string <code class="sig-name descname">DESCRIPTION_KEY</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier15DESCRIPTION_KEYE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Key to set the natural language description of the meaning of the code value of a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">metadata::Identifier</span></a>. </p>
+<p>The value is to be provided as a string. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier7URI_KEYE">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier7URI_KEYE"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier7URI_KEYE"></span><span id="osgeo::proj::metadata::Identifier::URI_KEY__ssC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1a2ce093bce8812891cdfce84ebed1b283"></span><em class="property">const</em> std::string <code class="sig-name descname">URI_KEY</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier7URI_KEYE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Key to set the URI of a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1Identifier"><span class="std std-ref">metadata::Identifier</span></a>. </p>
+<p>The value is to be provided as a string. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier4EPSGE">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier4EPSGE"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier4EPSGE"></span><span id="osgeo::proj::metadata::Identifier::EPSG__ssC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1a3d107064807be557a470f4a019933948"></span><em class="property">const</em> std::string <code class="sig-name descname">EPSG</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier4EPSGE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>EPSG codespace. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt id="_CPPv4N5osgeo4proj8metadata10Identifier3OGCE">
+<span id="_CPPv3N5osgeo4proj8metadata10Identifier3OGCE"></span><span id="_CPPv2N5osgeo4proj8metadata10Identifier3OGCE"></span><span id="osgeo::proj::metadata::Identifier::OGC__ssC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1Identifier_1ac293dc0c24a1a24353ad1880d2c36df3"></span><em class="property">const</em> std::string <code class="sig-name descname">OGC</code><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata10Identifier3OGCE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>OGC codespace. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4N5osgeo4proj8metadata18PositionalAccuracyE">
+<span id="_CPPv3N5osgeo4proj8metadata18PositionalAccuracyE"></span><span id="_CPPv2N5osgeo4proj8metadata18PositionalAccuracyE"></span><span id="osgeo::proj::metadata::PositionalAccuracy"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1PositionalAccuracy"></span><em class="property">class </em><code class="sig-name descname">PositionalAccuracy</code> : <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util10BaseObjectE" title="osgeo::proj::util::BaseObject">BaseObject</a><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata18PositionalAccuracyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><em>#include &lt;metadata.hpp&gt;</em><p>Accuracy of the position of features. </p>
+<p><dl class="simple">
+<dt><strong>Remark</strong></dt><dd><p>Simplified version of <a class="reference external" href="http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/quality/PositionalAccuracy.html">PositionalAccuracy</a> from <a class="reference internal" href="cpp_general.html#namespaceGeoAPI"><span class="std std-ref">GeoAPI</span></a>, which originates from <a class="reference internal" href="cpp_general.html#namespaceISO__19115"><span class="std std-ref">ISO_19115</span></a> </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata18PositionalAccuracy5valueEv">
+<span id="_CPPv3N5osgeo4proj8metadata18PositionalAccuracy5valueEv"></span><span id="_CPPv2N5osgeo4proj8metadata18PositionalAccuracy5valueEv"></span><span id="osgeo::proj::metadata::PositionalAccuracy::value"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1PositionalAccuracy_1ae1b8e84857da88f2e07506ec4fab47fd"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata18PositionalAccuracy5valueEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return the value of the positional accuracy. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Static Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata18PositionalAccuracy6createERKNSt6stringE">
+<span id="_CPPv3N5osgeo4proj8metadata18PositionalAccuracy6createERKNSt6stringE"></span><span id="_CPPv2N5osgeo4proj8metadata18PositionalAccuracy6createERKNSt6stringE"></span><span id="osgeo::proj::metadata::PositionalAccuracy::create__ssCR"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1PositionalAccuracy_1a34e52eede0fc60c3acf865d1d6084a4c"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata23PositionalAccuracyNNPtrE" title="osgeo::proj::metadata::PositionalAccuracyNNPtr">PositionalAccuracyNNPtr</a> <code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>valueIn</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata18PositionalAccuracy6createERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Instantiate a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1PositionalAccuracy"><span class="std std-ref">PositionalAccuracy</span></a>. </p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>a new <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1PositionalAccuracy"><span class="std std-ref">PositionalAccuracy</span></a>. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">valueIn</span></code>: positional accuracy value. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4N5osgeo4proj8metadata14TemporalExtentE">
+<span id="_CPPv3N5osgeo4proj8metadata14TemporalExtentE"></span><span id="_CPPv2N5osgeo4proj8metadata14TemporalExtentE"></span><span id="osgeo::proj::metadata::TemporalExtent"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1TemporalExtent"></span><em class="property">class </em><code class="sig-name descname">TemporalExtent</code> : <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util10BaseObjectE" title="osgeo::proj::util::BaseObject">BaseObject</a>, <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util11IComparableE" title="osgeo::proj::util::IComparable">IComparable</a><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata14TemporalExtentE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><em>#include &lt;metadata.hpp&gt;</em><p>Time period covered by the content of the dataset. </p>
+<p><dl class="simple">
+<dt><strong>Remark</strong></dt><dd><p>Simplified version of <a class="reference external" href="http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/TemporalExtent.html">TemporalExtent</a> from <a class="reference internal" href="cpp_general.html#namespaceGeoAPI"><span class="std std-ref">GeoAPI</span></a> </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata14TemporalExtent5startEv">
+<span id="_CPPv3N5osgeo4proj8metadata14TemporalExtent5startEv"></span><span id="_CPPv2N5osgeo4proj8metadata14TemporalExtent5startEv"></span><span id="osgeo::proj::metadata::TemporalExtent::start"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1TemporalExtent_1aeb0c3e9bd5215d6ceaf4b13cf379a7a2"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata14TemporalExtent5startEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the start of the temporal extent. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata14TemporalExtent4stopEv">
+<span id="_CPPv3N5osgeo4proj8metadata14TemporalExtent4stopEv"></span><span id="_CPPv2N5osgeo4proj8metadata14TemporalExtent4stopEv"></span><span id="osgeo::proj::metadata::TemporalExtent::stop"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1TemporalExtent_1a647002d3451a40c54d18555d83ff7a16"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata14TemporalExtent4stopEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the end of the temporal extent. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata14TemporalExtent8containsERK19TemporalExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata14TemporalExtent8containsERK19TemporalExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata14TemporalExtent8containsERK19TemporalExtentNNPtr"></span><span id="osgeo::proj::metadata::TemporalExtent::contains__TemporalExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1TemporalExtent_1a4b3f46dbf4dafcf36f724f3cd991ddee"></span>bool <code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19TemporalExtentNNPtrE" title="osgeo::proj::metadata::TemporalExtentNNPtr">TemporalExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata14TemporalExtent8containsERK19TemporalExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent contains the other one. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata14TemporalExtent10intersectsERK19TemporalExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata14TemporalExtent10intersectsERK19TemporalExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata14TemporalExtent10intersectsERK19TemporalExtentNNPtr"></span><span id="osgeo::proj::metadata::TemporalExtent::intersects__TemporalExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1TemporalExtent_1ab6c0b58a630e37c373fb330f539806ca"></span>bool <code class="sig-name descname">intersects</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19TemporalExtentNNPtrE" title="osgeo::proj::metadata::TemporalExtentNNPtr">TemporalExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata14TemporalExtent10intersectsERK19TemporalExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent intersects the other one. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Static Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata14TemporalExtent6createERKNSt6stringERKNSt6stringE">
+<span id="_CPPv3N5osgeo4proj8metadata14TemporalExtent6createERKNSt6stringERKNSt6stringE"></span><span id="_CPPv2N5osgeo4proj8metadata14TemporalExtent6createERKNSt6stringERKNSt6stringE"></span><span id="osgeo::proj::metadata::TemporalExtent::create__ssCR.ssCR"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1TemporalExtent_1ab980850cd2a518ade0aeb4cdeea0372b"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19TemporalExtentNNPtrE" title="osgeo::proj::metadata::TemporalExtentNNPtr">TemporalExtentNNPtr</a> <code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>start</em>, <em class="property">const</em> std::string &amp;<em>stop</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata14TemporalExtent6createERKNSt6stringERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Instantiate a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1TemporalExtent"><span class="std std-ref">TemporalExtent</span></a>. </p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>a new <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1TemporalExtent"><span class="std std-ref">TemporalExtent</span></a>. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">start</span></code>: start. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stop</span></code>: stop. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4N5osgeo4proj8metadata14VerticalExtentE">
+<span id="_CPPv3N5osgeo4proj8metadata14VerticalExtentE"></span><span id="_CPPv2N5osgeo4proj8metadata14VerticalExtentE"></span><span id="osgeo::proj::metadata::VerticalExtent"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1VerticalExtent"></span><em class="property">class </em><code class="sig-name descname">VerticalExtent</code> : <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util10BaseObjectE" title="osgeo::proj::util::BaseObject">BaseObject</a>, <em class="property">public</em> osgeo::proj::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4utilE" title="osgeo::proj::util">util</a>::<a class="reference internal" href="util.html#_CPPv4N5osgeo4proj4util11IComparableE" title="osgeo::proj::util::IComparable">IComparable</a><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata14VerticalExtentE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><em>#include &lt;metadata.hpp&gt;</em><p>Vertical domain of dataset. </p>
+<p><dl class="simple">
+<dt><strong>Remark</strong></dt><dd><p>Simplified version of <a class="reference external" href="http://www.geoapi.org/3.0/javadoc/org/opengis/metadata/extent/VerticalExtent.html">VerticalExtent</a> from <a class="reference internal" href="cpp_general.html#namespaceGeoAPI"><span class="std std-ref">GeoAPI</span></a> </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata14VerticalExtent12minimumValueEv">
+<span id="_CPPv3N5osgeo4proj8metadata14VerticalExtent12minimumValueEv"></span><span id="_CPPv2N5osgeo4proj8metadata14VerticalExtent12minimumValueEv"></span><span id="osgeo::proj::metadata::VerticalExtent::minimumValue"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1VerticalExtent_1aca939be3ffc30bb75ea53e9edf56cf15"></span>double <code class="sig-name descname">minimumValue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata14VerticalExtent12minimumValueEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the minimum of the vertical extent. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata14VerticalExtent12maximumValueEv">
+<span id="_CPPv3N5osgeo4proj8metadata14VerticalExtent12maximumValueEv"></span><span id="_CPPv2N5osgeo4proj8metadata14VerticalExtent12maximumValueEv"></span><span id="osgeo::proj::metadata::VerticalExtent::maximumValue"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1VerticalExtent_1a4324cf3ea472b8dcbf4f49f89cb7a407"></span>double <code class="sig-name descname">maximumValue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata14VerticalExtent12maximumValueEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the maximum of the vertical extent. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata14VerticalExtent4unitEv">
+<span id="_CPPv3N5osgeo4proj8metadata14VerticalExtent4unitEv"></span><span id="_CPPv2N5osgeo4proj8metadata14VerticalExtent4unitEv"></span><span id="osgeo::proj::metadata::VerticalExtent::unit"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1VerticalExtent_1a9e5a47a3b6fc869162ee6c2fd46e48cf"></span><a class="reference internal" href="common.html#_CPPv4N5osgeo4proj6commonE" title="osgeo::proj::common">common</a>::<a class="reference internal" href="common.html#_CPPv4N5osgeo4proj6common18UnitOfMeasureNNPtrE" title="osgeo::proj::common::UnitOfMeasureNNPtr">UnitOfMeasureNNPtr</a> &amp;<code class="sig-name descname">unit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata14VerticalExtent4unitEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns the unit of the vertical extent. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata14VerticalExtent8containsERK19VerticalExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata14VerticalExtent8containsERK19VerticalExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata14VerticalExtent8containsERK19VerticalExtentNNPtr"></span><span id="osgeo::proj::metadata::VerticalExtent::contains__VerticalExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1VerticalExtent_1a8fd04ef2c42c8517678badf2f55d94a1"></span>bool <code class="sig-name descname">contains</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19VerticalExtentNNPtrE" title="osgeo::proj::metadata::VerticalExtentNNPtr">VerticalExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata14VerticalExtent8containsERK19VerticalExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent contains the other one. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK5osgeo4proj8metadata14VerticalExtent10intersectsERK19VerticalExtentNNPtr">
+<span id="_CPPv3NK5osgeo4proj8metadata14VerticalExtent10intersectsERK19VerticalExtentNNPtr"></span><span id="_CPPv2NK5osgeo4proj8metadata14VerticalExtent10intersectsERK19VerticalExtentNNPtr"></span><span id="osgeo::proj::metadata::VerticalExtent::intersects__VerticalExtentNNPtrCRC"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1VerticalExtent_1a58e13085088163c6226f72f36266dcda"></span>bool <code class="sig-name descname">intersects</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19VerticalExtentNNPtrE" title="osgeo::proj::metadata::VerticalExtentNNPtr">VerticalExtentNNPtr</a> &amp;<em>other</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK5osgeo4proj8metadata14VerticalExtent10intersectsERK19VerticalExtentNNPtr" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether this extent intersects the other one. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric">Public Static Functions</p>
+<dl class="cpp function">
+<dt id="_CPPv4N5osgeo4proj8metadata14VerticalExtent6createEddRKN6common18UnitOfMeasureNNPtrE">
+<span id="_CPPv3N5osgeo4proj8metadata14VerticalExtent6createEddRKN6common18UnitOfMeasureNNPtrE"></span><span id="_CPPv2N5osgeo4proj8metadata14VerticalExtent6createEddRKN6common18UnitOfMeasureNNPtrE"></span><span id="osgeo::proj::metadata::VerticalExtent::create__double.double.common::UnitOfMeasureNNPtrCR"></span><span class="target" id="classosgeo_1_1proj_1_1metadata_1_1VerticalExtent_1a85552a502c6ee74133a1a7d1901b3fc3"></span><a class="reference internal" href="#_CPPv4N5osgeo4proj8metadata19VerticalExtentNNPtrE" title="osgeo::proj::metadata::VerticalExtentNNPtr">VerticalExtentNNPtr</a> <code class="sig-name descname">create</code><span class="sig-paren">(</span>double <em>minimumValue</em>, double <em>maximumValue</em>, <em class="property">const</em> <a class="reference internal" href="common.html#_CPPv4N5osgeo4proj6commonE" title="osgeo::proj::common">common</a>::<a class="reference internal" href="common.html#_CPPv4N5osgeo4proj6common18UnitOfMeasureNNPtrE" title="osgeo::proj::common::UnitOfMeasureNNPtr">UnitOfMeasureNNPtr</a> &amp;<em>unitIn</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N5osgeo4proj8metadata14VerticalExtent6createEddRKN6common18UnitOfMeasureNNPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Instantiate a <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1VerticalExtent"><span class="std std-ref">VerticalExtent</span></a>. </p>
+<p><dl class="simple">
+<dt><strong>Return</strong></dt><dd><p>a new <a class="reference internal" href="#classosgeo_1_1proj_1_1metadata_1_1VerticalExtent"><span class="std std-ref">VerticalExtent</span></a>. </p>
+</dd>
+<dt><strong>Parameters</strong></dt><dd><ul class="breatheparameterlist simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">minimumIn</span></code>: minimum. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">maximumIn</span></code>: maximum. </p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unitIn</span></code>: unit. </p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cs.html" class="btn btn-neutral float-right" title="cs namespace" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="util.html" class="btn btn-neutral float-left" title="util namespace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 1983-2021
+      <span class="lastupdated">
+        Last updated on 11 Mar 2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
