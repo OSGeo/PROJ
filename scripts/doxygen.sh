@@ -29,40 +29,22 @@ else
     echo "No Doxygen warnings found";
 fi
 
+if test $(doxygen --version) = "1.8.17" ; then
+    echo "Doxygen 1.8.17 is incompatible" && /bin/false;
+fi
 
-# XML generation (for Breathe)
-mkdir -p docs/build/tmp_breathe
-python scripts/generate_breathe_friendly_general_doc.py
 rm -rf docs/build/xml/
 
-# Ugly hack to workaround a bug of Doxygen 1.8.17 that erroneously detect proj_network_get_header_value_cbk_type/ as a variable
-sed "s/const char\* (\*proj_network_get_header_value_cbk_type/CONST_CHAR\* (\*proj_network_get_header_value_cbk_type/" < src/proj.h > docs/build/tmp_breathe/proj.h
-
-(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src/iso19111 src/iso19111/operation include/proj docs/build/tmp_breathe/proj.h src/filemanager.cpp src/networkfilemanager.cpp docs/build/tmp_breathe/general_doc.dox.reworked.h") | doxygen -  > docs/build/tmp_breathe/docs_log.txt 2>&1
-if grep -i warning docs/build/tmp_breathe/docs_log.txt; then
-    echo "Doxygen warnings found" && cat docs/build/tmp_breathe/docs_log.txt && /bin/false;
+(cat Doxyfile; printf "GENERATE_HTML=NO\nGENERATE_XML=YES\nINPUT= src/iso19111 src/iso19111/operation include/proj src/proj.h src/filemanager.cpp src/networkfilemanager.cpp src/general_doc.dox") | doxygen -  > docs/build/docs_log.txt 2>&1
+if grep -i warning docs/build/docs_log.txt; then
+    echo "Doxygen warnings found" && cat docs/build/docs_log.txt && /bin/false;
 else
     echo "No Doxygen warnings found";
 fi
 
-for i in ${TOPDIR}/docs/build/xml/*; do
-
-# Fix Breathe error on Doxygen XML
-# Type must be either just a name or a typedef-like declaration.
-#   If just a name:
-#     Invalid definition: Expected end of definition. [error at 32]
-#       osgeo::proj::common::MeasurePtr = typedef std::shared_ptr<Measure>
-    sed "s/ = typedef /=/g" < $i > $i.tmp;
-    mv $i.tmp $i
-done
-
 # There is a confusion for Breathe between PROJStringFormatter::Convention and WKTFormatter:Convention
 sed "s/Convention/Convention_/g" < ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml | sed "s/WKT2_2018/_WKT2_2018/g" | sed "s/WKT2_2019/_WKT2_2019/g" | sed "s/WKT2_2015/_WKT2_2015/g" | sed "s/WKT1_GDAL/_WKT1_GDAL/g" | sed "s/WKT1_ESRI/_WKT1_ESRI/g" > ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml.tmp
 mv ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml.tmp  ${TOPDIR}/docs/build/xml/classosgeo_1_1proj_1_1io_1_1WKTFormatter.xml
-
-# Ugly hack to workaround a bug of Doxygen 1.8.17 that erroneously detect proj_network_get_header_value_cbk_type/ as a variable
-sed "s/CONST_CHAR/const char/"  < ${TOPDIR}/docs/build/xml/proj_8h.xml > ${TOPDIR}/docs/build/xml/proj_8h.xml.tmp
-mv ${TOPDIR}/docs/build/xml/proj_8h.xml.tmp ${TOPDIR}/docs/build/xml/proj_8h.xml
 
 # Hack for Breathe 4.17.0 issue that is confused by osgeo::proj::common::UnitOfMeasure::Type::NONE (enumeration value of Type) and osgeo::proj::common::UnitOfMeasure::NONE (member value), whereas 4.16.0 works fine.
 # Filed as https://github.com/michaeljones/breathe/issues/518
