@@ -693,7 +693,75 @@ INSERT INTO "usage" VALUES (
     'NKG',  'SCOPE_GENERIC'     -- scope
 );
 
+-- NO
+INSERT INTO "helmert_transformation" VALUES (
+    'NKG','PAR_2020_NO', -- operation auth+code
+    'NKG_ETRF14 to ETRF93@2000.0', -- name
+    'Transformation from NKG_ETRF14 to ETRF93, at transformation reference epoch 2000.0', -- description / remark
+    'EPSG','1033',  -- method auth+code
+    'Position Vector transformation (geocentric domain)',
+    'NKG','ETRF14', -- source auth+code
+    'EPSG','7922',  -- target auth+code
+    0.01,           -- accuracy
+    -0.05172,       -- x
+    0.13747,        -- y
+    -0.01648,       -- z
+    'EPSG','9001',
+    0.00268452,     -- rx
+    0.00329165,     -- ry
+    -0.00116569,    -- rz
+    'EPSG','9104',
+    0.002583,       -- s
+    'EPSG','9202',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+    'NKG 2020',     -- operation version
+    0
+);
 
+INSERT INTO "usage" VALUES (
+    'NKG', '5041',              -- usage auth+code
+    'helmert_transformation',   -- object_table_name
+    'NKG','PAR_2020_NO',        -- object auth+code
+    'EPSG', '1352',             -- extent: Norway - onshore
+    'NKG', 'SCOPE_GENERIC'      -- scope
+);
+
+INSERT INTO "other_transformation" (
+    auth_name,
+    code,
+    name,
+    description,
+    method_auth_name,
+    method_code,
+    method_name,
+    source_crs_auth_name,
+    source_crs_code,
+    target_crs_auth_name,
+    target_crs_code,
+    accuracy,
+    operation_version,
+    deprecated
+)
+VALUES(
+    'NKG', 'NKG_ETRF14_ETRF93_2000', -- object auth+code
+    'NKG_ETRF14 to ETRF93@2000.0', -- name
+    'Transformation from NKG_ETRF14 to ETRF93, at transformation reference epoch 2000.0', -- description / remark
+    'PROJ', 'PROJString', 
+    '+proj=xyzgridshift +grids=no_kv_NKGETRF14_EPSG7922_2000.tif',
+    'NKG','ETRF14',  -- source auth+code
+    'EPSG','7922',   -- target auth+code
+    0.005,           -- accuracy
+    'NKG 2020',      -- operation_version
+    0                -- deprecated
+);
+
+INSERT INTO "usage" VALUES (
+    'NKG', '5064',
+    'other_transformation',
+    'NKG', 'NKG_ETRF14_ETRF93_2000',
+    'EPSG', '1352',
+    'NKG', 'SCOPE_GENERIC'
+);
 
 -- SE
 INSERT INTO "helmert_transformation" VALUES (
@@ -2051,6 +2119,116 @@ INSERT INTO "supersession" VALUES (
     'NKG', 'ITRF2000_TO_LT',
     'concatenated_operation',
     'NKG', 'ITRF2014_TO_LT',
+    'NKG',
+    0
+);
+
+
+-------------------------------------------------------
+-- Transformation: NKG_ETRF14 -> ETRF93@1995.0 (NO)
+-------------------------------------------------------
+
+INSERT INTO "other_transformation" (
+    auth_name,
+    code,
+    name,
+    description,
+    method_auth_name,
+    method_code,
+    method_name,
+    source_crs_auth_name,
+    source_crs_code,
+    target_crs_auth_name,
+    target_crs_code,
+    accuracy,
+    operation_version,
+    deprecated
+)
+VALUES(
+    'NKG', 'NO_2020_INTRAPLATE',        -- object auth+code
+    'ETRF93@2000.0 to ETRF93@1995.0',   -- name
+    NULL,                               -- description
+    'PROJ', 'PROJString',               -- method auth+cod
+    '+proj=deformation +dt=-5 +grids=eur_nkg_nkgrf17vel.tif',
+    'EPSG','7922',  -- source_crs:  ETRF93@2000.0
+    'EPSG','4936',  -- target_crs:  ETRS89 (NO)
+    0.005,          -- accuracy
+    'NKG 2020',     -- operation_version
+    0               -- deprecated
+);
+
+INSERT INTO "usage" VALUES (
+    'NKG', '5058',          -- usage auth+code
+    'other_transformation', -- object_table_name
+    'NKG', 'NO_2020_INTRAPLATE', -- object auth+code
+    'EPSG', '1352',         -- extent: Norway - onshore and offshore
+    'NKG',  'SCOPE_GENERIC' -- scope
+);
+
+INSERT INTO "concatenated_operation" VALUES(
+    'NKG', 'ETRF14_TO_NO', -- operation auth+code
+    'NKG_ETRF14 to ETRS89(NO)', -- name
+    'Transformation from NKG_ETRF14@2000.0 to ETRF93@1995.0', -- description
+    'NKG', 'ETRF14',-- source_crs:  NKG_ETRF00
+    'EPSG','4936',  -- target_crs:  ETRS89 (NO)
+    0.01,           -- accuracy
+    'NKG 2020',     -- operation_version
+    0               -- deprecated
+);
+
+INSERT INTO "concatenated_operation_step" (
+    operation_auth_name, operation_code, step_number, step_auth_name, step_code
+) VALUES
+    ('NKG', 'ETRF14_TO_NO', 1, 'NKG', 'PAR_2020_NO'),
+    ('NKG', 'ETRF14_TO_NO', 2, 'NKG', 'NO_2020_INTRAPLATE')
+;
+
+INSERT INTO "usage" VALUES (
+    'NKG', '5059',              -- usage auth+code
+    'concatenated_operation',   -- object_table_name
+    'NKG', 'ETRF14_TO_NO',      -- object auth+code
+    'EPSG', '1352',             -- extent: Norway - onshore and offshore
+    'NKG', 'SCOPE_GENERIC'      -- scope auth+code
+);
+
+
+-------------------------------------------------------
+-- Transformation: ITRF2014 -> ETRF93@1995.0 (NO)
+-------------------------------------------------------
+
+INSERT INTO "concatenated_operation"  VALUES (
+    'NKG', 'ITRF2014_TO_NO',  -- operation auth+code
+    'ITRF2014 to ETRS89(NO)', -- name
+    'Time-dependent transformation from ITRF2014 to ETRS89(NO)', -- description
+    'EPSG', '7789', -- source_crs:  ITRF2014
+    'EPSG', '4936', -- target_crs:  ETRS89(NO)
+    0.01,           -- accuracy
+    'NKG 2020',     -- operation_version
+    0               -- deprecated
+);
+
+INSERT INTO "concatenated_operation_step" (
+    operation_auth_name, operation_code, step_number, step_auth_name, step_code
+) VALUES
+    ('NKG', 'ITRF2014_TO_NO', 1, 'EPSG', '8366'), -- ITRF2014 -> ETRF2014
+    ('NKG', 'ITRF2014_TO_NO', 2, 'NKG', 'NKG_ETRF14_TO_ETRF2014'), 
+    ('NKG', 'ITRF2014_TO_NO', 3, 'NKG', 'NKG_ETRF14_ETRF93_2000'),
+    ('NKG', 'ITRF2014_TO_NO', 4, 'NKG', 'NO_2020_INTRAPLATE')
+;
+
+INSERT INTO "usage" VALUES (
+    'NKG', '5060',              -- usage auth+code
+    'concatenated_operation',   -- object_table_name
+    'NKG', 'ITRF2014_TO_NO',    -- object auth+code
+    'EPSG', '1352',             -- extent: Norway - onshore and offshore
+    'NKG', 'SCOPE_GENERIC'      -- scope auth+code
+);
+
+INSERT INTO "supersession" VALUES (
+    'concatenated_operation',
+    'NKG', 'ITRF2000_TO_NO',
+    'concatenated_operation',
+    'NKG', 'ITRF2014_TO_NO',
     'NKG',
     0
 );
