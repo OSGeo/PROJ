@@ -1,5 +1,8 @@
 -- This file is hand generated.
 
+INSERT INTO "extent" VALUES('PROJ','EXTENT_UNKNOWN','Not specified','Not specified.',-90.0,90.0,-180.0,180.0,0);
+INSERT INTO "scope" VALUES('PROJ','SCOPE_UNKNOWN','Not known.',0);
+
 -- grid_alternatives entries created from existing ones
 
 INSERT INTO grid_alternatives(original_grid_name,

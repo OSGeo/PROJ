@@ -8727,3 +8727,224 @@ PJ *proj_concatoperation_get_step(PJ_CONTEXT *ctx, const PJ *concatoperation,
     }
     return pj_obj_create(ctx, steps[i_step]);
 }
+// ---------------------------------------------------------------------------
+
+/** \brief Opaque object representing an insertion session. */
+struct PJ_INSERT_SESSION {
+    //! @cond Doxygen_Suppress
+    PJ_CONTEXT *ctx = nullptr;
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Starts a session for proj_get_insert_statements()
+ *
+ * Starts a new session for one or several calls to
+ * proj_get_insert_statements().
+ *
+ * An insertion session guarantees that the inserted objects will not create
+ * conflicting intermediate objects.
+ *
+ * The session must be stopped with proj_insert_object_session_destroy().
+ *
+ * Only one session may be active at a time for a given context.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @return the session, or NULL in case of error.
+ *
+ * @since 8.1
+ */
+PJ_INSERT_SESSION *proj_insert_object_session_create(PJ_CONTEXT *ctx) {
+    SANITIZE_CTX(ctx);
+    try {
+        auto dbContext = getDBcontext(ctx);
+        dbContext->startInsertStatementsSession();
+        PJ_INSERT_SESSION *session = new PJ_INSERT_SESSION;
+        session->ctx = ctx;
+        return session;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Stops an insertion session started with
+ * proj_insert_object_session_create()
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param session The insertion session.
+ * @since 8.1
+ */
+void proj_insert_object_session_destroy(PJ_CONTEXT *ctx,
+                                        PJ_INSERT_SESSION *session) {
+    SANITIZE_CTX(ctx);
+    if (session) {
+        try {
+            if (session->ctx != ctx) {
+                proj_log_error(ctx, __FUNCTION__,
+                               "proj_insert_object_session_destroy() called "
+                               "with a context different from the one of "
+                               "proj_insert_object_session_create()");
+            } else {
+                auto dbContext = getDBcontext(ctx);
+                dbContext->stopInsertStatementsSession();
+            }
+        } catch (const std::exception &e) {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+        }
+        delete session;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Suggests a database code for the passed object.
+ *
+ * Supported type of objects are PrimeMeridian, Ellipsoid, Datum, DatumEnsemble,
+ * GeodeticCRS, ProjectedCRS, VerticalCRS, CompoundCRS, BoundCRS, Conversion.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param object Object for which to suggest a code.
+ * @param authority Authority name into which the object will be inserted.
+ * @param numeric_code Whether the code should be numeric, or derived from the
+ * object name.
+ * @param options NULL terminated list of options, or NULL.
+ *                No options are supported currently.
+ * @return the suggested code, that is guaranteed to not conflict with an
+ * existing one (to be freed with proj_string_destroy),
+ * or nullptr in case of error.
+ *
+ * @since 8.1
+ */
+char *proj_suggests_code_for(PJ_CONTEXT *ctx, const PJ *object,
+                             const char *authority, int numeric_code,
+                             const char *const *options) {
+    SANITIZE_CTX(ctx);
+    (void)options;
+
+    if (!object || !authority) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    auto identifiedObject =
+        std::dynamic_pointer_cast<IdentifiedObject>(object->iso_obj);
+    if (!identifiedObject) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "Object is not a IdentifiedObject");
+        return nullptr;
+    }
+
+    try {
+        auto dbContext = getDBcontext(ctx);
+        return pj_strdup(dbContext
+                             ->suggestsCodeFor(NN_NO_CHECK(identifiedObject),
+                                               std::string(authority),
+                                               numeric_code != FALSE)
+                             .c_str());
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Free a string.
+ *
+ * Only to be used with functions that document using this function.
+ *
+ * @param str String to free.
+ *
+ * @since 8.1
+ */
+void proj_string_destroy(char *str) { free(str); }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns SQL statements needed to insert the passed object into the
+ * database.
+ *
+ * proj_insert_object_session_create() may have been called previously.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param session The insertion session. May be NULL if a single object must be
+ *                inserted.
+ * @param object The object to insert into the database. Currently only
+ *               PrimeMeridian, Ellipsoid, Datum, GeodeticCRS, ProjectedCRS,
+ *               VerticalCRS, CompoundCRS or BoundCRS are supported.
+ * @param authority Authority name into which the object will be inserted.
+ *                  Must not be NULL.
+ * @param code Code with which the object will be inserted.Must not be NULL.
+ * @param numeric_codes Whether intermediate objects that can be created should
+ *                      use numeric codes (true), or may be alphanumeric (false)
+ * @param options NULL terminated list of options, or NULL.
+ *                No options are supported currently.
+ *
+ * @return a list of insert statements (to be freed with
+ *         proj_string_list_destroy()), or NULL in case of error.
+ * @since 8.1
+ */
+PROJ_STRING_LIST proj_get_insert_statements(PJ_CONTEXT *ctx,
+                                            PJ_INSERT_SESSION *session,
+                                            const PJ *object,
+                                            const char *authority,
+                                            const char *code, int numeric_codes,
+                                            const char *const *options) {
+    SANITIZE_CTX(ctx);
+    (void)options;
+
+    struct TempSessionHolder {
+        PJ_CONTEXT *m_ctx;
+        PJ_INSERT_SESSION *m_tempSession = nullptr;
+        TempSessionHolder(const TempSessionHolder &) = delete;
+        TempSessionHolder &operator=(const TempSessionHolder &) = delete;
+
+        TempSessionHolder(PJ_CONTEXT *ctx, PJ_INSERT_SESSION *session)
+            : m_ctx(ctx),
+              m_tempSession(session ? nullptr
+                                    : proj_insert_object_session_create(ctx)) {}
+
+        ~TempSessionHolder() {
+            if (m_tempSession) {
+                proj_insert_object_session_destroy(m_ctx, m_tempSession);
+            }
+        }
+    };
+
+    try {
+        TempSessionHolder oHolder(ctx, session);
+        if (!session) {
+            session = oHolder.m_tempSession;
+            if (!session) {
+                return nullptr;
+            }
+        }
+
+        if (!object || !authority || !code) {
+            proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+            proj_log_error(ctx, __FUNCTION__, "missing required input");
+            return nullptr;
+        }
+        auto identifiedObject =
+            std::dynamic_pointer_cast<IdentifiedObject>(object->iso_obj);
+        if (!identifiedObject) {
+            proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+            proj_log_error(ctx, __FUNCTION__,
+                           "Object is not a IdentifiedObject");
+            return nullptr;
+        }
+
+        auto dbContext = getDBcontext(ctx);
+        auto statements = dbContext->getInsertStatementsFor(
+            NN_NO_CHECK(identifiedObject), authority, code,
+            numeric_codes != FALSE);
+        return to_string_list(std::move(statements));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}

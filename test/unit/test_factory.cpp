@@ -3434,4 +3434,577 @@ TEST(factory, getUnitList) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(factory, objectInsertion) {
+
+    // Cannot nest startInsertStatementsSession
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        EXPECT_THROW(ctxt->startInsertStatementsSession(), FactoryException);
+    }
+
+    {
+        auto ctxt = DatabaseContext::create();
+        // Tolerated withtout explicit stop
+        ctxt->startInsertStatementsSession();
+    }
+
+    {
+        auto ctxt = DatabaseContext::create();
+        // Tolerated
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // getInsertStatementsFor() must be preceded with
+    // startInsertStatementsSession()
+    {
+        auto ctxt = DatabaseContext::create();
+        EXPECT_THROW(ctxt->getInsertStatementsFor(GeographicCRS::EPSG_4326,
+                                                  "EPSG", "4326", true),
+                     FactoryException);
+    }
+
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        // Nothing to do
+        EXPECT_TRUE(ctxt->getInsertStatementsFor(GeographicCRS::EPSG_4326,
+                                                 "EPSG", "4326", true)
+                        .empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Geographic 2D CRS
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto crs = GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4326"),
+            GeographicCRS::EPSG_4326->datum(),
+            GeographicCRS::EPSG_4326->datumEnsemble(),
+            GeographicCRS::EPSG_4326->coordinateSystem());
+
+        EXPECT_EQ(ctxt->suggestsCodeFor(crs, "HOBU", true), "1");
+        EXPECT_EQ(ctxt->suggestsCodeFor(crs, "HOBU", false), "MY_EPSG_4326");
+
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "1234", true);
+
+        EXPECT_EQ(ctxt->suggestsCodeFor(crs, "HOBU", true), "1235");
+
+        ASSERT_EQ(sql.size(), 2U);
+        EXPECT_EQ(sql[0], "INSERT INTO geodetic_crs VALUES('HOBU','1234','my "
+                          "EPSG:4326','','geographic "
+                          "2D','EPSG','6422','EPSG','6326',NULL,0);");
+        EXPECT_EQ(
+            sql[1],
+            "INSERT INTO usage "
+            "VALUES('HOBU','USAGE_GEODETIC_CRS_1234','geodetic_crs','HOBU','"
+            "1234','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "1234", true).empty());
+        ctxt->stopInsertStatementsSession();
+        AuthorityFactory::create(ctxt, std::string("EPSG"))
+            ->createGeographicCRS("4326");
+        EXPECT_THROW(AuthorityFactory::create(ctxt, std::string("HOBU"))
+                         ->createGeographicCRS("1234"),
+                     NoSuchAuthorityCodeException);
+    }
+
+    // Geographic 3D CRS, with known usage
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto usages = AuthorityFactory::create(ctxt, std::string("EPSG"))
+                                ->createGeographicCRS("4979")
+                                ->domains();
+        auto array(ArrayOfBaseObject::create());
+        for (const auto &usage : usages) {
+            array->add(usage);
+        }
+        auto props =
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4979");
+        props.set(ObjectUsage::OBJECT_DOMAIN_KEY,
+                  nn_static_pointer_cast<BaseObject>(array));
+        const auto crs =
+            GeographicCRS::create(props, GeographicCRS::EPSG_4979->datum(),
+                                  GeographicCRS::EPSG_4979->datumEnsemble(),
+                                  GeographicCRS::EPSG_4979->coordinateSystem());
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "4979", false);
+        ASSERT_EQ(sql.size(), 2U);
+        EXPECT_EQ(sql[0], "INSERT INTO geodetic_crs VALUES('HOBU','4979','my "
+                          "EPSG:4979','','geographic "
+                          "3D','EPSG','6423','EPSG','6326',NULL,0);");
+        EXPECT_EQ(
+            sql[1],
+            "INSERT INTO usage "
+            "VALUES('HOBU','USAGE_GEODETIC_CRS_4979','geodetic_crs','HOBU','"
+            "4979','EPSG','1262','EPSG','1176');");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "4979", false).empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // BoundCRS of Geocentric CRS, with new usage
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        auto props =
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4978");
+        auto array(ArrayOfBaseObject::create());
+        const auto extent = Extent::createFromBBOX(1, 2, 3, 4);
+        optional<std::string> scope;
+        scope = "my scope";
+        array->add(ObjectDomain::create(scope, extent));
+        props.set(ObjectUsage::OBJECT_DOMAIN_KEY,
+                  nn_static_pointer_cast<BaseObject>(array));
+        const auto crs = GeodeticCRS::create(
+            props, NN_NO_CHECK(GeodeticCRS::EPSG_4978->datum()),
+            NN_NO_CHECK(nn_dynamic_pointer_cast<CartesianCS>(
+                GeodeticCRS::EPSG_4978->coordinateSystem())));
+        const auto boundCRS = BoundCRS::createFromTOWGS84(
+            crs, std::vector<double>{1, 2, 3, 4, 5, 6, 7});
+        const auto sql =
+            ctxt->getInsertStatementsFor(boundCRS, "HOBU", "4978", false);
+        ASSERT_EQ(sql.size(), 4U);
+        EXPECT_EQ(
+            sql[0],
+            "INSERT INTO geodetic_crs VALUES('HOBU','4978','my "
+            "EPSG:4978','','geocentric','EPSG','6500','EPSG','6326',NULL,0);");
+        EXPECT_EQ(sql[1],
+                  "INSERT INTO scope VALUES('HOBU','SCOPE_geodetic_crs_4978',"
+                  "'my scope',0);");
+        EXPECT_EQ(sql[2],
+                  "INSERT INTO extent VALUES('HOBU','EXTENT_geodetic_crs_4978',"
+                  "'unknown','unknown',2,4,1,3,0);");
+        EXPECT_EQ(
+            sql[3],
+            "INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_4978',"
+            "'geodetic_crs','HOBU','4978','HOBU',"
+            "'EXTENT_geodetic_crs_4978','HOBU','SCOPE_geodetic_crs_4978');");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(boundCRS, "HOBU", "4978", false)
+                .empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Geographic 2D CRS with unknown datum, numeric code
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto datum = GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my datum"),
+            Ellipsoid::WGS84, optional<std::string>(),
+            PrimeMeridian::GREENWICH);
+        const auto crs = GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4326"),
+            datum, GeographicCRS::EPSG_4326->coordinateSystem());
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true);
+        ASSERT_EQ(sql.size(), 4U);
+        EXPECT_EQ(sql[0],
+                  "INSERT INTO geodetic_datum VALUES('HOBU','1','my "
+                  "datum','','EPSG','7030','EPSG','8901',NULL,NULL,NULL,0);");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true).empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Geographic 2D CRS with unknown datum, alpha code
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto datum = GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my datum"),
+            Ellipsoid::WGS84, optional<std::string>(),
+            PrimeMeridian::GREENWICH);
+        const auto crs = GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4326"),
+            datum, GeographicCRS::EPSG_4326->coordinateSystem());
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "MY_EPSG_4326", false);
+
+        EXPECT_EQ(ctxt->suggestsCodeFor(crs, "HOBU", false), "MY_EPSG_4326_2");
+
+        ASSERT_EQ(sql.size(), 4U);
+        EXPECT_EQ(sql[0],
+                  "INSERT INTO geodetic_datum "
+                  "VALUES('HOBU','GEODETIC_DATUM_MY_EPSG_4326','my "
+                  "datum','','EPSG','7030','EPSG','8901',NULL,NULL,NULL,0);");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "MY_EPSG_4326", false)
+                .empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Geographic 2D CRS with unknown ellipsoid, numeric code
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto ellipsoid = Ellipsoid::createFlattenedSphere(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my ellipsoid"),
+            Length(6378137), Scale(295));
+        const auto datum = GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my datum"),
+            ellipsoid, optional<std::string>(), PrimeMeridian::GREENWICH);
+        const auto crs = GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4326"),
+            datum, GeographicCRS::EPSG_4326->coordinateSystem());
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true);
+        ASSERT_EQ(sql.size(), 5U);
+        EXPECT_EQ(
+            sql[0],
+            "INSERT INTO ellipsoid VALUES('HOBU','1','my "
+            "ellipsoid','','PROJ','EARTH',6378137,'EPSG','9001',295,NULL,0);");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true).empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Geographic 2D CRS with unknown ellipsoid, alpha code
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto ellipsoid = Ellipsoid::createTwoAxis(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my ellipsoid"),
+            Length(6378137), Length(6378136));
+        const auto datum = GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my datum"),
+            ellipsoid, optional<std::string>(), PrimeMeridian::GREENWICH);
+        const auto crs = GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4326"),
+            datum, GeographicCRS::EPSG_4326->coordinateSystem());
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", false);
+        ASSERT_EQ(sql.size(), 5U);
+        EXPECT_EQ(sql[0], "INSERT INTO ellipsoid "
+                          "VALUES('HOBU','ELLPS_GEODETIC_DATUM_XXXX','my "
+                          "ellipsoid','','PROJ','EARTH',6378137,'EPSG','9001',"
+                          "NULL,6378136,0);");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", false).empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Geographic 2D CRS with unknown prime meridian, numeric code
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto pm = PrimeMeridian::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "My meridian"),
+            Angle(10));
+        const auto datum = GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my datum"),
+            Ellipsoid::WGS84, optional<std::string>(), pm);
+        const auto crs = GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4326"),
+            datum, GeographicCRS::EPSG_4326->coordinateSystem());
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true);
+        ASSERT_EQ(sql.size(), 5U);
+        EXPECT_EQ(sql[0], "INSERT INTO prime_meridian VALUES('HOBU','1','My "
+                          "meridian',10,'EPSG','9122',0);");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true).empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Geographic 2D CRS with unknown prime meridian, alpha code
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto pm = PrimeMeridian::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "My meridian"),
+            Angle(10));
+        const auto datum = GeodeticReferenceFrame::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my datum"),
+            Ellipsoid::WGS84, optional<std::string>(), pm);
+        const auto crs = GeographicCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4326"),
+            datum, GeographicCRS::EPSG_4326->coordinateSystem());
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", false);
+        ASSERT_EQ(sql.size(), 5U);
+        EXPECT_EQ(sql[0], "INSERT INTO prime_meridian "
+                          "VALUES('HOBU','PM_GEODETIC_DATUM_XXXX','My "
+                          "meridian',10,'EPSG','9122',0);");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", false).empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Projected CRS, numeric code
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto crs = ProjectedCRS::create(
+            PropertyMap().set(IdentifiedObject::NAME_KEY, "my projected CRS"),
+            GeographicCRS::EPSG_4807,
+            Conversion::createUTM(PropertyMap(), 31, true),
+            CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true);
+        ASSERT_EQ(sql.size(), 4U);
+        EXPECT_EQ(sql[0],
+                  "INSERT INTO conversion VALUES('HOBU','1',"
+                  "'UTM zone 31N','',"
+                  "'EPSG','9807','Transverse Mercator',"
+                  "'EPSG','8801','Latitude of natural origin',0,'EPSG','9122',"
+                  "'EPSG','8802','Longitude of natural origin',3,'EPSG','9122',"
+                  "'EPSG','8805','Scale factor at natural origin',0.9996,"
+                  "'EPSG','9201',"
+                  "'EPSG','8806','False easting',500000,'EPSG','9001',"
+                  "'EPSG','8807','False northing',0,'EPSG','9001',"
+                  "NULL,NULL,NULL,NULL,NULL,NULL,"
+                  "NULL,NULL,NULL,NULL,NULL,NULL,0);");
+        EXPECT_EQ(sql[1],
+                  "INSERT INTO usage "
+                  "VALUES('HOBU','USAGE_CONVERSION_1','conversion','HOBU','1','"
+                  "PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');");
+        EXPECT_EQ(
+            sql[2],
+            "INSERT INTO projected_crs VALUES('HOBU','XXXX','my projected "
+            "CRS','','EPSG','4400','EPSG','4807','HOBU','1',NULL,0);");
+        EXPECT_EQ(
+            sql[3],
+            "INSERT INTO usage "
+            "VALUES('HOBU','USAGE_PROJECTED_CRS_XXXX','projected_crs','HOBU','"
+            "XXXX','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true).empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Vertical CRS, known vertical datum, numeric code
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        PropertyMap propertiesVDatum;
+        propertiesVDatum.set(Identifier::CODESPACE_KEY, "EPSG")
+            .set(Identifier::CODE_KEY, 5101)
+            .set(IdentifiedObject::NAME_KEY, "Ordnance Datum Newlyn");
+        auto vdatum = VerticalReferenceFrame::create(propertiesVDatum);
+        PropertyMap propertiesCRS;
+        propertiesCRS.set(IdentifiedObject::NAME_KEY, "my height");
+        const auto uom =
+            UnitOfMeasure("my unit", 3.0, UnitOfMeasure::Type::LINEAR);
+        const auto crs = VerticalCRS::create(
+            propertiesCRS, vdatum, VerticalCS::createGravityRelatedHeight(uom));
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true);
+        ASSERT_EQ(sql.size(), 5U);
+        EXPECT_EQ(sql[0], "INSERT INTO coordinate_system VALUES"
+                          "('HOBU','CS_VERTICAL_CRS_XXXX','vertical',1);");
+        EXPECT_EQ(sql[1], "INSERT INTO unit_of_measure VALUES"
+                          "('HOBU','MY_UNIT','my unit','length',3,NULL,0);");
+        EXPECT_EQ(sql[2],
+                  "INSERT INTO axis VALUES('HOBU',"
+                  "'CS_VERTICAL_CRS_XXXX_AXIS_1','Gravity-related height','H',"
+                  "'up','HOBU','CS_VERTICAL_CRS_XXXX',1,'HOBU','MY_UNIT');");
+        EXPECT_EQ(sql[3],
+                  "INSERT INTO vertical_crs VALUES('HOBU','XXXX','my height',"
+                  "'','HOBU','CS_VERTICAL_CRS_XXXX','EPSG','5101',0);");
+        EXPECT_EQ(sql[4],
+                  "INSERT INTO usage VALUES('HOBU','USAGE_VERTICAL_CRS_XXXX',"
+                  "'vertical_crs','HOBU','XXXX','PROJ','EXTENT_UNKNOWN',"
+                  "'PROJ','SCOPE_UNKNOWN');");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true).empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Vertical CRS, unknown vertical datum, alpha code
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        PropertyMap propertiesVDatum;
+        propertiesVDatum.set(IdentifiedObject::NAME_KEY, "my datum");
+        auto vdatum = VerticalReferenceFrame::create(propertiesVDatum);
+        PropertyMap propertiesCRS;
+        propertiesCRS.set(IdentifiedObject::NAME_KEY, "my height");
+        const auto crs = VerticalCRS::create(
+            propertiesCRS, vdatum,
+            VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+        const auto sql =
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", false);
+        ASSERT_EQ(sql.size(), 4U);
+        EXPECT_EQ(sql[0],
+                  "INSERT INTO vertical_datum VALUES('HOBU',"
+                  "'VERTICAL_DATUM_XXXX','my datum','',NULL,NULL,NULL,0);");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(
+            ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", false).empty());
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Compound CRS
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto wkt =
+            "COMPD_CS[\"unknown\","
+            "PROJCS[\"NAD_1983_2011_StatePlane_South_Carolina_FIPS_3900_USFT\","
+            "GEOGCS[\"NAD83(2011)\","
+            "DATUM[\"NAD83_National_Spatial_Reference_System_2011\","
+            "SPHEROID[\"GRS 1980\",6378137,298.257222101004,"
+            "AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"1116\"]],"
+            "PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,"
+            "AUTHORITY[\"EPSG\",\"9122\"]]],"
+            "PROJECTION[\"Lambert_Conformal_Conic_2SP\"],"
+            "PARAMETER[\"latitude_of_origin\",31.8333333333333],"
+            "PARAMETER[\"central_meridian\",-81],"
+            "PARAMETER[\"standard_parallel_1\",32.5],"
+            "PARAMETER[\"standard_parallel_2\",34.8333333333333],"
+            "PARAMETER[\"false_easting\",1999996],"
+            "PARAMETER[\"false_northing\",0],"
+            "UNIT[\"US survey foot\",0.304800609601219,"
+            "AUTHORITY[\"EPSG\",\"9003\"]],"
+            "AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]],"
+            "VERT_CS[\"NAVD88 height (ftUS)\","
+            "VERT_DATUM[\"North American Vertical Datum 1988\",2005,"
+            "AUTHORITY[\"EPSG\",\"5103\"]],"
+            "UNIT[\"US survey foot\",0.304800609601219,"
+            "AUTHORITY[\"EPSG\",\"9003\"]],"
+            "AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"6360\"]]]";
+        const auto crs =
+            nn_dynamic_pointer_cast<CRS>(WKTParser().createFromWKT(wkt));
+        ASSERT_TRUE(crs != nullptr);
+        const auto sql = ctxt->getInsertStatementsFor(NN_NO_CHECK(crs), "HOBU",
+                                                      "XXXX", false);
+        ASSERT_EQ(sql.size(), 6U);
+        EXPECT_EQ(sql[4],
+                  "INSERT INTO compound_crs VALUES('HOBU','XXXX','unknown',"
+                  "'','HOBU','COMPONENT_XXXX_1','EPSG','6360',0);");
+        EXPECT_EQ(sql[5],
+                  "INSERT INTO usage VALUES('HOBU','USAGE_COMPOUND_CRS_XXXX',"
+                  "'compound_crs','HOBU','XXXX','PROJ','EXTENT_UNKNOWN',"
+                  "'PROJ','SCOPE_UNKNOWN');");
+        const auto identified =
+            crs->identify(AuthorityFactory::create(ctxt, std::string()));
+        ASSERT_EQ(identified.size(), 1U);
+        EXPECT_EQ(
+            *(identified.front().first->identifiers().front()->codeSpace()),
+            "HOBU");
+        EXPECT_TRUE(identified.front().first->isEquivalentTo(
+            crs.get(),
+            IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS));
+        EXPECT_EQ(identified.front().second, 100);
+        EXPECT_TRUE(ctxt->getInsertStatementsFor(NN_NO_CHECK(crs), "HOBU",
+                                                 "XXXX", false)
+                        .empty());
+        ctxt->stopInsertStatementsSession();
+    }
+}
+
 } // namespace

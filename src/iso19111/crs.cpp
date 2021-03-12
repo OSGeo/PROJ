@@ -4829,7 +4829,14 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     const auto &thisName(nameStr());
 
     const auto &components = componentReferenceSystems();
-    const bool l_implicitCS = components[0]->hasImplicitCS();
+    bool l_implicitCS = components[0]->hasImplicitCS();
+    if (!l_implicitCS) {
+        const auto projCRS =
+            dynamic_cast<const ProjectedCRS *>(components[0].get());
+        if (projCRS) {
+            l_implicitCS = projCRS->baseCRS()->hasImplicitCS();
+        }
+    }
     const auto crsCriterion =
         l_implicitCS
             ? util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS
@@ -4949,6 +4956,13 @@ CompoundCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
 
             res.sort(lambdaSort);
+
+            // If there's a single candidate at 90% confidence with same name,
+            // then promote it to 100%
+            if (res.size() == 1 && res.front().second == 90 &&
+                thisName == res.front().first->nameStr()) {
+                res.front().second = 100;
+            }
         }
 
         // If we didn't find a match for the CompoundCRS, check if the

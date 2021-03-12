@@ -1180,8 +1180,32 @@ PROJ_UNIT_INFO PROJ_DLL **proj_get_units_from_database(
 void PROJ_DLL proj_unit_list_destroy(PROJ_UNIT_INFO** list);
 
 /* ------------------------------------------------------------------------- */
+/*! @cond Doxygen_Suppress */
+typedef struct PJ_INSERT_SESSION PJ_INSERT_SESSION;
+/*! @endcond */
 
+PJ_INSERT_SESSION PROJ_DLL *proj_insert_object_session_create(PJ_CONTEXT *ctx);
 
+void PROJ_DLL proj_insert_object_session_destroy(PJ_CONTEXT *ctx,
+                                                 PJ_INSERT_SESSION *session);
+
+PROJ_STRING_LIST PROJ_DLL proj_get_insert_statements(PJ_CONTEXT *ctx,
+                                            PJ_INSERT_SESSION *session,
+                                            const PJ *object,
+                                            const char *authority,
+                                            const char *code,
+                                            int numeric_codes,
+                                            const char *const *options);
+
+char PROJ_DLL *proj_suggests_code_for(PJ_CONTEXT *ctx,
+                                      const PJ *object,
+                                      const char *authority,
+                                      int numeric_code,
+                                      const char *const *options);
+
+void PROJ_DLL proj_string_destroy(char* str);
+
+/* ------------------------------------------------------------------------- */
 /*! @cond Doxygen_Suppress */
 typedef struct PJ_OPERATION_FACTORY_CONTEXT PJ_OPERATION_FACTORY_CONTEXT;
 /*! @endcond */

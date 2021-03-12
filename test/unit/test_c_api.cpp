@@ -5227,4 +5227,92 @@ TEST_F(CApi, proj_crs_is_derived) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_suggests_code_for) {
+    {
+        auto session = proj_insert_object_session_create(nullptr);
+        EXPECT_NE(session, nullptr);
+
+        EXPECT_EQ(proj_insert_object_session_create(nullptr), nullptr);
+
+        proj_insert_object_session_destroy(nullptr, session);
+    }
+
+    { proj_insert_object_session_destroy(nullptr, nullptr); }
+    {
+        auto wkt = "GEOGCRS[\"myGDA2020\",\n"
+                   "    DATUM[\"GDA2020\",\n"
+                   "        ELLIPSOID[\"GRS_1980\",6378137,298.257222101,\n"
+                   "            LENGTHUNIT[\"metre\",1]]],\n"
+                   "    PRIMEM[\"Greenwich\",0,\n"
+                   "        ANGLEUNIT[\"Degree\",0.0174532925199433]],\n"
+                   "    CS[ellipsoidal,2],\n"
+                   "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+                   "            ORDER[1],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+                   "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+                   "            ORDER[2],\n"
+                   "            ANGLEUNIT[\"degree\",0.0174532925199433]]]";
+        auto crs = proj_create_from_wkt(m_ctxt, wkt, nullptr, nullptr, nullptr);
+        ObjectKeeper keeper_from_wkt(crs);
+        EXPECT_NE(crs, nullptr);
+
+        {
+            char *code =
+                proj_suggests_code_for(m_ctxt, crs, "HOBU", false, nullptr);
+            ASSERT_NE(code, nullptr);
+            EXPECT_EQ(std::string(code), "MYGDA2020");
+            proj_string_destroy(code);
+        }
+
+        {
+            char *code =
+                proj_suggests_code_for(m_ctxt, crs, "HOBU", true, nullptr);
+            ASSERT_NE(code, nullptr);
+            EXPECT_EQ(std::string(code), "1");
+            proj_string_destroy(code);
+        }
+
+        // No session specified: we use a temporary session
+        for (int i = 0; i < 2; i++) {
+            auto list = proj_get_insert_statements(m_ctxt, nullptr, crs, "HOBU",
+                                                   "XXXX", false, nullptr);
+            ASSERT_NE(list, nullptr);
+            ASSERT_NE(list[0], nullptr);
+            EXPECT_EQ(std::string(list[0]),
+                      "INSERT INTO geodetic_datum VALUES('HOBU',"
+                      "'GEODETIC_DATUM_XXXX','GDA2020','','EPSG','7019',"
+                      "'EPSG','8901',NULL,NULL,NULL,0);");
+            proj_string_list_destroy(list);
+        }
+
+        auto session = proj_insert_object_session_create(m_ctxt);
+        EXPECT_NE(session, nullptr);
+
+        {
+            auto list = proj_get_insert_statements(m_ctxt, session, crs, "HOBU",
+                                                   "XXXX", false, nullptr);
+            ASSERT_NE(list, nullptr);
+            ASSERT_NE(list[0], nullptr);
+            EXPECT_EQ(std::string(list[0]),
+                      "INSERT INTO geodetic_datum VALUES('HOBU',"
+                      "'GEODETIC_DATUM_XXXX','GDA2020','','EPSG','7019',"
+                      "'EPSG','8901',NULL,NULL,NULL,0);");
+            proj_string_list_destroy(list);
+        }
+
+        // Object already inserted: return empty list
+        {
+            auto list = proj_get_insert_statements(m_ctxt, session, crs, "HOBU",
+                                                   "XXXX", false, nullptr);
+            ASSERT_NE(list, nullptr);
+            ASSERT_EQ(list[0], nullptr);
+            proj_string_list_destroy(list);
+        }
+
+        proj_insert_object_session_destroy(m_ctxt, session);
+    }
+}
+
 } // namespace
