@@ -27,6 +27,7 @@ Synopsis
     |    [--boundcrs-to-wgs84]
     |    [--main-db-path path] [--aux-db-path path]*
     |    [--identify] [--3d]
+    |    [--output-id AUTH:CODE]
     |    [--c-ify] [--single-line]
     |    --searchpaths | --remote-data | {object_definition} |
     |    {object_reference} | (-s {srs_def} -t {srs_def})
@@ -78,7 +79,7 @@ The following control parameters can appear in any order:
 .. option:: -o formats
 
     formats is a comma separated combination of:
-    ``all``, ``default``, ``PROJ``, ``WKT_ALL``, ``WKT2:2015``, ``WKT2:2019``, ``WKT1:GDAL``, ``WKT1:ESRI``, ``PROJJSON``.
+    ``all``, ``default``, ``PROJ``, ``WKT_ALL``, ``WKT2:2015``, ``WKT2:2019``, ``WKT1:GDAL``, ``WKT1:ESRI``, ``PROJJSON``, ``SQL``.
 
     Except ``all`` and ``default``, other formats can be preceded by ``-`` to disable them.
 
@@ -86,6 +87,8 @@ The following control parameters can appear in any order:
 
     .. note:: Before PROJ 6.3.0, WKT1:GDAL was implicitly calling --boundcrs-to-wgs84.
               This is no longer the case.
+
+    .. note:: When SQL is specified, :option:`--output-id` must be specified.
 
 .. option:: -k crs|operation|datum|ensemble|ellipsoid
 
@@ -271,6 +274,12 @@ The following control parameters can appear in any order:
     automatically promoted to a 3D version, where its vertical axis is the
     ellipsoidal height in metres, using the ellipsoid of the base geodetic CRS.
 
+.. option:: --output-id=AUTH:NAME
+
+    .. versionadded:: 8.1
+
+    Identifier to assign to the object (for SQL output).
+
 .. option:: --c-ify
 
     For developers only. Modify the string output of the utility so that it
@@ -441,6 +450,24 @@ Output:
             "code": 4283
         }
     }
+
+4. Exporting the SQL statements to insert a new CRS in the database.
+
+.. code-block:: console
+
+        projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs" --output-id HOBU:MY_CRS -o SQL -q
+
+Output:
+
+.. code-block:: sql
+
+    INSERT INTO geodetic_crs VALUES('HOBU','GEODETIC_CRS_MY_CRS','unknown','','geographic 2D','EPSG','6424','EPSG','6326',NULL,0);
+    INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_MY_CRS','geodetic_crs','HOBU','GEODETIC_CRS_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+    INSERT INTO conversion VALUES('HOBU','CONVERSION_MY_CRS','unknown','','EPSG','9805','Mercator (variant B)','EPSG','8823','Latitude of 1st standard parallel',5,'EPSG','9122','EPSG','8802','Longitude of natural origin',0,'EPSG','9122','EPSG','8806','False easting',0,'EPSG','9001','EPSG','8807','False northing',0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+    INSERT INTO usage VALUES('HOBU','USAGE_CONVERSION_MY_CRS','conversion','HOBU','CONVERSION_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+    INSERT INTO projected_crs VALUES('HOBU','MY_CRS','unknown','','EPSG','4400','HOBU','GEODETIC_CRS_MY_CRS','HOBU','CONVERSION_MY_CRS',NULL,0);
+    INSERT INTO usage VALUES('HOBU','USAGE_PROJECTED_CRS_MY_CRS','projected_crs','HOBU','MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+
 
 
 .. only:: man

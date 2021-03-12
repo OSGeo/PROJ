@@ -68,11 +68,14 @@ struct OutputOptions {
     bool WKT1_GDAL = false;
     bool WKT1_ESRI = false;
     bool PROJJSON = false;
+    bool SQL = false;
     bool c_ify = false;
     bool singleLine = false;
     bool strict = true;
     bool ballparkAllowed = true;
     bool allowEllipsoidalHeightAsVerticalCRS = false;
+    std::string outputAuthName{};
+    std::string outputCode{};
 };
 } // anonymous namespace
 
@@ -104,6 +107,7 @@ static void usage() {
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
         << "                [--identify] [--3d]" << std::endl
+        << "                [--output-id AUTH:CODE]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
         << "                --searchpaths | --remote-data |" << std::endl
         << "                {object_definition} | (-s {srs_def} -t {srs_def})"
@@ -111,7 +115,7 @@ static void usage() {
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
                  "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
-                 "WKT1:ESRI,PROJJSON"
+                 "WKT1:ESRI,PROJJSON,SQL"
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
@@ -310,7 +314,7 @@ static void outputObject(
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const OutputOptions &outputOpt) {
 
-    auto identified = dynamic_cast<const IdentifiedObject *>(obj.get());
+    auto identified = nn_dynamic_pointer_cast<IdentifiedObject>(obj);
     if (!outputOpt.quiet && identified && identified->isDeprecated()) {
         std::cout << "Warning: object is deprecated" << std::endl;
         auto crs = dynamic_cast<const CRS *>(obj.get());
@@ -556,8 +560,31 @@ static void outputObject(
                 std::cerr << "Error when exporting to PROJJSON: " << e.what()
                           << std::endl;
             }
-            // alreadyOutputted = true;
+            alreadyOutputted = true;
         }
+    }
+
+    if (identified && dbContext && outputOpt.SQL) {
+        try {
+            if (alreadyOutputted) {
+                std::cout << std::endl;
+            }
+            if (!outputOpt.quiet) {
+                std::cout << "SQL:" << std::endl;
+            }
+            dbContext->startInsertStatementsSession();
+            const auto statements = dbContext->getInsertStatementsFor(
+                NN_NO_CHECK(identified), outputOpt.outputAuthName,
+                outputOpt.outputCode, false);
+            dbContext->stopInsertStatementsSession();
+            for (const auto &sql : statements) {
+                std::cout << sql << std::endl;
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "Error when exporting to SQL: " << e.what()
+                      << std::endl;
+        }
+        // alreadyOutputted = true;
     }
 
     auto op = dynamic_cast<CoordinateOperation *>(obj.get());
@@ -825,6 +852,7 @@ int main(int argc, char **argv) {
     bool showSuperseded = false;
     bool promoteTo3D = false;
     double minimumAccuracy = -1;
+    bool outputAll = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -834,12 +862,14 @@ int main(int argc, char **argv) {
             auto formats(split(argv[i], ','));
             for (auto format : formats) {
                 if (ci_equal(format, "all")) {
+                    outputAll = true;
                     outputOpt.PROJ5 = true;
                     outputOpt.WKT2_2019 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                     outputOpt.WKT1_ESRI = true;
                     outputOpt.PROJJSON = true;
+                    outputOpt.SQL = true;
                 } else if (ci_equal(format, "default")) {
                     outputOpt.PROJ5 = true;
                     outputOpt.WKT2_2019 = true;
@@ -915,6 +945,10 @@ int main(int argc, char **argv) {
                     outputOpt.PROJJSON = true;
                 } else if (ci_equal(format, "-PROJJSON")) {
                     outputOpt.PROJJSON = false;
+                } else if (ci_equal(format, "SQL")) {
+                    outputOpt.SQL = true;
+                } else if (ci_equal(format, "-SQL")) {
+                    outputOpt.SQL = false;
                 } else {
                     std::cerr << "Unrecognized value for option -o: " << format
                               << std::endl;
@@ -1096,6 +1130,16 @@ int main(int argc, char **argv) {
             outputOpt.ballparkAllowed = false;
         } else if (ci_equal(arg, "--3d")) {
             promoteTo3D = true;
+        } else if (arg == "--output-id" && i + 1 < argc) {
+            i++;
+            const auto tokens = split(argv[i], ':');
+            if (tokens.size() != 2) {
+                std::cerr << "Invalid value for option --output-id"
+                          << std::endl;
+                usage();
+            }
+            outputOpt.outputAuthName = tokens[0];
+            outputOpt.outputCode = tokens[1];
         } else if (ci_equal(arg, "--searchpaths")) {
 #ifdef _WIN32
             constexpr char delim = ';';
@@ -1144,6 +1188,19 @@ int main(int argc, char **argv) {
         std::cerr << "ERROR: --bbox and --area are exclusive" << std::endl;
         std::exit(1);
     }
+    if (outputOpt.SQL && outputOpt.outputAuthName.empty()) {
+        if (outputAll) {
+            outputOpt.SQL = false;
+            std::cerr << "WARNING: SQL output disable since "
+                         "--output-id=AUTH:CODE has not been specified."
+                      << std::endl;
+        } else {
+            std::cerr << "ERROR: --output-id=AUTH:CODE must be specified when "
+                         "SQL output is enabled."
+                      << std::endl;
+            std::exit(1);
+        }
+    }
 
     DatabaseContextPtr dbContext;
     try {
@@ -1186,7 +1243,7 @@ int main(int argc, char **argv) {
         (outputOpt.PROJ5 + outputOpt.WKT2_2019 +
          outputOpt.WKT2_2019_SIMPLIFIED + outputOpt.WKT2_2015 +
          outputOpt.WKT2_2015_SIMPLIFIED + outputOpt.WKT1_GDAL +
-         outputOpt.WKT1_ESRI + outputOpt.PROJJSON) != 1) {
+         outputOpt.WKT1_ESRI + outputOpt.PROJJSON + outputOpt.SQL) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
         usage();
