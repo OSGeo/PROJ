@@ -11,4 +11,5 @@ RUN python3 -m pip install Sphinx breathe \
     sphinx_rtd_theme recommonmark sphinx-markdown-tables \
     sphinxcontrib-spelling
 
-
+# workaround for sphinxcontrib-spelling 7.1.0
+RUN sed -i '188s/except ImportError/except \(ImportError, UnicodeError\)/' /usr/local/lib/python3.6/dist-packages/sphinxcontrib/spelling/filters.py
