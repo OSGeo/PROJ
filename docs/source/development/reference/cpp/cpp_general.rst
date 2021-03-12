@@ -3,5 +3,5 @@
 General documentation
 ---------------------
 
-.. doxygenfile:: general_doc.dox.reworked.h
+.. doxygenpage:: general_doc
    :project: doxygen_api
