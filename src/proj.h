@@ -1195,6 +1195,7 @@ PROJ_STRING_LIST PROJ_DLL proj_get_insert_statements(PJ_CONTEXT *ctx,
                                             const char *authority,
                                             const char *code,
                                             int numeric_codes,
+                                            const char *const *allowed_authorities,
                                             const char *const *options);
 
 char PROJ_DLL *proj_suggests_code_for(PJ_CONTEXT *ctx,

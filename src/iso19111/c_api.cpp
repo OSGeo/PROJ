@@ -8881,6 +8881,15 @@ void proj_string_destroy(char *str) { free(str); }
  * @param code Code with which the object will be inserted.Must not be NULL.
  * @param numeric_codes Whether intermediate objects that can be created should
  *                      use numeric codes (true), or may be alphanumeric (false)
+ * @param allowed_authorities NULL terminated list of authority names, or NULL.
+ *                            Authorities to which intermediate objects are
+ *                            allowed to refer to. "authority" will be
+ *                            implicitly added to it. Note that unit,
+ *                            coordinate systems, projection methods and
+ *                            parameters will in any case be allowed to refer
+ *                            to EPSG.
+ *                            If NULL, allowed_authorities defaults to
+ *                            {"EPSG", "PROJ", nullptr}
  * @param options NULL terminated list of options, or NULL.
  *                No options are supported currently.
  *
@@ -8888,12 +8897,10 @@ void proj_string_destroy(char *str) { free(str); }
  *         proj_string_list_destroy()), or NULL in case of error.
  * @since 8.1
  */
-PROJ_STRING_LIST proj_get_insert_statements(PJ_CONTEXT *ctx,
-                                            PJ_INSERT_SESSION *session,
-                                            const PJ *object,
-                                            const char *authority,
-                                            const char *code, int numeric_codes,
-                                            const char *const *options) {
+PROJ_STRING_LIST proj_get_insert_statements(
+    PJ_CONTEXT *ctx, PJ_INSERT_SESSION *session, const PJ *object,
+    const char *authority, const char *code, int numeric_codes,
+    const char *const *allowed_authorities, const char *const *options) {
     SANITIZE_CTX(ctx);
     (void)options;
 
@@ -8939,9 +8946,16 @@ PROJ_STRING_LIST proj_get_insert_statements(PJ_CONTEXT *ctx,
         }
 
         auto dbContext = getDBcontext(ctx);
+        std::vector<std::string> allowedAuthorities{"EPSG", "PROJ"};
+        if (allowed_authorities) {
+            allowedAuthorities.clear();
+            for (auto iter = allowed_authorities; *iter; ++iter) {
+                allowedAuthorities.emplace_back(*iter);
+            }
+        }
         auto statements = dbContext->getInsertStatementsFor(
             NN_NO_CHECK(identifiedObject), authority, code,
-            numeric_codes != FALSE);
+            numeric_codes != FALSE, allowedAuthorities);
         return to_string_list(std::move(statements));
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());

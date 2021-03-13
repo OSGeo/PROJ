@@ -25,6 +25,7 @@ Synopsis
     |    [--show-superseded] [--hide-ballpark] [--accuracy {accuracy}]
     |    [--allow-ellipsoidal-height-as-vertical-crs]
     |    [--boundcrs-to-wgs84]
+    |    [--authority name]
     |    [--main-db-path path] [--aux-db-path path]*
     |    [--identify] [--3d]
     |    [--output-id AUTH:CODE]
@@ -240,6 +241,16 @@ The following control parameters can appear in any order:
     geographic CRS, and if found, wraps those CRS into a BoundCRS object.
     This is mostly to be used for early-binding approaches.
 
+.. option:: --authority name
+
+    Specify the name of the authority into which to restrict looks up for
+    objects, when specifying an object by name or when coordinate operations are
+    computed. The default is to allow all authorities.
+
+    When used with SQL output, this restricts the authorities to which intermediate
+    objects can belong to (the default is EPSG and PROJ). Note that the authority
+    of the :option:`--output-id` option will also be implicitly added.
+
 .. option:: --main-db-path path
 
     Specify the name and path of the database to be used by projinfo. The
@@ -451,11 +462,22 @@ Output:
         }
     }
 
-4. Exporting the SQL statements to insert a new CRS in the database.
+4. Exporting the SQL statements to insert a new CRS in an auxiliary database.
 
 .. code-block:: console
 
-        projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs" --output-id HOBU:MY_CRS -o SQL -q
+        # Get the SQL statements for a custom CRS
+        projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs +title=my_crs" --output-id HOBU:MY_CRS -o SQL -q > my_crs.sql
+        cat my_crs.sql
+
+        # Initialize an auxiliary database with the schema of the reference database
+        echo ".schema" | sqlite3 /path/to/proj.db | sqlite3 aux.db
+
+        # Append the content of the definition of HOBU:MY_CRS
+        sqlite3 aux.db < my_crs.db
+
+        # Check that everything works OK
+        projinfo --aux-db-path aux.db HOBU:MY_CRS
 
 Output:
 
@@ -465,9 +487,53 @@ Output:
     INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_MY_CRS','geodetic_crs','HOBU','GEODETIC_CRS_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
     INSERT INTO conversion VALUES('HOBU','CONVERSION_MY_CRS','unknown','','EPSG','9805','Mercator (variant B)','EPSG','8823','Latitude of 1st standard parallel',5,'EPSG','9122','EPSG','8802','Longitude of natural origin',0,'EPSG','9122','EPSG','8806','False easting',0,'EPSG','9001','EPSG','8807','False northing',0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
     INSERT INTO usage VALUES('HOBU','USAGE_CONVERSION_MY_CRS','conversion','HOBU','CONVERSION_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
-    INSERT INTO projected_crs VALUES('HOBU','MY_CRS','unknown','','EPSG','4400','HOBU','GEODETIC_CRS_MY_CRS','HOBU','CONVERSION_MY_CRS',NULL,0);
+    INSERT INTO projected_crs VALUES('HOBU','MY_CRS','my_crs','','EPSG','4400','HOBU','GEODETIC_CRS_MY_CRS','HOBU','CONVERSION_MY_CRS',NULL,0);
     INSERT INTO usage VALUES('HOBU','USAGE_PROJECTED_CRS_MY_CRS','projected_crs','HOBU','MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
 
+::
+
+    PROJ.4 string:
+    +proj=merc +lat_ts=5 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs
+
+    WKT2:2019 string:
+    PROJCRS["my_crs",
+        BASEGEOGCRS["unknown",
+            ENSEMBLE["World Geodetic System 1984 ensemble",
+                MEMBER["World Geodetic System 1984 (Transit)"],
+                MEMBER["World Geodetic System 1984 (G730)"],
+                MEMBER["World Geodetic System 1984 (G873)"],
+                MEMBER["World Geodetic System 1984 (G1150)"],
+                MEMBER["World Geodetic System 1984 (G1674)"],
+                MEMBER["World Geodetic System 1984 (G1762)"],
+                ELLIPSOID["WGS 84",6378137,298.257223563,
+                    LENGTHUNIT["metre",1]],
+                ENSEMBLEACCURACY[2.0]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            ID["HOBU","GEODETIC_CRS_MY_CRS"]],
+        CONVERSION["unknown",
+            METHOD["Mercator (variant B)",
+                ID["EPSG",9805]],
+            PARAMETER["Latitude of 1st standard parallel",5,
+                ANGLEUNIT["degree",0.0174532925199433],
+                ID["EPSG",8823]],
+            PARAMETER["Longitude of natural origin",0,
+                ANGLEUNIT["degree",0.0174532925199433],
+                ID["EPSG",8802]],
+            PARAMETER["False easting",0,
+                LENGTHUNIT["metre",1],
+                ID["EPSG",8806]],
+            PARAMETER["False northing",0,
+                LENGTHUNIT["metre",1],
+                ID["EPSG",8807]]],
+        CS[Cartesian,2],
+            AXIS["(E)",east,
+                ORDER[1],
+                LENGTHUNIT["metre",1]],
+            AXIS["(N)",north,
+                ORDER[2],
+                LENGTHUNIT["metre",1]],
+        ID["HOBU","MY_CRS"]]
 
 
 .. only:: man

@@ -76,6 +76,7 @@ struct OutputOptions {
     bool allowEllipsoidalHeightAsVerticalCRS = false;
     std::string outputAuthName{};
     std::string outputCode{};
+    std::vector<std::string> allowedAuthorities{};
 };
 } // anonymous namespace
 
@@ -104,6 +105,7 @@ static void usage() {
         << "                [--allow-ellipsoidal-height-as-vertical-crs]"
         << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
+        << "                [--authority name]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
         << "                [--identify] [--3d]" << std::endl
@@ -573,9 +575,14 @@ static void outputObject(
                 std::cout << "SQL:" << std::endl;
             }
             dbContext->startInsertStatementsSession();
+            auto allowedAuthorities(outputOpt.allowedAuthorities);
+            if (allowedAuthorities.empty()) {
+                allowedAuthorities.emplace_back("EPSG");
+                allowedAuthorities.emplace_back("PROJ");
+            }
             const auto statements = dbContext->getInsertStatementsFor(
                 NN_NO_CHECK(identified), outputOpt.outputAuthName,
-                outputOpt.outputCode, false);
+                outputOpt.outputCode, false, allowedAuthorities);
             dbContext->stopInsertStatementsSession();
             for (const auto &sql : statements) {
                 std::cout << sql << std::endl;
@@ -1118,6 +1125,7 @@ int main(int argc, char **argv) {
         } else if (arg == "--authority" && i + 1 < argc) {
             i++;
             authority = argv[i];
+            outputOpt.allowedAuthorities = split(authority, ',');
         } else if (arg == "--identify") {
             identify = true;
         } else if (arg == "--show-superseded") {

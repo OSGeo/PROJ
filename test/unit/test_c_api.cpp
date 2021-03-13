@@ -5229,7 +5229,7 @@ TEST_F(CApi, proj_crs_is_derived) {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_suggests_code_for) {
+TEST_F(CApi, proj_get_insert_statements) {
     {
         auto session = proj_insert_object_session_create(nullptr);
         EXPECT_NE(session, nullptr);
@@ -5274,16 +5274,59 @@ TEST_F(CApi, proj_suggests_code_for) {
             proj_string_destroy(code);
         }
 
+        const auto sizeOfStringList = [](const char *const *list) {
+            if (list == nullptr)
+                return -1;
+            int size = 0;
+            for (auto iter = list; *iter; ++iter) {
+                size += 1;
+            }
+            return size;
+        };
+
         // No session specified: we use a temporary session
         for (int i = 0; i < 2; i++) {
-            auto list = proj_get_insert_statements(m_ctxt, nullptr, crs, "HOBU",
-                                                   "XXXX", false, nullptr);
+            auto list = proj_get_insert_statements(
+                m_ctxt, nullptr, crs, "HOBU", "XXXX", false, nullptr, nullptr);
             ASSERT_NE(list, nullptr);
             ASSERT_NE(list[0], nullptr);
             EXPECT_EQ(std::string(list[0]),
                       "INSERT INTO geodetic_datum VALUES('HOBU',"
                       "'GEODETIC_DATUM_XXXX','GDA2020','','EPSG','7019',"
                       "'EPSG','8901',NULL,NULL,NULL,0);");
+            EXPECT_EQ(sizeOfStringList(list), 4);
+            proj_string_list_destroy(list);
+        }
+
+        // Pass an empty list of allowed authorities
+        // We cannot reuse the EPSG ellipsoid and prime meridian
+        {
+            const char *const allowed_authorities[] = {nullptr};
+            auto list =
+                proj_get_insert_statements(m_ctxt, nullptr, crs, "HOBU", "XXXX",
+                                           false, allowed_authorities, nullptr);
+            EXPECT_EQ(sizeOfStringList(list), 6);
+            proj_string_list_destroy(list);
+        }
+
+        // Allow only PROJ
+        // We cannot reuse the EPSG ellipsoid and prime meridian
+        {
+            const char *const allowed_authorities[] = {"PROJ", nullptr};
+            auto list =
+                proj_get_insert_statements(m_ctxt, nullptr, crs, "HOBU", "XXXX",
+                                           false, allowed_authorities, nullptr);
+            EXPECT_EQ(sizeOfStringList(list), 6);
+            proj_string_list_destroy(list);
+        }
+
+        // Allow EPSG
+        {
+            const char *const allowed_authorities[] = {"EPSG", nullptr};
+            auto list =
+                proj_get_insert_statements(m_ctxt, nullptr, crs, "HOBU", "XXXX",
+                                           false, allowed_authorities, nullptr);
+            EXPECT_EQ(sizeOfStringList(list), 4);
             proj_string_list_destroy(list);
         }
 
@@ -5291,8 +5334,8 @@ TEST_F(CApi, proj_suggests_code_for) {
         EXPECT_NE(session, nullptr);
 
         {
-            auto list = proj_get_insert_statements(m_ctxt, session, crs, "HOBU",
-                                                   "XXXX", false, nullptr);
+            auto list = proj_get_insert_statements(
+                m_ctxt, session, crs, "HOBU", "XXXX", false, nullptr, nullptr);
             ASSERT_NE(list, nullptr);
             ASSERT_NE(list[0], nullptr);
             EXPECT_EQ(std::string(list[0]),
@@ -5304,8 +5347,8 @@ TEST_F(CApi, proj_suggests_code_for) {
 
         // Object already inserted: return empty list
         {
-            auto list = proj_get_insert_statements(m_ctxt, session, crs, "HOBU",
-                                                   "XXXX", false, nullptr);
+            auto list = proj_get_insert_statements(
+                m_ctxt, session, crs, "HOBU", "XXXX", false, nullptr, nullptr);
             ASSERT_NE(list, nullptr);
             ASSERT_EQ(list[0], nullptr);
             proj_string_list_destroy(list);

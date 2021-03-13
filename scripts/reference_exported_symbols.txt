@@ -359,7 +359,7 @@ osgeo::proj::io::DatabaseContext::create(void*)
 osgeo::proj::io::DatabaseContext::~DatabaseContext()
 osgeo::proj::io::DatabaseContext::getAuthorities() const
 osgeo::proj::io::DatabaseContext::getDatabaseStructure() const
-osgeo::proj::io::DatabaseContext::getInsertStatementsFor(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::common::IdentifiedObject> > const&, std::string const&, std::string const&, bool)
+osgeo::proj::io::DatabaseContext::getInsertStatementsFor(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::common::IdentifiedObject> > const&, std::string const&, std::string const&, bool, std::vector<std::string, std::allocator<std::string> > const&)
 osgeo::proj::io::DatabaseContext::getMetadata(char const*) const
 osgeo::proj::io::DatabaseContext::getPath() const
 osgeo::proj::io::DatabaseContext::getSqliteHandle() const

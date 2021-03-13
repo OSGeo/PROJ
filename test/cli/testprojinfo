@@ -54,6 +54,10 @@ echo "Testing projinfo \"+proj=merc +lat_ts=5 +datum=WGS84 +type=crs\" --output-
 $EXE "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs" --output-id HOBU:MY_CRS -o SQL -q >>${OUT}
 echo "" >>${OUT}
 
+echo "Testing projinfo \"+proj=merc +lat_ts=5 +datum=WGS84 +type=crs\" --output-id HOBU:MY_CRS --authority HOBU -o SQL -q" >> ${OUT}
+$EXE "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs" --output-id HOBU:MY_CRS --authority HOBU -o SQL -q >>${OUT}
+echo "" >>${OUT}
+
 echo "Testing projinfo -s EPSG:4326 -t EPSG:32631 --single-line" >> ${OUT}
 $EXE -s EPSG:4326 -t EPSG:32631 --single-line >>${OUT}
 echo "" >>${OUT}

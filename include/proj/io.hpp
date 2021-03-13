@@ -844,10 +844,10 @@ class PROJ_GCC_DLL DatabaseContext {
     suggestsCodeFor(const common::IdentifiedObjectNNPtr &object,
                     const std::string &authName, bool numericCode);
 
-    PROJ_DLL std::vector<std::string>
-    getInsertStatementsFor(const common::IdentifiedObjectNNPtr &object,
-                           const std::string &authName, const std::string &code,
-                           bool numericCode);
+    PROJ_DLL std::vector<std::string> getInsertStatementsFor(
+        const common::IdentifiedObjectNNPtr &object,
+        const std::string &authName, const std::string &code, bool numericCode,
+        const std::vector<std::string> &allowedAuthorities = {"EPSG", "PROJ"});
 
     PROJ_DLL void stopInsertStatementsSession();
 
