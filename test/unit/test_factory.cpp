@@ -4005,6 +4005,36 @@ TEST(factory, objectInsertion) {
                         .empty());
         ctxt->stopInsertStatementsSession();
     }
+
+    // DynamicGeodeticReferenceFrame
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto datum = AuthorityFactory::create(ctxt, "EPSG")
+                               ->createDatum("1165"); // ITRF2014
+        const auto sql = ctxt->getInsertStatementsFor(datum, "HOBU", "XXXX",
+                                                      false, {"HOBU"});
+        const auto datumNew =
+            AuthorityFactory::create(ctxt, "HOBU")->createDatum("XXXX");
+        EXPECT_TRUE(datumNew->isEquivalentTo(
+            datum.get(), IComparable::Criterion::EQUIVALENT));
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // DynamicVerticalReferenceFrame
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto datum = AuthorityFactory::create(ctxt, "EPSG")
+                               ->createDatum("1096"); // Norway Normal Null 2000
+        const auto sql = ctxt->getInsertStatementsFor(datum, "HOBU", "XXXX",
+                                                      false, {"HOBU"});
+        const auto datumNew =
+            AuthorityFactory::create(ctxt, "HOBU")->createDatum("XXXX");
+        EXPECT_TRUE(datumNew->isEquivalentTo(
+            datum.get(), IComparable::Criterion::EQUIVALENT));
+        ctxt->stopInsertStatementsSession();
+    }
 }
 
 } // namespace

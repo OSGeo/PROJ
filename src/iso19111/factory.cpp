@@ -1825,13 +1825,27 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
     }
 
     // Insert new record in geodetic_datum table
+    std::string publicationDate("NULL");
+    if (datum->publicationDate().has_value()) {
+        publicationDate = '\'';
+        publicationDate +=
+            replaceAll(datum->publicationDate()->toString(), "'", "''");
+        publicationDate += '\'';
+    }
+    std::string frameReferenceEpoch("NULL");
+    const auto dynamicDatum =
+        dynamic_cast<const datum::DynamicGeodeticReferenceFrame *>(datum.get());
+    if (dynamicDatum) {
+        frameReferenceEpoch =
+            toString(dynamicDatum->frameReferenceEpoch().value());
+    }
     const auto sql = formatStatement(
         "INSERT INTO geodetic_datum VALUES("
-        "'%q','%q','%q','%q','%q','%q','%q','%q',NULL,NULL,NULL,0);",
+        "'%q','%q','%q','%q','%q','%q','%q','%q',%s,%s,NULL,0);",
         authName.c_str(), code.c_str(), datum->nameStr().c_str(),
         "", // description
         ellipsoidAuthName.c_str(), ellipsoidCode.c_str(), pmAuthName.c_str(),
-        pmCode.c_str());
+        pmCode.c_str(), publicationDate.c_str(), frameReferenceEpoch.c_str());
     appendSql(sqlStatements, sql);
 
     identifyOrInsertUsages(datum, "geodetic_datum", authName, code,
@@ -2066,12 +2080,26 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
     }
 
     // Insert new record in vertical_datum table
-    const auto sql = formatStatement("INSERT INTO vertical_datum VALUES("
-                                     "'%q','%q','%q','%q',NULL,NULL,NULL,0);",
-                                     authName.c_str(), code.c_str(),
-                                     datum->nameStr().c_str(),
-                                     "" // description
-    );
+    std::string publicationDate("NULL");
+    if (datum->publicationDate().has_value()) {
+        publicationDate = '\'';
+        publicationDate +=
+            replaceAll(datum->publicationDate()->toString(), "'", "''");
+        publicationDate += '\'';
+    }
+    std::string frameReferenceEpoch("NULL");
+    const auto dynamicDatum =
+        dynamic_cast<const datum::DynamicVerticalReferenceFrame *>(datum.get());
+    if (dynamicDatum) {
+        frameReferenceEpoch =
+            toString(dynamicDatum->frameReferenceEpoch().value());
+    }
+    const auto sql = formatStatement(
+        "INSERT INTO vertical_datum VALUES("
+        "'%q','%q','%q','%q',%s,%s,NULL,0);",
+        authName.c_str(), code.c_str(), datum->nameStr().c_str(),
+        "", // description
+        publicationDate.c_str(), frameReferenceEpoch.c_str());
     appendSql(sqlStatements, sql);
 
     identifyOrInsertUsages(datum, "vertical_datum", authName, code,
