@@ -39,6 +39,7 @@
 #include "proj/coordinateoperation.hpp"
 #include "proj/coordinatesystem.hpp"
 #include "proj/io.hpp"
+#include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
 #include "proj/internal/coordinatesystem_internal.hpp"
@@ -446,7 +447,8 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
         crs_authority = *(l_identifiers[0]->codeSpace());
     }
 
-    auto authorities = dbContext->getAllowedAuthorities(crs_authority, "EPSG");
+    auto authorities = dbContext->getAllowedAuthorities(
+        crs_authority, metadata::Identifier::EPSG);
     if (authorities.empty()) {
         authorities.emplace_back();
     }
@@ -1686,8 +1688,8 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
         auto geogCRS2D = demoteTo2D(std::string(), dbContext);
         if (dbContext) {
-            const auto res = geogCRS2D->identify(
-                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "EPSG"));
+            const auto res = geogCRS2D->identify(io::AuthorityFactory::create(
+                NN_NO_CHECK(dbContext), metadata::Identifier::EPSG));
             if (res.size() == 1) {
                 const auto &front = res.front();
                 if (front.second == 100) {
@@ -2086,26 +2088,31 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             ? util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS
             : util::IComparable::Criterion::EQUIVALENT;
 
-    const GeographicCRSNNPtr candidatesCRS[] = {GeographicCRS::EPSG_4326,
-                                                GeographicCRS::EPSG_4267,
-                                                GeographicCRS::EPSG_4269};
-    for (const auto &crs : candidatesCRS) {
-        const bool nameEquivalent = metadata::Identifier::isEquivalentName(
-            thisName.c_str(), crs->nameStr().c_str());
-        const bool nameEqual = thisName == crs->nameStr();
-        const bool isEq = _isEquivalentTo(crs.get(), crsCriterion, dbContext);
-        if (nameEquivalent && isEq && (!authorityFactory || nameEqual)) {
-            res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
-                             nameEqual ? 100 : 90);
-            return res;
-        } else if (nameEqual && !isEq && !authorityFactory) {
-            res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
-                             25);
-            return res;
-        } else if (isEq && !authorityFactory) {
-            res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
-                             70);
-            return res;
+    if (authorityFactory == nullptr ||
+        authorityFactory->getAuthority().empty() ||
+        authorityFactory->getAuthority() == metadata::Identifier::EPSG) {
+        const GeographicCRSNNPtr candidatesCRS[] = {GeographicCRS::EPSG_4326,
+                                                    GeographicCRS::EPSG_4267,
+                                                    GeographicCRS::EPSG_4269};
+        for (const auto &crs : candidatesCRS) {
+            const bool nameEquivalent = metadata::Identifier::isEquivalentName(
+                thisName.c_str(), crs->nameStr().c_str());
+            const bool nameEqual = thisName == crs->nameStr();
+            const bool isEq =
+                _isEquivalentTo(crs.get(), crsCriterion, dbContext);
+            if (nameEquivalent && isEq && (!authorityFactory || nameEqual)) {
+                res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
+                                 nameEqual ? 100 : 90);
+                return res;
+            } else if (nameEqual && !isEq && !authorityFactory) {
+                res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
+                                 25);
+                return res;
+            } else if (isEq && !authorityFactory) {
+                res.emplace_back(util::nn_static_pointer_cast<GeodeticCRS>(crs),
+                                 70);
+                return res;
+            }
         }
     }
 
@@ -3645,8 +3652,8 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     if (axisList.size() == 3 && !(isWKT2 && formatter->use2019Keywords())) {
         auto projCRS2D = demoteTo2D(std::string(), dbContext);
         if (dbContext) {
-            const auto res = projCRS2D->identify(
-                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "EPSG"));
+            const auto res = projCRS2D->identify(io::AuthorityFactory::create(
+                NN_NO_CHECK(dbContext), metadata::Identifier::EPSG));
             if (res.size() == 1) {
                 const auto &front = res.front();
                 if (front.second == 100) {
@@ -4164,19 +4171,25 @@ ProjectedCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                          ? 90
                                          : 70;
     };
-    auto computeUTMCRSName = [](const char *base, int l_zone, bool l_north) {
-        return base + toString(l_zone) + (l_north ? "N" : "S");
-    };
 
     const auto &conv = derivingConversionRef();
     const auto &cs = coordinateSystem();
 
     if (baseRes.size() == 1 && baseRes.front().second >= 70 &&
+        (authorityFactory == nullptr ||
+         authorityFactory->getAuthority().empty() ||
+         authorityFactory->getAuthority() == metadata::Identifier::EPSG) &&
         conv->isUTM(zone, north) &&
         cs->_isEquivalentTo(
             cs::CartesianCS::createEastingNorthing(common::UnitOfMeasure::METRE)
                 .get(),
             util::IComparable::Criterion::EQUIVALENT, dbContext)) {
+
+        auto computeUTMCRSName = [](const char *base, int l_zone,
+                                    bool l_north) {
+            return base + toString(l_zone) + (l_north ? "N" : "S");
+        };
+
         if (baseRes.front().first->_isEquivalentTo(
                 GeographicCRS::EPSG_4326.get(),
                 util::IComparable::Criterion::EQUIVALENT, dbContext)) {
