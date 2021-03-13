@@ -1,3 +1,27 @@
 $EXE +units=us-ft +init=${INIT_FILE}:404 -E -f '%.3f' >>${OUT} <<EOF
   (`#404 <https://github.com/OSGeo/proj.4/issues/404>`_)
 {"CPM", 	"a=6375738.7",		"rf=334.29",		"Comm. des Poids et Mesures 1799"},
+   double lamtp, cl, sd, sp, sav, tanphi;
+        sav = lampp;
+            lamt = lp.lam + Q->p22 * sav;
+            if (fabs(fabs(sav) - fabs(lamdp)) < TOL)
+            sav = lamdp;
+    double lamt, sdsq, s, lamdp, phidp, sppsq, dd, sd, sl, fac, scl, sav, spp;
+        sav = lamdp;
+    } while (fabs(lamdp - sav) >= TOL && --nn);
+        double yt, ba;
+        ba = 1. / (yt * Q->sw * Q->h + Q->cw);
+        xy.x = (xy.x * Q->cg - xy.y * Q->sg) * Q->cw * ba;
+        xy.y = yt * ba;
+ * This implements Space Oblique Mercator (SOM) projection, used by the
+ * The code is identical to that of Landsat SOM (PJ_lsat.c) with the following
+static double phi1_(double qs, double Te, double Tone_es) {
+    if (Te < EPSILON)
+        con = Te * sinpi;
+           sinpi / com + .5 / Te * log ((1. - con) /
+    else { /* point mean of intersepts */
+operation  proj=latlong geoidgrids=egm96_15.gtx  axis=dne ellps=GRS80
+  Url                      = {https://geodesie.ign.fr/contenu/fichiers/documentation/algorithmes/notice/NTG_88.pdf}
+it (neither in current documentation, nor in `historic one <https://web.archive.org/web/20160601000000*/http://trac.osgeo.org/proj/wiki/GenParms>`_).
+`Deformation model master file <https://github.com/linz/deformation-model-format>`_
+of a Deformation Model <https://github.com/linz/deformation-model-format/blob/master/doc/JsonGeotiffDeformationModelFormat_20200501.pdf>`__
