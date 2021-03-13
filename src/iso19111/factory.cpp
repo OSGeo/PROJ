@@ -374,6 +374,12 @@ struct DatabaseContext::Private {
                            const std::vector<std::string> &allowedAuthorities);
 
     std::vector<std::string>
+    getInsertStatementsFor(const datum::DatumEnsembleNNPtr &ensemble,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
+
+    std::vector<std::string>
     getInsertStatementsFor(const crs::GeodeticCRSNNPtr &crs,
                            const std::string &authName, const std::string &code,
                            bool numericCode,
@@ -1169,11 +1175,18 @@ identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
                        const std::string &authNameParent,
                        const datum::DatumEnsembleNNPtr &obj,
                        std::string &authName, std::string &code) {
-    const auto instantiateFunc = [](const AuthorityFactoryNNPtr &authFactory,
-                                    const std::string &lCode) {
-        return util::nn_static_pointer_cast<util::IComparable>(
-            authFactory->createDatumEnsemble(lCode, "geodetic_datum"));
-    };
+    const char *type = "geodetic_datum";
+    if (!obj->datums().empty() &&
+        dynamic_cast<const datum::VerticalReferenceFrame *>(
+            obj->datums().front().get())) {
+        type = "vertical_datum";
+    }
+    const auto instantiateFunc =
+        [&type](const AuthorityFactoryNNPtr &authFactory,
+                const std::string &lCode) {
+            return util::nn_static_pointer_cast<util::IComparable>(
+                authFactory->createDatumEnsemble(lCode, type));
+        };
     identifyFromNameOrCode(
         dbContext, allowedAuthorities, authNameParent, obj, instantiateFunc,
         AuthorityFactory::ObjectType::DATUM_ENSEMBLE, authName, code);
@@ -1249,6 +1262,28 @@ identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
     identifyFromNameOrCode(
         dbContext, allowedAuthorities, authNameParent, obj, instantiateFunc,
         AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME, authName, code);
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
+                       const std::vector<std::string> &allowedAuthorities,
+                       const std::string &authNameParent,
+                       const datum::DatumNNPtr &obj, std::string &authName,
+                       std::string &code) {
+    if (const auto geodeticDatum =
+            util::nn_dynamic_pointer_cast<datum::GeodeticReferenceFrame>(obj)) {
+        identifyFromNameOrCode(dbContext, allowedAuthorities, authNameParent,
+                               NN_NO_CHECK(geodeticDatum), authName, code);
+    } else if (const auto verticalDatum =
+                   util::nn_dynamic_pointer_cast<datum::VerticalReferenceFrame>(
+                       obj)) {
+        identifyFromNameOrCode(dbContext, allowedAuthorities, authNameParent,
+                               NN_NO_CHECK(verticalDatum), authName, code);
+    } else {
+        throw FactoryException("Unhandled type of datum");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1857,6 +1892,115 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
 // ---------------------------------------------------------------------------
 
 std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const datum::DatumEnsembleNNPtr &ensemble, const std::string &authName,
+    const std::string &code, bool numericCode,
+    const std::vector<std::string> &allowedAuthorities) {
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    // Check if the object is already known under that code
+    std::string datumAuthName;
+    std::string datumCode;
+    identifyFromNameOrCode(self, allowedAuthorities, authName, ensemble,
+                           datumAuthName, datumCode);
+    if (datumAuthName == authName && datumCode == code) {
+        return {};
+    }
+
+    std::vector<std::string> sqlStatements;
+
+    const auto &members = ensemble->datums();
+    assert(!members.empty());
+
+    int counter = 1;
+    std::vector<std::pair<std::string, std::string>> membersId;
+    for (const auto &member : members) {
+        std::string memberAuthName;
+        std::string memberCode;
+        identifyFromNameOrCode(self, allowedAuthorities, authName, member,
+                               memberAuthName, memberCode);
+        if (memberAuthName.empty()) {
+            memberAuthName = authName;
+            if (numericCode) {
+                memberCode =
+                    self->suggestsCodeFor(member, memberAuthName, true);
+            } else {
+                memberCode = "MEMBER_" + toString(counter) + "_OF_" + code;
+            }
+            const auto sqlStatementsTmp =
+                self->getInsertStatementsFor(member, memberAuthName, memberCode,
+                                             numericCode, allowedAuthorities);
+            sqlStatements.insert(sqlStatements.end(), sqlStatementsTmp.begin(),
+                                 sqlStatementsTmp.end());
+        }
+
+        membersId.emplace_back(
+            std::pair<std::string, std::string>(memberAuthName, memberCode));
+
+        ++counter;
+    }
+
+    const bool isGeodetic =
+        util::nn_dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
+            members.front()) != nullptr;
+
+    // Insert new record in geodetic_datum/vertical_datum table
+    const double accuracy =
+        c_locale_stod(ensemble->positionalAccuracy()->value());
+    if (isGeodetic) {
+        const auto firstDatum =
+            AuthorityFactory::create(self, membersId.front().first)
+                ->createGeodeticDatum(membersId.front().second);
+        const auto &ellipsoid = firstDatum->ellipsoid();
+        const auto &ellipsoidIds = ellipsoid->identifiers();
+        assert(!ellipsoidIds.empty());
+        const std::string &ellipsoidAuthName =
+            *(ellipsoidIds.front()->codeSpace());
+        const std::string &ellipsoidCode = ellipsoidIds.front()->code();
+        const auto &pm = firstDatum->primeMeridian();
+        const auto &pmIds = pm->identifiers();
+        assert(!pmIds.empty());
+        const std::string &pmAuthName = *(pmIds.front()->codeSpace());
+        const std::string &pmCode = pmIds.front()->code();
+        const auto sql = formatStatement(
+            "INSERT INTO geodetic_datum VALUES("
+            "'%q','%q','%q','%q','%q','%q','%q','%q',NULL,NULL,%f,0);",
+            authName.c_str(), code.c_str(), ensemble->nameStr().c_str(),
+            "", // description
+            ellipsoidAuthName.c_str(), ellipsoidCode.c_str(),
+            pmAuthName.c_str(), pmCode.c_str(), accuracy);
+        appendSql(sqlStatements, sql);
+    } else {
+        const auto sql = formatStatement("INSERT INTO vertical_datum VALUES("
+                                         "'%q','%q','%q','%q',NULL,NULL,%f,0);",
+                                         authName.c_str(), code.c_str(),
+                                         ensemble->nameStr().c_str(),
+                                         "", // description
+                                         accuracy);
+        appendSql(sqlStatements, sql);
+    }
+    identifyOrInsertUsages(ensemble,
+                           isGeodetic ? "geodetic_datum" : "vertical_datum",
+                           authName, code, allowedAuthorities, sqlStatements);
+
+    const char *tableName = isGeodetic ? "geodetic_datum_ensemble_member"
+                                       : "vertical_datum_ensemble_member";
+    counter = 1;
+    for (const auto &authCodePair : membersId) {
+        const auto sql = formatStatement(
+            "INSERT INTO %s VALUES("
+            "'%q','%q','%q','%q',%d);",
+            tableName, authName.c_str(), code.c_str(),
+            authCodePair.first.c_str(), authCodePair.second.c_str(), counter);
+        appendSql(sqlStatements, sql);
+        ++counter;
+    }
+
+    return sqlStatements;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
     const crs::GeodeticCRSNNPtr &crs, const std::string &authName,
     const std::string &code, bool numericCode,
     const std::vector<std::string> &allowedAuthorities) {
@@ -1870,11 +2014,20 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
     std::string datumCode;
     const auto &ensemble = crs->datumEnsemble();
     if (ensemble) {
-        identifyFromNameOrCode(self, allowedAuthorities, authName,
-                               NN_NO_CHECK(ensemble), datumAuthName, datumCode);
+        const auto ensembleNN = NN_NO_CHECK(ensemble);
+        identifyFromNameOrCode(self, allowedAuthorities, authName, ensembleNN,
+                               datumAuthName, datumCode);
         if (datumAuthName.empty()) {
-            throw FactoryException(
-                "Unhandled yet: insertion of new DatumEnsemble");
+            datumAuthName = authName;
+            if (numericCode) {
+                datumCode =
+                    self->suggestsCodeFor(ensembleNN, datumAuthName, true);
+            } else {
+                datumCode = "GEODETIC_DATUM_" + code;
+            }
+            sqlStatements = self->getInsertStatementsFor(
+                ensembleNN, datumAuthName, datumCode, numericCode,
+                allowedAuthorities);
         }
     } else {
         const auto &datum = crs->datum();
@@ -2124,11 +2277,20 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
     std::string datumCode;
     const auto &ensemble = crs->datumEnsemble();
     if (ensemble) {
-        identifyFromNameOrCode(self, allowedAuthorities, authName,
-                               NN_NO_CHECK(ensemble), datumAuthName, datumCode);
+        const auto ensembleNN = NN_NO_CHECK(ensemble);
+        identifyFromNameOrCode(self, allowedAuthorities, authName, ensembleNN,
+                               datumAuthName, datumCode);
         if (datumAuthName.empty()) {
-            throw FactoryException(
-                "Unhandled yet: insertion of new DatumEnsemble");
+            datumAuthName = authName;
+            if (numericCode) {
+                datumCode =
+                    self->suggestsCodeFor(ensembleNN, datumAuthName, true);
+            } else {
+                datumCode = "VERTICAL_DATUM_" + code;
+            }
+            sqlStatements = self->getInsertStatementsFor(
+                ensembleNN, datumAuthName, datumCode, numericCode,
+                allowedAuthorities);
         }
     } else {
         const auto &datum = crs->datum();
@@ -2546,6 +2708,12 @@ std::vector<std::string> DatabaseContext::getInsertStatementsFor(
                      object)) {
         return d->getInsertStatementsFor(NN_NO_CHECK(geodeticDatum), authName,
                                          code, numericCode, allowedAuthorities);
+    }
+
+    else if (const auto ensemble =
+                 util::nn_dynamic_pointer_cast<datum::DatumEnsemble>(object)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(ensemble), authName, code,
+                                         numericCode, allowedAuthorities);
     }
 
     else if (const auto geodCRS =

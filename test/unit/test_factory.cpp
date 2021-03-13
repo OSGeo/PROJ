@@ -4035,6 +4035,52 @@ TEST(factory, objectInsertion) {
             datum.get(), IComparable::Criterion::EQUIVALENT));
         ctxt->stopInsertStatementsSession();
     }
+
+    // geodetic DatumEnsemble, and add members inline
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto ensemble = AuthorityFactory::create(ctxt, "EPSG")
+                                  ->createDatumEnsemble("6326"); // WGS84
+        const auto sql = ctxt->getInsertStatementsFor(ensemble, "HOBU", "XXXX",
+                                                      false, {"HOBU"});
+        const auto ensembleNew =
+            AuthorityFactory::create(ctxt, "HOBU")->createDatumEnsemble("XXXX");
+        EXPECT_TRUE(ensembleNew->isEquivalentTo(
+            ensemble.get(), IComparable::Criterion::EQUIVALENT));
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // geodetic DatumEnsemble, and reference members
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto ensemble = AuthorityFactory::create(ctxt, "EPSG")
+                                  ->createDatumEnsemble("6326"); // WGS84
+        const auto sql =
+            ctxt->getInsertStatementsFor(ensemble, "HOBU", "XXXX", false);
+        const auto ensembleNew =
+            AuthorityFactory::create(ctxt, "HOBU")->createDatumEnsemble("XXXX");
+        EXPECT_TRUE(ensembleNew->isEquivalentTo(
+            ensemble.get(), IComparable::Criterion::EQUIVALENT));
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // vertical DatumEnsemble
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        // British Isles height ensemble
+        const auto ensemble =
+            AuthorityFactory::create(ctxt, "EPSG")->createDatumEnsemble("1288");
+        const auto sql = ctxt->getInsertStatementsFor(ensemble, "HOBU", "XXXX",
+                                                      false, {"HOBU"});
+        const auto ensembleNew =
+            AuthorityFactory::create(ctxt, "HOBU")->createDatumEnsemble("XXXX");
+        EXPECT_TRUE(ensembleNew->isEquivalentTo(
+            ensemble.get(), IComparable::Criterion::EQUIVALENT));
+        ctxt->stopInsertStatementsSession();
+    }
 }
 
 } // namespace
