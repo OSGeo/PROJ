@@ -18,7 +18,7 @@
  *
  * See the comments in geodesic.h for documentation.
  *
- * Copyright (c) Charles Karney (2012-2020) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2012-2021) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
  */
@@ -127,7 +127,13 @@ static void swapx(real* x, real* y)
 { real t = *x; *x = *y; *y = t; }
 
 static void norm2(real* sinx, real* cosx) {
+#if defined(_MSC_VER) && _MSC_VER <= 1900
+  /* Visual Studio 2015 (32-bit) has inaccurate hypot, the same as in some
+   * versions of python https://bugs.python.org/issue43088 */
+  real r = sqrt(*sinx * *sinx + *cosx * *cosx);
+#else
   real r = hypot(*sinx, *cosx);
+#endif
   *sinx /= r;
   *cosx /= r;
 }
@@ -164,23 +170,12 @@ static real AngRound(real x) {
 static void sincosdx(real x, real* sinx, real* cosx) {
   /* In order to minimize round-off errors, this function exactly reduces
    * the argument to the range [-45, 45] before converting it to radians. */
-  real r, s, c; int q;
+  real r, s, c; int q = 0;
   r = remquo(x, (real)(90), &q);
   /* now abs(r) <= 45 */
   r *= degree;
   /* Possibly could call the gnu extension sincos */
   s = sin(r); c = cos(r);
-#if defined(_MSC_VER) && _MSC_VER < 1900
-  /*
-   * Before version 14 (2015), Visual Studio had problems dealing
-   * with -0.0.  Specifically
-   *   VC 10,11,12 and 32-bit compile: fmod(-0.0, 360.0) -> +0.0
-   *   VC 12       and 64-bit compile:  sin(-0.0)        -> +0.0
-   * AngNormalize has a similar fix.
-   * python 2.7 on Windows 32-bit machines has the same problem.
-   */
-  if (x == 0) s = x;
-#endif
   switch ((unsigned)q & 3U) {
   case 0U: *sinx =  s; *cosx =  c; break;
   case 1U: *sinx =  c; *cosx = -s; break;
@@ -797,7 +792,9 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
      * not a shortest path. */
     if (sig12 < 1 || m12x >= 0) {
       /* Need at least 2, to handle 90 0 90 180 */
-      if (sig12 < 3 * tiny)
+      if (sig12 < 3 * tiny ||
+          // Prevent negative s12 or m12 for short lines
+          (sig12 < tol0 && (s12x < 0 || m12x < 0)))
         sig12 = m12x = s12x = 0;
       m12x *= g->b;
       s12x *= g->b;
@@ -868,7 +865,6 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
                         slam12, clam12,
                         &salp2, &calp2, &sig12, &ssig1, &csig1, &ssig2, &csig2,
                         &eps, &domg12, numit < maxit1, &dv, Ca);
-        /* 2 * tol0 is approximately 1 ulp for a number in [0, pi]. */
         /* Reversed test to allow escape with NaNs */
         if (tripb || !(fabs(v) >= (tripn ? 8 : 1) * tol0)) break;
         /* Update bracketing values */

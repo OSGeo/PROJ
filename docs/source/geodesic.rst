@@ -47,7 +47,7 @@ Traditionally two geodesic problems are considered:
   :math:`\alpha_2`.
 
 PROJ incorporates `C library for Geodesics
-<https://geographiclib.sourceforge.io/1.49/C/>`_ from `GeographicLib
+<https://geographiclib.sourceforge.io/1.52/C/>`_ from `GeographicLib
 <https://geographiclib.sourceforge.io>`_.  This library provides
 routines to solve the direct and inverse geodesic problems.  Full double
 precision accuracy is maintained provided that
@@ -55,7 +55,7 @@ precision accuracy is maintained provided that
 to the
 
     `application programming interface
-    <https://geographiclib.sourceforge.io/1.49/C/geodesic_8h.html>`_
+    <https://geographiclib.sourceforge.io/1.52/C/geodesic_8h.html>`_
 
 for full documentation.  A brief summary of the routines is given in
 geodesic(3).
