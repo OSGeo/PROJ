@@ -1546,3 +1546,16 @@ Candidate operations found: 1
 Note: using '--spatial-test intersects' would bring more results (2)
 NKG:ITRF2014_TO_DK, ITRF2014 to ETRS89(DK), 0.01 m, Denmark - onshore and offshore.
 
+Testing projinfo --dump-db-structure | head -n 5
+CREATE TABLE metadata(
+    key TEXT NOT NULL PRIMARY KEY CHECK (length(key) >= 1),
+    value TEXT NOT NULL
+);
+CREATE TABLE unit_of_measure(
+
+Testing projinfo --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tail -n 4
+INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MAJOR',1);
+INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MINOR',0);
+INSERT INTO geodetic_crs VALUES('HOBU','XXXX','WGS 84','','geographic 2D','EPSG','6422','EPSG','6326',NULL,0);
+INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_XXXX','geodetic_crs','HOBU','XXXX','EPSG','1262','EPSG','1183');
+

@@ -288,6 +288,14 @@ echo 'Testing NKG: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-
 $EXE -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo "Testing projinfo --dump-db-structure | head -n 5" >> ${OUT}
+$EXE --dump-db-structure | head -n 5 >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing projinfo --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tail -n 4" >> ${OUT}
+$EXE --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tail -n 4 >>${OUT}
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist

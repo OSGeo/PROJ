@@ -27,11 +27,13 @@ Synopsis
     |    [--boundcrs-to-wgs84]
     |    [--authority name]
     |    [--main-db-path path] [--aux-db-path path]*
+    |    [--dump-db-structure]
     |    [--identify] [--3d]
     |    [--output-id AUTH:CODE]
     |    [--c-ify] [--single-line]
-    |    --searchpaths | --remote-data | {object_definition} |
-    |    {object_reference} | (-s {srs_def} -t {srs_def})
+    |    --searchpaths | --remote-data |
+    |    --dump-db-structure [{object_definition} | {object_reference}] |
+    |    {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
     |
 
     where {object_definition} or {srs_def} is one of the possibilities accepted
@@ -274,6 +276,15 @@ The following control parameters can appear in any order:
     For example, `+proj=utm +zone=31 +datum=WGS84 +type=crs` will be identified
     with a likelihood of 70% to EPSG:32631
 
+.. option:: --dump-db-structure
+
+    .. versionadded:: 8.1
+
+    Outputs the sequence of SQL statements to create a new empty valid auxiliary
+    database. This option can be specified as the only switch of the utility.
+    If also specifying a CRS object and the :option:`--output-id` option, the
+    definition of the object as SQL statements will be appended.
+
 .. option:: --3d
 
     .. versionadded:: 6.3
@@ -475,6 +486,16 @@ Output:
 
         # Append the content of the definition of HOBU:MY_CRS
         sqlite3 aux.db < my_crs.db
+
+        # Check that everything works OK
+        projinfo --aux-db-path aux.db HOBU:MY_CRS
+
+or more simply:
+
+.. code-block:: console
+
+        # Create an auxiliary database with the definition of a custom CRS.
+        projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs +title=my_crs" --output-id HOBU:MY_CRS --dump-db-structure | sqlite3 aux.db
 
         # Check that everything works OK
         projinfo --aux-db-path aux.db HOBU:MY_CRS

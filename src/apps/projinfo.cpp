@@ -108,11 +108,16 @@ static void usage() {
         << "                [--authority name]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
+        << "                [--]" << std::endl
         << "                [--identify] [--3d]" << std::endl
         << "                [--output-id AUTH:CODE]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
         << "                --searchpaths | --remote-data |" << std::endl
-        << "                {object_definition} | (-s {srs_def} -t {srs_def})"
+        << "                --dump-db-structure [{object_definition} | "
+           "{object_reference}] |"
+        << std::endl
+        << "                {object_definition} | {object_reference} | "
+           "(-s {srs_def} -t {srs_def})"
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
@@ -124,7 +129,7 @@ static void usage() {
               << std::endl;
     std::cerr << std::endl;
     std::cerr << "{object_definition} might be a PROJ string, a WKT string, "
-                 " a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
+                 "a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
               << std::endl;
     std::exit(1);
 }
@@ -860,6 +865,7 @@ int main(int argc, char **argv) {
     bool promoteTo3D = false;
     double minimumAccuracy = -1;
     bool outputAll = false;
+    bool dumpDbStructure = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -1148,6 +1154,8 @@ int main(int argc, char **argv) {
             }
             outputOpt.outputAuthName = tokens[0];
             outputOpt.outputCode = tokens[1];
+        } else if (arg == "--dump-db-structure") {
+            dumpDbStructure = true;
         } else if (ci_equal(arg, "--searchpaths")) {
 #ifdef _WIN32
             constexpr char delim = ';';
@@ -1196,6 +1204,13 @@ int main(int argc, char **argv) {
         std::cerr << "ERROR: --bbox and --area are exclusive" << std::endl;
         std::exit(1);
     }
+
+    if (dumpDbStructure && user_string_specified && !outputSwitchSpecified) {
+        // Implicit settings in --output-db-structure mode + object
+        outputSwitchSpecified = true;
+        outputOpt.SQL = true;
+        outputOpt.quiet = true;
+    }
     if (outputOpt.SQL && outputOpt.outputAuthName.empty()) {
         if (outputAll) {
             outputOpt.SQL = false;
@@ -1215,13 +1230,22 @@ int main(int argc, char **argv) {
         dbContext =
             DatabaseContext::create(mainDBPath, auxDBPath).as_nullable();
     } catch (const std::exception &e) {
-        if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty()) {
+        if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty() ||
+            dumpDbStructure) {
             std::cerr << "ERROR: Cannot create database connection: "
                       << e.what() << std::endl;
             std::exit(1);
         }
         std::cerr << "WARNING: Cannot create database connection: " << e.what()
                   << std::endl;
+    }
+
+    if (dumpDbStructure) {
+        assert(dbContext);
+        const auto structure = dbContext->getDatabaseStructure();
+        for (const auto &sql : structure) {
+            std::cout << sql << std::endl;
+        }
     }
 
     if (!sourceCRSStr.empty() && targetCRSStr.empty()) {
@@ -1238,6 +1262,9 @@ int main(int argc, char **argv) {
             usage();
         }
     } else if (!user_string_specified) {
+        if (dumpDbStructure) {
+            std::exit(0);
+        }
         std::cerr << "Missing user string" << std::endl;
         usage();
     }
