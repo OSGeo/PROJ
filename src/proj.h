@@ -1044,6 +1044,9 @@ const char PROJ_DLL *proj_context_get_database_path(PJ_CONTEXT *ctx);
 const char PROJ_DLL *proj_context_get_database_metadata(PJ_CONTEXT* ctx,
                                                         const char* key);
 
+PROJ_STRING_LIST PROJ_DLL proj_context_get_database_structure(
+                                                PJ_CONTEXT* ctx,
+                                                const char* const *options);
 
 PJ_GUESSED_WKT_DIALECT PROJ_DLL proj_context_guess_wkt_dialect(PJ_CONTEXT *ctx,
                                                                const char *wkt);

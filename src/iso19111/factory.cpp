@@ -274,6 +274,8 @@ struct DatabaseContext::Private {
     std::vector<std::string> auxiliaryDatabasePaths_{};
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
+    int nLayoutVersionMajor_ = 0;
+    int nLayoutVersionMinor_ = 0;
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
     PJ_CONTEXT *pjCtxt_ = nullptr;
     int recLevel_ = 0;
@@ -305,7 +307,8 @@ struct DatabaseContext::Private {
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
 
-    void checkDatabaseLayout();
+    void checkDatabaseLayout(const std::string &path,
+                             const std::string &dbNamePrefix);
 
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
@@ -709,10 +712,22 @@ void DatabaseContext::Private::open(const std::string &databasePath,
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::checkDatabaseLayout() {
-    auto res = run("SELECT key, value FROM metadata WHERE key IN "
+void DatabaseContext::Private::checkDatabaseLayout(
+    const std::string &path, const std::string &dbNamePrefix) {
+    if (!dbNamePrefix.empty() && run("SELECT 1 FROM " + dbNamePrefix +
+                                     "sqlite_master WHERE name = 'metadata'")
+                                     .empty()) {
+        // Accept auxiliary databases without metadata table (sparse DBs)
+        return;
+    }
+    auto res = run("SELECT key, value FROM " + dbNamePrefix +
+                   "metadata WHERE key IN "
                    "('DATABASE.LAYOUT.VERSION.MAJOR', "
                    "'DATABASE.LAYOUT.VERSION.MINOR')");
+    if (res.empty() && !dbNamePrefix.empty()) {
+        // Accept auxiliary databases without layout metadata.
+        return;
+    }
     if (res.size() != 2) {
         // The database layout of PROJ 7.2 that shipped with EPSG v10.003 is
         // at the time of writing still compatible of the one we support.
@@ -730,35 +745,46 @@ void DatabaseContext::Private::checkDatabaseLayout() {
         }
 
         throw FactoryException(
-            databasePath_ +
-            " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
-            "DATABASE.LAYOUT.VERSION.MINOR "
-            "metadata. It comes from another PROJ installation.");
+            path + " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
+                   "DATABASE.LAYOUT.VERSION.MINOR "
+                   "metadata. It comes from another PROJ installation.");
     }
-    int nMajor = 0;
-    int nMinor = 0;
+    int major = 0;
+    int minor = 0;
     for (const auto &row : res) {
         if (row[0] == "DATABASE.LAYOUT.VERSION.MAJOR") {
-            nMajor = atoi(row[1].c_str());
+            major = atoi(row[1].c_str());
         } else if (row[0] == "DATABASE.LAYOUT.VERSION.MINOR") {
-            nMinor = atoi(row[1].c_str());
+            minor = atoi(row[1].c_str());
         }
     }
-    if (nMajor != DATABASE_LAYOUT_VERSION_MAJOR) {
+    if (major != DATABASE_LAYOUT_VERSION_MAJOR) {
         throw FactoryException(
-            databasePath_ +
-            " contains DATABASE.LAYOUT.VERSION.MAJOR = " + toString(nMajor) +
+            path +
+            " contains DATABASE.LAYOUT.VERSION.MAJOR = " + toString(major) +
             " whereas " + toString(DATABASE_LAYOUT_VERSION_MAJOR) +
             " is expected. "
             "It comes from another PROJ installation.");
     }
-    if (nMinor < DATABASE_LAYOUT_VERSION_MINOR) {
+    if (minor < DATABASE_LAYOUT_VERSION_MINOR) {
         throw FactoryException(
-            databasePath_ +
-            " contains DATABASE.LAYOUT.VERSION.MINOR = " + toString(nMinor) +
+            path +
+            " contains DATABASE.LAYOUT.VERSION.MINOR = " + toString(minor) +
             " whereas a number >= " + toString(DATABASE_LAYOUT_VERSION_MINOR) +
             " is expected. "
             "It comes from another PROJ installation.");
+    }
+    if (dbNamePrefix.empty()) {
+        nLayoutVersionMajor_ = major;
+        nLayoutVersionMinor_ = minor;
+    } else if (nLayoutVersionMajor_ != major || nLayoutVersionMinor_ != minor) {
+        throw FactoryException(
+            "Auxiliary database " + path +
+            " contains a DATABASE.LAYOUT.VERSION =  " + toString(major) + '.' +
+            toString(minor) +
+            " which is different from the one from the main database " +
+            databasePath_ + " which is " + toString(nLayoutVersionMajor_) +
+            '.' + toString(nLayoutVersionMinor_));
     }
 }
 
@@ -777,16 +803,27 @@ void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
 // ---------------------------------------------------------------------------
 
 std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
-    const char *sqls[] = {
-        "SELECT sql FROM sqlite_master WHERE type = 'table'",
-        "SELECT sql FROM sqlite_master WHERE type = 'view'",
-        "SELECT sql FROM sqlite_master WHERE type = 'trigger'"};
+    const std::string dbNamePrefix(auxiliaryDatabasePaths_.empty() &&
+                                           memoryDbForInsertPath_.empty()
+                                       ? ""
+                                       : "db_0.");
+    const auto sqlBegin("SELECT sql||';' FROM " + dbNamePrefix +
+                        "sqlite_master WHERE type = ");
+    const char *const objectTypes[] = {"'table'", "'view'", "'trigger'"};
     std::vector<std::string> res;
-    for (const auto &sql : sqls) {
-        auto sqlRes = run(sql);
+    for (const auto &objectType : objectTypes) {
+        const auto sqlRes = run(sqlBegin + objectType);
         for (const auto &row : sqlRes) {
             res.emplace_back(row[0]);
         }
+    }
+    if (nLayoutVersionMajor_ > 0) {
+        res.emplace_back(
+            "INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MAJOR'," +
+            toString(nLayoutVersionMajor_) + ");");
+        res.emplace_back(
+            "INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MINOR'," +
+            toString(nLayoutVersionMinor_) + ");");
     }
     return res;
 }
@@ -828,13 +865,16 @@ void DatabaseContext::Private::attachExtraDatabases(
         "' AS db_0");
     detach_ = true;
     int count = 1;
-    for (const auto &otherDb : auxiliaryDatabasePaths) {
+    for (const auto &otherDbPath : auxiliaryDatabasePaths) {
+        const auto attachedDbName("db_" + toString(static_cast<int>(count)));
         std::string sql = "ATTACH DATABASE '";
-        sql += replaceAll(otherDb, "'", "''");
-        sql += "' AS db_";
-        sql += toString(static_cast<int>(count));
+        sql += replaceAll(otherDbPath, "'", "''");
+        sql += "' AS ";
+        sql += attachedDbName;
         count++;
         run(sql);
+
+        checkDatabaseLayout(otherDbPath, attachedDbName + '.');
     }
 
     for (const auto &pair : tableStructure) {
@@ -2452,11 +2492,11 @@ DatabaseContext::create(const std::string &databasePath,
     auto dbCtx = DatabaseContext::nn_make_shared<DatabaseContext>();
     auto dbCtxPrivate = dbCtx->getPrivate();
     dbCtxPrivate->open(databasePath, ctx);
+    dbCtxPrivate->checkDatabaseLayout(databasePath, std::string());
     if (!auxiliaryDatabasePaths.empty()) {
         dbCtxPrivate->attachExtraDatabases(auxiliaryDatabasePaths);
         dbCtxPrivate->auxiliaryDatabasePaths_ = auxiliaryDatabasePaths;
     }
-    dbCtxPrivate->checkDatabaseLayout();
     dbCtxPrivate->self_ = dbCtx.as_nullable();
     return dbCtx;
 }
@@ -2527,6 +2567,9 @@ void DatabaseContext::startInsertStatementsSession() {
             "stopInsertStatementsSession() is.");
     }
 
+    d->memoryDbForInsertPath_.clear();
+    const auto sqlStatements = getDatabaseStructure();
+
     // Create a in-memory temporary sqlite3 database
     std::ostringstream buffer;
     buffer << "file:temp_db_for_insert_statements_";
@@ -2541,7 +2584,6 @@ void DatabaseContext::startInsertStatementsSession() {
     }
 
     // Fill the structure of this database
-    const auto sqlStatements = getDatabaseStructure();
     for (const auto &sql : sqlStatements) {
         if (sqlite3_exec(d->memoryDbHandle_, sql.c_str(), nullptr, nullptr,
                          nullptr) != SQLITE_OK) {

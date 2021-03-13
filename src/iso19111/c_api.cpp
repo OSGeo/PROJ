@@ -105,6 +105,28 @@ static void PROJ_NO_INLINE proj_log_debug(PJ_CONTEXT *ctx, const char *function,
 
 // ---------------------------------------------------------------------------
 
+template <class T> static PROJ_STRING_LIST to_string_list(T &&set) {
+    auto ret = new char *[set.size() + 1];
+    size_t i = 0;
+    for (const auto &str : set) {
+        try {
+            ret[i] = new char[str.size() + 1];
+        } catch (const std::exception &) {
+            while (--i > 0) {
+                delete[] ret[i];
+            }
+            delete[] ret;
+            throw;
+        }
+        std::memcpy(ret[i], str.c_str(), str.size() + 1);
+        i++;
+    }
+    ret[i] = nullptr;
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+
 void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
     delete cppContext;
 }
@@ -390,6 +412,35 @@ const char *proj_context_get_database_metadata(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the database structure
+ *
+ * Return SQL statements to run to initiate a new valid auxiliary empty
+ * database. It contains definitions of tables, views and triggers, as well
+ * as metadata for the version of the layout of the database.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param options null-terminated list of options, or NULL. None currently.
+ * @return list of SQL statements (to be freed with proj_string_list_destroy()),
+ *         or NULL in case of error.
+ * @since 8.1
+ */
+PROJ_STRING_LIST
+proj_context_get_database_structure(PJ_CONTEXT *ctx,
+                                    const char *const *options) {
+    SANITIZE_CTX(ctx);
+    (void)options;
+    try {
+        auto ret = to_string_list(getDBcontext(ctx)->getDatabaseStructure());
+        ctx->safeAutoCloseDbIfNeeded();
+        return ret;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Guess the "dialect" of the WKT string.
  *
  * @param ctx PROJ context, or NULL for default context
@@ -504,28 +555,6 @@ PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
     }
     ctx->safeAutoCloseDbIfNeeded();
     return nullptr;
-}
-
-// ---------------------------------------------------------------------------
-
-template <class T> static PROJ_STRING_LIST to_string_list(T &&set) {
-    auto ret = new char *[set.size() + 1];
-    size_t i = 0;
-    for (const auto &str : set) {
-        try {
-            ret[i] = new char[str.size() + 1];
-        } catch (const std::exception &) {
-            while (--i > 0) {
-                delete[] ret[i];
-            }
-            delete[] ret;
-            throw;
-        }
-        std::memcpy(ret[i], str.c_str(), str.size() + 1);
-        i++;
-    }
-    ret[i] = nullptr;
-    return ret;
 }
 
 // ---------------------------------------------------------------------------

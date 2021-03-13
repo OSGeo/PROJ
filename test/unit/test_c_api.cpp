@@ -1772,29 +1772,58 @@ TEST_F(CApi, proj_context_set_database_path_null) {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_context_set_database_path_main_memory_one_aux) {
+TEST_F(CApi, proj_context_set_database_path_aux) {
 
-    auto c_path = proj_context_get_database_path(m_ctxt);
-    ASSERT_TRUE(c_path != nullptr);
-    std::string path(c_path);
-    const char *aux_db_list[] = {path.c_str(), nullptr};
+    const std::string auxDbName(
+        "file:proj_test_aux.db?mode=memory&cache=shared");
 
-    // This is super exotic and a miracle that it works. :memory: as the
-    // main DB is empty. The real stuff is in the aux_db_list. No view
-    // is created in the ':memory:' internal DB, but as there's only one
-    // aux DB its tables and views can be directly queried...
-    // If that breaks at some point, that wouldn't be a big issue.
-    // Keeping that one as I had a hard time figuring out why it worked !
-    // The real thing is tested by the C++
-    // factory::attachExtraDatabases_auxiliary
-    EXPECT_TRUE(proj_context_set_database_path(m_ctxt, ":memory:", aux_db_list,
-                                               nullptr));
+    sqlite3 *dbAux = nullptr;
+    sqlite3_open_v2(
+        auxDbName.c_str(), &dbAux,
+        SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI, nullptr);
+    ASSERT_TRUE(dbAux != nullptr);
+    ASSERT_TRUE(sqlite3_exec(dbAux, "BEGIN", nullptr, nullptr, nullptr) ==
+                SQLITE_OK);
+    {
+        auto ctxt = DatabaseContext::create();
+        const auto dbStructure = ctxt->getDatabaseStructure();
+        for (const auto &sql : dbStructure) {
+            ASSERT_TRUE(sqlite3_exec(dbAux, sql.c_str(), nullptr, nullptr,
+                                     nullptr) == SQLITE_OK);
+        }
+    }
 
-    auto source_crs = proj_create_from_database(m_ctxt, "EPSG", "4326",
-                                                PJ_CATEGORY_CRS, false,
-                                                nullptr); // WGS84
-    ASSERT_NE(source_crs, nullptr);
-    ObjectKeeper keeper_source_crs(source_crs);
+    ASSERT_TRUE(sqlite3_exec(
+                    dbAux,
+                    "INSERT INTO geodetic_crs VALUES('OTHER','OTHER_4326','WGS "
+                    "84',NULL,'geographic 2D','EPSG','6422','EPSG','6326',"
+                    "NULL,0);",
+                    nullptr, nullptr, nullptr) == SQLITE_OK);
+    ASSERT_TRUE(sqlite3_exec(dbAux, "COMMIT", nullptr, nullptr, nullptr) ==
+                SQLITE_OK);
+
+    const char *const aux_db_list[] = {auxDbName.c_str(), nullptr};
+
+    EXPECT_TRUE(
+        proj_context_set_database_path(m_ctxt, nullptr, aux_db_list, nullptr));
+
+    sqlite3_close(dbAux);
+
+    {
+        auto crs = proj_create_from_database(m_ctxt, "EPSG", "4326",
+                                             PJ_CATEGORY_CRS, false,
+                                             nullptr); // WGS84
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper_source_crs(crs);
+    }
+
+    {
+        auto crs = proj_create_from_database(m_ctxt, "OTHER", "OTHER_4326",
+                                             PJ_CATEGORY_CRS, false,
+                                             nullptr); // WGS84
+        ASSERT_NE(crs, nullptr);
+        ObjectKeeper keeper_source_crs(crs);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2720,6 +2749,15 @@ TEST_F(CApi, proj_context_get_database_metadata) {
                 nullptr);
 
     EXPECT_TRUE(proj_context_get_database_metadata(m_ctxt, "FOO") == nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_context_get_database_structure) {
+    auto list = proj_context_get_database_structure(m_ctxt, nullptr);
+    ASSERT_NE(list, nullptr);
+    ASSERT_NE(list[0], nullptr);
+    proj_string_list_destroy(list);
 }
 
 // ---------------------------------------------------------------------------

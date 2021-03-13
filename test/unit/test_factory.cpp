@@ -2828,10 +2828,12 @@ TEST(factory, attachExtraDatabases_auxiliary) {
     ASSERT_TRUE(dbAux != nullptr);
     ASSERT_TRUE(sqlite3_exec(dbAux, "BEGIN", nullptr, nullptr, nullptr) ==
                 SQLITE_OK);
+
+    std::vector<std::string> tableStructureBefore;
     {
         auto ctxt = DatabaseContext::create();
-        const auto dbStructure = ctxt->getDatabaseStructure();
-        for (const auto &sql : dbStructure) {
+        tableStructureBefore = ctxt->getDatabaseStructure();
+        for (const auto &sql : tableStructureBefore) {
             if (sql.find("CREATE TRIGGER") == std::string::npos) {
                 ASSERT_TRUE(sqlite3_exec(dbAux, sql.c_str(), nullptr, nullptr,
                                          nullptr) == SQLITE_OK);
@@ -2864,6 +2866,9 @@ TEST(factory, attachExtraDatabases_auxiliary) {
             auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(crs);
             EXPECT_TRUE(gcrs != nullptr);
         }
+
+        const auto dbStructure = ctxt->getDatabaseStructure();
+        EXPECT_EQ(dbStructure, tableStructureBefore);
     }
 
     {
