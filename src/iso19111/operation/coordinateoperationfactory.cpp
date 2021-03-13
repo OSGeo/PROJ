@@ -439,7 +439,7 @@ CoordinateOperationContext::getIntermediateCRS() const {
  * If authorityFactory->getAuthority() is set to "any", then coordinate
  * operations from any authority will be searched
  * If authorityFactory->getAuthority() is a non-empty string different of "any",
- * then coordinate operatiosn will be searched only in that authority namespace.
+ * then coordinate operations will be searched only in that authority namespace.
  *
  * @param authorityFactory Authority factory, or null if no database lookup
  * is allowed.
