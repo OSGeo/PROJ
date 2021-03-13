@@ -4,7 +4,7 @@
  *
  * Run these tests by configuring with cmake and running "make test".
  *
- * Copyright (c) Charles Karney (2015-2019) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2015-2021) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
  **********************************************************************/
@@ -737,6 +737,9 @@ static int GeodSolve80() {
   result += checkEquals(M12, 1, 1e-15);
   result += checkEquals(M21, 1, 1e-15);
   result += checkEquals(S12, 0, 1e-10);
+  result += 1/a12 > 0 ? 0 : 1;
+  result += 1/s12 > 0 ? 0 : 1;
+  result += 1/m12 > 0 ? 0 : 1;
 
   a12 = geod_geninverse(&g, 90, 0, 90, 180,
                         &s12, &azi1, &azi2, &m12, &M12, &M21, &S12);
@@ -803,6 +806,24 @@ static int GeodSolve84() {
   result += checkNaN(lat2);
   result += checkNaN(lon2);
   result += checkNaN(azi2);
+  return result;
+}
+
+static int GeodSolve92() {
+  /* Check fix for inaccurate hypot with python 3.[89].  Problem reported
+   * by agdhruv https://github.com/geopy/geopy/issues/466 ; see
+   * https://bugs.python.org/issue43088 */
+  double azi1, azi2, s12;
+  struct geod_geodesic g;
+  int result = 0;
+  geod_init(&g, wgs84_a, wgs84_f);
+  geod_inverse(&g,
+               37.757540000000006, -122.47018,
+               37.75754,           -122.470177,
+               &s12, &azi1, &azi2);
+  result += checkEquals(azi1, 89.99999923, 1e-7  );
+  result += checkEquals(azi2, 90.00000106, 1e-7  );
+  result += checkEquals(s12,   0.264,      0.5e-3);
   return result;
 }
 
@@ -1092,6 +1113,7 @@ int main() {
   if ((i = GeodSolve78())) {++n; printf("GeodSolve78 fail: %d\n", i);}
   if ((i = GeodSolve80())) {++n; printf("GeodSolve80 fail: %d\n", i);}
   if ((i = GeodSolve84())) {++n; printf("GeodSolve84 fail: %d\n", i);}
+  if ((i = GeodSolve92())) {++n; printf("GeodSolve92 fail: %d\n", i);}
   if ((i = Planimeter0())) {++n; printf("Planimeter0 fail: %d\n", i);}
   if ((i = Planimeter5())) {++n; printf("Planimeter5 fail: %d\n", i);}
   if ((i = Planimeter6())) {++n; printf("Planimeter6 fail: %d\n", i);}
