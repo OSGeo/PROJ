@@ -127,7 +127,13 @@ static void swapx(real* x, real* y)
 { real t = *x; *x = *y; *y = t; }
 
 static void norm2(real* sinx, real* cosx) {
+#if defined(_MSC_VER) && _MSC_VER <= 1900
+  /* Visual Studio 2015 (32-bit) has inaccurate hypot, the same as in some
+   * versions of python https://bugs.python.org/issue43088 */
+  real r = sqrt(*sinx * *sinx + *cosx * *cosx);
+#else
   real r = hypot(*sinx, *cosx);
+#endif
   *sinx /= r;
   *cosx /= r;
 }
@@ -170,17 +176,6 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   r *= degree;
   /* Possibly could call the gnu extension sincos */
   s = sin(r); c = cos(r);
-#if defined(_MSC_VER) && _MSC_VER < 1900
-  /*
-   * Before version 14 (2015), Visual Studio had problems dealing
-   * with -0.0.  Specifically
-   *   VC 10,11,12 and 32-bit compile: fmod(-0.0, 360.0) -> +0.0
-   *   VC 12       and 64-bit compile:  sin(-0.0)        -> +0.0
-   * AngNormalize has a similar fix.
-   * python 2.7 on Windows 32-bit machines has the same problem.
-   */
-  if (x == 0) s = x;
-#endif
   switch ((unsigned)q & 3U) {
   case 0U: *sinx =  s; *cosx =  c; break;
   case 1U: *sinx =  c; *cosx = -s; break;
