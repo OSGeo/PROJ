@@ -127,9 +127,15 @@ static void swapx(real* x, real* y)
 { real t = *x; *x = *y; *y = t; }
 
 static void norm2(real* sinx, real* cosx) {
-#if defined(_MSC_VER) && _MSC_VER <= 1900
-  /* Visual Studio 2015 (32-bit) has inaccurate hypot, the same as in some
-   * versions of python https://bugs.python.org/issue43088 */
+#if defined(_MSC_VER) && defined(_M_IX86)
+  /* hypot for Visual Studio (A=win32) fails monotonicity, e.g., with
+   *   x  = 0.6102683302836215
+   *   y1 = 0.7906090004346522
+   *   y2 = y1 + 1e-16
+   * the test
+   *   hypot(x, y2) >= hypot(x, y1)
+   * fails.  See also
+   *   https://bugs.python.org/issue43088 */
   real r = sqrt(*sinx * *sinx + *cosx * *cosx);
 #else
   real r = hypot(*sinx, *cosx);
