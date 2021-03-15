@@ -82,7 +82,7 @@ sudo cp /usr/$MINGW_ARCH/libz.* /usr/$MINGW_ARCH/lib
 ln -s /usr/$MINGW_ARCH/zlib1.dll $WINE_SYSDIR
 
 # build libtiff
-wget https://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz
+wget http://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz
 tar xzf tiff-4.1.0.tar.gz
 (cd tiff-4.1.0 && ./configure --host=$MINGW_ARCH --prefix=/usr/$MINGW_ARCH && make && sudo make install)
 ln -s /usr/$MINGW_ARCH/bin/libtiff-5.dll $WINE_SYSDIR
