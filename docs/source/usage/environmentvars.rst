@@ -51,6 +51,18 @@ done by setting the variable with no content::
     :envvar:`PROJ_LIB` to allow for multiple versions of PROJ
     resource files on your system without conflicting.
 
+
+.. envvar:: PROJ_AUX_DB
+
+    .. versionadded:: 8.1.0
+
+    To set the path to one or several auxiliary SQLite3 databases of structure
+    identical to the main ``proj.db`` database and that can contain additional
+    object (CRS, transformation, ...) definitions. If several paths are
+    provided, they must be separated by the colon (:) character on Unix, and
+    on Windows, by the semi-colon (;) character.
+
+
 .. envvar:: PROJ_DEBUG
 
     Set the debug level of PROJ. The default debug level is zero, which results

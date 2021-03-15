@@ -296,6 +296,15 @@ echo "Testing projinfo --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tai
 $EXE --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tail -n 4 >>${OUT}
 echo "" >>${OUT}
 
+echo "Testing PROJ_AUX_DB environment variable" >> ${OUT}
+rm -f tmp_projinfo_aux.db
+$EXE --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | sqlite3 tmp_projinfo_aux.db
+export PROJ_AUX_DB=tmp_projinfo_aux.db
+$EXE HOBU:XXXX >>${OUT}
+unset PROJ_AUX_DB
+rm -f tmp_projinfo_aux.db
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist

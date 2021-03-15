@@ -2482,6 +2482,11 @@ DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
  * string for the default rules to locate the default proj.db
  * @param auxiliaryDatabasePaths Path and filename of auxiliary databases.
  * Might be empty.
+ * Starting with PROJ 8.1, if this parameter is an empty array,
+ * the PROJ_AUX_DB environment variable will be used, if set.
+ * It must contain one or several paths. If several paths are
+ * provided, they must be separated by the colon (:) character on Unix, and
+ * on Windows, by the semi-colon (;) character.
  * @param ctx Context used for file search.
  * @throw FactoryException
  */
@@ -2493,9 +2498,21 @@ DatabaseContext::create(const std::string &databasePath,
     auto dbCtxPrivate = dbCtx->getPrivate();
     dbCtxPrivate->open(databasePath, ctx);
     dbCtxPrivate->checkDatabaseLayout(databasePath, std::string());
-    if (!auxiliaryDatabasePaths.empty()) {
-        dbCtxPrivate->attachExtraDatabases(auxiliaryDatabasePaths);
-        dbCtxPrivate->auxiliaryDatabasePaths_ = auxiliaryDatabasePaths;
+    auto auxDbs(auxiliaryDatabasePaths);
+    if (auxDbs.empty()) {
+        const char *auxDbStr = getenv("PROJ_AUX_DB");
+        if (auxDbStr) {
+#ifdef _WIN32
+            const char *delim = ";";
+#else
+            const char *delim = ":";
+#endif
+            auxDbs = split(auxDbStr, delim);
+        }
+    }
+    if (!auxDbs.empty()) {
+        dbCtxPrivate->attachExtraDatabases(auxDbs);
+        dbCtxPrivate->auxiliaryDatabasePaths_ = auxDbs;
     }
     dbCtxPrivate->self_ = dbCtx.as_nullable();
     return dbCtx;
