@@ -302,6 +302,20 @@ The following control parameters can appear in any order:
 
     Identifier to assign to the object (for SQL output).
 
+    It is strongly recommended that new objects should not be added in common
+    registries, such as ``EPSG``, ``ESRI``, ``IAU``, etc.
+    Users should use a custom authority name instead. If a new object should be
+    added to the official EPSG registry, users are invited to follow the
+    procedure explained at https://epsg.org/dataset-change-requests.html.
+
+    Combined with :option:`--dump-db-structure`, users can create
+    auxiliary databases, instead of directly modifying the main proj.db database.
+    See the :ref:`example how to export to an auxiliary database <projinfo_aux_db_example>`.
+
+    Those auxiliary databases can be specified through
+    :cpp:func:`proj_context_set_database_path` or the :envvar:`PROJ_AUX_DB`
+    environment variable.
+
 .. option:: --c-ify
 
     For developers only. Modify the string output of the utility so that it
@@ -472,6 +486,8 @@ Output:
             "code": 4283
         }
     }
+
+.. _projinfo_aux_db_example:
 
 4. Exporting the SQL statements to insert a new CRS in an auxiliary database.
 

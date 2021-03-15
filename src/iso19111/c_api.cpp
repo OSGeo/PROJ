@@ -310,6 +310,12 @@ void proj_context_set_autoclose_database(PJ_CONTEXT *ctx, int autoclose) {
  * definition database ("proj.db"), and potentially auxiliary databases with
  * same structure.
  *
+ * Starting with PROJ 8.1, if the auxDbPaths parameter is an empty array,
+ * the PROJ_AUX_DB environment variable will be used, if set.
+ * It must contain one or several paths. If several paths are
+ * provided, they must be separated by the colon (:) character on Unix, and
+ * on Windows, by the semi-colon (;) character.
+ *
  * @param ctx PROJ context, or NULL for default context
  * @param dbPath Path to main database, or NULL for default.
  * @param auxDbPaths NULL-terminated list of auxiliary database filenames, or
@@ -8898,6 +8904,17 @@ void proj_string_destroy(char *str) { free(str); }
  * database.
  *
  * proj_insert_object_session_create() may have been called previously.
+ *
+ * It is strongly recommended that new objects should not be added in common
+ * registries, such as "EPSG", "ESRI", "IAU", etc. Users should use a custom
+ * authority name instead. If a new object should be
+ * added to the official EPSG registry, users are invited to follow the
+ * procedure explainted at https://epsg.org/dataset-change-requests.html.
+ *
+ * Combined with proj_context_get_database_structure(), users can create
+ * auxiliary databases, instead of directly modifying the main proj.db database.
+ * Those auxiliary databases can be specified through proj_context_set_database_path()
+ * or the PROJ_AUX_DB environment variable.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param session The insertion session. May be NULL if a single object must be
