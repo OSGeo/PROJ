@@ -174,6 +174,18 @@ extern "C" {
 #define PROJ_VERSION_MINOR 1
 #define PROJ_VERSION_PATCH 0
 
+/* Note: the following 3 defines have been introduced in PROJ 8.0.1 */
+/* Macro to compute a PROJ version number from its components */
+#define PROJ_COMPUTE_VERSION(maj,min,patch) ((maj)*10000+(min)*100+(patch))
+
+/* Current PROJ version from the above version numbers */
+#define PROJ_VERSION_NUMBER                 \
+    PROJ_COMPUTE_VERSION(PROJ_VERSION_MAJOR, PROJ_VERSION_MINOR, PROJ_VERSION_PATCH)
+
+/* Macro that returns true if the current PROJ version is at least the version specified by (maj,min,patch) */
+#define PROJ_AT_LEAST_VERSION(maj,min,patch) \
+    (PROJ_VERSION_NUMBER >= PROJ_COMPUTE_VERSION(maj,min,patch))
+
 extern char const PROJ_DLL pj_release[]; /* global release id string */
 
 /* first forward declare everything needed */
