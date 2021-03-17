@@ -434,8 +434,11 @@ static const char *getOptionValue(const char *option,
 
 /** \brief "Clone" an object.
  *
- * Technically this just increases the reference counter on the object, since
- * PJ objects are immutable.
+ * The object might be used independently of the original object, provided that
+ * the use of context is compatible. In particular if you intend to use a
+ * clone in a different thread than the original object, you should pass a
+ * context that is different from the one of the original object (or later
+ * assing a different context with proj_assign_context()).
  *
  * The returned object must be unreferenced with proj_destroy() after use.
  * It should be used by at most one thread at a time.
@@ -453,6 +456,18 @@ PJ *proj_clone(PJ_CONTEXT *ctx, const PJ *obj) {
         return nullptr;
     }
     if (!obj->iso_obj) {
+        if (!obj->alternativeCoordinateOperations.empty()) {
+            auto newPj = pj_new();
+            if (newPj) {
+                newPj->descr = "Set of coordinate operations";
+                newPj->ctx = ctx;
+                for (const auto &altOp : obj->alternativeCoordinateOperations) {
+                    newPj->alternativeCoordinateOperations.emplace_back(
+                        PJCoordOperation(ctx, altOp));
+                }
+            }
+            return newPj;
+        }
         return nullptr;
     }
     try {
@@ -1268,6 +1283,21 @@ static int proj_is_equivalent_to_internal(PJ_CONTEXT *ctx, const PJ *obj,
         }
         return false;
     }
+
+    if (obj->iso_obj == nullptr && other->iso_obj == nullptr &&
+        !obj->alternativeCoordinateOperations.empty() &&
+        obj->alternativeCoordinateOperations.size() ==
+            other->alternativeCoordinateOperations.size()) {
+        for (size_t i = 0; i < obj->alternativeCoordinateOperations.size();
+             ++i) {
+            if (obj->alternativeCoordinateOperations[i] !=
+                other->alternativeCoordinateOperations[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     if (!obj->iso_obj || !other->iso_obj) {
         return false;
     }
@@ -7864,7 +7894,7 @@ struct PJ_OPERATION_LIST : PJ_OBJ_LIST {
     PJ *source_crs;
     PJ *target_crs;
     bool hasPreparedOperation = false;
-    std::vector<CoordOperation> preparedOperations{};
+    std::vector<PJCoordOperation> preparedOperations{};
 
     explicit PJ_OPERATION_LIST(PJ_CONTEXT *ctx, const PJ *source_crsIn,
                                const PJ *target_crsIn,
@@ -7874,7 +7904,7 @@ struct PJ_OPERATION_LIST : PJ_OBJ_LIST {
     PJ_OPERATION_LIST(const PJ_OPERATION_LIST &) = delete;
     PJ_OPERATION_LIST &operator=(const PJ_OPERATION_LIST &) = delete;
 
-    const std::vector<CoordOperation> &getPreparedOperations(PJ_CONTEXT *ctx);
+    const std::vector<PJCoordOperation> &getPreparedOperations(PJ_CONTEXT *ctx);
 };
 
 // ---------------------------------------------------------------------------
@@ -7899,7 +7929,7 @@ PJ_OPERATION_LIST::~PJ_OPERATION_LIST() {
 
 // ---------------------------------------------------------------------------
 
-const std::vector<CoordOperation> &
+const std::vector<PJCoordOperation> &
 PJ_OPERATION_LIST::getPreparedOperations(PJ_CONTEXT *ctx) {
     if (!hasPreparedOperation) {
         hasPreparedOperation = true;

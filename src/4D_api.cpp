@@ -203,7 +203,7 @@ double proj_roundtrip (PJ *P, PJ_DIRECTION direction, int n, PJ_COORD *coord) {
 
 /**************************************************************************************/
 int pj_get_suggested_operation(PJ_CONTEXT*,
-                               const std::vector<CoordOperation>& opList,
+                               const std::vector<PJCoordOperation>& opList,
                                const int iExcluded[2],
                                PJ_DIRECTION direction,
                                PJ_COORD coord)
@@ -1034,7 +1034,7 @@ static PJ* add_coord_op_to_list(
                             PJ* pjGeogToSrc,
                             PJ* pjGeogToDst,
                             bool isOffshore,
-                            std::vector<CoordOperation>& altCoordOps) {
+                            std::vector<PJCoordOperation>& altCoordOps) {
 /*****************************************************************************/
 
     double minxSrc;
@@ -1193,7 +1193,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 
 
 /*****************************************************************************/
-std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
+std::vector<PJCoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
                                                      const PJ *source_crs,
                                                      const PJ *target_crs,
                                                      PJ_OBJ_LIST* op_list)
@@ -1218,7 +1218,7 @@ std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
 
     try
     {
-        std::vector<CoordOperation> preparedOpList;
+        std::vector<PJCoordOperation> preparedOpList;
 
         // Iterate over source->target candidate transformations and reproject
         // their long-lat bounding box into the source CRS.
@@ -1407,6 +1407,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
 
     P->alternativeCoordinateOperations = std::move(preparedOpList);
     // The returned P is rather dummy
+    P->descr = "Set of coordinate operations";
     P->iso_obj = nullptr;
     P->fwd = nullptr;
     P->inv = nullptr;

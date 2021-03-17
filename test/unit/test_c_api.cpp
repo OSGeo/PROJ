@@ -127,6 +127,10 @@ class CApi : public ::testing::Test {
         PJ *m_obj = nullptr;
         explicit ObjectKeeper(PJ *obj) : m_obj(obj) {}
         ~ObjectKeeper() { proj_destroy(m_obj); }
+        void clear() {
+            proj_destroy(m_obj);
+            m_obj = nullptr;
+        }
 
         ObjectKeeper(const ObjectKeeper &) = delete;
         ObjectKeeper &operator=(const ObjectKeeper &) = delete;
@@ -2734,6 +2738,40 @@ TEST_F(CApi, proj_clone) {
     ASSERT_NE(clone, nullptr);
 
     EXPECT_TRUE(proj_is_equivalent_to(obj, clone, PJ_COMP_STRICT));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_clone_of_obj_with_alternative_operations) {
+    // NAD27 to NAD83
+    auto obj =
+        proj_create_crs_to_crs(m_ctxt, "EPSG:4267", "EPSG:4269", nullptr);
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+
+    PJ_COORD c;
+    c.xyzt.x = 40.5;
+    c.xyzt.y = -60;
+    c.xyzt.z = 0;
+    c.xyzt.t = 2021;
+    PJ_COORD c_trans_ref = proj_trans(obj, PJ_FWD, c);
+    EXPECT_NE(c_trans_ref.xyzt.x, c.xyzt.x);
+    EXPECT_NEAR(c_trans_ref.xyzt.x, c.xyzt.x, 1e-3);
+    EXPECT_NEAR(c_trans_ref.xyzt.y, c.xyzt.y, 1e-3);
+
+    auto clone = proj_clone(m_ctxt, obj);
+    ObjectKeeper keeperClone(clone);
+    ASSERT_NE(clone, nullptr);
+
+    EXPECT_TRUE(proj_is_equivalent_to(obj, clone, PJ_COMP_STRICT));
+
+    keeper.clear();
+    obj = nullptr;
+    (void)obj;
+
+    PJ_COORD c_trans = proj_trans(clone, PJ_FWD, c);
+    EXPECT_EQ(c_trans.xyzt.x, c_trans_ref.xyzt.x);
+    EXPECT_EQ(c_trans.xyzt.y, c_trans_ref.xyzt.y);
 }
 
 // ---------------------------------------------------------------------------
