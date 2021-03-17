@@ -7,6 +7,7 @@ Reference
 .. toctree::
    :maxdepth: 1
 
+   macros
    datatypes
    functions
    cpp/index.rst
