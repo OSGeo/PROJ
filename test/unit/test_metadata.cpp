@@ -391,4 +391,8 @@ TEST(metadata, Identifier_isEquivalentName) {
     EXPECT_TRUE(Identifier::isEquivalentName("a", "\xc3\xa1"));
 
     EXPECT_TRUE(Identifier::isEquivalentName("\xc3\xa4", "\xc3\xa1"));
+
+    EXPECT_TRUE(Identifier::isEquivalentName(
+        "Unknown based on International 1924 (Hayford 1909, 1910) ellipsoid",
+        "Unknown_based_on_International_1924_Hayford_1909_1910_ellipsoid"));
 }
