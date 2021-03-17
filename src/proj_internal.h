@@ -282,7 +282,7 @@ typedef    PJ_COORD  (* PJ_OPERATOR)    (PJ_COORD, PJ *);
 #define PJD_GRIDSHIFT 3
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivalent) */
 
-struct CoordOperation
+struct PJCoordOperation
 {
     int idxInOriginalList;
     double minxSrc = 0.0;
@@ -298,7 +298,7 @@ struct CoordOperation
     double accuracy = -1.0;
     bool isOffshore = false;
 
-    CoordOperation(int idxInOriginalListIn,
+    PJCoordOperation(int idxInOriginalListIn,
                    double minxSrcIn, double minySrcIn, double maxxSrcIn, double maxySrcIn,
                    double minxDstIn, double minyDstIn, double maxxDstIn, double maxyDstIn,
                    PJ* pjIn, const std::string& nameIn, double accuracyIn, bool isOffshoreIn):
@@ -311,9 +311,20 @@ struct CoordOperation
     {
     }
 
-    CoordOperation(const CoordOperation&) = delete;
+    PJCoordOperation(const PJCoordOperation&) = delete;
 
-    CoordOperation(CoordOperation&& other):
+    PJCoordOperation(PJ_CONTEXT* ctx, const PJCoordOperation& other):
+        idxInOriginalList(other.idxInOriginalList),
+        minxSrc(other.minxSrc), minySrc(other.minySrc), maxxSrc(other.maxxSrc), maxySrc(other.maxySrc),
+        minxDst(other.minxDst), minyDst(other.minyDst), maxxDst(other.maxxDst), maxyDst(other.maxyDst),
+        pj(proj_clone(ctx, other.pj)),
+        name(std::move(other.name)),
+        accuracy(other.accuracy),
+        isOffshore(other.isOffshore)
+    {
+    }
+
+    PJCoordOperation(PJCoordOperation&& other):
         idxInOriginalList(other.idxInOriginalList),
         minxSrc(other.minxSrc), minySrc(other.minySrc), maxxSrc(other.maxxSrc), maxySrc(other.maxySrc),
         minxDst(other.minxDst), minyDst(other.minyDst), maxxDst(other.maxxDst), maxyDst(other.maxyDst),
@@ -324,9 +335,29 @@ struct CoordOperation
         other.pj = nullptr;
     }
 
-    CoordOperation& operator=(const CoordOperation&) = delete;
+    PJCoordOperation& operator=(const PJCoordOperation&) = delete;
 
-    ~CoordOperation()
+    bool operator == (const PJCoordOperation& other) const {
+        return idxInOriginalList == other.idxInOriginalList &&
+               minxSrc == other.minxSrc &&
+               minySrc == other.minySrc &&
+               maxxSrc == other.maxxSrc &&
+               maxySrc == other.maxySrc &&
+               minxDst == other.minxDst &&
+               minyDst == other.minyDst &&
+               maxxDst == other.maxxDst &&
+               maxyDst == other.maxyDst &&
+               name == other.name &&
+               proj_is_equivalent_to(pj, other.pj, PJ_COMP_STRICT) &&
+               accuracy == other.accuracy &&
+               isOffshore == other.isOffshore;
+    }
+
+    bool operator != (const PJCoordOperation& other) const {
+        return !(operator==(other));
+    }
+
+    ~PJCoordOperation()
     {
         proj_destroy(pj);
     }
@@ -545,7 +576,7 @@ struct PJconsts {
     /*************************************************************************************
      proj_create_crs_to_crs() alternative coordinate operations
     **************************************************************************************/
-    std::vector<CoordOperation> alternativeCoordinateOperations{};
+    std::vector<PJCoordOperation> alternativeCoordinateOperations{};
     int iCurCoordOp = -1;
 
     /*************************************************************************************
@@ -820,13 +851,13 @@ std::string PROJ_DLL pj_context_get_grid_cache_filename(PJ_CONTEXT *ctx);
 void PROJ_DLL pj_context_set_user_writable_directory(PJ_CONTEXT* ctx, const std::string& path);
 std::string PROJ_DLL pj_get_relative_share_proj(PJ_CONTEXT *ctx);
 
-std::vector<CoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
+std::vector<PJCoordOperation> pj_create_prepared_operations(PJ_CONTEXT *ctx,
                                                      const PJ *source_crs,
                                                      const PJ *target_crs,
                                                      PJ_OBJ_LIST* op_list);
 
 int pj_get_suggested_operation(PJ_CONTEXT *ctx,
-                               const std::vector<CoordOperation>& opList,
+                               const std::vector<PJCoordOperation>& opList,
                                const int iExcluded[2],
                                PJ_DIRECTION direction,
                                PJ_COORD coord);
