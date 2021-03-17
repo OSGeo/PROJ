@@ -19,7 +19,7 @@ noinst_PROGRAMS += include_proj_h_from_c
 noinst_PROGRAMS += test_network
 noinst_PROGRAMS += test_defmodel
 noinst_PROGRAMS += test_tinshift
-
+noinst_PROGRAMS += test_misc
 
 pj_phi2_test_SOURCES = pj_phi2_test.cpp main.cpp
 pj_phi2_test_LDADD = ../../src/libproj.la @GTEST_LIBS@
@@ -89,6 +89,13 @@ test_tinshift_LDADD = ../../src/libproj.la @GTEST_LIBS@
 test_tinshift-check: test_tinshift
 	PROJ_LIB=$(PROJ_LIB) ./test_tinshift
 
+test_misc_SOURCES = test_misc.cpp main.cpp
+test_misc_LDADD = ../../src/libproj.la @GTEST_LIBS@
+
+test_misc-check: test_misc
+	PROJ_LIB=$(PROJ_LIB) ./test_misc
+
 check-local: pj_phi2_test-check proj_errno_string_test-check \
 		proj_angular_io_test-check proj_context_test-check test_cpp_api-check \
-		gie_self_tests-check test_network-check test_defmodel-check test_tinshift-check
+		gie_self_tests-check test_network-check test_defmodel-check test_tinshift-check \
+		test_misc-check

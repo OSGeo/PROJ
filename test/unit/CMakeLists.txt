@@ -179,3 +179,13 @@ target_link_libraries(test_tinshift
 add_test(NAME test_tinshift COMMAND test_tinshift)
 set_property(TEST test_tinshift
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+
+add_executable(test_misc
+  main.cpp
+  test_misc.cpp)
+target_link_libraries(test_misc
+  PRIVATE GTest::gtest
+  PRIVATE ${PROJ_LIBRARIES})
+add_test(NAME test_misc COMMAND test_misc)
+set_property(TEST test_misc
+  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
