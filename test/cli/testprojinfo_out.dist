@@ -251,6 +251,26 @@ PROJJSON:
   }
 }
 
+Testing projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs" --output-id HOBU:MY_CRS -o SQL -q
+INSERT INTO geodetic_crs VALUES('HOBU','GEODETIC_CRS_MY_CRS','unknown','','geographic 2D','EPSG','6424','EPSG','6326',NULL,0);
+INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_MY_CRS','geodetic_crs','HOBU','GEODETIC_CRS_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+INSERT INTO conversion VALUES('HOBU','CONVERSION_MY_CRS','unknown','','EPSG','9805','Mercator (variant B)','EPSG','8823','Latitude of 1st standard parallel',5,'EPSG','9122','EPSG','8802','Longitude of natural origin',0,'EPSG','9122','EPSG','8806','False easting',0,'EPSG','9001','EPSG','8807','False northing',0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO usage VALUES('HOBU','USAGE_CONVERSION_MY_CRS','conversion','HOBU','CONVERSION_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+INSERT INTO projected_crs VALUES('HOBU','MY_CRS','unknown','','EPSG','4400','HOBU','GEODETIC_CRS_MY_CRS','HOBU','CONVERSION_MY_CRS',NULL,0);
+INSERT INTO usage VALUES('HOBU','USAGE_PROJECTED_CRS_MY_CRS','projected_crs','HOBU','MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+
+Testing projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs" --output-id HOBU:MY_CRS --authority HOBU -o SQL -q
+INSERT INTO ellipsoid VALUES('HOBU','ELLPS_GEODETIC_DATUM_GEODETIC_CRS_MY_CRS','WGS 84','','PROJ','EARTH',6378137,'EPSG','9001',298.257223563,NULL,0);
+INSERT INTO prime_meridian VALUES('HOBU','PM_GEODETIC_DATUM_GEODETIC_CRS_MY_CRS','Greenwich',0,'EPSG','9122',0);
+INSERT INTO geodetic_datum VALUES('HOBU','GEODETIC_DATUM_GEODETIC_CRS_MY_CRS','World Geodetic System 1984','','HOBU','ELLPS_GEODETIC_DATUM_GEODETIC_CRS_MY_CRS','HOBU','PM_GEODETIC_DATUM_GEODETIC_CRS_MY_CRS',NULL,NULL,NULL,0);
+INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_DATUM_GEODETIC_CRS_MY_CRS','geodetic_datum','HOBU','GEODETIC_DATUM_GEODETIC_CRS_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+INSERT INTO geodetic_crs VALUES('HOBU','GEODETIC_CRS_MY_CRS','unknown','','geographic 2D','EPSG','6424','HOBU','GEODETIC_DATUM_GEODETIC_CRS_MY_CRS',NULL,0);
+INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_MY_CRS','geodetic_crs','HOBU','GEODETIC_CRS_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+INSERT INTO conversion VALUES('HOBU','CONVERSION_MY_CRS','unknown','','EPSG','9805','Mercator (variant B)','EPSG','8823','Latitude of 1st standard parallel',5,'EPSG','9122','EPSG','8802','Longitude of natural origin',0,'EPSG','9122','EPSG','8806','False easting',0,'EPSG','9001','EPSG','8807','False northing',0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+INSERT INTO usage VALUES('HOBU','USAGE_CONVERSION_MY_CRS','conversion','HOBU','CONVERSION_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+INSERT INTO projected_crs VALUES('HOBU','MY_CRS','unknown','','EPSG','4400','HOBU','GEODETIC_CRS_MY_CRS','HOBU','CONVERSION_MY_CRS',NULL,0);
+INSERT INTO usage VALUES('HOBU','USAGE_PROJECTED_CRS_MY_CRS','projected_crs','HOBU','MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+
 Testing projinfo -s EPSG:4326 -t EPSG:32631 --single-line
 Candidate operations found: 1
 -------------------------------------
@@ -1525,4 +1545,48 @@ Testing NKG: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpa
 Candidate operations found: 1
 Note: using '--spatial-test intersects' would bring more results (2)
 NKG:ITRF2014_TO_DK, ITRF2014 to ETRS89(DK), 0.01 m, Denmark - onshore and offshore.
+
+Testing projinfo --dump-db-structure | head -n 5
+CREATE TABLE metadata(
+    key TEXT NOT NULL PRIMARY KEY CHECK (length(key) >= 1),
+    value TEXT NOT NULL
+);
+CREATE TABLE unit_of_measure(
+
+Testing projinfo --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tail -n 4
+INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MAJOR',1);
+INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MINOR',0);
+INSERT INTO geodetic_crs VALUES('HOBU','XXXX','WGS 84','','geographic 2D','EPSG','6422','EPSG','6326',NULL,0);
+INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_XXXX','geodetic_crs','HOBU','XXXX','EPSG','1262','EPSG','1183');
+
+Testing PROJ_AUX_DB environment variable
+PROJ.4 string:
++proj=longlat +datum=WGS84 +no_defs +type=crs
+
+WKT2:2019 string:
+GEOGCRS["WGS 84",
+    ENSEMBLE["World Geodetic System 1984 ensemble",
+        MEMBER["World Geodetic System 1984 (Transit)"],
+        MEMBER["World Geodetic System 1984 (G730)"],
+        MEMBER["World Geodetic System 1984 (G873)"],
+        MEMBER["World Geodetic System 1984 (G1150)"],
+        MEMBER["World Geodetic System 1984 (G1674)"],
+        MEMBER["World Geodetic System 1984 (G1762)"],
+        ELLIPSOID["WGS 84",6378137,298.257223563,
+            LENGTHUNIT["metre",1]],
+        ENSEMBLEACCURACY[2.0]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433]],
+    CS[ellipsoidal,2],
+        AXIS["geodetic latitude (Lat)",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["geodetic longitude (Lon)",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]],
+    USAGE[
+        SCOPE["Horizontal component of 3D system."],
+        AREA["World."],
+        BBOX[-90,-180,90,180]],
+    ID["HOBU","XXXX"]]
 

@@ -105,6 +105,28 @@ static void PROJ_NO_INLINE proj_log_debug(PJ_CONTEXT *ctx, const char *function,
 
 // ---------------------------------------------------------------------------
 
+template <class T> static PROJ_STRING_LIST to_string_list(T &&set) {
+    auto ret = new char *[set.size() + 1];
+    size_t i = 0;
+    for (const auto &str : set) {
+        try {
+            ret[i] = new char[str.size() + 1];
+        } catch (const std::exception &) {
+            while (--i > 0) {
+                delete[] ret[i];
+            }
+            delete[] ret;
+            throw;
+        }
+        std::memcpy(ret[i], str.c_str(), str.size() + 1);
+        i++;
+    }
+    ret[i] = nullptr;
+    return ret;
+}
+
+// ---------------------------------------------------------------------------
+
 void proj_context_delete_cpp_context(struct projCppContext *cppContext) {
     delete cppContext;
 }
@@ -288,6 +310,12 @@ void proj_context_set_autoclose_database(PJ_CONTEXT *ctx, int autoclose) {
  * definition database ("proj.db"), and potentially auxiliary databases with
  * same structure.
  *
+ * Starting with PROJ 8.1, if the auxDbPaths parameter is an empty array,
+ * the PROJ_AUX_DB environment variable will be used, if set.
+ * It must contain one or several paths. If several paths are
+ * provided, they must be separated by the colon (:) character on Unix, and
+ * on Windows, by the semi-colon (;) character.
+ *
  * @param ctx PROJ context, or NULL for default context
  * @param dbPath Path to main database, or NULL for default.
  * @param auxDbPaths NULL-terminated list of auxiliary database filenames, or
@@ -382,6 +410,35 @@ const char *proj_context_get_database_metadata(PJ_CONTEXT *ctx,
         ctx->get_cpp_context()->lastDbMetadataItem_ = osVal;
         ctx->safeAutoCloseDbIfNeeded();
         return ctx->cpp_context->lastDbMetadataItem_.c_str();
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the database structure
+ *
+ * Return SQL statements to run to initiate a new valid auxiliary empty
+ * database. It contains definitions of tables, views and triggers, as well
+ * as metadata for the version of the layout of the database.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param options null-terminated list of options, or NULL. None currently.
+ * @return list of SQL statements (to be freed with proj_string_list_destroy()),
+ *         or NULL in case of error.
+ * @since 8.1
+ */
+PROJ_STRING_LIST
+proj_context_get_database_structure(PJ_CONTEXT *ctx,
+                                    const char *const *options) {
+    SANITIZE_CTX(ctx);
+    (void)options;
+    try {
+        auto ret = to_string_list(getDBcontext(ctx)->getDatabaseStructure());
+        ctx->safeAutoCloseDbIfNeeded();
+        return ret;
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
         return nullptr;
@@ -519,28 +576,6 @@ PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
     }
     ctx->safeAutoCloseDbIfNeeded();
     return nullptr;
-}
-
-// ---------------------------------------------------------------------------
-
-template <class T> static PROJ_STRING_LIST to_string_list(T &&set) {
-    auto ret = new char *[set.size() + 1];
-    size_t i = 0;
-    for (const auto &str : set) {
-        try {
-            ret[i] = new char[str.size() + 1];
-        } catch (const std::exception &) {
-            while (--i > 0) {
-                delete[] ret[i];
-            }
-            delete[] ret;
-            throw;
-        }
-        std::memcpy(ret[i], str.c_str(), str.size() + 1);
-        i++;
-    }
-    ret[i] = nullptr;
-    return ret;
 }
 
 // ---------------------------------------------------------------------------
@@ -8756,4 +8791,250 @@ PJ *proj_concatoperation_get_step(PJ_CONTEXT *ctx, const PJ *concatoperation,
         return nullptr;
     }
     return pj_obj_create(ctx, steps[i_step]);
+}
+// ---------------------------------------------------------------------------
+
+/** \brief Opaque object representing an insertion session. */
+struct PJ_INSERT_SESSION {
+    //! @cond Doxygen_Suppress
+    PJ_CONTEXT *ctx = nullptr;
+    //! @endcond
+};
+
+// ---------------------------------------------------------------------------
+
+/** \brief Starts a session for proj_get_insert_statements()
+ *
+ * Starts a new session for one or several calls to
+ * proj_get_insert_statements().
+ *
+ * An insertion session guarantees that the inserted objects will not create
+ * conflicting intermediate objects.
+ *
+ * The session must be stopped with proj_insert_object_session_destroy().
+ *
+ * Only one session may be active at a time for a given context.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @return the session, or NULL in case of error.
+ *
+ * @since 8.1
+ */
+PJ_INSERT_SESSION *proj_insert_object_session_create(PJ_CONTEXT *ctx) {
+    SANITIZE_CTX(ctx);
+    try {
+        auto dbContext = getDBcontext(ctx);
+        dbContext->startInsertStatementsSession();
+        PJ_INSERT_SESSION *session = new PJ_INSERT_SESSION;
+        session->ctx = ctx;
+        return session;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Stops an insertion session started with
+ * proj_insert_object_session_create()
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param session The insertion session.
+ * @since 8.1
+ */
+void proj_insert_object_session_destroy(PJ_CONTEXT *ctx,
+                                        PJ_INSERT_SESSION *session) {
+    SANITIZE_CTX(ctx);
+    if (session) {
+        try {
+            if (session->ctx != ctx) {
+                proj_log_error(ctx, __FUNCTION__,
+                               "proj_insert_object_session_destroy() called "
+                               "with a context different from the one of "
+                               "proj_insert_object_session_create()");
+            } else {
+                auto dbContext = getDBcontext(ctx);
+                dbContext->stopInsertStatementsSession();
+            }
+        } catch (const std::exception &e) {
+            proj_log_error(ctx, __FUNCTION__, e.what());
+        }
+        delete session;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Suggests a database code for the passed object.
+ *
+ * Supported type of objects are PrimeMeridian, Ellipsoid, Datum, DatumEnsemble,
+ * GeodeticCRS, ProjectedCRS, VerticalCRS, CompoundCRS, BoundCRS, Conversion.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param object Object for which to suggest a code.
+ * @param authority Authority name into which the object will be inserted.
+ * @param numeric_code Whether the code should be numeric, or derived from the
+ * object name.
+ * @param options NULL terminated list of options, or NULL.
+ *                No options are supported currently.
+ * @return the suggested code, that is guaranteed to not conflict with an
+ * existing one (to be freed with proj_string_destroy),
+ * or nullptr in case of error.
+ *
+ * @since 8.1
+ */
+char *proj_suggests_code_for(PJ_CONTEXT *ctx, const PJ *object,
+                             const char *authority, int numeric_code,
+                             const char *const *options) {
+    SANITIZE_CTX(ctx);
+    (void)options;
+
+    if (!object || !authority) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    auto identifiedObject =
+        std::dynamic_pointer_cast<IdentifiedObject>(object->iso_obj);
+    if (!identifiedObject) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "Object is not a IdentifiedObject");
+        return nullptr;
+    }
+
+    try {
+        auto dbContext = getDBcontext(ctx);
+        return pj_strdup(dbContext
+                             ->suggestsCodeFor(NN_NO_CHECK(identifiedObject),
+                                               std::string(authority),
+                                               numeric_code != FALSE)
+                             .c_str());
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Free a string.
+ *
+ * Only to be used with functions that document using this function.
+ *
+ * @param str String to free.
+ *
+ * @since 8.1
+ */
+void proj_string_destroy(char *str) { free(str); }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns SQL statements needed to insert the passed object into the
+ * database.
+ *
+ * proj_insert_object_session_create() may have been called previously.
+ *
+ * It is strongly recommended that new objects should not be added in common
+ * registries, such as "EPSG", "ESRI", "IAU", etc. Users should use a custom
+ * authority name instead. If a new object should be
+ * added to the official EPSG registry, users are invited to follow the
+ * procedure explainted at https://epsg.org/dataset-change-requests.html.
+ *
+ * Combined with proj_context_get_database_structure(), users can create
+ * auxiliary databases, instead of directly modifying the main proj.db database.
+ * Those auxiliary databases can be specified through proj_context_set_database_path()
+ * or the PROJ_AUX_DB environment variable.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param session The insertion session. May be NULL if a single object must be
+ *                inserted.
+ * @param object The object to insert into the database. Currently only
+ *               PrimeMeridian, Ellipsoid, Datum, GeodeticCRS, ProjectedCRS,
+ *               VerticalCRS, CompoundCRS or BoundCRS are supported.
+ * @param authority Authority name into which the object will be inserted.
+ *                  Must not be NULL.
+ * @param code Code with which the object will be inserted.Must not be NULL.
+ * @param numeric_codes Whether intermediate objects that can be created should
+ *                      use numeric codes (true), or may be alphanumeric (false)
+ * @param allowed_authorities NULL terminated list of authority names, or NULL.
+ *                            Authorities to which intermediate objects are
+ *                            allowed to refer to. "authority" will be
+ *                            implicitly added to it. Note that unit,
+ *                            coordinate systems, projection methods and
+ *                            parameters will in any case be allowed to refer
+ *                            to EPSG.
+ *                            If NULL, allowed_authorities defaults to
+ *                            {"EPSG", "PROJ", nullptr}
+ * @param options NULL terminated list of options, or NULL.
+ *                No options are supported currently.
+ *
+ * @return a list of insert statements (to be freed with
+ *         proj_string_list_destroy()), or NULL in case of error.
+ * @since 8.1
+ */
+PROJ_STRING_LIST proj_get_insert_statements(
+    PJ_CONTEXT *ctx, PJ_INSERT_SESSION *session, const PJ *object,
+    const char *authority, const char *code, int numeric_codes,
+    const char *const *allowed_authorities, const char *const *options) {
+    SANITIZE_CTX(ctx);
+    (void)options;
+
+    struct TempSessionHolder {
+        PJ_CONTEXT *m_ctx;
+        PJ_INSERT_SESSION *m_tempSession = nullptr;
+        TempSessionHolder(const TempSessionHolder &) = delete;
+        TempSessionHolder &operator=(const TempSessionHolder &) = delete;
+
+        TempSessionHolder(PJ_CONTEXT *ctx, PJ_INSERT_SESSION *session)
+            : m_ctx(ctx),
+              m_tempSession(session ? nullptr
+                                    : proj_insert_object_session_create(ctx)) {}
+
+        ~TempSessionHolder() {
+            if (m_tempSession) {
+                proj_insert_object_session_destroy(m_ctx, m_tempSession);
+            }
+        }
+    };
+
+    try {
+        TempSessionHolder oHolder(ctx, session);
+        if (!session) {
+            session = oHolder.m_tempSession;
+            if (!session) {
+                return nullptr;
+            }
+        }
+
+        if (!object || !authority || !code) {
+            proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+            proj_log_error(ctx, __FUNCTION__, "missing required input");
+            return nullptr;
+        }
+        auto identifiedObject =
+            std::dynamic_pointer_cast<IdentifiedObject>(object->iso_obj);
+        if (!identifiedObject) {
+            proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+            proj_log_error(ctx, __FUNCTION__,
+                           "Object is not a IdentifiedObject");
+            return nullptr;
+        }
+
+        auto dbContext = getDBcontext(ctx);
+        std::vector<std::string> allowedAuthorities{"EPSG", "PROJ"};
+        if (allowed_authorities) {
+            allowedAuthorities.clear();
+            for (auto iter = allowed_authorities; *iter; ++iter) {
+                allowedAuthorities.emplace_back(*iter);
+            }
+        }
+        auto statements = dbContext->getInsertStatementsFor(
+            NN_NO_CHECK(identifiedObject), authority, code,
+            numeric_codes != FALSE, allowedAuthorities);
+        return to_string_list(std::move(statements));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
 }

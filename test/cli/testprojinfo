@@ -50,6 +50,14 @@ echo "Testing projinfo -o ALL EPSG:4326" >> ${OUT}
 $EXE -o ALL EPSG:4326 >>${OUT}
 echo "" >>${OUT}
 
+echo "Testing projinfo \"+proj=merc +lat_ts=5 +datum=WGS84 +type=crs\" --output-id HOBU:MY_CRS -o SQL -q" >> ${OUT}
+$EXE "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs" --output-id HOBU:MY_CRS -o SQL -q >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing projinfo \"+proj=merc +lat_ts=5 +datum=WGS84 +type=crs\" --output-id HOBU:MY_CRS --authority HOBU -o SQL -q" >> ${OUT}
+$EXE "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs" --output-id HOBU:MY_CRS --authority HOBU -o SQL -q >>${OUT}
+echo "" >>${OUT}
+
 echo "Testing projinfo -s EPSG:4326 -t EPSG:32631 --single-line" >> ${OUT}
 $EXE -s EPSG:4326 -t EPSG:32631 --single-line >>${OUT}
 echo "" >>${OUT}
@@ -278,6 +286,23 @@ echo "" >>${OUT}
 # Quick check of NKG transformations
 echo 'Testing NKG: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark' >> ${OUT}
 $EXE -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark >>${OUT} 2>&1
+echo "" >>${OUT}
+
+echo "Testing projinfo --dump-db-structure | head -n 5" >> ${OUT}
+$EXE --dump-db-structure | head -n 5 >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing projinfo --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tail -n 4" >> ${OUT}
+$EXE --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tail -n 4 >>${OUT}
+echo "" >>${OUT}
+
+echo "Testing PROJ_AUX_DB environment variable" >> ${OUT}
+rm -f tmp_projinfo_aux.db
+$EXE --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | sqlite3 tmp_projinfo_aux.db
+export PROJ_AUX_DB=tmp_projinfo_aux.db
+$EXE HOBU:XXXX >>${OUT}
+unset PROJ_AUX_DB
+rm -f tmp_projinfo_aux.db
 echo "" >>${OUT}
 
 # do 'diff' with distribution results

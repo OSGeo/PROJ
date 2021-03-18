@@ -68,11 +68,15 @@ struct OutputOptions {
     bool WKT1_GDAL = false;
     bool WKT1_ESRI = false;
     bool PROJJSON = false;
+    bool SQL = false;
     bool c_ify = false;
     bool singleLine = false;
     bool strict = true;
     bool ballparkAllowed = true;
     bool allowEllipsoidalHeightAsVerticalCRS = false;
+    std::string outputAuthName{};
+    std::string outputCode{};
+    std::vector<std::string> allowedAuthorities{};
 };
 } // anonymous namespace
 
@@ -101,24 +105,31 @@ static void usage() {
         << "                [--allow-ellipsoidal-height-as-vertical-crs]"
         << std::endl
         << "                [--boundcrs-to-wgs84]" << std::endl
+        << "                [--authority name]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
+        << "                [--]" << std::endl
         << "                [--identify] [--3d]" << std::endl
+        << "                [--output-id AUTH:CODE]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
         << "                --searchpaths | --remote-data |" << std::endl
-        << "                {object_definition} | (-s {srs_def} -t {srs_def})"
+        << "                --dump-db-structure [{object_definition} | "
+           "{object_reference}] |"
+        << std::endl
+        << "                {object_definition} | {object_reference} | "
+           "(-s {srs_def} -t {srs_def})"
         << std::endl;
     std::cerr << std::endl;
     std::cerr << "-o: formats is a comma separated combination of: "
                  "all,default,PROJ,WKT_ALL,WKT2:2015,WKT2:2019,WKT1:GDAL,"
-                 "WKT1:ESRI,PROJJSON"
+                 "WKT1:ESRI,PROJJSON,SQL"
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
               << std::endl;
     std::cerr << std::endl;
     std::cerr << "{object_definition} might be a PROJ string, a WKT string, "
-                 " a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
+                 "a AUTHORITY:CODE, or urn:ogc:def:OBJECT_TYPE:AUTHORITY::CODE"
               << std::endl;
     std::exit(1);
 }
@@ -310,7 +321,7 @@ static void outputObject(
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const OutputOptions &outputOpt) {
 
-    auto identified = dynamic_cast<const IdentifiedObject *>(obj.get());
+    auto identified = nn_dynamic_pointer_cast<IdentifiedObject>(obj);
     if (!outputOpt.quiet && identified && identified->isDeprecated()) {
         std::cout << "Warning: object is deprecated" << std::endl;
         auto crs = dynamic_cast<const CRS *>(obj.get());
@@ -556,8 +567,36 @@ static void outputObject(
                 std::cerr << "Error when exporting to PROJJSON: " << e.what()
                           << std::endl;
             }
-            // alreadyOutputted = true;
+            alreadyOutputted = true;
         }
+    }
+
+    if (identified && dbContext && outputOpt.SQL) {
+        try {
+            if (alreadyOutputted) {
+                std::cout << std::endl;
+            }
+            if (!outputOpt.quiet) {
+                std::cout << "SQL:" << std::endl;
+            }
+            dbContext->startInsertStatementsSession();
+            auto allowedAuthorities(outputOpt.allowedAuthorities);
+            if (allowedAuthorities.empty()) {
+                allowedAuthorities.emplace_back("EPSG");
+                allowedAuthorities.emplace_back("PROJ");
+            }
+            const auto statements = dbContext->getInsertStatementsFor(
+                NN_NO_CHECK(identified), outputOpt.outputAuthName,
+                outputOpt.outputCode, false, allowedAuthorities);
+            dbContext->stopInsertStatementsSession();
+            for (const auto &sql : statements) {
+                std::cout << sql << std::endl;
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "Error when exporting to SQL: " << e.what()
+                      << std::endl;
+        }
+        // alreadyOutputted = true;
     }
 
     auto op = dynamic_cast<CoordinateOperation *>(obj.get());
@@ -825,6 +864,8 @@ int main(int argc, char **argv) {
     bool showSuperseded = false;
     bool promoteTo3D = false;
     double minimumAccuracy = -1;
+    bool outputAll = false;
+    bool dumpDbStructure = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -834,12 +875,14 @@ int main(int argc, char **argv) {
             auto formats(split(argv[i], ','));
             for (auto format : formats) {
                 if (ci_equal(format, "all")) {
+                    outputAll = true;
                     outputOpt.PROJ5 = true;
                     outputOpt.WKT2_2019 = true;
                     outputOpt.WKT2_2015 = true;
                     outputOpt.WKT1_GDAL = true;
                     outputOpt.WKT1_ESRI = true;
                     outputOpt.PROJJSON = true;
+                    outputOpt.SQL = true;
                 } else if (ci_equal(format, "default")) {
                     outputOpt.PROJ5 = true;
                     outputOpt.WKT2_2019 = true;
@@ -915,6 +958,10 @@ int main(int argc, char **argv) {
                     outputOpt.PROJJSON = true;
                 } else if (ci_equal(format, "-PROJJSON")) {
                     outputOpt.PROJJSON = false;
+                } else if (ci_equal(format, "SQL")) {
+                    outputOpt.SQL = true;
+                } else if (ci_equal(format, "-SQL")) {
+                    outputOpt.SQL = false;
                 } else {
                     std::cerr << "Unrecognized value for option -o: " << format
                               << std::endl;
@@ -1084,6 +1131,7 @@ int main(int argc, char **argv) {
         } else if (arg == "--authority" && i + 1 < argc) {
             i++;
             authority = argv[i];
+            outputOpt.allowedAuthorities = split(authority, ',');
         } else if (arg == "--identify") {
             identify = true;
         } else if (arg == "--show-superseded") {
@@ -1096,6 +1144,18 @@ int main(int argc, char **argv) {
             outputOpt.ballparkAllowed = false;
         } else if (ci_equal(arg, "--3d")) {
             promoteTo3D = true;
+        } else if (arg == "--output-id" && i + 1 < argc) {
+            i++;
+            const auto tokens = split(argv[i], ':');
+            if (tokens.size() != 2) {
+                std::cerr << "Invalid value for option --output-id"
+                          << std::endl;
+                usage();
+            }
+            outputOpt.outputAuthName = tokens[0];
+            outputOpt.outputCode = tokens[1];
+        } else if (arg == "--dump-db-structure") {
+            dumpDbStructure = true;
         } else if (ci_equal(arg, "--searchpaths")) {
 #ifdef _WIN32
             constexpr char delim = ';';
@@ -1145,18 +1205,47 @@ int main(int argc, char **argv) {
         std::exit(1);
     }
 
+    if (dumpDbStructure && user_string_specified && !outputSwitchSpecified) {
+        // Implicit settings in --output-db-structure mode + object
+        outputSwitchSpecified = true;
+        outputOpt.SQL = true;
+        outputOpt.quiet = true;
+    }
+    if (outputOpt.SQL && outputOpt.outputAuthName.empty()) {
+        if (outputAll) {
+            outputOpt.SQL = false;
+            std::cerr << "WARNING: SQL output disable since "
+                         "--output-id=AUTH:CODE has not been specified."
+                      << std::endl;
+        } else {
+            std::cerr << "ERROR: --output-id=AUTH:CODE must be specified when "
+                         "SQL output is enabled."
+                      << std::endl;
+            std::exit(1);
+        }
+    }
+
     DatabaseContextPtr dbContext;
     try {
         dbContext =
             DatabaseContext::create(mainDBPath, auxDBPath).as_nullable();
     } catch (const std::exception &e) {
-        if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty()) {
+        if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty() ||
+            dumpDbStructure) {
             std::cerr << "ERROR: Cannot create database connection: "
                       << e.what() << std::endl;
             std::exit(1);
         }
         std::cerr << "WARNING: Cannot create database connection: " << e.what()
                   << std::endl;
+    }
+
+    if (dumpDbStructure) {
+        assert(dbContext);
+        const auto structure = dbContext->getDatabaseStructure();
+        for (const auto &sql : structure) {
+            std::cout << sql << std::endl;
+        }
     }
 
     if (!sourceCRSStr.empty() && targetCRSStr.empty()) {
@@ -1173,6 +1262,9 @@ int main(int argc, char **argv) {
             usage();
         }
     } else if (!user_string_specified) {
+        if (dumpDbStructure) {
+            std::exit(0);
+        }
         std::cerr << "Missing user string" << std::endl;
         usage();
     }
@@ -1186,7 +1278,7 @@ int main(int argc, char **argv) {
         (outputOpt.PROJ5 + outputOpt.WKT2_2019 +
          outputOpt.WKT2_2019_SIMPLIFIED + outputOpt.WKT2_2015 +
          outputOpt.WKT2_2015_SIMPLIFIED + outputOpt.WKT1_GDAL +
-         outputOpt.WKT1_ESRI + outputOpt.PROJJSON) != 1) {
+         outputOpt.WKT1_ESRI + outputOpt.PROJJSON + outputOpt.SQL) != 1) {
         std::cerr << "-q can only be used with a single output format"
                   << std::endl;
         usage();

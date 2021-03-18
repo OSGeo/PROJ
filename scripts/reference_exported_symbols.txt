@@ -359,10 +359,14 @@ osgeo::proj::io::DatabaseContext::create(void*)
 osgeo::proj::io::DatabaseContext::~DatabaseContext()
 osgeo::proj::io::DatabaseContext::getAuthorities() const
 osgeo::proj::io::DatabaseContext::getDatabaseStructure() const
+osgeo::proj::io::DatabaseContext::getInsertStatementsFor(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::common::IdentifiedObject> > const&, std::string const&, std::string const&, bool, std::vector<std::string, std::allocator<std::string> > const&)
 osgeo::proj::io::DatabaseContext::getMetadata(char const*) const
 osgeo::proj::io::DatabaseContext::getPath() const
 osgeo::proj::io::DatabaseContext::getSqliteHandle() const
 osgeo::proj::io::DatabaseContext::lookForGridInfo(std::string const&, bool, std::string&, std::string&, std::string&, bool&, bool&, bool&) const
+osgeo::proj::io::DatabaseContext::startInsertStatementsSession()
+osgeo::proj::io::DatabaseContext::stopInsertStatementsSession()
+osgeo::proj::io::DatabaseContext::suggestsCodeFor(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::common::IdentifiedObject> > const&, std::string const&, bool)
 osgeo::proj::io::FactoryException::~FactoryException()
 osgeo::proj::io::FactoryException::FactoryException(char const*)
 osgeo::proj::io::FactoryException::FactoryException(osgeo::proj::io::FactoryException const&)
@@ -788,6 +792,7 @@ proj_context_errno
 proj_context_errno_string
 proj_context_get_database_metadata
 proj_context_get_database_path
+proj_context_get_database_structure
 proj_context_get_url_endpoint
 proj_context_get_use_proj4_init_rules
 proj_context_get_user_writable_directory
@@ -960,6 +965,7 @@ proj_get_crs_list_parameters_destroy
 proj_get_ellipsoid
 proj_get_id_auth_name
 proj_get_id_code
+proj_get_insert_statements
 proj_get_name
 proj_get_non_deprecated
 proj_get_prime_meridian
@@ -980,6 +986,8 @@ proj_grid_info
 proj_identify
 proj_info
 proj_init_info
+proj_insert_object_session_create
+proj_insert_object_session_destroy
 proj_int_list_destroy
 proj_is_crs
 proj_is_deprecated
@@ -1017,7 +1025,9 @@ proj_prime_meridian_get_parameters
 proj_query_geodetic_crs_from_datum
 proj_roundtrip
 proj_rtodms
+proj_string_destroy
 proj_string_list_destroy
+proj_suggests_code_for
 proj_todeg
 proj_torad
 proj_trans

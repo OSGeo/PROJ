@@ -49,9 +49,11 @@
 
 #include "sqlite3_utils.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <iomanip>
 #include <limits>
 #include <locale>
@@ -101,13 +103,18 @@ constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // must be incremented.
 constexpr int DATABASE_LAYOUT_VERSION_MINOR = 0;
 
+constexpr size_t N_MAX_PARAMS = 7;
+
 // ---------------------------------------------------------------------------
 
 struct SQLValues {
-    enum class Type { STRING, DOUBLE };
+    enum class Type { STRING, INT, DOUBLE };
 
     // cppcheck-suppress noExplicitConstructor
     SQLValues(const std::string &value) : type_(Type::STRING), str_(value) {}
+
+    // cppcheck-suppress noExplicitConstructor
+    SQLValues(int value) : type_(Type::INT), int_(value) {}
 
     // cppcheck-suppress noExplicitConstructor
     SQLValues(double value) : type_(Type::DOUBLE), double_(value) {}
@@ -118,11 +125,15 @@ struct SQLValues {
     const std::string &stringValue() const { return str_; }
 
     // cppcheck-suppress functionStatic
+    int intValue() const { return int_; }
+
+    // cppcheck-suppress functionStatic
     double doubleValue() const { return double_; }
 
   private:
     Type type_;
     std::string str_{};
+    int int_ = 0;
     double double_ = 0.0;
 };
 
@@ -255,15 +266,26 @@ struct DatabaseContext::Private {
   private:
     friend class DatabaseContext;
 
+    // This is a manual implementation of std::enable_shared_from_this<> that
+    // avoids publicly deriving from it.
+    std::weak_ptr<DatabaseContext> self_{};
+
     std::string databasePath_{};
+    std::vector<std::string> auxiliaryDatabasePaths_{};
     bool close_handle_ = true;
     sqlite3 *sqlite_handle_{};
+    int nLayoutVersionMajor_ = 0;
+    int nLayoutVersionMinor_ = 0;
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
     PJ_CONTEXT *pjCtxt_ = nullptr;
     int recLevel_ = 0;
     bool detach_ = false;
     std::string lastMetadataValue_{};
     std::map<std::string, std::list<SQLRow>> mapCanonicalizeGRFName_{};
+
+    // Used by startInsertStatementsSession() and related functions
+    std::string memoryDbForInsertPath_{};
+    sqlite3 *memoryDbHandle_ = nullptr;
 
     using LRUCacheOfObjects = lru11::Cache<std::string, util::BaseObjectPtr>;
 
@@ -285,7 +307,8 @@ struct DatabaseContext::Private {
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
 
-    void checkDatabaseLayout();
+    void checkDatabaseLayout(const std::string &path,
+                             const std::string &dbNamePrefix);
 
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
@@ -296,8 +319,98 @@ struct DatabaseContext::Private {
 
     void closeDB() noexcept;
 
+    void clearCaches();
+
     // cppcheck-suppress functionStatic
     void registerFunctions();
+
+    std::string findFreeCode(const std::string &tableName,
+                             const std::string &authName,
+                             const std::string &codePrototype);
+
+    void identify(const DatabaseContextNNPtr &dbContext,
+                  const cs::CoordinateSystemNNPtr &obj, std::string &authName,
+                  std::string &code);
+    void identifyOrInsert(const DatabaseContextNNPtr &dbContext,
+                          const cs::CoordinateSystemNNPtr &obj,
+                          const std::string &ownerType,
+                          const std::string &ownerAuthName,
+                          const std::string &ownerCode, std::string &authName,
+                          std::string &code,
+                          std::vector<std::string> &sqlStatements);
+
+    void identify(const DatabaseContextNNPtr &dbContext,
+                  const common::UnitOfMeasure &obj, std::string &authName,
+                  std::string &code);
+    void identifyOrInsert(const DatabaseContextNNPtr &dbContext,
+                          const common::UnitOfMeasure &unit,
+                          const std::string &ownerAuthName,
+                          std::string &authName, std::string &code,
+                          std::vector<std::string> &sqlStatements);
+
+    void appendSql(std::vector<std::string> &sqlStatements,
+                   const std::string &sql);
+
+    void
+    identifyOrInsertUsages(const common::ObjectUsageNNPtr &obj,
+                           const std::string &tableName,
+                           const std::string &authName, const std::string &code,
+                           const std::vector<std::string> &allowedAuthorities,
+                           std::vector<std::string> &sqlStatements);
+
+    std::vector<std::string>
+    getInsertStatementsFor(const datum::PrimeMeridianNNPtr &pm,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
+
+    std::vector<std::string>
+    getInsertStatementsFor(const datum::EllipsoidNNPtr &ellipsoid,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
+
+    std::vector<std::string>
+    getInsertStatementsFor(const datum::GeodeticReferenceFrameNNPtr &datum,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
+
+    std::vector<std::string>
+    getInsertStatementsFor(const datum::DatumEnsembleNNPtr &ensemble,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
+
+    std::vector<std::string>
+    getInsertStatementsFor(const crs::GeodeticCRSNNPtr &crs,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
+
+    std::vector<std::string>
+    getInsertStatementsFor(const crs::ProjectedCRSNNPtr &crs,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
+
+    std::vector<std::string>
+    getInsertStatementsFor(const datum::VerticalReferenceFrameNNPtr &datum,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
+
+    std::vector<std::string>
+    getInsertStatementsFor(const crs::VerticalCRSNNPtr &crs,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
+
+    std::vector<std::string>
+    getInsertStatementsFor(const crs::CompoundCRSNNPtr &crs,
+                           const std::string &authName, const std::string &code,
+                           bool numericCode,
+                           const std::vector<std::string> &allowedAuthorities);
 
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
     std::unique_ptr<SQLite3VFS> vfs_{};
@@ -351,6 +464,24 @@ void DatabaseContext::Private::closeDB() noexcept {
         sqlite3_close(sqlite_handle_);
         sqlite_handle_ = nullptr;
     }
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::clearCaches() {
+
+    cacheUOM_.clear();
+    cacheCRS_.clear();
+    cacheEllipsoid_.clear();
+    cacheGeodeticDatum_.clear();
+    cacheDatumEnsemble_.clear();
+    cachePrimeMeridian_.clear();
+    cacheCS_.clear();
+    cacheExtent_.clear();
+    cacheCRSToCrsCoordOp_.clear();
+    cacheGridInfo_.clear();
+    cacheAllowedAuthorities_.clear();
+    cacheAliasNames_.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -581,10 +712,22 @@ void DatabaseContext::Private::open(const std::string &databasePath,
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::checkDatabaseLayout() {
-    auto res = run("SELECT key, value FROM metadata WHERE key IN "
+void DatabaseContext::Private::checkDatabaseLayout(
+    const std::string &path, const std::string &dbNamePrefix) {
+    if (!dbNamePrefix.empty() && run("SELECT 1 FROM " + dbNamePrefix +
+                                     "sqlite_master WHERE name = 'metadata'")
+                                     .empty()) {
+        // Accept auxiliary databases without metadata table (sparse DBs)
+        return;
+    }
+    auto res = run("SELECT key, value FROM " + dbNamePrefix +
+                   "metadata WHERE key IN "
                    "('DATABASE.LAYOUT.VERSION.MAJOR', "
                    "'DATABASE.LAYOUT.VERSION.MINOR')");
+    if (res.empty() && !dbNamePrefix.empty()) {
+        // Accept auxiliary databases without layout metadata.
+        return;
+    }
     if (res.size() != 2) {
         // The database layout of PROJ 7.2 that shipped with EPSG v10.003 is
         // at the time of writing still compatible of the one we support.
@@ -602,35 +745,46 @@ void DatabaseContext::Private::checkDatabaseLayout() {
         }
 
         throw FactoryException(
-            databasePath_ +
-            " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
-            "DATABASE.LAYOUT.VERSION.MINOR "
-            "metadata. It comes from another PROJ installation.");
+            path + " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
+                   "DATABASE.LAYOUT.VERSION.MINOR "
+                   "metadata. It comes from another PROJ installation.");
     }
-    int nMajor = 0;
-    int nMinor = 0;
+    int major = 0;
+    int minor = 0;
     for (const auto &row : res) {
         if (row[0] == "DATABASE.LAYOUT.VERSION.MAJOR") {
-            nMajor = atoi(row[1].c_str());
+            major = atoi(row[1].c_str());
         } else if (row[0] == "DATABASE.LAYOUT.VERSION.MINOR") {
-            nMinor = atoi(row[1].c_str());
+            minor = atoi(row[1].c_str());
         }
     }
-    if (nMajor != DATABASE_LAYOUT_VERSION_MAJOR) {
+    if (major != DATABASE_LAYOUT_VERSION_MAJOR) {
         throw FactoryException(
-            databasePath_ +
-            " contains DATABASE.LAYOUT.VERSION.MAJOR = " + toString(nMajor) +
+            path +
+            " contains DATABASE.LAYOUT.VERSION.MAJOR = " + toString(major) +
             " whereas " + toString(DATABASE_LAYOUT_VERSION_MAJOR) +
             " is expected. "
             "It comes from another PROJ installation.");
     }
-    if (nMinor < DATABASE_LAYOUT_VERSION_MINOR) {
+    if (minor < DATABASE_LAYOUT_VERSION_MINOR) {
         throw FactoryException(
-            databasePath_ +
-            " contains DATABASE.LAYOUT.VERSION.MINOR = " + toString(nMinor) +
+            path +
+            " contains DATABASE.LAYOUT.VERSION.MINOR = " + toString(minor) +
             " whereas a number >= " + toString(DATABASE_LAYOUT_VERSION_MINOR) +
             " is expected. "
             "It comes from another PROJ installation.");
+    }
+    if (dbNamePrefix.empty()) {
+        nLayoutVersionMajor_ = major;
+        nLayoutVersionMinor_ = minor;
+    } else if (nLayoutVersionMajor_ != major || nLayoutVersionMinor_ != minor) {
+        throw FactoryException(
+            "Auxiliary database " + path +
+            " contains a DATABASE.LAYOUT.VERSION =  " + toString(major) + '.' +
+            toString(minor) +
+            " which is different from the one from the main database " +
+            databasePath_ + " which is " + toString(nLayoutVersionMajor_) +
+            '.' + toString(nLayoutVersionMinor_));
     }
 }
 
@@ -649,16 +803,27 @@ void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
 // ---------------------------------------------------------------------------
 
 std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
-    const char *sqls[] = {
-        "SELECT sql FROM sqlite_master WHERE type = 'table'",
-        "SELECT sql FROM sqlite_master WHERE type = 'view'",
-        "SELECT sql FROM sqlite_master WHERE type = 'trigger'"};
+    const std::string dbNamePrefix(auxiliaryDatabasePaths_.empty() &&
+                                           memoryDbForInsertPath_.empty()
+                                       ? ""
+                                       : "db_0.");
+    const auto sqlBegin("SELECT sql||';' FROM " + dbNamePrefix +
+                        "sqlite_master WHERE type = ");
+    const char *const objectTypes[] = {"'table'", "'view'", "'trigger'"};
     std::vector<std::string> res;
-    for (const auto &sql : sqls) {
-        auto sqlRes = run(sql);
+    for (const auto &objectType : objectTypes) {
+        const auto sqlRes = run(sqlBegin + objectType);
         for (const auto &row : sqlRes) {
             res.emplace_back(row[0]);
         }
+    }
+    if (nLayoutVersionMajor_ > 0) {
+        res.emplace_back(
+            "INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MAJOR'," +
+            toString(nLayoutVersionMajor_) + ");");
+        res.emplace_back(
+            "INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MINOR'," +
+            toString(nLayoutVersionMinor_) + ");");
     }
     return res;
 }
@@ -684,6 +849,10 @@ void DatabaseContext::Private::attachExtraDatabases(
     }
 
     closeDB();
+    if (auxiliaryDatabasePaths.empty()) {
+        open(databasePath_, pjCtxt());
+        return;
+    }
 
     sqlite3_open_v2(
         ":memory:", &sqlite_handle_,
@@ -696,13 +865,16 @@ void DatabaseContext::Private::attachExtraDatabases(
         "' AS db_0");
     detach_ = true;
     int count = 1;
-    for (const auto &otherDb : auxiliaryDatabasePaths) {
+    for (const auto &otherDbPath : auxiliaryDatabasePaths) {
+        const auto attachedDbName("db_" + toString(static_cast<int>(count)));
         std::string sql = "ATTACH DATABASE '";
-        sql += replaceAll(otherDb, "'", "''");
-        sql += "' AS db_";
-        sql += toString(static_cast<int>(count));
+        sql += replaceAll(otherDbPath, "'", "''");
+        sql += "' AS ";
+        sql += attachedDbName;
         count++;
         run(sql);
+
+        checkDatabaseLayout(otherDbPath, attachedDbName + '.');
     }
 
     for (const auto &pair : tableStructure) {
@@ -850,13 +1022,16 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
 
     int nBindField = 1;
     for (const auto &param : parameters) {
-        if (param.type() == SQLValues::Type::STRING) {
+        const auto paramType = param.type();
+        if (paramType == SQLValues::Type::STRING) {
             auto strValue = param.stringValue();
             sqlite3_bind_text(stmt, nBindField, strValue.c_str(),
                               static_cast<int>(strValue.size()),
                               SQLITE_TRANSIENT);
+        } else if (paramType == SQLValues::Type::INT) {
+            sqlite3_bind_int(stmt, nBindField, param.intValue());
         } else {
-            assert(param.type() == SQLValues::Type::DOUBLE);
+            assert(paramType == SQLValues::Type::DOUBLE);
             sqlite3_bind_double(stmt, nBindField, param.doubleValue());
         }
         nBindField++;
@@ -869,8 +1044,11 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
         nPos = sqlSubst.find('?', nPos);
         assert(nPos != std::string::npos);
         std::string strValue;
-        if (param.type() == SQLValues::Type::STRING) {
+        const auto paramType = param.type();
+        if (paramType == SQLValues::Type::STRING) {
             strValue = '\'' + param.stringValue() + '\'';
+        } else if (paramType == SQLValues::Type::INT) {
+            strValue = toString(param.intValue());
         } else {
             strValue = toString(param.doubleValue());
         }
@@ -915,12 +1093,1379 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
     return result;
 }
 
+// ---------------------------------------------------------------------------
+
+static std::string formatStatement(const char *fmt, ...) {
+    std::string res;
+    va_list args;
+    va_start(args, fmt);
+    for (int i = 0; fmt[i] != '\0'; ++i) {
+        if (fmt[i] == '%') {
+            if (fmt[i + 1] == '%') {
+                res += '%';
+            } else if (fmt[i + 1] == 'q') {
+                const char *arg = va_arg(args, const char *);
+                for (int j = 0; arg[j] != '\0'; ++j) {
+                    if (arg[j] == '\'')
+                        res += arg[j];
+                    res += arg[j];
+                }
+            } else if (fmt[i + 1] == 's') {
+                const char *arg = va_arg(args, const char *);
+                res += arg;
+            } else if (fmt[i + 1] == 'f') {
+                const double arg = va_arg(args, double);
+                res += toString(arg);
+            } else if (fmt[i + 1] == 'd') {
+                const int arg = va_arg(args, int);
+                res += toString(arg);
+            } else {
+                va_end(args);
+                throw FactoryException(
+                    "Unsupported formatter in formatStatement()");
+            }
+            ++i;
+        } else {
+            res += fmt[i];
+        }
+    }
+    va_end(args);
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::appendSql(
+    std::vector<std::string> &sqlStatements, const std::string &sql) {
+    sqlStatements.emplace_back(sql);
+    char *errMsg = nullptr;
+    if (sqlite3_exec(memoryDbHandle_, sql.c_str(), nullptr, nullptr, &errMsg) !=
+        SQLITE_OK) {
+        std::string s("Cannot execute " + sql);
+        if (errMsg) {
+            s += " : ";
+            s += errMsg;
+        }
+        sqlite3_free(errMsg);
+        throw FactoryException(s);
+    }
+    sqlite3_free(errMsg);
+}
+
+// ---------------------------------------------------------------------------
+
+static void identifyFromNameOrCode(
+    const DatabaseContextNNPtr &dbContext,
+    const std::vector<std::string> &allowedAuthorities,
+    const std::string &authNameParent, const common::IdentifiedObjectNNPtr &obj,
+    std::function<std::shared_ptr<util::IComparable>(
+        const AuthorityFactoryNNPtr &authFactory, const std::string &)>
+        instantiateFunc,
+    AuthorityFactory::ObjectType objType, std::string &authName,
+    std::string &code) {
+
+    auto allowedAuthoritiesTmp(allowedAuthorities);
+    allowedAuthoritiesTmp.emplace_back(authNameParent);
+
+    for (const auto &id : obj->identifiers()) {
+        try {
+            const auto idAuthName = *(id->codeSpace());
+            if (std::find(allowedAuthoritiesTmp.begin(),
+                          allowedAuthoritiesTmp.end(),
+                          idAuthName) != allowedAuthoritiesTmp.end()) {
+                const auto factory =
+                    AuthorityFactory::create(dbContext, idAuthName);
+                if (instantiateFunc(factory, id->code())
+                        ->isEquivalentTo(
+                            obj.get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                    authName = idAuthName;
+                    code = id->code();
+                    return;
+                }
+            }
+        } catch (const std::exception &) {
+        }
+    }
+
+    for (const auto &allowedAuthority : allowedAuthoritiesTmp) {
+        const auto factory =
+            AuthorityFactory::create(dbContext, allowedAuthority);
+        const auto candidates =
+            factory->createObjectsFromName(obj->nameStr(), {objType}, false, 0);
+        for (const auto &candidate : candidates) {
+            const auto &ids = candidate->identifiers();
+            if (!ids.empty() &&
+                candidate->isEquivalentTo(
+                    obj.get(), util::IComparable::Criterion::EQUIVALENT)) {
+                const auto &id = ids.front();
+                authName = *(id->codeSpace());
+                code = id->code();
+                return;
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
+                       const std::vector<std::string> &allowedAuthorities,
+                       const std::string &authNameParent,
+                       const datum::DatumEnsembleNNPtr &obj,
+                       std::string &authName, std::string &code) {
+    const char *type = "geodetic_datum";
+    if (!obj->datums().empty() &&
+        dynamic_cast<const datum::VerticalReferenceFrame *>(
+            obj->datums().front().get())) {
+        type = "vertical_datum";
+    }
+    const auto instantiateFunc =
+        [&type](const AuthorityFactoryNNPtr &authFactory,
+                const std::string &lCode) {
+            return util::nn_static_pointer_cast<util::IComparable>(
+                authFactory->createDatumEnsemble(lCode, type));
+        };
+    identifyFromNameOrCode(
+        dbContext, allowedAuthorities, authNameParent, obj, instantiateFunc,
+        AuthorityFactory::ObjectType::DATUM_ENSEMBLE, authName, code);
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
+                       const std::vector<std::string> &allowedAuthorities,
+                       const std::string &authNameParent,
+                       const datum::GeodeticReferenceFrameNNPtr &obj,
+                       std::string &authName, std::string &code) {
+    const auto instantiateFunc = [](const AuthorityFactoryNNPtr &authFactory,
+                                    const std::string &lCode) {
+        return util::nn_static_pointer_cast<util::IComparable>(
+            authFactory->createGeodeticDatum(lCode));
+    };
+    identifyFromNameOrCode(
+        dbContext, allowedAuthorities, authNameParent, obj, instantiateFunc,
+        AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME, authName, code);
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
+                       const std::vector<std::string> &allowedAuthorities,
+                       const std::string &authNameParent,
+                       const datum::EllipsoidNNPtr &obj, std::string &authName,
+                       std::string &code) {
+    const auto instantiateFunc = [](const AuthorityFactoryNNPtr &authFactory,
+                                    const std::string &lCode) {
+        return util::nn_static_pointer_cast<util::IComparable>(
+            authFactory->createEllipsoid(lCode));
+    };
+    identifyFromNameOrCode(
+        dbContext, allowedAuthorities, authNameParent, obj, instantiateFunc,
+        AuthorityFactory::ObjectType::ELLIPSOID, authName, code);
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
+                       const std::vector<std::string> &allowedAuthorities,
+                       const std::string &authNameParent,
+                       const datum::PrimeMeridianNNPtr &obj,
+                       std::string &authName, std::string &code) {
+    const auto instantiateFunc = [](const AuthorityFactoryNNPtr &authFactory,
+                                    const std::string &lCode) {
+        return util::nn_static_pointer_cast<util::IComparable>(
+            authFactory->createPrimeMeridian(lCode));
+    };
+    identifyFromNameOrCode(
+        dbContext, allowedAuthorities, authNameParent, obj, instantiateFunc,
+        AuthorityFactory::ObjectType::PRIME_MERIDIAN, authName, code);
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
+                       const std::vector<std::string> &allowedAuthorities,
+                       const std::string &authNameParent,
+                       const datum::VerticalReferenceFrameNNPtr &obj,
+                       std::string &authName, std::string &code) {
+    const auto instantiateFunc = [](const AuthorityFactoryNNPtr &authFactory,
+                                    const std::string &lCode) {
+        return util::nn_static_pointer_cast<util::IComparable>(
+            authFactory->createVerticalDatum(lCode));
+    };
+    identifyFromNameOrCode(
+        dbContext, allowedAuthorities, authNameParent, obj, instantiateFunc,
+        AuthorityFactory::ObjectType::VERTICAL_REFERENCE_FRAME, authName, code);
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+identifyFromNameOrCode(const DatabaseContextNNPtr &dbContext,
+                       const std::vector<std::string> &allowedAuthorities,
+                       const std::string &authNameParent,
+                       const datum::DatumNNPtr &obj, std::string &authName,
+                       std::string &code) {
+    if (const auto geodeticDatum =
+            util::nn_dynamic_pointer_cast<datum::GeodeticReferenceFrame>(obj)) {
+        identifyFromNameOrCode(dbContext, allowedAuthorities, authNameParent,
+                               NN_NO_CHECK(geodeticDatum), authName, code);
+    } else if (const auto verticalDatum =
+                   util::nn_dynamic_pointer_cast<datum::VerticalReferenceFrame>(
+                       obj)) {
+        identifyFromNameOrCode(dbContext, allowedAuthorities, authNameParent,
+                               NN_NO_CHECK(verticalDatum), authName, code);
+    } else {
+        throw FactoryException("Unhandled type of datum");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+static const char *getCSDatabaseType(const cs::CoordinateSystemNNPtr &obj) {
+    if (dynamic_cast<const cs::EllipsoidalCS *>(obj.get())) {
+        return "ellipsoidal";
+    } else if (dynamic_cast<const cs::CartesianCS *>(obj.get())) {
+        return "Cartesian";
+    } else if (dynamic_cast<const cs::VerticalCS *>(obj.get())) {
+        return "vertical";
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+std::string
+DatabaseContext::Private::findFreeCode(const std::string &tableName,
+                                       const std::string &authName,
+                                       const std::string &codePrototype) {
+    std::string code(codePrototype);
+    if (run("SELECT 1 FROM " + tableName + " WHERE auth_name = ? AND code = ?",
+            {authName, code})
+            .empty()) {
+        return code;
+    }
+
+    for (int counter = 2; counter < 10; counter++) {
+        code = codePrototype + '_' + toString(counter);
+        if (run("SELECT 1 FROM " + tableName +
+                    " WHERE auth_name = ? AND code = ?",
+                {authName, code})
+                .empty()) {
+            return code;
+        }
+    }
+
+    // shouldn't happen hopefully...
+    throw FactoryException("Cannot insert " + tableName +
+                           ": too many similar codes");
+}
+
+// ---------------------------------------------------------------------------
+
+static const char *getUnitDatabaseType(const common::UnitOfMeasure &unit) {
+    switch (unit.type()) {
+    case common::UnitOfMeasure::Type::LINEAR:
+        return "length";
+
+    case common::UnitOfMeasure::Type::ANGULAR:
+        return "angle";
+
+    case common::UnitOfMeasure::Type::SCALE:
+        return "scale";
+
+    case common::UnitOfMeasure::Type::TIME:
+        return "time";
+
+    default:
+        break;
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::identify(const DatabaseContextNNPtr &dbContext,
+                                        const common::UnitOfMeasure &obj,
+                                        std::string &authName,
+                                        std::string &code) {
+    // Identify quickly a few well-known units
+    const double convFactor = obj.conversionToSI();
+    switch (obj.type()) {
+    case common::UnitOfMeasure::Type::LINEAR: {
+        if (convFactor == 1.0) {
+            authName = metadata::Identifier::EPSG;
+            code = "9001";
+            return;
+        }
+        break;
+    }
+    case common::UnitOfMeasure::Type::ANGULAR: {
+        constexpr double CONV_FACTOR_DEGREE = 1.74532925199432781271e-02;
+        if (std::abs(convFactor - CONV_FACTOR_DEGREE) <=
+            1e-10 * CONV_FACTOR_DEGREE) {
+            authName = metadata::Identifier::EPSG;
+            code = "9102";
+            return;
+        }
+        break;
+    }
+    case common::UnitOfMeasure::Type::SCALE: {
+        if (convFactor == 1.0) {
+            authName = metadata::Identifier::EPSG;
+            code = "9201";
+            return;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+    std::string sql("SELECT auth_name, code FROM unit_of_measure "
+                    "WHERE abs(conv_factor - ?) <= 1e-10 * conv_factor");
+    ListOfParams params{convFactor};
+    const char *type = getUnitDatabaseType(obj);
+    if (type) {
+        sql += " AND type = ?";
+        params.emplace_back(std::string(type));
+    }
+    sql += " ORDER BY auth_name, code";
+    const auto res = run(sql, params);
+    for (const auto &row : res) {
+        const auto &rowAuthName = row[0];
+        const auto &rowCode = row[1];
+        const auto tmpAuthFactory =
+            AuthorityFactory::create(dbContext, rowAuthName);
+        try {
+            tmpAuthFactory->createUnitOfMeasure(rowCode);
+            authName = rowAuthName;
+            code = rowCode;
+            return;
+        } catch (const std::exception &) {
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::identifyOrInsert(
+    const DatabaseContextNNPtr &dbContext, const common::UnitOfMeasure &unit,
+    const std::string &ownerAuthName, std::string &authName, std::string &code,
+    std::vector<std::string> &sqlStatements) {
+    authName = unit.codeSpace();
+    code = unit.code();
+    if (authName.empty()) {
+        identify(dbContext, unit, authName, code);
+    }
+    if (!authName.empty()) {
+        return;
+    }
+    const char *type = getUnitDatabaseType(unit);
+    if (type == nullptr) {
+        throw FactoryException("Cannot insert this type of UnitOfMeasure");
+    }
+
+    // Insert new record
+    authName = ownerAuthName;
+    const std::string codePrototype(replaceAll(toupper(unit.name()), " ", "_"));
+    code = findFreeCode("unit_of_measure", authName, codePrototype);
+
+    const auto sql = formatStatement(
+        "INSERT INTO unit_of_measure VALUES('%q','%q','%q','%q',%f,NULL,0);",
+        authName.c_str(), code.c_str(), unit.name().c_str(), type,
+        unit.conversionToSI());
+    appendSql(sqlStatements, sql);
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::identify(const DatabaseContextNNPtr &dbContext,
+                                        const cs::CoordinateSystemNNPtr &obj,
+                                        std::string &authName,
+                                        std::string &code) {
+
+    const auto &axisList = obj->axisList();
+    if (axisList.size() == 1U &&
+        axisList[0]->unit()._isEquivalentTo(UnitOfMeasure::METRE) &&
+        &(axisList[0]->direction()) == &cs::AxisDirection::UP &&
+        (axisList[0]->nameStr() == "Up" ||
+         axisList[0]->nameStr() == "Gravity-related height")) {
+        // preferred coordinate system for gravity-related height
+        authName = metadata::Identifier::EPSG;
+        code = "6499";
+        return;
+    }
+
+    std::string sql(
+        "SELECT auth_name, code FROM coordinate_system WHERE dimension = ?");
+    ListOfParams params{static_cast<int>(axisList.size())};
+    const char *type = getCSDatabaseType(obj);
+    if (type) {
+        sql += " AND type = ?";
+        params.emplace_back(std::string(type));
+    }
+    sql += " ORDER BY auth_name, code";
+    const auto res = run(sql, params);
+    for (const auto &row : res) {
+        const auto &rowAuthName = row[0];
+        const auto &rowCode = row[1];
+        const auto tmpAuthFactory =
+            AuthorityFactory::create(dbContext, rowAuthName);
+        try {
+            const auto cs = tmpAuthFactory->createCoordinateSystem(rowCode);
+            if (cs->_isEquivalentTo(obj.get(),
+                                    util::IComparable::Criterion::EQUIVALENT)) {
+                authName = rowAuthName;
+                code = rowCode;
+                if (authName == metadata::Identifier::EPSG && code == "4400") {
+                    // preferred coordinate system for cartesian
+                    // Easting, Northing
+                    return;
+                }
+                if (authName == metadata::Identifier::EPSG && code == "6422") {
+                    // preferred coordinate system for geographic lat, lon
+                    return;
+                }
+                if (authName == metadata::Identifier::EPSG && code == "6423") {
+                    // preferred coordinate system for geographic lat, lon, h
+                    return;
+                }
+            }
+        } catch (const std::exception &) {
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::identifyOrInsert(
+    const DatabaseContextNNPtr &dbContext, const cs::CoordinateSystemNNPtr &obj,
+    const std::string &ownerType, const std::string &ownerAuthName,
+    const std::string &ownerCode, std::string &authName, std::string &code,
+    std::vector<std::string> &sqlStatements) {
+
+    identify(dbContext, obj, authName, code);
+    if (!authName.empty()) {
+        return;
+    }
+
+    const char *type = getCSDatabaseType(obj);
+    if (type == nullptr) {
+        throw FactoryException("Cannot insert this type of CoordinateSystem");
+    }
+
+    // Insert new record in coordinate_system
+    authName = ownerAuthName;
+    const std::string codePrototype("CS_" + ownerType + '_' + ownerCode);
+    code = findFreeCode("coordinate_system", authName, codePrototype);
+
+    const auto &axisList = obj->axisList();
+    {
+        const auto sql = formatStatement(
+            "INSERT INTO coordinate_system VALUES('%q','%q','%q',%d);",
+            authName.c_str(), code.c_str(), type,
+            static_cast<int>(axisList.size()));
+        appendSql(sqlStatements, sql);
+    }
+
+    // Insert new records for the axis
+    for (int i = 0; i < static_cast<int>(axisList.size()); ++i) {
+        const auto &axis = axisList[i];
+        std::string uomAuthName;
+        std::string uomCode;
+        identifyOrInsert(dbContext, axis->unit(), ownerAuthName, uomAuthName,
+                         uomCode, sqlStatements);
+        const auto sql = formatStatement(
+            "INSERT INTO axis VALUES("
+            "'%q','%q','%q','%q','%q','%q','%q',%d,'%q','%q');",
+            authName.c_str(), (code + "_AXIS_" + toString(i + 1)).c_str(),
+            axis->nameStr().c_str(), axis->abbreviation().c_str(),
+            axis->direction().toString().c_str(), authName.c_str(),
+            code.c_str(), i + 1, uomAuthName.c_str(), uomCode.c_str());
+        appendSql(sqlStatements, sql);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+static void
+addAllowedAuthoritiesCond(const std::vector<std::string> &allowedAuthorities,
+                          const std::string &authName, std::string &sql,
+                          ListOfParams &params) {
+    sql += "auth_name IN (?";
+    params.emplace_back(authName);
+    for (const auto &allowedAuthority : allowedAuthorities) {
+        sql += ",?";
+        params.emplace_back(allowedAuthority);
+    }
+    sql += ')';
+}
+
+// ---------------------------------------------------------------------------
+
+void DatabaseContext::Private::identifyOrInsertUsages(
+    const common::ObjectUsageNNPtr &obj, const std::string &tableName,
+    const std::string &authName, const std::string &code,
+    const std::vector<std::string> &allowedAuthorities,
+    std::vector<std::string> &sqlStatements) {
+
+    std::string usageCode("USAGE_");
+    const std::string upperTableName(toupper(tableName));
+    if (!starts_with(code, upperTableName)) {
+        usageCode += upperTableName;
+        usageCode += '_';
+    }
+    usageCode += code;
+
+    const auto &domains = obj->domains();
+    if (domains.empty()) {
+        const auto sql =
+            formatStatement("INSERT INTO usage VALUES('%q','%q','%q','%q','%q',"
+                            "'PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');",
+                            authName.c_str(), usageCode.c_str(),
+                            tableName.c_str(), authName.c_str(), code.c_str());
+        appendSql(sqlStatements, sql);
+        return;
+    }
+
+    int usageCounter = 1;
+    for (const auto &domain : domains) {
+        std::string scopeAuthName;
+        std::string scopeCode;
+        const auto &scope = domain->scope();
+        if (scope.has_value()) {
+            std::string sql =
+                "SELECT auth_name, code, "
+                "(CASE WHEN auth_name = 'EPSG' THEN 0 ELSE 1 END) "
+                "AS order_idx "
+                "FROM scope WHERE scope = ? AND deprecated = 0 AND ";
+            ListOfParams params{*scope};
+            addAllowedAuthoritiesCond(allowedAuthorities, authName, sql,
+                                      params);
+            sql += " ORDER BY order_idx, auth_name, code";
+            const auto rows = run(sql, params);
+            if (!rows.empty()) {
+                const auto &row = rows.front();
+                scopeAuthName = row[0];
+                scopeCode = row[1];
+            } else {
+                scopeAuthName = authName;
+                scopeCode = "SCOPE_" + tableName + "_" + code;
+                const auto sqlToInsert = formatStatement(
+                    "INSERT INTO scope VALUES('%q','%q','%q',0);",
+                    scopeAuthName.c_str(), scopeCode.c_str(), scope->c_str());
+                appendSql(sqlStatements, sqlToInsert);
+            }
+        } else {
+            scopeAuthName = "PROJ";
+            scopeCode = "SCOPE_UNKNOWN";
+        }
+
+        std::string extentAuthName("PROJ");
+        std::string extentCode("EXTENT_UNKNOWN");
+        const auto &extent = domain->domainOfValidity();
+        if (extent) {
+            const auto &geogElts = extent->geographicElements();
+            if (!geogElts.empty()) {
+                const auto bbox =
+                    dynamic_cast<const metadata::GeographicBoundingBox *>(
+                        geogElts.front().get());
+                if (bbox) {
+                    std::string sql =
+                        "SELECT auth_name, code, "
+                        "(CASE WHEN auth_name = 'EPSG' THEN 0 ELSE 1 END) "
+                        "AS order_idx "
+                        "FROM extent WHERE south_lat = ? AND north_lat = ? "
+                        "AND west_lon = ? AND east_lon = ? AND deprecated = 0 "
+                        "AND ";
+                    ListOfParams params{
+                        bbox->southBoundLatitude(), bbox->northBoundLatitude(),
+                        bbox->westBoundLongitude(), bbox->eastBoundLongitude()};
+                    addAllowedAuthoritiesCond(allowedAuthorities, authName, sql,
+                                              params);
+                    sql += " ORDER BY order_idx, auth_name, code";
+                    const auto rows = run(sql, params);
+                    if (!rows.empty()) {
+                        const auto &row = rows.front();
+                        extentAuthName = row[0];
+                        extentCode = row[1];
+                    } else {
+                        extentAuthName = authName;
+                        extentCode = "EXTENT_" + tableName + "_" + code;
+                        std::string description(*(extent->description()));
+                        if (description.empty()) {
+                            description = "unknown";
+                        }
+                        const auto sqlToInsert = formatStatement(
+                            "INSERT INTO extent "
+                            "VALUES('%q','%q','%q','%q',%f,%f,%f,%f,0);",
+                            extentAuthName.c_str(), extentCode.c_str(),
+                            description.c_str(), description.c_str(),
+                            bbox->southBoundLatitude(),
+                            bbox->northBoundLatitude(),
+                            bbox->westBoundLongitude(),
+                            bbox->eastBoundLongitude());
+                        appendSql(sqlStatements, sqlToInsert);
+                    }
+                }
+            }
+        }
+
+        if (domains.size() > 1) {
+            usageCode += '_';
+            usageCode += toString(usageCounter);
+        }
+        const auto sql = formatStatement(
+            "INSERT INTO usage VALUES('%q','%q','%q','%q','%q',"
+            "'%q','%q','%q','%q');",
+            authName.c_str(), usageCode.c_str(), tableName.c_str(),
+            authName.c_str(), code.c_str(), extentAuthName.c_str(),
+            extentCode.c_str(), scopeAuthName.c_str(), scopeCode.c_str());
+        appendSql(sqlStatements, sql);
+
+        usageCounter++;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const datum::PrimeMeridianNNPtr &pm, const std::string &authName,
+    const std::string &code, bool /*numericCode*/,
+    const std::vector<std::string> &allowedAuthorities) {
+
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    // Check if the object is already known under that code
+    std::string pmAuthName;
+    std::string pmCode;
+    identifyFromNameOrCode(self, allowedAuthorities, authName, pm, pmAuthName,
+                           pmCode);
+    if (pmAuthName == authName && pmCode == code) {
+        return {};
+    }
+
+    std::vector<std::string> sqlStatements;
+
+    // Insert new record in prime_meridian table
+    std::string uomAuthName;
+    std::string uomCode;
+    identifyOrInsert(self, pm->longitude().unit(), authName, uomAuthName,
+                     uomCode, sqlStatements);
+
+    const auto sql = formatStatement(
+        "INSERT INTO prime_meridian VALUES("
+        "'%q','%q','%q',%f,'%q','%q',0);",
+        authName.c_str(), code.c_str(), pm->nameStr().c_str(),
+        pm->longitude().value(), uomAuthName.c_str(), uomCode.c_str());
+    appendSql(sqlStatements, sql);
+
+    return sqlStatements;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const datum::EllipsoidNNPtr &ellipsoid, const std::string &authName,
+    const std::string &code, bool /*numericCode*/,
+    const std::vector<std::string> &allowedAuthorities) {
+
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    // Check if the object is already known under that code
+    std::string ellipsoidAuthName;
+    std::string ellipsoidCode;
+    identifyFromNameOrCode(self, allowedAuthorities, authName, ellipsoid,
+                           ellipsoidAuthName, ellipsoidCode);
+    if (ellipsoidAuthName == authName && ellipsoidCode == code) {
+        return {};
+    }
+
+    std::vector<std::string> sqlStatements;
+
+    // Find or insert celestial body
+    const auto &semiMajorAxis = ellipsoid->semiMajorAxis();
+    const double semiMajorAxisMetre = semiMajorAxis.getSIValue();
+    constexpr double tolerance = 0.005;
+    std::string bodyAuthName;
+    std::string bodyCode;
+    auto res = run("SELECT auth_name, code, "
+                   "(ABS(semi_major_axis - ?) / semi_major_axis ) "
+                   "AS rel_error FROM celestial_body WHERE rel_error <= ?",
+                   {semiMajorAxisMetre, tolerance});
+    if (!res.empty()) {
+        const auto &row = res.front();
+        bodyAuthName = row[0];
+        bodyCode = row[1];
+    } else {
+        bodyAuthName = authName;
+        bodyCode = "BODY_" + code;
+        const auto bodyName = "Body of " + ellipsoid->nameStr();
+        const auto sql = formatStatement(
+            "INSERT INTO celestial_body VALUES('%q','%q','%q',%f);",
+            bodyAuthName.c_str(), bodyCode.c_str(), bodyName.c_str(),
+            semiMajorAxisMetre);
+        appendSql(sqlStatements, sql);
+    }
+
+    // Insert new record in ellipsoid table
+    std::string uomAuthName;
+    std::string uomCode;
+    identifyOrInsert(self, semiMajorAxis.unit(), authName, uomAuthName, uomCode,
+                     sqlStatements);
+    std::string invFlattening("NULL");
+    std::string semiMinorAxis("NULL");
+    if (ellipsoid->isSphere() || ellipsoid->semiMinorAxis().has_value()) {
+        semiMinorAxis = toString(ellipsoid->computeSemiMinorAxis().value());
+    } else {
+        invFlattening = toString(ellipsoid->computedInverseFlattening());
+    }
+
+    const auto sql = formatStatement(
+        "INSERT INTO ellipsoid VALUES("
+        "'%q','%q','%q','%q','%q','%q',%f,'%q','%q',%s,%s,0);",
+        authName.c_str(), code.c_str(), ellipsoid->nameStr().c_str(),
+        "", // description
+        bodyAuthName.c_str(), bodyCode.c_str(), semiMajorAxis.value(),
+        uomAuthName.c_str(), uomCode.c_str(), invFlattening.c_str(),
+        semiMinorAxis.c_str());
+    appendSql(sqlStatements, sql);
+
+    return sqlStatements;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const datum::GeodeticReferenceFrameNNPtr &datum,
+    const std::string &authName, const std::string &code, bool numericCode,
+    const std::vector<std::string> &allowedAuthorities) {
+
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    // Check if the object is already known under that code
+    std::string datumAuthName;
+    std::string datumCode;
+    identifyFromNameOrCode(self, allowedAuthorities, authName, datum,
+                           datumAuthName, datumCode);
+    if (datumAuthName == authName && datumCode == code) {
+        return {};
+    }
+
+    std::vector<std::string> sqlStatements;
+
+    // Find or insert ellipsoid
+    std::string ellipsoidAuthName;
+    std::string ellipsoidCode;
+    const auto &ellipsoidOfDatum = datum->ellipsoid();
+    identifyFromNameOrCode(self, allowedAuthorities, authName, ellipsoidOfDatum,
+                           ellipsoidAuthName, ellipsoidCode);
+    if (ellipsoidAuthName.empty()) {
+        ellipsoidAuthName = authName;
+        if (numericCode) {
+            ellipsoidCode = self->suggestsCodeFor(ellipsoidOfDatum,
+                                                  ellipsoidAuthName, true);
+        } else {
+            ellipsoidCode = "ELLPS_" + code;
+        }
+        sqlStatements = self->getInsertStatementsFor(
+            ellipsoidOfDatum, ellipsoidAuthName, ellipsoidCode, numericCode,
+            allowedAuthorities);
+    }
+
+    // Find or insert prime meridian
+    std::string pmAuthName;
+    std::string pmCode;
+    const auto &pmOfDatum = datum->primeMeridian();
+    identifyFromNameOrCode(self, allowedAuthorities, authName, pmOfDatum,
+                           pmAuthName, pmCode);
+    if (pmAuthName.empty()) {
+        pmAuthName = authName;
+        if (numericCode) {
+            pmCode = self->suggestsCodeFor(pmOfDatum, pmAuthName, true);
+        } else {
+            pmCode = "PM_" + code;
+        }
+        const auto sqlStatementsTmp = self->getInsertStatementsFor(
+            pmOfDatum, pmAuthName, pmCode, numericCode, allowedAuthorities);
+        sqlStatements.insert(sqlStatements.end(), sqlStatementsTmp.begin(),
+                             sqlStatementsTmp.end());
+    }
+
+    // Insert new record in geodetic_datum table
+    std::string publicationDate("NULL");
+    if (datum->publicationDate().has_value()) {
+        publicationDate = '\'';
+        publicationDate +=
+            replaceAll(datum->publicationDate()->toString(), "'", "''");
+        publicationDate += '\'';
+    }
+    std::string frameReferenceEpoch("NULL");
+    const auto dynamicDatum =
+        dynamic_cast<const datum::DynamicGeodeticReferenceFrame *>(datum.get());
+    if (dynamicDatum) {
+        frameReferenceEpoch =
+            toString(dynamicDatum->frameReferenceEpoch().value());
+    }
+    const auto sql = formatStatement(
+        "INSERT INTO geodetic_datum VALUES("
+        "'%q','%q','%q','%q','%q','%q','%q','%q',%s,%s,NULL,0);",
+        authName.c_str(), code.c_str(), datum->nameStr().c_str(),
+        "", // description
+        ellipsoidAuthName.c_str(), ellipsoidCode.c_str(), pmAuthName.c_str(),
+        pmCode.c_str(), publicationDate.c_str(), frameReferenceEpoch.c_str());
+    appendSql(sqlStatements, sql);
+
+    identifyOrInsertUsages(datum, "geodetic_datum", authName, code,
+                           allowedAuthorities, sqlStatements);
+
+    return sqlStatements;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const datum::DatumEnsembleNNPtr &ensemble, const std::string &authName,
+    const std::string &code, bool numericCode,
+    const std::vector<std::string> &allowedAuthorities) {
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    // Check if the object is already known under that code
+    std::string datumAuthName;
+    std::string datumCode;
+    identifyFromNameOrCode(self, allowedAuthorities, authName, ensemble,
+                           datumAuthName, datumCode);
+    if (datumAuthName == authName && datumCode == code) {
+        return {};
+    }
+
+    std::vector<std::string> sqlStatements;
+
+    const auto &members = ensemble->datums();
+    assert(!members.empty());
+
+    int counter = 1;
+    std::vector<std::pair<std::string, std::string>> membersId;
+    for (const auto &member : members) {
+        std::string memberAuthName;
+        std::string memberCode;
+        identifyFromNameOrCode(self, allowedAuthorities, authName, member,
+                               memberAuthName, memberCode);
+        if (memberAuthName.empty()) {
+            memberAuthName = authName;
+            if (numericCode) {
+                memberCode =
+                    self->suggestsCodeFor(member, memberAuthName, true);
+            } else {
+                memberCode = "MEMBER_" + toString(counter) + "_OF_" + code;
+            }
+            const auto sqlStatementsTmp =
+                self->getInsertStatementsFor(member, memberAuthName, memberCode,
+                                             numericCode, allowedAuthorities);
+            sqlStatements.insert(sqlStatements.end(), sqlStatementsTmp.begin(),
+                                 sqlStatementsTmp.end());
+        }
+
+        membersId.emplace_back(
+            std::pair<std::string, std::string>(memberAuthName, memberCode));
+
+        ++counter;
+    }
+
+    const bool isGeodetic =
+        util::nn_dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
+            members.front()) != nullptr;
+
+    // Insert new record in geodetic_datum/vertical_datum table
+    const double accuracy =
+        c_locale_stod(ensemble->positionalAccuracy()->value());
+    if (isGeodetic) {
+        const auto firstDatum =
+            AuthorityFactory::create(self, membersId.front().first)
+                ->createGeodeticDatum(membersId.front().second);
+        const auto &ellipsoid = firstDatum->ellipsoid();
+        const auto &ellipsoidIds = ellipsoid->identifiers();
+        assert(!ellipsoidIds.empty());
+        const std::string &ellipsoidAuthName =
+            *(ellipsoidIds.front()->codeSpace());
+        const std::string &ellipsoidCode = ellipsoidIds.front()->code();
+        const auto &pm = firstDatum->primeMeridian();
+        const auto &pmIds = pm->identifiers();
+        assert(!pmIds.empty());
+        const std::string &pmAuthName = *(pmIds.front()->codeSpace());
+        const std::string &pmCode = pmIds.front()->code();
+        const auto sql = formatStatement(
+            "INSERT INTO geodetic_datum VALUES("
+            "'%q','%q','%q','%q','%q','%q','%q','%q',NULL,NULL,%f,0);",
+            authName.c_str(), code.c_str(), ensemble->nameStr().c_str(),
+            "", // description
+            ellipsoidAuthName.c_str(), ellipsoidCode.c_str(),
+            pmAuthName.c_str(), pmCode.c_str(), accuracy);
+        appendSql(sqlStatements, sql);
+    } else {
+        const auto sql = formatStatement("INSERT INTO vertical_datum VALUES("
+                                         "'%q','%q','%q','%q',NULL,NULL,%f,0);",
+                                         authName.c_str(), code.c_str(),
+                                         ensemble->nameStr().c_str(),
+                                         "", // description
+                                         accuracy);
+        appendSql(sqlStatements, sql);
+    }
+    identifyOrInsertUsages(ensemble,
+                           isGeodetic ? "geodetic_datum" : "vertical_datum",
+                           authName, code, allowedAuthorities, sqlStatements);
+
+    const char *tableName = isGeodetic ? "geodetic_datum_ensemble_member"
+                                       : "vertical_datum_ensemble_member";
+    counter = 1;
+    for (const auto &authCodePair : membersId) {
+        const auto sql = formatStatement(
+            "INSERT INTO %s VALUES("
+            "'%q','%q','%q','%q',%d);",
+            tableName, authName.c_str(), code.c_str(),
+            authCodePair.first.c_str(), authCodePair.second.c_str(), counter);
+        appendSql(sqlStatements, sql);
+        ++counter;
+    }
+
+    return sqlStatements;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const crs::GeodeticCRSNNPtr &crs, const std::string &authName,
+    const std::string &code, bool numericCode,
+    const std::vector<std::string> &allowedAuthorities) {
+
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    std::vector<std::string> sqlStatements;
+
+    // Find or insert datum/datum ensemble
+    std::string datumAuthName;
+    std::string datumCode;
+    const auto &ensemble = crs->datumEnsemble();
+    if (ensemble) {
+        const auto ensembleNN = NN_NO_CHECK(ensemble);
+        identifyFromNameOrCode(self, allowedAuthorities, authName, ensembleNN,
+                               datumAuthName, datumCode);
+        if (datumAuthName.empty()) {
+            datumAuthName = authName;
+            if (numericCode) {
+                datumCode =
+                    self->suggestsCodeFor(ensembleNN, datumAuthName, true);
+            } else {
+                datumCode = "GEODETIC_DATUM_" + code;
+            }
+            sqlStatements = self->getInsertStatementsFor(
+                ensembleNN, datumAuthName, datumCode, numericCode,
+                allowedAuthorities);
+        }
+    } else {
+        const auto &datum = crs->datum();
+        assert(datum);
+        const auto datumNN = NN_NO_CHECK(datum);
+        identifyFromNameOrCode(self, allowedAuthorities, authName, datumNN,
+                               datumAuthName, datumCode);
+        if (datumAuthName.empty()) {
+            datumAuthName = authName;
+            if (numericCode) {
+                datumCode = self->suggestsCodeFor(datumNN, datumAuthName, true);
+            } else {
+                datumCode = "GEODETIC_DATUM_" + code;
+            }
+            sqlStatements =
+                self->getInsertStatementsFor(datumNN, datumAuthName, datumCode,
+                                             numericCode, allowedAuthorities);
+        }
+    }
+
+    // Find or insert coordinate system
+    const auto &coordinateSystem = crs->coordinateSystem();
+    std::string csAuthName;
+    std::string csCode;
+    identifyOrInsert(self, coordinateSystem, "GEODETIC_CRS", authName, code,
+                     csAuthName, csCode, sqlStatements);
+
+    const char *type = GEOG_2D;
+    if (coordinateSystem->axisList().size() == 3) {
+        if (dynamic_cast<const crs::GeographicCRS *>(crs.get())) {
+            type = GEOG_3D;
+        } else {
+            type = GEOCENTRIC;
+        }
+    }
+
+    // Insert new record in geodetic_crs table
+    const auto sql =
+        formatStatement("INSERT INTO geodetic_crs VALUES("
+                        "'%q','%q','%q','%q','%q','%q','%q','%q','%q',NULL,0);",
+                        authName.c_str(), code.c_str(), crs->nameStr().c_str(),
+                        "", // description
+                        type, csAuthName.c_str(), csCode.c_str(),
+                        datumAuthName.c_str(), datumCode.c_str());
+    appendSql(sqlStatements, sql);
+
+    identifyOrInsertUsages(crs, "geodetic_crs", authName, code,
+                           allowedAuthorities, sqlStatements);
+    return sqlStatements;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const crs::ProjectedCRSNNPtr &crs, const std::string &authName,
+    const std::string &code, bool numericCode,
+    const std::vector<std::string> &allowedAuthorities) {
+
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    std::vector<std::string> sqlStatements;
+
+    // Find or insert base geodetic CRS
+    const auto &baseCRS = crs->baseCRS();
+    std::string geodAuthName;
+    std::string geodCode;
+
+    auto allowedAuthoritiesTmp(allowedAuthorities);
+    allowedAuthoritiesTmp.emplace_back(authName);
+    for (const auto &allowedAuthority : allowedAuthoritiesTmp) {
+        const auto factory = AuthorityFactory::create(self, allowedAuthority);
+        const auto candidates = baseCRS->identify(factory);
+        for (const auto &candidate : candidates) {
+            if (candidate.second == 100) {
+                const auto &ids = candidate.first->identifiers();
+                for (const auto &id : ids) {
+                    geodAuthName = *(id->codeSpace());
+                    geodCode = id->code();
+                    break;
+                }
+            }
+            if (!geodAuthName.empty()) {
+                break;
+            }
+        }
+    }
+    if (geodAuthName.empty()) {
+        geodAuthName = authName;
+        geodCode = "GEODETIC_CRS_" + code;
+        sqlStatements = self->getInsertStatementsFor(
+            baseCRS, geodAuthName, geodCode, numericCode, allowedAuthorities);
+    }
+
+    // Insert new record in conversion table
+    const auto &conversion = crs->derivingConversionRef();
+    std::string convAuthName(authName);
+    std::string convCode("CONVERSION_" + code);
+    if (numericCode) {
+        convCode = self->suggestsCodeFor(conversion, convAuthName, true);
+    }
+    {
+        const auto &method = conversion->method();
+        const auto &methodIds = method->identifiers();
+        if (methodIds.empty()) {
+            throw FactoryException(
+                "Cannot insert projection with method without identifier");
+        }
+        const auto &methodId = methodIds.front();
+        const auto &methodAuthName = *(methodId->codeSpace());
+        const auto &methodCode = methodId->code();
+        auto sql = formatStatement("INSERT INTO conversion VALUES("
+                                   "'%q','%q','%q','','%q','%q','%q'",
+                                   convAuthName.c_str(), convCode.c_str(),
+                                   conversion->nameStr().c_str(),
+                                   methodAuthName.c_str(), methodCode.c_str(),
+                                   method->nameStr().c_str());
+        const auto &values = conversion->parameterValues();
+        if (values.size() > N_MAX_PARAMS) {
+            throw FactoryException("Cannot insert projection with more than " +
+                                   toString(static_cast<int>(N_MAX_PARAMS)) +
+                                   " parameters");
+        }
+        for (const auto &genOpParamvalue : values) {
+            auto opParamValue =
+                dynamic_cast<const operation::OperationParameterValue *>(
+                    genOpParamvalue.get());
+            if (!opParamValue) {
+                throw FactoryException("Cannot insert projection with "
+                                       "non-OperationParameterValue");
+            }
+            const auto &param = opParamValue->parameter();
+            const auto &paramIds = param->identifiers();
+            if (paramIds.empty()) {
+                throw FactoryException(
+                    "Cannot insert projection with method parameter "
+                    "without identifier");
+            }
+            const auto &paramId = paramIds.front();
+            const auto &paramAuthName = *(paramId->codeSpace());
+            const auto &paramCode = paramId->code();
+            const auto &value = opParamValue->parameterValue()->value();
+            const auto &unit = value.unit();
+            std::string uomAuthName;
+            std::string uomCode;
+            identifyOrInsert(self, unit, authName, uomAuthName, uomCode,
+                             sqlStatements);
+            sql += formatStatement(",'%q','%q','%q',%f,'%q','%q'",
+                                   paramAuthName.c_str(), paramCode.c_str(),
+                                   param->nameStr().c_str(), value.value(),
+                                   uomAuthName.c_str(), uomCode.c_str());
+        }
+        for (size_t i = values.size(); i < N_MAX_PARAMS; ++i) {
+            sql += ",NULL,NULL,NULL,NULL,NULL,NULL";
+        }
+        sql += ",0);";
+        appendSql(sqlStatements, sql);
+        identifyOrInsertUsages(crs, "conversion", convAuthName, convCode,
+                               allowedAuthorities, sqlStatements);
+    }
+
+    // Find or insert coordinate system
+    const auto &coordinateSystem = crs->coordinateSystem();
+    std::string csAuthName;
+    std::string csCode;
+    identifyOrInsert(self, coordinateSystem, "PROJECTED_CRS", authName, code,
+                     csAuthName, csCode, sqlStatements);
+
+    // Insert new record in projected_crs table
+    const auto sql = formatStatement(
+        "INSERT INTO projected_crs VALUES("
+        "'%q','%q','%q','%q','%q','%q','%q','%q','%q','%q',NULL,0);",
+        authName.c_str(), code.c_str(), crs->nameStr().c_str(),
+        "", // description
+        csAuthName.c_str(), csCode.c_str(), geodAuthName.c_str(),
+        geodCode.c_str(), convAuthName.c_str(), convCode.c_str());
+    appendSql(sqlStatements, sql);
+
+    identifyOrInsertUsages(crs, "projected_crs", authName, code,
+                           allowedAuthorities, sqlStatements);
+
+    return sqlStatements;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const datum::VerticalReferenceFrameNNPtr &datum,
+    const std::string &authName, const std::string &code,
+    bool /* numericCode */,
+    const std::vector<std::string> &allowedAuthorities) {
+
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    std::vector<std::string> sqlStatements;
+
+    // Check if the object is already known under that code
+    std::string datumAuthName;
+    std::string datumCode;
+    identifyFromNameOrCode(self, allowedAuthorities, authName, datum,
+                           datumAuthName, datumCode);
+    if (datumAuthName == authName && datumCode == code) {
+        return {};
+    }
+
+    // Insert new record in vertical_datum table
+    std::string publicationDate("NULL");
+    if (datum->publicationDate().has_value()) {
+        publicationDate = '\'';
+        publicationDate +=
+            replaceAll(datum->publicationDate()->toString(), "'", "''");
+        publicationDate += '\'';
+    }
+    std::string frameReferenceEpoch("NULL");
+    const auto dynamicDatum =
+        dynamic_cast<const datum::DynamicVerticalReferenceFrame *>(datum.get());
+    if (dynamicDatum) {
+        frameReferenceEpoch =
+            toString(dynamicDatum->frameReferenceEpoch().value());
+    }
+    const auto sql = formatStatement(
+        "INSERT INTO vertical_datum VALUES("
+        "'%q','%q','%q','%q',%s,%s,NULL,0);",
+        authName.c_str(), code.c_str(), datum->nameStr().c_str(),
+        "", // description
+        publicationDate.c_str(), frameReferenceEpoch.c_str());
+    appendSql(sqlStatements, sql);
+
+    identifyOrInsertUsages(datum, "vertical_datum", authName, code,
+                           allowedAuthorities, sqlStatements);
+
+    return sqlStatements;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const crs::VerticalCRSNNPtr &crs, const std::string &authName,
+    const std::string &code, bool numericCode,
+    const std::vector<std::string> &allowedAuthorities) {
+
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    std::vector<std::string> sqlStatements;
+
+    // Find or insert datum/datum ensemble
+    std::string datumAuthName;
+    std::string datumCode;
+    const auto &ensemble = crs->datumEnsemble();
+    if (ensemble) {
+        const auto ensembleNN = NN_NO_CHECK(ensemble);
+        identifyFromNameOrCode(self, allowedAuthorities, authName, ensembleNN,
+                               datumAuthName, datumCode);
+        if (datumAuthName.empty()) {
+            datumAuthName = authName;
+            if (numericCode) {
+                datumCode =
+                    self->suggestsCodeFor(ensembleNN, datumAuthName, true);
+            } else {
+                datumCode = "VERTICAL_DATUM_" + code;
+            }
+            sqlStatements = self->getInsertStatementsFor(
+                ensembleNN, datumAuthName, datumCode, numericCode,
+                allowedAuthorities);
+        }
+    } else {
+        const auto &datum = crs->datum();
+        assert(datum);
+        const auto datumNN = NN_NO_CHECK(datum);
+        identifyFromNameOrCode(self, allowedAuthorities, authName, datumNN,
+                               datumAuthName, datumCode);
+        if (datumAuthName.empty()) {
+            datumAuthName = authName;
+            if (numericCode) {
+                datumCode = self->suggestsCodeFor(datumNN, datumAuthName, true);
+            } else {
+                datumCode = "VERTICAL_DATUM_" + code;
+            }
+            sqlStatements =
+                self->getInsertStatementsFor(datumNN, datumAuthName, datumCode,
+                                             numericCode, allowedAuthorities);
+        }
+    }
+
+    // Find or insert coordinate system
+    const auto &coordinateSystem = crs->coordinateSystem();
+    std::string csAuthName;
+    std::string csCode;
+    identifyOrInsert(self, coordinateSystem, "VERTICAL_CRS", authName, code,
+                     csAuthName, csCode, sqlStatements);
+
+    // Insert new record in vertical_crs table
+    const auto sql =
+        formatStatement("INSERT INTO vertical_crs VALUES("
+                        "'%q','%q','%q','%q','%q','%q','%q','%q',0);",
+                        authName.c_str(), code.c_str(), crs->nameStr().c_str(),
+                        "", // description
+                        csAuthName.c_str(), csCode.c_str(),
+                        datumAuthName.c_str(), datumCode.c_str());
+    appendSql(sqlStatements, sql);
+
+    identifyOrInsertUsages(crs, "vertical_crs", authName, code,
+                           allowedAuthorities, sqlStatements);
+
+    return sqlStatements;
+}
+
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
+    const crs::CompoundCRSNNPtr &crs, const std::string &authName,
+    const std::string &code, bool numericCode,
+    const std::vector<std::string> &allowedAuthorities) {
+
+    const auto self = NN_NO_CHECK(self_.lock());
+
+    std::vector<std::string> sqlStatements;
+
+    int counter = 1;
+    std::vector<std::pair<std::string, std::string>> componentsId;
+    const auto &components = crs->componentReferenceSystems();
+    if (components.size() != 2) {
+        throw FactoryException(
+            "Cannot insert compound CRS with number of components != 2");
+    }
+
+    auto allowedAuthoritiesTmp(allowedAuthorities);
+    allowedAuthoritiesTmp.emplace_back(authName);
+
+    for (const auto &component : components) {
+        std::string compAuthName;
+        std::string compCode;
+
+        for (const auto &allowedAuthority : allowedAuthoritiesTmp) {
+            const auto factory =
+                AuthorityFactory::create(self, allowedAuthority);
+            const auto candidates = component->identify(factory);
+            for (const auto &candidate : candidates) {
+                if (candidate.second == 100) {
+                    const auto &ids = candidate.first->identifiers();
+                    for (const auto &id : ids) {
+                        compAuthName = *(id->codeSpace());
+                        compCode = id->code();
+                        break;
+                    }
+                }
+                if (!compAuthName.empty()) {
+                    break;
+                }
+            }
+        }
+
+        if (compAuthName.empty()) {
+            compAuthName = authName;
+            if (numericCode) {
+                compCode = self->suggestsCodeFor(component, compAuthName, true);
+            } else {
+                compCode = "COMPONENT_" + code + '_' + toString(counter);
+            }
+            const auto sqlStatementsTmp =
+                self->getInsertStatementsFor(component, compAuthName, compCode,
+                                             numericCode, allowedAuthorities);
+            sqlStatements.insert(sqlStatements.end(), sqlStatementsTmp.begin(),
+                                 sqlStatementsTmp.end());
+        }
+
+        componentsId.emplace_back(
+            std::pair<std::string, std::string>(compAuthName, compCode));
+
+        ++counter;
+    }
+
+    // Insert new record in compound_crs table
+    const auto sql = formatStatement(
+        "INSERT INTO compound_crs VALUES("
+        "'%q','%q','%q','%q','%q','%q','%q','%q',0);",
+        authName.c_str(), code.c_str(), crs->nameStr().c_str(),
+        "", // description
+        componentsId[0].first.c_str(), componentsId[0].second.c_str(),
+        componentsId[1].first.c_str(), componentsId[1].second.c_str());
+    appendSql(sqlStatements, sql);
+
+    identifyOrInsertUsages(crs, "compound_crs", authName, code,
+                           allowedAuthorities, sqlStatements);
+
+    return sqlStatements;
+}
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-DatabaseContext::~DatabaseContext() = default;
+DatabaseContext::~DatabaseContext() {
+    try {
+        stopInsertStatementsSession();
+    } catch (const std::exception &) {
+    }
+}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -937,6 +2482,11 @@ DatabaseContext::DatabaseContext() : d(internal::make_unique<Private>()) {}
  * string for the default rules to locate the default proj.db
  * @param auxiliaryDatabasePaths Path and filename of auxiliary databases.
  * Might be empty.
+ * Starting with PROJ 8.1, if this parameter is an empty array,
+ * the PROJ_AUX_DB environment variable will be used, if set.
+ * It must contain one or several paths. If several paths are
+ * provided, they must be separated by the colon (:) character on Unix, and
+ * on Windows, by the semi-colon (;) character.
  * @param ctx Context used for file search.
  * @throw FactoryException
  */
@@ -945,11 +2495,26 @@ DatabaseContext::create(const std::string &databasePath,
                         const std::vector<std::string> &auxiliaryDatabasePaths,
                         PJ_CONTEXT *ctx) {
     auto dbCtx = DatabaseContext::nn_make_shared<DatabaseContext>();
-    dbCtx->getPrivate()->open(databasePath, ctx);
-    if (!auxiliaryDatabasePaths.empty()) {
-        dbCtx->getPrivate()->attachExtraDatabases(auxiliaryDatabasePaths);
+    auto dbCtxPrivate = dbCtx->getPrivate();
+    dbCtxPrivate->open(databasePath, ctx);
+    dbCtxPrivate->checkDatabaseLayout(databasePath, std::string());
+    auto auxDbs(auxiliaryDatabasePaths);
+    if (auxDbs.empty()) {
+        const char *auxDbStr = getenv("PROJ_AUX_DB");
+        if (auxDbStr) {
+#ifdef _WIN32
+            const char *delim = ";";
+#else
+            const char *delim = ":";
+#endif
+            auxDbs = split(auxDbStr, delim);
+        }
     }
-    dbCtx->getPrivate()->checkDatabaseLayout();
+    if (!auxDbs.empty()) {
+        dbCtxPrivate->attachExtraDatabases(auxDbs);
+        dbCtxPrivate->auxiliaryDatabasePaths_ = auxDbs;
+    }
+    dbCtxPrivate->self_ = dbCtx.as_nullable();
     return dbCtx;
 }
 
@@ -995,6 +2560,279 @@ const char *DatabaseContext::getMetadata(const char *key) const {
     }
     d->lastMetadataValue_ = res.front()[0];
     return d->lastMetadataValue_.c_str();
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Starts a session for getInsertStatementsFor()
+ *
+ * Starts a new session for one or several calls to getInsertStatementsFor().
+ * An insertion session guarantees that the inserted objects will not create
+ * conflicting intermediate objects.
+ *
+ * The session must be stopped with stopInsertStatementsSession().
+ *
+ * Only one session may be active at a time for a given database context.
+ *
+ * @throw FactoryException
+ * @since 8.1
+ */
+void DatabaseContext::startInsertStatementsSession() {
+    if (d->memoryDbHandle_) {
+        throw FactoryException(
+            "startInsertStatementsSession() cannot be invoked until "
+            "stopInsertStatementsSession() is.");
+    }
+
+    d->memoryDbForInsertPath_.clear();
+    const auto sqlStatements = getDatabaseStructure();
+
+    // Create a in-memory temporary sqlite3 database
+    std::ostringstream buffer;
+    buffer << "file:temp_db_for_insert_statements_";
+    buffer << this;
+    buffer << ".db?mode=memory&cache=shared";
+    d->memoryDbForInsertPath_ = buffer.str();
+    sqlite3_open_v2(
+        d->memoryDbForInsertPath_.c_str(), &d->memoryDbHandle_,
+        SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI, nullptr);
+    if (d->memoryDbHandle_ == nullptr) {
+        throw FactoryException("Cannot create in-memory database");
+    }
+
+    // Fill the structure of this database
+    for (const auto &sql : sqlStatements) {
+        if (sqlite3_exec(d->memoryDbHandle_, sql.c_str(), nullptr, nullptr,
+                         nullptr) != SQLITE_OK) {
+            throw FactoryException("Cannot execute " + sql);
+        }
+    }
+
+    // Attach this database to the current one(s)
+    auto auxiliaryDatabasePaths(d->auxiliaryDatabasePaths_);
+    auxiliaryDatabasePaths.push_back(d->memoryDbForInsertPath_);
+    d->attachExtraDatabases(auxiliaryDatabasePaths);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Suggests a database code for the passed object.
+ *
+ * Supported type of objects are PrimeMeridian, Ellipsoid, Datum, DatumEnsemble,
+ * GeodeticCRS, ProjectedCRS, VerticalCRS, CompoundCRS, BoundCRS, Conversion.
+ *
+ * @param object Object for which to suggest a code.
+ * @param authName Authority name into which the object will be inserted.
+ * @param numericCode Whether the code should be numeric, or derived from the
+ * object name.
+ * @return the suggested code, that is guaranteed to not conflict with an
+ * existing one.
+ *
+ * @throw FactoryException
+ * @since 8.1
+ */
+std::string
+DatabaseContext::suggestsCodeFor(const common::IdentifiedObjectNNPtr &object,
+                                 const std::string &authName,
+                                 bool numericCode) {
+    const char *tableName = "";
+    if (dynamic_cast<const datum::PrimeMeridian *>(object.get())) {
+        tableName = "prime_meridian";
+    } else if (dynamic_cast<const datum::Ellipsoid *>(object.get())) {
+        tableName = "ellipsoid";
+    } else if (dynamic_cast<const datum::GeodeticReferenceFrame *>(
+                   object.get())) {
+        tableName = "geodetic_datum";
+    } else if (dynamic_cast<const datum::VerticalReferenceFrame *>(
+                   object.get())) {
+        tableName = "vertical_datum";
+    } else if (const auto ensemble =
+                   dynamic_cast<const datum::DatumEnsemble *>(object.get())) {
+        const auto &datums = ensemble->datums();
+        if (!datums.empty() &&
+            dynamic_cast<const datum::GeodeticReferenceFrame *>(
+                datums[0].get())) {
+            tableName = "geodetic_datum";
+        } else {
+            tableName = "vertical_datum";
+        }
+    } else if (const auto boundCRS =
+                   dynamic_cast<const crs::BoundCRS *>(object.get())) {
+        return suggestsCodeFor(boundCRS->baseCRS(), authName, numericCode);
+    } else if (dynamic_cast<const crs::CRS *>(object.get())) {
+        tableName = "crs_view";
+    } else if (dynamic_cast<const operation::Conversion *>(object.get())) {
+        tableName = "conversion";
+    } else {
+        throw FactoryException("suggestsCodeFor(): unhandled type of object");
+    }
+
+    if (numericCode) {
+        std::string sql("SELECT MAX(code) FROM ");
+        sql += tableName;
+        sql += " WHERE auth_name = ? AND code >= '1' AND code <= '999999999' "
+               "AND upper(code) = lower(code)";
+        const auto res = d->run(sql, {authName});
+        if (res.empty()) {
+            return "1";
+        }
+        return toString(atoi(res.front()[0].c_str()) + 1);
+    }
+
+    std::string code;
+    code.reserve(object->nameStr().size());
+    bool insertUnderscore = false;
+    for (const auto ch : toupper(object->nameStr())) {
+        if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z')) {
+            if (insertUnderscore && code.back() != '_')
+                code += '_';
+            code += ch;
+            insertUnderscore = false;
+        } else {
+            insertUnderscore = true;
+        }
+    }
+    return d->findFreeCode(tableName, authName, code);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns SQL statements needed to insert the passed object into the
+ * database.
+ *
+ * startInsertStatementsSession() must have been called previously.
+ *
+ * @param object The object to insert into the database. Currently only
+ *               PrimeMeridian, Ellipsoid, Datum, GeodeticCRS, ProjectedCRS,
+ *               VerticalCRS, CompoundCRS or BoundCRS are supported.
+ * @param authName Authority name into which the object will be inserted.
+ * @param code Code with which the object will be inserted.
+ * @param numericCode Whether intermediate objects that can be created should
+ *                    use numeric codes (true), or may be alphanumeric (false)
+ * @param allowedAuthorities Authorities to which intermediate objects are
+ *                           allowed to refer to. authName will be implicitly
+ *                           added to it. Note that unit, coordinate
+ *                           systems, projection methods and parameters will in
+ *                           any case be allowed to refer to EPSG.
+ * @throw FactoryException
+ * @since 8.1
+ */
+std::vector<std::string> DatabaseContext::getInsertStatementsFor(
+    const common::IdentifiedObjectNNPtr &object, const std::string &authName,
+    const std::string &code, bool numericCode,
+    const std::vector<std::string> &allowedAuthorities) {
+    if (d->memoryDbHandle_ == nullptr) {
+        throw FactoryException(
+            "startInsertStatementsSession() should be invoked first");
+    }
+
+    const auto crs = util::nn_dynamic_pointer_cast<crs::CRS>(object);
+    if (crs) {
+        // Check if the object is already known under that code
+        const auto self = NN_NO_CHECK(d->self_.lock());
+        auto allowedAuthoritiesTmp(allowedAuthorities);
+        allowedAuthoritiesTmp.emplace_back(authName);
+        for (const auto &allowedAuthority : allowedAuthoritiesTmp) {
+            const auto factory =
+                AuthorityFactory::create(self, allowedAuthority);
+            const auto candidates = crs->identify(factory);
+            for (const auto &candidate : candidates) {
+                if (candidate.second == 100) {
+                    const auto &ids = candidate.first->identifiers();
+                    for (const auto &id : ids) {
+                        if (*(id->codeSpace()) == authName &&
+                            id->code() == code) {
+                            return {};
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (const auto pm =
+            util::nn_dynamic_pointer_cast<datum::PrimeMeridian>(object)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(pm), authName, code,
+                                         numericCode, allowedAuthorities);
+    }
+
+    else if (const auto ellipsoid =
+                 util::nn_dynamic_pointer_cast<datum::Ellipsoid>(object)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(ellipsoid), authName, code,
+                                         numericCode, allowedAuthorities);
+    }
+
+    else if (const auto geodeticDatum =
+                 util::nn_dynamic_pointer_cast<datum::GeodeticReferenceFrame>(
+                     object)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(geodeticDatum), authName,
+                                         code, numericCode, allowedAuthorities);
+    }
+
+    else if (const auto ensemble =
+                 util::nn_dynamic_pointer_cast<datum::DatumEnsemble>(object)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(ensemble), authName, code,
+                                         numericCode, allowedAuthorities);
+    }
+
+    else if (const auto geodCRS =
+                 std::dynamic_pointer_cast<crs::GeodeticCRS>(crs)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(geodCRS), authName, code,
+                                         numericCode, allowedAuthorities);
+    }
+
+    else if (const auto projCRS =
+                 std::dynamic_pointer_cast<crs::ProjectedCRS>(crs)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(projCRS), authName, code,
+                                         numericCode, allowedAuthorities);
+    }
+
+    else if (const auto verticalDatum =
+                 util::nn_dynamic_pointer_cast<datum::VerticalReferenceFrame>(
+                     object)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(verticalDatum), authName,
+                                         code, numericCode, allowedAuthorities);
+    }
+
+    else if (const auto vertCRS =
+                 std::dynamic_pointer_cast<crs::VerticalCRS>(crs)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(vertCRS), authName, code,
+                                         numericCode, allowedAuthorities);
+    }
+
+    else if (const auto compoundCRS =
+                 std::dynamic_pointer_cast<crs::CompoundCRS>(crs)) {
+        return d->getInsertStatementsFor(NN_NO_CHECK(compoundCRS), authName,
+                                         code, numericCode, allowedAuthorities);
+    }
+
+    else if (const auto boundCRS =
+                 std::dynamic_pointer_cast<crs::BoundCRS>(crs)) {
+        return getInsertStatementsFor(boundCRS->baseCRS(), authName, code,
+                                      numericCode, allowedAuthorities);
+    }
+
+    else {
+        throw FactoryException(
+            "getInsertStatementsFor(): unhandled type of object");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Stops an insertion session started with
+ * startInsertStatementsSession()
+ *
+ * @since 8.1
+ */
+void DatabaseContext::stopInsertStatementsSession() {
+    if (d->memoryDbHandle_) {
+        d->clearCaches();
+        d->attachExtraDatabases(d->auxiliaryDatabasePaths_);
+        sqlite3_close(d->memoryDbHandle_);
+        d->memoryDbHandle_ = nullptr;
+        d->memoryDbForInsertPath_.clear();
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1518,7 +3356,12 @@ util::PropertyMap AuthorityFactory::Private::createPropertiesSearchUsages(
         "JOIN scope ON usage.scope_auth_name = scope.auth_name AND "
         "usage.scope_code = scope.code "
         "WHERE object_table_name = ? AND object_auth_name = ? AND "
-        "object_code = ? "
+        "object_code = ? AND "
+        // We voluntary exclude extent and scope with a specific code
+        "NOT (usage.extent_auth_name = 'PROJ' AND "
+        "usage.extent_code = 'EXTENT_UNKNOWN') AND "
+        "NOT (usage.scope_auth_name = 'PROJ' AND "
+        "usage.scope_code = 'SCOPE_UNKNOWN') "
         "ORDER BY score, usage.auth_name, usage.code");
     auto res = run(sql, {table_name, authority(), code});
     std::vector<ObjectDomainNNPtr> usages;
@@ -1624,7 +3467,8 @@ AuthorityFactoryNNPtr
 AuthorityFactory::create(const DatabaseContextNNPtr &context,
                          const std::string &authorityName) {
     const auto getFactory = [&context, &authorityName]() {
-        for (const auto &knownName : {"EPSG", "ESRI", "PROJ"}) {
+        for (const auto &knownName :
+             {metadata::Identifier::EPSG.c_str(), "ESRI", "PROJ"}) {
             if (ci_equal(authorityName, knownName)) {
                 return AuthorityFactory::nn_make_shared<AuthorityFactory>(
                     context, knownName);
@@ -2802,8 +4646,7 @@ AuthorityFactory::createConversion(const std::string &code) const {
         const size_t base_param_idx = idx;
         std::vector<operation::OperationParameterNNPtr> parameters;
         std::vector<operation::ParameterValueNNPtr> values;
-        constexpr int N_MAX_PARAMS = 7;
-        for (int i = 0; i < N_MAX_PARAMS; ++i) {
+        for (size_t i = 0; i < N_MAX_PARAMS; ++i) {
             const auto &param_auth_name = row[base_param_idx + i * 6 + 0];
             if (param_auth_name.empty()) {
                 break;
@@ -3523,8 +5366,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                "target_crs_code, "
                "interpolation_crs_auth_name, interpolation_crs_code, "
                "operation_version, accuracy, deprecated";
-        constexpr int N_MAX_PARAMS = 7;
-        for (int i = 1; i <= N_MAX_PARAMS; ++i) {
+        for (size_t i = 1; i <= N_MAX_PARAMS; ++i) {
             buffer << ", param" << i << "_auth_name";
             buffer << ", param" << i << "_code";
             buffer << ", param" << i << "_name";
@@ -3563,7 +5405,7 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
             const size_t base_param_idx = idx;
             std::vector<operation::OperationParameterNNPtr> parameters;
             std::vector<operation::ParameterValueNNPtr> values;
-            for (int i = 0; i < N_MAX_PARAMS; ++i) {
+            for (size_t i = 0; i < N_MAX_PARAMS; ++i) {
                 const auto &param_auth_name = row[base_param_idx + i * 6 + 0];
                 if (param_auth_name.empty()) {
                     break;

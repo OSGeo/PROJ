@@ -838,6 +838,19 @@ class PROJ_GCC_DLL DatabaseContext {
 
     PROJ_DLL std::vector<std::string> getDatabaseStructure() const;
 
+    PROJ_DLL void startInsertStatementsSession();
+
+    PROJ_DLL std::string
+    suggestsCodeFor(const common::IdentifiedObjectNNPtr &object,
+                    const std::string &authName, bool numericCode);
+
+    PROJ_DLL std::vector<std::string> getInsertStatementsFor(
+        const common::IdentifiedObjectNNPtr &object,
+        const std::string &authName, const std::string &code, bool numericCode,
+        const std::vector<std::string> &allowedAuthorities = {"EPSG", "PROJ"});
+
+    PROJ_DLL void stopInsertStatementsSession();
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
         PROJ_DLL void *
