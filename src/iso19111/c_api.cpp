@@ -8943,8 +8943,8 @@ void proj_string_destroy(char *str) { free(str); }
  *
  * Combined with proj_context_get_database_structure(), users can create
  * auxiliary databases, instead of directly modifying the main proj.db database.
- * Those auxiliary databases can be specified through proj_context_set_database_path()
- * or the PROJ_AUX_DB environment variable.
+ * Those auxiliary databases can be specified through
+ * proj_context_set_database_path() or the PROJ_AUX_DB environment variable.
  *
  * @param ctx PROJ context, or NULL for default context
  * @param session The insertion session. May be NULL if a single object must be
