@@ -4243,6 +4243,22 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
         return listTmp;
     }
 
+    const auto CheckIfHasOperations = [=](const std::string &auth_name,
+                                          const std::string &code) {
+        return !(d->run("SELECT 1 FROM coordinate_operation_view WHERE "
+                        "(source_crs_auth_name = ? AND source_crs_code = ?) OR "
+                        "(target_crs_auth_name = ? AND target_crs_code = ?)",
+                        {auth_name, code, auth_name, code})
+                     .empty());
+    };
+
+    // If the source or target CRS are not the source or target of an operation,
+    // do not run the next costly requests.
+    if (!CheckIfHasOperations(sourceCRSAuthName, sourceCRSCode) ||
+        !CheckIfHasOperations(targetCRSAuthName, targetCRSCode)) {
+        return listTmp;
+    }
+
     const std::string sqlProlog(
         discardSuperseded
             ?
