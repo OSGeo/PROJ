@@ -1002,6 +1002,24 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         auto props =
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
                                     !newName.empty() ? newName : nameStr());
+        const auto &l_domains = domains();
+        if (!l_domains.empty()) {
+            auto array = util::ArrayOfBaseObject::create();
+            for (const auto &domain : l_domains) {
+                auto extent = domain->domainOfValidity();
+                if (extent) {
+                    // Propagate only the extent, not the scope, as it might
+                    // imply more that we can guarantee with the promotion to
+                    // 3D.
+                    auto newDomain = common::ObjectDomain::create(
+                        util::optional<std::string>(), extent);
+                    array->add(newDomain);
+                }
+            }
+            if (!array->empty()) {
+                props.set(common::ObjectUsage::OBJECT_DOMAIN_KEY, array);
+            }
+        }
         const auto &l_identifiers = identifiers();
         if (l_identifiers.size() == 1) {
             std::string remarks("Promoted to 3D from ");
