@@ -4019,6 +4019,7 @@ TEST(factory, objectInsertion) {
                                ->createDatum("1165"); // ITRF2014
         const auto sql = ctxt->getInsertStatementsFor(datum, "HOBU", "XXXX",
                                                       false, {"HOBU"});
+        EXPECT_TRUE(!sql.empty());
         const auto datumNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatum("XXXX");
         EXPECT_TRUE(datumNew->isEquivalentTo(
@@ -4034,6 +4035,7 @@ TEST(factory, objectInsertion) {
                                ->createDatum("1096"); // Norway Normal Null 2000
         const auto sql = ctxt->getInsertStatementsFor(datum, "HOBU", "XXXX",
                                                       false, {"HOBU"});
+        EXPECT_TRUE(!sql.empty());
         const auto datumNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatum("XXXX");
         EXPECT_TRUE(datumNew->isEquivalentTo(
@@ -4049,6 +4051,7 @@ TEST(factory, objectInsertion) {
                                   ->createDatumEnsemble("6326"); // WGS84
         const auto sql = ctxt->getInsertStatementsFor(ensemble, "HOBU", "XXXX",
                                                       false, {"HOBU"});
+        EXPECT_TRUE(!sql.empty());
         const auto ensembleNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatumEnsemble("XXXX");
         EXPECT_TRUE(ensembleNew->isEquivalentTo(
@@ -4064,6 +4067,7 @@ TEST(factory, objectInsertion) {
                                   ->createDatumEnsemble("6326"); // WGS84
         const auto sql =
             ctxt->getInsertStatementsFor(ensemble, "HOBU", "XXXX", false);
+        EXPECT_TRUE(!sql.empty());
         const auto ensembleNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatumEnsemble("XXXX");
         EXPECT_TRUE(ensembleNew->isEquivalentTo(
@@ -4080,6 +4084,7 @@ TEST(factory, objectInsertion) {
             AuthorityFactory::create(ctxt, "EPSG")->createDatumEnsemble("1288");
         const auto sql = ctxt->getInsertStatementsFor(ensemble, "HOBU", "XXXX",
                                                       false, {"HOBU"});
+        EXPECT_TRUE(!sql.empty());
         const auto ensembleNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatumEnsemble("XXXX");
         EXPECT_TRUE(ensembleNew->isEquivalentTo(
@@ -4176,6 +4181,66 @@ TEST(factory, objectInsertion) {
         EXPECT_TRUE(crsNew->isEquivalentTo(crs.get(),
                                            IComparable::Criterion::EQUIVALENT));
         ctxt->stopInsertStatementsSession();
+    }
+
+    // Error: unknown projection method.
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto wkt =
+            "PROJCRS[\"unknown\",\n"
+            "    BASEGEOGCRS[\"unknown\",\n"
+            "        DATUM[\"World Geodetic System 1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                LENGTHUNIT[\"metre\",1]]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "    CONVERSION[\"unknown\",\n"
+            "        METHOD[\"unknown\"]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(E)\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        AXIS[\"(N)\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"metre\",1]]]";
+        const auto crs =
+            nn_dynamic_pointer_cast<CRS>(WKTParser().createFromWKT(wkt));
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_THROW(ctxt->getInsertStatementsFor(NN_NO_CHECK(crs), "HOBU",
+                                                  "XXXX", false),
+                     std::exception);
+    }
+
+    // Error: unknown projection parameter.
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto wkt =
+            "PROJCRS[\"unknown\",\n"
+            "    BASEGEOGCRS[\"unknown\",\n"
+            "        DATUM[\"World Geodetic System 1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                LENGTHUNIT[\"metre\",1]]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "    CONVERSION[\"unknown\",\n"
+            "        METHOD[\"Transverse Mercator\"],\n"
+            "        PARAMETER[\"unknown\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(E)\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        AXIS[\"(N)\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"metre\",1]]]";
+        const auto crs =
+            nn_dynamic_pointer_cast<CRS>(WKTParser().createFromWKT(wkt));
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_THROW(ctxt->getInsertStatementsFor(NN_NO_CHECK(crs), "HOBU",
+                                                  "XXXX", false),
+                     std::exception);
     }
 }
 
