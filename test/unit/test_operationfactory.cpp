@@ -3445,9 +3445,9 @@ TEST(operation,
               "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
+              "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=rad +z_in=m "
-              "+xy_out=deg +z_out=us-ft "
-              "+step +proj=axisswap +order=2,1");
+              "+xy_out=deg +z_out=us-ft");
 }
 
 // ---------------------------------------------------------------------------
@@ -3602,9 +3602,9 @@ TEST(
               "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
+              "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=rad +z_in=m "
-              "+xy_out=deg +z_out=us-ft "
-              "+step +proj=axisswap +order=2,1");
+              "+xy_out=deg +z_out=us-ft");
 }
 
 // ---------------------------------------------------------------------------
@@ -4819,6 +4819,99 @@ TEST(operation, compoundCRS_to_geogCRS_3D_with_3D_helmert_context) {
         "+step +proj=cart +ellps=WGS84 "
         "+step +proj=helmert +x=-674.374 +y=-15.056 +z=-405.346 "
         "+step +inv +proj=cart +ellps=bessel "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+        "+step +proj=axisswap +order=2,1";
+    EXPECT_EQ(list[0]->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              expected_proj);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     compoundCRS_to_geogCRS_3D_with_3D_helmert_same_geog_src_target_context) {
+    // Use case of https://github.com/OSGeo/PROJ/pull/2584
+    // From EPSG:XXXX+YYYY to EPSG:XXXX (3D), with a vertical shift grid
+    // operation in another datum ZZZZ, and the XXXX<--->ZZZZ being an Helmert
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // CH1903+ + EGM96 height
+    auto srcObj = createFromUserInput("EPSG:4150+5773", dbContext, false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src),
+        // CH1903+
+        authFactory->createCoordinateReferenceSystem("4150")->promoteTo3D(
+            std::string(), dbContext),
+        ctxt);
+    ASSERT_GE(list.size(), 1U);
+    // Check that there is push v_3 / pop v_3 in the step before vgridshift
+    // Check that there is *no* push v_3 / pop v_3 after vgridshift
+    const char *expected_proj =
+        "+proj=pipeline "
+        "+step +proj=push +v_1 +v_2 " // avoid any horizontal change
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=push +v_3 "
+        "+step +proj=cart +ellps=bessel "
+        "+step +proj=helmert +x=674.374 +y=15.056 +z=405.346 "
+        "+step +inv +proj=cart +ellps=WGS84 "
+        "+step +proj=pop +v_3 "
+        "+step +proj=vgridshift +grids=us_nga_egm96_15.tif +multiplier=1 "
+        "+step +proj=cart +ellps=WGS84 "
+        "+step +proj=helmert +x=-674.374 +y=-15.056 +z=-405.346 "
+        "+step +inv +proj=cart +ellps=bessel "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=pop +v_1 +v_2" // avoid any horizontal change
+        ;
+    EXPECT_EQ(list[0]->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              expected_proj);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     compoundCRS_to_geogCRS_3D_with_null_helmert_same_geog_src_target_context) {
+    // Variation of previous case
+    // From EPSG:XXXX+YYYY to EPSG:XXXX (3D), with a vertical shift grid
+    // operation in another datum ZZZZ, and the XXXX<--->ZZZZ being a
+    // null Helmert
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // ETRS89 + EGM96 height
+    auto srcObj = createFromUserInput("EPSG:4258+5773", dbContext, false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src),
+        // ETRS89 3D
+        authFactory->createCoordinateReferenceSystem("4937"), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    // No push/pop needed
+    const char *expected_proj =
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +proj=vgridshift +grids=us_nga_egm96_15.tif +multiplier=1 "
         "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
         "+step +proj=axisswap +order=2,1";
     EXPECT_EQ(list[0]->exportToPROJString(
