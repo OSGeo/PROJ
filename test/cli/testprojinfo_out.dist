@@ -1200,6 +1200,10 @@ PROJCRS["WGS 84 / UTM zone 31N",
             ORDER[3],
             LENGTHUNIT["metre",1,
                 ID["EPSG",9001]]],
+    USAGE[
+        SCOPE["unknown"],
+        AREA["Between 0°E and 6°E, northern hemisphere between equator and 84°N, onshore and offshore. Algeria. Andorra. Belgium. Benin. Burkina Faso. Denmark - North Sea. France. Germany - North Sea. Ghana. Luxembourg. Mali. Netherlands. Niger. Nigeria. Norway. Spain. Togo. United Kingdom (UK) - North Sea."],
+        BBOX[0,0,84,6]],
     REMARK["Promoted to 3D from EPSG:32631"]]
 
 Testing -s EPSG:32631 -t EPSG:4326+3855 --summary
