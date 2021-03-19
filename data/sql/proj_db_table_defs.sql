@@ -534,9 +534,7 @@ BEGIN
             'EPSG_9842_Equidistant Cylindrical',
             'EPSG_9843_Axis Order Reversal (2D)',
             'EPSG_9844_Axis Order Reversal (Geographic3D horizontal)',
-            'EPSG_9827_Bonne',
-            'PROJ_gstm_Gauss Schreiber Transverse Mercator',
-            'PROJ_mill_PROJ mill');
+            'EPSG_9827_Bonne') AND NEW.auth_name != 'PROJ';
 END;
 
 CREATE TRIGGER conversion_table_insert_trigger

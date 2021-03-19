@@ -2171,13 +2171,44 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
     {
         const auto &method = conversion->method();
         const auto &methodIds = method->identifiers();
+        std::string methodAuthName;
+        std::string methodCode;
         if (methodIds.empty()) {
-            throw FactoryException(
-                "Cannot insert projection with method without identifier");
+            const int epsgCode = method->getEPSGCode();
+            if (epsgCode > 0) {
+                methodAuthName = metadata::Identifier::EPSG;
+                methodCode = toString(epsgCode);
+            } else {
+                const auto &methodName = method->nameStr();
+                size_t nProjectionMethodMappings = 0;
+                const auto projectionMethodMappings =
+                    operation::getProjectionMethodMappings(
+                        nProjectionMethodMappings);
+                const operation::MethodMapping *methodMapping = nullptr;
+                for (size_t i = 0; i < nProjectionMethodMappings; ++i) {
+                    const auto &mapping = projectionMethodMappings[i];
+                    if (metadata::Identifier::isEquivalentName(
+                            mapping.wkt2_name, methodName.c_str())) {
+                        methodMapping = &mapping;
+                    }
+                }
+                if (methodMapping == nullptr ||
+                    methodMapping->proj_name_main == nullptr) {
+                    throw FactoryException("Cannot insert projection with "
+                                           "method without identifier");
+                }
+                methodAuthName = "PROJ";
+                methodCode = methodMapping->proj_name_main;
+                if (methodMapping->proj_name_aux) {
+                    methodCode += ' ';
+                    methodCode += methodMapping->proj_name_aux;
+                }
+            }
+        } else {
+            const auto &methodId = methodIds.front();
+            methodAuthName = *(methodId->codeSpace());
+            methodCode = methodId->code();
         }
-        const auto &methodId = methodIds.front();
-        const auto &methodAuthName = *(methodId->codeSpace());
-        const auto &methodCode = methodId->code();
         auto sql = formatStatement("INSERT INTO conversion VALUES("
                                    "'%q','%q','%q','','%q','%q','%q'",
                                    convAuthName.c_str(), convCode.c_str(),
@@ -2200,14 +2231,22 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
             }
             const auto &param = opParamValue->parameter();
             const auto &paramIds = param->identifiers();
+            std::string paramAuthName;
+            std::string paramCode;
             if (paramIds.empty()) {
-                throw FactoryException(
-                    "Cannot insert projection with method parameter "
-                    "without identifier");
+                const int paramEPSGCode = param->getEPSGCode();
+                if (paramEPSGCode == 0) {
+                    throw FactoryException(
+                        "Cannot insert projection with method parameter "
+                        "without identifier");
+                }
+                paramAuthName = metadata::Identifier::EPSG;
+                paramCode = toString(paramEPSGCode);
+            } else {
+                const auto &paramId = paramIds.front();
+                paramAuthName = *(paramId->codeSpace());
+                paramCode = paramId->code();
             }
-            const auto &paramId = paramIds.front();
-            const auto &paramAuthName = *(paramId->codeSpace());
-            const auto &paramCode = paramId->code();
             const auto &value = opParamValue->parameterValue()->value();
             const auto &unit = value.unit();
             std::string uomAuthName;

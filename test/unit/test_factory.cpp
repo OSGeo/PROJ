@@ -4019,6 +4019,7 @@ TEST(factory, objectInsertion) {
                                ->createDatum("1165"); // ITRF2014
         const auto sql = ctxt->getInsertStatementsFor(datum, "HOBU", "XXXX",
                                                       false, {"HOBU"});
+        EXPECT_TRUE(!sql.empty());
         const auto datumNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatum("XXXX");
         EXPECT_TRUE(datumNew->isEquivalentTo(
@@ -4034,6 +4035,7 @@ TEST(factory, objectInsertion) {
                                ->createDatum("1096"); // Norway Normal Null 2000
         const auto sql = ctxt->getInsertStatementsFor(datum, "HOBU", "XXXX",
                                                       false, {"HOBU"});
+        EXPECT_TRUE(!sql.empty());
         const auto datumNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatum("XXXX");
         EXPECT_TRUE(datumNew->isEquivalentTo(
@@ -4049,6 +4051,7 @@ TEST(factory, objectInsertion) {
                                   ->createDatumEnsemble("6326"); // WGS84
         const auto sql = ctxt->getInsertStatementsFor(ensemble, "HOBU", "XXXX",
                                                       false, {"HOBU"});
+        EXPECT_TRUE(!sql.empty());
         const auto ensembleNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatumEnsemble("XXXX");
         EXPECT_TRUE(ensembleNew->isEquivalentTo(
@@ -4064,6 +4067,7 @@ TEST(factory, objectInsertion) {
                                   ->createDatumEnsemble("6326"); // WGS84
         const auto sql =
             ctxt->getInsertStatementsFor(ensemble, "HOBU", "XXXX", false);
+        EXPECT_TRUE(!sql.empty());
         const auto ensembleNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatumEnsemble("XXXX");
         EXPECT_TRUE(ensembleNew->isEquivalentTo(
@@ -4080,11 +4084,163 @@ TEST(factory, objectInsertion) {
             AuthorityFactory::create(ctxt, "EPSG")->createDatumEnsemble("1288");
         const auto sql = ctxt->getInsertStatementsFor(ensemble, "HOBU", "XXXX",
                                                       false, {"HOBU"});
+        EXPECT_TRUE(!sql.empty());
         const auto ensembleNew =
             AuthorityFactory::create(ctxt, "HOBU")->createDatumEnsemble("XXXX");
         EXPECT_TRUE(ensembleNew->isEquivalentTo(
             ensemble.get(), IComparable::Criterion::EQUIVALENT));
         ctxt->stopInsertStatementsSession();
+    }
+
+    // non-EPSG projection method
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto crs = nn_dynamic_pointer_cast<CRS>(
+            PROJStringParser().createFromPROJString(
+                "+proj=sinu +lon_0=195 +x_0=0 +y_0=0 +R=3396000 +units=m "
+                "+no_defs +type=crs"));
+        ASSERT_TRUE(crs != nullptr);
+        const auto statements = ctxt->getInsertStatementsFor(
+            NN_NO_CHECK(crs), "HOBU", "XXXX", false);
+        bool found = false;
+        for (const auto &sql : statements) {
+            if (sql.find("INSERT INTO conversion") != std::string::npos) {
+                found = true;
+                const char *expected =
+                    "VALUES('HOBU','CONVERSION_XXXX',"
+                    "'unknown','','PROJ','sinu','Sinusoidal',";
+                EXPECT_TRUE(sql.find(expected) != std::string::npos) << sql;
+            }
+        }
+        EXPECT_TRUE(found);
+        const auto crsNew =
+            AuthorityFactory::create(ctxt, "HOBU")->createProjectedCRS("XXXX");
+        EXPECT_TRUE(crsNew->isEquivalentTo(crs.get(),
+                                           IComparable::Criterion::EQUIVALENT));
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Missing projection method and parameter id
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto wkt =
+            "PROJCRS[\"unknown\",\n"
+            "    BASEGEOGCRS[\"unknown\",\n"
+            "        DATUM[\"World Geodetic System 1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                LENGTHUNIT[\"metre\",1]]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "    CONVERSION[\"UTM zone 31N\",\n"
+            "        METHOD[\"Transverse Mercator\"],\n"
+            "        PARAMETER[\"Latitude of natural origin\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        PARAMETER[\"Longitude of natural origin\",3,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+            "            SCALEUNIT[\"unity\",1]],\n"
+            "        PARAMETER[\"False easting\",500000,\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        PARAMETER[\"False northing\",0,\n"
+            "            LENGTHUNIT[\"metre\",1]]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(E)\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        AXIS[\"(N)\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"metre\",1]]]";
+        const auto crs =
+            nn_dynamic_pointer_cast<CRS>(WKTParser().createFromWKT(wkt));
+        ASSERT_TRUE(crs != nullptr);
+        const auto statements = ctxt->getInsertStatementsFor(
+            NN_NO_CHECK(crs), "HOBU", "XXXX", false);
+        bool found = false;
+        const char *expected =
+            "INSERT INTO conversion VALUES('HOBU','CONVERSION_XXXX',"
+            "'UTM zone 31N','','EPSG','9807','Transverse Mercator',"
+            "'EPSG','8801','Latitude of natural origin',0,'EPSG','9102',"
+            "'EPSG','8802','Longitude of natural origin',3,'EPSG','9102',"
+            "'EPSG','8805','Scale factor at natural origin',0.9996,"
+            "'EPSG','9201',"
+            "'EPSG','8806','False easting',500000,'EPSG','9001',"
+            "'EPSG','8807','False northing',0,'EPSG','9001',"
+            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+            "NULL,0)";
+        for (const auto &sql : statements) {
+            if (sql.find("INSERT INTO conversion") != std::string::npos) {
+                found = true;
+                EXPECT_TRUE(sql.find(expected) != std::string::npos) << sql;
+            }
+        }
+        EXPECT_TRUE(found);
+        const auto crsNew =
+            AuthorityFactory::create(ctxt, "HOBU")->createProjectedCRS("XXXX");
+        EXPECT_TRUE(crsNew->isEquivalentTo(crs.get(),
+                                           IComparable::Criterion::EQUIVALENT));
+        ctxt->stopInsertStatementsSession();
+    }
+
+    // Error: unknown projection method.
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto wkt =
+            "PROJCRS[\"unknown\",\n"
+            "    BASEGEOGCRS[\"unknown\",\n"
+            "        DATUM[\"World Geodetic System 1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                LENGTHUNIT[\"metre\",1]]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "    CONVERSION[\"unknown\",\n"
+            "        METHOD[\"unknown\"]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(E)\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        AXIS[\"(N)\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"metre\",1]]]";
+        const auto crs =
+            nn_dynamic_pointer_cast<CRS>(WKTParser().createFromWKT(wkt));
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_THROW(ctxt->getInsertStatementsFor(NN_NO_CHECK(crs), "HOBU",
+                                                  "XXXX", false),
+                     std::exception);
+    }
+
+    // Error: unknown projection parameter.
+    {
+        auto ctxt = DatabaseContext::create();
+        ctxt->startInsertStatementsSession();
+        const auto wkt =
+            "PROJCRS[\"unknown\",\n"
+            "    BASEGEOGCRS[\"unknown\",\n"
+            "        DATUM[\"World Geodetic System 1984\",\n"
+            "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+            "                LENGTHUNIT[\"metre\",1]]],\n"
+            "        PRIMEM[\"Greenwich\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "    CONVERSION[\"unknown\",\n"
+            "        METHOD[\"Transverse Mercator\"],\n"
+            "        PARAMETER[\"unknown\",0,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
+            "    CS[Cartesian,2],\n"
+            "        AXIS[\"(E)\",east,\n"
+            "            ORDER[1],\n"
+            "            LENGTHUNIT[\"metre\",1]],\n"
+            "        AXIS[\"(N)\",north,\n"
+            "            ORDER[2],\n"
+            "            LENGTHUNIT[\"metre\",1]]]";
+        const auto crs =
+            nn_dynamic_pointer_cast<CRS>(WKTParser().createFromWKT(wkt));
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_THROW(ctxt->getInsertStatementsFor(NN_NO_CHECK(crs), "HOBU",
+                                                  "XXXX", false),
+                     std::exception);
     }
 }
 
