@@ -20,13 +20,13 @@ contributor the community is always very welcoming.
 Conference
 ----------
 
-.. image::   ../../images/foss4g2020.png
-   :alt:     FOSS4G 2020
-   :target:  https://2020.foss4g.org/
+.. image::   ../../images/foss4g2021.jpg
+   :alt:     FOSS4G 2021
+   :target:  https://2021.foss4g.org/
 
-`FOSS4G 2020 <https://2020.foss4g.org/>`_ is the leading annual conference for
+`FOSS4G 2021 <https://2021.foss4g.org/>`_ is the leading annual conference for
 free and open source geospatial software. It will include presentations related
 to PROJ, and some of the PROJ development community will be attending. It is the
 event for those interested in PROJ, other FOSS geospatial technologies and the
-community around them. The conference will be held in Calgary, Canada,
-August 24th - August 29th, 2020.
+community around them. The conference will due to COVID-19 be held in a virtual
+setting September 27th - October 2nd, 2021.
