@@ -4888,16 +4888,12 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
 
                 // Lambda to add to the set the name of geodetic datum of the
                 // CRS
-                const auto addDatumOfToSet = [](std::set<std::string> &set,
-                                                const crs::CRSNNPtr &crs) {
+                const auto addDatumOfToSet = [&dbContext](
+                                                 std::set<std::string> &set,
+                                                 const crs::CRSNNPtr &crs) {
                     auto geodCRS = crs->extractGeodeticCRS();
                     if (geodCRS) {
-                        const auto &datum = geodCRS->datum();
-                        if (datum) {
-                            set.insert(datum->nameStr());
-                        } else {
-                            set.insert(geodCRS->datumEnsemble()->nameStr());
-                        }
+                        set.insert(geodCRS->datumNonNull(dbContext)->nameStr());
                     }
                 };
 
