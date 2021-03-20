@@ -50,6 +50,7 @@
 #include "proj.h"
 #include "proj_internal.h" // M_PI
 // clang-format on
+#include "proj_constants.h"
 
 #include <algorithm>
 #include <cassert>
@@ -1973,6 +1974,65 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
     // cppcheck-suppress functionStatic
     _exportToPROJString(io::PROJStringFormatter *formatter) const override {
 
+        bool saveHorizontalCoords = false;
+        const auto transf =
+            dynamic_cast<Transformation *>(opSrcCRSToGeogCRS.get());
+        if (transf && opSrcCRSToGeogCRS->sourceCRS()->_isEquivalentTo(
+                          opGeogCRStoDstCRS->targetCRS()
+                              ->demoteTo2D(std::string(), nullptr)
+                              .get(),
+                          util::IComparable::Criterion::EQUIVALENT)) {
+            const int methodEPSGCode = transf->method()->getEPSGCode();
+
+            const bool bGeocentricTranslation =
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_2D ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOGRAPHIC_3D;
+
+            if ((bGeocentricTranslation &&
+                 !(transf->parameterValueNumericAsSI(
+                       EPSG_CODE_PARAMETER_X_AXIS_TRANSLATION) == 0 &&
+                   transf->parameterValueNumericAsSI(
+                       EPSG_CODE_PARAMETER_Y_AXIS_TRANSLATION) == 0 &&
+                   transf->parameterValueNumericAsSI(
+                       EPSG_CODE_PARAMETER_Z_AXIS_TRANSLATION) == 0)) ||
+
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_COORDINATE_FRAME_GEOCENTRIC ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_COORDINATE_FRAME_GEOGRAPHIC_3D ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOCENTRIC ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_2D ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_TIME_DEPENDENT_COORDINATE_FRAME_GEOGRAPHIC_3D ||
+                methodEPSGCode == EPSG_CODE_METHOD_POSITION_VECTOR_GEOCENTRIC ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_2D ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_POSITION_VECTOR_GEOGRAPHIC_3D ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOCENTRIC ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_2D ||
+                methodEPSGCode ==
+                    EPSG_CODE_METHOD_TIME_DEPENDENT_POSITION_VECTOR_GEOGRAPHIC_3D) {
+                saveHorizontalCoords = true;
+            }
+        }
+
+        if (saveHorizontalCoords) {
+            formatter->addStep("push");
+            formatter->addParam("v_1");
+            formatter->addParam("v_2");
+        }
+
         formatter->pushOmitZUnitConversion();
 
         opSrcCRSToGeogCRS->_exportToPROJString(formatter);
@@ -1994,6 +2054,12 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
         opGeogCRStoDstCRS->_exportToPROJString(formatter);
 
         formatter->popOmitZUnitConversion();
+
+        if (saveHorizontalCoords) {
+            formatter->addStep("pop");
+            formatter->addParam("v_1");
+            formatter->addParam("v_2");
+        }
     }
 };
 
@@ -4432,51 +4498,71 @@ getOps(const CoordinateOperationNNPtr &op) {
 
 // ---------------------------------------------------------------------------
 
-static bool useDifferentTransformationsForSameSourceTarget(
+static std::string normalize2D3DInName(const std::string &s) {
+    std::string out = s;
+    const char *const patterns[] = {
+        " (2D)",
+        " (geographic3D horizontal)",
+        " (geog2D)",
+        " (geog3D)",
+    };
+    for (const char *pattern : patterns) {
+        out = replaceAll(out, pattern, "");
+    }
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+
+static bool useCompatibleTransformationsForSameSourceTarget(
     const CoordinateOperationNNPtr &opA, const CoordinateOperationNNPtr &opB) {
-    auto subOpsA = getOps(opA);
-    auto subOpsB = getOps(opB);
+    const auto subOpsA = getOps(opA);
+    const auto subOpsB = getOps(opB);
+
     for (const auto &subOpA : subOpsA) {
         if (!dynamic_cast<const Transformation *>(subOpA.get()))
             continue;
-        if (subOpA->sourceCRS()->nameStr() == "unknown" ||
-            subOpA->targetCRS()->nameStr() == "unknown")
+        const auto subOpAName = normalize2D3DInName(subOpA->nameStr());
+        const auto &subOpASourceCRSName = subOpA->sourceCRS()->nameStr();
+        const auto &subOpATargetCRSName = subOpA->targetCRS()->nameStr();
+        if (subOpASourceCRSName == "unknown" ||
+            subOpATargetCRSName == "unknown")
             continue;
         for (const auto &subOpB : subOpsB) {
             if (!dynamic_cast<const Transformation *>(subOpB.get()))
                 continue;
-            if (subOpB->sourceCRS()->nameStr() == "unknown" ||
-                subOpB->targetCRS()->nameStr() == "unknown")
+            const auto &subOpBSourceCRSName = subOpB->sourceCRS()->nameStr();
+            const auto &subOpBTargetCRSName = subOpB->targetCRS()->nameStr();
+            if (subOpBSourceCRSName == "unknown" ||
+                subOpBTargetCRSName == "unknown")
                 continue;
 
-            if (subOpA->sourceCRS()->nameStr() ==
-                    subOpB->sourceCRS()->nameStr() &&
-                subOpA->targetCRS()->nameStr() ==
-                    subOpB->targetCRS()->nameStr()) {
-                if (starts_with(subOpA->nameStr(), NULL_GEOGRAPHIC_OFFSET) &&
+            if (subOpASourceCRSName == subOpBSourceCRSName &&
+                subOpATargetCRSName == subOpBTargetCRSName) {
+                const auto &subOpBName = normalize2D3DInName(subOpB->nameStr());
+                if (starts_with(subOpAName, NULL_GEOGRAPHIC_OFFSET) &&
                     starts_with(subOpB->nameStr(), NULL_GEOGRAPHIC_OFFSET)) {
                     continue;
                 }
-
-                if (!subOpA->isEquivalentTo(subOpB.get())) {
-                    return true;
+                if (subOpAName != subOpBName) {
+                    return false;
                 }
-            } else if (subOpA->sourceCRS()->nameStr() ==
-                           subOpB->targetCRS()->nameStr() &&
-                       subOpA->targetCRS()->nameStr() ==
-                           subOpB->sourceCRS()->nameStr()) {
-                if (starts_with(subOpA->nameStr(), NULL_GEOGRAPHIC_OFFSET) &&
-                    starts_with(subOpB->nameStr(), NULL_GEOGRAPHIC_OFFSET)) {
+            } else if (subOpASourceCRSName == subOpBTargetCRSName &&
+                       subOpATargetCRSName == subOpBSourceCRSName) {
+                const auto &subOpBName = subOpB->nameStr();
+                if (starts_with(subOpAName, NULL_GEOGRAPHIC_OFFSET) &&
+                    starts_with(subOpBName, NULL_GEOGRAPHIC_OFFSET)) {
                     continue;
                 }
 
-                if (!subOpA->isEquivalentTo(subOpB->inverse().get())) {
-                    return true;
+                if (subOpAName !=
+                    normalize2D3DInName(subOpB->inverse()->nameStr())) {
+                    return false;
                 }
             }
         }
     }
-    return false;
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -4732,30 +4818,41 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                         (*ids.front()->codeSpace()) + ':' + ids.front()->code();
                 }
 
-                const auto computeOpsToInterp =
-                    [&srcToInterpOps, &interpToTargetOps, &componentsSrc,
-                     &interpolationGeogCRS, &targetCRS, &dbContext,
-                     &context]() {
-                        srcToInterpOps = createOperations(
-                            componentsSrc[0], NN_NO_CHECK(interpolationGeogCRS),
-                            context);
-                        auto target2D =
-                            targetCRS->demoteTo2D(std::string(), dbContext);
-                        if (!componentsSrc[0]->isEquivalentTo(
-                                target2D.get(),
-                                util::IComparable::Criterion::EQUIVALENT)) {
-                            // We do the transformation from the
-                            // interpolationCRS
-                            // to the target one in 3D (see #2225)
-                            // But we don't do that between sourceCRS and
-                            // interpolationCRS, as this would mess with an
-                            // orthometric elevation.
-                            auto interp3D = interpolationGeogCRS->promoteTo3D(
-                                std::string(), dbContext);
-                            interpToTargetOps =
-                                createOperations(interp3D, targetCRS, context);
-                        }
-                    };
+                const auto computeOpsToInterp = [&srcToInterpOps,
+                                                 &interpToTargetOps,
+                                                 &componentsSrc,
+                                                 &interpolationGeogCRS,
+                                                 &targetCRS, &geogDst,
+                                                 &dbContext, &context]() {
+                    // Do the sourceCRS to interpolation CRS in 2D only
+                    // to avoid altering the orthometric elevation
+                    srcToInterpOps = createOperations(
+                        componentsSrc[0], NN_NO_CHECK(interpolationGeogCRS),
+                        context);
+
+                    // But do the interpolation CRS to targetCRS in 3D
+                    // to have proper ellipsoid height transformation.
+                    // We need to force the vertical axis of this 3D'ified
+                    // interpolation CRS to be the same as the target CRS,
+                    // to avoid potential double vertical unit conversion,
+                    // as the vertical transformation already takes care of
+                    // that.
+                    auto interp3D =
+                        interpolationGeogCRS
+                            ->demoteTo2D(std::string(), dbContext)
+                            ->promoteTo3D(
+                                std::string(), dbContext,
+                                geogDst->coordinateSystem()
+                                            ->axisList()
+                                            .size() == 3
+                                    ? geogDst->coordinateSystem()->axisList()[2]
+                                    : cs::VerticalCS::
+                                          createGravityRelatedHeight(
+                                              common::UnitOfMeasure::METRE)
+                                              ->axisList()[0]);
+                    interpToTargetOps =
+                        createOperations(interp3D, targetCRS, context);
+                };
 
                 if (!key.empty()) {
                     auto iter = cacheHorizToInterpAndInterpToTarget.find(key);
@@ -4784,32 +4881,92 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
 #ifdef TRACE_CREATE_OPERATIONS
                 ENTER_BLOCK("creating HorizVerticalHorizPROJBased operations");
 #endif
+                const bool srcAndTargetGeogAreSame =
+                    componentsSrc[0]->isEquivalentTo(
+                        targetCRS->demoteTo2D(std::string(), dbContext).get(),
+                        util::IComparable::Criterion::EQUIVALENT);
+
+                // Lambda to add to the set the name of geodetic datum of the
+                // CRS
+                const auto addDatumOfToSet = [](std::set<std::string> &set,
+                                                const crs::CRSNNPtr &crs) {
+                    auto geodCRS = crs->extractGeodeticCRS();
+                    if (geodCRS) {
+                        const auto &datum = geodCRS->datum();
+                        if (datum) {
+                            set.insert(datum->nameStr());
+                        } else {
+                            set.insert(geodCRS->datumEnsemble()->nameStr());
+                        }
+                    }
+                };
+
+                // Lambda to return the set of names of geodetic datums used
+                // by the source and target CRS of a list of operations.
+                const auto makeDatumSet =
+                    [&addDatumOfToSet](
+                        const std::vector<CoordinateOperationNNPtr> &ops) {
+                        std::set<std::string> datumSetOps;
+                        for (const auto &subOp : ops) {
+                            if (!dynamic_cast<const Transformation *>(
+                                    subOp.get()))
+                                continue;
+                            addDatumOfToSet(datumSetOps,
+                                            NN_NO_CHECK(subOp->sourceCRS()));
+                            addDatumOfToSet(datumSetOps,
+                                            NN_NO_CHECK(subOp->targetCRS()));
+                        }
+                        return datumSetOps;
+                    };
+
+                std::map<CoordinateOperation *, std::set<std::string>>
+                    mapSetDatumsUsed;
+                if (srcAndTargetGeogAreSame) {
+                    // When the geographic CRS of the source and target, we
+                    // want to make sure that the transformation from the
+                    // source to the interpolation CRS uses the same datums as
+                    // the one from the interpolation CRS to the target CRS.
+                    // A simplistic view would be that the srcToInterp and
+                    // interpToTarget should be the same, but they are
+                    // subtelties, like interpToTarget being done in 3D, so with
+                    // additional conversion steps, slightly different names in
+                    // operations between 2D and 3D. The initial filter on
+                    // checking that we use the same set of datum enable us
+                    // to be confident we reject upfront geodetically-dubious
+                    // operations.
+                    for (const auto &op : srcToInterpOps) {
+                        mapSetDatumsUsed[op.get()] = makeDatumSet(getOps(op));
+                    }
+                    for (const auto &op : interpToTargetOps) {
+                        mapSetDatumsUsed[op.get()] = makeDatumSet(getOps(op));
+                    }
+                }
+
                 for (const auto &srcToInterp : srcToInterpOps) {
-                    if (interpToTargetOps.empty()) {
+                    for (const auto &interpToTarget : interpToTargetOps) {
+
+                        if ((srcAndTargetGeogAreSame &&
+                             mapSetDatumsUsed[srcToInterp.get()] !=
+                                 mapSetDatumsUsed[interpToTarget.get()]) ||
+                            !useCompatibleTransformationsForSameSourceTarget(
+                                srcToInterp, interpToTarget)) {
+#ifdef TRACE_CREATE_OPERATIONS
+                            logTrace(
+                                "Considering that '" + srcToInterp->nameStr() +
+                                "' and '" + interpToTarget->nameStr() +
+                                "' do not use consistent operations in the pre "
+                                "and post-vertical transformation steps");
+#endif
+                            continue;
+                        }
+
                         try {
                             auto op = createHorizVerticalHorizPROJBased(
                                 sourceCRS, targetCRS, srcToInterp,
-                                verticalTransform, srcToInterp->inverse(),
+                                verticalTransform, interpToTarget,
                                 interpolationGeogCRS, true);
                             res.emplace_back(op);
                         } catch (const std::exception &) {
-                        }
-                    } else {
-                        for (const auto &interpToTarget : interpToTargetOps) {
-
-                            if (useDifferentTransformationsForSameSourceTarget(
-                                    srcToInterp, interpToTarget)) {
-                                continue;
-                            }
-
-                            try {
-                                auto op = createHorizVerticalHorizPROJBased(
-                                    sourceCRS, targetCRS, srcToInterp,
-                                    verticalTransform, interpToTarget,
-                                    interpolationGeogCRS, true);
-                                res.emplace_back(op);
-                            } catch (const std::exception &) {
-                            }
                         }
                     }
                 }
