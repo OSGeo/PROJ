@@ -4923,6 +4923,89 @@ TEST(operation,
 
 // ---------------------------------------------------------------------------
 
+TEST(operation,
+     compoundCRS_to_geogCRS_3D_with_same_geog_src_target_interp_context) {
+    auto dbContext = DatabaseContext::create();
+    // Tests a mix of Datum and DatumEnsemble regarding WGS 84 when we compare
+    // the datums used in the source -> interpolation_crs and
+    // interpolation_crs -> target transformations.
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto dstObj = WKTParser().createFromWKT(
+        "COMPOUNDCRS[\"WGS 84 + my_height\",\n"
+        "    GEOGCRS[\"WGS 84\",\n"
+        "        DATUM[\"World Geodetic System 1984\",\n"
+        "            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                LENGTHUNIT[\"metre\",1]]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        CS[ellipsoidal,2],\n"
+        "            AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                ORDER[1],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                ORDER[2],\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        ID[\"EPSG\",4326]],\n"
+        "    BOUNDCRS[\n"
+        "        SOURCECRS[\n"
+        "            VERTCRS[\"my_height\",\n"
+        "                VDATUM[\"my_height\"],\n"
+        "                CS[vertical,1],\n"
+        "                    AXIS[\"up\",up,\n"
+        "                        LENGTHUNIT[\"metre\",1,\n"
+        "                            ID[\"EPSG\",9001]]]]],\n"
+        "        TARGETCRS[\n"
+        "            GEOGCRS[\"WGS 84\",\n"
+        "                DATUM[\"World Geodetic System 1984\",\n"
+        "                    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                CS[ellipsoidal,3],\n"
+        "                    AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                        ORDER[1],\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                    AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                        ORDER[2],\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                    AXIS[\"ellipsoidal height (h)\",up,\n"
+        "                        ORDER[3],\n"
+        "                        LENGTHUNIT[\"metre\",1]],\n"
+        "                ID[\"EPSG\",4979]]],\n"
+        "        ABRIDGEDTRANSFORMATION["
+        "\"my_height to WGS84 ellipsoidal height\",\n"
+        "            METHOD[\"GravityRelatedHeight to Geographic3D\"],\n"
+        "            PARAMETERFILE[\"Geoid (height correction) model file\","
+        "\"fake.gtx\",\n"
+        "                ID[\"EPSG\",8666]]]]]");
+    auto dst = nn_dynamic_pointer_cast<CRS>(dstObj);
+    ASSERT_TRUE(dst != nullptr);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4979"), // WGS 84 3D
+        NN_NO_CHECK(dst), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    const char *expected_proj =
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+        "+step +inv +proj=vgridshift +grids=fake.gtx +multiplier=1 "
+        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+        "+step +proj=axisswap +order=2,1";
+    EXPECT_EQ(list[0]->exportToPROJString(
+                  PROJStringFormatter::create(
+                      PROJStringFormatter::Convention::PROJ_5, dbContext)
+                      .get()),
+              expected_proj);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
