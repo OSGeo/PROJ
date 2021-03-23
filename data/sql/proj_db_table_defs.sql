@@ -1089,7 +1089,7 @@ CREATE TABLE grid_alternatives(
     proj_grid_name TEXT NOT NULL,                   -- PROJ >= 7 grid name (e.g us_nga_egm08_25.tif)
     old_proj_grid_name TEXT,                        -- PROJ < 7 grid name (e.g egm08_25.gtx)
     proj_grid_format TEXT NOT NULL,                 -- 'GTiff', 'GTX', 'NTv2', JSON
-    proj_method TEXT NOT NULL,                      -- hgridshift, vgridshift, geoid_like, geocentricoffset or tinshift
+    proj_method TEXT NOT NULL,                      -- hgridshift, vgridshift, geoid_like, geocentricoffset, tinshift or velocity_grid
     inverse_direction BOOLEAN NOT NULL CHECK (inverse_direction IN (0, 1)), -- whether the PROJ grid direction is reversed w.r.t to the authority one (TRUE in that case)
     package_name TEXT,                              -- no longer used. Must be NULL
     url TEXT,                                       -- optional URL where to download the PROJ grid
@@ -1099,7 +1099,7 @@ CREATE TABLE grid_alternatives(
 
     CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name),
     CONSTRAINT check_grid_alternatives_grid_fromat CHECK (proj_grid_format IN ('GTiff', 'GTX', 'NTv2', 'JSON')),
-    CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift', 'geoid_like', 'geocentricoffset', 'tinshift')),
+    CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift', 'geoid_like', 'geocentricoffset', 'tinshift', 'velocity_grid')),
     CONSTRAINT check_grid_alternatives_inverse_direction CHECK (NOT(proj_method = 'geoid_like' AND inverse_direction = 1)),
     CONSTRAINT check_grid_alternatives_package_name CHECK (package_name IS NULL),
     CONSTRAINT check_grid_alternatives_direct_download_url CHECK (NOT(direct_download IS NULL AND url IS NOT NULL)),

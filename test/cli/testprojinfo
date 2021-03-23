@@ -275,6 +275,10 @@ echo 'Testing -s "ETRS89 / TM35FIN(E,N) + N2000 height" -t "KKJ / Finland Unifor
 $EXE -s "ETRS89 / TM35FIN(E,N) + N2000 height" -t "KKJ / Finland Uniform Coordinate System + N43 height" --grid-check none -o PROJ -q  >>${OUT} 2>&1
 echo "" >>${OUT}
 
+# Quick check of NKG transformations
+echo 'Testing NKG: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark' >> ${OUT}
+$EXE -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark >>${OUT} 2>&1
+echo "" >>${OUT}
 
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"

@@ -1525,3 +1525,8 @@ Testing -s "ETRS89 / TM35FIN(E,N) + N2000 height" -t "KKJ / Finland Uniform Coor
   +step +inv +proj=tinshift +file=fi_nls_n43_n60.json
   +step +proj=axisswap +order=2,1
 
+Testing NKG: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark
+Candidate operations found: 1
+Note: using '--spatial-test intersects' would bring more results (2)
+NKG:ITRF2014_TO_DK, ITRF2014 to ETRS89(DK), 0.01 m, Denmark - onshore and offshore.
+
