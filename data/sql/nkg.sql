@@ -2322,7 +2322,7 @@ INSERT INTO "usage" VALUES (
     'NKG', '5063',              -- usage auth+code
     'concatenated_operation',   -- object_table_name
     'NKG', 'ITRF2014_TO_SE',    -- object auth+code
-    'EPSG', '1352',             -- extent: Sweden - onshore and offshore
+    'EPSG', '1225',             -- extent: Sweden - onshore and offshore
     'NKG', 'SCOPE_GENERIC'      -- scope auth+code
 );
 
