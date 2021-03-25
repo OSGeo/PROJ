@@ -169,3 +169,45 @@ INSERT INTO "usage" VALUES(
     'EPSG','3263', -- area of use: Japan - onshore mainland
     'EPSG','1024'  -- unknown
 );
+
+-- Switzerland
+
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_4937_TO_EPSG_5729','ETRS89 to LHN95 height',
+    NULL,
+    'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',
+    'EPSG','4937', -- source CRS (ETRS89)
+    'EPSG','5729', -- target CRS (LHN95 height)
+    NULL,
+    'EPSG','8666','Geoid (height correction) model file','chgeo2004_ETRS.agr',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'EPSG_4937_TO_EPSG_5729_USAGE',
+    'grid_transformation',
+    'PROJ',
+    'EPSG_4937_TO_EPSG_5729',
+    'EPSG','1286', -- area of use: Europe - Liechtenstein and Switzerland
+    'EPSG','1024'  -- unknown
+);
+
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_4937_TO_EPSG_5728','ETRS89 to LN02 height',
+    NULL,
+    'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',
+    'EPSG','4937', -- source CRS (ETRS89)
+    'EPSG','5728', -- target CRS (LN02 height)
+    NULL,
+    'EPSG','8666','Geoid (height correction) model file','chgeo2004_htrans_ETRS.agr',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'EPSG_4937_TO_EPSG_5728_USAGE',
+    'grid_transformation',
+    'PROJ',
+    'EPSG_4937_TO_EPSG_5728',
+    'EPSG','1286', -- area of use: Europe - Liechtenstein and Switzerland
+    'EPSG','1024'  -- unknown
+);
