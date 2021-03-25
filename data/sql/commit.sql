@@ -9,11 +9,6 @@ CREATE INDEX grid_transformation_idx ON grid_transformation(source_crs_auth_name
 CREATE INDEX other_transformation_idx ON other_transformation(source_crs_auth_name, source_crs_code, target_crs_auth_name, target_crs_code);
 CREATE INDEX concatenated_operation_idx ON concatenated_operation(source_crs_auth_name, source_crs_code, target_crs_auth_name, target_crs_code);
 
--- Do an explicit foreign_key_check as foreign key checking is a no-op within
--- a transaction. Unfortunately we can't ask for this to be an error, so this
--- is just for verbose output. In Makefile, we check this separately
-PRAGMA foreign_key_check;
-
 -- Final consistency checks
 CREATE TABLE dummy(foo);
 CREATE TRIGGER final_checks
