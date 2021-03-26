@@ -127,7 +127,7 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		tests/tinshift_crs_implicit.json \
 		tests/tinshift_simplified_kkj_etrs.json \
 		tests/tinshift_simplified_n60_n2000.json \
-		generate_all_sql_in.cmake sql_filelist.cmake \
+		generate_proj_db.cmake sql_filelist.cmake \
 		$(SQL_ORDERED_LIST)
 
 install-data-local:
@@ -142,7 +142,6 @@ install-data-local:
           fi; \
 	done
 
-# head -c1 not handled on Solaris
 proj.db: $(DATAPATH)/sql/*.sql
 	@echo "Make proj.db"
 	$(RM) proj.db
@@ -161,22 +160,12 @@ proj.db: $(DATAPATH)/sql/*.sql
 		echo "Build of proj.db failed"; \
 		$(RM) proj.db; \
 		exit 1; \
-	fi; \
-	echo "" | head -c1; \
-        if [ $$? -eq 0 ] ; then \
-         echo "Running foreign_key_check"; \
-	 if [ $$(echo "pragma foreign_key_check;" | sqlite3 proj.db | head -c1 | wc -c) -ne 0 ]; then \
-		echo "Foreign key check failed"; \
-		$(RM) proj.db; \
-		exit 1; \
-	 else \
-	   if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" ; then \
+	 fi; \
+	 if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" ; then \
 		mkdir -p "$(PROJ_DB_CACHE_DIR)"; \
 		cat $${SQL_EXPANDED_LIST} | md5sum > "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5"; \
 		cp proj.db "$(PROJ_DB_CACHE_DIR)"; \
-	   fi \
-	 fi \
-	fi
+	 fi
 
 # For out-of-tree builds, link all file of the source data dir to the generated data
 # Also link select resource files in a for_tests subdirectory so that we are not

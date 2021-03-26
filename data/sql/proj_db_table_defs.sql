@@ -1,8 +1,5 @@
 --- Table structures
 
-PRAGMA page_size = 4096;
-PRAGMA foreign_keys = 1;
-
 CREATE TABLE metadata(
     key TEXT NOT NULL PRIMARY KEY CHECK (length(key) >= 1),
     value TEXT NOT NULL
