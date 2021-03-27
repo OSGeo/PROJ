@@ -1045,6 +1045,38 @@ def import_projcs():
                     sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
+                elif method == 'Equal_Earth':
+                    assert len(parsed_conv_wkt) == 1 + 3 + 2
+                    False_Easting = parsed_conv_wkt['False_Easting']
+                    False_Northing = parsed_conv_wkt['False_Northing']
+                    Central_Meridian = parsed_conv_wkt['Central_Meridian']
+
+                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+
+                    conv_name = 'unnamed'
+                    conv_auth_name = 'ESRI'
+                    conv_code = code
+
+                    sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','1078','Equal Earth','EPSG','8802','Longitude of natural origin',%s,'EPSG','%s','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
+                        code, conv_name, Central_Meridian, ang_uom_code, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+
+                    sql_extract = sql[sql.find('NULL'):]
+                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
+                        all_sql.append(sql)
+
+                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
+                        all_sql.append(sql)
+
+                        map_conversion_sql_to_code[sql_extract] = conv_code
+                    else:
+                        conv_code = map_conversion_sql_to_code[sql_extract]
+
+                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
+                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, deprecated)
+                    all_sql.append(sql)
+                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
+                    all_sql.append(sql)
+
                 else:
 
                     sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,NULL,NULL,'%s','%s',NULL,NULL,'%s',%d);""" % (
