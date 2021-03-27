@@ -696,6 +696,13 @@ config_str = """
         - Latitude_Of_Center: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
         - Height: EPSG_NAME_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT
 
+- Equal_Earth:
+    WKT2_name: EPSG_NAME_METHOD_EQUAL_EARTH
+    Params:
+        - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+        - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+        - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+
 
 # Missing/unclear mappings
 

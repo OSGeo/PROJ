@@ -929,6 +929,15 @@ static const ESRIParamMapping paramsESRI_IGAC_Plano_Cartesiano[] = {
      EPSG_CODE_PARAMETER_PROJECTION_PLANE_ORIGIN_HEIGHT, "0.0", false},
     {nullptr, nullptr, 0, "0.0", false}};
 
+static const ESRIParamMapping paramsESRI_Equal_Earth[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
 static const ESRIMethodMapping esriMappings[] = {
     {"Plate_Carree", EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL,
      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL, paramsESRI_Plate_Carree},
@@ -1093,6 +1102,8 @@ static const ESRIMethodMapping esriMappings[] = {
      0, paramsESRI_Transverse_Cylindrical_Equal_Area},
     {"IGAC_Plano_Cartesiano", EPSG_NAME_METHOD_COLOMBIA_URBAN,
      EPSG_CODE_METHOD_COLOMBIA_URBAN, paramsESRI_IGAC_Plano_Cartesiano},
+    {"Equal_Earth", EPSG_NAME_METHOD_EQUAL_EARTH, EPSG_CODE_METHOD_EQUAL_EARTH,
+     paramsESRI_Equal_Earth},
 };
 
 // ---------------------------------------------------------------------------
