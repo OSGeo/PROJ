@@ -18,7 +18,7 @@ jobs:
           - container: "proj-docs"
             dockerfile: "./Dockerfile"
     env:
-      PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' }}
+      PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' && github.event_name != 'pull_request' }}
       CONTAINER: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v2
