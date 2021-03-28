@@ -1594,3 +1594,9 @@ GEOGCRS["WGS 84",
         BBOX[-90,-180,90,180]],
     ID["HOBU","XXXX"]]
 
+Testing -s EPSG:23030 -t EPSG:25830 --bbox -6,40,-5,41 --grid-check known_available --hide-ballpark --summary
+Checks that ED50 to ETRS89 (12) is in the output (superseded transformation, but replacements has unknown grid)
+Candidate operations found: 2
+unknown id, Inverse of UTM zone 30N + ED50 to ETRS89 (12) + UTM zone 30N, 0.2 m, Spain - mainland, Balearic Islands, Ceuta and Melila - onshore.
+unknown id, Inverse of UTM zone 30N + ED50 to ETRS89 (7) + UTM zone 30N, 1.5 m, Spain - onshore mainland except northwest (north of 41°30'N and west of 4°30'W).
+

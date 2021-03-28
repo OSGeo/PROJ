@@ -5810,12 +5810,15 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
 
     std::string sql;
     if (discardSuperseded) {
-        sql = "SELECT source_crs_auth_name, source_crs_code, "
-              "target_crs_auth_name, target_crs_code, "
+        sql = "SELECT cov.source_crs_auth_name, cov.source_crs_code, "
+              "cov.target_crs_auth_name, cov.target_crs_code, "
               "cov.auth_name, cov.code, cov.table_name, "
               "extent.south_lat, extent.west_lon, extent.north_lat, "
               "extent.east_lon, "
-              "ss.replacement_auth_name, ss.replacement_code FROM "
+              "ss.replacement_auth_name, ss.replacement_code, "
+              "(gt.auth_name IS NOT NULL) AS replacement_is_grid_transform, "
+              "(ga.proj_grid_name IS NOT NULL) AS replacement_is_known_grid "
+              "FROM "
               "coordinate_operation_view cov "
               "JOIN usage ON "
               "usage.object_table_name = cov.table_name AND "
@@ -5830,6 +5833,11 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
               "ss.superseded_code = cov.code AND "
               "ss.superseded_table_name = ss.replacement_table_name AND "
               "ss.same_source_target_crs = 1 "
+              "LEFT JOIN grid_transformation gt ON "
+              "gt.auth_name = ss.replacement_auth_name AND "
+              "gt.code = ss.replacement_code "
+              "LEFT JOIN grid_alternatives ga ON "
+              "ga.original_grid_name = gt.grid_name "
               "WHERE ";
     } else {
         sql = "SELECT source_crs_auth_name, source_crs_code, "
@@ -5851,10 +5859,14 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     ListOfParams params;
     if (!sourceCRSAuthName.empty() && !targetCRSAuthName.empty()) {
         if (tryReverseOrder) {
-            sql += "((source_crs_auth_name = ? AND source_crs_code = ? AND "
-                   "target_crs_auth_name = ? AND target_crs_code = ?) OR "
-                   "(source_crs_auth_name = ? AND source_crs_code = ? AND "
-                   "target_crs_auth_name = ? AND target_crs_code = ?)) AND ";
+            sql += "((cov.source_crs_auth_name = ? AND cov.source_crs_code = ? "
+                   "AND "
+                   "cov.target_crs_auth_name = ? AND cov.target_crs_code = ?) "
+                   "OR "
+                   "(cov.source_crs_auth_name = ? AND cov.source_crs_code = ? "
+                   "AND "
+                   "cov.target_crs_auth_name = ? AND cov.target_crs_code = ?)) "
+                   "AND ";
             params.emplace_back(sourceCRSAuthName);
             params.emplace_back(sourceCRSCode);
             params.emplace_back(targetCRSAuthName);
@@ -5864,8 +5876,10 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
             params.emplace_back(sourceCRSAuthName);
             params.emplace_back(sourceCRSCode);
         } else {
-            sql += "source_crs_auth_name = ? AND source_crs_code = ? AND "
-                   "target_crs_auth_name = ? AND target_crs_code = ? AND ";
+            sql += "cov.source_crs_auth_name = ? AND cov.source_crs_code = ? "
+                   "AND "
+                   "cov.target_crs_auth_name = ? AND cov.target_crs_code = ? "
+                   "AND ";
             params.emplace_back(sourceCRSAuthName);
             params.emplace_back(sourceCRSCode);
             params.emplace_back(targetCRSAuthName);
@@ -5873,27 +5887,33 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         }
     } else if (!sourceCRSAuthName.empty()) {
         if (tryReverseOrder) {
-            sql += "((source_crs_auth_name = ? AND source_crs_code = ?) OR "
-                   "(target_crs_auth_name = ? AND target_crs_code = ?)) AND ";
+            sql += "((cov.source_crs_auth_name = ? AND cov.source_crs_code = ? "
+                   ")OR "
+                   "(cov.target_crs_auth_name = ? AND cov.target_crs_code = ?))"
+                   " AND ";
             params.emplace_back(sourceCRSAuthName);
             params.emplace_back(sourceCRSCode);
             params.emplace_back(sourceCRSAuthName);
             params.emplace_back(sourceCRSCode);
         } else {
-            sql += "source_crs_auth_name = ? AND source_crs_code = ? AND ";
+            sql += "cov.source_crs_auth_name = ? AND cov.source_crs_code = ? "
+                   "AND ";
             params.emplace_back(sourceCRSAuthName);
             params.emplace_back(sourceCRSCode);
         }
     } else if (!targetCRSAuthName.empty()) {
         if (tryReverseOrder) {
-            sql += "((source_crs_auth_name = ? AND source_crs_code = ?) OR "
-                   "(target_crs_auth_name = ? AND target_crs_code = ?)) AND ";
+            sql += "((cov.source_crs_auth_name = ? AND cov.source_crs_code = ?)"
+                   " OR "
+                   "(cov.target_crs_auth_name = ? AND cov.target_crs_code = ?))"
+                   " AND ";
             params.emplace_back(targetCRSAuthName);
             params.emplace_back(targetCRSCode);
             params.emplace_back(targetCRSAuthName);
             params.emplace_back(targetCRSCode);
         } else {
-            sql += "target_crs_auth_name = ? AND target_crs_code = ? AND ";
+            sql += "cov.target_crs_auth_name = ? AND cov.target_crs_code = ? "
+                   "AND ";
             params.emplace_back(targetCRSAuthName);
             params.emplace_back(targetCRSCode);
         }
@@ -5905,7 +5925,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
     }
     sql += " ORDER BY pseudo_area_from_swne(south_lat, west_lon, north_lat, "
            "east_lon) DESC, "
-           "(CASE WHEN accuracy is NULL THEN 1 ELSE 0 END), accuracy";
+           "(CASE WHEN cov.accuracy is NULL THEN 1 ELSE 0 END), cov.accuracy";
     auto res = d->run(sql, params);
     std::set<std::pair<std::string, std::string>> setTransf;
     if (discardSuperseded) {
@@ -5929,7 +5949,12 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         if (discardSuperseded) {
             const auto &replacement_auth_name = row[11];
             const auto &replacement_code = row[12];
+            const bool replacement_is_grid_transform = row[13] == "1";
+            const bool replacement_is_known_grid = row[14] == "1";
             if (!replacement_auth_name.empty() &&
+                // Ignore supersession if the replacement uses a unknown grid
+                !(replacement_is_grid_transform &&
+                  !replacement_is_known_grid) &&
                 setTransf.find(std::pair<std::string, std::string>(
                     replacement_auth_name, replacement_code)) !=
                     setTransf.end()) {
@@ -5982,7 +6007,12 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
         if (discardSuperseded) {
             const auto &replacement_auth_name = row[11];
             const auto &replacement_code = row[12];
+            const bool replacement_is_grid_transform = row[13] == "1";
+            const bool replacement_is_known_grid = row[14] == "1";
             if (!replacement_auth_name.empty() &&
+                // Ignore supersession if the replacement uses a unknown grid
+                !(replacement_is_grid_transform &&
+                  !replacement_is_known_grid) &&
                 setTransf.find(std::pair<std::string, std::string>(
                     replacement_auth_name, replacement_code)) !=
                     setTransf.end()) {
