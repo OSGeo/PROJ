@@ -280,6 +280,11 @@ echo 'Testing NKG: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-
 $EXE -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark >>${OUT} 2>&1
 echo "" >>${OUT}
 
+echo 'Testing -s EPSG:23030 -t EPSG:25830 --bbox -6,40,-5,41 --grid-check known_available --hide-ballpark --summary' >> ${OUT}
+echo 'Checks that ED50 to ETRS89 (12) is in the output (superseded transformation, but replacements has unknown grid)' >> ${OUT}
+$EXE -s EPSG:23030 -t EPSG:25830 --bbox -6,40,-5,41 --grid-check known_available --hide-ballpark --summary >>${OUT} 2>&1
+echo "" >>${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
