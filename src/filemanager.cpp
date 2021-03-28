@@ -1267,7 +1267,7 @@ static std::string pj_get_relative_share_proj_internal_no_check() {
     constexpr char dir_sep = '\\';
 #else
     Dl_info info;
-    if (!dladdr((const void *)pj_get_relative_share_proj, &info)) {
+    if (!dladdr((void *)pj_get_relative_share_proj, &info)) {
         return std::string();
     }
     std::string out(info.dli_fname);
