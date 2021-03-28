@@ -988,17 +988,35 @@ static void reproject_bbox(PJ* pjGeogToCrs,
     if( !(west_lon == -180.0 && east_lon == 180.0 &&
           south_lat == -90.0 && north_lat == 90.0) )
     {
+        double east_step;
+
         minx = -minx;
         miny = -miny;
         maxx = -maxx;
         maxy = -maxy;
 
+        if (east_lon >= west_lon)
+        {
+            east_step = (east_lon - west_lon) / 20;
+        }
+        else
+        {
+            east_step = (east_lon - west_lon + 360.0) / 20;
+        }
+
         std::vector<double> x(21 * 4), y(21 * 4);
         for( int j = 0; j <= 20; j++ )
         {
-            x[j] = west_lon + j * (east_lon - west_lon) / 20;
+            double lon_step = west_lon + j * east_step;
+
+            if (lon_step > 180.0)
+            {
+                lon_step -= 360.0;
+            }
+
+            x[j] = lon_step;
             y[j] = south_lat;
-            x[21+j] = west_lon + j * (east_lon - west_lon) / 20;
+            x[21+j] = lon_step;
             y[21+j] = north_lat;
             x[21*2+j] = west_lon;
             y[21*2+j] = south_lat + j * (north_lat - south_lat) / 20;
