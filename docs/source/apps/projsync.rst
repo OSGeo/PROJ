@@ -149,7 +149,7 @@ Examples
     Bugs
     ****
 
-    A list of know bugs can be found at https://github.com/OSGeo/PROJ/issues
+    A list of known bugs can be found at https://github.com/OSGeo/PROJ/issues
     where new bug reports can be submitted to.
     Bugs specific to resource files should be submitted to
     https://github.com/OSGeo/PROJ-data/issues
