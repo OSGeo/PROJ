@@ -6,9 +6,20 @@ on: [push, pull_request, workflow_dispatch]
 #
 jobs:
   containers:
+    name: ${{ matrix.container }} Container
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        container: ["proj","proj-docs"]
+        dockerfile: ["./Dockerfile", "./docs/docbuild/Dockerfile"]
+        exclude:
+          - container: "proj"
+            dockerfile: "./docs/docbuild/Dockerfile"
+          - container: "proj-docs"
+            dockerfile: "./Dockerfile"
     env:
       PUSH_PACKAGES: ${{ github.repository_owner == 'OSGeo' }}
+      CONTAINER: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v2
       - name: Lint
@@ -50,13 +61,13 @@ jobs:
           push: ${{ env.PUSH_PACKAGES == 'true' }}
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          file: ./Dockerfile
+          file: ${{ matrix.dockerfile }}
           platforms: linux/amd64
           tags: |
-            docker.io/osgeo/proj:${{ steps.prep.outputs.VERSION }}
-            docker.io/osgeo/proj:latest
-            ghcr.io/osgeo/proj:${{ steps.prep.outputs.VERSION }}
-            ghcr.io/osgeo/proj:latest
+            docker.io/osgeo/${{ matrix.container }}:${{ steps.prep.outputs.VERSION }}
+            docker.io/osgeo/${{ matrix.container }}:latest
+            ghcr.io/osgeo/${{ matrix.container }}:${{ steps.prep.outputs.VERSION }}
+            ghcr.io/osgeo/${{ matrix.container }}:latest
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}
