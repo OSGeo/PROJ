@@ -115,6 +115,11 @@ VALUES
 
 -- es_ign - Instituto Geográfico Nacional (IGN)
 ('SPED2ETV2.gsb','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
+-- alias BALR2009.gsb and PENR2009.gsb to the composite es_ign_SPED2ETV2.tif grid
+-- because the transformation using SPED2ETV2 has been supersed per the ones using
+-- BALR2009.gsb and PENR2009.gsb, but we don't have grids for those ones.
+('BALR2009.gsb','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
+('PENR2009.gsb','es_ign_SPED2ETV2.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/es_ign_SPED2ETV2.tif',1,1,NULL),
 ('EGM08_REDNAP.txt','es_ign_egm08-rednap.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/es_ign_egm08-rednap.tif',1,1,NULL),
 ('EGM08_REDNAP_Canarias.txt','es_ign_egm08-rednap-canarias.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/es_ign_egm08-rednap-canarias.tif',1,1,NULL),
 
