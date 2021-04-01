@@ -9,6 +9,6 @@
 INSERT INTO "metadata" VALUES('DATABASE.LAYOUT.VERSION.MAJOR', 1);
 INSERT INTO "metadata" VALUES('DATABASE.LAYOUT.VERSION.MINOR', 0);
 
--- TODO at next update remove exception case for EPSG:9658 and 9660 in customization.sql
+-- TODO at next update remove exception case for EPSG:9658 to 9661 in commit.sql and EPSG:9659 and 9661 in customizations.sql
 INSERT INTO "metadata" VALUES('EPSG.VERSION', 'v10.017');
 INSERT INTO "metadata" VALUES('EPSG.DATE', '2021-04-01');

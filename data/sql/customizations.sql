@@ -343,7 +343,10 @@ FROM grid_transformation gt
 JOIN compound_crs c ON gt.target_crs_code = c.code AND gt.target_crs_auth_name = c.auth_name
 JOIN geodetic_crs gcrs ON gt.source_crs_auth_name = gcrs.auth_name AND gt.source_crs_code = gcrs.code
 JOIN vertical_crs vcrs on vcrs.auth_name = c.vertical_crs_auth_name AND vcrs.code = c.vertical_crs_code
-WHERE method_auth_name = 'EPSG' AND method_code IN ('1088', '1089', '1090', '1091', '1092', '1093', '1094', '1095', '1096', '1097', '1098', '1103') AND gt.deprecated = 0;
+WHERE method_auth_name = 'EPSG' AND method_name LIKE 'Geog3D to Geog2D+%'
+AND NOT EXISTS (SELECT 1 FROM grid_transformation gt2 WHERE gt2.method_name LIKE 'Geographic3D to%' AND gt2.source_crs_auth_name = gt.source_crs_auth_name AND gt2.source_crs_code = gt.source_crs_code AND gt2.target_crs_auth_name = vcrs.auth_name AND gt2.target_crs_code = vcrs.code)
+AND NOT (gt.auth_name == 'EPSG' AND gt.code IN (9659,9661)) -- issue in EPSG v10.017
+AND gt.deprecated = 0;
 
 INSERT INTO "usage"
 SELECT
@@ -358,4 +361,5 @@ SELECT
     u.scope_code
 FROM grid_transformation gt
 JOIN usage u ON u.object_auth_name = gt.auth_name AND u.object_code = gt.code AND u.object_table_name = 'grid_transformation'
-WHERE method_auth_name = 'EPSG' AND method_code IN ('1088', '1089', '1090', '1091', '1092', '1093', '1094', '1095', '1096', '1097', '1098', '1103') AND gt.deprecated = 0;
+WHERE method_auth_name = 'EPSG' AND method_name LIKE 'Geog3D to Geog2D+%'
+AND EXISTS (SELECT 1 FROM grid_transformation gt2 WHERE gt2.auth_name = 'PROJ' AND gt2.code = gt.auth_name || '_' || gt.code || '_RESTRICTED_TO_VERTCRS');

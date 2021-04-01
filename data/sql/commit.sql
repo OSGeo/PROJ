@@ -113,11 +113,11 @@ FOR EACH ROW BEGIN
                       g.method_name LIKE 'Geographic3D to GravityRelatedHeight%' AND
                       g.target_crs_auth_name || g.target_crs_code NOT IN
                       (SELECT auth_name || code FROM vertical_crs));
-    SELECT RAISE(ABORT, 'One grid_transformation with Geographic3D to GravityRelatedHeight has not its source_crs in geodetic_crs table with type = ''geographic 3D''')
+    SELECT RAISE(ABORT, 'One grid_transformation with Geographic3D to GravityRelatedHeight or Geog3D to Geog2D+XXX has not its source_crs in geodetic_crs table with type = ''geographic 3D''')
         WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
                       g.deprecated = 0 AND
-                      g.method_name LIKE 'Geographic3D to GravityRelatedHeight%' AND
-                      NOT (g.auth_name = 'EPSG' AND g.code IN (9658,9660)) AND -- those are wrongly registered as they refer to a Geog2D CRS in EPGS v10.017. Reported to EPSG
+                      (g.method_name LIKE 'Geographic3D to %' OR g.method_name LIKE 'Geog3D to %') AND
+                      NOT (g.auth_name = 'EPSG' AND g.code IN (9658,9659,9660,9661)) AND -- those are wrongly registered as they refer to a Geog2D CRS in EPGS v10.017. Reported to EPSG
                       g.source_crs_auth_name || g.source_crs_code NOT IN
                       (SELECT auth_name || code FROM geodetic_crs
                        WHERE type = 'geographic 3D'));
