@@ -172,10 +172,6 @@ INSERT INTO "axis" VALUES('EPSG','63','Geodetic latitude','Lat','north','EPSG','
 INSERT INTO "axis" VALUES('EPSG','64','Geodetic longitude','Long','east','EPSG','6405',2,'EPSG','9102');
 INSERT INTO "axis" VALUES('EPSG','65','Geodetic latitude','Lat','north','EPSG','6406',1,'EPSG','9116');
 INSERT INTO "axis" VALUES('EPSG','66','Geodetic longitude','Long','east','EPSG','6406',2,'EPSG','9116');
-INSERT INTO "axis" VALUES('EPSG','69','Geodetic latitude','Lat','north','EPSG','6408',1,'EPSG','9115');
-INSERT INTO "axis" VALUES('EPSG','70','Geodetic longitude','Long','east','EPSG','6408',2,'EPSG','9115');
-INSERT INTO "axis" VALUES('EPSG','71','Geodetic latitude','Lat','north','EPSG','6409',1,'EPSG','9118');
-INSERT INTO "axis" VALUES('EPSG','72','Geodetic longitude','Long','east','EPSG','6409',2,'EPSG','9118');
 INSERT INTO "axis" VALUES('EPSG','106','Geodetic latitude','Lat','north','EPSG','6422',1,'EPSG','9122');
 INSERT INTO "axis" VALUES('EPSG','107','Geodetic longitude','Lon','east','EPSG','6422',2,'EPSG','9122');
 INSERT INTO "axis" VALUES('EPSG','115','Geocentric X','X','geocentricX','EPSG','6500',1,'EPSG','9001');
@@ -204,10 +200,10 @@ INSERT INTO "axis" VALUES('EPSG','174','Plant North','y','northwest','EPSG','651
 INSERT INTO "axis" VALUES('EPSG','211','Plant East','x','east','EPSG','6512',1,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','212','Plant North','y','north','EPSG','6512',2,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','213','Local height','z','up','EPSG','6512',3,'EPSG','9001');
-INSERT INTO "axis" VALUES('EPSG','32763','Bin grid I','I','J-axis plus 90 degrees','EPSG','32760',1,NULL,NULL);
-INSERT INTO "axis" VALUES('EPSG','32764','Bin grid J','J','See associated operation','EPSG','32760',2,NULL,NULL);
-INSERT INTO "axis" VALUES('EPSG','32765','Bin grid I','I','J-axis minus 90 degrees','EPSG','32761',1,NULL,NULL);
-INSERT INTO "axis" VALUES('EPSG','32766','Bin grid J','J','See associated operation','EPSG','32761',2,NULL,NULL);
+INSERT INTO "axis" VALUES('EPSG','32845','Bin grid I','I','J-axis plus 90 degrees','EPSG','32760',1,NULL,NULL);
+INSERT INTO "axis" VALUES('EPSG','32846','Bin grid J','J','See associated operation','EPSG','32760',2,NULL,NULL);
+INSERT INTO "axis" VALUES('EPSG','32847','Bin grid I','I','J-axis minus 90 degrees','EPSG','32761',1,NULL,NULL);
+INSERT INTO "axis" VALUES('EPSG','32848','Bin grid J','J','See associated operation','EPSG','32761',2,NULL,NULL);
 INSERT INTO "axis" VALUES('EPSG','1082','Gravity-related height','H','up','EPSG','1030',1,'EPSG','9002');
 INSERT INTO "axis" VALUES('EPSG','1516','Depth','D','down','EPSG','1043',1,'EPSG','9003');
 INSERT INTO "axis" VALUES('EPSG','1051','Local depth','d','down','EPSG','1049',1,'EPSG','9001');
@@ -224,6 +220,10 @@ INSERT INTO "axis" VALUES('EPSG','61','Spherical longitude','Long','east','EPSG'
 INSERT INTO "axis" VALUES('EPSG','62','Geocentric radius','R','up','EPSG','6404',3,'EPSG','9001');
 INSERT INTO "axis" VALUES('EPSG','67','Geodetic latitude','Lat','north','EPSG','6407',1,'EPSG','9117');
 INSERT INTO "axis" VALUES('EPSG','68','Geodetic longitude','Long','east','EPSG','6407',2,'EPSG','9117');
+INSERT INTO "axis" VALUES('EPSG','69','Geodetic latitude','Lat','north','EPSG','6408',1,'EPSG','9115');
+INSERT INTO "axis" VALUES('EPSG','70','Geodetic longitude','Long','east','EPSG','6408',2,'EPSG','9115');
+INSERT INTO "axis" VALUES('EPSG','71','Geodetic latitude','Lat','north','EPSG','6409',1,'EPSG','9118');
+INSERT INTO "axis" VALUES('EPSG','72','Geodetic longitude','Long','east','EPSG','6409',2,'EPSG','9118');
 INSERT INTO "axis" VALUES('EPSG','73','Geodetic latitude','Lat','north','EPSG','6410',1,'EPSG','9119');
 INSERT INTO "axis" VALUES('EPSG','74','Geodetic longitude','Long','east','EPSG','6410',2,'EPSG','9119');
 INSERT INTO "axis" VALUES('EPSG','75','Geodetic latitude','Lat','north','EPSG','6411',1,'EPSG','9107');

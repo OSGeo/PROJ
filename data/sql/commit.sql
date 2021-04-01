@@ -122,7 +122,7 @@ FOR EACH ROW BEGIN
         WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
                       g.deprecated = 0 AND
                       g.method_name LIKE 'Geographic3D to GravityRelatedHeight%' AND
-                      NOT (g.auth_name = 'EPSG' AND g.code IN (7648, 7649, 7650)) AND -- those are wrongly registered as they use a geocentric CRS. Reported to EPSG
+                      NOT (g.auth_name = 'EPSG' AND g.code IN (9658,9660)) AND -- those are wrongly registered as they refer to a Geog2D CRS in EPGS v10.017. Reported to EPSG
                       g.source_crs_auth_name || g.source_crs_code NOT IN
                       (SELECT auth_name || code FROM geodetic_crs
                        WHERE type = 'geographic 3D'));
