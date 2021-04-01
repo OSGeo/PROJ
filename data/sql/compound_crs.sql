@@ -268,7 +268,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','7403','NTF (Paris) / France III + NGF 
 INSERT INTO "usage" VALUES('EPSG','5268','compound_crs','EPSG','7403','EPSG','1733','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','7404','RT90 + RH70 height',NULL,'EPSG','4124','EPSG','5718',0);
 INSERT INTO "usage" VALUES('EPSG','5269','compound_crs','EPSG','7404','EPSG','3313','EPSG','1142');
-INSERT INTO "compound_crs" VALUES('EPSG','7405','OSGB 1936 / British National Grid + ODN height',NULL,'EPSG','27700','EPSG','5701',0);
+INSERT INTO "compound_crs" VALUES('EPSG','7405','OSGB36 / British National Grid + ODN height',NULL,'EPSG','27700','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','5270','compound_crs','EPSG','7405','EPSG','2792','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','7406','NAD27 + NGVD29 height (ftUS)',NULL,'EPSG','4267','EPSG','5702',0);
 INSERT INTO "usage" VALUES('EPSG','5271','compound_crs','EPSG','7406','EPSG','1323','EPSG','1142');
@@ -690,6 +690,10 @@ INSERT INTO "compound_crs" VALUES('EPSG','9543','ITRF2005 + SA LLD height',NULL,
 INSERT INTO "usage" VALUES('EPSG','14522','compound_crs','EPSG','9543','EPSG','3309','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9544','NAD83(CSRS)v6 + CGVD2013(CGG2013a) height',NULL,'EPSG','8252','EPSG','9245',0);
 INSERT INTO "usage" VALUES('EPSG','14525','compound_crs','EPSG','9544','EPSG','1061','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','9656','ETRF2000-PL + Baltic 1986 height',NULL,'EPSG','9702','EPSG','9650',0);
+INSERT INTO "usage" VALUES('EPSG','15108','compound_crs','EPSG','9656','EPSG','3293','EPSG','1270');
+INSERT INTO "compound_crs" VALUES('EPSG','9657','ETRF2000-PL + EVRF2007-PL height',NULL,'EPSG','9702','EPSG','9651',0);
+INSERT INTO "usage" VALUES('EPSG','15109','compound_crs','EPSG','9657','EPSG','3293','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','9705','WGS 84 + MSL height',NULL,'EPSG','4326','EPSG','5714',0);
 INSERT INTO "usage" VALUES('EPSG','15089','compound_crs','EPSG','9705','EPSG','1262','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9707','WGS 84 + EGM96 height',NULL,'EPSG','4326','EPSG','5773',0);

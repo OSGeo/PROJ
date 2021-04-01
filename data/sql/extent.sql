@@ -240,7 +240,7 @@ INSERT INTO "extent" VALUES('EPSG','1260','Zambia','Zambia.',-18.08,-8.19,21.99,
 INSERT INTO "extent" VALUES('EPSG','1261','Zimbabwe','Zimbabwe.',-22.42,-15.61,25.23,33.08,0);
 INSERT INTO "extent" VALUES('EPSG','1262','World','World.',-90.0,90.0,-180.0,180.0,0);
 INSERT INTO "extent" VALUES('EPSG','1263','Not specified','Not specified.',-90.0,90.0,-180.0,180.0,0);
-INSERT INTO "extent" VALUES('EPSG','1264','UK - Great Britain; Isle of Man','United Kingdom (UK) - Great Britain - England and Wales onshore, Scotland onshore and Western Isles nearshore; Isle of Man onshore.',49.79,60.94,-8.82,1.92,0);
+INSERT INTO "extent" VALUES('EPSG','1264','UK - Great Britain onshore and nearshore; Isle of Man','United Kingdom (UK) - Great Britain - England and Wales onshore, Scotland onshore and Western Isles nearshore including Sea of the Hebrides and The Minch; Isle of Man onshore.',49.797,60.935,-8.818,1.92,0);
 INSERT INTO "extent" VALUES('EPSG','1265','Argentina - Comodoro Rivadavia','Argentina - Comodoro Rivadavia area.',-46.7,-45.19,-69.5,-67.1,0);
 INSERT INTO "extent" VALUES('EPSG','1266','Venezuela - Puerto La Cruz','Venezuela - Puerto La Cruz area.',10.0,10.31,-64.7,-64.5,0);
 INSERT INTO "extent" VALUES('EPSG','1267','Venezuela - Barinas','Venezuela - Barinas area.',7.31,9.07,-71.49,-67.58,0);
@@ -3591,3 +3591,4 @@ INSERT INTO "extent" VALUES('EPSG','4612','Canada - Newfoundland','Canada - Newf
 INSERT INTO "extent" VALUES('EPSG','4613','Europe - Lyon-Turin','France and Italy - on or related to the rail route from Lyon to Turin.',44.87236950014,45.88320957683,4.6505192204449,7.8772423467624,0);
 INSERT INTO "extent" VALUES('EPSG','4614','Argentina - Comodoro Rivadavia - west of 67.5°W','Argentina - Comodoro Rivadavia area west of 67°30''W.',-46.699998855591,-45.199998855591,-69.5,-67.5,0);
 INSERT INTO "extent" VALUES('EPSG','4615','Norway, Svalbard and Jan Mayen - offshore','Norway (offshore) and Svalbard and Jan Mayen (offshore).',56.087,84.723,-13.63,38.0,0);
+INSERT INTO "extent" VALUES('EPSG','4616','UK - Great Britain onshore; Isle of Man','United Kingdom (UK) - Great Britain - England, Scotland and Wales onshore; Isle of Man onshore.',49.815037348282,60.926651214189,-8.6861861839429,1.9002468741098,0);
