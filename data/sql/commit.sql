@@ -122,6 +122,18 @@ FOR EACH ROW BEGIN
                       (SELECT auth_name || code FROM geodetic_crs
                        WHERE type = 'geographic 3D'));
 
+    -- check that grids with 'Vertical Offset by Grid Interpolation' methods are properly registered
+    SELECT RAISE(ABORT, 'One grid_transformation with Vertical Offset by Grid Interpolation has not its source_crs in vertical_crs table')
+        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
+                      g.method_name LIKE 'Vertical Offset by Grid Interpolation%' AND
+                      g.source_crs_auth_name || g.source_crs_code NOT IN
+                      (SELECT auth_name || code FROM vertical_crs));
+    SELECT RAISE(ABORT, 'One grid_transformation with Vertical Offset by Grid Interpolation has not its target_crs in vertical_crs table')
+        WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
+                      g.method_name LIKE 'Vertical Offset by Grid Interpolation%' AND
+                      g.target_crs_auth_name || g.target_crs_code NOT IN
+                      (SELECT auth_name || code FROM vertical_crs));
+
     -- check that transformations intersect the area of use of their source/target CRS
     -- EPSG, ESRI and IGNF have cases where this does not hold.
     SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its source CRS')
