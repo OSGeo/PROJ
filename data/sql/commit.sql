@@ -139,7 +139,7 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its source CRS')
         WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, usage vu, extent ve, usage cu, extent ce WHERE
                       v.deprecated = 0 AND
-                      v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF') AND
+                      (v.table_name = 'grid_transformation' OR v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF')) AND
                       v.source_crs_auth_name = c.auth_name AND
                       v.source_crs_code = c.code AND
                       vu.object_table_name = v.table_name AND
@@ -156,7 +156,8 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its target CRS')
         WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, usage vu, extent ve, usage cu, extent ce WHERE
                       v.deprecated = 0 AND
-                      v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF') AND
+                      ((v.table_name = 'grid_transformation' AND NOT (v.auth_name = 'IGNF' AND v.code = 'TSG1185'))
+                       OR v.auth_name NOT IN ('EPSG', 'ESRI', 'IGNF')) AND
                       v.target_crs_auth_name = c.auth_name AND
                       v.target_crs_code = c.code AND
                       vu.object_table_name = v.table_name AND
