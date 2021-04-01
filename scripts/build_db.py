@@ -29,6 +29,7 @@
 ###############################################################################
 
 import os
+import re
 import sqlite3
 import sys
 
@@ -166,6 +167,12 @@ def compute_publication_date(datum_code, datum_name, frame_reference_epoch, publ
             publication_date += '-01-01'
         elif len(publication_date) == 7:
             publication_date += '-01'
+        elif len(publication_date) == 4+1+4:
+            m = re.search('([0-9]{4})-([0-9]{4})', publication_date)
+            if m:
+                publication_date = m.group(1)
+            else:
+                assert False, (datum_code, datum_name, publication_date)
         else:
             assert len(publication_date) == 10, (datum_code, datum_name, publication_date)
     else:
@@ -226,13 +233,30 @@ def fill_datumensemble(proj_db_cursor):
             proj_db_cursor.execute(
             "INSERT INTO " + datum_ensemble_member_table + " (ensemble_auth_name, ensemble_code, member_auth_name, member_code, sequence) VALUES (?, ?, ?, ?, ?)", (EPSG_AUTHORITY, datum_code, EPSG_AUTHORITY, member_code, sequence))
 
+handled_coord_sys_type = "('Cartesian', 'vertical', 'ellipsoidal', 'spherical', 'ordinal')"
+
 def fill_coordinate_system(proj_db_cursor):
     proj_db_cursor.execute(
-        "INSERT INTO coordinate_system SELECT ?, coord_sys_code, coord_sys_type, dimension FROM epsg.epsg_coordinatesystem", (EPSG_AUTHORITY,))
+        "INSERT INTO coordinate_system SELECT ?, coord_sys_code, coord_sys_type, dimension FROM epsg.epsg_coordinatesystem WHERE coord_sys_type IN " + handled_coord_sys_type, (EPSG_AUTHORITY,))
+    proj_db_cursor.execute("SELECT coord_sys_name, coord_sys_code, coord_sys_type, dimension FROM epsg.epsg_coordinatesystem WHERE coord_sys_type NOT IN " + handled_coord_sys_type)
+    res = proj_db_cursor.fetchall()
+    for row in res:
+        print('Skipping coordinate system %s' % str(row))
 
 
 def fill_axis(proj_db_cursor):
-    proj_db_cursor.execute("INSERT INTO axis SELECT ?, coord_axis_code, coord_axis_name, coord_axis_abbreviation, coord_axis_orientation, ?, coord_sys_code, coord_axis_order, CASE WHEN uom_code IS NULL THEN NULL ELSE ? END, uom_code FROM epsg.epsg_coordinateaxis ca LEFT JOIN epsg.epsg_coordinateaxisname can ON ca.coord_axis_name_code = can.coord_axis_name_code", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+    proj_db_cursor.execute(
+        "INSERT INTO axis "
+        "SELECT ?, coord_axis_code, coord_axis_name, coord_axis_abbreviation, "
+        "coord_axis_orientation, ?, ca.coord_sys_code, coord_axis_order, "
+        "CASE WHEN uom_code IS NULL THEN NULL ELSE ? END, uom_code "
+        "FROM epsg.epsg_coordinateaxis ca "
+        "LEFT JOIN epsg.epsg_coordinateaxisname can "
+        "ON ca.coord_axis_name_code = can.coord_axis_name_code "
+        "JOIN epsg.epsg_coordinatesystem cs "
+        "ON cs.coord_sys_code = ca.coord_sys_code "
+        "WHERE coord_sys_type IN " + handled_coord_sys_type,
+        (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 
 def fill_geodetic_crs(proj_db_cursor):
@@ -549,6 +573,8 @@ def fill_grid_transformation(proj_db_cursor):
             grid2_param_code = param_code[1]
             grid2_param_name = param_name[1]
             grid2_value = param_value[1]
+        # NOTE: update src/iso19111/operation/transformation.cpp if adding
+        # new methods
         # 1071: Vertical Offset by Grid Interpolation (NZLVD)
         # 1080: Vertical Offset by Grid Interpolation (BEV AT)
         # 1081: Geographic3D to GravityRelatedHeight (BEV AT)
@@ -566,8 +592,10 @@ def fill_grid_transformation(proj_db_cursor):
         # 1096: Geog3D to Geog2D+GravityRelatedHeight (OSGM15-Ire)
         # 1097: Geog3D to Geog2D+GravityRelatedHeight (OSGM-GB)
         # 1098: Geog3D to Geog2D+GravityRelatedHeight (SA 2010)
+        # 1100: Geog3D to Geog2D+GravityRelatedHeight (PL txt)
+        # 1101: Vertical Offset by Grid Interpolation (PL txt)
         # 1103: Geog3D to Geog2D+GravityRelatedHeight (EGM)
-        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1103) and n_params == 2:
+        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1100, 1101, 1103) and n_params == 2:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0

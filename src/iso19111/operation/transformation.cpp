@@ -2005,6 +2005,7 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
         "1096", // Geog3D to Geog2D+GravityRelatedHeight (OSGM15-Ire)
         "1097", // Geog3D to Geog2D+GravityRelatedHeight (OSGM-GB)
         "1098", // Geog3D to Geog2D+GravityRelatedHeight (SA 2010)
+        "1100", // Geog3D to Geog2D+GravityRelatedHeight (PL txt)
         "1103", // Geog3D to Geog2D+GravityRelatedHeight (EGM)
         "9661", // Geographic3D to GravityRelatedHeight (EGM)
         "9662", // Geographic3D to GravityRelatedHeight (Ausgeoid98)
@@ -2346,7 +2347,8 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON ||
         methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
         methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_BEV_AT ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX) {
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX ||
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_PL_TXT) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
@@ -3196,7 +3198,8 @@ void Transformation::_exportToPROJString(
 
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
         methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_BEV_AT ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX) {
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX ||
+        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_PL_TXT) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);

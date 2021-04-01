@@ -271,7 +271,6 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6223','carthage','PROJ'
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6312','hermannskogel','PROJ');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6299','ire65','PROJ');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6272','nzgd49','PROJ');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6277','OSGB36','PROJ');
 
 -- Given that we have installed above a WGS84 alias to the datum, add also one
 -- to the EPSG:4326 CRS, as this is a common use case (https://github.com/OSGeo/PROJ/issues/2216)
