@@ -60,14 +60,12 @@ The following command-line options can appear in any order:
 .. option:: -f <format>
 
     Where *format* is a printf format string to control the output form of the
-    geographic coordinate values. The default mode is DMS for geographic
-    coordinates and ``"%.3f"`` for distance.
+    geographic coordinate values. The default mode is DMS.
 
 .. option:: -F <format>
 
     Where *format* is a printf format string to control the output form of the distance
-    value (``-F``). The default mode is DMS for geographic coordinates and
-    ``"%.3f"`` for distance.
+    value. The default mode is ``"%.3f"``.
 
 .. option:: -w<n>
 
