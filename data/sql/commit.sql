@@ -122,7 +122,6 @@ FOR EACH ROW BEGIN
         WHERE EXISTS (SELECT * FROM grid_transformation g WHERE
                       g.deprecated = 0 AND
                       (g.method_name LIKE 'Geographic3D to %' OR g.method_name LIKE 'Geog3D to %') AND
-                      NOT (g.auth_name = 'EPSG' AND g.code IN (9658,9659,9660,9661)) AND -- those are wrongly registered as they refer to a Geog2D CRS in EPGS v10.017. Reported to EPSG
                       g.source_crs_auth_name || g.source_crs_code NOT IN
                       (SELECT auth_name || code FROM geodetic_crs
                        WHERE type = 'geographic 3D'));
