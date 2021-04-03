@@ -20,6 +20,7 @@ namespace { // anonymous namespace
 struct cass_data {
     double *en;
     double m0;
+    bool hyperbolic;
 };
 } // anonymous namespace
 
@@ -33,7 +34,8 @@ static PJ_XY cass_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
     const double cosphi = cos (lp.phi);
     const double M = pj_mlfn (lp.phi, sinphi, cosphi, Q->en);
 
-    const double nu  = 1./sqrt(1. - P->es * sinphi*sinphi);
+    const double nu_square = 1./(1. - P->es * sinphi*sinphi);
+    const double nu  = sqrt(nu_square);
     const double tanphi = tan(lp.phi);
     const double T = tanphi * tanphi;
     const double A = lp.lam * cosphi;
@@ -44,6 +46,11 @@ static PJ_XY cass_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
         (C1 - (8. - T + 8. * C) * A2 * C2));
     xy.y = M - Q->m0 + nu * tanphi * A2 *
         (.5 + (5. - T + 6. * C) * A2 * C3);
+    if( Q->hyperbolic )
+    {
+        const double rho = nu_square * (1. - P->es) * nu;
+        xy.y -= xy.y * xy.y * xy.y / (6 * rho * nu);
+    }
 
     return xy;
 }
@@ -74,6 +81,15 @@ static PJ_LP cass_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
         (.5 - (1. + 3. * T1) * D2 * C3);
     lp.lam = D * (1. + T1 * D2 *
         (-C4 + (1. + 3. * T1) * D2 * C5)) / cos (phi1);
+
+    if( Q->hyperbolic )
+    {
+        // EPSG guidance note 7-2 suggests a custom approximation for the
+        // 'Vanua Levu 1915 / Vanua Levu Grid' case, but better use the
+        // generic inversion method
+        lp = pj_generic_inverse_2d(xy, P, lp);
+    }
+
     return lp;
 }
 
@@ -120,6 +136,8 @@ PJ *PROJECTION(cass) {
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
     Q->m0 = pj_mlfn (P->phi0,  sin (P->phi0),  cos (P->phi0), Q->en);
+    if (pj_param_exists(P->params, "hyperbolic"))
+        Q->hyperbolic = true;
     P->inv = cass_e_inverse;
     P->fwd = cass_e_forward;
 
