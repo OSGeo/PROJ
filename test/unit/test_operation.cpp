@@ -4223,6 +4223,18 @@ TEST(operation, adams_ws2_export_failure) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, hyperbolic_cassini_soldner) {
+    auto dbContext = DatabaseContext::create();
+    auto crs =
+        AuthorityFactory::create(dbContext, "EPSG")->createProjectedCRS("3139");
+    EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=cass +hyperbolic +lat_0=-16.25 +lon_0=179.333333333333 "
+              "+x_0=251727.9155424 +y_0=334519.953768 "
+              "+a=6378306.3696 +b=6356571.996 +units=link +no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, PROJ_based) {
     auto conv = SingleOperation::createPROJBased(PropertyMap(), "+proj=merc",
                                                  nullptr, nullptr);

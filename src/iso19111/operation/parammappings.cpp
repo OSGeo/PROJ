@@ -642,6 +642,10 @@ static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_CASSINI_SOLDNER, EPSG_CODE_METHOD_CASSINI_SOLDNER,
      "Cassini_Soldner", "cass", nullptr, paramsNatOrigin},
 
+    {EPSG_NAME_METHOD_HYPERBOLIC_CASSINI_SOLDNER,
+     EPSG_CODE_METHOD_HYPERBOLIC_CASSINI_SOLDNER, nullptr, "cass", "hyperbolic",
+     paramsNatOrigin},
+
     {PROJ_WKT2_NAME_METHOD_EQUIDISTANT_CONIC, 0, "Equidistant_Conic", "eqdc",
      nullptr, paramsEQDC},
 

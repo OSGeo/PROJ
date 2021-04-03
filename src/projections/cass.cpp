@@ -17,34 +17,40 @@ PROJ_HEAD(cass, "Cassini") "\n\tCyl, Sph&Ell";
 
 
 namespace { // anonymous namespace
-struct pj_opaque {
+struct cass_data {
     double *en;
     double m0;
+    bool hyperbolic;
 };
 } // anonymous namespace
 
 
 
 static PJ_XY cass_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
-    double n, t, a1, c, a2, tn;
     PJ_XY xy = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct cass_data *Q = static_cast<struct cass_data*>(P->opaque);
 
-    n = sin (lp.phi);
-    c = cos (lp.phi);
-    xy.y = pj_mlfn (lp.phi, n, c, Q->en);
+    const double sinphi = sin (lp.phi);
+    const double cosphi = cos (lp.phi);
+    const double M = pj_mlfn (lp.phi, sinphi, cosphi, Q->en);
 
-    n  = 1./sqrt(1. - P->es * n*n);
-    tn = tan(lp.phi);
-    t = tn * tn;
-    a1 = lp.lam * c;
-    c *= P->es * c / (1 - P->es);
-    a2 = a1 * a1;
+    const double nu_square = 1./(1. - P->es * sinphi*sinphi);
+    const double nu  = sqrt(nu_square);
+    const double tanphi = tan(lp.phi);
+    const double T = tanphi * tanphi;
+    const double A = lp.lam * cosphi;
+    const double C = P->es * (cosphi * cosphi) / (1 - P->es);
+    const double A2 = A * A;
 
-    xy.x = n * a1 * (1. - a2 * t *
-        (C1 - (8. - t + 8. * c) * a2 * C2));
-    xy.y -= Q->m0 - n * tn * a2 *
-        (.5 + (5. - t + 6. * c) * a2 * C3);
+    xy.x = nu * A * (1. - A2 * T *
+        (C1 - (8. - T + 8. * C) * A2 * C2));
+    xy.y = M - Q->m0 + nu * tanphi * A2 *
+        (.5 + (5. - T + 6. * C) * A2 * C3);
+    if( Q->hyperbolic )
+    {
+        const double rho = nu_square * (1. - P->es) * nu;
+        xy.y -= xy.y * xy.y * xy.y / (6 * rho * nu);
+    }
 
     return xy;
 }
@@ -59,23 +65,31 @@ static PJ_XY cass_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward
 
 
 static PJ_LP cass_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
-    double n, t, r, dd, d2, tn, ph1;
     PJ_LP lp = {0.0, 0.0};
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    struct cass_data *Q = static_cast<struct cass_data*>(P->opaque);
 
-    ph1 = pj_inv_mlfn (P->ctx, Q->m0 + xy.y, P->es, Q->en);
-    tn  = tan (ph1);
-    t   = tn*tn;
-    n   = sin (ph1);
-    r   = 1. / (1. - P->es * n * n);
-    n   = sqrt (r);
-    r  *= (1. - P->es) * n;
-    dd  = xy.x / n;
-    d2  = dd * dd;
-    lp.phi = ph1 - (n * tn / r) * d2 *
-        (.5 - (1. + 3. * t) * d2 * C3);
-    lp.lam = dd * (1. + t * d2 *
-        (-C4 + (1. + 3. * t) * d2 * C5)) / cos (ph1);
+    const double phi1 = pj_inv_mlfn (P->ctx, Q->m0 + xy.y, P->es, Q->en);
+    const double tanphi1 = tan (phi1);
+    const double T1 = tanphi1*tanphi1;
+    const double sinphi1 = sin (phi1);
+    const double nu1_square = 1. / (1. - P->es * sinphi1 * sinphi1);
+    const double nu1 = sqrt (nu1_square);
+    const double rho1 = nu1_square * (1. - P->es) * nu1;
+    const double D  = xy.x / nu1;
+    const double D2 = D * D;
+    lp.phi = phi1 - (nu1 * tanphi1 / rho1) * D2 *
+        (.5 - (1. + 3. * T1) * D2 * C3);
+    lp.lam = D * (1. + T1 * D2 *
+        (-C4 + (1. + 3. * T1) * D2 * C5)) / cos (phi1);
+
+    if( Q->hyperbolic )
+    {
+        // EPSG guidance note 7-2 suggests a custom approximation for the
+        // 'Vanua Levu 1915 / Vanua Levu Grid' case, but better use the
+        // generic inversion method
+        lp = pj_generic_inverse_2d(xy, P, lp);
+    }
+
     return lp;
 }
 
@@ -95,7 +109,7 @@ static PJ *destructor (PJ *P, int errlev) {                        /* Destructor
     if (nullptr==P->opaque)
         return pj_default_destructor (P, errlev);
 
-    free (static_cast<struct pj_opaque*>(P->opaque)->en);
+    free (static_cast<struct cass_data*>(P->opaque)->en);
     return pj_default_destructor (P, errlev);
 }
 
@@ -111,16 +125,19 @@ PJ *PROJECTION(cass) {
     }
 
     /* otherwise it's ellipsoidal */
-    P->opaque = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
+    auto Q = static_cast<struct cass_data*>(calloc (1, sizeof (struct cass_data)));
+    P->opaque = Q;
     if (nullptr==P->opaque)
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->destructor = destructor;
 
-    static_cast<struct pj_opaque*>(P->opaque)->en = pj_enfn (P->es);
-    if (nullptr==static_cast<struct pj_opaque*>(P->opaque)->en)
+    Q->en = pj_enfn (P->es);
+    if (nullptr==Q->en)
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
 
-    static_cast<struct pj_opaque*>(P->opaque)->m0 = pj_mlfn (P->phi0,  sin (P->phi0),  cos (P->phi0),  static_cast<struct pj_opaque*>(P->opaque)->en);
+    Q->m0 = pj_mlfn (P->phi0,  sin (P->phi0),  cos (P->phi0), Q->en);
+    if (pj_param_exists(P->params, "hyperbolic"))
+        Q->hyperbolic = true;
     P->inv = cass_e_inverse;
     P->fwd = cass_e_forward;
 
