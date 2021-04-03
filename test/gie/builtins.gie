@@ -809,6 +809,7 @@ operation +proj=cass   +ellps=GRS80
 tolerance 0.1 mm
 accept  2 1
 expect  222605.285776991 110642.229253999
+roundtrip 1
 accept  2 -1
 expect  222605.285776991 -110642.229253999
 accept  -2 1
