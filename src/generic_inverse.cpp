@@ -55,7 +55,7 @@ PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial) {
             return lp;
         }
 
-        if (fabs(deltaX) > 1e-6 || fabs(deltaY) > 1e-6) {
+        if (i == 0 || fabs(deltaX) > 1e-6 || fabs(deltaY) > 1e-6) {
             // Compute Jacobian matrix (only if we aren't close to the final
             // result to speed things a bit)
             PJ_LP lp2;
