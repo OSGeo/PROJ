@@ -993,25 +993,31 @@ static void reproject_bbox(PJ* pjGeogToCrs,
         maxx = -maxx;
         maxy = -maxy;
 
-        std::vector<double> x(21 * 4), y(21 * 4);
-        for( int j = 0; j <= 20; j++ )
+        constexpr int N_STEPS = 20;
+        constexpr int N_STEPS_P1 = N_STEPS+1;
+        constexpr int XY_SIZE = N_STEPS_P1 * 4;
+        std::vector<double> x(XY_SIZE);
+        std::vector<double> y(XY_SIZE);
+        const double step_lon = (east_lon - west_lon) / N_STEPS;
+        const double step_lat = (north_lat - south_lat) / N_STEPS;
+        for( int j = 0; j <= N_STEPS; j++ )
         {
-            x[j] = west_lon + j * (east_lon - west_lon) / 20;
+            x[j] = west_lon + j * step_lon;
             y[j] = south_lat;
-            x[21+j] = west_lon + j * (east_lon - west_lon) / 20;
-            y[21+j] = north_lat;
-            x[21*2+j] = west_lon;
-            y[21*2+j] = south_lat + j * (north_lat - south_lat) / 20;
-            x[21*3+j] = east_lon;
-            y[21*3+j] = south_lat + j * (north_lat - south_lat) / 20;
+            x[N_STEPS_P1+j] = x[j];
+            y[N_STEPS_P1+j] = north_lat;
+            x[N_STEPS_P1*2+j] = west_lon;
+            y[N_STEPS_P1*2+j] = south_lat + j * step_lat;
+            x[N_STEPS_P1*3+j] = east_lon;
+            y[N_STEPS_P1*3+j] = y[N_STEPS_P1*2+j];
         }
         proj_trans_generic (
             pjGeogToCrs, PJ_FWD,
-                &x[0], sizeof(double), 21 * 4,
-                &y[0], sizeof(double), 21 * 4,
+                &x[0], sizeof(double), XY_SIZE,
+                &y[0], sizeof(double), XY_SIZE,
                 nullptr, 0, 0,
                 nullptr, 0, 0);
-        for( int j = 0; j < 21 * 4; j++ )
+        for( int j = 0; j < XY_SIZE; j++ )
         {
             if( x[j] != HUGE_VAL && y[j] != HUGE_VAL )
             {
