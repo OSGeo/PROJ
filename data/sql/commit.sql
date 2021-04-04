@@ -191,6 +191,9 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'missing au_ga_AUSGeoid98.tif')
         WHERE NOT EXISTS(SELECT 1 FROM grid_alternatives WHERE proj_grid_name = 'au_ga_AUSGeoid98.tif');
 
+    -- check PROJ.VERSION value
+    SELECT RAISE(ABORT, 'Value of PROJ.VERSION entry of metadata tables not substituted by actual value')
+        WHERE (SELECT 1 FROM metadata WHERE key = 'PROJ.VERSION' AND value LIKE '$%');
 
 END;
 INSERT INTO dummy DEFAULT VALUES;
