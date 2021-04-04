@@ -34,7 +34,7 @@ import requests
 import sys
 
 # url = "http://librairies.ign.fr/geoportail/resources/IGNF.xml"
-url = "https://geodesie.ign.fr/contenu/fichiers/IGNF.v3.1.0.xml"
+url = "https://raw.githubusercontent.com/rouault/proj-resources/master/IGNF.v3.1.0.xml"
 
 if len(sys.argv) not in (1, 2) or (len(sys.argv) == 2 and sys.argv[1].startswith('-')):
     print('Usage: build_db_create_ignf.py [path_to_IGNF.xml]')
@@ -393,7 +393,11 @@ for node in root.iterfind('.//VerticalCRS'):
 mapGridURLs = {
      # France metropole
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/RAF09.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/metropole/RAF09.mnt',
+        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF09.mnt',
+
+     # France metropole
+    'https://geodesie.ign.fr/contenu/fichiers/documentation/grilles/metropole/RAF18.mnt':
+        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/RAF18.mnt',
 
     # Corse
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/RAC09.mnt':
@@ -453,26 +457,26 @@ mapGridURLs = {
 
     # Guadeloupe WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00v2.mnt',
+        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00v2.txt',
 
     # Les Saintes WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_ls.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_lsv2.mnt',
+        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',
 
     'ggg00_lsv2.mnt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_lsv2.mnt',
+        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_lsv2.txt',
 
     # Martinique WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm00.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggm00v2.mnt',
+        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggm00v2.txt',
 
     # Saint Barthelemy WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_sb.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_sbv2.mnt',
+        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_sbv2.txt',
 
     # Saint Martin WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_sm.txt':
-        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_smv2.mnt',
+        'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/anciennes/ggg00_smv2.txt',
 
     # La Desirade WGS84
     'http://geodesie.ign.fr/contenu/fichiers/documentation/grilles/outremer/ggg00_ld.txt':
@@ -532,7 +536,7 @@ for node in root.iterfind('.//Transformation'):
             print('Fixing URL of ' + filename + ' to ' + mapGridURLs[filename])
             filename = mapGridURLs[filename]
 
-        if not filename.endswith('RAF09.mnt') and not filename.endswith('ggspm06v1.mnt'): # no longer available
+        if not filename.endswith('ggspm06v1.mnt'): # no longer available
             r = requests.head(filename, allow_redirects = True  )
             if r.status_code not in (200, 302):
                 assert False, (r.status_code, id, name, filename)
@@ -1134,11 +1138,15 @@ all_sql.append("""INSERT INTO grid_alternatives(original_grid_name,
                               'https://cdn.proj.org/fr_ign_ntf_r93.tif', 1, 1, NULL);
 """)
 
-for grid in setVerticalGrids:
+for grid in sorted(setVerticalGrids):
 
     original_grid_name = grid
     old_proj_grid_name = grid[grid.rfind('/')+1:].replace('.txt', '.gtx').replace('.mnt', '.gtx').replace('.gra', '.gtx')
     gtiff_grid_name = 'fr_ign_' + old_proj_grid_name[0:-4] + '.tif'
+
+    proj_cdn_url = 'https://cdn.proj.org/' + gtiff_grid_name
+    r = requests.head(proj_cdn_url, allow_redirects = True)
+    assert r.status_code in (200, 302), proj_cdn_url
 
     all_sql.append("""INSERT INTO grid_alternatives(original_grid_name,
                             proj_grid_name,
@@ -1155,7 +1163,7 @@ for grid in setVerticalGrids:
                             'geoid_like',
                             0,
                             NULL,
-                            '%s', 1, 1, NULL);""" % (original_grid_name, gtiff_grid_name, old_proj_grid_name, 'https://cdn.proj.org/' + gtiff_grid_name))
+                            '%s', 1, 1, NULL);""" % (original_grid_name, gtiff_grid_name, old_proj_grid_name, proj_cdn_url))
 
 
 all_sql.append('')
