@@ -777,7 +777,7 @@ CREATE TABLE helmert_transformation_table(
 
     method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
     method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
-    --method_name NOT NULL CHECK (length(method_name) >= 2),
+    --method_name TEXT NOT NULL CHECK (length(method_name) >= 2),
 
     source_crs_auth_name TEXT NOT NULL,
     source_crs_code TEXT NOT NULL,
@@ -1009,7 +1009,7 @@ CREATE TABLE grid_transformation(
 
     method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
     method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
-    method_name NOT NULL CHECK (length(method_name) >= 2),
+    method_name TEXT NOT NULL CHECK (length(method_name) >= 2),
 
     source_crs_auth_name TEXT NOT NULL,
     source_crs_code TEXT NOT NULL,
@@ -1132,7 +1132,7 @@ CREATE TABLE other_transformation(
     -- PROJ string and then method_name is a WKT string (CoordinateOperation)
     method_auth_name TEXT NOT NULL CHECK (length(method_auth_name) >= 1),
     method_code TEXT NOT NULL CHECK (length(method_code) >= 1),
-    method_name NOT NULL CHECK (length(method_name) >= 2),
+    method_name TEXT NOT NULL CHECK (length(method_name) >= 2),
 
     source_crs_auth_name TEXT NOT NULL,
     source_crs_code TEXT NOT NULL,
