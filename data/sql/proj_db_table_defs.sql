@@ -86,8 +86,8 @@ CREATE TABLE scope(
 );
 
 CREATE TABLE usage(
-    auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
-    code INTEGER_OR_TEXT NOT NULL CHECK (length(code) >= 1),
+    auth_name TEXT CHECK (auth_name IS NULL OR length(auth_name) >= 1),
+    code INTEGER_OR_TEXT CHECK (code IS NULL OR length(code) >= 1),
     object_table_name TEXT NOT NULL CHECK (object_table_name IN (
         'geodetic_datum', 'vertical_datum',
         'geodetic_crs', 'projected_crs', 'vertical_crs', 'compound_crs',
@@ -1490,7 +1490,7 @@ CREATE VIEW authority_list AS
     UNION
     SELECT DISTINCT auth_name FROM scope
     UNION
-    SELECT DISTINCT auth_name FROM usage
+    SELECT DISTINCT auth_name FROM usage WHERE auth_name IS NOT NULL
     UNION
     SELECT DISTINCT auth_name FROM prime_meridian
     UNION
