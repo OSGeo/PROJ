@@ -6629,6 +6629,20 @@ AuthorityFactory::createFromCRSCodesWithIntermediates(
 
 //! @cond Doxygen_Suppress
 
+struct TrfmInfo {
+    std::string situation{};
+    std::string table_name{};
+    std::string auth_name{};
+    std::string code{};
+    std::string name{};
+    double west = 0;
+    double south = 0;
+    double east = 0;
+    double north = 0;
+};
+
+// ---------------------------------------------------------------------------
+
 std::vector<operation::CoordinateOperationNNPtr>
 AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
     const crs::CRSNNPtr &sourceCRS, const std::string &sourceCRSAuthName,
@@ -6654,98 +6668,159 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         return listTmp;
     }
 
-    std::string minDate;
-    const auto &sourceDatum = sourceGeodCRS->datum();
-    const auto &targetDatum = targetGeodCRS->datum();
-    if (sourceDatum && sourceDatum->publicationDate().has_value() &&
-        targetDatum && targetDatum->publicationDate().has_value()) {
-        const auto sourceDate(sourceDatum->publicationDate()->toString());
-        const auto targetDate(targetDatum->publicationDate()->toString());
-        minDate = std::min(sourceDate, targetDate);
+    // Find all geodetic CRS that share the same datum as the source CRS
+    SQLResultSet listSourceCRS;
+    {
+        const auto res = d->run("SELECT datum_auth_name, datum_code FROM "
+                                "geodetic_crs WHERE auth_name = ? AND code = ?",
+                                {sourceCRSAuthName, sourceCRSCode});
+        if (res.size() != 1) {
+            return listTmp;
+        }
+        const auto &row = res.front();
+        const auto sourceDatumAuthName = row[0];
+        const auto sourceDatumCode = row[1];
+
+        listSourceCRS =
+            d->run("SELECT auth_name, code FROM geodetic_crs WHERE "
+                   "datum_auth_name = ? AND datum_code = ? AND deprecated = 0",
+                   {sourceDatumAuthName, sourceDatumCode});
     }
 
-    // For some reason, filtering on v1.deprecated and v2.deprecated kills
-    // performance
-    const std::string sqlProlog("SELECT v1.table_name as table1, "
-                                "v1.auth_name AS auth_name1, v1.code AS code1, "
-                                "v1.deprecated AS deprecated1, "
-                                "v2.table_name as table2, "
-                                "v2.auth_name AS auth_name2, v2.code AS code2, "
-                                "v2.deprecated AS deprecated2 "
-                                "FROM coordinate_operation_view v1 "
-                                "JOIN coordinate_operation_view v2 "
-                                "JOIN geodetic_crs g_source "
-                                "JOIN geodetic_crs g_v1s "
-                                "JOIN geodetic_crs g_v1t "
-                                "JOIN geodetic_crs g_v2s "
-                                "JOIN geodetic_crs g_v2t "
-                                "JOIN geodetic_crs g_target "
-                                "ON g_v1s.auth_name = v1.source_crs_auth_name "
-                                "AND g_v1s.code = v1.source_crs_code "
-                                "AND g_v1t.auth_name = v1.target_crs_auth_name "
-                                "AND g_v1t.code = v1.target_crs_code "
-                                "AND g_v2s.auth_name = v2.source_crs_auth_name "
-                                "AND g_v2s.code = v2.source_crs_code "
-                                "AND g_v2t.auth_name = v2.target_crs_auth_name "
-                                "AND g_v2t.code = v2.target_crs_code ");
-    const std::string joinArea("JOIN usage u1 ON "
-                               "u1.object_table_name = v1.table_name AND "
-                               "u1.object_auth_name = v1.auth_name AND "
-                               "u1.object_code = v1.code "
-                               "JOIN extent a1 "
-                               "ON a1.auth_name = u1.extent_auth_name AND "
-                               "a1.code = u1.extent_code "
-                               "JOIN usage u2 ON "
-                               "u2.object_table_name = v2.table_name AND "
-                               "u2.object_auth_name = v2.auth_name AND "
-                               "u2.object_code = v2.code "
-                               "JOIN extent a2 "
-                               "ON a2.auth_name = u2.extent_auth_name AND "
-                               "a2.code = u2.extent_code ");
-
-    auto params = ListOfParams{sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode};
-
-    std::string additionalWhere(joinArea);
-    additionalWhere +=
-        "WHERE g_source.auth_name = ? AND g_source.code = ? "
-        "AND g_target.auth_name = ? AND g_target.code = ? "
-        "AND intersects_bbox("
-        "a1.south_lat, a1.west_lon, a1.north_lat, a1.east_lon, "
-        "a2.south_lat, a2.west_lon, a2.north_lat, a2.east_lon) = 1 ";
-
-#if 0
-    // While those additional constraints are correct, they are found to
-    // kill performance. So enforce them as post-processing
-
-    if (!allowedAuthorities.empty()) {
-        additionalWhere += "AND v1.auth_name IN (";
-        for (size_t i = 0; i < allowedAuthorities.size(); i++) {
-            if (i > 0)
-                additionalWhere += ',';
-            additionalWhere += '?';
+    // Find all geodetic CRS that share the same datum as the target CRS
+    SQLResultSet listTargetCRS;
+    {
+        const auto res = d->run("SELECT datum_auth_name, datum_code FROM "
+                                "geodetic_crs WHERE auth_name = ? AND code = ?",
+                                {targetCRSAuthName, targetCRSCode});
+        if (res.size() != 1) {
+            return listTmp;
         }
-        additionalWhere += ") AND v2.auth_name IN (";
-        for (size_t i = 0; i < allowedAuthorities.size(); i++) {
-            if (i > 0)
-                additionalWhere += ',';
-            additionalWhere += '?';
-        }
-        additionalWhere += ") ";
-        for (const auto &allowedAuthority : allowedAuthorities) {
-            params.emplace_back(allowedAuthority);
-        }
-        for (const auto &allowedAuthority : allowedAuthorities) {
-            params.emplace_back(allowedAuthority);
+        const auto &row = res.front();
+        const auto targetDatumAuthName = row[0];
+        const auto targetDatumCode = row[1];
+
+        listTargetCRS =
+            d->run("SELECT auth_name, code FROM geodetic_crs WHERE "
+                   "datum_auth_name = ? AND datum_code = ? AND deprecated = 0",
+                   {targetDatumAuthName, targetDatumCode});
+    }
+
+    ListOfParams params;
+    const auto BuildSQLPart =
+        [this, &allowedAuthorities, &params, &listSourceCRS,
+         &listTargetCRS](bool isSourceCRS, bool selectOnTarget) {
+            std::string situation;
+            if (isSourceCRS)
+                situation = "src";
+            else
+                situation = "tgt";
+            if (selectOnTarget)
+                situation += "_is_tgt";
+            else
+                situation += "_is_src";
+            const std::string prefix1(selectOnTarget ? "source" : "target");
+            const std::string prefix2(selectOnTarget ? "target" : "source");
+            std::string sql("SELECT '");
+            sql += situation;
+            sql += "' as situation, v.table_name, v.auth_name, "
+                   "v.code, v.name, gcrs.datum_auth_name, gcrs.datum_code, "
+                   "a.west_lon, a.south_lat, a.east_lon, a.north_lat "
+                   "FROM coordinate_operation_view v "
+                   "JOIN geodetic_crs gcrs on gcrs.auth_name = ";
+            sql += prefix1;
+            sql += "_crs_auth_name AND gcrs.code = ";
+            sql += prefix1;
+            sql += "_crs_code "
+
+                   "LEFT JOIN usage u ON "
+                   "u.object_table_name = v.table_name AND "
+                   "u.object_auth_name = v.auth_name AND "
+                   "u.object_code = v.code "
+                   "LEFT JOIN extent a "
+                   "ON a.auth_name = u.extent_auth_name AND "
+                   "a.code = u.extent_code "
+                   "WHERE v.deprecated = 0 AND (";
+
+            std::string cond;
+
+            const auto &list = isSourceCRS ? listSourceCRS : listTargetCRS;
+            for (const auto &row : list) {
+                if (!cond.empty())
+                    cond += " OR ";
+                cond += '(';
+                cond += prefix2;
+                cond += "_crs_auth_name = ? AND ";
+                cond += prefix2;
+                cond += "_crs_code = ?)";
+                params.emplace_back(row[0]);
+                params.emplace_back(row[1]);
+            }
+
+            sql += cond;
+            sql += ") ";
+
+            if (!allowedAuthorities.empty()) {
+                sql += "AND v.auth_name IN (";
+                for (size_t i = 0; i < allowedAuthorities.size(); i++) {
+                    if (i > 0)
+                        sql += ',';
+                    sql += '?';
+                }
+                sql += ") ";
+                for (const auto &allowedAuthority : allowedAuthorities) {
+                    params.emplace_back(allowedAuthority);
+                }
+            }
+            if (d->hasAuthorityRestriction()) {
+                sql += "AND v.auth_name = ? ";
+                params.emplace_back(d->authority());
+            }
+
+            return sql;
+        };
+
+    std::string sql(BuildSQLPart(true, true));
+    sql += "UNION ALL ";
+    sql += BuildSQLPart(false, true);
+    sql += "UNION ALL ";
+    sql += BuildSQLPart(true, false);
+    sql += "UNION ALL ";
+    sql += BuildSQLPart(false, false);
+    // fprintf(stderr, "sql : %s\n", sql.c_str());
+
+    // Find all operations that have as source/target CRS a CRS that
+    // share the same datum as the source or targetCRS
+    const auto res = d->run(sql, params);
+
+    std::map<std::string, std::list<TrfmInfo>> mapIntermDatumOfSource;
+    std::map<std::string, std::list<TrfmInfo>> mapIntermDatumOfTarget;
+
+    for (const auto &row : res) {
+        try {
+            TrfmInfo trfm;
+            trfm.situation = row[0];
+            trfm.table_name = row[1];
+            trfm.auth_name = row[2];
+            trfm.code = row[3];
+            trfm.name = row[4];
+            const auto &datum_auth_name = row[5];
+            const auto &datum_code = row[6];
+            trfm.west = c_locale_stod(row[7]);
+            trfm.south = c_locale_stod(row[8]);
+            trfm.east = c_locale_stod(row[9]);
+            trfm.north = c_locale_stod(row[10]);
+            const std::string key = datum_auth_name + ':' + datum_code;
+            if (trfm.situation == "src_is_tgt" ||
+                trfm.situation == "src_is_src")
+                mapIntermDatumOfSource[key].emplace_back(std::move(trfm));
+            else
+                mapIntermDatumOfTarget[key].emplace_back(std::move(trfm));
+        } catch (const std::exception &) {
         }
     }
-    if (d->hasAuthorityRestriction()) {
-        additionalWhere += "AND v1.auth_name = ? AND v2.auth_name = ? ";
-        params.emplace_back(d->authority());
-        params.emplace_back(d->authority());
-    }
-#endif
 
+    std::vector<const metadata::GeographicBoundingBox *> extraBbox;
     for (const auto &extent : {intersectingExtent1, intersectingExtent2}) {
         if (extent) {
             const auto &geogExtent = extent->geographicElements();
@@ -6760,99 +6835,105 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
                     const double east_lon = bbox->eastBoundLongitude();
                     if (south_lat != -90.0 || west_lon != -180.0 ||
                         north_lat != 90.0 || east_lon != 180.0) {
-                        additionalWhere +=
-                            "AND intersects_bbox(a1.south_lat, a1.west_lon, "
-                            "a1.north_lat, a1.east_lon, ?, ?, ?, ?) AND "
-                            "intersects_bbox(a2.south_lat, a2.west_lon, "
-                            "a2.north_lat, a2.east_lon, ?, ?, ?, ?)  ";
-                        params.emplace_back(south_lat);
-                        params.emplace_back(west_lon);
-                        params.emplace_back(north_lat);
-                        params.emplace_back(east_lon);
-                        params.emplace_back(south_lat);
-                        params.emplace_back(west_lon);
-                        params.emplace_back(north_lat);
-                        params.emplace_back(east_lon);
+                        extraBbox.emplace_back(bbox);
                     }
                 }
             }
         }
     }
 
-    // Case (source->intermediate) and (intermediate->target)
-    std::string sql(sqlProlog +
-                    "AND g_v1t.datum_auth_name = g_v2s.datum_auth_name "
-                    "AND g_v1t.datum_code = g_v2s.datum_code "
-                    "AND g_v1s.datum_auth_name = g_source.datum_auth_name "
-                    "AND g_v1s.datum_code = g_source.datum_code "
-                    "AND g_v2t.datum_auth_name = g_target.datum_auth_name "
-                    "AND g_v2t.datum_code = g_target.datum_code ");
+    std::map<std::string, operation::CoordinateOperationPtr> oMapTrfmKeyToOp;
+    std::list<std::pair<TrfmInfo, TrfmInfo>> candidates;
+    std::map<std::string, TrfmInfo> setOfTransformations;
 
-    if (!minDate.empty()) {
-        sql += "AND EXISTS(SELECT 1 FROM geodetic_datum y "
-               "WHERE "
-               "y.auth_name = g_v1t.datum_auth_name AND "
-               "y.code = g_v1t.datum_code AND "
-               "(y.publication_date IS NULL OR "
-               "(y.publication_date >= '" +
-               minDate + "'))) ";
+    const auto MakeKey = [](const TrfmInfo &trfm) {
+        return trfm.table_name + '_' + trfm.auth_name + '_' + trfm.code;
+    };
+
+    // Find transformations that share a pivot datum, and do bbox filtering
+    for (const auto &kvSource : mapIntermDatumOfSource) {
+        const auto &listTrmfSource = kvSource.second;
+        auto iter = mapIntermDatumOfTarget.find(kvSource.first);
+        if (iter == mapIntermDatumOfTarget.end())
+            continue;
+
+        const auto &listTrfmTarget = iter->second;
+        for (const auto &trfmSource : listTrmfSource) {
+            auto bbox1 = metadata::GeographicBoundingBox::create(
+                trfmSource.west, trfmSource.south, trfmSource.east,
+                trfmSource.north);
+            bool okBbox1 = true;
+            for (const auto bbox : extraBbox)
+                okBbox1 &= bbox->intersects(bbox1);
+            if (!okBbox1)
+                continue;
+
+            const std::string key1 = MakeKey(trfmSource);
+
+            for (const auto &trfmTarget : listTrfmTarget) {
+                auto bbox2 = metadata::GeographicBoundingBox::create(
+                    trfmTarget.west, trfmTarget.south, trfmTarget.east,
+                    trfmTarget.north);
+                if (!bbox1->intersects(bbox2))
+                    continue;
+                bool okBbox2 = true;
+                for (const auto bbox : extraBbox)
+                    okBbox2 &= bbox->intersects(bbox2);
+                if (!okBbox2)
+                    continue;
+
+                operation::CoordinateOperationPtr op1;
+                if (oMapTrfmKeyToOp.find(key1) == oMapTrfmKeyToOp.end()) {
+                    auto op1NN = d->createFactory(trfmSource.auth_name)
+                                     ->createCoordinateOperation(
+                                         trfmSource.code, true,
+                                         usePROJAlternativeGridNames,
+                                         trfmSource.table_name);
+                    op1 = op1NN.as_nullable();
+                    if (useIrrelevantPivot(op1NN, sourceCRSAuthName,
+                                           sourceCRSCode, targetCRSAuthName,
+                                           targetCRSCode)) {
+                        op1.reset();
+                    }
+                    oMapTrfmKeyToOp[key1] = op1;
+                } else {
+                    op1 = oMapTrfmKeyToOp[key1];
+                }
+                if (op1 == nullptr)
+                    continue;
+
+                const std::string key2 = MakeKey(trfmTarget);
+
+                operation::CoordinateOperationPtr op2;
+                if (oMapTrfmKeyToOp.find(key2) == oMapTrfmKeyToOp.end()) {
+                    auto op2NN = d->createFactory(trfmTarget.auth_name)
+                                     ->createCoordinateOperation(
+                                         trfmTarget.code, true,
+                                         usePROJAlternativeGridNames,
+                                         trfmTarget.table_name);
+                    op2 = op2NN.as_nullable();
+                    if (useIrrelevantPivot(op2NN, sourceCRSAuthName,
+                                           sourceCRSCode, targetCRSAuthName,
+                                           targetCRSCode)) {
+                        op2.reset();
+                    }
+                    oMapTrfmKeyToOp[key2] = op2;
+                } else {
+                    op2 = oMapTrfmKeyToOp[key2];
+                }
+                if (op2 == nullptr)
+                    continue;
+
+                candidates.emplace_back(
+                    std::pair<TrfmInfo, TrfmInfo>(trfmSource, trfmTarget));
+                setOfTransformations[key1] = trfmSource;
+                setOfTransformations[key2] = trfmTarget;
+            }
+        }
     }
 
-    // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
-    auto res = d->run(sql + additionalWhere, params);
-    // fprintf(stderr, "after\n");
-
-    const auto filterDeprecatedAndNotMatchingAuth =
-        [&](SQLResultSet &&resultSet) {
-            SQLResultSet filteredResultSet;
-            for (const auto &row : resultSet) {
-                const auto &deprecated1 = row[3];
-                const auto &deprecated2 = row[7];
-                if (deprecated1 == "1" || deprecated2 == "1") {
-                    continue;
-                }
-                const auto &auth_name1 = row[1];
-                const auto &auth_name2 = row[5];
-                if (d->hasAuthorityRestriction()) {
-                    if (auth_name1 != d->authority() ||
-                        auth_name2 != d->authority()) {
-                        continue;
-                    }
-                }
-                if (!allowedAuthorities.empty()) {
-                    {
-                        bool found = false;
-                        for (const auto &auth : allowedAuthorities) {
-                            if (auth_name1 == auth) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            continue;
-                        }
-                    }
-                    {
-                        bool found = false;
-                        for (const auto &auth : allowedAuthorities) {
-                            if (auth_name2 == auth) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            continue;
-                        }
-                    }
-                }
-
-                filteredResultSet.emplace_back(row);
-            }
-            return filteredResultSet;
-        };
-
-    const auto filterOutSuperseded = [&](SQLResultSet &&resultSet) {
-        std::set<std::pair<std::string, std::string>> setTransf;
+    std::set<std::string> setSuperseded;
+    if (discardSuperseded && !setOfTransformations.empty()) {
         std::string findSupersededSql(
             "SELECT superseded_table_name, "
             "superseded_auth_name, superseded_code, "
@@ -6861,91 +6942,62 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         bool findSupersededFirstWhere = true;
         ListOfParams findSupersededParams;
 
-        std::set<std::string> setAlreadyAsked;
         const auto keyMapSupersession = [](const std::string &table_name,
                                            const std::string &auth_name,
                                            const std::string &code) {
             return table_name + auth_name + code;
         };
 
-        for (const auto &row : resultSet) {
-            const auto &table1 = row[0];
-            const auto &auth_name1 = row[1];
-            const auto &code1 = row[2];
-            const auto key1 = keyMapSupersession(table1, auth_name1, code1);
-            if (setAlreadyAsked.find(key1) == setAlreadyAsked.end()) {
-                setAlreadyAsked.insert(key1);
-                if (!findSupersededFirstWhere)
-                    findSupersededSql += " OR ";
-                findSupersededFirstWhere = false;
-                findSupersededSql +=
-                    "(superseded_table_name = ? AND replacement_table_name = "
-                    "superseded_table_name AND superseded_auth_name = ? AND "
-                    "superseded_code = ?)";
-                findSupersededParams.push_back(table1);
-                findSupersededParams.push_back(auth_name1);
-                findSupersededParams.push_back(code1);
-            }
+        std::set<std::pair<std::string, std::string>> setTransf;
+        for (const auto &kv : setOfTransformations) {
+            const auto &table = kv.second.table_name;
+            const auto &auth_name = kv.second.auth_name;
+            const auto &code = kv.second.code;
 
-            const auto &table2 = row[4];
-            const auto &auth_name2 = row[5];
-            const auto &code2 = row[6];
-            const auto key2 = keyMapSupersession(table2, auth_name2, code2);
-            if (setAlreadyAsked.find(key2) == setAlreadyAsked.end()) {
-                setAlreadyAsked.insert(key2);
-                if (!findSupersededFirstWhere)
-                    findSupersededSql += " OR ";
-                findSupersededFirstWhere = false;
-                findSupersededSql +=
-                    "(superseded_table_name = ? AND replacement_table_name = "
-                    "superseded_table_name AND superseded_auth_name = ? AND "
-                    "superseded_code = ?)";
-                findSupersededParams.push_back(table2);
-                findSupersededParams.push_back(auth_name2);
-                findSupersededParams.push_back(code2);
-            }
+            if (!findSupersededFirstWhere)
+                findSupersededSql += " OR ";
+            findSupersededFirstWhere = false;
+            findSupersededSql +=
+                "(superseded_table_name = ? AND replacement_table_name = "
+                "superseded_table_name AND superseded_auth_name = ? AND "
+                "superseded_code = ?)";
+            findSupersededParams.push_back(table);
+            findSupersededParams.push_back(auth_name);
+            findSupersededParams.push_back(code);
 
             setTransf.insert(
-                std::pair<std::string, std::string>(auth_name1, code1));
-            setTransf.insert(
-                std::pair<std::string, std::string>(auth_name2, code2));
+                std::pair<std::string, std::string>(auth_name, code));
         }
         findSupersededSql += ')';
 
         std::map<std::string, std::vector<std::pair<std::string, std::string>>>
             mapSupersession;
 
-        if (!findSupersededParams.empty()) {
-            const auto resSuperseded =
-                d->run(findSupersededSql, findSupersededParams);
-            for (const auto &row : resSuperseded) {
-                const auto &superseded_table_name = row[0];
-                const auto &superseded_auth_name = row[1];
-                const auto &superseded_code = row[2];
-                const auto &replacement_auth_name = row[3];
-                const auto &replacement_code = row[4];
-                mapSupersession[keyMapSupersession(superseded_table_name,
-                                                   superseded_auth_name,
-                                                   superseded_code)]
-                    .push_back(std::pair<std::string, std::string>(
-                        replacement_auth_name, replacement_code));
-            }
+        const auto resSuperseded =
+            d->run(findSupersededSql, findSupersededParams);
+        for (const auto &row : resSuperseded) {
+            const auto &superseded_table_name = row[0];
+            const auto &superseded_auth_name = row[1];
+            const auto &superseded_code = row[2];
+            const auto &replacement_auth_name = row[3];
+            const auto &replacement_code = row[4];
+            mapSupersession[keyMapSupersession(superseded_table_name,
+                                               superseded_auth_name,
+                                               superseded_code)]
+                .push_back(std::pair<std::string, std::string>(
+                    replacement_auth_name, replacement_code));
         }
 
-        SQLResultSet filteredResultSet;
-        for (const auto &row : resultSet) {
-            const auto &table1 = row[0];
-            const auto &auth_name1 = row[1];
-            const auto &code1 = row[2];
-            const auto &table2 = row[4];
-            const auto &auth_name2 = row[5];
-            const auto &code2 = row[6];
+        for (const auto &kv : setOfTransformations) {
+            const auto &table = kv.second.table_name;
+            const auto &auth_name = kv.second.auth_name;
+            const auto &code = kv.second.code;
 
-            auto iter1 = mapSupersession.find(
-                keyMapSupersession(table1, auth_name1, code1));
-            if (iter1 != mapSupersession.end()) {
+            const auto iter = mapSupersession.find(
+                keyMapSupersession(table, auth_name, code));
+            if (iter != mapSupersession.end()) {
                 bool foundReplacement = false;
-                for (const auto &replacement : iter1->second) {
+                for (const auto &replacement : iter->second) {
                     const auto &replacement_auth_name = replacement.first;
                     const auto &replacement_code = replacement.second;
                     if (setTransf.find(std::pair<std::string, std::string>(
@@ -6959,388 +7011,72 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
                     }
                 }
                 if (foundReplacement) {
-                    continue;
+                    setSuperseded.insert(kv.first);
                 }
             }
-
-            auto iter2 = mapSupersession.find(
-                keyMapSupersession(table2, auth_name2, code2));
-            if (iter2 != mapSupersession.end()) {
-                bool foundReplacement = false;
-                for (const auto &replacement : iter2->second) {
-                    const auto &replacement_auth_name = replacement.first;
-                    const auto &replacement_code = replacement.second;
-                    if (setTransf.find(std::pair<std::string, std::string>(
-                            replacement_auth_name, replacement_code)) !=
-                        setTransf.end()) {
-                        // Skip transformations that are superseded by others
-                        // that got
-                        // returned in the result set.
-                        foundReplacement = true;
-                        break;
-                    }
-                }
-                if (foundReplacement) {
-                    continue;
-                }
-            }
-
-            filteredResultSet.emplace_back(row);
         }
-        return filteredResultSet;
-    };
-
-    res = filterDeprecatedAndNotMatchingAuth(std::move(res));
-    if (discardSuperseded) {
-        res = filterOutSuperseded(std::move(res));
     }
 
     auto opFactory = operation::CoordinateOperationFactory::create();
-
-    for (const auto &row : res) {
-        const auto &table1 = row[0];
-        const auto &auth_name1 = row[1];
-        const auto &code1 = row[2];
-        const auto &table2 = row[4];
-        const auto &auth_name2 = row[5];
-        const auto &code2 = row[6];
-
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
+    for (const auto &pair : candidates) {
+        const auto &trfmSource = pair.first;
+        const auto &trfmTarget = pair.second;
+        const std::string key1 = MakeKey(trfmSource);
+        const std::string key2 = MakeKey(trfmTarget);
+        if (setSuperseded.find(key1) != setSuperseded.end() ||
+            setSuperseded.find(key2) != setSuperseded.end()) {
             continue;
         }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
+        auto op1 = oMapTrfmKeyToOp[key1];
+        auto op2 = oMapTrfmKeyToOp[key2];
+        auto op1NN = NN_NO_CHECK(op1);
+        auto op2NN = NN_NO_CHECK(op2);
+        if (trfmSource.situation == "src_is_tgt")
+            op1NN = op1NN->inverse();
+        if (trfmTarget.situation == "tgt_is_src")
+            op2NN = op2NN->inverse();
 
-        const auto &op1Source = op1->sourceCRS();
-        const auto &op1Target = op1->targetCRS();
-        const auto &op2Source = op2->sourceCRS();
-        const auto &op2Target = op2->targetCRS();
-        if (op1Source && op1Target && op2Source && op2Target) {
-            std::vector<operation::CoordinateOperationNNPtr> steps;
-
-            if (!sourceCRS->isEquivalentTo(
-                    op1Source.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opFirst = opFactory->createOperation(
-                    sourceCRS, NN_NO_CHECK(op1Source));
-                assert(opFirst);
-                steps.emplace_back(NN_NO_CHECK(opFirst));
-            }
-
-            steps.emplace_back(op1);
-
-            if (!op1Target->isEquivalentTo(
-                    op2Source.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opMiddle = opFactory->createOperation(
-                    NN_NO_CHECK(op1Target), NN_NO_CHECK(op2Source));
-                assert(opMiddle);
-                steps.emplace_back(NN_NO_CHECK(opMiddle));
-            }
-
-            steps.emplace_back(op2);
-
-            if (!op2Target->isEquivalentTo(
-                    targetCRS.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opLast = opFactory->createOperation(NN_NO_CHECK(op2Target),
-                                                         targetCRS);
-                assert(opLast);
-                steps.emplace_back(NN_NO_CHECK(opLast));
-            }
-
-            listTmp.emplace_back(
-                operation::ConcatenatedOperation::createComputeMetadata(steps,
-                                                                        false));
-        }
-    }
-
-    // Case (source->intermediate) and (target->intermediate)
-    sql = sqlProlog + "AND g_v1t.datum_auth_name = g_v2t.datum_auth_name "
-                      "AND g_v1t.datum_code = g_v2t.datum_code "
-                      "AND g_v1s.datum_auth_name = g_source.datum_auth_name "
-                      "AND g_v1s.datum_code = g_source.datum_code "
-                      "AND g_v2s.datum_auth_name = g_target.datum_auth_name "
-                      "AND g_v2s.datum_code = g_target.datum_code ";
-
-    if (!minDate.empty()) {
-        sql += "AND EXISTS(SELECT 1 FROM geodetic_datum y "
-               "WHERE "
-               "y.auth_name = g_v1t.datum_auth_name AND "
-               "y.code = g_v1t.datum_code AND "
-               "(y.publication_date IS NULL OR "
-               "(y.publication_date >= '" +
-               minDate + "'))) ";
-    }
-
-    // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
-    res = d->run(sql + additionalWhere, params);
-    // fprintf(stderr, "after\n");
-
-    res = filterDeprecatedAndNotMatchingAuth(std::move(res));
-    if (discardSuperseded) {
-        res = filterOutSuperseded(std::move(res));
-    }
-    for (const auto &row : res) {
-        const auto &table1 = row[0];
-        const auto &auth_name1 = row[1];
-        const auto &code1 = row[2];
-        const auto &table2 = row[4];
-        const auto &auth_name2 = row[5];
-        const auto &code2 = row[6];
-
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
+        const auto &op1Source = op1NN->sourceCRS();
+        const auto &op1Target = op1NN->targetCRS();
+        const auto &op2Source = op2NN->sourceCRS();
+        const auto &op2Target = op2NN->targetCRS();
+        if (!(op1Source && op1Target && op2Source && op2Target)) {
             continue;
         }
 
-        const auto &op1Source = op1->sourceCRS();
-        const auto &op1Target = op1->targetCRS();
-        const auto &op2Source = op2->sourceCRS();
-        const auto &op2Target = op2->targetCRS();
-        if (op1Source && op1Target && op2Source && op2Target) {
-            std::vector<operation::CoordinateOperationNNPtr> steps;
+        std::vector<operation::CoordinateOperationNNPtr> steps;
 
-            if (!sourceCRS->isEquivalentTo(
-                    op1Source.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opFirst = opFactory->createOperation(
-                    sourceCRS, NN_NO_CHECK(op1Source));
-                assert(opFirst);
-                steps.emplace_back(NN_NO_CHECK(opFirst));
-            }
-
-            steps.emplace_back(op1);
-
-            if (!op1Target->isEquivalentTo(
-                    op2Target.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opMiddle = opFactory->createOperation(
-                    NN_NO_CHECK(op1Target), NN_NO_CHECK(op2Target));
-                assert(opMiddle);
-                steps.emplace_back(NN_NO_CHECK(opMiddle));
-            }
-
-            steps.emplace_back(op2->inverse());
-
-            if (!op2Source->isEquivalentTo(
-                    targetCRS.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opLast = opFactory->createOperation(NN_NO_CHECK(op2Source),
-                                                         targetCRS);
-                assert(opLast);
-                steps.emplace_back(NN_NO_CHECK(opLast));
-            }
-
-            listTmp.emplace_back(
-                operation::ConcatenatedOperation::createComputeMetadata(steps,
-                                                                        false));
-        }
-    }
-
-    // Case (intermediate->source) and (intermediate->target)
-    sql = sqlProlog + "AND g_v1s.datum_auth_name = g_v2s.datum_auth_name "
-                      "AND g_v1s.datum_code = g_v2s.datum_code "
-                      "AND g_v1t.datum_auth_name = g_source.datum_auth_name "
-                      "AND g_v1t.datum_code = g_source.datum_code "
-                      "AND g_v2t.datum_auth_name = g_target.datum_auth_name "
-                      "AND g_v2t.datum_code = g_target.datum_code ";
-
-    if (!minDate.empty()) {
-        sql += "AND EXISTS(SELECT 1 FROM geodetic_datum y "
-               "WHERE "
-               "y.auth_name = g_v1s.datum_auth_name AND "
-               "y.code = g_v1s.datum_code AND "
-               "(y.publication_date IS NULL OR "
-               "(y.publication_date >= '" +
-               minDate + "'))) ";
-    }
-
-    // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
-    res = d->run(sql + additionalWhere, params);
-    // fprintf(stderr, "after\n");
-
-    res = filterDeprecatedAndNotMatchingAuth(std::move(res));
-    if (discardSuperseded) {
-        res = filterOutSuperseded(std::move(res));
-    }
-    for (const auto &row : res) {
-        const auto &table1 = row[0];
-        const auto &auth_name1 = row[1];
-        const auto &code1 = row[2];
-        const auto &table2 = row[4];
-        const auto &auth_name2 = row[5];
-        const auto &code2 = row[6];
-
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
+        if (!sourceCRS->isEquivalentTo(
+                op1Source.get(), util::IComparable::Criterion::EQUIVALENT)) {
+            auto opFirst =
+                opFactory->createOperation(sourceCRS, NN_NO_CHECK(op1Source));
+            assert(opFirst);
+            steps.emplace_back(NN_NO_CHECK(opFirst));
         }
 
-        const auto &op1Source = op1->sourceCRS();
-        const auto &op1Target = op1->targetCRS();
-        const auto &op2Source = op2->sourceCRS();
-        const auto &op2Target = op2->targetCRS();
-        if (op1Source && op1Target && op2Source && op2Target) {
-            std::vector<operation::CoordinateOperationNNPtr> steps;
+        steps.emplace_back(op1NN);
 
-            if (!sourceCRS->isEquivalentTo(
-                    op1Target.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opFirst = opFactory->createOperation(
-                    sourceCRS, NN_NO_CHECK(op1Target));
-                assert(opFirst);
-                steps.emplace_back(NN_NO_CHECK(opFirst));
-            }
-
-            steps.emplace_back(op1->inverse());
-
-            if (!op1Source->isEquivalentTo(
-                    op2Source.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opMiddle = opFactory->createOperation(
-                    NN_NO_CHECK(op1Source), NN_NO_CHECK(op2Source));
-                assert(opMiddle);
-                steps.emplace_back(NN_NO_CHECK(opMiddle));
-            }
-
-            steps.emplace_back(op2);
-
-            if (!op2Target->isEquivalentTo(
-                    targetCRS.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opLast = opFactory->createOperation(NN_NO_CHECK(op2Target),
-                                                         targetCRS);
-                assert(opLast);
-                steps.emplace_back(NN_NO_CHECK(opLast));
-            }
-
-            listTmp.emplace_back(
-                operation::ConcatenatedOperation::createComputeMetadata(steps,
-                                                                        false));
-        }
-    }
-
-    // Case (intermediate->source) and (target->intermediate)
-    sql = sqlProlog + "AND g_v1s.datum_auth_name = g_v2t.datum_auth_name "
-                      "AND g_v1s.datum_code = g_v2t.datum_code "
-                      "AND g_v1t.datum_auth_name = g_source.datum_auth_name "
-                      "AND g_v1t.datum_code = g_source.datum_code "
-                      "AND g_v2s.datum_auth_name = g_target.datum_auth_name "
-                      "AND g_v2s.datum_code = g_target.datum_code ";
-
-    if (!minDate.empty()) {
-        sql += "AND EXISTS(SELECT 1 FROM geodetic_datum y "
-               "WHERE "
-               "y.auth_name = g_v1s.datum_auth_name AND "
-               "y.code = g_v1s.datum_code AND "
-               "(y.publication_date IS NULL OR "
-               "(y.publication_date >= '" +
-               minDate + "'))) ";
-    }
-
-    // fprintf(stderr, "before %s\n", (sql + additionalWhere).c_str());
-    res = d->run(sql + additionalWhere, params);
-    // fprintf(stderr, "after\n");
-
-    res = filterDeprecatedAndNotMatchingAuth(std::move(res));
-    if (discardSuperseded) {
-        res = filterOutSuperseded(std::move(res));
-    }
-    for (const auto &row : res) {
-        const auto &table1 = row[0];
-        const auto &auth_name1 = row[1];
-        const auto &code1 = row[2];
-        const auto &table2 = row[4];
-        const auto &auth_name2 = row[5];
-        const auto &code2 = row[6];
-
-        auto op1 = d->createFactory(auth_name1)
-                       ->createCoordinateOperation(
-                           code1, true, usePROJAlternativeGridNames, table1);
-        if (useIrrelevantPivot(op1, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
-        }
-        auto op2 = d->createFactory(auth_name2)
-                       ->createCoordinateOperation(
-                           code2, true, usePROJAlternativeGridNames, table2);
-        if (useIrrelevantPivot(op2, sourceCRSAuthName, sourceCRSCode,
-                               targetCRSAuthName, targetCRSCode)) {
-            continue;
+        if (!op1Target->isEquivalentTo(
+                op2Source.get(), util::IComparable::Criterion::EQUIVALENT)) {
+            auto opMiddle = opFactory->createOperation(NN_NO_CHECK(op1Target),
+                                                       NN_NO_CHECK(op2Source));
+            assert(opMiddle);
+            steps.emplace_back(NN_NO_CHECK(opMiddle));
         }
 
-        const auto &op1Source = op1->sourceCRS();
-        const auto &op1Target = op1->targetCRS();
-        const auto &op2Source = op2->sourceCRS();
-        const auto &op2Target = op2->targetCRS();
-        if (op1Source && op1Target && op2Source && op2Target) {
-            std::vector<operation::CoordinateOperationNNPtr> steps;
+        steps.emplace_back(op2NN);
 
-            if (!sourceCRS->isEquivalentTo(
-                    op1Target.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opFirst = opFactory->createOperation(
-                    sourceCRS, NN_NO_CHECK(op1Target));
-                assert(opFirst);
-                steps.emplace_back(NN_NO_CHECK(opFirst));
-            }
-
-            steps.emplace_back(op1->inverse());
-
-            if (!op1Source->isEquivalentTo(
-                    op2Target.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opMiddle = opFactory->createOperation(
-                    NN_NO_CHECK(op1Source), NN_NO_CHECK(op2Target));
-                assert(opMiddle);
-                steps.emplace_back(NN_NO_CHECK(opMiddle));
-            }
-
-            steps.emplace_back(op2->inverse());
-
-            if (!op2Source->isEquivalentTo(
-                    targetCRS.get(),
-                    util::IComparable::Criterion::EQUIVALENT)) {
-                auto opLast = opFactory->createOperation(NN_NO_CHECK(op2Source),
-                                                         targetCRS);
-                assert(opLast);
-                steps.emplace_back(NN_NO_CHECK(opLast));
-            }
-
-            listTmp.emplace_back(
-                operation::ConcatenatedOperation::createComputeMetadata(steps,
-                                                                        false));
+        if (!op2Target->isEquivalentTo(
+                targetCRS.get(), util::IComparable::Criterion::EQUIVALENT)) {
+            auto opLast =
+                opFactory->createOperation(NN_NO_CHECK(op2Target), targetCRS);
+            assert(opLast);
+            steps.emplace_back(NN_NO_CHECK(opLast));
         }
+
+        listTmp.emplace_back(
+            operation::ConcatenatedOperation::createComputeMetadata(steps,
+                                                                    false));
     }
 
     std::vector<operation::CoordinateOperationNNPtr> list;

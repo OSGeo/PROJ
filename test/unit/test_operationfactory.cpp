@@ -1531,6 +1531,37 @@ TEST(operation, geocentric_to_geogCRS_3D_different_datum_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createBetweenGeodeticCRSWithDatumBasedIntermediates) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt =
+        CoordinateOperationContext::create(authFactoryEPSG, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        // IG05/12 Intermediate CRS
+        authFactoryEPSG->createCoordinateReferenceSystem("6990"),
+        // ITRF2014
+        authFactoryEPSG->createCoordinateReferenceSystem("9000"), ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of ITRF2008 to IG05/12 Intermediate CRS + "
+              "Conversion from ITRF2008 (geog2D) to ITRF2008 (geocentric) + "
+              "ITRF2008 to ITRF2014 (1) + "
+              "Conversion from ITRF2014 (geocentric) to ITRF2014 (geog2D)");
+
+    auto listInv = CoordinateOperationFactory::create()->createOperations(
+        // ITRF2014
+        authFactoryEPSG->createCoordinateReferenceSystem("9000"),
+        // IG05/12 Intermediate CRS
+        authFactoryEPSG->createCoordinateReferenceSystem("6990"), ctxt);
+    ASSERT_EQ(listInv.size(), 1U);
+    EXPECT_EQ(listInv[0]->nameStr(),
+              "Conversion from ITRF2014 (geog2D) to ITRF2014 (geocentric) + "
+              "Inverse of ITRF2008 to ITRF2014 (1) + "
+              "Conversion from ITRF2008 (geocentric) to ITRF2008 (geog2D) + "
+              "ITRF2008 to IG05/12 Intermediate CRS");
+}
+
+// ---------------------------------------------------------------------------
 TEST(operation, esri_projectedCRS_to_geogCRS_with_ITRF_intermediate_context) {
     auto dbContext = DatabaseContext::create();
     auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
