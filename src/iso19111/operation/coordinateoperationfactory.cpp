@@ -3282,22 +3282,19 @@ bool CoordinateOperationFactory::Private::createOperationsFromDatabase(
         res.insert(res.end(), resWithIntermediate.begin(),
                    resWithIntermediate.end());
         doFilterAndCheckPerfectOp = !res.empty();
+    }
 
-    } else if (!context.inCreateOperationsWithDatumPivotAntiRecursion &&
-               !resFindDirectNonEmptyBeforeFiltering && geodSrc && geodDst &&
-               !sameGeodeticDatum &&
-               context.context->getIntermediateCRS().empty() &&
-               context.context->getAllowUseIntermediateCRS() !=
-                   CoordinateOperationContext::IntermediateCRSUse::NEVER) {
-
-        bool tryWithGeodeticDatumIntermediate = res.empty();
-        if (tryWithGeodeticDatumIntermediate) {
-            auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
-                sourceCRS, targetCRS, context, true);
-            res.insert(res.end(), resWithIntermediate.begin(),
-                       resWithIntermediate.end());
-            doFilterAndCheckPerfectOp = !res.empty();
-        }
+    if (res.empty() && !context.inCreateOperationsWithDatumPivotAntiRecursion &&
+        !resFindDirectNonEmptyBeforeFiltering && geodSrc && geodDst &&
+        !sameGeodeticDatum && context.context->getIntermediateCRS().empty() &&
+        context.context->getAllowUseIntermediateCRS() !=
+            CoordinateOperationContext::IntermediateCRSUse::NEVER) {
+        // Currently triggered by "IG05/12 Intermediate CRS" to ITRF2014
+        auto resWithIntermediate = findsOpsInRegistryWithIntermediate(
+            sourceCRS, targetCRS, context, true);
+        res.insert(res.end(), resWithIntermediate.begin(),
+                   resWithIntermediate.end());
+        doFilterAndCheckPerfectOp = !res.empty();
     }
 
     if (doFilterAndCheckPerfectOp) {
