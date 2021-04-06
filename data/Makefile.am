@@ -147,14 +147,15 @@ proj.db: $(DATAPATH)/sql/*.sql
 	$(RM) proj.db
 	@export SQL_EXPANDED_LIST=""; \
 	 for x in $(SQL_ORDERED_LIST); do \
-		export SQL_EXPANDED_LIST="$${SQL_EXPANDED_LIST} $(DATAPATH)/$$x"; \
+		 export SQL_EXPANDED_LIST="$${SQL_EXPANDED_LIST} $(DATAPATH)/$$x"; \
 	 done; \
+	 cat $${SQL_EXPANDED_LIST} | sed 's/$${PROJ_VERSION}/${PACKAGE_VERSION}/' > all.sql.in; \
 	 if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db" -a -f "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" ; then \
-	    cat $${SQL_EXPANDED_LIST} | md5sum | diff - "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" > /dev/null \
+	    cat all.sql.in | md5sum | diff - "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5" > /dev/null \
 	    && (echo "Reusing cached proj.db"; cp "$(PROJ_DB_CACHE_DIR)/proj.db" proj.db); \
 	 fi; \
 	 if test ! -f proj.db ; then \
-	   cat $${SQL_EXPANDED_LIST} | sqlite3 proj.db; \
+	   cat all.sql.in | sqlite3 proj.db; \
 	 fi; \
 	 if [ $$? -ne 0 ] ; then \
 		echo "Build of proj.db failed"; \
@@ -163,9 +164,10 @@ proj.db: $(DATAPATH)/sql/*.sql
 	 fi; \
 	 if test "x$(PROJ_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" ; then \
 		mkdir -p "$(PROJ_DB_CACHE_DIR)"; \
-		cat $${SQL_EXPANDED_LIST} | md5sum > "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5"; \
+		cat all.sql.in | md5sum > "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5"; \
 		cp proj.db "$(PROJ_DB_CACHE_DIR)"; \
-	 fi
+	 fi; \
+	 $(RM) all.sql.in
 
 # For out-of-tree builds, link all file of the source data dir to the generated data
 # Also link select resource files in a for_tests subdirectory so that we are not
