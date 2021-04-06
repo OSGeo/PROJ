@@ -15,15 +15,7 @@ if [ -z "$prefix" ]; then
     exit 1
 fi
 
-export PKG_CONFIG_PATH=$prefix/lib/pkgconfig
 export LD_LIBRARY_PATH=$prefix/lib
-
-echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
-
-PKG_CONFIG_MODVERSION=$(pkg-config proj --modversion)
-echo "pkg-config proj --modversion: $PKG_CONFIG_MODVERSION"
-PKG_CONFIG_DATADIR=$(pkg-config proj --variable=datadir)
-echo "pkg-config proj --variable=datadir: $PKG_CONFIG_DATADIR"
 
 UNAME=$(uname)
 case $UNAME in
@@ -31,10 +23,21 @@ case $UNAME in
     alias ldd="otool -L" ;;
   Linux*)
     ;;
+  MINGW* | MSYS*)
+    prefix=$(cygpath -u ${prefix})
+    export LD_LIBRARY_PATH=$prefix/bin ;;
   *)
     echo "no ldd equivalent found for UNAME=$UNAME"
     exit 1 ;;
 esac
+
+export PKG_CONFIG_PATH=$prefix/lib/pkgconfig
+echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
+
+PKG_CONFIG_MODVERSION=$(pkg-config proj --modversion)
+echo "pkg-config proj --modversion: $PKG_CONFIG_MODVERSION"
+PKG_CONFIG_DATADIR=$(pkg-config proj --variable=datadir)
+echo "pkg-config proj --variable=datadir: $PKG_CONFIG_DATADIR"
 
 cd $(dirname $0)
 
@@ -46,8 +49,8 @@ make
 ERRORS=0
 
 LDD_OUTPUT=$(ldd ./$PROGRAM | grep proj)
-LDD_SUBSTR=$LD_LIBRARY_PATH/libproj.
-LDD_RPATH_SUBSTR=@rpath/libproj.
+LDD_SUBSTR=$LD_LIBRARY_PATH/libproj
+LDD_RPATH_SUBSTR=@rpath/libproj
 printf "Testing expected ldd output ... "
 case "$LDD_OUTPUT" in
   *$LDD_SUBSTR*)
@@ -60,6 +63,10 @@ case "$LDD_OUTPUT" in
 esac
 
 SEARCHPATH_OUTPUT=$(./$PROGRAM -s)
+case $UNAME in
+  MINGW* | MSYS*)
+    SEARCHPATH_OUTPUT=$(echo "$SEARCHPATH_OUTPUT" | tr '\\' '/')
+esac
 printf "Testing expected searchpath/datadir ... "
 case "$SEARCHPATH_OUTPUT" in
   *$PKG_CONFIG_DATADIR*)
