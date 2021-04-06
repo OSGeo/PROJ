@@ -133,6 +133,100 @@ FOR EACH ROW BEGIN
                       g.target_crs_auth_name || g.target_crs_code NOT IN
                       (SELECT auth_name || code FROM vertical_crs));
 
+    -- check that Helmert transformations have source and target of the same nature (the fkey already checks they are geodetic_crs)
+    SELECT RAISE(ABORT, 'One helmert_transformation has a source CRS of a different nature than its target CRS')
+        WHERE EXISTS (SELECT helmert_transformation.auth_name,
+                             helmert_transformation.code,
+                             helmert_transformation.name,
+                             crs1.type AS crs1_type,
+                             crs2.type AS crs2_type
+                      FROM helmert_transformation
+                      JOIN geodetic_crs crs1 ON
+                          crs1.auth_name = source_crs_auth_name AND crs1.code = source_crs_code
+                      JOIN geodetic_crs crs2 ON
+                          crs2.auth_name = target_crs_auth_name AND crs2.code = target_crs_code
+                      WHERE helmert_transformation.deprecated = 0 AND crs1.type != crs2.type);
+
+    -- check that the method used by a Helmert transformation is consistent with the dimensionality of the CRS
+    SELECT RAISE(ABORT, 'The domain of the method of helmert_transformation is not consistent with the dimensionality of the CRS')
+        WHERE EXISTS (SELECT helmert_transformation.auth_name,
+                             helmert_transformation.code,
+                             helmert_transformation.name,
+                             helmert_transformation.method_name,
+                             crs.type AS crs_type
+                      FROM helmert_transformation
+                      JOIN geodetic_crs crs ON
+                          crs.auth_name = source_crs_auth_name AND crs.code = source_crs_code
+                      WHERE helmert_transformation.deprecated = 0 AND
+                          ((method_name LIKE '%geog2D domain%' AND crs.type != 'geographic 2D') OR
+                           (method_name LIKE '%geog3D domain%' AND crs.type != 'geographic 3D') OR
+                           (method_name LIKE '%geocentric domain%' AND crs.type != 'geocentric')));
+
+    -- check that a time-dependent Helmert transformation has its source or target CRS being dyanmic
+    SELECT RAISE(ABORT, 'A time-dependent Helmert transformations has its source and target CRS both non-dynamic')
+        WHERE EXISTS (SELECT helmert_transformation.auth_name,
+                             helmert_transformation.code,
+                             helmert_transformation.name
+                      FROM helmert_transformation
+                      JOIN geodetic_crs crs1 ON
+                          crs1.auth_name = source_crs_auth_name AND crs1.code = source_crs_code
+                      JOIN geodetic_crs crs2 ON
+                          crs2.auth_name = target_crs_auth_name AND crs2.code = target_crs_code
+                      JOIN geodetic_datum gd1 ON
+                          gd1.auth_name = crs1.datum_auth_name AND gd1.code = crs1.datum_code
+                      JOIN geodetic_datum gd2 ON
+                          gd2.auth_name = crs2.datum_auth_name AND gd2.code = crs2.datum_code
+                      WHERE helmert_transformation.deprecated = 0 AND
+                            method_name LIKE 'Time-dependent%' AND
+                            gd1.frame_reference_epoch IS NULL AND
+                            gd2.frame_reference_epoch IS NULL);
+
+    -- check that transformations operations between vertical CRS are from/into a vertical CRS
+    SELECT RAISE(ABORT, 'A transformation operating on vertical CRS has a source CRS not being a vertical CRS')
+        WHERE EXISTS (SELECT other_transformation.auth_name,
+                             other_transformation.code,
+                             other_transformation.name
+                      FROM other_transformation
+                      LEFT JOIN vertical_crs crs ON
+                          crs.auth_name = source_crs_auth_name AND crs.code = source_crs_code
+                      WHERE other_transformation.deprecated = 0 AND
+                            method_name IN ('Vertical Offset', 'Height Depth Reversal', 'Change of Vertical Unit') AND
+                            crs.code IS NULL);
+    SELECT RAISE(ABORT, 'AA transformation operating on vertical CRS has a target CRS not being a vertical CRS')
+        WHERE EXISTS (SELECT other_transformation.auth_name,
+                             other_transformation.code,
+                             other_transformation.name
+                      FROM other_transformation
+                      LEFT JOIN vertical_crs crs ON
+                          crs.auth_name = target_crs_auth_name AND crs.code = target_crs_code
+                      WHERE other_transformation.deprecated = 0 AND
+                            method_name IN ('Vertical Offset', 'Height Depth Reversal', 'Change of Vertical Unit') AND
+                            crs.code IS NULL);
+
+    -- check that 'Geographic2D with Height Offsets' transformations have a compound CRS with a geog2D as source
+    SELECT RAISE(ABORT, 'A transformation Geographic2D with Height Offsets does not have a compound CRS with a geog2D as source')
+        WHERE EXISTS (SELECT other_transformation.auth_name,
+                             other_transformation.code,
+                             other_transformation.name
+                      FROM other_transformation
+                      LEFT JOIN compound_crs ccrs ON
+                          ccrs.auth_name = source_crs_auth_name AND ccrs.code = source_crs_code
+                      LEFT JOIN geodetic_crs gcrs ON
+                          gcrs.auth_name = horiz_crs_auth_name AND gcrs.code = horiz_crs_code
+                      WHERE other_transformation.deprecated = 0 AND
+                            method_name = 'Geographic2D with Height Offsets' AND
+                            (gcrs.code IS NULL OR gcrs.type != 'geographic 2D'));
+    SELECT RAISE(ABORT, 'A transformation Geographic2D with Height Offsets does not have a geographic 3D CRS as target')
+        WHERE EXISTS (SELECT other_transformation.auth_name,
+                             other_transformation.code,
+                             other_transformation.name
+                      FROM other_transformation
+                      LEFT JOIN geodetic_crs gcrs ON
+                          gcrs.auth_name = target_crs_auth_name AND gcrs.code = target_crs_code
+                      WHERE other_transformation.deprecated = 0 AND
+                            method_name = 'Geographic2D with Height Offsets' AND
+                            (gcrs.type IS NULL OR gcrs.type != 'geographic 3D'));
+
     -- check that transformations intersect the area of use of their source/target CRS
     -- EPSG, ESRI and IGNF have cases where this does not hold.
     SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its source CRS')
