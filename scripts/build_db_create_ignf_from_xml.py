@@ -320,7 +320,7 @@ for node in root.iterfind('.//GeographicCRS'):
         all_sql.append(sql)
 
     mapCrsId[id] = ('IGNF', id)
-    mapGeographicId[id] = ('IGNF', id)
+    mapGeographicId[id] = ('IGNF', id, type)
     key = str((mapDatumId[datumCode], extent_auth_and_code))
     if key in mapDatumAndAreaToGeographicId:
         #print('Adding ' + id + ' to ' + str(mapDatumAndAreaToGeographicId[key]))
@@ -345,7 +345,7 @@ for node in root.iterfind('.//GeographicCRS'):
         all_sql.append(sql)
 
         mapCrsId[id] = ('IGNF', id)
-        mapGeographicId[id] = ('IGNF', id)
+        mapGeographicId[id] = ('IGNF', id, type)
         key = str((mapDatumId[datumCode], extent_auth_and_code))
         if key in mapDatumAndAreaToGeographicId:
             #print('Adding ' + id + ' to ' + str(mapDatumAndAreaToGeographicId[key]))
@@ -665,6 +665,9 @@ for node in root.iterfind('.//Transformation'):
         method_geog_code = "'9603'"
         method_geog_name = "'Geocentric translations (geog2D domain)'"
 
+        method_geog_3d_code = "'1035'"
+        method_geog_3d_name = "'Geocentric translations (geog3D domain)'"
+
     else:
         s = vals[3].find('ParameterValue').find('value').text
         assert vals[3].find('ParameterValue').find('value').attrib['uom'] == 'UNITE'
@@ -688,6 +691,9 @@ for node in root.iterfind('.//Transformation'):
 
         method_geog_code = "'9606'"
         method_geog_name = "'Position Vector transformation (geog2D domain)'"
+
+        method_geog_3d_code = "'1037'"
+        method_geog_3d_name = "'Geocentric translations (geog3D domain)'"
 
     for src in get_alias_of(sourceCRS):
         for target in get_alias_of(targetCRS):
@@ -716,6 +722,11 @@ for node in root.iterfind('.//Transformation'):
     for sourceGeogId in sourceGeogIdAr:
         for targetGeogId in targetGeogIdAr:
 
+            # Check type
+            type = mapGeographicId[sourceGeogId][2]
+            if type != mapGeographicId[targetGeogId][2]:
+                continue
+
             for src in get_alias_of(sourceGeogId):
                 for target in get_alias_of(targetGeogId):
 
@@ -723,7 +734,7 @@ for node in root.iterfind('.//Transformation'):
                     #sql = """INSERT INTO "coordinate_operation" VALUES('IGNF','%s','helmert_transformation');""" % (id_geog)
                     #all_sql.append(sql)
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG',%s,%s,'%s','%s','%s','%s',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);""" % (id_geog, name, method_geog_code, method_geog_name, src[0], src[1], target[0], target[1], x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code, operation_version)
+                    sql = """INSERT INTO "helmert_transformation" VALUES('IGNF','%s','%s',NULL,'EPSG',%s,%s,'%s','%s','%s','%s',NULL,%s,%s,%s,'EPSG','9001',%s,%s,%s,%s,%s,%s,%s, %s,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'%s',0);""" % (id_geog, name, method_geog_code if type == 'geographic 2D' else method_geog_3d_code, method_geog_name if type == 'geographic 2D' else method_geog_3d_name, src[0], src[1], target[0], target[1], x, y, z, rx, ry, rz, r_uom_auth_name, r_uom_code, s, s_uom_auth_name, s_uom_code, operation_version)
                     all_sql.append(sql)
                     sql = """INSERT INTO "usage" VALUES('IGNF', '%s_USAGE','helmert_transformation','IGNF','%s','%s','%s','%s','%s');""" % (id_geog, id_geog, extent_auth_and_code[0], extent_auth_and_code[1], scope_auth_and_code[0], scope_auth_and_code[1])
                     all_sql.append(sql)
