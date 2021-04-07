@@ -496,3 +496,11 @@ and the second one a no-op
 Test effect of --accuracy
 ##############################################################
 Test effect of --no-ballpark
+##############################################################
+Check that we can use a transformation spanning the antimeridian (should use Pulkovo 1942 to WGS 84 (20))
+50 179.999999999	49d59'59.36"N	179d59'52.133"W 0.000
+50 -179.999999999	49d59'59.36"N	179d59'52.133"W 0.000
+##############################################################
+Check that we can use a transformation spanning the antimeridian (should use Pulkovo 1942 to WGS 84 (20))
+5540944.47  499999.999	49d59'59.36"N	179d59'52.133"W 0.000
+5540944.47  500000.001	49d59'59.36"N	179d59'52.133"W 0.000

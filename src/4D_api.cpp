@@ -346,6 +346,8 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
                         if (proj_log_level(P->ctx, PJ_LOG_TELL) >= PJ_LOG_DEBUG) {
                             std::string msg("Using coordinate operation ");
                             msg += alt.name;
+                            msg += " as a fallback due to lack of more "
+                                   "appropriate operations";
                             pj_log(P->ctx, PJ_LOG_DEBUG, msg.c_str());
                         }
                         P->iCurCoordOp = i;

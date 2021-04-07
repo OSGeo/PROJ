@@ -1033,6 +1033,20 @@ $EXE -E --no-ballpark EPSG:4267 EPSG:4258 >> ${OUT} <<EOF
 49 2
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Check that we can use a transformation spanning the antimeridian (should use Pulkovo 1942 to WGS 84 (20))" >> ${OUT}
+$EXE -E "Pulkovo 1942" "WGS 84" >> ${OUT} <<EOF
+50 179.999999999
+50 -179.999999999
+EOF
+
+echo  "##############################################################" >> ${OUT}
+echo  "Check that we can use a transformation spanning the antimeridian (should use Pulkovo 1942 to WGS 84 (20))" >> ${OUT}
+$EXE -E EPSG:2636 "WGS 84" >> ${OUT} <<EOF
+5540944.47  499999.999
+5540944.47  500000.001
+EOF
+
 
 # Done!
 # do 'diff' with distribution results
