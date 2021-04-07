@@ -53,10 +53,59 @@ jobs:
             set VCPKG_INSTALLED=c:\vcpkg\installed\${{ env.ARCH }}-windows
             set PATH=%VCPKG_INSTALLED%\bin;%PATH%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
-            set PROJ_LIB=%PROJ_DIR%\share\proj
             set PROJ_BUILD=%GITHUB_WORKSPACE%\build
             cd %PROJ_BUILD%
             ctest -V -C Release
             set PATH=%PROJ_DIR%\bin;%PATH%
             call %GITHUB_WORKSPACE%\test\postinstall\test_cmake.bat %PROJ_DIR%
+            proj
+
+  MSYS2:
+    runs-on: windows-latest
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    env:
+        CMAKE_GENERATOR: "MSYS Makefiles"
+
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install:  >-
+            git
+            make
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-curl
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-libtiff
+            mingw-w64-x86_64-sqlite3
+
+      - name: Build
+        run: |
+            PROJ_BUILD=${GITHUB_WORKSPACE}/build
+            PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
+            mkdir ${PROJ_BUILD}
+            cd ${PROJ_BUILD}
+            cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" ..
+            make -j 2
+            make install
+            ls ${PROJ_DIR}/bin
+
+      - name: Run tests
+        run: |
+            PROJ_BUILD=${GITHUB_WORKSPACE}/build
+            PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
+            cd ${PROJ_BUILD}
+            ctest --output-on-failure
+            export PATH=${PROJ_DIR}/bin:${PATH}
+            ../test/postinstall/test_cmake.sh ${PROJ_DIR}
+            ../test/postinstall/test_pkg-config.sh ${PROJ_DIR}
             proj
