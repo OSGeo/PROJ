@@ -53,7 +53,6 @@ jobs:
             set VCPKG_INSTALLED=c:\vcpkg\installed\${{ env.ARCH }}-windows
             set PATH=%VCPKG_INSTALLED%\bin;%PATH%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
-            set PROJ_LIB=%PROJ_DIR%\share\proj
             set PROJ_BUILD=%GITHUB_WORKSPACE%\build
             cd %PROJ_BUILD%
             ctest -V -C Release
@@ -104,7 +103,6 @@ jobs:
         run: |
             PROJ_BUILD=${GITHUB_WORKSPACE}/build
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
-            export PROJ_LIB=${PROJ_DIR}/share/proj
             cd ${PROJ_BUILD}
             ctest --output-on-failure
             export PATH=${PROJ_DIR}/bin:${PATH}
