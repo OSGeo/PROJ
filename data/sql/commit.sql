@@ -245,7 +245,9 @@ FOR EACH ROW BEGIN
                       cu.object_code = c.code AND
                       cu.extent_auth_name = ce.auth_name AND
                       cu.extent_code = ce.code AND
-                      NOT (ce.south_lat < ve.north_lat AND ve.south_lat < ce.north_lat));
+                      NOT ((ce.south_lat < ve.north_lat AND ve.south_lat < ce.north_lat) OR
+                          (ce.west_lon < ce.east_lon AND ve.west_lon < ve.east_lon AND
+                              NOT (ce.west_lon < ve.east_lon AND ve.west_lon < ce.east_lon))) );
     SELECT RAISE(ABORT, 'The area of use of at least one coordinate_operation does not intersect the one of its target CRS')
         WHERE EXISTS (SELECT * FROM coordinate_operation_view v, crs_view c, usage vu, extent ve, usage cu, extent ce WHERE
                       v.deprecated = 0 AND
@@ -263,7 +265,9 @@ FOR EACH ROW BEGIN
                       cu.object_code = c.code AND
                       cu.extent_auth_name = ce.auth_name AND
                       cu.extent_code = ce.code AND
-                      NOT (ce.south_lat < ve.north_lat AND ve.south_lat < ce.north_lat));
+                      NOT ((ce.south_lat < ve.north_lat AND ve.south_lat < ce.north_lat) OR
+                          (ce.west_lon < ce.east_lon AND ve.west_lon < ve.east_lon AND
+                              NOT (ce.west_lon < ve.east_lon AND ve.west_lon < ce.east_lon))) );
 
     -- check geoid_model table
     SELECT RAISE(ABORT, 'missing GEOID99 in geoid_model')
