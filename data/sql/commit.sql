@@ -9,6 +9,9 @@ CREATE INDEX grid_transformation_idx ON grid_transformation(source_crs_auth_name
 CREATE INDEX other_transformation_idx ON other_transformation(source_crs_auth_name, source_crs_code, target_crs_auth_name, target_crs_code);
 CREATE INDEX concatenated_operation_idx ON concatenated_operation(source_crs_auth_name, source_crs_code, target_crs_auth_name, target_crs_code);
 
+-- We don't need to select by auth_name, code so nullify them to save space
+UPDATE usage SET auth_name = NULL, code = NULL;
+
 -- Final consistency checks
 CREATE TABLE dummy(foo);
 CREATE TRIGGER final_checks

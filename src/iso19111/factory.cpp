@@ -101,7 +101,7 @@ namespace io {
 constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
 // must be incremented.
-constexpr int DATABASE_LAYOUT_VERSION_MINOR = 0;
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 1;
 
 constexpr size_t N_MAX_PARAMS = 7;
 
@@ -735,7 +735,7 @@ void DatabaseContext::Private::checkDatabaseLayout(
             // cppcheck-suppress knownConditionTrueFalse
             DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
                 // cppcheck-suppress knownConditionTrueFalse
-                DATABASE_LAYOUT_VERSION_MINOR == 0,
+                DATABASE_LAYOUT_VERSION_MINOR == 1,
             "remove that assertion and below lines next time we upgrade "
             "database structure");
         res = run("SELECT 1 FROM metadata WHERE key = 'EPSG.VERSION' AND "
@@ -766,6 +766,15 @@ void DatabaseContext::Private::checkDatabaseLayout(
             " is expected. "
             "It comes from another PROJ installation.");
     }
+    // Database layout v1.0 of PROJ 8.0 is forward compatible with v1.1
+    static_assert(
+        // cppcheck-suppress knownConditionTrueFalse
+        DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
+            // cppcheck-suppress knownConditionTrueFalse
+            DATABASE_LAYOUT_VERSION_MINOR == 1,
+        "re-enable the check below if database layout v1.0 and v1.1 is no "
+        "longer compatible");
+#if 0
     if (minor < DATABASE_LAYOUT_VERSION_MINOR) {
         throw FactoryException(
             path +
@@ -774,6 +783,7 @@ void DatabaseContext::Private::checkDatabaseLayout(
             " is expected. "
             "It comes from another PROJ installation.");
     }
+#endif
     if (dbNamePrefix.empty()) {
         nLayoutVersionMajor_ = major;
         nLayoutVersionMinor_ = minor;
