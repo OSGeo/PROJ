@@ -1304,6 +1304,10 @@ int main(int argc, char **argv) {
                 types.push_back(PJ_TYPE_BOUND_CRS);
             } else if (ci_equal(token, "other")) {
                 types.push_back(PJ_TYPE_OTHER_CRS);
+            } else {
+                std::cerr << "Unrecognized value for option --list-crs: " << token
+                          << std::endl;
+                usage();
             }
         }
 
