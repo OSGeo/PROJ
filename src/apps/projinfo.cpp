@@ -113,6 +113,7 @@ static void usage() {
         << "                [--output-id AUTH:CODE]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
         << "                --searchpaths | --remote-data |" << std::endl
+        << "                --list-crs [list-crs-filter] |" << std::endl
         << "                --dump-db-structure [{object_definition} | "
            "{object_reference}] |"
         << std::endl
@@ -126,6 +127,13 @@ static void usage() {
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
+              << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "list-crs-filter is a comma separated combination of: "
+                 "auth_name=XXX,allow_deprecated,geodetic,geocentric,"
+              << std::endl;
+    std::cerr << "geographic,geographic_2d,geographic_3d,vertical,"
+                 "protected,compound,temporal,engineering,bound,other"
               << std::endl;
     std::cerr << std::endl;
     std::cerr << "{object_definition} might be a PROJ string, a WKT string, "
@@ -866,6 +874,7 @@ int main(int argc, char **argv) {
     double minimumAccuracy = -1;
     bool outputAll = false;
     bool dumpDbStructure = false;
+    std::string listCRS;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -1156,6 +1165,12 @@ int main(int argc, char **argv) {
             outputOpt.outputCode = tokens[1];
         } else if (arg == "--dump-db-structure") {
             dumpDbStructure = true;
+        } else if (arg == "--list-crs") {
+            listCRS = "all_types";
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                i++;
+                listCRS = argv[i];
+            }
         } else if (ci_equal(arg, "--searchpaths")) {
 #ifdef _WIN32
             constexpr char delim = ';';
@@ -1248,6 +1263,72 @@ int main(int argc, char **argv) {
         }
     }
 
+    if (!listCRS.empty()) {
+        auto params = proj_get_crs_list_parameters_create();
+        bool all_types = false;
+        std::vector<PJ_TYPE> types;
+        std::vector<std::string> auth_names;
+        auto tokens = split(listCRS, ',');
+        for (auto token : tokens) {
+            auto auth_tokens = split(token, '=');
+            if (auth_tokens.size() == 2 && ci_equal(auth_tokens[0], "auth_name")) {
+                auth_names.push_back(auth_tokens[1]);
+                continue;
+            }
+
+            if (ci_equal(token, "allow_deprecated")) {
+                params->allow_deprecated = true;
+            } else if (ci_equal(token, "all_types")) {
+                all_types = true;
+            } else if (ci_equal(token, "geodetic")) {
+                types.push_back(PJ_TYPE_GEODETIC_CRS);
+            } else if (ci_equal(token, "geocentric")) {
+                types.push_back(PJ_TYPE_GEOCENTRIC_CRS);
+            } else if (ci_equal(token, "geographic")) {
+                types.push_back(PJ_TYPE_GEOGRAPHIC_CRS);
+            } else if (ci_equal(token, "geographic_2d")) {
+                types.push_back(PJ_TYPE_GEOGRAPHIC_2D_CRS);
+            } else if (ci_equal(token, "geographic_3d")) {
+                types.push_back(PJ_TYPE_GEOGRAPHIC_3D_CRS);
+            } else if (ci_equal(token, "vertical")) {
+                types.push_back(PJ_TYPE_VERTICAL_CRS);
+            } else if (ci_equal(token, "projected")) {
+                types.push_back(PJ_TYPE_PROJECTED_CRS);
+            } else if (ci_equal(token, "compound")) {
+                types.push_back(PJ_TYPE_COMPOUND_CRS);
+            } else if (ci_equal(token, "temporal")) {
+                types.push_back(PJ_TYPE_TEMPORAL_CRS);
+            } else if (ci_equal(token, "engineering")) {
+                types.push_back(PJ_TYPE_ENGINEERING_CRS);
+            } else if (ci_equal(token, "bound")) {
+                types.push_back(PJ_TYPE_BOUND_CRS);
+            } else if (ci_equal(token, "other")) {
+                types.push_back(PJ_TYPE_OTHER_CRS);
+            }
+        }
+
+        if (all_types) {
+            types.clear();
+        }
+        params->typesCount = types.size();
+        params->types = types.data();
+
+        if (auth_names.empty()) {
+            auth_names.push_back("");
+        }
+
+        for (auto auth_name : auth_names) {
+            int result_count = 0;
+            auto list = proj_get_crs_info_list_from_database(nullptr, auth_name.c_str(), params, &result_count);
+            for (int i = 0; i < result_count; i++) {
+                std::cout << list[i]->auth_name << ":" << list[i]->code << " \"" << list[i]->name << "\"" <<
+                    (list[i]->deprecated ? " [deprecated]" : "") << std::endl;
+            }
+            proj_crs_info_list_destroy(list);
+        }
+        proj_get_crs_list_parameters_destroy(params);
+    }
+
     if (!sourceCRSStr.empty() && targetCRSStr.empty()) {
         std::cerr << "Source CRS specified, but missing target CRS"
                   << std::endl;
@@ -1262,7 +1343,7 @@ int main(int argc, char **argv) {
             usage();
         }
     } else if (!user_string_specified) {
-        if (dumpDbStructure) {
+        if (dumpDbStructure || !listCRS.empty()) {
             std::exit(0);
         }
         std::cerr << "Missing user string" << std::endl;
