@@ -32,6 +32,7 @@ Synopsis
     |    [--output-id AUTH:CODE]
     |    [--c-ify] [--single-line]
     |    --searchpaths | --remote-data |
+    |    --list-crs [list-crs-filter] |
     |    --dump-db-structure [{object_definition} | {object_reference}] |
     |    {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
     |
@@ -56,6 +57,9 @@ Synopsis
       (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
     - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.2/projjson.schema.json (*added in 6.2*)
     - a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (*added in 7.1*)
+
+    [list-crs-filter] is a comma separated combination of: auth_name=XXX,allow_deprecated,geodetic,geocentric,
+    geographic,geographic_2d,geographic_3d,vertical,protected,compound,temporal,engineering,bound,other
 
     {object_reference} is a filename preceded by the '@' character.  The
     file referenced by the {object_reference} must contain a valid
@@ -284,6 +288,16 @@ The following control parameters can appear in any order:
     database. This option can be specified as the only switch of the utility.
     If also specifying a CRS object and the :option:`--output-id` option, the
     definition of the object as SQL statements will be appended.
+
+.. option:: --list-crs [list-crs-filter]
+
+    .. versionadded:: 8.1
+
+    Outputs a list (authority name:code and CRS name) of the filtered CRSs from the database.
+    If no filter is provided all authority names and types of non deprecated CRSs are dumped.
+    list-crs-filter is a comma separated combination of: auth_name=XXX,allow_deprecated,geodetic,geocentric,
+    geographic,geographic_2d,geographic_3d,vertical,protected,compound,temporal,engineering,bound,other
+    where XXX is the authority. When auth_name is provided multiple times, it is included for each one.
 
 .. option:: --3d
 
