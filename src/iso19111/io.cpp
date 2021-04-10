@@ -6626,9 +6626,9 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
     };
 
     // urn:ogc:def:crs:EPSG::4326
-    if (tokens.size() == 7 && tokens[0] == "urn") {
+    if (tokens.size() == 7 && tolower(tokens[0]) == "urn") {
 
-        const auto &type = tokens[3];
+        const auto type = tokens[3] == "CRS" ? "crs" : tokens[3];
         const auto &authName = tokens[4];
         const auto &code = tokens[6];
         return createFromURNPart(type, authName, code);

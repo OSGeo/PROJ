@@ -10360,6 +10360,10 @@ TEST(io, createFromUserInput) {
     EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:ellipsoid:EPSG::7030", dbContext));
 
+    // Found as srsName in some GMLs...
+    EXPECT_NO_THROW(
+        createFromUserInput("URN:OGC:DEF:CRS:OGC:1.3:CRS84", dbContext));
+
     // Legacy formulations
     EXPECT_NO_THROW(
         createFromUserInput("urn:x-ogc:def:crs:EPSG::4326", dbContext));
