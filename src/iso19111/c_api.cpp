@@ -495,7 +495,7 @@ static const char *getOptionValue(const char *option,
  * the use of context is compatible. In particular if you intend to use a
  * clone in a different thread than the original object, you should pass a
  * context that is different from the one of the original object (or later
- * assing a different context with proj_assign_context()).
+ * assign a different context with proj_assign_context()).
  *
  * The returned object must be unreferenced with proj_destroy() after use.
  * It should be used by at most one thread at a time.
