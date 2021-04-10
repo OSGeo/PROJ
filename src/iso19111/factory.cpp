@@ -4951,6 +4951,79 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
     if (crs) {
         return NN_NO_CHECK(crs);
     }
+
+    if (d->authority() == metadata::Identifier::OGC) {
+        if (code == "AnsiDate") {
+            // Derived from http://www.opengis.net/def/crs/OGC/0/AnsiDate
+            return crs::TemporalCRS::create(
+                util::PropertyMap()
+                    // above URL indicates Julian Date" as name... likely wrong
+                    .set(common::IdentifiedObject::NAME_KEY, "Ansi Date")
+                    .set(metadata::Identifier::CODESPACE_KEY, d->authority())
+                    .set(metadata::Identifier::CODE_KEY, code),
+                datum::TemporalDatum::create(
+                    util::PropertyMap().set(
+                        common::IdentifiedObject::NAME_KEY,
+                        "Epoch time for the ANSI date (1-Jan-1601, 00h00 UTC) "
+                        "as day 1."),
+                    common::DateTime::create("1600-12-31T00:00:00Z"),
+                    datum::TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN),
+                cs::TemporalCountCS::create(
+                    util::PropertyMap(),
+                    cs::CoordinateSystemAxis::create(
+                        util::PropertyMap().set(
+                            common::IdentifiedObject::NAME_KEY, "Time"),
+                        "T", cs::AxisDirection::FUTURE,
+                        common::UnitOfMeasure("day", 0,
+                                              UnitOfMeasure::Type::TIME))));
+        }
+        if (code == "JulianDate") {
+            // Derived from http://www.opengis.net/def/crs/OGC/0/JulianDate
+            return crs::TemporalCRS::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY, "Julian Date")
+                    .set(metadata::Identifier::CODESPACE_KEY, d->authority())
+                    .set(metadata::Identifier::CODE_KEY, code),
+                datum::TemporalDatum::create(
+                    util::PropertyMap().set(
+                        common::IdentifiedObject::NAME_KEY,
+                        "The beginning of the Julian period."),
+                    common::DateTime::create("-4714-11-24T12:00:00Z"),
+                    datum::TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN),
+                cs::TemporalCountCS::create(
+                    util::PropertyMap(),
+                    cs::CoordinateSystemAxis::create(
+                        util::PropertyMap().set(
+                            common::IdentifiedObject::NAME_KEY, "Time"),
+                        "T", cs::AxisDirection::FUTURE,
+                        common::UnitOfMeasure("day", 0,
+                                              UnitOfMeasure::Type::TIME))));
+        }
+        if (code == "UnixTime") {
+            // Derived from http://www.opengis.net/def/crs/OGC/0/UnixTime
+            return crs::TemporalCRS::create(
+                util::PropertyMap()
+                    .set(common::IdentifiedObject::NAME_KEY, "Unix Time")
+                    .set(metadata::Identifier::CODESPACE_KEY, d->authority())
+                    .set(metadata::Identifier::CODE_KEY, code),
+                datum::TemporalDatum::create(
+                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                            "Unix epoch"),
+                    common::DateTime::create("1970-01-01T00:00:00Z"),
+                    datum::TemporalDatum::CALENDAR_PROLEPTIC_GREGORIAN),
+                cs::TemporalCountCS::create(
+                    util::PropertyMap(),
+                    cs::CoordinateSystemAxis::create(
+                        util::PropertyMap().set(
+                            common::IdentifiedObject::NAME_KEY, "Time"),
+                        "T", cs::AxisDirection::FUTURE,
+                        common::UnitOfMeasure::SECOND)));
+        }
+        if (code == "84") {
+            return createCoordinateReferenceSystem("CRS84", false);
+        }
+    }
+
     auto res = d->runWithCodeParam(
         "SELECT type FROM crs_view WHERE auth_name = ? AND code = ?", code);
     if (res.empty()) {

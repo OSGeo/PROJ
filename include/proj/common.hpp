@@ -125,6 +125,8 @@ class PROJ_GCC_DLL UnitOfMeasure : public util::BaseObject {
 
     PROJ_DLL static const UnitOfMeasure METRE;
     PROJ_DLL static const UnitOfMeasure METRE_PER_YEAR;
+    PROJ_DLL static const UnitOfMeasure FOOT;
+    PROJ_DLL static const UnitOfMeasure US_FOOT;
 
     PROJ_DLL static const UnitOfMeasure RADIAN;
     PROJ_DLL static const UnitOfMeasure MICRORADIAN;

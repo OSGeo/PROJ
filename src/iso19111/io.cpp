@@ -6126,6 +6126,188 @@ EllipsoidNNPtr JSONParser::buildEllipsoid(const json &j) {
 
 // ---------------------------------------------------------------------------
 
+// import a CRS encoded as OGC Best Practice document 11-135.
+
+static const char *const crsURLPrefixes[] = {
+    "http://opengis.net/def/crs",     "https://opengis.net/def/crs",
+    "http://www.opengis.net/def/crs", "https://www.opengis.net/def/crs",
+    "www.opengis.net/def/crs",
+};
+
+static bool isCRSURL(const std::string &text) {
+    for (const auto crsURLPrefix : crsURLPrefixes) {
+        if (starts_with(text, crsURLPrefix)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static CRSNNPtr importFromCRSURL(const std::string &text,
+                                 const DatabaseContextNNPtr &dbContext) {
+    // e.g http://www.opengis.net/def/crs/EPSG/0/4326
+    std::vector<std::string> parts;
+    for (const auto crsURLPrefix : crsURLPrefixes) {
+        if (starts_with(text, crsURLPrefix)) {
+            parts = split(text.substr(strlen(crsURLPrefix)), '/');
+            break;
+        }
+    }
+
+    // e.g
+    // "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/def/crs/EPSG/0/4326&2=http://www.opengis.net/def/crs/EPSG/0/3855"
+    if (!parts.empty() && starts_with(parts[0], "-compound?")) {
+        parts = split(text.substr(text.find('?') + 1), '&');
+        std::map<int, std::string> mapParts;
+        for (const auto &part : parts) {
+            const auto queryParam = split(part, '=');
+            if (queryParam.size() != 2) {
+                throw ParsingException("invalid OGC CRS URL");
+            }
+            try {
+                mapParts[std::stoi(queryParam[0])] = queryParam[1];
+            } catch (const std::exception &) {
+                throw ParsingException("invalid OGC CRS URL");
+            }
+        }
+        std::vector<CRSNNPtr> components;
+        std::string name;
+        for (size_t i = 1; i <= mapParts.size(); ++i) {
+            const auto iter = mapParts.find(static_cast<int>(i));
+            if (iter == mapParts.end()) {
+                throw ParsingException("invalid OGC CRS URL");
+            }
+            components.emplace_back(importFromCRSURL(iter->second, dbContext));
+            if (!name.empty()) {
+                name += " + ";
+            }
+            name += components.back()->nameStr();
+        }
+        return CompoundCRS::create(
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY, name),
+            components);
+    }
+
+    if (parts.size() < 4) {
+        throw ParsingException("invalid OGC CRS URL");
+    }
+
+    const auto &auth_name = parts[1];
+    const auto &code = parts[3];
+    auto factoryCRS = AuthorityFactory::create(dbContext, auth_name);
+    return factoryCRS->createCoordinateReferenceSystem(code, true);
+}
+
+// ---------------------------------------------------------------------------
+
+/* Import a CRS encoded as WMSAUTO string.
+ *
+ * Note that the WMS 1.3 specification does not include the
+ * units code, while apparently earlier specs do.  We try to
+ * guess around this.
+ *
+ * (code derived from GDAL's importFromWMSAUTO())
+ */
+
+static CRSNNPtr importFromWMSAUTO(const std::string &text) {
+
+    int nUnitsId = 9001;
+    double dfRefLong;
+    double dfRefLat = 0.0;
+
+    assert(ci_starts_with(text, "AUTO:"));
+    const auto parts = split(text.substr(strlen("AUTO:")), ',');
+
+    try {
+        constexpr int AUTO_MOLLWEIDE = 42005;
+        if (parts.size() == 4) {
+            nUnitsId = std::stoi(parts[1]);
+            dfRefLong = c_locale_stod(parts[2]);
+            dfRefLat = c_locale_stod(parts[3]);
+        } else if (parts.size() == 3 && std::stoi(parts[0]) == AUTO_MOLLWEIDE) {
+            nUnitsId = std::stoi(parts[1]);
+            dfRefLong = c_locale_stod(parts[2]);
+        } else if (parts.size() == 3) {
+            dfRefLong = c_locale_stod(parts[1]);
+            dfRefLat = c_locale_stod(parts[2]);
+        } else if (parts.size() == 2 && std::stoi(parts[0]) == AUTO_MOLLWEIDE) {
+            dfRefLong = c_locale_stod(parts[1]);
+        } else {
+            throw ParsingException("invalid WMS AUTO CRS definition");
+        }
+
+        const auto getConversion = [=]() {
+            const int nProjId = std::stoi(parts[0]);
+            switch (nProjId) {
+            case 42001: // Auto UTM
+                if (!(dfRefLong >= -180 && dfRefLong < 180)) {
+                    throw ParsingException("invalid WMS AUTO CRS definition: "
+                                           "invalid longitude");
+                }
+                return Conversion::createUTM(
+                    util::PropertyMap(),
+                    static_cast<int>(floor((dfRefLong + 180.0) / 6.0)) + 1,
+                    dfRefLat >= 0.0);
+
+            case 42002: // Auto TM (strangely very UTM-like).
+                return Conversion::createTransverseMercator(
+                    util::PropertyMap(), common::Angle(0),
+                    common::Angle(dfRefLong), common::Scale(0.9996),
+                    common::Length(500000),
+                    common::Length((dfRefLat >= 0.0) ? 0.0 : 10000000.0));
+
+            case 42003: // Auto Orthographic.
+                return Conversion::createOrthographic(
+                    util::PropertyMap(), common::Angle(dfRefLat),
+                    common::Angle(dfRefLong), common::Length(0),
+                    common::Length(0));
+
+            case 42004: // Auto Equirectangular
+                return Conversion::createEquidistantCylindrical(
+                    util::PropertyMap(), common::Angle(dfRefLat),
+                    common::Angle(dfRefLong), common::Length(0),
+                    common::Length(0));
+
+            case 42005: // MSVC 2015 thinks that AUTO_MOLLWEIDE is not constant
+                return Conversion::createMollweide(
+                    util::PropertyMap(), common::Angle(dfRefLong),
+                    common::Length(0), common::Length(0));
+
+            default:
+                throw ParsingException("invalid WMS AUTO CRS definition: "
+                                       "unsupported projection id");
+            }
+        };
+
+        const auto getUnits = [=]() {
+            switch (nUnitsId) {
+            case 9001:
+                return UnitOfMeasure::METRE;
+
+            case 9002:
+                return UnitOfMeasure::FOOT;
+
+            case 9003:
+                return UnitOfMeasure::US_FOOT;
+
+            default:
+                throw ParsingException("invalid WMS AUTO CRS definition: "
+                                       "unsupported units code");
+            }
+        };
+
+        return crs::ProjectedCRS::create(
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+            crs::GeographicCRS::EPSG_4326, getConversion(),
+            cs::CartesianCS::createEastingNorthing(getUnits()));
+
+    } catch (const std::exception &) {
+        throw ParsingException("invalid WMS AUTO CRS definition");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                            const DatabaseContextPtr &dbContext,
                                            bool usePROJ4InitRules,
@@ -6185,6 +6367,14 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                              ctx, false) == TRUE)
                                       : usePROJ4InitRules)
             .createFromPROJString(text);
+    }
+
+    if (isCRSURL(text) && dbContext) {
+        return importFromCRSURL(text, NN_NO_CHECK(dbContext));
+    }
+
+    if (ci_starts_with(text, "AUTO:")) {
+        return importFromWMSAUTO(text);
     }
 
     auto tokens = split(text, ':');
@@ -6406,15 +6596,14 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         return ConcatenatedOperation::createComputeMetadata(components, true);
     }
 
-    // urn:ogc:def:crs:EPSG::4326
-    if (tokens.size() == 7) {
+    const auto createFromURNPart =
+        [&dbContext](const std::string &type, const std::string &authName,
+                     const std::string &code) -> BaseObjectNNPtr {
         if (!dbContext) {
             throw ParsingException("no database context specified");
         }
-        const auto &type = tokens[3];
         auto factory =
-            AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[4]);
-        const auto &code = tokens[6];
+            AuthorityFactory::create(NN_NO_CHECK(dbContext), authName);
         if (type == "crs") {
             return factory->createCoordinateReferenceSystem(code);
         }
@@ -6434,6 +6623,39 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             return factory->createPrimeMeridian(code);
         }
         throw ParsingException(concat("unhandled object type: ", type));
+    };
+
+    // urn:ogc:def:crs:EPSG::4326
+    if (tokens.size() == 7 && tokens[0] == "urn") {
+
+        const auto &type = tokens[3];
+        const auto &authName = tokens[4];
+        const auto &code = tokens[6];
+        return createFromURNPart(type, authName, code);
+    }
+
+    // urn:ogc:def:crs:OGC::AUTO42001:-117:33
+    if (tokens.size() > 7 && tokens[0] == "urn" && tokens[4] == "OGC" &&
+        ci_starts_with(tokens[6], "AUTO")) {
+        const auto textAUTO = text.substr(text.find(":AUTO") + 5);
+        return importFromWMSAUTO("AUTO:" + replaceAll(textAUTO, ":", ","));
+    }
+
+    // Legacy urn:opengis:crs:EPSG:0:4326 (note the missing def: compared to
+    // above)
+    if (tokens.size() == 6 && tokens[0] == "urn" && tokens[2] != "def") {
+        const auto &type = tokens[2];
+        const auto &authName = tokens[3];
+        const auto &code = tokens[5];
+        return createFromURNPart(type, authName, code);
+    }
+
+    // Legacy urn:x-ogc:def:crs:EPSG:4326 (note the missing version)
+    if (tokens.size() == 6 && tokens[0] == "urn") {
+        const auto &type = tokens[3];
+        const auto &authName = tokens[4];
+        const auto &code = tokens[5];
+        return createFromURNPart(type, authName, code);
     }
 
     if (dbContext) {
@@ -6590,6 +6812,10 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li> OGC URN combining references for concatenated operations
  *      e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
+ * <li>OGC URL for a single CRS. e.g.
+ * "http://www.opengis.net/def/crs/EPSG/0/4326</li> <li>OGC URL for a compound
+ * CRS. e.g
+ * "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/def/crs/EPSG/0/4326&2=http://www.opengis.net/def/crs/EPSG/0/3855"</li>
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>

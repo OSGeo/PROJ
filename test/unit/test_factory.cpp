@@ -4244,4 +4244,27 @@ TEST(factory, objectInsertion) {
     }
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(factory, ogc_timecrs) {
+    auto ctxt = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(ctxt, Identifier::OGC);
+    factory->createCoordinateReferenceSystem("AnsiDate");
+    factory->createCoordinateReferenceSystem("JulianDate");
+    factory->createCoordinateReferenceSystem("UnixTime");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, ogc_crs) {
+    auto ctxt = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(ctxt, Identifier::OGC);
+    factory->createCoordinateReferenceSystem("CRS84");
+    factory->createCoordinateReferenceSystem("84");
+    factory->createCoordinateReferenceSystem("CRS27");
+    factory->createCoordinateReferenceSystem("CRS83");
+}
+
+// ---------------------------------------------------------------------------
+
 } // namespace
