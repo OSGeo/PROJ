@@ -847,6 +847,7 @@ int main(int argc, char **argv) {
     std::string objectKind;
     bool summary = false;
     ExtentPtr bboxFilter = nullptr;
+    std::vector<double> bboxValues;
     std::string area;
     bool spatialCriterionExplicitlySpecified = false;
     CoordinateOperationContext::SpatialCriterion spatialCriterion =
@@ -986,9 +987,10 @@ int main(int argc, char **argv) {
                 usage();
             }
             try {
+                bboxValues = {c_locale_stod(bbox[0]), c_locale_stod(bbox[1]),
+                              c_locale_stod(bbox[2]), c_locale_stod(bbox[3])};
                 bboxFilter = Extent::createFromBBOX(
-                                 c_locale_stod(bbox[0]), c_locale_stod(bbox[1]),
-                                 c_locale_stod(bbox[2]), c_locale_stod(bbox[3]))
+                                 bboxValues[0], bboxValues[1], bboxValues[2], bboxValues[3])
                                  .as_nullable();
             } catch (const std::exception &e) {
                 std::cerr << "Invalid value for option --bbox: " << bboxStr
@@ -1300,6 +1302,15 @@ int main(int argc, char **argv) {
         }
         params->typesCount = types.size();
         params->types = types.data();
+
+        if (bboxValues.size() == 4) {
+            params->bbox_valid = true;
+            params->crs_area_of_use_contains_bbox = false;
+            params->west_lon_degree = bboxValues[0];
+            params->south_lat_degree = bboxValues[1];
+            params->east_lon_degree = bboxValues[2];
+            params->north_lat_degree = bboxValues[3];
+        }
 
         PJ_CONTEXT* ctx = proj_context_create();
         std::vector<const char*> auxPaths;
