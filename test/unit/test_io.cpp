@@ -10349,6 +10349,8 @@ TEST(io, createFromUserInput) {
     EXPECT_NO_THROW(createFromUserInput("epsg:4326", dbContext));
     EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:crs:EPSG::4326", dbContext));
+    EXPECT_THROW(createFromUserInput("urn:ogc:def:crs:EPSG::4326", nullptr),
+                 ParsingException);
     EXPECT_NO_THROW(createFromUserInput(
         "urn:ogc:def:coordinateOperation:EPSG::1671", dbContext));
     EXPECT_NO_THROW(
@@ -10357,6 +10359,20 @@ TEST(io, createFromUserInput) {
         createFromUserInput("urn:ogc:def:meridian:EPSG::8901", dbContext));
     EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:ellipsoid:EPSG::7030", dbContext));
+
+    // Legacy formulations
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:x-ogc:def:crs:EPSG::4326", dbContext));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:opengis:def:crs:EPSG::4326", dbContext));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:opengis:crs:EPSG::4326", dbContext));
+    EXPECT_THROW(createFromUserInput("urn:opengis:crs:EPSG::4326", nullptr),
+                 ParsingException);
+    EXPECT_THROW(
+        createFromUserInput("urn:opengis:unhandled:EPSG::4326", dbContext),
+        ParsingException);
+
     {
         auto obj = createFromUserInput("EPSG:2393+5717", dbContext);
         auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);

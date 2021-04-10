@@ -6485,7 +6485,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
     }
 
     // urn:ogc:def:crs:EPSG::4326
-    if (tokens.size() == 7) {
+    if (tokens.size() == 7 && tokens[0] == "urn") {
         if (!dbContext) {
             throw ParsingException("no database context specified");
         }
@@ -6510,6 +6510,22 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         }
         if (type == "meridian") {
             return factory->createPrimeMeridian(code);
+        }
+        throw ParsingException(concat("unhandled object type: ", type));
+    }
+
+    // Legacy urn:opengis:crs:EPSG:0:4326 (note the missing def: compared to
+    // above)
+    if (tokens.size() == 6 && tokens[0] == "urn") {
+        if (!dbContext) {
+            throw ParsingException("no database context specified");
+        }
+        const auto &type = tokens[2];
+        auto factory =
+            AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[3]);
+        const auto &code = tokens[5];
+        if (type == "crs") {
+            return factory->createCoordinateReferenceSystem(code);
         }
         throw ParsingException(concat("unhandled object type: ", type));
     }
