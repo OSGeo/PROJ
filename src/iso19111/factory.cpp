@@ -5019,6 +5019,9 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                         "T", cs::AxisDirection::FUTURE,
                         common::UnitOfMeasure::SECOND)));
         }
+        if (code == "84") {
+            return createCoordinateReferenceSystem("CRS84", false);
+        }
     }
 
     auto res = d->runWithCodeParam(
