@@ -317,6 +317,17 @@ const UnitOfMeasure UnitOfMeasure::METRE("metre", 1.0,
                                          UnitOfMeasure::Type::LINEAR,
                                          Identifier::EPSG, "9001");
 
+/** \brief Foot, unit of measure of type LINEAR. */
+const UnitOfMeasure UnitOfMeasure::FOOT("foot", 0.3048,
+                                        UnitOfMeasure::Type::LINEAR,
+                                        Identifier::EPSG, "9002");
+
+/** \brief US survey foot, unit of measure of type LINEAR. */
+const UnitOfMeasure UnitOfMeasure::US_FOOT("US survey foot",
+                                           0.304800609601219241184,
+                                           UnitOfMeasure::Type::LINEAR,
+                                           Identifier::EPSG, "9003");
+
 /** \brief Degree, unit of measure of type ANGULAR. */
 const UnitOfMeasure UnitOfMeasure::DEGREE("degree", M_PI / 180.,
                                           UnitOfMeasure::Type::ANGULAR,
