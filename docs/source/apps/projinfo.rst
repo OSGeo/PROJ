@@ -58,9 +58,6 @@ Synopsis
     - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.2/projjson.schema.json (*added in 6.2*)
     - a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (*added in 7.1*)
 
-    [list-crs-filter] is a comma separated combination of: auth_name=XXX,allow_deprecated,geodetic,geocentric,
-    geographic,geographic_2d,geographic_3d,vertical,protected,compound,temporal,engineering,bound,other
-
     {object_reference} is a filename preceded by the '@' character.  The
     file referenced by the {object_reference} must contain a valid
     {object_definition}.
