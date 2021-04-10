@@ -14,7 +14,7 @@ function(proj_add_test_script_sh SH_NAME BIN_USE)
     get_filename_component(testname ${SH_NAME} NAME_WE)
 
     add_test(NAME "${testname}"
-      WORKING_DIRECTORY ${PROJ_SOURCE_DIR}/data
+      WORKING_DIRECTORY ${PROJ_BINARY_DIR}/test/cli
       COMMAND bash ${PROJ_SOURCE_DIR}/test/cli/${SH_NAME}
       ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${${BIN_USE}}
     )
