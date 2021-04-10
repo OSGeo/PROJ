@@ -1238,6 +1238,9 @@ unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (1), 1 m, World.
 unknown id, Inverse of UTM zone 31N + WGS 84 to EGM2008 height (2), 0.5 m, World.
 unknown id, Inverse of UTM zone 31N + Inverse of Transformation from EGM2008 height to WGS 84 (ballpark vertical transformation, without ellipsoid height to vertical height correction), unknown accuracy, World, has ballpark transformation
 
+Testing -s EPSG:4326 -t EPSG:32661 --normalize-axis-order -o PROJ -q --single-line
++proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=stere +lat_0=90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 +ellps=WGS84
+
 Testing -s EPSG:4936 -t EPSG:4978 --spatial-test intersects --summary where WGS 84 to ETRS89 (2) uses a transformation method not supported by PROJ currently (time-specific Helmert), and thus must be sorted last
 Candidate operations found: 2
 unknown id, Ballpark geocentric translation from ETRS89 to WGS 84, unknown accuracy, World, has ballpark transformation

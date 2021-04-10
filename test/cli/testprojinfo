@@ -135,6 +135,11 @@ echo "Testing -s EPSG:32631 -t EPSG:4326+3855 --3d --summary" >> ${OUT}
 $EXE -s EPSG:32631 -t EPSG:4326+3855 --3d --summary >>${OUT} 2>&1
 echo "" >>${OUT}
 
+# Undocumented option: --normalize-axis-order
+echo "Testing -s EPSG:4326 -t EPSG:32661 --normalize-axis-order -o PROJ -q --single-line" >> ${OUT}
+$EXE -s EPSG:4326 -t EPSG:32661 --normalize-axis-order -o PROJ -q --single-line >>${OUT} 2>&1
+echo "" >>${OUT}
+
 echo "Testing -s EPSG:4936 -t EPSG:4978 --spatial-test intersects --summary where WGS 84 to ETRS89 (2) uses a transformation method not supported by PROJ currently (time-specific Helmert), and thus must be sorted last" >> ${OUT}
 $EXE -s EPSG:4936 -t EPSG:4978 --spatial-test intersects --summary >>${OUT} 2>&1
 echo "" >>${OUT}
