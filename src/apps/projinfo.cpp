@@ -130,10 +130,9 @@ static void usage() {
               << std::endl;
     std::cerr << std::endl;
     std::cerr << "list-crs-filter is a comma separated combination of: "
-                 "auth_name=XXX,allow_deprecated,geodetic,geocentric,"
+                 "allow_deprecated,geodetic,geocentric,"
               << std::endl;
-    std::cerr << "geographic,geographic_2d,geographic_3d,vertical,"
-                 "protected,compound,temporal,engineering,bound,other"
+    std::cerr << "geographic,geographic_2d,geographic_3d,vertical,projected,compound"
               << std::endl;
     std::cerr << std::endl;
     std::cerr << "{object_definition} might be a PROJ string, a WKT string, "
@@ -1267,15 +1266,8 @@ int main(int argc, char **argv) {
         auto params = proj_get_crs_list_parameters_create();
         bool all_types = false;
         std::vector<PJ_TYPE> types;
-        std::vector<std::string> auth_names;
         auto tokens = split(listCRS, ',');
         for (auto token : tokens) {
-            auto auth_tokens = split(token, '=');
-            if (auth_tokens.size() == 2 && ci_equal(auth_tokens[0], "auth_name")) {
-                auth_names.push_back(auth_tokens[1]);
-                continue;
-            }
-
             if (ci_equal(token, "allow_deprecated")) {
                 params->allow_deprecated = true;
             } else if (ci_equal(token, "all_types")) {
@@ -1296,14 +1288,6 @@ int main(int argc, char **argv) {
                 types.push_back(PJ_TYPE_PROJECTED_CRS);
             } else if (ci_equal(token, "compound")) {
                 types.push_back(PJ_TYPE_COMPOUND_CRS);
-            } else if (ci_equal(token, "temporal")) {
-                types.push_back(PJ_TYPE_TEMPORAL_CRS);
-            } else if (ci_equal(token, "engineering")) {
-                types.push_back(PJ_TYPE_ENGINEERING_CRS);
-            } else if (ci_equal(token, "bound")) {
-                types.push_back(PJ_TYPE_BOUND_CRS);
-            } else if (ci_equal(token, "other")) {
-                types.push_back(PJ_TYPE_OTHER_CRS);
             } else {
                 std::cerr << "Unrecognized value for option --list-crs: " << token
                           << std::endl;
@@ -1317,13 +1301,26 @@ int main(int argc, char **argv) {
         params->typesCount = types.size();
         params->types = types.data();
 
-        if (auth_names.empty()) {
-            auth_names.push_back("");
+        PJ_CONTEXT* ctx = proj_context_create();
+        std::vector<const char*> auxPaths;
+        auxPaths.reserve(auxDBPath.size() + 1);
+        for (const auto& path : auxDBPath) {
+            auxPaths.push_back(path.c_str());
+        }
+        auxPaths.push_back(nullptr);
+        if (!proj_context_set_database_path(ctx, mainDBPath.c_str(), auxPaths.data(), nullptr)) {
+            std::cerr << "ERROR: Cannot create context with this args --main-db-path and --aux-db-path" << std::endl;
+            proj_context_destroy(ctx);
+            std::exit(1);
         }
 
-        for (auto auth_name : auth_names) {
+        auto allowedAuthorities(outputOpt.allowedAuthorities);
+        if (allowedAuthorities.empty()) {
+            allowedAuthorities.emplace_back(std::string());
+        }
+        for (auto auth_name : allowedAuthorities) {
             int result_count = 0;
-            auto list = proj_get_crs_info_list_from_database(nullptr, auth_name.c_str(), params, &result_count);
+            auto list = proj_get_crs_info_list_from_database(ctx, auth_name.c_str(), params, &result_count);
             for (int i = 0; i < result_count; i++) {
                 std::cout << list[i]->auth_name << ":" << list[i]->code << " \"" << list[i]->name << "\"" <<
                     (list[i]->deprecated ? " [deprecated]" : "") << std::endl;
@@ -1331,6 +1328,7 @@ int main(int argc, char **argv) {
             proj_crs_info_list_destroy(list);
         }
         proj_get_crs_list_parameters_destroy(params);
+        proj_context_destroy(ctx);
     }
 
     if (!sourceCRSStr.empty() && targetCRSStr.empty()) {

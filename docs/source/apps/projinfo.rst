@@ -292,9 +292,8 @@ The following control parameters can appear in any order:
 
     Outputs a list (authority name:code and CRS name) of the filtered CRSs from the database.
     If no filter is provided all authority names and types of non deprecated CRSs are dumped.
-    list-crs-filter is a comma separated combination of: auth_name=XXX,allow_deprecated,geodetic,geocentric,
-    geographic,geographic_2d,geographic_3d,vertical,protected,compound,temporal,engineering,bound,other
-    where XXX is the authority. When auth_name is provided multiple times, it is included for each one.
+    list-crs-filter is a comma separated combination of: allow_deprecated,geodetic,geocentric,
+    geographic,geographic_2d,geographic_3d,vertical,projected,compound.
 
 .. option:: --3d
 
