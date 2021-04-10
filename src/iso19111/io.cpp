@@ -6200,6 +6200,114 @@ static CRSNNPtr importFromCRSURL(const std::string &text,
 
 // ---------------------------------------------------------------------------
 
+/* Import a CRS encoded as WMSAUTO string.
+ *
+ * Note that the WMS 1.3 specification does not include the
+ * units code, while apparently earlier specs do.  We try to
+ * guess around this.
+ *
+ * (code derived from GDAL's importFromWMSAUTO())
+ */
+
+static CRSNNPtr importFromWMSAUTO(const std::string &text) {
+
+    int nUnitsId = 9001;
+    double dfRefLong;
+    double dfRefLat = 0.0;
+
+    assert(ci_starts_with(text, "AUTO:"));
+    const auto parts = split(text.substr(strlen("AUTO:")), ',');
+
+    try {
+        constexpr int AUTO_MOLLWEIDE = 42005;
+        if (parts.size() == 4) {
+            nUnitsId = std::stoi(parts[1]);
+            dfRefLong = c_locale_stod(parts[2]);
+            dfRefLat = c_locale_stod(parts[3]);
+        } else if (parts.size() == 3 && std::stoi(parts[0]) == AUTO_MOLLWEIDE) {
+            nUnitsId = std::stoi(parts[1]);
+            dfRefLong = c_locale_stod(parts[2]);
+        } else if (parts.size() == 3) {
+            dfRefLong = c_locale_stod(parts[1]);
+            dfRefLat = c_locale_stod(parts[2]);
+        } else if (parts.size() == 2 && std::stoi(parts[0]) == AUTO_MOLLWEIDE) {
+            dfRefLong = c_locale_stod(parts[1]);
+        } else {
+            throw ParsingException("invalid WMS AUTO CRS definition");
+        }
+
+        const auto getConversion = [=]() {
+            const int nProjId = std::stoi(parts[0]);
+            switch (nProjId) {
+            case 42001: // Auto UTM
+                if (!(dfRefLong >= -180 && dfRefLong < 180)) {
+                    throw ParsingException("invalid WMS AUTO CRS definition: "
+                                           "invalid longitude");
+                }
+                return Conversion::createUTM(
+                    util::PropertyMap(),
+                    static_cast<int>(floor((dfRefLong + 180.0) / 6.0)) + 1,
+                    dfRefLat >= 0.0);
+
+            case 42002: // Auto TM (strangely very UTM-like).
+                return Conversion::createTransverseMercator(
+                    util::PropertyMap(), common::Angle(0),
+                    common::Angle(dfRefLong), common::Scale(0.9996),
+                    common::Length(500000),
+                    common::Length((dfRefLat >= 0.0) ? 0.0 : 10000000.0));
+
+            case 42003: // Auto Orthographic.
+                return Conversion::createOrthographic(
+                    util::PropertyMap(), common::Angle(dfRefLat),
+                    common::Angle(dfRefLong), common::Length(0),
+                    common::Length(0));
+
+            case 42004: // Auto Equirectangular
+                return Conversion::createEquidistantCylindrical(
+                    util::PropertyMap(), common::Angle(dfRefLat),
+                    common::Angle(dfRefLong), common::Length(0),
+                    common::Length(0));
+
+            case 42005: // MSVC 2015 thinks that AUTO_MOLLWEIDE is not constant
+                return Conversion::createMollweide(
+                    util::PropertyMap(), common::Angle(dfRefLong),
+                    common::Length(0), common::Length(0));
+
+            default:
+                throw ParsingException("invalid WMS AUTO CRS definition: "
+                                       "unsupported projection id");
+            }
+        };
+
+        const auto getUnits = [=]() {
+            switch (nUnitsId) {
+            case 9001:
+                return UnitOfMeasure::METRE;
+
+            case 9002:
+                return UnitOfMeasure::FOOT;
+
+            case 9003:
+                return UnitOfMeasure::US_FOOT;
+
+            default:
+                throw ParsingException("invalid WMS AUTO CRS definition: "
+                                       "unsupported units code");
+            }
+        };
+
+        return crs::ProjectedCRS::create(
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+            crs::GeographicCRS::EPSG_4326, getConversion(),
+            cs::CartesianCS::createEastingNorthing(getUnits()));
+
+    } catch (const std::exception &) {
+        throw ParsingException("invalid WMS AUTO CRS definition");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                            const DatabaseContextPtr &dbContext,
                                            bool usePROJ4InitRules,
@@ -6263,6 +6371,10 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
 
     if (isCRSURL(text) && dbContext) {
         return importFromCRSURL(text, NN_NO_CHECK(dbContext));
+    }
+
+    if (ci_starts_with(text, "AUTO:")) {
+        return importFromWMSAUTO(text);
     }
 
     auto tokens = split(text, ':');
@@ -6520,6 +6632,13 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         const auto &authName = tokens[4];
         const auto &code = tokens[6];
         return createFromURNPart(type, authName, code);
+    }
+
+    // urn:ogc:def:crs:OGC::AUTO42001:-117:33
+    if (tokens.size() > 7 && tokens[0] == "urn" && tokens[4] == "OGC" &&
+        ci_starts_with(tokens[6], "AUTO")) {
+        const auto textAUTO = text.substr(text.find(":AUTO") + 5);
+        return importFromWMSAUTO("AUTO:" + replaceAll(textAUTO, ":", ","));
     }
 
     // Legacy urn:opengis:crs:EPSG:0:4326 (note the missing def: compared to
