@@ -1002,6 +1002,10 @@ TEST(crs, EPSG_32661_projected_north_pole_north_east) {
     EXPECT_EQ(
         opNormalized->exportToPROJString(PROJStringFormatter::create().get()),
         proj_string_normalized);
+
+    EXPECT_EQ(opNormalized->sourceCRS()->domains().size(), 1U);
+    EXPECT_EQ(opNormalized->sourceCRS()->remarks(),
+              "Axis order reversed compared to EPSG:4326");
 }
 
 // ---------------------------------------------------------------------------

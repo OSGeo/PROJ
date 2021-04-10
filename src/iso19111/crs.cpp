@@ -824,21 +824,58 @@ bool CRS::mustAxisOrderBeSwitchedForVisualization() const {
 //! @cond Doxygen_Suppress
 
 CRSNNPtr CRS::normalizeForVisualization() const {
-    auto props = util::PropertyMap().set(
-        common::IdentifiedObject::NAME_KEY,
-        nameStr() + " (with axis order normalized for visualization)");
+
+    const auto createProperties = [this](const std::string &newName =
+                                             std::string()) {
+        auto props = util::PropertyMap().set(
+            common::IdentifiedObject::NAME_KEY,
+            !newName.empty()
+                ? newName
+                : nameStr() +
+                      " (with axis order normalized for visualization)");
+        const auto &l_domains = domains();
+        if (!l_domains.empty()) {
+            auto array = util::ArrayOfBaseObject::create();
+            for (const auto &domain : l_domains) {
+                array->add(domain);
+            }
+            if (!array->empty()) {
+                props.set(common::ObjectUsage::OBJECT_DOMAIN_KEY, array);
+            }
+        }
+        const auto &l_identifiers = identifiers();
+        const auto &l_remarks = remarks();
+        if (l_identifiers.size() == 1) {
+            std::string remarks("Axis order reversed compared to ");
+            remarks += *(l_identifiers[0]->codeSpace());
+            remarks += ':';
+            remarks += l_identifiers[0]->code();
+            if (!l_remarks.empty()) {
+                remarks += ". ";
+                remarks += l_remarks;
+            }
+            props.set(common::IdentifiedObject::REMARKS_KEY, remarks);
+        } else if (!l_remarks.empty()) {
+            props.set(common::IdentifiedObject::REMARKS_KEY, l_remarks);
+        }
+        return props;
+    };
 
     const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
     if (compoundCRS) {
         const auto &comps = compoundCRS->componentReferenceSystems();
-        if (!comps.empty()) {
+        if (!comps.empty() &&
+            comps[0]->mustAxisOrderBeSwitchedForVisualization()) {
             std::vector<CRSNNPtr> newComps;
             newComps.emplace_back(comps[0]->normalizeForVisualization());
+            std::string l_name = newComps.back()->nameStr();
             for (size_t i = 1; i < comps.size(); i++) {
                 newComps.emplace_back(comps[i]);
+                l_name += " + ";
+                l_name += newComps.back()->nameStr();
             }
             return util::nn_static_pointer_cast<CRS>(
-                CompoundCRS::create(props, newComps));
+                CompoundCRS::create(createProperties(l_name), newComps));
         }
     }
 
@@ -852,8 +889,9 @@ CRSNNPtr CRS::normalizeForVisualization() const {
                           : cs::EllipsoidalCS::create(util::PropertyMap(),
                                                       axisList[1], axisList[0],
                                                       axisList[2]);
-            return util::nn_static_pointer_cast<CRS>(GeographicCRS::create(
-                props, geogCRS->datum(), geogCRS->datumEnsemble(), cs));
+            return util::nn_static_pointer_cast<CRS>(
+                GeographicCRS::create(createProperties(), geogCRS->datum(),
+                                      geogCRS->datumEnsemble(), cs));
         }
     }
 
@@ -867,8 +905,9 @@ CRSNNPtr CRS::normalizeForVisualization() const {
                                               axisList[0])
                     : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
                                               axisList[0], axisList[2]);
-            return util::nn_static_pointer_cast<CRS>(ProjectedCRS::create(
-                props, projCRS->baseCRS(), projCRS->derivingConversion(), cs));
+            return util::nn_static_pointer_cast<CRS>(
+                ProjectedCRS::create(createProperties(), projCRS->baseCRS(),
+                                     projCRS->derivingConversion(), cs));
         }
     }
 
@@ -1021,12 +1060,19 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
             }
         }
         const auto &l_identifiers = identifiers();
+        const auto &l_remarks = remarks();
         if (l_identifiers.size() == 1) {
             std::string remarks("Promoted to 3D from ");
             remarks += *(l_identifiers[0]->codeSpace());
             remarks += ':';
             remarks += l_identifiers[0]->code();
+            if (!l_remarks.empty()) {
+                remarks += ". ";
+                remarks += l_remarks;
+            }
             props.set(common::IdentifiedObject::REMARKS_KEY, remarks);
+        } else if (!l_remarks.empty()) {
+            props.set(common::IdentifiedObject::REMARKS_KEY, l_remarks);
         }
         return props;
     };
