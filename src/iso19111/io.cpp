@@ -6484,15 +6484,14 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         return ConcatenatedOperation::createComputeMetadata(components, true);
     }
 
-    // urn:ogc:def:crs:EPSG::4326
-    if (tokens.size() == 7 && tokens[0] == "urn") {
+    const auto createFromURNPart =
+        [&dbContext](const std::string &type, const std::string &authName,
+                     const std::string &code) -> BaseObjectNNPtr {
         if (!dbContext) {
             throw ParsingException("no database context specified");
         }
-        const auto &type = tokens[3];
         auto factory =
-            AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[4]);
-        const auto &code = tokens[6];
+            AuthorityFactory::create(NN_NO_CHECK(dbContext), authName);
         if (type == "crs") {
             return factory->createCoordinateReferenceSystem(code);
         }
@@ -6512,22 +6511,32 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             return factory->createPrimeMeridian(code);
         }
         throw ParsingException(concat("unhandled object type: ", type));
+    };
+
+    // urn:ogc:def:crs:EPSG::4326
+    if (tokens.size() == 7 && tokens[0] == "urn") {
+
+        const auto &type = tokens[3];
+        const auto &authName = tokens[4];
+        const auto &code = tokens[6];
+        return createFromURNPart(type, authName, code);
     }
 
     // Legacy urn:opengis:crs:EPSG:0:4326 (note the missing def: compared to
     // above)
-    if (tokens.size() == 6 && tokens[0] == "urn") {
-        if (!dbContext) {
-            throw ParsingException("no database context specified");
-        }
+    if (tokens.size() == 6 && tokens[0] == "urn" && tokens[2] != "def") {
         const auto &type = tokens[2];
-        auto factory =
-            AuthorityFactory::create(NN_NO_CHECK(dbContext), tokens[3]);
+        const auto &authName = tokens[3];
         const auto &code = tokens[5];
-        if (type == "crs") {
-            return factory->createCoordinateReferenceSystem(code);
-        }
-        throw ParsingException(concat("unhandled object type: ", type));
+        return createFromURNPart(type, authName, code);
+    }
+
+    // Legacy urn:x-ogc:def:crs:EPSG:4326 (note the missing version)
+    if (tokens.size() == 6 && tokens[0] == "urn") {
+        const auto &type = tokens[3];
+        const auto &authName = tokens[4];
+        const auto &code = tokens[5];
+        return createFromURNPart(type, authName, code);
     }
 
     if (dbContext) {

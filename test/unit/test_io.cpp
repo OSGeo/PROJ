@@ -10367,6 +10367,8 @@ TEST(io, createFromUserInput) {
         createFromUserInput("urn:opengis:def:crs:EPSG::4326", dbContext));
     EXPECT_NO_THROW(
         createFromUserInput("urn:opengis:crs:EPSG::4326", dbContext));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:x-ogc:def:crs:EPSG:4326", dbContext));
     EXPECT_THROW(createFromUserInput("urn:opengis:crs:EPSG::4326", nullptr),
                  ParsingException);
     EXPECT_THROW(
