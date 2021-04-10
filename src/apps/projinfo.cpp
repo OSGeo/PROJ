@@ -108,7 +108,6 @@ static void usage() {
         << "                [--authority name]" << std::endl
         << "                [--main-db-path path] [--aux-db-path path]*"
         << std::endl
-        << "                [--]" << std::endl
         << "                [--identify] [--3d]" << std::endl
         << "                [--output-id AUTH:CODE]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
