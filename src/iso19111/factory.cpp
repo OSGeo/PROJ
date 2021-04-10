@@ -7338,19 +7338,21 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
  */
 std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
 
-    const auto getSqlArea = [](const std::string &table_name) {
-        return "JOIN usage u ON "
-               "u.object_table_name = '" +
-               table_name +
-               "' AND "
+    const auto getSqlArea = [](const char* table_name) {
+        std::string sql(
+            "JOIN usage u ON u.object_table_name = '");
+        sql += table_name;
+        sql += "' AND "
                "u.object_auth_name = c.auth_name AND "
                "u.object_code = c.code "
                "JOIN extent a "
                "ON a.auth_name = u.extent_auth_name AND "
                "a.code = u.extent_code ";
+       return sql;
     };
 
-    std::string sql = "SELECT c.auth_name, c.code, c.name, c.type, "
+    std::string sql = "SELECT * FROM ("
+                      "SELECT c.auth_name, c.code, c.name, c.type, "
                       "c.deprecated, "
                       "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
                       "a.description, NULL FROM geodetic_crs c " +
@@ -7365,9 +7367,9 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
            "a.description, cm.name AS conversion_method_name FROM "
-           "projected_crs c " +
-           getSqlArea("projected_crs") +
-           "LEFT JOIN conversion_table conv ON "
+           "projected_crs c ";
+    sql += getSqlArea("projected_crs");
+    sql += "LEFT JOIN conversion_table conv ON "
            "c.conversion_auth_name = conv.auth_name AND "
            "c.conversion_code = conv.code "
            "LEFT JOIN conversion_method cm ON "
@@ -7381,8 +7383,8 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     sql += "SELECT c.auth_name, c.code, c.name, 'vertical', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-           "a.description, NULL FROM vertical_crs c " +
-           getSqlArea("vertical_crs");
+           "a.description, NULL FROM vertical_crs c ";
+    sql += getSqlArea("vertical_crs");
     if (d->hasAuthorityRestriction()) {
         sql += " WHERE c.auth_name = ?";
         params.emplace_back(d->authority());
@@ -7391,12 +7393,13 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
     sql += "SELECT c.auth_name, c.code, c.name, 'compound', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-           "a.description, NULL FROM compound_crs c " +
-           getSqlArea("compound_crs");
+           "a.description, NULL FROM compound_crs c ";
+    sql += getSqlArea("compound_crs");
     if (d->hasAuthorityRestriction()) {
         sql += " WHERE c.auth_name = ?";
         params.emplace_back(d->authority());
     }
+    sql += ") r ORDER BY auth_name, code";
     auto sqlRes = d->run(sql, params);
     std::list<AuthorityFactory::CRSInfo> res;
     for (const auto &row : sqlRes) {
