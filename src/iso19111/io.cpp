@@ -6126,6 +6126,80 @@ EllipsoidNNPtr JSONParser::buildEllipsoid(const json &j) {
 
 // ---------------------------------------------------------------------------
 
+// import a CRS encoded as OGC Best Practice document 11-135.
+
+static const char *const crsURLPrefixes[] = {
+    "http://opengis.net/def/crs",     "https://opengis.net/def/crs",
+    "http://www.opengis.net/def/crs", "https://www.opengis.net/def/crs",
+    "www.opengis.net/def/crs",
+};
+
+static bool isCRSURL(const std::string &text) {
+    for (const auto crsURLPrefix : crsURLPrefixes) {
+        if (starts_with(text, crsURLPrefix)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static CRSNNPtr importFromCRSURL(const std::string &text,
+                                 const DatabaseContextNNPtr &dbContext) {
+    // e.g http://www.opengis.net/def/crs/EPSG/0/4326
+    std::vector<std::string> parts;
+    for (const auto crsURLPrefix : crsURLPrefixes) {
+        if (starts_with(text, crsURLPrefix)) {
+            parts = split(text.substr(strlen(crsURLPrefix)), '/');
+            break;
+        }
+    }
+
+    // e.g
+    // "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/def/crs/EPSG/0/4326&2=http://www.opengis.net/def/crs/EPSG/0/3855"
+    if (!parts.empty() && starts_with(parts[0], "-compound?")) {
+        parts = split(text.substr(text.find('?') + 1), '&');
+        std::map<int, std::string> mapParts;
+        for (const auto &part : parts) {
+            const auto queryParam = split(part, '=');
+            if (queryParam.size() != 2) {
+                throw ParsingException("invalid OGC CRS URL");
+            }
+            try {
+                mapParts[std::stoi(queryParam[0])] = queryParam[1];
+            } catch (const std::exception &) {
+                throw ParsingException("invalid OGC CRS URL");
+            }
+        }
+        std::vector<CRSNNPtr> components;
+        std::string name;
+        for (size_t i = 1; i <= mapParts.size(); ++i) {
+            const auto iter = mapParts.find(static_cast<int>(i));
+            if (iter == mapParts.end()) {
+                throw ParsingException("invalid OGC CRS URL");
+            }
+            components.emplace_back(importFromCRSURL(iter->second, dbContext));
+            if (!name.empty()) {
+                name += " + ";
+            }
+            name += components.back()->nameStr();
+        }
+        return CompoundCRS::create(
+            util::PropertyMap().set(IdentifiedObject::NAME_KEY, name),
+            components);
+    }
+
+    if (parts.size() < 4) {
+        throw ParsingException("invalid OGC CRS URL");
+    }
+
+    const auto &auth_name = parts[1];
+    const auto &code = parts[3];
+    auto factoryCRS = AuthorityFactory::create(dbContext, auth_name);
+    return factoryCRS->createCoordinateReferenceSystem(code, true);
+}
+
+// ---------------------------------------------------------------------------
+
 static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                            const DatabaseContextPtr &dbContext,
                                            bool usePROJ4InitRules,
@@ -6185,6 +6259,10 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                              ctx, false) == TRUE)
                                       : usePROJ4InitRules)
             .createFromPROJString(text);
+    }
+
+    if (isCRSURL(text) && dbContext) {
+        return importFromCRSURL(text, NN_NO_CHECK(dbContext));
     }
 
     auto tokens = split(text, ':');
@@ -6590,6 +6668,10 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li> OGC URN combining references for concatenated operations
  *      e.g.
  * "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618"</li>
+ * <li>OGC URL for a single CRS. e.g.
+ * "http://www.opengis.net/def/crs/EPSG/0/4326</li> <li>OGC URL for a compound
+ * CRS. e.g
+ * "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/def/crs/EPSG/0/4326&2=http://www.opengis.net/def/crs/EPSG/0/3855"</li>
  * <li>an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
  *     uniqueness is not guaranteed, the function may apply heuristics to
  *     determine the appropriate best match.</li>

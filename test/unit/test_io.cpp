@@ -10637,6 +10637,84 @@ TEST(io, createFromUserInput) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, createFromUserInput_ogc_crs_url) {
+    auto dbContext = DatabaseContext::create();
+
+    {
+        auto obj = createFromUserInput(
+            "http://www.opengis.net/def/crs/EPSG/0/4326", dbContext);
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+    }
+
+    EXPECT_THROW(
+        createFromUserInput("http://www.opengis.net/def/crs", dbContext),
+        ParsingException);
+
+    EXPECT_THROW(
+        createFromUserInput("http://www.opengis.net/def/crs/EPSG/0", dbContext),
+        ParsingException);
+
+    EXPECT_THROW(createFromUserInput(
+                     "http://www.opengis.net/def/crs/EPSG/0/XXXX", dbContext),
+                 NoSuchAuthorityCodeException);
+
+    {
+        auto obj = createFromUserInput(
+            "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/"
+            "def/crs/EPSG/0/4326&2=http://www.opengis.net/def/crs/EPSG/0/3855",
+            dbContext);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "WGS 84 + EGM2008 height");
+    }
+
+    // No part
+    EXPECT_THROW(createFromUserInput("http://www.opengis.net/def/crs-compound?",
+                                     dbContext),
+                 ParsingException);
+
+    // Just one part
+    EXPECT_THROW(
+        createFromUserInput("http://www.opengis.net/def/crs-compound?1=http://"
+                            "www.opengis.net/def/crs/EPSG/0/4326",
+                            dbContext),
+        InvalidCompoundCRSException);
+
+    // Invalid compound CRS
+    EXPECT_THROW(
+        createFromUserInput(
+            "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/"
+            "def/crs/EPSG/0/4326&2=http://www.opengis.net/def/crs/EPSG/0/4326",
+            dbContext),
+        InvalidCompoundCRSException);
+
+    // Missing 2=
+    EXPECT_THROW(
+        createFromUserInput(
+            "http://www.opengis.net/def/crs-compound?1=http://www.opengis.net/"
+            "def/crs/EPSG/0/4326&3=http://www.opengis.net/def/crs/EPSG/0/3855",
+            dbContext),
+        ParsingException);
+
+    // Invalid query parameter
+    EXPECT_THROW(
+        createFromUserInput("http://www.opengis.net/def/crs-compound?1=http://"
+                            "www.opengis.net/def/crs/EPSG/0/4326&bla",
+                            dbContext),
+        ParsingException);
+
+    // Invalid query parameter
+    EXPECT_THROW(
+        createFromUserInput("http://www.opengis.net/def/crs-compound?1=http://"
+                            "www.opengis.net/def/crs/EPSG/0/4326&two=http://"
+                            "www.opengis.net/def/crs/EPSG/0/3855",
+                            dbContext),
+        ParsingException);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, createFromUserInput_hack_EPSG_102100) {
     auto dbContext = DatabaseContext::create();
     auto obj = createFromUserInput("EPSG:102100", dbContext);
