@@ -1362,8 +1362,8 @@ int main(int argc, char **argv) {
             } else if (ci_equal(token, "compound")) {
                 types.insert(AuthorityFactory::ObjectType::COMPOUND_CRS);
             } else {
-                std::cerr << "Unrecognized value for option --list-crs: " << token
-                          << std::endl;
+                std::cerr << "Unrecognized value for option --list-crs: "
+                          << token << std::endl;
                 usage();
             }
         }
@@ -1375,7 +1375,8 @@ int main(int argc, char **argv) {
         }
         for (auto auth_name : allowedAuthorities) {
             try {
-                auto factory = AuthorityFactory::create(NN_NO_CHECK(dbContext), auth_name);
+                auto factory = AuthorityFactory::create(
+                                NN_NO_CHECK(dbContext), auth_name);
                 auto list = factory->getCRSInfoList();
                 for (const auto &info : list) {
                     if (!allow_deprecated && info.deprecated) {
@@ -1385,15 +1386,27 @@ int main(int argc, char **argv) {
                         continue;
                     }
                     if (bboxFilter) {
+                        if (!info.bbox_valid) {
+                            continue;
+                        }
                         auto crsExtent = Extent::createFromBBOX(
                             info.west_lon_degree, info.south_lat_degree,
                             info.east_lon_degree, info.north_lat_degree);
-                        if (!bboxFilter->intersects(crsExtent)) {
-                            continue;
+                        if (spatialCriterion == CoordinateOperationContext::
+                                    SpatialCriterion::STRICT_CONTAINMENT) {
+                            if (!bboxFilter->contains(crsExtent)) {
+                                continue;
+                            }
+                        } else {
+                            if (!bboxFilter->intersects(crsExtent)) {
+                                continue;
+                            }
                         }
                     }
-                    std::cout << info.authName << ":" << info.code << " \"" << info.name << "\"" <<
-                                (info.deprecated ? " [deprecated]" : "") << std::endl;
+                    std::cout << info.authName << ":" << info.code
+                              << " \"" << info.name << "\""
+                              << (info.deprecated ? " [deprecated]" : "")
+                              << std::endl;
                 }
             } catch (const std::exception &e) {
                 std::cerr << "ERROR: list-crs failed with: " << e.what()

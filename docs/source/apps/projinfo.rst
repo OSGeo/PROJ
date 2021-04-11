@@ -294,7 +294,7 @@ The following control parameters can appear in any order:
     If no filter is provided all authority names and types of non deprecated CRSs are dumped.
     list-crs-filter is a comma separated combination of: allow_deprecated,geodetic,geocentric,
     geographic,geographic_2d,geographic_3d,vertical,projected,compound.
-    Affected by options :option:`--authority`, :option:`--area` and :option:`--bbox`
+    Affected by options :option:`--authority`, :option:`--area`, :option:`--bbox` and :option:`--spatial-test`
 
 .. option:: --3d
 

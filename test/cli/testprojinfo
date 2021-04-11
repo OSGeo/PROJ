@@ -322,8 +322,24 @@ echo 'Testing --list-crs | grep deprecated | sort' >> ${OUT}
 $EXE --list-crs | grep deprecated | sort >> ${OUT}
 echo "" >>${OUT}
 
-echo 'Testing --list-crs vertical --bbox 0,40,1,41 | grep "Alicante\|NAVD88" | sort' >> ${OUT}
-$EXE --list-crs vertical --bbox 0,40,1,41 | grep "Alicante\|NAVD88" | sort >> ${OUT}
+echo 'Testing --list-crs vertical --bbox 0,40,1,41 --spatial-test intersects | grep "Alicante\|NAVD88" | sort' >> ${OUT}
+$EXE --list-crs vertical --bbox 0,40,1,41 --spatial-test intersects | grep "Alicante\|NAVD88" | sort >> ${OUT}
+echo "" >>${OUT}
+
+echo 'Testing --list-crs vertical --bbox -10,35,5,45 --spatial-test contains | grep "Alicante\|NAVD88" | sort' >> ${OUT}
+$EXE --list-crs vertical --bbox -10,35,5,45 --spatial-test contains | grep "Alicante\|NAVD88" | sort >> ${OUT}
+echo "" >>${OUT}
+
+echo 'Testing --list-crs --area Spain --spatial-test intersects | grep "EPSG:9505\|EPSG:9398\|EPSG:4258\|EPSG:5703" | sort' >> ${OUT}
+$EXE --list-crs --area Spain --spatial-test intersects | grep "EPSG:9505\|EPSG:9398\|EPSG:4258\|EPSG:5703" | sort >> ${OUT}
+echo "" >>${OUT}
+
+echo 'Testing --list-crs --area Spain --spatial-test contains | grep "EPSG:9505\|EPSG:9398\|EPSG:4258\|EPSG:5703" | sort' >> ${OUT}
+$EXE --list-crs --area Spain --spatial-test contains | grep "EPSG:9505\|EPSG:9398\|EPSG:4258\|EPSG:5703" | sort >> ${OUT}
+echo "" >>${OUT}
+
+echo 'Testing --list-crs --area Spain | grep "EPSG:9505\|EPSG:9398\|EPSG:4258\|EPSG:5703" | sort' >> ${OUT}
+$EXE --list-crs --area Spain | grep "EPSG:9505\|EPSG:9398\|EPSG:4258\|EPSG:5703" | sort >> ${OUT}
 echo "" >>${OUT}
 
 echo 'Testing --list-crs geodetic | grep "EPSG:4326\|EPSG:4979\|EPSG:4978" | sort' >> ${OUT}
@@ -338,12 +354,12 @@ echo 'Testing --list-crs geocentric,geographic_3d | grep "EPSG:4326\|EPSG:4979\|
 $EXE --list-crs geocentric,geographic_3d | grep "EPSG:4326\|EPSG:4979\|EPSG:4978" | sort >> ${OUT}
 echo "" >>${OUT}
 
-echo 'Testing --list-crs geographic_2d,allow_deprecated --bbox -100,40,-90,41 | grep deprecated | grep "NAD83(FBN)\|GCS_IGS08" | sort' >> ${OUT}
-$EXE --list-crs geographic_2d,allow_deprecated --bbox -100,40,-90,41 | grep deprecated | grep "NAD83(FBN)\|GCS_IGS08" | sort >> ${OUT}
+echo 'Testing --list-crs geographic_2d,allow_deprecated --bbox -100,40,-90,41 --spatial-test intersects | grep deprecated | grep "NAD83(FBN)\|GCS_IGS08" | sort' >> ${OUT}
+$EXE --list-crs geographic_2d,allow_deprecated --bbox -100,40,-90,41 --spatial-test intersects | grep deprecated | grep "NAD83(FBN)\|GCS_IGS08" | sort >> ${OUT}
 echo "" >>${OUT}
 
-echo 'Testing --list-crs projected --bbox -100,40,-90,41 | grep "(2011).*Missouri East\|York" | sort' >> ${OUT}
-$EXE --list-crs projected --bbox -100,40,-90,41 | grep "(2011).*Missouri East\|York" | sort >> ${OUT}
+echo 'Testing --list-crs projected --bbox -100,40,-90,41 --spatial-test intersects | grep "(2011).*Missouri East\|York" | sort' >> ${OUT}
+$EXE --list-crs projected --bbox -100,40,-90,41 --spatial-test intersects | grep "(2011).*Missouri East\|York" | sort >> ${OUT}
 echo "" >>${OUT}
 
 # do 'diff' with distribution results

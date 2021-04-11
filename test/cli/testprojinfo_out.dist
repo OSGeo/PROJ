@@ -1615,8 +1615,24 @@ OGC:CRS84 "WGS 84 (CRS84)"
 
 Testing --list-crs | grep deprecated | sort
 
-Testing --list-crs vertical --bbox 0,40,1,41 | grep "Alicante\|NAVD88" | sort
+Testing --list-crs vertical --bbox 0,40,1,41 --spatial-test intersects | grep "Alicante\|NAVD88" | sort
 EPSG:5782 "Alicante height"
+
+Testing --list-crs vertical --bbox -10,35,5,45 --spatial-test contains | grep "Alicante\|NAVD88" | sort
+EPSG:5782 "Alicante height"
+
+Testing --list-crs --area Spain --spatial-test intersects | grep "EPSG:9505\|EPSG:9398\|EPSG:4258\|EPSG:5703" | sort
+EPSG:4258 "ETRS89"
+EPSG:9398 "Tenerife height"
+EPSG:9505 "ETRS89 + Alicante height"
+
+Testing --list-crs --area Spain --spatial-test contains | grep "EPSG:9505\|EPSG:9398\|EPSG:4258\|EPSG:5703" | sort
+EPSG:9398 "Tenerife height"
+EPSG:9505 "ETRS89 + Alicante height"
+
+Testing --list-crs --area Spain | grep "EPSG:9505\|EPSG:9398\|EPSG:4258\|EPSG:5703" | sort
+EPSG:9398 "Tenerife height"
+EPSG:9505 "ETRS89 + Alicante height"
 
 Testing --list-crs geodetic | grep "EPSG:4326\|EPSG:4979\|EPSG:4978" | sort
 EPSG:4326 "WGS 84"
@@ -1631,10 +1647,10 @@ Testing --list-crs geocentric,geographic_3d | grep "EPSG:4326\|EPSG:4979\|EPSG:4
 EPSG:4978 "WGS 84"
 EPSG:4979 "WGS 84"
 
-Testing --list-crs geographic_2d,allow_deprecated --bbox -100,40,-90,41 | grep deprecated | grep "NAD83(FBN)\|GCS_IGS08" | sort
+Testing --list-crs geographic_2d,allow_deprecated --bbox -100,40,-90,41 --spatial-test intersects | grep deprecated | grep "NAD83(FBN)\|GCS_IGS08" | sort
 EPSG:8449 "NAD83(FBN)" [deprecated]
 ESRI:104010 "GCS_IGS08" [deprecated]
 
-Testing --list-crs projected --bbox -100,40,-90,41 | grep "(2011).*Missouri East\|York" | sort
+Testing --list-crs projected --bbox -100,40,-90,41 --spatial-test intersects | grep "(2011).*Missouri East\|York" | sort
 EPSG:6512 "NAD83(2011) / Missouri East"
 
