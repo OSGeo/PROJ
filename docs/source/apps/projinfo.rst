@@ -32,6 +32,7 @@ Synopsis
     |    [--output-id AUTH:CODE]
     |    [--c-ify] [--single-line]
     |    --searchpaths | --remote-data |
+    |    --list-crs [list-crs-filter] |
     |    --dump-db-structure [{object_definition} | {object_reference}] |
     |    {object_definition} | {object_reference} | (-s {srs_def} -t {srs_def})
     |
@@ -284,6 +285,16 @@ The following control parameters can appear in any order:
     database. This option can be specified as the only switch of the utility.
     If also specifying a CRS object and the :option:`--output-id` option, the
     definition of the object as SQL statements will be appended.
+
+.. option:: --list-crs [list-crs-filter]
+
+    .. versionadded:: 8.1
+
+    Outputs a list (authority name:code and CRS name) of the filtered CRSs from the database.
+    If no filter is provided all authority names and types of non deprecated CRSs are dumped.
+    list-crs-filter is a comma separated combination of: allow_deprecated,geodetic,geocentric,
+    geographic,geographic_2d,geographic_3d,vertical,projected,compound.
+    Affected by options :option:`--authority`, :option:`--area`, :option:`--bbox` and :option:`--spatial-test`
 
 .. option:: --3d
 

@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <fstream> // std::ifstream
 #include <iostream>
+#include <set>
 #include <utility>
 
 #include "proj.h"
@@ -112,6 +113,7 @@ static void usage() {
         << "                [--output-id AUTH:CODE]" << std::endl
         << "                [--c-ify] [--single-line]" << std::endl
         << "                --searchpaths | --remote-data |" << std::endl
+        << "                --list-crs [list-crs-filter] |" << std::endl
         << "                --dump-db-structure [{object_definition} | "
            "{object_reference}] |"
         << std::endl
@@ -125,6 +127,12 @@ static void usage() {
               << std::endl;
     std::cerr << "    Except 'all' and 'default', other format can be preceded "
                  "by '-' to disable them"
+              << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "list-crs-filter is a comma separated combination of: "
+                 "allow_deprecated,geodetic,geocentric,"
+              << std::endl;
+    std::cerr << "geographic,geographic_2d,geographic_3d,vertical,projected,compound"
               << std::endl;
     std::cerr << std::endl;
     std::cerr << "{object_definition} might be a PROJ string, a WKT string, "
@@ -156,6 +164,90 @@ static std::string c_ify_string(const std::string &str) {
 }
 
 // ---------------------------------------------------------------------------
+
+static ExtentPtr makeBboxFilter(DatabaseContextPtr dbContext, const std::string& bboxStr, const std::string& area)
+{
+    ExtentPtr bboxFilter = nullptr;
+    if (!bboxStr.empty()) {
+            auto bbox(split(bboxStr, ','));
+            if (bbox.size() != 4) {
+                std::cerr << "Incorrect number of values for option --bbox: "
+                          << bboxStr << std::endl;
+                usage();
+            }
+            try {
+                std::vector<double> bboxValues = {c_locale_stod(bbox[0]), c_locale_stod(bbox[1]),
+                              c_locale_stod(bbox[2]), c_locale_stod(bbox[3])};
+                bboxFilter = Extent::createFromBBOX(
+                                 bboxValues[0], bboxValues[1], bboxValues[2], bboxValues[3])
+                                 .as_nullable();
+            } catch (const std::exception &e) {
+                std::cerr << "Invalid value for option --bbox: " << bboxStr
+                          << ", " << e.what() << std::endl;
+                usage();
+            }
+    } else if (!area.empty()) {
+        assert(dbContext);
+        try {
+            if (area.find(' ') == std::string::npos &&
+                area.find(':') != std::string::npos) {
+                auto tokens = split(area, ':');
+                if (tokens.size() == 2) {
+                    const std::string &areaAuth = tokens[0];
+                    const std::string &areaCode = tokens[1];
+                    bboxFilter = AuthorityFactory::create(
+                                        NN_NO_CHECK(dbContext), areaAuth)
+                                        ->createExtent(areaCode)
+                                        .as_nullable();
+                }
+            }
+            if (!bboxFilter) {
+                auto authFactory = AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), std::string());
+                auto res = authFactory->listAreaOfUseFromName(area, false);
+                if (res.size() == 1) {
+                    bboxFilter =
+                        AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                    res.front().first)
+                            ->createExtent(res.front().second)
+                            .as_nullable();
+                } else {
+                    res = authFactory->listAreaOfUseFromName(area, true);
+                    if (res.size() == 1) {
+                        bboxFilter =
+                            AuthorityFactory::create(NN_NO_CHECK(dbContext),
+                                                        res.front().first)
+                                ->createExtent(res.front().second)
+                                .as_nullable();
+                    } else if (res.empty()) {
+                        std::cerr << "No area of use matching provided name"
+                                    << std::endl;
+                        std::exit(1);
+                    } else {
+                        std::cerr << "Several candidates area of use "
+                                        "matching provided name :"
+                                    << std::endl;
+                        for (const auto &candidate : res) {
+                            auto obj =
+                                AuthorityFactory::create(
+                                    NN_NO_CHECK(dbContext), candidate.first)
+                                    ->createExtent(candidate.second);
+                            std::cerr << "  " << candidate.first << ":"
+                                        << candidate.second << " : "
+                                        << *obj->description() << std::endl;
+                        }
+                        std::exit(1);
+                    }
+                }
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "Area of use retrieval failed: " << e.what()
+                        << std::endl;
+            std::exit(1);
+        }
+    }
+    return bboxFilter;
+}
 
 static BaseObjectNNPtr buildObject(
     DatabaseContextPtr dbContext, const std::string &user_string,
@@ -838,7 +930,7 @@ int main(int argc, char **argv) {
     OutputOptions outputOpt;
     std::string objectKind;
     bool summary = false;
-    ExtentPtr bboxFilter = nullptr;
+    std::string bboxStr;
     std::string area;
     bool spatialCriterionExplicitlySpecified = false;
     CoordinateOperationContext::SpatialCriterion spatialCriterion =
@@ -865,6 +957,8 @@ int main(int argc, char **argv) {
     double minimumAccuracy = -1;
     bool outputAll = false;
     bool dumpDbStructure = false;
+    std::string listCRS;
+    bool listCRSSpecified = false;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -969,23 +1063,7 @@ int main(int argc, char **argv) {
             }
         } else if (arg == "--bbox" && i + 1 < argc) {
             i++;
-            auto bboxStr(argv[i]);
-            auto bbox(split(bboxStr, ','));
-            if (bbox.size() != 4) {
-                std::cerr << "Incorrect number of values for option --bbox: "
-                          << bboxStr << std::endl;
-                usage();
-            }
-            try {
-                bboxFilter = Extent::createFromBBOX(
-                                 c_locale_stod(bbox[0]), c_locale_stod(bbox[1]),
-                                 c_locale_stod(bbox[2]), c_locale_stod(bbox[3]))
-                                 .as_nullable();
-            } catch (const std::exception &e) {
-                std::cerr << "Invalid value for option --bbox: " << bboxStr
-                          << ", " << e.what() << std::endl;
-                usage();
-            }
+            bboxStr = argv[i];
         } else if (arg == "--accuracy" && i + 1 < argc) {
             i++;
             try {
@@ -1155,6 +1233,12 @@ int main(int argc, char **argv) {
             outputOpt.outputCode = tokens[1];
         } else if (arg == "--dump-db-structure") {
             dumpDbStructure = true;
+        } else if (arg == "--list-crs") {
+            listCRSSpecified = true;
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                i++;
+                listCRS = argv[i];
+            }
         } else if (ci_equal(arg, "--searchpaths")) {
 #ifdef _WIN32
             constexpr char delim = ';';
@@ -1199,7 +1283,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (bboxFilter && !area.empty()) {
+    if (!bboxStr.empty() && !area.empty()) {
         std::cerr << "ERROR: --bbox and --area are exclusive" << std::endl;
         std::exit(1);
     }
@@ -1247,6 +1331,90 @@ int main(int argc, char **argv) {
         }
     }
 
+    if (listCRSSpecified) {
+        bool allow_deprecated = false;
+        std::set<AuthorityFactory::ObjectType> types;
+        auto tokens = split(listCRS, ',');
+        if (listCRS.empty()) {
+            tokens.clear();
+        }
+        for (auto token : tokens) {
+            if (ci_equal(token, "allow_deprecated")) {
+                allow_deprecated = true;
+            } else if (ci_equal(token, "geodetic")) {
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS);
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
+                types.insert(AuthorityFactory::ObjectType::GEOCENTRIC_CRS);
+            } else if (ci_equal(token, "geocentric")) {
+                types.insert(AuthorityFactory::ObjectType::GEOCENTRIC_CRS);
+            } else if (ci_equal(token, "geographic")) {
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS);
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
+            } else if (ci_equal(token, "geographic_2d")) {
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS);
+            } else if (ci_equal(token, "geographic_3d")) {
+                types.insert(AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS);
+            } else if (ci_equal(token, "vertical")) {
+                types.insert(AuthorityFactory::ObjectType::VERTICAL_CRS);
+            } else if (ci_equal(token, "projected")) {
+                types.insert(AuthorityFactory::ObjectType::PROJECTED_CRS);
+            } else if (ci_equal(token, "compound")) {
+                types.insert(AuthorityFactory::ObjectType::COMPOUND_CRS);
+            } else {
+                std::cerr << "Unrecognized value for option --list-crs: "
+                          << token << std::endl;
+                usage();
+            }
+        }
+
+        auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area);
+        auto allowedAuthorities(outputOpt.allowedAuthorities);
+        if (allowedAuthorities.empty()) {
+            allowedAuthorities.emplace_back(std::string());
+        }
+        for (auto auth_name : allowedAuthorities) {
+            try {
+                auto factory = AuthorityFactory::create(
+                                NN_NO_CHECK(dbContext), auth_name);
+                auto list = factory->getCRSInfoList();
+                for (const auto &info : list) {
+                    if (!allow_deprecated && info.deprecated) {
+                        continue;
+                    }
+                    if (!types.empty() && types.find(info.type) == types.end()) {
+                        continue;
+                    }
+                    if (bboxFilter) {
+                        if (!info.bbox_valid) {
+                            continue;
+                        }
+                        auto crsExtent = Extent::createFromBBOX(
+                            info.west_lon_degree, info.south_lat_degree,
+                            info.east_lon_degree, info.north_lat_degree);
+                        if (spatialCriterion == CoordinateOperationContext::
+                                    SpatialCriterion::STRICT_CONTAINMENT) {
+                            if (!bboxFilter->contains(crsExtent)) {
+                                continue;
+                            }
+                        } else {
+                            if (!bboxFilter->intersects(crsExtent)) {
+                                continue;
+                            }
+                        }
+                    }
+                    std::cout << info.authName << ":" << info.code
+                              << " \"" << info.name << "\""
+                              << (info.deprecated ? " [deprecated]" : "")
+                              << std::endl;
+                }
+            } catch (const std::exception &e) {
+                std::cerr << "ERROR: list-crs failed with: " << e.what()
+                          << std::endl;
+                std::exit(1);
+            }
+        }
+    }
+
     if (!sourceCRSStr.empty() && targetCRSStr.empty()) {
         std::cerr << "Source CRS specified, but missing target CRS"
                   << std::endl;
@@ -1261,7 +1429,7 @@ int main(int argc, char **argv) {
             usage();
         }
     } else if (!user_string_specified) {
-        if (dumpDbStructure) {
+        if (dumpDbStructure || listCRSSpecified) {
             std::exit(0);
         }
         std::cerr << "Missing user string" << std::endl;
@@ -1380,68 +1548,7 @@ int main(int argc, char **argv) {
             std::exit(1);
         }
     } else {
-
-        if (!area.empty()) {
-            assert(dbContext);
-            try {
-                if (area.find(' ') == std::string::npos &&
-                    area.find(':') != std::string::npos) {
-                    auto tokens = split(area, ':');
-                    if (tokens.size() == 2) {
-                        const std::string &areaAuth = tokens[0];
-                        const std::string &areaCode = tokens[1];
-                        bboxFilter = AuthorityFactory::create(
-                                         NN_NO_CHECK(dbContext), areaAuth)
-                                         ->createExtent(areaCode)
-                                         .as_nullable();
-                    }
-                }
-                if (!bboxFilter) {
-                    auto authFactory = AuthorityFactory::create(
-                        NN_NO_CHECK(dbContext), std::string());
-                    auto res = authFactory->listAreaOfUseFromName(area, false);
-                    if (res.size() == 1) {
-                        bboxFilter =
-                            AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                     res.front().first)
-                                ->createExtent(res.front().second)
-                                .as_nullable();
-                    } else {
-                        res = authFactory->listAreaOfUseFromName(area, true);
-                        if (res.size() == 1) {
-                            bboxFilter =
-                                AuthorityFactory::create(NN_NO_CHECK(dbContext),
-                                                         res.front().first)
-                                    ->createExtent(res.front().second)
-                                    .as_nullable();
-                        } else if (res.empty()) {
-                            std::cerr << "No area of use matching provided name"
-                                      << std::endl;
-                            std::exit(1);
-                        } else {
-                            std::cerr << "Several candidates area of use "
-                                         "matching provided name :"
-                                      << std::endl;
-                            for (const auto &candidate : res) {
-                                auto obj =
-                                    AuthorityFactory::create(
-                                        NN_NO_CHECK(dbContext), candidate.first)
-                                        ->createExtent(candidate.second);
-                                std::cerr << "  " << candidate.first << ":"
-                                          << candidate.second << " : "
-                                          << *obj->description() << std::endl;
-                            }
-                            std::exit(1);
-                        }
-                    }
-                }
-            } catch (const std::exception &e) {
-                std::cerr << "Area of use retrieval failed: " << e.what()
-                          << std::endl;
-                std::exit(1);
-            }
-        }
-
+        auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area);
         try {
             outputOperations(
                 dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
