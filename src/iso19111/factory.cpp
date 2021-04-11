@@ -7338,9 +7338,8 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
  */
 std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
 
-    const auto getSqlArea = [](const char* table_name) {
-        std::string sql(
-            "JOIN usage u ON u.object_table_name = '");
+    const auto getSqlArea = [](const char *table_name) {
+        std::string sql("JOIN usage u ON u.object_table_name = '");
         sql += table_name;
         sql += "' AND "
                "u.object_auth_name = c.auth_name AND "
@@ -7348,7 +7347,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
                "JOIN extent a "
                "ON a.auth_name = u.extent_auth_name AND "
                "a.code = u.extent_code ";
-       return sql;
+        return sql;
     };
 
     std::string sql = "SELECT * FROM ("
