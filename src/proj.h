@@ -948,6 +948,11 @@ typedef struct
     /** Name of the projection method for a projected CRS. Might be NULL even
      *for projected CRS in some cases. */
     char* projection_method_name;
+
+    /** Name of the celestial body of the CRS (e.g. "Earth").
+     * @since 8.1
+     */
+    char* celestial_body_name;
 } PROJ_CRS_INFO;
 
 /** \brief Structure describing optional parameters for proj_get_crs_list();
@@ -982,6 +987,12 @@ typedef struct
 
     /** Whether deprecated objects are allowed. Default to FALSE. */
     int allow_deprecated;
+
+    /** Celestial body of the CRS (e.g. "Earth"). The default value, NULL,
+     *  means no restriction
+     * @since 8.1
+     */
+    const char* celestial_body_name;
 } PROJ_CRS_LIST_PARAMETERS;
 
 /** \brief Structure given description of a unit.
@@ -1365,6 +1376,8 @@ int PROJ_DLL proj_ellipsoid_get_parameters(PJ_CONTEXT *ctx,
                                             double *out_semi_minor_metre,
                                             int    *out_is_semi_minor_computed,
                                             double *out_inv_flattening);
+
+const char PROJ_DLL *proj_get_celestial_body_name(PJ_CONTEXT *ctx, const PJ *obj);
 
 PJ PROJ_DLL *proj_get_prime_meridian(PJ_CONTEXT *ctx,
                                              const PJ *obj);

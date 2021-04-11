@@ -3544,7 +3544,8 @@ const DatabaseContextNNPtr &AuthorityFactory::databaseContext() const {
 AuthorityFactory::CRSInfo::CRSInfo()
     : authName{}, code{}, name{}, type{ObjectType::CRS}, deprecated{},
       bbox_valid{}, west_lon_degree{}, south_lat_degree{}, east_lon_degree{},
-      north_lat_degree{}, areaName{}, projectionMethodName{} {}
+      north_lat_degree{}, areaName{}, projectionMethodName{},
+      celestialBodyName{} {}
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -7350,52 +7351,70 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         return sql;
     };
 
+    const auto getJoinCelestialBody = [](const char *crs_alias) {
+        std::string sql("JOIN geodetic_datum gd ON gd.auth_name = ");
+        sql += crs_alias;
+        sql += ".datum_auth_name AND gd.code = ";
+        sql += crs_alias;
+        sql += ".datum_code "
+               "JOIN ellipsoid e ON e.auth_name = gd.ellipsoid_auth_name "
+               "AND e.code = gd.ellipsoid_code "
+               "JOIN celestial_body cb ON "
+               "cb.auth_name = e.celestial_body_auth_name "
+               "AND cb.code = e.celestial_body_code ";
+        return sql;
+    };
+
     std::string sql = "SELECT * FROM ("
                       "SELECT c.auth_name, c.code, c.name, c.type, "
                       "c.deprecated, "
                       "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-                      "a.description, NULL FROM geodetic_crs c " +
-                      getSqlArea("geodetic_crs");
+                      "a.description, NULL, cb.name FROM geodetic_crs c ";
+    sql += getSqlArea("geodetic_crs");
+    sql += getJoinCelestialBody("c");
     ListOfParams params;
     if (d->hasAuthorityRestriction()) {
-        sql += " WHERE c.auth_name = ?";
+        sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
-    sql += " UNION ALL ";
-    sql += "SELECT c.auth_name, c.code, c.name, 'projected', "
+    sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'projected', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-           "a.description, cm.name AS conversion_method_name FROM "
-           "projected_crs c ";
-    sql += getSqlArea("projected_crs");
-    sql += "LEFT JOIN conversion_table conv ON "
+           "a.description, cm.name, cb.name AS conversion_method_name FROM "
+           "projected_crs c "
+           "LEFT JOIN conversion_table conv ON "
            "c.conversion_auth_name = conv.auth_name AND "
            "c.conversion_code = conv.code "
            "LEFT JOIN conversion_method cm ON "
            "conv.method_auth_name = cm.auth_name AND "
-           "conv.method_code = cm.code";
+           "conv.method_code = cm.code "
+           "JOIN geodetic_crs gcrs ON "
+           "gcrs.auth_name = c.geodetic_crs_auth_name "
+           "AND gcrs.code = c.geodetic_crs_code ";
+    sql += getSqlArea("projected_crs");
+    sql += getJoinCelestialBody("gcrs");
     if (d->hasAuthorityRestriction()) {
-        sql += " WHERE c.auth_name = ?";
+        sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
-    sql += " UNION ALL ";
-    sql += "SELECT c.auth_name, c.code, c.name, 'vertical', "
+    // FIXME: we can't handle non-EARTH vertical CRS for now
+    sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'vertical', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-           "a.description, NULL FROM vertical_crs c ";
+           "a.description, NULL, 'Earth' FROM vertical_crs c ";
     sql += getSqlArea("vertical_crs");
     if (d->hasAuthorityRestriction()) {
-        sql += " WHERE c.auth_name = ?";
+        sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
-    sql += " UNION ALL ";
-    sql += "SELECT c.auth_name, c.code, c.name, 'compound', "
+    // FIXME: we can't handle non-EARTH vertical CRS for now
+    sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'compound', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
-           "a.description, NULL FROM compound_crs c ";
+           "a.description, NULL, 'Earth' FROM compound_crs c ";
     sql += getSqlArea("compound_crs");
     if (d->hasAuthorityRestriction()) {
-        sql += " WHERE c.auth_name = ?";
+        sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
     sql += ") r ORDER BY auth_name, code";
@@ -7432,6 +7451,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         }
         info.areaName = row[9];
         info.projectionMethodName = row[10];
+        info.celestialBodyName = row[11];
         res.emplace_back(info);
     }
     return res;
