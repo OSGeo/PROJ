@@ -1654,3 +1654,6 @@ ESRI:104010 "GCS_IGS08" [deprecated]
 Testing --list-crs projected --bbox -100,40,-90,41 --spatial-test intersects | grep "(2011).*Missouri East\|York" | sort
 EPSG:6512 "NAD83(2011) / Missouri East"
 
+Testing --list-crs projected --area France | grep "RGF93 / Lambert-93\|UTM zone 11N" | sort
+EPSG:2154 "RGF93 / Lambert-93"
+
