@@ -168,7 +168,8 @@ static std::string c_ify_string(const std::string &str) {
 
 static ExtentPtr makeBboxFilter(DatabaseContextPtr dbContext,
                                 const std::string &bboxStr,
-                                const std::string &area) {
+                                const std::string &area,
+                                bool errorIfSeveralAreaMatches) {
     ExtentPtr bboxFilter = nullptr;
     if (!bboxStr.empty()) {
         auto bbox(split(bboxStr, ','));
@@ -225,7 +226,7 @@ static ExtentPtr makeBboxFilter(DatabaseContextPtr dbContext,
                         std::cerr << "No area of use matching provided name"
                                   << std::endl;
                         std::exit(1);
-                    } else {
+                    } else if (errorIfSeveralAreaMatches) {
                         std::cerr << "Several candidates area of use "
                                      "matching provided name :"
                                   << std::endl;
@@ -1369,16 +1370,19 @@ int main(int argc, char **argv) {
             }
         }
 
-        auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area);
+        const std::string areaLower = tolower(area);
+        // If the area name has more than a single match, we
+        // will do filtering on info.areaName
+        auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area, false);
         auto allowedAuthorities(outputOpt.allowedAuthorities);
         if (allowedAuthorities.empty()) {
             allowedAuthorities.emplace_back(std::string());
         }
-        for (auto auth_name : allowedAuthorities) {
+        for (const auto &auth_name : allowedAuthorities) {
             try {
                 auto factory =
                     AuthorityFactory::create(NN_NO_CHECK(dbContext), auth_name);
-                auto list = factory->getCRSInfoList();
+                const auto list = factory->getCRSInfoList();
                 for (const auto &info : list) {
                     if (!allow_deprecated && info.deprecated) {
                         continue;
@@ -1405,6 +1409,10 @@ int main(int argc, char **argv) {
                                 continue;
                             }
                         }
+                    } else if (!area.empty() &&
+                               tolower(info.areaName).find(areaLower) ==
+                                   std::string::npos) {
+                        continue;
                     }
                     std::cout << info.authName << ":" << info.code << " \""
                               << info.name << "\""
@@ -1552,7 +1560,7 @@ int main(int argc, char **argv) {
             std::exit(1);
         }
     } else {
-        auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area);
+        auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area, true);
         try {
             outputOperations(
                 dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
