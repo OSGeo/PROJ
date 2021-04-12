@@ -15,6 +15,14 @@ esac
 
 TOPDIR="$SCRIPT_DIR/.."
 
+if ! (clang-format --version 2>/dev/null | grep 10 >/dev/null); then
+    echo "clang-format 10 not available. Running it from a Docker image";
+    docker build -t proj_clang_format -f "$TOPDIR"/scripts/proj_clang_format/Dockerfile "$TOPDIR"/scripts/proj_clang_format
+    UID=$(id -u "${USER}")
+    GID=$(id -g "${USER}")
+    exec docker run --rm -u "$UID:$GID" -v "$TOPDIR":"$TOPDIR" proj_clang_format "$TOPDIR"/scripts/reformat_cpp.sh
+fi
+
 for i in "$TOPDIR"/include/proj/*.hpp "$TOPDIR"/include/proj/internal/*.hpp \
          "$TOPDIR"/src/iso19111/*.cpp \
          "$TOPDIR"/src/iso19111/operation/*.cpp \
