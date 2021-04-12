@@ -257,7 +257,7 @@ static BaseObjectNNPtr buildObject(
     const std::string &kind, const std::string &context,
     bool buildBoundCRSToWGS84,
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
-    bool promoteTo3D, bool quiet) {
+    bool promoteTo3D, bool normalizeAxisOrder, bool quiet) {
     BaseObjectPtr obj;
 
     std::string l_user_string(user_string);
@@ -402,6 +402,13 @@ static BaseObjectNNPtr buildObject(
         auto crs = std::dynamic_pointer_cast<CRS>(obj);
         if (crs) {
             obj = crs->promoteTo3D(std::string(), dbContext).as_nullable();
+        }
+    }
+
+    if (normalizeAxisOrder) {
+        auto crs = std::dynamic_pointer_cast<CRS>(obj);
+        if (crs) {
+            obj = crs->normalizeForVisualization().as_nullable();
         }
     }
 
@@ -807,12 +814,12 @@ static void outputOperations(
     CoordinateOperationContext::IntermediateCRSUse allowUseIntermediateCRS,
     const std::vector<std::pair<std::string, std::string>> &pivots,
     const std::string &authority, bool usePROJGridAlternatives,
-    bool showSuperseded, bool promoteTo3D, double minimumAccuracy,
-    const OutputOptions &outputOpt, bool summary) {
+    bool showSuperseded, bool promoteTo3D, bool normalizeAxisOrder,
+    double minimumAccuracy, const OutputOptions &outputOpt, bool summary) {
     auto sourceObj =
         buildObject(dbContext, sourceCRSStr, "crs", "source CRS", false,
                     CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                    promoteTo3D, outputOpt.quiet);
+                    promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
     auto sourceCRS = nn_dynamic_pointer_cast<CRS>(sourceObj);
     if (!sourceCRS) {
         std::cerr << "source CRS string is not a CRS" << std::endl;
@@ -823,7 +830,7 @@ static void outputOperations(
     auto targetObj =
         buildObject(dbContext, targetCRSStr, "crs", "target CRS", false,
                     CoordinateOperationContext::IntermediateCRSUse::NEVER,
-                    promoteTo3D, outputOpt.quiet);
+                    promoteTo3D, normalizeAxisOrder, outputOpt.quiet);
     auto targetCRS = nn_dynamic_pointer_cast<CRS>(targetObj);
     if (!targetCRS) {
         std::cerr << "target CRS string is not a CRS" << std::endl;
@@ -957,6 +964,7 @@ int main(int argc, char **argv) {
     bool identify = false;
     bool showSuperseded = false;
     bool promoteTo3D = false;
+    bool normalizeAxisOrder = false;
     double minimumAccuracy = -1;
     bool outputAll = false;
     bool dumpDbStructure = false;
@@ -1224,6 +1232,9 @@ int main(int argc, char **argv) {
             outputOpt.ballparkAllowed = false;
         } else if (ci_equal(arg, "--3d")) {
             promoteTo3D = true;
+        } else if (ci_equal(arg, "--normalize-axis-order")) {
+            // Undocumented for now
+            normalizeAxisOrder = true;
         } else if (arg == "--output-id" && i + 1 < argc) {
             i++;
             const auto tokens = split(argv[i], ':');
@@ -1468,7 +1479,7 @@ int main(int argc, char **argv) {
             auto obj(buildObject(dbContext, user_string, objectKind,
                                  "input string", buildBoundCRSToWGS84,
                                  allowUseIntermediateCRS, promoteTo3D,
-                                 outputOpt.quiet));
+                                 normalizeAxisOrder, outputOpt.quiet));
             if (guessDialect) {
                 auto dialect = WKTParser().guessDialect(user_string);
                 std::cout << "Guessed WKT dialect: ";
@@ -1562,12 +1573,13 @@ int main(int argc, char **argv) {
     } else {
         auto bboxFilter = makeBboxFilter(dbContext, bboxStr, area, true);
         try {
-            outputOperations(
-                dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
-                spatialCriterion, spatialCriterionExplicitlySpecified,
-                crsExtentUse, gridAvailabilityUse, allowUseIntermediateCRS,
-                pivots, authority, usePROJGridAlternatives, showSuperseded,
-                promoteTo3D, minimumAccuracy, outputOpt, summary);
+            outputOperations(dbContext, sourceCRSStr, targetCRSStr, bboxFilter,
+                             spatialCriterion,
+                             spatialCriterionExplicitlySpecified, crsExtentUse,
+                             gridAvailabilityUse, allowUseIntermediateCRS,
+                             pivots, authority, usePROJGridAlternatives,
+                             showSuperseded, promoteTo3D, normalizeAxisOrder,
+                             minimumAccuracy, outputOpt, summary);
         } catch (const std::exception &e) {
             std::cerr << "outputOperations() failed with: " << e.what()
                       << std::endl;

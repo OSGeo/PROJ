@@ -142,7 +142,7 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
 
     PROJ_INTERNAL bool mustAxisOrderBeSwitchedForVisualization() const;
 
-    PROJ_INTERNAL CRSNNPtr normalizeForVisualization() const;
+    PROJ_FOR_TEST CRSNNPtr normalizeForVisualization() const;
 
     PROJ_INTERNAL CRSNNPtr allowNonConformantWKT1Export() const;
 

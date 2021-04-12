@@ -117,6 +117,7 @@ osgeo::proj::crs::CRS::extractGeographicCRS() const
 osgeo::proj::crs::CRS::extractVerticalCRS() const
 osgeo::proj::crs::CRS::getNonDeprecated(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> > const&) const
 osgeo::proj::crs::CRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
+osgeo::proj::crs::CRS::normalizeForVisualization() const
 osgeo::proj::crs::CRS::promoteTo3D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::CRS::shallowClone() const
 osgeo::proj::crs::CRS::stripVerticalComponent() const
