@@ -1089,6 +1089,8 @@ class PROJ_GCC_DLL AuthorityFactory {
         /** Name of the projection method for a projected CRS. Might be empty
          * even for projected CRS in some cases. */
         std::string projectionMethodName;
+        /** Name of the celestial body of the CRS (e.g. "Earth") */
+        std::string celestialBodyName;
 
         //! @cond Doxygen_Suppress
         CRSInfo();

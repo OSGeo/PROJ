@@ -1021,6 +1021,131 @@ TEST_F(CApi, proj_crs) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_get_celestial_body_name) {
+
+    // Geographic CRS
+    {
+        auto obj = proj_create_from_database(m_ctxt, "EPSG", "4326",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_NE(celestial_body_name, nullptr);
+        EXPECT_EQ(std::string(celestial_body_name), "Earth");
+    }
+
+    // Projected CRS
+    {
+        auto obj = proj_create_from_database(m_ctxt, "EPSG", "32631",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_NE(celestial_body_name, nullptr);
+        EXPECT_EQ(std::string(celestial_body_name), "Earth");
+    }
+
+    // Vertical CRS
+    {
+        auto obj = proj_create_from_database(m_ctxt, "EPSG", "3855",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_NE(celestial_body_name, nullptr);
+        EXPECT_EQ(std::string(celestial_body_name), "Earth");
+    }
+
+    // Compound CRS
+    {
+        auto obj = proj_create_from_database(m_ctxt, "EPSG", "9518",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_NE(celestial_body_name, nullptr);
+        EXPECT_EQ(std::string(celestial_body_name), "Earth");
+    }
+
+    // Geodetic datum
+    {
+        auto obj = proj_create_from_database(m_ctxt, "EPSG", "6267",
+                                             PJ_CATEGORY_DATUM, false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_NE(celestial_body_name, nullptr);
+        EXPECT_EQ(std::string(celestial_body_name), "Earth");
+    }
+
+    // Datum ensemble
+    {
+        auto obj = proj_create_from_database(
+            m_ctxt, "EPSG", "6326", PJ_CATEGORY_DATUM_ENSEMBLE, false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_NE(celestial_body_name, nullptr);
+        EXPECT_EQ(std::string(celestial_body_name), "Earth");
+    }
+
+    // Vertical datum
+    {
+        auto obj = proj_create_from_database(m_ctxt, "EPSG", "1027",
+                                             PJ_CATEGORY_DATUM, false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_NE(celestial_body_name, nullptr);
+        EXPECT_EQ(std::string(celestial_body_name), "Earth");
+    }
+
+    // Ellipsoid
+    {
+        auto obj = proj_create_from_database(
+            m_ctxt, "EPSG", "7030", PJ_CATEGORY_ELLIPSOID, false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_NE(celestial_body_name, nullptr);
+        EXPECT_EQ(std::string(celestial_body_name), "Earth");
+    }
+
+    // Ellipsoid non-EARTH
+    {
+        auto obj = proj_create_from_database(
+            m_ctxt, "ESRI", "107903", PJ_CATEGORY_ELLIPSOID, false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_NE(celestial_body_name, nullptr);
+        EXPECT_EQ(std::string(celestial_body_name), "Moon");
+    }
+
+    // Coordinate operation -> error
+    {
+        auto obj = proj_create_from_database(m_ctxt, "EPSG", "1591",
+                                             PJ_CATEGORY_COORDINATE_OPERATION,
+                                             false, nullptr);
+        ASSERT_NE(obj, nullptr);
+        ObjectKeeper keeper(obj);
+        const char *celestial_body_name =
+            proj_get_celestial_body_name(m_ctxt, obj);
+        ASSERT_EQ(celestial_body_name, nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_get_prime_meridian) {
     auto crs = proj_create_from_wkt(
         m_ctxt,
@@ -3527,6 +3652,8 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         bool found3855 = false;
         bool found3901 = false;
         for (int i = 0; i < result_count; i++) {
+            // EPSG should only include Earth CRS, at least for now...
+            EXPECT_EQ(std::string(list[i]->celestial_body_name), "Earth");
             auto code = std::string(list[i]->code);
             if (code == "4326") {
                 found4326 = true;
@@ -3697,6 +3824,32 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
             EXPECT_LE(list[i]->south_lat_degree, params->north_lat_degree);
             EXPECT_GE(list[i]->north_lat_degree, params->south_lat_degree);
         }
+        proj_get_crs_list_parameters_destroy(params);
+        proj_crs_info_list_destroy(list);
+    }
+
+    // Filter on celestial body
+    {
+        int result_count = 0;
+        auto params = proj_get_crs_list_parameters_create();
+        params->celestial_body_name = "non existing";
+        auto list = proj_get_crs_info_list_from_database(m_ctxt, nullptr,
+                                                         params, &result_count);
+        ASSERT_NE(list, nullptr);
+        EXPECT_EQ(result_count, 0);
+        proj_get_crs_list_parameters_destroy(params);
+        proj_crs_info_list_destroy(list);
+    }
+
+    // Filter on celestial body
+    {
+        int result_count = 0;
+        auto params = proj_get_crs_list_parameters_create();
+        params->celestial_body_name = "Earth";
+        auto list = proj_get_crs_info_list_from_database(m_ctxt, nullptr,
+                                                         params, &result_count);
+        ASSERT_NE(list, nullptr);
+        EXPECT_GT(result_count, 0);
         proj_get_crs_list_parameters_destroy(params);
         proj_crs_info_list_destroy(list);
     }

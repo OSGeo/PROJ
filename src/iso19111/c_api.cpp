@@ -2193,6 +2193,53 @@ PJ *proj_get_ellipsoid(PJ_CONTEXT *ctx, const PJ *obj) {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Get the name of the celestial body of this object.
+ *
+ * Object should be a CRS, Datum or Ellipsoid.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param obj Object of type CRS, Datum or Ellipsoid.(must not be NULL)
+ * @return the name of the celestial body, or NULL.
+ * @since 8.1
+ */
+const char *proj_get_celestial_body_name(PJ_CONTEXT *ctx, const PJ *obj) {
+    SANITIZE_CTX(ctx);
+    const IdentifiedObject *ptr = obj->iso_obj.get();
+    if (dynamic_cast<const CRS *>(ptr)) {
+        const auto geodCRS = extractGeodeticCRS(ctx, obj, __FUNCTION__);
+        if (!geodCRS) {
+            // FIXME when vertical CRS can be non-EARTH...
+            return datum::Ellipsoid::EARTH.c_str();
+        }
+        return geodCRS->ellipsoid()->celestialBody().c_str();
+    }
+    const auto ensemble = dynamic_cast<const DatumEnsemble *>(ptr);
+    if (ensemble) {
+        ptr = ensemble->datums().front().get();
+        // Go on
+    }
+    const auto geodetic_datum =
+        dynamic_cast<const GeodeticReferenceFrame *>(ptr);
+    if (geodetic_datum) {
+        return geodetic_datum->ellipsoid()->celestialBody().c_str();
+    }
+    const auto vertical_datum =
+        dynamic_cast<const VerticalReferenceFrame *>(ptr);
+    if (vertical_datum) {
+        // FIXME when vertical CRS can be non-EARTH...
+        return datum::Ellipsoid::EARTH.c_str();
+    }
+    const auto ellipsoid = dynamic_cast<const Ellipsoid *>(ptr);
+    if (ellipsoid) {
+        return ellipsoid->celestialBody().c_str();
+    }
+    proj_log_error(ctx, __FUNCTION__,
+                   "Object is not a CRS, Datum or Ellipsoid");
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Get the horizontal datum from a CRS
  *
  * This function may return a Datum or DatumEnsemble object.
@@ -2655,6 +2702,7 @@ PROJ_CRS_LIST_PARAMETERS *proj_get_crs_list_parameters_create() {
         ret->east_lon_degree = 0.0;
         ret->north_lat_degree = 0.0;
         ret->allow_deprecated = FALSE;
+        ret->celestial_body_name = nullptr;
     }
     return ret;
 }
@@ -2792,6 +2840,10 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                     }
                 }
             }
+            if (params && params->celestial_body_name &&
+                params->celestial_body_name != info.celestialBodyName) {
+                continue;
+            }
 
             ret[i] = new PROJ_CRS_INFO;
             ret[i]->auth_name = pj_strdup(info.authName.c_str());
@@ -2809,6 +2861,8 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                 info.projectionMethodName.empty()
                     ? nullptr
                     : pj_strdup(info.projectionMethodName.c_str());
+            ret[i]->celestial_body_name =
+                pj_strdup(info.celestialBodyName.c_str());
             i++;
         }
         ret[i] = nullptr;
@@ -2842,6 +2896,7 @@ void proj_crs_info_list_destroy(PROJ_CRS_INFO **list) {
             free(list[i]->name);
             free(list[i]->area_name);
             free(list[i]->projection_method_name);
+            free(list[i]->celestial_body_name);
             delete list[i];
         }
         delete[] list;
