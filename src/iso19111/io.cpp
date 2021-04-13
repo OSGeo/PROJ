@@ -6424,6 +6424,46 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             }
             throw;
         }
+    } else if (tokens.size() == 3) {
+        // ESRI:103668+EPSG:5703 ... compound
+        auto tokensCenter = split(tokens[1], '+');
+        if (tokensCenter.size() == 2) {
+            if (!dbContext) {
+                throw ParsingException("no database context specified");
+            }
+            DatabaseContextNNPtr dbContextNNPtr(NN_NO_CHECK(dbContext));
+
+            const auto &authName1 = tokens[0];
+            const auto &code1 = tokensCenter[0];
+            const auto &authName2 = tokensCenter[1];
+            const auto &code2 = tokens[2];
+
+            crs::CRSPtr crs1 = nullptr;
+            crs::CRSPtr crs2 = nullptr;
+
+            const auto authorities = dbContextNNPtr->getAuthorities();
+            for (const auto &authCandidate : authorities) {
+                if (ci_equal(authCandidate, authName1)) {
+                    auto factory =
+                        AuthorityFactory::create(dbContextNNPtr, authCandidate);
+                    crs1 =
+                        factory->createCoordinateReferenceSystem(code1, false);
+                }
+                if (ci_equal(authCandidate, authName2)) {
+                    auto factory =
+                        AuthorityFactory::create(dbContextNNPtr, authCandidate);
+                    crs2 =
+                        factory->createCoordinateReferenceSystem(code2, false);
+                }
+            }
+            if (crs1 && crs2) {
+                return CompoundCRS::createLax(
+                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                            crs1->nameStr() + " + " +
+                                                crs2->nameStr()),
+                    {NN_NO_CHECK(crs1), NN_NO_CHECK(crs2)}, dbContext);
+            }
+        }
     }
 
     if (starts_with(text, "urn:ogc:def:crs,")) {
