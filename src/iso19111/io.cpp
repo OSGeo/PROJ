@@ -6438,31 +6438,15 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             const auto &authName2 = tokensCenter[1];
             const auto &code2 = tokens[2];
 
-            crs::CRSPtr crs1 = nullptr;
-            crs::CRSPtr crs2 = nullptr;
-
-            const auto authorities = dbContextNNPtr->getAuthorities();
-            for (const auto &authCandidate : authorities) {
-                if (ci_equal(authCandidate, authName1)) {
-                    auto factory =
-                        AuthorityFactory::create(dbContextNNPtr, authCandidate);
-                    crs1 =
-                        factory->createCoordinateReferenceSystem(code1, false);
-                }
-                if (ci_equal(authCandidate, authName2)) {
-                    auto factory =
-                        AuthorityFactory::create(dbContextNNPtr, authCandidate);
-                    crs2 =
-                        factory->createCoordinateReferenceSystem(code2, false);
-                }
-            }
-            if (crs1 && crs2) {
-                return CompoundCRS::createLax(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                            crs1->nameStr() + " + " +
-                                                crs2->nameStr()),
-                    {NN_NO_CHECK(crs1), NN_NO_CHECK(crs2)}, dbContext);
-            }
+            auto factory1 = AuthorityFactory::create(dbContextNNPtr, authName1);
+            auto crs1 = factory1->createCoordinateReferenceSystem(code1, false);
+            auto factory2 = AuthorityFactory::create(dbContextNNPtr, authName2);
+            auto crs2 = factory2->createCoordinateReferenceSystem(code2, false);
+            return CompoundCRS::createLax(
+                util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                        crs1->nameStr() + " + " +
+                                            crs2->nameStr()),
+                {crs1, crs2}, dbContext);
         }
     }
 
