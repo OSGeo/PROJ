@@ -6827,6 +6827,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li> OGC URN combining references for compound coordinate reference systems
  *      e.g. "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717"
  *      We also accept a custom abbreviated syntax EPSG:2393+5717
+ *      or ESRI:103668+EPSG:5703
  * </li>
  * <li> OGC URN combining references for references for projected or derived
  * CRSs
