@@ -6424,6 +6424,30 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             }
             throw;
         }
+    } else if (tokens.size() == 3) {
+        // ESRI:103668+EPSG:5703 ... compound
+        auto tokensCenter = split(tokens[1], '+');
+        if (tokensCenter.size() == 2) {
+            if (!dbContext) {
+                throw ParsingException("no database context specified");
+            }
+            DatabaseContextNNPtr dbContextNNPtr(NN_NO_CHECK(dbContext));
+
+            const auto &authName1 = tokens[0];
+            const auto &code1 = tokensCenter[0];
+            const auto &authName2 = tokensCenter[1];
+            const auto &code2 = tokens[2];
+
+            auto factory1 = AuthorityFactory::create(dbContextNNPtr, authName1);
+            auto crs1 = factory1->createCoordinateReferenceSystem(code1, false);
+            auto factory2 = AuthorityFactory::create(dbContextNNPtr, authName2);
+            auto crs2 = factory2->createCoordinateReferenceSystem(code2, false);
+            return CompoundCRS::createLax(
+                util::PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                        crs1->nameStr() + " + " +
+                                            crs2->nameStr()),
+                {crs1, crs2}, dbContext);
+        }
     }
 
     if (starts_with(text, "urn:ogc:def:crs,")) {
@@ -6803,6 +6827,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <li> OGC URN combining references for compound coordinate reference systems
  *      e.g. "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717"
  *      We also accept a custom abbreviated syntax EPSG:2393+5717
+ *      or ESRI:103668+EPSG:5703
  * </li>
  * <li> OGC URN combining references for references for projected or derived
  * CRSs

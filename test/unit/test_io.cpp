@@ -10307,6 +10307,8 @@ TEST(io, createFromUserInput) {
     EXPECT_THROW(createFromUserInput("+proj=unhandled +type=crs", nullptr),
                  ParsingException);
     EXPECT_THROW(createFromUserInput("EPSG:4326", nullptr), ParsingException);
+    EXPECT_THROW(createFromUserInput("ESRI:103668+EPSG:5703", nullptr),
+                 ParsingException);
     EXPECT_THROW(
         createFromUserInput("urn:ogc:def:unhandled:EPSG::4326", dbContext),
         ParsingException);
@@ -10386,6 +10388,26 @@ TEST(io, createFromUserInput) {
         EXPECT_EQ(crs->nameStr(),
                   "KKJ / Finland Uniform Coordinate System + N60 height");
     }
+
+    {
+        auto obj = createFromUserInput("EPSG:2393+EPSG:5717", dbContext);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(),
+                  "KKJ / Finland Uniform Coordinate System + N60 height");
+    }
+    {
+        auto obj = createFromUserInput("ESRI:103668+EPSG:5703", dbContext);
+        auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(),
+                  "NAD_1983_HARN_Adj_MN_Ramsey_Meters + NAVD88 height");
+    }
+    EXPECT_THROW(createFromUserInput("ESRI:42+EPSG:5703", dbContext),
+                 NoSuchAuthorityCodeException);
+    EXPECT_THROW(createFromUserInput("ESRI:103668+EPSG:999999", dbContext),
+                 NoSuchAuthorityCodeException);
+
     {
         auto obj = createFromUserInput(
             "urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717", dbContext);
