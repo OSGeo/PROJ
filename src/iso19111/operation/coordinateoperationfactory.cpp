@@ -377,7 +377,7 @@ CoordinateOperationContext::getGridAvailabilityUse() const {
  * The current implementation is limited to researching one intermediate
  * step.
  *
- * By default, with the IF_NO_DIRECT_TRANSFORMATION stratgey, all potential
+ * By default, with the IF_NO_DIRECT_TRANSFORMATION strategy, all potential
  * C candidates will be used if there is no direct transformation.
  */
 void CoordinateOperationContext::setAllowUseIntermediateCRS(

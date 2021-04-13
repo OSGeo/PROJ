@@ -50,7 +50,7 @@ Background
 
 PROJ has traditionally been written in C89. Until recently, no formal
 requirements of e.g. build systems has been defined and formally accepted by
-the project. :ref:RFC2 <rfc2>` formally introduces dependencies on C++11 and
+the project. :ref:`RFC2 <rfc2>` formally introduces dependencies on C++11 and
 SQLite 3.7.
 
 In this RFC a rolling update of version or standard requirements is described.
@@ -94,7 +94,7 @@ PROJ uses C89 and C++11. For C, that means that the used standard is three
 iterations behind the most recent standard. C++ is two iterations behind.
 Following the rules in this RFC the required C standard used in PROJ is at
 allowed to be two iterations behind the most recent standard. That means that a
-change to C99 is possible, as long as the PROJ PSC aknowledges such a change.
+change to C99 is possible, as long as the PROJ PSC acknowledges such a change.
 
 When a new standard for either C or C++ is released PROJ should consider
 changing its requirement to the next standard in the line. For C++ that means a

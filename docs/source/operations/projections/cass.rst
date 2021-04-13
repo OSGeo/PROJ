@@ -68,7 +68,7 @@ Options
 .. option:: +hyperbolic
 
     Use modified form of the standard Cassini-Soldner projection known as the Hyperbolic Cassini-Soldner.
-    This is used in particular for the "Vanua Levu Grid" of the the island of Vanua Levu, Fiji (EPSG:3139)
+    This is used in particular for the "Vanua Levu Grid" of the island of Vanua Levu, Fiji (EPSG:3139)
 
 
 Mathematical definition

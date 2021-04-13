@@ -38,7 +38,7 @@ method in the forward direction, and direct read in the reverse direction.
 Example
 -------------------------------------------------------------------------------
 
-NTF to RGF93 transformation using gr3df97a.tif grid
+NTF to RGF93 transformation using :file:`gr3df97a.tif` grid
 
 ::
 
@@ -83,7 +83,7 @@ Optional
 
     If output_crs is specified, the grid is referenced in the geographic CRS corresponding
     to the output geocentric CRS. This is for example the case for the French
-    gr3df97a.tif grid converting from NTF to RGF93, but referenced against RGF93.
+    :file:`gr3df97a.tif` grid converting from NTF to RGF93, but referenced against RGF93.
     Thus in the forward direction (NTF->RGF93), an iterative method is used to find
     the appropriate shift.
 

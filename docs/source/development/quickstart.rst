@@ -12,8 +12,8 @@ be seen at the end of the section.
 See the following sections for more in-depth descriptions of different parts of
 the PROJ API or consult the :doc:`API reference <reference/index>` for specifics.
 
-Before the PROJ API can be used it is necessary to include the ``proj.h`` header
-file. Here ``stdio.h`` is also included so we can print some text to the screen:
+Before the PROJ API can be used it is necessary to include the :file:`proj.h` header
+file. Here :file:`stdio.h` is also included so we can print some text to the screen:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
@@ -115,7 +115,7 @@ projected CRS.
 
 PROJ uses its own data structures for handling coordinates. Here we use a
 :c:type:`PJ_COORD` which is easily assigned with the function :c:func:`proj_coord`.
-When using +proj=longlat, the order of coordinates is longitude, latitude,
+When using ``+proj=longlat``, the order of coordinates is longitude, latitude,
 and values are expressed in degrees. If you used instead a EPSG geographic CRS,
 like EPSG:4326 (WGS84), it would be latitude, longitude.
 

@@ -139,7 +139,7 @@ Build under scan-build:
 If CSA finds errors, they will be emitted during the build. And in which case,
 at the end of the build process, scan-build will emit a warning message
 indicating errors have been found and how to display the error report. This
-is with someling like
+is with something like
 
 ::
 

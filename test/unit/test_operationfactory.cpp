@@ -3037,7 +3037,7 @@ TEST(operation, transformation_VERTCON_to_PROJ_string) {
         PropertyMap(), VerticalReferenceFrame::create(PropertyMap()),
         VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
 
-    // Use of this type of transformation is a bit of non-sense here
+    // Use of this type of transformation is a bit of nonsense here
     // since it should normally be used with NGVD29 and NAVD88 for VerticalCRS,
     // and NAD27/NAD83 as horizontal CRS...
     auto vtransformation = Transformation::createVERTCON(
@@ -3817,7 +3817,7 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
         PropertyMap(), VerticalReferenceFrame::create(PropertyMap()),
         VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
 
-    // Use of this type of transformation is a bit of non-sense here
+    // Use of this type of transformation is a bit of nonsense here
     // since it should normally be used with NGVD29 and NAVD88 for VerticalCRS,
     // and NAD27/NAD83 as horizontal CRS...
     auto vtransformation = Transformation::createVERTCON(

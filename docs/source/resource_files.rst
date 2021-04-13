@@ -10,8 +10,8 @@ contain preconfigured proj-strings for various coordinate reference systems
 and the `defaults` file contains default values for parameters of select
 projections.
 
-In addition to the bundled init-files the PROJ project also distributes a number
-of packages containing transformation grids and additional init-files not included
+In addition to the bundled init files the PROJ project also distributes a number
+of packages containing transformation grids and additional init files not included
 in the main PROJ package.
 
 .. _resource_file_paths:
@@ -20,7 +20,7 @@ Where are PROJ resource files looked for ?
 -------------------------------------------------------------------------------
 
 PROJ will attempt to locate its resource files - database, transformation grids
-or init-files - from several directories.
+or init files - from several directories.
 The following paths are checked in order:
 
 - For resource files that have an explicit relative or absolute path,
@@ -39,29 +39,30 @@ The following paths are checked in order:
 
   The PROJ user writable directory, which is :
 
-    * on Windows, ${LOCALAPPDATA}/proj
-    * on MacOSX, ${HOME}/Library/Application Support/proj
-    * on other platforms (Linux), ${XDG_DATA_HOME}/proj if :envvar:`XDG_DATA_HOME`
-      is defined. Else ${HOME}/.local/share/proj
+    * on Windows, ``${LOCALAPPDATA}/proj``
+    * on macOS, ``${HOME}/Library/Application Support/proj``
+    * on other platforms (Linux), ``${XDG_DATA_HOME}/proj`` if
+      :envvar:`XDG_DATA_HOME` is defined. Else ``${HOME}/.local/share/proj``
 
 - Path(s) set with by the environment variable :envvar:`PROJ_LIB`.
-  On Linux/MacOSX/Unix, use ``:`` to separate paths. On Windows, ``;``
+  On Linux/macOS/Unix, use ``:`` to separate paths. On Windows, ``;``
 
 - .. versionadded:: 7.0
 
-  The *../share/proj/* and its contents are found automatically
+  The :file:`../share/proj/` and its contents are found automatically
   at run-time if the installation respects the build structure. That is, the
-  binaries and proj.dll/libproj.so are installed under *../bin/* or *../lib/*,
-  and resource files are in *../share/proj/*.
+  binaries and :file:`proj.dll`/:file:`libproj.so` are installed under
+  :file:`../bin/` or :file:`../lib/`, and resource files are in
+  :file:`../share/proj/`.
 
 - A path built into PROJ as its resource installation directory (whose value is
-  $(pkgdatadir) for builds using the Makefile build system or
-  ${CMAKE_INSTALL_PREFIX}/${DATADIR} for CMake builds). Note, however,
+  ``$(pkgdatadir)`` for builds using the Makefile build system or
+  ``${CMAKE_INSTALL_PREFIX}/${DATADIR}`` for CMake builds). Note, however,
   that since this is a hard-wired path setting, it only works if the whole
   PROJ installation is not moved somewhere else.
 
-  .. note:: if PROJ is built with the PROJ_LIB_ENV_VAR_TRIED_LAST CMake option /
-            --enable-proj-lib-env-var-tried-last configure switch, then this
+  .. note:: if PROJ is built with the ``PROJ_LIB_ENV_VAR_TRIED_LAST`` CMake option /
+            ``--enable-proj-lib-env-var-tried-last`` configure switch, then this
             hard-wired path will be tried before looking at the environment
             variable :envvar:`PROJ_LIB`.
 
@@ -74,7 +75,7 @@ attempt to use remote grids stored on CDN (Content Delivery Network) storage.
 
 .. _proj-db:
 
-proj.db
+Core database :file:`proj.db`
 -------------------------------------------------------------------------------
 
 A proj installation includes a SQLite database of transformation information
@@ -83,13 +84,13 @@ print an error if the database can't be found.
 
 .. _proj-ini:
 
-proj.ini
+Configuration :file:`proj.ini`
 -------------------------------------------------------------------------------
 
 .. versionadded:: 7.0
 
-proj.ini is a text configuration file, mostly dedicated at setting up network
-related parameters.
+:file:`proj.ini` is a text configuration file, mostly dedicated at setting up
+network related parameters.
 
 Its default content is:
 
@@ -152,9 +153,9 @@ proj-datumgrid
 .. note::
 
     The packages described below can be used with PROJ 7 and later but are
-    primarily meant to be used with PROJ 6 and earlier versions. The proj-datumgrid
-    series of packages are not maintained anymore and are only kept available for
-    legacy purposes.
+    primarily meant to be used with PROJ 6 and earlier versions.
+    The ``proj-datumgrid`` series of packages are not maintained anymore and
+    are only kept available for legacy purposes.
 
 For a functioning build of PROJ prior to version 7, installation of the
 `proj-datumgrid <https://github.com/OSGeo/proj-datumgrid>`_ is needed. If you
@@ -170,8 +171,8 @@ legacy reasons. Without this package, the test suite fails miserably.
 Regional packages
 +++++++++++++++++
 
-In addition to the default *proj-datumgrid* package regional packages are also
-distributed. These include grids and init-files that are valid within the given
+In addition to the default ``proj-datumgrid`` package regional packages are also
+distributed. These include grids and init files that are valid within the given
 region. The packages are divided into geographical regions in order to keep the
 needed disk space by PROJ at a minimum. Some users may have a use for resource
 files covering several regions in which case they can download more than one.
@@ -200,8 +201,8 @@ includes grids that have global extent, e.g. the global geoid model EGM08.
 -latest packages
 ++++++++++++++++
 
-All packages above come in different versions, e.g proj-datumgrid-1.8 or
-proj-datumgrid-europe-1.4. The `-latest` packages are symbolic links to the
+All packages above come in different versions, e.g., ``proj-datumgrid-1.8`` or
+``proj-datumgrid-europe-1.4``. The ``-latest`` packages are symbolic links to the
 latest version of a given package. That means that the link
 https://download.osgeo.org/proj/proj-datumgrid-north-america-latest.zip is
 equivalent to https://download.osgeo.org/proj/proj-datumgrid-north-america-1.2.zip
@@ -269,7 +270,7 @@ Spain
 HTDP
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This section describes the use of the `crs2crs2grid.py` script and the HTDP
+This section describes the use of the :file:`crs2crs2grid.py` script and the HTDP
 (Horizontal Time Dependent Positioning) grid shift modelling program from
 NGS/NOAA to produce PROJ compatible grid shift files for fine grade
 conversions between various NAD83 epochs and WGS84.  Traditionally PROJ has
@@ -286,23 +287,24 @@ Getting and building HTDP
 The HTDP modelling program is written in FORTRAN.  The source and documentation
 can be found on the HTDP page at http://www.ngs.noaa.gov/TOOLS/Htdp/Htdp.shtml
 
-On linux systems it will be necessary to install `gfortran` or some FORTRAN
-compiler.  For ubuntu something like the following should work.
+On Linux systems it will be necessary to install GFortran or some Fortran
+compiler.  For Ubuntu something like the following should work.
 
 ::
 
     apt-get install gfortran
 
-To compile the program do something like the following to produce the binary "htdp" from the source code.
+To compile the program do something like the following to produce the binary
+:program:`htdp` from the source code.
 
 ::
 
     gfortran htdp.for -o htdp
 
-Getting crs2crs2grid.py
+Getting :file:`crs2crs2grid.py`
 ................................................................................
 
-The `crs2crs2grid.py` script can be found at
+The :file:`crs2crs2grid.py` script can be found at
 https://github.com/OSGeo/gdal/tree/master/gdal/swig/python/samples/crs2crs2grid.py
 
 The script depends on having the GDAL Python bindings operational; if they are not you
@@ -336,16 +338,16 @@ Usage
 
     crs2crs2grid.py 29 2002.0 8 2002.0 -o nad83_2002.ct2
 
-The goal of `crs2crs2grid.py` is to produce a grid shift file for a designated
-region.  The region is defined using the `-griddef` switch.  When missing a
+The goal of :file:`crs2crs2grid.py` is to produce a grid shift file for a designated
+region.  The region is defined using the ``-griddef`` switch.  When missing a
 continental US region is used.  The script creates a set of sample points for
-the grid definition, runs the "htdp" program against it and then parses the
+the grid definition, runs :program:`htdp` against it and then parses the
 resulting points and computes a point by point shift to encode into the final
-grid shift file.  By default it is assumed the `htdp` program will be in the
+grid shift file.  By default it is assumed that :program:`htdp` is in the
 executable path.  If not, please provide the path to the executable using the
-`-htdp` switch.
+``-htdp`` switch.
 
-The `htdp` program supports transformations between many CRSes and for each (or
+The :program:`htdp` program supports transformations between many CRSes and for each (or
 most?) of them you need to provide a date at which the CRS is fixed.  The full
 set of CRS Ids available in the HTDP program are:
 
@@ -406,13 +408,13 @@ Init files are used for preconfiguring proj-strings for often used
 transformations, such as those found in the EPSG database. Most init files contain
 transformations from a given coordinate reference system to WGS84. This makes
 it easy to transform between any two coordinate reference systems with
-``cs2cs``. Init files can however contain any proj-string and don't necessarily
+:program:`cs2cs`. Init files can however contain any proj-string and don't necessarily
 have to follow the *cs2cs* paradigm where WGS84 is used as a pivot datum. The
 ITRF init file is a good example of that.
 
 A number of init files come pre-bundled with PROJ but it is also possible to
 add your own custom init files. PROJ looks for the init files in the directory
-listed in the ``PROJ_LIB`` environment variable.
+listed in the :envvar:`PROJ_LIB` environment variable.
 
 The format of init files is an identifier in angled brackets and a
 proj-string:

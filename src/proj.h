@@ -1055,7 +1055,7 @@ typedef struct
  * proj_create_from_database() and other functions in that section
  * will have generally minimal interaction with the functions declared in the
  * upper section of this header file (calling those functions on those objects
- * will either return an error or default/non-sensical values). The exception is
+ * will either return an error or default/nonsensical values). The exception is
  * for ISO19111 objects of type CoordinateOperation that can be exported as a
  * valid PROJ pipeline. In this case, the PJ objects will work for example with
  * proj_trans_generic().

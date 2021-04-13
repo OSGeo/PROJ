@@ -350,7 +350,7 @@ Updates
 
   * Follow PDAL's CMake RPATH strategy (`#2009 <https://github.com/OSGeo/PROJ/issues/2009>`_)
 
-  * WKT import/export: add support for WKT1_ESRI VERTCS synta (`#2024 <https://github.com/OSGeo/PROJ/issues/2024>`_)
+  * WKT import/export: add support for WKT1_ESRI VERTCS syntax (`#2024 <https://github.com/OSGeo/PROJ/issues/2024>`_)
 
   * :program:`projinfo`: add a ``--hide-ballpark`` option (`#2127 <https://github.com/OSGeo/PROJ/issues/2127>`_)
 

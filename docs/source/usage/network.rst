@@ -34,7 +34,7 @@ the user authorizes network access.
 Authorizing network access can be done in multiple ways:
 
   - enabling / uncommenting the ``network = on`` line of :ref:`proj-ini`
-  - definiting the :envvar:`PROJ_NETWORK` environment variable to ON
+  - defining the :envvar:`PROJ_NETWORK` environment variable to ON
   - or using the :cpp:func:`proj_context_set_enable_network` with a
     ``enabled`` = TRUE value.
 

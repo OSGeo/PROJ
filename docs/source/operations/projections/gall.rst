@@ -43,12 +43,12 @@ The Gall projection is neither conformal nor equal-area, but has a blend of vari
 Unlike the Mercator, the Gall shows the poles as lines running across the top and bottom of the map.
 
 
-Example using Gall Stereographical  ::
+Example using Gall Stereographic  ::
 
     $ echo 9 51 | proj +proj=gall +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +units=m
     708432.90   5193386.36
 
-Example using Gall Stereographical (Central meridian 90°W) ::
+Example using Gall Stereographic (Central meridian 90°W) ::
 
     $ echo 9 51 | proj +proj=gall +lon_0=90w +x_0=0 +y_0=0 +ellps=WGS84 +units=m
     7792761.91  5193386.36
@@ -72,7 +72,7 @@ Parameters
 Mathematical definition
 #######################
 
-The formulas describing the Gall Stereographical are all taken from :cite:`Snyder1993`.
+The formulas describing the Gall Stereographic are all taken from :cite:`Snyder1993`.
 
 Spherical form
 **************

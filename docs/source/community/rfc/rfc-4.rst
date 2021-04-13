@@ -89,7 +89,7 @@ can build with rather ancient libcurl for similar functionality, we can aim for
 libcurl >= 7.29.0 (as being available in RHEL 7).
 
 An alternate pluggable network interface can also be set by the user in case
-suppot for libcurl was not built in, or if for the desired context of use, the
+support for libcurl was not built in, or if for the desired context of use, the
 user wishes to provide the network implementation (a typical use case could be
 QGIS that would use its QT-based networking facilities to solve issues with
 SSL, proxy, authentication, etc.)
@@ -223,7 +223,7 @@ to limit the number of HTTP GET requests and minimize latency caused by network
 access. This is very similar to the behavior of the GDAL
 `/vsicurl/ <https://gdal.org/user/virtual_file_systems.html#vsicurl-http-https-ftp-files-random-access>`_
 I/O layer. The plan is to mostly copy GDAL's vsicurl implementation inside PROJ, with
-needed adjustmeents and proper namespacing of it.
+needed adjustments and proper namespacing of it.
 
 A retry strategy (typically a delay with an exponential back-off and some random
 jitter) will be added to account for intermittent network or server-side failure.
@@ -403,7 +403,7 @@ and ${LOCALAPPDATA} on Windows builds. Exact details to be sorted out, but
 https://github.com/ActiveState/appdirs/blob/a54ea98feed0a7593475b94de3a359e9e1fe8fdb/appdirs.py#L45-L97
 can be a good reference.
 
-As this database might be accesse by several threads or processes at the same
+As this database might be accessed by several threads or processes at the same
 time, the code accessing to it will carefully honour SQLite3 errors regarding
 to locks, to do appropriate retries if another thread/process is currently
 locking the database. Accesses requiring a modification of the database will
@@ -602,7 +602,7 @@ Weak points:
 * Multi-samples variables are located in different sections of the files
   (correspond to TIFF PlanarConfiguration = Separate)
 
-* No natural way of having hiearchical / multigrids. They must be encoded as
+* No natural way of having hierarchical / multigrids. They must be encoded as
   separate variables
 
 * georeferencing in netCDF is somewhat less standardized than TIFF/GeoTIFF.
@@ -704,7 +704,7 @@ document.
 Tooling
 +++++++
 
-A script will be deveoped to accept a list of individual grids to combine
+A script will be developed to accept a list of individual grids to combine
 together into a single file.
 
 A ntv2_to_gtiff.py convenience script will be created to convert NTv2 grids,
