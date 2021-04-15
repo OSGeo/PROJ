@@ -6389,6 +6389,12 @@ operation +proj=utm   +a=6400000 +zone=30
 # utm not possible on sphere
 expect failure errno invalid_op_illegal_arg_value
 
+-------------------------------------------------------------------------------
+# Test that we error out when the UTM zone is not an integer (#2671)
+-------------------------------------------------------------------------------
+operation   +proj=utm +zone=11ooops +ellps=WGS84
+expect      failure   errno invalid_op_illegal_arg_value
+
 ===============================================================================
 # van der Grinten (I)
 # 	Misc Sph
