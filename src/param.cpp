@@ -201,6 +201,14 @@ PROJVALUE pj_param (PJ_CONTEXT *ctx, paralist *pl, const char *opt) {
     switch (type) {
     case 'i':    /* integer input */
         value.i = atoi(opt);
+        for( const char* ptr = opt; *ptr != '\0'; ++ptr )
+        {
+            if( !(*ptr >= '0' && *ptr <= '9') )
+            {
+                proj_context_errno_set (ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+                value.i = 0;
+            }
+        }
         break;
     case 'd':    /* simple real input */
         value.f = pj_atof(opt);
