@@ -1508,6 +1508,16 @@ TEST(factory, AuthorityFactory_getAuthorityCodes) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_getCelestialBodyCodes) {
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "PROJ");
+    auto set = factory->getCelestialBodyCodes();
+    ASSERT_TRUE(!set.empty());
+    EXPECT_EQ(set.size(), 1U);
+    EXPECT_TRUE(set.find("EARTH") != set.end());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, AuthorityFactory_getDescriptionText) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->getDescriptionText("-1"),

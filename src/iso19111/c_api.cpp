@@ -2674,6 +2674,40 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the list of celestial body codes used in the database.
+ *
+ * The returned list is NULL terminated and must be freed with
+ * proj_string_list_destroy().
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param auth_name Authority name (must not be NULL)
+ *
+ * @return a NULL terminated list of NULL-terminated strings that must be
+ * freed with proj_string_list_destroy(), or NULL in case of error.
+ */
+PROJ_STRING_LIST
+proj_get_celestial_body_codes_from_database(PJ_CONTEXT *ctx,
+                                            const char *auth_name) {
+    SANITIZE_CTX(ctx);
+    if (!auth_name) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    try {
+        auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
+        auto ret = to_string_list(factory->getCelestialBodyCodes());
+        ctx->safeAutoCloseDbIfNeeded();
+        return ret;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    ctx->safeAutoCloseDbIfNeeded();
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 /** Free a list of NULL terminated strings. */
 void proj_string_list_destroy(PROJ_STRING_LIST list) {
     if (list) {

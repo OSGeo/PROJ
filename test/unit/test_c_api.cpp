@@ -1398,6 +1398,17 @@ TEST_F(CApi, proj_get_codes_from_database) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_get_celestial_body_codes_from_database) {
+    auto list = proj_get_celestial_body_codes_from_database(m_ctxt, "PROJ");
+    ListFreer feer(list);
+    ASSERT_NE(list, nullptr);
+    ASSERT_TRUE(list[0] != nullptr);
+    EXPECT_EQ(list[0], std::string("EARTH"));
+    EXPECT_EQ(list[1], nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, conversion) {
     auto crs = proj_create_from_database(m_ctxt, "EPSG", "32631",
                                          PJ_CATEGORY_CRS, false, nullptr);

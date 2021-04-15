@@ -7293,6 +7293,24 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns the set of celestial body codes of the given object type.
+ *
+ * @return the set of celestial body codes
+ * @throw FactoryException
+ */
+std::set<std::string> AuthorityFactory::getCelestialBodyCodes() const {
+    std::string sql = "SELECT code FROM celestial_body "
+                      "WHERE auth_name = ?";
+    auto res = d->run(sql, {d->authority()});
+    std::set<std::string> set;
+    for (const auto &row : res) {
+        set.insert(row[0]);
+    }
+    return set;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Gets a description of the object corresponding to a code.
  *
  * \note In case of several objects of different types with the same code,

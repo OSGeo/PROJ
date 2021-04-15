@@ -1057,6 +1057,8 @@ class PROJ_GCC_DLL AuthorityFactory {
     getAuthorityCodes(const ObjectType &type,
                       bool allowDeprecated = true) const;
 
+    PROJ_DLL std::set<std::string> getCelestialBodyCodes() const;
+
     PROJ_DLL std::string getDescriptionText(const std::string &code) const;
 
     // non-standard

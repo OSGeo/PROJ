@@ -1183,6 +1183,9 @@ PROJ_STRING_LIST PROJ_DLL proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                              PJ_TYPE type,
                                              int allow_deprecated);
 
+PROJ_STRING_LIST PROJ_DLL proj_get_celestial_body_codes_from_database(
+    PJ_CONTEXT *ctx, const char *auth_name);
+
 PROJ_CRS_LIST_PARAMETERS PROJ_DLL *proj_get_crs_list_parameters_create(void);
 
 void PROJ_DLL proj_get_crs_list_parameters_destroy(

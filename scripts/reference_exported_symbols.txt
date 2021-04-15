@@ -346,6 +346,7 @@ osgeo::proj::io::AuthorityFactory::CRSInfo::CRSInfo()
 osgeo::proj::io::AuthorityFactory::databaseContext() const
 osgeo::proj::io::AuthorityFactory::getAuthorityCodes(osgeo::proj::io::AuthorityFactory::ObjectType const&, bool) const
 osgeo::proj::io::AuthorityFactory::getAuthority() const
+osgeo::proj::io::AuthorityFactory::getCelestialBodyCodes() const
 osgeo::proj::io::AuthorityFactory::getCRSInfoList() const
 osgeo::proj::io::AuthorityFactory::getDescriptionText(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getOfficialNameFromAlias(std::string const&, std::string const&, std::string const&, bool, std::string&, std::string&, std::string&) const
@@ -960,6 +961,7 @@ proj_geod
 proj_get_area_of_use
 proj_get_authorities_from_database
 proj_get_celestial_body_name
+proj_get_celestial_body_codes_from_database
 proj_get_codes_from_database
 proj_get_crs_info_list_from_database
 proj_get_crs_list_parameters_create
