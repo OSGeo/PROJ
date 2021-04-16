@@ -2684,6 +2684,7 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
  *
  * @return a NULL terminated list of NULL-terminated strings that must be
  * freed with proj_string_list_destroy(), or NULL in case of error.
+ * @since 8.1
  */
 PROJ_STRING_LIST
 proj_get_celestial_body_codes_from_database(PJ_CONTEXT *ctx,
