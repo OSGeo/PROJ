@@ -1398,17 +1398,6 @@ TEST_F(CApi, proj_get_codes_from_database) {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_get_celestial_body_codes_from_database) {
-    auto list = proj_get_celestial_body_codes_from_database(m_ctxt, "PROJ");
-    ListFreer feer(list);
-    ASSERT_NE(list, nullptr);
-    ASSERT_TRUE(list[0] != nullptr);
-    EXPECT_EQ(list[0], std::string("EARTH"));
-    EXPECT_EQ(list[1], nullptr);
-}
-
-// ---------------------------------------------------------------------------
-
 TEST_F(CApi, conversion) {
     auto crs = proj_create_from_database(m_ctxt, "EPSG", "32631",
                                          PJ_CATEGORY_CRS, false, nullptr);
@@ -3905,6 +3894,37 @@ TEST_F(CApi, proj_get_units_from_database) {
         }
         EXPECT_TRUE(found9001);
         proj_unit_list_destroy(list);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_get_celestial_body_list_from_database) {
+    { proj_celestial_body_list_destroy(nullptr); }
+
+    {
+        auto list = proj_get_celestial_body_list_from_database(nullptr, nullptr, 0);
+        ASSERT_NE(list, nullptr);
+        ASSERT_NE(list[0], nullptr);
+        ASSERT_NE(list[0]->auth_name, nullptr);
+        ASSERT_NE(list[0]->name, nullptr);
+        proj_celestial_body_list_destroy(list);
+    }
+    {
+        int result_count = 0;
+        auto list = proj_get_celestial_body_list_from_database(nullptr, "ESRI", &result_count);
+        ASSERT_NE(list, nullptr);
+        EXPECT_GT(result_count, 1);
+        EXPECT_EQ(list[result_count], nullptr);
+        bool foundGanymede = false;
+        for (int i = 0; i < result_count; i++) {
+            EXPECT_EQ(std::string(list[i]->auth_name), "ESRI");
+            if (std::string(list[i]->name) == "Ganymede") {
+                foundGanymede = true;
+            }
+        }
+        EXPECT_TRUE(foundGanymede);
+        proj_celestial_body_list_destroy(list);
     }
 }
 

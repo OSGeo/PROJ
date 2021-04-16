@@ -7293,24 +7293,6 @@ AuthorityFactory::getAuthorityCodes(const ObjectType &type,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Returns the set of celestial body codes of the given object type.
- *
- * @return the set of celestial body codes
- * @throw FactoryException
- */
-std::set<std::string> AuthorityFactory::getCelestialBodyCodes() const {
-    std::string sql = "SELECT code FROM celestial_body "
-                      "WHERE auth_name = ?";
-    auto res = d->run(sql, {d->authority()});
-    std::set<std::string> set;
-    for (const auto &row : res) {
-        set.insert(row[0]);
-    }
-    return set;
-}
-
-// ---------------------------------------------------------------------------
-
 /** \brief Gets a description of the object corresponding to a code.
  *
  * \note In case of several objects of different types with the same code,
@@ -7483,6 +7465,14 @@ AuthorityFactory::UnitInfo::UnitInfo()
       deprecated{} {}
 //! @endcond
 
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+AuthorityFactory::CelestialBodyInfo::CelestialBodyInfo() : authName{}, name{} {}
+//! @endcond
+
+
 // ---------------------------------------------------------------------------
 
 /** \brief Return the list of units.
@@ -7532,6 +7522,35 @@ std::list<AuthorityFactory::UnitInfo> AuthorityFactory::getUnitList() const {
     }
     return res;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the list of celestial bodies.
+ * @throw FactoryException
+ *
+ * @since 8.1
+ */
+std::list<AuthorityFactory::CelestialBodyInfo>
+AuthorityFactory::getCelestialBodyList() const {
+    std::string sql = "SELECT auth_name, name FROM celestial_body";
+    ListOfParams params;
+    if (d->hasAuthorityRestriction()) {
+        sql += " WHERE auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+    sql += " ORDER BY auth_name, name";
+
+    auto sqlRes = d->run(sql, params);
+    std::list<AuthorityFactory::CelestialBodyInfo> res;
+    for (const auto &row : sqlRes) {
+        AuthorityFactory::CelestialBodyInfo info;
+        info.authName = row[0];
+        info.name = row[1];
+        res.emplace_back(info);
+    }
+    return res;
+}
+
 
 // ---------------------------------------------------------------------------
 

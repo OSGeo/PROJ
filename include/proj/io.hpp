@@ -1057,8 +1057,6 @@ class PROJ_GCC_DLL AuthorityFactory {
     getAuthorityCodes(const ObjectType &type,
                       bool allowDeprecated = true) const;
 
-    PROJ_DLL std::set<std::string> getCelestialBodyCodes() const;
-
     PROJ_DLL std::string getDescriptionText(const std::string &code) const;
 
     // non-standard
@@ -1127,6 +1125,19 @@ class PROJ_GCC_DLL AuthorityFactory {
     };
 
     PROJ_DLL std::list<UnitInfo> getUnitList() const;
+
+    /** Celestial Body information */
+    struct CelestialBodyInfo {
+        /** Authority name */
+        std::string authName;
+        /** Name */
+        std::string name;
+        //! @cond Doxygen_Suppress
+        CelestialBodyInfo();
+        //! @endcond
+    };
+
+    PROJ_DLL std::list<CelestialBodyInfo> getCelestialBodyList() const;
 
     PROJ_DLL static AuthorityFactoryNNPtr
     create(const DatabaseContextNNPtr &context,

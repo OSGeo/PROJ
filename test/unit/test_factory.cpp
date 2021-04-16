@@ -1508,16 +1508,6 @@ TEST(factory, AuthorityFactory_getAuthorityCodes) {
 
 // ---------------------------------------------------------------------------
 
-TEST(factory, AuthorityFactory_getCelestialBodyCodes) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "PROJ");
-    auto set = factory->getCelestialBodyCodes();
-    ASSERT_TRUE(!set.empty());
-    EXPECT_EQ(set.size(), 1U);
-    EXPECT_TRUE(set.find("EARTH") != set.end());
-}
-
-// ---------------------------------------------------------------------------
-
 TEST(factory, AuthorityFactory_getDescriptionText) {
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     EXPECT_THROW(factory->getDescriptionText("-1"),
@@ -3445,6 +3435,39 @@ TEST(factory, getUnitList) {
         EXPECT_GT(list.size(), 1U);
         for (const auto &info : list) {
             EXPECT_EQ(info.authName, "EPSG");
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(factory, getCelestialBodyList) {
+    auto ctxt = DatabaseContext::create();
+    {
+        auto factory = AuthorityFactory::create(ctxt, std::string());
+        auto list = factory->getCelestialBodyList();
+        EXPECT_GT(list.size(), 1U);
+        bool foundPROJ = false;
+        bool foundESRI = false;
+        bool foundEarth = false;
+        for (const auto &info : list) {
+            foundESRI |= info.authName == "ESRI";
+            foundPROJ |= info.authName == "PROJ";
+            if (info.authName == "PROJ") {
+                EXPECT_EQ(info.name, "Earth");
+                foundEarth = true;
+            }
+        }
+        EXPECT_TRUE(foundESRI);
+        EXPECT_TRUE(foundPROJ);
+        EXPECT_TRUE(foundEarth);
+    }
+    {
+        auto factory = AuthorityFactory::create(ctxt, "ESRI");
+        auto list = factory->getCelestialBodyList();
+        EXPECT_GT(list.size(), 1U);
+        for (const auto &info : list) {
+            EXPECT_EQ(info.authName, "ESRI");
         }
     }
 }

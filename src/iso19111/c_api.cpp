@@ -2674,38 +2674,73 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return the list of celestial body codes used in the database.
+/** \brief Enumerate celestial bodies from the database.
  *
- * The returned list is NULL terminated and must be freed with
- * proj_string_list_destroy().
+ * The returned object is an array of PROJ_CELESTIAL_BODY_INFO* pointers, whose last
+ * entry is NULL. This array should be freed with proj_celestial_body_list_destroy()
  *
  * @param ctx PROJ context, or NULL for default context
- * @param auth_name Authority name (must not be NULL)
- *
- * @return a NULL terminated list of NULL-terminated strings that must be
- * freed with proj_string_list_destroy(), or NULL in case of error.
+ * @param auth_name Authority name, used to restrict the search.
+ * Or NULL for all authorities.
+ * @param out_result_count Output parameter pointing to an integer to receive
+ * the size of the result list. Might be NULL
+ * @return an array of PROJ_CELESTIAL_BODY_INFO* pointers to be freed with
+ * proj_celestial_body_list_destroy(), or NULL in case of error.
  * @since 8.1
  */
-PROJ_STRING_LIST
-proj_get_celestial_body_codes_from_database(PJ_CONTEXT *ctx,
-                                            const char *auth_name) {
+PROJ_CELESTIAL_BODY_INFO **proj_get_celestial_body_list_from_database(PJ_CONTEXT *ctx,
+                                              const char *auth_name,
+                                              int *out_result_count) {
     SANITIZE_CTX(ctx);
-    if (!auth_name) {
-        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
-        proj_log_error(ctx, __FUNCTION__, "missing required input");
-        return nullptr;
-    }
+    PROJ_CELESTIAL_BODY_INFO **ret = nullptr;
+    int i = 0;
     try {
-        auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
-        auto ret = to_string_list(factory->getCelestialBodyCodes());
+        auto factory = AuthorityFactory::create(getDBcontext(ctx),
+                                                auth_name ? auth_name : "");
+        auto list = factory->getCelestialBodyList();
+        ret = new PROJ_CELESTIAL_BODY_INFO *[list.size() + 1];
+        for (const auto &info : list) {
+            ret[i] = new PROJ_CELESTIAL_BODY_INFO;
+            ret[i]->auth_name = pj_strdup(info.authName.c_str());
+            ret[i]->name = pj_strdup(info.name.c_str());
+            i++;
+        }
+        ret[i] = nullptr;
+        if (out_result_count)
+            *out_result_count = i;
         ctx->safeAutoCloseDbIfNeeded();
         return ret;
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ret) {
+            ret[i + 1] = nullptr;
+            proj_celestial_body_list_destroy(ret);
+        }
+        if (out_result_count)
+            *out_result_count = 0;
     }
     ctx->safeAutoCloseDbIfNeeded();
     return nullptr;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Destroy the result returned by
+ * proj_get_celestial_body_list_from_database().
+ *
+ * @since 8.1
+ */
+void proj_celestial_body_list_destroy(PROJ_CELESTIAL_BODY_INFO **list) {
+    if (list) {
+        for (int i = 0; list[i] != nullptr; i++) {
+            free(list[i]->auth_name);
+            free(list[i]->name);
+            delete list[i];
+        }
+        delete[] list;
+    }
+}
+
 
 // ---------------------------------------------------------------------------
 
