@@ -6752,42 +6752,55 @@ AuthorityFactory::createBetweenGeodeticCRSWithDatumBasedIntermediates(
         return listTmp;
     }
 
-    // Find all geodetic CRS that share the same datum as the source CRS
-    SQLResultSet listSourceCRS;
-    {
-        const auto res = d->run("SELECT datum_auth_name, datum_code FROM "
-                                "geodetic_crs WHERE auth_name = ? AND code = ?",
-                                {sourceCRSAuthName, sourceCRSCode});
-        if (res.size() != 1) {
-            return listTmp;
-        }
-        const auto &row = res.front();
-        const auto sourceDatumAuthName = row[0];
-        const auto sourceDatumCode = row[1];
+    const auto GetListCRSWithSameDatum = [this](const crs::GeodeticCRS *crs,
+                                                const std::string &crsAuthName,
+                                                const std::string &crsCode) {
+        // Find all geodetic CRS that share the same datum as the CRS
+        SQLResultSet listCRS;
 
-        listSourceCRS =
+        const common::IdentifiedObject *obj = crs->datum().get();
+        if (obj == nullptr)
+            obj = crs->datumEnsemble().get();
+        assert(obj != nullptr);
+        const auto &ids = obj->identifiers();
+        std::string datumAuthName;
+        std::string datumCode;
+        if (!ids.empty()) {
+            const auto &id = ids.front();
+            datumAuthName = *(id->codeSpace());
+            datumCode = id->code();
+        } else {
+            const auto res =
+                d->run("SELECT datum_auth_name, datum_code FROM "
+                       "geodetic_crs WHERE auth_name = ? AND code = ?",
+                       {crsAuthName, crsCode});
+            if (res.size() != 1) {
+                return listCRS;
+            }
+            const auto &row = res.front();
+            datumAuthName = row[0];
+            datumCode = row[1];
+        }
+
+        listCRS =
             d->run("SELECT auth_name, code FROM geodetic_crs WHERE "
                    "datum_auth_name = ? AND datum_code = ? AND deprecated = 0",
-                   {sourceDatumAuthName, sourceDatumCode});
-    }
-
-    // Find all geodetic CRS that share the same datum as the target CRS
-    SQLResultSet listTargetCRS;
-    {
-        const auto res = d->run("SELECT datum_auth_name, datum_code FROM "
-                                "geodetic_crs WHERE auth_name = ? AND code = ?",
-                                {targetCRSAuthName, targetCRSCode});
-        if (res.size() != 1) {
-            return listTmp;
+                   {datumAuthName, datumCode});
+        if (listCRS.empty()) {
+            // Can happen if the CRS is deprecated
+            listCRS.emplace_back(SQLRow{crsAuthName, crsCode});
         }
-        const auto &row = res.front();
-        const auto targetDatumAuthName = row[0];
-        const auto targetDatumCode = row[1];
+        return listCRS;
+    };
 
-        listTargetCRS =
-            d->run("SELECT auth_name, code FROM geodetic_crs WHERE "
-                   "datum_auth_name = ? AND datum_code = ? AND deprecated = 0",
-                   {targetDatumAuthName, targetDatumCode});
+    const SQLResultSet listSourceCRS = GetListCRSWithSameDatum(
+        sourceGeodCRS, sourceCRSAuthName, sourceCRSCode);
+    const SQLResultSet listTargetCRS = GetListCRSWithSameDatum(
+        targetGeodCRS, targetCRSAuthName, targetCRSCode);
+    if (listSourceCRS.empty() || listTargetCRS.empty()) {
+        // would happen only if we had CRS objects in the database without a
+        // link to a datum.
+        return listTmp;
     }
 
     ListOfParams params;
