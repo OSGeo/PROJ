@@ -7465,6 +7465,14 @@ AuthorityFactory::UnitInfo::UnitInfo()
       deprecated{} {}
 //! @endcond
 
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+AuthorityFactory::CelestialBodyInfo::CelestialBodyInfo() : authName{}, name{} {}
+//! @endcond
+
+
 // ---------------------------------------------------------------------------
 
 /** \brief Return the list of units.
@@ -7514,6 +7522,35 @@ std::list<AuthorityFactory::UnitInfo> AuthorityFactory::getUnitList() const {
     }
     return res;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return the list of celestial bodies.
+ * @throw FactoryException
+ *
+ * @since 8.1
+ */
+std::list<AuthorityFactory::CelestialBodyInfo>
+AuthorityFactory::getCelestialBodyList() const {
+    std::string sql = "SELECT auth_name, name FROM celestial_body";
+    ListOfParams params;
+    if (d->hasAuthorityRestriction()) {
+        sql += " WHERE auth_name = ?";
+        params.emplace_back(d->authority());
+    }
+    sql += " ORDER BY auth_name, name";
+
+    auto sqlRes = d->run(sql, params);
+    std::list<AuthorityFactory::CelestialBodyInfo> res;
+    for (const auto &row : sqlRes) {
+        AuthorityFactory::CelestialBodyInfo info;
+        info.authName = row[0];
+        info.name = row[1];
+        res.emplace_back(info);
+    }
+    return res;
+}
+
 
 // ---------------------------------------------------------------------------
 

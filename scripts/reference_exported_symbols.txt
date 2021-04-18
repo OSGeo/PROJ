@@ -319,6 +319,7 @@ osgeo::proj::internal::split(std::string const&, std::string const&)
 osgeo::proj::internal::tolower(std::string const&)
 osgeo::proj::internal::toString(double, int)
 osgeo::proj::io::AuthorityFactory::~AuthorityFactory()
+osgeo::proj::io::AuthorityFactory::CelestialBodyInfo::CelestialBodyInfo()
 osgeo::proj::io::AuthorityFactory::createCompoundCRS(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createConversion(std::string const&) const
 osgeo::proj::io::AuthorityFactory::createCoordinateOperation(std::string const&, bool) const
@@ -346,6 +347,7 @@ osgeo::proj::io::AuthorityFactory::CRSInfo::CRSInfo()
 osgeo::proj::io::AuthorityFactory::databaseContext() const
 osgeo::proj::io::AuthorityFactory::getAuthorityCodes(osgeo::proj::io::AuthorityFactory::ObjectType const&, bool) const
 osgeo::proj::io::AuthorityFactory::getAuthority() const
+osgeo::proj::io::AuthorityFactory::getCelestialBodyList() const
 osgeo::proj::io::AuthorityFactory::getCRSInfoList() const
 osgeo::proj::io::AuthorityFactory::getDescriptionText(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getOfficialNameFromAlias(std::string const&, std::string const&, std::string const&, bool, std::string&, std::string&, std::string&) const
@@ -781,6 +783,7 @@ proj_as_projjson
 proj_as_proj_string
 proj_assign_context
 proj_as_wkt
+proj_celestial_body_list_destroy
 proj_cleanup
 proj_clone
 proj_concatoperation_get_step
@@ -959,6 +962,7 @@ proj_factors
 proj_geod
 proj_get_area_of_use
 proj_get_authorities_from_database
+proj_get_celestial_body_list_from_database
 proj_get_celestial_body_name
 proj_get_codes_from_database
 proj_get_crs_info_list_from_database

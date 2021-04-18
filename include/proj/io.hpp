@@ -1126,6 +1126,19 @@ class PROJ_GCC_DLL AuthorityFactory {
 
     PROJ_DLL std::list<UnitInfo> getUnitList() const;
 
+    /** Celestial Body information */
+    struct CelestialBodyInfo {
+        /** Authority name */
+        std::string authName;
+        /** Name */
+        std::string name;
+        //! @cond Doxygen_Suppress
+        CelestialBodyInfo();
+        //! @endcond
+    };
+
+    PROJ_DLL std::list<CelestialBodyInfo> getCelestialBodyList() const;
+
     PROJ_DLL static AuthorityFactoryNNPtr
     create(const DatabaseContextNNPtr &context,
            const std::string &authorityName);

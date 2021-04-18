@@ -2674,6 +2674,76 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Enumerate celestial bodies from the database.
+ *
+ * The returned object is an array of PROJ_CELESTIAL_BODY_INFO* pointers, whose last
+ * entry is NULL. This array should be freed with proj_celestial_body_list_destroy()
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param auth_name Authority name, used to restrict the search.
+ * Or NULL for all authorities.
+ * @param out_result_count Output parameter pointing to an integer to receive
+ * the size of the result list. Might be NULL
+ * @return an array of PROJ_CELESTIAL_BODY_INFO* pointers to be freed with
+ * proj_celestial_body_list_destroy(), or NULL in case of error.
+ * @since 8.1
+ */
+PROJ_CELESTIAL_BODY_INFO **proj_get_celestial_body_list_from_database(PJ_CONTEXT *ctx,
+                                              const char *auth_name,
+                                              int *out_result_count) {
+    SANITIZE_CTX(ctx);
+    PROJ_CELESTIAL_BODY_INFO **ret = nullptr;
+    int i = 0;
+    try {
+        auto factory = AuthorityFactory::create(getDBcontext(ctx),
+                                                auth_name ? auth_name : "");
+        auto list = factory->getCelestialBodyList();
+        ret = new PROJ_CELESTIAL_BODY_INFO *[list.size() + 1];
+        for (const auto &info : list) {
+            ret[i] = new PROJ_CELESTIAL_BODY_INFO;
+            ret[i]->auth_name = pj_strdup(info.authName.c_str());
+            ret[i]->name = pj_strdup(info.name.c_str());
+            i++;
+        }
+        ret[i] = nullptr;
+        if (out_result_count)
+            *out_result_count = i;
+        ctx->safeAutoCloseDbIfNeeded();
+        return ret;
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+        if (ret) {
+            ret[i + 1] = nullptr;
+            proj_celestial_body_list_destroy(ret);
+        }
+        if (out_result_count)
+            *out_result_count = 0;
+    }
+    ctx->safeAutoCloseDbIfNeeded();
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Destroy the result returned by
+ * proj_get_celestial_body_list_from_database().
+ *
+ * @since 8.1
+ */
+void proj_celestial_body_list_destroy(PROJ_CELESTIAL_BODY_INFO **list) {
+    if (list) {
+        for (int i = 0; list[i] != nullptr; i++) {
+            free(list[i]->auth_name);
+            free(list[i]->name);
+            delete list[i];
+        }
+        delete[] list;
+    }
+}
+
+
+// ---------------------------------------------------------------------------
+
 /** Free a list of NULL terminated strings. */
 void proj_string_list_destroy(PROJ_STRING_LIST list) {
     if (list) {

@@ -1028,6 +1028,22 @@ typedef struct
     int deprecated;
 } PROJ_UNIT_INFO;
 
+/** \brief Structure given description of a celestial body.
+ *
+ * This structure may grow over time, and should not be directly allocated by
+ * client code.
+ * @since 8.1
+ */
+typedef struct
+{
+    /** Authority name. */
+    char* auth_name;
+
+    /** Object name. For example "Earth" */
+    char* name;
+
+} PROJ_CELESTIAL_BODY_INFO;
+
 
 /**@}*/
 
@@ -1182,6 +1198,13 @@ PROJ_STRING_LIST PROJ_DLL proj_get_codes_from_database(PJ_CONTEXT *ctx,
                                              const char *auth_name,
                                              PJ_TYPE type,
                                              int allow_deprecated);
+
+PROJ_CELESTIAL_BODY_INFO PROJ_DLL **proj_get_celestial_body_list_from_database(
+                                              PJ_CONTEXT *ctx,
+                                              const char *auth_name,
+                                              int *out_result_count);
+
+void PROJ_DLL proj_celestial_body_list_destroy(PROJ_CELESTIAL_BODY_INFO** list);
 
 PROJ_CRS_LIST_PARAMETERS PROJ_DLL *proj_get_crs_list_parameters_create(void);
 
