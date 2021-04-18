@@ -10424,7 +10424,7 @@ TEST(io, createFromUserInput) {
                                        dbContext);
         auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
-        EXPECT_EQ(crs->nameStr(), "UTM zone 31N / WGS 84 (3D)");
+        EXPECT_EQ(crs->nameStr(), "WGS 84 (3D) / UTM zone 31N");
         EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 4979);
         EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
         EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
