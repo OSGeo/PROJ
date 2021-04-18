@@ -1033,6 +1033,22 @@ TEST(operation, geogCRS_to_geogCRS_init_IGNF_to_init_IGNF_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_context_deprecated) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem(
+            "4226"), // Cote d'Ivoire (deprecated)
+        authFactory->createCoordinateReferenceSystem("4258"), // ETRS89
+        ctxt);
+    ASSERT_TRUE(!list.empty());
+    EXPECT_EQ(list[0]->nameStr(),
+              "Ballpark geographic offset from Cote d'Ivoire to ETRS89");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, geogCRS_to_geogCRS_3D) {
 
     auto geogcrs_m_obj = PROJStringParser().createFromPROJString(
