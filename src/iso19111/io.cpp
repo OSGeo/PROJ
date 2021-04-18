@@ -6491,73 +6491,62 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                 AuthorityFactory::create(NN_NO_CHECK(dbContext), tokensOp[1]);
             auto op = factoryOp->createCoordinateOperation(tokensOp[3], true);
 
-            if (dynamic_cast<GeographicCRS *>(baseCRS.get()) &&
-                dynamic_cast<Conversion *>(op.get()) &&
-                dynamic_cast<CartesianCS *>(cs.get())) {
-                auto geogCRS = NN_NO_CHECK(
-                    util::nn_dynamic_pointer_cast<GeographicCRS>(baseCRS));
-                auto name = op->nameStr() + " / " + baseCRS->nameStr();
-                if (geogCRS->coordinateSystem()->axisList().size() == 3 &&
-                    baseCRS->nameStr().find("3D") == std::string::npos) {
-                    name += " (3D)";
-                }
-                return ProjectedCRS::create(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY, name),
-                    geogCRS,
-                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
-                    NN_NO_CHECK(
-                        util::nn_dynamic_pointer_cast<CartesianCS>(cs)));
-            } else if (dynamic_cast<GeodeticCRS *>(baseCRS.get()) &&
-                       !dynamic_cast<GeographicCRS *>(baseCRS.get()) &&
-                       dynamic_cast<Conversion *>(op.get()) &&
-                       dynamic_cast<CartesianCS *>(cs.get())) {
-                return DerivedGeodeticCRS::create(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                            op->nameStr() + " / " +
-                                                baseCRS->nameStr()),
-                    NN_NO_CHECK(
-                        util::nn_dynamic_pointer_cast<GeodeticCRS>(baseCRS)),
-                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
-                    NN_NO_CHECK(
-                        util::nn_dynamic_pointer_cast<CartesianCS>(cs)));
-            } else if (dynamic_cast<GeographicCRS *>(baseCRS.get()) &&
-                       dynamic_cast<Conversion *>(op.get()) &&
-                       dynamic_cast<EllipsoidalCS *>(cs.get())) {
-                return DerivedGeographicCRS::create(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                            op->nameStr() + " / " +
-                                                baseCRS->nameStr()),
-                    NN_NO_CHECK(
-                        util::nn_dynamic_pointer_cast<GeodeticCRS>(baseCRS)),
-                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
-                    NN_NO_CHECK(
-                        util::nn_dynamic_pointer_cast<EllipsoidalCS>(cs)));
-            } else if (dynamic_cast<ProjectedCRS *>(baseCRS.get()) &&
-                       dynamic_cast<Conversion *>(op.get())) {
-                return DerivedProjectedCRS::create(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                            op->nameStr() + " / " +
-                                                baseCRS->nameStr()),
-                    NN_NO_CHECK(
-                        util::nn_dynamic_pointer_cast<ProjectedCRS>(baseCRS)),
-                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
-                    cs);
-            } else if (dynamic_cast<VerticalCRS *>(baseCRS.get()) &&
-                       dynamic_cast<Conversion *>(op.get()) &&
-                       dynamic_cast<VerticalCS *>(cs.get())) {
-                return DerivedVerticalCRS::create(
-                    util::PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                            op->nameStr() + " / " +
-                                                baseCRS->nameStr()),
-                    NN_NO_CHECK(
-                        util::nn_dynamic_pointer_cast<VerticalCRS>(baseCRS)),
-                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<Conversion>(op)),
-                    NN_NO_CHECK(util::nn_dynamic_pointer_cast<VerticalCS>(cs)));
-            } else {
-                throw ParsingException("unsupported combination of baseCRS, CS "
-                                       "and coordinateOperation for a "
-                                       "DerivedCRS");
+            std::string name(baseCRS->nameStr());
+            auto geogCRS =
+                util::nn_dynamic_pointer_cast<GeographicCRS>(baseCRS);
+            if (geogCRS &&
+                geogCRS->coordinateSystem()->axisList().size() == 3 &&
+                baseCRS->nameStr().find("3D") == std::string::npos) {
+                name += " (3D)";
             }
+            name += " / ";
+            name += op->nameStr();
+            auto props =
+                util::PropertyMap().set(IdentifiedObject::NAME_KEY, name);
+
+            if (auto conv = util::nn_dynamic_pointer_cast<Conversion>(op)) {
+                auto convNN = NN_NO_CHECK(conv);
+                if (geogCRS != nullptr) {
+                    auto geogCRSNN = NN_NO_CHECK(geogCRS);
+                    if (CartesianCSPtr ccs =
+                            util::nn_dynamic_pointer_cast<CartesianCS>(cs)) {
+                        return ProjectedCRS::create(props, geogCRSNN, convNN,
+                                                    NN_NO_CHECK(ccs));
+                    }
+                    if (EllipsoidalCSPtr ecs =
+                            util::nn_dynamic_pointer_cast<EllipsoidalCS>(cs)) {
+                        return DerivedGeographicCRS::create(
+                            props, geogCRSNN, convNN, NN_NO_CHECK(ecs));
+                    }
+                } else if (dynamic_cast<GeodeticCRS *>(baseCRS.get()) &&
+                           dynamic_cast<CartesianCS *>(cs.get())) {
+                    return DerivedGeodeticCRS::create(
+                        props,
+                        NN_NO_CHECK(util::nn_dynamic_pointer_cast<GeodeticCRS>(
+                            baseCRS)),
+                        convNN,
+                        NN_NO_CHECK(
+                            util::nn_dynamic_pointer_cast<CartesianCS>(cs)));
+                } else if (auto pcrs =
+                               util::nn_dynamic_pointer_cast<ProjectedCRS>(
+                                   baseCRS)) {
+                    return DerivedProjectedCRS::create(props, NN_NO_CHECK(pcrs),
+                                                       convNN, cs);
+                } else if (dynamic_cast<VerticalCRS *>(baseCRS.get()) &&
+                           dynamic_cast<VerticalCS *>(cs.get())) {
+                    return DerivedVerticalCRS::create(
+                        props,
+                        NN_NO_CHECK(util::nn_dynamic_pointer_cast<VerticalCRS>(
+                            baseCRS)),
+                        convNN,
+                        NN_NO_CHECK(
+                            util::nn_dynamic_pointer_cast<VerticalCS>(cs)));
+                }
+            }
+
+            throw ParsingException("unsupported combination of baseCRS, CS "
+                                   "and coordinateOperation for a "
+                                   "DerivedCRS");
         }
 
         // OGC 07-092r2: para 7.5.2
