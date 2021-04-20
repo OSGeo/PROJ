@@ -1000,6 +1000,9 @@ class PROJ_GCC_DLL AuthorityFactory {
         const std::string &sourceCRSCode,
         const std::string &targetCRSCode) const;
 
+    PROJ_DLL std::list<std::string>
+    getAvailableGeoidmodels(const std::string &code) const;
+
     PROJ_DLL const std::string &getAuthority() PROJ_PURE_DECL;
 
     /** Object type. */

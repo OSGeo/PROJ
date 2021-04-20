@@ -2139,6 +2139,58 @@ TEST(
     }
 }
 
+TEST(factory, AuthorityFactory_getAvailableGeoidmodels) {
+    const std::list<std::string> navd88geoidmodels{
+        "GEOID03",  "GEOID06", "GEOID09", "GEOID12A",
+        "GEOID12B", "GEOID18", "GEOID99"};
+
+    const std::string OSGM15{"OSGM15"};
+
+    auto chechNavd88 = [&navd88geoidmodels](const std::list<std::string> &res) {
+        ASSERT_EQ(res.size(), navd88geoidmodels.size());
+        auto it = navd88geoidmodels.cbegin();
+        for (const auto &model : res) {
+            EXPECT_EQ(*it, model);
+            it++;
+        }
+    };
+    auto factory =
+        AuthorityFactory::create(DatabaseContext::create(), std::string());
+
+    {
+        auto res = factory->getAvailableGeoidmodels("4326");
+        ASSERT_TRUE(res.empty());
+    }
+
+    {
+        auto res = factory->getAvailableGeoidmodels("5703");
+        chechNavd88(res);
+    }
+    {
+        auto res = factory->getAvailableGeoidmodels("6360");
+        chechNavd88(res);
+    }
+    {
+        auto res = factory->getAvailableGeoidmodels("8228");
+        chechNavd88(res);
+    }
+    {
+        auto res = factory->getAvailableGeoidmodels("6357");
+        chechNavd88(res);
+    }
+
+    {
+        auto res = factory->getAvailableGeoidmodels("5701");
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(OSGM15, res.front());
+    }
+    {
+        auto res = factory->getAvailableGeoidmodels("5732");
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(OSGM15, res.front());
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 TEST_F(FactoryWithTmpDatabase,
