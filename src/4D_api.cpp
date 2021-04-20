@@ -1350,11 +1350,9 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
                                             area->east_lon_degree,
                                             area->north_lat_degree);
     }
-    else {
-        proj_operation_factory_context_set_spatial_criterion(
-            ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
-    }
 
+    proj_operation_factory_context_set_spatial_criterion(
+        ctx, operation_ctx, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
     proj_operation_factory_context_set_grid_availability_use(
         ctx, operation_ctx,
         proj_context_is_network_enabled(ctx) ?
