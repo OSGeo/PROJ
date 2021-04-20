@@ -2676,8 +2676,9 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
 
 /** \brief Enumerate celestial bodies from the database.
  *
- * The returned object is an array of PROJ_CELESTIAL_BODY_INFO* pointers, whose last
- * entry is NULL. This array should be freed with proj_celestial_body_list_destroy()
+ * The returned object is an array of PROJ_CELESTIAL_BODY_INFO* pointers, whose
+ * last entry is NULL. This array should be freed with
+ * proj_celestial_body_list_destroy()
  *
  * @param ctx PROJ context, or NULL for default context
  * @param auth_name Authority name, used to restrict the search.
@@ -2688,9 +2689,8 @@ PROJ_STRING_LIST proj_get_codes_from_database(PJ_CONTEXT *ctx,
  * proj_celestial_body_list_destroy(), or NULL in case of error.
  * @since 8.1
  */
-PROJ_CELESTIAL_BODY_INFO **proj_get_celestial_body_list_from_database(PJ_CONTEXT *ctx,
-                                              const char *auth_name,
-                                              int *out_result_count) {
+PROJ_CELESTIAL_BODY_INFO **proj_get_celestial_body_list_from_database(
+    PJ_CONTEXT *ctx, const char *auth_name, int *out_result_count) {
     SANITIZE_CTX(ctx);
     PROJ_CELESTIAL_BODY_INFO **ret = nullptr;
     int i = 0;
@@ -2740,7 +2740,6 @@ void proj_celestial_body_list_destroy(PROJ_CELESTIAL_BODY_INFO **list) {
         delete[] list;
     }
 }
-
 
 // ---------------------------------------------------------------------------
 
