@@ -5773,6 +5773,7 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  * @return list of geoid model names
  * @throw FactoryException
  */
+
 std::list<std::string>
 AuthorityFactory::getAvailableGeoidmodels(const std::string &code) const {
     /// The second part of the query is for CRSs that use that geoid model via
@@ -5799,7 +5800,7 @@ AuthorityFactory::getAvailableGeoidmodels(const std::string &code) const {
            "INNER JOIN other_transformation OT1 "
            " ON  OT1.source_crs_code = GT1.target_crs_code "
            " AND OT1.source_crs_auth_name = GT1.target_crs_auth_name "
-           " AND OT1.method_auth_name = \"EPSG\" "
+           " AND OT1.method_auth_name = 'EPSG' "
            " AND OT1.method_code IN (1068, 1069) "
            " AND OT1.target_crs_code = ? ";
 
