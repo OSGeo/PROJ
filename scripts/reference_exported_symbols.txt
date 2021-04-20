@@ -347,6 +347,7 @@ osgeo::proj::io::AuthorityFactory::CRSInfo::CRSInfo()
 osgeo::proj::io::AuthorityFactory::databaseContext() const
 osgeo::proj::io::AuthorityFactory::getAuthorityCodes(osgeo::proj::io::AuthorityFactory::ObjectType const&, bool) const
 osgeo::proj::io::AuthorityFactory::getAuthority() const
+osgeo::proj::io::AuthorityFactory::getAvailableGeoidmodels(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getCelestialBodyList() const
 osgeo::proj::io::AuthorityFactory::getCRSInfoList() const
 osgeo::proj::io::AuthorityFactory::getDescriptionText(std::string const&) const
