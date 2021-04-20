@@ -3903,7 +3903,8 @@ TEST_F(CApi, proj_get_celestial_body_list_from_database) {
     { proj_celestial_body_list_destroy(nullptr); }
 
     {
-        auto list = proj_get_celestial_body_list_from_database(nullptr, nullptr, 0);
+        auto list =
+            proj_get_celestial_body_list_from_database(nullptr, nullptr, 0);
         ASSERT_NE(list, nullptr);
         ASSERT_NE(list[0], nullptr);
         ASSERT_NE(list[0]->auth_name, nullptr);
@@ -3912,7 +3913,8 @@ TEST_F(CApi, proj_get_celestial_body_list_from_database) {
     }
     {
         int result_count = 0;
-        auto list = proj_get_celestial_body_list_from_database(nullptr, "ESRI", &result_count);
+        auto list = proj_get_celestial_body_list_from_database(nullptr, "ESRI",
+                                                               &result_count);
         ASSERT_NE(list, nullptr);
         EXPECT_GT(result_count, 1);
         EXPECT_EQ(list[result_count], nullptr);

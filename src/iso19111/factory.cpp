@@ -7478,13 +7478,11 @@ AuthorityFactory::UnitInfo::UnitInfo()
       deprecated{} {}
 //! @endcond
 
-
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
 AuthorityFactory::CelestialBodyInfo::CelestialBodyInfo() : authName{}, name{} {}
 //! @endcond
-
 
 // ---------------------------------------------------------------------------
 
@@ -7563,7 +7561,6 @@ AuthorityFactory::getCelestialBodyList() const {
     }
     return res;
 }
-
 
 // ---------------------------------------------------------------------------
 

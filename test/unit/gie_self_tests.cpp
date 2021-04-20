@@ -809,14 +809,14 @@ TEST(gie, proj_create_crs_to_crs_with_area_large) {
     // Test bugfix for https://github.com/OSGeo/gdal/issues/3695
     auto area = proj_area_create();
     proj_area_set_bbox(area, -14.1324, 49.5614, 3.76488, 62.1463);
-    auto P = proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4277", "EPSG:4326",
-                                    area);
+    auto P =
+        proj_create_crs_to_crs(PJ_DEFAULT_CTX, "EPSG:4277", "EPSG:4326", area);
     proj_area_destroy(area);
     ASSERT_TRUE(P != nullptr);
     PJ_COORD c;
 
     c.xyzt.x = 50; // Lat in deg
-    c.xyzt.y = -2;  // Long in deg
+    c.xyzt.y = -2; // Long in deg
     c.xyzt.z = 0;
     c.xyzt.t = HUGE_VAL;
     c = proj_trans(P, PJ_FWD, c);
