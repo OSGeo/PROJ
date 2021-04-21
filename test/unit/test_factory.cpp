@@ -2140,22 +2140,17 @@ TEST(
 }
 
 TEST(factory, AuthorityFactory_getAvailableGeoidmodels) {
-    const std::list<std::string> navd88geoidmodels{
-        "GEOID03",  "GEOID06", "GEOID09", "GEOID12A",
-        "GEOID12B", "GEOID18", "GEOID99"};
 
     const std::string OSGM15{"OSGM15"};
 
-    auto checkNavd88 = [&navd88geoidmodels](const std::list<std::string> &res) {
-        ASSERT_EQ(res.size(), navd88geoidmodels.size());
-        auto it = navd88geoidmodels.cbegin();
-        for (const auto &model : res) {
-            EXPECT_EQ(*it, model);
-            it++;
-        }
+    auto checkNavd88 = [](const std::list<std::string> &res) {
+        const std::string GEOID12B{"GEOID12B"};
+        const std::string GEOID18{"GEOID18"};
+        EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), GEOID12B));
+        EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), GEOID18));
     };
-    auto factory =
-        AuthorityFactory::create(DatabaseContext::create(), std::string());
+
+    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
 
     {
         auto res = factory->getGeoidModels("4326");
@@ -2181,13 +2176,11 @@ TEST(factory, AuthorityFactory_getAvailableGeoidmodels) {
 
     {
         auto res = factory->getGeoidModels("5701");
-        ASSERT_EQ(res.size(), 1U);
-        EXPECT_EQ(OSGM15, res.front());
+        EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), OSGM15));
     }
     {
         auto res = factory->getGeoidModels("5732");
-        ASSERT_EQ(res.size(), 1U);
-        EXPECT_EQ(OSGM15, res.front());
+        EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), OSGM15));
     }
 }
 
