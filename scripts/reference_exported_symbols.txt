@@ -347,10 +347,10 @@ osgeo::proj::io::AuthorityFactory::CRSInfo::CRSInfo()
 osgeo::proj::io::AuthorityFactory::databaseContext() const
 osgeo::proj::io::AuthorityFactory::getAuthorityCodes(osgeo::proj::io::AuthorityFactory::ObjectType const&, bool) const
 osgeo::proj::io::AuthorityFactory::getAuthority() const
-osgeo::proj::io::AuthorityFactory::getAvailableGeoidmodels(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getCelestialBodyList() const
 osgeo::proj::io::AuthorityFactory::getCRSInfoList() const
 osgeo::proj::io::AuthorityFactory::getDescriptionText(std::string const&) const
+osgeo::proj::io::AuthorityFactory::getGeoidModels(std::string const&) const
 osgeo::proj::io::AuthorityFactory::getOfficialNameFromAlias(std::string const&, std::string const&, std::string const&, bool, std::string&, std::string&, std::string&) const
 osgeo::proj::io::AuthorityFactory::getUnitList() const
 osgeo::proj::io::AuthorityFactory::identifyBodyFromSemiMajorAxis(double, double) const

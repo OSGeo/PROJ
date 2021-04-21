@@ -5775,22 +5775,24 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
  */
 
 std::list<std::string>
-AuthorityFactory::getAvailableGeoidmodels(const std::string &code) const {
-    /// The second part of the query is for CRSs that use that geoid model via
-    /// Height Depth Reversal (EPSG:1068) or Change of Vertical Unit (EPSG:1069)
+AuthorityFactory::getGeoidModels(const std::string &code) const {
+
     ListOfParams params;
-    std::string sql = "SELECT DISTINCT GM0.name "
-                      " FROM geoid_model GM0 "
-                      "INNER JOIN grid_transformation GT0 "
-                      " ON  GT0.code = GM0.operation_code "
-                      " AND GT0.auth_name = GM0.operation_auth_name "
-                      " AND GT0.target_crs_code = ? ";
+    std::string sql;
+    sql += "SELECT DISTINCT GM0.name "
+           " FROM geoid_model GM0 "
+           "INNER JOIN grid_transformation GT0 "
+           " ON  GT0.code = GM0.operation_code "
+           " AND GT0.auth_name = GM0.operation_auth_name "
+           " AND GT0.target_crs_code = ? ";
     params.emplace_back(code);
     if (d->hasAuthorityRestriction()) {
         sql += " AND GT0.target_crs_auth_name = ? ";
         params.emplace_back(d->authority());
     }
 
+    /// The second part of the query is for CRSs that use that geoid model via
+    /// Height Depth Reversal (EPSG:1068) or Change of Vertical Unit (EPSG:1069)
     sql += "UNION "
            "SELECT DISTINCT GM0.name "
            " FROM geoid_model GM0 "
@@ -5803,7 +5805,6 @@ AuthorityFactory::getAvailableGeoidmodels(const std::string &code) const {
            " AND OT1.method_auth_name = 'EPSG' "
            " AND OT1.method_code IN (1068, 1069) "
            " AND OT1.target_crs_code = ? ";
-
     params.emplace_back(code);
     if (d->hasAuthorityRestriction()) {
         sql += " AND OT1.target_crs_auth_name = ? ";
