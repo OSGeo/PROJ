@@ -2143,11 +2143,12 @@ TEST(factory, AuthorityFactory_getAvailableGeoidmodels) {
 
     const std::string OSGM15{"OSGM15"};
 
-    auto checkNavd88 = [](const std::list<std::string> &res) {
+    auto checkNavd88 = [&OSGM15](const std::list<std::string> &res) {
         const std::string GEOID12B{"GEOID12B"};
         const std::string GEOID18{"GEOID18"};
         EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), GEOID12B));
         EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), GEOID18));
+        EXPECT_FALSE(res.end() != std::find(res.begin(), res.end(), OSGM15));
     };
 
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
