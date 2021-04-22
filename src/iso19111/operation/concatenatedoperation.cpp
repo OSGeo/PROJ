@@ -321,7 +321,8 @@ void ConcatenatedOperation::fixStepsDirection(
                 if (l_sourceCRS) {
                     derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
                         l_sourceCRS.get());
-                    if (conv->isEquivalentTo(
+                    if (derivedCRS &&
+                        conv->isEquivalentTo(
                             derivedCRS->derivingConversion().get(),
                             util::IComparable::Criterion::EQUIVALENT)) {
                         op->setCRSs(concatOpTargetCRS, NN_NO_CHECK(l_sourceCRS),
