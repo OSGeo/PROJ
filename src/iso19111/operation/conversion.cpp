@@ -2252,6 +2252,26 @@ Conversion::createChangeVerticalUnit(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a conversion based on the Change of Vertical Unit
+ * method (without explicit conversion factor)
+ *
+ * This method is defined as [EPSG:1104]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::1104)
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @return a new Conversion.
+ */
+ConversionNNPtr
+Conversion::createChangeVerticalUnit(const util::PropertyMap &properties) {
+    return create(properties,
+                  createMethodMapNameEPSGCode(
+                      EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT_NO_CONV_FACTOR),
+                  VectorOfParameters{}, VectorOfValues{});
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instantiate a conversion based on the Height Depth Reversal
  * method.
  *
@@ -2405,6 +2425,14 @@ CoordinateOperationNNPtr Conversion::inverse() const {
         auto conv = createChangeVerticalUnit(
             createPropertiesForInverse(this, false, false),
             common::Scale(1.0 / convFactor));
+        conv->setCRSs(this, true);
+        return conv;
+    }
+
+    if (methodEPSGCode ==
+        EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT_NO_CONV_FACTOR) {
+        auto conv = createChangeVerticalUnit(
+            createPropertiesForInverse(this, false, false));
         conv->setCRSs(this, true);
         return conv;
     }
@@ -3345,7 +3373,8 @@ void Conversion::_exportToPROJString(
     const auto &methodName = l_method->nameStr();
     const int methodEPSGCode = l_method->getEPSGCode();
     const bool isZUnitConversion =
-        methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT;
+        methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT ||
+        methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT_NO_CONV_FACTOR;
     const bool isAffineParametric =
         methodEPSGCode == EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION;
     const bool isGeographicGeocentric =
@@ -3368,6 +3397,8 @@ void Conversion::_exportToPROJString(
     }
 
     auto l_sourceCRS = sourceCRS();
+    auto l_targetCRS = targetCRS();
+
     crs::GeographicCRSPtr srcGeogCRS;
     if (!formatter->getCRSExport() && l_sourceCRS && applySourceCRSModifiers) {
 
@@ -3633,8 +3664,35 @@ void Conversion::_exportToPROJString(
     } else if (formatter->convention() ==
                    io::PROJStringFormatter::Convention::PROJ_5 &&
                isZUnitConversion) {
-        double convFactor = parameterValueNumericAsSI(
-            EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
+        double convFactor;
+        if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
+            convFactor = parameterValueNumericAsSI(
+                EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
+        } else {
+            assert(methodEPSGCode ==
+                   EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT_NO_CONV_FACTOR);
+            const auto vertSrcCRS =
+                dynamic_cast<const crs::VerticalCRS *>(l_sourceCRS.get());
+            const auto vertTgtCRS =
+                dynamic_cast<const crs::VerticalCRS *>(l_targetCRS.get());
+            if (vertSrcCRS && vertTgtCRS) {
+                const double convSrc = vertSrcCRS->coordinateSystem()
+                                           ->axisList()[0]
+                                           ->unit()
+                                           .conversionToSI();
+                const double convDst = vertTgtCRS->coordinateSystem()
+                                           ->axisList()[0]
+                                           ->unit()
+                                           .conversionToSI();
+                convFactor = convSrc / convDst;
+            } else {
+                throw io::FormattingException(
+                    "Export of "
+                    "EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT_NO_CONV_FACTOR "
+                    "conversion to a PROJ string "
+                    "requires an input and output vertical CRS");
+            }
+        }
         auto uom = common::UnitOfMeasure(std::string(), convFactor,
                                          common::UnitOfMeasure::Type::LINEAR)
                        .exportToPROJString();
@@ -3685,8 +3743,6 @@ void Conversion::_exportToPROJString(
         formatter->addParam("h_0", heightOrigin);
         bConversionDone = true;
     }
-
-    auto l_targetCRS = targetCRS();
 
     bool bAxisSpecFound = false;
     if (!bConversionDone) {

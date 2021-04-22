@@ -291,7 +291,7 @@ INSERT INTO "usage" VALUES('EPSG','13338','vertical_datum','EPSG','5132','EPSG',
 INSERT INTO "vertical_datum" VALUES('EPSG','5133','AIOC 1995',NULL,'1995-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13339','vertical_datum','EPSG','5133','EPSG','2592','EPSG','1136');
 INSERT INTO "vertical_datum" VALUES('EPSG','5134','Black Sea',NULL,NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','13340','vertical_datum','EPSG','5134','EPSG','3251','EPSG','1201');
+INSERT INTO "usage" VALUES('EPSG','13340','vertical_datum','EPSG','5134','EPSG','1102','EPSG','1201');
 INSERT INTO "vertical_datum" VALUES('EPSG','5135','Hong Kong Principal Datum',NULL,'1980-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13341','vertical_datum','EPSG','5135','EPSG','3334','EPSG','1184');
 INSERT INTO "vertical_datum" VALUES('EPSG','5136','Hong Kong Chart Datum',NULL,NULL,NULL,NULL,0);

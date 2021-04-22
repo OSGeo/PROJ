@@ -3357,7 +3357,7 @@ TEST(operation,
         NN_NO_CHECK(src), GeographicCRS::EPSG_4979);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->nameStr(), "axis order change (2D) + "
-                             "Transformation from unknown to unknown + "
+                             "Conversion from unknown to unknown + "
                              "unknown to WGS84 ellipsoidal height");
     EXPECT_EQ(
         op->exportToPROJString(PROJStringFormatter::create().get()),
@@ -3719,7 +3719,7 @@ TEST(operation,
             "Inverse of unnamed + "
             "Transformation from NAD83 to WGS84 + "
             "Ballpark geographic offset from WGS 84 to NAD83(2011) + "
-            "Transformation from NAVD88 height (ftUS) to NAVD88 height + "
+            "Conversion from NAVD88 height (ftUS) to NAVD88 height + "
             "Inverse of NAD83(2011) to NAVD88 height (1) + "
             "Conversion from NAD83(2011) (geog3D) to NAD83(2011) "
             "(geocentric)") {
@@ -4101,7 +4101,7 @@ TEST(
     EXPECT_EQ(list[0]->nameStr(),
               "Inverse of unnamed + "
               "Transformation from NAD83 to WGS84 + "
-              "NAVD88 height to NAVD88 height (ftUS) + "
+              "Conversion from NAVD88 height to NAVD88 height (ftUS) + "
               "Inverse of Transformation from NAD83 to WGS84 + "
               "unnamed");
     auto grids = list[0]->gridsNeeded(dbContext, false);
@@ -5304,7 +5304,7 @@ TEST(operation, compoundCRS_to_geogCRS_with_vertical_unit_change) {
     ASSERT_EQ(listCompoundToGeog.size(), listCompoundMetreToGeog.size());
 
     EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
-              "Inverse of NAVD88 height to NAVD88 height (ftUS) + " +
+              "Conversion from NAVD88 height (ftUS) to NAVD88 height + " +
                   listCompoundMetreToGeog[0]->nameStr());
     EXPECT_EQ(
         listCompoundToGeog[0]->exportToPROJString(
@@ -5369,7 +5369,7 @@ TEST(
     ASSERT_GE(listCompoundToGeog.size(), 1U);
 
     EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
-              "Inverse of NAVD88 height to NAVD88 height (ftUS) + " +
+              "Conversion from NAVD88 height (ftUS) to NAVD88 height + " +
                   listCompoundMetreToGeog[0]->nameStr());
     EXPECT_EQ(
         listCompoundToGeog[0]->exportToPROJString(
@@ -5425,7 +5425,7 @@ TEST(operation, compoundCRS_to_geogCRS_with_height_depth_reversal) {
     ASSERT_EQ(listCompoundToGeog.size(), listCompoundMetreToGeog.size());
 
     EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
-              "Inverse of NAVD88 height to NAVD88 depth + " +
+              "Conversion from NAVD88 depth to NAVD88 height + " +
                   listCompoundMetreToGeog[0]->nameStr());
     EXPECT_EQ(
         listCompoundToGeog[0]->exportToPROJString(
@@ -5489,8 +5489,7 @@ TEST(
     ASSERT_EQ(listCompoundToGeog.size(), listCompoundMetreToGeog.size());
 
     EXPECT_EQ(listCompoundToGeog[0]->nameStr(),
-              "Inverse of NAVD88 height (ftUS) to NAVD88 depth (ftUS) + "
-              "Inverse of NAVD88 height to NAVD88 height (ftUS) + " +
+              "Conversion from NAVD88 depth (ftUS) to NAVD88 height + " +
                   listCompoundMetreToGeog[0]->nameStr());
     EXPECT_EQ(
         listCompoundToGeog[0]->exportToPROJString(
@@ -5504,8 +5503,7 @@ TEST(
                            .get()),
                    "+step +proj=unitconvert +xy_in=deg +xy_out=rad",
                    "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-                   "+step +proj=axisswap +order=1,2,-3 "
-                   "+step +proj=unitconvert +z_in=us-ft +z_out=m"));
+                   "+step +proj=affine +s33=-0.304800609601219"));
 
     // Check reverse path
     auto listGeogToCompound =

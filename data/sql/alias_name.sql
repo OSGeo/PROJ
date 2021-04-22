@@ -7256,3 +7256,4 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9657','PL-ETRF2000 + Kron
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4277','OSGB 1936','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','27700','OSGB 1936 / British National Grid','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9702','PL-ETRF2000','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9713','NAD83(CSRS) / UTM 24N','EPSG');

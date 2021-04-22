@@ -7313,6 +7313,12 @@ INSERT INTO "projected_crs" VALUES('EPSG','9698','REDGEOMIN / UTM zone 18S',NULL
 INSERT INTO "usage" VALUES('EPSG','14943','projected_crs','EPSG','9698','EPSG','3829','EPSG','1181');
 INSERT INTO "projected_crs" VALUES('EPSG','9699','REDGEOMIN / UTM zone 19S',NULL,'EPSG','4400','EPSG','9696','EPSG','16119',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14945','projected_crs','EPSG','9699','EPSG','3811','EPSG','1181');
+INSERT INTO "projected_crs" VALUES('EPSG','9709','NAD83(CSRS) / UTM zone 23N',NULL,'EPSG','4400','EPSG','4617','EPSG','16023',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','15204','projected_crs','EPSG','9709','EPSG','2153','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','9712','NAD83 / UTM zone 24N',NULL,'EPSG','4400','EPSG','4269','EPSG','16024',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','15196','projected_crs','EPSG','9712','EPSG','4617','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','9713','NAD83(CSRS) / UTM zone 24N',NULL,'EPSG','4400','EPSG','4617','EPSG','16024',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','15195','projected_crs','EPSG','9713','EPSG','4617','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','20004','Pulkovo 1995 / Gauss-Kruger zone 4',NULL,'EPSG','4530','EPSG','4200','EPSG','16204',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6177','projected_crs','EPSG','20004','EPSG','1763','EPSG','1211');
 INSERT INTO "projected_crs" VALUES('EPSG','20005','Pulkovo 1995 / Gauss-Kruger zone 5',NULL,'EPSG','4530','EPSG','4200','EPSG','16205',NULL,0);

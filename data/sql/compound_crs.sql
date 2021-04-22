@@ -698,3 +698,9 @@ INSERT INTO "compound_crs" VALUES('EPSG','9705','WGS 84 + MSL height',NULL,'EPSG
 INSERT INTO "usage" VALUES('EPSG','15089','compound_crs','EPSG','9705','EPSG','1262','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9707','WGS 84 + EGM96 height',NULL,'EPSG','4326','EPSG','5773',0);
 INSERT INTO "usage" VALUES('EPSG','15091','compound_crs','EPSG','9707','EPSG','1262','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','9711','NAD83(CSRS) / UTM zone 23N + CGVD2013 height',NULL,'EPSG','9709','EPSG','6647',0);
+INSERT INTO "usage" VALUES('EPSG','15205','compound_crs','EPSG','9711','EPSG','2153','EPSG','1142');
+INSERT INTO "compound_crs" VALUES('EPSG','9714','NAD83(CSRS) / UTM zone 24N + CGVD2013 height',NULL,'EPSG','9713','EPSG','6647',0);
+INSERT INTO "usage" VALUES('EPSG','15197','compound_crs','EPSG','9714','EPSG','4617','EPSG','1142');
+INSERT INTO "compound_crs" VALUES('EPSG','9715','NAD83(CSRS) / UTM zone 15N + CGVD2013a height',NULL,'EPSG','3159','EPSG','9245',0);
+INSERT INTO "usage" VALUES('EPSG','15200','compound_crs','EPSG','9715','EPSG','3414','EPSG','1142');
