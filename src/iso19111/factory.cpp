@@ -5803,7 +5803,7 @@ AuthorityFactory::getGeoidModels(const std::string &code) const {
            " ON  OT1.source_crs_code = GT1.target_crs_code "
            " AND OT1.source_crs_auth_name = GT1.target_crs_auth_name "
            " AND OT1.method_auth_name = 'EPSG' "
-           " AND OT1.method_code IN (1068, 1069) "
+           " AND OT1.method_code IN (1068, 1069, 1104) "
            " AND OT1.target_crs_code = ? ";
     params.emplace_back(code);
     if (d->hasAuthorityRestriction()) {
@@ -5823,11 +5823,11 @@ AuthorityFactory::getGeoidModels(const std::string &code) const {
            " ON  OT1.source_crs_code = GT1.target_crs_code "
            " AND OT1.source_crs_auth_name = GT1.target_crs_auth_name "
            " AND OT1.method_auth_name = 'EPSG' "
-           " AND OT1.method_code IN (1068, 1069) "
+           " AND OT1.method_code IN (1068, 1069, 1104) "
            "INNER JOIN other_transformation OT2 "
            " ON  OT2.source_crs_code = OT1.target_crs_code "
            " AND OT2.source_crs_auth_name = OT1.target_crs_auth_name "
-           " AND OT2.method_code IN (1068, 1069) "
+           " AND OT2.method_code IN (1068, 1069, 1104) "
            " AND OT2.target_crs_code = ? ";
     params.emplace_back(code);
     if (d->hasAuthorityRestriction()) {
