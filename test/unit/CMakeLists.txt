@@ -166,6 +166,10 @@ add_executable(test_defmodel
 target_link_libraries(test_defmodel
   PRIVATE GTest::gtest
   PRIVATE ${PROJ_LIBRARIES})
+if(NLOHMANN_JSON STREQUAL "external")
+  target_compile_definitions(test_defmodel PRIVATE EXTERNAL_NLOHMANN_JSON)
+  target_link_libraries(test_defmodel PRIVATE nlohmann_json::nlohmann_json)
+endif()
 add_test(NAME test_defmodel COMMAND test_defmodel)
 set_property(TEST test_defmodel
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
@@ -176,6 +180,10 @@ add_executable(test_tinshift
 target_link_libraries(test_tinshift
   PRIVATE GTest::gtest
   PRIVATE ${PROJ_LIBRARIES})
+if(NLOHMANN_JSON STREQUAL "external")
+  target_compile_definitions(test_tinshift PRIVATE EXTERNAL_NLOHMANN_JSON)
+  target_link_libraries(test_tinshift PRIVATE nlohmann_json::nlohmann_json)
+endif()
 add_test(NAME test_tinshift COMMAND test_tinshift)
 set_property(TEST test_tinshift
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})

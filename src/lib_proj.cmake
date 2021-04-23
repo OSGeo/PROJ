@@ -293,7 +293,6 @@ include_directories(${PROJ_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 source_group("CMake Files" FILES CMakeLists.txt)
 
-
 # Embed PROJ_LIB data files location
 add_definitions(-DPROJ_LIB="${CMAKE_INSTALL_PREFIX}/${DATADIR}")
 
@@ -396,6 +395,11 @@ endif()
 
 target_include_directories(proj PRIVATE ${SQLITE3_INCLUDE_DIR})
 target_link_libraries(proj PRIVATE ${SQLITE3_LIBRARY})
+
+if(NLOHMANN_JSON STREQUAL "external")
+  target_compile_definitions(proj PRIVATE EXTERNAL_NLOHMANN_JSON)
+  target_link_libraries(proj PRIVATE nlohmann_json::nlohmann_json)
+endif()
 
 if(TIFF_ENABLED)
   target_compile_definitions(proj PRIVATE -DTIFF_ENABLED)
