@@ -2456,7 +2456,8 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
             for (const auto &candidate : candidates) {
                 if (candidate.second == 100) {
                     const auto &ids = candidate.first->identifiers();
-                    for (const auto &id : ids) {
+                    if (!ids.empty()) {
+                        const auto &id = ids.front();
                         compAuthName = *(id->codeSpace());
                         compCode = id->code();
                         break;
