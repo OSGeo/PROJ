@@ -263,12 +263,12 @@ libproj_la_SOURCES = \
 # The sed hack is to please MSVC
 wkt1_parser:
 	bison --no-lines -d  -p pj_wkt1_ -o$(top_srcdir)/src/wkt1_generated_parser.c $(top_srcdir)/src/wkt1_grammar.y
-	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/wkt1_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"  > $(top_srcdir)/src/wkt1_generated_parser.c.tmp
+	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/wkt1_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/" | sed "s/return yystpcpy (yyres, yystr) - yyres;/return (YYPTRDIFF_T)(yystpcpy (yyres, yystr) - yyres);/" | sed "s/YYPTRDIFF_T yysize = yyssp - yyss + 1;/YYPTRDIFF_T yysize = (YYPTRDIFF_T)(yyssp - yyss + 1);/" > $(top_srcdir)/src/wkt1_generated_parser.c.tmp
 	mv $(top_srcdir)/src/wkt1_generated_parser.c.tmp $(top_srcdir)/src/wkt1_generated_parser.c
 
 wkt2_parser:
 	bison --no-lines -d  -p pj_wkt2_ -o$(top_srcdir)/src/wkt2_generated_parser.c $(top_srcdir)/src/wkt2_grammar.y
-	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/wkt2_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"  > $(top_srcdir)/src/wkt2_generated_parser.c.tmp
+	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/wkt2_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"| sed "s/return yystpcpy (yyres, yystr) - yyres;/return (YYPTRDIFF_T)(yystpcpy (yyres, yystr) - yyres);/" | sed "s/YYPTRDIFF_T yysize = yyssp - yyss + 1;/YYPTRDIFF_T yysize = (YYPTRDIFF_T)(yyssp - yyss + 1);/"> $(top_srcdir)/src/wkt2_generated_parser.c.tmp
 	mv $(top_srcdir)/src/wkt2_generated_parser.c.tmp $(top_srcdir)/src/wkt2_generated_parser.c
 
 
