@@ -293,3 +293,60 @@ if(UNIX OR MINGW)
     ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
+
+################################################################################
+# "make dist" workalike
+################################################################################
+
+set(CPACK_SOURCE_GENERATOR "TGZ;ZIP")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "proj-${PROJ_VERSION}")
+set(CPACK_PACKAGE_VENDOR "OSGeo")
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJ_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJ_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${PROJ_VERSION_PATCH})
+set(CPACK_VERBATIM_VARIABLES TRUE)
+set(CPACK_SOURCE_IGNORE_FILES
+  /\\..*  # any file/directory starting with .
+  /.*\\.yml
+  /.*\\.gz
+  /.*\\.zip
+  /.*build.*/
+  \\.deps
+  /autogen\\.sh
+  /autom4te\\.cache
+  /CODE_OF_CONDUCT.md
+  /CONTRIBUTING.md
+  /Dockerfile
+  /docs/
+  /Doxyfile
+  /examples/
+  /HOWTO-RELEASE
+  /m4/lt*
+  /m4/libtool*
+  /media/
+  /schemas/
+  /scripts/
+  /test/fuzzers/
+  /test/gigs/.*gie\\.failing
+  /test/postinstall/
+  /travis/
+  ${PROJECT_BINARY_DIR}
+)
+
+include(CPack)
+
+# Simplify README.md to README
+add_custom_target(README
+  COMMAND ${CMAKE_COMMAND}
+    -D PROJ_SOURCE_DIR=${PROJ_SOURCE_DIR}
+    -P ${PROJ_SOURCE_DIR}/cmake/ProjReadme.cmake
+)
+
+get_property(_is_multi_config_generator GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(NOT _is_multi_config_generator)
+  add_custom_target(dist
+    COMMAND ${CMAKE_MAKE_PROGRAM} package_source
+    DEPENDS README
+  )
+  message(STATUS "PROJ: Configured 'dist' target")
+endif()
