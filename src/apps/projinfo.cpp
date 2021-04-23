@@ -1339,9 +1339,15 @@ int main(int argc, char **argv) {
 
     if (dumpDbStructure) {
         assert(dbContext);
-        const auto structure = dbContext->getDatabaseStructure();
-        for (const auto &sql : structure) {
-            std::cout << sql << std::endl;
+        try {
+            const auto structure = dbContext->getDatabaseStructure();
+            for (const auto &sql : structure) {
+                std::cout << sql << std::endl;
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "ERROR: getDatabaseStructure() failed: " << e.what()
+                      << std::endl;
+            std::exit(1);
         }
     }
 
