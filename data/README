@@ -4,16 +4,6 @@ File Contents:
 
 README  --- This file
 
-epsg    --- Translation of EPSG GCS/PCS codes into PROJ via init= mechanism.
-
-epsg-deprecated --- EPSG definitions that have been deprecated. They are
-                not part of 'epsg' anymore, but may have been delivered
-		with earlier versions of 'epsg'.
-		Thus, they might occur e.g. in WMS (Web Mapping Services)
-		running with old EPSG definitions.
-		This file is not complete at all - it contains just
-		definitions that were individually reported.
-
 nad27   --- North American Datum 1927 for "init=" definition of
 			State Plane Coordinate Systems (SPCS).
 
@@ -25,9 +15,4 @@ world   --- Proj specifications for several international grid systems.
 
 nad.lst --- Reference list of SPCS States and NGS datum identifiers
 
-IGNF    --- Translation of French Mapping Agency codes into PROJ via init= mechanism.
-
-install     --- Unix shell (sh) script to install proj init files.
-				Read beginning for usage instructions.
-
-Additional data files are available in https://github.com/OSGeo/proj-datumgrid/
+Additional data files are available in https://github.com/OSGeo/PROJ-data
