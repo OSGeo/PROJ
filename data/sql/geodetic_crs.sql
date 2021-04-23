@@ -923,7 +923,7 @@ INSERT INTO "usage" VALUES('EPSG','3556','geodetic_crs','EPSG','4726','EPSG','31
 INSERT INTO "geodetic_crs" VALUES('EPSG','4727','Midway 1961',NULL,'geographic 2D','EPSG','6422','EPSG','6727',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3557','geodetic_crs','EPSG','4727','EPSG','3202','EPSG','1160');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4728','PN84',NULL,'geographic 2D','EPSG','6422','EPSG','6728',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','3558','geodetic_crs','EPSG','4728','EPSG','3873','EPSG','1160');
+INSERT INTO "usage" VALUES('EPSG','3558','geodetic_crs','EPSG','4728','EPSG','4598','EPSG','1160');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4729','Pitcairn 1967',NULL,'geographic 2D','EPSG','6422','EPSG','6729',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3559','geodetic_crs','EPSG','4729','EPSG','3208','EPSG','1160');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4730','Santo 1965',NULL,'geographic 2D','EPSG','6422','EPSG','6730',NULL,0);

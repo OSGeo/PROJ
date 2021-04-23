@@ -5613,6 +5613,8 @@ operation::CoordinateOperationNNPtr AuthorityFactory::createCoordinateOperation(
                 int method_code_int = std::atoi(method_code.c_str());
                 if (operation::isAxisOrderReversal(method_code_int) ||
                     method_code_int == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT ||
+                    method_code_int ==
+                        EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT_NO_CONV_FACTOR ||
                     method_code_int == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
                     auto op = operation::Conversion::create(props, propsMethod,
                                                             parameters, values);

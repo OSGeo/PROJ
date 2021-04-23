@@ -5302,6 +5302,13 @@ TEST(operation, createChangeVerticalUnit) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createChangeVerticalUnitNoconvFactor) {
+    auto conv = Conversion::createChangeVerticalUnit(PropertyMap());
+    EXPECT_TRUE(conv->validateParameters().empty());
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, createGeographicGeocentric) {
     auto conv = Conversion::createGeographicGeocentric(PropertyMap());
     EXPECT_TRUE(conv->validateParameters().empty());

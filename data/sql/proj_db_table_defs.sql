@@ -500,6 +500,7 @@ BEGIN
             'EPSG_1052_Colombia Urban',
             'EPSG_1068_Height Depth Reversal',
             'EPSG_1069_Change of Vertical Unit',
+            'EPSG_1104_Change of Vertical Unit',
             'EPSG_1078_Equal Earth',
             'EPSG_9602_Geographic/geocentric conversions',
             'EPSG_9659_Geographic3D to 2D conversion',

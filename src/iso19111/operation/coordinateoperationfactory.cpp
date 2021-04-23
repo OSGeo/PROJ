@@ -2097,6 +2097,17 @@ static std::string buildTransfName(const std::string &srcName,
 
 // ---------------------------------------------------------------------------
 
+static std::string buildConvName(const std::string &srcName,
+                                 const std::string &targetName) {
+    std::string name("Conversion from ");
+    name += srcName;
+    name += " to ";
+    name += targetName;
+    return name;
+}
+
+// ---------------------------------------------------------------------------
+
 static SingleOperationNNPtr createPROJBased(
     const util::PropertyMap &properties,
     const io::IPROJStringExportableNNPtr &projExportable,
@@ -4273,8 +4284,8 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
         ((srcIsUp && dstIsDown) || (srcIsDown && dstIsUp));
 
     const double factor = convSrc / convDst;
-    auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
     if (!equivalentVDatum) {
+        auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
         name += BALLPARK_VERTICAL_TRANSFORMATION;
         auto conv = Transformation::createChangeVerticalUnit(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name),
@@ -4285,6 +4296,7 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
         conv->setHasBallparkTransformation(true);
         res.push_back(conv);
     } else if (convSrc != convDst || !heightDepthReversal) {
+        auto name = buildConvName(sourceCRS->nameStr(), targetCRS->nameStr());
         auto conv = Conversion::createChangeVerticalUnit(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name),
             // In case of a height depth reversal, we should probably have
@@ -4293,6 +4305,7 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
         conv->setCRSs(sourceCRS, targetCRS, nullptr);
         res.push_back(conv);
     } else {
+        auto name = buildConvName(sourceCRS->nameStr(), targetCRS->nameStr());
         auto conv = Conversion::createHeightDepthReversal(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name));
         conv->setCRSs(sourceCRS, targetCRS, nullptr);

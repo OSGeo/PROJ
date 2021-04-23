@@ -77,7 +77,7 @@ INSERT INTO "scope" VALUES('EPSG','1097','Cartography System of Distrito Federal
 INSERT INTO "scope" VALUES('EPSG','1098','Web mapping and visualisation.',0);
 INSERT INTO "scope" VALUES('EPSG','1099','Change of height to a different vertical reference surface and unit.',0);
 INSERT INTO "scope" VALUES('EPSG','1100','Change of prime meridian.',0);
-INSERT INTO "scope" VALUES('EPSG','1101','Change of height or depth unit to facilitate transformation through concatenated operations.',0);
+INSERT INTO "scope" VALUES('EPSG','1101','Change of height or depth unit.',0);
 INSERT INTO "scope" VALUES('EPSG','1102','Cadastre, engineering survey, civilian topographic mapping.',0);
 INSERT INTO "scope" VALUES('EPSG','1103','Coastal hydrography.',0);
 INSERT INTO "scope" VALUES('EPSG','1104','Coastal hydrography, offshore oil and gas exploration and production.',0);

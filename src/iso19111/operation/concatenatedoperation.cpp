@@ -48,6 +48,7 @@
 #include "proj.h"
 #include "proj_internal.h" // M_PI
 // clang-format on
+#include "proj_constants.h"
 
 #include "proj_json_streaming_writer.hpp"
 
@@ -321,7 +322,8 @@ void ConcatenatedOperation::fixStepsDirection(
                 if (l_sourceCRS) {
                     derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
                         l_sourceCRS.get());
-                    if (conv->isEquivalentTo(
+                    if (derivedCRS &&
+                        conv->isEquivalentTo(
                             derivedCRS->derivingConversion().get(),
                             util::IComparable::Criterion::EQUIVALENT)) {
                         op->setCRSs(concatOpTargetCRS, NN_NO_CHECK(l_sourceCRS),
@@ -340,6 +342,37 @@ void ConcatenatedOperation::fixStepsDirection(
             if (l_sourceCRS && l_targetCRS) {
                 op->setCRSs(NN_NO_CHECK(l_sourceCRS), NN_NO_CHECK(l_targetCRS),
                             nullptr);
+            } else if (l_sourceCRS && l_targetCRS == nullptr &&
+                       conv->method()->getEPSGCode() ==
+                           EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
+                // Needed for EPSG:7987 e.g.
+                auto vertCRS =
+                    dynamic_cast<const crs::VerticalCRS *>(l_sourceCRS.get());
+                if (vertCRS && ends_with(l_sourceCRS->nameStr(), " height") &&
+                    &vertCRS->coordinateSystem()->axisList()[0]->direction() ==
+                        &cs::AxisDirection::UP) {
+                    op->setCRSs(
+                        NN_NO_CHECK(l_sourceCRS),
+                        crs::VerticalCRS::create(
+                            util::PropertyMap().set(
+                                common::IdentifiedObject::NAME_KEY,
+                                l_sourceCRS->nameStr().substr(
+                                    0, l_sourceCRS->nameStr().size() -
+                                           strlen(" height")) +
+                                    " depth"),
+                            vertCRS->datum(), vertCRS->datumEnsemble(),
+                            cs::VerticalCS::create(
+                                util::PropertyMap(),
+                                cs::CoordinateSystemAxis::create(
+                                    util::PropertyMap().set(
+                                        common::IdentifiedObject::NAME_KEY,
+                                        "Gravity-related depth"),
+                                    "D", cs::AxisDirection::DOWN,
+                                    vertCRS->coordinateSystem()
+                                        ->axisList()[0]
+                                        ->unit()))),
+                        nullptr);
+                }
             }
         } else if (!conv && l_sourceCRS && l_targetCRS) {
 

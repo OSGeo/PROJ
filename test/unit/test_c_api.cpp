@@ -5021,7 +5021,7 @@ TEST_F(CApi, proj_create_vertical_crs_ex) {
     ASSERT_TRUE(name != nullptr);
     EXPECT_EQ(name,
               std::string("Inverse of UTM zone 11N + "
-                          "Transformation from myVertCRS (ftUS) to myVertCRS + "
+                          "Conversion from myVertCRS (ftUS) to myVertCRS + "
                           "Transformation from myVertCRS to NAD83(2011)"));
 
     auto proj_5 = proj_as_proj_string(m_ctxt, P, PJ_PROJ_5, nullptr);
@@ -5090,7 +5090,7 @@ TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
         name,
         std::string("Inverse of UTM zone 11N + "
                     "Ballpark geographic offset from NAD83(2011) to WGS 84 + "
-                    "Transformation from myVertCRS to myVertCRS (metre) + "
+                    "Conversion from myVertCRS to myVertCRS (metre) + "
                     "Transformation from myVertCRS (metre) to WGS 84 + "
                     "Ballpark geographic offset from WGS 84 to NAD83(2011)"));
 
