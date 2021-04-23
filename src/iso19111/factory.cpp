@@ -5810,6 +5810,30 @@ AuthorityFactory::getGeoidModels(const std::string &code) const {
         sql += " AND OT1.target_crs_auth_name = ? ";
         params.emplace_back(d->authority());
     }
+
+    /// The third part of the query is for CRSs that use that geoid model via
+    /// other_transformation table twice, like transforming depth and feet
+    sql += "UNION "
+           "SELECT DISTINCT GM0.name "
+           " FROM geoid_model GM0 "
+           "INNER JOIN grid_transformation GT1 "
+           " ON  GT1.code = GM0.operation_code "
+           " AND GT1.auth_name = GM0.operation_auth_name "
+           "INNER JOIN other_transformation OT1 "
+           " ON  OT1.source_crs_code = GT1.target_crs_code "
+           " AND OT1.source_crs_auth_name = GT1.target_crs_auth_name "
+           " AND OT1.method_auth_name = 'EPSG' "
+           " AND OT1.method_code IN (1068, 1069) "
+           "INNER JOIN other_transformation OT2 "
+           " ON  OT2.source_crs_code = OT1.target_crs_code "
+           " AND OT2.source_crs_auth_name = OT1.target_crs_auth_name "
+           " AND OT2.method_code IN (1068, 1069) "
+           " AND OT2.target_crs_code = ? ";
+    params.emplace_back(code);
+    if (d->hasAuthorityRestriction()) {
+        sql += " AND OT2.target_crs_auth_name = ? ";
+        params.emplace_back(d->authority());
+    }
     sql += " ORDER BY 1 ";
 
     auto sqlRes = d->run(sql, params);

@@ -2142,13 +2142,19 @@ TEST(
 TEST(factory, AuthorityFactory_getAvailableGeoidmodels) {
 
     const std::string OSGM15{"OSGM15"};
+    const std::string GEOID12B{"GEOID12B"};
+    const std::string GEOID18{"GEOID18"};
 
-    auto checkNavd88 = [&OSGM15](const std::list<std::string> &res) {
-        const std::string GEOID12B{"GEOID12B"};
-        const std::string GEOID18{"GEOID18"};
+    auto checkNavd88 = [&](const std::list<std::string> &res) {
         EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), GEOID12B));
         EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), GEOID18));
         EXPECT_FALSE(res.end() != std::find(res.begin(), res.end(), OSGM15));
+    };
+
+    auto checkOdn = [&](const std::list<std::string> &res) {
+        EXPECT_FALSE(res.end() != std::find(res.begin(), res.end(), GEOID12B));
+        EXPECT_FALSE(res.end() != std::find(res.begin(), res.end(), GEOID18));
+        EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), OSGM15));
     };
 
     auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
@@ -2159,29 +2165,33 @@ TEST(factory, AuthorityFactory_getAvailableGeoidmodels) {
     }
 
     {
-        auto res = factory->getGeoidModels("5703");
+        auto res = factory->getGeoidModels("5703"); // "NAVD88 height"
         checkNavd88(res);
     }
     {
-        auto res = factory->getGeoidModels("6360");
+        auto res = factory->getGeoidModels("6360"); // "NAVD88 height (ftUS)"
         checkNavd88(res);
     }
     {
-        auto res = factory->getGeoidModels("8228");
+        auto res = factory->getGeoidModels("8228"); // "NAVD88 height (ft)"
         checkNavd88(res);
     }
     {
-        auto res = factory->getGeoidModels("6357");
+        auto res = factory->getGeoidModels("6357"); // "NAVD88 depth"
+        checkNavd88(res);
+    }
+    {
+        auto res = factory->getGeoidModels("6358"); // "NAVD88 depth (ftUS)"
         checkNavd88(res);
     }
 
     {
-        auto res = factory->getGeoidModels("5701");
-        EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), OSGM15));
+        auto res = factory->getGeoidModels("5701"); // "ODN height"
+        checkOdn(res);
     }
     {
-        auto res = factory->getGeoidModels("5732");
-        EXPECT_TRUE(res.end() != std::find(res.begin(), res.end(), OSGM15));
+        auto res = factory->getGeoidModels("5732"); // "Belfast height"
+        checkOdn(res);
     }
 }
 
