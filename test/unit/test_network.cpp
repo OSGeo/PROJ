@@ -38,14 +38,14 @@
 #include <sqlite3.h>
 #include <time.h>
 
+#ifdef CURL_ENABLED
+#include <curl/curl.h>
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <unistd.h>
-#endif
-
-#ifdef CURL_ENABLED
-#include <curl/curl.h>
 #endif
 
 namespace {
