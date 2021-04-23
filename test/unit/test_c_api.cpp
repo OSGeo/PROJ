@@ -5622,11 +5622,6 @@ TEST_F(CApi, proj_get_insert_statements) {
 // ---------------------------------------------------------------------------
 
 TEST_F(CApi, proj_get_geoid_models_from_database) {
-
-    const std::string GEOID12B{"GEOID12B"};
-    const std::string GEOID18{"GEOID18"};
-    const std::string OSGM15{"OSGM15"};
-
     auto findInList = [](PROJ_STRING_LIST list, const std::string &ref) {
         while (list && *list) {
             if (std::string(*list) == ref) {
@@ -5637,47 +5632,12 @@ TEST_F(CApi, proj_get_geoid_models_from_database) {
         return false;
     };
 
-    {
-        auto list = proj_get_geoid_models_from_database(m_ctxt, "EPSG", "4326",
-                                                        nullptr);
-        ListFreer freer(list);
-        ASSERT_NE(list, nullptr);
-        EXPECT_EQ(list[0], nullptr);
-    }
-
-    {
-        auto list = proj_get_geoid_models_from_database(m_ctxt, "EPSG", "5703",
-                                                        nullptr);
-        ListFreer freer(list);
-        EXPECT_TRUE(findInList(list, GEOID12B));
-        EXPECT_TRUE(findInList(list, GEOID18));
-        EXPECT_FALSE(findInList(list, OSGM15));
-    }
-    {
-        auto list = proj_get_geoid_models_from_database(m_ctxt, "EPSG", "8228",
-                                                        nullptr);
-        ListFreer freer(list);
-        EXPECT_TRUE(findInList(list, GEOID12B));
-        EXPECT_TRUE(findInList(list, GEOID18));
-        EXPECT_FALSE(findInList(list, OSGM15));
-    }
-    {
-        auto list = proj_get_geoid_models_from_database(m_ctxt, "EPSG", "6358",
-                                                        nullptr);
-        ListFreer freer(list);
-        EXPECT_TRUE(findInList(list, GEOID12B));
-        EXPECT_TRUE(findInList(list, GEOID18));
-        EXPECT_FALSE(findInList(list, OSGM15));
-    }
-
-    {
-        auto list = proj_get_geoid_models_from_database(m_ctxt, "EPSG", "5701",
-                                                        nullptr);
-        ListFreer freer(list);
-        EXPECT_FALSE(findInList(list, GEOID12B));
-        EXPECT_FALSE(findInList(list, GEOID18));
-        EXPECT_TRUE(findInList(list, OSGM15));
-    }
+    auto list =
+        proj_get_geoid_models_from_database(m_ctxt, "EPSG", "5703", nullptr);
+    ListFreer freer(list);
+    EXPECT_TRUE(findInList(list, "GEOID12B"));
+    EXPECT_TRUE(findInList(list, "GEOID18"));
+    EXPECT_FALSE(findInList(list, "OSGM15"));
 }
 
 } // namespace
