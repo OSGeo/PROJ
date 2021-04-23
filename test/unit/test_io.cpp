@@ -10584,16 +10584,17 @@ TEST(io, createFromUserInput) {
         EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
     }
     {
-        // Completely non-sensical from a geodesic point of view...
-        auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::3855,"
-                                       "cs:EPSG::6499,"
-                                       "coordinateOperation:EPSG::16031",
+        // DerivedVerticalCRS based on "NAVD88 height", using a foot UP axis,
+        // and EPSG:7813 "Vertical Axis Unit Conversion" conversion
+        auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::5703,"
+                                       "cs:EPSG::1030,"
+                                       "coordinateOperation:EPSG::7813",
                                        dbContext);
         auto crs = nn_dynamic_pointer_cast<DerivedVerticalCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
-        EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 3855);
-        EXPECT_EQ(crs->coordinateSystem()->getEPSGCode(), 6499);
-        EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
+        EXPECT_EQ(crs->baseCRS()->getEPSGCode(), 5703);
+        EXPECT_EQ(crs->coordinateSystem()->getEPSGCode(), 1030);
+        EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 7813);
     }
 
     {
