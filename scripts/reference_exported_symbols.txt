@@ -971,6 +971,7 @@ proj_get_crs_info_list_from_database
 proj_get_crs_list_parameters_create
 proj_get_crs_list_parameters_destroy
 proj_get_ellipsoid
+proj_get_geoid_models_from_database
 proj_get_id_auth_name
 proj_get_id_code
 proj_get_insert_statements
