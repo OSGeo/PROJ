@@ -274,7 +274,7 @@ static BaseObjectNNPtr buildObject(
             char buffer[256];
             fs.read(buffer, sizeof(buffer));
             l_user_string.append(buffer, static_cast<size_t>(fs.gcount()));
-            if (l_user_string.size() > 100 * 1000) {
+            if (l_user_string.size() > 1000 * 1000) {
                 fs.close();
                 std::cerr << context << ": too big file" << std::endl;
                 std::exit(1);
