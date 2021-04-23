@@ -1,0 +1,51 @@
+name: coverity-scan
+
+# Controls when the action will run. 
+on:
+  # Run this action on a schedule (we're allowed a maximum of two per day)
+  schedule:
+    - cron: '0 18 * * SUN' # Sunday at 18:00 UTC
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    if: github.repository == 'OSGeo/PROJ'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --allow-unauthenticated curl libcurl4-gnutls-dev libtiff-dev sqlite3 libsqlite3-dev g++ make cmake
+      - name: Configure PROJ
+        run: |
+          cmake . -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF
+      - name: Download Coverity Build Tool
+        run: |
+          wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=OSGeo%2Fproj.4" -O cov-analysis-linux64.tar.gz
+          mkdir cov-analysis-linux64
+          tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+      - name: Build with cov-build
+        run: |
+          pwd
+          export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
+          cov-build --dir cov-int make -j$(nproc)
+      - name: Submit to Coverity Scan
+        run: |
+          tar czvf proj.tgz cov-int
+          curl \
+            --form project=OSGeo%2Fproj.4 \
+            --form token=$TOKEN \
+            --form email=even.rouault@spatialys.com \
+            --form file=@proj.tgz \
+            --form version=master \
+            --form description="`git rev-parse --abbrev-ref HEAD` `git rev-parse --short HEAD`" \
+            https://scan.coverity.com/builds?project=OSGeo%2Fproj.4
+        env:
+          TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
