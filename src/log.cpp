@@ -49,7 +49,7 @@ void pj_stderr_logger( void *app_data, int level, const char *msg )
 /*                               pj_vlog()                              */
 /************************************************************************/
 void pj_vlog( PJ_CONTEXT *ctx, int level, const char *fmt, va_list args );
-/* Workhorse for the log functions - relates to pj_log as vsprintf relates to sprintf */
+
 void pj_vlog( PJ_CONTEXT *ctx, int level, const char *fmt, va_list args )
 
 {
@@ -67,12 +67,13 @@ void pj_vlog( PJ_CONTEXT *ctx, int level, const char *fmt, va_list args )
     if( level > debug_level )
         return;
 
-    msg_buf = (char *) malloc(100000);
+    constexpr size_t BUF_SIZE = 100000;
+    msg_buf = (char *) malloc(BUF_SIZE);
     if( msg_buf == nullptr )
         return;
 
-    /* we should use vsnprintf where available once we add configure detect.*/
-    vsprintf( msg_buf, fmt, args );
+    vsnprintf( msg_buf, BUF_SIZE, fmt, args );
+    msg_buf[BUF_SIZE-1] = '\0';
 
     ctx->logger( ctx->logger_app_data, level, msg_buf );
 
