@@ -10358,6 +10358,8 @@ TEST(io, createFromUserInput) {
     EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:datum:EPSG::6326", dbContext));
     EXPECT_NO_THROW(
+        createFromUserInput("urn:ogc:def:ensemble:EPSG::6326", dbContext));
+    EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:meridian:EPSG::8901", dbContext));
     EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:ellipsoid:EPSG::7030", dbContext));
