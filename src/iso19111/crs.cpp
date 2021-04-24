@@ -6506,6 +6506,33 @@ DerivedVerticalCRSNNPtr DerivedVerticalCRS::create(
 void DerivedVerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     const bool isWKT2 = formatter->version() == io::WKTFormatter::Version::WKT2;
     if (!isWKT2) {
+
+        bool useBaseMethod = true;
+        const DerivedVerticalCRS *dvcrs = this;
+        while (true) {
+            // If the derived vertical CRS is obtained through simple conversion
+            // methods that just do unit change or height/depth reversal, export
+            // it as a regular VerticalCRS
+            const int methodCode =
+                dvcrs->derivingConversionRef()->method()->getEPSGCode();
+            if (methodCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT ||
+                methodCode ==
+                    EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT_NO_CONV_FACTOR ||
+                methodCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
+                dvcrs = dynamic_cast<DerivedVerticalCRS *>(baseCRS().get());
+                if (dvcrs == nullptr) {
+                    break;
+                }
+            } else {
+                useBaseMethod = false;
+                break;
+            }
+        }
+        if (useBaseMethod) {
+            VerticalCRS::_exportToWKT(formatter);
+            return;
+        }
+
         io::FormattingException::Throw(
             "DerivedVerticalCRS can only be exported to WKT2");
     }

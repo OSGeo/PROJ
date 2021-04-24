@@ -6491,12 +6491,13 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                 AuthorityFactory::create(NN_NO_CHECK(dbContext), tokensOp[1]);
             auto op = factoryOp->createCoordinateOperation(tokensOp[3], true);
 
-            std::string name(baseCRS->nameStr());
+            const auto &baseName = baseCRS->nameStr();
+            std::string name(baseName);
             auto geogCRS =
                 util::nn_dynamic_pointer_cast<GeographicCRS>(baseCRS);
             if (geogCRS &&
                 geogCRS->coordinateSystem()->axisList().size() == 3 &&
-                baseCRS->nameStr().find("3D") == std::string::npos) {
+                baseName.find("3D") == std::string::npos) {
                 name += " (3D)";
             }
             name += " / ";
@@ -6532,15 +6533,61 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                    baseCRS)) {
                     return DerivedProjectedCRS::create(props, NN_NO_CHECK(pcrs),
                                                        convNN, cs);
-                } else if (dynamic_cast<VerticalCRS *>(baseCRS.get()) &&
-                           dynamic_cast<VerticalCS *>(cs.get())) {
-                    return DerivedVerticalCRS::create(
-                        props,
-                        NN_NO_CHECK(util::nn_dynamic_pointer_cast<VerticalCRS>(
-                            baseCRS)),
-                        convNN,
-                        NN_NO_CHECK(
-                            util::nn_dynamic_pointer_cast<VerticalCS>(cs)));
+                } else if (auto vertBaseCRS =
+                               util::nn_dynamic_pointer_cast<VerticalCRS>(
+                                   baseCRS)) {
+                    if (auto vertCS =
+                            util::nn_dynamic_pointer_cast<VerticalCS>(cs)) {
+                        const int methodCode = convNN->method()->getEPSGCode();
+                        std::string newName(baseName);
+                        std::string unitNameSuffix;
+                        for (const char *suffix : {" (ft)", " (ftUS)"}) {
+                            if (ends_with(newName, suffix)) {
+                                unitNameSuffix = suffix;
+                                newName.resize(newName.size() - strlen(suffix));
+                                break;
+                            }
+                        }
+                        bool newNameOk = false;
+                        if (methodCode ==
+                                EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT_NO_CONV_FACTOR ||
+                            methodCode ==
+                                EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
+                            const auto &unitName =
+                                vertCS->axisList()[0]->unit().name();
+                            if (unitName == UnitOfMeasure::METRE.name()) {
+                                newNameOk = true;
+                            } else if (unitName == UnitOfMeasure::FOOT.name()) {
+                                newName += " (ft)";
+                                newNameOk = true;
+                            } else if (unitName ==
+                                       UnitOfMeasure::US_FOOT.name()) {
+                                newName += " (ftUS)";
+                                newNameOk = true;
+                            }
+                        } else if (methodCode ==
+                                   EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
+                            if (ends_with(newName, " height")) {
+                                newName.resize(newName.size() -
+                                               strlen(" height"));
+                                newName += " depth";
+                                newName += unitNameSuffix;
+                                newNameOk = true;
+                            } else if (ends_with(newName, " depth")) {
+                                newName.resize(newName.size() -
+                                               strlen(" depth"));
+                                newName += " height";
+                                newName += unitNameSuffix;
+                                newNameOk = true;
+                            }
+                        }
+                        if (newNameOk) {
+                            props.set(IdentifiedObject::NAME_KEY, newName);
+                        }
+                        return DerivedVerticalCRS::create(
+                            props, NN_NO_CHECK(vertBaseCRS), convNN,
+                            NN_NO_CHECK(vertCS));
+                    }
                 }
             }
 
