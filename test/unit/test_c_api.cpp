@@ -5619,5 +5619,25 @@ TEST_F(CApi, proj_get_insert_statements) {
         proj_insert_object_session_destroy(m_ctxt, session);
     }
 }
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_get_geoid_models_from_database) {
+    auto findInList = [](PROJ_STRING_LIST list, const std::string &ref) {
+        while (list && *list) {
+            if (std::string(*list) == ref) {
+                return true;
+            }
+            list++;
+        }
+        return false;
+    };
+
+    auto list =
+        proj_get_geoid_models_from_database(m_ctxt, "EPSG", "5703", nullptr);
+    ListFreer freer(list);
+    EXPECT_TRUE(findInList(list, "GEOID12B"));
+    EXPECT_TRUE(findInList(list, "GEOID18"));
+    EXPECT_FALSE(findInList(list, "OSGM15"));
+}
 
 } // namespace

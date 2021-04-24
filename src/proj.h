@@ -1188,6 +1188,12 @@ PJ_OBJ_LIST PROJ_DLL *proj_identify(PJ_CONTEXT *ctx,
                                         const char* const *options,
                                         int **out_confidence);
 
+PROJ_STRING_LIST PROJ_DLL proj_get_geoid_models_from_database(
+                               PJ_CONTEXT *ctx,
+                               const char *auth_name,
+                               const char *code,
+                               const char *const *options);
+
 void PROJ_DLL proj_int_list_destroy(int* list);
 
 /* ------------------------------------------------------------------------- */

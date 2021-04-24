@@ -5765,6 +5765,88 @@ AuthorityFactory::createFromCoordinateReferenceSystemCodes(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Returns a list of geoid models available for that crs
+ *
+ * The list includes the geoid models connected directly with the crs,
+ * or via "Height Depth Reversal" or "Change of Vertical Unit" transformations
+ *
+ * @param code crs code allocated by authority.
+ * @return list of geoid model names
+ * @throw FactoryException
+ */
+
+std::list<std::string>
+AuthorityFactory::getGeoidModels(const std::string &code) const {
+
+    ListOfParams params;
+    std::string sql;
+    sql += "SELECT DISTINCT GM0.name "
+           " FROM geoid_model GM0 "
+           "INNER JOIN grid_transformation GT0 "
+           " ON  GT0.code = GM0.operation_code "
+           " AND GT0.auth_name = GM0.operation_auth_name "
+           " AND GT0.target_crs_code = ? ";
+    params.emplace_back(code);
+    if (d->hasAuthorityRestriction()) {
+        sql += " AND GT0.target_crs_auth_name = ? ";
+        params.emplace_back(d->authority());
+    }
+
+    /// The second part of the query is for CRSs that use that geoid model via
+    /// Height Depth Reversal (EPSG:1068) or Change of Vertical Unit (EPSG:1069)
+    sql += "UNION "
+           "SELECT DISTINCT GM0.name "
+           " FROM geoid_model GM0 "
+           "INNER JOIN grid_transformation GT1 "
+           " ON  GT1.code = GM0.operation_code "
+           " AND GT1.auth_name = GM0.operation_auth_name "
+           "INNER JOIN other_transformation OT1 "
+           " ON  OT1.source_crs_code = GT1.target_crs_code "
+           " AND OT1.source_crs_auth_name = GT1.target_crs_auth_name "
+           " AND OT1.method_auth_name = 'EPSG' "
+           " AND OT1.method_code IN (1068, 1069, 1104) "
+           " AND OT1.target_crs_code = ? ";
+    params.emplace_back(code);
+    if (d->hasAuthorityRestriction()) {
+        sql += " AND OT1.target_crs_auth_name = ? ";
+        params.emplace_back(d->authority());
+    }
+
+    /// The third part of the query is for CRSs that use that geoid model via
+    /// other_transformation table twice, like transforming depth and feet
+    sql += "UNION "
+           "SELECT DISTINCT GM0.name "
+           " FROM geoid_model GM0 "
+           "INNER JOIN grid_transformation GT1 "
+           " ON  GT1.code = GM0.operation_code "
+           " AND GT1.auth_name = GM0.operation_auth_name "
+           "INNER JOIN other_transformation OT1 "
+           " ON  OT1.source_crs_code = GT1.target_crs_code "
+           " AND OT1.source_crs_auth_name = GT1.target_crs_auth_name "
+           " AND OT1.method_auth_name = 'EPSG' "
+           " AND OT1.method_code IN (1068, 1069, 1104) "
+           "INNER JOIN other_transformation OT2 "
+           " ON  OT2.source_crs_code = OT1.target_crs_code "
+           " AND OT2.source_crs_auth_name = OT1.target_crs_auth_name "
+           " AND OT2.method_code IN (1068, 1069, 1104) "
+           " AND OT2.target_crs_code = ? ";
+    params.emplace_back(code);
+    if (d->hasAuthorityRestriction()) {
+        sql += " AND OT2.target_crs_auth_name = ? ";
+        params.emplace_back(d->authority());
+    }
+    sql += " ORDER BY 1 ";
+
+    auto sqlRes = d->run(sql, params);
+    std::list<std::string> res;
+    for (const auto &row : sqlRes) {
+        res.push_back(row[0]);
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Returns a list operation::CoordinateOperation between two CRS.
  *
  * The list is ordered with preferred operations first. No attempt is made

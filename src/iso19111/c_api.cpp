@@ -9162,3 +9162,46 @@ PROJ_STRING_LIST proj_get_insert_statements(
     }
     return nullptr;
 }
+
+// ---------------------------------------------------------------------------
+
+/** \brief Returns a list of geoid models available for that crs
+ *
+ * The list includes the geoid models connected directly with the crs,
+ * or via "Height Depth Reversal" or "Change of Vertical Unit" transformations.
+ * The returned list is NULL terminated and must be freed with
+ * proj_string_list_destroy().
+ *
+ * @param ctx Context, or NULL for default context.
+ * @param auth_name Authority name (must not be NULL)
+ * @param code Object code (must not be NULL)
+ * @param options should be set to NULL for now
+ * @return list of geoid models names (to be freed with
+ * proj_string_list_destroy()), or NULL in case of error.
+ * @since 8.1
+ */
+PROJ_STRING_LIST
+proj_get_geoid_models_from_database(PJ_CONTEXT *ctx, const char *auth_name,
+                                    const char *code,
+                                    const char *const *options) {
+    SANITIZE_CTX(ctx);
+    if (!auth_name || !code) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return nullptr;
+    }
+    (void)options;
+    try {
+        const std::string codeStr(code);
+        auto factory = AuthorityFactory::create(getDBcontext(ctx), auth_name);
+        auto geoidModels = factory->getGeoidModels(codeStr);
+        ctx->safeAutoCloseDbIfNeeded();
+        return to_string_list(std::move(geoidModels));
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    ctx->safeAutoCloseDbIfNeeded();
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
