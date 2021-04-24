@@ -5620,6 +5620,32 @@ TEST(crs, DerivedVerticalCRS_WKT1) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, DerivedVerticalCRS_WKT1_when_simple_derivation) {
+
+    auto derivingConversion =
+        Conversion::createChangeVerticalUnit(PropertyMap().set(
+            IdentifiedObject::NAME_KEY, "Vertical Axis Unit Conversion"));
+
+    auto crs = DerivedVerticalCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived vertCRS"),
+        createVerticalCRS(), derivingConversion,
+        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::FOOT));
+
+    auto expected = "VERT_CS[\"Derived vertCRS\",\n"
+                    "    VERT_DATUM[\"Ordnance Datum Newlyn\",2005,\n"
+                    "        AUTHORITY[\"EPSG\",\"5101\"]],\n"
+                    "    UNIT[\"foot\",0.3048,\n"
+                    "        AUTHORITY[\"EPSG\",\"9002\"]],\n"
+                    "    AXIS[\"Gravity-related height\",UP]]";
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        expected);
+}
+
+// ---------------------------------------------------------------------------
+
 static DerivedEngineeringCRSNNPtr createDerivedEngineeringCRS() {
 
     auto derivingConversion = Conversion::create(
