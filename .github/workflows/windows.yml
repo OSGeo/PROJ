@@ -94,7 +94,7 @@ jobs:
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             mkdir ${PROJ_BUILD}
             cd ${PROJ_BUILD}
-            cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" ..
+            cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" ..
             make -j 2
             make install
             ls ${PROJ_DIR}/bin
