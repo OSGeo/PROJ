@@ -120,21 +120,21 @@ Preliminary step: install clang. For example:
 
 ::
 
-    wget http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-    tar xJf clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-    mv clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04 clang+llvm-6
+    wget https://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+    tar xJf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+    mv clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04 clang+llvm-9
 
 Run configure under the scan-build utility of clang:
 
 ::
 
-    ./clang+llvm-6/bin/scan-build ./configure
+    ./clang+llvm-9/bin/scan-build ./configure
 
 Build under scan-build:
 
 ::
 
-    ./clang+llvm-6/bin/scan-build make [-j8]
+    ./clang+llvm-9/bin/scan-build make [-j8]
 
 If CSA finds errors, they will be emitted during the build. And in which case,
 at the end of the build process, scan-build will emit a warning message
@@ -143,7 +143,7 @@ is with someling like
 
 ::
 
-    ./clang+llvm-6/bin/scan-view /tmp/scan-build-2018-03-15-121416-17476-1
+    ./clang+llvm-9/bin/scan-view /tmp/scan-build-2021-03-15-121416-17476-1
 
 
 This will open a web browser with the interactive report.
