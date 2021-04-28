@@ -1,3 +1,72 @@
+8.0.1 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Database: update to EPSG v10.018 (#2636)
+
+ o Add transformations for CHGeo2004, Swiss geoid model (#2604)
+
+ o Additions to the norwegian NKG2020 transformation (#2600)
+
+ Bug fixes
+ ---------
+
+ o pj_vlog(): fix buffer overflow in case of super lengthy error message (#2693)
+
+ o Revert "proj_create_crs_to_crs_from_pj(): do not use PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION if area is specified" (#2679)
+
+ o UTM: error out when value of +zone= is not an integer (#2672)
+
+ o getCRSInfoList(): make result order deterministic (by increasing auth_name,
+   code) (#2661)
+
+ o createOperation(): make sure no to discard deprecated operations if the
+   replacement uses an unknow grid (#2623)
+
+ o Fix build on Solaris 11.4 (#2621)
+
+ o Add mapping of ESRI Equal_Area projection method to EPSG (#2612)
+
+ o Fix incorrect EPGS extent code for EPSG:7789>EPSG:4976 NKG transformation (#2599)
+
+ o fix wrong capitalization of CHENyx06_ETRS.gsb (#2597)
+
+ o createOperations(): improve handling of vertical transforms when
+   when compound CRSs are used (#2592)
+
+ o CRS::promoteTo3D(): propagate the extent from the 2D CRS (#2589)
+
+ o createFromCRSCodesWithIntermediates(): improve performance when there is
+   no match (#2583)
+
+ o Fix proj_clone() to work on 'meta' coordinate operation PJ* objects that
+   can be returned by proj_create_crs_to_crs() (#2582)
+
+ o add PROJ_COMPUTE_VERSION, PROJ_VERSION_NUMBER,
+   PROJ_AT_LEAST_VERSION macros (#2581)
+
+ o Make proj_lp_dist() and proj_geod() work on a PJ* CRS object (#2570)
+
+ o Fix gcc 11 -Wnonnull compilation warnings (#2559)
+
+ o Fix use of uninitialized memory in gie tests (#2558)
+
+ o createOperations(): fix incorrect height transformation between 3D promoted RGF93 and CH1903+ (#2555)
+
+
+ THANKS TO
+ ---------
+
+ Dan Jacobson
+ Sveinung Himle
+ Mike Taves
+ Javier Jimenez Shaw
+ Kristian Evers
+ Even Rouault
+
+
 8.0.0 Release Notes
 -------------------
 
