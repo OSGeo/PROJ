@@ -3,7 +3,7 @@
 # -------------------------------------------------------------------------------
 #                                      NKG
 # -------------------------------------------------------------------------------
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_NKG_ETRF00
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_NKG_ETRF00
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
@@ -16,14 +16,14 @@ expect      3541657.9311 948983.7980 5201383.2227 2020.5
 
 # 2008 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_DK
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_DK
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
 expect      3541657.9362 948983.7825 5201383.2292 2020.5
 
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_DK
+operation   urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_DK
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
@@ -32,7 +32,7 @@ expect      3541657.3829 948984.2188 5201383.5296 2020.5
 
 # 2020 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_DK
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_DK
 tolerance   0.1 mm
 
 # BUDD
@@ -43,7 +43,7 @@ expect      3513638.5607    778956.1875   5248216.2477  2015.0
 accept      3582104.8458    532590.0946   5232755.0863 2015.0
 expect      3582105.2916    532589.7310   5232754.8057 2015.0
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_NKG_ETRF14
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_NKG_ETRF14
 tolerance   0.1 mm
 
 # BUDD
@@ -54,7 +54,7 @@ expect      3513638.5071    778956.1528   5248216.2870  2015.0
 accept      3582104.8458    532590.0946   5232755.0863 2015.0
 expect      3582105.2401    532589.6950   5232754.8507 2015.0
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF14_TO_DK
+operation   urn:ogc:def:coordinateOperation:NKG::ETRF14_TO_DK
 tolerance   0.1 mm
 
 # BUDD
@@ -71,14 +71,14 @@ expect      3582105.2916    532589.7310   5232754.8057 2015.0
 
 # 2008 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_EE
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_EE
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
 expect      3541657.9395 948983.8006 5201383.2242 2020.5
 
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_EE
+operation   urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_EE
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
@@ -87,7 +87,7 @@ expect      3541657.3862 948984.2370 5201383.5246 2020.5
 
 # 2020 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_EE
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_EE
 tolerance   0.1 mm
 
 # AJOE
@@ -100,14 +100,14 @@ expect      2922028.2730   1516183.5457   5444680.4094  2015.0
 
 # 2008 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_FI
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_FI
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
 expect      3541657.9522 948983.7911 5201383.2230 2020.5
 
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_FI
+operation   urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_FI
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
@@ -116,7 +116,7 @@ expect      3541657.3989 948984.2274 5201383.5235 2020.5
 
 # 2020 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_FI
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_FI
 tolerance   0.1 mm
 
 # DEGE
@@ -130,14 +130,14 @@ expect      2994012.5170   1112559.5902   5502271.7683 2015.0
 
 # 2008 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_LV
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_LV
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
 expect      3541657.9806 948983.8606 5201383.3118 2020.5
 
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_LV
+operation   urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_LV
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
@@ -145,7 +145,7 @@ expect      3541657.4273 948984.2970 5201383.6122 2020.5
 
 # 2020 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_LV
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_LV
 tolerance   0.1 mm
 
 # BAUS
@@ -159,14 +159,14 @@ expect      3226814.9950   1449250.1841   5289639.3779 2015.0
 
 # 2008 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_LT
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_LT
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
 expect      3541657.9358 948983.8042 5201383.2294 2020.5
 
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_LT
+operation   urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_LT
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
@@ -174,7 +174,7 @@ expect      3541657.3826 948984.2405 5201383.5299 2020.5
 
 # 2020 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_LT
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_LT
 tolerance   0.1 mm
 
 # VLNS
@@ -188,14 +188,14 @@ expect      3343600.9945   1580417.5661   5179337.1637 2015.0
 
 # 2008 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_NO
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_NO
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
 expect      3541657.9204 948983.8049 5201383.2054 2020.5
 
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_NO
+operation   urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_NO
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
@@ -203,7 +203,7 @@ expect      3541657.3671 948984.2412 5201383.5058 2020.5
 
 # 2020 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_NO
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_NO
 tolerance   0.1 mm
 
 # STAS
@@ -224,14 +224,14 @@ expect      2107889.5097 895603.2085 5933242.3152 2020.0
 # -------------------------------------------------------------------------------
 
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_SE
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2000_TO_SE
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
 expect      3541657.9223 948983.7912 5201383.2025 2020.5
 
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_SE
+operation   urn:ogc:def:coordinateOperation:NKG::ETRF00_TO_SE
 tolerance   1 mm
 
 accept      3541657.3778 948984.2343 5201383.5231 2020.5
@@ -239,7 +239,7 @@ expect      3541657.3690 948984.2275 5201383.5030 2020.5
 
 # 2020 Transformations
 
-operation   operation urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_SE
+operation   urn:ogc:def:coordinateOperation:NKG::ITRF2014_TO_SE
 tolerance   0.1 mm
 
 # ARJ0
