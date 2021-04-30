@@ -36,3 +36,24 @@ function(proj_add_gie_test TESTNAME TESTCASE)
     proj_test_set_properties(${TESTNAME})
 
 endfunction()
+
+# Create user writable directory for tests
+add_custom_target(create_tmp_user_writable_dir ALL
+                  COMMAND ${CMAKE_COMMAND} -E make_directory {PROJ_BINARY_DIR}/tmp_user_writable_dir)
+
+function(proj_add_gie_network_dependent_test TESTNAME TESTCASE)
+
+    set(GIE_BIN $<TARGET_FILE_NAME:gie>)
+    set(TESTFILE ${PROJ_SOURCE_DIR}/test/${TESTCASE})
+    add_test(NAME ${TESTNAME}
+      WORKING_DIRECTORY ${PROJ_SOURCE_DIR}/test
+      COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${GIE_BIN}
+      ${TESTFILE}
+    )
+    set_property(TEST ${TESTNAME}
+        PROPERTY ENVIRONMENT
+          "PROJ_USER_WRITABLE_DIRECTORY=${PROJ_BINARY_DIR}/tmp_user_writable_dir"
+          "PROJ_NETWORK=ON"
+          "PROJ_LIB=${PROJ_BINARY_DIR}/data/for_tests")
+
+endfunction()
