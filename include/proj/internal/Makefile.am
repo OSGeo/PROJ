@@ -1,4 +1,4 @@
-SUBDIRS = nlohmann
+SUBDIRS = vendor
 
 noinst_HEADERS = \
 	coordinatesystem_internal.hpp \

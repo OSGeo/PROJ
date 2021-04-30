@@ -122,8 +122,48 @@ include(ProjMac)
 include(policies)
 
 ################################################################################
+# Check for nlohmann_json
+################################################################################
+
+set(NLOHMANN_JSON_ORIGIN "auto" CACHE STRING
+"nlohmann/json origin. The default auto will try to use external \
+nlohmann/json if possible")
+set_property(CACHE NLOHMANN_JSON_ORIGIN PROPERTY STRINGS auto internal external)
+
+# Probably not the strictest minimum, but known to work with it
+set(MIN_NLOHMANN_JSON_VERSION 3.7.0)
+
+if(NLOHMANN_JSON_ORIGIN STREQUAL "external")
+  find_package(nlohmann_json REQUIRED)
+  set(NLOHMANN_JSON "external")
+elseif(NLOHMANN_JSON_ORIGIN STREQUAL "internal")
+  set(NLOHMANN_JSON "internal")
+else()
+  find_package(nlohmann_json QUIET)
+  if(nlohmann_json_FOUND)
+    set(NLOHMANN_JSON "external")
+  else()
+    set(NLOHMANN_JSON "internal")
+  endif()
+endif()
+
+if(NLOHMANN_JSON STREQUAL "external")
+  # Check minimum version
+  if(nlohmann_json_VERSION VERSION_LESS MIN_NLOHMANN_JSON_VERSION)
+    message(STATUS "external nlohmann/json version ${nlohmann_json_VERSION} "
+      "is older than minimum requirement ${MIN_NLOHMANN_JSON_VERSION}")
+    set(NLOHMANN_JSON "internal")
+  else()
+    message(STATUS "found nlohmann/json version ${nlohmann_json_VERSION}")
+  endif()
+endif()
+
+message(STATUS "nlohmann/json: ${NLOHMANN_JSON}")
+
+################################################################################
 # Check for sqlite3
 ################################################################################
+
 find_program(EXE_SQLITE3 sqlite3)
 if(NOT EXE_SQLITE3)
   message(SEND_ERROR "sqlite3 binary not found!")

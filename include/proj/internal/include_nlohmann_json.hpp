@@ -26,13 +26,26 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
+#ifndef INCLUDE_NLOHMANN_JSON_HPP
+#define INCLUDE_NLOHMANN_JSON_HPP
+
 #if defined(__GNUC__)
 #pragma GCC system_header
 #endif
+
+#ifdef EXTERNAL_NLOHMANN_JSON
+
+#include <nlohmann/json.hpp>
+
+#else // !EXTERNAL_NLOHMANN_JSON
 
 // to avoid any clash if PROJ users have another version of nlohmann/json.hpp
 #define nlohmann proj_nlohmann
 
 #if !defined(DOXYGEN_ENABLED)
-#include "nlohmann/json.hpp"
+#include "vendor/nlohmann/json.hpp"
 #endif
+
+#endif // EXTERNAL_NLOHMANN_JSON
+
+#endif // INCLUDE_NLOHMANN_JSON_HPP
