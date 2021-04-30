@@ -35,8 +35,8 @@ fi
 
 # build libcurl.a (builing against Ubuntu libcurl.a doesn't work easily)
 cd curl
-./buildconf
-./configure --disable-shared --prefix=$SRC/install
+autoreconf -i
+./configure --disable-shared --with-openssl --prefix=$SRC/install
 make clean -s
 make -j$(nproc) -s
 make install
