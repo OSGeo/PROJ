@@ -1,5 +1,7 @@
 set(GIE_BIN "gie")
 
+option(RUN_NETWORK_DEPENDENT_TESTS "Whether to run tests dependent on network availability" ON)
+
 # Regression tests
 proj_add_gie_test("Builtins" "gie/builtins.gie")
 proj_add_gie_test("Builtins2" "gie/more_builtins.gie")
@@ -18,6 +20,10 @@ proj_add_gie_test("guyou" "gie/guyou.gie")
 proj_add_gie_test("peirce_q" "gie/peirce_q.gie")
 proj_add_gie_test("defmodel" "gie/defmodel.gie")
 proj_add_gie_test("tinshift" "gie/tinshift.gie")
+
+if(CURL_ENABLED AND RUN_NETWORK_DEPENDENT_TESTS)
+proj_add_gie_network_dependent_test("nkg" "gie/nkg.gie")
+endif()
 
 # GIGS tests. Uncommented tests are expected to fail due to issues with
 # various projections. Should be investigated further and fixed.

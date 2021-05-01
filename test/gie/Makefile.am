@@ -17,7 +17,8 @@ EXTRA_DIST = 4D-API_cs2cs-style.gie \
 	guyou.gie \
 	peirce_q.gie \
 	defmodel.gie \
-	tinshift.gie
+	tinshift.gie \
+	nkg.gie
 
 PROJ_LIB ?= ../../data/for_tests
 
