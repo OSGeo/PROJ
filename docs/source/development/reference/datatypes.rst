@@ -695,7 +695,7 @@ Info structures
     .. c:member:: const char *PJ_PROJ_INFO.id
 
         Short ID of the operation the :c:type:`PJ` object is based on, that is,
-        what comes afther the ``+proj=`` in a proj-string, e.g. "*merc*".
+        what comes after the ``+proj=`` in a proj-string, e.g. "*merc*".
 
     .. c:member:: const char *PJ_PROJ_INFO.description
 
