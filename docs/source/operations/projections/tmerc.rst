@@ -156,7 +156,7 @@ Spherical form
 **************
 
 Because the full (ellipsoidal) projection includes the spherical
-projection as one of the components, we present the spherial form first
+projection as one of the components, we present the spherical form first
 with the coordinates tagged with primes, :math:`\phi'`,
 :math:`\lambda'`, :math:`\zeta' = \xi' + i\eta'`, :math:`x'`,
 :math:`y'`, so that they can be distinguished from the corresponding

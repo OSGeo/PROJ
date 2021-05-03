@@ -12,8 +12,8 @@ be seen at the end of the section.
 See the following sections for more in-depth descriptions of different parts of
 the PROJ API or consult the :doc:`API reference <reference/index>` for specifics.
 
-Before the PROJ API can be used it is necessary to include the ``proj.h`` header
-file. Here ``stdio.h`` is also included so we can print some text to the screen:
+Before the PROJ API can be used it is necessary to include the :file:`proj.h` header
+file. Here :file:`stdio.h` is also included so we can print some text to the screen:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
@@ -45,7 +45,7 @@ a string that describes the target CRS and an optional description of the area o
 use.
 The strings for the source or target CRS may be PROJ strings (``+proj=longlat +datum=WGS84``),
 CRS identified by their code (``EPSG:4326`` or ``urn:ogc:def:crs:EPSG::4326``) or
-by a well-known text (WKT) string (
+by a well-known text (WKT) string:
 ::
 
     GEOGCRS["WGS 84",
@@ -67,7 +67,6 @@ by a well-known text (WKT) string (
             BBOX[-90,-180,90,180]],
         ID["EPSG",4326]]
 
-).
 The use of PROJ strings to describe a CRS is considered as legacy (one of the
 main weakness of PROJ strings is their inability to describe a geodetic datum,
 other than the few ones hardcoded in the ``+datum`` parameter).
@@ -115,7 +114,7 @@ projected CRS.
 
 PROJ uses its own data structures for handling coordinates. Here we use a
 :c:type:`PJ_COORD` which is easily assigned with the function :c:func:`proj_coord`.
-When using +proj=longlat, the order of coordinates is longitude, latitude,
+When using ``+proj=longlat``, the order of coordinates is longitude, latitude,
 and values are expressed in degrees. If you used instead a EPSG geographic CRS,
 like EPSG:4326 (WGS84), it would be latitude, longitude.
 

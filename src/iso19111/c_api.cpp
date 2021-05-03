@@ -290,7 +290,7 @@ PJ_OBJ_LIST::~PJ_OBJ_LIST() = default;
 // ---------------------------------------------------------------------------
 
 /** \brief Set if the database must be closed after each C API call where it
- * has been openeded, and automatically re-openeded when needed.
+ * has been opened, and automatically re-opened when needed.
  *
  * The default value is FALSE, that is the database remains open until the
  * context is destroyed.
@@ -7451,7 +7451,7 @@ int proj_coordoperation_get_param(
  * difference terms might be zero if the transformation only includes
  * translation
  * parameters. In that case, value_count could be set to 3.
- * @param emit_error_if_incompatible Boolean to inicate if an error must be
+ * @param emit_error_if_incompatible Boolean to indicate if an error must be
  * logged if coordoperation is not compatible with a WKT1 TOWGS84
  * representation.
  * @return TRUE in case of success, or FALSE if coordoperation is not
@@ -7924,7 +7924,7 @@ void proj_operation_factory_context_set_use_proj_alternative_grid_names(
  * The current implementation is limited to researching one intermediate
  * step.
  *
- * By default, with the IF_NO_DIRECT_TRANSFORMATION stratgey, all potential
+ * By default, with the IF_NO_DIRECT_TRANSFORMATION strategy, all potential
  * C candidates will be used if there is no direct transformation.
  *
  * @param ctx PROJ context, or NULL for default context
@@ -9063,7 +9063,7 @@ void proj_string_destroy(char *str) { free(str); }
  * registries, such as "EPSG", "ESRI", "IAU", etc. Users should use a custom
  * authority name instead. If a new object should be
  * added to the official EPSG registry, users are invited to follow the
- * procedure explainted at https://epsg.org/dataset-change-requests.html.
+ * procedure explained at https://epsg.org/dataset-change-requests.html.
  *
  * Combined with proj_context_get_database_structure(), users can create
  * auxiliary databases, instead of directly modifying the main proj.db database.

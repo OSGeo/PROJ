@@ -661,7 +661,7 @@ class PROJ_GCC_DLL IPROJStringExportable {
      * <li>For PROJStringFormatter::Convention::PROJ_4, format a string
      * compatible with the OGRSpatialReference::exportToProj4() of GDAL
      * &lt;=2.3. It is only compatible of a few CRS objects. The PROJ string
-     * will also contain a +type=crs parameter to disambiguish the nature of
+     * will also contain a +type=crs parameter to disambiguate the nature of
      * the string from a CoordinateOperation.
      * <ul>
      * <li>For a crs::GeographicCRS, returns a proj=longlat string, with
@@ -741,7 +741,7 @@ PROJ_DLL util::BaseObjectNNPtr createFromUserInput(const std::string &text,
 
 // ---------------------------------------------------------------------------
 
-/** \brief Parse a WKT string into the appropriate suclass of util::BaseObject.
+/** \brief Parse a WKT string into the appropriate subclass of util::BaseObject.
  */
 class PROJ_GCC_DLL WKTParser {
   public:
@@ -784,7 +784,7 @@ class PROJ_GCC_DLL WKTParser {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Parse a PROJ string into the appropriate suclass of util::BaseObject.
+/** \brief Parse a PROJ string into the appropriate subclass of util::BaseObject.
  */
 class PROJ_GCC_DLL PROJStringParser {
   public:

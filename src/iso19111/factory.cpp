@@ -3508,7 +3508,7 @@ AuthorityFactory::AuthorityFactory(const DatabaseContextNNPtr &context,
  * where createFromCoordinateReferenceSystemCodes(const std::string&,const std::string&,const std::string&,const std::string&) const
  * is called.
  *
- * @param context Contexte.
+ * @param context Context.
  * @param authorityName Authority name.
  * @return new AuthorityFactory.
  */
@@ -5853,7 +5853,7 @@ AuthorityFactory::getGeoidModels(const std::string &code) const {
  * The list is ordered with preferred operations first. No attempt is made
  * at inferring operations that are not explicitly in the database (see
  * createFromCRSCodesWithIntermediates() for that), and only
- * source -> target operations are searched (ie if target -> source is present,
+ * source -> target operations are searched (i.e. if target -> source is present,
  * you need to call this method with the arguments reversed, and apply the
  * reverse transformations).
  *
@@ -6258,7 +6258,7 @@ static bool useIrrelevantPivot(const operation::CoordinateOperationNNPtr &op,
  *
  * Deprecated operations are rejected.
  *
- * The method will take care of considering all potential combinations (ie
+ * The method will take care of considering all potential combinations (i.e.
  * contrary to createFromCoordinateReferenceSystemCodes(), you do not need to
  * call it with sourceCRS and targetCRS switched)
  *
@@ -7658,7 +7658,7 @@ AuthorityFactory::getCelestialBodyList() const {
  * @param source Source of the alias. Can help in case of ambiguities.
  * Or empty otherwise.
  * @param tryEquivalentNameSpelling whether the comparison of aliasedName with
- * the alt_name column of the alis_name table should be done with using
+ * the alt_name column of the alias_name table should be done with using
  * metadata::Identifier::isEquivalentName() rather than strict string
  * comparison;
  * @param outTableName Table name in which the official name has been found.

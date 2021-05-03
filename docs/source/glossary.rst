@@ -11,7 +11,7 @@ Glossary
         For a transformation between two geographic CRS, a ballpark
         transformation is a coordinate operation that only takes into account
         potential difference of axis orders (long-lat vs lat-long),
-        units (degree vs grads) and  prime meridian (Greewich vs Paris/Rome/other
+        units (degree vs grads) and  prime meridian (Greenwich vs Paris/Rome/other
         historic prime meridians). It does not attempt any datum shift, hence
         the "ballpark" qualifier in its name. Its accuracy is unknown, and could
         lead in some cases to errors of a few hundreds of metres.

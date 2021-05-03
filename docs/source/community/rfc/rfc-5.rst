@@ -22,7 +22,7 @@ as https://github.com/OSGeo/proj-datumgrid converted in GeoTIFF files. In the
 current state, we could have a somewhat inconsistency between users relying on
 the proj-datumgrid, proj-datumgrid-[world,northamerica,oceania,europe] packages
 of mostly NTv2 and GTX files, and what is shipped through the CDN. Maintaining
-two repositories is also a maintaince burden in the long term.
+two repositories is also a maintenance burden in the long term.
 
 It is thus desirable to have a single source of truth, and we propose it to be
 based on the GeoTIFF grids.
@@ -44,14 +44,14 @@ Summary of work planned by this RFC and related decisions
 - Each file will be named according to the following pattern
   ``${agency_name}_${filename}[.ext]``. For example fr_ign_ntf_r93.tif
   This convention should allow packagers, if the need arise, to be able to
-  split the monolothic package in smaller ones, based on criterion related to
+  split the monolithic package in smaller ones, based on criterion related to
   the country.
 
   The agency name is the one you can see from the directory names at
   https://github.com/OSGeo/PROJ-data/.
   ``${agency_name}`` itself is structure like ``${two_letter_country_code_of_agency_nationality}_${some_abbreviation}``
   (with the exception of eur_nkg, for the Nordic Geodetic Commission which
-  isn't affiliated to a single country but to some european countries, and
+  isn't affiliated to a single country but to some European countries, and
   follows the general scheme)
 
 - https://github.com/OSGeo/proj-datumgrid and related packages will only be

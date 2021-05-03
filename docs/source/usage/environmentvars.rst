@@ -23,7 +23,7 @@ On windows systems environment variables can be set in the command line with::
 
     > set VAR="some variable"
 
-```VAR`` will be available for the entire session, unless it is unset. This is
+``VAR`` will be available for the entire session, unless it is unset. This is
 done by setting the variable with no content::
 
     > set VAR=
@@ -42,7 +42,7 @@ done by setting the variable with no content::
     installation root) and the current folder.
 
     You can also set the location of the resource files using
-    :func:`proj_context_set_search_paths` in the `proj.h` API header.
+    :func:`proj_context_set_search_paths` in the :file:`proj.h` API header.
 
 .. versionchanged:: 6.1.0
 
@@ -57,7 +57,7 @@ done by setting the variable with no content::
     .. versionadded:: 8.1.0
 
     To set the path to one or several auxiliary SQLite3 databases of structure
-    identical to the main ``proj.db`` database and that can contain additional
+    identical to the main :file:`proj.db` database and that can contain additional
     object (CRS, transformation, ...) definitions. If several paths are
     provided, they must be separated by the colon (:) character on Unix, and
     on Windows, by the semi-colon (;) character.
@@ -66,7 +66,7 @@ done by setting the variable with no content::
 .. envvar:: PROJ_DEBUG
 
     Set the debug level of PROJ. The default debug level is zero, which results
-    in no debug output when using PROJ. A number from 1-3, whit 3 being the most
+    in no debug output when using PROJ. A number from 1-3, with 3 being the most
     verbose setting.
 
 .. envvar:: PROJ_NETWORK
@@ -82,8 +82,8 @@ done by setting the variable with no content::
 
     .. versionadded:: 7.0.0
 
-    Define the endpoint of the CDN storage. Normally defined through the proj.ini
-    configuration file locale in :envvar:`PROJ_LIB`.
+    Define the endpoint of the CDN storage. Normally defined through the
+    :file:`proj.ini` configuration file locale in :envvar:`PROJ_LIB`.
     Alternatively, the :c:func:`proj_context_set_url_endpoint` function can
     be used.
 
@@ -91,6 +91,6 @@ done by setting the variable with no content::
 
     .. versionadded:: 7.2.0
 
-    Define a custum path to the CA Bundle file. This can be useful if `curl`
+    Define a custom path to the CA Bundle file. This can be useful if `curl`
     and :envvar:`PROJ_NETWORK` are enabled. Alternatively, the 
     :c:func:`proj_curl_set_ca_bundle_path` function can be used.
