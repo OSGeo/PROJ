@@ -39,13 +39,13 @@ The following control parameters can appear in any order:
 
 .. option:: --endpoint URL
 
-    Defines the URL where to download the master ``files.geojson`` file and then
+    Defines the URL where to download the master :file:`files.geojson` file and then
     the resource files. Defaults to the value set in :ref:`proj-ini`
 
 .. option:: --local-geojson-file FILENAME
 
     Defines the filename for the master GeoJSON files that references resources.
-    Defaults to ${endpoint}/files.geojson
+    Defaults to ``${endpoint}/files.geojson``
 
 .. option:: --user-writable-directory
 

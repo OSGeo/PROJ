@@ -39,13 +39,15 @@ ETRS89/UTM32N (EPSG:25832) and ETRS89/DKTM1 (EPSG:4093):
     $ ./projinfo -s EPSG:25832 -t EPSG:4093 -o PROJ
     Candidate operations found: 1
     -------------------------------------
-    Operation n°1:
+    Operation No. 1:
 
     unknown id, Inverse of UTM zone 32N + DKTM1, 0 m, World
 
     PROJ string:
-    +proj=pipeline +step +inv +proj=utm +zone=32 +ellps=GRS80
-    +step +proj=tmerc +lat_0=0 +lon_0=9 +k=0.99998 +x_0=200000 +y_0=-5000000 +ellps=GRS80
+    +proj=pipeline
+      +step +inv +proj=utm +zone=32 +ellps=GRS80
+      +step +proj=tmerc +lat_0=0 +lon_0=9 +k=0.99998 +x_0=200000 +y_0=-5000000
+            +ellps=GRS80
 
 See the :program:`projinfo` :ref:`documentation <projinfo>` for more info on
 how to use it.

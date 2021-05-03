@@ -75,7 +75,7 @@ attempt to use remote grids stored on CDN (Content Delivery Network) storage.
 
 .. _proj-db:
 
-Core database :file:`proj.db`
+:file:`proj.db`
 -------------------------------------------------------------------------------
 
 A proj installation includes a SQLite database of transformation information
@@ -84,7 +84,7 @@ print an error if the database can't be found.
 
 .. _proj-ini:
 
-Configuration :file:`proj.ini`
+:file:`proj.ini`
 -------------------------------------------------------------------------------
 
 .. versionadded:: 7.0

@@ -69,7 +69,7 @@ Geographic CRS to Geographic CRS, with known identifiers
 With the above example of two geographic CRS, that have an identified identifier,
 (:program:`projinfo` internally resolves NAD27 to EPSG:4267 and NAD83 to EPSG:4269)
 the algorithm will first search
-in the coordinate operation related tables of the ``proj.db`` if there are records
+in the coordinate operation related tables of the :file:`proj.db` if there are records
 that list direct transformations between the source and the target CRS. The
 transformations typically involve :ref:`Helmert <helmert>`-style operations or datum shift based on
 grids (more esoteric operations are possible).
@@ -161,7 +161,7 @@ Geodetic/geographic CRS to Geodetic/geographic CRS, without known identifiers
 
 In a number of situations, the source and/or target CRS do not have an identifier
 (WKT without identifier, PROJ string, ..)
-The first step is to try to find in the ``proj.db`` a CRS of the same nature of
+The first step is to try to find in the :file:`proj.db` a CRS of the same nature of
 the CRS to identify and whose name exactly matches the one provided to the
 :c:func:`createOperations` method. If there is exactly one match and that the CRS are
 "computationally" equivalent, then use the code of the CRS for further computations.
@@ -238,7 +238,7 @@ are equivalent for most purposes.
 
     Candidate operations found: 1
     -------------------------------------
-    Operation n°1:
+    Operation No. 1:
 
     unknown id, axis order change (geographic3D horizontal) + RGF93 to ETRS89 (1) + Conversion from ETRS89 (geog2D) to ETRS89 (geocentric), 0 m, France
 
@@ -338,7 +338,7 @@ following results for the AGD84 to GDA2020 coordinate operations lookup:
 
     Candidate operations found: 4
     -------------------------------------
-    Operation n°1:
+    Operation No. 1:
 
     unknown id, AGD84 to GDA94 (5) + GDA94 to GDA2020 (1), 0.11 m, Australia - AGD84
 
@@ -357,7 +357,7 @@ following results for the AGD84 to GDA2020 coordinate operations lookup:
                    +step +proj=axisswap +order=2,1
 
     -------------------------------------
-    Operation n°2:
+    Operation No. 2:
 
     unknown id, AGD84 to GDA94 (2) + GDA94 to GDA2020 (1), 1.01 m, Australia - AGD84
 
@@ -378,7 +378,7 @@ following results for the AGD84 to GDA2020 coordinate operations lookup:
                    +step +proj=axisswap +order=2,1
 
     -------------------------------------
-    Operation n°3:
+    Operation No. 3:
 
     unknown id, AGD84 to GDA94 (5) + GDA94 to GDA2020 (2), 0.15 m, unknown domain of validity
 
@@ -391,7 +391,7 @@ following results for the AGD84 to GDA2020 coordinate operations lookup:
                    +step +proj=axisswap +order=2,1
 
     -------------------------------------
-    Operation n°4:
+    Operation No. 4:
 
     unknown id, AGD84 to GDA94 (5) + GDA94 to GDA2020 (3), 0.15 m, unknown domain of validity
 
@@ -424,7 +424,7 @@ If one forces the datum hub to be considered to be EPSG:4326, ones gets:
 
     Candidate operations found: 2
     -------------------------------------
-    Operation n°1:
+    Operation No. 1:
 
     unknown id, AGD84 to WGS 84 (7) + Inverse of GDA2020 to WGS 84 (2), 4 m, Australia - AGD84
 
@@ -442,7 +442,7 @@ If one forces the datum hub to be considered to be EPSG:4326, ones gets:
                    +step +proj=axisswap +order=2,1
 
     -------------------------------------
-    Operation n°2:
+    Operation No. 2:
 
     unknown id, AGD84 to WGS 84 (9) + Inverse of GDA2020 to WGS 84 (2), 4 m, Australia - AGD84
 
@@ -500,7 +500,7 @@ particular case. Such transformations are done in 2 steps:
 
     Candidate operations found: 1
     -------------------------------------
-    Operation n°1:
+    Operation No. 1:
 
     unknown id, Inverse of UTM zone 31N + Inverse of RGF93 to WGS 84 (1), 1 m, France
 
@@ -531,7 +531,7 @@ between those:
     $ projinfo -s "NAVD88 height" -t "NAD83(2011)" -o PROJ --spatial-test intersects
     Candidate operations found: 11
     -------------------------------------
-    Operation n°1:
+    Operation No. 1:
 
     INVERSE(DERIVED_FROM(EPSG)):9229, Inverse of NAD83(2011) to NAVD88 height (3), 0.015 m, USA - CONUS - onshore
 
@@ -560,7 +560,7 @@ This is implemented by the ``createOperationsVertToVert`` method
 
     Candidate operations found: 3
     -------------------------------------
-    Operation n°1:
+    Operation No. 1:
 
     unknown id, Inverse of NGVD29 height (ftUS) to NGVD29 depth (ftUS) + NGVD29 height (ftUS) to NGVD29 height (m) + NGVD29 height (m) to NAVD88 height (3), 0.02 m, USA - CONUS east of 89°W - onshore
 
@@ -568,7 +568,7 @@ This is implemented by the ``createOperationsVertToVert`` method
     +proj=pipeline +step +proj=axisswap +order=1,2,-3 +step +proj=unitconvert +z_in=us-ft +z_out=m +step +proj=vgridshift +grids=vertcone.gtx +multiplier=0.001
 
     -------------------------------------
-    Operation n°2:
+    Operation No. 2:
 
     unknown id, Inverse of NGVD29 height (ftUS) to NGVD29 depth (ftUS) + NGVD29 height (ftUS) to NGVD29 height (m) + NGVD29 height (m) to NAVD88 height (2), 0.02 m, USA - CONUS 89°W-107°W - onshore
 
@@ -576,7 +576,7 @@ This is implemented by the ``createOperationsVertToVert`` method
     +proj=pipeline +step +proj=axisswap +order=1,2,-3 +step +proj=unitconvert +z_in=us-ft +z_out=m +step +proj=vgridshift +grids=vertconc.gtx +multiplier=0.001
 
     -------------------------------------
-    Operation n°3:
+    Operation No. 3:
 
     unknown id, Inverse of NGVD29 height (ftUS) to NGVD29 depth (ftUS) + NGVD29 height (ftUS) to NGVD29 height (m) + NGVD29 height (m) to NAVD88 height (1), 0.02 m, USA - CONUS west of 107°W - onshore
 
@@ -761,7 +761,7 @@ Example:
 
     Candidate operations found: 1
     -------------------------------------
-    Operation n°1:
+    Operation No. 1:
 
     unknown id, Inverse of unknown + Transformation from unknown to WGS84 + Inverse of ETRS89 to WGS 84 (1), unknown accuracy, Europe - ETRS89
 

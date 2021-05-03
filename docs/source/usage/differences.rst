@@ -121,8 +121,8 @@ Version 6.3.0
 projinfo
 --------
 
-Before PROJ 6.3.0, WKT1:GDAL was implicitly calling --boundcrs-to-wgs84, to
-add a TOWGS84[] node in some cases. This is no longer the case.
+Before PROJ 6.3.0, WKT1:GDAL was implicitly calling ``--boundcrs-to-wgs84``, to
+add a ``TOWGS84[]`` node in some cases. This is no longer the case.
 
 
 Version 7.0.0

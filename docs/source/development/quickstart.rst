@@ -45,7 +45,7 @@ a string that describes the target CRS and an optional description of the area o
 use.
 The strings for the source or target CRS may be PROJ strings (``+proj=longlat +datum=WGS84``),
 CRS identified by their code (``EPSG:4326`` or ``urn:ogc:def:crs:EPSG::4326``) or
-by a well-known text (WKT) string (
+by a well-known text (WKT) string:
 ::
 
     GEOGCRS["WGS 84",
@@ -67,7 +67,6 @@ by a well-known text (WKT) string (
             BBOX[-90,-180,90,180]],
         ID["EPSG",4326]]
 
-).
 The use of PROJ strings to describe a CRS is considered as legacy (one of the
 main weakness of PROJ strings is their inability to describe a geodetic datum,
 other than the few ones hardcoded in the ``+datum`` parameter).
