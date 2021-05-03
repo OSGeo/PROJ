@@ -7,9 +7,9 @@
 
 PROJ_HEAD(mil_os, "Miller Oblated Stereographic") "\n\tAzi(mod)";
 PROJ_HEAD(lee_os, "Lee Oblated Stereographic") "\n\tAzi(mod)";
-PROJ_HEAD(gs48, "Mod. Stereographic of 48 U.S.") "\n\tAzi(mod)";
-PROJ_HEAD(alsk, "Mod. Stereographic of Alaska") "\n\tAzi(mod)";
-PROJ_HEAD(gs50, "Mod. Stereographic of 50 U.S.") "\n\tAzi(mod)";
+PROJ_HEAD(gs48, "Modified Stereographic of 48 U.S.") "\n\tAzi(mod)";
+PROJ_HEAD(alsk, "Modified Stereographic of Alaska") "\n\tAzi(mod)";
+PROJ_HEAD(gs50, "Modified Stereographic of 50 U.S.") "\n\tAzi(mod)";
 
 #define EPSLN 1e-12
 

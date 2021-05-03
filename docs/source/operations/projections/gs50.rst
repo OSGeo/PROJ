@@ -1,7 +1,7 @@
 .. _gs50:
 
 ********************************************************************************
-Mod. Stererographics of 50 U.S.
+Modified Stereographic of 50 U.S.
 ********************************************************************************
 
 +---------------------+----------------------------------------------------------+
@@ -24,7 +24,7 @@ Mod. Stererographics of 50 U.S.
 .. figure:: ./images/gs50.png
    :width: 500 px
    :align: center
-   :alt:   Mod. Stererographics of 50 U.S.
+   :alt:   Modified Stereographic of 50 U.S.
 
    proj-string: ``+proj=gs50``
 

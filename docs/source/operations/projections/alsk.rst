@@ -1,7 +1,7 @@
 .. _alsk:
 
 ********************************************************************************
-Modified Stererographics of Alaska
+Modified Stereographic of Alaska
 ********************************************************************************
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Modified azimuthal                                       |
@@ -23,7 +23,7 @@ Modified Stererographics of Alaska
 .. figure:: ./images/alsk.png
    :width: 500 px
    :align: center
-   :alt:   Mod. Stererographics of Alaska
+   :alt:   Modified Stereographic of Alaska
 
    proj-string: ``+proj=alsk``
 

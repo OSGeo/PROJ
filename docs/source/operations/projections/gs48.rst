@@ -1,7 +1,7 @@
 .. _gs48:
 
 ********************************************************************************
-Mod. Stererographics of 48 U.S.
+Modified Stereographic of 48 U.S.
 ********************************************************************************
 
 +---------------------+----------------------------------------------------------+
@@ -24,7 +24,7 @@ Mod. Stererographics of 48 U.S.
 .. figure:: ./images/gs48.png
    :width: 500 px
    :align: center
-   :alt:   Mod. Stererographics of 48 U.S.  
+   :alt:   Modified Stereographic of 48 U.S.
 
    proj-string: ``+proj=gs48``
 
