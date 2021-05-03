@@ -36,7 +36,7 @@ the body centre to the considered point.
 
 .. note::
 
-    This conversion must be distinguished fom the :ref:`cart`
+    This conversion must be distinguished from the :ref:`cart`
     which converts geodetic coordinates to geocentric coordinates in the cartesian
     domain.
 

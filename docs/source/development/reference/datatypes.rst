@@ -571,7 +571,7 @@ List structures
 
     .. c:member:: const char *ell
 
-        Elliptical parameter, e.g. `rf=298.257` or `b=6356772.2`.
+        Elliptical parameter, e.g. ``rf=298.257`` or ``b=6356772.2``.
 
     .. c:member:: const char *name
 
@@ -670,8 +670,9 @@ Info structures
 
         Search path for PROJ. List of directories separated by
         semicolons (Windows) or colons (non-Windows), e.g.
-        "C:\\Users\\doctorwho;C:\\OSGeo4W64\\share\\proj".
-        Grids and init files are looked for in directories in the search path.
+        ``C:\\Users\\doctorwho;C:\\OSGeo4W64\\share\\proj``.
+        Grids and :ref:`init files <init_files>` are looked for in
+        directories in the search path.
 
 .. c:type:: PJ_PROJ_INFO
 
@@ -694,7 +695,7 @@ Info structures
     .. c:member:: const char *PJ_PROJ_INFO.id
 
         Short ID of the operation the :c:type:`PJ` object is based on, that is,
-        what comes afther the ``+proj=`` in a proj-string, e.g. "*merc*".
+        what comes after the ``+proj=`` in a proj-string, e.g. "*merc*".
 
     .. c:member:: const char *PJ_PROJ_INFO.description
 
@@ -757,7 +758,7 @@ Info structures
 
     .. c:member:: int PJ_GRID_INFO.n_lat
 
-        Number of grid cells in the latitudianl direction.
+        Number of grid cells in the latitudinal direction.
 
     .. c:member:: double PJ_GRID_INFO.cs_lon
 
@@ -793,7 +794,7 @@ Info structures
 
     .. c:member:: char PJ_INIT_INFO.version[32]
 
-        Version number of init-file, e.g. "*9.0.0*"
+        Version number of init file, e.g. "*9.0.0*"
 
     .. c:member:: char PJ_INIT_INFO.origin[32]
 
@@ -801,7 +802,7 @@ Info structures
 
     .. c:member:: char PJ_INIT_INFO.lastupdate
 
-        Date of last update of the init-file.
+        Date of last update of the init file.
 
 
 .. _error_codes:
@@ -860,16 +861,16 @@ Errors in class PROJ_ERR_COORD_TRANSFM
 
 .. c:macro:: PROJ_ERR_COORD_TRANSFM_INVALID_COORD
 
-    Invalid input coordinate. e.g a latitude > 90°.
+    Invalid input coordinate. e.g. a latitude > 90°.
 
 .. c:macro:: PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN
 
-    Coordinate is outside of the projection domain. e.g approximate mercator with \|longitude - lon_0\| > 90°,
-    or iterative convergence method failed.
+    Coordinate is outside of the projection domain. e.g. approximate mercator
+    with \|longitude - lon_0\| > 90°, or iterative convergence method failed.
 
 .. c:macro:: PROJ_ERR_COORD_TRANSFM_NO_OPERATION
 
-    No operation found, e.g if no match the required accuracy, or if ballpark transformations
+    No operation found, e.g. if no match the required accuracy, or if ballpark transformations
     were asked to not be used and they would be only such candidate.
 
 .. c:macro:: PROJ_ERR_COORD_TRANSFM_OUTSIDE_GRID

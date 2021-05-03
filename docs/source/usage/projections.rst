@@ -42,23 +42,23 @@ Units
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Horizontal units can be specified using the ``+units`` keyword with a symbolic
-name for a unit (ie. ``us-ft``).  Alternatively the translation to meters can be
-specified with the ``+to_meter`` keyword (ie. 0.304800609601219 for US feet).  The
-``-lu`` argument to ``cs2cs`` or ``proj`` can be used to list symbolic unit names.
-The default unit for projected coordinates is the meter.
+name for a unit (i.e. ``us-ft``).  Alternatively the translation to meters can be
+specified with the ``+to_meter`` keyword (i.e. 0.304800609601219 for US feet).  The
+``-lu`` argument to :program:`cs2cs` or :program:`proj` can be used to list
+symbolic unit names. The default unit for projected coordinates is the meter.
 A few special projections deviate from this behavior, most notably the
 latlong pseudo-projection that returns degrees.
 
 Vertical (Z) units can be specified using the ``+vunits`` keyword with a
-symbolic name for a unit (ie. ``us-ft``).  Alternatively the translation to
-meters can be specified with the ``+vto_meter`` keyword (ie. 0.304800609601219
-for US feet).  The ``-lu`` argument to ``cs2cs`` or ``proj`` can be used to list
-symbolic unit names.  If no vertical units are specified, the vertical units will
-default to be the same as the horizontal coordinates.
+symbolic name for a unit (i.e. ``us-ft``).  Alternatively the translation to
+meters can be specified with the ``+vto_meter`` keyword (i.e. 0.304800609601219
+for US feet).  The ``-lu`` argument to :program:`cs2cs` or :program:`proj` can
+be used to list symbolic unit names.  If no vertical units are specified, the
+vertical units will default to be the same as the horizontal coordinates.
 
 .. note::
-    ``proj`` do not handle vertical units at all and hence the ``+vto_meter``
-    argument will be ignored.
+    :program:`proj` does not handle vertical units at all and hence the
+    ``+vto_meter`` argument will be ignored.
 
 Scaling of output units can be done by applying the ``+k_0`` argument. The
 returned coordinates are scaled by the value assigned with the ``+k_0``
@@ -97,8 +97,8 @@ name, or the longitude of the alternative prime meridian relative to greenwich.
 
 Currently prime meridian declarations are only utilized by the
 ``pj_transform()`` API call, not the ``pj_inv()`` and ``pj_fwd()`` calls.
-Consequently the user utility ``cs2cs`` does honour prime meridians but the
-``proj`` user utility ignores them.
+Consequently the user utility :program:`cs2cs` does honour prime meridians but
+the :program:`proj` user utility ignores them.
 
 The following predeclared prime meridian names are supported.  These can be
 listed using with ``cs2cs -lm``.
@@ -157,7 +157,7 @@ They can be combined in +axis in forms like:
 
 .. note::
 
-    The ``+axis`` argument does not work with the ``proj`` command line
+    The ``+axis`` argument does not work with the :program:`proj` command line
     utility.
 
 

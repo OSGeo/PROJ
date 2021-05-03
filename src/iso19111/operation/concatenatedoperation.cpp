@@ -417,7 +417,7 @@ void ConcatenatedOperation::fixStepsDirection(
  * extent
  *
  * @param operationsIn Vector of the CoordinateOperation steps.
- * @param checkExtent Whether we should check the non-emptyness of the
+ * @param checkExtent Whether we should check the non-emptiness of the
  * intersection
  * of the extents of the operations
  * @throws InvalidOperation

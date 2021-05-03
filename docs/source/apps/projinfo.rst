@@ -134,7 +134,7 @@ The following control parameters can appear in any order:
     Specify how the area of use of coordinate operations found in the database
     are compared to the area of use specified explicitly with :option:`--area` or :option:`--bbox`,
     or derived implicitly from the area of use of the source and target CRS.
-    By default, projinfo will only keep coordinate operations whose are of use
+    By default, :program:`projinfo` will only keep coordinate operations whose are of use
     is strictly within the area of interest (``contains`` strategy).
     If using the ``intersects`` strategy, the spatial test is relaxed, and any
     coordinate operation whose area of use at least partly intersects the
@@ -184,7 +184,7 @@ The following control parameters can appear in any order:
 
     Determine if intermediate (pivot) CRS can be used when researching coordinate
     operation between 2 CRS. A typical example is the WGS84 pivot. By default,
-    projinfo will consider any potential pivot if there is no direct transformation
+    :program:`projinfo` will consider any potential pivot if there is no direct transformation
     ( ``if_no_direct_transformation``). If using the ``never`` strategy,
     only direct transformations between the source and target CRS will be
     used. If using the ``always`` strategy, intermediate CRS will be considered
@@ -239,8 +239,8 @@ The following control parameters can appear in any order:
 
 .. option:: --main-db-path path
 
-    Specify the name and path of the database to be used by projinfo. The
-    default is proj.db in the PROJ resource directories.
+    Specify the name and path of the database to be used by :program:`projinfo`.
+    The default is :file:`proj.db` in the PROJ resource directories.
 
 .. option:: --aux-db-path path
 

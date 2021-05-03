@@ -39,13 +39,15 @@ ETRS89/UTM32N (EPSG:25832) and ETRS89/DKTM1 (EPSG:4093):
     $ ./projinfo -s EPSG:25832 -t EPSG:4093 -o PROJ
     Candidate operations found: 1
     -------------------------------------
-    Operation n°1:
+    Operation No. 1:
 
     unknown id, Inverse of UTM zone 32N + DKTM1, 0 m, World
 
     PROJ string:
-    +proj=pipeline +step +inv +proj=utm +zone=32 +ellps=GRS80
-    +step +proj=tmerc +lat_0=0 +lon_0=9 +k=0.99998 +x_0=200000 +y_0=-5000000 +ellps=GRS80
+    +proj=pipeline
+      +step +inv +proj=utm +zone=32 +ellps=GRS80
+      +step +proj=tmerc +lat_0=0 +lon_0=9 +k=0.99998 +x_0=200000 +y_0=-5000000
+            +ellps=GRS80
 
 See the :program:`projinfo` :ref:`documentation <projinfo>` for more info on
 how to use it.
@@ -125,7 +127,7 @@ input ordered as latitude/longitude  (typically with the EPSG dataset), however,
 internally PROJ expects an longitude/latitude ordering for all projections. This
 is generally hidden for users but in a few cases it is exposed at the surface
 level of PROJ, most prominently in the :program:`proj` utility which expects
-longitude/latitude ordering of input date (unless :program:`proj -r` is used).
+longitude/latitude ordering of input date (unless :option:`proj -r` is used).
 
 In case of doubt about the axis order of a specific CRS :program:`projinfo` is
 able to provide an answer. Simply look up the CRS and examine the axis specification
@@ -181,7 +183,7 @@ was simply known as PROJ. Eventually a new version was released, known
 as PROJ.2 in order to distinguish between the two versions. Later on both
 PROJ.3 and PROJ.4 was released. By the time PROJ.4 was released the
 software had matured enough that a new major version release wasn't an
-immediate necesity. PROJ.4 was around for more than 25 years before it
+immediate necessity. PROJ.4 was around for more than 25 years before it
 again became time for an update. This left the project in a bit of a
 conundrum regarding the name. For the majority of the life-time of the product it was known as PROJ.4, but with the release of version 5 the name
 was no longer aligned with the version number. As a consequence, it was

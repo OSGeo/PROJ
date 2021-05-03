@@ -33,7 +33,7 @@ Transformation setup
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The objects returned by the functions defined in this section have minimal
-interaction with the the functions of the
+interaction with the functions of the
 `C API for ISO-19111 functionality`_, and vice versa. See its introduction
 paragraph for more details.
 
@@ -686,7 +686,7 @@ Distances
     :param PJ_COORD b: Coordinate of second point
     :returns: `PJ_COORD` where the first value is the distance between :c:data:`a`
               and :c:data:`b` in meters, the second value is the forward azimuth
-              and the thir value is the reverse azimuth. The fourth coordinate
+              and the third value is the reverse azimuth. The fourth coordinate
               value is unused.
 
 
@@ -930,7 +930,7 @@ The PJ* objects returned by :c:func:`proj_create_from_wkt`,
 :c:func:`proj_create_from_database` and other functions in that section
 will have generally minimal interaction with the functions declared in the
 previous sections (calling those functions on those objects
-will either return an error or default/non-sensical values). The exception is
+will either return an error or default/nonsensical values). The exception is
 for ISO19111 objects of type CoordinateOperation that can be exported as a
 valid PROJ pipeline. In this case,  objects will work for example with
 :c:func:`proj_trans_generic`.

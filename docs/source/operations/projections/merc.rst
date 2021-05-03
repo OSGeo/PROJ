@@ -181,7 +181,7 @@ This is obtained by taking the :math:`\sinh` of the equation for
 using :math:`\tau = \tau'/(1 - e^2)` as an initial guess and with the
 needed derivative given by
 
-..math::
+.. math::
     \frac{d\tau'}{d\tau} = \frac{1 - e^2}{1 + (1 - e^2)\tau^2}
     \sqrt{1 + \tau'^2} \sqrt{1 + \tau^2}
 

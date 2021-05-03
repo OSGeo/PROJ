@@ -6573,7 +6573,7 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <ul>
  * <li>WKT string</li>
  * <li>PROJ string</li>
- * <li>database code, prefixed by its authoriy. e.g. "EPSG:4326"</li>
+ * <li>database code, prefixed by its authority. e.g. "EPSG:4326"</li>
  * <li>OGC URN. e.g. "urn:ogc:def:crs:EPSG::4326",
  *     "urn:ogc:def:coordinateOperation:EPSG::1671",
  *     "urn:ogc:def:ellipsoid:EPSG::7001"
@@ -6624,7 +6624,7 @@ BaseObjectNNPtr createFromUserInput(const std::string &text,
  * <ul>
  * <li>WKT string</li>
  * <li>PROJ string</li>
- * <li>database code, prefixed by its authoriy. e.g. "EPSG:4326"</li>
+ * <li>database code, prefixed by its authority. e.g. "EPSG:4326"</li>
  * <li>OGC URN. e.g. "urn:ogc:def:crs:EPSG::4326",
  *     "urn:ogc:def:coordinateOperation:EPSG::1671",
  *     "urn:ogc:def:ellipsoid:EPSG::7001"
