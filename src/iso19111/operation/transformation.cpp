@@ -366,7 +366,7 @@ TransformationNNPtr Transformation::create(
 
 // ---------------------------------------------------------------------------
 
-/** \brief Instantiate a transformation ands its OperationMethod.
+/** \brief Instantiate a transformation and its OperationMethod.
  *
  * @param propertiesTransformation The \ref general_properties of the
  * Transformation.

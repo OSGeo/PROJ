@@ -128,7 +128,7 @@ Updates
 Bug fixes
 ---------
 
-* Do not restrict longitude to [-90;90] range in spherical transver Mercator
+* Do not restrict longitude to [-90;90] range in spherical transverse Mercator
   forward projection (`#2471 <https://github.com/OSGeo/PROJ/issues/2471>`_)
 
 * :cpp:func:`createOperations()`: fix Compound to Geog3D/Projected3D CRS with non-metre ellipsoidal height (`#2500 <https://github.com/OSGeo/PROJ/issues/2500>`_)
@@ -351,7 +351,7 @@ Updates
   * Update to EPSG 9.8.12, ESRI 10.8.1 and import scope and remarks for
     conversion (`#2238 <https://github.com/OSGeo/PROJ/issues/2238>`_) (#2267)
 
-  * Map the Behrman projection to ``cae`` when converting ESRI CRSes (`#1986 <https://github.com/OSGeo/PROJ/issues/1986>`_)
+  * Map the Behrmann projection to ``cae`` when converting ESRI CRSes (`#1986 <https://github.com/OSGeo/PROJ/issues/1986>`_)
 
   * Support conversion of Flat_Polar_Quartic projection method (`#1987 <https://github.com/OSGeo/PROJ/issues/1987>`_)
 
@@ -410,7 +410,7 @@ Updates
 
   * Follow PDAL's CMake RPATH strategy (`#2009 <https://github.com/OSGeo/PROJ/issues/2009>`_)
 
-  * WKT import/export: add support for WKT1_ESRI VERTCS synta (`#2024 <https://github.com/OSGeo/PROJ/issues/2024>`_)
+  * WKT import/export: add support for WKT1_ESRI VERTCS syntax (`#2024 <https://github.com/OSGeo/PROJ/issues/2024>`_)
 
   * :program:`projinfo`: add a ``--hide-ballpark`` option (`#2127 <https://github.com/OSGeo/PROJ/issues/2127>`_)
 

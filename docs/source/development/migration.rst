@@ -109,58 +109,58 @@ Function mapping from old to new API
 +---------------------------------------+-------------------------------------------------+
 | Old API functions                     | New API functions                               |
 +=======================================+=================================================+
-| pj_fwd                                | :c:func:`proj_trans`                            |
+| ``pj_fwd``                            | :c:func:`proj_trans`                            |
 +---------------------------------------+-------------------------------------------------+
-| pj_inv                                | :c:func:`proj_trans`                            |
+| ``pj_inv``                            | :c:func:`proj_trans`                            |
 +---------------------------------------+-------------------------------------------------+
-| pj_fwd3                               | :c:func:`proj_trans`                            |
+| ``pj_fwd3``                           | :c:func:`proj_trans`                            |
 +---------------------------------------+-------------------------------------------------+
-| pj_inv3                               | :c:func:`proj_trans`                            |
+| ``pj_inv3``                           | :c:func:`proj_trans`                            |
 +---------------------------------------+-------------------------------------------------+
-| pj_transform                          | :c:func:`proj_create_crs_to_crs`                |
+| ``pj_transform``                      | :c:func:`proj_create_crs_to_crs`                |
 |                                       | or :c:func:`proj_create_crs_to_crs_from_pj` +   |
 |                                       | (:c:func:`proj_normalize_for_visualization` +)  |
 |                                       | :c:func:`proj_trans`,                           |
 |                                       | :c:func:`proj_trans_array` or                   |
 |                                       | :c:func:`proj_trans_generic`                    |
 +---------------------------------------+-------------------------------------------------+
-| pj_init                               | :c:func:`proj_create` /                         |
+| ``pj_init``                           | :c:func:`proj_create` /                         |
 |                                       | :c:func:`proj_create_crs_to_crs`                |
 +---------------------------------------+-------------------------------------------------+
-| pj_init                               | :c:func:`proj_create` /                         |
+| ``pj_init``                           | :c:func:`proj_create` /                         |
 |                                       | :c:func:`proj_create_crs_to_crs`                |
 +---------------------------------------+-------------------------------------------------+
-| pj_free                               | :c:func:`proj_destroy`                          |
+| ``pj_free``                           | :c:func:`proj_destroy`                          |
 +---------------------------------------+-------------------------------------------------+
-| pj_is_latlong                         | :c:func:`proj_get_type`                         |
+| ``pj_is_latlong``                     | :c:func:`proj_get_type`                         |
 +---------------------------------------+-------------------------------------------------+
-| pj_is_geocent                         | :c:func:`proj_get_type`                         |
+| ``pj_is_geocent``                     | :c:func:`proj_get_type`                         |
 +---------------------------------------+-------------------------------------------------+
-| pj_get_def                            | :c:func:`proj_pj_info`                          |
+| ``pj_get_def``                        | :c:func:`proj_pj_info`                          |
 +---------------------------------------+-------------------------------------------------+
-| pj_latlong_from_proj                  | *No direct equivalent*, but can be accomplished |
+| ``pj_latlong_from_proj``              | *No direct equivalent*, but can be accomplished |
 |                                       | by chaining :c:func:`proj_create`,              |
 |                                       | :c:func:`proj_crs_get_horizontal_datum` and     |
 |                                       | :c:func:`proj_create_geographic_crs_from_datum` |
 +---------------------------------------+-------------------------------------------------+
-| pj_set_finder                         | :c:func:`proj_context_set_file_finder`          |
+| ``pj_set_finder``                     | :c:func:`proj_context_set_file_finder`          |
 +---------------------------------------+-------------------------------------------------+
-| pj_set_searchpath                     | :c:func:`proj_context_set_search_paths`         |
+| ``pj_set_searchpath``                 | :c:func:`proj_context_set_search_paths`         |
 +---------------------------------------+-------------------------------------------------+
-| pj_deallocate_grids                   | *No equivalent*                                 |
+| ``pj_deallocate_grids``               | *No equivalent*                                 |
 +---------------------------------------+-------------------------------------------------+
-| pj_strerrno                           | *No equivalent*                                 |
+| ``pj_strerrno``                       | *No equivalent*                                 |
 +---------------------------------------+-------------------------------------------------+
-| pj_get_errno_ref                      | :c:func:`proj_errno`                            |
+| ``pj_get_errno_ref``                  | :c:func:`proj_errno`                            |
 +---------------------------------------+-------------------------------------------------+
-| pj_get_release                        | :c:func:`proj_info`                             |
+| ``pj_get_release``                    | :c:func:`proj_info`                             |
 +---------------------------------------+-------------------------------------------------+
 
 
 Backward incompatibilities
 ###############################################################################
 
-Access to the proj_api.h is still possible but requires to define the
+Access to the :file:`proj_api.h` is still possible but requires to define the
 ``ACCEPT_USE_OF_DEPRECATED_PROJ_API_H`` macro.
 
 The emulation of the now deprecated ``+init=epsg:XXXX`` syntax in PROJ 6 is not
@@ -234,9 +234,9 @@ how to use it. First note that in order to go from system A to system B, the old
 starts by doing an **inverse** transformation from system A to WGS84, then does a
 **forward** transformation from WGS84 to system B.
 
-With ``cs2cs`` being the command line interface to the old API, and ``cct`` being the same
-for the new, this example of doing the same thing in both world views will should give
-an idea of the differences:
+With :program:`cs2cs` being the command line interface to the old API, and
+:program:`cct` being the same for the new, this example of doing the same
+thing in both world views will should give an idea of the differences:
 
 ::
 
@@ -348,39 +348,40 @@ Function mapping from old to new API
 +---------------------------------------+---------------------------------------+
 | Old API functions                     | New API functions                     |
 +=======================================+=======================================+
-| pj_fwd                                | :c:func:`proj_trans`                  |
+| ``pj_fwd``                            | :c:func:`proj_trans`                  |
 +---------------------------------------+---------------------------------------+
-| pj_inv                                | :c:func:`proj_trans`                  |
+| ``pj_inv``                            | :c:func:`proj_trans`                  |
 +---------------------------------------+---------------------------------------+
-| pj_fwd3                               | :c:func:`proj_trans`                  |
+| ``pj_fwd3``                           | :c:func:`proj_trans`                  |
 +---------------------------------------+---------------------------------------+
-| pj_inv3                               | :c:func:`proj_trans`                  |
+| ``pj_inv3``                           | :c:func:`proj_trans`                  |
 +---------------------------------------+---------------------------------------+
-| pj_transform                          | proj_trans_array or proj_trans_generic|
+| ``pj_transform``                      | :c:func:`proj_trans_array` or         |
+|                                       | :c:func:`proj_trans_generic`          |
 +---------------------------------------+---------------------------------------+
-| pj_init                               | :c:func:`proj_create`                 |
+| ``pj_init``                           | :c:func:`proj_create`                 |
 +---------------------------------------+---------------------------------------+
-| pj_init_plus                          | :c:func:`proj_create`                 |
+| ``pj_init_plus``                      | :c:func:`proj_create`                 |
 +---------------------------------------+---------------------------------------+
-| pj_free                               | :c:func:`proj_destroy`                |
+| ``pj_free``                           | :c:func:`proj_destroy`                |
 +---------------------------------------+---------------------------------------+
-| pj_is_latlong                         | :c:func:`proj_angular_output`         |
+| ``pj_is_latlong``                     | :c:func:`proj_angular_output`         |
 +---------------------------------------+---------------------------------------+
-| pj_is_geocent                         | :c:func:`proj_angular_output`         |
+| ``pj_is_geocent``                     | :c:func:`proj_angular_output`         |
 +---------------------------------------+---------------------------------------+
-| pj_get_def                            | :c:func:`proj_pj_info`                |
+| ``pj_get_def``                        | :c:func:`proj_pj_info`                |
 +---------------------------------------+---------------------------------------+
-| pj_latlong_from_proj                  | *No equivalent*                       |
+| ``pj_latlong_from_proj``              | *No equivalent*                       |
 +---------------------------------------+---------------------------------------+
-| pj_set_finder                         | *No equivalent*                       |
+| ``pj_set_finder``                     | *No equivalent*                       |
 +---------------------------------------+---------------------------------------+
-| pj_set_searchpath                     | *No equivalent*                       |
+| ``pj_set_searchpath``                 | *No equivalent*                       |
 +---------------------------------------+---------------------------------------+
-| pj_deallocate_grids                   | *No equivalent*                       |
+| ``pj_deallocate_grids``               | *No equivalent*                       |
 +---------------------------------------+---------------------------------------+
-| pj_strerrno                           | *No equivalent*                       |
+| ``pj_strerrno``                       | *No equivalent*                       |
 +---------------------------------------+---------------------------------------+
-| pj_get_errno_ref                      | :c:func:`proj_errno`                  |
+| ``pj_get_errno_ref``                  | :c:func:`proj_errno`                  |
 +---------------------------------------+---------------------------------------+
-| pj_get_release                        | :c:func:`proj_info`                   |
+| ``pj_get_release``                    | :c:func:`proj_info`                   |
 +---------------------------------------+---------------------------------------+

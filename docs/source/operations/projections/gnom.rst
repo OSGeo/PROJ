@@ -31,7 +31,7 @@ Gnomonic
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the Gnomomic projection.
+.. note:: All parameters are optional for the Gnomonic projection.
 
 .. include:: ../options/lon_0.rst
 

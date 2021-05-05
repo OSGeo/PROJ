@@ -62,10 +62,10 @@ the old behavior.
 Version 6.0.0
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Removal of proj_def.dat
------------------------
+Removal of :file:`proj_def.dat`
+-------------------------------
 
-Before PROJ 6, the ``proj_def.dat`` was used to provide general and per-projection
+Before PROJ 6, the :file:`proj_def.dat` was used to provide general and per-projection
 parameters, when ``+no_defs`` was not specified. It has now been removed. In case,
 no ellipsoid or datum specification is provided in the PROJ string, the
 default ellipsoid is GRS80 (was WGS84 in previous PROJ versions).
@@ -121,8 +121,8 @@ Version 6.3.0
 projinfo
 --------
 
-Before PROJ 6.3.0, WKT1:GDAL was implicitly calling --boundcrs-to-wgs84, to
-add a TOWGS84[] node in some cases. This is no longer the case.
+Before PROJ 6.3.0, WKT1:GDAL was implicitly calling ``--boundcrs-to-wgs84``, to
+add a ``TOWGS84[]`` node in some cases. This is no longer the case.
 
 
 Version 7.0.0

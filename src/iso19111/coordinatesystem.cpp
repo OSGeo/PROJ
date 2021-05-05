@@ -1108,7 +1108,7 @@ CartesianCSNNPtr CartesianCS::createSouthPoleEastingNorthNorthingNorth(
 
 /** \brief Instantiate a CartesianCS with the three geocentric axes.
  *
- * @param unit Liinear unit of the axes.
+ * @param unit Linear unit of the axes.
  * @return a new CartesianCS.
  */
 CartesianCSNNPtr

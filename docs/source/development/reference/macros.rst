@@ -6,15 +6,15 @@ Macros
 
 .. c:macro:: PROJ_VERSION_MAJOR
 
-    Major version number, e.g 8 for PROJ 8.0.1
+    Major version number, e.g. 8 for PROJ 8.0.1
 
 .. c:macro:: PROJ_VERSION_MINOR
 
-    Minor version number, e.g 0 for PROJ 8.0.1
+    Minor version number, e.g. 0 for PROJ 8.0.1
 
 .. c:macro:: PROJ_VERSION_PATCH
 
-    Patch version number, e.g 1 for PROJ 8.0.1
+    Patch version number, e.g. 1 for PROJ 8.0.1
 
 .. c:macro:: PROJ_COMPUTE_VERSION(maj,min,patch)
 

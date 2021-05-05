@@ -40,7 +40,7 @@ The inappropriate use of the Mercator projection has declined but still
 occasionally occurs. One method of contrasting the Mercator projection is to
 present an alternative in the form of an equal area projection. The map
 projection derived here is thus not simply a pretty Christmas tree ornament:
-it is instead a complement to Mercator's conformal navigation anamorphose
+it is instead a complement to Mercator's conformal navigation anamorphosis
 and can be displayed as an alternative. The equations for the new map
 projection preserve the latitudinal stretching of the Mercator while
 adjusting the longitudinal spacing. This allows placement of the new map

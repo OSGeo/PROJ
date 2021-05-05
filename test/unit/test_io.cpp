@@ -10504,7 +10504,7 @@ TEST(io, createFromUserInput) {
                  ParsingException);
 
     {
-        // Completely non-sensical from a geodesic point of view...
+        // Completely nonsensical from a geodesic point of view...
         auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::4978,"
                                        "cs:EPSG::6500,"
                                        "coordinateOperation:EPSG::16031",
@@ -10516,7 +10516,7 @@ TEST(io, createFromUserInput) {
         EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
     }
     {
-        // Completely non-sensical from a geodesic point of view...
+        // Completely nonsensical from a geodesic point of view...
         auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::4979,"
                                        "cs:EPSG::6423,"
                                        "coordinateOperation:EPSG::16031",
@@ -10528,7 +10528,7 @@ TEST(io, createFromUserInput) {
         EXPECT_EQ(crs->derivingConversion()->getEPSGCode(), 16031);
     }
     {
-        // Completely non-sensical from a geodesic point of view...
+        // Completely nonsensical from a geodesic point of view...
         auto obj = createFromUserInput("urn:ogc:def:crs,crs:EPSG::32631,"
                                        "cs:EPSG::4400,"
                                        "coordinateOperation:EPSG::16031",

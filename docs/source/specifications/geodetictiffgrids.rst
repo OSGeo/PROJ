@@ -73,7 +73,7 @@ is an easy way to inspect such grid files:
   .. note::
 
     Regarding anti-meridian handling, a variety of possibilities exist.
-    We do not attempt to standardize this and filesh hosted on the CDN will use
+    We do not attempt to standardize this and files hosted on the CDN will use
     a georeferencing close to the original data producer.
     For example, NOAA vertical grids that apply to Conterminous USA might even have a top-left
     longitude beyond 180 (for consistency with Alaska grids, whose origin is < 180)
@@ -406,7 +406,7 @@ is an easy way to inspect such grid files:
     Will be ignored by PROJ (this information can be inferred by the grids extent)
 
   * The ``parent_grid_name`` metadata item should be present if this is a
-    subgrid and its value should be equal to the paren's ``grid_name``
+    subgrid and its value should be equal to the parent's ``grid_name``
     Will be ignored by PROJ (this information can be inferred by the grids extent)
 
   * The ``number_of_nested_grids`` metadata item should be present if there are
@@ -569,7 +569,7 @@ tag set to 0.
 
 If a low-resolution grid is available, it should be put before subgrids of
 higher-resolution in the chain of IFD linking. On reading, PROJ will use the
-value from the highest-resoluted grid that contains the point of interest.
+value from the highest-resolution grid that contains the point of interest.
 
 For efficient reading from the network, files hosted on the CDN will use
 a layout similar to the one described in the `low level paragraph of the Cloud Optimized GeoTIFF

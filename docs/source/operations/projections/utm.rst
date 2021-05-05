@@ -47,7 +47,7 @@ Convert geodetic coordinate to UTM Zone 32 on the northern hemisphere::
     $ echo 12 56 | proj +proj=utm +zone=32
     687071.44       6210141.33
 
-Convert geodetic coordinate to UTM Zone 59 on the souther hemisphere::
+Convert geodetic coordinate to UTM Zone 59 on the southern hemisphere::
 
     $ echo 174 -44 | proj +proj=utm +zone=59 +south
     740526.32       5123750.87

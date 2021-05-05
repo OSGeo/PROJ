@@ -101,14 +101,14 @@ On Debian and similar systems (e.g. Ubuntu) the APT package manager is used::
 Fedora
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-On Fedora the dnf package manager is used::
+On Fedora the :program:`dnf` package manager is used::
 
     sudo dnf install proj
 
 Red Hat
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-On Red Hat based system packages are installed with yum::
+On Red Hat based system packages are installed with :program:`yum`::
 
     sudo yum install proj
 

@@ -23,7 +23,7 @@ justifies adding this otherwise non-standard projection.
 | **Available forms** | Forward and inverse, spherical and ellipsoidal          .|
 |                     | One or two standard parallels (1SP and 2SP).             |
 |                     | "LCC 2SP Michigan" form can be used by setting           |
-|                     | `+k_0` parameter to specify elliposid scale.             |
+|                     | ``+k_0`` parameter to specify ellipsoid scale.           |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Best for regions predominantly east–west in extent and   |
 |                     | located in the middle north or south latitudes.          |

@@ -31,7 +31,7 @@ Central Cylindrical
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the Central Cylindricla projection.
+.. note:: All parameters are optional for the Central Cylindrical projection.
 
 .. include:: ../options/lon_0.rst
 

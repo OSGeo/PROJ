@@ -363,7 +363,7 @@ const UnitOfMeasure UnitOfMeasure::ARC_SECOND_PER_YEAR(
     "arc-seconds per year", M_PI / 180. / 3600. / 31556925.445,
     UnitOfMeasure::Type::ANGULAR, Identifier::EPSG, "1043");
 
-/** \brief Part-sper-million per year, unit of measure of type SCALE. */
+/** \brief Parts-per-million per year, unit of measure of type SCALE. */
 const UnitOfMeasure UnitOfMeasure::PPM_PER_YEAR("parts per million per year",
                                                 1e-6 / 31556925.445,
                                                 UnitOfMeasure::Type::SCALE,

@@ -157,7 +157,7 @@ all classes, except the CoordinateOperation class that point to CRS for
 sourceCRS and targetCRS members, whereas DerivedCRS point to a Conversion
 instance (which derives from CoordinateOperation). This issue was detected in
 the ISO-19111 standard. The solution adopted here is to use std::weak_ptr
-in the CoordinateOperation class to avoid the cycle. This design artifact is
+in the CoordinateOperation class to avoid the cycle. This design artefact is
 transparent to users.
 
 Another important design point is that all ISO19111 objects are immutable after
@@ -215,12 +215,12 @@ On the algorithmic side, a somewhat involved logic is the
 CoordinateOperationFactory::createOperations() in `coordinateoperation.cpp`_
 that takes a pair of source and target CRS and returns a set of possible
 `coordinate operations`_ (either single operations like a Conversion or a
-Transformation, or concatenated operations). It uses the intrinsinc structure
+Transformation, or concatenated operations). It uses the intrinsic structure
 of those objects to create the coordinate operation pipeline. That is, if
 going from a ProjectedCRS to another one, by doing first the inverse conversion
 from the source ProjectedCRS to its base GeographicCRS, then finding the
 appropriate transformation(s) from this base GeographicCRS to the base
-GeographicCRS of the target CRS, and then appyling the conversion from this
+GeographicCRS of the target CRS, and then applying the conversion from this
 base GeographicCRS to the target ProjectedCRS. At each step, it queries the
 database to find if one or several transformations are available. The
 resulting coordinate operations are filtered, and sorted, with user provided hints:
@@ -238,7 +238,7 @@ resulting coordinate operations are filtered, and sorted, with user provided hin
       compared. By default, only transformations whose area of use is fully
       contained in the desired area of use are selected. It is also possible
       to relax this test by specifying that only an intersection test must be used.
-    - whether `PROJ transformation grid`_ names should be susbstituted to the
+    - whether `PROJ transformation grid`_ names should be substituted to the
       official names, when a match is found in the `grid_alternatives` table
       of the database. Defaults to true
     - whether the availability of those grids should be used to filter and sort
@@ -636,7 +636,7 @@ Impacted files
 --------------
 
 New files (excluding makefile.am, CMakeLists.txt and other build infrastructure
-artifacts):
+artefacts):
 
     * include/proj/: Public installed C++ headers
         - `common.hpp`_: declarations of osgeo::proj::common namespace.
@@ -853,7 +853,7 @@ Doxygen.
 .. _`Spaghetti inheritance diagram`: http://even.rouault.free.fr/proj_cpp_api/html/inherits.html
 
 A basic integration of the Doxygen XML output into the general PROJ
-documentation (using reStructuredText format) has been done with the the
+documentation (using reStructuredText format) has been done with the
 Sphinx extension `Breathe`_, producing:
 
     * `One section with the C++ API`_

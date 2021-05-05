@@ -27,7 +27,7 @@ are maintained in a `separate git repository <https://github.com/OSGeo/proj-datu
 
 .. attention::
 
-    The ``projects.h`` header and the functions related to it is considered
+    The :file:`projects.h` header and the functions related to it is considered
     deprecated from version 5.0.0 and onwards. The header has been removed
     PROJ in version 6.0.0 released February 1st 2019.
 
@@ -38,7 +38,7 @@ are maintained in a `separate git repository <https://github.com/OSGeo/proj-datu
 
 .. attention::
 
-    The ``proj_api.h`` header and the functions related to it is
+    The :file:`proj_api.h` header and the functions related to it is
     considered deprecated from version 5.0.0 and onwards. The header has been
     removed in version 8.0.0 released March 1st 2021.
 

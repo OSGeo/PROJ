@@ -131,7 +131,7 @@ tweaks in the underlying API.
  Bug fixes
  ---------
 
- o Do not restrict longitude to [-90;90] range in spherical transver Mercator
+ o Do not restrict longitude to [-90;90] range in spherical transverse Mercator
    forward projection (#2471)
 
  o createOperations(): fix Compound to Geog3D/Projected3D CRS with non-metre ellipsoidal height (#2500)
@@ -407,7 +407,7 @@ tweaks in the underlying API.
     o Update to EPSG 9.8.12, ESRI 10.8.1 and import scope and remarks for
       conversion (#2238) (#2267)
 
-    o Map the Behrman projection to cae when converting ESRI CRSes (#1986)
+    o Map the Behrmann projection to cae when converting ESRI CRSes (#1986)
 
     o Support conversion of Flat_Polar_Quartic projection method (#1987)
 

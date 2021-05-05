@@ -57,7 +57,7 @@ Rules for pipelines
 
 Will result in an error.
 
-**2. Pipelines can only be nested if the nested pipeline is defined in an init-file.**
+**2. Pipelines can only be nested if the nested pipeline is defined in an init file.**
 
 ::
 

@@ -46,6 +46,11 @@ templates_path = ['_templates']
 # BibTeX configuration
 bibtex_bibfiles = ['references.bib']
 
+# Spelling configuration
+spelling_lang = tokenizer_lang = 'en_GB'
+spelling_show_suggestions = False
+spelling_ignore_importable_modules = False
+
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 # source_suffix = ['.rst', '.md']
