@@ -3,6 +3,66 @@
 News
 ###############################################################################
 
+8.0.1 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*May 5th 2021*
+
+Updates
+-------
+
+* Database: update to EPSG v10.018 (`#2636 <https://github.com/OSGeo/PROJ/issues/2636>`_)
+
+* Add transformations for CHGeo2004, Swiss geoid model (`#2604 <https://github.com/OSGeo/PROJ/issues/2604>`_)
+
+* Additions to the norwegian NKG2020 transformation (`#2600 <https://github.com/OSGeo/PROJ/issues/2600>`_)
+
+Bug fixes
+---------
+
+* :c:func:`pj_vlog()`: fix buffer overflow in case of super lengthy error message (`#2693 <https://github.com/OSGeo/PROJ/issues/2693>`_)
+
+* Revert ":c:func:`proj_create_crs_to_crs_from_pj()`: do not use PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION if area is specified" (`#2679 <https://github.com/OSGeo/PROJ/issues/2679>`_)
+
+* UTM: error out when value of ``+zone=`` is not an integer (`#2672 <https://github.com/OSGeo/PROJ/issues/2672>`_)
+
+* :cpp:func:`getCRSInfoList()`: make result order deterministic (by increasing auth_name,
+  code) (`#2661 <https://github.com/OSGeo/PROJ/issues/2661>`_)
+
+* :cpp:func:`createOperation()`: make sure no to discard deprecated operations if the
+  replacement uses an unknow grid (`#2623 <https://github.com/OSGeo/PROJ/issues/2623>`_)
+
+* Fix build on Solaris 11.4 (`#2621 <https://github.com/OSGeo/PROJ/issues/2621>`_)
+
+* Add mapping of ESRI Equal_Area projection method to EPSG (`#2612 <https://github.com/OSGeo/PROJ/issues/2612>`_)
+
+* Fix incorrect EPGS extent code for EPSG:7789>EPSG:4976 NKG transformation (`#2599 <https://github.com/OSGeo/PROJ/issues/2599>`_)
+
+* fix wrong capitalization of CHENyx06_ETRS.gsb (`#2597 <https://github.com/OSGeo/PROJ/issues/2597>`_)
+
+* :cpp:func:`createOperations()`: improve handling of vertical transforms when
+  when compound CRSs are used (`#2592 <https://github.com/OSGeo/PROJ/issues/2592>`_)
+
+* :cpp:func:`CRS::promoteTo3D()`: propagate the extent from the 2D CRS (`#2589 <https://github.com/OSGeo/PROJ/issues/2589>`_)
+
+* :cpp:func:`createFromCRSCodesWithIntermediates()`: improve performance when there is
+  no match (`#2583 <https://github.com/OSGeo/PROJ/issues/2583>`_)
+
+* Fix :c:func:`proj_clone()` to work on 'meta' coordinate operation ``PJ*`` objects that
+  can be returned by :c:func:`proj_create_crs_to_crs()` (`#2582 <https://github.com/OSGeo/PROJ/issues/2582>`_)
+
+* add ``PROJ_COMPUTE_VERSION``, ``PROJ_VERSION_NUMBER``,
+  ``PROJ_AT_LEAST_VERSION`` macros (`#2581 <https://github.com/OSGeo/PROJ/issues/2581>`_)
+
+* Make :c:func:`proj_lp_dist()` and :c:func:`proj_geod()` work on a ``PJ*`` CRS object (`#2570 <https://github.com/OSGeo/PROJ/issues/2570>`_)
+
+* Fix gcc 11 ``-Wnonnull`` compilation warnings (`#2559 <https://github.com/OSGeo/PROJ/issues/2559>`_)
+
+* Fix use of uninitialized memory in gie tests (`#2558 <https://github.com/OSGeo/PROJ/issues/2558>`_)
+
+* :c:func:`createOperations()`: fix incorrect height transformation between 3D promoted RGF93 and CH1903+ (`#2555 <https://github.com/OSGeo/PROJ/issues/2555>`_)
+
+
+
 8.0.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *March 1st 2021*
