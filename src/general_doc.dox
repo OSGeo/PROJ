@@ -124,7 +124,7 @@ GDAL v2.4 and earlier mostly implements:
 (http://portal.opengeospatial.org/files/?artifact_id=999)
 
 The [GDAL documentation, OGC WKT Coordinate System Issues]
-(http://www.gdal.org/wktproblems.html) discusses issues, and GDAL implementation
+(https://gdal.org/tutorials/wktproblems.html) discusses issues, and GDAL implementation
 choices.
 
 An older specification of WKT1 is/was used by some software packages:
