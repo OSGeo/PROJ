@@ -118,7 +118,7 @@ Older specifications of well-known text representation of coordinate reference
 systems are also supported by PROJ, mostly for compatibility with legacy
 systems, or older versions of GDAL.
 
-GDAL v2.3 and earlier mostly implements:
+GDAL v2.4 and earlier mostly implements:
 
 [OGC 01-009, 2001-01-12, OpenGIS Coordinate Transformation Service Implementation Specification]
 (http://portal.opengeospatial.org/files/?artifact_id=999)
