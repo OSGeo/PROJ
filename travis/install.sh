@@ -28,7 +28,19 @@ make dist-all >/dev/null
 TAR_FILENAME=`ls *.tar.gz`
 TAR_DIRECTORY=`basename $TAR_FILENAME .tar.gz`
 tar xvzf $TAR_FILENAME
-cd $TAR_DIRECTORY
+cd ..
+
+# compare with CMake's dist
+mkdir build_cmake
+cd build_cmake
+cmake -DBUILD_TESTING=OFF ..
+make dist
+tar xzf $TAR_FILENAME
+cd ..
+diff -qr build_autoconf/$TAR_DIRECTORY build_cmake/$TAR_DIRECTORY || true
+
+# continue build from autoconf
+cd build_autoconf/$TAR_DIRECTORY
 
 # There's a nasty #define CS in a Solaris system header. Avoid being caught about that again
 CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"

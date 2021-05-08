@@ -4,6 +4,7 @@ EXTRA_DIST = CMakeLists.txt \
 			proj_config.cmake.in \
 			ProjConfig.cmake \
 			ProjMac.cmake \
+			ProjReadme.cmake \
 			ProjTest.cmake \
 			ProjVersion.cmake \
 			policies.cmake \
