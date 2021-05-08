@@ -1751,13 +1751,13 @@ o The PROJ.4 project also distributes the datum-grid package,
  o Return correct latitude when using negative northings in
    Transverse Mercator (tmerc). #138.
 
- o Return correct result at origin in inverse Mod. Stererographic
+ o Return correct result at origin in inverse Modified Stereographic
    of Alaska. #161.
 
- o Return correct result at origin in inverse Mod. Stererographic
+ o Return correct result at origin in inverse Modified Stereographic
    of 48 U.S. #162.
 
- o Return correct result at origin in inverse Mod. Stererographic
+ o Return correct result at origin in inverse Modified Stereographic
    of 50 U.S. #163.
 
  o Return correct result at origin in inverse Lee Oblated
