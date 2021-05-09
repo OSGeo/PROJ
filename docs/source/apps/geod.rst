@@ -55,7 +55,7 @@ The following command-line options can appear in any order:
 .. option:: -lu
 
     Gives a listing of all the units that may be selected with the *+units=*
-    option.
+    option. (Default units are meters.)
 
 .. option:: -f <format>
 
