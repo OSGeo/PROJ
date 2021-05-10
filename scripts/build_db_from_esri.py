@@ -30,31 +30,35 @@
 #  DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
+import argparse
 import csv
 import os
 import sqlite3
 import sys
+from pathlib import Path
 
-if len(sys.argv) != 3:
-    print('Usage: build_db_from_esri.py path_to_esri_csv_dir proj.db')
-    print('')
-    print('path_to_esri_csv_dir is typically the path to the "csv" directory ')
-    print('of a "git clone https://github.com/Esri/projection-engine-db-doc"')
-    sys.exit(1)
+parser = argparse.ArgumentParser()
+parser.add_argument('esri_csv_dir', help='Path to ESRI CSV dir, typically the path '
+                                         'to the "csv" directory of a "git clone '
+                                         'https://github.com/Esri/projection-engine-db-doc',
+                    type=Path)
+parser.add_argument('proj_db', help='Path to current proj.db file', type=Path)
+parser.add_argument('version', help='ArcMap version string, e.g. "ArcMap 10.8.1"')
+parser.add_argument('date', help='ArcMap version date as a yyyy-MM-dd string, e.g. "2020-05-24"')
+args = parser.parse_args()
 
-path_to_csv = sys.argv[1]
-proj_db = sys.argv[2]
+path_to_csv = args.esri_csv_dir
+proj_db = args.proj_db
+version = args.version
+date = args.date
 
 conn = sqlite3.connect(proj_db)
 cursor = conn.cursor()
 
 all_sql = []
 
-# TODO: update this !
-version = 'ArcMap 10.8.1'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.VERSION', '%s');""" % (version))
-date = '2020-05-24'
 all_sql.append(
     """INSERT INTO "metadata" VALUES('ESRI.DATE', '%s');""" % (date))
 
@@ -148,7 +152,7 @@ def find_extent(extentname, slat, nlat, llon, rlon):
 #################
 
 def import_linunit():
-    with open(os.path.join(path_to_csv, 'pe_list_linunit.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_linunit.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -206,7 +210,7 @@ map_spheroid_esri_name_to_auth_code = {}
 
 
 def import_spheroid():
-    with open(os.path.join(path_to_csv, 'pe_list_spheroid.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_spheroid.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -306,7 +310,7 @@ map_pm_esri_name_to_auth_code = {}
 
 
 def import_prime_meridian():
-    with open(os.path.join(path_to_csv, 'pe_list_primem.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_primem.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -385,7 +389,7 @@ map_datum_esri_to_parameters = {}
 
 
 def import_datum():
-    with open(os.path.join(path_to_csv, 'pe_list_datum.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_datum.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -486,7 +490,7 @@ map_geogcs_esri_name_to_auth_code = {}
 
 
 def import_geogcs():
-    with open(os.path.join(path_to_csv, 'pe_list_geogcs.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_geogcs.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -779,7 +783,7 @@ set_esri_cs_code = set()
 map_conversion_sql_to_code = {}
 
 def import_projcs():
-    with open(os.path.join(path_to_csv, 'pe_list_projcs.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_projcs.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -1114,7 +1118,7 @@ map_vdatum_esri_to_parameters = {}
 
 
 def import_vdatum():
-    with open(os.path.join(path_to_csv, 'pe_list_vdatum.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_vdatum.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -1189,7 +1193,7 @@ map_vertcs_esri_name_to_auth_code = {}
 
 
 def import_vertcs():
-    with open(os.path.join(path_to_csv, 'pe_list_vertcs.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_vertcs.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -1383,7 +1387,7 @@ map_compoundcrs_esri_name_to_auth_code = {}
 
 
 def import_hvcoordsys():
-    with open(os.path.join(path_to_csv, 'pe_list_hvcoordsys.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_hvcoordsys.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -1470,7 +1474,7 @@ def get_parameter(wkt, param_name):
 
 
 def import_geogtran():
-    with open(os.path.join(path_to_csv, 'pe_list_geogtran.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_geogtran.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
