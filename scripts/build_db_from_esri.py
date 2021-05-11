@@ -30,33 +30,33 @@
 #  DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
+import argparse
 import csv
 import os
 import sqlite3
 import sys
+from pathlib import Path
 
-if len(sys.argv) != 3:
-    print('Usage: build_db_from_esri.py path_to_esri_csv_dir proj.db')
-    print('')
-    print('path_to_esri_csv_dir is typically the path to the "csv" directory ')
-    print('of a "git clone https://github.com/Esri/projection-engine-db-doc"')
-    sys.exit(1)
+parser = argparse.ArgumentParser()
+parser.add_argument('esri_csv_dir', help='Path to ESRI CSV dir, typically the path '
+                                         'to the "csv" directory of a "git clone '
+                                         'https://github.com/Esri/projection-engine-db-doc',
+                    type=Path)
+parser.add_argument('proj_db', help='Path to current proj.db file', type=Path)
+parser.add_argument('version', help='ArcMap version string, e.g. "ArcMap 10.8.1"')
+parser.add_argument('date', help='ArcMap version date as a yyyy-MM-dd string, e.g. "2020-05-24"')
+args = parser.parse_args()
 
-path_to_csv = sys.argv[1]
-proj_db = sys.argv[2]
+path_to_csv = args.esri_csv_dir
+proj_db = args.proj_db
+version = args.version
+date = args.date
 
 conn = sqlite3.connect(proj_db)
 cursor = conn.cursor()
 
-all_sql = []
-
-# TODO: update this !
-version = 'ArcMap 10.8.1'
-all_sql.append(
-    """INSERT INTO "metadata" VALUES('ESRI.VERSION', '%s');""" % (version))
-date = '2020-05-24'
-all_sql.append(
-    """INSERT INTO "metadata" VALUES('ESRI.DATE', '%s');""" % (date))
+all_sql = ["""INSERT INTO "metadata" VALUES('ESRI.VERSION', '{}');""".format(version),
+           """INSERT INTO "metadata" VALUES('ESRI.DATE', '{}');""".format(date)]
 
 manual_grids = """------------------
 -- ESRI grid names
@@ -87,6 +87,7 @@ VALUES
 -- 'france/RGNC1991_NEA74Noumea' : we have a 3D geocentric corresponding one: no need for mapping
 """
 
+
 def escape_literal(x):
     return x.replace("'", "''")
 
@@ -114,7 +115,7 @@ def find_extent(extentname, slat, nlat, llon, rlon):
         row = cursor.fetchone()
 
     if row is None:
-        #print('unknown extent inserted: ' + extentname)
+        # print('unknown extent inserted: ' + extentname)
 
         if float(rlon) > 180:
             new_rlon = '%s' % (float(rlon) - 360)
@@ -122,15 +123,15 @@ def find_extent(extentname, slat, nlat, llon, rlon):
                   (rlon, new_rlon, extentname))
             rlon = new_rlon
 
-        assert float(slat) >= -90 and float(slat) <= 90, (extentname,
-                                                          slat, nlat, llon, rlon)
-        assert float(nlat) >= -90 and float(nlat) <= 90, (extentname,
-                                                          slat, nlat, llon, rlon)
+        assert -90 <= float(slat) <= 90, (extentname,
+                                          slat, nlat, llon, rlon)
+        assert -90 <= float(nlat) <= 90, (extentname,
+                                          slat, nlat, llon, rlon)
         assert float(nlat) > float(slat), (extentname, slat, nlat, llon, rlon)
-        assert float(llon) >= -180 and float(llon) <= 180, (extentname,
-                                                            slat, nlat, llon, rlon)
-        assert float(rlon) >= -180 and float(rlon) <= 180, (extentname,
-                                                            slat, nlat, llon, rlon)
+        assert -180 <= float(llon) <= 180, (extentname,
+                                            slat, nlat, llon, rlon)
+        assert -180 <= float(rlon) <= 180, (extentname,
+                                            slat, nlat, llon, rlon)
 
         sql = """INSERT INTO "extent" VALUES('ESRI','%d','%s','%s',%s,%s,%s,%s,0);""" % (
             esri_area_counter, escape_literal(extentname), escape_literal(extentname), slat, nlat, llon, rlon)
@@ -147,8 +148,9 @@ def find_extent(extentname, slat, nlat, llon, rlon):
 
 #################
 
+
 def import_linunit():
-    with open(os.path.join(path_to_csv, 'pe_list_linunit.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_linunit.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -206,7 +208,7 @@ map_spheroid_esri_name_to_auth_code = {}
 
 
 def import_spheroid():
-    with open(os.path.join(path_to_csv, 'pe_list_spheroid.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_spheroid.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -306,7 +308,7 @@ map_pm_esri_name_to_auth_code = {}
 
 
 def import_prime_meridian():
-    with open(os.path.join(path_to_csv, 'pe_list_primem.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_primem.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -385,7 +387,7 @@ map_datum_esri_to_parameters = {}
 
 
 def import_datum():
-    with open(os.path.join(path_to_csv, 'pe_list_datum.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_datum.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -486,7 +488,7 @@ map_geogcs_esri_name_to_auth_code = {}
 
 
 def import_geogcs():
-    with open(os.path.join(path_to_csv, 'pe_list_geogcs.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_geogcs.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -638,7 +640,6 @@ def import_geogcs():
                             p['pm_code'] = pm_code
                             map_datum_esri_to_parameters[datum_code] = p
 
-
                 # We may have already the EPSG entry, so use it preferably
                 if esri_name not in map_geogcs_esri_name_to_auth_code:
                     map_geogcs_esri_name_to_auth_code[esri_name] = ['ESRI', code]
@@ -649,7 +650,7 @@ def import_geogcs():
                 sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','geodetic_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                 all_sql.append(sql)
 
-                if deprecated and code != latestWkid and code not in ('4305', '4812'): # Voirol 1960 no longer in EPSG
+                if deprecated and code != latestWkid and code not in ('4305', '4812'):  # Voirol 1960 no longer in EPSG
                     cursor.execute(
                         "SELECT name FROM geodetic_crs WHERE auth_name = 'EPSG' AND code = ?", (latestWkid,))
                     src_row = cursor.fetchone()
@@ -661,15 +662,17 @@ def import_geogcs():
 
 ########################
 
+
 def parse_wkt(s, level):
     if s[0] == '"':
         return s
     pos = s.find('[')
     if pos < 0:
         return s
-    return { s[0:pos] : parse_wkt_array(s[pos+1:-1], level + 1) }
+    return {s[0:pos]: parse_wkt_array(s[pos+1:-1], level + 1)}
 
-def parse_wkt_array(s, level = 0):
+
+def parse_wkt_array(s, level=0):
     ar = []
     in_string = False
     cur_token = ''
@@ -689,7 +692,7 @@ def parse_wkt_array(s, level = 0):
             cur_token += c
             indent_level -= 1
             assert indent_level >= 0
-        elif indent_level == 0 and  c == ',':
+        elif indent_level == 0 and c == ',':
             ar.append(parse_wkt(cur_token, level + 1))
             cur_token = ''
         else:
@@ -701,7 +704,7 @@ def parse_wkt_array(s, level = 0):
     if level == 0:
         d = {}
         for elt in ar:
-            assert type(elt) == type({})
+            assert isinstance(elt, dict)
             assert len(elt) == 1
             if 'PROJECTION' in elt:
                 assert len(elt['PROJECTION']) == 1, elt['PROJECTION']
@@ -732,6 +735,7 @@ def parse_wkt_array(s, level = 0):
         return ar
 
 ########################
+
 
 def get_cs(parsed_conv_wkt):
 
@@ -774,12 +778,14 @@ def get_cs(parsed_conv_wkt):
 
 ########################
 
+
 map_projcs_esri_name_to_auth_code = {}
 set_esri_cs_code = set()
 map_conversion_sql_to_code = {}
 
+
 def import_projcs():
-    with open(os.path.join(path_to_csv, 'pe_list_projcs.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_projcs.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -1114,7 +1120,7 @@ map_vdatum_esri_to_parameters = {}
 
 
 def import_vdatum():
-    with open(os.path.join(path_to_csv, 'pe_list_vdatum.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_vdatum.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -1189,7 +1195,7 @@ map_vertcs_esri_name_to_auth_code = {}
 
 
 def import_vertcs():
-    with open(os.path.join(path_to_csv, 'pe_list_vertcs.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_vertcs.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -1383,7 +1389,7 @@ map_compoundcrs_esri_name_to_auth_code = {}
 
 
 def import_hvcoordsys():
-    with open(os.path.join(path_to_csv, 'pe_list_hvcoordsys.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_hvcoordsys.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -1470,7 +1476,7 @@ def get_parameter(wkt, param_name):
 
 
 def import_geogtran():
-    with open(os.path.join(path_to_csv, 'pe_list_geogtran.csv'), 'rt') as csvfile:
+    with open(path_to_csv / 'pe_list_geogtran.csv', 'rt') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         nfields = len(header)
@@ -1541,7 +1547,7 @@ def import_geogtran():
                         # print('Skipping GEOGTRAN %s (EPSG source) since it uses a non-supported yet suported method'% esri_name)
                         continue
                     if 'NADCON5' in wkt:
-                        print('Skipping NADCON5 %s (EPSG source) since it uses a non-supported yet suported method'% esri_name)
+                        print('Skipping NADCON5 %s (EPSG source) since it uses a non-supported yet suported method' % esri_name)
                         continue
 
                 # Don't do anything particular except checking we know it
@@ -1552,7 +1558,7 @@ def import_geogtran():
                 # We don't want to import ESRI deprecated transformations
                 # (there are a lot), do we ?
                 if deprecated:
-                    #print('Skipping deprecated GEOGTRAN %s' % esri_name)
+                    # print('Skipping deprecated GEOGTRAN %s' % esri_name)
                     continue
 
                 assert wkt.startswith('GEOGTRAN')
@@ -1747,7 +1753,6 @@ def import_geogtran():
                     filename = wkt[pos:end_pos]
                     assert filename.startswith('Dataset_')
                     filename = filename[len('Dataset_'):]
-
 
                     cursor.execute(
                         "SELECT g.name, g.grid_name FROM grid_transformation g JOIN usage u ON u.object_table_name = 'grid_transformation' AND u.object_auth_name = g.auth_name AND u.object_code = g.code JOIN extent e ON u.extent_auth_name = e.auth_name AND u.extent_code = e.code WHERE g.auth_name != 'ESRI' AND g.source_crs_auth_name = ? AND g.source_crs_code = ? AND g.target_crs_auth_name = ? AND g.target_crs_code = ? AND e.auth_name = ? AND e.code = ?", (src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, extent_auth_name, extent_code))
