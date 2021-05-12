@@ -4410,6 +4410,73 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_compoundCRS_issue_2720) {
+    auto dbContext = DatabaseContext::create();
+    auto objSrc = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+        "COMPD_CS[\"Orthographic + EGM96 geoid height\","
+        "PROJCS[\"Orthographic\","
+        "GEOGCS[\"GCS_WGS_1984\","
+        "DATUM[\"D_unknown\","
+        "SPHEROID[\"WGS84\",6378137,298.257223563]],"
+        "PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.017453292519943295]],"
+        "PROJECTION[\"Orthographic\"],"
+        "PARAMETER[\"Latitude_Of_Center\",36.1754430555555000],"
+        "PARAMETER[\"Longitude_Of_Center\",-86.7740944444444000],"
+        "PARAMETER[\"false_easting\",0],"
+        "PARAMETER[\"false_northing\",0],"
+        "UNIT[\"Meter\",1]],"
+        "VERT_CS[\"EGM96 geoid height\","
+        "VERT_DATUM[\"EGM96 geoid\",2005,"
+        "EXTENSION[\"PROJ4_GRIDS\",\"egm96_15.gtx\"],"
+        "AUTHORITY[\"EPSG\",\"5171\"]],"
+        "UNIT[\"metre\",1,"
+        "AUTHORITY[\"EPSG\",\"9001\"]],"
+        "AXIS[\"Up\",UP],"
+        "AUTHORITY[\"EPSG\",\"5773\"]]]");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDst = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+        "COMPD_CS[\"WGS84 Coordinate System + EGM96 geoid height\","
+        "GEOGCS[\"WGS84 Coordinate System\","
+        "DATUM[\"WGS 1984\","
+        "SPHEROID[\"WGS 1984\",6378137,298.257223563],"
+        "TOWGS84[0,0,0,0,0,0,0],"
+        "AUTHORITY[\"EPSG\",\"6326\"]],"
+        "PRIMEM[\"Greenwich\",0],"
+        "UNIT[\"degree\",0.0174532925199433],"
+        "AUTHORITY[\"EPSG\",\"4326\"]],"
+        "VERT_CS[\"EGM96 geoid height\","
+        "VERT_DATUM[\"EGM96 geoid\",2005,"
+        "EXTENSION[\"PROJ4_GRIDS\",\"egm96_15.gtx\"],"
+        "AUTHORITY[\"EPSG\",\"5171\"]],"
+        "UNIT[\"metre\",1,"
+        "AUTHORITY[\"EPSG\",\"9001\"]],"
+        "AXIS[\"Up\",UP],"
+        "AUTHORITY[\"EPSG\",\"5773\"]]]");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst), ctxt);
+    EXPECT_EQ(list.size(), 1U);
+
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=ortho +f=0 +lat_0=36.1754430555555 "
+              "+lon_0=-86.7740944444444 +x_0=0 +y_0=0 +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, vertCRS_to_vertCRS) {
 
     auto vertcrs_m_obj = PROJStringParser().createFromPROJString("+vunits=m");
