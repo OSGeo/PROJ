@@ -5853,9 +5853,9 @@ AuthorityFactory::getGeoidModels(const std::string &code) const {
  * The list is ordered with preferred operations first. No attempt is made
  * at inferring operations that are not explicitly in the database (see
  * createFromCRSCodesWithIntermediates() for that), and only
- * source -> target operations are searched (i.e. if target -> source is present,
- * you need to call this method with the arguments reversed, and apply the
- * reverse transformations).
+ * source -> target operations are searched (i.e. if target -> source is
+ * present, you need to call this method with the arguments reversed, and apply
+ * the reverse transformations).
  *
  * Deprecated operations are rejected.
  *

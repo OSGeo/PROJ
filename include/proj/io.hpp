@@ -784,7 +784,8 @@ class PROJ_GCC_DLL WKTParser {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Parse a PROJ string into the appropriate subclass of util::BaseObject.
+/** \brief Parse a PROJ string into the appropriate subclass of
+ * util::BaseObject.
  */
 class PROJ_GCC_DLL PROJStringParser {
   public:
