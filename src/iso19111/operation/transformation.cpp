@@ -2806,14 +2806,14 @@ void Transformation::_exportToPROJString(
                                   common::UnitOfMeasure::ARC_SECOND);
 
         auto sourceCRSGeog =
-            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
+            extractGeographicCRSIfGeographicCRSOrEquivalent(sourceCRS());
         if (!sourceCRSGeog) {
             throw io::FormattingException(
                 "Can apply Geographic 2D offsets only to GeographicCRS");
         }
 
         auto targetCRSGeog =
-            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
+            extractGeographicCRSIfGeographicCRSOrEquivalent(targetCRS());
         if (!targetCRSGeog) {
             throw io::FormattingException(
                 "Can apply Geographic 2D offsets only to GeographicCRS");
