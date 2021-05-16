@@ -2007,6 +2007,7 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
         "1098", // Geog3D to Geog2D+GravityRelatedHeight (SA 2010)
         "1100", // Geog3D to Geog2D+GravityRelatedHeight (PL txt)
         "1103", // Geog3D to Geog2D+GravityRelatedHeight (EGM)
+        "1105", // Geog3D to Geog2D+GravityRelatedHeight (ITAL2005)
         "9661", // Geographic3D to GravityRelatedHeight (EGM)
         "9662", // Geographic3D to GravityRelatedHeight (Ausgeoid98)
         "9663", // Geographic3D to GravityRelatedHeight (OSGM-GB)
@@ -2932,15 +2933,28 @@ void Transformation::_exportToPROJString(
 
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTICAL_OFFSET) {
 
-        auto sourceCRSVert =
-            dynamic_cast<const crs::VerticalCRS *>(sourceCRS().get());
+        const crs::CRS *srcCRS = sourceCRS().get();
+        const crs::CRS *tgtCRS = targetCRS().get();
+
+        const auto sourceCRSCompound =
+            dynamic_cast<const crs::CompoundCRS *>(srcCRS);
+        const auto targetCRSCompound =
+            dynamic_cast<const crs::CompoundCRS *>(tgtCRS);
+        if (sourceCRSCompound && targetCRSCompound &&
+            sourceCRSCompound->componentReferenceSystems()[0]->_isEquivalentTo(
+                targetCRSCompound->componentReferenceSystems()[0].get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
+            srcCRS = sourceCRSCompound->componentReferenceSystems()[1].get();
+            tgtCRS = targetCRSCompound->componentReferenceSystems()[1].get();
+        }
+
+        auto sourceCRSVert = dynamic_cast<const crs::VerticalCRS *>(srcCRS);
         if (!sourceCRSVert) {
             throw io::FormattingException(
                 "Can apply Vertical offset only to VerticalCRS");
         }
 
-        auto targetCRSVert =
-            dynamic_cast<const crs::VerticalCRS *>(targetCRS().get());
+        auto targetCRSVert = dynamic_cast<const crs::VerticalCRS *>(tgtCRS);
         if (!targetCRSVert) {
             throw io::FormattingException(
                 "Can apply Vertical offset only to VerticalCRS");

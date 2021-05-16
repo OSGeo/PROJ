@@ -14,7 +14,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1049','Incheon',NULL,'1963-01-01',NU
 INSERT INTO "usage" VALUES('EPSG','13101','vertical_datum','EPSG','1049','EPSG','3739','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1050','Trieste',NULL,'1875-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13102','vertical_datum','EPSG','1050','EPSG','2370','EPSG','1178');
-INSERT INTO "vertical_datum" VALUES('EPSG','1051','Genoa',NULL,'1942-01-01',NULL,NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1051','Genoa 1942',NULL,'1942-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13103','vertical_datum','EPSG','1051','EPSG','3736','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1054','Sri Lanka Vertical Datum',NULL,'1932-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13106','vertical_datum','EPSG','1054','EPSG','3310','EPSG','1178');
@@ -224,6 +224,10 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1302','Local Tidal Datum at Pago Pag
 INSERT INTO "usage" VALUES('EPSG','14795','vertical_datum','EPSG','1302','EPSG','2288','EPSG','1026');
 INSERT INTO "vertical_datum" VALUES('EPSG','1303','National Vertical Datum 1992',NULL,'1994-01-01',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14852','vertical_datum','EPSG','1303','EPSG','3217','EPSG','1181');
+INSERT INTO "vertical_datum" VALUES('EPSG','1306','Catania 1965',NULL,'1965-01-01',NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','15330','vertical_datum','EPSG','1306','EPSG','2340','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1307','Cagliari 1956',NULL,'1956-01-01',NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','15331','vertical_datum','EPSG','1307','EPSG','2339','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,0);

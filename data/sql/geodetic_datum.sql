@@ -330,6 +330,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1304','Red Geodesica Para Mineria en
 INSERT INTO "usage" VALUES('EPSG','15025','geodetic_datum','EPSG','1304','EPSG','1066','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1305','ETRF2000 Poland',NULL,'EPSG','7019','EPSG','8901','2012-11-15',NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','15061','geodetic_datum','EPSG','1305','EPSG','1192','EPSG','1180');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1308','EOS21 Intermediate Reference Frame',NULL,'EPSG','7019','EPSG','8901','2021-01-01',NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','15312','geodetic_datum','EPSG','1308','EPSG','4620','EPSG','1141');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,0);

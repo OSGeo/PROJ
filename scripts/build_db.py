@@ -618,7 +618,8 @@ def fill_grid_transformation(proj_db_cursor):
         # 1100: Geog3D to Geog2D+GravityRelatedHeight (PL txt)
         # 1101: Vertical Offset by Grid Interpolation (PL txt)
         # 1103: Geog3D to Geog2D+GravityRelatedHeight (EGM)
-        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1100, 1101, 1103) and n_params == 2:
+        # 1105: Geog3D to Geog2D+GravityRelatedHeight (ITAL2005)
+        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1100, 1101, 1103, 1105) and n_params == 2:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
