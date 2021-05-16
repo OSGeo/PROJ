@@ -306,7 +306,15 @@ static bool IsTIFF(size_t header_size, const unsigned char *header) {
 
 // ---------------------------------------------------------------------------
 
-enum class TIFFDataType { Int16, UInt16, Int32, UInt32, Float32, Float64 };
+enum class TIFFDataType {
+    Int16,
+    UInt16,
+    Int32,
+    UInt32,
+    Float16,
+    Float32,
+    Float64
+};
 
 // ---------------------------------------------------------------------------
 
@@ -590,6 +598,79 @@ float GTiffGrid::readValue(const std::vector<unsigned char> &buffer,
 
 // ---------------------------------------------------------------------------
 
+/************************************************************************/
+/*                           HalfToFloat()                              */
+/*                                                                      */
+/*  16-bit floating point number to 32-bit one.                         */
+/************************************************************************/
+
+static uint32_t HalfToFloat(uint16_t iHalf) {
+
+    uint32_t iSign = (iHalf >> 15) & 0x00000001;
+    int iExponent = (iHalf >> 10) & 0x0000001f;
+    uint32_t iMantissa = iHalf & 0x000003ff;
+
+    if (iExponent == 0) {
+        if (iMantissa == 0) {
+            /* --------------------------------------------------------------------
+             */
+            /*      Plus or minus zero. */
+            /* --------------------------------------------------------------------
+             */
+
+            return iSign << 31;
+        } else {
+            /* --------------------------------------------------------------------
+             */
+            /*      Denormalized number -- renormalize it. */
+            /* --------------------------------------------------------------------
+             */
+
+            while (!(iMantissa & 0x00000400)) {
+                iMantissa <<= 1;
+                iExponent -= 1;
+            }
+
+            iExponent += 1;
+            iMantissa &= ~0x00000400U;
+        }
+    } else if (iExponent == 31) {
+        if (iMantissa == 0) {
+            /* --------------------------------------------------------------------
+             */
+            /*       Positive or negative infinity. */
+            /* --------------------------------------------------------------------
+             */
+
+            return (iSign << 31) | 0x7f800000;
+        } else {
+            /* --------------------------------------------------------------------
+             */
+            /*       NaN -- preserve sign and significand bits. */
+            /* --------------------------------------------------------------------
+             */
+
+            return (iSign << 31) | 0x7f800000 | (iMantissa << 13);
+        }
+    }
+
+    /* -------------------------------------------------------------------- */
+    /*       Normalized number.                                             */
+    /* -------------------------------------------------------------------- */
+
+    iExponent = iExponent + (127 - 15);
+    iMantissa = iMantissa << 13;
+
+    /* -------------------------------------------------------------------- */
+    /*       Assemble sign, exponent and mantissa.                          */
+    /* -------------------------------------------------------------------- */
+
+    /* coverity[overflow_sink] */
+    return (iSign << 31) | (static_cast<uint32_t>(iExponent) << 23) | iMantissa;
+}
+
+// ---------------------------------------------------------------------------
+
 bool GTiffGrid::valueAt(uint16_t sample, int x, int yFromBottom,
                         float &out) const {
     assert(x >= 0 && yFromBottom >= 0 && x < m_width && yFromBottom < m_height);
@@ -672,6 +753,23 @@ bool GTiffGrid::valueAt(uint16_t sample, int x, int yFromBottom,
     case TIFFDataType::UInt32:
         out = readValue<unsigned int>(*pBuffer, offsetInBlock, sample);
         break;
+
+    case TIFFDataType::Float16: {
+        const auto ptr = reinterpret_cast<const uint16_t *>(pBuffer->data());
+        assert(offsetInBlock < pBuffer->size() / sizeof(uint16_t));
+        const uint32_t nval = HalfToFloat(ptr[offsetInBlock]);
+        float fval;
+        memcpy(&fval, &nval, sizeof(float));
+        if (!m_hasNodata || fval != m_noData) {
+            double scale = 1;
+            double offset = 0;
+            getScaleOffset(scale, offset, sample);
+            out = static_cast<float>(fval * scale + offset);
+        } else {
+            out = fval;
+        }
+        break;
+    }
 
     case TIFFDataType::Float32:
         out = readValue<float>(*pBuffer, offsetInBlock, sample);
@@ -893,6 +991,8 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
         dt = TIFFDataType::Int32;
     else if (sampleFormat == SAMPLEFORMAT_UINT && bitsPerSample == 32)
         dt = TIFFDataType::UInt32;
+    else if (sampleFormat == SAMPLEFORMAT_IEEEFP && bitsPerSample == 16)
+        dt = TIFFDataType::Float16;
     else if (sampleFormat == SAMPLEFORMAT_IEEEFP && bitsPerSample == 32)
         dt = TIFFDataType::Float32;
     else if (sampleFormat == SAMPLEFORMAT_IEEEFP && bitsPerSample == 64)

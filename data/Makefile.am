@@ -62,6 +62,7 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		tests/test_vgrid_bottomup_with_scale.tif \
 		tests/test_vgrid_deflate_floatingpointpredictor.tif \
 		tests/test_vgrid_deflate.tif \
+		tests/test_vgrid_half_float.tif \
 		tests/test_vgrid_float64.tif \
 		tests/test_vgrid_in_second_channel.tif \
 		tests/test_vgrid_int16.tif \
