@@ -14,7 +14,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','5193','Incheon height',NULL,'EPSG','64
 INSERT INTO "usage" VALUES('EPSG','3864','vertical_crs','EPSG','5193','EPSG','3739','EPSG','1179');
 INSERT INTO "vertical_crs" VALUES('EPSG','5195','Trieste height',NULL,'EPSG','6499','EPSG','1050',0);
 INSERT INTO "usage" VALUES('EPSG','3865','vertical_crs','EPSG','5195','EPSG','2370','EPSG','1178');
-INSERT INTO "vertical_crs" VALUES('EPSG','5214','Genoa height',NULL,'EPSG','6499','EPSG','1051',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','5214','Genoa 1942 height',NULL,'EPSG','6499','EPSG','1051',0);
 INSERT INTO "usage" VALUES('EPSG','3866','vertical_crs','EPSG','5214','EPSG','3736','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','5237','SLVD height',NULL,'EPSG','6499','EPSG','1054',0);
 INSERT INTO "usage" VALUES('EPSG','3876','vertical_crs','EPSG','5237','EPSG','3310','EPSG','1178');
@@ -458,6 +458,10 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9675','Pago Pago 2020 height',NULL,'EP
 INSERT INTO "usage" VALUES('EPSG','14793','vertical_crs','EPSG','9675','EPSG','2288','EPSG','1026');
 INSERT INTO "vertical_crs" VALUES('EPSG','9681','NVD 1992 height',NULL,'EPSG','6499','EPSG','1303',0);
 INSERT INTO "usage" VALUES('EPSG','14851','vertical_crs','EPSG','9681','EPSG','3217','EPSG','1181');
+INSERT INTO "vertical_crs" VALUES('EPSG','9721','Catania 1965 height',NULL,'EPSG','6499','EPSG','1306',0);
+INSERT INTO "usage" VALUES('EPSG','15276','vertical_crs','EPSG','9721','EPSG','2340','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','9722','Cagliari 1956 height',NULL,'EPSG','6499','EPSG','1307',0);
+INSERT INTO "usage" VALUES('EPSG','15278','vertical_crs','EPSG','9722','EPSG','2339','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','5336','Black Sea depth',NULL,'EPSG','6498','EPSG','5134',0);
 INSERT INTO "usage" VALUES('EPSG','3936','vertical_crs','EPSG','5336','EPSG','1102','EPSG','1198');
 INSERT INTO "vertical_crs" VALUES('EPSG','5612','Baltic 1977 depth',NULL,'EPSG','6498','EPSG','5105',0);

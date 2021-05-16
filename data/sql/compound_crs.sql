@@ -704,3 +704,11 @@ INSERT INTO "compound_crs" VALUES('EPSG','9714','NAD83(CSRS) / UTM zone 24N + CG
 INSERT INTO "usage" VALUES('EPSG','15197','compound_crs','EPSG','9714','EPSG','4617','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','9715','NAD83(CSRS) / UTM zone 15N + CGVD2013a height',NULL,'EPSG','3159','EPSG','9245',0);
 INSERT INTO "usage" VALUES('EPSG','15200','compound_crs','EPSG','9715','EPSG','3414','EPSG','1142');
+INSERT INTO "compound_crs" VALUES('EPSG','9723','ETRS89 + Genoa 1942 height',NULL,'EPSG','4258','EPSG','5214',0);
+INSERT INTO "usage" VALUES('EPSG','15255','compound_crs','EPSG','9723','EPSG','3736','EPSG','1270');
+INSERT INTO "compound_crs" VALUES('EPSG','9724','ETRS89 + Catania 1965 height',NULL,'EPSG','4258','EPSG','9721',0);
+INSERT INTO "usage" VALUES('EPSG','15324','compound_crs','EPSG','9724','EPSG','2340','EPSG','1270');
+INSERT INTO "compound_crs" VALUES('EPSG','9725','ETRS89 + Cagliari 1956 height',NULL,'EPSG','4258','EPSG','9722',0);
+INSERT INTO "usage" VALUES('EPSG','15257','compound_crs','EPSG','9725','EPSG','2339','EPSG','1270');
+INSERT INTO "compound_crs" VALUES('EPSG','9742','EOS21 Grid + ODN height',NULL,'EPSG','9741','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','15318','compound_crs','EPSG','9742','EPSG','4620','EPSG','1141');

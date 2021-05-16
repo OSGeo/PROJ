@@ -405,7 +405,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (4)",
     USAGE[
         SCOPE["Transformation of coordinates at 1m to 2m level of accuracy."],
         AREA["Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast west of 44°W and north of 40°N."],
-        BBOX[40,-141.00299072266,83.16267232269,-44]],
+        BBOX[40,-141.01,83.17,-44]],
     ID["DERIVED_FROM(EPSG)",1313],
     REMARK["Uses NTv2 data files. Replaces NTv1 (transformation code 1312) except in Quebec. Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and (code 4269) have longitudes positive east. May be used as tfm to WGS 84 - see code 1693."]]
 
@@ -460,7 +460,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (3)",
     USAGE[
         SCOPE["Historic record only - now superseded - see remarks."],
         AREA["Canada - onshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon; offshore east coast west of 44°W and north of 40°N."],
-        BBOX[40,-141.00299072266,83.16267232269,-44]],
+        BBOX[40,-141.01,83.17,-44]],
     ID["DERIVED_FROM(EPSG)",1312],
     REMARK["Uses NTv1 method. Replaced in Quebec by code 1462 and elsewhere in 1997 by NTv2 (transformation code 1313). Input expects longitudes to be positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 

@@ -624,6 +624,9 @@ INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1297','EVRF2007-PL','EP
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1305','ETRF2000-PL','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6277','OSGB36','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6277','OSGB 1936','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1051','Genoa','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1308','EOS21-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6282','Pointe Noire','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7257,3 +7260,17 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4277','OSGB 1936','EPSG')
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','27700','OSGB 1936 / British National Grid','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9702','PL-ETRF2000','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9713','NAD83(CSRS) / UTM 24N','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4265','Roma40','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4982','ETRF89 IT','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4983','ETRF89 IT','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4670','ETRF89 IT','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3065','ETRF89 IT / UTM zone 33N','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3064','ETRF89 IT / UTM zone 32N','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5214','Genoa height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9741','ETRS89 / EOS21 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9742','ETRS89 / EOS21 SnakeGrid + Newlyn height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9716','ETRF89 IT / UTM zone 34N','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5608','770','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5608','IGLD (1955) - DHt','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5609','771','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5609','IGLD (1985) - DHt','EPSG');
