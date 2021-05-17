@@ -22,6 +22,7 @@ VALUES
 -- source file contains undulation in first band, and deflection in 2nd and 3d band
 ('AUSGeoid2020_20180201.gsb','au_ga_AUSGeoid2020_20180201.tif','AUSGeoid2020_20180201.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/au_ga_AUSGeoid2020_20180201.tif',1,1,NULL),
 ('AGQG_20191107.gsb','au_ga_AGQG_20191107.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/au_ga_AGQG_20191107.tif',1,1,NULL),
+('AGQG_20201120.gsb','au_ga_AGQG_20201120.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/au_ga_AGQG_20201120.tif',1,1,NULL),
 
 -- au_icsm - Australian Intergovernmental Committee on Surveying and Mapping
 ('A66 National (13.09.01).gsb','au_icsm_A66_National_13_09_01.tif','A66_National_13_09_01.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/au_icsm_A66_National_13_09_01.tif',1,1,NULL),
