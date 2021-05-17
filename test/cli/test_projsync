@@ -188,6 +188,28 @@ fi
 cat ${TMP_OUT} | grep "nz_linz_nzgeoid2009.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
 cat ${TMP_OUT} | grep "us_noaa_alaska.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
 
+cat > dummy.geojson <<EOF
+{
+"type": "FeatureCollection",
+"features": [
+{ "type": "Feature", "properties": { "url": "https://example.com/removed_in_1.7.tif", "name": "removed_in_1.7", "area_of_use": "Australia", "type": "VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL", "source_crs_code": "EPSG:7843", "source_crs_name": "GDA2020", "target_crs_code": "EPSG:9458", "target_crs_name": "AVWS height", "source": "Geoscience Australia", "source_country": "Australia", "source_id": "au_ga", "source_url": "http://www.ga.gov.au", "description": "GDA2020 (EPSG:7843) to AVWS height (EPSG:9458)", "file_size": 60878523, "sha256sum": "c06f24dae030587cc2556a316782ade83b6d91f1b8d03922ddd0ce58f3868baa", "version_removed": "1.7" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 93.0083333, -61.0083333 ], [ 174.0083333, -61.0083333 ], [ 174.0083333, -8.0083333 ], [ 93.0083333, -8.0083333 ], [ 93.0083333, -61.0083333 ] ] ] } },
+{ "type": "Feature", "properties": { "url": "https://example.com/added_in_99_99.tif", "name": "added_in_99_99.tif", "area_of_use": "Australia", "type": "VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL", "source_crs_code": "EPSG:7843", "source_crs_name": "GDA2020", "target_crs_code": "EPSG:9458", "target_crs_name": "AVWS height", "source": "Geoscience Australia", "source_country": "Australia", "source_id": "au_ga", "source_url": "http://www.ga.gov.au", "description": "GDA2020 (EPSG:7843) to AVWS height (EPSG:9458)", "file_size": 60878523, "sha256sum": "c06f24dae030587cc2556a316782ade83b6d91f1b8d03922ddd0ce58f3868baa", "version_added": "99.99" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 93.0083333, -61.0083333 ], [ 174.0083333, -61.0083333 ], [ 174.0083333, -8.0083333 ], [ 93.0083333, -8.0083333 ], [ 93.0083333, -61.0083333 ] ] ] } },
+{ "type": "Feature", "properties": { "url": "https://example.com/without_version.tif", "name": "without_version.tif", "area_of_use": "Australia", "type": "VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL", "source_crs_code": "EPSG:7843", "source_crs_name": "GDA2020", "target_crs_code": "EPSG:9458", "target_crs_name": "AVWS height", "source": "Geoscience Australia", "source_country": "Australia", "source_id": "au_ga", "source_url": "http://www.ga.gov.au", "description": "GDA2020 (EPSG:7843) to AVWS height (EPSG:9458)", "file_size": 60878523, "sha256sum": "c06f24dae030587cc2556a316782ade83b6d91f1b8d03922ddd0ce58f3868baa" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 93.0083333, -61.0083333 ], [ 174.0083333, -61.0083333 ], [ 174.0083333, -8.0083333 ], [ 93.0083333, -8.0083333 ], [ 93.0083333, -61.0083333 ] ] ] } }
+]
+}
+EOF
+
+echo "Testing $EXE --source-id au_ga --verbose --dry-run --local-geojson-file dummy.geojson"
+if ! $EXE --source-id au_ga --verbose --dry-run --local-geojson-file dummy.geojson > ${TMP_OUT}; then
+    echo "--source-id au_ga --verbose --dry-run --local-geojson-file dummy.geojson"
+    cat ${TMP_OUT}
+    exit 100
+fi
+rm dummy.geojson
+cat ${TMP_OUT} | grep "Skipping removed_in_1.7 as it is no longer useful starting with PROJ-data 1.7" >/dev/null || (cat ${TMP_OUT}; exit 100)
+cat ${TMP_OUT} | grep "Skipping added_in_99_99.tif as it is only useful starting with PROJ-data 99.99" >/dev/null || (cat ${TMP_OUT}; exit 100)
+cat ${TMP_OUT} | grep "Would download https://cdn.proj.org/without_version.tif" >/dev/null || (cat ${TMP_OUT}; exit 100)
+
 rm -rf ${PROJ_USER_WRITABLE_DIRECTORY}
 rm ${TMP_OUT}
 
