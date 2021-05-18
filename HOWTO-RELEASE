@@ -99,7 +99,16 @@ If needed, update the year in `CITATION`.
 *Commit the changes to master.*
 
 
-1.5 Create maintenance branch
+1.5 Update `PROJ_DATA.VERSION`
+-------------------------------------------------------------------------------
+
+If the database references data from an updated PROJ-data package, update
+`PROJ_DATA.VERSION` in `data/sql/metadata.sql`.
+
+*Commit the changes to master.*
+
+
+1.6 Create maintenance branch
 -------------------------------------------------------------------------------
 
 *Skip this step if you are preparing a patch release or RC2 and later.*
@@ -117,7 +126,7 @@ subsequently cherry-picked to the maintenance branch.
 *Push branch upstream.*
 
 
-1.6 Prepare and upload archives
+1.7 Prepare and upload archives
 -------------------------------------------------------------------------------
 
 Run autoconf and configure the build:
@@ -148,13 +157,13 @@ scp proj-x.y.zRCn.* warmerdam@download.osgeo.org:/osgeo/download/proj
 Adjust version numbers and usernames accordingly.
 
 
-1.7 Announce the release candidate
+1.8 Announce the release candidate
 -------------------------------------------------------------------------------
 
 Announce the release candidate on the PROJ mailing list.
 
 
-1.8 Promotion to final release
+1.9 Promotion to final release
 -------------------------------------------------------------------------------
 
 When you are confident that the latest release candidate is ready for promotion

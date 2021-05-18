@@ -72,7 +72,9 @@ static void usage() {
     std::cerr << "          [--source-id ID] [--area-of-use NAME]" << std::endl;
     std::cerr << "          [--file NAME]" << std::endl;
     std::cerr << "          [--all] [--exclude-world-coverage]" << std::endl;
-    std::cerr << "          [--quiet] [--dry-run] [--list-files]" << std::endl;
+    std::cerr << "          [--quiet | --verbose] [--dry-run] [--list-files]"
+              << std::endl;
+    std::cerr << "          [--no-version-filtering]" << std::endl;
     std::exit(1);
 }
 
@@ -124,10 +126,12 @@ int main(int argc, char *argv[]) {
     double queried_north = 0.0;
     bool intersects = true;
     bool quiet = false;
+    bool verbose = false;
     bool includeWorldCoverage = true;
     bool queryAll = false;
     std::string queriedFilename;
     std::string files_geojson_local;
+    bool versionFiltering = true;
 
     for (int i = 1; i < argc; i++) {
         std::string arg(argv[i]);
@@ -208,8 +212,12 @@ int main(int argc, char *argv[]) {
             includeWorldCoverage = false;
         } else if (arg == "--all") {
             queryAll = true;
+        } else if (arg == "--no-version-filtering") {
+            versionFiltering = false;
         } else if (arg == "-q" || arg == "--quiet") {
             quiet = true;
+        } else if (arg == "--verbose") {
+            verbose = true;
         } else {
             usage();
         }
@@ -281,6 +289,22 @@ int main(int argc, char *argv[]) {
         std::cout << "filename,source_id,area_of_use,file_size" << std::endl;
     }
 
+    std::string proj_data_version_str;
+    int proj_data_version_major = 0;
+    int proj_data_version_minor = 0;
+    {
+        const char *proj_data_version =
+            proj_context_get_database_metadata(ctx, "PROJ_DATA.VERSION");
+        if (proj_data_version) {
+            proj_data_version_str = proj_data_version;
+            const auto tokens = split(proj_data_version, '.');
+            if (tokens.size() >= 2) {
+                proj_data_version_major = atoi(tokens[0].c_str());
+                proj_data_version_minor = atoi(tokens[1].c_str());
+            }
+        }
+    }
+
     try {
         const auto j = json::parse(text);
         bool foundMatchSourceIdCriterion = false;
@@ -315,6 +339,64 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             const auto name(j_name.get<std::string>());
+
+            if (versionFiltering && proj_data_version_major > 0 &&
+                properties.contains("version_added")) {
+                const auto j_version_added = properties["version_added"];
+                if (j_version_added.is_string()) {
+                    const auto version_added(
+                        j_version_added.get<std::string>());
+                    const auto tokens = split(version_added, '.');
+                    if (tokens.size() >= 2) {
+                        int version_major = atoi(tokens[0].c_str());
+                        int version_minor = atoi(tokens[1].c_str());
+                        if (proj_data_version_major < version_major ||
+                            (proj_data_version_major == version_major &&
+                             proj_data_version_minor < version_minor)) {
+                            // File only useful for a later PROJ version
+                            if (verbose) {
+                                std::cout << "Skipping " << name
+                                          << " as it is only useful starting "
+                                             "with PROJ-data "
+                                          << version_added
+                                          << " and we are targetting "
+                                          << proj_data_version_str << std::endl;
+                            }
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            if (versionFiltering &&
+                proj_data_version_major > 0 &&
+                properties.contains("version_removed")) {
+                const auto j_version_removed = properties["version_removed"];
+                if (j_version_removed.is_string()) {
+                    const auto version_removed(
+                        j_version_removed.get<std::string>());
+                    const auto tokens = split(version_removed, '.');
+                    if (tokens.size() >= 2) {
+                        int version_major = atoi(tokens[0].c_str());
+                        int version_minor = atoi(tokens[1].c_str());
+                        if (proj_data_version_major > version_major ||
+                            (proj_data_version_major == version_major &&
+                             proj_data_version_minor >= version_minor)) {
+                            // File only useful for a previous PROJ version
+                            if (verbose) {
+                                std::cout << "Skipping " << name
+                                          << " as it is no longer useful "
+                                             "starting with PROJ-data "
+                                          << version_removed
+                                          << " and we are targetting "
+                                          << proj_data_version_str << std::endl;
+                            }
+                            continue;
+                        }
+                    }
+                }
+            }
+
             files.insert(name);
 
             if (!properties.contains("source_id")) {

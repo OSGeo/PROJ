@@ -15,3 +15,7 @@ INSERT INTO "metadata" VALUES('EPSG.DATE', '2021-05-16');
 -- The value of ${PROJ_VERSION} is substituted at build time by the actual
 -- value.
 INSERT INTO "metadata" VALUES('PROJ.VERSION', '${PROJ_VERSION}');
+
+-- Version of the PROJ-data package with which this database is the most
+-- compatible.
+INSERT INTO "metadata" VALUES('PROJ_DATA.VERSION', '1.7');

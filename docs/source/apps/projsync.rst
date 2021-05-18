@@ -24,7 +24,8 @@ Synopsis
     |      [--source-id ID] [--area-of-use NAME]
     |      [--file NAME]
     |      [--all] [--exclude-world-coverage]
-    |      [--quiet] [--dry-run] [--list-files]
+    |      [--quiet | --verbose] [--dry-run] [--list-files]
+    |      [--no-version-filtering]
 
 Description
 ***********
@@ -108,6 +109,12 @@ The following control parameters can appear in any order:
 
     Quiet mode
 
+.. option:: --verbose
+
+    .. versionadded:: 8.1
+
+    Verbose mode (more than default)
+
 .. option:: --dry-run
 
     Simulate the behavior of the tool without downloading resource files.
@@ -115,6 +122,16 @@ The following control parameters can appear in any order:
 .. option:: --list-files
 
     List file names, with the source_id and area_of_use properties.
+
+.. option:: --no-version-filtering
+
+    .. versionadded:: 8.1
+
+    By default, projsync only downloads files that are compatible of
+    the PROJ_DATA.VERSION metadata of :file:`proj.db`, taking into account the
+    ``version_added`` and ``version_removed`` properties of entries in :file:`files.geojson`.
+    When specifying this switch, all files referenced in :file:`files.geojson`
+    will be candidate (combined with other filters).
 
 
 At least one of  :option:`--list-files`,  :option:`--file`,  :option:`--source-id`,
