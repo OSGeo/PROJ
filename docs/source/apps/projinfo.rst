@@ -442,6 +442,103 @@ Output:
         }
     }
 
+.. _projinfo_aux_db_example:
+
+4. Exporting the SQL statements to insert a new CRS in an auxiliary database.
+
+.. code-block:: console
+
+        # Get the SQL statements for a custom CRS
+        projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs +title=my_crs" --output-id HOBU:MY_CRS -o SQL -q > my_crs.sql
+        cat my_crs.sql
+
+        # Initialize an auxiliary database with the schema of the reference database
+        echo ".schema" | sqlite3 /path/to/proj.db | sqlite3 aux.db
+
+        # Append the content of the definition of HOBU:MY_CRS
+        sqlite3 aux.db < my_crs.db
+
+        # Check that everything works OK
+        projinfo --aux-db-path aux.db HOBU:MY_CRS
+
+or more simply:
+
+.. code-block:: console
+
+        # Create an auxiliary database with the definition of a custom CRS.
+        projinfo "+proj=merc +lat_ts=5 +datum=WGS84 +type=crs +title=my_crs" --output-id HOBU:MY_CRS --dump-db-structure | sqlite3 aux.db
+
+        # Check that everything works OK
+        projinfo --aux-db-path aux.db HOBU:MY_CRS
+
+Output:
+
+.. code-block:: sql
+
+    INSERT INTO geodetic_crs VALUES('HOBU','GEODETIC_CRS_MY_CRS','unknown','','geographic 2D','EPSG','6424','EPSG','6326',NULL,0);
+    INSERT INTO usage VALUES('HOBU','USAGE_GEODETIC_CRS_MY_CRS','geodetic_crs','HOBU','GEODETIC_CRS_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+    INSERT INTO conversion VALUES('HOBU','CONVERSION_MY_CRS','unknown','','EPSG','9805','Mercator (variant B)','EPSG','8823','Latitude of 1st standard parallel',5,'EPSG','9122','EPSG','8802','Longitude of natural origin',0,'EPSG','9122','EPSG','8806','False easting',0,'EPSG','9001','EPSG','8807','False northing',0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+    INSERT INTO usage VALUES('HOBU','USAGE_CONVERSION_MY_CRS','conversion','HOBU','CONVERSION_MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+    INSERT INTO projected_crs VALUES('HOBU','MY_CRS','my_crs','','EPSG','4400','HOBU','GEODETIC_CRS_MY_CRS','HOBU','CONVERSION_MY_CRS',NULL,0);
+    INSERT INTO usage VALUES('HOBU','USAGE_PROJECTED_CRS_MY_CRS','projected_crs','HOBU','MY_CRS','PROJ','EXTENT_UNKNOWN','PROJ','SCOPE_UNKNOWN');
+
+::
+
+    PROJ.4 string:
+    +proj=merc +lat_ts=5 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs
+
+    WKT2:2019 string:
+    PROJCRS["my_crs",
+        BASEGEOGCRS["unknown",
+            ENSEMBLE["World Geodetic System 1984 ensemble",
+                MEMBER["World Geodetic System 1984 (Transit)"],
+                MEMBER["World Geodetic System 1984 (G730)"],
+                MEMBER["World Geodetic System 1984 (G873)"],
+                MEMBER["World Geodetic System 1984 (G1150)"],
+                MEMBER["World Geodetic System 1984 (G1674)"],
+                MEMBER["World Geodetic System 1984 (G1762)"],
+                ELLIPSOID["WGS 84",6378137,298.257223563,
+                    LENGTHUNIT["metre",1]],
+                ENSEMBLEACCURACY[2.0]],
+            PRIMEM["Greenwich",0,
+                ANGLEUNIT["degree",0.0174532925199433]],
+            ID["HOBU","GEODETIC_CRS_MY_CRS"]],
+        CONVERSION["unknown",
+            METHOD["Mercator (variant B)",
+                ID["EPSG",9805]],
+            PARAMETER["Latitude of 1st standard parallel",5,
+                ANGLEUNIT["degree",0.0174532925199433],
+                ID["EPSG",8823]],
+            PARAMETER["Longitude of natural origin",0,
+                ANGLEUNIT["degree",0.0174532925199433],
+                ID["EPSG",8802]],
+            PARAMETER["False easting",0,
+                LENGTHUNIT["metre",1],
+                ID["EPSG",8806]],
+            PARAMETER["False northing",0,
+                LENGTHUNIT["metre",1],
+                ID["EPSG",8807]]],
+        CS[Cartesian,2],
+            AXIS["(E)",east,
+                ORDER[1],
+                LENGTHUNIT["metre",1]],
+            AXIS["(N)",north,
+                ORDER[2],
+                LENGTHUNIT["metre",1]],
+        ID["HOBU","MY_CRS"]]
+
+5. Get the WKT representation of EPSG:25832 in the WKT1:GDAL output format and on a single line
+
+.. code-block:: console
+
+      projinfo -o WKT1:GDAL --single-line EPSG:25832
+
+Output:
+
+::
+
+    WKT1:GDAL string:
+    PROJCS["ETRS89 / UTM zone 32N",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",9],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","25832"]]
 
 .. only:: man
 
