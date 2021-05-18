@@ -58,8 +58,10 @@ software packages. After installation you can use PROJ from the OSGeo4W shell.
 To install PROJ do the following:
 
 .. note::
-    If you have already installed software via OSGeo4W on your computer it is
-    likely that PROJ is already installed.
+    If you have already installed software via OSGeo4W on your computer, or if
+    you have already installed QGIS on your computer, it is likely that PROJ is 
+    already installed. Type "OSGeo4W Shell" in your start menu and check whether
+    that gives a match.
 
 1. Download either the `32 bit`_ or `64 bit`_ installer.
 2. Run the OSGeo4W setup program.
