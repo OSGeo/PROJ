@@ -2077,6 +2077,16 @@ ConversionNNPtr Conversion::createQuadrilateralizedSphericalCube(
         createParams(centerLat, centerLong, falseEasting, falseNorthing));
 }
 
+// ----------------------------------------------------------------------------
+ConversionNNPtr Conversion::createS2(
+    const util::PropertyMap &properties, const common::Angle &centerLat,
+    const common::Angle &centerLong, const common::Length &falseEasting,
+    const common::Length &falseNorthing) {
+    return create(
+        properties, PROJ_WKT2_NAME_METHOD_S2,
+        createParams(centerLat, centerLong, falseEasting, falseNorthing));
+}
+
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a conversion based on the [Spherical Cross-Track Height]

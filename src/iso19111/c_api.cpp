@@ -7018,6 +7018,29 @@ PJ *proj_create_conversion_quadrilateralized_spherical_cube(
 }
 // ---------------------------------------------------------------------------
 
+PJ *proj_create_conversion_s2(
+    PJ_CONTEXT *ctx, double center_lat, double center_long,
+    double false_easting, double false_northing, const char *ang_unit_name,
+    double ang_unit_conv_factor, const char *linear_unit_name,
+    double linear_unit_conv_factor) {
+    SANITIZE_CTX(ctx);
+    try {
+        UnitOfMeasure linearUnit(
+            createLinearUnit(linear_unit_name, linear_unit_conv_factor));
+        UnitOfMeasure angUnit(
+            createAngularUnit(ang_unit_name, ang_unit_conv_factor));
+        auto conv = Conversion::createS2(
+            PropertyMap(), Angle(center_lat, angUnit),
+            Angle(center_long, angUnit), Length(false_easting, linearUnit),
+            Length(false_northing, linearUnit));
+        return proj_create_conversion(ctx, conv);
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+    return nullptr;
+}
+// --------------------------------------------------------------------------
+
 /** \brief Instantiate a ProjectedCRS with a conversion based on the Spherical
  * Cross-Track Height projection method.
  *

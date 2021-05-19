@@ -149,7 +149,7 @@ const int kLimitIJ = 1 << kMaxCellLevel;  // == S2CellId::kMaxSize
 unsigned const int kMaxSiTi = 1U << (kMaxCellLevel + 1);
 
 
-static int32 FastIntRound(double x) {
+static int32_t FastIntRound(double x) {
     // This function is not templatized because gcc doesn't seem to be able
     // to deal with inline assembly code in templatized functions, and there
     // is no advantage to passing an argument type of "float" on Intel
@@ -158,7 +158,7 @@ static int32 FastIntRound(double x) {
 #if defined __GNUC__ && (defined __i386__ || defined __SSE2__)
 #if defined __SSE2__
     // SSE2.
-    int32 result;
+    int32_t result;
     __asm__ __volatile__
         ("cvtsd2si %1, %0"
          : "=r" (result)    // Output operand is a register
@@ -166,7 +166,7 @@ static int32 FastIntRound(double x) {
     return result;
 #elif defined __i386__
     // FPU stack.  Adapted from /usr/include/bits/mathinline.h.
-    int32 result;
+    int32_t result;
     __asm__ __volatile__
         ("fistpl %0"
          : "=m" (result)    // Output operand is a memory location
@@ -175,15 +175,15 @@ static int32 FastIntRound(double x) {
     return result;
 #endif  // if defined __x86_64__ || ...
 #else
-    return Round<int32, double>(x);
+    return Round<int32_t, double>(x);
 #endif  // if defined __GNUC__ && ...
   }
 
-  static int64 FastInt64Round(double x) {
+  static int64_t FastInt64Round(double x) {
 #if defined __GNUC__ && (defined __i386__ || defined __x86_64__)
 #if defined __x86_64__
     // SSE2.
-    int64 result;
+    int64_t result;
     __asm__ __volatile__
         ("cvtsd2si %1, %0"
          : "=r" (result)    // Output operand is a register
@@ -192,7 +192,7 @@ static int32 FastIntRound(double x) {
 #elif defined __i386__
     // There is no CVTSD2SI in i386 to produce a 64 bit int, even with SSE2.
     // FPU stack.  Adapted from /usr/include/bits/mathinline.h.
-    int64 result;
+    int64_t result;
     __asm__ __volatile__
         ("fistpll %0"
          : "=m" (result)    // Output operand is a memory location
@@ -201,7 +201,7 @@ static int32 FastIntRound(double x) {
     return result;
 #endif  // if defined __i386__
 #else
-    return Round<int64, double>(x);
+    return Round<int64_t, double>(x);
 #endif  // if defined __GNUC__ && ...
   }
 
@@ -295,7 +295,7 @@ inline PJ_XYZ FaceUVtoXYZ(int face, double u, double v) {
 }
 
 inline PJ_XYZ FaceUVtoXYZ(int face, const PJ_XY& uv) {
-  return FaceUVtoXYZ(face, uv[0], uv[1]);
+  return FaceUVtoXYZ(face, uv.x, uv.y);
 }
 
 inline void ValidFaceXYZtoUV(int face, const PJ_XYZ& p,
@@ -316,12 +316,13 @@ inline void ValidFaceXYZtoUV(int face, const PJ_XYZ& p, PJ_XY* puv) {
 }
 
 inline int GetFace(const PJ_XYZ& p) {
-  int face = p.LargestAbsComponent();
+  int face = LargestAbsComponent(p);
   double pFace;
   switch (face) {
     case 0:  pFace = p.x; break;
     case 1:  pFace = p.y; break;
     default: pFace = p.z; break;
+  }
   if (pFace < 0) face += 3;
   return face;
 }
@@ -339,13 +340,15 @@ inline int XYZtoFaceUV(const PJ_XYZ& p, PJ_XY* puv) {
 inline bool FaceXYZtoUV(int face, const PJ_XYZ& p,
                         double* pu, double* pv) {
   double pFace;
-  case 0:  pFace = p.x; break;
-  case 1:  pFace = p.y; break;
-  case 2:  pFace = p.z; break;
-  case 3:  pFace = p.x; break;
-  case 4:  pFace = p.y; break;
-  default: pFace = p.z; break;  
-if (face < 3) {
+  switch(face) {
+    case 0:  pFace = p.x; break;
+    case 1:  pFace = p.y; break;
+    case 2:  pFace = p.z; break;
+    case 3:  pFace = p.x; break;
+    case 4:  pFace = p.y; break;
+    default: pFace = p.z; break;
+  }  
+  if (face < 3) {
     if (pFace <= 0) return false;
   } else {
     if (pFace >= 0) return false;
@@ -368,7 +371,7 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double lat, lon;
     double theta, phi;
-    double t, mu; /* nu; */
+    //double t, mu; /* nu; */
     enum Area area;
 
     /* Convert the geodetic latitude to a geocentric latitude.
@@ -402,13 +405,14 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     z = sinlat;
 
     PJ_XYZ spherePoint {x, y, z};
-    PJ_XZ uvCoords;
+    PJ_XY uvCoords;
 
     XYZtoFaceUV(spherePoint, &uvCoords);
     double s = UVtoST(uvCoords.x);
     double t = UVtoST(uvCoords.y);
 
     return {s, t};
+}
 
 static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {     
     PJ_LP lp = {0.0,0.0};
@@ -418,6 +422,7 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
     double t;
     int area;
 
+    // Do the S2 projections to get from s,t to u,v to x,y,z
     double u = STtoUV(xy.x);
     double v = STtoUV(xy.y);
 
@@ -426,6 +431,7 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
     double r = sphereCoords.y;
     double s = sphereCoords.z;
 
+    // Get the spherical angles from the x y z
     lp.phi = acos(-s) - M_HALFPI;
     lp.lam = atan2(r, q);
     if (Q->face == FACE_RIGHT) {
@@ -434,6 +440,20 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
         lp.lam = qsc_shift_lon_origin(lp.lam, -M_PI);
     } else if (Q->face == FACE_LEFT) {
         lp.lam = qsc_shift_lon_origin(lp.lam, +M_HALFPI);
+    }
+
+    /* Apply the shift from the sphere to the ellipsoid as described
+     * in [LK12]. */
+    if (P->es != 0.0) {
+        int invert_sign;
+        double tanphi, xa;
+        invert_sign = (lp.phi < 0.0 ? 1 : 0);
+        tanphi = tan(lp.phi);
+        xa = Q->b / sqrt(tanphi * tanphi + Q->one_minus_f_squared);
+        lp.phi = atan(sqrt(P->a * P->a - xa * xa) / (Q->one_minus_f * xa));
+        if (invert_sign) {
+            lp.phi = -lp.phi;
+        }
     }
 
     return lp;
@@ -445,8 +465,8 @@ PJ *PROJECTION(s2) {
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-    P->inv = qsc_e_inverse;
-    P->fwd = qsc_e_forward;
+    P->inv = s2_inverse;
+    P->fwd = s2_forward;
     /* Determine the cube face from the center of projection. */
     if (P->phi0 >= M_HALFPI - M_FORTPI / 2.0) {
         Q->face = FACE_TOP;
