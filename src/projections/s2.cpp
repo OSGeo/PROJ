@@ -46,6 +46,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 
+#include <iostream>
 /* The six cube faces. */
 namespace { // anonymous namespace
 enum Face {
@@ -214,7 +215,7 @@ static int32_t FastIntRound(double x) {
 #define S2_TAN_PROJECTION       1
 #define S2_QUADRATIC_PROJECTION 2
 
-#define S2_PROJECTION S2_QUADRATIC_PROJECTION
+#define S2_PROJECTION S2_LINEAR_PROJECTION
 
 #if S2_PROJECTION == S2_LINEAR_PROJECTION
 
@@ -264,7 +265,6 @@ inline double UVtoST(double u) {
 #endif
 
 inline double IJtoSTMin(int i) {
-  //S2_DCHECK(i >= 0 && i <= kLimitIJ);
   return (1.0 / kLimitIJ) * i;
 }
 
@@ -274,7 +274,6 @@ inline int STtoIJ(double s) {
 }
 
 inline double SiTitoST(unsigned int si) {
-  //S2_DCHECK_LE(si, kMaxSiTi);
   return (1.0 / kMaxSiTi) * si;
 }
 
@@ -300,7 +299,6 @@ inline PJ_XYZ FaceUVtoXYZ(int face, const PJ_XY& uv) {
 
 inline void ValidFaceXYZtoUV(int face, const PJ_XYZ& p,
                              double* pu, double* pv) {
-  //S2_DCHECK_GT(p.DotProd(GetNorm(face)), 0);
   switch (face) {
     case 0:  *pu =  p.y / p.x; *pv =  p.z / p.x; break;
     case 1:  *pu = -p.x / p.y; *pv =  p.z / p.y; break;
@@ -361,6 +359,36 @@ inline bool FaceXYZtoUV(int face, const PJ_XYZ& p, PJ_XY* puv) {
   return FaceXYZtoUV(face, p, &(*puv).x, &(*puv).y);
 }
 
+// This function inverts ValidFaceXYZtoUV()
+inline bool UVtoSphereXYZ(int face, double u, double v, PJ_XYZ* xyz) {
+	double major_coord = 1 / sqrt(1 + u*u + v*v);
+	double minor_coord_1 = u*major_coord;
+	double minor_coord_2 = v*major_coord;
+
+	switch(face) {
+		case 0: xyz->x = major_coord;
+			xyz->y = minor_coord_1;
+			xyz->z = minor_coord_2; break;
+		case 1: xyz->x = -minor_coord_1;
+			xyz->y = major_coord;
+			xyz->z = minor_coord_2; break;
+		case 2: xyz->x = -minor_coord_1;
+			xyz->y = -minor_coord_2;
+			xyz->z = major_coord; break;
+		case 3: xyz->x = -major_coord;
+			xyz->y = -minor_coord_2;
+			xyz->z = -minor_coord_1; break;
+		case 4: xyz->x = minor_coord_2;
+			xyz->y = -major_coord;
+			xyz->z = -minor_coord_1; break;
+		default:xyz->x = minor_coord_2;
+			xyz->y = minor_coord_1;
+			xyz->z = -major_coord; break;
+	}
+
+	return true;
+}
+
 // ============================================
 //
 //       S2 Version of QSC Projection
@@ -371,7 +399,6 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double lat, lon;
     double theta, phi;
-    //double t, mu; /* nu; */
     enum Area area;
 
     /* Convert the geodetic latitude to a geocentric latitude.
@@ -389,13 +416,6 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     double sinlat, coslat;
     double sinlon, coslon;
 
-    if (Q->face == FACE_RIGHT) {
-        lon = qsc_shift_lon_origin(lon, +M_HALFPI);
-    } else if (Q->face == FACE_BACK) {
-        lon = qsc_shift_lon_origin(lon, +M_PI);
-    } else if (Q->face == FACE_LEFT) {
-        lon = qsc_shift_lon_origin(lon, -M_HALFPI);
-    }
     sinlat = sin(lat);
     coslat = cos(lat);
     sinlon = sin(lon);
@@ -407,7 +427,7 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     PJ_XYZ spherePoint {x, y, z};
     PJ_XY uvCoords;
 
-    XYZtoFaceUV(spherePoint, &uvCoords);
+    ValidFaceXYZtoUV(Q->face, spherePoint, &uvCoords.x, &uvCoords.y);
     double s = UVtoST(uvCoords.x);
     double t = UVtoST(uvCoords.y);
 
@@ -426,7 +446,11 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
     double u = STtoUV(xy.x);
     double v = STtoUV(xy.y);
 
-    PJ_XYZ sphereCoords = FaceUVtoXYZ(Q->face, u, v);
+    std::cout << "face is " << Q->face << std::endl;
+    std::cout << "uv are " << u << ", " << v << std::endl;
+
+    PJ_XYZ sphereCoords;
+    UVtoSphereXYZ(Q->face, u, v, &sphereCoords);
     double q = sphereCoords.x;
     double r = sphereCoords.y;
     double s = sphereCoords.z;
@@ -434,14 +458,7 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
     // Get the spherical angles from the x y z
     lp.phi = acos(-s) - M_HALFPI;
     lp.lam = atan2(r, q);
-    if (Q->face == FACE_RIGHT) {
-        lp.lam = qsc_shift_lon_origin(lp.lam, -M_HALFPI);
-    } else if (Q->face == FACE_BACK) {
-        lp.lam = qsc_shift_lon_origin(lp.lam, -M_PI);
-    } else if (Q->face == FACE_LEFT) {
-        lp.lam = qsc_shift_lon_origin(lp.lam, +M_HALFPI);
-    }
-
+    
     /* Apply the shift from the sphere to the ellipsoid as described
      * in [LK12]. */
     if (P->es != 0.0) {
