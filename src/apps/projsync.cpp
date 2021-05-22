@@ -368,8 +368,7 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            if (versionFiltering &&
-                proj_data_version_major > 0 &&
+            if (versionFiltering && proj_data_version_major > 0 &&
                 properties.contains("version_removed")) {
                 const auto j_version_removed = properties["version_removed"];
                 if (j_version_removed.is_string()) {
