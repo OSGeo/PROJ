@@ -1312,10 +1312,10 @@ int main(int argc, char **argv) {
         if (outputAll) {
             outputOpt.SQL = false;
             std::cerr << "WARNING: SQL output disable since "
-                         "--output-id=AUTH:CODE has not been specified."
+                         "--output-id AUTH:CODE has not been specified."
                       << std::endl;
         } else {
-            std::cerr << "ERROR: --output-id=AUTH:CODE must be specified when "
+            std::cerr << "ERROR: --output-id AUTH:CODE must be specified when "
                          "SQL output is enabled."
                       << std::endl;
             std::exit(1);
