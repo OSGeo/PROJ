@@ -1557,7 +1557,7 @@ Testing projinfo --dump-db-structure | head -n 5
 CREATE TABLE metadata(
     key TEXT NOT NULL PRIMARY KEY CHECK (length(key) >= 1),
     value TEXT NOT NULL
-);
+) WITHOUT ROWID;
 CREATE TABLE unit_of_measure(
 
 Testing projinfo --dump-db-structure --output-id HOBU:XXXX EPSG:4326 | tail -n 4
