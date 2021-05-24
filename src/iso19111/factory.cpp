@@ -3252,9 +3252,9 @@ DatabaseContext::getTransformationsForGridName(
     const DatabaseContextNNPtr &databaseContext, const std::string &gridName) {
     auto sqlRes = databaseContext->d->run(
         "SELECT auth_name, code FROM grid_transformation "
-        "WHERE grid_name = ? OR grid_name = "
+        "WHERE grid_name = ? OR grid_name IN "
         "(SELECT original_grid_name FROM grid_alternatives "
-        "WHERE proj_grid_name = ?)",
+        "WHERE proj_grid_name = ?) ORDER BY auth_name, code",
         {gridName, gridName});
     std::vector<operation::CoordinateOperationNNPtr> res;
     for (const auto &row : sqlRes) {
