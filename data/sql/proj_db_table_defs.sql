@@ -14,7 +14,7 @@
 CREATE TABLE metadata(
     key TEXT NOT NULL PRIMARY KEY CHECK (length(key) >= 1),
     value TEXT NOT NULL
-);
+) WITHOUT ROWID;
 
 CREATE TABLE unit_of_measure(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -25,7 +25,7 @@ CREATE TABLE unit_of_measure(
     proj_short_name TEXT, -- PROJ string name, like 'm', 'ft'. Might be NULL
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_unit_of_measure PRIMARY KEY (auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TABLE celestial_body (
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -33,7 +33,7 @@ CREATE TABLE celestial_body (
     name TEXT NOT NULL CHECK (length(name) >= 2),
     semi_major_axis FLOAT NOT NULL CHECK (semi_major_axis > 0), -- approximate (in metre)
     CONSTRAINT pk_celestial_body PRIMARY KEY (auth_name, code)
-);
+) WITHOUT ROWID;
 
 INSERT INTO celestial_body VALUES('PROJ', 'EARTH', 'Earth', 6378137.0);
 
@@ -54,7 +54,7 @@ CREATE TABLE ellipsoid (
     CONSTRAINT fk_ellipsoid_celestial_body FOREIGN KEY (celestial_body_auth_name, celestial_body_code) REFERENCES celestial_body(auth_name, code),
     CONSTRAINT fk_ellipsoid_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT check_ellipsoid_inv_flattening_semi_minor_mutually_exclusive CHECK ((inv_flattening IS NULL AND semi_minor_axis IS NOT NULL) OR (inv_flattening IS NOT NULL AND semi_minor_axis IS NULL))
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER ellipsoid_insert_trigger
 BEFORE INSERT ON ellipsoid
@@ -75,7 +75,7 @@ CREATE TABLE extent(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_extent PRIMARY KEY (auth_name, code),
     CONSTRAINT check_extent_lat CHECK (south_lat <= north_lat)
-);
+) WITHOUT ROWID;
 
 CREATE TABLE scope(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -83,7 +83,7 @@ CREATE TABLE scope(
     scope TEXT NOT NULL CHECK (length(scope) >= 1),
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_scope PRIMARY KEY (auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TABLE usage(
     auth_name TEXT CHECK (auth_name IS NULL OR length(auth_name) >= 1),
@@ -134,7 +134,7 @@ CREATE TABLE prime_meridian(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_prime_meridian PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_prime_meridian_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER prime_meridian_insert_trigger
 BEFORE INSERT ON prime_meridian
@@ -159,7 +159,7 @@ CREATE TABLE geodetic_datum (
     CONSTRAINT pk_geodetic_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_datum_ellipsoid FOREIGN KEY (ellipsoid_auth_name, ellipsoid_code) REFERENCES ellipsoid(auth_name, code),
     CONSTRAINT fk_geodetic_datum_prime_meridian FOREIGN KEY (prime_meridian_auth_name, prime_meridian_code) REFERENCES prime_meridian(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER geodetic_datum_insert_trigger
 BEFORE INSERT ON geodetic_datum
@@ -193,7 +193,7 @@ CREATE TABLE vertical_datum (
     ensemble_accuracy FLOAT CHECK (ensemble_accuracy IS NULL OR ensemble_accuracy > 0), --- only for a datum ensemble. and should be set when it is a datum ensemble
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TABLE vertical_datum_ensemble_member (
     ensemble_auth_name TEXT NOT NULL,
@@ -231,7 +231,7 @@ CREATE TABLE axis(
     CONSTRAINT pk_axis PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_axis_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_axis_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER axis_insert_trigger
 BEFORE INSERT ON axis
@@ -261,7 +261,7 @@ CREATE TABLE geodetic_crs(
     CONSTRAINT check_geodetic_crs_cs_bis CHECK (NOT ((NOT(coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL)) AND text_definition IS NOT NULL)),
     CONSTRAINT check_geodetic_crs_datum CHECK (NOT ((datum_auth_name IS NULL OR datum_code IS NULL) AND text_definition IS NULL)),
     CONSTRAINT check_geodetic_crs_datum_bis CHECK (NOT ((NOT(datum_auth_name IS NULL OR datum_code IS NULL)) AND text_definition IS NOT NULL))
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER geodetic_crs_insert_trigger
 BEFORE INSERT ON geodetic_crs
@@ -302,7 +302,7 @@ CREATE TABLE vertical_crs(
     CONSTRAINT pk_vertical_crs PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_vertical_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
     CONSTRAINT fk_vertical_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES vertical_datum(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER vertical_crs_insert_trigger
 BEFORE INSERT ON vertical_crs
@@ -326,7 +326,7 @@ CREATE TABLE conversion_method(
     name TEXT NOT NULL CHECK (length(name) >= 2),
 
     CONSTRAINT pk_conversion_method PRIMARY KEY (auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TABLE conversion_param(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -334,7 +334,7 @@ CREATE TABLE conversion_param(
     name TEXT NOT NULL CHECK (length(name) >= 2),
 
     CONSTRAINT pk_conversion_param PRIMARY KEY (auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TABLE conversion_table(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -408,7 +408,7 @@ CREATE TABLE conversion_table(
     CONSTRAINT fk_conversion_param5_uom FOREIGN KEY (param5_uom_auth_name, param5_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_conversion_param6_uom FOREIGN KEY (param6_uom_auth_name, param6_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_conversion_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE VIEW conversion AS SELECT
     c.auth_name,
@@ -706,7 +706,7 @@ CREATE TABLE projected_crs(
     CONSTRAINT check_projected_crs_cs_bis CHECK (NOT((NOT(coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL)) AND text_definition IS NOT NULL)),
     CONSTRAINT check_projected_crs_geodetic_crs CHECK (NOT((geodetic_crs_auth_name IS NULL OR geodetic_crs_code IS NULL) AND text_definition IS NULL)),
     CONSTRAINT check_projected_crs_conversion CHECK (NOT((NOT(conversion_auth_name IS NULL OR conversion_code IS NULL)) AND text_definition IS NOT NULL))
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER projected_crs_insert_trigger
 BEFORE INSERT ON projected_crs
@@ -747,7 +747,7 @@ CREATE TABLE compound_crs(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_compound_crs PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_compound_crs_vertical_crs FOREIGN KEY (vertical_crs_auth_name, vertical_crs_code) REFERENCES vertical_crs(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER compound_crs_insert_trigger
 BEFORE INSERT ON compound_crs
@@ -778,7 +778,7 @@ CREATE TABLE coordinate_operation_method(
     name TEXT NOT NULL CHECK (length(name) >= 2),
 
     CONSTRAINT pk_coordinate_operation_method PRIMARY KEY (auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TABLE helmert_transformation_table(
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
@@ -850,7 +850,7 @@ CREATE TABLE helmert_transformation_table(
     CONSTRAINT fk_helmert_rate_scale_difference_uom FOREIGN KEY (rate_scale_difference_uom_auth_name, rate_scale_difference_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_helmert_epoch_uom FOREIGN KEY (epoch_uom_auth_name, epoch_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_helmert_pivot_uom FOREIGN KEY (pivot_uom_auth_name, pivot_uom_code) REFERENCES unit_of_measure(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE VIEW helmert_transformation AS SELECT
     h.auth_name,
@@ -1052,7 +1052,7 @@ CREATE TABLE grid_transformation(
     --CONSTRAINT fk_grid_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     --CONSTRAINT fk_grid_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
     CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER grid_transformation_insert_trigger
 BEFORE INSERT ON grid_transformation
@@ -1079,7 +1079,7 @@ CREATE TABLE grid_packages(
     url TEXT,                                       -- optional URL where to download the PROJ grid
     direct_download BOOLEAN CHECK (direct_download IN (0, 1)), -- whether the URL can be used directly (if 0, authentication etc mightbe needed)
     open_license BOOLEAN CHECK (open_license IN (0, 1))
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER grid_packages_insert_trigger
 BEFORE INSERT ON grid_packages
@@ -1113,7 +1113,7 @@ CREATE TABLE grid_alternatives(
     CONSTRAINT check_grid_alternatives_open_license_url CHECK (NOT(open_license IS NULL AND url IS NOT NULL)),
     CONSTRAINT check_grid_alternatives_constraint_cdn CHECK (NOT(url LIKE 'https://cdn.proj.org/%' AND (direct_download = 0 OR open_license = 0 OR url != 'https://cdn.proj.org/' || proj_grid_name))),
     CONSTRAINT check_grid_alternatives_tinshift CHECK ((proj_grid_format != 'JSON' AND proj_method != 'tinshift') OR (proj_grid_format = 'JSON' AND proj_method = 'tinshift'))
-);
+) WITHOUT ROWID;
 
 CREATE INDEX idx_grid_alternatives_proj_grid_name ON grid_alternatives(proj_grid_name);
 CREATE INDEX idx_grid_alternatives_old_proj_grid_name ON grid_alternatives(old_proj_grid_name);
@@ -1222,7 +1222,7 @@ CREATE TABLE other_transformation(
     CONSTRAINT fk_other_transformation_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code),
     CONSTRAINT fk_other_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code),
     CONSTRAINT check_other_transformation_method CHECK (NOT (method_auth_name = 'PROJ' AND method_code NOT IN ('PROJString', 'WKT')))
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER other_transformation_insert_trigger
 BEFORE INSERT ON other_transformation
@@ -1266,7 +1266,7 @@ CREATE TABLE concatenated_operation(
     --CONSTRAINT fk_concatenated_operation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
     --CONSTRAINT fk_concatenated_operation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
     --CONSTRAINT fk_concatenated_operation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER concatenated_operation_insert_trigger
 BEFORE INSERT ON concatenated_operation
@@ -1296,7 +1296,7 @@ CREATE TABLE concatenated_operation_step(
 
     CONSTRAINT pk_concatenated_operation_step PRIMARY KEY (operation_auth_name, operation_code, step_number)
     --CONSTRAINT fk_concatenated_operation_step_to_operation FOREIGN KEY (step_auth_name, step_code) REFERENCES coordinate_operation(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER concatenated_operation_step_insert_trigger
 BEFORE INSERT ON concatenated_operation_step
@@ -1317,7 +1317,7 @@ CREATE TABLE geoid_model(
     operation_code INTEGER_OR_TEXT NOT NULL,
     CONSTRAINT pk_geoid_model PRIMARY KEY (name, operation_auth_name, operation_code)
     -- CONSTRAINT fk_geoid_model_operation FOREIGN KEY (operation_auth_name, operation_code) REFERENCES coordinate_operation(auth_name, code)
-);
+) WITHOUT ROWID;
 
 CREATE TRIGGER geoid_model_insert_trigger
 BEFORE INSERT ON geoid_model
