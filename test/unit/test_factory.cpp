@@ -1326,26 +1326,6 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
-TEST(
-    factory,
-    AuthorityFactory_createCoordinateOperation_concatenated_operation_epsg_9731) {
-    auto factory = AuthorityFactory::create(DatabaseContext::create(), "EPSG");
-    auto op = factory->createCoordinateOperation("9731", false);
-    auto concatenated = nn_dynamic_pointer_cast<ConcatenatedOperation>(op);
-    ASSERT_TRUE(concatenated != nullptr);
-    EXPECT_EQ(
-        concatenated->exportToPROJString(PROJStringFormatter::create().get()),
-        "+proj=pipeline "
-        "+step +proj=axisswap +order=2,1 "
-        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +inv +proj=vgridshift +grids=geo_igm_mar06.grd +multiplier=1 "
-        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-        "+step +proj=axisswap +order=2,1 "
-        "+step +proj=geogoffset +dh=0.141");
-}
-
-// ---------------------------------------------------------------------------
-
 static bool in(const std::string &str, const std::vector<std::string> &list) {
     for (const auto &listItem : list) {
         if (str == listItem) {
@@ -1365,7 +1345,8 @@ TEST(factory, AuthorityFactory_build_all_concatenated) {
         AuthorityFactory::ObjectType::CONCATENATED_OPERATION, false);
     EXPECT_LT(setConcatenatedNoDeprecated.size(), setConcatenated.size());
     for (const auto &code : setConcatenated) {
-        if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572"})) {
+        if (in(code,
+               {"8422", "8481", "8482", "8565", "8566", "8572", "9731"})) {
             EXPECT_THROW(factory->createCoordinateOperation(code, false),
                          FactoryException)
                 << code;
