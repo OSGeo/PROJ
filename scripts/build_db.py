@@ -53,6 +53,9 @@ def ingest_sqlite_dump(cursor, filename):
         # generated .sql files
         line = line.replace('INTEGER_OR_TEXT', 'TEXT')
 
+        # Same for WITHOUT ROWID
+        line = line.replace('WITHOUT ROWID', '')
+
         sql += line
         if sqlite3.complete_statement(sql):
             sql = sql.strip()

@@ -245,34 +245,6 @@ void ConcatenatedOperation::fixStepsDirection(
         return false;
     };
 
-    // Special case for EPSG:9731 "ETRS89 to ETRS89 + Catania 1965 height (1)"
-    // which chains "ETRS89 to ETRS89 + Genoa 1942 height (1)" and
-    // "Genoa 1942 height to Catania 1965 height (1)"
-    if (operationsInOut.size() == 2 && isGeographic(concatOpSourceCRS.get())) {
-        const auto compoundTarget =
-            dynamic_cast<const crs::CompoundCRS *>(concatOpTargetCRS.get());
-        const auto compoundTargetOp0 = dynamic_cast<const crs::CompoundCRS *>(
-            operationsInOut[0]->targetCRS().get());
-        if (compoundTarget && compoundTargetOp0 &&
-            operationsInOut[0]->sourceCRS() &&
-            operationsInOut[1]->sourceCRS() &&
-            operationsInOut[1]->targetCRS() &&
-            concatOpSourceCRS->nameStr() ==
-                compoundTarget->componentReferenceSystems()[0]->nameStr() &&
-            concatOpSourceCRS->nameStr() ==
-                operationsInOut[0]->sourceCRS()->nameStr() &&
-            concatOpSourceCRS->nameStr() ==
-                compoundTargetOp0->componentReferenceSystems()[0]->nameStr() &&
-            compoundTargetOp0->componentReferenceSystems()[1]->nameStr() ==
-                operationsInOut[1]->sourceCRS()->nameStr() &&
-            operationsInOut[1]->targetCRS()->nameStr() ==
-                compoundTarget->componentReferenceSystems()[1]->nameStr()) {
-            operationsInOut[1]->setCRSs(
-                NN_NO_CHECK(operationsInOut[0]->targetCRS()), concatOpTargetCRS,
-                nullptr);
-        }
-    }
-
     for (size_t i = 0; i < operationsInOut.size(); ++i) {
         auto &op = operationsInOut[i];
         auto l_sourceCRS = op->sourceCRS();
