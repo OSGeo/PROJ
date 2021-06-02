@@ -40,24 +40,9 @@
 #include "proj.h"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/lru_cache.hpp"
+#include "proj/internal/mutex.hpp"
 #include "proj_internal.h"
 #include "sqlite3_utils.hpp"
-
-#ifdef __MINGW32__
-// mingw32-win32 doesn't implement std::mutex
-namespace {
-class MyMutex {
-  public:
-    // cppcheck-suppress functionStatic
-    void lock() { pj_acquire_lock(); }
-    // cppcheck-suppress functionStatic
-    void unlock() { pj_release_lock(); }
-};
-} // namespace
-#else
-#include <mutex>
-#define MyMutex std::mutex
-#endif
 
 #ifdef CURL_ENABLED
 #include <curl/curl.h>
@@ -152,7 +137,7 @@ class NetworkChunkCache {
     };
 
     lru11::Cache<
-        Key, std::shared_ptr<std::vector<unsigned char>>, MyMutex,
+        Key, std::shared_ptr<std::vector<unsigned char>>, NS_PROJ::mutex,
         std::unordered_map<
             Key,
             typename std::list<lru11::KeyValuePair<
@@ -176,7 +161,7 @@ class NetworkFilePropertiesCache {
     void clearMemoryCache();
 
   private:
-    lru11::Cache<std::string, FileProperties, MyMutex> cache_{};
+    lru11::Cache<std::string, FileProperties, NS_PROJ::mutex> cache_{};
 };
 
 // ---------------------------------------------------------------------------

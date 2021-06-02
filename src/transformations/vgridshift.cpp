@@ -6,32 +6,15 @@
 #include <time.h>
 
 #include "proj_internal.h"
+#include "proj/internal/mutex.hpp"
 #include "grids.hpp"
 
 PROJ_HEAD(vgridshift, "Vertical grid shift");
 
-using namespace NS_PROJ;
-
-
-#ifdef __MINGW32__
-// mingw32-win32 doesn't implement std::mutex
-namespace {
-class MyMutex {
-  public:
-    // cppcheck-suppress functionStatic
-    void lock() { pj_acquire_lock(); }
-    // cppcheck-suppress functionStatic
-    void unlock() { pj_release_lock(); }
-};
-}
-#else
-#include <mutex>
-#define MyMutex std::mutex
-#endif
-
-static MyMutex gMutex{};
+static NS_PROJ::mutex gMutex{};
 static std::set<std::string> gKnownGrids{};
 
+using namespace NS_PROJ;
 
 namespace { // anonymous namespace
 struct vgridshiftData {
@@ -251,7 +234,6 @@ PJ *TRANSFORMATION(vgridshift,0) {
 }
 
 void pj_clear_vgridshift_knowngrids_cache() {
-    gMutex.lock();
+    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(gMutex);
     gKnownGrids.clear();
-    gMutex.unlock();
 }
