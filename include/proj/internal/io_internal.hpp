@@ -173,7 +173,6 @@ struct projCppContext {
     PJ_CONTEXT *ctx_ = nullptr;
     std::string dbPath_{};
     std::vector<std::string> auxDbPaths_{};
-    bool autoCloseDb_ = false;
 
     projCppContext(const projCppContext &) = delete;
     projCppContext &operator=(const projCppContext &) = delete;
@@ -200,17 +199,6 @@ struct projCppContext {
     inline const std::vector<std::string> &getAuxDbPaths() const {
         return auxDbPaths_;
     }
-
-    void setAutoCloseDb(bool autoClose) {
-        autoCloseDb_ = autoClose;
-        autoCloseDbIfNeeded();
-    }
-    inline bool getAutoCloseDb() const { return autoCloseDb_; }
-
-    // cppcheck-suppress functionStatic
-    void closeDb();
-
-    void autoCloseDbIfNeeded();
 
     NS_PROJ::io::DatabaseContextNNPtr getDatabaseContext();
 };
