@@ -897,7 +897,7 @@ void DatabaseContext::Private::open(const std::string &databasePath,
         }
     }
 
-    sqlite_handle_ = SQLiteHandle::open(path, ctx);
+    sqlite_handle_ = SQLiteHandleCache::get().getHandle(path, ctx);
 
     databasePath_ = path;
 }
