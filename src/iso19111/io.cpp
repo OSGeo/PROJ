@@ -6944,7 +6944,12 @@ BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
     DatabaseContextPtr dbContext;
     try {
         if (ctx != nullptr && ctx->cpp_context) {
-            dbContext = ctx->cpp_context->getDatabaseContext().as_nullable();
+            // Only connect to proj.db if needed
+            if (text.find("proj=") == std::string::npos ||
+                text.find("init=") != std::string::npos) {
+                dbContext =
+                    ctx->cpp_context->getDatabaseContext().as_nullable();
+            }
         }
     } catch (const std::exception &) {
     }
