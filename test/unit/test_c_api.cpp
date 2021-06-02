@@ -30,6 +30,7 @@
 
 #include <cstdio>
 #include <limits>
+#include <math.h>
 
 #include "proj.h"
 #include "proj_constants.h"
@@ -3970,9 +3971,10 @@ TEST_F(CApi, proj_normalize_for_visualization_with_alternatives) {
     {
         PJ_COORD c;
         // Approximately Roma
-        c.lpz.lam = 12.5;
-        c.lpz.phi = 42;
-        c.lpz.z = 0;
+        c.xyzt.x = 12.5;
+        c.xyzt.y = 42;
+        c.xyzt.z = 0;
+        c.xyzt.t = HUGE_VAL;
         c = proj_trans(Pnormalized, PJ_FWD, c);
         EXPECT_NEAR(c.xy.x, 1789912.46264783037, 1e-8);
         EXPECT_NEAR(c.xy.y, 4655716.25402576849, 1e-8);
@@ -3991,9 +3993,10 @@ TEST_F(CApi, proj_normalize_for_visualization_with_alternatives) {
     {
         PJ_COORD c;
         // Approximately Roma
-        c.xyz.x = 1789912.46264783037;
-        c.xyz.y = 4655716.25402576849;
-        c.xyz.z = 0;
+        c.xyzt.x = 1789912.46264783037;
+        c.xyzt.y = 4655716.25402576849;
+        c.xyzt.z = 0;
+        c.xyzt.t = HUGE_VAL;
         c = proj_trans(Pnormalized, PJ_INV, c);
         EXPECT_NEAR(c.lp.lam, 12.5, 1e-8);
         EXPECT_NEAR(c.lp.phi, 42, 1e-8);
@@ -4013,9 +4016,10 @@ TEST_F(CApi, proj_normalize_for_visualization_with_alternatives_reverse) {
 
     PJ_COORD c;
     // Approximately Roma
-    c.xyz.x = 1789912.46264783037;
-    c.xyz.y = 4655716.25402576849;
-    c.xyz.z = 0;
+    c.xyzt.x = 1789912.46264783037;
+    c.xyzt.y = 4655716.25402576849;
+    c.xyzt.z = 0;
+    c.xyzt.t = HUGE_VAL;
     c = proj_trans(Pnormalized, PJ_FWD, c);
     EXPECT_NEAR(c.lp.lam, 12.5, 1e-8);
     EXPECT_NEAR(c.lp.phi, 42, 1e-8);
