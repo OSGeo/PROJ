@@ -47,6 +47,10 @@
 
 #include <sqlite3.h>
 
+#ifndef __MINGW32__
+#include <thread>
+#endif
+
 using namespace osgeo::proj::common;
 using namespace osgeo::proj::crs;
 using namespace osgeo::proj::cs;
@@ -5543,5 +5547,73 @@ TEST_F(CApi, proj_get_geoid_models_from_database) {
     EXPECT_TRUE(findInList(list, "GEOID18"));
     EXPECT_FALSE(findInList(list, "OSGM15"));
 }
+
+// ---------------------------------------------------------------------------
+
+#if !defined(_WIN32)
+TEST_F(CApi, open_plenty_of_contexts) {
+    // Test that we only consume 1 file handle for the connection to the
+    // database
+    std::vector<FILE *> dummyFilePointers;
+    std::vector<PJ_CONTEXT *> ctxts;
+    // 1024 is the number of file descriptors that can be opened simultaneously
+    // by a Linux process (by default)
+    for (int i = 0; i < 1024 - 50; i++) {
+        FILE *f = fopen("/dev/null", "rb");
+        ASSERT_TRUE(f != nullptr);
+        dummyFilePointers.push_back(f);
+    }
+    for (int i = 0; i < 100; i++) {
+        PJ_CONTEXT *ctxt = proj_context_create();
+        ASSERT_TRUE(ctxt != nullptr);
+        auto obj = proj_create(ctxt, "EPSG:4326");
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
+        ctxts.push_back(ctxt);
+    }
+    for (PJ_CONTEXT *ctxt : ctxts) {
+        proj_context_destroy(ctxt);
+    }
+    for (FILE *f : dummyFilePointers) {
+        fclose(f);
+    }
+    proj_cleanup();
+}
+#endif // !defined(_WIN32)
+
+// ---------------------------------------------------------------------------
+
+#ifndef __MINGW32__
+// We need std::thread support
+
+TEST_F(CApi, concurrent_context) {
+    // Test that concurrent access to the database is thread safe.
+    std::vector<std::thread> threads;
+    for (int i = 0; i < 4; i++) {
+        threads.emplace_back(std::thread([] {
+            for (int j = 0; j < 60; j++) {
+                PJ_CONTEXT *ctxt = proj_context_create();
+                {
+                    auto obj = proj_create(ctxt, "EPSG:4326");
+                    ObjectKeeper keeper(obj);
+                    EXPECT_NE(obj, nullptr);
+                }
+                {
+                    auto obj = proj_create(
+                        ctxt, ("EPSG:" + std::to_string(32600 + j)).c_str());
+                    ObjectKeeper keeper(obj);
+                    EXPECT_NE(obj, nullptr);
+                }
+                proj_context_destroy(ctxt);
+            }
+        }));
+    }
+    for (auto &t : threads) {
+        t.join();
+    }
+    proj_cleanup();
+}
+
+#endif // __MINGW32__
 
 } // namespace
