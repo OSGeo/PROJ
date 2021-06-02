@@ -180,4 +180,5 @@ void proj_cleanup() {
   FileManager::clearMemoryCache();
   pj_clear_hgridshift_knowngrids_cache();
   pj_clear_vgridshift_knowngrids_cache();
+  pj_clear_sqlite_cache();
 }

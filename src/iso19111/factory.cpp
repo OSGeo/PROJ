@@ -42,6 +42,7 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 #include "proj/internal/lru_cache.hpp"
+#include "proj/internal/mutex.hpp"
 #include "proj/internal/tracing.hpp"
 
 #include "operation/coordinateoperation_internal.hpp"
@@ -145,6 +146,226 @@ using ListOfParams = std::list<SQLValues>;
 
 // ---------------------------------------------------------------------------
 
+static double PROJ_SQLITE_GetValAsDouble(sqlite3_value *val, bool &gotVal) {
+    switch (sqlite3_value_type(val)) {
+    case SQLITE_FLOAT:
+        gotVal = true;
+        return sqlite3_value_double(val);
+
+    case SQLITE_INTEGER:
+        gotVal = true;
+        return static_cast<double>(sqlite3_value_int64(val));
+
+    default:
+        gotVal = false;
+        return 0.0;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+static void PROJ_SQLITE_pseudo_area_from_swne(sqlite3_context *pContext,
+                                              int /* argc */,
+                                              sqlite3_value **argv) {
+    bool b0, b1, b2, b3;
+    double south_lat = PROJ_SQLITE_GetValAsDouble(argv[0], b0);
+    double west_lon = PROJ_SQLITE_GetValAsDouble(argv[1], b1);
+    double north_lat = PROJ_SQLITE_GetValAsDouble(argv[2], b2);
+    double east_lon = PROJ_SQLITE_GetValAsDouble(argv[3], b3);
+    if (!b0 || !b1 || !b2 || !b3) {
+        sqlite3_result_null(pContext);
+        return;
+    }
+    // Deal with area crossing antimeridian
+    if (east_lon < west_lon) {
+        east_lon += 360.0;
+    }
+    // Integrate cos(lat) between south_lat and north_lat
+    double pseudo_area = (east_lon - west_lon) *
+                         (std::sin(common::Angle(north_lat).getSIValue()) -
+                          std::sin(common::Angle(south_lat).getSIValue()));
+    sqlite3_result_double(pContext, pseudo_area);
+}
+
+// ---------------------------------------------------------------------------
+
+static void PROJ_SQLITE_intersects_bbox(sqlite3_context *pContext,
+                                        int /* argc */, sqlite3_value **argv) {
+    bool b0, b1, b2, b3, b4, b5, b6, b7;
+    double south_lat1 = PROJ_SQLITE_GetValAsDouble(argv[0], b0);
+    double west_lon1 = PROJ_SQLITE_GetValAsDouble(argv[1], b1);
+    double north_lat1 = PROJ_SQLITE_GetValAsDouble(argv[2], b2);
+    double east_lon1 = PROJ_SQLITE_GetValAsDouble(argv[3], b3);
+    double south_lat2 = PROJ_SQLITE_GetValAsDouble(argv[4], b4);
+    double west_lon2 = PROJ_SQLITE_GetValAsDouble(argv[5], b5);
+    double north_lat2 = PROJ_SQLITE_GetValAsDouble(argv[6], b6);
+    double east_lon2 = PROJ_SQLITE_GetValAsDouble(argv[7], b7);
+    if (!b0 || !b1 || !b2 || !b3 || !b4 || !b5 || !b6 || !b7) {
+        sqlite3_result_null(pContext);
+        return;
+    }
+    auto bbox1 = metadata::GeographicBoundingBox::create(west_lon1, south_lat1,
+                                                         east_lon1, north_lat1);
+    auto bbox2 = metadata::GeographicBoundingBox::create(west_lon2, south_lat2,
+                                                         east_lon2, north_lat2);
+    sqlite3_result_int(pContext, bbox1->intersects(bbox2) ? 1 : 0);
+}
+
+// ---------------------------------------------------------------------------
+
+class SQLiteHandle {
+    sqlite3 *sqlite_handle_ = nullptr;
+    bool close_handle_ = true;
+
+#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+    std::unique_ptr<SQLite3VFS> vfs_{};
+#endif
+
+    SQLiteHandle(const SQLiteHandle &) = delete;
+    SQLiteHandle &operator=(const SQLiteHandle &) = delete;
+
+    SQLiteHandle() = default;
+
+    // cppcheck-suppress functionStatic
+    void registerFunctions();
+
+  public:
+    ~SQLiteHandle();
+
+    sqlite3 *handle() { return sqlite_handle_; }
+
+    static std::shared_ptr<SQLiteHandle>
+    open(const std::string &path, const std::string &custom_sqlite3_vfs_name);
+
+    // might not be shared between thread depending how the handle was opened!
+    static std::shared_ptr<SQLiteHandle>
+    initFromExisting(sqlite3 *sqlite_handle, bool close_handle);
+};
+
+// ---------------------------------------------------------------------------
+
+SQLiteHandle::~SQLiteHandle() {
+    if (close_handle_ && sqlite_handle_) {
+        sqlite3_close(sqlite_handle_);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+std::shared_ptr<SQLiteHandle>
+SQLiteHandle::open(const std::string &path,
+                   const std::string &custom_sqlite3_vfs_name) {
+    std::string vfsName;
+#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+    std::unique_ptr<SQLite3VFS> vfs;
+    if (custom_sqlite3_vfs_name.empty()) {
+        vfs = SQLite3VFS::create(false, true, true);
+        if (vfs == nullptr) {
+            throw FactoryException("Open of " + path + " failed");
+        }
+        vfsName = vfs->name();
+    } else
+#endif
+    {
+        vfsName = custom_sqlite3_vfs_name;
+    }
+    sqlite3 *sqlite_handle = nullptr;
+    // SQLITE_OPEN_FULLMUTEX as this will be used from concurrent threads
+    if (sqlite3_open_v2(path.c_str(), &sqlite_handle,
+                        SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX,
+                        vfsName.empty() ? nullptr : vfsName.c_str()) !=
+            SQLITE_OK ||
+        !sqlite_handle) {
+        if (sqlite_handle != nullptr) {
+            sqlite3_close(sqlite_handle);
+        }
+        throw FactoryException("Open of " + path + " failed");
+    }
+    auto handle = std::shared_ptr<SQLiteHandle>(new SQLiteHandle());
+    handle->sqlite_handle_ = sqlite_handle;
+#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
+    handle->vfs_ = std::move(vfs);
+#endif
+    handle->registerFunctions();
+    return handle;
+}
+
+// ---------------------------------------------------------------------------
+
+std::shared_ptr<SQLiteHandle>
+SQLiteHandle::initFromExisting(sqlite3 *sqlite_handle, bool close_handle) {
+    auto handle = std::shared_ptr<SQLiteHandle>(new SQLiteHandle());
+    handle->sqlite_handle_ = sqlite_handle;
+    handle->close_handle_ = close_handle;
+    handle->registerFunctions();
+    return handle;
+}
+
+// ---------------------------------------------------------------------------
+
+#ifndef SQLITE_DETERMINISTIC
+#define SQLITE_DETERMINISTIC 0
+#endif
+
+void SQLiteHandle::registerFunctions() {
+    sqlite3_create_function(sqlite_handle_, "pseudo_area_from_swne", 4,
+                            SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
+                            PROJ_SQLITE_pseudo_area_from_swne, nullptr,
+                            nullptr);
+
+    sqlite3_create_function(sqlite_handle_, "intersects_bbox", 8,
+                            SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
+                            PROJ_SQLITE_intersects_bbox, nullptr, nullptr);
+}
+
+// ---------------------------------------------------------------------------
+
+class SQLiteHandleCache {
+    NS_PROJ::mutex sMutex_{};
+
+    // Map dbname to SQLiteHandle
+    lru11::Cache<std::string, std::shared_ptr<SQLiteHandle>> cache_{};
+
+  public:
+    static SQLiteHandleCache &get();
+
+    std::shared_ptr<SQLiteHandle> getHandle(const std::string &path,
+                                            PJ_CONTEXT *ctx);
+
+    void clear();
+};
+
+// ---------------------------------------------------------------------------
+
+SQLiteHandleCache &SQLiteHandleCache::get() {
+    // Global cache
+    static SQLiteHandleCache gSQLiteHandleCache;
+    return gSQLiteHandleCache;
+}
+
+// ---------------------------------------------------------------------------
+
+void SQLiteHandleCache::clear() {
+    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    cache_.clear();
+}
+
+// ---------------------------------------------------------------------------
+
+std::shared_ptr<SQLiteHandle>
+SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
+    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    std::shared_ptr<SQLiteHandle> handle;
+    std::string key = path + ctx->custom_sqlite3_vfs_name;
+    if (!cache_.tryGet(key, handle)) {
+        handle = SQLiteHandle::open(path, ctx->custom_sqlite3_vfs_name);
+        cache_.insert(key, handle);
+    }
+    return handle;
+}
+
+// ---------------------------------------------------------------------------
+
 struct DatabaseContext::Private {
     Private();
     ~Private();
@@ -152,7 +373,9 @@ struct DatabaseContext::Private {
     void open(const std::string &databasePath, PJ_CONTEXT *ctx);
     void setHandle(sqlite3 *sqlite_handle);
 
-    sqlite3 *handle() const { return sqlite_handle_; }
+    sqlite3 *handle() const {
+        return sqlite_handle_ ? sqlite_handle_->handle() : nullptr;
+    }
 
     PJ_CONTEXT *pjCtxt() const { return pjCtxt_; }
     void setPjCtxt(PJ_CONTEXT *ctxt) { pjCtxt_ = ctxt; }
@@ -272,8 +495,7 @@ struct DatabaseContext::Private {
 
     std::string databasePath_{};
     std::vector<std::string> auxiliaryDatabasePaths_{};
-    bool close_handle_ = true;
-    sqlite3 *sqlite_handle_{};
+    std::shared_ptr<SQLiteHandle> sqlite_handle_{};
     int nLayoutVersionMajor_ = 0;
     int nLayoutVersionMinor_ = 0;
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
@@ -320,9 +542,6 @@ struct DatabaseContext::Private {
     void closeDB() noexcept;
 
     void clearCaches();
-
-    // cppcheck-suppress functionStatic
-    void registerFunctions();
 
     std::string findFreeCode(const std::string &tableName,
                              const std::string &authName,
@@ -412,10 +631,6 @@ struct DatabaseContext::Private {
                            bool numericCode,
                            const std::vector<std::string> &allowedAuthorities);
 
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    std::unique_ptr<SQLite3VFS> vfs_{};
-#endif
-
     Private(const Private &) = delete;
     Private &operator=(const Private &) = delete;
 };
@@ -460,10 +675,7 @@ void DatabaseContext::Private::closeDB() noexcept {
     }
     mapSqlToStatement_.clear();
 
-    if (close_handle_ && sqlite_handle_ != nullptr) {
-        sqlite3_close(sqlite_handle_);
-        sqlite_handle_ = nullptr;
-    }
+    sqlite_handle_.reset();
 }
 
 // ---------------------------------------------------------------------------
@@ -685,29 +897,9 @@ void DatabaseContext::Private::open(const std::string &databasePath,
         }
     }
 
-    std::string vfsName;
-#ifdef ENABLE_CUSTOM_LOCKLESS_VFS
-    if (ctx->custom_sqlite3_vfs_name.empty()) {
-        vfs_ = SQLite3VFS::create(false, true, true);
-        if (vfs_ == nullptr) {
-            throw FactoryException("Open of " + path + " failed");
-        }
-        vfsName = vfs_->name();
-    } else
-#endif
-    {
-        vfsName = ctx->custom_sqlite3_vfs_name;
-    }
-    if (sqlite3_open_v2(path.c_str(), &sqlite_handle_,
-                        SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX,
-                        vfsName.empty() ? nullptr : vfsName.c_str()) !=
-            SQLITE_OK ||
-        !sqlite_handle_) {
-        throw FactoryException("Open of " + path + " failed");
-    }
+    sqlite_handle_ = SQLiteHandle::open(path, ctx);
 
     databasePath_ = path;
-    registerFunctions();
 }
 
 // ---------------------------------------------------------------------------
@@ -804,10 +996,7 @@ void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
 
     assert(sqlite_handle);
     assert(!sqlite_handle_);
-    sqlite_handle_ = sqlite_handle;
-    close_handle_ = false;
-
-    registerFunctions();
+    sqlite_handle_ = SQLiteHandle::initFromExisting(sqlite_handle, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -844,7 +1033,7 @@ std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
 
 void DatabaseContext::Private::attachExtraDatabases(
     const std::vector<std::string> &auxiliaryDatabasePaths) {
-    assert(close_handle_);
+
     assert(sqlite_handle_);
 
     auto tables =
@@ -867,12 +1056,14 @@ void DatabaseContext::Private::attachExtraDatabases(
         return;
     }
 
+    sqlite3 *sqlite_handle = nullptr;
     sqlite3_open_v2(
-        ":memory:", &sqlite_handle_,
+        ":memory:", &sqlite_handle,
         SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_URI, nullptr);
-    if (!sqlite_handle_) {
+    if (!sqlite_handle) {
         throw FactoryException("cannot create in memory database");
     }
+    sqlite_handle_ = SQLiteHandle::initFromExisting(sqlite_handle, true);
 
     run("ATTACH DATABASE '" + replaceAll(databasePath_, "'", "''") +
         "' AS db_0");
@@ -923,92 +1114,6 @@ void DatabaseContext::Private::attachExtraDatabases(
         }
         run(sql);
     }
-
-    registerFunctions();
-}
-
-// ---------------------------------------------------------------------------
-
-static double PROJ_SQLITE_GetValAsDouble(sqlite3_value *val, bool &gotVal) {
-    switch (sqlite3_value_type(val)) {
-    case SQLITE_FLOAT:
-        gotVal = true;
-        return sqlite3_value_double(val);
-
-    case SQLITE_INTEGER:
-        gotVal = true;
-        return static_cast<double>(sqlite3_value_int64(val));
-
-    default:
-        gotVal = false;
-        return 0.0;
-    }
-}
-
-// ---------------------------------------------------------------------------
-
-static void PROJ_SQLITE_pseudo_area_from_swne(sqlite3_context *pContext,
-                                              int /* argc */,
-                                              sqlite3_value **argv) {
-    bool b0, b1, b2, b3;
-    double south_lat = PROJ_SQLITE_GetValAsDouble(argv[0], b0);
-    double west_lon = PROJ_SQLITE_GetValAsDouble(argv[1], b1);
-    double north_lat = PROJ_SQLITE_GetValAsDouble(argv[2], b2);
-    double east_lon = PROJ_SQLITE_GetValAsDouble(argv[3], b3);
-    if (!b0 || !b1 || !b2 || !b3) {
-        sqlite3_result_null(pContext);
-        return;
-    }
-    // Deal with area crossing antimeridian
-    if (east_lon < west_lon) {
-        east_lon += 360.0;
-    }
-    // Integrate cos(lat) between south_lat and north_lat
-    double pseudo_area = (east_lon - west_lon) *
-                         (std::sin(common::Angle(north_lat).getSIValue()) -
-                          std::sin(common::Angle(south_lat).getSIValue()));
-    sqlite3_result_double(pContext, pseudo_area);
-}
-
-// ---------------------------------------------------------------------------
-
-static void PROJ_SQLITE_intersects_bbox(sqlite3_context *pContext,
-                                        int /* argc */, sqlite3_value **argv) {
-    bool b0, b1, b2, b3, b4, b5, b6, b7;
-    double south_lat1 = PROJ_SQLITE_GetValAsDouble(argv[0], b0);
-    double west_lon1 = PROJ_SQLITE_GetValAsDouble(argv[1], b1);
-    double north_lat1 = PROJ_SQLITE_GetValAsDouble(argv[2], b2);
-    double east_lon1 = PROJ_SQLITE_GetValAsDouble(argv[3], b3);
-    double south_lat2 = PROJ_SQLITE_GetValAsDouble(argv[4], b4);
-    double west_lon2 = PROJ_SQLITE_GetValAsDouble(argv[5], b5);
-    double north_lat2 = PROJ_SQLITE_GetValAsDouble(argv[6], b6);
-    double east_lon2 = PROJ_SQLITE_GetValAsDouble(argv[7], b7);
-    if (!b0 || !b1 || !b2 || !b3 || !b4 || !b5 || !b6 || !b7) {
-        sqlite3_result_null(pContext);
-        return;
-    }
-    auto bbox1 = metadata::GeographicBoundingBox::create(west_lon1, south_lat1,
-                                                         east_lon1, north_lat1);
-    auto bbox2 = metadata::GeographicBoundingBox::create(west_lon2, south_lat2,
-                                                         east_lon2, north_lat2);
-    sqlite3_result_int(pContext, bbox1->intersects(bbox2) ? 1 : 0);
-}
-
-// ---------------------------------------------------------------------------
-
-#ifndef SQLITE_DETERMINISTIC
-#define SQLITE_DETERMINISTIC 0
-#endif
-
-void DatabaseContext::Private::registerFunctions() {
-    sqlite3_create_function(sqlite_handle_, "pseudo_area_from_swne", 4,
-                            SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
-                            PROJ_SQLITE_pseudo_area_from_swne, nullptr,
-                            nullptr);
-
-    sqlite3_create_function(sqlite_handle_, "intersects_bbox", 8,
-                            SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
-                            PROJ_SQLITE_intersects_bbox, nullptr, nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -1023,11 +1128,11 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
         stmt = iter->second;
         sqlite3_reset(stmt);
     } else {
-        if (sqlite3_prepare_v2(sqlite_handle_, sql.c_str(),
+        if (sqlite3_prepare_v2(handle(), sql.c_str(),
                                static_cast<int>(sql.size()), &stmt,
                                nullptr) != SQLITE_OK) {
             throw FactoryException("SQLite error on " + sql + ": " +
-                                   sqlite3_errmsg(sqlite_handle_));
+                                   sqlite3_errmsg(handle()));
         }
         mapSqlToStatement_.insert(
             std::pair<std::string, sqlite3_stmt *>(sql, stmt));
@@ -1100,7 +1205,7 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
             break;
         } else {
             throw FactoryException("SQLite error on " + sql + ": " +
-                                   sqlite3_errmsg(sqlite_handle_));
+                                   sqlite3_errmsg(handle()));
         }
     }
     return result;
@@ -2656,10 +2761,15 @@ void DatabaseContext::startInsertStatementsSession() {
 
     // Fill the structure of this database
     for (const auto &sql : sqlStatements) {
+        char *errmsg = nullptr;
         if (sqlite3_exec(d->memoryDbHandle_, sql.c_str(), nullptr, nullptr,
-                         nullptr) != SQLITE_OK) {
-            throw FactoryException("Cannot execute " + sql);
+                         &errmsg) != SQLITE_OK) {
+            const auto sErrMsg =
+                "Cannot execute " + sql + ": " + (errmsg ? errmsg : "");
+            sqlite3_free(errmsg);
+            throw FactoryException(sErrMsg);
         }
+        sqlite3_free(errmsg);
     }
 
     // Attach this database to the current one(s)
@@ -8961,3 +9071,7 @@ const std::string &NoSuchAuthorityCodeException::getAuthorityCode() const {
 
 } // namespace io
 NS_PROJ_END
+
+// ---------------------------------------------------------------------------
+
+void pj_clear_sqlite_cache() { NS_PROJ::io::SQLiteHandleCache::get().clear(); }

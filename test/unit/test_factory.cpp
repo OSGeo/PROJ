@@ -2912,7 +2912,7 @@ TEST(factory, attachExtraDatabases_none) {
 TEST(factory, attachExtraDatabases_auxiliary) {
 
     const std::string auxDbName(
-        "file:proj_test_aux.db?mode=memory&cache=shared");
+        "file:attachExtraDatabases_auxiliary.db?mode=memory&cache=shared");
 
     sqlite3 *dbAux = nullptr;
     sqlite3_open_v2(

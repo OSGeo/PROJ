@@ -868,6 +868,8 @@ const PJ_UNITS *pj_list_angular_units();
 void pj_clear_hgridshift_knowngrids_cache();
 void pj_clear_vgridshift_knowngrids_cache();
 
+void pj_clear_sqlite_cache();
+
 PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial);
 
 
