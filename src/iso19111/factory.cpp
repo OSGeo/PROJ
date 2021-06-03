@@ -217,6 +217,9 @@ class SQLiteHandle {
     sqlite3 *sqlite_handle_ = nullptr;
     bool close_handle_ = true;
 
+    int nLayoutVersionMajor_ = 0;
+    int nLayoutVersionMinor_ = 0;
+
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
     std::unique_ptr<SQLite3VFS> vfs_{};
 #endif
@@ -224,41 +227,68 @@ class SQLiteHandle {
     SQLiteHandle(const SQLiteHandle &) = delete;
     SQLiteHandle &operator=(const SQLiteHandle &) = delete;
 
-    SQLiteHandle() = default;
+    SQLiteHandle(sqlite3 *sqlite_handle, bool close_handle)
+        : sqlite_handle_(sqlite_handle), close_handle_(close_handle) {
+        assert(sqlite_handle_);
+    }
 
     // cppcheck-suppress functionStatic
     void registerFunctions();
+
+    SQLResultSet run(const std::string &sql,
+                     const ListOfParams &parameters = ListOfParams(),
+                     bool useMaxFloatPrecision = false);
 
   public:
     ~SQLiteHandle();
 
     sqlite3 *handle() { return sqlite_handle_; }
 
-    static std::shared_ptr<SQLiteHandle>
-    open(const std::string &path, const std::string &custom_sqlite3_vfs_name);
+    static std::shared_ptr<SQLiteHandle> open(PJ_CONTEXT *ctx,
+                                              const std::string &path);
 
     // might not be shared between thread depending how the handle was opened!
     static std::shared_ptr<SQLiteHandle>
-    initFromExisting(sqlite3 *sqlite_handle, bool close_handle);
+    initFromExisting(sqlite3 *sqlite_handle, bool close_handle,
+                     int nLayoutVersionMajor, int nLayoutVersionMinor);
+
+    void checkDatabaseLayout(const std::string &mainDbPath,
+                             const std::string &path,
+                             const std::string &dbNamePrefix);
+
+    SQLResultSet run(sqlite3_stmt *stmt, const std::string &sql,
+                     const ListOfParams &parameters = ListOfParams(),
+                     bool useMaxFloatPrecision = false);
+
+    inline int getLayoutVersionMajor() const { return nLayoutVersionMajor_; }
+    inline int getLayoutVersionMinor() const { return nLayoutVersionMinor_; }
 };
 
 // ---------------------------------------------------------------------------
 
 SQLiteHandle::~SQLiteHandle() {
-    if (close_handle_ && sqlite_handle_) {
+    if (close_handle_) {
         sqlite3_close(sqlite_handle_);
     }
 }
 
 // ---------------------------------------------------------------------------
 
-std::shared_ptr<SQLiteHandle>
-SQLiteHandle::open(const std::string &path,
-                   const std::string &custom_sqlite3_vfs_name) {
+std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
+                                                 const std::string &path) {
+
+    const int sqlite3VersionNumber = sqlite3_libversion_number();
+    // Minimum version for correct performance: 3.11
+    if (sqlite3VersionNumber < 3 * 1000000 + 11 * 1000) {
+        pj_log(ctx, PJ_LOG_ERROR,
+               "SQLite3 version is %s, whereas at least 3.11 should be used",
+               sqlite3_libversion());
+    }
+
     std::string vfsName;
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
     std::unique_ptr<SQLite3VFS> vfs;
-    if (custom_sqlite3_vfs_name.empty()) {
+    if (ctx->custom_sqlite3_vfs_name.empty()) {
         vfs = SQLite3VFS::create(false, true, true);
         if (vfs == nullptr) {
             throw FactoryException("Open of " + path + " failed");
@@ -267,7 +297,7 @@ SQLiteHandle::open(const std::string &path,
     } else
 #endif
     {
-        vfsName = custom_sqlite3_vfs_name;
+        vfsName = ctx->custom_sqlite3_vfs_name;
     }
     sqlite3 *sqlite_handle = nullptr;
     // SQLITE_OPEN_FULLMUTEX as this will be used from concurrent threads
@@ -281,24 +311,218 @@ SQLiteHandle::open(const std::string &path,
         }
         throw FactoryException("Open of " + path + " failed");
     }
-    auto handle = std::shared_ptr<SQLiteHandle>(new SQLiteHandle());
-    handle->sqlite_handle_ = sqlite_handle;
+    auto handle =
+        std::shared_ptr<SQLiteHandle>(new SQLiteHandle(sqlite_handle, true));
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
     handle->vfs_ = std::move(vfs);
 #endif
     handle->registerFunctions();
+    handle->checkDatabaseLayout(path, path, std::string());
     return handle;
 }
 
 // ---------------------------------------------------------------------------
 
 std::shared_ptr<SQLiteHandle>
-SQLiteHandle::initFromExisting(sqlite3 *sqlite_handle, bool close_handle) {
-    auto handle = std::shared_ptr<SQLiteHandle>(new SQLiteHandle());
-    handle->sqlite_handle_ = sqlite_handle;
-    handle->close_handle_ = close_handle;
+SQLiteHandle::initFromExisting(sqlite3 *sqlite_handle, bool close_handle,
+                               int nLayoutVersionMajor,
+                               int nLayoutVersionMinor) {
+    auto handle = std::shared_ptr<SQLiteHandle>(
+        new SQLiteHandle(sqlite_handle, close_handle));
+    handle->nLayoutVersionMajor_ = nLayoutVersionMajor;
+    handle->nLayoutVersionMinor_ = nLayoutVersionMinor;
     handle->registerFunctions();
     return handle;
+}
+
+// ---------------------------------------------------------------------------
+
+SQLResultSet SQLiteHandle::run(sqlite3_stmt *stmt, const std::string &sql,
+                               const ListOfParams &parameters,
+                               bool useMaxFloatPrecision) {
+    int nBindField = 1;
+    for (const auto &param : parameters) {
+        const auto paramType = param.type();
+        if (paramType == SQLValues::Type::STRING) {
+            auto strValue = param.stringValue();
+            sqlite3_bind_text(stmt, nBindField, strValue.c_str(),
+                              static_cast<int>(strValue.size()),
+                              SQLITE_TRANSIENT);
+        } else if (paramType == SQLValues::Type::INT) {
+            sqlite3_bind_int(stmt, nBindField, param.intValue());
+        } else {
+            assert(paramType == SQLValues::Type::DOUBLE);
+            sqlite3_bind_double(stmt, nBindField, param.doubleValue());
+        }
+        nBindField++;
+    }
+
+#ifdef TRACE_DATABASE
+    size_t nPos = 0;
+    std::string sqlSubst(sql);
+    for (const auto &param : parameters) {
+        nPos = sqlSubst.find('?', nPos);
+        assert(nPos != std::string::npos);
+        std::string strValue;
+        const auto paramType = param.type();
+        if (paramType == SQLValues::Type::STRING) {
+            strValue = '\'' + param.stringValue() + '\'';
+        } else if (paramType == SQLValues::Type::INT) {
+            strValue = toString(param.intValue());
+        } else {
+            strValue = toString(param.doubleValue());
+        }
+        sqlSubst =
+            sqlSubst.substr(0, nPos) + strValue + sqlSubst.substr(nPos + 1);
+        nPos += strValue.size();
+    }
+    logTrace(sqlSubst, "DATABASE");
+#endif
+
+    SQLResultSet result;
+    const int column_count = sqlite3_column_count(stmt);
+    while (true) {
+        int ret = sqlite3_step(stmt);
+        if (ret == SQLITE_ROW) {
+            SQLRow row(column_count);
+            for (int i = 0; i < column_count; i++) {
+                if (useMaxFloatPrecision &&
+                    sqlite3_column_type(stmt, i) == SQLITE_FLOAT) {
+                    // sqlite3_column_text() does not use maximum precision
+                    std::ostringstream buffer;
+                    buffer.imbue(std::locale::classic());
+                    buffer << std::setprecision(18);
+                    buffer << sqlite3_column_double(stmt, i);
+                    row[i] = buffer.str();
+                } else {
+                    const char *txt = reinterpret_cast<const char *>(
+                        sqlite3_column_text(stmt, i));
+                    if (txt) {
+                        row[i] = txt;
+                    }
+                }
+            }
+            result.emplace_back(std::move(row));
+        } else if (ret == SQLITE_DONE) {
+            break;
+        } else {
+            throw FactoryException("SQLite error on " + sql + ": " +
+                                   sqlite3_errmsg(sqlite_handle_));
+        }
+    }
+    return result;
+}
+
+// ---------------------------------------------------------------------------
+
+SQLResultSet SQLiteHandle::run(const std::string &sql,
+                               const ListOfParams &parameters,
+                               bool useMaxFloatPrecision) {
+    sqlite3_stmt *stmt = nullptr;
+    try {
+        if (sqlite3_prepare_v2(sqlite_handle_, sql.c_str(),
+                               static_cast<int>(sql.size()), &stmt,
+                               nullptr) != SQLITE_OK) {
+            throw FactoryException("SQLite error on " + sql + ": " +
+                                   sqlite3_errmsg(sqlite_handle_));
+        }
+        auto ret = run(stmt, sql, parameters, useMaxFloatPrecision);
+        sqlite3_finalize(stmt);
+        return ret;
+    } catch (const std::exception &) {
+        if (stmt)
+            sqlite3_finalize(stmt);
+        throw;
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void SQLiteHandle::checkDatabaseLayout(const std::string &mainDbPath,
+                                       const std::string &path,
+                                       const std::string &dbNamePrefix) {
+    if (!dbNamePrefix.empty() && run("SELECT 1 FROM " + dbNamePrefix +
+                                     "sqlite_master WHERE name = 'metadata'")
+                                     .empty()) {
+        // Accept auxiliary databases without metadata table (sparse DBs)
+        return;
+    }
+    auto res = run("SELECT key, value FROM " + dbNamePrefix +
+                   "metadata WHERE key IN "
+                   "('DATABASE.LAYOUT.VERSION.MAJOR', "
+                   "'DATABASE.LAYOUT.VERSION.MINOR')");
+    if (res.empty() && !dbNamePrefix.empty()) {
+        // Accept auxiliary databases without layout metadata.
+        return;
+    }
+    if (res.size() != 2) {
+        // The database layout of PROJ 7.2 that shipped with EPSG v10.003 is
+        // at the time of writing still compatible of the one we support.
+        static_assert(
+            // cppcheck-suppress knownConditionTrueFalse
+            DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
+                // cppcheck-suppress knownConditionTrueFalse
+                DATABASE_LAYOUT_VERSION_MINOR == 1,
+            "remove that assertion and below lines next time we upgrade "
+            "database structure");
+        res = run("SELECT 1 FROM metadata WHERE key = 'EPSG.VERSION' AND "
+                  "value = 'v10.003'");
+        if (!res.empty()) {
+            return;
+        }
+
+        throw FactoryException(
+            path + " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
+                   "DATABASE.LAYOUT.VERSION.MINOR "
+                   "metadata. It comes from another PROJ installation.");
+    }
+    int major = 0;
+    int minor = 0;
+    for (const auto &row : res) {
+        if (row[0] == "DATABASE.LAYOUT.VERSION.MAJOR") {
+            major = atoi(row[1].c_str());
+        } else if (row[0] == "DATABASE.LAYOUT.VERSION.MINOR") {
+            minor = atoi(row[1].c_str());
+        }
+    }
+    if (major != DATABASE_LAYOUT_VERSION_MAJOR) {
+        throw FactoryException(
+            path +
+            " contains DATABASE.LAYOUT.VERSION.MAJOR = " + toString(major) +
+            " whereas " + toString(DATABASE_LAYOUT_VERSION_MAJOR) +
+            " is expected. "
+            "It comes from another PROJ installation.");
+    }
+    // Database layout v1.0 of PROJ 8.0 is forward compatible with v1.1
+    static_assert(
+        // cppcheck-suppress knownConditionTrueFalse
+        DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
+            // cppcheck-suppress knownConditionTrueFalse
+            DATABASE_LAYOUT_VERSION_MINOR == 1,
+        "re-enable the check below if database layout v1.0 and v1.1 is no "
+        "longer compatible");
+#if 0
+    if (minor < DATABASE_LAYOUT_VERSION_MINOR) {
+        throw FactoryException(
+            path +
+            " contains DATABASE.LAYOUT.VERSION.MINOR = " + toString(minor) +
+            " whereas a number >= " + toString(DATABASE_LAYOUT_VERSION_MINOR) +
+            " is expected. "
+            "It comes from another PROJ installation.");
+    }
+#endif
+    if (dbNamePrefix.empty()) {
+        nLayoutVersionMajor_ = major;
+        nLayoutVersionMinor_ = minor;
+    } else if (nLayoutVersionMajor_ != major || nLayoutVersionMinor_ != minor) {
+        throw FactoryException(
+            "Auxiliary database " + path +
+            " contains a DATABASE.LAYOUT.VERSION =  " + toString(major) + '.' +
+            toString(minor) +
+            " which is different from the one from the main database " +
+            mainDbPath + " which is " + toString(nLayoutVersionMajor_) + '.' +
+            toString(nLayoutVersionMinor_));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -358,7 +582,7 @@ SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
     std::shared_ptr<SQLiteHandle> handle;
     std::string key = path + ctx->custom_sqlite3_vfs_name;
     if (!cache_.tryGet(key, handle)) {
-        handle = SQLiteHandle::open(path, ctx->custom_sqlite3_vfs_name);
+        handle = SQLiteHandle::open(ctx, path);
         cache_.insert(key, handle);
     }
     return handle;
@@ -496,8 +720,6 @@ struct DatabaseContext::Private {
     std::string databasePath_{};
     std::vector<std::string> auxiliaryDatabasePaths_{};
     std::shared_ptr<SQLiteHandle> sqlite_handle_{};
-    int nLayoutVersionMajor_ = 0;
-    int nLayoutVersionMinor_ = 0;
     std::map<std::string, sqlite3_stmt *> mapSqlToStatement_{};
     PJ_CONTEXT *pjCtxt_ = nullptr;
     int recLevel_ = 0;
@@ -528,9 +750,6 @@ struct DatabaseContext::Private {
 
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
-
-    void checkDatabaseLayout(const std::string &path,
-                             const std::string &dbNamePrefix);
 
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
@@ -877,14 +1096,6 @@ void DatabaseContext::Private::open(const std::string &databasePath,
         ctx = pj_get_default_ctx();
     }
 
-    const int sqlite3VersionNumber = sqlite3_libversion_number();
-    // Minimum version for correct performance: 3.11
-    if (sqlite3VersionNumber < 3 * 1000000 + 11 * 1000) {
-        pj_log(ctx, PJ_LOG_ERROR,
-               "SQLite3 version is %s, whereas at least 3.11 should be used",
-               sqlite3_libversion());
-    }
-
     setPjCtxt(ctx);
     std::string path(databasePath);
     if (path.empty()) {
@@ -904,99 +1115,11 @@ void DatabaseContext::Private::open(const std::string &databasePath,
 
 // ---------------------------------------------------------------------------
 
-void DatabaseContext::Private::checkDatabaseLayout(
-    const std::string &path, const std::string &dbNamePrefix) {
-    if (!dbNamePrefix.empty() && run("SELECT 1 FROM " + dbNamePrefix +
-                                     "sqlite_master WHERE name = 'metadata'")
-                                     .empty()) {
-        // Accept auxiliary databases without metadata table (sparse DBs)
-        return;
-    }
-    auto res = run("SELECT key, value FROM " + dbNamePrefix +
-                   "metadata WHERE key IN "
-                   "('DATABASE.LAYOUT.VERSION.MAJOR', "
-                   "'DATABASE.LAYOUT.VERSION.MINOR')");
-    if (res.empty() && !dbNamePrefix.empty()) {
-        // Accept auxiliary databases without layout metadata.
-        return;
-    }
-    if (res.size() != 2) {
-        // The database layout of PROJ 7.2 that shipped with EPSG v10.003 is
-        // at the time of writing still compatible of the one we support.
-        static_assert(
-            // cppcheck-suppress knownConditionTrueFalse
-            DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
-                // cppcheck-suppress knownConditionTrueFalse
-                DATABASE_LAYOUT_VERSION_MINOR == 1,
-            "remove that assertion and below lines next time we upgrade "
-            "database structure");
-        res = run("SELECT 1 FROM metadata WHERE key = 'EPSG.VERSION' AND "
-                  "value = 'v10.003'");
-        if (!res.empty()) {
-            return;
-        }
-
-        throw FactoryException(
-            path + " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
-                   "DATABASE.LAYOUT.VERSION.MINOR "
-                   "metadata. It comes from another PROJ installation.");
-    }
-    int major = 0;
-    int minor = 0;
-    for (const auto &row : res) {
-        if (row[0] == "DATABASE.LAYOUT.VERSION.MAJOR") {
-            major = atoi(row[1].c_str());
-        } else if (row[0] == "DATABASE.LAYOUT.VERSION.MINOR") {
-            minor = atoi(row[1].c_str());
-        }
-    }
-    if (major != DATABASE_LAYOUT_VERSION_MAJOR) {
-        throw FactoryException(
-            path +
-            " contains DATABASE.LAYOUT.VERSION.MAJOR = " + toString(major) +
-            " whereas " + toString(DATABASE_LAYOUT_VERSION_MAJOR) +
-            " is expected. "
-            "It comes from another PROJ installation.");
-    }
-    // Database layout v1.0 of PROJ 8.0 is forward compatible with v1.1
-    static_assert(
-        // cppcheck-suppress knownConditionTrueFalse
-        DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
-            // cppcheck-suppress knownConditionTrueFalse
-            DATABASE_LAYOUT_VERSION_MINOR == 1,
-        "re-enable the check below if database layout v1.0 and v1.1 is no "
-        "longer compatible");
-#if 0
-    if (minor < DATABASE_LAYOUT_VERSION_MINOR) {
-        throw FactoryException(
-            path +
-            " contains DATABASE.LAYOUT.VERSION.MINOR = " + toString(minor) +
-            " whereas a number >= " + toString(DATABASE_LAYOUT_VERSION_MINOR) +
-            " is expected. "
-            "It comes from another PROJ installation.");
-    }
-#endif
-    if (dbNamePrefix.empty()) {
-        nLayoutVersionMajor_ = major;
-        nLayoutVersionMinor_ = minor;
-    } else if (nLayoutVersionMajor_ != major || nLayoutVersionMinor_ != minor) {
-        throw FactoryException(
-            "Auxiliary database " + path +
-            " contains a DATABASE.LAYOUT.VERSION =  " + toString(major) + '.' +
-            toString(minor) +
-            " which is different from the one from the main database " +
-            databasePath_ + " which is " + toString(nLayoutVersionMajor_) +
-            '.' + toString(nLayoutVersionMinor_));
-    }
-}
-
-// ---------------------------------------------------------------------------
-
 void DatabaseContext::Private::setHandle(sqlite3 *sqlite_handle) {
 
     assert(sqlite_handle);
     assert(!sqlite_handle_);
-    sqlite_handle_ = SQLiteHandle::initFromExisting(sqlite_handle, false);
+    sqlite_handle_ = SQLiteHandle::initFromExisting(sqlite_handle, false, 0, 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -1018,13 +1141,13 @@ std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
             res.emplace_back(row[0]);
         }
     }
-    if (nLayoutVersionMajor_ > 0) {
+    if (sqlite_handle_->getLayoutVersionMajor() > 0) {
         res.emplace_back(
             "INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MAJOR'," +
-            toString(nLayoutVersionMajor_) + ");");
+            toString(sqlite_handle_->getLayoutVersionMajor()) + ");");
         res.emplace_back(
             "INSERT INTO metadata VALUES('DATABASE.LAYOUT.VERSION.MINOR'," +
-            toString(nLayoutVersionMinor_) + ");");
+            toString(sqlite_handle_->getLayoutVersionMinor()) + ");");
     }
     return res;
 }
@@ -1050,6 +1173,9 @@ void DatabaseContext::Private::attachExtraDatabases(
         }
     }
 
+    const int nLayoutVersionMajor = sqlite_handle_->getLayoutVersionMajor();
+    const int nLayoutVersionMinor = sqlite_handle_->getLayoutVersionMinor();
+
     closeDB();
     if (auxiliaryDatabasePaths.empty()) {
         open(databasePath_, pjCtxt());
@@ -1063,7 +1189,8 @@ void DatabaseContext::Private::attachExtraDatabases(
     if (!sqlite_handle) {
         throw FactoryException("cannot create in memory database");
     }
-    sqlite_handle_ = SQLiteHandle::initFromExisting(sqlite_handle, true);
+    sqlite_handle_ = SQLiteHandle::initFromExisting(
+        sqlite_handle, true, nLayoutVersionMajor, nLayoutVersionMinor);
 
     run("ATTACH DATABASE '" + replaceAll(databasePath_, "'", "''") +
         "' AS db_0");
@@ -1078,7 +1205,8 @@ void DatabaseContext::Private::attachExtraDatabases(
         count++;
         run(sql);
 
-        checkDatabaseLayout(otherDbPath, attachedDbName + '.');
+        sqlite_handle_->checkDatabaseLayout(databasePath_, otherDbPath,
+                                            attachedDbName + '.');
     }
 
     for (const auto &pair : tableStructure) {
@@ -1138,77 +1266,7 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
             std::pair<std::string, sqlite3_stmt *>(sql, stmt));
     }
 
-    int nBindField = 1;
-    for (const auto &param : parameters) {
-        const auto paramType = param.type();
-        if (paramType == SQLValues::Type::STRING) {
-            auto strValue = param.stringValue();
-            sqlite3_bind_text(stmt, nBindField, strValue.c_str(),
-                              static_cast<int>(strValue.size()),
-                              SQLITE_TRANSIENT);
-        } else if (paramType == SQLValues::Type::INT) {
-            sqlite3_bind_int(stmt, nBindField, param.intValue());
-        } else {
-            assert(paramType == SQLValues::Type::DOUBLE);
-            sqlite3_bind_double(stmt, nBindField, param.doubleValue());
-        }
-        nBindField++;
-    }
-
-#ifdef TRACE_DATABASE
-    size_t nPos = 0;
-    std::string sqlSubst(sql);
-    for (const auto &param : parameters) {
-        nPos = sqlSubst.find('?', nPos);
-        assert(nPos != std::string::npos);
-        std::string strValue;
-        const auto paramType = param.type();
-        if (paramType == SQLValues::Type::STRING) {
-            strValue = '\'' + param.stringValue() + '\'';
-        } else if (paramType == SQLValues::Type::INT) {
-            strValue = toString(param.intValue());
-        } else {
-            strValue = toString(param.doubleValue());
-        }
-        sqlSubst =
-            sqlSubst.substr(0, nPos) + strValue + sqlSubst.substr(nPos + 1);
-        nPos += strValue.size();
-    }
-    logTrace(sqlSubst, "DATABASE");
-#endif
-
-    SQLResultSet result;
-    const int column_count = sqlite3_column_count(stmt);
-    while (true) {
-        int ret = sqlite3_step(stmt);
-        if (ret == SQLITE_ROW) {
-            SQLRow row(column_count);
-            for (int i = 0; i < column_count; i++) {
-                if (useMaxFloatPrecision &&
-                    sqlite3_column_type(stmt, i) == SQLITE_FLOAT) {
-                    // sqlite3_column_text() does not use maximum precision
-                    std::ostringstream buffer;
-                    buffer.imbue(std::locale::classic());
-                    buffer << std::setprecision(18);
-                    buffer << sqlite3_column_double(stmt, i);
-                    row[i] = buffer.str();
-                } else {
-                    const char *txt = reinterpret_cast<const char *>(
-                        sqlite3_column_text(stmt, i));
-                    if (txt) {
-                        row[i] = txt;
-                    }
-                }
-            }
-            result.emplace_back(std::move(row));
-        } else if (ret == SQLITE_DONE) {
-            break;
-        } else {
-            throw FactoryException("SQLite error on " + sql + ": " +
-                                   sqlite3_errmsg(handle()));
-        }
-    }
-    return result;
+    return sqlite_handle_->run(stmt, sql, parameters, useMaxFloatPrecision);
 }
 
 // ---------------------------------------------------------------------------
@@ -2656,7 +2714,6 @@ DatabaseContext::create(const std::string &databasePath,
     auto dbCtx = DatabaseContext::nn_make_shared<DatabaseContext>();
     auto dbCtxPrivate = dbCtx->getPrivate();
     dbCtxPrivate->open(databasePath, ctx);
-    dbCtxPrivate->checkDatabaseLayout(databasePath, std::string());
     auto auxDbs(auxiliaryDatabasePaths);
     if (auxDbs.empty()) {
         const char *auxDbStr = getenv("PROJ_AUX_DB");
