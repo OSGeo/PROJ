@@ -201,6 +201,8 @@ struct projCppContext {
     }
 
     NS_PROJ::io::DatabaseContextNNPtr getDatabaseContext();
+
+    void closeDb() { databaseContext_ = nullptr; }
 };
 
 //! @endcond
