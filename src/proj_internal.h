@@ -495,10 +495,10 @@ struct PJconsts {
     int  is_latlong = 0;            /* proj=latlong ... not really a projection at all */
     int  is_geocent = 0;            /* proj=geocent ... not really a projection at all */
     int  need_ellps = 0;            /* 0 for operations that are purely cartesian */
-    int  skip_fwd_prepare = 1;
-    int  skip_fwd_finalize = 1;
-    int  skip_inv_prepare = 1;
-    int  skip_inv_finalize = 1;
+    int  skip_fwd_prepare = 0;
+    int  skip_fwd_finalize = 0;
+    int  skip_inv_prepare = 0;
+    int  skip_inv_finalize = 0;
 
     enum pj_io_units left =  PJ_IO_UNITS_WHATEVER; /* Flags for input/output coordinate types */
     enum pj_io_units right =  PJ_IO_UNITS_WHATEVER;

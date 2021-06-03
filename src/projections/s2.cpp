@@ -1,21 +1,6 @@
 /*
  * This implements the S2 projection.
  *
- * Copyright (c) 2011, 2012  Martin Lambers <marlam@marlam.de>
- *
- * The QSC projection was introduced in:
- * [OL76]
- * E.M. O'Neill and R.E. Laubscher, "Extended Studies of a Quadrilateralized
- * Spherical Cube Earth Data Base", Naval Environmental Prediction Research
- * Facility Tech. Report NEPRF 3-76 (CSC), May 1976.
- *
- * The preceding shift from an ellipsoid to a sphere, which allows to apply
- * this projection to ellipsoids as used in the Ellipsoidal Cube Map model,
- * is described in
- * [LK12]
- * M. Lambers and A. Kolb, "Ellipsoidal Cube Maps for Accurate Rendering of
- * Planetary-Scale Terrain Data", Proc. Pacific Graphics (Short Papers), Sep.
- * 2012
  *
  * You have to choose one of the following projection centers,
  * corresponding to the centers of the six cube faces:
@@ -28,7 +13,7 @@
  * Other projection centers will not work!
  *
  * In the projection code below, each cube face is handled differently.
- * See the computation of the face parameter in the PROJECTION(qsc) function
+ * See the computation of the face parameter in the PROJECTION(s2) function
  * and the handling of different face values (FACE_*) in the forward and
  * inverse projections.
  *
@@ -47,6 +32,7 @@
 #include "proj_internal.h"
 
 #include <iostream>
+#include <cstdio>
 /* The six cube faces. */
 namespace { // anonymous namespace
 enum Face {
@@ -83,41 +69,6 @@ enum Area {
 };
 } // anonymous namespace
 
-/* Helper function for forward projection: compute the theta angle
- * and determine the area number. */
-static double qsc_fwd_equat_face_theta(double phi, double y, double x, enum Area *area) {
-    double theta;
-    if (phi < EPS10) {
-        *area = AREA_0;
-        theta = 0.0;
-    } else {
-        theta = atan2(y, x);
-        if (fabs(theta) <= M_FORTPI) {
-            *area = AREA_0;
-        } else if (theta > M_FORTPI && theta <= M_HALFPI + M_FORTPI) {
-            *area = AREA_1;
-            theta -= M_HALFPI;
-        } else if (theta > M_HALFPI + M_FORTPI || theta <= -(M_HALFPI + M_FORTPI)) {
-            *area = AREA_2;
-            theta = (theta >= 0.0 ? theta - M_PI : theta + M_PI);
-        } else {
-            *area = AREA_3;
-            theta += M_HALFPI;
-        }
-    }
-    return theta;
-}
-
-/* Helper function: shift the longitude. */
-static double qsc_shift_lon_origin(double lon, double offset) {
-    double slon = lon + offset;
-    if (slon < -M_PI) {
-        slon += M_TWOPI;
-    } else if (slon > +M_PI) {
-        slon -= M_TWOPI;
-    }
-    return slon;
-}
 
 // =================================================
 //
@@ -395,11 +346,8 @@ inline bool UVtoSphereXYZ(int face, double u, double v, PJ_XYZ* xyz) {
 //
 // ============================================
 static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
-    PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     double lat, lon;
-    double theta, phi;
-    enum Area area;
 
     /* Convert the geodetic latitude to a geocentric latitude.
      * This corresponds to the shift from the ellipsoid to the sphere
@@ -430,24 +378,16 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     ValidFaceXYZtoUV(Q->face, spherePoint, &uvCoords.x, &uvCoords.y);
     double s = UVtoST(uvCoords.x);
     double t = UVtoST(uvCoords.y);
-
     return {s, t};
 }
 
 static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {     
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double mu, nu, cosmu, tannu;
-    double tantheta, theta, cosphi, phi;
-    double t;
-    int area;
 
     // Do the S2 projections to get from s,t to u,v to x,y,z
     double u = STtoUV(xy.x);
     double v = STtoUV(xy.y);
-
-    std::cout << "face is " << Q->face << std::endl;
-    std::cout << "uv are " << u << ", " << v << std::endl;
 
     PJ_XYZ sphereCoords;
     UVtoSphereXYZ(Q->face, u, v, &sphereCoords);
