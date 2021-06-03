@@ -252,6 +252,9 @@ class SQLiteHandle {
     initFromExisting(sqlite3 *sqlite_handle, bool close_handle,
                      int nLayoutVersionMajor, int nLayoutVersionMinor);
 
+    static std::unique_ptr<SQLiteHandle>
+    initFromExistingUniquePtr(sqlite3 *sqlite_handle, bool close_handle);
+
     void checkDatabaseLayout(const std::string &mainDbPath,
                              const std::string &path,
                              const std::string &dbNamePrefix);
@@ -331,6 +334,17 @@ SQLiteHandle::initFromExisting(sqlite3 *sqlite_handle, bool close_handle,
         new SQLiteHandle(sqlite_handle, close_handle));
     handle->nLayoutVersionMajor_ = nLayoutVersionMajor;
     handle->nLayoutVersionMinor_ = nLayoutVersionMinor;
+    handle->registerFunctions();
+    return handle;
+}
+
+// ---------------------------------------------------------------------------
+
+std::unique_ptr<SQLiteHandle>
+SQLiteHandle::initFromExistingUniquePtr(sqlite3 *sqlite_handle,
+                                        bool close_handle) {
+    auto handle = std::unique_ptr<SQLiteHandle>(
+        new SQLiteHandle(sqlite_handle, close_handle));
     handle->registerFunctions();
     return handle;
 }
@@ -729,7 +743,7 @@ struct DatabaseContext::Private {
 
     // Used by startInsertStatementsSession() and related functions
     std::string memoryDbForInsertPath_{};
-    sqlite3 *memoryDbHandle_ = nullptr;
+    std::unique_ptr<SQLiteHandle> memoryDbHandle_{};
 
     using LRUCacheOfObjects = lru11::Cache<std::string, util::BaseObjectPtr>;
 
@@ -1315,8 +1329,8 @@ void DatabaseContext::Private::appendSql(
     std::vector<std::string> &sqlStatements, const std::string &sql) {
     sqlStatements.emplace_back(sql);
     char *errMsg = nullptr;
-    if (sqlite3_exec(memoryDbHandle_, sql.c_str(), nullptr, nullptr, &errMsg) !=
-        SQLITE_OK) {
+    if (sqlite3_exec(memoryDbHandle_->handle(), sql.c_str(), nullptr, nullptr,
+                     &errMsg) != SQLITE_OK) {
         std::string s("Cannot execute " + sql);
         if (errMsg) {
             s += " : ";
@@ -2809,18 +2823,21 @@ void DatabaseContext::startInsertStatementsSession() {
     buffer << this;
     buffer << ".db?mode=memory&cache=shared";
     d->memoryDbForInsertPath_ = buffer.str();
+    sqlite3 *memoryDbHandle = nullptr;
     sqlite3_open_v2(
-        d->memoryDbForInsertPath_.c_str(), &d->memoryDbHandle_,
+        d->memoryDbForInsertPath_.c_str(), &memoryDbHandle,
         SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI, nullptr);
-    if (d->memoryDbHandle_ == nullptr) {
+    if (memoryDbHandle == nullptr) {
         throw FactoryException("Cannot create in-memory database");
     }
+    d->memoryDbHandle_ =
+        SQLiteHandle::initFromExistingUniquePtr(memoryDbHandle, true);
 
     // Fill the structure of this database
     for (const auto &sql : sqlStatements) {
         char *errmsg = nullptr;
-        if (sqlite3_exec(d->memoryDbHandle_, sql.c_str(), nullptr, nullptr,
-                         &errmsg) != SQLITE_OK) {
+        if (sqlite3_exec(d->memoryDbHandle_->handle(), sql.c_str(), nullptr,
+                         nullptr, &errmsg) != SQLITE_OK) {
             const auto sErrMsg =
                 "Cannot execute " + sql + ": " + (errmsg ? errmsg : "");
             sqlite3_free(errmsg);
@@ -3050,8 +3067,7 @@ void DatabaseContext::stopInsertStatementsSession() {
     if (d->memoryDbHandle_) {
         d->clearCaches();
         d->attachExtraDatabases(d->auxiliaryDatabasePaths_);
-        sqlite3_close(d->memoryDbHandle_);
-        d->memoryDbHandle_ = nullptr;
+        d->memoryDbHandle_.reset();
         d->memoryDbForInsertPath_.clear();
     }
 }
