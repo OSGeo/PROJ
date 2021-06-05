@@ -249,7 +249,7 @@ Brazil
 Netherlands
 ................................................................................
 
-`Dutch grid <https://zakelijk.kadaster.nl/transformatie-van-coordinaten>`__ (Registration required before download)
+`Dutch grid <https://www.nsgi.nl/geodetische-infrastructuur/coordinatentransformatie>`__ (Registration required before download)
 
 Portugal
 ................................................................................
