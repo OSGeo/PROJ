@@ -33,6 +33,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
+#ifndef FROM_PROJ_CPP
+#define FROM_PROJ_CPP
+#endif
 
 /* allocate and deallocate memory */
 /* These routines are used so that applications can readily replace
@@ -45,6 +48,8 @@
 #include <string.h>
 
 #include <new>
+
+#include "proj/internal/io_internal.hpp"
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -176,8 +181,16 @@ PJ *pj_default_destructor (PJ *P, int errlev) {   /* Destructor */
 /*****************************************************************************/
 void proj_cleanup() {
 /*****************************************************************************/
+
+  // Close the database context of the default PJ_CONTEXT
+  auto cpp_context = pj_get_default_ctx()->cpp_context;
+  if( cpp_context ) {
+      cpp_context->closeDb();
+  }
+
   pj_clear_initcache();
   FileManager::clearMemoryCache();
   pj_clear_hgridshift_knowngrids_cache();
   pj_clear_vgridshift_knowngrids_cache();
+  pj_clear_sqlite_cache();
 }
