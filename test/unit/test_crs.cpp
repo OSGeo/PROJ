@@ -4646,9 +4646,10 @@ TEST(crs, boundCRS_identify_db) {
         auto res = crs->identify(factoryEPSG);
         ASSERT_EQ(res.size(), 1U);
         EXPECT_EQ(res.front().second, 25);
-        auto wkt = crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
-        EXPECT_TRUE(wkt.find("32122") != std::string::npos) << wkt;
+        auto boundCRS = dynamic_cast<const BoundCRS *>(res.front().first.get());
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 32122);
+        EXPECT_EQ(boundCRS->transformation()->method()->getEPSGCode(), 9603);
     }
 
     {
@@ -4664,6 +4665,25 @@ TEST(crs, boundCRS_identify_db) {
         ASSERT_TRUE(boundCRS != nullptr);
         EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 3148);
         EXPECT_EQ(res.front().second, 70);
+    }
+
+    {
+        // Identify a WKT with datum WGS84 and TOWGS84
+        auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(
+            "GEOGCS[\"WGS84 Coordinate System\",DATUM[\"WGS 1984\","
+            "SPHEROID[\"WGS 1984\",6378137,298.257223563],"
+            "TOWGS84[0,0,0,0,0,0,0],AUTHORITY[\"EPSG\",\"6326\"]],"
+            "PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],"
+            "AUTHORITY[\"EPSG\",\"4326\"]]");
+        auto crs = nn_dynamic_pointer_cast<BoundCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factoryEPSG);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().second, 100);
+        auto boundCRS = dynamic_cast<const BoundCRS *>(res.front().first.get());
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_EQ(boundCRS->baseCRS()->getEPSGCode(), 4326);
+        EXPECT_EQ(boundCRS->transformation()->method()->getEPSGCode(), 9606);
     }
 }
 
