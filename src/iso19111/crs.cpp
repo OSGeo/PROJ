@@ -46,6 +46,8 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
+#include "operation/oputils.hpp"
+
 #include "proj_constants.h"
 #include "proj_json_streaming_writer.hpp"
 
@@ -5519,7 +5521,13 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     auto opNormalized = op->normalizeForVisualization();
                     std::string opTransfPROJString;
                     bool opTransfPROJStringValid = false;
-                    if (op->nameStr().find("Ballpark geographic") == 0) {
+                    const auto &opName = op->nameStr();
+                    if (starts_with(opName,
+                                    osgeo::proj::operation::
+                                        BALLPARK_GEOCENTRIC_TRANSLATION) ||
+                        starts_with(
+                            opName,
+                            osgeo::proj::operation::NULL_GEOGRAPHIC_OFFSET)) {
                         if (refIsNullTransform) {
                             res.emplace_back(create(candidateBaseCRS,
                                                     d->hubCRS_,
