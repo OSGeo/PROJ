@@ -5522,12 +5522,11 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     std::string opTransfPROJString;
                     bool opTransfPROJStringValid = false;
                     const auto &opName = op->nameStr();
-                    if (starts_with(opName,
-                                    osgeo::proj::operation::
-                                        BALLPARK_GEOCENTRIC_TRANSLATION) ||
-                        starts_with(
+                    if (starts_with(
                             opName,
-                            osgeo::proj::operation::NULL_GEOGRAPHIC_OFFSET)) {
+                            operation::BALLPARK_GEOCENTRIC_TRANSLATION) ||
+                        starts_with(opName,
+                                    operation::NULL_GEOGRAPHIC_OFFSET)) {
                         if (refIsNullTransform) {
                             res.emplace_back(create(candidateBaseCRS,
                                                     d->hubCRS_,
