@@ -1047,6 +1047,12 @@ $EXE -E EPSG:2636 "WGS 84" >> ${OUT} <<EOF
 5540944.47  500000.001
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Check that we select the operation that has the smallest area of use, when 2 have the same accuracy" >> ${OUT}
+$EXE -E EPSG:4326 "NAD83(HARN)" >> ${OUT} <<EOF
+34 -120
+EOF
+
 
 # Done!
 # do 'diff' with distribution results

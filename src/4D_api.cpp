@@ -243,7 +243,15 @@ int pj_get_suggested_operation(PJ_CONTEXT*,
             // onshore. So in a general way, prefer a onshore area to a
             // offshore one.
             if( iBest < 0 ||
-                (alt.accuracy >= 0 && alt.accuracy < bestAccuracy &&
+                (alt.accuracy >= 0 &&
+                (alt.accuracy < bestAccuracy ||
+                 // If two operations have the same accuracy, use the one that
+                 // is contained within a larger one
+                 (alt.accuracy == bestAccuracy &&
+                  alt.minxSrc > opList[iBest].minxSrc &&
+                  alt.minySrc > opList[iBest].minySrc &&
+                  alt.maxxSrc < opList[iBest].maxxSrc &&
+                  alt.maxySrc < opList[iBest].maxySrc)) &&
                 !alt.isOffshore) ) {
                 iBest = i;
                 bestAccuracy = alt.accuracy;
