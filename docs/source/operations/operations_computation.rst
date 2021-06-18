@@ -59,9 +59,9 @@ From a code point of view, the entry point of the algorithm is the C++
 
 It combines several strategies:
 
-- look up in the PROJ database for available operations
-- consider the pair (source CRS, target CRS) to synthetize operations depending
-  on the nature of the source and target CRS.
+  - look up in the PROJ database for available operations
+  - consider the pair (source CRS, target CRS) to synthetize operations depending
+    on the nature of the source and target CRS.
 
 Geographic CRS to Geographic CRS, with known identifiers
 --------------------------------------------------------
@@ -155,6 +155,18 @@ performed in the order they are listed below:
     have the same length, consider as more relevant the one whose name comes last in
     lexicographic order (e.g. "FOO to BAR (3)" will have higher precedence than
     "FOO to BAR (2)")
+
+.. note::
+
+    :c:func:`proj_trans`, on the results returned by :c:func:`proj_create_crs_to_crs`,
+    will not necessarily use the operation that
+    is listed in first position due to the above algorithm. :c:func:`proj_trans`
+    has more context, since it has the coordinate to transform, so it can compare
+    this coordinate to the area of use of operations. Typically, the above criteria
+    will favor an operation that has a larger area of use over another one with a
+    smaller area, due to it being more generally applicable. But once coordinates are known,
+    :c:func:`proj_trans` can select an operation with a smaller
+    area of use that applies to the coordinate to transform.
 
 Geodetic/geographic CRS to Geodetic/geographic CRS, without known identifiers
 -----------------------------------------------------------------------------
