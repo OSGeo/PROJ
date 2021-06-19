@@ -2181,7 +2181,7 @@ TEST(operation, projCRS_to_projCRS_through_geog3D) {
               "+step +proj=cart +ellps=WGS84 "
               "+step +proj=helmert +x=-0.16959 +y=0.35312 +z=0.51846 "
               "+rx=-0.03385 +ry=0.16325 +rz=-0.03446 +s=0.03693 "
-              "+convention=position_vector "
+              "+convention=coordinate_frame "
               "+step +inv +proj=cart +ellps=GRS80 "
               "+step +proj=pop +v_3 "
               "+step +proj=tmerc +lat_0=0 +lon_0=-84 +k=0.9999 +x_0=500000 "
