@@ -206,7 +206,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','6175','ETRS89 / UTM zone 35N + NN54 he
 INSERT INTO "usage" VALUES('EPSG','4495','compound_crs','EPSG','6175','EPSG','4069','EPSG','1153');
 INSERT INTO "compound_crs" VALUES('EPSG','6176','ETRS89 / UTM zone 36N + NN54 height',NULL,'EPSG','25836','EPSG','5776',0);
 INSERT INTO "usage" VALUES('EPSG','4496','compound_crs','EPSG','6176','EPSG','3676','EPSG','1153');
-INSERT INTO "compound_crs" VALUES('EPSG','6190','Belge 1972 / Belgian Lambert 72 + Ostend height',NULL,'EPSG','31370','EPSG','5710',0);
+INSERT INTO "compound_crs" VALUES('EPSG','6190','BD72 / Belgian Lambert 72 + Ostend height',NULL,'EPSG','31370','EPSG','5710',0);
 INSERT INTO "usage" VALUES('EPSG','4507','compound_crs','EPSG','6190','EPSG','1347','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','6349','NAD83(2011) + NAVD88 height',NULL,'EPSG','6318','EPSG','5703',0);
 INSERT INTO "usage" VALUES('EPSG','4583','compound_crs','EPSG','6349','EPSG','3664','EPSG','1142');

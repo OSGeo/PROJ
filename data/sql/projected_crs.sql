@@ -7733,7 +7733,7 @@ INSERT INTO "projected_crs" VALUES('EPSG','21482','Beijing 1954 / Gauss-Kruger 2
 INSERT INTO "usage" VALUES('EPSG','6320','projected_crs','EPSG','21482','EPSG','1596','EPSG','1209');
 INSERT INTO "projected_crs" VALUES('EPSG','21483','Beijing 1954 / Gauss-Kruger 23N',NULL,'EPSG','4530','EPSG','4214','EPSG','16323',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','6321','projected_crs','EPSG','21483','EPSG','1597','EPSG','1209');
-INSERT INTO "projected_crs" VALUES('EPSG','21500','Belge 1950 (Brussels) / Belge Lambert 50',NULL,'EPSG','4499','EPSG','4809','EPSG','19901',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','21500','BD50 (Brussels) / Belge Lambert 50',NULL,'EPSG','4499','EPSG','4809','EPSG','19901',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6322','projected_crs','EPSG','21500','EPSG','1347','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','21780','Bern 1898 (Bern) / LV03C',NULL,'EPSG','4498','EPSG','4801','EPSG','19923',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6323','projected_crs','EPSG','21780','EPSG','1286','EPSG','1142');
@@ -9221,9 +9221,9 @@ INSERT INTO "projected_crs" VALUES('EPSG','31296','MGI / M34',NULL,'EPSG','4499'
 INSERT INTO "usage" VALUES('EPSG','7063','projected_crs','EPSG','31296','EPSG','1708','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','31297','MGI / Austria Lambert',NULL,'EPSG','4499','EPSG','4312','EPSG','19947',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','7064','projected_crs','EPSG','31297','EPSG','1037','EPSG','1210');
-INSERT INTO "projected_crs" VALUES('EPSG','31300','Belge 1972 / Belge Lambert 72',NULL,'EPSG','4499','EPSG','4313','EPSG','19902',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','31300','BD72 / Belge Lambert 72',NULL,'EPSG','4499','EPSG','4313','EPSG','19902',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','7065','projected_crs','EPSG','31300','EPSG','1347','EPSG','1142');
-INSERT INTO "projected_crs" VALUES('EPSG','31370','Belge 1972 / Belgian Lambert 72',NULL,'EPSG','4499','EPSG','4313','EPSG','19961',NULL,0);
+INSERT INTO "projected_crs" VALUES('EPSG','31370','BD72 / Belgian Lambert 72',NULL,'EPSG','4499','EPSG','4313','EPSG','19961',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','7066','projected_crs','EPSG','31370','EPSG','1347','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','31461','DHDN / 3-degree Gauss zone 1',NULL,'EPSG','4499','EPSG','4314','EPSG','16261',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','7067','projected_crs','EPSG','31461','EPSG','1628','EPSG','1142');

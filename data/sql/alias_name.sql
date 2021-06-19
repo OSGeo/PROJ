@@ -56,7 +56,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6172','POSGAR','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6202','AGD66','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6203','AGD84','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6204','Ain el Abd','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6215','Belge 1950','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6215','BD50','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6230','ED50','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6231','ED87','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6237','HD72','EPSG');
@@ -78,7 +78,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6297','Tananarive','EPS
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6303','TC(1948)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6308','RT38','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6312','MGI','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6313','Belge 1972','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6313','BD72','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6314','DHDN','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6318','NGN','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6319','KUDAMS','EPSG');
@@ -627,6 +627,9 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6277','OSGB 1936','EPSG
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1051','Genoa','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1308','EOS21-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6282','Pointe Noire','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6215','Belge 1950','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6313','Belge 1972','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6809','BD50 (Brussels)','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -729,11 +732,11 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3564','Old Hawaiian / SP
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3565','Old Hawaiian / SP zone 5','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3991','Puerto Rico SPCS 27','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4134','PDO Survey Datum 1993','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4215','BD 50','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4215','Belge 1950','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4268','NAD Michigan','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4313','BD 72','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4313','Belge 1972','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4609','CGQ77','EPSG');
-INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4809','BD 50 (Brussels)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4809','Belge 1950 (Brussels)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5701','Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5702','National Geodetic Vertical Datum of 1929 height (ftUS)','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5703','North American Vertical Datum of 1988 height (m)','EPSG');
@@ -1079,7 +1082,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31268','MGI / Gauss zone
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31291','MGI / Austria West','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31292','MGI / Austria Central','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31293','MGI / Austria East','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31370','BD 72 / Lambert 72','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31370','BD72 / Lambert 72','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31461','DHDN / Gauss zone 1','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31462','DHDN / Gauss zone 2','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31463','DHDN / Gauss zone 3','EPSG');
@@ -2753,7 +2756,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3816','NAD83(NSRS2007) /
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9378','IGb14 - XYZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3812','ETRS89 / LB08','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','3447','ETRS89 / LB05','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31370','BD 72 / LB72','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31370','BD72 / LB72','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4236','Hu Tzu Shan','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4179','Pulkovo 1942(56)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','4178','Uniform Astro-Geodetic Network (UAGN) 1983','EPSG');
@@ -7338,3 +7341,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21032','GSK-2011 / 6-deg
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21004','GSK-2011 / 6-degree Gauss-Kruger CM 21E','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21009','GSK-2011 / 6-degree Gauss-Kruger CM 51E','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','20918','GSK-2011 / 6-degree Gauss-Kruger zone 18','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21500','Belge 1950 (Brussels) / Belge Lambert 50','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31300','Belge 1972 / Belge Lambert 72','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31370','Belge 1972 / Belgian Lambert 72','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6190','Belge 1972 / Belgian Lambert 72 + Ostend height','EPSG');

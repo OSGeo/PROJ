@@ -312,7 +312,7 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','4213','Beduaram',NULL,'geographic 2D',
 INSERT INTO "usage" VALUES('EPSG','3095','geodetic_crs','EPSG','4213','EPSG','2771','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4214','Beijing 1954',NULL,'geographic 2D','EPSG','6422','EPSG','6214',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3096','geodetic_crs','EPSG','4214','EPSG','1067','EPSG','1027');
-INSERT INTO "geodetic_crs" VALUES('EPSG','4215','Belge 1950',NULL,'geographic 2D','EPSG','6422','EPSG','6215',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','4215','BD50',NULL,'geographic 2D','EPSG','6422','EPSG','6215',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3097','geodetic_crs','EPSG','4215','EPSG','1347','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4216','Bermuda 1957',NULL,'geographic 2D','EPSG','6422','EPSG','6216',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3098','geodetic_crs','EPSG','4216','EPSG','3221','EPSG','1027');
@@ -502,7 +502,7 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','4311','Zanderij',NULL,'geographic 2D',
 INSERT INTO "usage" VALUES('EPSG','3191','geodetic_crs','EPSG','4311','EPSG','1222','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4312','MGI',NULL,'geographic 2D','EPSG','6422','EPSG','6312',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3192','geodetic_crs','EPSG','4312','EPSG','1037','EPSG','1027');
-INSERT INTO "geodetic_crs" VALUES('EPSG','4313','Belge 1972',NULL,'geographic 2D','EPSG','6422','EPSG','6313',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','4313','BD72',NULL,'geographic 2D','EPSG','6422','EPSG','6313',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3193','geodetic_crs','EPSG','4313','EPSG','1347','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4314','DHDN',NULL,'geographic 2D','EPSG','6422','EPSG','6314',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3194','geodetic_crs','EPSG','4314','EPSG','2326','EPSG','1027');
@@ -1014,7 +1014,7 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','4807','NTF (Paris)',NULL,'geographic 2
 INSERT INTO "usage" VALUES('EPSG','3637','geodetic_crs','EPSG','4807','EPSG','3694','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4808','Padang (Jakarta)',NULL,'geographic 2D','EPSG','6422','EPSG','6808',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','3638','geodetic_crs','EPSG','4808','EPSG','1355','EPSG','1027');
-INSERT INTO "geodetic_crs" VALUES('EPSG','4809','Belge 1950 (Brussels)',NULL,'geographic 2D','EPSG','6422','EPSG','6809',NULL,0);
+INSERT INTO "geodetic_crs" VALUES('EPSG','4809','BD50 (Brussels)',NULL,'geographic 2D','EPSG','6422','EPSG','6809',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3639','geodetic_crs','EPSG','4809','EPSG','1347','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4810','Tananarive (Paris)',NULL,'geographic 2D','EPSG','6403','EPSG','6810',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3640','geodetic_crs','EPSG','4810','EPSG','3273','EPSG','1027');
