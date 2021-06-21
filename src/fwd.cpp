@@ -182,7 +182,7 @@ PJ_XY pj_fwd(PJ_LP lp, PJ *P) {
 
     last_errno = proj_errno_reset(P);
 
-    if (!P->skip_fwd_prepare && 0 != strcmp(P->short_name, "s2"))
+    if (!P->skip_fwd_prepare)
         coo = fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0] || HUGE_VAL==coo.v[1])
         return proj_coord_error ().xy;
@@ -201,7 +201,7 @@ PJ_XY pj_fwd(PJ_LP lp, PJ *P) {
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xy;
 
-    if (!P->skip_fwd_finalize && 0 != strcmp(P->short_name, "s2"))
+    if (!P->skip_fwd_finalize)
         coo = fwd_finalize (P, coo);
 
     return error_or_coord(P, coo, last_errno).xy;
@@ -216,7 +216,7 @@ PJ_XYZ pj_fwd3d(PJ_LPZ lpz, PJ *P) {
 
     last_errno = proj_errno_reset(P);
 
-    if (!P->skip_fwd_prepare && 0 != strcmp(P->short_name, "s2"))
+    if (!P->skip_fwd_prepare)
         coo = fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xyz;
@@ -235,7 +235,7 @@ PJ_XYZ pj_fwd3d(PJ_LPZ lpz, PJ *P) {
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xyz;
 
-    if (!P->skip_fwd_finalize && 0 != strcmp(P->short_name, "s2"))
+    if (!P->skip_fwd_finalize)
         coo = fwd_finalize (P, coo);
 
     return error_or_coord(P, coo, last_errno).xyz;
@@ -246,7 +246,7 @@ PJ_XYZ pj_fwd3d(PJ_LPZ lpz, PJ *P) {
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
     int last_errno = proj_errno_reset(P);
 
-    if (!P->skip_fwd_prepare && 0 != strcmp(P->short_name, "s2"))
+    if (!P->skip_fwd_prepare)
         coo = fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
@@ -265,7 +265,7 @@ PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
-    if (!P->skip_fwd_finalize && 0 != strcmp(P->short_name, "s2"))
+    if (!P->skip_fwd_finalize)
         coo = fwd_finalize (P, coo);
 
     return error_or_coord(P, coo, last_errno);

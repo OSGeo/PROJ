@@ -1,8 +1,8 @@
-    /******************************************************************************
-     * Project:  PROJ.4
-     * Purpose:  Revised, experimental API for PROJ.4, intended as the foundation
-     *           for added geodetic functionality.
-     *
+/******************************************************************************
+ * Project:  PROJ.4
+ * Purpose:  Revised, experimental API for PROJ.4, intended as the foundation
+ *           for added geodetic functionality.
+ *
  *           The original proj API (defined previously in projects.h) has grown
  *           organically over the years, but it has also grown somewhat messy.
  *

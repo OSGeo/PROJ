@@ -1313,12 +1313,6 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
         const util::PropertyMap &properties, const common::Angle &centerLat,
         const common::Angle &centerLong, const common::Length &falseEasting,
         const common::Length &falseNorthing);
-    
-    PROJ_DLL static ConversionNNPtr createS2(
-        const util::PropertyMap &properties, const common::Angle &centerLat,
-        const common::Angle &centerLong, const common::Length &falseEasting,
-        const common::Length &falseNorthing);
-
 
     PROJ_DLL static ConversionNNPtr createSphericalCrossTrackHeight(
         const util::PropertyMap &properties, const common::Angle &pegPointLat,

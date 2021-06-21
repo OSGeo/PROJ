@@ -172,7 +172,6 @@ enum pj_io_units {
 };
 enum pj_io_units pj_left (PJ *P);
 enum pj_io_units pj_right (PJ *P);
-enum S2ProjectionType {Linear, Quadratic, Tangent, NoUVtoST};
 
 PJ_COORD PROJ_DLL proj_coord_error (void);
 
@@ -560,13 +559,6 @@ struct PJconsts {
     double  long_wrap_center = 0.0;     /* 0.0 for -180 to 180, actually in radians*/
     int     is_long_wrap_set = 0;
     char    axis[4] = {0,0,0,0};        /* Axis order, pj_transform/pj_adjust_axis */
-
-    /*************************************************************************************
-
-                               S 2   P A R A M E T E R S
-
-    **************************************************************************************/
-    S2ProjectionType UVtoST = Quadratic;
 
     /*************************************************************************************
      ISO-19111 interface

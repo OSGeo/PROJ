@@ -41,8 +41,6 @@
 #include "filemanager.hpp"
 #include <math.h>
 
-std::map<std::string, S2ProjectionType> stringToS2ProjectionType { {"linear", Linear}, {"quadratic", Quadratic}, {"tangent", Tangent}, {"none", NoUVtoST} };
-
 /**************************************************************************************/
 static paralist *string_to_paralist (PJ_CONTEXT *ctx, char *definition) {
 /***************************************************************************************
@@ -643,17 +641,6 @@ pj_init_ctx_with_allow_init_epsg(PJ_CONTEXT *ctx, int argc, char **argv, int all
     {
         proj_log_error(PIN, _("Invalid value for lat_0: |lat_0| should be <= 90°"));
         return pj_default_destructor (PIN, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
-    }
-
-    /* S2 projection parameter */
-    PROJVALUE maybeUVtoST = pj_param(ctx, start, "sUVtoST");
-    if (nullptr != maybeUVtoST.s) {
-        try {
-            PIN->UVtoST = stringToS2ProjectionType.at(maybeUVtoST.s);
-        } catch (std::out_of_range) {
-            proj_log_error(PIN, _("Invalid value for s2 parameter: should be linear, quadratic, tangent, or none."));
-            return pj_default_destructor (PIN, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
-	}
     }
 
     /* False easting and northing */

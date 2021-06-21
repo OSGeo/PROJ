@@ -1,4 +1,30 @@
-/*
+/******************************************************************************
+ * Project:  PROJ
+ * Purpose:  Implementing the S2 family of projections in PROJ
+ * Author:   Marcus Elia, <marcus at geopi.pe>
+ *
+ ******************************************************************************
+ * Copyright (c) 2021, Marcus Elia, <marcus at geopi.pe>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ *****************************************************************************
+ *
  * This implements the S2 projection.  This code is similar
  * to the QSC projection.
  *
@@ -19,7 +45,7 @@
  * The S2 projection functions are adapted from the above link and the S2
  * Math util functions are adapted from
  * https://github.com/google/s2geometry/blob/0c4c460bdfe696da303641771f9def900b3e440f/src/s2/util/math/vector.h
- */
+ ****************************************************************************/
 
 #define PJ_LIB__
 
@@ -41,13 +67,16 @@ enum Face {
 };
 } // anonymous namespace
 
+enum S2ProjectionType {Linear, Quadratic, Tangent, NoUVtoST};
+std::map<std::string, S2ProjectionType> stringToS2ProjectionType { {"linear", Linear}, {"quadratic", Quadratic}, {"tangent", Tangent}, {"none", NoUVtoST} };
+
 namespace { // anonymous namespace
 struct pj_opaque {
-        enum Face face;
-        double a_squared;
-        double b;
-        double one_minus_f;
-        double one_minus_f_squared;
+    enum Face face;
+    double a_squared;
+    double one_minus_f;
+    double one_minus_f_squared;
+    S2ProjectionType UVtoST;
 };
 } // anonymous namespace
 PROJ_HEAD(s2, "S2") "\n\tAzi, Sph";
@@ -267,8 +296,8 @@ static PJ_XY s2_forward (PJ_LP lp, PJ *P) {
     PJ_XY uvCoords;
 
     ValidFaceXYZtoUV(Q->face, spherePoint, &uvCoords.x, &uvCoords.y);
-    double s = UVtoST(uvCoords.x, (S2ProjectionType)P->UVtoST);
-    double t = UVtoST(uvCoords.y, (S2ProjectionType)P->UVtoST);
+    double s = UVtoST(uvCoords.x, Q->UVtoST);
+    double t = UVtoST(uvCoords.y, Q->UVtoST);
     return {s, t};
 }
 
@@ -277,8 +306,8 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
 
     // Do the S2 projections to get from s,t to u,v to x,y,z
-    double u = STtoUV(xy.x, (S2ProjectionType)P->UVtoST);
-    double v = STtoUV(xy.y, (S2ProjectionType)P->UVtoST);
+    double u = STtoUV(xy.x, Q->UVtoST);
+    double v = STtoUV(xy.y, Q->UVtoST);
 
     PJ_XYZ sphereCoords;
     UVtoSphereXYZ(Q->face, u, v, &sphereCoords);
@@ -297,7 +326,7 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
         double tanphi, xa;
         invert_sign = (lp.phi < 0.0 ? 1 : 0);
         tanphi = tan(lp.phi);
-        xa = Q->b / sqrt(tanphi * tanphi + Q->one_minus_f_squared);
+        xa = P->b / sqrt(tanphi * tanphi + Q->one_minus_f_squared);
         lp.phi = atan(sqrt(P->a * P->a - xa * xa) / (Q->one_minus_f * xa));
         if (invert_sign) {
             lp.phi = -lp.phi;
@@ -312,6 +341,23 @@ PJ *PROJECTION(s2) {
     if (nullptr==Q)
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
+
+    /* Determine which UVtoST function is to be used */
+    PROJVALUE maybeUVtoST = pj_param(P->ctx, P->params, "sUVtoST");
+    if (nullptr != maybeUVtoST.s) {
+        try {
+            Q->UVtoST = stringToS2ProjectionType.at(maybeUVtoST.s);
+        } catch (std::out_of_range) {
+            proj_log_error(P, _("Invalid value for s2 parameter: should be linear, quadratic, tangent, or none."));
+            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+	}
+    } else {
+	    Q->UVtoST = Quadratic;
+    }
+
+    P->left = PJ_IO_UNITS_RADIANS;
+    P->right = PJ_IO_UNITS_PROJECTED;
+    P->from_greenwich = -P->lam0;
 
     P->inv = s2_inverse;
     P->fwd = s2_forward;
@@ -332,8 +378,7 @@ PJ *PROJECTION(s2) {
      * described in [LK12]. */
     if (P->es != 0.0) {
         Q->a_squared = P->a * P->a;
-        Q->b = P->a * sqrt(1.0 - P->es);
-        Q->one_minus_f = 1.0 - (P->a - Q->b) / P->a;
+        Q->one_minus_f = 1.0 - (P->a - P->b) / P->a;
         Q->one_minus_f_squared = Q->one_minus_f * Q->one_minus_f;
     }
 
