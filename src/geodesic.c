@@ -56,7 +56,7 @@ static unsigned digits, maxit1, maxit2;
 static real epsilon, realmin, pi, degree, NaN,
   tiny, tol0, tol1, tol2, tolb, xthresh;
 
-static void Init() {
+static void Init(void) {
   if (!init) {
     digits = DBL_MANT_DIG;
     epsilon = DBL_EPSILON;
@@ -210,6 +210,7 @@ static real atan2dx(real y, real x) {
   case 1: ang = (y >= 0 ? 180 : -180) - ang; break;
   case 2: ang =  90 - ang; break;
   case 3: ang = -90 + ang; break;
+  default: break;
   }
   return ang;
 }
