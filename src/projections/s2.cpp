@@ -79,7 +79,7 @@ struct pj_opaque {
     S2ProjectionType UVtoST;
 };
 } // anonymous namespace
-PROJ_HEAD(s2, "S2") "\n\tAzi, Sph";
+PROJ_HEAD(s2, "S2") "\n\tMisc, Sph&Ell";
 
 #define EPS10 1.e-10
 
@@ -99,11 +99,11 @@ enum Area {
 //                  S2 Math Util
 //
 // =================================================
-PJ_XYZ Abs(const PJ_XYZ& p) {
+static PJ_XYZ Abs(const PJ_XYZ& p) {
     return {abs(p.x), abs(p.y), abs(p.z)};
 }
 // return the index of the largest component (fabs)
-int LargestAbsComponent(const PJ_XYZ& p) {
+static int LargestAbsComponent(const PJ_XYZ& p) {
     PJ_XYZ temp = Abs(p);
     return temp.x > temp.y ?
              temp.x > temp.z ? 0 : 2 :
@@ -115,7 +115,14 @@ int LargestAbsComponent(const PJ_XYZ& p) {
 //              S2 Projection Functions
 //
 // =================================================
-double STtoUV(double s, S2ProjectionType s2_projection) {
+
+// Unfortunately, tan(M_PI_4) is slightly less than 1.0.  This isn't due to
+// a flaw in the implementation of tan(), it's because the derivative of
+// tan(x) at x=pi/4 is 2, and it happens that the two adjacent floating
+// point numbers on either side of the infinite-precision value of pi/4 have
+// tangents that are slightly below and slightly above 1.0 when rounded to
+// the nearest double-precision result.
+static double STtoUV(double s, S2ProjectionType s2_projection) {
     switch(s2_projection) {
         case Linear:
             return 2 * s - 1;
@@ -126,14 +133,14 @@ double STtoUV(double s, S2ProjectionType s2_projection) {
             break;
         case Tangent:
             s = std::tan(M_PI_2 * s - M_PI_4);
-            return s + (1.0 / (long{1} << 53)) * s;
+            return s + (1.0 / static_cast<double>(static_cast<std::int64_t>(1) << 53)) * s;
             break;
         default:
             return s;
     }
 }
 
-double UVtoST(double u, S2ProjectionType s2_projection) {
+static double UVtoST(double u, S2ProjectionType s2_projection) {
     switch(s2_projection) {
         case Linear:
             return 0.5 * (u + 1);
@@ -327,7 +334,7 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
         invert_sign = (lp.phi < 0.0 ? 1 : 0);
         tanphi = tan(lp.phi);
         xa = P->b / sqrt(tanphi * tanphi + Q->one_minus_f_squared);
-        lp.phi = atan(sqrt(P->a * P->a - xa * xa) / (Q->one_minus_f * xa));
+        lp.phi = atan(sqrt(Q->a_squared - xa * xa) / (Q->one_minus_f * xa));
         if (invert_sign) {
             lp.phi = -lp.phi;
         }
@@ -347,7 +354,7 @@ PJ *PROJECTION(s2) {
     if (nullptr != maybeUVtoST.s) {
         try {
             Q->UVtoST = stringToS2ProjectionType.at(maybeUVtoST.s);
-        } catch (std::out_of_range) {
+        } catch (const std::out_of_range&) {
             proj_log_error(P, _("Invalid value for s2 parameter: should be linear, quadratic, tangent, or none."));
             return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
 	}

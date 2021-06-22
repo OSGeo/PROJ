@@ -126,6 +126,7 @@ Projections map the spherical 3D space to a flat 2D space.
    robin
    rouss
    rpoly
+   s2
    sch
    sinu
    somerc

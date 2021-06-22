@@ -5,13 +5,13 @@ S2
 ********************************************************************************
 
 +---------------------+----------------------------------------------------------+
-| **Classification**  | Azimuthal                                                |
+| **Classification**  | Miscellaneous                                            |
 +---------------------+----------------------------------------------------------+
 | **Available forms** | Forward and inverse, ellipsoidal                         |
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | s2                                                      |
+| **Alias**           | s2                                                       |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
@@ -36,7 +36,9 @@ This step is followed by a non-linear transformation to normalize the area of re
 different choices available for this transformation, meaning that S2 is a family of projections. The final output is in
 s,t-coordinates, which are in [0,1] x [0,1].
 See the comments in `S2 Code<https://github.com/google/s2geometry/blob/0c4c460bdfe696da303641771f9def900b3e440f/src/s2/s2coords.h#L226>`_
-for an explanation of the tradeoff between speed and area-preservation. See S2's `Earthcube page<https://s2geometry.io/resources/earthcube>`_
+for an explanation of the tradeoff between speed and area-preservation. Note that the projection is azimuthal when "none" or
+"linear" is selected for the area-normalization, but it is not azimuthal when "quadratic" or "tangent" is chosen. See 
+S2's `Earthcube page<https://s2geometry.io/resources/earthcube>`_
 to visualize the unfolded cube and the orientation of each face.
 
 In this implementation, the cube side is selected by choosing one of the following six projection centers:
