@@ -1,3 +1,97 @@
+8.1.0 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ + Database
+
+   o Update to EPSG v10.027 (#2751)
+
+   o Decrease DB size by using WITHOUT ROWID tables (#2730) (#2647)
+
+   o Add a ANALYZE step during proj.db creation allowing for
+     faster lookups (#2729)
+
+   o Added a PROJ.VERSION metadata entry (#2646)
+
+   o Added NGO48 (EPSG:4273) to ETRS89 (EPSG:4258) triangulation-based
+     transformation (#2554)
+
+   o Additions to the norwegian NKG2020 transformation (#2548)
+
+   o ESRI projection database updated to version 12.8 (#2717)
+
+ + API additions
+
+   o Added proj_get_geoid_models_from_database() function that returns a list of
+     geoid models available for a given CRS (#2681)
+
+   o Added proj_get_celestial_body_list_from_database that returns a list
+     of celestial bodies in the PROJ database (#2667)
+
+   o Added proj_get_celestial_body_name() (#2662)
+
+ + Various improvements
+
+   o proj_trans/cs2cs: If two operations have the same accuracy,
+     use the one that is contained within a larger one (#2750)
+
+   o Share SQLite database handle among all contexts (#2738)
+
+   o Add proj/internal/mutex.hpp as compat layer for mingw32 for std::mutex (#2736)
+
+   o projsync: make it filter out files not intended for the current version (#2725)
+
+   o Improvements related to DerivedVerticalCRS using Change Unit and
+     Height/Depth reversal methods (#2696)
+
+   o Update internal nlohmann/json to 3.9.1, and add a CMake option to
+     be able to use external nlohmann/json (#2686)
+
+   o createFromUserInput(): change name of CRS built from URN combined references to match the convention of EPSG projected CRS (#2677)
+
+   o Parse compound id with two authorities, like ESRI:103668+EPSG:5703 (#2669)
+
+   o Added projinfo option --list-crs (supports --area) (#2663)
+
+   o Added support for hyperbolic Cassini-Soldner (#2637)
+
+   o Added capability to get SQL statements to add custom CRS in the database (#2577)
+
+ Bug fixes
+ ---------
+
+ o Fix 'Please include winsock2.h before windows.h' warning with msys (#2692)
+
+ o Minor changes to address lint in geodesic.c (#2752)
+
+ o BoundCRS::identify(): avoid incompatible transformation for
+   WKT1 / TOWGS84 export (#2747)
+
+ o proj_create(): do not open proj.db if string is a PROJ string,
+   even if proj_context_set_autoclose_database() has been set (#2735)
+
+ o Fix export of transformation to PROJ string in a particular situation
+   where CompoundCRS are involved (#2721)
+
+ Thanks to
+ ---------
+
+ Howard Butler
+ Alan D. Snow
+ Roel van den Berg
+ Heidi Vanparys
+ Sveinung Himle
+ 積丹尼 Dan Jacobson
+ Nyall Dawson
+ Javier Jimenez Shaw
+ Charles Karney
+ Mike Taves
+ Kristian Evers
+ Even Rouault
+
+
 8.0.1 Release Notes
 -------------------
 
