@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "GEOD" "1" "Mar 1, 2021" "8.0.0" "PROJ"
+.TH "GEOD" "1" "Jul 1, 2021" "8.1.0" "PROJ"
 .SH NAME
 geod \- Geodesic computations
 .
@@ -80,21 +80,19 @@ Gives a listing of all the ellipsoids that may be selected with the
 .TP
 .B \-lu
 Gives a listing of all the units that may be selected with the \fI+units=\fP
-option.
+option. (Default units are meters.)
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-f <format>
 Where \fIformat\fP is a printf format string to control the output form of the
-geographic coordinate values. The default mode is DMS for geographic
-coordinates and \fB"%.3f"\fP for distance.
+geographic coordinate values. The default mode is DMS.
 .UNINDENT
 .INDENT 0.0
 .TP
 .B \-F <format>
 Where \fIformat\fP is a printf format string to control the output form of the distance
-value (\fB\-F\fP). The default mode is DMS for geographic coordinates and
-\fB"%.3f"\fP for distance.
+value. The default mode is \fB"%.3f"\fP\&.
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -249,7 +247,7 @@ C. F. F. Karney, \fI\%Algorithms for Geodesics\fP, J. Geodesy \fB87\fP(1), 43–
 \fBproj(1)\fP, \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgie(1)\fP, \fBprojinfo(1)\fP, \fBprojsync(1)\fP
 .SH BUGS
 .sp
-A list of know bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
+A list of known bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
 where new bug reports can be submitted to.
 .SH HOME PAGE
 .sp

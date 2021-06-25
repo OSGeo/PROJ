@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJSYNC" "1" "Mar 1, 2021" "8.0.0" "PROJ"
+.TH "PROJSYNC" "1" "Jul 1, 2021" "8.1.0" "PROJ"
 .SH NAME
 projsync \- Downloading tool of resource files
 .
@@ -44,7 +44,8 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [\-\-source\-id ID] [\-\-area\-of\-use NAME]
 [\-\-file NAME]
 [\-\-all] [\-\-exclude\-world\-coverage]
-[\-\-quiet] [\-\-dry\-run] [\-\-list\-files]
+[\-\-quiet | \-\-verbose] [\-\-dry\-run] [\-\-list\-files]
+[\-\-no\-version\-filtering]
 .in -2
 .fi
 .sp
@@ -67,7 +68,7 @@ the resource files. Defaults to the value set in proj\-ini
 .TP
 .B \-\-local\-geojson\-file FILENAME
 Defines the filename for the master GeoJSON files that references resources.
-Defaults to ${endpoint}/files.geojson
+Defaults to \fB${endpoint}/files.geojson\fP
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -143,6 +144,14 @@ Quiet mode
 .UNINDENT
 .INDENT 0.0
 .TP
+.B \-\-verbose
+New in version 8.1.
+
+.sp
+Verbose mode (more than default)
+.UNINDENT
+.INDENT 0.0
+.TP
 .B \-\-dry\-run
 Simulate the behavior of the tool without downloading resource files.
 .UNINDENT
@@ -150,6 +159,18 @@ Simulate the behavior of the tool without downloading resource files.
 .TP
 .B \-\-list\-files
 List file names, with the source_id and area_of_use properties.
+.UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-no\-version\-filtering
+New in version 8.1.
+
+.sp
+By default, projsync only downloads files that are compatible of
+the PROJ_DATA.VERSION metadata of \fBproj.db\fP, taking into account the
+\fBversion_added\fP and \fBversion_removed\fP properties of entries in \fBfiles.geojson\fP\&.
+When specifying this switch, all files referenced in \fBfiles.geojson\fP
+will be candidate (combined with other filters).
 .UNINDENT
 .sp
 At least one of  \fI\%\-\-list\-files\fP,  \fI\%\-\-file\fP,  \fI\%\-\-source\-id\fP,
@@ -191,7 +212,7 @@ projsync \-\-source\-id fr_ign \-\-bbox 2,49,2,49
 \fBcs2cs(1)\fP, \fBcct(1)\fP, \fBgeod(1)\fP, \fBgie(1)\fP, \fBproj(1)\fP, \fBprojinfo(1)\fP
 .SH BUGS
 .sp
-A list of know bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
+A list of known bugs can be found at \fI\%https://github.com/OSGeo/PROJ/issues\fP
 where new bug reports can be submitted to.
 Bugs specific to resource files should be submitted to
 \fI\%https://github.com/OSGeo/PROJ\-data/issues\fP
