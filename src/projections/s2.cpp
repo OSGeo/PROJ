@@ -50,7 +50,7 @@
 #define PJ_LIB__
 
 #include <errno.h>
-#include <math.h>
+#include <cmath>
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -100,7 +100,7 @@ enum Area {
 //
 // =================================================
 static PJ_XYZ Abs(const PJ_XYZ& p) {
-    return {abs(p.x), abs(p.y), abs(p.z)};
+    return {std::fabs(p.x), std::fabs(p.y), std::fabs(p.z)};
 }
 // return the index of the largest component (fabs)
 static int LargestAbsComponent(const PJ_XYZ& p) {

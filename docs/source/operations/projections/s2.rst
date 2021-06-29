@@ -20,6 +20,7 @@ S2
 | **Output type**     | Projected coordinates                                    |
 +---------------------+----------------------------------------------------------+
 
+.. versionadded:: 8.2
 
 The S2 projection, like the Quadrilateralized Spherical Cube (QSC) projection, projects
 a sphere surface onto the six sides of a cube:
