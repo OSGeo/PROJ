@@ -39,6 +39,8 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include <algorithm>
+
 #include <sqlite3.h>
 
 #ifdef _MSC_VER
