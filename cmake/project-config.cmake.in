@@ -15,6 +15,11 @@ set (@PROJECT_VARIANT_NAME@_INCLUDE_DIRS "${_ROOT}/@INCLUDEDIR@")
 set (@PROJECT_VARIANT_NAME@_LIBRARY_DIRS "${_ROOT}/@LIBDIR@")
 set (@PROJECT_VARIANT_NAME@_BINARY_DIRS "${_ROOT}/@BINDIR@")
 
+if ("@NLOHMANN_JSON@" STREQUAL "external")
+  include(CMakeFindDependencyMacro)
+  find_dependency(nlohmann_json REQUIRED)
+endif ()
+
 set (@PROJECT_VARIANT_NAME@_LIBRARIES @PROJECT_VARIANT_NAME@::proj)
 # Read in the exported definition of the library
 include ("${_DIR}/@PROJECT_NAME_LOWER@-targets.cmake")
