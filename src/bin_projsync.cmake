@@ -14,7 +14,7 @@ if(NLOHMANN_JSON STREQUAL "external")
 endif()
 
 install(TARGETS bin_projsync
-  RUNTIME DESTINATION ${BINDIR})
+  DESTINATION ${BINDIR})
 
 if(MSVC AND BUILD_SHARED_LIBS)
   target_compile_definitions(bin_projsync PRIVATE PROJ_MSVC_DLL_IMPORT=1)
