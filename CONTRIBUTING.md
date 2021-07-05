@@ -1,11 +1,11 @@
-# How to contribute to PROJ.4
+# How to contribute to PROJ
 
-PROJ.4 has a wide and varied user base. Some are highly skilled geodesists with a deep
+PROJ has a wide and varied user base. Some are highly skilled geodesists with a deep
 knowledge of map projections and reference systems, some are GIS software developers
 and others are GIS users. All users, regardless of the profession or skill level,
-has the ability to contribute to PROJ.4. Here's a few suggestion on how:
+has the ability to contribute to PROJ. Here's a few suggestion on how:
 
-* Help PROJ.4-users that is less experienced than yourself.
+* Help PROJ-users that is less experienced than yourself.
 * Write a bug report
 * Request a new feature
 * Write documentation for your favorite map projection
@@ -13,16 +13,16 @@ has the ability to contribute to PROJ.4. Here's a few suggestion on how:
 * Implement a new feature
 
 In the following sections you can find some guidelines on how to contribute.
-As PROJ.4 is managed on GitHub most contributions require that you have a GitHub
+As PROJ is managed on GitHub most contributions require that you have a GitHub
 account. Familiarity with [issues](https://guides.github.com/features/issues/) and
 the [GitHub Flow](https://guides.github.com/introduction/flow/) is an advantage.
 
-## Help a fellow PROJ.4 user
-The main forum for support for PROJ.4 is the mailing list. You can subscribe to
+## Help a fellow PROJ user
+The main forum for support for PROJ is the mailing list. You can subscribe to
 the mailing list [here](http://lists.osgeo.org/mailman/listinfo/proj) and read
 the archive [here](http://lists.osgeo.org/pipermail/proj/).
 
-If you have questions about the usage of PROJ.4 the mailing list is also the place to go.
+If you have questions about the usage of PROJ the mailing list is also the place to go.
 Please *do not* use the GitHub issue tracker as a support forum. Your question is much
 more likely to be answered on the mailing list, as many more people follow that than
 the issue tracker.
@@ -30,7 +30,7 @@ the issue tracker.
 ## Adding bug reports
 
 Bug reports are handled in the [issue tracker](https://github.com/OSGeo/PROJ/issues)
-on PROJ.4's home on GitHub. Writing a good bug report is not easy. But fixing a poorly
+on PROJ's home on GitHub. Writing a good bug report is not easy. But fixing a poorly
 documented bug is not easy either, so please put in the effort it takes to create a
 thorough bug report.
 
@@ -38,7 +38,7 @@ A good bug report includes at least:
 
 * A title that quickly explains the problem
 * A description of the problem and how it can be reproduced
-* Version of PROJ.4 being used
+* Version of PROJ being used
 * Version numbers of any other relevant software being used, e.g. operating system
 * A description of what already has been done to solve the problem
 
@@ -47,15 +47,15 @@ will find interest in solving the problem. You will probably get follow-up quest
 after submitting a bug report. Please answer them in a timely manner if you have an
 interest in getting the issue solved.
 
-Finally, please only submit bug reports that are actually related to PROJ.4. If the
-issue materializes in software that uses PROJ.4 it is likely a problem with that
-particular software. Make sure that it actually is a PROJ.4 problem before you submit
-an issue. If you can reproduce the problem only by using tools from PROJ.4 it is
-definitely a problem with PROJ.4.
+Finally, please only submit bug reports that are actually related to PROJ. If the
+issue materializes in software that uses PROJ it is likely a problem with that
+particular software. Make sure that it actually is a PROJ problem before you submit
+an issue. If you can reproduce the problem only by using tools from PROJ it is
+definitely a problem with PROJ.
 
 ## Feature requests
 
-Got an idea for a new feature in PROJ.4? Submit a thorough description of the new
+Got an idea for a new feature in PROJ? Submit a thorough description of the new
 feature in the [issue tracker](https://github.com/OSGeo/PROJ/issues). Please
 include any technical documents that can help the developer make the new feature a
 reality. An example of this could be a publicly available academic paper that
@@ -67,13 +67,13 @@ Note that not all feature requests are accepted.
 
 ## Write documentation
 
-PROJ.4 is in dire need of better documentation. Any contributions of documentation
-are greatly appreciated. The PROJ.4 documentation is available on [proj.org](https://proj.org).
+PROJ is in dire need of better documentation. Any contributions of documentation
+are greatly appreciated. The PROJ documentation is available on [proj.org](https://proj.org).
 The website is generated with [Sphinx](http://www.sphinx-doc.org/en/stable/). Contributions
 to the documentation should be made as [Pull Requests](https://github.com/OSGeo/PROJ/pulls)
 on GitHub.
 
-If you intend to document one of PROJ.4's supported projections please use the
+If you intend to document one of PROJ's supported projections please use the
 [Mercator projection](https://proj.org/operations/projections/merc.html) as a template.
 
 
@@ -83,7 +83,7 @@ See [Code Contributions](https://proj.org/community/code_contributions.html)
 
 #### Legalese
 Committers are the front line gatekeepers to keep the code base clear of improperly contributed code.
-It is important to the PROJ.4 users, developers and the OSGeo foundation to avoid contributing any
+It is important to the PROJ users, developers and the OSGeo foundation to avoid contributing any
 code to the project without it being clearly licensed under the project license.
 
 Generally speaking the key issues are that those providing code to be included in the repository
