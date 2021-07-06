@@ -13,7 +13,7 @@ target_link_libraries(geod PRIVATE ${PROJ_LIBRARIES})
 target_compile_options(geod PRIVATE ${PROJ_CXX_WARN_FLAGS})
 
 install(TARGETS geod
-  RUNTIME DESTINATION ${BINDIR})
+  DESTINATION ${BINDIR})
 
 if(MSVC AND BUILD_SHARED_LIBS)
   target_compile_definitions(geod PRIVATE PROJ_MSVC_DLL_IMPORT=1)
