@@ -3476,7 +3476,7 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
                               vertDst->datum(), vertDst->datumEnsemble(),
                               cs::VerticalCS::createGravityRelatedHeight(
                                   common::UnitOfMeasure::METRE)));
-            const auto properties = util::PropertyMap().set(
+            auto properties = util::PropertyMap().set(
                 common::IdentifiedObject::NAME_KEY,
                 buildOpName("Transformation", vertCRSMetre, geogSrcCRS));
 
@@ -3485,14 +3485,21 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
             std::vector<metadata::PositionalAccuracyNNPtr> accuracies;
             const auto &modelAccuracies =
                 model->coordinateOperationAccuracies();
+            std::vector<CoordinateOperationNNPtr> transformationsForGrid;
+            double accuracy = -1;
+            size_t idx = static_cast<size_t>(-1);
             if (modelAccuracies.empty()) {
                 if (authFactory) {
-                    const auto transformationsForGrid =
+                    transformationsForGrid =
                         io::DatabaseContext::getTransformationsForGridName(
                             authFactory->databaseContext(), projFilename);
-                    double accuracy = -1;
-                    for (const auto &transf : transformationsForGrid) {
-                        accuracy = std::max(accuracy, getAccuracy(transf));
+                    for (size_t i = 0; i < transformationsForGrid.size(); ++i) {
+                        const auto &transf = transformationsForGrid[i];
+                        const double transfAcc = getAccuracy(transf);
+                        if (transfAcc - accuracy > 1e-10) {
+                            accuracy = transfAcc;
+                            idx = i;
+                        }
                     }
                     if (accuracy >= 0) {
                         accuracies.emplace_back(
@@ -3500,6 +3507,31 @@ CoordinateOperationFactory::Private::createOperationsGeogToVertFromGeoid(
                                 toString(accuracy)));
                     }
                 }
+            }
+
+            // Set extent
+            bool dummy = false;
+            // Use in priority the one of the geoid model transformation
+            auto extent = getExtent(model, true, dummy);
+            // Otherwise fallback to the extent of a transformation using
+            // the grid.
+            if (extent == nullptr && authFactory != nullptr) {
+                if (transformationsForGrid.empty()) {
+                    transformationsForGrid =
+                        io::DatabaseContext::getTransformationsForGridName(
+                            authFactory->databaseContext(), projFilename);
+                }
+                if (idx != static_cast<size_t>(-1)) {
+                    const auto &transf = transformationsForGrid[idx];
+                    extent = getExtent(transf, true, dummy);
+                } else if (!transformationsForGrid.empty()) {
+                    const auto &transf = transformationsForGrid.front();
+                    extent = getExtent(transf, true, dummy);
+                }
+            }
+            if (extent) {
+                properties.set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
+                               NN_NO_CHECK(extent));
             }
 
             return Transformation::createGravityRelatedHeightToGeographic3D(
