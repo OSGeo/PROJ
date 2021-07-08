@@ -5082,7 +5082,20 @@ TEST_F(CApi, proj_create_vertical_crs_ex_implied_accuracy) {
     ObjectKeeper keeper_transform(transform);
 
     // This is the accuracy of operations EPSG:5656 / 5657
-    ASSERT_EQ(proj_coordoperation_get_accuracy(m_ctxt, transform), 0.15);
+    const double acc = proj_coordoperation_get_accuracy(m_ctxt, transform);
+    EXPECT_NEAR(acc, 0.15, 1e-10);
+
+    // Check there's an asssociated area of use
+    double west_lon_degree = 0;
+    double south_lat_degree = 0;
+    double east_lon_degree = 0;
+    double north_lat_degree = 0;
+    ASSERT_EQ(proj_get_area_of_use(m_ctxt, transform, &west_lon_degree,
+                                   &south_lat_degree, &east_lon_degree,
+                                   &north_lat_degree, nullptr),
+              true);
+    EXPECT_LE(north_lat_degree, -10);
+    EXPECT_GE(west_lon_degree, 110);
 }
 
 // ---------------------------------------------------------------------------
