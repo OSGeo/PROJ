@@ -330,7 +330,7 @@ static PJ_LP s2_inverse (PJ_XY xy, PJ *P) {
      * in [LK12]. */
     if (P->es != 0.0) {
         int invert_sign;
-        double tanphi, xa;
+        volatile double tanphi, xa;
         invert_sign = (lp.phi < 0.0 ? 1 : 0);
         tanphi = tan(lp.phi);
         xa = P->b / sqrt(tanphi * tanphi + Q->one_minus_f_squared);
