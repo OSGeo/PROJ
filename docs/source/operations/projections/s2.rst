@@ -67,7 +67,7 @@ The specific transformation can be chosen with the UVtoST parameter:
 +-------------------------+-----------------------------+
 |  ``+UVtoST=tangent``    | slowest, best normalization |
 +-------------------------+-----------------------------+
-|    ``+UVtoST=none``     | returns u,v-coordinates      |
+|    ``+UVtoST=none``     | returns u,v-coordinates     |
 +-------------------------+-----------------------------+
 
 Furthermore, this implementation allows the projection to be applied to ellipsoids.

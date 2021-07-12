@@ -48,6 +48,7 @@
  ****************************************************************************/
 
 #define PJ_LIB__
+#define _USE_MATH_DEFINES  // needed for M_1_PI availability with MSVC
 
 #include <errno.h>
 #include <cmath>
