@@ -223,6 +223,9 @@
 #define PROJ_WKT2_NAME_METHOD_QUADRILATERALIZED_SPHERICAL_CUBE  \
     "Quadrilateralized Spherical Cube"
 
+#define PROJ_WKT2_NAME_METHOD_S2 \
+    "S2"
+
 #define PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT  \
     "Spherical Cross-Track Height"
 

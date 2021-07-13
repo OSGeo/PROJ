@@ -181,6 +181,7 @@ libproj_la_SOURCES = \
 	projections/putp6.cpp \
 	projections/qsc.cpp \
 	projections/robin.cpp \
+	projections/s2.cpp \
 	projections/sch.cpp \
 	projections/sts.cpp \
 	projections/urm5.cpp \
