@@ -829,7 +829,7 @@ static const MethodMapping projectionMethodMappings[] = {
 
     {PROJ_WKT2_NAME_METHOD_QUADRILATERALIZED_SPHERICAL_CUBE, 0,
      "Quadrilateralized_Spherical_Cube", "qsc", nullptr, paramsNatOrigin},
-    
+
     {PROJ_WKT2_NAME_METHOD_SPHERICAL_CROSS_TRACK_HEIGHT, 0,
      "Spherical_Cross_Track_Height", "sch", nullptr, paramsSch},
 
