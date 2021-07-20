@@ -2123,6 +2123,47 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, projCRS_to_geogCRS_crs_extent_use_none) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("23031"), // ED50 UTM31
+            authFactory->createCoordinateReferenceSystem("4326"), ctxt);
+        bool found_EPSG_15964 = false;
+        for (const auto &op : list) {
+            if (op->nameStr().find("ED50 to WGS 84 (42)") !=
+                std::string::npos) {
+                found_EPSG_15964 = true;
+            }
+        }
+        // not expected since doesn't intersect EPSG:23031 area of use
+        EXPECT_FALSE(found_EPSG_15964);
+    }
+    {
+        auto ctxt =
+            CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+        // Ignore source and target CRS extent
+        ctxt->setSourceAndTargetCRSExtentUse(
+            CoordinateOperationContext::SourceTargetCRSExtentUse::NONE);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            authFactory->createCoordinateReferenceSystem("23031"), // ED50 UTM31
+            authFactory->createCoordinateReferenceSystem("4326"), ctxt);
+        bool found_EPSG_15964 = false;
+        for (const auto &op : list) {
+            if (op->nameStr().find("ED50 to WGS 84 (42)") !=
+                std::string::npos) {
+                found_EPSG_15964 = true;
+            }
+        }
+        EXPECT_TRUE(found_EPSG_15964);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, projCRS_to_projCRS_north_pole_inverted_axis) {
 
     auto authFactory =
