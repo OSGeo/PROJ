@@ -5346,6 +5346,12 @@ CoordinateOperationFactory::createOperations(
     metadata::ExtentPtr targetCRSExtent;
     auto l_resolvedTargetCRS =
         crs::CRS::getResolvedCRS(l_targetCRS, authFactory, targetCRSExtent);
+    if (context->getSourceAndTargetCRSExtentUse() ==
+        CoordinateOperationContext::SourceTargetCRSExtentUse::NONE) {
+        // Make sure *not* to use CRS extent if requested to ignore it
+        sourceCRSExtent.reset();
+        targetCRSExtent.reset();
+    }
     Private::Context contextPrivate(sourceCRSExtent, targetCRSExtent, context);
 
     if (context->getSourceAndTargetCRSExtentUse() ==
