@@ -904,6 +904,11 @@ Candidate operations found: 1
 Note: using '--spatial-test intersects' would bring more results (2)
 EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore.
 
+Testing projinfo -s EPSG:23031 -t EPSG:4326 --bbox -13.87,34.91,-7.24,41.88 --crs-extent-use none --summary
+Candidate operations found: 1
+Note: using '--spatial-test intersects' would bring more results (9)
+unknown id, Inverse of UTM zone 31N + ED50 to WGS 84 (42), 5 m, Portugal - mainland - offshore.
+
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area EPSG:3237 --summary
 Candidate operations found: 1
 Note: using '--spatial-test intersects' would bring more results (2)
