@@ -411,6 +411,9 @@ texinfo_documents = [
 breathe_projects = {
     "doxygen_api":"../build/xml/",
 }
+breathe_domain_by_extension = {
+    "h" : "c",
+}
 
 import redirects
 redirect_files = redirects.gather_redirects()
