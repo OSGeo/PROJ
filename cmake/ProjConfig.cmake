@@ -15,6 +15,7 @@ check_function_exists(localeconv HAVE_LOCALECONV)
 check_function_exists(strerror HAVE_STRERROR)
 if(NOT WIN32)
     check_library_exists(dl dladdr "" HAVE_LIBDL)
+    check_library_exists(m exp "" HAVE_LIBM)
 endif()
 
 set(PACKAGE "proj")

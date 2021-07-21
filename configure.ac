@@ -181,7 +181,7 @@ esac
 dnl Checks for libraries.
 save_CFLAGS="$CFLAGS"
 CFLAGS=`echo "$CFLAGS" | sed "s/-Werror/ /"`
-AC_CHECK_LIB(m,exp,,,)
+AC_CHECK_LIB(m,exp,,HAVE_LIBM=no,)
 CFLAGS="$save_CFLAGS"
 
 dnl We check for headers
@@ -198,7 +198,7 @@ AC_SEARCH_LIBS([sqrt], [m])
 
 AC_CHECK_FUNC(localeconv, [AC_DEFINE(HAVE_LOCALECONV,1,[Define to 1 if you have localeconv])])
 AC_CHECK_FUNCS([strerror])
-AC_CHECK_LIB(dl,dladdr,,,)
+AC_CHECK_LIB(dl,dladdr,,HAVE_LIBDL=no,)
 
 dnl ---------------------------------------------------------------------------
 dnl Provide a mechanism to disable real mutex support (if lacking win32 or
@@ -321,6 +321,18 @@ AC_SUBST(CURL_LIBS,$CURL_LIBS)
 AC_SUBST(CURL_ENABLED_FLAGS,$CURL_ENABLED_FLAGS)
 AM_CONDITIONAL(HAVE_CURL, [test "x$FOUND_CURL" = "xyes"])
 
+dnl ---------------------------------------------------------------------------
+dnl Check for extra libraries, required for static linking with pkg-config
+dnl ---------------------------------------------------------------------------
+
+EXTRA_LIBS="-lstdc++"
+if test "$HAVE_LIBM" != "no" ; then
+  EXTRA_LIBS="$EXTRA_LIBS -lm"
+fi
+if test "$HAVE_LIBDL" != "no" ; then
+  EXTRA_LIBS="$EXTRA_LIBS -ldl"
+fi
+AC_SUBST(EXTRA_LIBS,$EXTRA_LIBS)
 
 dnl ---------------------------------------------------------------------------
 dnl proj-lib-env-var-tried-last
