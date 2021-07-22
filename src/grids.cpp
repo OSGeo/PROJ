@@ -76,6 +76,13 @@ static void swap_words(void *dataIn, size_t word_size, size_t word_count)
 
 // ---------------------------------------------------------------------------
 
+void ExtentAndRes::computeInvRes() {
+    invResX = 1.0 / resX;
+    invResY = 1.0 / resY;
+}
+
+// ---------------------------------------------------------------------------
+
 bool ExtentAndRes::fullWorldLongitude() const {
     return isGeographic && east - west + resX >= 2 * M_PI - 1e-10;
 }
@@ -126,6 +133,7 @@ static ExtentAndRes globalExtent() {
     extent.north = M_PI / 2;
     extent.resX = M_PI;
     extent.resY = M_PI / 2;
+    extent.computeInvRes();
     return extent;
 }
 
@@ -249,6 +257,7 @@ GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx,
     extent.resY = ystep * DEG_TO_RAD;
     extent.east = (xorigin + xstep * (columns - 1)) * DEG_TO_RAD;
     extent.north = (yorigin + ystep * (rows - 1)) * DEG_TO_RAD;
+    extent.computeInvRes();
 
     return new GTXVerticalShiftGrid(ctx, std::move(fp), name, columns, rows,
                                     extent);
@@ -328,54 +337,30 @@ class BlockCache {
   public:
     void insert(uint32_t ifdIdx, uint32_t blockNumber,
                 const std::vector<unsigned char> &data);
-    std::shared_ptr<std::vector<unsigned char>> get(uint32_t ifdIdx,
-                                                    uint32_t blockNumber);
+    const std::vector<unsigned char> *get(uint32_t ifdIdx,
+                                          uint32_t blockNumber);
 
   private:
-    struct Key {
-        uint32_t ifdIdx;
-        uint32_t blockNumber;
-
-        Key(uint32_t ifdIdxIn, uint32_t blockNumberIn)
-            : ifdIdx(ifdIdxIn), blockNumber(blockNumberIn) {}
-        bool operator==(const Key &other) const {
-            return ifdIdx == other.ifdIdx && blockNumber == other.blockNumber;
-        }
-    };
-
-    struct KeyHasher {
-        std::size_t operator()(const Key &k) const {
-            return k.ifdIdx ^ (k.blockNumber << 16) ^ (k.blockNumber >> 16);
-        }
-    };
+    typedef uint64_t Key;
 
     static constexpr int NUM_BLOCKS_AT_CROSSING_TILES = 4;
     static constexpr int MAX_SAMPLE_COUNT = 3;
-    lru11::Cache<
-        Key, std::shared_ptr<std::vector<unsigned char>>, lru11::NullLock,
-        std::unordered_map<
-            Key,
-            typename std::list<lru11::KeyValuePair<
-                Key, std::shared_ptr<std::vector<unsigned char>>>>::iterator,
-            KeyHasher>>
-        cache_{NUM_BLOCKS_AT_CROSSING_TILES * MAX_SAMPLE_COUNT};
+    lru11::Cache<Key, std::vector<unsigned char>, lru11::NullLock> cache_{
+        NUM_BLOCKS_AT_CROSSING_TILES * MAX_SAMPLE_COUNT};
 };
 
 // ---------------------------------------------------------------------------
 
 void BlockCache::insert(uint32_t ifdIdx, uint32_t blockNumber,
                         const std::vector<unsigned char> &data) {
-    cache_.insert(Key(ifdIdx, blockNumber),
-                  std::make_shared<std::vector<unsigned char>>(data));
+    cache_.insert((static_cast<uint64_t>(ifdIdx) << 32) | blockNumber, data);
 }
 
 // ---------------------------------------------------------------------------
 
-std::shared_ptr<std::vector<unsigned char>>
-BlockCache::get(uint32_t ifdIdx, uint32_t blockNumber) {
-    std::shared_ptr<std::vector<unsigned char>> ret;
-    cache_.tryGet(Key(ifdIdx, blockNumber), ret);
-    return ret;
+const std::vector<unsigned char> *BlockCache::get(uint32_t ifdIdx,
+                                                  uint32_t blockNumber) {
+    return cache_.getPtr((static_cast<uint64_t>(ifdIdx) << 32) | blockNumber);
 }
 
 // ---------------------------------------------------------------------------
@@ -388,7 +373,7 @@ class GTiffGrid : public Grid {
     uint32_t m_ifdIdx;
     TIFFDataType m_dt;
     uint16_t m_samplesPerPixel;
-    uint16_t m_planarConfig;
+    uint16_t m_planarConfig; // set to -1 if m_samplesPerPixel == 1
     bool m_bottomUp;
     toff_t m_dirOffset;
     bool m_tiled;
@@ -397,17 +382,18 @@ class GTiffGrid : public Grid {
     mutable std::vector<unsigned char> m_buffer{};
     unsigned m_blocksPerRow = 0;
     unsigned m_blocksPerCol = 0;
-    std::map<int, double> m_mapOffset{};
-    std::map<int, double> m_mapScale{};
+    unsigned m_blocks = 0;
+    std::vector<double> m_adfOffset{};
+    std::vector<double> m_adfScale{};
     std::map<std::pair<int, std::string>, std::string> m_metadata{};
     bool m_hasNodata = false;
+    bool m_blockIs256Pixel = false;
+    bool m_isSingleBlock = false;
     float m_noData = 0.0f;
     uint32_t m_subfileType = 0;
 
     GTiffGrid(const GTiffGrid &) = delete;
     GTiffGrid &operator=(const GTiffGrid &) = delete;
-
-    void getScaleOffset(double &scale, double &offset, uint16_t sample) const;
 
     template <class T>
     float readValue(const std::vector<unsigned char> &buffer,
@@ -446,7 +432,9 @@ GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
                      uint16_t planarConfig, bool bottomUpIn)
     : Grid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx), m_hTIFF(hTIFF),
       m_cache(cache), m_fp(fp), m_ifdIdx(ifdIdx), m_dt(dtIn),
-      m_samplesPerPixel(samplesPerPixelIn), m_planarConfig(planarConfig),
+      m_samplesPerPixel(samplesPerPixelIn),
+      m_planarConfig(samplesPerPixelIn == 1 ? static_cast<uint16_t>(-1)
+                                            : planarConfig),
       m_bottomUp(bottomUpIn), m_dirOffset(TIFFCurrentDirOffset(hTIFF)),
       m_tiled(TIFFIsTiled(hTIFF) != 0) {
 
@@ -460,10 +448,15 @@ GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
             m_blockHeight = m_height;
     }
 
+    m_blockIs256Pixel = (m_blockWidth == 256) && (m_blockHeight == 256);
+    m_isSingleBlock = (m_blockWidth == static_cast<uint32_t>(m_width)) &&
+                      (m_blockHeight == static_cast<uint32_t>(m_height));
+
     TIFFGetField(m_hTIFF, TIFFTAG_SUBFILETYPE, &m_subfileType);
 
     m_blocksPerRow = (m_width + m_blockWidth - 1) / m_blockWidth;
     m_blocksPerCol = (m_height + m_blockHeight - 1) / m_blockHeight;
+    m_blocks = m_blocksPerRow * m_blocksPerCol;
 
     const char *text = nullptr;
     // Poor-man XML parsing of TIFFTAG_GDAL_METADATA tag. Hopefully good
@@ -515,16 +508,26 @@ GTiffGrid::GTiffGrid(PJ_CONTEXT *ctx, TIFF *hTIFF, BlockCache &cache, File *fp,
                     break;
                 const auto role = tag.substr(rolePos, endQuote - rolePos);
                 if (role == "offset") {
-                    if (sample >= 0) {
+                    if (sample >= 0 &&
+                        static_cast<unsigned>(sample) <= m_samplesPerPixel) {
                         try {
-                            m_mapOffset[sample] = c_locale_stod(value);
+                            if (m_adfOffset.empty()) {
+                                m_adfOffset.resize(m_samplesPerPixel);
+                                m_adfScale.resize(m_samplesPerPixel, 1);
+                            }
+                            m_adfOffset[sample] = c_locale_stod(value);
                         } catch (const std::exception &) {
                         }
                     }
                 } else if (role == "scale") {
-                    if (sample >= 0) {
+                    if (sample >= 0 &&
+                        static_cast<unsigned>(sample) <= m_samplesPerPixel) {
                         try {
-                            m_mapScale[sample] = c_locale_stod(value);
+                            if (m_adfOffset.empty()) {
+                                m_adfOffset.resize(m_samplesPerPixel);
+                                m_adfScale.resize(m_samplesPerPixel, 1);
+                            }
+                            m_adfScale[sample] = c_locale_stod(value);
                         } catch (const std::exception &) {
                         }
                     }
@@ -555,33 +558,16 @@ GTiffGrid::~GTiffGrid() = default;
 
 // ---------------------------------------------------------------------------
 
-void GTiffGrid::getScaleOffset(double &scale, double &offset,
-                               uint16_t sample) const {
-    {
-        auto iter = m_mapScale.find(sample);
-        if (iter != m_mapScale.end())
-            scale = iter->second;
-    }
-
-    {
-        auto iter = m_mapOffset.find(sample);
-        if (iter != m_mapOffset.end())
-            offset = iter->second;
-    }
-}
-
-// ---------------------------------------------------------------------------
-
 template <class T>
 float GTiffGrid::readValue(const std::vector<unsigned char> &buffer,
                            uint32_t offsetInBlock, uint16_t sample) const {
     const auto ptr = reinterpret_cast<const T *>(buffer.data());
     assert(offsetInBlock < buffer.size() / sizeof(T));
     const auto val = ptr[offsetInBlock];
-    if (!m_hasNodata || static_cast<float>(val) != m_noData) {
-        double scale = 1;
-        double offset = 0;
-        getScaleOffset(scale, offset, sample);
+    if ((!m_hasNodata || static_cast<float>(val) != m_noData) &&
+        sample < m_adfScale.size()) {
+        double scale = m_adfScale[sample];
+        double offset = m_adfOffset[sample];
         return static_cast<float>(val * scale + offset);
     } else {
         return static_cast<float>(val);
@@ -595,27 +581,41 @@ bool GTiffGrid::valueAt(uint16_t sample, int x, int yFromBottom,
     assert(x >= 0 && yFromBottom >= 0 && x < m_width && yFromBottom < m_height);
     assert(sample < m_samplesPerPixel);
 
-    const int blockX = x / m_blockWidth;
-
     // All non-TIFF grids have the first rows in the file being the one
     // corresponding to the southern-most row. In GeoTIFF, the convention is
     // *generally* different (when m_bottomUp == false), TIFF being an
     // image-oriented image. If m_bottomUp == true, then we had GeoTIFF hints
     // that the first row of the image is the southern-most.
     const int yTIFF = m_bottomUp ? yFromBottom : m_height - 1 - yFromBottom;
-    const int blockY = yTIFF / m_blockHeight;
 
-    uint32_t blockId = blockY * m_blocksPerRow + blockX;
-    if (m_planarConfig == PLANARCONFIG_SEPARATE) {
-        blockId += sample * m_blocksPerCol * m_blocksPerRow;
+    int blockXOff;
+    int blockYOff;
+    uint32_t blockId;
+
+    if (m_blockIs256Pixel) {
+        const int blockX = x / 256;
+        blockXOff = x % 256;
+        const int blockY = yTIFF / 256;
+        blockYOff = yTIFF % 256;
+        blockId = blockY * m_blocksPerRow + blockX;
+    } else if (m_isSingleBlock) {
+        blockXOff = x;
+        blockYOff = yTIFF;
+        blockId = 0;
+    } else {
+        const int blockX = x / m_blockWidth;
+        blockXOff = x % m_blockWidth;
+        const int blockY = yTIFF / m_blockHeight;
+        blockYOff = yTIFF % m_blockHeight;
+        blockId = blockY * m_blocksPerRow + blockX;
     }
 
-    auto cachedBuffer = m_cache.get(m_ifdIdx, blockId);
-    std::vector<unsigned char> *pBuffer = &m_buffer;
-    if (cachedBuffer != nullptr) {
-        // Safe as we don't access the cache before pBuffer is used
-        pBuffer = cachedBuffer.get();
-    } else {
+    if (m_planarConfig == PLANARCONFIG_SEPARATE) {
+        blockId += sample * m_blocks;
+    }
+
+    const std::vector<unsigned char> *pBuffer = m_cache.get(m_ifdIdx, blockId);
+    if (pBuffer == nullptr) {
         if (TIFFCurrentDirOffset(m_hTIFF) != m_dirOffset &&
             !TIFFSetSubDirectory(m_hTIFF, m_dirOffset)) {
             return false;
@@ -643,6 +643,7 @@ bool GTiffGrid::valueAt(uint16_t sample, int x, int yFromBottom,
             }
         }
 
+        pBuffer = &m_buffer;
         try {
             m_cache.insert(m_ifdIdx, blockId, m_buffer);
         } catch (const std::exception &e) {
@@ -651,8 +652,11 @@ bool GTiffGrid::valueAt(uint16_t sample, int x, int yFromBottom,
         }
     }
 
-    uint32_t offsetInBlock =
-        (x % m_blockWidth) + (yTIFF % m_blockHeight) * m_blockWidth;
+    uint32_t offsetInBlock;
+    if (m_blockIs256Pixel)
+        offsetInBlock = blockXOff + blockYOff * 256U;
+    else
+        offsetInBlock = blockXOff + blockYOff * m_blockWidth;
     if (m_planarConfig == PLANARCONFIG_CONTIG)
         offsetInBlock = offsetInBlock * m_samplesPerPixel + sample;
 
@@ -1053,6 +1057,7 @@ std::unique_ptr<GTiffGrid> GTiffDataset::nextGrid() {
     extent.resY = fabs(vRes) * mulFactor;
     extent.east = (west + hRes * (width - 1)) * mulFactor;
     extent.south = (north - vRes * (height - 1)) * mulFactor;
+    extent.computeInvRes();
 
     if (vRes < 0) {
         std::swap(extent.north, extent.south);
@@ -1451,7 +1456,7 @@ const VerticalShiftGrid *VerticalShiftGrid::gridAt(double lon,
 const VerticalShiftGrid *VerticalShiftGridSet::gridAt(double lon,
                                                       double lat) const {
     for (const auto &grid : m_grids) {
-        if (dynamic_cast<NullVerticalShiftGrid *>(grid.get())) {
+        if (grid->isNullGrid()) {
             return grid.get();
         }
         const auto &extent = grid->extentAndRes();
@@ -1604,6 +1609,8 @@ NTv1Grid *NTv1Grid::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
     extent.north = to_double(header + 40) * DEG_TO_RAD;
     extent.resX = to_double(header + 104) * DEG_TO_RAD;
     extent.resY = to_double(header + 88) * DEG_TO_RAD;
+    extent.computeInvRes();
+
     if (!(fabs(extent.west) <= 4 * M_PI && fabs(extent.east) <= 4 * M_PI &&
           fabs(extent.north) <= M_PI + 1e-5 &&
           fabs(extent.south) <= M_PI + 1e-5 && extent.west < extent.east &&
@@ -1616,9 +1623,9 @@ NTv1Grid *NTv1Grid::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
         return nullptr;
     }
     const int columns = static_cast<int>(
-        fabs((extent.east - extent.west) / extent.resX + 0.5) + 1);
+        fabs((extent.east - extent.west) * extent.invResX + 0.5) + 1);
     const int rows = static_cast<int>(
-        fabs((extent.north - extent.south) / extent.resY + 0.5) + 1);
+        fabs((extent.north - extent.south) * extent.invResY + 0.5) + 1);
 
     return new NTv1Grid(ctx, std::move(fp), filename, columns, rows, extent);
 }
@@ -1948,6 +1955,7 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
             to_double(header + OFFSET_SOUTH_LAT + 16 * 4) * DEG_TO_RAD / 3600.0;
         extent.resX =
             to_double(header + OFFSET_SOUTH_LAT + 16 * 5) * DEG_TO_RAD / 3600.0;
+        extent.computeInvRes();
 
         if (!(fabs(extent.west) <= 4 * M_PI && fabs(extent.east) <= 4 * M_PI &&
               fabs(extent.north) <= M_PI + 1e-5 &&
@@ -1961,9 +1969,9 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
             return nullptr;
         }
         const int columns = static_cast<int>(
-            fabs((extent.east - extent.west) / extent.resX + 0.5) + 1);
+            fabs((extent.east - extent.west) * extent.invResX + 0.5) + 1);
         const int rows = static_cast<int>(
-            fabs((extent.north - extent.south) / extent.resY + 0.5) + 1);
+            fabs((extent.north - extent.south) * extent.invResY + 0.5) + 1);
 
         pj_log(ctx, PJ_LOG_TRACE,
                "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)", gridName.c_str(),
@@ -2429,7 +2437,7 @@ const HorizontalShiftGrid *HorizontalShiftGrid::gridAt(double lon,
 const HorizontalShiftGrid *HorizontalShiftGridSet::gridAt(double lon,
                                                           double lat) const {
     for (const auto &grid : m_grids) {
-        if (dynamic_cast<NullHorizontalShiftGrid *>(grid.get())) {
+        if (grid->isNullGrid()) {
             return grid.get();
         }
         const auto &extent = grid->extentAndRes();
@@ -2760,7 +2768,7 @@ const GenericShiftGrid *GenericShiftGrid::gridAt(double x, double y) const {
 
 const GenericShiftGrid *GenericShiftGridSet::gridAt(double x, double y) const {
     for (const auto &grid : m_grids) {
-        if (dynamic_cast<NullGenericShiftGrid *>(grid.get())) {
+        if (grid->isNullGrid()) {
             return grid.get();
         }
         const auto &extent = grid->extentAndRes();
@@ -3196,7 +3204,7 @@ static double read_vgrid_value(PJ_CONTEXT *ctx, const ListOfVGrids &grids,
     }
 
     /* Interpolation of a location within the grid */
-    double grid_x = (input.lam - extent.west) / extent.resX;
+    double grid_x = (input.lam - extent.west) * extent.invResX;
     if (input.lam < extent.west) {
         if (extent.fullWorldLongitude()) {
             // The first fmod goes to ]-lim, lim[ range
@@ -3205,7 +3213,7 @@ static double read_vgrid_value(PJ_CONTEXT *ctx, const ListOfVGrids &grids,
                               grid->width(),
                           grid->width());
         } else {
-            grid_x = (input.lam + 2 * M_PI - extent.west) / extent.resX;
+            grid_x = (input.lam + 2 * M_PI - extent.west) * extent.invResX;
         }
     } else if (input.lam > extent.east) {
         if (extent.fullWorldLongitude()) {
@@ -3215,10 +3223,10 @@ static double read_vgrid_value(PJ_CONTEXT *ctx, const ListOfVGrids &grids,
                               grid->width(),
                           grid->width());
         } else {
-            grid_x = (input.lam - 2 * M_PI - extent.west) / extent.resX;
+            grid_x = (input.lam - 2 * M_PI - extent.west) * extent.invResX;
         }
     }
-    double grid_y = (input.phi - extent.south) / extent.resY;
+    double grid_y = (input.phi - extent.south) * extent.invResY;
     int grid_ix = static_cast<int>(lround(floor(grid_x)));
     if (!(grid_ix >= 0 && grid_ix < grid->width())) {
         // in the unlikely case we end up here...
@@ -3262,39 +3270,60 @@ static double read_vgrid_value(PJ_CONTEXT *ctx, const ListOfVGrids &grids,
         return HUGE_VAL;
     }
 
-    double total_weight = 0.0;
-    int n_weights = 0;
-    double value = 0.0f;
+    double value = 0.0;
 
-    if (!grid->isNodata(value_a, vmultiplier)) {
-        double weight = (1.0 - grid_x) * (1.0 - grid_y);
-        value += value_a * weight;
-        total_weight += weight;
-        n_weights++;
-    }
-    if (!grid->isNodata(value_b, vmultiplier)) {
-        double weight = (grid_x) * (1.0 - grid_y);
-        value += value_b * weight;
-        total_weight += weight;
-        n_weights++;
-    }
-    if (!grid->isNodata(value_c, vmultiplier)) {
-        double weight = (1.0 - grid_x) * (grid_y);
-        value += value_c * weight;
-        total_weight += weight;
-        n_weights++;
-    }
-    if (!grid->isNodata(value_d, vmultiplier)) {
-        double weight = (grid_x) * (grid_y);
-        value += value_d * weight;
-        total_weight += weight;
-        n_weights++;
-    }
-    if (n_weights == 0) {
+    const double grid_x_y = grid_x * grid_y;
+    const bool a_valid = !grid->isNodata(value_a, vmultiplier);
+    const bool b_valid = !grid->isNodata(value_b, vmultiplier);
+    const bool c_valid = !grid->isNodata(value_c, vmultiplier);
+    const bool d_valid = !grid->isNodata(value_d, vmultiplier);
+    const int countValid =
+        static_cast<int>(a_valid) + static_cast<int>(b_valid) +
+        static_cast<int>(c_valid) + static_cast<int>(d_valid);
+    if (countValid == 4) {
+        {
+            double weight = 1.0 - grid_x - grid_y + grid_x_y;
+            value = value_a * weight;
+        }
+        {
+            double weight = grid_x - grid_x_y;
+            value += value_b * weight;
+        }
+        {
+            double weight = grid_y - grid_x_y;
+            value += value_c * weight;
+        }
+        {
+            double weight = grid_x_y;
+            value += value_d * weight;
+        }
+    } else if (countValid == 0) {
         proj_context_errno_set(ctx, PROJ_ERR_COORD_TRANSFM_GRID_AT_NODATA);
         value = HUGE_VAL;
-    } else if (n_weights != 4)
+    } else {
+        double total_weight = 0.0;
+        if (a_valid) {
+            double weight = 1.0 - grid_x - grid_y + grid_x_y;
+            value = value_a * weight;
+            total_weight = weight;
+        }
+        if (b_valid) {
+            double weight = grid_x - grid_x_y;
+            value += value_b * weight;
+            total_weight += weight;
+        }
+        if (c_valid) {
+            double weight = grid_y - grid_x_y;
+            value += value_c * weight;
+            total_weight += weight;
+        }
+        if (d_valid) {
+            double weight = grid_x_y;
+            value += value_d * weight;
+            total_weight += weight;
+        }
         value /= total_weight;
+    }
 
     return value * vmultiplier;
 }
@@ -3364,8 +3393,10 @@ double pj_vgrid_value(PJ *P, const ListOfVGrids &grids, PJ_LP lp,
     double value;
 
     value = read_vgrid_value(P->ctx, grids, lp, vmultiplier);
-    proj_log_trace(P, "proj_vgrid_value: (%f, %f) = %f", lp.lam * RAD_TO_DEG,
-                   lp.phi * RAD_TO_DEG, value);
+    if (pj_log_active(P->ctx, PJ_LOG_TRACE)) {
+        proj_log_trace(P, "proj_vgrid_value: (%f, %f) = %f",
+                       lp.lam * RAD_TO_DEG, lp.phi * RAD_TO_DEG, value);
+    }
 
     return value;
 }
@@ -3413,14 +3444,14 @@ bool pj_bilinear_interpolation_three_samples(
     // by identifying the lower-left x,y of it (ix, iy), and the upper-right
     // (ix2, iy2)
 
-    double grid_x = (lp.lam - extent.west) / extent.resX;
+    double grid_x = (lp.lam - extent.west) * extent.invResX;
     // Special case for grids with world extent, and dealing with wrap-around
     if (lp.lam < extent.west) {
-        grid_x = (lp.lam + 2 * M_PI - extent.west) / extent.resX;
+        grid_x = (lp.lam + 2 * M_PI - extent.west) * extent.invResX;
     } else if (lp.lam > extent.east) {
-        grid_x = (lp.lam - 2 * M_PI - extent.west) / extent.resX;
+        grid_x = (lp.lam - 2 * M_PI - extent.west) * extent.invResX;
     }
-    double grid_y = (lp.phi - extent.south) / extent.resY;
+    double grid_y = (lp.phi - extent.south) * extent.invResY;
     int ix = static_cast<int>(grid_x);
     int iy = static_cast<int>(grid_y);
     int ix2 = std::min(ix + 1, grid->width() - 1);

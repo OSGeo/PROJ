@@ -45,6 +45,10 @@ struct ExtentAndRes {
     double north;      // in radian for geographic, in CRS units otherwise
     double resX;       // in radian for geographic, in CRS units otherwise
     double resY;       // in radian for geographic, in CRS units otherwise
+    double invResX;    // = 1 / resX;
+    double invResY;    // = 1 / resY;
+
+    void computeInvRes();
 
     bool fullWorldLongitude() const;
     bool contains(const ExtentAndRes &other) const;
