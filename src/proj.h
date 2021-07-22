@@ -559,7 +559,7 @@ PJ PROJ_DLL *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx,
                                             const PJ *target_crs,
                                             PJ_AREA *area,
                                             const char* const *options);
-/*! @endcond Doxygen_Suppress */
+/*! @endcond */
 PJ PROJ_DLL *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ* obj);
 /*! @cond Doxygen_Suppress */
 void PROJ_DLL proj_assign_context(PJ* pj, PJ_CONTEXT* ctx);
