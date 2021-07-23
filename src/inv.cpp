@@ -36,10 +36,11 @@
 #define INPUT_UNITS  P->right
 #define OUTPUT_UNITS P->left
 
-static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
+static void inv_prepare (PJ *P, PJ_COORD& coo) {
     if (coo.v[0] == HUGE_VAL || coo.v[1] == HUGE_VAL || coo.v[2] == HUGE_VAL) {
         proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-        return proj_coord_error ();
+        coo = proj_coord_error ();
+        return;
     }
 
     /* The helmert datum shift will choke unless it gets a sensible 4D coordinate */
@@ -52,10 +53,10 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
     /* Handle remaining possible input types */
     switch (INPUT_UNITS) {
     case PJ_IO_UNITS_WHATEVER:
-        return coo;
+        break;
 
     case PJ_IO_UNITS_DEGREES:
-        return coo;
+        break;
 
     /* de-scale and de-offset */
     case PJ_IO_UNITS_CARTESIAN:
@@ -65,8 +66,7 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
         if (P->is_geocent) {
             coo = proj_trans (P->cart, PJ_INV, coo);
         }
-
-        return coo;
+        break;
 
     case PJ_IO_UNITS_PROJECTED:
     case PJ_IO_UNITS_CLASSIC:
@@ -74,7 +74,7 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
         coo.xyz.y = P->to_meter  * coo.xyz.y - P->y0;
         coo.xyz.z = P->vto_meter * coo.xyz.z - P->z0;
         if (INPUT_UNITS==PJ_IO_UNITS_PROJECTED)
-            return coo;
+            return;
 
         /* Classic proj.4 functions expect plane coordinates in units of the semimajor axis  */
         /* Multiplying by ra, rather than dividing by a because the CalCOFI projection       */
@@ -82,23 +82,20 @@ static PJ_COORD inv_prepare (PJ *P, PJ_COORD coo) {
         /* (CalCOFI avoids further scaling by stomping - but a better solution is possible)  */
         coo.xyz.x *= P->ra;
         coo.xyz.y *= P->ra;
-        return coo;
+        break;
 
     case PJ_IO_UNITS_RADIANS:
         coo.lpz.z = P->vto_meter * coo.lpz.z - P->z0;
         break;
     }
-
-    /* Should not happen, so we could return pj_coord_err here */
-    return coo;
 }
 
 
 
-static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
+static void inv_finalize (PJ *P, PJ_COORD& coo) {
     if (coo.xyz.x == HUGE_VAL) {
         proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-        return proj_coord_error ();
+        coo = proj_coord_error ();
     }
 
     if (OUTPUT_UNITS==PJ_IO_UNITS_RADIANS) {
@@ -113,7 +110,7 @@ static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
         if (P->vgridshift)
             coo = proj_trans (P->vgridshift, PJ_INV, coo); /* Go geometric from orthometric */
         if (coo.lp.lam==HUGE_VAL)
-            return coo;
+            return;
         if (P->hgridshift)
             coo = proj_trans (P->hgridshift, PJ_FWD, coo);
         else if (P->helmert || (P->cart_wgs84 != nullptr && P->cart != nullptr)) {
@@ -123,35 +120,32 @@ static PJ_COORD inv_finalize (PJ *P, PJ_COORD coo) {
             coo = proj_trans (P->cart_wgs84, PJ_INV, coo); /* Go back to angular using WGS84 ellps */
         }
         if (coo.lp.lam==HUGE_VAL)
-            return coo;
+            return;
 
         /* If input latitude was geocentrical, convert back to geocentrical */
         if (P->geoc)
             coo = pj_geocentric_latitude (P, PJ_FWD, coo);
     }
-
-    return coo;
 }
 
-
-static PJ_COORD error_or_coord(PJ *P, PJ_COORD coord, int last_errno) {
-    if (proj_errno(P))
+static inline PJ_COORD error_or_coord(PJ *P, PJ_COORD coord, int last_errno) {
+    if (P->ctx->last_errno)
         return proj_coord_error();
 
-    proj_errno_restore(P, last_errno);
+    P->ctx->last_errno = last_errno;
+
     return coord;
 }
 
-
 PJ_LP pj_inv(PJ_XY xy, PJ *P) {
-    int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.xy = xy;
 
-    last_errno = proj_errno_reset(P);
+    const int last_errno = P->ctx->last_errno;
+    P->ctx->last_errno = 0;
 
     if (!P->skip_inv_prepare)
-        coo = inv_prepare (P, coo);
+        inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().lp;
 
@@ -170,7 +164,7 @@ PJ_LP pj_inv(PJ_XY xy, PJ *P) {
         return proj_coord_error ().lp;
 
     if (!P->skip_inv_finalize)
-        coo = inv_finalize (P, coo);
+        inv_finalize (P, coo);
 
     return error_or_coord(P, coo, last_errno).lp;
 }
@@ -178,14 +172,14 @@ PJ_LP pj_inv(PJ_XY xy, PJ *P) {
 
 
 PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
-    int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.xyz = xyz;
 
-    last_errno = proj_errno_reset(P);
+    const int last_errno = P->ctx->last_errno;
+    P->ctx->last_errno = 0;
 
     if (!P->skip_inv_prepare)
-        coo = inv_prepare (P, coo);
+         inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().lpz;
 
@@ -204,7 +198,7 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
         return proj_coord_error ().lpz;
 
     if (!P->skip_inv_finalize)
-        coo = inv_finalize (P, coo);
+        inv_finalize (P, coo);
 
     return error_or_coord(P, coo, last_errno).lpz;
 }
@@ -212,10 +206,12 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
 
 
 PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
-    int last_errno = proj_errno_reset(P);
+
+    const int last_errno = P->ctx->last_errno;
+    P->ctx->last_errno = 0;
 
     if (!P->skip_inv_prepare)
-        coo = inv_prepare (P, coo);
+        inv_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
@@ -234,7 +230,7 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
         return proj_coord_error ();
 
     if (!P->skip_inv_finalize)
-        coo = inv_finalize (P, coo);
+        inv_finalize (P, coo);
 
     return error_or_coord(P, coo, last_errno);
 }

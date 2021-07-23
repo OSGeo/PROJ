@@ -38,9 +38,12 @@
 #define OUTPUT_UNITS P->right
 
 
-static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
+static void fwd_prepare (PJ *P, PJ_COORD& coo) {
     if (HUGE_VAL==coo.v[0] || HUGE_VAL==coo.v[1] || HUGE_VAL==coo.v[2])
-        return proj_coord_error ();
+    {
+        coo = proj_coord_error ();
+        return;
+    }
 
     /* The helmert datum shift will choke unless it gets a sensible 4D coordinate */
     if (HUGE_VAL==coo.v[2] && P->helmert) coo.v[2] = 0.0;
@@ -56,13 +59,15 @@ static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
         {
             proj_log_error(P, _("Invalid latitude"));
             proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_INVALID_COORD);
-            return proj_coord_error ();
+            coo = proj_coord_error ();
+            return;
         }
         if (coo.lp.lam > 10  ||  coo.lp.lam < -10)
         {
             proj_log_error(P, _("Invalid longitude"));
             proj_errno_set (P, PROJ_ERR_COORD_TRANSFM_INVALID_COORD);
-            return proj_coord_error ();
+            coo = proj_coord_error ();
+            return;
         }
 
 
@@ -89,7 +94,7 @@ static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
             coo = proj_trans (P->cart,       PJ_INV, coo); /* Go back to angular using local ellps */
         }
         if (coo.lp.lam==HUGE_VAL)
-            return coo;
+            return;
         if (P->vgridshift)
             coo = proj_trans (P->vgridshift, PJ_FWD, coo); /* Go orthometric from geometric */
 
@@ -100,18 +105,18 @@ static PJ_COORD fwd_prepare (PJ *P, PJ_COORD coo) {
         if (0==P->over)
             coo.lp.lam = adjlon(coo.lp.lam);
 
-        return coo;
+        return;
     }
 
 
     /* We do not support gridshifts on cartesian input */
     if (INPUT_UNITS==PJ_IO_UNITS_CARTESIAN && P->helmert)
-            return proj_trans (P->helmert, PJ_INV, coo);
-    return coo;
+            coo = proj_trans (P->helmert, PJ_INV, coo);
+    return;
 }
 
 
-static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
+static void fwd_finalize (PJ *P, PJ_COORD& coo) {
 
     switch (OUTPUT_UNITS) {
 
@@ -161,29 +166,28 @@ static PJ_COORD fwd_finalize (PJ *P, PJ_COORD coo) {
 
     if (P->axisswap)
         coo = proj_trans (P->axisswap, PJ_FWD, coo);
-
-    return coo;
 }
 
 
-static PJ_COORD error_or_coord(PJ *P, PJ_COORD coord, int last_errno) {
-    if (proj_errno(P))
+static inline PJ_COORD error_or_coord(PJ *P, PJ_COORD coord, int last_errno) {
+    if (P->ctx->last_errno)
         return proj_coord_error();
 
-    proj_errno_restore(P, last_errno);
+    P->ctx->last_errno = last_errno;
+
     return coord;
 }
 
 
 PJ_XY pj_fwd(PJ_LP lp, PJ *P) {
-    int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.lp = lp;
 
-    last_errno = proj_errno_reset(P);
+    const int last_errno = P->ctx->last_errno;
+    P->ctx->last_errno = 0;
 
     if (!P->skip_fwd_prepare)
-        coo = fwd_prepare (P, coo);
+        fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0] || HUGE_VAL==coo.v[1])
         return proj_coord_error ().xy;
 
@@ -202,7 +206,7 @@ PJ_XY pj_fwd(PJ_LP lp, PJ *P) {
         return proj_coord_error ().xy;
 
     if (!P->skip_fwd_finalize)
-        coo = fwd_finalize (P, coo);
+        fwd_finalize (P, coo);
 
     return error_or_coord(P, coo, last_errno).xy;
 }
@@ -210,14 +214,14 @@ PJ_XY pj_fwd(PJ_LP lp, PJ *P) {
 
 
 PJ_XYZ pj_fwd3d(PJ_LPZ lpz, PJ *P) {
-    int last_errno;
     PJ_COORD coo = {{0,0,0,0}};
     coo.lpz = lpz;
 
-    last_errno = proj_errno_reset(P);
+    const int last_errno = P->ctx->last_errno;
+    P->ctx->last_errno = 0;
 
     if (!P->skip_fwd_prepare)
-        coo = fwd_prepare (P, coo);
+        fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ().xyz;
 
@@ -236,7 +240,7 @@ PJ_XYZ pj_fwd3d(PJ_LPZ lpz, PJ *P) {
         return proj_coord_error ().xyz;
 
     if (!P->skip_fwd_finalize)
-        coo = fwd_finalize (P, coo);
+        fwd_finalize (P, coo);
 
     return error_or_coord(P, coo, last_errno).xyz;
 }
@@ -244,10 +248,12 @@ PJ_XYZ pj_fwd3d(PJ_LPZ lpz, PJ *P) {
 
 
 PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
-    int last_errno = proj_errno_reset(P);
+
+    const int last_errno = P->ctx->last_errno;
+    P->ctx->last_errno = 0;
 
     if (!P->skip_fwd_prepare)
-        coo = fwd_prepare (P, coo);
+        fwd_prepare (P, coo);
     if (HUGE_VAL==coo.v[0])
         return proj_coord_error ();
 
@@ -266,7 +272,7 @@ PJ_COORD pj_fwd4d (PJ_COORD coo, PJ *P) {
         return proj_coord_error ();
 
     if (!P->skip_fwd_finalize)
-        coo = fwd_finalize (P, coo);
+        fwd_finalize (P, coo);
 
     return error_or_coord(P, coo, last_errno);
 }
