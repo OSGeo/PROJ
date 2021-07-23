@@ -918,6 +918,7 @@ void pj_acquire_lock(void);
 void pj_release_lock(void);
 void pj_cleanup_lock(void);
 
+bool pj_log_active( PJ_CONTEXT *ctx, int level );
 void pj_log( PJ_CONTEXT * ctx, int level, const char *fmt, ... );
 void pj_stderr_logger( void *, int, const char * );
 
