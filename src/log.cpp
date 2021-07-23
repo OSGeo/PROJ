@@ -46,6 +46,27 @@ void pj_stderr_logger( void *app_data, int level, const char *msg )
 }
 
 /************************************************************************/
+/*                           pj_log_active()                            */
+/************************************************************************/
+
+bool pj_log_active( PJ_CONTEXT *ctx, int level )
+{
+    int debug_level = ctx->debug_level;
+    int shutup_unless_errno_set = debug_level < 0;
+
+    /* For negative debug levels, we first start logging when errno is set */
+    if (ctx->last_errno==0 && shutup_unless_errno_set)
+        return false;
+
+    if (debug_level < 0)
+        debug_level = -debug_level;
+
+    if( level > debug_level )
+        return false;
+    return true;
+}
+
+/************************************************************************/
 /*                               pj_vlog()                              */
 /************************************************************************/
 
@@ -54,17 +75,7 @@ void pj_vlog( PJ_CONTEXT *ctx, int level, const PJ* P, const char *fmt, va_list 
 
 {
     char *msg_buf;
-    int debug_level = ctx->debug_level;
-    int shutup_unless_errno_set = debug_level < 0;
-
-    /* For negative debug levels, we first start logging when errno is set */
-    if (ctx->last_errno==0 && shutup_unless_errno_set)
-        return;
-
-    if (debug_level < 0)
-        debug_level = -debug_level;
-
-    if( level > debug_level )
+    if( !pj_log_active(ctx, level) )
         return;
 
     constexpr size_t BUF_SIZE = 100000;

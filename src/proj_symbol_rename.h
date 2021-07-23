@@ -71,6 +71,7 @@
 #define pj_is_latlong internal_pj_is_latlong
 #define pj_latlong_from_proj internal_pj_latlong_from_proj
 #define pj_log internal_pj_log
+#define pj_log_active internal_pj_log_active
 #define pj_malloc internal_pj_malloc
 #define pj_open_lib internal_pj_open_lib
 #define pj_pr_list internal_pj_pr_list
