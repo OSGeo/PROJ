@@ -27,19 +27,19 @@ dmstor(const char *is, char **rs) {
 
 	double
 dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
-	int n, nl;
+	int n, nl, adv;
 	char *s, work[MAX_WORK];
         const char* p;
 	double v, tv;
 
 	if (rs)
 		*rs = (char *)is;
-	/* copy sting into work space */
+	/* copy string into work space */
 	while (isspace(*is)) ++is;
 	n = MAX_WORK;
 	s = work;
 	p = (char *)is;
-	while (isgraph(*p) && --n)
+	while ((isgraph(*p) || *p == (char) 0xc2 || *p == (char) 0xb0) && --n)
 		*s++ = *p++;
 	*s = '\0';
 	/* it is possible that a really odd input (like lots of leading
@@ -48,10 +48,11 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 	if (sign == '+' || sign == '-') s++;
 	else sign = '+';
 	v = 0.;
-	for (nl = 0 ; nl < 3 ; nl = n + 1 ) {
+	for (nl = 0 ; nl < 3 ; nl = n + 1) {
 		if (!(isdigit(*s) || *s == '.')) break;
 		if ((tv = proj_strtod(s, &s)) == HUGE_VAL)
 			return tv;
+		adv = 1;
 		switch (*s) {
 		case 'D': case 'd':
 			n = 0; break;
@@ -59,6 +60,13 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 			n = 1; break;
 		case '"':
 			n = 2; break;
+		/* degree symbol ("\xc2\xb0" in UTF-8) */
+		case (char) 0xc2:
+			if (s[1] == (char) 0xb0) {
+				n = 0;
+				adv = 2;
+				break;
+			}
 		case 'r': case 'R':
 			if (nl) {
 				proj_context_errno_set( ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE );
@@ -77,9 +85,9 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 			return HUGE_VAL;
 		}
 		v += tv * vm[n];
-		++s;
+		s += adv;
 	}
-		/* postfix sign */
+	/* postfix sign */
 	if (*s && (p = strchr(sym, *s))) {
 		sign = (p - sym) >= 4 ? '-' : '+';
 		++s;

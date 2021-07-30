@@ -442,6 +442,9 @@ TEST(gie, info_functions) {
     /* we can't expect perfect numerical accuracy so testing with a tolerance */
     ASSERT_NEAR(-2.0, proj_dmstor(&buf[0], NULL), 1e-7);
 
+    /* test degree sign on DMS input */
+    ASSERT_NEAR(0.34512432, proj_dmstor("19°46'27\"E", NULL), 1e-7);
+
     /* test proj_derivatives_retrieve() and proj_factors_retrieve() */
     P = proj_create(PJ_DEFAULT_CTX, "+proj=merc +ellps=WGS84");
     a = proj_coord(0, 0, 0, 0);
