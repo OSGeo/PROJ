@@ -113,6 +113,7 @@ include(ProjVersion)
 proj_version(MAJOR 8 MINOR 2 PATCH 0)
 set(PROJ_API_VERSION "22")
 set(PROJ_BUILD_VERSION "23.0.1")
+set(EQUINOR_VERSION "1.0.0")
 
 ################################################################################
 # Build features and variants

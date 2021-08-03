@@ -2,7 +2,7 @@ DATAPATH = $(top_srcdir)/data
 
 pkgdata_DATA = proj.ini GL27 nad.lst nad27 nad83 world other.extra \
 		CH \
-		ITRF2000 ITRF2008 ITRF2014 proj.db \
+		ITRF2000 ITRF2008 ITRF2014 proj.db equinor.db
 		projjson.schema.json \
 		deformation_model.schema.json \
 		triangulation.schema.json
@@ -45,6 +45,15 @@ SQL_ORDERED_LIST = sql/begin.sql \
 		sql/customizations.sql \
 		sql/nkg_post_customizations.sql \
 		sql/commit.sql
+
+
+SQL_EQUINOR_ORDERED_LIST = sql_equinor_oracle/begin.sql \
+		sql_equinor_oracle/proj_db_table_defs.sql \
+		sql_equinor_oracle/proj_db_table_defs.sql \
+  		sql_equinor_oracle/unit_of_measure.sql \
+  		sql_equinor_oracle/coordinate_system.sql
+		
+		
 
 EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		world other.extra \
@@ -128,7 +137,9 @@ EXTRA_DIST = proj.ini GL27 nad.lst nad27 nad83 \
 		tests/tinshift_simplified_kkj_etrs.json \
 		tests/tinshift_simplified_n60_n2000.json \
 		generate_proj_db.cmake sql_filelist.cmake \
-		$(SQL_ORDERED_LIST)
+		$(SQL_ORDERED_LIST) \
+		generate_equinor_db.cmake sql_equinor_filelist.cmake \
+		$(SQL_EQUINOR_ORDERED_LIST) 
 
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
@@ -166,6 +177,34 @@ proj.db: $(DATAPATH)/sql/*.sql
 		mkdir -p "$(PROJ_DB_CACHE_DIR)"; \
 		cat all.sql.in | md5sum > "$(PROJ_DB_CACHE_DIR)/proj.db.sql.md5"; \
 		cp proj.db "$(PROJ_DB_CACHE_DIR)"; \
+	 fi; \
+	 $(RM) all.sql.in
+
+
+equinor.db: $(DATAPATH)/sql_equinor_oracle/*.sql
+	@echo "Make equinor.db"
+	$(RM) equinor.db
+	@export SQL_EXPANDED_LIST=""; \
+	 for x in $(SQL_EQUINOR_ORDERED_LIST); do \
+		 export SQL_EXPANDED_LIST="$${SQL_EXPANDED_LIST} $(DATAPATH)/$$x"; \
+	 done; \
+	 cat $${SQL_EXPANDED_LIST} | sed 's/$${EQUINOR_VERSION}/${PACKAGE_VERSION}/' > all.sql.in; \
+	 if test "x$(EQUINOR_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" -a -f "$(EQUINOR_DB_CACHE_DIR)/equinor.db" -a -f "$(EQUINOR_DB_CACHE_DIR)/equinor.db.sql.md5" ; then \
+	    cat all.sql.in | md5sum | diff - "$(EQUINOR_DB_CACHE_DIR)/equinor.db.sql.md5" > /dev/null \
+	    && (echo "Reusing cached equinor.db"; cp "$(EQUINOR_DB_CACHE_DIR)/equinor.db" equinor.db); \
+	 fi; \
+	 if test ! -f equinor.db ; then \
+	   cat all.sql.in | sqlite3 equinor.db; \
+	 fi; \
+	 if [ $$? -ne 0 ] ; then \
+		echo "Build of equinor.db failed"; \
+		$(RM) equinor.db; \
+		exit 1; \
+	 fi; \
+	 if test "x$(EQUINOR_DB_CACHE_DIR)" != "x" -a -x "$$(command -v md5sum)" ; then \
+		mkdir -p "$(EQUINOR_DB_CACHE_DIR)"; \
+		cat all.sql.in | md5sum > "$(EQUINOR_DB_CACHE_DIR)/equinor.db.sql.md5"; \
+		cp equinor.db "$(EQUINOR_DB_CACHE_DIR)"; \
 	 fi; \
 	 $(RM) all.sql.in
 
@@ -215,8 +254,10 @@ check-local:
 	ln -sf ../$(DATAPATH)/tests/ntv2_0_downsampled.gsb for_tests/ntv2_0.gsb; \
 	ln -sf ../$(DATAPATH)/tests/egm96_15_downsampled.gtx for_tests/egm96_15.gtx; \
 	ln -sf ../$(DATAPATH)/proj.ini for_tests; \
-	ln -sf ../proj.db for_tests
+	ln -sf ../proj.db for_tests; \
+	ln -sf ../equinor.db for_tests
 
 clean-local:
 	$(RM) proj.db
+	$(RM) equinor.db
 	$(RM) -rf for_tests

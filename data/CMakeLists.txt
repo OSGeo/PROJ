@@ -30,8 +30,11 @@ set(GRIDSHIFT_FILES ${GSB_FILES} ${GTX_FILES})
 file(GLOB SCHEMA_FILES *.json)
 
 set(ALL_SQL_IN "${CMAKE_CURRENT_BINARY_DIR}/all.sql.in")
+set(ALL_EQNR_SQL_IN "${CMAKE_CURRENT_BINARY_DIR}/all.eqnr.sql.in")
 set(PROJ_DB "${CMAKE_CURRENT_BINARY_DIR}/proj.db")
+set(EQUINOR_DB "${CMAKE_CURRENT_BINARY_DIR}/equinor.db")
 include(sql_filelist.cmake)
+include(sql_equinor_filelist.cmake)
 
 add_custom_command(
   OUTPUT ${PROJ_DB}
@@ -41,11 +44,26 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJ_DB} ${CMAKE_CURRENT_BINARY_DIR}/for_tests
   DEPENDS ${SQL_FILES} "${CMAKE_CURRENT_SOURCE_DIR}/generate_proj_db.cmake"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  COMMENT "Generating proj.db"
+  COMMENT "Generating the db proj.db"
   VERBATIM
 )
 
 add_custom_target(generate_proj_db ALL DEPENDS ${PROJ_DB})
+
+
+add_custom_command(
+  OUTPUT ${EQUINOR_DB}
+  COMMAND ${CMAKE_COMMAND} -E remove -f ${EQUINOR_DB}
+  COMMAND ${CMAKE_COMMAND} "-DALL_EQNR_SQL_IN=${ALL_EQNR_SQL_IN}" "-DEXE_SQLITE3=${EXE_SQLITE3}" "-DEQUINOR_DB=${EQUINOR_DB}" "-DEQUINOR_VERSION=${EQUINOR_VERSION}"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/generate_equinor_db.cmake"
+  COMMAND ${CMAKE_COMMAND} -E copy ${EQUINOR_DB} ${CMAKE_CURRENT_BINARY_DIR}/for_tests
+  DEPENDS ${SQL_FILES} "${CMAKE_CURRENT_SOURCE_DIR}/generate_equinor_db.cmake"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  COMMENT "Generating the db equinor.db"
+  VERBATIM
+)
+
+add_custom_target(generate_equinor_db ALL DEPENDS ${EQUINOR_DB})
 
 if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
   foreach(FILE ${CONFIG_FILES} ${PROJ_DICTIONARY} ${GRIDSHIFT_FILES})
@@ -97,6 +115,7 @@ set(ALL_DATA_FILE
   ${PROJ_DICTIONARY}
   ${GRIDSHIFT_FILES}
   ${PROJ_DB}
+  ${EQINOR_DB}
   ${SCHEMA_FILES}
 )
 install(
