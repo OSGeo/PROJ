@@ -229,8 +229,6 @@ endif()
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package(Threads)
 
-include(CheckIncludeFiles)
-
 include(CheckCSourceCompiles)
 if(MSVC)
   set(CMAKE_REQUIRED_FLAGS "${CMAKE_C_FLAGS} /WX /W4")
