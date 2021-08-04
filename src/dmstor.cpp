@@ -29,7 +29,7 @@ dmstor(const char *is, char **rs) {
 dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 	int n, nl, adv;
 	char *s, work[MAX_WORK];
-        const char* p;
+	const char* p;
 	double v, tv;
 
 	if (rs)
@@ -39,11 +39,18 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 	n = MAX_WORK;
 	s = work;
 	p = (char *)is;
+
+	/*
+	 * Copy characters into work until we hit a non-printable character or run
+	 * out of space in the buffer.  Make a special exception for the bytes 0xc2
+	 * and 0xb0, because they comprise Degree Sign U+00B0 in UTF-8.
+	 *
+	 * It is possible that a really odd input (like lots of leading zeros)
+	 * could be truncated in copying into work.  But ...
+	 */
 	while ((isgraph(*p) || *p == (char) 0xc2 || *p == (char) 0xb0) && --n)
 		*s++ = *p++;
 	*s = '\0';
-	/* it is possible that a really odd input (like lots of leading
-		zeros) could be truncated in copying into work.  But ... */
 	int sign = *(s = work);
 	if (sign == '+' || sign == '-') s++;
 	else sign = '+';
