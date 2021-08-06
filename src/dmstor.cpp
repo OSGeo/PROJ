@@ -60,33 +60,32 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 		if ((tv = proj_strtod(s, &s)) == HUGE_VAL)
 			return tv;
 		adv = 1;
-		switch (*s) {
-		case 'D': case 'd':
-			n = 0; break;
-		case '\'':
-			n = 1; break;
-		case '"':
-			n = 2; break;
-		/* degree symbol ("\xc2\xb0" in UTF-8) */
-		case (char) 0xc2:
-			if (s[1] == (char) 0xb0) {
-				n = 0;
-				adv = 2;
-				break;
-			}
-		case 'r': case 'R':
+
+		if (*s == 'D' || *s == 'd') {
+			n = 0;
+		} else if (*s == '\'') {
+			n = 1;
+		} else if (*s == '"') {
+			n = 2;
+		} else if (s[0] == (char) 0xc2 && s[1] == (char) 0xb0) {
+			/* degree symbol ("\xc2\xb0" in UTF-8) */
+			n = 0;
+			adv = 2;
+		} else if (*s == 'r' || *s == 'R') {
 			if (nl) {
 				proj_context_errno_set( ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE );
 				return HUGE_VAL;
 			}
 			++s;
 			v = tv;
-			goto skip;
-		default:
+			n = 4;
+			continue;
+		} else {
 			v += tv * vm[nl];
-		skip:	n = 4;
+			n = 4;
 			continue;
 		}
+
 		if (n < nl) {
 			proj_context_errno_set( ctx, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE );
 			return HUGE_VAL;
