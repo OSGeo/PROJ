@@ -20,6 +20,12 @@ vm[] = {
 	.0002908882086657216,
 	.0000048481368110953599
 };
+/* byte sequence for Degree Sign U+00B0 in UTF-8. */
+	static constexpr char
+DEG_SIGN1 = '\xc2';
+	static constexpr char
+DEG_SIGN2 = '\xb0';
+
 	double
 dmstor(const char *is, char **rs) {
 	return dmstor_ctx( pj_get_default_ctx(), is, rs );
@@ -42,13 +48,13 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 
 	/*
 	 * Copy characters into work until we hit a non-printable character or run
-	 * out of space in the buffer.  Make a special exception for the bytes 0xc2
-	 * and 0xb0, because they comprise Degree Sign U+00B0 in UTF-8.
+	 * out of space in the buffer.  Make a special exception for the bytes of
+	 * the Degree Sign in UTF-8.
 	 *
 	 * It is possible that a really odd input (like lots of leading zeros)
 	 * could be truncated in copying into work.  But ...
 	 */
-	while ((isgraph(*p) || *p == (char) 0xc2 || *p == (char) 0xb0) && --n)
+	while ((isgraph(*p) || *p == DEG_SIGN1 || *p == DEG_SIGN2) && --n)
 		*s++ = *p++;
 	*s = '\0';
 	int sign = *(s = work);
@@ -67,8 +73,8 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 			n = 1;
 		} else if (*s == '"') {
 			n = 2;
-		} else if (s[0] == (char) 0xc2 && s[1] == (char) 0xb0) {
-			/* degree symbol ("\xc2\xb0" in UTF-8) */
+		} else if (s[0] == DEG_SIGN1 && s[1] == DEG_SIGN2) {
+			/* degree symbol in UTF-8 */
 			n = 0;
 			adv = 2;
 		} else if (*s == 'r' || *s == 'R') {
