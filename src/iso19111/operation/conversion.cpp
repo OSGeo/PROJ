@@ -331,6 +331,9 @@ Conversion::create(const util::PropertyMap &properties,
  */
 ConversionNNPtr Conversion::createUTM(const util::PropertyMap &properties,
                                       int zone, bool north) {
+    if (zone < 1 || zone > 60) {
+        throw InvalidOperation("Invalid zone number");
+    }
     return create(
         getUTMConversionProperty(properties, zone, north),
         EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
