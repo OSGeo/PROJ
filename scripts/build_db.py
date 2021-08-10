@@ -650,8 +650,12 @@ def fill_grid_transformation(proj_db_cursor):
                )
 
         #proj_db_cursor.execute("INSERT INTO coordinate_operation VALUES (?,?,'grid_transformation')", (EPSG_AUTHORITY, code))
-        proj_db_cursor.execute('INSERT INTO grid_transformation VALUES (' +
-            '?,?,?, ?, ?,?,?, ?,?, ?,?, ?, ?,?,?,?, ?,?,?,?, ?,?, ?,?)', arg)
+        try:
+            proj_db_cursor.execute('INSERT INTO grid_transformation VALUES (' +
+                '?,?,?, ?, ?,?,?, ?,?, ?,?, ?, ?,?,?,?, ?,?,?,?, ?,?, ?,?)', arg)
+        except sqlite3.IntegrityError as e:
+            print(arg)
+            raise
 
 def fill_other_transformation(proj_db_cursor):
     # 9601: Longitude rotation
