@@ -155,6 +155,12 @@ FSF's configuration procedure is used to ease installation of the PROJ system.
     Follow the CMake installation guide if you are not using a UNIX-like
     operating system.
 
+If you are building from the git repository you have to first run::
+
+    ./autogen.sh
+
+which will generate a ``configure`` script that can be used in the next step.
+
 The default destination path prefix for installed files is ``/usr/local``.
 Results from the installation script will be placed into subdirectories ``bin``,
 ``include``, ``lib``, and ``man/man1``. If this default path prefix
@@ -168,12 +174,6 @@ If another path prefix is required, then execute::
 
 In either case, the directory of the prefix path must exist and be writable by
 the installer.
-
-If you are building from the git repository you have to first run::
-
-    ./autogen.sh
-
-which will generate a configure script that can be used as described above.
 
 With the data files in place we can now build and install PROJ::
 
