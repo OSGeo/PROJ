@@ -145,6 +145,7 @@ static PJ_LP laea_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
     switch (Q->mode) {
     case EQUIT:
     case OBLIQ:
+    {
         xy.x /= Q->dd;
         xy.y *=  Q->dd;
         rho = hypot(xy.x, xy.y);
@@ -153,7 +154,13 @@ static PJ_LP laea_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
             lp.phi = P->phi0;
             return lp;
         }
-        sCe = 2. * asin(.5 * rho / Q->rq);
+        const double asin_argument = .5 * rho / Q->rq;
+        if( asin_argument > 1 )
+        {
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+            return lp;
+        }
+        sCe = 2. * asin(asin_argument);
         cCe = cos(sCe);
         sCe = sin(sCe);
         xy.x *= sCe;
@@ -165,6 +172,7 @@ static PJ_LP laea_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
             xy.y = rho * cCe;
         }
         break;
+    }
     case N_POLE:
         xy.y = -xy.y;
         /*-fallthrough*/
