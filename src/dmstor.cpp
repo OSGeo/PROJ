@@ -67,7 +67,12 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 			return tv;
 		int adv = 1;
 
-		if (*s == 'D' || *s == 'd') {
+		if (*s == 'D' || *s == 'd' || *s == DEG_SIGN2) {
+			/*
+			 * Accept \xb0 as a single-byte degree symbol. This byte is the
+			 * degree symbol in various single-byte encodings: multiple ISO
+			 * 8859 parts, several Windows code pages and others.
+			 */
 			n = 0;
 		} else if (*s == '\'') {
 			n = 1;
