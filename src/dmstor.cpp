@@ -33,7 +33,7 @@ dmstor(const char *is, char **rs) {
 
 	double
 dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
-	int n, nl, adv;
+	int n, nl;
 	char *s, work[MAX_WORK];
 	const char* p;
 	double v, tv;
@@ -65,7 +65,7 @@ dmstor_ctx(PJ_CONTEXT *ctx, const char *is, char **rs) {
 		if (!(isdigit(*s) || *s == '.')) break;
 		if ((tv = proj_strtod(s, &s)) == HUGE_VAL)
 			return tv;
-		adv = 1;
+		int adv = 1;
 
 		if (*s == 'D' || *s == 'd') {
 			n = 0;
