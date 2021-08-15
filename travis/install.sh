@@ -48,7 +48,7 @@ CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"
 # autoconf build from generated tarball
 mkdir build_autoconf
 cd build_autoconf
-../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
+../configure --prefix=/tmp/proj_autoconf_install_from_dist_all ${PROJ_AUTOCONF_BUILD_OPTIONS:---enable-lto}
 
 make >/dev/null
 
@@ -119,7 +119,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     mkdir build_cmake
     cd build_cmake
     cmake --version
-    cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
+    cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install ${PROJ_CMAKE_BUILD_OPTIONS:--DENABLE_IPO=ON}
     VERBOSE=1 make >/dev/null
     make install >/dev/null
     ctest
