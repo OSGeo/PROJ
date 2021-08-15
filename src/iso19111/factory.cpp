@@ -1145,9 +1145,8 @@ std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
                                        : "db_0.");
     const auto sqlBegin("SELECT sql||';' FROM " + dbNamePrefix +
                         "sqlite_master WHERE type = ");
-    const char *const objectTypes[] = {"'table' AND "
-                                       "name NOT LIKE 'sqlite_stat%'",
-                                       "'view'", "'trigger'"};
+    const char *tableType = "'table' AND name NOT LIKE 'sqlite_stat%'";
+    const char *const objectTypes[] = {tableType, "'view'", "'trigger'"};
     std::vector<std::string> res;
     for (const auto &objectType : objectTypes) {
         const auto sqlRes = run(sqlBegin + objectType);
