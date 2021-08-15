@@ -446,7 +446,12 @@ TEST(gie, info_functions) {
     ASSERT_NEAR(0.34512432, proj_dmstor("19°46'27\"E", NULL), 1e-7);
 
     /* test ISO 8859-1, cp1252, et al. degree sign on DMS input */
-    ASSERT_NEAR(0.34512432, proj_dmstor("19" "\260" "46'27\"E", NULL), 1e-7);
+    ASSERT_NEAR(0.34512432,
+                proj_dmstor("19"
+                            "\260"
+                            "46'27\"E",
+                            NULL),
+                1e-7);
 
     /* test proj_derivatives_retrieve() and proj_factors_retrieve() */
     P = proj_create(PJ_DEFAULT_CTX, "+proj=merc +ellps=WGS84");
