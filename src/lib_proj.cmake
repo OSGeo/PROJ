@@ -317,6 +317,12 @@ add_library(proj
   ${ALL_LIBPROJ_HEADERS}
   ${PROJ_RESOURCES}
 )
+
+if(ENABLE_IPO AND "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.3)
+    set(PROJ_C_WARN_FLAGS ${PROJ_C_WARN_FLAGS} -fno-semantic-interposition)
+    set(PROJ_CXX_WARN_FLAGS ${PROJ_CXX_WARN_FLAGS} -fno-semantic-interposition)
+endif()
+
 target_compile_options(proj
   PRIVATE $<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>
   PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>

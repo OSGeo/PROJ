@@ -153,14 +153,16 @@ if test "x$enable_lto" = "xyes"; then
         CXXFLAGS="$SAVED_CXXFLAGS"
     fi
     AC_LANG_POP([C++])
-    AX_CHECK_COMPILE_FLAG([-Wodr], [CXX_WFLAGS="$CXX_WFLAGS -Wodr"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+
+    if test "$FLTO_FLAG" != ""; then
+        dnl Only enable -fno-semantic-interposition with -flto. Alone it results in bigger files
+        AX_CHECK_COMPILE_FLAG([-fno-semantic-interposition], [CFLAGS="$CFLAGS -fno-semantic-interposition" CXXFLAGS="$CXXFLAGS -fno-semantic-interposition"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+        AX_CHECK_COMPILE_FLAG([-Wodr], [CXX_WFLAGS="$CXX_WFLAGS -Wodr"],,[$ERROR_ON_UNKNOWN_OPTIONS])
+    fi
 else
     AC_MSG_RESULT([no])
 fi
 AC_SUBST(FLTO_FLAG,$FLTO_FLAG)
-
-dnl Result in better inlining, but larger file
-dnl AX_CHECK_COMPILE_FLAG([-fno-semantic-interposition], [CFLAGS="$CFLAGS -fno-semantic-interposition" CXXFLAGS="$CXXFLAGS -fno-semantic-interposition"],,[$ERROR_ON_UNKNOWN_OPTIONS])
 
 AC_SUBST(C_WFLAGS,$C_WFLAGS)
 AC_SUBST(CXX_WFLAGS,$CXX_WFLAGS)
