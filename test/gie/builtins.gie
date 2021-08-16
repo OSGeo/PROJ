@@ -5615,6 +5615,7 @@ accept    20            70
 expect    748315.3282   -2055979.4669
 roundtrip 1
 
+# Polar Stereographic Variant B, ellipsoidal
 -------------------------------------------------------------------------------
 operation +proj=stere   +ellps=GRS80        +lat_0=-90  +lat_ts=-70
 -------------------------------------------------------------------------------
@@ -5626,6 +5627,50 @@ roundtrip 1
 tolerance 0.1 mm
 accept    20            -70
 expect    748315.3282   2055979.4669
+roundtrip 1
+
+# Polar Stereographic Variant A, ellipsoidal
+-------------------------------------------------------------------------------
+operation +proj=stere   +ellps=GRS80       +lat_0=-90  +k_0=0.97
+-------------------------------------------------------------------------------
+tolerance 1e-15m
+accept    0 -90
+expect    0 0
+roundtrip 1
+
+tolerance 0.1 mm
+accept    20            -70
+expect    748424.7446   2056280.0858
+roundtrip 1
+
+# Polar Stereographic Variant B, spherical
+-------------------------------------------------------------------------------
+operation +proj=stere   +R=6378137        +lat_0=-90  +lat_ts=-70
+-------------------------------------------------------------------------------
+tolerance 1e-15m
+accept    0 -90
+expect    0 0
+roundtrip 1
+
+tolerance 0.1 mm
+accept    20            -70
+expect    746100.2968   2049893.7182
+roundtrip 1
+
+
+# Polar Stereographic Variant A, spherical
+# k_0 = (1 + math.sin(abs(lat_ts=-70) / 180. * math.pi)) / 2.0
+-------------------------------------------------------------------------------
+operation +proj=stere   +R=6378137        +lat_0=-90  +k_0=0.9698463103929542
+-------------------------------------------------------------------------------
+tolerance 1e-15m
+accept    0 -90
+expect    0 0
+roundtrip 1
+
+tolerance 0.1 mm
+accept    20            -70
+expect    746100.2968   2049893.7182
 roundtrip 1
 
 ===============================================================================
