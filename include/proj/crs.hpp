@@ -1168,6 +1168,10 @@ class PROJ_GCC_DLL DerivedGeographicCRS final : public GeographicCRS,
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::EllipsoidalCSNNPtr &csIn);
 
+    PROJ_DLL DerivedGeographicCRSNNPtr
+    demoteTo2D(const std::string &newName,
+               const io::DatabaseContextPtr &dbContext) const;
+
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)

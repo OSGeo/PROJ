@@ -131,6 +131,7 @@ osgeo::proj::crs::DerivedGeodeticCRS::~DerivedGeodeticCRS()
 osgeo::proj::crs::DerivedGeodeticCRS::_exportToWKT(osgeo::proj::io::WKTFormatter*) const
 osgeo::proj::crs::DerivedGeographicCRS::baseCRS() const
 osgeo::proj::crs::DerivedGeographicCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::GeodeticCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::EllipsoidalCS> > const&)
+osgeo::proj::crs::DerivedGeographicCRS::demoteTo2D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::DerivedGeographicCRS::~DerivedGeographicCRS()
 osgeo::proj::crs::DerivedProjectedCRS::baseCRS() const
 osgeo::proj::crs::DerivedProjectedCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::ProjectedCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystem> > const&)

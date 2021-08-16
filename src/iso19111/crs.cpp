@@ -1079,8 +1079,24 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         return props;
     };
 
-    const auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
-    if (geogCRS) {
+    if (auto derivedGeogCRS =
+            dynamic_cast<const DerivedGeographicCRS *>(this)) {
+        const auto &axisList = derivedGeogCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 2) {
+            auto cs = cs::EllipsoidalCS::create(
+                util::PropertyMap(), axisList[0], axisList[1],
+                verticalAxisIfNotAlreadyPresent);
+            auto baseGeog3DCRS = util::nn_dynamic_pointer_cast<GeodeticCRS>(
+                derivedGeogCRS->baseCRS()->promoteTo3D(
+                    std::string(), dbContext, verticalAxisIfNotAlreadyPresent));
+            return util::nn_static_pointer_cast<CRS>(
+                DerivedGeographicCRS::create(
+                    createProperties(), NN_CHECK_THROW(baseGeog3DCRS),
+                    derivedGeogCRS->derivingConversion(), cs));
+        }
+    }
+
+    else if (auto geogCRS = dynamic_cast<const GeographicCRS *>(this)) {
         const auto &axisList = geogCRS->coordinateSystem()->axisList();
         if (axisList.size() == 2) {
             const auto &l_identifiers = identifiers();
@@ -1120,8 +1136,7 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         }
     }
 
-    const auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
-    if (projCRS) {
+    else if (auto projCRS = dynamic_cast<const ProjectedCRS *>(this)) {
         const auto &axisList = projCRS->coordinateSystem()->axisList();
         if (axisList.size() == 2) {
             auto base3DCRS =
@@ -1137,8 +1152,7 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         }
     }
 
-    const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
-    if (boundCRS) {
+    else if (auto boundCRS = dynamic_cast<const BoundCRS *>(this)) {
         auto base3DCRS = boundCRS->baseCRS()->promoteTo3D(
             newName, dbContext, verticalAxisIfNotAlreadyPresent);
         auto transf = boundCRS->transformation();
@@ -1174,18 +1188,21 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
  */
 CRSNNPtr CRS::demoteTo2D(const std::string &newName,
                          const io::DatabaseContextPtr &dbContext) const {
-    const auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
-    if (geogCRS) {
+
+    if (auto derivedGeogCRS =
+            dynamic_cast<const DerivedGeographicCRS *>(this)) {
+        return derivedGeogCRS->demoteTo2D(newName, dbContext);
+    }
+
+    else if (auto geogCRS = dynamic_cast<const GeographicCRS *>(this)) {
         return geogCRS->demoteTo2D(newName, dbContext);
     }
 
-    const auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
-    if (projCRS) {
+    else if (auto projCRS = dynamic_cast<const ProjectedCRS *>(this)) {
         return projCRS->demoteTo2D(newName, dbContext);
     }
 
-    const auto boundCRS = dynamic_cast<const BoundCRS *>(this);
-    if (boundCRS) {
+    else if (auto boundCRS = dynamic_cast<const BoundCRS *>(this)) {
         auto base2DCRS = boundCRS->baseCRS()->demoteTo2D(newName, dbContext);
         auto transf = boundCRS->transformation();
         try {
@@ -1199,8 +1216,7 @@ CRSNNPtr CRS::demoteTo2D(const std::string &newName,
         }
     }
 
-    const auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
-    if (compoundCRS) {
+    else if (auto compoundCRS = dynamic_cast<const CompoundCRS *>(this)) {
         const auto &components = compoundCRS->componentReferenceSystems();
         if (components.size() >= 2) {
             return components[0];
@@ -5894,6 +5910,38 @@ bool DerivedGeographicCRS::_isEquivalentTo(
     auto otherDerivedCRS = dynamic_cast<const DerivedGeographicCRS *>(other);
     return otherDerivedCRS != nullptr &&
            DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a variant of this CRS "demoted" to a 2D one, if not already
+ * the case.
+ *
+ *
+ * @param newName Name of the new CRS. If empty, nameStr() will be used.
+ * @param dbContext Database context to look for potentially already registered
+ *                  2D CRS. May be nullptr.
+ * @return a new CRS demoted to 2D, or the current one if already 2D or not
+ * applicable.
+ * @since 8.1.1
+ */
+DerivedGeographicCRSNNPtr DerivedGeographicCRS::demoteTo2D(
+    const std::string &newName, const io::DatabaseContextPtr &dbContext) const {
+
+    const auto &axisList = coordinateSystem()->axisList();
+    if (axisList.size() == 3) {
+        auto cs = cs::EllipsoidalCS::create(util::PropertyMap(), axisList[0],
+                                            axisList[1]);
+        auto baseGeog2DCRS = util::nn_dynamic_pointer_cast<GeodeticCRS>(
+            baseCRS()->demoteTo2D(std::string(), dbContext));
+        return DerivedGeographicCRS::create(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    !newName.empty() ? newName : nameStr()),
+            NN_CHECK_THROW(baseGeog2DCRS), derivingConversion(), cs);
+    }
+
+    return NN_NO_CHECK(std::dynamic_pointer_cast<DerivedGeographicCRS>(
+        shared_from_this().as_nullable()));
 }
 
 // ---------------------------------------------------------------------------
