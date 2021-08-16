@@ -825,6 +825,64 @@ bool CRS::mustAxisOrderBeSwitchedForVisualization() const {
 
 //! @cond Doxygen_Suppress
 
+void CRS::setProperties(
+    const util::PropertyMap &properties) // throw(InvalidValueTypeException)
+{
+    std::string l_remarks;
+    std::string extensionProj4;
+    properties.getStringValue(IdentifiedObject::REMARKS_KEY, l_remarks);
+    properties.getStringValue("EXTENSION_PROJ4", extensionProj4);
+
+    const char *PROJ_CRS_STRING_PREFIX = "PROJ CRS string: ";
+    const char *PROJ_CRS_STRING_SUFFIX = ". ";
+    const auto beginOfProjStringPos = l_remarks.find(PROJ_CRS_STRING_PREFIX);
+    if (beginOfProjStringPos == std::string::npos && extensionProj4.empty()) {
+        ObjectUsage::setProperties(properties);
+        return;
+    }
+
+    util::PropertyMap newProperties(properties);
+
+    // Parse remarks and extract EXTENSION_PROJ4 from it
+    if (extensionProj4.empty()) {
+        if (beginOfProjStringPos != std::string::npos) {
+            const auto endOfProjStringPos =
+                l_remarks.find(PROJ_CRS_STRING_SUFFIX, beginOfProjStringPos);
+            if (endOfProjStringPos == std::string::npos) {
+                extensionProj4 = l_remarks.substr(
+                    beginOfProjStringPos + strlen(PROJ_CRS_STRING_PREFIX));
+            } else {
+                extensionProj4 = l_remarks.substr(
+                    beginOfProjStringPos + strlen(PROJ_CRS_STRING_PREFIX),
+                    endOfProjStringPos - beginOfProjStringPos -
+                        strlen(PROJ_CRS_STRING_PREFIX));
+            }
+        }
+    }
+
+    if (!extensionProj4.empty()) {
+        if (beginOfProjStringPos == std::string::npos) {
+            // Add EXTENSION_PROJ4 to remarks
+            l_remarks =
+                PROJ_CRS_STRING_PREFIX + extensionProj4 +
+                (l_remarks.empty() ? std::string()
+                                   : PROJ_CRS_STRING_SUFFIX + l_remarks);
+        }
+    }
+
+    newProperties.set(IdentifiedObject::REMARKS_KEY, l_remarks);
+
+    ObjectUsage::setProperties(newProperties);
+
+    d->extensionProj4_ = extensionProj4;
+}
+
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
+
 CRSNNPtr CRS::normalizeForVisualization() const {
 
     const auto createProperties = [this](const std::string &newName =
@@ -1610,8 +1668,6 @@ GeodeticCRS::create(const util::PropertyMap &properties,
         GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(crs);
     crs->setProperties(properties);
-    properties.getStringValue("EXTENSION_PROJ4",
-                              crs->CRS::getPrivate()->extensionProj4_);
 
     return crs;
 }
@@ -1657,8 +1713,7 @@ GeodeticCRS::create(const util::PropertyMap &properties,
         GeodeticCRS::nn_make_shared<GeodeticCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(crs);
     crs->setProperties(properties);
-    properties.getStringValue("EXTENSION_PROJ4",
-                              crs->CRS::getPrivate()->extensionProj4_);
+
     return crs;
 }
 
@@ -2574,8 +2629,6 @@ GeographicCRS::create(const util::PropertyMap &properties,
         GeographicCRS::nn_make_shared<GeographicCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(crs);
     crs->setProperties(properties);
-    properties.getStringValue("EXTENSION_PROJ4",
-                              crs->CRS::getPrivate()->extensionProj4_);
     crs->CRS::getPrivate()->setImplicitCS(properties);
     return crs;
 }
@@ -4049,8 +4102,6 @@ ProjectedCRS::create(const util::PropertyMap &properties,
     crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
-    properties.getStringValue("EXTENSION_PROJ4",
-                              crs->CRS::getPrivate()->extensionProj4_);
     crs->CRS::getPrivate()->setImplicitCS(properties);
     return crs;
 }
