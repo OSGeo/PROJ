@@ -15,7 +15,7 @@
     The code in this file is mostly based on
 
         The Standard and Abridged Molodensky Coordinate Transformation
-        Formulae, 2004, R.E. Deaking,
+        Formulae, 2004, R.E. Deakin,
         http://www.mygeodesy.id.au/documents/Molodensky%20V2.pdf
 
 
