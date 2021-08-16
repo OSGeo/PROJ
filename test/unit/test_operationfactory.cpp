@@ -6108,6 +6108,30 @@ TEST(operation, createOperation_fallback_to_proj4_strings) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createOperation_fallback_to_proj4_strings_bound_of_geog) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +ellps=GRS80 +towgs84=0,0,0 +type=crs");
+    auto src = nn_dynamic_pointer_cast<BoundCRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +ellps=clrk66 +towgs84=0,0,0 +type=crs");
+    auto dest = nn_dynamic_pointer_cast<BoundCRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=longlat +geoc +ellps=GRS80 +towgs84=0,0,0 "
+              "+step +proj=longlat +geoc +ellps=clrk66 +towgs84=0,0,0 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(
     operation,
     createOperation_fallback_to_proj4_strings_regular_with_datum_to_projliteral) {
