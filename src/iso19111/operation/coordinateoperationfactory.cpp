@@ -3121,7 +3121,8 @@ void CoordinateOperationFactory::Private::createOperationsFromProj4Ext(
     projFormatter->setLegacyCRSToCRSContext(true);
     projFormatter->startInversion();
     sourceProjExportable->_exportToPROJString(projFormatter.get());
-    auto geogSrc = dynamic_cast<const crs::GeographicCRS *>(sourceCRS.get());
+    auto geogSrc = dynamic_cast<const crs::GeographicCRS *>(
+        boundSrc ? boundSrc->baseCRS().get() : sourceCRS.get());
     if (geogSrc) {
         auto tmpFormatter = io::PROJStringFormatter::create();
         geogSrc->addAngularUnitConvertAndAxisSwap(tmpFormatter.get());
@@ -3131,7 +3132,8 @@ void CoordinateOperationFactory::Private::createOperationsFromProj4Ext(
     projFormatter->stopInversion();
 
     targetProjExportable->_exportToPROJString(projFormatter.get());
-    auto geogDst = dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
+    auto geogDst = dynamic_cast<const crs::GeographicCRS *>(
+        boundDst ? boundDst->baseCRS().get() : targetCRS.get());
     if (geogDst) {
         auto tmpFormatter = io::PROJStringFormatter::create();
         geogDst->addAngularUnitConvertAndAxisSwap(tmpFormatter.get());
