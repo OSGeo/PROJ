@@ -6403,6 +6403,32 @@ TEST(crs, promoteTo3D_and_demoteTo2D) {
         EXPECT_TRUE(dynamic_cast<const ProjectedCRS *>(demoted.get()) !=
                     nullptr);
     }
+
+    {
+        auto crs = createDerivedGeographicCRS();
+        auto crs3D = crs->promoteTo3D(std::string(), dbContext);
+        auto crs3DAsDerivedGeog =
+            nn_dynamic_pointer_cast<DerivedGeographicCRS>(crs3D);
+        ASSERT_TRUE(crs3DAsDerivedGeog != nullptr);
+        EXPECT_EQ(crs3DAsDerivedGeog->baseCRS()
+                      ->coordinateSystem()
+                      ->axisList()
+                      .size(),
+                  3U);
+        EXPECT_EQ(crs3DAsDerivedGeog->coordinateSystem()->axisList().size(),
+                  3U);
+        EXPECT_TRUE(crs3DAsDerivedGeog->promoteTo3D(std::string(), nullptr)
+                        ->isEquivalentTo(crs3DAsDerivedGeog.get()));
+
+        auto demoted = crs3DAsDerivedGeog->demoteTo2D(std::string(), dbContext);
+        EXPECT_EQ(demoted->baseCRS()->coordinateSystem()->axisList().size(),
+                  2U);
+        EXPECT_EQ(demoted->coordinateSystem()->axisList().size(), 2U);
+        EXPECT_TRUE(demoted->isEquivalentTo(
+            crs.get(), IComparable::Criterion::EQUIVALENT));
+        EXPECT_TRUE(demoted->demoteTo2D(std::string(), nullptr)
+                        ->isEquivalentTo(demoted.get()));
+    }
 }
 
 // ---------------------------------------------------------------------------
