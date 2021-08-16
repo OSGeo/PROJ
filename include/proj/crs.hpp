@@ -173,6 +173,10 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
     PROJ_INTERNAL virtual std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const;
 
+    PROJ_INTERNAL void
+    setProperties(const util::PropertyMap
+                      &properties); // throw(InvalidValueTypeException)
+
   private:
     PROJ_OPAQUE_PRIVATE_DATA
 };
