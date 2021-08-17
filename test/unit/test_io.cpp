@@ -13717,3 +13717,74 @@ TEST(json_export, coordinate_system_id) {
     EXPECT_EQ(cs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(io, EXTENSION_PROJ4) {
+    // Check that the PROJ string is preserved in the remarks
+    auto obj = PROJStringParser().createFromPROJString(
+        "+proj=utm +datum=NAD27 +zone=11 +over +type=crs");
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->remarks(),
+              "PROJ CRS string: +proj=utm +datum=NAD27 +zone=11 +over");
+
+    // Chat that the PROJ string is detected when ingesting a WKT2 with
+    // a REMARKS node that contains it
+    auto wkt2 = crs->exportToWKT(WKTFormatter::create().get());
+    auto obj2 = WKTParser().createFromWKT(wkt2);
+    auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj2);
+    ASSERT_TRUE(crs2 != nullptr);
+    EXPECT_EQ(crs2->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=utm +datum=NAD27 +zone=11 +over +type=crs");
+
+    // Chat that the PROJ string is detected when ingesting a WKT2 with
+    // a REMARKS node that contains it (in the middle of the remarks)
+    auto wkt3 =
+        "PROJCRS[\"unknown\",\n"
+        "    BASEGEOGCRS[\"unknown\",\n"
+        "        DATUM[\"North American Datum 1927\",\n"
+        "            ELLIPSOID[\"Clarke 1866\",6378206.4,294.978698213898,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",6267]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8901]]],\n"
+        "    CONVERSION[\"UTM zone 11N\",\n"
+        "        METHOD[\"Transverse Mercator\",\n"
+        "            ID[\"EPSG\",9807]],\n"
+        "        PARAMETER[\"Latitude of natural origin\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8801]],\n"
+        "        PARAMETER[\"Longitude of natural origin\",-117,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8802]],\n"
+        "        PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "            SCALEUNIT[\"unity\",1],\n"
+        "            ID[\"EPSG\",8805]],\n"
+        "        PARAMETER[\"False easting\",500000,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8806]],\n"
+        "        PARAMETER[\"False northing\",0,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8807]],\n"
+        "        ID[\"EPSG\",16011]],\n"
+        "    CS[Cartesian,2],\n"
+        "        AXIS[\"(E)\",east,\n"
+        "            ORDER[1],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]],\n"
+        "        AXIS[\"(N)\",north,\n"
+        "            ORDER[2],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]],\n"
+        "    REMARK[\"Prefix. PROJ CRS string: +proj=utm +datum=NAD27 +zone=11 "
+        "+over. Suffix\"]]";
+    auto obj3 = WKTParser().createFromWKT(wkt3);
+    auto crs3 = nn_dynamic_pointer_cast<ProjectedCRS>(obj3);
+    ASSERT_TRUE(crs3 != nullptr);
+    EXPECT_EQ(crs3->remarks(), "Prefix. PROJ CRS string: +proj=utm "
+                               "+datum=NAD27 +zone=11 +over. Suffix");
+    EXPECT_EQ(crs3->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=utm +datum=NAD27 +zone=11 +over +type=crs");
+}
