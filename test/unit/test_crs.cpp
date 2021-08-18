@@ -4411,6 +4411,93 @@ TEST(crs, boundCRS_to_WKT2) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, boundCRS_with_usage) {
+
+    auto wkt =
+        "BOUNDCRS[\n"
+        "    SOURCECRS[\n"
+        "        PROJCRS[\"Monte Mario / Italy zone 2\",\n"
+        "            BASEGEOGCRS[\"Monte Mario\",\n"
+        "                DATUM[\"Monte Mario\",\n"
+        "                    ELLIPSOID[\"International 1924\",6378388,297,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                ID[\"EPSG\",4265]],\n"
+        "            CONVERSION[\"unnamed\",\n"
+        "                METHOD[\"Transverse Mercator\",\n"
+        "                    ID[\"EPSG\",9807]],\n"
+        "                PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8801]],\n"
+        "                PARAMETER[\"Longitude of natural origin\",15,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8802]],\n"
+        "                PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
+        "                    SCALEUNIT[\"unity\",1],\n"
+        "                    ID[\"EPSG\",8805]],\n"
+        "                PARAMETER[\"False easting\",2520000,\n"
+        "                    LENGTHUNIT[\"metre\",1],\n"
+        "                    ID[\"EPSG\",8806]],\n"
+        "                PARAMETER[\"False northing\",0,\n"
+        "                    LENGTHUNIT[\"metre\",1],\n"
+        "                    ID[\"EPSG\",8807]]],\n"
+        "            CS[Cartesian,2],\n"
+        "                AXIS[\"x\",east,\n"
+        "                    ORDER[1],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                AXIS[\"y\",north,\n"
+        "                    ORDER[2],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",3004]]],\n"
+        "    TARGETCRS[\n"
+        "        GEOGCRS[\"WGS 84\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,2],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            ID[\"EPSG\",4326]]],\n"
+        "    ABRIDGEDTRANSFORMATION[\"Transformation from Monte Mario to "
+        "WGS84\",\n"
+        "        METHOD[\"Position Vector transformation (geog2D domain)\",\n"
+        "            ID[\"EPSG\",9606]],\n"
+        "        PARAMETER[\"X-axis translation\",-50.2,\n"
+        "            ID[\"EPSG\",8605]],\n"
+        "        PARAMETER[\"Y-axis translation\",-50.4,\n"
+        "            ID[\"EPSG\",8606]],\n"
+        "        PARAMETER[\"Z-axis translation\",84.8,\n"
+        "            ID[\"EPSG\",8607]],\n"
+        "        PARAMETER[\"X-axis rotation\",-0.69,\n"
+        "            ID[\"EPSG\",8608]],\n"
+        "        PARAMETER[\"Y-axis rotation\",-2.012,\n"
+        "            ID[\"EPSG\",8609]],\n"
+        "        PARAMETER[\"Z-axis rotation\",0.459,\n"
+        "            ID[\"EPSG\",8610]],\n"
+        "        PARAMETER[\"Scale difference\",0.99997192,\n"
+        "            ID[\"EPSG\",8611]]],\n"
+        "    USAGE[\n"
+        "        SCOPE[\"unknown\"],\n"
+        "        AREA[\"Italy - Sicily onshore\"],\n"
+        "        BBOX[36.59,12.36,38.35,15.71]]]";
+    auto crs =
+        nn_dynamic_pointer_cast<BoundCRS>(WKTParser().createFromWKT(wkt));
+    ASSERT_TRUE(crs != nullptr);
+
+    auto got_wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
+    EXPECT_EQ(got_wkt, wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, boundCRS_crs_link) {
 
     {
