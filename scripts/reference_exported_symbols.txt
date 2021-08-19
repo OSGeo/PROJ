@@ -98,6 +98,7 @@ osgeo::proj::crs::BoundCRS::~BoundCRS()
 osgeo::proj::crs::BoundCRS::create(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Transformation> > const&)
 osgeo::proj::crs::BoundCRS::createFromNadgrids(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::string const&)
 osgeo::proj::crs::BoundCRS::createFromTOWGS84(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, std::vector<double, std::allocator<double> > const&)
+osgeo::proj::crs::BoundCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Transformation> > const&)
 osgeo::proj::crs::BoundCRS::hubCRS() const
 osgeo::proj::crs::BoundCRS::transformation() const
 osgeo::proj::crs::CompoundCRS::componentReferenceSystems() const

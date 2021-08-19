@@ -89,10 +89,6 @@ using json = nlohmann::json;
 
 //! @cond Doxygen_Suppress
 static const std::string emptyString{};
-
-// If changing that value, change it in data/projjson.schema.json as well
-#define PROJJSON_CURRENT_VERSION                                               \
-    "https://proj.org/schemas/v0.2/projjson.schema.json"
 //! @endcond
 
 #if 0
@@ -108,6 +104,18 @@ template<> nn<std::unique_ptr<NS_PROJ::io::WKTNode, std::default_delete<NS_PROJ:
 
 NS_PROJ_START
 namespace io {
+
+//! @cond Doxygen_Suppress
+const char *JSONFormatter::PROJJSON_v0_2 =
+    "https://proj.org/schemas/v0.2/projjson.schema.json";
+
+const char *JSONFormatter::PROJJSON_v0_3 =
+    "https://proj.org/schemas/v0.3/projjson.schema.json";
+
+// v0.2 is our base version. We only upgrade to 0.3 for usage node in BoundCRS
+#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_2
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -4593,8 +4601,8 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
         NN_NO_CHECK(targetCRS), nullptr, buildProperties(methodNode),
         parameters, values, std::vector<PositionalAccuracyNNPtr>());
 
-    return BoundCRS::create(NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS),
-                            transformation);
+    return BoundCRS::create(buildProperties(node), NN_NO_CHECK(sourceCRS),
+                            NN_NO_CHECK(targetCRS), transformation);
 }
 
 // ---------------------------------------------------------------------------
@@ -5057,7 +5065,8 @@ class JSONParser {
 
     IdentifierNNPtr buildId(const json &j, bool removeInverseOf);
     static ObjectDomainPtr buildObjectDomain(const json &j);
-    PropertyMap buildProperties(const json &j, bool removeInverseOf = false);
+    PropertyMap buildProperties(const json &j, bool removeInverseOf = false,
+                                bool nameRequired = true);
 
     GeographicCRSNNPtr buildGeographicCRS(const json &j);
     GeodeticCRSNNPtr buildGeodeticCRS(const json &j);
@@ -5358,13 +5367,17 @@ IdentifierNNPtr JSONParser::buildId(const json &j, bool removeInverseOf) {
 
 // ---------------------------------------------------------------------------
 
-PropertyMap JSONParser::buildProperties(const json &j, bool removeInverseOf) {
+PropertyMap JSONParser::buildProperties(const json &j, bool removeInverseOf,
+                                        bool nameRequired) {
     PropertyMap map;
-    std::string name(getName(j));
-    if (removeInverseOf && starts_with(name, "Inverse of ")) {
-        name = name.substr(strlen("Inverse of "));
+
+    if (j.contains("name") || nameRequired) {
+        std::string name(getName(j));
+        if (removeInverseOf && starts_with(name, "Inverse of ")) {
+            name = name.substr(strlen("Inverse of "));
+        }
+        map.set(IdentifiedObject::NAME_KEY, name);
     }
-    map.set(IdentifiedObject::NAME_KEY, name);
 
     if (j.contains("ids")) {
         auto idsJ = getArray(j, "ids");
@@ -5782,7 +5795,10 @@ BoundCRSNNPtr JSONParser::buildBoundCRS(const json &j) {
         nullptr, buildProperties(methodJ), parameters, values,
         std::vector<PositionalAccuracyNNPtr>());
 
-    return BoundCRS::create(sourceCRS, targetCRS, transformation);
+    return BoundCRS::create(buildProperties(j,
+                                            /* removeInverseOf= */ false,
+                                            /* nameRequired=*/false),
+                            sourceCRS, targetCRS, transformation);
 }
 
 // ---------------------------------------------------------------------------
@@ -10529,7 +10545,7 @@ struct JSONFormatter::Private {
     bool allowIDInImmediateChild_ = false;
     bool omitTypeInImmediateChild_ = false;
     bool abridgedTransformation_ = false;
-    std::string schema_ = PROJJSON_CURRENT_VERSION;
+    std::string schema_ = PROJJSON_DEFAULT_VERSION;
 
     std::string result_{};
 
@@ -10580,7 +10596,10 @@ JSONFormatter &JSONFormatter::setIndentationWidth(int width) noexcept {
  * If set to empty string, it will not be written.
  */
 JSONFormatter &JSONFormatter::setSchema(const std::string &schema) noexcept {
-    d->schema_ = schema;
+    // Upgrade only to v0.3 if the default was v0.2
+    if (schema != PROJJSON_v0_3 || d->schema_ == PROJJSON_v0_2) {
+        d->schema_ = schema;
+    }
     return *this;
 }
 
@@ -10604,8 +10623,9 @@ bool JSONFormatter::outputId() const { return d->outputIdStack_.back(); }
 
 // ---------------------------------------------------------------------------
 
-bool JSONFormatter::outputUsage() const {
-    return outputId() && d->outputIdStack_.size() == 2;
+bool JSONFormatter::outputUsage(bool calledBeforeObjectContext) const {
+    return outputId() &&
+           d->outputIdStack_.size() == (calledBeforeObjectContext ? 1U : 2U);
 }
 
 // ---------------------------------------------------------------------------
