@@ -537,7 +537,11 @@ class PROJ_GCC_DLL JSONFormatter {
     // cppcheck-suppress functionStatic
     PROJ_INTERNAL bool outputId() const;
 
-    PROJ_INTERNAL bool outputUsage() const;
+    PROJ_INTERNAL bool
+    outputUsage(bool calledBeforeObjectContext = false) const;
+
+    PROJ_INTERNAL static const char *PROJJSON_v0_2;
+    PROJ_INTERNAL static const char *PROJJSON_v0_3;
 
     //! @endcond
 

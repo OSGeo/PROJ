@@ -11891,9 +11891,12 @@ TEST(json_import, compound_crs) {
 // ---------------------------------------------------------------------------
 
 TEST(json_import, bound_crs) {
+    // Explicitly check that the version is v0.2 in that circumstance. Might
+    // require adjustments in the future.
     auto json =
         "{\n"
-        "  \"$schema\": \"foo\",\n"
+        "  \"$schema\": "
+        "\"https://proj.org/schemas/v0.2/projjson.schema.json\",\n"
         "  \"type\": \"BoundCRS\",\n"
         "  \"source_crs\": {\n"
         "    \"type\": \"GeographicCRS\",\n"
@@ -11987,9 +11990,125 @@ TEST(json_import, bound_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
     ASSERT_TRUE(boundCRS != nullptr);
-    EXPECT_EQ(
-        boundCRS->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
-        json);
+    EXPECT_EQ(boundCRS->exportToJSON(JSONFormatter::create().get()), json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, bound_crs_with_name_and_usage) {
+    // Explicitly check that the version is v0.3 in that circumstance. Might
+    // require adjustments in the future.
+    auto json =
+        "{\n"
+        "  \"$schema\": "
+        "\"https://proj.org/schemas/v0.3/projjson.schema.json\",\n"
+        "  \"type\": \"BoundCRS\",\n"
+        "  \"name\": \"my bound crs\",\n"
+        "  \"source_crs\": {\n"
+        "    \"type\": \"GeographicCRS\",\n"
+        "    \"name\": \"unknown\",\n"
+        "    \"datum\": {\n"
+        "      \"type\": \"GeodeticReferenceFrame\",\n"
+        "      \"name\": \"Unknown based on GRS80 ellipsoid\",\n"
+        "      \"ellipsoid\": {\n"
+        "        \"name\": \"GRS 1980\",\n"
+        "        \"semi_major_axis\": 6378137,\n"
+        "        \"inverse_flattening\": 298.257222101,\n"
+        "        \"id\": {\n"
+        "          \"authority\": \"EPSG\",\n"
+        "          \"code\": 7019\n"
+        "        }\n"
+        "      }\n"
+        "    },\n"
+        "    \"coordinate_system\": {\n"
+        "      \"subtype\": \"ellipsoidal\",\n"
+        "      \"axis\": [\n"
+        "        {\n"
+        "          \"name\": \"Longitude\",\n"
+        "          \"abbreviation\": \"lon\",\n"
+        "          \"direction\": \"east\",\n"
+        "          \"unit\": \"degree\"\n"
+        "        },\n"
+        "        {\n"
+        "          \"name\": \"Latitude\",\n"
+        "          \"abbreviation\": \"lat\",\n"
+        "          \"direction\": \"north\",\n"
+        "          \"unit\": \"degree\"\n"
+        "        }\n"
+        "      ]\n"
+        "    }\n"
+        "  },\n"
+        "  \"target_crs\": {\n"
+        "    \"type\": \"GeographicCRS\",\n"
+        "    \"name\": \"WGS 84\",\n"
+        "    \"datum\": {\n"
+        "      \"type\": \"GeodeticReferenceFrame\",\n"
+        "      \"name\": \"World Geodetic System 1984\",\n"
+        "      \"ellipsoid\": {\n"
+        "        \"name\": \"WGS 84\",\n"
+        "        \"semi_major_axis\": 6378137,\n"
+        "        \"inverse_flattening\": 298.257223563\n"
+        "      }\n"
+        "    },\n"
+        "    \"coordinate_system\": {\n"
+        "      \"subtype\": \"ellipsoidal\",\n"
+        "      \"axis\": [\n"
+        "        {\n"
+        "          \"name\": \"Latitude\",\n"
+        "          \"abbreviation\": \"lat\",\n"
+        "          \"direction\": \"north\",\n"
+        "          \"unit\": \"degree\"\n"
+        "        },\n"
+        "        {\n"
+        "          \"name\": \"Longitude\",\n"
+        "          \"abbreviation\": \"lon\",\n"
+        "          \"direction\": \"east\",\n"
+        "          \"unit\": \"degree\"\n"
+        "        }\n"
+        "      ]\n"
+        "    },\n"
+        "    \"id\": {\n"
+        "      \"authority\": \"EPSG\",\n"
+        "      \"code\": 4326\n"
+        "    }\n"
+        "  },\n"
+        "  \"transformation\": {\n"
+        "    \"name\": \"unknown to WGS84\",\n"
+        "    \"method\": {\n"
+        "      \"name\": \"NTv2\",\n"
+        "      \"id\": {\n"
+        "        \"authority\": \"EPSG\",\n"
+        "        \"code\": 9615\n"
+        "      }\n"
+        "    },\n"
+        "    \"parameters\": [\n"
+        "      {\n"
+        "        \"name\": \"Latitude and longitude difference file\",\n"
+        "        \"value\": \"@foo\",\n"
+        "        \"id\": {\n"
+        "          \"authority\": \"EPSG\",\n"
+        "          \"code\": 8656\n"
+        "        }\n"
+        "      }\n"
+        "    ]\n"
+        "  },\n"
+        "  \"scope\": \"Example only (fictitious).\",\n"
+        "  \"area\": \"Description of the extent of the CRS.\",\n"
+        "  \"bbox\": {\n"
+        "    \"south_latitude\": -90,\n"
+        "    \"west_longitude\": -180,\n"
+        "    \"north_latitude\": 90,\n"
+        "    \"east_longitude\": 180\n"
+        "  },\n"
+        "  \"id\": {\n"
+        "    \"authority\": \"foo\",\n"
+        "    \"code\": 1234\n"
+        "  }\n"
+        "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
+    ASSERT_TRUE(boundCRS != nullptr);
+    EXPECT_EQ(boundCRS->exportToJSON(JSONFormatter::create().get()), json);
 }
 
 // ---------------------------------------------------------------------------

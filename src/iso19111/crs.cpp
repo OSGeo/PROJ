@@ -1217,7 +1217,7 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         try {
             transf->getTOWGS84Parameters();
             return BoundCRS::create(
-                base3DCRS,
+                createProperties(), base3DCRS,
                 boundCRS->hubCRS()->promoteTo3D(std::string(), dbContext),
                 transf->promoteTo3D(std::string(), dbContext));
         } catch (const io::FormattingException &) {
@@ -5294,6 +5294,37 @@ BoundCRS::transformation() PROJ_PURE_DEFN {
 /** \brief Instantiate a BoundCRS from a base CRS, a hub CRS and a
  * transformation.
  *
+ * @param properties See \ref general_properties.
+ * @param baseCRSIn base CRS.
+ * @param hubCRSIn hub CRS.
+ * @param transformationIn transformation from base CRS to hub CRS.
+ * @return new BoundCRS.
+ * @since PROJ 8.2
+ */
+BoundCRSNNPtr
+BoundCRS::create(const util::PropertyMap &properties, const CRSNNPtr &baseCRSIn,
+                 const CRSNNPtr &hubCRSIn,
+                 const operation::TransformationNNPtr &transformationIn) {
+    auto crs = BoundCRS::nn_make_shared<BoundCRS>(baseCRSIn, hubCRSIn,
+                                                  transformationIn);
+    crs->assignSelf(crs);
+    const auto &l_name = baseCRSIn->nameStr();
+    if (properties.get(common::IdentifiedObject::NAME_KEY) == nullptr &&
+        !l_name.empty()) {
+        auto newProperties(properties);
+        newProperties.set(common::IdentifiedObject::NAME_KEY, l_name);
+        crs->setProperties(newProperties);
+    } else {
+        crs->setProperties(properties);
+    }
+    return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a BoundCRS from a base CRS, a hub CRS and a
+ * transformation.
+ *
  * @param baseCRSIn base CRS.
  * @param hubCRSIn hub CRS.
  * @param transformationIn transformation from base CRS to hub CRS.
@@ -5302,15 +5333,7 @@ BoundCRS::transformation() PROJ_PURE_DEFN {
 BoundCRSNNPtr
 BoundCRS::create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
                  const operation::TransformationNNPtr &transformationIn) {
-    auto crs = BoundCRS::nn_make_shared<BoundCRS>(baseCRSIn, hubCRSIn,
-                                                  transformationIn);
-    crs->assignSelf(crs);
-    const auto &l_name = baseCRSIn->nameStr();
-    if (!l_name.empty()) {
-        crs->setProperties(util::PropertyMap().set(
-            common::IdentifiedObject::NAME_KEY, l_name));
-    }
-    return crs;
+    return create(util::PropertyMap(), baseCRSIn, hubCRSIn, transformationIn);
 }
 
 // ---------------------------------------------------------------------------
@@ -5415,6 +5438,7 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->setAbridgedTransformation(true);
         d->transformation()->_exportToWKT(formatter);
         formatter->setAbridgedTransformation(false);
+        ObjectUsage::baseExportToWKT(formatter);
         formatter->endNode();
     } else {
 
@@ -5455,8 +5479,21 @@ void BoundCRS::_exportToJSON(
     io::JSONFormatter *formatter) const // throw(io::FormattingException)
 {
     auto writer = formatter->writer();
-    auto objectContext(
-        formatter->MakeObjectContext("BoundCRS", !identifiers().empty()));
+    const auto &l_name = nameStr();
+    if ((formatter->outputUsage(true) && !domains().empty()) ||
+        (formatter->outputId() && !identifiers().empty()) ||
+        !remarks().empty() ||
+        (!l_name.empty() && l_name != d->baseCRS()->nameStr())) {
+        // Only upgrades to v0.3 schema if needed
+        formatter->setSchema(io::JSONFormatter::PROJJSON_v0_3);
+    }
+
+    auto objectContext(formatter->MakeObjectContext("BoundCRS", false));
+
+    if (!l_name.empty() && l_name != d->baseCRS()->nameStr()) {
+        writer->AddObjKey("name");
+        writer->Add(l_name);
+    }
 
     writer->AddObjKey("source_crs");
     d->baseCRS()->_exportToJSON(formatter);
@@ -5469,6 +5506,8 @@ void BoundCRS::_exportToJSON(
     formatter->setAbridgedTransformation(true);
     d->transformation()->_exportToJSON(formatter);
     formatter->setAbridgedTransformation(false);
+
+    ObjectUsage::baseExportToJSON(formatter);
 }
 //! @endcond
 

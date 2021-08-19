@@ -1011,6 +1011,11 @@ class PROJ_GCC_DLL BoundCRS final : public CRS,
     //! @endcond
 
     PROJ_DLL static BoundCRSNNPtr
+    create(const util::PropertyMap &properties, const CRSNNPtr &baseCRSIn,
+           const CRSNNPtr &hubCRSIn,
+           const operation::TransformationNNPtr &transformationIn);
+
+    PROJ_DLL static BoundCRSNNPtr
     create(const CRSNNPtr &baseCRSIn, const CRSNNPtr &hubCRSIn,
            const operation::TransformationNNPtr &transformationIn);
 

@@ -55,7 +55,7 @@ Synopsis
       (*added in 6.2*)
     - a OGC URN combining references for concatenated operations
       (e.g. "urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618")
-    - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.2/projjson.schema.json (*added in 6.2*)
+    - a PROJJSON string. The jsonschema is at https://proj.org/schemas/v0.3/projjson.schema.json (*added in 6.2*)
     - a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (*added in 7.1*)
 
     {object_reference} is a filename preceded by the '@' character.  The
