@@ -3117,6 +3117,115 @@ TEST_F(FactoryWithTmpDatabase,
 
 // ---------------------------------------------------------------------------
 
+TEST_F(FactoryWithTmpDatabase,
+       check_fixup_direction_concatenated_inverse_map_projection) {
+
+    // This tests https://github.com/OSGeo/PROJ/issues/2817
+
+    createStructure();
+    populateWithFakeEPSG();
+
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('EPSG','NOOP_TRANSFORMATION_32631','name',NULL,"
+        "'PROJ','PROJString','+proj=noop',"
+        "'EPSG','32631','EPSG','32631',0.0,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    ASSERT_TRUE(
+        execute("INSERT INTO usage VALUES('EPSG',"
+                "'other_transformation_NOOP_TRANSFORMATION_32631_usage',"
+                "'other_transformation',"
+                "'EPSG','NOOP_TRANSFORMATION_32631',"
+                "'EPSG','1262','EPSG','1024');"))
+        << last_error();
+
+    ASSERT_TRUE(execute(
+        "INSERT INTO other_transformation "
+        "VALUES('EPSG','NOOP_TRANSFORMATION_4326','name',NULL,"
+        "'PROJ','PROJString','+proj=noop',"
+        "'EPSG','4326','EPSG','4326',0.0,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"
+        "NULL,NULL,NULL,NULL,NULL,NULL,0);"))
+        << last_error();
+
+    ASSERT_TRUE(execute("INSERT INTO usage VALUES('EPSG',"
+                        "'other_transformation_NOOP_TRANSFORMATION_4326_usage',"
+                        "'other_transformation',"
+                        "'EPSG','NOOP_TRANSFORMATION_4326',"
+                        "'EPSG','1262','EPSG','1024');"))
+        << last_error();
+
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation "
+                        "VALUES('EPSG','TEST_CONCATENATED','name',NULL,"
+                        "'EPSG','4326','EPSG'"
+                        ",'4326',NULL,NULL,0);"))
+        << last_error();
+    ASSERT_TRUE(execute("INSERT INTO usage VALUES('EPSG',"
+                        "'concatenated_operation_TEST_CONCATENATED_usage',"
+                        "'concatenated_operation',"
+                        "'EPSG','TEST_CONCATENATED',"
+                        "'EPSG','1262','EPSG','1024');"))
+        << last_error();
+
+    // Forward map projection
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                        "VALUES('EPSG','TEST_CONCATENATED',1,"
+                        "'EPSG','16031');"))
+        << last_error();
+
+    // Noop projected
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                        "VALUES('EPSG','TEST_CONCATENATED',2,"
+                        "'EPSG','NOOP_TRANSFORMATION_32631');"))
+        << last_error();
+
+    // Inverse map projection
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                        "VALUES('EPSG','TEST_CONCATENATED',3,"
+                        "'EPSG','16031');"))
+        << last_error();
+
+    // Noop geographic
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                        "VALUES('EPSG','TEST_CONCATENATED',4,"
+                        "'EPSG','NOOP_TRANSFORMATION_4326');"))
+        << last_error();
+
+    // Forward map projection
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                        "VALUES('EPSG','TEST_CONCATENATED',5,"
+                        "'EPSG','16031');"))
+        << last_error();
+
+    // Noop projected
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                        "VALUES('EPSG','TEST_CONCATENATED',6,"
+                        "'EPSG','NOOP_TRANSFORMATION_32631');"))
+        << last_error();
+
+    // Inverse map projection
+    ASSERT_TRUE(execute("INSERT INTO concatenated_operation_step "
+                        "VALUES('EPSG','TEST_CONCATENATED',7,"
+                        "'EPSG','16031');"))
+        << last_error();
+
+    auto dbContext = DatabaseContext::create(m_ctxt);
+    auto authFactory = AuthorityFactory::create(dbContext, std::string("EPSG"));
+    const auto op =
+        authFactory->createCoordinateOperation("TEST_CONCATENATED", false);
+    auto wkt = op->exportToPROJString(PROJStringFormatter::create().get());
+    EXPECT_EQ(wkt, "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(factory, createObjectsFromName) {
     auto ctxt = DatabaseContext::create();
     auto factory = AuthorityFactory::create(ctxt, std::string());
