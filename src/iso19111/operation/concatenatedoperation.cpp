@@ -335,13 +335,26 @@ void ConcatenatedOperation::fixStepsDirection(
                 }
             }
         } else if (conv && i > 0 && i < operationsInOut.size() - 1) {
-            // For an intermediate conversion, use the target CRS of the
-            // previous step and the source CRS of the next step
+
             l_sourceCRS = operationsInOut[i - 1]->targetCRS();
             l_targetCRS = operationsInOut[i + 1]->sourceCRS();
+            // For an intermediate conversion, use the target CRS of the
+            // previous step and the source CRS of the next step
             if (l_sourceCRS && l_targetCRS) {
-                op->setCRSs(NN_NO_CHECK(l_sourceCRS), NN_NO_CHECK(l_targetCRS),
-                            nullptr);
+                // If the sourceCRS is a projectedCRS and the target a
+                // geographic one, then we must inverse the operation. See
+                // https://github.com/OSGeo/PROJ/issues/2817
+                if (dynamic_cast<const crs::ProjectedCRS *>(
+                        l_sourceCRS.get()) &&
+                    dynamic_cast<const crs::GeographicCRS *>(
+                        l_targetCRS.get())) {
+                    op->setCRSs(NN_NO_CHECK(l_targetCRS),
+                                NN_NO_CHECK(l_sourceCRS), nullptr);
+                    op = op->inverse();
+                } else {
+                    op->setCRSs(NN_NO_CHECK(l_sourceCRS),
+                                NN_NO_CHECK(l_targetCRS), nullptr);
+                }
             } else if (l_sourceCRS && l_targetCRS == nullptr &&
                        conv->method()->getEPSGCode() ==
                            EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL) {
@@ -380,6 +393,11 @@ void ConcatenatedOperation::fixStepsDirection(
             // whereas we should instead use the reverse path.
             auto prevOpTarget = (i == 0) ? concatOpSourceCRS.as_nullable()
                                          : operationsInOut[i - 1]->targetCRS();
+            if (prevOpTarget == nullptr) {
+                throw InvalidOperation(
+                    "Cannot determine targetCRS of operation at step " +
+                    toString(static_cast<int>(i)));
+            }
             if (compareStepCRS(l_sourceCRS.get(), prevOpTarget.get())) {
                 // do nothing
             } else if (compareStepCRS(l_targetCRS.get(), prevOpTarget.get())) {
