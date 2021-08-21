@@ -387,37 +387,6 @@ static void set_ellipsoid(PJ *P) {
 }
 
 
-static enum pj_io_units get_next_non_whatever_unit(struct Pipeline* pipeline, size_t step, PJ_DIRECTION dir) {
-    const auto& steps = pipeline->steps;
-    const auto nsteps = steps.size();
-
-    if (dir == PJ_FWD) {
-        for (size_t i = step+1; i<nsteps; i++) {
-            auto pj = steps[i].pj;
-            if (pj_left(pj) != pj_right(pj))
-                return pj_left(pj);
-            if (pj_left(pj) != PJ_IO_UNITS_WHATEVER)
-                return pj_left(pj);
-            if (pj_right(pj) != PJ_IO_UNITS_WHATEVER)
-                return pj_right(pj);
-        }
-    } else {
-        for (size_t i=step; i>0;) {
-            i--;
-            auto pj = steps[i].pj;
-            if (pj_right(pj) != pj_left(pj))
-                return pj_right(pj);
-            if (pj_right(pj) != PJ_IO_UNITS_WHATEVER)
-                return pj_right(pj);
-            if (pj_left(pj) != PJ_IO_UNITS_WHATEVER)
-                return pj_left(pj);
-        }
-    }
-    return PJ_IO_UNITS_WHATEVER;
-}
-
-
-
 PJ *OPERATION(pipeline,0) {
     int i, nsteps = 0, argc;
     int i_pipeline = -1, i_first_step = -1, i_current_step;
@@ -585,20 +554,42 @@ PJ *OPERATION(pipeline,0) {
     /*      proj=pipeline step proj=unitconvert xy_in=deg xy_out=rad step ...           */
     /* where the left-hand side units of the first step shouldn't be changed to RADIANS */
     /* as it will result in deg->rad conversions in cs2cs and other applications.       */
-    for (i=0; i<nsteps; i++) {
+
+    for (i=nsteps-2; i>=0; --i) {
         auto pj = pipeline->steps[i].pj;
         if (pj_left(pj) == PJ_IO_UNITS_WHATEVER && pj_right(pj) == PJ_IO_UNITS_WHATEVER) {
-            pj->left = get_next_non_whatever_unit(pipeline, i, PJ_FWD);
-            pj->right = get_next_non_whatever_unit(pipeline, i, PJ_FWD);
+            const auto right_pj = pipeline->steps[i+1].pj;
+            const auto right_pj_left = pj_left(right_pj);
+            const auto right_pj_right = pj_right(right_pj);
+            if (right_pj_left != right_pj_right || right_pj_left != PJ_IO_UNITS_WHATEVER )
+            {
+                pj->left = right_pj_left;
+                pj->right = right_pj_left;
+            }
+            else if (right_pj_right != PJ_IO_UNITS_WHATEVER)
+            {
+                pj->left = right_pj_right;
+                pj->right = right_pj_right;
+            }
         }
     }
 
-    for (i=nsteps; i>0;) {
-        --i;
+    for (i=1; i<nsteps; i++) {
         auto pj = pipeline->steps[i].pj;
         if (pj_left(pj) == PJ_IO_UNITS_WHATEVER && pj_right(pj) == PJ_IO_UNITS_WHATEVER) {
-            pj->right = get_next_non_whatever_unit(pipeline, i, PJ_INV);
-            pj->left = get_next_non_whatever_unit(pipeline, i, PJ_INV);
+            const auto left_pj = pipeline->steps[i-1].pj;
+            const auto left_pj_left = pj_left(left_pj);
+            const auto left_pj_right = pj_right(left_pj);
+            if (left_pj_left != left_pj_right || left_pj_right != PJ_IO_UNITS_WHATEVER )
+            {
+                pj->left = left_pj_right;
+                pj->right = left_pj_right;
+            }
+            else if (left_pj_left != PJ_IO_UNITS_WHATEVER)
+            {
+                pj->left = left_pj_left;
+                pj->right = left_pj_left;
+            }
         }
     }
 
