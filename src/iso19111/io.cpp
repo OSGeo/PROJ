@@ -7475,31 +7475,36 @@ const std::string &PROJStringFormatter::toString() const {
         }
     }
 
-    bool changeDone;
-    do {
-        changeDone = false;
-        auto iterPrev = d->steps_.begin();
-        if (iterPrev == d->steps_.end()) {
-            break;
+    {
+        auto iterCur = d->steps_.begin();
+        if (iterCur != d->steps_.end()) {
+            ++iterCur;
         }
-        auto iterCur = iterPrev;
-        iterCur++;
-        for (size_t i = 1; i < d->steps_.size(); ++i, ++iterCur, ++iterPrev) {
+        while (iterCur != d->steps_.end()) {
 
+            assert(iterCur != d->steps_.begin());
+            auto iterPrev = std::prev(iterCur);
             auto &prevStep = *iterPrev;
             auto &curStep = *iterCur;
 
             const auto curStepParamCount = curStep.paramValues.size();
             const auto prevStepParamCount = prevStep.paramValues.size();
 
+            const auto deletePrevAndCurIter = [this, &iterPrev, &iterCur]() {
+                iterCur = d->steps_.erase(iterPrev, std::next(iterCur));
+                if (iterCur != d->steps_.begin())
+                    iterCur = std::prev(iterCur);
+                if (iterCur == d->steps_.begin())
+                    ++iterCur;
+            };
+
             // longlat (or its inverse) with ellipsoid only is a no-op
             // do that only for an internal step
-            if (i + 1 < d->steps_.size() && curStep.name == "longlat" &&
-                curStepParamCount == 1 &&
+            if (std::next(iterCur) != d->steps_.end() &&
+                curStep.name == "longlat" && curStepParamCount == 1 &&
                 curStep.paramValues[0].keyEquals("ellps")) {
-                d->steps_.erase(iterCur);
-                changeDone = true;
-                break;
+                iterCur = d->steps_.erase(iterCur);
+                continue;
             }
 
             // push v_x followed by pop v_x is a no-op.
@@ -7507,10 +7512,8 @@ const std::string &PROJStringFormatter::toString() const {
                 !curStep.inverted && !prevStep.inverted &&
                 curStepParamCount == 1 && prevStepParamCount == 1 &&
                 curStep.paramValues[0].key == prevStep.paramValues[0].key) {
-                ++iterCur;
-                d->steps_.erase(iterPrev, iterCur);
-                changeDone = true;
-                break;
+                deletePrevAndCurIter();
+                continue;
             }
 
             // pop v_x followed by push v_x is, almost, a no-op. For our
@@ -7520,10 +7523,8 @@ const std::string &PROJStringFormatter::toString() const {
                 !curStep.inverted && !prevStep.inverted &&
                 curStepParamCount == 1 && prevStepParamCount == 1 &&
                 curStep.paramValues[0].key == prevStep.paramValues[0].key) {
-                ++iterCur;
-                d->steps_.erase(iterPrev, iterCur);
-                changeDone = true;
-                break;
+                deletePrevAndCurIter();
+                continue;
             }
 
             // unitconvert (xy) followed by its inverse is a no-op
@@ -7537,10 +7538,8 @@ const std::string &PROJStringFormatter::toString() const {
                 prevStep.paramValues[1].keyEquals("xy_out") &&
                 curStep.paramValues[0].value == prevStep.paramValues[1].value &&
                 curStep.paramValues[1].value == prevStep.paramValues[0].value) {
-                ++iterCur;
-                d->steps_.erase(iterPrev, iterCur);
-                changeDone = true;
-                break;
+                deletePrevAndCurIter();
+                continue;
             }
 
             // unitconvert (z) followed by its inverse is a no-op
@@ -7554,10 +7553,8 @@ const std::string &PROJStringFormatter::toString() const {
                 prevStep.paramValues[1].keyEquals("z_out") &&
                 curStep.paramValues[0].value == prevStep.paramValues[1].value &&
                 curStep.paramValues[1].value == prevStep.paramValues[0].value) {
-                ++iterCur;
-                d->steps_.erase(iterPrev, iterCur);
-                changeDone = true;
-                break;
+                deletePrevAndCurIter();
+                continue;
             }
 
             // unitconvert (xyz) followed by its inverse is a no-op
@@ -7577,13 +7574,20 @@ const std::string &PROJStringFormatter::toString() const {
                 curStep.paramValues[1].value == prevStep.paramValues[3].value &&
                 curStep.paramValues[2].value == prevStep.paramValues[0].value &&
                 curStep.paramValues[3].value == prevStep.paramValues[1].value) {
-                ++iterCur;
-                d->steps_.erase(iterPrev, iterCur);
-                changeDone = true;
-                break;
+                deletePrevAndCurIter();
+                continue;
             }
 
+            const auto deletePrevIter = [this, &iterPrev, &iterCur]() {
+                d->steps_.erase(iterPrev, iterCur);
+                if (iterCur != d->steps_.begin())
+                    iterCur = std::prev(iterCur);
+                if (iterCur == d->steps_.begin())
+                    ++iterCur;
+            };
+
             // combine unitconvert (xy) and unitconvert (z)
+            bool changeDone = false;
             for (int k = 0; k < 2; ++k) {
                 auto &first = (k == 0) ? curStep : prevStep;
                 auto &second = (k == 0) ? prevStep : curStep;
@@ -7600,7 +7604,7 @@ const std::string &PROJStringFormatter::toString() const {
                     auto xy_out = second.paramValues[1].value;
                     auto z_in = first.paramValues[0].value;
                     auto z_out = first.paramValues[1].value;
-                    d->steps_.erase(iterPrev, iterCur);
+
                     iterCur->paramValues.clear();
                     iterCur->paramValues.emplace_back(
                         Step::KeyValue("xy_in", xy_in));
@@ -7610,12 +7614,14 @@ const std::string &PROJStringFormatter::toString() const {
                         Step::KeyValue("xy_out", xy_out));
                     iterCur->paramValues.emplace_back(
                         Step::KeyValue("z_out", z_out));
+
+                    deletePrevIter();
                     changeDone = true;
                     break;
                 }
             }
             if (changeDone) {
-                break;
+                continue;
             }
 
             // +step +proj=unitconvert +xy_in=X1 +xy_out=X2
@@ -7639,22 +7645,21 @@ const std::string &PROJStringFormatter::toString() const {
                     auto z_in = first.paramValues[1].value;
                     auto z_out = first.paramValues[3].value;
                     if (z_in != z_out) {
-                        d->steps_.erase(iterPrev, iterCur);
                         iterCur->paramValues.clear();
                         iterCur->paramValues.emplace_back(
                             Step::KeyValue("z_in", z_in));
                         iterCur->paramValues.emplace_back(
                             Step::KeyValue("z_out", z_out));
+                        deletePrevIter();
                     } else {
-                        ++iterCur;
-                        d->steps_.erase(iterPrev, iterCur);
+                        deletePrevAndCurIter();
                     }
                     changeDone = true;
                     break;
                 }
             }
             if (changeDone) {
-                break;
+                continue;
             }
 
             // +step +proj=unitconvert +xy_in=X1 +z_in=Z1 +xy_out=X2 +z_out=Z2
@@ -7676,7 +7681,7 @@ const std::string &PROJStringFormatter::toString() const {
                 auto z_in = prevStep.paramValues[1].value;
                 auto xy_out = prevStep.paramValues[2].value;
                 auto z_out = curStep.paramValues[1].value;
-                d->steps_.erase(iterPrev, iterCur);
+
                 iterCur->paramValues.clear();
                 iterCur->paramValues.emplace_back(
                     Step::KeyValue("xy_in", xy_in));
@@ -7685,23 +7690,24 @@ const std::string &PROJStringFormatter::toString() const {
                     Step::KeyValue("xy_out", xy_out));
                 iterCur->paramValues.emplace_back(
                     Step::KeyValue("z_out", z_out));
-                changeDone = true;
-                break;
+
+                deletePrevIter();
+                continue;
             }
 
             // unitconvert (1), axisswap order=2,1, unitconvert(2)  ==>
             // axisswap order=2,1, unitconvert (1), unitconvert(2) which
             // will get further optimized by previous case
-            if (i + 1 < d->steps_.size() && prevStep.name == "unitconvert" &&
-                curStep.name == "axisswap" && curStepParamCount == 1 &&
+            if (std::next(iterCur) != d->steps_.end() &&
+                prevStep.name == "unitconvert" && curStep.name == "axisswap" &&
+                curStepParamCount == 1 &&
                 curStep.paramValues[0].equals("order", "2,1")) {
-                auto iterNext = iterCur;
-                ++iterNext;
+                auto iterNext = std::next(iterCur);
                 auto &nextStep = *iterNext;
                 if (nextStep.name == "unitconvert") {
                     std::swap(*iterPrev, *iterCur);
-                    changeDone = true;
-                    break;
+                    ++iterCur;
+                    continue;
                 }
             }
 
@@ -7710,27 +7716,28 @@ const std::string &PROJStringFormatter::toString() const {
                 curStepParamCount == 1 && prevStepParamCount == 1 &&
                 curStep.paramValues[0].equals("order", "2,1") &&
                 prevStep.paramValues[0].equals("order", "2,1")) {
-                ++iterCur;
-                d->steps_.erase(iterPrev, iterCur);
-                changeDone = true;
-                break;
+                deletePrevAndCurIter();
+                continue;
             }
 
             // axisswap order=2,1, unitconvert, axisswap order=2,1 -> can
             // suppress axisswap
-            if (i + 1 < d->steps_.size() && prevStep.name == "axisswap" &&
-                curStep.name == "unitconvert" && prevStepParamCount == 1 &&
+            if (std::next(iterCur) != d->steps_.end() &&
+                prevStep.name == "axisswap" && curStep.name == "unitconvert" &&
+                prevStepParamCount == 1 &&
                 prevStep.paramValues[0].equals("order", "2,1")) {
-                auto iterNext = iterCur;
-                ++iterNext;
+                auto iterNext = std::next(iterCur);
                 auto &nextStep = *iterNext;
                 if (nextStep.name == "axisswap" &&
                     nextStep.paramValues.size() == 1 &&
                     nextStep.paramValues[0].equals("order", "2,1")) {
                     d->steps_.erase(iterPrev);
                     d->steps_.erase(iterNext);
-                    changeDone = true;
-                    break;
+                    if (iterCur != d->steps_.begin())
+                        iterCur = std::prev(iterCur);
+                    if (iterCur == d->steps_.begin())
+                        ++iterCur;
+                    continue;
                 }
             }
 
@@ -7746,10 +7753,8 @@ const std::string &PROJStringFormatter::toString() const {
                   prevStep.paramValues[0].equals("ellps", "GRS80")) ||
                  (curStep.paramValues[0].equals("ellps", "GRS80") &&
                   prevStep.paramValues[0].equals("ellps", "WGS84")))) {
-                ++iterCur;
-                d->steps_.erase(iterPrev, iterCur);
-                changeDone = true;
-                break;
+                deletePrevAndCurIter();
+                continue;
             }
 
             if (curStep.name == "helmert" && prevStep.name == "helmert" &&
@@ -7782,8 +7787,7 @@ const std::string &PROJStringFormatter::toString() const {
                     const double ySum = leftParamsMap[y] + rightParamsMap[y];
                     const double zSum = leftParamsMap[z] + rightParamsMap[z];
                     if (xSum == 0.0 && ySum == 0.0 && zSum == 0.0) {
-                        ++iterCur;
-                        d->steps_.erase(iterPrev, iterCur);
+                        deletePrevAndCurIter();
                     } else {
                         prevStep.paramValues[0] =
                             Step::KeyValue("x", internal::toString(xSum));
@@ -7792,10 +7796,10 @@ const std::string &PROJStringFormatter::toString() const {
                         prevStep.paramValues[2] =
                             Step::KeyValue("z", internal::toString(zSum));
 
-                        d->steps_.erase(iterCur);
+                        // Delete this iter
+                        iterCur = d->steps_.erase(iterCur);
                     }
-                    changeDone = true;
-                    break;
+                    continue;
                 }
             }
 
@@ -7836,10 +7840,8 @@ const std::string &PROJStringFormatter::toString() const {
                         break;
                     }
                     if (doErase) {
-                        ++iterCur;
-                        d->steps_.erase(iterPrev, iterCur);
-                        changeDone = true;
-                        break;
+                        deletePrevAndCurIter();
+                        continue;
                     }
                 }
             }
@@ -7853,10 +7855,10 @@ const std::string &PROJStringFormatter::toString() const {
             // +step +proj=vgridshift [...]
             // +step +inv +proj=hgridshift +grids=grid_A +omit_fwd
             // +step +proj=pop +v_1 +v_2
-            if (i + 1 < d->steps_.size() && prevStep.name == "hgridshift" &&
-                prevStepParamCount == 1 && curStep.name == "vgridshift") {
-                auto iterNext = iterCur;
-                ++iterNext;
+            if (std::next(iterCur) != d->steps_.end() &&
+                prevStep.name == "hgridshift" && prevStepParamCount == 1 &&
+                curStep.name == "vgridshift") {
+                auto iterNext = std::next(iterCur);
                 auto &nextStep = *iterNext;
                 if (nextStep.name == "hgridshift" &&
                     nextStep.inverted != prevStep.inverted &&
@@ -7876,11 +7878,9 @@ const std::string &PROJStringFormatter::toString() const {
                     popStep.name = "pop";
                     popStep.paramValues.emplace_back("v_1");
                     popStep.paramValues.emplace_back("v_2");
-                    ++iterNext;
-                    d->steps_.insert(iterNext, popStep);
+                    d->steps_.insert(std::next(iterNext), popStep);
 
-                    changeDone = true;
-                    break;
+                    continue;
                 }
             }
 
@@ -7896,14 +7896,14 @@ const std::string &PROJStringFormatter::toString() const {
                     }
                 }
                 if (allSame) {
-                    ++iterCur;
-                    d->steps_.erase(iterPrev, iterCur);
-                    changeDone = true;
-                    break;
+                    deletePrevAndCurIter();
+                    continue;
                 }
             }
+
+            ++iterCur;
         }
-    } while (changeDone);
+    }
 
     if (d->steps_.size() > 1 ||
         (d->steps_.size() == 1 &&
