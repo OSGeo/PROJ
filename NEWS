@@ -4,6 +4,59 @@
  Updates
  -------
 
+ o EPSG Database updated to version 10.028 (#2773)
+
+ Bug Fixes
+ ---------
+
+ o Include algorithm header file to avoid build errors on Alpine Linux (#2769)
+
+ o CMake: fix installation of executables on iOS (#2766)
+
+ o Associate extents to transformations of CRS's that include GEOIDMODEL (#2769)
+
+ o Logging: avoid some overhead when logging is not enabled (#2775)
+
+ o ortho: remove useless and invalid log trace (#2777)
+
+ o CMake: remove external nlohmann_json from INTERFACE_LINK_LIBRARIES target (#2781)
+ o reateOperations(): fix SourceTargetCRSExtentUse::NONE mode (#2783)
+
+ o GeoTIFF grid reading: perf improvements (#2788)
+
+ o Conversion::createUTM(): avoid integer overflow (#2796)
+
+ o Inverse laea ellipsoidal: return PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN
+   when appropriates (#2801)
+
+ o Make sure that proj_crs_promote_to_3D returns a derived CRS (#2806)
+
+ o createOperations(): fix missing deg<-->rad conversion when transforming with a
+   CRS that has a fallback-to-PROJ4-string behaviour and is a BoundCRS of a
+   GeographicCRS (#2808)
+
+ o WKT2 import/export: preserve PROJ.4 CRS extension string in REMARKS[] (#2812)
+
+ o BoundCRS: accept importing/exporting in WKT2 and PROJJSON the
+   scope/area/extent/id attributes (#2815)
+
+ o ConcatenatedOperation::fixStepsDirection(): fix bad chaining of steps when
+   inverse map projection is involved in non-final step (#2819)
+
+
+ THANKS TO
+ ---------
+
+ Brendan Jurd
+ Kristian Evers
+ Even Rouault
+
+8.1.0 Release Notes
+-------------------
+
+ Updates
+ -------
+
  + Database
 
    o Update to EPSG v10.027 (#2751)
