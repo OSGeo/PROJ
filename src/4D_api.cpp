@@ -784,11 +784,8 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
     It may even use free formatting "proj  =  utm;  zone  =32  ellps= GRS80".
     Note that the semicolon separator is allowed, but not required.
 **************************************************************************************/
-    PJ    *P;
     char  *args, **argv;
     size_t argc, n;
-    int    ret;
-    int    allow_init_epsg;
 
     if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
@@ -816,18 +813,10 @@ PJ *pj_create_internal (PJ_CONTEXT *ctx, const char *definition) {
         return nullptr;
     }
 
-    /* ...and let pj_init_ctx do the hard work */
-    /* New interface: forbid init=epsg:XXXX syntax by default */
-    allow_init_epsg = proj_context_get_use_proj4_init_rules(ctx, FALSE);
-    P = pj_init_ctx_with_allow_init_epsg (ctx, (int) argc, argv, allow_init_epsg);
+    PJ* P = pj_create_argv_internal (ctx, (int) argc, argv);
 
     free (argv);
     free (args);
-
-    /* Support cs2cs-style modifiers */
-    ret = cs2cs_emulation_setup  (P);
-    if (0==ret)
-        return proj_destroy (P);
 
     return P;
 }
@@ -867,11 +856,8 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
 /*************************************************************************************/
 PJ *pj_create_argv_internal (PJ_CONTEXT *ctx, int argc, char **argv) {
 /**************************************************************************************
-Same as proj_create_argv() but calls pj_create_internal() instead of proj_create() internally
+For use by pipeline init function.
 **************************************************************************************/
-    PJ *P;
-    const char *c;
-
     if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
     if (nullptr==argv) {
@@ -879,16 +865,16 @@ Same as proj_create_argv() but calls pj_create_internal() instead of proj_create
         return nullptr;
     }
 
-    /* We assume that free format is used, and build a full proj_create compatible string */
-    c = pj_make_args (argc, argv);
-    if (nullptr==c) {
-        proj_context_errno_set(ctx, PROJ_ERR_OTHER /*ENOMEM*/);
-        return nullptr;
-    }
+    /* ...and let pj_init_ctx do the hard work */
+    /* New interface: forbid init=epsg:XXXX syntax by default */
+    const int allow_init_epsg = proj_context_get_use_proj4_init_rules(ctx, FALSE);
+    PJ* P = pj_init_ctx_with_allow_init_epsg (ctx, argc, argv, allow_init_epsg);
 
-    P = pj_create_internal (ctx, c);
+    /* Support cs2cs-style modifiers */
+    int ret = cs2cs_emulation_setup  (P);
+    if (0==ret)
+        return proj_destroy (P);
 
-    free ((char *) c);
     return P;
 }
 
