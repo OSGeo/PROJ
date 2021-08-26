@@ -3014,6 +3014,38 @@ TEST(crs, projectedCRS_identify_db) {
         EXPECT_EQ(res.front().first->getEPSGCode(), 32631);
         EXPECT_GE(res.front().second, 70.0);
     }
+    {
+        // Identify a ESRI WKT where the datum name doesn't start with D_
+        auto wkt = "PROJCS[\"S-JTSK_[JTSK03]_Krovak_East_North\","
+                   "GEOGCS[\"S-JTSK_[JTSK03]\","
+                   "    DATUM[\"S-JTSK_[JTSK03]\","
+                   "        SPHEROID[\"Bessel_1841\",6377397.155,299.1528128]],"
+                   "    PRIMEM[\"Greenwich\",0.0],"
+                   "    UNIT[\"Degree\",0.0174532925199433]],"
+                   "PROJECTION[\"Krovak\"],"
+                   "PARAMETER[\"False_Easting\",0.0],"
+                   "PARAMETER[\"False_Northing\",0.0],"
+                   "PARAMETER[\"Pseudo_Standard_Parallel_1\",78.5],"
+                   "PARAMETER[\"Scale_Factor\",0.9999],"
+                   "PARAMETER[\"Azimuth\",30.2881397527778],"
+                   "PARAMETER[\"Longitude_Of_Center\",24.8333333333333],"
+                   "PARAMETER[\"Latitude_Of_Center\",49.5],"
+                   "PARAMETER[\"X_Scale\",-1.0],"
+                   "PARAMETER[\"Y_Scale\",1.0],"
+                   "PARAMETER[\"XY_Plane_Rotation\",90.0],"
+                   "UNIT[\"Meter\",1.0]]";
+        EXPECT_EQ(WKTParser().guessDialect(wkt),
+                  WKTParser::WKTGuessedDialect::WKT1_ESRI);
+        auto obj =
+            WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto factoryAll = AuthorityFactory::create(dbContext, std::string());
+        auto res = crs->identify(factoryAll);
+        ASSERT_EQ(res.size(), 1U);
+        EXPECT_EQ(res.front().first->getEPSGCode(), 8353);
+        EXPECT_EQ(res.front().second, 100);
+    }
 }
 
 // ---------------------------------------------------------------------------
