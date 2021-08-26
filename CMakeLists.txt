@@ -112,7 +112,7 @@ message(STATUS "Configuring PROJ:")
 include(ProjVersion)
 proj_version(MAJOR 8 MINOR 1 PATCH 0)
 set(PROJ_API_VERSION "22")
-set(PROJ_BUILD_VERSION "23.0.1")
+set(PROJ_BUILD_VERSION "23.1.1")
 
 ################################################################################
 # Build features and variants
