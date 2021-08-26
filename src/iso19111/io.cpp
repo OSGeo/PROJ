@@ -3469,6 +3469,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     int bestMatchCount = -1;
     for (const auto &mapping : esriMappings) {
         int matchCount = 0;
+        int unmatchCount = 0;
         for (const auto *param = mapping->params; param->esri_name; ++param) {
             auto iter = mapParamNameToValue.find(param->esri_name);
             if (iter != mapParamNameToValue.end()) {
@@ -3493,9 +3494,12 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
                 }
             } else if (param->is_fixed_value) {
                 mapParamNameToValue[param->esri_name] = param->fixed_value;
+            } else {
+                unmatchCount++;
             }
         }
-        if (matchCount > bestMatchCount) {
+        if (matchCount > bestMatchCount &&
+            !(maybeEsriStyle_ && unmatchCount >= matchCount)) {
             esriMapping = mapping;
             bestMatchCount = matchCount;
         }
@@ -3630,7 +3634,7 @@ ConversionNNPtr WKTParser::Private::buildProjection(
     if (projectionNode->GP()->childrenSize() == 0) {
         ThrowNotEnoughChildren(WKTConstants::PROJECTION);
     }
-    if (esriStyle_) {
+    if (esriStyle_ || maybeEsriStyle_) {
         return buildProjectionFromESRI(baseGeodCRS, projCRSNode, projectionNode,
                                        defaultLinearUnit, defaultAngularUnit);
     }
@@ -7019,6 +7023,12 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
 
     const auto dialect = guessDialect(wkt);
     d->maybeEsriStyle_ = (dialect == WKTGuessedDialect::WKT1_ESRI);
+    if (d->maybeEsriStyle_) {
+        if (wkt.find("PARAMETER[\"X_Scale\",") != std::string::npos) {
+            d->esriStyle_ = true;
+            d->maybeEsriStyle_ = false;
+        }
+    }
 
     const auto build = [this, &wkt]() -> BaseObjectNNPtr {
         size_t indexEnd;
