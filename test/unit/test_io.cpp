@@ -5722,6 +5722,18 @@ static const struct {
      {{"False_Easting", 1},
       {"False_Northing", 2},
       {"Central_Meridian", 3},
+      {"Option", 0.0}},
+     "Goode Homolosine",
+     {
+         {"Longitude of natural origin", 3},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
+    {"Goode_Homolosine",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"Central_Meridian", 3},
       {"Option", 1.0}},
      "Interrupted Goode Homolosine",
      {
@@ -6286,6 +6298,31 @@ TEST(wkt_parse, wkt1_esri_gauss_kruger) {
             WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
                 .get()),
         wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_esri_goode_homolosine_without_option_0) {
+    // Not sure if it is really valid to not have PARAMETER["Option",0.0]
+    // but it seems reasonable to check that we understand that as
+    // Goode Homolosine and not Interrupted Goode Homolosine (option 1)
+    auto wkt = "PROJCS[\"unknown\",GEOGCS[\"GCS_unknown\",DATUM[\"D_WGS_1984\","
+               "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+               "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+               "PROJECTION[\"Goode_Homolosine\"],"
+               "PARAMETER[\"False_Easting\",0.0],"
+               "PARAMETER[\"False_Northing\",0.0],"
+               "PARAMETER[\"Central_Meridian\",0.0],"
+               "UNIT[\"Meter\",1.0]]";
+
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
+              "Goode Homolosine");
 }
 
 // ---------------------------------------------------------------------------
