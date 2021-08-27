@@ -1239,6 +1239,7 @@ struct WKTParser::Private {
     std::vector<double> toWGS84Parameters_{};
     std::string datumPROJ4Grids_{};
     bool esriStyle_ = false;
+    bool maybeEsriStyle_ = false;
     DatabaseContextPtr dbContext_{};
 
     static constexpr int MAX_PROPERTY_SIZE = 1024;
@@ -2203,17 +2204,39 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
     // Remap GDAL WGS_1984 to EPSG v9 "World Geodetic System 1984" official
     // name.
     // Also remap EPSG v10 datum ensemble names to non-ensemble EPSG v9
+    bool nameSet = false;
     if (name == "WGS_1984" || name == "World Geodetic System 1984 ensemble") {
+        nameSet = true;
         properties.set(IdentifiedObject::NAME_KEY,
                        GeodeticReferenceFrame::EPSG_6326->nameStr());
     } else if (name == "European Terrestrial Reference System 1989 ensemble") {
+        nameSet = true;
         properties.set(IdentifiedObject::NAME_KEY,
                        "European Terrestrial Reference System 1989");
-    } else if (starts_with(name, "D_")) {
+    }
+
+    // If we got hints this might be a ESRI WKT, then check in the DB to
+    // confirm
+    std::string officialName;
+    std::string authNameFromAlias;
+    std::string codeFromAlias;
+    if (!nameSet && maybeEsriStyle_ && dbContext_ &&
+        !(starts_with(name, "D_") || esriStyle_)) {
+        std::string outTableName;
+        auto authFactory =
+            AuthorityFactory::create(NN_NO_CHECK(dbContext_), std::string());
+        officialName = authFactory->getOfficialNameFromAlias(
+            name, "geodetic_datum", "ESRI", false, outTableName,
+            authNameFromAlias, codeFromAlias);
+        if (!officialName.empty()) {
+            maybeEsriStyle_ = false;
+            esriStyle_ = true;
+        }
+    }
+
+    if (!nameSet && (starts_with(name, "D_") || esriStyle_)) {
         esriStyle_ = true;
         const char *tableNameForAlias = nullptr;
-        std::string authNameFromAlias;
-        std::string codeFromAlias;
         if (name == "D_WGS_1984") {
             name = "World Geodetic System 1984";
             authNameFromAlias = Identifier::EPSG;
@@ -2228,18 +2251,23 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
 
         bool setNameAndId = true;
         if (dbContext_ && tableNameForAlias) {
-            std::string outTableName;
-            auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
-                                                        std::string());
-            auto officialName = authFactory->getOfficialNameFromAlias(
-                name, tableNameForAlias, "ESRI", false, outTableName,
-                authNameFromAlias, codeFromAlias);
             if (officialName.empty()) {
-                // For the case of "D_GDA2020" where there is no D_GDA2020 ESRI
-                // alias, so just try without the D_ prefix.
-                const auto nameWithoutDPrefix = name.substr(2);
-                if (identifyFromName(nameWithoutDPrefix)) {
-                    setNameAndId = false; // already done in identifyFromName()
+                std::string outTableName;
+                auto authFactory = AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext_), std::string());
+                officialName = authFactory->getOfficialNameFromAlias(
+                    name, tableNameForAlias, "ESRI", false, outTableName,
+                    authNameFromAlias, codeFromAlias);
+            }
+            if (officialName.empty()) {
+                if (starts_with(name, "D_")) {
+                    // For the case of "D_GDA2020" where there is no D_GDA2020
+                    // ESRI alias, so just try without the D_ prefix.
+                    const auto nameWithoutDPrefix = name.substr(2);
+                    if (identifyFromName(nameWithoutDPrefix)) {
+                        setNameAndId =
+                            false; // already done in identifyFromName()
+                    }
                 }
             } else {
                 if (primeMeridian->nameStr() !=
@@ -2266,7 +2294,7 @@ GeodeticReferenceFrameNNPtr WKTParser::Private::buildGeodeticReferenceFrame(
                 properties.set(IdentifiedObject::IDENTIFIERS_KEY, identifiers);
             }
         }
-    } else if (name.find('_') != std::string::npos) {
+    } else if (!nameSet && name.find('_') != std::string::npos) {
         // Likely coming from WKT1
         identifyFromName(name);
     }
@@ -3441,6 +3469,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     int bestMatchCount = -1;
     for (const auto &mapping : esriMappings) {
         int matchCount = 0;
+        int unmatchCount = 0;
         for (const auto *param = mapping->params; param->esri_name; ++param) {
             auto iter = mapParamNameToValue.find(param->esri_name);
             if (iter != mapParamNameToValue.end()) {
@@ -3465,9 +3494,12 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
                 }
             } else if (param->is_fixed_value) {
                 mapParamNameToValue[param->esri_name] = param->fixed_value;
+            } else {
+                unmatchCount++;
             }
         }
-        if (matchCount > bestMatchCount) {
+        if (matchCount > bestMatchCount &&
+            !(maybeEsriStyle_ && unmatchCount >= matchCount)) {
             esriMapping = mapping;
             bestMatchCount = matchCount;
         }
@@ -3602,7 +3634,7 @@ ConversionNNPtr WKTParser::Private::buildProjection(
     if (projectionNode->GP()->childrenSize() == 0) {
         ThrowNotEnoughChildren(WKTConstants::PROJECTION);
     }
-    if (esriStyle_) {
+    if (esriStyle_ || maybeEsriStyle_) {
         return buildProjectionFromESRI(baseGeodCRS, projCRSNode, projectionNode,
                                        defaultLinearUnit, defaultAngularUnit);
     }
@@ -6988,6 +7020,16 @@ BaseObjectNNPtr createFromUserInput(const std::string &text, PJ_CONTEXT *ctx) {
  * @throw ParsingException
  */
 BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
+
+    const auto dialect = guessDialect(wkt);
+    d->maybeEsriStyle_ = (dialect == WKTGuessedDialect::WKT1_ESRI);
+    if (d->maybeEsriStyle_) {
+        if (wkt.find("PARAMETER[\"X_Scale\",") != std::string::npos) {
+            d->esriStyle_ = true;
+            d->maybeEsriStyle_ = false;
+        }
+    }
+
     const auto build = [this, &wkt]() -> BaseObjectNNPtr {
         size_t indexEnd;
         WKTNodeNNPtr root = WKTNode::createFrom(wkt, 0, 0, indexEnd);
@@ -7047,7 +7089,6 @@ BaseObjectNNPtr WKTParser::createFromWKT(const std::string &wkt) {
 
     auto obj = build();
 
-    const auto dialect = guessDialect(wkt);
     if (dialect == WKTGuessedDialect::WKT1_GDAL ||
         dialect == WKTGuessedDialect::WKT1_ESRI) {
         auto errorMsg = pj_wkt1_parse(wkt);
@@ -7090,7 +7131,10 @@ WKTParser::guessDialect(const std::string &wkt) noexcept {
     for (const auto &pointerKeyword : wkt1_keywords) {
         if (ci_starts_with(wkt, *pointerKeyword)) {
 
-            if (ci_find(wkt, "GEOGCS[\"GCS_") != std::string::npos) {
+            if (ci_find(wkt, "GEOGCS[\"GCS_") != std::string::npos ||
+                (!ci_starts_with(wkt, WKTConstants::LOCAL_CS) &&
+                 ci_find(wkt, "AXIS[") == std::string::npos &&
+                 ci_find(wkt, "AUTHORITY[") == std::string::npos)) {
                 return WKTGuessedDialect::WKT1_ESRI;
             }
 
