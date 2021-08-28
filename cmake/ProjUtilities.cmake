@@ -83,6 +83,16 @@ function(configure_proj_pc)
   if(CURL_ENABLED)
     set(CURL_LIBS -lcurl)
   endif()
+  set(EXTRA_LIBS "-lstdc++")
+  if(HAVE_LIBM)
+    list(APPEND EXTRA_LIBS "-lm")
+  endif()
+  if(HAVE_LIBDL)
+    list(APPEND EXTRA_LIBS "-ldl")
+  endif()
+  # Join list with a space
+  string(REPLACE ";" " " _tmp_str "${EXTRA_LIBS}")
+  set(EXTRA_LIBS "${_tmp_str}")
 
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/proj.pc.in
