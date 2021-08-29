@@ -7777,6 +7777,10 @@ const std::string &PROJStringFormatter::toString() const {
                     nextStep.paramValues[0].equals("order", "2,1")) {
                     d->steps_.erase(iterPrev);
                     d->steps_.erase(iterNext);
+                    // Coverity complains about invalid usage of iterCur
+                    // due to the above erase(iterNext). To the best of our
+                    // understanding, this is a false-positive.
+                    // coverity[use_iterator]
                     if (iterCur != d->steps_.begin())
                         iterCur = std::prev(iterCur);
                     if (iterCur == d->steps_.begin())
