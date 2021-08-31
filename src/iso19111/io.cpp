@@ -7467,9 +7467,11 @@ const std::string &PROJStringFormatter::toString() const {
         } else if (step.name == "push" && step.inverted) {
             step.name = "pop";
             step.inverted = false;
+            ++iter;
         } else if (step.name == "pop" && step.inverted) {
             step.name = "push";
             step.inverted = false;
+            ++iter;
         } else if (step.name == "noop" && steps.size() > 1) {
             iter = steps.erase(iter);
         } else {
