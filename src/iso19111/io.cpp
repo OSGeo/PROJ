@@ -8005,7 +8005,7 @@ const std::string &PROJStringFormatter::toString() const {
             if (d->maxLineLength_ > 0 && d->multiLine_ &&
                 curLine.size() + newKV.size() >
                     static_cast<size_t>(d->maxLineLength_)) {
-                if (d->multiLine_ && !d->result_.empty())
+                if (!d->result_.empty())
                     d->result_ += '\n';
                 d->result_ += curLine;
                 curLine = std::string(
