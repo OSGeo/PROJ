@@ -7442,7 +7442,8 @@ const std::string &PROJStringFormatter::toString() const {
 
     d->result_.clear();
 
-    for (auto iter = d->steps_.begin(); iter != d->steps_.end();) {
+    auto &steps = d->steps_;
+    for (auto iter = steps.begin(); iter != steps.end();) {
         // Remove no-op helmert
         auto &step = *iter;
         const auto paramCount = step.paramValues.size();
@@ -7456,27 +7457,27 @@ const std::string &PROJStringFormatter::toString() const {
               step.paramValues[5].equals("rz", "0") &&
               step.paramValues[6].equals("s", "0") &&
               step.paramValues[7].keyEquals("convention")))) {
-            iter = d->steps_.erase(iter);
+            iter = steps.erase(iter);
         } else if (d->coordOperationOptimizations_ &&
                    step.name == "unitconvert" && paramCount == 2 &&
                    step.paramValues[0].keyEquals("xy_in") &&
                    step.paramValues[1].keyEquals("xy_out") &&
                    step.paramValues[0].value == step.paramValues[1].value) {
-            iter = d->steps_.erase(iter);
+            iter = steps.erase(iter);
         } else if (step.name == "push" && step.inverted) {
             step.name = "pop";
             step.inverted = false;
         } else if (step.name == "pop" && step.inverted) {
             step.name = "push";
             step.inverted = false;
-        } else if (step.name == "noop" && d->steps_.size() > 1) {
-            iter = d->steps_.erase(iter);
+        } else if (step.name == "noop" && steps.size() > 1) {
+            iter = steps.erase(iter);
         } else {
             ++iter;
         }
     }
 
-    for (auto &step : d->steps_) {
+    for (auto &step : steps) {
         if (!step.inverted) {
             continue;
         }
@@ -7520,13 +7521,13 @@ const std::string &PROJStringFormatter::toString() const {
     }
 
     {
-        auto iterCur = d->steps_.begin();
-        if (iterCur != d->steps_.end()) {
+        auto iterCur = steps.begin();
+        if (iterCur != steps.end()) {
             ++iterCur;
         }
-        while (iterCur != d->steps_.end()) {
+        while (iterCur != steps.end()) {
 
-            assert(iterCur != d->steps_.begin());
+            assert(iterCur != steps.begin());
             auto iterPrev = std::prev(iterCur);
             auto &prevStep = *iterPrev;
             auto &curStep = *iterCur;
@@ -7534,20 +7535,20 @@ const std::string &PROJStringFormatter::toString() const {
             const auto curStepParamCount = curStep.paramValues.size();
             const auto prevStepParamCount = prevStep.paramValues.size();
 
-            const auto deletePrevAndCurIter = [this, &iterPrev, &iterCur]() {
-                iterCur = d->steps_.erase(iterPrev, std::next(iterCur));
-                if (iterCur != d->steps_.begin())
+            const auto deletePrevAndCurIter = [&steps, &iterPrev, &iterCur]() {
+                iterCur = steps.erase(iterPrev, std::next(iterCur));
+                if (iterCur != steps.begin())
                     iterCur = std::prev(iterCur);
-                if (iterCur == d->steps_.begin())
+                if (iterCur == steps.begin())
                     ++iterCur;
             };
 
             // longlat (or its inverse) with ellipsoid only is a no-op
             // do that only for an internal step
-            if (std::next(iterCur) != d->steps_.end() &&
+            if (std::next(iterCur) != steps.end() &&
                 curStep.name == "longlat" && curStepParamCount == 1 &&
                 curStep.paramValues[0].keyEquals("ellps")) {
-                iterCur = d->steps_.erase(iterCur);
+                iterCur = steps.erase(iterCur);
                 continue;
             }
 
@@ -7622,11 +7623,11 @@ const std::string &PROJStringFormatter::toString() const {
                 continue;
             }
 
-            const auto deletePrevIter = [this, &iterPrev, &iterCur]() {
-                d->steps_.erase(iterPrev, iterCur);
-                if (iterCur != d->steps_.begin())
+            const auto deletePrevIter = [&steps, &iterPrev, &iterCur]() {
+                steps.erase(iterPrev, iterCur);
+                if (iterCur != steps.begin())
                     iterCur = std::prev(iterCur);
-                if (iterCur == d->steps_.begin())
+                if (iterCur == steps.begin())
                     ++iterCur;
             };
 
@@ -7742,7 +7743,7 @@ const std::string &PROJStringFormatter::toString() const {
             // unitconvert (1), axisswap order=2,1, unitconvert(2)  ==>
             // axisswap order=2,1, unitconvert (1), unitconvert(2) which
             // will get further optimized by previous case
-            if (std::next(iterCur) != d->steps_.end() &&
+            if (std::next(iterCur) != steps.end() &&
                 prevStep.name == "unitconvert" && curStep.name == "axisswap" &&
                 curStepParamCount == 1 &&
                 curStep.paramValues[0].equals("order", "2,1")) {
@@ -7766,7 +7767,7 @@ const std::string &PROJStringFormatter::toString() const {
 
             // axisswap order=2,1, unitconvert, axisswap order=2,1 -> can
             // suppress axisswap
-            if (std::next(iterCur) != d->steps_.end() &&
+            if (std::next(iterCur) != steps.end() &&
                 prevStep.name == "axisswap" && curStep.name == "unitconvert" &&
                 prevStepParamCount == 1 &&
                 prevStep.paramValues[0].equals("order", "2,1")) {
@@ -7775,15 +7776,15 @@ const std::string &PROJStringFormatter::toString() const {
                 if (nextStep.name == "axisswap" &&
                     nextStep.paramValues.size() == 1 &&
                     nextStep.paramValues[0].equals("order", "2,1")) {
-                    d->steps_.erase(iterPrev);
-                    d->steps_.erase(iterNext);
+                    steps.erase(iterPrev);
+                    steps.erase(iterNext);
                     // Coverity complains about invalid usage of iterCur
                     // due to the above erase(iterNext). To the best of our
                     // understanding, this is a false-positive.
                     // coverity[use_iterator]
-                    if (iterCur != d->steps_.begin())
+                    if (iterCur != steps.begin())
                         iterCur = std::prev(iterCur);
-                    if (iterCur == d->steps_.begin())
+                    if (iterCur == steps.begin())
                         ++iterCur;
                     continue;
                 }
@@ -7845,7 +7846,7 @@ const std::string &PROJStringFormatter::toString() const {
                             Step::KeyValue("z", internal::toString(zSum));
 
                         // Delete this iter
-                        iterCur = d->steps_.erase(iterCur);
+                        iterCur = steps.erase(iterCur);
                     }
                     continue;
                 }
@@ -7903,7 +7904,7 @@ const std::string &PROJStringFormatter::toString() const {
             // +step +proj=vgridshift [...]
             // +step +inv +proj=hgridshift +grids=grid_A +omit_fwd
             // +step +proj=pop +v_1 +v_2
-            if (std::next(iterCur) != d->steps_.end() &&
+            if (std::next(iterCur) != steps.end() &&
                 prevStep.name == "hgridshift" && prevStepParamCount == 1 &&
                 curStep.name == "vgridshift") {
                 auto iterNext = std::next(iterCur);
@@ -7916,7 +7917,7 @@ const std::string &PROJStringFormatter::toString() const {
                     pushStep.name = "push";
                     pushStep.paramValues.emplace_back("v_1");
                     pushStep.paramValues.emplace_back("v_2");
-                    d->steps_.insert(iterPrev, pushStep);
+                    steps.insert(iterPrev, pushStep);
 
                     prevStep.paramValues.emplace_back("omit_inv");
 
@@ -7926,7 +7927,7 @@ const std::string &PROJStringFormatter::toString() const {
                     popStep.name = "pop";
                     popStep.paramValues.emplace_back("v_1");
                     popStep.paramValues.emplace_back("v_2");
-                    d->steps_.insert(std::next(iterNext), popStep);
+                    steps.insert(std::next(iterNext), popStep);
 
                     continue;
                 }
@@ -7953,10 +7954,10 @@ const std::string &PROJStringFormatter::toString() const {
         }
     }
 
-    if (d->steps_.size() > 1 ||
-        (d->steps_.size() == 1 &&
-         (d->steps_.front().inverted || d->steps_.front().hasKey("omit_inv") ||
-          d->steps_.front().hasKey("omit_fwd") ||
+    if (steps.size() > 1 ||
+        (steps.size() == 1 &&
+         (steps.front().inverted || steps.front().hasKey("omit_inv") ||
+          steps.front().hasKey("omit_fwd") ||
           !d->globalParamValues_.empty()))) {
         d->appendToResult("+proj=pipeline");
 
@@ -7975,7 +7976,7 @@ const std::string &PROJStringFormatter::toString() const {
         }
     }
 
-    for (const auto &step : d->steps_) {
+    for (const auto &step : steps) {
         std::string curLine;
         if (!d->result_.empty()) {
             if (d->multiLine_) {

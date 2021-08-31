@@ -297,9 +297,10 @@ const BaseObjectNNPtr *PropertyMap::get(const std::string &key) const {
 
 //! @cond Doxygen_Suppress
 void PropertyMap::unset(const std::string &key) {
-    for (auto iter = d->list_.begin(); iter != d->list_.end(); ++iter) {
+    auto &list = d->list_;
+    for (auto iter = list.begin(); iter != list.end(); ++iter) {
         if (iter->first == key) {
-            d->list_.erase(iter);
+            list.erase(iter);
             return;
         }
     }
