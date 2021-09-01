@@ -37,6 +37,8 @@ around a given latitude and longitude.
           ellipsoid must be forced to a sphere, for example by adding a ``+f=0``
           parameter.
 
+This projection method corresponds to ``ÈPSG:9840``.
+
 Parameters
 ################################################################################
 
