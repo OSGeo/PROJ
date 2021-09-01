@@ -46,7 +46,9 @@ topocentric conversion must be preceded by the :ref:`cart` conversion to
 perform the initial geographic to geocentric coordinates conversion.
 
 The formulas used come from the "Geocentric/topocentric conversions" paragraph
-of :cite:`IOGP2018`
+of :cite:`IOGP2018`. ``+proj=topocentric`` alone corresponds to the ``EPSG:9836``
+conversion method, ``+proj=cart`` followed by ``+proj=topocentric`` corresponds
+to ``EPSG:9837``.
 
 Usage
 ################################################################################
