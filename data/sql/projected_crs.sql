@@ -7327,6 +7327,10 @@ INSERT INTO "projected_crs" VALUES('EPSG','9748','NAD83(2011) / Alabama East (ft
 INSERT INTO "usage" VALUES('EPSG','15376','projected_crs','EPSG','9748','EPSG','2154','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','9749','NAD83(2011) / Alabama West (ftUS)',NULL,'EPSG','4497','EPSG','6318','EPSG','9747',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','15375','projected_crs','EPSG','9749','EPSG','2155','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','9761','ECML14_NB Grid',NULL,'EPSG','4400','EPSG','9758','EPSG','9760',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','16498','projected_crs','EPSG','9761','EPSG','4621','EPSG','1141');
+INSERT INTO "projected_crs" VALUES('EPSG','9766','EWR2 Grid',NULL,'EPSG','4400','EPSG','9763','EPSG','9765',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','16509','projected_crs','EPSG','9766','EPSG','4622','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','20004','Pulkovo 1995 / Gauss-Kruger zone 4',NULL,'EPSG','4530','EPSG','4200','EPSG','16204',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6177','projected_crs','EPSG','20004','EPSG','1763','EPSG','1211');
 INSERT INTO "projected_crs" VALUES('EPSG','20005','Pulkovo 1995 / Gauss-Kruger zone 5',NULL,'EPSG','4530','EPSG','4200','EPSG','16205',NULL,0);

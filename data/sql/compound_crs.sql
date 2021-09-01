@@ -712,3 +712,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','9725','ETRS89 + Cagliari 1956 height',
 INSERT INTO "usage" VALUES('EPSG','15257','compound_crs','EPSG','9725','EPSG','2339','EPSG','1270');
 INSERT INTO "compound_crs" VALUES('EPSG','9742','EOS21 Grid + ODN height',NULL,'EPSG','9741','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','15318','compound_crs','EPSG','9742','EPSG','4620','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','9762','ECML14_NB Grid + ODN height',NULL,'EPSG','9761','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','16499','compound_crs','EPSG','9762','EPSG','4621','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','9767','EWR2 Grid + ODN height',NULL,'EPSG','9766','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','16510','compound_crs','EPSG','9767','EPSG','4622','EPSG','1141');

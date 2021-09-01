@@ -60,7 +60,7 @@ INSERT INTO "scope" VALUES('EPSG','1080','Angola LNG project.',0);
 INSERT INTO "scope" VALUES('EPSG','1081','Seismic survey.',0);
 INSERT INTO "scope" VALUES('EPSG','1082','Approximate transformation of seismic data acquired before 1985 to CRS used post 1985.',0);
 INSERT INTO "scope" VALUES('EPSG','1083','Approximation (to better than 2cm) using NTv2 method of results of FINELTRA programme concatenated with LV-95 parameters.',0);
-INSERT INTO "scope" VALUES('EPSG','1084','Approximation (to better than 2m) using NTv2 method of results of FINELTRA programme concatenated with LV-95 parameters.',0);
+INSERT INTO "scope" VALUES('EPSG','1084','Parameter values from CH1903+ to ETRS89 (tfm code 1647) and are used as an approximation from CH1903 with a lesser accuracy of 1.5m which equates to the magnitude of distortions in the CH1903 network.',0);
 INSERT INTO "scope" VALUES('EPSG','1085','Approximation using NTv2 method of results of FINELTRA programme to an accuracy of 0.01m except at boundary of the Geneva and Vaud cantons, in city of Geneva and in the main valleys of Valais canton where differences are up to 20 cm.',0);
 INSERT INTO "scope" VALUES('EPSG','1086','Approximation of horizontal component of official 3D RDNAPTRANS(TM) transformation, which since 1st October 2000 has defined Amersfoort geodetic datum.',0);
 INSERT INTO "scope" VALUES('EPSG','1087','Approximation for pan-European small-scale mapping in extended ETRS89.',0);
