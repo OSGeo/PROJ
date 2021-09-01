@@ -13,7 +13,7 @@ distribution of the source code and various resource file archives. See
 Current Release
 --------------------------------------------------------------------------------
 
-* **2021-07-01** `proj-8.1.0.tar.gz`_ (`md5`_)
+* **2021-09-01** `proj-8.1.1.tar.gz`_ (`md5`_)
 * **2021-07-01** `proj-data-1.7.tar.gz`_
 * **PDF Manual** `proj.pdf`_
 
@@ -82,8 +82,9 @@ Past Releases
 * **2018-03-01** `proj-datumgrid-oceania-1.1.zip`_
 * **2018-03-01** `proj-datumgrid-oceania-1.0.zip`_
 
+.. _`proj-8.1.1.tar.gz`: https://download.osgeo.org/proj/proj-8.1.1.tar.gz
+.. _`md5`: https://download.osgeo.org/proj/proj-8.1.1.tar.gz.md5
 .. _`proj-8.1.0.tar.gz`: https://download.osgeo.org/proj/proj-8.1.0.tar.gz
-.. _`md5`: https://download.osgeo.org/proj/proj-8.1.0.tar.gz.md5
 .. _`proj-8.0.1.tar.gz`: https://download.osgeo.org/proj/proj-8.0.1.tar.gz
 .. _`proj-8.0.0.tar.gz`: https://download.osgeo.org/proj/proj-8.0.0.tar.gz
 .. _`proj-7.2.1.tar.gz`: https://download.osgeo.org/proj/proj-7.2.1.tar.gz

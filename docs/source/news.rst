@@ -3,6 +3,54 @@
 News
 ###############################################################################
 
+8.1.1 Release Notes
+++++++++++++++++++++++++++++++++++++++++
+*September 1st 2021*
+
+Updates
+-------
+
+* EPSG Database updated to version 10.028 (`#2773 <https://github.com/OSGeo/PROJ/issues/2773>`_)
+
+Bug Fixes
+---------
+
+* Include algorithm header file to avoid build errors on Alpine Linux (`#2769 <https://github.com/OSGeo/PROJ/issues/2769>`_)
+
+* CMake: fix installation of executables on iOS (`#2766 <https://github.com/OSGeo/PROJ/issues/2766>`_)
+
+* Associate extents to transformations of CRS's that include GEOIDMODEL (`#2769 <https://github.com/OSGeo/PROJ/issues/2769>`_)
+
+* Logging: avoid some overhead when logging is not enabled (`#2775 <https://github.com/OSGeo/PROJ/issues/2775>`_)
+
+* ortho: remove useless and invalid log trace (`#2777 <https://github.com/OSGeo/PROJ/issues/2777>`_)
+
+* CMake: remove external nlohmann_json from INTERFACE_LINK_LIBRARIES target (`#2781 <https://github.com/OSGeo/PROJ/issues/2781>`_)
+* reateOperations(): fix SourceTargetCRSExtentUse::NONE mode (`#2783 <https://github.com/OSGeo/PROJ/issues/2783>`_)
+
+* GeoTIFF grid reading: perf improvements (`#2788 <https://github.com/OSGeo/PROJ/issues/2788>`_)
+
+* :cpp:func:`Conversion::createUTM()`: avoid integer overflow (`#2796 <https://github.com/OSGeo/PROJ/issues/2796>`_)
+
+* Inverse laea ellipsoidal: return ``PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN``
+  when appropriates (`#2801 <https://github.com/OSGeo/PROJ/issues/2801>`_)
+
+* Make sure that :c:func:`proj_crs_promote_to_3D` returns a derived CRS (`#2806 <https://github.com/OSGeo/PROJ/issues/2806>`_)
+
+* :cpp:func:`createOperations()`: fix missing deg<-->rad conversion when transforming with a
+  CRS that has a fallback-to-PROJ4-string behaviour and is a BoundCRS of a
+  GeographicCRS (`#2808 <https://github.com/OSGeo/PROJ/issues/2808>`_)
+
+* WKT2 import/export: preserve PROJ.4 CRS extension string in REMARKS[] (`#2812 <https://github.com/OSGeo/PROJ/issues/2812>`_)
+
+* BoundCRS: accept importing/exporting in WKT2 and PROJJSON the
+  scope/area/extent/id attributes (`#2815 <https://github.com/OSGeo/PROJ/issues/2815>`_)
+
+* :cpp:func:`ConcatenatedOperation::fixStepsDirection()`: fix bad chaining of steps when
+  inverse map projection is involved in non-final step (`#2819 <https://github.com/OSGeo/PROJ/issues/2819>`_)
+
+
+
 8.1.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *July 1st 2021*
