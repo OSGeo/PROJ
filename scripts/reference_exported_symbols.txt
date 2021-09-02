@@ -571,6 +571,7 @@ osgeo::proj::operation::Conversion::create(osgeo::proj::util::PropertyMap const&
 osgeo::proj::operation::Conversion::createPolarStereographicVariantA(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Scale const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createPolarStereographicVariantB(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createPoleRotationGRIBConvention(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&)
+osgeo::proj::operation::Conversion::createPoleRotationNetCDFCFConvention(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&)
 osgeo::proj::operation::Conversion::createPopularVisualisationPseudoMercator(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createQuadrilateralizedSphericalCube(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
 osgeo::proj::operation::Conversion::createRobinson(osgeo::proj::util::PropertyMap const&, osgeo::proj::common::Angle const&, osgeo::proj::common::Length const&, osgeo::proj::common::Length const&)
@@ -884,6 +885,7 @@ proj_create_conversion_orthographic
 proj_create_conversion_polar_stereographic_variant_a
 proj_create_conversion_polar_stereographic_variant_b
 proj_create_conversion_pole_rotation_grib_convention
+proj_create_conversion_pole_rotation_netcdf_cf_convention
 proj_create_conversion_popular_visualisation_pseudo_mercator
 proj_create_conversion_quadrilateralized_spherical_cube
 proj_create_conversion_robinson
