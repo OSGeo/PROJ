@@ -5983,7 +5983,9 @@ void DerivedGeographicCRS::_exportToPROJString(
     }
 
     if (ci_equal(methodName,
-                 PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION)) {
+                 PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION) ||
+        ci_equal(methodName,
+                 PROJ_WKT2_NAME_METHOD_POLE_ROTATION_NETCDF_CF_CONVENTION)) {
         l_conv->_exportToPROJString(formatter);
         return;
     }

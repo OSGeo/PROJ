@@ -1305,6 +1305,22 @@ static const ParamMapping *const paramsPoleRotationGRIBConvention[] = {
     &paramSouthPoleLatGRIB, &paramSouthPoleLonGRIB, &paramAxisRotationGRIB,
     nullptr};
 
+static const ParamMapping paramGridNorthPoleLatitudeNetCDF = {
+    PROJ_WKT2_NAME_PARAMETER_GRID_NORTH_POLE_LATITUDE_NETCDF_CONVENTION, 0,
+    nullptr, common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping paramGridNorthPoleLongitudeNetCDF = {
+    PROJ_WKT2_NAME_PARAMETER_GRID_NORTH_POLE_LONGITUDE_NETCDF_CONVENTION, 0,
+    nullptr, common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping paramNorthPoleGridLongitudeNetCDF = {
+    PROJ_WKT2_NAME_PARAMETER_NORTH_POLE_GRID_LONGITUDE_NETCDF_CONVENTION, 0,
+    nullptr, common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping *const paramsPoleRotationNetCDFCFConvention[] = {
+    &paramGridNorthPoleLatitudeNetCDF, &paramGridNorthPoleLongitudeNetCDF,
+    &paramNorthPoleGridLongitudeNetCDF, nullptr};
+
 static const MethodMapping otherMethodMappings[] = {
     {EPSG_NAME_METHOD_CHANGE_VERTICAL_UNIT,
      EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT, nullptr, nullptr, nullptr,
@@ -1332,6 +1348,9 @@ static const MethodMapping otherMethodMappings[] = {
 
     {PROJ_WKT2_NAME_METHOD_POLE_ROTATION_GRIB_CONVENTION, 0, nullptr, nullptr,
      nullptr, paramsPoleRotationGRIBConvention},
+
+    {PROJ_WKT2_NAME_METHOD_POLE_ROTATION_NETCDF_CF_CONVENTION, 0, nullptr,
+     nullptr, nullptr, paramsPoleRotationNetCDFCFConvention},
 
     {EPSG_NAME_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC,
      EPSG_CODE_METHOD_GEOCENTRIC_TRANSLATION_GEOCENTRIC, nullptr, nullptr,

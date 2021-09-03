@@ -2227,6 +2227,51 @@ ConversionNNPtr Conversion::createPoleRotationGRIBConvention(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a conversion based on the Pole Rotation method, using
+ * the conventions of the netCDF CF convention for the netCDF format.
+ *
+ * Those are mentioned in the Note 2 of
+ * https://cfconventions.org/Data/cf-conventions/cf-conventions-1.8/cf-conventions.html#_rotated_pole
+ *
+ * Several conventions for the pole rotation method exists.
+ * The parameters provided in this method are remapped to the PROJ ob_tran
+ * operation with:
+ * <pre>
+ * +proj=ob_tran +o_proj=longlat +o_lon_p=northPoleGridLongitude
+ *                               +o_lat_p=gridNorthPoleLatitude
+ *                               +lon_0=180+gridNorthPoleLongitude
+ * </pre>
+ *
+ * Another implementation of that convention is also in the netcdf-java library:
+ * https://github.com/Unidata/netcdf-java/blob/3ce72c0cd167609ed8c69152bb4a004d1daa9273/cdm/core/src/main/java/ucar/unidata/geoloc/projection/RotatedPole.java
+ *
+ * The PROJ implementation of this method assumes a spherical ellipsoid.
+ *
+ * @param properties See \ref general_properties of the conversion. If the name
+ * is not provided, it is automatically set.
+ * @param gridNorthPoleLatitude True latitude of the north pole of the rotated
+ * grid
+ * @param gridNorthPoleLongitude True longitude of the north pole of the rotated
+ * grid.
+ * @param northPoleGridLongitude Longitude of the true north pole in the rotated
+ * grid.
+ * @return a new Conversion.
+ *
+ * @since 8.2
+ */
+ConversionNNPtr Conversion::createPoleRotationNetCDFCFConvention(
+    const util::PropertyMap &properties,
+    const common::Angle &gridNorthPoleLatitude,
+    const common::Angle &gridNorthPoleLongitude,
+    const common::Angle &northPoleGridLongitude) {
+    return create(properties,
+                  PROJ_WKT2_NAME_METHOD_POLE_ROTATION_NETCDF_CF_CONVENTION,
+                  createParams(gridNorthPoleLatitude, gridNorthPoleLongitude,
+                               northPoleGridLongitude));
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Instantiate a conversion based on the Change of Vertical Unit
  * method.
  *
@@ -3627,6 +3672,24 @@ void Conversion::_exportToPROJString(
         formatter->addParam("o_lon_p", -rotation);
         formatter->addParam("o_lat_p", -southPoleLat);
         formatter->addParam("lon_0", southPoleLon);
+        bConversionDone = true;
+    } else if (ci_equal(
+                   methodName,
+                   PROJ_WKT2_NAME_METHOD_POLE_ROTATION_NETCDF_CF_CONVENTION)) {
+        double gridNorthPoleLatitude = parameterValueNumeric(
+            PROJ_WKT2_NAME_PARAMETER_GRID_NORTH_POLE_LATITUDE_NETCDF_CONVENTION,
+            common::UnitOfMeasure::DEGREE);
+        double gridNorthPoleLongitude = parameterValueNumeric(
+            PROJ_WKT2_NAME_PARAMETER_GRID_NORTH_POLE_LONGITUDE_NETCDF_CONVENTION,
+            common::UnitOfMeasure::DEGREE);
+        double northPoleGridLongitude = parameterValueNumeric(
+            PROJ_WKT2_NAME_PARAMETER_NORTH_POLE_GRID_LONGITUDE_NETCDF_CONVENTION,
+            common::UnitOfMeasure::DEGREE);
+        formatter->addStep("ob_tran");
+        formatter->addParam("o_proj", "longlat");
+        formatter->addParam("o_lon_p", northPoleGridLongitude);
+        formatter->addParam("o_lat_p", gridNorthPoleLatitude);
+        formatter->addParam("lon_0", 180 + gridNorthPoleLongitude);
         bConversionDone = true;
     } else if (ci_equal(methodName, "Adams_Square_II")) {
         // Look for ESRI method and parameter names (to be opposed
