@@ -222,6 +222,13 @@ static PJ *pj_obj_create(PJ_CONTEXT *ctx, const IdentifiedObjectNNPtr &objIn) {
                     const auto &ellps = geodCRS->ellipsoid();
                     const double a = ellps->semiMajorAxis().getSIValue();
                     const double es = ellps->squaredEccentricity();
+                    if (!(a > 0 && es >= 0)) {
+                        proj_log_error(pj, _("Invalid ellipsoid parameters"));
+                        proj_errno_set(pj,
+                                       PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+                        proj_destroy(pj);
+                        return nullptr;
+                    }
                     pj_calc_ellipsoid_params(pj, a, es);
                     assert(pj->geod == nullptr);
                     pj->geod = static_cast<struct geod_geodesic *>(

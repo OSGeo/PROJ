@@ -346,6 +346,32 @@ TEST_F(CApi, proj_create_from_wkt) {
         ObjectKeeper keeper(obj);
         EXPECT_NE(obj, nullptr);
     }
+    {
+        // Invalid ellipsoidal parameter (semi major axis)
+        auto obj = proj_create_from_wkt(
+            m_ctxt,
+            "GEOGCS[\"test\",\n"
+            "    DATUM[\"test\",\n"
+            "        SPHEROID[\"test\",0,298.257223563,\"unused\"]],\n"
+            "    PRIMEM[\"Greenwich\",0],\n"
+            "    UNIT[\"degree\",0.0174532925199433]]",
+            nullptr, nullptr, nullptr);
+        ObjectKeeper keeper(obj);
+        EXPECT_EQ(obj, nullptr);
+    }
+    {
+        // Invalid ellipsoidal parameter (inverse flattening)
+        auto obj = proj_create_from_wkt(
+            m_ctxt,
+            "GEOGCS[\"test\",\n"
+            "    DATUM[\"test\",\n"
+            "        SPHEROID[\"test\",6378137,-1,\"unused\"]],\n"
+            "    PRIMEM[\"Greenwich\",0],\n"
+            "    UNIT[\"degree\",0.0174532925199433]]",
+            nullptr, nullptr, nullptr);
+        ObjectKeeper keeper(obj);
+        EXPECT_EQ(obj, nullptr);
+    }
 }
 
 // ---------------------------------------------------------------------------
