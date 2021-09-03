@@ -707,7 +707,7 @@ std::unique_ptr<File> FileWin32::open(PJ_CONTEXT *ctx, const char *filename,
             UTF8ToWString(std::string(filename)).c_str(), dwDesiredAccess,
             FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
             dwCreationDisposition, &extendedParameters);
-#else // UWP
+#else  // UWP
         HANDLE hFile = CreateFileW(
             UTF8ToWString(std::string(filename)).c_str(), dwDesiredAccess,
             FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
@@ -1155,7 +1155,7 @@ const char *proj_context_get_user_writable_directory(PJ_CONTEXT *ctx,
 #else
 #if UWP
         if (false) {
-#else // UWP
+#else  // UWP
         wchar_t *wPath;
         if (SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &wPath) ==
             S_OK) {
