@@ -1403,7 +1403,9 @@ VerticalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 #endif
     }
 
-    pj_log(ctx, PJ_LOG_ERROR, "Unrecognized vertical grid format for filename '%s'", filename.c_str());
+    pj_log(ctx, PJ_LOG_ERROR,
+           "Unrecognized vertical grid format for filename '%s'",
+           filename.c_str());
     return nullptr;
 }
 
@@ -2399,7 +2401,9 @@ HorizontalShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 #endif
     }
 
-    pj_log(ctx, PJ_LOG_ERROR, "Unrecognized horizontal grid format for filename '%s'", filename.c_str());
+    pj_log(ctx, PJ_LOG_ERROR,
+           "Unrecognized horizontal grid format for filename '%s'",
+           filename.c_str());
     return nullptr;
 }
 
@@ -2735,7 +2739,9 @@ GenericShiftGridSet::open(PJ_CONTEXT *ctx, const std::string &filename) {
 #endif
     }
 
-    pj_log(ctx, PJ_LOG_ERROR, "Unrecognized generic grid format for filename '%s'", filename.c_str());
+    pj_log(ctx, PJ_LOG_ERROR,
+           "Unrecognized generic grid format for filename '%s'",
+           filename.c_str());
     return nullptr;
 }
 
