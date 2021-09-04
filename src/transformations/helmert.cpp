@@ -369,7 +369,8 @@ static PJ_XYZ helmert_forward_3d (PJ_LPZ lpz, PJ *P) {
     point.lpz = lpz;
 
     if (Q->fourparam) {
-        point.xy = helmert_forward(point.lp, P);
+        const auto xy = helmert_forward(point.lp, P);
+        point.xy = xy;
         return point.xyz;
     }
 
@@ -409,7 +410,8 @@ static PJ_LPZ helmert_reverse_3d (PJ_XYZ xyz, PJ *P) {
     point.xyz = xyz;
 
     if (Q->fourparam) {
-        point.lp = helmert_reverse(point.xy, P);
+        const auto lp = helmert_reverse(point.xy, P);
+        point.lp = lp;
         return point.lpz;
     }
 
@@ -448,7 +450,8 @@ static PJ_COORD helmert_forward_4d (PJ_COORD point, PJ *P) {
         build_rot_matrix(P);
     }
 
-    point.xyz = helmert_forward_3d (point.lpz, P);
+    const auto xyz = helmert_forward_3d (point.lpz, P);
+    point.xyz = xyz;
 
     return point;
 }
@@ -466,7 +469,8 @@ static PJ_COORD helmert_reverse_4d (PJ_COORD point, PJ *P) {
         build_rot_matrix(P);
     }
 
-    point.lpz = helmert_reverse_3d (point.xyz, P);
+    const auto lpz = helmert_reverse_3d (point.xyz, P);
+    point.lpz = lpz;
 
     return point;
 }

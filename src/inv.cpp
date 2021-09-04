@@ -151,9 +151,15 @@ PJ_LP pj_inv(PJ_XY xy, PJ *P) {
 
     /* Do the transformation, using the lowest dimensional transformer available */
     if (P->inv)
-        coo.lp = P->inv(coo.xy, P);
+    {
+        const auto lp = P->inv(coo.xy, P);
+        coo.lp = lp;
+    }
     else if (P->inv3d)
-        coo.lpz = P->inv3d (coo.xyz, P);
+    {
+        const auto lpz = P->inv3d (coo.xyz, P);
+        coo.lpz = lpz;
+    }
     else if (P->inv4d)
         coo = P->inv4d (coo, P);
     else {
@@ -185,11 +191,17 @@ PJ_LPZ pj_inv3d (PJ_XYZ xyz, PJ *P) {
 
     /* Do the transformation, using the lowest dimensional transformer feasible */
     if (P->inv3d)
-        coo.lpz = P->inv3d (coo.xyz, P);
+    {
+        const auto lpz = P->inv3d (coo.xyz, P);
+        coo.lpz = lpz;
+    }
     else if (P->inv4d)
         coo = P->inv4d (coo, P);
     else if (P->inv)
-        coo.lp = P->inv (coo.xy, P);
+    {
+        const auto lp = P->inv (coo.xy, P);
+        coo.lp = lp;
+    }
     else {
         proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ().lpz;
@@ -219,9 +231,15 @@ PJ_COORD pj_inv4d (PJ_COORD coo, PJ *P) {
     if (P->inv4d)
         coo = P->inv4d (coo, P);
     else if (P->inv3d)
-        coo.lpz = P->inv3d (coo.xyz, P);
+    {
+        const auto lpz = P->inv3d (coo.xyz, P);
+        coo.lpz = lpz;
+    }
     else if (P->inv)
-        coo.lp = P->inv (coo.xy, P);
+    {
+        const auto lp = P->inv (coo.xy, P);
+        coo.lp = lp;
+    }
     else {
         proj_errno_set (P, PROJ_ERR_OTHER_NO_INVERSE_OP);
         return proj_coord_error ();

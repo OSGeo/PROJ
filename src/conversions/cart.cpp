@@ -212,7 +212,8 @@ static PJ_XY cart_forward (PJ_LP lp, PJ *P) {
     point.lp = lp;
     point.lpz.z = 0;
 
-    point.xyz = cartesian (point.lpz, P);
+    const auto xyz = cartesian (point.lpz, P);
+    point.xyz = xyz;
     return point.xy;
 }
 
@@ -222,7 +223,8 @@ static PJ_LP cart_reverse (PJ_XY xy, PJ *P) {
     point.xy = xy;
     point.xyz.z = 0;
 
-    point.lpz = geodetic (point.xyz, P);
+    const auto lpz = geodetic (point.xyz, P);
+    point.lpz = lpz;
     return point.lp;
 }
 

@@ -115,7 +115,8 @@ static void process(FILE *fid) {
                 facs_bad = proj_errno(Proj);
             }
 
-            data.xy = (*proj.fwd)(data.lp, Proj);
+            const auto xy = (*proj.fwd)(data.lp, Proj);
+            data.xy = xy;
 
             if (dofactors && inverse) {
                 facs = proj_factors(Proj, coord);

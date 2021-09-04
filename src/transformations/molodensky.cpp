@@ -215,7 +215,8 @@ static PJ_XY forward_2d(PJ_LP lp, PJ *P) {
     PJ_COORD point = {{0,0,0,0}};
 
     point.lp = lp;
-    point.xyz = forward_3d(point.lpz, P);
+    const auto xyz = forward_3d(point.lpz, P);
+    point.xyz = xyz;
 
     return point.xy;
 }
@@ -226,7 +227,8 @@ static PJ_LP reverse_2d(PJ_XY xy, PJ *P) {
 
     point.xy = xy;
     point.xyz.z = 0;
-    point.lpz = reverse_3d(point.xyz, P);
+    const auto lpz = reverse_3d(point.xyz, P);
+    point.lpz = lpz;
 
     return point.lp;
 }
@@ -259,7 +261,8 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
 
 
 static PJ_COORD forward_4d(PJ_COORD obs, PJ *P) {
-    obs.xyz = forward_3d(obs.lpz, P);
+    const auto xyz = forward_3d(obs.lpz, P);
+    obs.xyz = xyz;
     return obs;
 }
 
@@ -291,7 +294,8 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
 
 
 static PJ_COORD reverse_4d(PJ_COORD obs, PJ *P) {
-    obs.lpz = reverse_3d(obs.xyz, P);
+    const auto lpz = reverse_3d(obs.xyz, P);
+    obs.lpz = lpz;
     return obs;
 }
 
