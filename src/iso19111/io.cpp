@@ -6773,65 +6773,61 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         const auto searchObject =
             [&factory](
                 const std::string &objectName, bool approximateMatch,
-                const std::vector<AuthorityFactory::ObjectType> &objectTypes,
-                bool &goOn) {
-                constexpr size_t limitResultCount = 10;
-                auto res = factory->createObjectsFromName(
-                    objectName, objectTypes, approximateMatch,
-                    limitResultCount);
-                if (res.size() == 1) {
-                    return res.front();
-                }
-                if (res.size() > 1) {
-                    if (objectTypes.size() == 1 &&
-                        objectTypes[0] == AuthorityFactory::ObjectType::CRS) {
-                        for (size_t ndim = 2; ndim <= 3; ndim++) {
-                            for (const auto &obj : res) {
-                                auto crs = dynamic_cast<crs::GeographicCRS *>(
-                                    obj.get());
-                                if (crs && crs->coordinateSystem()
-                                                   ->axisList()
-                                                   .size() == ndim) {
-                                    return obj;
-                                }
+                const std::vector<AuthorityFactory::ObjectType> &objectTypes)
+            -> IdentifiedObjectPtr {
+            constexpr size_t limitResultCount = 10;
+            auto res = factory->createObjectsFromName(
+                objectName, objectTypes, approximateMatch, limitResultCount);
+            if (res.size() == 1) {
+                return res.front().as_nullable();
+            }
+            if (res.size() > 1) {
+                if (objectTypes.size() == 1 &&
+                    objectTypes[0] == AuthorityFactory::ObjectType::CRS) {
+                    for (size_t ndim = 2; ndim <= 3; ndim++) {
+                        for (const auto &obj : res) {
+                            auto crs =
+                                dynamic_cast<crs::GeographicCRS *>(obj.get());
+                            if (crs &&
+                                crs->coordinateSystem()->axisList().size() ==
+                                    ndim) {
+                                return obj.as_nullable();
                             }
                         }
                     }
-
-                    std::string msg("several objects matching this name: ");
-                    bool first = true;
-                    for (const auto &obj : res) {
-                        if (msg.size() > 200) {
-                            msg += ", ...";
-                            break;
-                        }
-                        if (!first) {
-                            msg += ", ";
-                        }
-                        first = false;
-                        msg += obj->nameStr();
-                    }
-                    throw ParsingException(msg);
                 }
-                goOn = true;
-                throw ParsingException("dummy");
-            };
+
+                std::string msg("several objects matching this name: ");
+                bool first = true;
+                for (const auto &obj : res) {
+                    if (msg.size() > 200) {
+                        msg += ", ...";
+                        break;
+                    }
+                    if (!first) {
+                        msg += ", ";
+                    }
+                    first = false;
+                    msg += obj->nameStr();
+                }
+                throw ParsingException(msg);
+            }
+            return nullptr;
+        };
 
         const auto searchCRS = [&searchObject](const std::string &objectName) {
-            bool goOn = false;
             const auto objectTypes = std::vector<AuthorityFactory::ObjectType>{
                 AuthorityFactory::ObjectType::CRS};
-            try {
+            {
                 constexpr bool approximateMatch = false;
-                return searchObject(objectName, approximateMatch, objectTypes,
-                                    goOn);
-            } catch (const std::exception &) {
-                if (!goOn)
-                    throw;
+                auto ret =
+                    searchObject(objectName, approximateMatch, objectTypes);
+                if (ret)
+                    return ret;
             }
+
             constexpr bool approximateMatch = true;
-            return searchObject(objectName, approximateMatch, objectTypes,
-                                goOn);
+            return searchObject(objectName, approximateMatch, objectTypes);
         };
 
         // strings like "WGS 84 + EGM96 height"
@@ -6841,8 +6837,8 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
             if (tokensCompound.size() == 2) {
                 auto obj1 = searchCRS(tokensCompound[0]);
                 auto obj2 = searchCRS(tokensCompound[1]);
-                auto crs1 = util::nn_dynamic_pointer_cast<CRS>(obj1);
-                auto crs2 = util::nn_dynamic_pointer_cast<CRS>(obj2);
+                auto crs1 = std::dynamic_pointer_cast<CRS>(obj1);
+                auto crs2 = std::dynamic_pointer_cast<CRS>(obj2);
                 if (crs1 && crs2) {
                     compoundCRS =
                         CompoundCRS::create(
@@ -6862,28 +6858,19 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         // Fourth pass: approximate match on other objects
         for (int pass = 0; pass <= 3; ++pass) {
             const bool approximateMatch = (pass >= 2);
-            bool goOn = false;
-            try {
-                return searchObject(
-                    text, approximateMatch,
-                    (pass == 0 || pass == 2)
-                        ? std::vector<
-                              AuthorityFactory::ObjectType>{AuthorityFactory::
-                                                                ObjectType::CRS}
-                        : std::vector<
-                              AuthorityFactory::
-                                  ObjectType>{AuthorityFactory::ObjectType::
-                                                  ELLIPSOID,
-                                              AuthorityFactory::ObjectType::
-                                                  DATUM,
-                                              AuthorityFactory::ObjectType::
-                                                  DATUM_ENSEMBLE,
-                                              AuthorityFactory::ObjectType::
-                                                  COORDINATE_OPERATION},
-                    goOn);
-            } catch (const std::exception &) {
-                if (!goOn)
-                    throw;
+            auto ret = searchObject(
+                text, approximateMatch,
+                (pass == 0 || pass == 2)
+                    ? std::vector<
+                          AuthorityFactory::ObjectType>{AuthorityFactory::
+                                                            ObjectType::CRS}
+                    : std::vector<AuthorityFactory::ObjectType>{
+                          AuthorityFactory::ObjectType::ELLIPSOID,
+                          AuthorityFactory::ObjectType::DATUM,
+                          AuthorityFactory::ObjectType::DATUM_ENSEMBLE,
+                          AuthorityFactory::ObjectType::COORDINATE_OPERATION});
+            if (ret) {
+                return NN_NO_CHECK(ret);
             }
             if (compoundCRS) {
                 return NN_NO_CHECK(compoundCRS);
