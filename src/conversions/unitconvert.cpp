@@ -322,7 +322,8 @@ static PJ_XYZ forward_3d(PJ_LPZ lpz, PJ *P) {
     point.lpz = lpz;
 
     /* take care of the horizontal components in the 2D function */
-    point.xy = forward_2d(point.lp, P);
+    const auto xy = forward_2d(point.lp, P);
+    point.xy = xy;
 
     point.xyz.z *= Q->z_factor;
 
@@ -339,7 +340,8 @@ static PJ_LPZ reverse_3d(PJ_XYZ xyz, PJ *P) {
     point.xyz = xyz;
 
     /* take care of the horizontal components in the 2D function */
-    point.lp = reverse_2d(point.xy, P);
+    const auto lp = reverse_2d(point.xy, P);
+    point.lp = lp;
 
     point.xyz.z /= Q->z_factor;
 

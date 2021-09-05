@@ -566,11 +566,6 @@ PJ *OPERATION(pipeline,0) {
                 pj->left = right_pj_left;
                 pj->right = right_pj_left;
             }
-            else if (right_pj_right != PJ_IO_UNITS_WHATEVER)
-            {
-                pj->left = right_pj_right;
-                pj->right = right_pj_right;
-            }
         }
     }
 
@@ -584,11 +579,6 @@ PJ *OPERATION(pipeline,0) {
             {
                 pj->left = left_pj_right;
                 pj->right = left_pj_right;
-            }
-            else if (left_pj_left != PJ_IO_UNITS_WHATEVER)
-            {
-                pj->left = left_pj_left;
-                pj->right = left_pj_left;
             }
         }
     }

@@ -2274,6 +2274,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
         auto searchByDatumCode =
             [this, &authorityFactory, &res, &geodetic_crs_type, crsCriterion,
              &dbContext](const common::IdentifiedObjectNNPtr &l_datum) {
+                bool resModified = false;
                 for (const auto &id : l_datum->identifiers()) {
                     try {
                         auto tempRes =
@@ -2284,11 +2285,13 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                             if (_isEquivalentTo(crs.get(), crsCriterion,
                                                 dbContext)) {
                                 res.emplace_back(crs, 70);
+                                resModified = true;
                             }
                         }
                     } catch (const std::exception &) {
                     }
                 }
+                return resModified;
             };
 
         auto searchByEllipsoid = [this, &authorityFactory, &res, &thisDatum,
@@ -2331,8 +2334,8 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
             }
         };
 
-        const auto searchByDatumOrEllipsoid = [&authorityFactory, &res,
-                                               &thisDatum, searchByDatumCode,
+        const auto searchByDatumOrEllipsoid = [&authorityFactory, &thisDatum,
+                                               searchByDatumCode,
                                                searchByEllipsoid]() {
             if (!thisDatum->identifiers().empty()) {
                 searchByDatumCode(thisDatum);
@@ -2342,11 +2345,12 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                     {io::AuthorityFactory::ObjectType::
                          GEODETIC_REFERENCE_FRAME},
                     false);
-                const size_t sizeBefore = res.size();
+                bool resModified = false;
                 for (const auto &candidateDatum : candidateDatums) {
-                    searchByDatumCode(candidateDatum);
+                    if (searchByDatumCode(candidateDatum))
+                        resModified = true;
                 }
-                if (sizeBefore == res.size()) {
+                if (!resModified) {
                     searchByEllipsoid();
                 }
             }

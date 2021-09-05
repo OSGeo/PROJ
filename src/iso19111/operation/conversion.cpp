@@ -2359,12 +2359,11 @@ ConversionNNPtr Conversion::createAxisOrderReversal(bool is3D) {
                       createMethodMapNameEPSGCode(
                           EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_3D),
                       {}, {});
-    } else {
-        return create(createMapNameEPSGCode(AXIS_ORDER_CHANGE_2D_NAME, 15498),
-                      createMethodMapNameEPSGCode(
-                          EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_2D),
-                      {}, {});
     }
+    return create(
+        createMapNameEPSGCode(AXIS_ORDER_CHANGE_2D_NAME, 15498),
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_AXIS_ORDER_REVERSAL_2D),
+        {}, {});
 }
 
 // ---------------------------------------------------------------------------

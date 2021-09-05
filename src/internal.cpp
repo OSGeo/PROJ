@@ -83,11 +83,17 @@ chained calls starting out with a call to its 2D interface.
         direction = static_cast<PJ_DIRECTION>(-direction);
     switch (direction) {
         case PJ_FWD:
-            coo.xy = pj_fwd (coo.lp, P);
+        {
+            const auto xy = pj_fwd (coo.lp, P);
+            coo.xy = xy;
             return coo;
+        }
         case PJ_INV:
-            coo.lp = pj_inv (coo.xy, P);
+        {
+            const auto lp = pj_inv (coo.xy, P);
+            coo.lp = lp;
             return coo;
+        }
         case PJ_IDENT:
             break;
     }
@@ -110,11 +116,17 @@ chained calls starting out with a call to its 3D interface.
         direction = static_cast<PJ_DIRECTION>(-direction);
     switch (direction) {
         case PJ_FWD:
-            coo.xyz = pj_fwd3d (coo.lpz, P);
+        {
+            const auto xyz = pj_fwd3d (coo.lpz, P);
+            coo.xyz = xyz;
             return coo;
+        }
         case PJ_INV:
-            coo.lpz = pj_inv3d (coo.xyz, P);
+        {
+            const auto lpz = pj_inv3d (coo.xyz, P);
+            coo.lpz = lpz;
             return coo;
+        }
         case PJ_IDENT:
             break;
     }
