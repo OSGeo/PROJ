@@ -2363,6 +2363,7 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         const auto &methodIds = method->identifiers();
         std::string methodAuthName;
         std::string methodCode;
+        const operation::MethodMapping *methodMapping = nullptr;
         if (methodIds.empty()) {
             const int epsgCode = method->getEPSGCode();
             if (epsgCode > 0) {
@@ -2374,7 +2375,6 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
                 const auto projectionMethodMappings =
                     operation::getProjectionMethodMappings(
                         nProjectionMethodMappings);
-                const operation::MethodMapping *methodMapping = nullptr;
                 for (size_t i = 0; i < nProjectionMethodMappings; ++i) {
                     const auto &mapping = projectionMethodMappings[i];
                     if (metadata::Identifier::isEquivalentName(
@@ -2399,18 +2399,52 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
             methodAuthName = *(methodId->codeSpace());
             methodCode = methodId->code();
         }
+
         auto sql = formatStatement("INSERT INTO conversion VALUES("
                                    "'%q','%q','%q','','%q','%q','%q'",
                                    convAuthName.c_str(), convCode.c_str(),
                                    conversion->nameStr().c_str(),
                                    methodAuthName.c_str(), methodCode.c_str(),
                                    method->nameStr().c_str());
-        const auto &values = conversion->parameterValues();
-        if (values.size() > N_MAX_PARAMS) {
+        const auto &srcValues = conversion->parameterValues();
+        if (srcValues.size() > N_MAX_PARAMS) {
             throw FactoryException("Cannot insert projection with more than " +
                                    toString(static_cast<int>(N_MAX_PARAMS)) +
                                    " parameters");
         }
+
+        std::vector<operation::GeneralParameterValueNNPtr> values;
+        if (methodMapping == nullptr) {
+            if (methodAuthName == metadata::Identifier::EPSG) {
+                methodMapping = operation::getMapping(atoi(methodCode.c_str()));
+            } else {
+                methodMapping =
+                    operation::getMapping(method->nameStr().c_str());
+            }
+        }
+        if (methodMapping != nullptr) {
+            // Re-order projection parameters in their reference order
+            for (size_t j = 0; methodMapping->params[j] != nullptr; ++j) {
+                for (size_t i = 0; i < srcValues.size(); ++i) {
+                    auto opParamValue = dynamic_cast<
+                        const operation::OperationParameterValue *>(
+                        srcValues[i].get());
+                    if (!opParamValue) {
+                        throw FactoryException("Cannot insert projection with "
+                                               "non-OperationParameterValue");
+                    }
+                    if (methodMapping->params[j]->wkt2_name &&
+                        opParamValue->parameter()->nameStr() ==
+                            methodMapping->params[j]->wkt2_name) {
+                        values.emplace_back(srcValues[i]);
+                    }
+                }
+            }
+        }
+        if (values.size() != srcValues.size()) {
+            values = srcValues;
+        }
+
         for (const auto &genOpParamvalue : values) {
             auto opParamValue =
                 dynamic_cast<const operation::OperationParameterValue *>(
