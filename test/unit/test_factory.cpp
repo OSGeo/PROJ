@@ -4358,7 +4358,8 @@ TEST(factory, objectInsertion) {
         ctxt->stopInsertStatementsSession();
     }
 
-    // Missing projection method and parameter id
+    // Missing projection method and parameter id, and parameters not in
+    // their nominal order
     {
         auto ctxt = DatabaseContext::create();
         ctxt->startInsertStatementsSession();
@@ -4372,9 +4373,9 @@ TEST(factory, objectInsertion) {
             "            ANGLEUNIT[\"degree\",0.0174532925199433]]],\n"
             "    CONVERSION[\"UTM zone 31N\",\n"
             "        METHOD[\"Transverse Mercator\"],\n"
-            "        PARAMETER[\"Latitude of natural origin\",0,\n"
-            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
             "        PARAMETER[\"Longitude of natural origin\",3,\n"
+            "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+            "        PARAMETER[\"Latitude of natural origin\",0,\n"
             "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
             "        PARAMETER[\"Scale factor at natural origin\",0.9996,\n"
             "            SCALEUNIT[\"unity\",1]],\n"
