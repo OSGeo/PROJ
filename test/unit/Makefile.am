@@ -4,7 +4,7 @@ EXTRA_DIST = CMakeLists.txt
 
 noinst_HEADERS = gtest_include.h test_primitives.hpp
 
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include -I$(top_srcdir)/test @GTEST_CFLAGS@ @SQLITE3_CFLAGS@
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include -I$(top_srcdir)/test @GTEST_CFLAGS@ @SQLITE3_CFLAGS@ -DMUTEX_@MUTEX_SETTING@
 AM_CXXFLAGS = @CXX_WFLAGS@ @NO_ZERO_AS_NULL_POINTER_CONSTANT_FLAG@
 
 PROJ_LIB ?= ../../data/for_tests
@@ -20,6 +20,7 @@ noinst_PROGRAMS += test_network
 noinst_PROGRAMS += test_defmodel
 noinst_PROGRAMS += test_tinshift
 noinst_PROGRAMS += test_misc
+noinst_PROGRAMS += test_fork
 
 pj_phi2_test_SOURCES = pj_phi2_test.cpp main.cpp
 pj_phi2_test_LDADD = ../../src/libproj.la @GTEST_LIBS@
@@ -95,7 +96,13 @@ test_misc_LDADD = ../../src/libproj.la @GTEST_LIBS@
 test_misc-check: test_misc
 	PROJ_LIB=$(PROJ_LIB) ./test_misc
 
+test_fork_SOURCES = test_fork.c
+test_fork_LDADD = ../../src/libproj.la @THREAD_LIB@
+
+test_fork-check: test_fork
+	PROJ_LIB=$(PROJ_LIB) ./test_fork
+
 check-local: pj_phi2_test-check proj_errno_string_test-check \
 		proj_angular_io_test-check proj_context_test-check test_cpp_api-check \
 		gie_self_tests-check test_network-check test_defmodel-check test_tinshift-check \
-		test_misc-check
+		test_misc-check test_fork-check
