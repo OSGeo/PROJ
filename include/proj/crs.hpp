@@ -270,6 +270,8 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
 
     PROJ_DLL bool isGeocentric() PROJ_PURE_DECL;
 
+    PROJ_DLL bool isSphericalPlanetocentric() PROJ_PURE_DECL;
+
     PROJ_DLL static GeodeticCRSNNPtr
     create(const util::PropertyMap &properties,
            const datum::GeodeticReferenceFrameNNPtr &datum,

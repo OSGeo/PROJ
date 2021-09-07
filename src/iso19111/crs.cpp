@@ -1608,7 +1608,7 @@ GeodeticCRS::velocityModel() PROJ_PURE_DEFN {
 
 // ---------------------------------------------------------------------------
 
-/** \brief Return whether the CRS is a geocentric one.
+/** \brief Return whether the CRS is a Cartesian geocentric one.
  *
  * A geocentric CRS is a geodetic CRS that has a Cartesian coordinate system
  * with three axis, whose direction is respectively
@@ -1625,6 +1625,31 @@ bool GeodeticCRS::isGeocentric() PROJ_PURE_DEFN {
            &axisList[0]->direction() == &cs::AxisDirection::GEOCENTRIC_X &&
            &axisList[1]->direction() == &cs::AxisDirection::GEOCENTRIC_Y &&
            &axisList[2]->direction() == &cs::AxisDirection::GEOCENTRIC_Z;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether the CRS is a Spherical planetocentric one.
+ *
+ * A Spherical planetocentric CRS is a geodetic CRS that has a spherical
+ * (angular) coordinate system with 2 axis, which represent geocentric latitude/
+ * longitude or longitude/geocentric latitude.
+ *
+ * Such CRS are typically used in use case that apply to non-Earth bodies.
+ *
+ * @return true if the CRS is a Spherical planetocentric CRS.
+ *
+ * @since 8.2
+ */
+bool GeodeticCRS::isSphericalPlanetocentric() PROJ_PURE_DEFN {
+    const auto &cs = coordinateSystem();
+    const auto &axisList = cs->axisList();
+    return axisList.size() == 2 &&
+           dynamic_cast<cs::SphericalCS *>(cs.get()) != nullptr &&
+           ((ci_equal(axisList[0]->nameStr(), "planetocentric latitude") &&
+             ci_equal(axisList[1]->nameStr(), "planetocentric longitude")) ||
+            (ci_equal(axisList[0]->nameStr(), "planetocentric longitude") &&
+             ci_equal(axisList[1]->nameStr(), "planetocentric latitude")));
 }
 
 // ---------------------------------------------------------------------------

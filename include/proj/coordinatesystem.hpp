@@ -314,6 +314,11 @@ class PROJ_GCC_DLL SphericalCS final : public CoordinateSystem {
            const CoordinateSystemAxisNNPtr &axis2,
            const CoordinateSystemAxisNNPtr &axis3);
 
+    PROJ_DLL static SphericalCSNNPtr
+    create(const util::PropertyMap &properties,
+           const CoordinateSystemAxisNNPtr &axis1,
+           const CoordinateSystemAxisNNPtr &axis2);
+
   protected:
     PROJ_INTERNAL explicit SphericalCS(
         const std::vector<CoordinateSystemAxisNNPtr> &axisIn);

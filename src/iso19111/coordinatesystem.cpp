@@ -667,6 +667,27 @@ SphericalCSNNPtr SphericalCS::create(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a SphericalCS with 2 axis.
+ *
+ * This is an extension to ISO19111 to support (planet)-ocentric CS with
+ * geocentric latitude.
+ *
+ * @param properties See \ref general_properties.
+ * @param axis1 The first axis.
+ * @param axis2 The second axis.
+ * @return a new SphericalCS.
+ */
+SphericalCSNNPtr SphericalCS::create(const util::PropertyMap &properties,
+                                     const CoordinateSystemAxisNNPtr &axis1,
+                                     const CoordinateSystemAxisNNPtr &axis2) {
+    std::vector<CoordinateSystemAxisNNPtr> axis{axis1, axis2};
+    auto cs(SphericalCS::nn_make_shared<SphericalCS>(axis));
+    cs->setProperties(properties);
+    return cs;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 EllipsoidalCS::~EllipsoidalCS() = default;
 //! @endcond

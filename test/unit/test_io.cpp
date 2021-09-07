@@ -894,6 +894,37 @@ TEST(wkt_parse, wkt2_EPSG_4979) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt2_spherical_planetocentric) {
+    const auto wkt =
+        "GEODCRS[\"Mercury (2015) / Ocentric\",\n"
+        "    DATUM[\"Mercury (2015)\",\n"
+        "        ELLIPSOID[\"Mercury (2015)\",2440530,1075.12334801762,\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        ANCHOR[\"Hun Kal: 20.0\"]],\n"
+        "    PRIMEM[\"Reference Meridian\",0,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "    CS[spherical,2],\n"
+        "        AXIS[\"planetocentric latitude (U)\",north,\n"
+        "            ORDER[1],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "        AXIS[\"planetocentric longitude (V)\",east,\n"
+        "            ORDER[2],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "    ID[\"IAU\",19902,2015],\n"
+        "    REMARK[\"Source of IAU Coordinate systems: "
+        "doi://10.1007/s10569-017-9805-5\"]]";
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_TRUE(crs->isSphericalPlanetocentric());
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
+        wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 static void checkGeocentric(GeodeticCRSPtr crs) {
     // Explicitly check this is NOT a GeographicCRS
     EXPECT_TRUE(!dynamic_cast<GeographicCRS *>(crs.get()));
@@ -11470,6 +11501,59 @@ TEST(json_import, geographic_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(gcrs != nullptr);
+    EXPECT_EQ(gcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, spherical_planetocentric) {
+    const auto json = "{\n"
+                      "  \"$schema\": \"foo\",\n"
+                      "  \"type\": \"GeodeticCRS\",\n"
+                      "  \"name\": \"Mercury (2015) / Ocentric\",\n"
+                      "  \"datum\": {\n"
+                      "    \"type\": \"GeodeticReferenceFrame\",\n"
+                      "    \"name\": \"Mercury (2015)\",\n"
+                      "    \"anchor\": \"Hun Kal: 20.0\",\n"
+                      "    \"ellipsoid\": {\n"
+                      "      \"name\": \"Mercury (2015)\",\n"
+                      "      \"semi_major_axis\": 2440530,\n"
+                      "      \"inverse_flattening\": 1075.12334801762\n"
+                      "    },\n"
+                      "    \"prime_meridian\": {\n"
+                      "      \"name\": \"Reference Meridian\",\n"
+                      "      \"longitude\": 0\n"
+                      "    }\n"
+                      "  },\n"
+                      "  \"coordinate_system\": {\n"
+                      "    \"subtype\": \"spherical\",\n"
+                      "    \"axis\": [\n"
+                      "      {\n"
+                      "        \"name\": \"Planetocentric latitude\",\n"
+                      "        \"abbreviation\": \"U\",\n"
+                      "        \"direction\": \"north\",\n"
+                      "        \"unit\": \"degree\"\n"
+                      "      },\n"
+                      "      {\n"
+                      "        \"name\": \"Planetocentric longitude\",\n"
+                      "        \"abbreviation\": \"V\",\n"
+                      "        \"direction\": \"east\",\n"
+                      "        \"unit\": \"degree\"\n"
+                      "      }\n"
+                      "    ]\n"
+                      "  },\n"
+                      "  \"id\": {\n"
+                      "    \"authority\": \"IAU\",\n"
+                      "    \"code\": 19902\n"
+                      "  },\n"
+                      "  \"remarks\": \"Source of IAU Coordinate systems: "
+                      "doi://10.1007/s10569-017-9805-5\"\n"
+                      "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gcrs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(gcrs != nullptr);
+    EXPECT_TRUE(gcrs->isSphericalPlanetocentric());
     EXPECT_EQ(gcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
 }

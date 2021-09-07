@@ -152,6 +152,7 @@ osgeo::proj::crs::GeodeticCRS::ellipsoid() const
 osgeo::proj::crs::GeodeticCRS::~GeodeticCRS()
 osgeo::proj::crs::GeodeticCRS::identify(std::shared_ptr<osgeo::proj::io::AuthorityFactory> const&) const
 osgeo::proj::crs::GeodeticCRS::isGeocentric() const
+osgeo::proj::crs::GeodeticCRS::isSphericalPlanetocentric() const
 osgeo::proj::crs::GeodeticCRS::primeMeridian() const
 osgeo::proj::crs::GeodeticCRS::velocityModel() const
 osgeo::proj::crs::GeographicCRS::coordinateSystem() const
@@ -225,6 +226,7 @@ osgeo::proj::cs::OrdinalCS::create(osgeo::proj::util::PropertyMap const&, std::v
 osgeo::proj::cs::OrdinalCS::~OrdinalCS()
 osgeo::proj::cs::ParametricCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
 osgeo::proj::cs::ParametricCS::~ParametricCS()
+osgeo::proj::cs::SphericalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
 osgeo::proj::cs::SphericalCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)
 osgeo::proj::cs::SphericalCS::~SphericalCS()
 osgeo::proj::cs::TemporalCountCS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystemAxis> > const&)

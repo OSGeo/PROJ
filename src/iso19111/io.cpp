@@ -2798,7 +2798,11 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
             return VerticalCS::create(csMap, axisList[0]);
         }
     } else if (ci_equal(csType, "spherical")) {
-        if (axisCount == 3) {
+        if (axisCount == 2) {
+            // Extension to ISO19111 to support (planet)-ocentric CS with
+            // geocentric latitude
+            return SphericalCS::create(csMap, axisList[0], axisList[1]);
+        } else if (axisCount == 3) {
             return SphericalCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
         }
@@ -5945,62 +5949,67 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
         axisList.emplace_back(buildAxis(axis));
     }
     const PropertyMap &csMap = emptyPropertyMap;
+    const auto axisCount = axisList.size();
     if (subtype == "ellipsoidal") {
-        if (axisList.size() == 2) {
+        if (axisCount == 2) {
             return EllipsoidalCS::create(csMap, axisList[0], axisList[1]);
         }
-        if (axisList.size() == 3) {
+        if (axisCount == 3) {
             return EllipsoidalCS::create(csMap, axisList[0], axisList[1],
                                          axisList[2]);
         }
         throw ParsingException("Expected 2 or 3 axis");
     }
     if (subtype == "Cartesian") {
-        if (axisList.size() == 2) {
+        if (axisCount == 2) {
             return CartesianCS::create(csMap, axisList[0], axisList[1]);
         }
-        if (axisList.size() == 3) {
+        if (axisCount == 3) {
             return CartesianCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
         }
         throw ParsingException("Expected 2 or 3 axis");
     }
     if (subtype == "vertical") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return VerticalCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
     if (subtype == "spherical") {
-        if (axisList.size() == 3) {
+        if (axisCount == 2) {
+            // Extension to ISO19111 to support (planet)-ocentric CS with
+            // geocentric latitude
+            return SphericalCS::create(csMap, axisList[0], axisList[1]);
+        } else if (axisCount == 3) {
             return SphericalCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
         }
-        throw ParsingException("Expected 3 axis");
+        throw ParsingException("Expected 2 or 3 axis");
     }
     if (subtype == "ordinal") {
         return OrdinalCS::create(csMap, axisList);
     }
     if (subtype == "parametric") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return ParametricCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
     if (subtype == "TemporalDateTime") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return DateTimeTemporalCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
     if (subtype == "TemporalCount") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return TemporalCountCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
     if (subtype == "TemporalMeasure") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return TemporalMeasureCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
