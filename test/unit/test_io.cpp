@@ -10063,6 +10063,29 @@ TEST(io, projparse_geocent_wktext) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_geoc) {
+    std::string input("+proj=longlat +geoc +datum=WGS84 +no_defs +type=crs");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<GeodeticCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_TRUE(crs->isSphericalPlanetocentric());
+#if 1
+    EXPECT_THROW(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        FormattingException);
+#else
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        input);
+#endif
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_projected_wktext) {
     std::string input("+proj=merc +foo +wktext +type=crs");
     auto obj = PROJStringParser().createFromPROJString(input);
@@ -10209,13 +10232,13 @@ TEST(io, projparse_init) {
     }
 
     {
-        auto obj = createFromUserInput("+title=mytitle +geoc +init=epsg:4326",
+        auto obj = createFromUserInput("+title=mytitle +over +init=epsg:4326",
                                        dbContext, true);
         auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         EXPECT_EQ(crs->nameStr(), "mytitle");
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=longlat +geoc +datum=WGS84 +no_defs +type=crs");
+                  "+proj=longlat +over +datum=WGS84 +no_defs +type=crs");
     }
 
     {

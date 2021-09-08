@@ -1996,6 +1996,61 @@ void GeodeticCRS::addGeocentricUnitConversionIntoPROJString(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void GeodeticCRS::addAngularUnitConvertAndAxisSwap(
+    io::PROJStringFormatter *formatter) const {
+    const auto &axisList = coordinateSystem()->axisList();
+
+    formatter->addStep("unitconvert");
+    formatter->addParam("xy_in", "rad");
+    if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
+        formatter->addParam("z_in", "m");
+    }
+    {
+        const auto &unitHoriz = axisList[0]->unit();
+        const auto projUnit = unitHoriz.exportToPROJString();
+        if (projUnit.empty()) {
+            formatter->addParam("xy_out", unitHoriz.conversionToSI());
+        } else {
+            formatter->addParam("xy_out", projUnit);
+        }
+    }
+    if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
+        const auto &unitZ = axisList[2]->unit();
+        auto projVUnit = unitZ.exportToPROJString();
+        if (projVUnit.empty()) {
+            formatter->addParam("z_out", unitZ.conversionToSI());
+        } else {
+            formatter->addParam("z_out", projVUnit);
+        }
+    }
+
+    const char *order[2] = {nullptr, nullptr};
+    const char *one = "1";
+    const char *two = "2";
+    for (int i = 0; i < 2; i++) {
+        const auto &dir = axisList[i]->direction();
+        if (&dir == &cs::AxisDirection::WEST) {
+            order[i] = "-1";
+        } else if (&dir == &cs::AxisDirection::EAST) {
+            order[i] = one;
+        } else if (&dir == &cs::AxisDirection::SOUTH) {
+            order[i] = "-2";
+        } else if (&dir == &cs::AxisDirection::NORTH) {
+            order[i] = two;
+        }
+    }
+    if (order[0] && order[1] && (order[0] != one || order[1] != two)) {
+        formatter->addStep("axisswap");
+        char orderStr[10];
+        sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
+        formatter->addParam("order", orderStr);
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 void GeodeticCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
@@ -2007,19 +2062,38 @@ void GeodeticCRS::_exportToPROJString(
         return;
     }
 
-    if (!isGeocentric()) {
+    if (isGeocentric()) {
+        if (!formatter->getCRSExport()) {
+            formatter->addStep("cart");
+        } else {
+            formatter->addStep("geocent");
+        }
+
+        addDatumInfoToPROJString(formatter);
+        addGeocentricUnitConversionIntoPROJString(formatter);
+    } else if (isSphericalPlanetocentric()) {
+        if (!formatter->getCRSExport()) {
+            formatter->addStep("geoc");
+            addDatumInfoToPROJString(formatter);
+            addAngularUnitConvertAndAxisSwap(formatter);
+        } else {
+            io::FormattingException::Throw(
+                "GeodeticCRS::exportToPROJString() not supported on spherical "
+                "planetocentric coordinate systems");
+            // The below code now works as input to PROJ, but I'm not sure we
+            // want to propagate this, given that we got cs2cs doing conversion
+            // in the wrong direction in past versions.
+            /*formatter->addStep("longlat");
+            formatter->addParam("geoc");
+
+            addDatumInfoToPROJString(formatter);*/
+        }
+    } else {
         io::FormattingException::Throw(
             "GeodeticCRS::exportToPROJString() only "
-            "supports geocentric coordinate systems");
+            "supports geocentric or spherical planetocentric "
+            "coordinate systems");
     }
-
-    if (!formatter->getCRSExport()) {
-        formatter->addStep("cart");
-    } else {
-        formatter->addStep("geocent");
-    }
-    addDatumInfoToPROJString(formatter);
-    addGeocentricUnitConversionIntoPROJString(formatter);
 }
 //! @endcond
 
@@ -2880,61 +2954,6 @@ GeographicCRS::demoteTo2D(const std::string &newName,
     return NN_NO_CHECK(std::dynamic_pointer_cast<GeographicCRS>(
         shared_from_this().as_nullable()));
 }
-
-// ---------------------------------------------------------------------------
-
-//! @cond Doxygen_Suppress
-void GeographicCRS::addAngularUnitConvertAndAxisSwap(
-    io::PROJStringFormatter *formatter) const {
-    const auto &axisList = coordinateSystem()->axisList();
-
-    formatter->addStep("unitconvert");
-    formatter->addParam("xy_in", "rad");
-    if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
-        formatter->addParam("z_in", "m");
-    }
-    {
-        const auto &unitHoriz = axisList[0]->unit();
-        const auto projUnit = unitHoriz.exportToPROJString();
-        if (projUnit.empty()) {
-            formatter->addParam("xy_out", unitHoriz.conversionToSI());
-        } else {
-            formatter->addParam("xy_out", projUnit);
-        }
-    }
-    if (axisList.size() == 3 && !formatter->omitZUnitConversion()) {
-        const auto &unitZ = axisList[2]->unit();
-        auto projVUnit = unitZ.exportToPROJString();
-        if (projVUnit.empty()) {
-            formatter->addParam("z_out", unitZ.conversionToSI());
-        } else {
-            formatter->addParam("z_out", projVUnit);
-        }
-    }
-
-    const char *order[2] = {nullptr, nullptr};
-    const char *one = "1";
-    const char *two = "2";
-    for (int i = 0; i < 2; i++) {
-        const auto &dir = axisList[i]->direction();
-        if (&dir == &cs::AxisDirection::WEST) {
-            order[i] = "-1";
-        } else if (&dir == &cs::AxisDirection::EAST) {
-            order[i] = one;
-        } else if (&dir == &cs::AxisDirection::SOUTH) {
-            order[i] = "-2";
-        } else if (&dir == &cs::AxisDirection::NORTH) {
-            order[i] = two;
-        }
-    }
-    if (order[0] && order[1] && (order[0] != one || order[1] != two)) {
-        formatter->addStep("axisswap");
-        char orderStr[10];
-        sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
-        formatter->addParam("order", orderStr);
-    }
-}
-//! @endcond
 
 // ---------------------------------------------------------------------------
 

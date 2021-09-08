@@ -3459,11 +3459,15 @@ void Conversion::_exportToPROJString(
             }
         }
 
-        srcGeogCRS = std::dynamic_pointer_cast<crs::GeographicCRS>(horiz);
-        if (srcGeogCRS) {
+        auto srcGeodCRS = dynamic_cast<const crs::GeodeticCRS *>(horiz.get());
+        if (srcGeodCRS) {
+            srcGeogCRS = std::dynamic_pointer_cast<crs::GeographicCRS>(horiz);
+        }
+        if (srcGeodCRS &&
+            (srcGeogCRS || srcGeodCRS->isSphericalPlanetocentric())) {
             formatter->setOmitProjLongLatIfPossible(true);
             formatter->startInversion();
-            srcGeogCRS->_exportToPROJString(formatter);
+            srcGeodCRS->_exportToPROJString(formatter);
             formatter->stopInversion();
             formatter->setOmitProjLongLatIfPossible(false);
         }

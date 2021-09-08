@@ -474,13 +474,16 @@ static void getTransformationType(const crs::CRSNNPtr &sourceCRSIn,
         dynamic_cast<const crs::GeographicCRS *>(sourceCRSIn.get());
     auto targetCRSGeog =
         dynamic_cast<const crs::GeographicCRS *>(targetCRSIn.get());
-    if (!sourceCRSGeog || !targetCRSGeog) {
+    if (!(sourceCRSGeog ||
+          (sourceCRSGeod && sourceCRSGeod->isSphericalPlanetocentric())) ||
+        !(targetCRSGeog ||
+          (targetCRSGeod && targetCRSGeod->isSphericalPlanetocentric()))) {
         throw InvalidOperation("Inconsistent CRS type");
     }
     const auto nSrcAxisCount =
-        sourceCRSGeog->coordinateSystem()->axisList().size();
+        sourceCRSGeod->coordinateSystem()->axisList().size();
     const auto nTargetAxisCount =
-        targetCRSGeog->coordinateSystem()->axisList().size();
+        targetCRSGeod->coordinateSystem()->axisList().size();
     isGeog2D = nSrcAxisCount == 2 && nTargetAxisCount == 2;
     isGeog3D = !isGeog2D && nSrcAxisCount >= 2 && nTargetAxisCount >= 2;
 }
@@ -1003,36 +1006,36 @@ TransformationNNPtr Transformation::createTOWGS84(
             "Invalid number of elements in TOWGS84Parameters");
     }
 
-    crs::CRSPtr transformSourceCRS = sourceCRSIn->extractGeodeticCRS();
-    if (!transformSourceCRS) {
+    auto transformSourceGeodCRS = sourceCRSIn->extractGeodeticCRS();
+    if (!transformSourceGeodCRS) {
         throw InvalidOperation(
             "Cannot find GeodeticCRS in sourceCRS of TOWGS84 transformation");
     }
 
     util::PropertyMap properties;
     properties.set(common::IdentifiedObject::NAME_KEY,
-                   concat("Transformation from ", transformSourceCRS->nameStr(),
-                          " to WGS84"));
+                   concat("Transformation from ",
+                          transformSourceGeodCRS->nameStr(), " to WGS84"));
 
-    auto targetCRS =
-        dynamic_cast<const crs::GeographicCRS *>(transformSourceCRS.get())
-            ? util::nn_static_pointer_cast<crs::CRS>(
-                  crs::GeographicCRS::EPSG_4326)
-            : util::nn_static_pointer_cast<crs::CRS>(
-                  crs::GeodeticCRS::EPSG_4978);
+    auto targetCRS = dynamic_cast<const crs::GeographicCRS *>(
+                         transformSourceGeodCRS.get()) ||
+                             transformSourceGeodCRS->isSphericalPlanetocentric()
+                         ? util::nn_static_pointer_cast<crs::CRS>(
+                               crs::GeographicCRS::EPSG_4326)
+                         : util::nn_static_pointer_cast<crs::CRS>(
+                               crs::GeodeticCRS::EPSG_4978);
 
+    crs::CRSNNPtr transformSourceCRS = NN_NO_CHECK(transformSourceGeodCRS);
     if (TOWGS84Parameters.size() == 3) {
         return createGeocentricTranslations(
-            properties, NN_NO_CHECK(transformSourceCRS), targetCRS,
-            TOWGS84Parameters[0], TOWGS84Parameters[1], TOWGS84Parameters[2],
-            {});
+            properties, transformSourceCRS, targetCRS, TOWGS84Parameters[0],
+            TOWGS84Parameters[1], TOWGS84Parameters[2], {});
     }
 
-    return createPositionVector(properties, NN_NO_CHECK(transformSourceCRS),
-                                targetCRS, TOWGS84Parameters[0],
-                                TOWGS84Parameters[1], TOWGS84Parameters[2],
-                                TOWGS84Parameters[3], TOWGS84Parameters[4],
-                                TOWGS84Parameters[5], TOWGS84Parameters[6], {});
+    return createPositionVector(
+        properties, transformSourceCRS, targetCRS, TOWGS84Parameters[0],
+        TOWGS84Parameters[1], TOWGS84Parameters[2], TOWGS84Parameters[3],
+        TOWGS84Parameters[4], TOWGS84Parameters[5], TOWGS84Parameters[6], {});
 }
 
 // ---------------------------------------------------------------------------

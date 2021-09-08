@@ -6092,7 +6092,7 @@ TEST(operation, createOperation_on_crs_with_canonical_bound_crs) {
 
 TEST(operation, createOperation_fallback_to_proj4_strings) {
     auto objDest = PROJStringParser().createFromPROJString(
-        "+proj=longlat +geoc +datum=WGS84 +type=crs");
+        "+proj=longlat +over +datum=WGS84 +type=crs");
     auto dest = nn_dynamic_pointer_cast<GeographicCRS>(objDest);
     ASSERT_TRUE(dest != nullptr);
 
@@ -6102,7 +6102,7 @@ TEST(operation, createOperation_fallback_to_proj4_strings) {
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +proj=longlat +geoc +datum=WGS84 "
+              "+step +proj=longlat +over +datum=WGS84 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
 }
 
@@ -6110,12 +6110,12 @@ TEST(operation, createOperation_fallback_to_proj4_strings) {
 
 TEST(operation, createOperation_fallback_to_proj4_strings_bound_of_geog) {
     auto objSrc = PROJStringParser().createFromPROJString(
-        "+proj=longlat +geoc +ellps=GRS80 +towgs84=0,0,0 +type=crs");
+        "+proj=longlat +over +ellps=GRS80 +towgs84=0,0,0 +type=crs");
     auto src = nn_dynamic_pointer_cast<BoundCRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
 
     auto objDest = PROJStringParser().createFromPROJString(
-        "+proj=longlat +geoc +ellps=clrk66 +towgs84=0,0,0 +type=crs");
+        "+proj=longlat +over +ellps=clrk66 +towgs84=0,0,0 +type=crs");
     auto dest = nn_dynamic_pointer_cast<BoundCRS>(objDest);
     ASSERT_TRUE(dest != nullptr);
 
@@ -6125,8 +6125,8 @@ TEST(operation, createOperation_fallback_to_proj4_strings_bound_of_geog) {
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-              "+step +inv +proj=longlat +geoc +ellps=GRS80 +towgs84=0,0,0 "
-              "+step +proj=longlat +geoc +ellps=clrk66 +towgs84=0,0,0 "
+              "+step +inv +proj=longlat +over +ellps=GRS80 +towgs84=0,0,0 "
+              "+step +proj=longlat +over +ellps=clrk66 +towgs84=0,0,0 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
 }
 
@@ -6831,4 +6831,118 @@ TEST(operation, derivedGeographicCRS_with_to_wgs84_to_geographicCRS) {
         EXPECT_EQ(op2->exportToPROJString(PROJStringFormatter::create().get()),
                   "+proj=pipeline +step +proj=axisswap +order=2,1 " + pipeline);
     }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_spherical_ocentric_to_geographic) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +datum=WGS84 +type=crs");
+    auto src = nn_dynamic_pointer_cast<GeodeticCRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), GeographicCRS::EPSG_4326);
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=geoc +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_geographic_to_spherical_ocentric) {
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +datum=WGS84 +type=crs");
+    auto dest = nn_dynamic_pointer_cast<GeodeticCRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4326, NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=geoc +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_bound_of_spherical_ocentric_to_same_type) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +ellps=GRS80 +towgs84=1,2,3 +type=crs");
+    auto src = nn_dynamic_pointer_cast<BoundCRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +ellps=clrk66 +towgs84=4,5,6 +type=crs");
+    auto dest = nn_dynamic_pointer_cast<BoundCRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=geoc +ellps=GRS80 "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=helmert +x=-3 +y=-3 +z=-3 "
+              "+step +inv +proj=cart +ellps=clrk66 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=geoc +ellps=clrk66 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_spherical_ocentric_to_projected) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +datum=WGS84 +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=utm +zone=11 +datum=WGS84 +type=crs");
+    auto dest = nn_dynamic_pointer_cast<CRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=geoc +ellps=WGS84 "
+              "+step +proj=utm +zone=11 +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     createOperation_spherical_ocentric_to_projected_of_spherical_ocentric) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +datum=WGS84 +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=utm +geoc +zone=11 +datum=WGS84 +type=crs");
+    auto dest = nn_dynamic_pointer_cast<CRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=geoc +ellps=WGS84 "
+              "+step +proj=utm +zone=11 +ellps=WGS84");
 }

@@ -310,6 +310,9 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
     PROJ_INTERNAL void addGeocentricUnitConversionIntoPROJString(
         io::PROJStringFormatter *formatter) const;
 
+    PROJ_INTERNAL void
+    addAngularUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter) const;
+
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
@@ -402,12 +405,10 @@ class PROJ_GCC_DLL GeographicCRS : public GeodeticCRS {
 
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
-        PROJ_INTERNAL void
-        addAngularUnitConvertAndAxisSwap(
-            io::PROJStringFormatter *formatter) const;
 
-    PROJ_INTERNAL void _exportToPROJString(io::PROJStringFormatter *formatter)
-        const override; // throw(FormattingException)
+        PROJ_INTERNAL void
+        _exportToPROJString(io::PROJStringFormatter *formatter)
+            const override; // throw(FormattingException)
 
     PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
         const override; // throw(FormattingException)

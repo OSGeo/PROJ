@@ -59,10 +59,10 @@
 
 static PJ *transformation = nullptr;
 
-static bool srcIsGeog = false;
+static bool srcIsLongLat = false;
 static double srcToRadians = 0.0;
 
-static bool destIsGeog = false;
+static bool destIsLongLat = false;
 static double destToRadians = 0.0;
 static bool destIsLatLong = false;
 
@@ -158,7 +158,7 @@ static void process(FILE *fid)
 
         if (data.u != HUGE_VAL) {
 
-            if (srcIsGeog) {
+            if (srcIsLongLat) {
                 /* dmstor gives values to radians. Convert now to the SRS unit
                  */
                 data.u /= srcToRadians;
@@ -179,7 +179,7 @@ static void process(FILE *fid)
         if (data.u == HUGE_VAL) /* error output */
             fputs(oterr, stdout);
 
-        else if (destIsGeog && !oform) { /*ascii DMS output */
+        else if (destIsLongLat && !oform) { /*ascii DMS output */
 
             // rtodms() expect radians: convert from the output SRS unit
             data.u *= destToRadians;
@@ -206,7 +206,7 @@ static void process(FILE *fid)
             }
 
         } else { /* x-y or decimal degree ascii output */
-            if (destIsGeog) {
+            if (destIsLongLat) {
                 data.v *= destToRadians * RAD_TO_DEG;
                 data.u *= destToRadians * RAD_TO_DEG;
             }
@@ -239,7 +239,7 @@ static void process(FILE *fid)
 /************************************************************************/
 
 static PJ *instantiate_crs(const std::string &definition,
-                               bool &isGeog, double &toRadians,
+                               bool &isLongLatCS, double &toRadians,
                                bool &isLatFirst) {
     PJ *crs = proj_create(nullptr,
                           pj_add_type_crs_if_needed(definition).c_str());
@@ -247,7 +247,7 @@ static PJ *instantiate_crs(const std::string &definition,
         return nullptr;
     }
 
-    isGeog = false;
+    isLongLatCS = false;
     toRadians = 0.0;
     isLatFirst = false;
 
@@ -259,11 +259,11 @@ static PJ *instantiate_crs(const std::string &definition,
         type = proj_get_type(crs);
     }
     if (type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
-        type == PJ_TYPE_GEOGRAPHIC_3D_CRS) {
+        type == PJ_TYPE_GEOGRAPHIC_3D_CRS ||
+        type == PJ_TYPE_GEODETIC_CRS) {
         auto cs = proj_crs_get_coordinate_system(nullptr, crs);
         assert(cs);
 
-        isGeog = true;
         const char *axisName = "";
         proj_cs_get_axis_info(nullptr, cs, 0,
                                   &axisName, // name,
@@ -276,6 +276,9 @@ static PJ *instantiate_crs(const std::string &definition,
                                   );
         isLatFirst =
             NS_PROJ::internal::ci_find(std::string(axisName), "latitude") !=
+            std::string::npos;
+        isLongLatCS = isLatFirst ||
+            NS_PROJ::internal::ci_find(std::string(axisName), "longitude") !=
             std::string::npos;
 
         proj_destroy(cs);
@@ -736,7 +739,7 @@ int main(int argc, char **argv) {
     PJ *src = nullptr;
     if (!fromStr.empty()) {
         bool ignored;
-        src = instantiate_crs(fromStr, srcIsGeog,
+        src = instantiate_crs(fromStr, srcIsLongLat,
                               srcToRadians, ignored);
         if (!src) {
             emess(3, "cannot instantiate source coordinate system");
@@ -745,7 +748,7 @@ int main(int argc, char **argv) {
 
     PJ *dst = nullptr;
     if (!toStr.empty()) {
-        dst = instantiate_crs(toStr, destIsGeog,
+        dst = instantiate_crs(toStr, destIsLongLat,
                               destToRadians, destIsLatLong);
         if (!dst) {
             emess(3, "cannot instantiate target coordinate system");
@@ -760,7 +763,7 @@ int main(int argc, char **argv) {
             emess(3,
                   "missing target CRS and source CRS is not a projected CRS");
         }
-        destIsGeog = true;
+        destIsLongLat = true;
     } else if (fromStr.empty()) {
         assert(dst);
         bool ignored;
@@ -770,7 +773,7 @@ int main(int argc, char **argv) {
             emess(3,
                   "missing source CRS and target CRS is not a projected CRS");
         }
-        srcIsGeog = true;
+        srcIsLongLat = true;
     }
     proj_destroy(src);
     proj_destroy(dst);
@@ -835,13 +838,13 @@ int main(int argc, char **argv) {
     }
 
     /* set input formatting control */
-    if (!srcIsGeog)
+    if (!srcIsLongLat)
         informat = strtod;
     else {
         informat = dmstor;
     }
 
-    if (!destIsGeog && !oform)
+    if (!destIsLongLat && !oform)
         oform = "%.2f";
 
     /* process input file list */
