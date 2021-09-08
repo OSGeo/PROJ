@@ -2993,19 +2993,19 @@ CoordinateOperationFactory::Private::createOperations(
         }
     }
 
-    // Special case if both CRS are geodetic
-    if (geodSrc && geodDst && !derivedSrc && !derivedDst) {
-        createOperationsGeodToGeod(sourceCRS, targetCRS, context, geodSrc,
-                                   geodDst, res);
-        return res;
-    }
-
     if (geodSrc && geodSrc->isSphericalPlanetocentric()) {
         createOperationsFromSphericalPlanetocentric(sourceCRS, targetCRS,
                                                     context, geodSrc, res);
         return res;
     } else if (geodDst && geodDst->isSphericalPlanetocentric()) {
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
+    }
+
+    // Special case if both CRS are geodetic
+    if (geodSrc && geodDst && !derivedSrc && !derivedDst) {
+        createOperationsGeodToGeod(sourceCRS, targetCRS, context, geodSrc,
+                                   geodDst, res);
+        return res;
     }
 
     if (boundSrc) {
@@ -3940,6 +3940,24 @@ void CoordinateOperationFactory::Private::
 
     ENTER_FUNCTION();
 
+    const auto IsSameDatum = [&context,
+                              &geodSrc](const crs::GeodeticCRS *geodDst) {
+        const auto &authFactory = context.context->getAuthorityFactory();
+        const auto dbContext =
+            authFactory ? authFactory->databaseContext().as_nullable()
+                        : nullptr;
+
+        return geodSrc->datumNonNull(dbContext)->_isEquivalentTo(
+            geodDst->datumNonNull(dbContext).get(),
+            util::IComparable::Criterion::EQUIVALENT);
+    };
+    auto geogDst = dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
+    if (geogDst && IsSameDatum(geogDst)) {
+        res.emplace_back(Conversion::createGeographicGeocentricLatitude(
+            sourceCRS, targetCRS));
+        return;
+    }
+
     // Create an intermediate geographic CRS with the same datum as the
     // source spherical planetocentric one
     std::string interm_crs_name(geodSrc->nameStr());
@@ -3953,7 +3971,8 @@ void CoordinateOperationFactory::Private::
             cs::EllipsoidalCS::createLatitudeLongitude(
                 common::UnitOfMeasure::DEGREE)));
 
-    auto opFirst = createGeodToGeodPROJBased(sourceCRS, interm_crs);
+    auto opFirst =
+        Conversion::createGeographicGeocentricLatitude(sourceCRS, interm_crs);
     auto opsSecond = createOperations(interm_crs, targetCRS, context);
     for (const auto &opSecond : opsSecond) {
         try {
@@ -3999,7 +4018,8 @@ void CoordinateOperationFactory::Private::
     auto intermBoundCRS =
         crs::BoundCRS::create(intermGeog, boundSrc->hubCRS(), transf);
 
-    auto opFirst = createGeodToGeodPROJBased(geodSrcBase, intermGeog);
+    auto opFirst =
+        Conversion::createGeographicGeocentricLatitude(geodSrcBase, intermGeog);
     setCRSs(opFirst.get(), sourceCRS, intermBoundCRS);
     auto opsSecond = createOperations(intermBoundCRS, targetCRS, context);
     for (const auto &opSecond : opsSecond) {

@@ -693,5 +693,9 @@
 #define EPSG_NAME_METHOD_GEOGRAPHIC_TOPOCENTRIC "Geographic/topocentric conversions"
 #define EPSG_CODE_METHOD_GEOGRAPHIC_TOPOCENTRIC 9837
 
+/* ------------------------------------------------------------------------ */
+
+#define PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE                   \
+    "Geographic latitude / Geocentric latitude"
 
 #endif /* PROJ_CONSTANTS_INCLUDED */

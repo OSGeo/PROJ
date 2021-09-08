@@ -6873,6 +6873,29 @@ TEST(operation, createOperation_geographic_to_spherical_ocentric) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, createOperation_spherical_ocentric_to_geocentric) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +geoc +datum=WGS84 +type=crs");
+    auto src = nn_dynamic_pointer_cast<GeodeticCRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=geocent +datum=WGS84 +type=crs");
+    auto dest = nn_dynamic_pointer_cast<GeodeticCRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=geoc +ellps=WGS84 "
+              "+step +proj=cart +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, createOperation_bound_of_spherical_ocentric_to_same_type) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=longlat +geoc +ellps=GRS80 +towgs84=1,2,3 +type=crs");

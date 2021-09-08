@@ -79,6 +79,7 @@ constexpr double UTM_SCALE_FACTOR = 0.9996;
 constexpr double UTM_FALSE_EASTING = 500000.0;
 constexpr double UTM_NORTH_FALSE_NORTHING = 0.0;
 constexpr double UTM_SOUTH_FALSE_NORTHING = 10000000.0;
+
 //! @endcond
 
 // ---------------------------------------------------------------------------
@@ -2403,6 +2404,28 @@ Conversion::createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a conversion between a GeographicCRS and a spherical
+ * planetocentric GeodeticCRS
+ *
+ * This method peforms conversion between geodetic latitude and geocentric
+ * latitude
+ *
+ * @return a new Conversion.
+ */
+ConversionNNPtr
+Conversion::createGeographicGeocentricLatitude(const crs::CRSNNPtr &sourceCRS,
+                                               const crs::CRSNNPtr &targetCRS) {
+    auto properties = util::PropertyMap().set(
+        common::IdentifiedObject::NAME_KEY,
+        buildOpName("Conversion", sourceCRS, targetCRS));
+    auto conv = create(
+        properties, PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE, {});
+    conv->setCRSs(sourceCRS, targetCRS, nullptr);
+    return conv;
+}
+
+// ---------------------------------------------------------------------------
+
 InverseConversion::InverseConversion(const ConversionNNPtr &forward)
     : Conversion(
           OperationMethod::create(createPropertiesForInverse(forward->method()),
@@ -2505,6 +2528,15 @@ CoordinateOperationNNPtr Conversion::inverse() const {
 
         auto conv = createHeightDepthReversal(
             createPropertiesForInverse(this, false, false));
+        conv->setCRSs(this, true);
+        return conv;
+    }
+
+    if (method()->nameStr() ==
+        PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE) {
+        auto conv =
+            create(createPropertiesForInverse(this, false, false),
+                   PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE, {});
         conv->setCRSs(this, true);
         return conv;
     }
@@ -3446,6 +3478,77 @@ void Conversion::_exportToPROJString(
 
     auto l_sourceCRS = sourceCRS();
     auto l_targetCRS = targetCRS();
+
+    if (methodName == PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE) {
+
+        const auto extractGeodeticCRSIfGeodeticCRSOrEquivalent =
+            [](const crs::CRSPtr &crs) {
+                auto geodCRS = std::dynamic_pointer_cast<crs::GeodeticCRS>(crs);
+                if (!geodCRS) {
+                    auto compoundCRS =
+                        std::dynamic_pointer_cast<crs::CompoundCRS>(crs);
+                    if (compoundCRS) {
+                        const auto &components =
+                            compoundCRS->componentReferenceSystems();
+                        if (!components.empty()) {
+                            geodCRS =
+                                util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+                                    components[0]);
+                            if (!geodCRS) {
+                                auto boundCRS = util::nn_dynamic_pointer_cast<
+                                    crs::BoundCRS>(components[0]);
+                                if (boundCRS) {
+                                    geodCRS = util::nn_dynamic_pointer_cast<
+                                        crs::GeodeticCRS>(boundCRS->baseCRS());
+                                }
+                            }
+                        }
+                    } else {
+                        auto boundCRS =
+                            std::dynamic_pointer_cast<crs::BoundCRS>(crs);
+                        if (boundCRS) {
+                            geodCRS =
+                                util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+                                    boundCRS->baseCRS());
+                        }
+                    }
+                }
+                return geodCRS;
+            };
+
+        auto sourceCRSGeod = dynamic_cast<const crs::GeodeticCRS *>(
+            extractGeodeticCRSIfGeodeticCRSOrEquivalent(l_sourceCRS).get());
+        auto targetCRSGeod = dynamic_cast<const crs::GeodeticCRS *>(
+            extractGeodeticCRSIfGeodeticCRSOrEquivalent(l_targetCRS).get());
+        if (sourceCRSGeod && targetCRSGeod) {
+            auto sourceCRSGeog =
+                dynamic_cast<const crs::GeographicCRS *>(sourceCRSGeod);
+            auto targetCRSGeog =
+                dynamic_cast<const crs::GeographicCRS *>(targetCRSGeod);
+            bool isSrcGeocentricLat =
+                sourceCRSGeod->isSphericalPlanetocentric();
+            bool isSrcGeographic = sourceCRSGeog != nullptr;
+            bool isTargetGeocentricLat =
+                targetCRSGeod->isSphericalPlanetocentric();
+            bool isTargetGeographic = targetCRSGeog != nullptr;
+            if ((isSrcGeocentricLat && isTargetGeographic) ||
+                (isSrcGeographic && isTargetGeocentricLat)) {
+
+                formatter->startInversion();
+                sourceCRSGeod->_exportToPROJString(formatter);
+                formatter->stopInversion();
+
+                targetCRSGeod->_exportToPROJString(formatter);
+
+                return;
+            }
+        }
+
+        throw io::FormattingException("Invalid nature of source and/or "
+                                      "targetCRS for Geographic latitude / "
+                                      "Geocentric latitude"
+                                      "conversion");
+    }
 
     crs::GeographicCRSPtr srcGeogCRS;
     if (!formatter->getCRSExport() && l_sourceCRS && applySourceCRSModifiers) {
