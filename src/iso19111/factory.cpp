@@ -78,6 +78,20 @@
 // parallel. This is slightly faster
 #define ENABLE_CUSTOM_LOCKLESS_VFS
 
+#if defined(_WIN32) && defined(MUTEX_pthread)
+#undef MUTEX_pthread
+#endif
+
+/* SQLite3 might use seak()+read() or pread[64]() to read data */
+/* The later allows the same SQLite handle to be safely used in forked */
+/* children of a parent process, while the former doesn't. */
+/* So we use pthread_atfork() to set a flag in forked children, to ask them */
+/* to close and reopen their database handle. */
+#if defined(MUTEX_pthread) && !defined(SQLITE_USE_PREAD)
+#include <pthread.h>
+#define REOPEN_SQLITE_DB_AFTER_FORK
+#endif
+
 using namespace NS_PROJ::internal;
 using namespace NS_PROJ::common;
 
@@ -217,6 +231,10 @@ class SQLiteHandle {
     sqlite3 *sqlite_handle_ = nullptr;
     bool close_handle_ = true;
 
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    bool is_valid_ = true;
+#endif
+
     int nLayoutVersionMajor_ = 0;
     int nLayoutVersionMinor_ = 0;
 
@@ -243,6 +261,12 @@ class SQLiteHandle {
     ~SQLiteHandle();
 
     sqlite3 *handle() { return sqlite_handle_; }
+
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    bool isValid() const { return is_valid_; }
+
+    void invalidate() { is_valid_ = false; }
+#endif
 
     static std::shared_ptr<SQLiteHandle> open(PJ_CONTEXT *ctx,
                                               const std::string &path);
@@ -559,6 +583,10 @@ void SQLiteHandle::registerFunctions() {
 // ---------------------------------------------------------------------------
 
 class SQLiteHandleCache {
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    bool firstTime_ = true;
+#endif
+
     NS_PROJ::mutex sMutex_{};
 
     // Map dbname to SQLiteHandle
@@ -571,6 +599,10 @@ class SQLiteHandleCache {
                                             PJ_CONTEXT *ctx);
 
     void clear();
+
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    void invalidateHandles();
+#endif
 };
 
 // ---------------------------------------------------------------------------
@@ -593,6 +625,15 @@ void SQLiteHandleCache::clear() {
 std::shared_ptr<SQLiteHandle>
 SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
     NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    if (firstTime_) {
+        firstTime_ = false;
+        pthread_atfork(nullptr, nullptr,
+                       []() { SQLiteHandleCache::get().invalidateHandles(); });
+    }
+#endif
+
     std::shared_ptr<SQLiteHandle> handle;
     std::string key = path + ctx->custom_sqlite3_vfs_name;
     if (!cache_.tryGet(key, handle)) {
@@ -601,6 +642,19 @@ SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
     }
     return handle;
 }
+
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+// ---------------------------------------------------------------------------
+
+void SQLiteHandleCache::invalidateHandles() {
+    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    const auto lambda =
+        [](const lru11::KeyValuePair<std::string, std::shared_ptr<SQLiteHandle>>
+               &kvp) { kvp.value->invalidate(); };
+    cache_.cwalk(lambda);
+    cache_.clear();
+}
+#endif
 
 // ---------------------------------------------------------------------------
 
@@ -611,9 +665,7 @@ struct DatabaseContext::Private {
     void open(const std::string &databasePath, PJ_CONTEXT *ctx);
     void setHandle(sqlite3 *sqlite_handle);
 
-    sqlite3 *handle() const {
-        return sqlite_handle_ ? sqlite_handle_->handle() : nullptr;
-    }
+    const std::shared_ptr<SQLiteHandle> &handle();
 
     PJ_CONTEXT *pjCtxt() const { return pjCtxt_; }
     void setPjCtxt(PJ_CONTEXT *ctxt) { pjCtxt_ = ctxt; }
@@ -931,6 +983,21 @@ void DatabaseContext::Private::clearCaches() {
 
 // ---------------------------------------------------------------------------
 
+const std::shared_ptr<SQLiteHandle> &DatabaseContext::Private::handle() {
+#ifdef REOPEN_SQLITE_DB_AFTER_FORK
+    if (sqlite_handle_ && !sqlite_handle_->isValid()) {
+        closeDB();
+        open(databasePath_, pjCtxt_);
+        if (!auxiliaryDatabasePaths_.empty()) {
+            attachExtraDatabases(auxiliaryDatabasePaths_);
+        }
+    }
+#endif
+    return sqlite_handle_;
+}
+
+// ---------------------------------------------------------------------------
+
 void DatabaseContext::Private::insertIntoCache(LRUCacheOfObjects &cache,
                                                const std::string &code,
                                                const util::BaseObjectPtr &obj) {
@@ -1170,7 +1237,8 @@ std::vector<std::string> DatabaseContext::Private::getDatabaseStructure() {
 void DatabaseContext::Private::attachExtraDatabases(
     const std::vector<std::string> &auxiliaryDatabasePaths) {
 
-    assert(sqlite_handle_);
+    auto l_handle = handle();
+    assert(l_handle);
 
     auto tables =
         run("SELECT name FROM sqlite_master WHERE type IN ('table', 'view') "
@@ -1186,8 +1254,8 @@ void DatabaseContext::Private::attachExtraDatabases(
         }
     }
 
-    const int nLayoutVersionMajor = sqlite_handle_->getLayoutVersionMajor();
-    const int nLayoutVersionMinor = sqlite_handle_->getLayoutVersionMinor();
+    const int nLayoutVersionMajor = l_handle->getLayoutVersionMajor();
+    const int nLayoutVersionMinor = l_handle->getLayoutVersionMinor();
 
     closeDB();
     if (auxiliaryDatabasePaths.empty()) {
@@ -1204,6 +1272,7 @@ void DatabaseContext::Private::attachExtraDatabases(
     }
     sqlite_handle_ = SQLiteHandle::initFromExisting(
         sqlite_handle, true, nLayoutVersionMajor, nLayoutVersionMinor);
+    l_handle = sqlite_handle_;
 
     run("ATTACH DATABASE '" + replaceAll(databasePath_, "'", "''") +
         "' AS db_0");
@@ -1218,8 +1287,8 @@ void DatabaseContext::Private::attachExtraDatabases(
         count++;
         run(sql);
 
-        sqlite_handle_->checkDatabaseLayout(databasePath_, otherDbPath,
-                                            attachedDbName + '.');
+        l_handle->checkDatabaseLayout(databasePath_, otherDbPath,
+                                      attachedDbName + '.');
     }
 
     for (const auto &pair : tableStructure) {
@@ -1263,23 +1332,26 @@ SQLResultSet DatabaseContext::Private::run(const std::string &sql,
                                            const ListOfParams &parameters,
                                            bool useMaxFloatPrecision) {
 
+    auto l_handle = handle();
+    assert(l_handle);
+
     sqlite3_stmt *stmt = nullptr;
     auto iter = mapSqlToStatement_.find(sql);
     if (iter != mapSqlToStatement_.end()) {
         stmt = iter->second;
         sqlite3_reset(stmt);
     } else {
-        if (sqlite3_prepare_v2(handle(), sql.c_str(),
+        if (sqlite3_prepare_v2(l_handle->handle(), sql.c_str(),
                                static_cast<int>(sql.size()), &stmt,
                                nullptr) != SQLITE_OK) {
             throw FactoryException("SQLite error on " + sql + ": " +
-                                   sqlite3_errmsg(handle()));
+                                   sqlite3_errmsg(l_handle->handle()));
         }
         mapSqlToStatement_.insert(
             std::pair<std::string, sqlite3_stmt *>(sql, stmt));
     }
 
-    return sqlite_handle_->run(stmt, sql, parameters, useMaxFloatPrecision);
+    return l_handle->run(stmt, sql, parameters, useMaxFloatPrecision);
 }
 
 // ---------------------------------------------------------------------------
@@ -3117,9 +3189,7 @@ DatabaseContextNNPtr DatabaseContext::create(void *sqlite_handle) {
 
 // ---------------------------------------------------------------------------
 
-void *DatabaseContext::getSqliteHandle() const {
-    return getPrivate()->handle();
-}
+void *DatabaseContext::getSqliteHandle() const { return d->handle()->handle(); }
 
 // ---------------------------------------------------------------------------
 

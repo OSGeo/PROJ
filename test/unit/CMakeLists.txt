@@ -189,3 +189,15 @@ target_link_libraries(test_misc
 add_test(NAME test_misc COMMAND test_misc)
 set_property(TEST test_misc
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+
+if (USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+add_definitions(-DMUTEX_pthread)
+add_executable(test_fork
+  test_fork.c)
+target_link_libraries(test_fork
+  PRIVATE ${PROJ_LIBRARIES}
+  PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+add_test(NAME test_fork COMMAND test_fork)
+set_property(TEST test_fork
+  PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
+endif()
