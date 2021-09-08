@@ -264,7 +264,8 @@ createConversion(const util::PropertyMap &properties,
                  const std::vector<ParameterValueNNPtr> &values) {
 
     std::vector<OperationParameterNNPtr> parameters;
-    for (int i = 0; mapping->params[i] != nullptr; i++) {
+    for (int i = 0; mapping->params != nullptr && mapping->params[i] != nullptr;
+         i++) {
         const auto *param = mapping->params[i];
         auto paramProperties = util::PropertyMap().set(
             common::IdentifiedObject::NAME_KEY, param->wkt2_name);
