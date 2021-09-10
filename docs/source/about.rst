@@ -26,4 +26,4 @@ was moved under the MIT license. The full text of the license follows, and can
 also be found in the file ``COPYING``, at the top level of the source
 distribution package.
 
-.. include:: ../../COPYING
+.. literalinclude:: ../../COPYING
