@@ -6389,7 +6389,7 @@ TEST(wkt_parse, wkt1_oracle) {
     auto res = crs->identify(factoryAll);
     ASSERT_GE(res.size(), 1U);
     EXPECT_EQ(res.front().first->getEPSGCode(), 2154);
-    EXPECT_EQ(res.front().second, 100);
+    EXPECT_EQ(res.front().second, 90);
 }
 
 // ---------------------------------------------------------------------------

@@ -26,7 +26,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','6739','NAD27 to NAD83(HARN) 
 INSERT INTO "usage" VALUES('EPSG','9755','concatenated_operation','EPSG','6739','EPSG','1410','EPSG','1032');
 INSERT INTO "concatenated_operation" VALUES('EPSG','6874','Tananarive (Paris) to WGS 84 (2)','Used by OMV.','EPSG','4810','EPSG','4326',3.0,'OGP-Mdg',0);
 INSERT INTO "usage" VALUES('EPSG','9803','concatenated_operation','EPSG','6874','EPSG','3273','EPSG','1043');
-INSERT INTO "concatenated_operation" VALUES('EPSG','7811','NTF (Paris) to RGF93 (2)','Second step is an emulation (using the NTv2 method) of the geocentric Interpolation method described in tfm code 9337. Note that the grid file parameters are of opposite sign.','EPSG','4807','EPSG','4171',1.0,'IOGP-Fra NTv2',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','7811','NTF (Paris) to RGF93 v1 (2)','Second step is an emulation (using the NTv2 method) of the geocentric interpolation method described in CT code 9337. Note that the grid file parameters are of opposite sign.','EPSG','4807','EPSG','4171',1.0,'IOGP-Fra NTv2',0);
 INSERT INTO "usage" VALUES('EPSG','10276','concatenated_operation','EPSG','7811','EPSG','3694','EPSG','1041');
 INSERT INTO "concatenated_operation" VALUES('EPSG','7965','Poolbeg height (ft(Br36)) to Malin Head height (1)','','EPSG','5754','EPSG','5731',0.1,'1',0);
 INSERT INTO "usage" VALUES('EPSG','10349','concatenated_operation','EPSG','7965','EPSG','1305','EPSG','1059');
@@ -423,7 +423,7 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','9103','NAD27 to ITRF2014 (1)
 INSERT INTO "usage" VALUES('EPSG','10917','concatenated_operation','EPSG','9103','EPSG','3357','EPSG','1136');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9336','NAD27 to NAD83(CSRS)v4 (3)','Can be taken as an approximate transformation NAD27 to WGS 84 - see code 8585.','EPSG','4267','EPSG','8246',2.5,'EPSG-Can AB',0);
 INSERT INTO "usage" VALUES('EPSG','14011','concatenated_operation','EPSG','9336','EPSG','2376','EPSG','1151');
-INSERT INTO "concatenated_operation" VALUES('EPSG','9337','NTF (Paris) to RGF93 (1)','See transformation code 7811 for an alternative which uses the NTv2 method as an emulation of the geocentric interpolation in the second step.','EPSG','4807','EPSG','4171',1.0,'IOGP-Fra',0);
+INSERT INTO "concatenated_operation" VALUES('EPSG','9337','NTF (Paris) to RGF93 v1 (1)','See transformation code 7811 for an alternative which uses the NTv2 method as an emulation of the geocentric interpolation in the second step.','EPSG','4807','EPSG','4171',1.0,'IOGP-Fra',0);
 INSERT INTO "usage" VALUES('EPSG','14012','concatenated_operation','EPSG','9337','EPSG','3694','EPSG','1041');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9499','ETRS89 to GHA height (2)','This concatenated operation gives the same result as the HoehenGrid-plus offset from ETRS89 to GHA height. HoehenGrid-plus is implemented in BEV-Transformator using MGI (CRS 4312) as the interpolation CRS for the grid','EPSG','4937','EPSG','5778',0.07,'BEV-Aut',0);
 INSERT INTO "usage" VALUES('EPSG','14958','concatenated_operation','EPSG','9499','EPSG','1037','EPSG','1133');

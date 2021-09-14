@@ -174,7 +174,7 @@ INSERT INTO "extent" VALUES('EPSG','1194','Puerto Rico','Puerto Rico - onshore a
 INSERT INTO "extent" VALUES('EPSG','1195','Qatar','Qatar - onshore and offshore.',24.55,27.05,50.55,53.04,0);
 INSERT INTO "extent" VALUES('EPSG','1196','Reunion','Reunion - onshore and offshore - Reunion island, Ile Europa, Bassas da India, Juan de Nova, Iles Glorieuses, and Ile Tromelin.',-25.92,-10.6,37.58,58.27,1);
 INSERT INTO "extent" VALUES('EPSG','1197','Romania','Romania - onshore and offshore.',43.44,48.27,20.26,31.41,0);
-INSERT INTO "extent" VALUES('EPSG','1198','Russia','Russian Federation - onshore and offshore.',39.87,85.2,18.92,-168.97,0);
+INSERT INTO "extent" VALUES('EPSG','1198','Russia','Russian Federation - onshore and offshore.',39.87,85.19,18.92,-168.97,0);
 INSERT INTO "extent" VALUES('EPSG','1199','Rwanda','Rwanda.',-2.83,-1.05,28.85,30.9,0);
 INSERT INTO "extent" VALUES('EPSG','1200','St Kitts and Nevis','St Kitts and Nevis - onshore and offshore.',16.34,17.67,-63.63,-62.2,0);
 INSERT INTO "extent" VALUES('EPSG','1201','St Lucia','St Lucia - onshore and offshore.',13.23,14.28,-62.5,-59.99,0);
