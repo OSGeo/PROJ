@@ -1340,6 +1340,8 @@ static const MethodMapping otherMethodMappings[] = {
     {EPSG_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC,
      EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC, nullptr, nullptr, nullptr,
      nullptr},
+    {PROJ_WKT2_NAME_METHOD_GEOGRAPHIC_GEOCENTRIC_LATITUDE, 0, nullptr, nullptr,
+     nullptr, nullptr},
     {EPSG_NAME_METHOD_LONGITUDE_ROTATION, EPSG_CODE_METHOD_LONGITUDE_ROTATION,
      nullptr, nullptr, nullptr, paramsLongitudeRotation},
     {EPSG_NAME_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION,

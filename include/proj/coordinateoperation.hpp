@@ -1385,6 +1385,10 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     createGeographicGeocentric(const crs::CRSNNPtr &sourceCRS,
                                const crs::CRSNNPtr &targetCRS);
 
+    PROJ_INTERNAL static ConversionNNPtr
+    createGeographicGeocentricLatitude(const crs::CRSNNPtr &sourceCRS,
+                                       const crs::CRSNNPtr &targetCRS);
+
     //! @endcond
 
   protected:

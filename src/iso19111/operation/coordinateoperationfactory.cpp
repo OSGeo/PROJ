@@ -558,6 +558,17 @@ struct CoordinateOperationFactory::Private {
         const crs::GeodeticCRS *geodDst,
         std::vector<CoordinateOperationNNPtr> &res);
 
+    static void createOperationsFromSphericalPlanetocentric(
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        Private::Context &context, const crs::GeodeticCRS *geodSrc,
+        std::vector<CoordinateOperationNNPtr> &res);
+
+    static void createOperationsFromBoundOfSphericalPlanetocentric(
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        Private::Context &context, const crs::BoundCRS *boundSrc,
+        const crs::GeodeticCRSNNPtr &geodSrcBase,
+        std::vector<CoordinateOperationNNPtr> &res);
+
     static void createOperationsDerivedTo(
         const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
         Private::Context &context, const crs::DerivedCRS *derivedSrc,
@@ -2982,11 +2993,37 @@ CoordinateOperationFactory::Private::createOperations(
         }
     }
 
+    if (geodSrc && geodSrc->isSphericalPlanetocentric()) {
+        createOperationsFromSphericalPlanetocentric(sourceCRS, targetCRS,
+                                                    context, geodSrc, res);
+        return res;
+    } else if (geodDst && geodDst->isSphericalPlanetocentric()) {
+        return applyInverse(createOperations(targetCRS, sourceCRS, context));
+    }
+
     // Special case if both CRS are geodetic
     if (geodSrc && geodDst && !derivedSrc && !derivedDst) {
         createOperationsGeodToGeod(sourceCRS, targetCRS, context, geodSrc,
                                    geodDst, res);
         return res;
+    }
+
+    if (boundSrc) {
+        auto geodSrcBase = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+            boundSrc->baseCRS());
+        if (geodSrcBase && geodSrcBase->isSphericalPlanetocentric()) {
+            createOperationsFromBoundOfSphericalPlanetocentric(
+                sourceCRS, targetCRS, context, boundSrc,
+                NN_NO_CHECK(geodSrcBase), res);
+            return res;
+        }
+    } else if (boundDst) {
+        auto geodDstBase = util::nn_dynamic_pointer_cast<crs::GeodeticCRS>(
+            boundDst->baseCRS());
+        if (geodDstBase && geodDstBase->isSphericalPlanetocentric()) {
+            return applyInverse(
+                createOperations(targetCRS, sourceCRS, context));
+        }
     }
 
     // If the source is a derived CRS, then chain the inverse of its
@@ -3891,6 +3928,112 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
     // Transformation between two geodetic systems of unknown type
     // This should normally not be triggered with "standard" CRS
     res.emplace_back(createGeodToGeodPROJBased(sourceCRS, targetCRS));
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperationFactory::Private::
+    createOperationsFromSphericalPlanetocentric(
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        Private::Context &context, const crs::GeodeticCRS *geodSrc,
+        std::vector<CoordinateOperationNNPtr> &res) {
+
+    ENTER_FUNCTION();
+
+    const auto IsSameDatum = [&context,
+                              &geodSrc](const crs::GeodeticCRS *geodDst) {
+        const auto &authFactory = context.context->getAuthorityFactory();
+        const auto dbContext =
+            authFactory ? authFactory->databaseContext().as_nullable()
+                        : nullptr;
+
+        return geodSrc->datumNonNull(dbContext)->_isEquivalentTo(
+            geodDst->datumNonNull(dbContext).get(),
+            util::IComparable::Criterion::EQUIVALENT);
+    };
+    auto geogDst = dynamic_cast<const crs::GeographicCRS *>(targetCRS.get());
+    if (geogDst && IsSameDatum(geogDst)) {
+        res.emplace_back(Conversion::createGeographicGeocentricLatitude(
+            sourceCRS, targetCRS));
+        return;
+    }
+
+    // Create an intermediate geographic CRS with the same datum as the
+    // source spherical planetocentric one
+    std::string interm_crs_name(geodSrc->nameStr());
+    interm_crs_name += " (geographic)";
+    auto interm_crs =
+        util::nn_static_pointer_cast<crs::CRS>(crs::GeographicCRS::create(
+            addDomains(util::PropertyMap().set(
+                           common::IdentifiedObject::NAME_KEY, interm_crs_name),
+                       geodSrc),
+            geodSrc->datum(), geodSrc->datumEnsemble(),
+            cs::EllipsoidalCS::createLatitudeLongitude(
+                common::UnitOfMeasure::DEGREE)));
+
+    auto opFirst =
+        Conversion::createGeographicGeocentricLatitude(sourceCRS, interm_crs);
+    auto opsSecond = createOperations(interm_crs, targetCRS, context);
+    for (const auto &opSecond : opsSecond) {
+        try {
+            res.emplace_back(ConcatenatedOperation::createComputeMetadata(
+                {opFirst, opSecond}, disallowEmptyIntersection));
+        } catch (const InvalidOperationEmptyIntersection &) {
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperationFactory::Private::
+    createOperationsFromBoundOfSphericalPlanetocentric(
+        const crs::CRSNNPtr &sourceCRS, const crs::CRSNNPtr &targetCRS,
+        Private::Context &context, const crs::BoundCRS *boundSrc,
+        const crs::GeodeticCRSNNPtr &geodSrcBase,
+        std::vector<CoordinateOperationNNPtr> &res) {
+
+    ENTER_FUNCTION();
+
+    // Create an intermediate geographic CRS with the same datum as the
+    // source spherical planetocentric one
+    std::string interm_crs_name(geodSrcBase->nameStr());
+    interm_crs_name += " (geographic)";
+    auto intermGeog =
+        util::nn_static_pointer_cast<crs::CRS>(crs::GeographicCRS::create(
+            addDomains(util::PropertyMap().set(
+                           common::IdentifiedObject::NAME_KEY, interm_crs_name),
+                       geodSrcBase.get()),
+            geodSrcBase->datum(), geodSrcBase->datumEnsemble(),
+            cs::EllipsoidalCS::createLatitudeLongitude(
+                common::UnitOfMeasure::DEGREE)));
+
+    // Create an intermediate boundCRS wrapping the above intermediate
+    // geographic CRS
+    auto transf = boundSrc->transformation()->shallowClone();
+    // keep a reference to the target before patching it with itself
+    // (this is due to our abuse of passing shared_ptr by reference
+    auto transfTarget = transf->targetCRS();
+    setCRSs(transf.get(), intermGeog, transfTarget);
+
+    auto intermBoundCRS =
+        crs::BoundCRS::create(intermGeog, boundSrc->hubCRS(), transf);
+
+    auto opFirst =
+        Conversion::createGeographicGeocentricLatitude(geodSrcBase, intermGeog);
+    setCRSs(opFirst.get(), sourceCRS, intermBoundCRS);
+    auto opsSecond = createOperations(intermBoundCRS, targetCRS, context);
+    for (const auto &opSecond : opsSecond) {
+        try {
+            auto opSecondClone = opSecond->shallowClone();
+            // In theory, we should not need that setCRSs() forcing, but due
+            // how BoundCRS transformations are implemented currently, we
+            // need it in practice.
+            setCRSs(opSecondClone.get(), intermBoundCRS, targetCRS);
+            res.emplace_back(ConcatenatedOperation::createComputeMetadata(
+                {opFirst, opSecondClone}, disallowEmptyIntersection));
+        } catch (const InvalidOperationEmptyIntersection &) {
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

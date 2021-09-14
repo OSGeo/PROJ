@@ -2798,7 +2798,11 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
             return VerticalCS::create(csMap, axisList[0]);
         }
     } else if (ci_equal(csType, "spherical")) {
-        if (axisCount == 3) {
+        if (axisCount == 2) {
+            // Extension to ISO19111 to support (planet)-ocentric CS with
+            // geocentric latitude
+            return SphericalCS::create(csMap, axisList[0], axisList[1]);
+        } else if (axisCount == 3) {
             return SphericalCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
         }
@@ -5945,62 +5949,67 @@ CoordinateSystemNNPtr JSONParser::buildCS(const json &j) {
         axisList.emplace_back(buildAxis(axis));
     }
     const PropertyMap &csMap = emptyPropertyMap;
+    const auto axisCount = axisList.size();
     if (subtype == "ellipsoidal") {
-        if (axisList.size() == 2) {
+        if (axisCount == 2) {
             return EllipsoidalCS::create(csMap, axisList[0], axisList[1]);
         }
-        if (axisList.size() == 3) {
+        if (axisCount == 3) {
             return EllipsoidalCS::create(csMap, axisList[0], axisList[1],
                                          axisList[2]);
         }
         throw ParsingException("Expected 2 or 3 axis");
     }
     if (subtype == "Cartesian") {
-        if (axisList.size() == 2) {
+        if (axisCount == 2) {
             return CartesianCS::create(csMap, axisList[0], axisList[1]);
         }
-        if (axisList.size() == 3) {
+        if (axisCount == 3) {
             return CartesianCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
         }
         throw ParsingException("Expected 2 or 3 axis");
     }
     if (subtype == "vertical") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return VerticalCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
     if (subtype == "spherical") {
-        if (axisList.size() == 3) {
+        if (axisCount == 2) {
+            // Extension to ISO19111 to support (planet)-ocentric CS with
+            // geocentric latitude
+            return SphericalCS::create(csMap, axisList[0], axisList[1]);
+        } else if (axisCount == 3) {
             return SphericalCS::create(csMap, axisList[0], axisList[1],
                                        axisList[2]);
         }
-        throw ParsingException("Expected 3 axis");
+        throw ParsingException("Expected 2 or 3 axis");
     }
     if (subtype == "ordinal") {
         return OrdinalCS::create(csMap, axisList);
     }
     if (subtype == "parametric") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return ParametricCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
     if (subtype == "TemporalDateTime") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return DateTimeTemporalCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
     if (subtype == "TemporalCount") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return TemporalCountCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
     }
     if (subtype == "TemporalMeasure") {
-        if (axisList.size() == 1) {
+        if (axisCount == 1) {
             return TemporalMeasureCS::create(csMap, axisList[0]);
         }
         throw ParsingException("Expected 1 axis");
@@ -8630,10 +8639,10 @@ struct PROJStringParser::Private {
     PrimeMeridianNNPtr buildPrimeMeridian(Step &step);
     GeodeticReferenceFrameNNPtr buildDatum(Step &step,
                                            const std::string &title);
-    GeographicCRSNNPtr buildGeographicCRS(int iStep, int iUnitConvert,
-                                          int iAxisSwap, bool ignorePROJAxis);
+    GeodeticCRSNNPtr buildGeodeticCRS(int iStep, int iUnitConvert,
+                                      int iAxisSwap, bool ignorePROJAxis);
     GeodeticCRSNNPtr buildGeocentricCRS(int iStep, int iUnitConvert);
-    CRSNNPtr buildProjectedCRS(int iStep, GeographicCRSNNPtr geogCRS,
+    CRSNNPtr buildProjectedCRS(int iStep, const GeodeticCRSNNPtr &geogCRS,
                                int iUnitConvert, int iAxisSwap);
     CRSNNPtr buildBoundOrCompoundCRSIfNeeded(int iStep, CRSNNPtr crs);
     UnitOfMeasure buildUnit(Step &step, const std::string &unitsParamName,
@@ -8647,6 +8656,9 @@ struct PROJStringParser::Private {
 
     EllipsoidalCSNNPtr buildEllipsoidalCS(int iStep, int iUnitConvert,
                                           int iAxisSwap, bool ignorePROJAxis);
+
+    SphericalCSNNPtr buildSphericalCS(int iStep, int iUnitConvert,
+                                      int iAxisSwap, bool ignorePROJAxis);
 };
 
 // ---------------------------------------------------------------------------
@@ -9273,10 +9285,13 @@ PROJStringParser::Private::processAxisSwap(Step &step,
     assert(iAxisSwap < 0 || ci_equal(steps_[iAxisSwap].name, "axisswap"));
 
     const bool isGeographic = unit.type() == UnitOfMeasure::Type::ANGULAR;
+    const bool isSpherical = isGeographic && hasParamValue(step, "geoc");
     const auto &eastName =
-        isGeographic ? AxisName::Longitude : AxisName::Easting;
-    const auto &eastAbbev =
-        isGeographic ? AxisAbbreviation::lon : AxisAbbreviation::E;
+        isSpherical ? "Planetocentric longitude"
+                    : isGeographic ? AxisName::Longitude : AxisName::Easting;
+    const auto &eastAbbev = isSpherical ? "V"
+                                        : isGeographic ? AxisAbbreviation::lon
+                                                       : AxisAbbreviation::E;
     const auto &eastDir = isGeographic
                               ? AxisDirection::EAST
                               : (axisType == AxisType::NORTH_POLE)
@@ -9292,9 +9307,11 @@ PROJStringParser::Private::processAxisSwap(Step &step,
             : nullMeridian);
 
     const auto &northName =
-        isGeographic ? AxisName::Latitude : AxisName::Northing;
-    const auto &northAbbev =
-        isGeographic ? AxisAbbreviation::lat : AxisAbbreviation::N;
+        isSpherical ? "Planetocentric latitude"
+                    : isGeographic ? AxisName::Latitude : AxisName::Northing;
+    const auto &northAbbev = isSpherical ? "U"
+                                         : isGeographic ? AxisAbbreviation::lat
+                                                        : AxisAbbreviation::N;
     const auto &northDir = isGeographic
                                ? AxisDirection::NORTH
                                : (axisType == AxisType::NORTH_POLE)
@@ -9311,15 +9328,19 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                         .as_nullable()
                   : nullMeridian);
 
-    CoordinateSystemAxisNNPtr west =
-        createAxis(isGeographic ? AxisName::Longitude : AxisName::Westing,
-                   isGeographic ? AxisAbbreviation::lon : std::string(),
-                   AxisDirection::WEST, unit);
+    CoordinateSystemAxisNNPtr west = createAxis(
+        isSpherical ? "Planetocentric longitude"
+                    : isGeographic ? AxisName::Longitude : AxisName::Westing,
+        isSpherical ? "V"
+                    : isGeographic ? AxisAbbreviation::lon : std::string(),
+        AxisDirection::WEST, unit);
 
-    CoordinateSystemAxisNNPtr south =
-        createAxis(isGeographic ? AxisName::Latitude : AxisName::Southing,
-                   isGeographic ? AxisAbbreviation::lat : std::string(),
-                   AxisDirection::SOUTH, unit);
+    CoordinateSystemAxisNNPtr south = createAxis(
+        isSpherical ? "Planetocentric latitude"
+                    : isGeographic ? AxisName::Latitude : AxisName::Southing,
+        isSpherical ? "U"
+                    : isGeographic ? AxisAbbreviation::lat : std::string(),
+        AxisDirection::SOUTH, unit);
 
     std::vector<CoordinateSystemAxisNNPtr> axis{east, north};
 
@@ -9419,6 +9440,42 @@ EllipsoidalCSNNPtr PROJStringParser::Private::buildEllipsoidalCS(
 
 // ---------------------------------------------------------------------------
 
+SphericalCSNNPtr PROJStringParser::Private::buildSphericalCS(
+    int iStep, int iUnitConvert, int iAxisSwap, bool ignorePROJAxis) {
+    auto &step = steps_[iStep];
+    assert(iUnitConvert < 0 ||
+           ci_equal(steps_[iUnitConvert].name, "unitconvert"));
+
+    UnitOfMeasure angularUnit = UnitOfMeasure::DEGREE;
+    if (iUnitConvert >= 0) {
+        auto &stepUnitConvert = steps_[iUnitConvert];
+        const std::string *xy_in = &getParamValue(stepUnitConvert, "xy_in");
+        const std::string *xy_out = &getParamValue(stepUnitConvert, "xy_out");
+        if (stepUnitConvert.inverted) {
+            std::swap(xy_in, xy_out);
+        }
+        if (iUnitConvert < iStep) {
+            std::swap(xy_in, xy_out);
+        }
+        if (xy_in->empty() || xy_out->empty() || *xy_in != "rad" ||
+            (*xy_out != "rad" && *xy_out != "deg" && *xy_out != "grad")) {
+            throw ParsingException("unhandled values for xy_in and/or xy_out");
+        }
+        if (*xy_out == "rad") {
+            angularUnit = UnitOfMeasure::RADIAN;
+        } else if (*xy_out == "grad") {
+            angularUnit = UnitOfMeasure::GRAD;
+        }
+    }
+
+    std::vector<CoordinateSystemAxisNNPtr> axis = processAxisSwap(
+        step, angularUnit, iAxisSwap, AxisType::REGULAR, ignorePROJAxis);
+
+    return SphericalCS::create(emptyPropertyMap, axis[0], axis[1]);
+}
+
+// ---------------------------------------------------------------------------
+
 static double getNumericValue(const std::string &paramValue,
                               bool *pHasError = nullptr) {
     try {
@@ -9438,7 +9495,7 @@ namespace {
 template <class T> inline void ignoreRetVal(T) {}
 } // namespace
 
-GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
+GeodeticCRSNNPtr PROJStringParser::Private::buildGeodeticCRS(
     int iStep, int iUnitConvert, int iAxisSwap, bool ignorePROJAxis) {
     auto &step = steps_[iStep];
 
@@ -9453,8 +9510,6 @@ GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
 
     auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
                                    title.empty() ? "unknown" : title);
-    auto cs =
-        buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignorePROJAxis);
 
     if (l_isGeographicStep &&
         (hasUnusedParameters(step) ||
@@ -9463,7 +9518,17 @@ GeographicCRSNNPtr PROJStringParser::Private::buildGeographicCRS(
     }
     props.set("IMPLICIT_CS", true);
 
-    return GeographicCRS::create(props, datum, cs);
+    if (!hasParamValue(step, "geoc")) {
+        auto cs =
+            buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, ignorePROJAxis);
+
+        return GeographicCRS::create(props, datum, cs);
+    } else {
+        auto cs =
+            buildSphericalCS(iStep, iUnitConvert, iAxisSwap, ignorePROJAxis);
+
+        return GeodeticCRS::create(props, datum, cs);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -9614,8 +9679,10 @@ static bool is_in_stringlist(const std::string &str, const char *stringlist) {
 
 // ---------------------------------------------------------------------------
 
-CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
-    int iStep, GeographicCRSNNPtr geogCRS, int iUnitConvert, int iAxisSwap) {
+CRSNNPtr
+PROJStringParser::Private::buildProjectedCRS(int iStep,
+                                             const GeodeticCRSNNPtr &geodCRS,
+                                             int iUnitConvert, int iAxisSwap) {
     auto &step = steps_[iStep];
     const auto mappings = getMappingsFromPROJName(step.name);
     const MethodMapping *mapping = mappings.empty() ? nullptr : mappings[0];
@@ -9641,7 +9708,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     }
 
     if (mapping) {
-        mapping = selectSphericalOrEllipsoidal(mapping, geogCRS);
+        mapping = selectSphericalOrEllipsoidal(mapping, geodCRS);
     }
 
     assert(isProjectedStep(step.name));
@@ -9651,7 +9718,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     const auto &title = title_;
 
     if (!buildPrimeMeridian(step)->longitude()._isEquivalentTo(
-            geogCRS->primeMeridian()->longitude(),
+            geodCRS->primeMeridian()->longitude(),
             util::IComparable::Criterion::EQUIVALENT)) {
         throw ParsingException("inconsistent pm values between projectedCRS "
                                "and its base geographicalCRS");
@@ -9917,7 +9984,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                     }
                     if (k >= 0 && k <= 1) {
                         const double es =
-                            geogCRS->ellipsoid()->squaredEccentricity();
+                            geodCRS->ellipsoid()->squaredEccentricity();
                         if (es < 0 || es == 1) {
                             throw ParsingException("Invalid flattening");
                         }
@@ -10028,10 +10095,16 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
              {"PROJ ob_tran o_proj=longlat", "PROJ ob_tran o_proj=lonlat",
               "PROJ ob_tran o_proj=latlon", "PROJ ob_tran o_proj=latlong"}) {
             if (starts_with(methodName, substr)) {
-                return DerivedGeographicCRS::create(
-                    PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
-                    geogCRS, NN_NO_CHECK(conv),
-                    buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap, false));
+                auto geogCRS =
+                    util::nn_dynamic_pointer_cast<GeographicCRS>(geodCRS);
+                if (geogCRS) {
+                    return DerivedGeographicCRS::create(
+                        PropertyMap().set(IdentifiedObject::NAME_KEY,
+                                          "unnamed"),
+                        NN_NO_CHECK(geogCRS), NN_NO_CHECK(conv),
+                        buildEllipsoidalCS(iStep, iUnitConvert, iAxisSwap,
+                                           false));
+                }
             }
         }
     }
@@ -10039,11 +10112,11 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     std::vector<CoordinateSystemAxisNNPtr> axis =
         processAxisSwap(step, unit, iAxisSwap, axisType, false);
 
-    auto csGeogCRS = geogCRS->coordinateSystem();
-    auto cs = csGeogCRS->axisList().size() == 2
+    auto csGeodCRS = geodCRS->coordinateSystem();
+    auto cs = csGeodCRS->axisList().size() == 2
                   ? CartesianCS::create(emptyPropertyMap, axis[0], axis[1])
                   : CartesianCS::create(emptyPropertyMap, axis[0], axis[1],
-                                        csGeogCRS->axisList()[2]);
+                                        csGeodCRS->axisList()[2]);
 
     auto props = PropertyMap().set(IdentifiedObject::NAME_KEY,
                                    title.empty() ? "unknown" : title);
@@ -10057,7 +10130,7 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         bWebMercator
             ? createPseudoMercator(
                   props.set(IdentifiedObject::NAME_KEY, webMercatorName), cs)
-            : ProjectedCRS::create(props, geogCRS, NN_NO_CHECK(conv), cs);
+            : ProjectedCRS::create(props, geodCRS, NN_NO_CHECK(conv), cs);
 
     return crs;
 }
@@ -10528,8 +10601,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             // First run is dry run to mark all recognized/unrecognized tokens
             for (int iter = 0; iter < 2; iter++) {
                 auto obj = d->buildBoundOrCompoundCRSIfNeeded(
-                    0, d->buildGeographicCRS(iFirstGeogStep, iFirstUnitConvert,
-                                             iFirstAxisSwap, false));
+                    0, d->buildGeodeticCRS(iFirstGeogStep, iFirstUnitConvert,
+                                           iFirstAxisSwap, false));
                 if (iter == 1) {
                     return nn_static_pointer_cast<BaseObject>(obj);
                 }
@@ -10546,14 +10619,14 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     iProjStep,
                     d->buildProjectedCRS(
                         iProjStep,
-                        d->buildGeographicCRS(iFirstGeogStep,
-                                              iFirstUnitConvert < iFirstGeogStep
-                                                  ? iFirstUnitConvert
-                                                  : -1,
-                                              iFirstAxisSwap < iFirstGeogStep
-                                                  ? iFirstAxisSwap
-                                                  : -1,
-                                              true),
+                        d->buildGeodeticCRS(iFirstGeogStep,
+                                            iFirstUnitConvert < iFirstGeogStep
+                                                ? iFirstUnitConvert
+                                                : -1,
+                                            iFirstAxisSwap < iFirstGeogStep
+                                                ? iFirstAxisSwap
+                                                : -1,
+                                            true),
                         iFirstUnitConvert < iFirstGeogStep ? iSecondUnitConvert
                                                            : iFirstUnitConvert,
                         iFirstAxisSwap < iFirstGeogStep ? iSecondAxisSwap

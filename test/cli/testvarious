@@ -144,10 +144,10 @@ $EXE +proj=geocent +datum=WGS84  \
 EOF
 #
 echo "#############################################################" >> ${OUT}
-echo Test conversion from geocentric latlong to geodetic latlong >> ${OUT}
+echo Test conversion from geodetic latlong to geocentric latlong >> ${OUT}
 #
-$EXE +proj=latlong +datum=WGS84 +geoc \
- +to +proj=latlong +datum=WGS84  \
+$EXE +proj=latlong +datum=WGS84 \
+ +to +proj=latlong +datum=WGS84 +geoc  \
  -E >>${OUT} <<EOF
 0d00'00.000"W 0d00'00.000"N 0.0
 79d00'00.000"W 45d00'00.000"N 0.0
@@ -156,10 +156,10 @@ $EXE +proj=latlong +datum=WGS84 +geoc \
 EOF
 #
 echo "#############################################################" >> ${OUT}
-echo Test conversion from geodetic latlong to geocentric latlong >> ${OUT}
+echo Test conversion from geocentric latlong to geodetic latlong >> ${OUT}
 #
-$EXE +proj=latlong +datum=WGS84 \
- +to +proj=latlong +datum=WGS84 +geoc  \
+$EXE +proj=latlong +datum=WGS84 +geoc \
+ +to +proj=latlong +datum=WGS84  \
  -E >>${OUT} <<EOF
 0d00'00.000"W 0d00'00.000"N 0.0
 79d00'00.000"W 44d48'27.276"N 0.000
