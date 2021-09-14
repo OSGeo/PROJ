@@ -12035,12 +12035,9 @@ TEST(json_import, compound_crs) {
 // ---------------------------------------------------------------------------
 
 TEST(json_import, bound_crs) {
-    // Explicitly check that the version is v0.2 in that circumstance. Might
-    // require adjustments in the future.
     auto json =
         "{\n"
-        "  \"$schema\": "
-        "\"https://proj.org/schemas/v0.2/projjson.schema.json\",\n"
+        "  \"$schema\": \"foo\",\n"
         "  \"type\": \"BoundCRS\",\n"
         "  \"source_crs\": {\n"
         "    \"type\": \"GeographicCRS\",\n"
@@ -12134,18 +12131,17 @@ TEST(json_import, bound_crs) {
     auto obj = createFromUserInput(json, nullptr);
     auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
     ASSERT_TRUE(boundCRS != nullptr);
-    EXPECT_EQ(boundCRS->exportToJSON(JSONFormatter::create().get()), json);
+    EXPECT_EQ(
+        boundCRS->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+        json);
 }
 
 // ---------------------------------------------------------------------------
 
 TEST(json_import, bound_crs_with_name_and_usage) {
-    // Explicitly check that the version is v0.3 in that circumstance. Might
-    // require adjustments in the future.
     auto json =
         "{\n"
-        "  \"$schema\": "
-        "\"https://proj.org/schemas/v0.3/projjson.schema.json\",\n"
+        "  \"$schema\": \"foo\",\n"
         "  \"type\": \"BoundCRS\",\n"
         "  \"name\": \"my bound crs\",\n"
         "  \"source_crs\": {\n"
@@ -12252,7 +12248,9 @@ TEST(json_import, bound_crs_with_name_and_usage) {
     auto obj = createFromUserInput(json, nullptr);
     auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
     ASSERT_TRUE(boundCRS != nullptr);
-    EXPECT_EQ(boundCRS->exportToJSON(JSONFormatter::create().get()), json);
+    EXPECT_EQ(
+        boundCRS->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+        json);
 }
 
 // ---------------------------------------------------------------------------
@@ -13914,6 +13912,78 @@ TEST(json_import, derived_temporal_crs) {
     auto crs = nn_dynamic_pointer_cast<DerivedTemporalCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, id) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"Ellipsoid\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"semi_major_axis\": 6378137,\n"
+                "  \"inverse_flattening\": 298.257223563,\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": 6326,\n"
+                "    \"version\": 1,\n"
+                "    \"authority_citation\": \"my citation\",\n"
+                "    \"uri\": \"my uri\"\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
+    ASSERT_TRUE(ellps != nullptr);
+    EXPECT_EQ(ellps->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, id_code_string_version_string) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"Ellipsoid\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"semi_major_axis\": 6378137,\n"
+                "  \"inverse_flattening\": 298.257223563,\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": \"abc\",\n"
+                "    \"version\": \"def\",\n"
+                "    \"authority_citation\": \"my citation\",\n"
+                "    \"uri\": \"my uri\"\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
+    ASSERT_TRUE(ellps != nullptr);
+    EXPECT_EQ(ellps->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, id_code_string_version_double) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"Ellipsoid\",\n"
+                "  \"name\": \"WGS 84\",\n"
+                "  \"semi_major_axis\": 6378137,\n"
+                "  \"inverse_flattening\": 298.257223563,\n"
+                "  \"id\": {\n"
+                "    \"authority\": \"EPSG\",\n"
+                "    \"code\": \"abc\",\n"
+                "    \"version\": 9.8,\n"
+                "    \"authority_citation\": \"my citation\",\n"
+                "    \"uri\": \"my uri\"\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto ellps = nn_dynamic_pointer_cast<Ellipsoid>(obj);
+    ASSERT_TRUE(ellps != nullptr);
+    EXPECT_EQ(ellps->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
               json);
 }
 

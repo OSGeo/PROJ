@@ -13,17 +13,18 @@ the same as WKT2:2019.
 
 PROJJSON is available as input and output of PROJ since PROJ 6.2.
 
-The current version is 0.3.
+The current version is 0.4.
 
 Schema
 ------
 
 A JSON schema of its grammar is available at
-https://proj.org/schemas/v0.3/projjson.schema.json
+https://proj.org/schemas/v0.4/projjson.schema.json
 
 History
 -------
 
+* v0.4: additional properties allowed in id object (version, authority_citation, uri)
 * v0.3: additional properties allowed in BoundCRS object (name, scope, area, bbox, usages, remarks, id, ids)
 * v0.2: addition of geoid_model in VerticalCRS object.
 * v0.1: initial version for PROJ 6.2

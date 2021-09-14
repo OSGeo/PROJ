@@ -41,6 +41,7 @@
 #include "proj_json_streaming_writer.hpp"
 
 #include <algorithm>
+#include <limits>
 #include <memory>
 #include <string>
 #include <vector>
@@ -1113,6 +1114,31 @@ void Identifier::_exportToJSON(JSONFormatter *formatter) const {
             writer->Add(std::stoi(l_code));
         } catch (const std::exception &) {
             writer->Add(l_code);
+        }
+
+        if (version().has_value()) {
+            const auto l_version = *(version());
+            writer->AddObjKey("version");
+            try {
+                const double dblVersion = c_locale_stod(l_version);
+                if (dblVersion >= std::numeric_limits<int>::min() &&
+                    dblVersion <= std::numeric_limits<int>::max() &&
+                    static_cast<int>(dblVersion) == dblVersion) {
+                    writer->Add(static_cast<int>(dblVersion));
+                } else {
+                    writer->Add(dblVersion);
+                }
+            } catch (const std::exception &) {
+                writer->Add(l_version);
+            }
+        }
+        if (authority().has_value() && *(authority()->title()) != l_codeSpace) {
+            writer->AddObjKey("authority_citation");
+            writer->Add(*(authority()->title()));
+        }
+        if (uri().has_value()) {
+            writer->AddObjKey("uri");
+            writer->Add(*(uri()));
         }
     }
 }
