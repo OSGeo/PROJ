@@ -35,6 +35,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstring>
+#include <limits>
 #include <list>
 #include <locale>
 #include <map>
@@ -106,14 +107,10 @@ NS_PROJ_START
 namespace io {
 
 //! @cond Doxygen_Suppress
-const char *JSONFormatter::PROJJSON_v0_2 =
-    "https://proj.org/schemas/v0.2/projjson.schema.json";
+const char *JSONFormatter::PROJJSON_v0_4 =
+    "https://proj.org/schemas/v0.4/projjson.schema.json";
 
-const char *JSONFormatter::PROJJSON_v0_3 =
-    "https://proj.org/schemas/v0.3/projjson.schema.json";
-
-// v0.2 is our base version. We only upgrade to 0.3 for usage node in BoundCRS
-#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_2
+#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_4
 
 //! @endcond
 
@@ -5398,6 +5395,36 @@ IdentifierNNPtr JSONParser::buildId(const json &j, bool removeInverseOf) {
     } else {
         throw ParsingException("Unexpected type for value of \"code\"");
     }
+
+    if (j.contains("version")) {
+        auto versionJ = j["version"];
+        std::string version;
+        if (versionJ.is_string()) {
+            version = versionJ.get<std::string>();
+        } else if (versionJ.is_number()) {
+            const double dblVersion = versionJ.get<double>();
+            if (dblVersion >= std::numeric_limits<int>::min() &&
+                dblVersion <= std::numeric_limits<int>::max() &&
+                static_cast<int>(dblVersion) == dblVersion) {
+                version = internal::toString(static_cast<int>(dblVersion));
+            } else {
+                version = internal::toString(dblVersion);
+            }
+        } else {
+            throw ParsingException("Unexpected type for value of \"version\"");
+        }
+        propertiesId.set(Identifier::VERSION_KEY, version);
+    }
+
+    if (j.contains("authority_citation")) {
+        propertiesId.set(Identifier::AUTHORITY_KEY,
+                         getString(j, "authority_citation"));
+    }
+
+    if (j.contains("uri")) {
+        propertiesId.set(Identifier::URI_KEY, getString(j, "uri"));
+    }
+
     return Identifier::create(code, propertiesId);
 }
 
@@ -10709,10 +10736,7 @@ JSONFormatter &JSONFormatter::setIndentationWidth(int width) noexcept {
  * If set to empty string, it will not be written.
  */
 JSONFormatter &JSONFormatter::setSchema(const std::string &schema) noexcept {
-    // Upgrade only to v0.3 if the default was v0.2
-    if (schema != PROJJSON_v0_3 || d->schema_ == PROJJSON_v0_2) {
-        d->schema_ = schema;
-    }
+    d->schema_ = schema;
     return *this;
 }
 

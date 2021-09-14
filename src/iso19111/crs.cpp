@@ -5528,13 +5528,6 @@ void BoundCRS::_exportToJSON(
 {
     auto writer = formatter->writer();
     const auto &l_name = nameStr();
-    if ((formatter->outputUsage(true) && !domains().empty()) ||
-        (formatter->outputId() && !identifiers().empty()) ||
-        !remarks().empty() ||
-        (!l_name.empty() && l_name != d->baseCRS()->nameStr())) {
-        // Only upgrades to v0.3 schema if needed
-        formatter->setSchema(io::JSONFormatter::PROJJSON_v0_3);
-    }
 
     auto objectContext(formatter->MakeObjectContext("BoundCRS", false));
 
