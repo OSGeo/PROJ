@@ -3430,6 +3430,29 @@ std::list<std::string> DatabaseContext::getAliases(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Return the 'name' column of a table for an object
+ *
+ * @param tableName Table name/category.
+ * @param authName Authority name of the object.
+ * @param code Code of the object
+ * @return Name (or empty)
+ * @throw FactoryException
+ */
+std::string DatabaseContext::getName(const std::string &tableName,
+                                     const std::string &authName,
+                                     const std::string &code) const {
+    std::string sql("SELECT name FROM \"");
+    sql += replaceAll(tableName, "\"", "\"\"");
+    sql += "\" WHERE auth_name = ? AND code = ?";
+    auto res = d->run(sql, {authName, code});
+    if (res.empty()) {
+        return std::string();
+    }
+    return res.front()[0];
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return the 'text_definition' column of a table for an object
  *
  * @param tableName Table name/category.

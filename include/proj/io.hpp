@@ -892,6 +892,10 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_INTERNAL bool isKnownName(const std::string &name,
                                    const std::string &tableName) const;
 
+    PROJ_INTERNAL std::string getName(const std::string &tableName,
+                                      const std::string &authName,
+                                      const std::string &code) const;
+
     PROJ_INTERNAL std::string getTextDefinition(const std::string &tableName,
                                                 const std::string &authName,
                                                 const std::string &code) const;
