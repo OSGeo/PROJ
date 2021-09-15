@@ -254,7 +254,7 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
         const double J11 = -rho * sinphi * sinlam;
         const double J12 = nu * cosphi * coslam;
         const double J21 = rho * (cosphi * Q->cosph0 + sinphi * Q->sinph0 * coslam);
-        const double J22 = nu * Q->sinph0 * Q->cosph0 * sinlam;
+        const double J22 = nu * Q->sinph0 * cosphi * sinlam;
         const double D = J11 * J22 - J12 * J21;
         const double dx = xy.x - xy_new.x;
         const double dy = xy.y - xy_new.y;
