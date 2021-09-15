@@ -263,13 +263,13 @@ static PJ_LP ortho_e_inverse (PJ_XY xy, PJ *P) {           /* Ellipsoidal, inver
         lp.phi += dphi;
         if( lp.phi > M_PI_2)
         {
-            lp.phi = M_PI_2 - (M_PI_2 - lp.phi);
-            lp.lam = adjlon(lp.lam + 180);
+            lp.phi = M_PI_2 - (lp.phi - M_PI_2);
+            lp.lam = adjlon(lp.lam + M_PI);
         }
         else if( lp.phi < -M_PI_2)
         {
             lp.phi = -M_PI_2 + (-M_PI_2 - lp.phi);
-            lp.lam = adjlon(lp.lam + 180);
+            lp.lam = adjlon(lp.lam + M_PI);
         }
         lp.lam += dlam;
         if( fabs(dphi) < 1e-12 && fabs(dlam) < 1e-12 )
