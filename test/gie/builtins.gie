@@ -4531,6 +4531,68 @@ tolerance   0.1 mm
 accept      0               -6343600
 expect      0               -59.966377950099655436
 
+# At pole or very close to it
+direction   forward
+tolerance   0.1 mm
+accept      0              90
+expect      0              5523613.1150
+
+direction   inverse
+tolerance   0.1 mm
+accept      0              5523613.1150
+expect      0              90
+
+direction   forward
+tolerance   0.1 mm
+accept      0              89.99999999
+expect      0              5523613.1145
+roundtrip   1
+
+direction   forward
+tolerance   0.1 mm
+accept      180            89.99999999
+expect      0              5523613.1156
+roundtrip   1
+
+direction   forward
+tolerance   0.1 mm
+accept      90             89.99999999
+expect      0.0011         5523613.1150
+# Roundrip doesn't work on 32bit builds
+#roundtrip   1
+
+direction   forward
+tolerance   0.1 mm
+accept      -90            89.99999999
+expect      -0.0011        5523613.1150
+roundtrip   1
+
+# Southern hemisphere
+operation   +proj=ortho +ellps=WGS84 +lat_0=-30
+
+# At pole or very close to it
+direction   forward
+tolerance   0.1 mm
+accept      0              -90
+expect      0              -5523613.1150
+
+direction   inverse
+tolerance   0.1 mm
+accept      0              -5523613.1150
+expect      0              -90
+
+direction   forward
+tolerance   0.1 mm
+accept      0              -89.99999999
+expect      0              -5523613.1145
+roundtrip   1
+
+direction   forward
+tolerance   0.1 mm
+accept      180            -89.99999999
+expect      0              -5523613.1156
+roundtrip   1
+
 -------------------------------------------------------------------------------
 # Oblique
 # Test case from https://github.com/OSGeo/PROJ/issues/2844
