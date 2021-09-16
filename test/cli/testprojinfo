@@ -372,8 +372,8 @@ $EXE --list-crs projected --bbox -100,40,-90,41 --spatial-test intersects | grep
 echo "" >>${OUT}
 
 # Test case where --area has several matches
-echo 'Testing --list-crs projected --area France | grep "RGF93 / Lambert-93\|UTM zone 11N" | sort' >> ${OUT}
-$EXE --list-crs projected --area France | grep "RGF93 / Lambert-93\|UTM zone 11N" | sort >> ${OUT}
+echo 'Testing --list-crs projected --area France | grep "RGF93 v1 / Lambert-93\|UTM zone 11N" | sort' >> ${OUT}
+$EXE --list-crs projected --area France | grep "RGF93 v1 / Lambert-93\|UTM zone 11N" | sort >> ${OUT}
 echo "" >>${OUT}
 
 # do 'diff' with distribution results

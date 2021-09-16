@@ -2911,9 +2911,14 @@ TEST(crs, projectedCRS_identify_db) {
         ASSERT_TRUE(crs != nullptr);
         auto factoryAll = AuthorityFactory::create(dbContext, std::string());
         auto res = crs->identify(factoryAll);
-        ASSERT_GE(res.size(), 1U);
-        EXPECT_EQ(res.front().first->getEPSGCode(), 2154);
-        EXPECT_EQ(res.front().second, 90);
+        bool found = false;
+        for (const auto &candidate : res) {
+            if (candidate.first->getEPSGCode() == 2154) {
+                found = true;
+                EXPECT_EQ(candidate.second, 90);
+            }
+        }
+        EXPECT_TRUE(found);
     }
     {
         // Identify with DatumEnsemble
@@ -6034,6 +6039,10 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                   "+proj=longlat +datum=WGS84 +geoidgrids=us_nga_egm08_25.tif "
                   "+vunits=m +no_defs +type=crs");
     }
+#ifdef disabled_since_epsg_10_035
+    // There are now too many transformations from NGF-IGN69 height to WGS 84
+    // for createBoundCRSToWGS84IfPossible() to be able to select a
+    // vertical geoidgrid
     {
         // NTF (Paris) / Lambert zone II + NGF-IGN69 height
         auto crs_7421 = factory->createCoordinateReferenceSystem("7421");
@@ -6053,6 +6062,7 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
                   "+towgs84=-168,-60,320,0,0,0,0 +units=m "
                   "+geoidgrids=fr_ign_RAF18.tif +vunits=m +no_defs +type=crs");
     }
+#endif
     {
         auto crs = createVerticalCRS();
         EXPECT_EQ(crs->createBoundCRSToWGS84IfPossible(

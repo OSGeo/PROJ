@@ -880,7 +880,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
         ctxt);
     ASSERT_EQ(list.size(), 4U);
 
-    EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to RGF93 (1)");
+    EXPECT_EQ(list[0]->nameStr(), "NTF (Paris) to RGF93 v1 (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
               "+step +proj=axisswap +order=2,1 "
@@ -895,7 +895,7 @@ TEST(operation, geogCRS_to_geogCRS_context_concatenated_operation) {
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
 
-    EXPECT_EQ(list[1]->nameStr(), "NTF (Paris) to RGF93 (2)");
+    EXPECT_EQ(list[1]->nameStr(), "NTF (Paris) to RGF93 v1 (2)");
     EXPECT_EQ(list[1]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
               "+proj=unitconvert +xy_in=grad +xy_out=rad +step +inv "
@@ -1485,7 +1485,7 @@ TEST(operation, geogCRS_3D_to_geogCRS_3D_different_datum_context) {
         ctxt);
     ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
-              "RGF93 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
+              "RGF93 v1 to ETRS89 (1) + Inverse of CH1903+ to ETRS89 (1)");
     // Check that there is no +push +v_3
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
@@ -1526,8 +1526,8 @@ TEST(operation, geocentric_to_geogCRS_3D_different_datum_context) {
         ctxt);
     ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(),
-              "Conversion from RGF93 (geocentric) to RGF93 (geog3D) + "
-              "RGF93 to ETRS89 (1) + "
+              "Conversion from RGF93 v1 (geocentric) to RGF93 v1 (geog3D) + "
+              "RGF93 v1 to ETRS89 (1) + "
               "Inverse of CH1903+ to ETRS89 (1)");
     // Check that there is no +push +v_3
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -3759,7 +3759,7 @@ TEST(operation,
         if (op->nameStr() ==
             "Inverse of unnamed + "
             "Transformation from NAD83 to WGS84 + "
-            "Ballpark geographic offset from WGS 84 to NAD83(2011) + "
+            "Inverse of NAD83(2011) to WGS 84 (1) + "
             "Conversion from NAVD88 height (ftUS) to NAVD88 height + "
             "Inverse of NAD83(2011) to NAVD88 height (1) + "
             "Conversion from NAD83(2011) (geog3D) to NAD83(2011) "
@@ -4834,9 +4834,8 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                   "Geoid09 hybrid model. Replaced by 2012 model (CT code 6326)."
                   "\n"
                   "For NAD83(NSRS2007) to WGS 84 (1) (EPSG:15931): "
-                  "Approximation at the +/- 1m level assuming that "
-                  "NAD83(NSRS2007) is equivalent to WGS 84 within the accuracy "
-                  "of the transformation.");
+                  "Approximation assuming that NAD83(NSRS2007) is equivalent "
+                  "to WGS 84 within the accuracy of the transformation.");
     }
 
     // NAD83 + NAVD88 height --> WGS 84
@@ -4898,14 +4897,14 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
 
         auto list = CoordinateOperationFactory::create()->createOperations(
             nnSrc,
-            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84
+            authFactory->createCoordinateReferenceSystem("4985"), // WGS 72 3D
             ctxt);
-        ASSERT_GE(list.size(), 2U);
+        ASSERT_GE(list.size(), 1U);
 
         EXPECT_EQ(list[0]->nameStr(),
                   "Inverse of NAD83(2011) to NAVD88 height (3) + "
-                  "Inverse of NAD83 to NAD83(2011) (1) + "
-                  "NAD83 to WGS 84 (1)");
+                  "NAD83(2011) to WGS 84 (1) + "
+                  "Inverse of WGS 72 to WGS 84 (2)");
         EXPECT_EQ(list[0]->exportToPROJString(
                       PROJStringFormatter::create(
                           PROJStringFormatter::Convention::PROJ_5,
@@ -4916,25 +4915,10 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                   "+step +proj=vgridshift +grids=us_noaa_g2018u0.tif "
                   "+multiplier=1 "
-                  "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-                  "+step +proj=axisswap +order=2,1");
-
-        // Shows vertical step, and then horizontal step
-        EXPECT_EQ(list[1]->nameStr(),
-                  "Inverse of NAD83(2011) to NAVD88 height (3) + "
-                  "Inverse of NAD83 to NAD83(2011) (1) + "
-                  "NAD83 to WGS 84 (18)");
-        EXPECT_EQ(list[1]->exportToPROJString(
-                      PROJStringFormatter::create(
-                          PROJStringFormatter::Convention::PROJ_5,
-                          authFactory->databaseContext())
-                          .get()),
-                  "+proj=pipeline "
-                  "+step +proj=axisswap +order=2,1 "
-                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-                  "+step +proj=vgridshift +grids=us_noaa_g2018u0.tif "
-                  "+multiplier=1 "
-                  "+step +proj=hgridshift +grids=us_noaa_FL.tif "
+                  "+step +proj=cart +ellps=WGS84 "
+                  "+step +inv +proj=helmert +x=0 +y=0 +z=4.5 +rx=0 +ry=0 "
+                  "+rz=0.554 +s=0.219 +convention=position_vector "
+                  "+step +inv +proj=cart +ellps=WGS72 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
     }
