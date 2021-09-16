@@ -189,7 +189,7 @@ Tests are run with::
 With a successful install of PROJ we can now install data files using the
 :program:`projsync` utility::
 
-    projsync --system-directory
+    projsync --system-directory --all
 
 which will download all resource files currently available for PROJ. If less than
 the entire collection of resource files is needed the call to :program:`projsync`
