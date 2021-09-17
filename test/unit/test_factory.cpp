@@ -3871,7 +3871,7 @@ TEST(factory, objectInsertion) {
         ctxt->startInsertStatementsSession();
         const auto datum = GeodeticReferenceFrame::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "my datum"),
-            Ellipsoid::WGS84, optional<std::string>(),
+            Ellipsoid::WGS84, optional<std::string>("my anchor"),
             PrimeMeridian::GREENWICH);
         const auto crs = GeographicCRS::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4326"),
@@ -3881,8 +3881,8 @@ TEST(factory, objectInsertion) {
         ASSERT_EQ(sql.size(), 4U);
         EXPECT_EQ(sql[0],
                   "INSERT INTO geodetic_datum VALUES('HOBU','1','my "
-                  "datum','','EPSG','7030','EPSG','8901',NULL,NULL,NULL,NULL,"
-                  "0);");
+                  "datum','','EPSG','7030','EPSG','8901',NULL,NULL,NULL,"
+                  "'my anchor',0);");
         const auto identified =
             crs->identify(AuthorityFactory::create(ctxt, std::string()));
         ASSERT_EQ(identified.size(), 1U);
@@ -4171,7 +4171,8 @@ TEST(factory, objectInsertion) {
         ctxt->startInsertStatementsSession();
         PropertyMap propertiesVDatum;
         propertiesVDatum.set(IdentifiedObject::NAME_KEY, "my datum");
-        auto vdatum = VerticalReferenceFrame::create(propertiesVDatum);
+        auto vdatum = VerticalReferenceFrame::create(
+            propertiesVDatum, optional<std::string>("my anchor"));
         PropertyMap propertiesCRS;
         propertiesCRS.set(IdentifiedObject::NAME_KEY, "my height");
         const auto crs = VerticalCRS::create(
@@ -4180,10 +4181,9 @@ TEST(factory, objectInsertion) {
         const auto sql =
             ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", false);
         ASSERT_EQ(sql.size(), 4U);
-        EXPECT_EQ(sql[0],
-                  "INSERT INTO vertical_datum VALUES('HOBU',"
-                  "'VERTICAL_DATUM_XXXX','my datum','',NULL,NULL,NULL,NULL,"
-                  "0);");
+        EXPECT_EQ(sql[0], "INSERT INTO vertical_datum VALUES('HOBU',"
+                          "'VERTICAL_DATUM_XXXX','my datum','',NULL,NULL,NULL,"
+                          "'my anchor',0);");
         const auto identified =
             crs->identify(AuthorityFactory::create(ctxt, std::string()));
         ASSERT_EQ(identified.size(), 1U);
