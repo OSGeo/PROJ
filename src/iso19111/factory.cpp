@@ -116,7 +116,7 @@ namespace io {
 constexpr int DATABASE_LAYOUT_VERSION_MAJOR = 1;
 // If the code depends on the new additions, then DATABASE_LAYOUT_VERSION_MINOR
 // must be incremented.
-constexpr int DATABASE_LAYOUT_VERSION_MINOR = 1;
+constexpr int DATABASE_LAYOUT_VERSION_MINOR = 2;
 
 constexpr size_t N_MAX_PARAMS = 7;
 
@@ -494,21 +494,6 @@ void SQLiteHandle::checkDatabaseLayout(const std::string &mainDbPath,
         return;
     }
     if (res.size() != 2) {
-        // The database layout of PROJ 7.2 that shipped with EPSG v10.003 is
-        // at the time of writing still compatible of the one we support.
-        static_assert(
-            // cppcheck-suppress knownConditionTrueFalse
-            DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
-                // cppcheck-suppress knownConditionTrueFalse
-                DATABASE_LAYOUT_VERSION_MINOR == 1,
-            "remove that assertion and below lines next time we upgrade "
-            "database structure");
-        res = run("SELECT 1 FROM metadata WHERE key = 'EPSG.VERSION' AND "
-                  "value = 'v10.003'");
-        if (!res.empty()) {
-            return;
-        }
-
         throw FactoryException(
             path + " lacks DATABASE.LAYOUT.VERSION.MAJOR / "
                    "DATABASE.LAYOUT.VERSION.MINOR "
@@ -531,15 +516,7 @@ void SQLiteHandle::checkDatabaseLayout(const std::string &mainDbPath,
             " is expected. "
             "It comes from another PROJ installation.");
     }
-    // Database layout v1.0 of PROJ 8.0 is forward compatible with v1.1
-    static_assert(
-        // cppcheck-suppress knownConditionTrueFalse
-        DATABASE_LAYOUT_VERSION_MAJOR == 1 &&
-            // cppcheck-suppress knownConditionTrueFalse
-            DATABASE_LAYOUT_VERSION_MINOR == 1,
-        "re-enable the check below if database layout v1.0 and v1.1 is no "
-        "longer compatible");
-#if 0
+
     if (minor < DATABASE_LAYOUT_VERSION_MINOR) {
         throw FactoryException(
             path +
@@ -548,7 +525,7 @@ void SQLiteHandle::checkDatabaseLayout(const std::string &mainDbPath,
             " is expected. "
             "It comes from another PROJ installation.");
     }
-#endif
+
     if (dbNamePrefix.empty()) {
         nLayoutVersionMajor_ = major;
         nLayoutVersionMinor_ = minor;
@@ -1371,6 +1348,19 @@ static std::string formatStatement(const char *fmt, ...) {
                         res += arg[j];
                     res += arg[j];
                 }
+            } else if (fmt[i + 1] == 'Q') {
+                const char *arg = va_arg(args, const char *);
+                if (arg == nullptr)
+                    res += "NULL";
+                else {
+                    res += '\'';
+                    for (int j = 0; arg[j] != '\0'; ++j) {
+                        if (arg[j] == '\'')
+                            res += arg[j];
+                        res += arg[j];
+                    }
+                    res += '\'';
+                }
             } else if (fmt[i + 1] == 's') {
                 const char *arg = va_arg(args, const char *);
                 res += arg;
@@ -2175,13 +2165,15 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         frameReferenceEpoch =
             toString(dynamicDatum->frameReferenceEpoch().value());
     }
+    const std::string anchor = *(datum->anchorDefinition());
     const auto sql = formatStatement(
         "INSERT INTO geodetic_datum VALUES("
-        "'%q','%q','%q','%q','%q','%q','%q','%q',%s,%s,NULL,0);",
+        "'%q','%q','%q','%q','%q','%q','%q','%q',%s,%s,NULL,%Q,0);",
         authName.c_str(), code.c_str(), datum->nameStr().c_str(),
         "", // description
         ellipsoidAuthName.c_str(), ellipsoidCode.c_str(), pmAuthName.c_str(),
-        pmCode.c_str(), publicationDate.c_str(), frameReferenceEpoch.c_str());
+        pmCode.c_str(), publicationDate.c_str(), frameReferenceEpoch.c_str(),
+        anchor.empty() ? nullptr : anchor.c_str());
     appendSql(sqlStatements, sql);
 
     identifyOrInsertUsages(datum, "geodetic_datum", authName, code,
@@ -2262,21 +2254,28 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         assert(!pmIds.empty());
         const std::string &pmAuthName = *(pmIds.front()->codeSpace());
         const std::string &pmCode = pmIds.front()->code();
+        const auto anchor = *(firstDatum->anchorDefinition());
         const auto sql = formatStatement(
             "INSERT INTO geodetic_datum VALUES("
-            "'%q','%q','%q','%q','%q','%q','%q','%q',NULL,NULL,%f,0);",
+            "'%q','%q','%q','%q','%q','%q','%q','%q',NULL,NULL,%f,%Q,0);",
             authName.c_str(), code.c_str(), ensemble->nameStr().c_str(),
             "", // description
             ellipsoidAuthName.c_str(), ellipsoidCode.c_str(),
-            pmAuthName.c_str(), pmCode.c_str(), accuracy);
+            pmAuthName.c_str(), pmCode.c_str(), accuracy,
+            anchor.empty() ? nullptr : anchor.c_str());
         appendSql(sqlStatements, sql);
     } else {
-        const auto sql = formatStatement("INSERT INTO vertical_datum VALUES("
-                                         "'%q','%q','%q','%q',NULL,NULL,%f,0);",
-                                         authName.c_str(), code.c_str(),
-                                         ensemble->nameStr().c_str(),
-                                         "", // description
-                                         accuracy);
+        const auto firstDatum =
+            AuthorityFactory::create(self, membersId.front().first)
+                ->createVerticalDatum(membersId.front().second);
+        const auto anchor = *(firstDatum->anchorDefinition());
+        const auto sql = formatStatement(
+            "INSERT INTO vertical_datum VALUES("
+            "'%q','%q','%q','%q',NULL,NULL,%f,%Q,"
+            "0);",
+            authName.c_str(), code.c_str(), ensemble->nameStr().c_str(),
+            "", // description
+            accuracy, anchor.empty() ? nullptr : anchor.c_str());
         appendSql(sqlStatements, sql);
     }
     identifyOrInsertUsages(ensemble,
@@ -2622,12 +2621,14 @@ std::vector<std::string> DatabaseContext::Private::getInsertStatementsFor(
         frameReferenceEpoch =
             toString(dynamicDatum->frameReferenceEpoch().value());
     }
+    const auto anchor = *(datum->anchorDefinition());
     const auto sql = formatStatement(
         "INSERT INTO vertical_datum VALUES("
-        "'%q','%q','%q','%q',%s,%s,NULL,0);",
+        "'%q','%q','%q','%q',%s,%s,NULL,%Q,0);",
         authName.c_str(), code.c_str(), datum->nameStr().c_str(),
         "", // description
-        publicationDate.c_str(), frameReferenceEpoch.c_str());
+        publicationDate.c_str(), frameReferenceEpoch.c_str(),
+        anchor.empty() ? nullptr : anchor.c_str());
     appendSql(sqlStatements, sql);
 
     identifyOrInsertUsages(datum, "vertical_datum", authName, code,
@@ -4320,14 +4321,14 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
             return;
         }
     }
-    auto res =
-        d->runWithCodeParam("SELECT name, ellipsoid_auth_name, ellipsoid_code, "
-                            "prime_meridian_auth_name, prime_meridian_code, "
-                            "publication_date, frame_reference_epoch, "
-                            "ensemble_accuracy, deprecated FROM geodetic_datum "
-                            "WHERE "
-                            "auth_name = ? AND code = ?",
-                            code);
+    auto res = d->runWithCodeParam(
+        "SELECT name, ellipsoid_auth_name, ellipsoid_code, "
+        "prime_meridian_auth_name, prime_meridian_code, "
+        "publication_date, frame_reference_epoch, "
+        "ensemble_accuracy, anchor, deprecated FROM geodetic_datum "
+        "WHERE "
+        "auth_name = ? AND code = ?",
+        code);
     if (res.empty()) {
         throw NoSuchAuthorityCodeException("geodetic datum not found",
                                            d->authority(), code);
@@ -4342,7 +4343,8 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
         const auto &publication_date = row[5];
         const auto &frame_reference_epoch = row[6];
         const auto &ensemble_accuracy = row[7];
-        const bool deprecated = row[8] == "1";
+        const auto &anchor = row[8];
+        const bool deprecated = row[9] == "1";
 
         std::string massagedName = name;
         if (turnEnsembleAsDatum) {
@@ -4380,17 +4382,19 @@ void AuthorityFactory::createGeodeticDatumOrEnsemble(
             auto pm = d->createFactory(prime_meridian_auth_name)
                           ->createPrimeMeridian(prime_meridian_code);
 
-            auto anchor = util::optional<std::string>();
+            auto anchorOpt = util::optional<std::string>();
+            if (!anchor.empty())
+                anchorOpt = anchor;
             if (!publication_date.empty()) {
                 props.set("PUBLICATION_DATE", publication_date);
             }
             auto datum = frame_reference_epoch.empty()
                              ? datum::GeodeticReferenceFrame::create(
-                                   props, ellipsoid, anchor, pm)
+                                   props, ellipsoid, anchorOpt, pm)
                              : util::nn_static_pointer_cast<
                                    datum::GeodeticReferenceFrame>(
                                    datum::DynamicGeodeticReferenceFrame::create(
-                                       props, ellipsoid, anchor, pm,
+                                       props, ellipsoid, anchorOpt, pm,
                                        common::Measure(
                                            c_locale_stod(frame_reference_epoch),
                                            common::UnitOfMeasure::YEAR),
@@ -4430,7 +4434,7 @@ void AuthorityFactory::createVerticalDatumOrEnsemble(
     datum::DatumEnsemblePtr &outDatumEnsemble, bool turnEnsembleAsDatum) const {
     auto res =
         d->runWithCodeParam("SELECT name, publication_date, "
-                            "frame_reference_epoch, ensemble_accuracy, "
+                            "frame_reference_epoch, ensemble_accuracy, anchor, "
                             "deprecated FROM "
                             "vertical_datum WHERE auth_name = ? AND code = ?",
                             code);
@@ -4444,7 +4448,8 @@ void AuthorityFactory::createVerticalDatumOrEnsemble(
         const auto &publication_date = row[1];
         const auto &frame_reference_epoch = row[2];
         const auto &ensemble_accuracy = row[3];
-        const bool deprecated = row[4] == "1";
+        const auto &anchor = row[4];
+        const bool deprecated = row[5] == "1";
         auto props = d->createPropertiesSearchUsages("vertical_datum", code,
                                                      name, deprecated);
         if (!turnEnsembleAsDatum && !ensemble_accuracy.empty()) {
@@ -4472,14 +4477,17 @@ void AuthorityFactory::createVerticalDatumOrEnsemble(
                 starts_with(code, "from_geogdatum_")) {
                 props.set("VERT_DATUM_TYPE", "2002");
             }
-            auto anchor = util::optional<std::string>();
+            auto anchorOpt = util::optional<std::string>();
+            if (!anchor.empty())
+                anchorOpt = anchor;
             if (frame_reference_epoch.empty()) {
-                outDatum = datum::VerticalReferenceFrame::create(props, anchor)
-                               .as_nullable();
+                outDatum =
+                    datum::VerticalReferenceFrame::create(props, anchorOpt)
+                        .as_nullable();
             } else {
                 outDatum =
                     datum::DynamicVerticalReferenceFrame::create(
-                        props, anchor,
+                        props, anchorOpt,
                         util::optional<datum::RealizationMethod>(),
                         common::Measure(c_locale_stod(frame_reference_epoch),
                                         common::UnitOfMeasure::YEAR),
