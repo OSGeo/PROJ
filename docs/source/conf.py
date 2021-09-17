@@ -196,6 +196,10 @@ html_favicon = '../images/favicon.png'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+htm_css_files = [
+    'theme_overrides.css',  # override wide tables in RTD theme
+]
+
 html_context = {
     'display_github': True,
     'theme_vcs_pageview_mode': 'edit',
@@ -203,9 +207,6 @@ html_context = {
     'github_repo': 'PROJ',
     # TODO: edit when switching active branch
     'github_version': '/8.1/docs/source/',
-    'css_files': [
-        '_static/theme_overrides.css',  # override wide tables in RTD theme
-    ],
 }
 
 # Add any extra paths that contain custom files (such as robots.txt or
