@@ -2073,8 +2073,16 @@ void GeodeticCRS::_exportToPROJString(
         addGeocentricUnitConversionIntoPROJString(formatter);
     } else if (isSphericalPlanetocentric()) {
         if (!formatter->getCRSExport()) {
-            formatter->addStep("geoc");
-            addDatumInfoToPROJString(formatter);
+
+            if (!formatter->omitProjLongLatIfPossible() ||
+                primeMeridian()->longitude().getSIValue() != 0.0 ||
+                !ellipsoid()->isSphere() ||
+                !formatter->getTOWGS84Parameters().empty() ||
+                !formatter->getHDatumExtension().empty()) {
+                formatter->addStep("geoc");
+                addDatumInfoToPROJString(formatter);
+            }
+
             addAngularUnitConvertAndAxisSwap(formatter);
         } else {
             io::FormattingException::Throw(
