@@ -1619,7 +1619,8 @@ class FactoryWithTmpDatabase : public ::testing::Test {
         ASSERT_TRUE(
             execute("INSERT INTO geodetic_datum "
                     "VALUES('EPSG','6326','World Geodetic System 1984','',"
-                    "'EPSG','7030','EPSG','8901',NULL,NULL,NULL,0);"))
+                    "'EPSG','7030','EPSG','8901',NULL,NULL,NULL,"
+                    "'my anchor',0);"))
             << last_error();
         ASSERT_TRUE(execute("INSERT INTO usage VALUES('EPSG',"
                             "'geodetic_datum_6326_usage','geodetic_datum',"
@@ -1627,7 +1628,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
             << last_error();
         ASSERT_TRUE(
             execute("INSERT INTO vertical_datum VALUES('EPSG','1027','EGM2008 "
-                    "geoid',NULL,NULL,NULL,NULL,0);"))
+                    "geoid',NULL,NULL,NULL,NULL,'my anchor',0);"))
             << last_error();
         ASSERT_TRUE(execute("INSERT INTO usage VALUES('EPSG',"
                             "'vertical_datum_1027_usage','vertical_datum',"
@@ -1827,7 +1828,7 @@ class FactoryWithTmpDatabase : public ::testing::Test {
                                 val + "','" + val +
                                 "','',"
                                 "'EPSG','7030','EPSG','8901',"
-                                "NULL,NULL,NULL,0);"))
+                                "NULL,NULL,NULL,NULL,0);"))
                 << last_error();
             ASSERT_TRUE(execute("INSERT INTO usage VALUES('FOO',"
                                 "'geodetic_datum_" +
@@ -2038,11 +2039,15 @@ TEST_F(FactoryWithTmpDatabase, AuthorityFactory_test_with_fake_EPSG_database) {
     EXPECT_TRUE(nn_dynamic_pointer_cast<Ellipsoid>(
                     factory->createObject("7030")) != nullptr);
 
-    EXPECT_TRUE(nn_dynamic_pointer_cast<GeodeticReferenceFrame>(
-                    factory->createObject("6326")) != nullptr);
+    auto grf = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(
+        factory->createObject("6326"));
+    ASSERT_TRUE(grf != nullptr);
+    EXPECT_EQ(*grf->anchorDefinition(), "my anchor");
 
-    EXPECT_TRUE(nn_dynamic_pointer_cast<VerticalReferenceFrame>(
-                    factory->createObject("1027")) != nullptr);
+    auto vrf = nn_dynamic_pointer_cast<VerticalReferenceFrame>(
+        factory->createObject("1027"));
+    ASSERT_TRUE(vrf != nullptr);
+    EXPECT_EQ(*vrf->anchorDefinition(), "my anchor");
 
     EXPECT_TRUE(nn_dynamic_pointer_cast<GeographicCRS>(
                     factory->createObject("4326")) != nullptr);
@@ -3866,7 +3871,7 @@ TEST(factory, objectInsertion) {
         ctxt->startInsertStatementsSession();
         const auto datum = GeodeticReferenceFrame::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "my datum"),
-            Ellipsoid::WGS84, optional<std::string>(),
+            Ellipsoid::WGS84, optional<std::string>("my anchor"),
             PrimeMeridian::GREENWICH);
         const auto crs = GeographicCRS::create(
             PropertyMap().set(IdentifiedObject::NAME_KEY, "my EPSG:4326"),
@@ -3876,7 +3881,8 @@ TEST(factory, objectInsertion) {
         ASSERT_EQ(sql.size(), 4U);
         EXPECT_EQ(sql[0],
                   "INSERT INTO geodetic_datum VALUES('HOBU','1','my "
-                  "datum','','EPSG','7030','EPSG','8901',NULL,NULL,NULL,0);");
+                  "datum','','EPSG','7030','EPSG','8901',NULL,NULL,NULL,"
+                  "'my anchor',0);");
         const auto identified =
             crs->identify(AuthorityFactory::create(ctxt, std::string()));
         ASSERT_EQ(identified.size(), 1U);
@@ -3911,7 +3917,8 @@ TEST(factory, objectInsertion) {
         EXPECT_EQ(sql[0],
                   "INSERT INTO geodetic_datum "
                   "VALUES('HOBU','GEODETIC_DATUM_MY_EPSG_4326','my "
-                  "datum','','EPSG','7030','EPSG','8901',NULL,NULL,NULL,0);");
+                  "datum','','EPSG','7030','EPSG','8901',NULL,NULL,NULL,NULL,"
+                  "0);");
         const auto identified =
             crs->identify(AuthorityFactory::create(ctxt, std::string()));
         ASSERT_EQ(identified.size(), 1U);
@@ -4164,7 +4171,8 @@ TEST(factory, objectInsertion) {
         ctxt->startInsertStatementsSession();
         PropertyMap propertiesVDatum;
         propertiesVDatum.set(IdentifiedObject::NAME_KEY, "my datum");
-        auto vdatum = VerticalReferenceFrame::create(propertiesVDatum);
+        auto vdatum = VerticalReferenceFrame::create(
+            propertiesVDatum, optional<std::string>("my anchor"));
         PropertyMap propertiesCRS;
         propertiesCRS.set(IdentifiedObject::NAME_KEY, "my height");
         const auto crs = VerticalCRS::create(
@@ -4173,9 +4181,9 @@ TEST(factory, objectInsertion) {
         const auto sql =
             ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", false);
         ASSERT_EQ(sql.size(), 4U);
-        EXPECT_EQ(sql[0],
-                  "INSERT INTO vertical_datum VALUES('HOBU',"
-                  "'VERTICAL_DATUM_XXXX','my datum','',NULL,NULL,NULL,0);");
+        EXPECT_EQ(sql[0], "INSERT INTO vertical_datum VALUES('HOBU',"
+                          "'VERTICAL_DATUM_XXXX','my datum','',NULL,NULL,NULL,"
+                          "'my anchor',0);");
         const auto identified =
             crs->identify(AuthorityFactory::create(ctxt, std::string()));
         ASSERT_EQ(identified.size(), 1U);

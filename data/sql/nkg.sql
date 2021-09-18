@@ -47,6 +47,7 @@ INSERT INTO "geodetic_datum" VALUES (
     '2016-03-16',   -- publication date
     2000.0,         -- frame reference epoch
     NULL,           -- ensemble accuracy
+    NULL,           -- anchor
     0               -- deprecated
 );
 
@@ -91,6 +92,7 @@ INSERT INTO "geodetic_datum" VALUES (
     '2021-03-01',   -- publication date
     2000.0,         -- frame reference epoch
     NULL,           -- ensemble accuracy
+    NULL,           -- anchor
     0               -- deprecated
 );
 

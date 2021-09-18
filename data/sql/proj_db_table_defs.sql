@@ -155,6 +155,7 @@ CREATE TABLE geodetic_datum (
     publication_date TEXT, --- YYYY-MM-DD format
     frame_reference_epoch FLOAT, --- only set for dynamic datum, and should be set when it is a dynamic datum
     ensemble_accuracy FLOAT CHECK (ensemble_accuracy IS NULL OR ensemble_accuracy > 0), --- only for a datum ensemble. and should be set when it is a datum ensemble
+    anchor TEXT,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_datum PRIMARY KEY (auth_name, code),
     CONSTRAINT fk_geodetic_datum_ellipsoid FOREIGN KEY (ellipsoid_auth_name, ellipsoid_code) REFERENCES ellipsoid(auth_name, code),
@@ -191,6 +192,7 @@ CREATE TABLE vertical_datum (
     publication_date TEXT CHECK (NULL OR length(publication_date) = 10), --- YYYY-MM-DD format
     frame_reference_epoch FLOAT, --- only set for dynamic datum, and should be set when it is a dynamic datum
     ensemble_accuracy FLOAT CHECK (ensemble_accuracy IS NULL OR ensemble_accuracy > 0), --- only for a datum ensemble. and should be set when it is a datum ensemble
+    anchor TEXT,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_vertical_datum PRIMARY KEY (auth_name, code)
 ) WITHOUT ROWID;
@@ -247,7 +249,7 @@ CREATE TABLE geodetic_crs(
     code INTEGER_OR_TEXT NOT NULL CHECK (length(code) >= 1),
     name TEXT NOT NULL CHECK (length(name) >= 2),
     description TEXT,
-    type TEXT NOT NULL CHECK (type IN ('geographic 2D', 'geographic 3D', 'geocentric')),
+    type TEXT NOT NULL CHECK (type IN ('geographic 2D', 'geographic 3D', 'geocentric', 'other')),
     coordinate_system_auth_name TEXT,
     coordinate_system_code INTEGER_OR_TEXT,
     datum_auth_name TEXT,

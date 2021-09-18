@@ -5579,7 +5579,7 @@ TEST_F(CApi, proj_get_insert_statements) {
             EXPECT_EQ(std::string(list[0]),
                       "INSERT INTO geodetic_datum VALUES('HOBU',"
                       "'GEODETIC_DATUM_XXXX','GDA2020','','EPSG','7019',"
-                      "'EPSG','8901',NULL,NULL,NULL,0);");
+                      "'EPSG','8901',NULL,NULL,NULL,NULL,0);");
             EXPECT_EQ(sizeOfStringList(list), 4);
             proj_string_list_destroy(list);
         }
@@ -5627,7 +5627,7 @@ TEST_F(CApi, proj_get_insert_statements) {
             EXPECT_EQ(std::string(list[0]),
                       "INSERT INTO geodetic_datum VALUES('HOBU',"
                       "'GEODETIC_DATUM_XXXX','GDA2020','','EPSG','7019',"
-                      "'EPSG','8901',NULL,NULL,NULL,0);");
+                      "'EPSG','8901',NULL,NULL,NULL,NULL,0);");
             proj_string_list_destroy(list);
         }
 
