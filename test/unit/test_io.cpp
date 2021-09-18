@@ -7852,6 +7852,56 @@ TEST(io, projstringformatter_axisswap_unitconvert_axisswap) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_axisswap_one_minus_two_inv) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->ingestPROJString(
+        "+proj=pipeline +step +inv +proj=axisswap +order=1,-2");
+    EXPECT_EQ(fmt->toString(), "+proj=axisswap +order=1,-2");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projstringformatter_axisswap_two_one_followed_two_minus_one) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->ingestPROJString("+proj=pipeline "
+                          "+step +proj=axisswap +order=2,1 "
+                          "+step +proj=axisswap +order=2,-1");
+    EXPECT_EQ(fmt->toString(), "+proj=axisswap +order=1,-2");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projstringformatter_axisswap_minus_two_one_followed_two_one) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->ingestPROJString("+proj=pipeline "
+                          "+step +proj=axisswap +order=-2,1 "
+                          "+step +proj=axisswap +order=2,1");
+    EXPECT_EQ(fmt->toString(), "+proj=axisswap +order=1,-2");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projstringformatter_unmodified) {
+    const char *const strs[] = {"+proj=pipeline "
+                                "+step +proj=axisswap +order=2,-1 "
+                                "+step +proj=axisswap +order=2,1",
+
+                                "+proj=pipeline "
+                                "+step +proj=axisswap +order=2,1 "
+                                "+step +proj=axisswap +order=-2,1",
+
+                                "+proj=pipeline "
+                                "+step +inv +proj=axisswap +order=-2,1 "
+                                "+step +proj=axisswap +order=2,1"};
+    for (const char *str : strs) {
+        auto fmt = PROJStringFormatter::create();
+        fmt->ingestPROJString(str);
+        EXPECT_EQ(fmt->toString(), str);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projstringformatter_optim_hgridshift_vgridshift_hgridshift_inv) {
     // Nominal case
     {
@@ -8786,9 +8836,12 @@ TEST(io, projparse_longlat_axisswap) {
                     op->exportToPROJString(PROJStringFormatter::create().get()),
                     (atoi(order1) == 2 && atoi(order2) == 1)
                         ? "+proj=noop"
-                        : "+proj=pipeline +step +proj=axisswap +order=2,1 "
-                          "+step +proj=axisswap +order=" +
-                              std::string(order1) + "," + order2);
+                        : (atoi(order1) == 2 && atoi(order2) == -1)
+                              ? "+proj=axisswap +order=1,-2"
+                              : "+proj=pipeline +step +proj=axisswap "
+                                "+order=2,1 "
+                                "+step +proj=axisswap +order=" +
+                                    std::string(order1) + "," + order2);
             }
         }
     }

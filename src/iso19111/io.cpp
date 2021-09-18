@@ -7509,10 +7509,19 @@ const std::string &PROJStringFormatter::toString() const {
 
         const auto paramCount = step.paramValues.size();
 
-        // axisswap order=2,1 is its own inverse
+        // axisswap order=2,1 (or 1,-2) is its own inverse
         if (step.name == "axisswap" && paramCount == 1 &&
-            step.paramValues[0].equals("order", "2,1")) {
+            (step.paramValues[0].equals("order", "2,1") ||
+             step.paramValues[0].equals("order", "1,-2"))) {
             step.inverted = false;
+            continue;
+        }
+
+        // axisswap inv order=2,-1 ==> axisswap order -2,1
+        if (step.name == "axisswap" && paramCount == 1 &&
+            step.paramValues[0].equals("order", "2,-1")) {
+            step.inverted = false;
+            step.paramValues[0] = Step::KeyValue("order", "-2,1");
             continue;
         }
 
@@ -7787,6 +7796,25 @@ const std::string &PROJStringFormatter::toString() const {
                 curStep.paramValues[0].equals("order", "2,1") &&
                 prevStep.paramValues[0].equals("order", "2,1")) {
                 deletePrevAndCurIter();
+                continue;
+            }
+
+            // axisswap order=2,1 followed by axisswap order=2,-1 is
+            // equivalent to axisswap order=1,-2
+            // Same for axisswap order=-2,1 followed by axisswap order=2,1
+            if (curStep.name == "axisswap" && prevStep.name == "axisswap" &&
+                curStepParamCount == 1 && prevStepParamCount == 1 &&
+                ((prevStep.paramValues[0].equals("order", "2,1") &&
+                  !curStep.inverted &&
+                  curStep.paramValues[0].equals("order", "2,-1")) ||
+                 (prevStep.paramValues[0].equals("order", "-2,1") &&
+                  !prevStep.inverted &&
+                  curStep.paramValues[0].equals("order", "2,1")))) {
+
+                prevStep.inverted = false;
+                prevStep.paramValues[0] = Step::KeyValue("order", "1,-2");
+                // Delete this iter
+                iterCur = steps.erase(iterCur);
                 continue;
             }
 

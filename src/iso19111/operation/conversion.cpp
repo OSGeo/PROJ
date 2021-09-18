@@ -3534,11 +3534,13 @@ void Conversion::_exportToPROJString(
             if ((isSrcGeocentricLat && isTargetGeographic) ||
                 (isSrcGeographic && isTargetGeocentricLat)) {
 
+                formatter->setOmitProjLongLatIfPossible(true);
                 formatter->startInversion();
                 sourceCRSGeod->_exportToPROJString(formatter);
                 formatter->stopInversion();
 
                 targetCRSGeod->_exportToPROJString(formatter);
+                formatter->setOmitProjLongLatIfPossible(false);
 
                 return;
             }
