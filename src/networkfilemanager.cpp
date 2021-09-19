@@ -1185,7 +1185,7 @@ bool NetworkFilePropertiesCache::tryGet(PJ_CONTEXT *ctx, const std::string &url,
     if (stmt->execute() != SQLITE_ROW) {
         return false;
     }
-    props.lastChecked = stmt->getInt64();
+    props.lastChecked = static_cast<time_t>(stmt->getInt64());
     props.size = stmt->getInt64();
     const char *lastModified = stmt->getText();
     props.lastModified = lastModified ? lastModified : std::string();
@@ -2265,7 +2265,7 @@ int proj_is_download_needed(PJ_CONTEXT *ctx, const char *url_or_filename,
     }
 
     NS_PROJ::FileProperties cachedProps;
-    cachedProps.lastChecked = stmt->getInt64();
+    cachedProps.lastChecked = static_cast<time_t>(stmt->getInt64());
     cachedProps.size = stmt->getInt64();
     const char *lastModified = stmt->getText();
     cachedProps.lastModified = lastModified ? lastModified : std::string();
