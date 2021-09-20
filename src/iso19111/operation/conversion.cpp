@@ -2493,6 +2493,9 @@ CoordinateOperationNNPtr Conversion::inverse() const {
     if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
         const double convFactor = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
+        if (convFactor == 0) {
+            throw InvalidOperation("Invalid conversion factor");
+        }
         auto conv = createChangeVerticalUnit(
             createPropertiesForInverse(this, false, false),
             common::Scale(1.0 / convFactor));
