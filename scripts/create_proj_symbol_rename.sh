@@ -29,7 +29,7 @@ for i in ${PROJ_ROOT}/src/*.c; do
     echo $i
     (cd tmp_alias; gcc -fvisibility=hidden ${i} -I../src -I${PROJ_ROOT}/src -I${PROJ_ROOT}/include -fPIC -c)
 done
-for i in ${PROJ_ROOT}/src/*.cpp ${PROJ_ROOT}/src/iso19111/*.cpp; do
+for i in ${PROJ_ROOT}/src/*.cpp ${PROJ_ROOT}/src/iso19111/*.cpp ${PROJ_ROOT}/src/iso19111/operation/*.cpp; do
     echo $i
     (cd tmp_alias; g++ -fvisibility=hidden -std=c++11 ${i} -I../src -I${PROJ_ROOT}/src -I${PROJ_ROOT}/include -fPIC -c)
 done
