@@ -3998,6 +3998,9 @@ TEST_F(CApi, proj_normalize_for_visualization) {
     EXPECT_EQ(std::string(projstr),
               "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=utm +zone=31 +ellps=WGS84");
+
+    EXPECT_TRUE(proj_degree_input(Pnormalized, PJ_FWD));
+    EXPECT_FALSE(proj_degree_output(Pnormalized, PJ_FWD));
 }
 
 // ---------------------------------------------------------------------------
@@ -4010,6 +4013,9 @@ TEST_F(CApi, proj_normalize_for_visualization_with_alternatives) {
     auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
     ObjectKeeper keeper_Pnormalized(Pnormalized);
     ASSERT_NE(Pnormalized, nullptr);
+
+    EXPECT_TRUE(proj_degree_input(Pnormalized, PJ_FWD));
+    EXPECT_FALSE(proj_degree_output(Pnormalized, PJ_FWD));
 
     {
         PJ_COORD c;
@@ -4056,6 +4062,9 @@ TEST_F(CApi, proj_normalize_for_visualization_with_alternatives_reverse) {
     auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
     ObjectKeeper keeper_Pnormalized(Pnormalized);
     ASSERT_NE(Pnormalized, nullptr);
+
+    EXPECT_FALSE(proj_degree_input(Pnormalized, PJ_FWD));
+    EXPECT_TRUE(proj_degree_output(Pnormalized, PJ_FWD));
 
     PJ_COORD c;
     // Approximately Roma
