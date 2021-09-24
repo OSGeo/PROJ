@@ -8711,6 +8711,10 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
             if (!pjNew)
                 return nullptr;
             pjNew->ctx = ctx;
+            pjNew->descr = "Set of coordinate operations";
+            pjNew->left = obj->left;
+            pjNew->right = obj->right;
+
             for (const auto &alt : obj->alternativeCoordinateOperations) {
                 auto co = dynamic_cast<const CoordinateOperation *>(
                     alt.pj->iso_obj.get());
