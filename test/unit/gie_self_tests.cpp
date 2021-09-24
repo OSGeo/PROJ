@@ -475,6 +475,33 @@ TEST(gie, info_functions) {
 
     proj_destroy(P);
 
+    // Test with a projected CRS
+    {
+        P = proj_create(PJ_DEFAULT_CTX, "EPSG:3395");
+
+        const auto factors2 = proj_factors(P, a);
+
+        EXPECT_EQ(factors.angular_distortion, factors2.angular_distortion);
+        EXPECT_EQ(factors.meridian_parallel_angle,
+                  factors2.meridian_parallel_angle);
+        EXPECT_EQ(factors.meridian_convergence, factors2.meridian_convergence);
+        EXPECT_EQ(factors.tissot_semimajor, factors2.tissot_semimajor);
+
+        proj_destroy(P);
+    }
+
+    // Test with a geographic CRS --> error
+    {
+        P = proj_create(PJ_DEFAULT_CTX, "EPSG:4326");
+
+        const auto factors2 = proj_factors(P, a);
+        EXPECT_NE(proj_errno(P), 0);
+        proj_errno_reset(P);
+        EXPECT_EQ(factors2.meridian_parallel_angle, 0);
+
+        proj_destroy(P);
+    }
+
     /* Check that proj_list_* functions work by looping through them */
     size_t n = 0;
     for (oper_list = proj_list_operations(); oper_list->id; ++oper_list)
