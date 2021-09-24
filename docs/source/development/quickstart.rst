@@ -65,7 +65,7 @@ thread context to ``P``.
 
 The strings for the source and target CRS may be any of:
 
--  PROJ strings, e.g. ``+proj=longlat +datum=WGS84``,
+-  PROJ strings, e.g. ``+proj=longlat +datum=WGS84 +type=crs``,
 -  CRS identified by their code, e.g. ``EPSG:4326`` or
    ``urn:ogc:def:crs:EPSG::4326``, or
 -  a well-known text (WKT) string, e.g.:
