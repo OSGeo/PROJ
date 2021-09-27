@@ -28,10 +28,9 @@ See the :doc:`reference for more info on data types <reference/datatypes>`.
   :lines: 43-46
   :dedent: 4
 
-For use in multi-threaded programs the :c:type:`PJ_CONTEXT` threading-context is used.
-In this particular example it is not needed, but for the sake of completeness
-it created here. The section on :doc:`threads <threads>` discusses
-this in detail.
+For use in multi-threaded programs the :c:type:`PJ_CONTEXT` threading-context
+is used.  In this particular example it is not needed, but for the sake of
+completeness we demonstrate its use here.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
@@ -39,13 +38,38 @@ this in detail.
   :dedent: 4
 
 Next we create the :c:type:`PJ` transformation object ``P`` with the function
-:c:func:`proj_create_crs_to_crs`. :c:func:`proj_create_crs_to_crs` takes the threading context ``C``
-created above, a string that describes the source coordinate reference system (CRS),
-a string that describes the target CRS and an optional description of the area of
-use.
-The strings for the source or target CRS may be PROJ strings (``+proj=longlat +datum=WGS84``),
-CRS identified by their code (``EPSG:4326`` or ``urn:ogc:def:crs:EPSG::4326``) or
-by a well-known text (WKT) string:
+:c:func:`proj_create_crs_to_crs`.
+
+.. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
+  :language: c
+  :lines: 52-60
+  :dedent: 4
+
+Here we have set up a transformation from geographic coordinates to UTM zone
+32N.
+
+:c:func:`proj_create_crs_to_crs` takes as its arguments:
+
+-  the threading context ``C`` created above,
+-  a string that describes the source coordinate reference system (CRS),
+-  a string that describes the target CRS and
+-  an optional description of the area of use.
+
+It is recommended to create one threading context per thread used by the
+program.  This ensures that all :c:type:`PJ` objects created in the same
+context will be sharing resources such as error-numbers and loaded grids.
+
+If you are sure that ``P`` will only be used by a single program thread, you
+may pass ``NULL`` for the threading context.  This will assign the default
+thread context to ``P``.
+
+The strings for the source and target CRS may be any of:
+
+-  PROJ strings, e.g. ``+proj=longlat +datum=WGS84 +type=crs``,
+-  CRS identified by their code, e.g. ``EPSG:4326`` or
+   ``urn:ogc:def:crs:EPSG::4326``, or
+-  a well-known text (WKT) string, e.g.:
+
 ::
 
     GEOGCRS["WGS 84",
@@ -67,89 +91,107 @@ by a well-known text (WKT) string:
             BBOX[-90,-180,90,180]],
         ID["EPSG",4326]]
 
-The use of PROJ strings to describe a CRS is considered as legacy (one of the
-main weakness of PROJ strings is their inability to describe a geodetic datum,
-other than the few ones hardcoded in the ``+datum`` parameter).
-Here we transform from geographic coordinates to UTM zone 32N.
-It is recommended to create one threading-context per thread used by the program.
-This ensures that all :c:type:`PJ` objects created in the same context will be
-sharing resources such as error-numbers and loaded grids.
-In case the creation of the :c:type:`PJ` object fails an error message is
-displayed and the program returns. See :doc:`errorhandling` for further
-details.
+.. warning::
 
-.. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
-  :language: c
-  :lines: 52-60
-  :dedent: 4
+    The use of PROJ strings to describe a CRS is not recommended.  One of the
+    main weaknesses of PROJ strings is their inability to describe a geodetic
+    datum, other than the few ones hardcoded in the ``+datum`` parameter.
 
-:c:func:`proj_create_crs_to_crs` creates a transformation object, which accepts
-coordinates expressed in the units and axis order of the definition of the
-source CRS, and return transformed coordinates in the units and axis order of
-the definition of the target CRS.
-For almost most geographic CRS, the units will be in most cases degrees (in
-rare cases, such as EPSG:4807 / NTF (Paris), this can be grads). For geographic
-CRS defined by the EPSG authority, the order of coordinates is latitude first,
-longitude second. When using a PROJ string, on contrary the order will be
-longitude first, latitude second.
-For projected CRS, the units may vary (metre, us-foot, etc..). For projected
-CRS defined by the EPSG authority, and with EAST / NORTH directions, the order
-might be easting first, northing second, or the reverse.  When using a PROJ string,
-the order will be easting first, northing second, except if the ``+axis``
-parameter modifies it.
+:c:func:`proj_create_crs_to_crs` will return a pointer to a :c:type:`PJ`
+object, or a null pointer in the case of an error.  The details of the error
+can be retrieved using :c:func:`proj_context_errno`. See :doc:`errorhandling`
+for further details.
 
-If for the needs of your software, you want
-a uniform axis order (and thus do not care about axis order mandated by the
-authority defining the CRS), the :c:func:`proj_normalize_for_visualization`
-function can be used to modify the PJ* object returned by
-:c:func:`proj_create_crs_to_crs` so that it accepts as input and returns as
-output coordinates using the traditional GIS order, that is longitude, latitude
-(followed by elevation, time) for geographic CRS and easting, northing for most
-projected CRS.
+Now that we have a normalized transformation object in ``P``, we can use it
+with :c:func:`proj_trans` to transform coordinates from the source CRS to the
+target CRS, but first we will discuss the interpretation of coordinates.
+
+By default, a :c:type:`PJ` transformation object accepts coordinates expressed
+in the units and axis order of the source CRS, and returns transformed
+coordinates in the units and axis order of the target CRS.
+
+For most geographic CRS, the units will be in degrees.  In rare cases, such as
+EPSG:4807 / NTF (Paris), this can be grads. For geographic CRS defined by the
+EPSG authority, the order of coordinates is latitude first, longitude second.
+When using a PROJ string, the order is the reverse; longitude first, latitude
+second.
+
+For projected CRS, the units may vary (metre, us-foot, etc.). For projected CRS
+defined by the EPSG authority, and with EAST / NORTH directions, the order
+might be easting first, northing second, or the reverse.  When using a PROJ
+string, the order will be easting first, northing second, except if the
+``+axis`` parameter modifies it.
+
+If you prefer to work with a uniform axis order, regardless of the axis orders
+mandated by the source and target CRS, you can use the
+:c:func:`proj_normalize_for_visualization` function.
+
+:c:func:`proj_normalize_for_visualization` takes a threading context and an
+existing :c:type:`PJ` object, and generates from it a new :c:type:`PJ` that
+accepts as input and returns as output coordinates using the traditional GIS
+order.  That is, longitude followed by latitude, optionally followed by
+elevation and time for geographic CRS, and easting followed by northing for
+most projected CRS.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
   :lines: 65-71
   :dedent: 4
 
-PROJ uses its own data structures for handling coordinates. Here we use a
-:c:type:`PJ_COORD` which is easily assigned with the function :c:func:`proj_coord`.
-When using ``+proj=longlat``, the order of coordinates is longitude, latitude,
-and values are expressed in degrees. If you used instead a EPSG geographic CRS,
-like EPSG:4326 (WGS84), it would be latitude, longitude.
+Next we create a :c:type:`PJ_COORD` coordinate object, using the function
+:c:func:`proj_coord`.
+
+The following example creates a coordinate for 55°N 12°E (Copenhagen).
+
+Because we have normalized the transformation object with
+:c:func:`proj_normalize_for_visualization`, the order of coordinates is
+longitude followed by latitude, and the units are degrees.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
   :lines: 76
   :dedent: 4
 
-The coordinate defined above is transformed with :c:func:`proj_trans`. For this
-a :c:type:`PJ` object, a transformation direction (either forward or inverse)
-and the coordinate is needed. The transformed coordinate is returned in ``b``.
-Here the forward (:c:type:`PJ_FWD`) transformation from geographic to UTM is made.
+Now we are ready to transform the coordinate into UTM zone 32, using the
+function :c:func:`proj_trans`.
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
   :lines: 79-80
   :dedent: 4
 
-The inverse transformation (UTM to geographic) is done similar to above,
-this time using :c:type:`PJ_INV` as the direction.
+:c:func:`proj_trans` takes as its arguments:
+
+-  a :c:type:`PJ` transformation object,
+-  a :c:type:`PJ_DIRECTION` direction, and
+-  the :c:type:`PJ_COORD` coordinate to transform.
+
+The direction argument can be one of:
+
+-  ``PJ_FWD`` -- "forward" transformation from source CRS to target CRS.
+-  ``PJ_IDENT`` -- "identity", return the source coordinate unchanged.
+-  ``PJ_INV`` -- "inverse" transformation from target CRS to source CRS.
+
+It returns the new transformed :c:type:`PJ_COORD` coordinate.
+
+We can perform the transformation in reverse (from UTM zone 32 back to
+geographic) as follows:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 81-82
+  :lines: 82-83
   :dedent: 4
 
-Before ending the program the allocated memory needs to be released again:
+Before ending the program, we need to release the memory allocated to our
+objects:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c
-  :lines: 85-86
+  :lines: 86-87
   :dedent: 4
 
 
-A complete compilable version of the above can be seen here:
+A complete compilable version of the example code can be seen below:
 
 .. literalinclude:: ../../../examples/pj_obs_api_mini_demo.c
   :language: c

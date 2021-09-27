@@ -14,7 +14,6 @@ PROJ project or using the library in their own software.
    quickstart
    transformations
    errorhandling
-   threads
    reference/index
    cmake
    bindings
