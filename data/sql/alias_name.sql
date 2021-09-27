@@ -630,6 +630,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6282','Pointe Noire','E
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6215','Belge 1950','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6313','Belge 1972','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6809','BD50 (Brussels)','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1156','World Geodetic System 1984 (G1762'')','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1310','ECML14_NB-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6151','Swiss Terrestrial Reference Frame 1995 (CHTRF95)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1311','EWR2-IRF','EPSG');
@@ -638,6 +639,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1312','RGF93 v2','EPSG'
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1312','Réseau Géodésique Français 1993','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1313','RGF93 v2b','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1313','Réseau Géodésique Français 1993','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1309','WGS 84 (G2139)','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1193','NAD83(CSRS) 1997','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1194','NAD83(CSRS) 1997','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1195','NAD83(CSRS) 2002','EPSG');
@@ -7359,6 +7361,9 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21500','Belge 1950 (Brus
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31300','Belge 1972 / Belge Lambert 72','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','31370','Belge 1972 / Belgian Lambert 72','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6190','Belge 1972 / Belgian Lambert 72 + Ostend height','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','7664','WGS 84 (G1762'')','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','7665','WGS 84 (G1762'')','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9057','WGS 84 (G1762'')','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9761','ETRS89 / ECML14_NB SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9762','ETRS89 / ECML14_NB SnakeGrid + Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9766','ETRS89 / EWR2 SnakeGrid','EPSG');

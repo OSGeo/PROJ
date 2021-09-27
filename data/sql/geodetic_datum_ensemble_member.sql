@@ -17,3 +17,4 @@ INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6326','EPSG','1153',
 INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6326','EPSG','1154',4);
 INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6326','EPSG','1155',5);
 INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6326','EPSG','1156',6);
+INSERT INTO "geodetic_datum_ensemble_member" VALUES('EPSG','6326','EPSG','1309',7);
