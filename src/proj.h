@@ -600,6 +600,19 @@ size_t PROJ_DLL proj_trans_generic (
     double *t, size_t st, size_t nt
 );
 
+int PROJ_DLL proj_trans_bounds(
+    PJ *P,
+    PJ_DIRECTION direction,
+    const double left,
+    const double bottom,
+    const double right,
+    const double top,
+    double* out_left,
+    double* out_bottom,
+    double* out_right,
+    double* out_top,
+    int densify_pts
+);
 
 /* Initializers */
 PJ_COORD PROJ_DLL proj_coord (double x, double y, double z, double t);

@@ -5676,6 +5676,394 @@ TEST_F(CApi, proj_get_geoid_models_from_database) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_trans_bounds_densify_0) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:4326",
+        "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 "
+        "+a=6370997 +b=6370997 +units=m +no_defs",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        P, PJ_FWD,
+        40, -120, 64, -80,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        0
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -1684649.41338, 1);
+    EXPECT_NEAR(out_bottom, -350356.81377, 1);
+    EXPECT_NEAR(out_right, 1684649.41338, 1);
+    EXPECT_NEAR(out_top, 2234551.18559, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_densify_100) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:4326",
+        "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 "
+        "+a=6370997 +b=6370997 +units=m +no_defs",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        P, PJ_FWD,
+        40, -120, 64, -80,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        100
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -1684649.41338, 1);
+    EXPECT_NEAR(out_bottom, -555777.79210, 1);
+    EXPECT_NEAR(out_right, 1684649.41338, 1);
+    EXPECT_NEAR(out_top, 2234551.18559, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_normalized) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:4326",
+        "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 "
+        "+a=6370997 +b=6370997 +units=m +no_defs",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto normalized_p = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper normal_keeper_P(normalized_p);
+    ASSERT_NE(normalized_p, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        normalized_p, PJ_FWD,
+        -120, 40, -80, 64,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        100
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -1684649.41338, 1);
+    EXPECT_NEAR(out_bottom, -555777.79210, 1);
+    EXPECT_NEAR(out_right, 1684649.41338, 1);
+    EXPECT_NEAR(out_top, 2234551.18559, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_antimeridian) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:4167",
+        "EPSG:3851",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        P, PJ_FWD,
+        -55.95, 160.6, -25.88, -171.2,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, 5228058.6143420935, 1);
+    EXPECT_NEAR(out_bottom, 1722483.900174921, 1);
+    EXPECT_NEAR(out_right, 8692574.544944234, 1);
+    EXPECT_NEAR(out_top, 4624385.494808555, 1);
+    double out_left_inv;
+    double out_bottom_inv;
+    double out_right_inv;
+    double out_top_inv;
+    int success_inv = proj_trans_bounds(
+        P, PJ_INV,
+        5228058.6143420935, 1722483.900174921, 8692574.544944234, 4624385.494808555,
+        &out_left_inv,
+        &out_bottom_inv,
+        &out_right_inv,
+        &out_top_inv,
+        21
+    );
+    EXPECT_TRUE(success_inv == 1);
+    EXPECT_NEAR(out_left_inv, -56.7471249, 1);
+    EXPECT_NEAR(out_bottom_inv, 153.2799922, 1);
+    EXPECT_NEAR(out_right_inv, -24.6148194, 1);
+    EXPECT_NEAR(out_top_inv, -162.1813873, 1);
+}
+
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_beyond_global_bounds) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:6933",
+        "EPSG:4326",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto normalized_p = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper normal_keeper_P(normalized_p);
+    ASSERT_NE(normalized_p, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        normalized_p, PJ_FWD,
+        -17367531.3203125, -7314541.19921875, 17367531.3203125, 7314541.19921875,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -180, 1);
+    EXPECT_NEAR(out_bottom, -85.0445994113099, 1);
+    EXPECT_NEAR(out_right, 180, 1);
+    EXPECT_NEAR(out_top, 85.0445994113099, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_ignore_inf) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "OGC:CRS84",
+        "ESRI:102036",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        P, PJ_FWD,
+        -180.0, -90.0, 180.0, 0.0,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, 0, 1);
+    EXPECT_NEAR(out_bottom, -89178008, 1);
+    EXPECT_NEAR(out_right, 0, 1);
+    EXPECT_NEAR(out_top, 0, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_ignore_inf_geographic) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "PROJCS[\"Interrupted_Goode_Homolosine\","
+        "GEOGCS[\"GCS_unnamed ellipse\",DATUM[\"D_unknown\","
+        "SPHEROID[\"Unknown\",6378137,298.257223563]],"
+        "PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Interrupted_Goode_Homolosine\"],"
+        "UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],"
+        "AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+        "OGC:CRS84",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        P, PJ_FWD,
+        -15028000.0, 7515000.0, -14975000.0, 7556000.0,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -179.2133, 1);
+    EXPECT_NEAR(out_bottom, 70.9345, 1);
+    EXPECT_NEAR(out_right, -177.9054, 1);
+    EXPECT_NEAR(out_top, 71.4364, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds_noop_geographic) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:4284",
+        "EPSG:4284",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        P, PJ_FWD,
+        19.57, 35.14, -168.97, 81.91,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, 19.57, 1);
+    EXPECT_NEAR(out_bottom, 35.14, 1);
+    EXPECT_NEAR(out_right, -168.97, 1);
+    EXPECT_NEAR(out_top, 81.91, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds__north_pole) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:32661",
+        "EPSG:4326",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto normalized_p = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper normal_keeper_P(normalized_p);
+    ASSERT_NE(normalized_p, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        normalized_p, PJ_FWD,
+        -1371213.7625429356, -1405880.71737131, 5371213.762542935, 5405880.71737131,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -180.0, 1);
+    EXPECT_NEAR(out_bottom, 48.656, 1);
+    EXPECT_NEAR(out_right, 180.0, 1);
+    EXPECT_NEAR(out_top, 90.0, 1);
+    double out_left_inv;
+    double out_bottom_inv;
+    double out_right_inv;
+    double out_top_inv;
+    int success_inv = proj_trans_bounds(
+        normalized_p, PJ_INV,
+        -180.0, 60.0, 180.0, 90.0,
+        &out_left_inv,
+        &out_bottom_inv,
+        &out_right_inv,
+        &out_top_inv,
+        21
+    );
+    EXPECT_TRUE(success_inv == 1);
+    EXPECT_NEAR(out_left_inv, -1371213.76, 1);
+    EXPECT_NEAR(out_bottom_inv, -1405880.72, 1);
+    EXPECT_NEAR(out_right_inv, 5371213.76, 1);
+    EXPECT_NEAR(out_top_inv, 5405880.72, 1);
+}
+
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds__south_pole) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:32761",
+        "EPSG:4326",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto normalized_p = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper normal_keeper_P(normalized_p);
+    ASSERT_NE(normalized_p, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        normalized_p, PJ_FWD,
+        -1371213.7625429356, -1405880.71737131, 5371213.762542935, 5405880.71737131,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -180.0, 1);
+    EXPECT_NEAR(out_bottom, -90, 1);
+    EXPECT_NEAR(out_right, 180.0, 1);
+    EXPECT_NEAR(out_top, -48.656, 1);
+    double out_left_inv;
+    double out_bottom_inv;
+    double out_right_inv;
+    double out_top_inv;
+    int success_inv = proj_trans_bounds(
+        normalized_p, PJ_INV,
+        -180.0, -90.0, 180.0, -60.0,
+        &out_left_inv,
+        &out_bottom_inv,
+        &out_right_inv,
+        &out_top_inv,
+        21
+    );
+    EXPECT_TRUE(success_inv == 1);
+    EXPECT_NEAR(out_left_inv, -1371213.76, 1);
+    EXPECT_NEAR(out_bottom_inv, -1405880.72, 1);
+    EXPECT_NEAR(out_right_inv, 5371213.76, 1);
+    EXPECT_NEAR(out_top_inv, 5405880.72, 1);
+}
+
+
+// ---------------------------------------------------------------------------
+
 #if !defined(_WIN32)
 TEST_F(CApi, open_plenty_of_contexts) {
     // Test that we only consume 1 file handle for the connection to the
