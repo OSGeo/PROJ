@@ -339,7 +339,7 @@ TEST(factory, AuthorityFactory_createDatumEnsembleGeodetic) {
     ASSERT_EQ(ensemble->identifiers().size(), 1U);
     EXPECT_EQ(ensemble->identifiers()[0]->code(), "6326");
     EXPECT_EQ(*(ensemble->identifiers()[0]->codeSpace()), "EPSG");
-    EXPECT_EQ(ensemble->datums().size(), 6U);
+    EXPECT_EQ(ensemble->datums().size(), 7U);
     EXPECT_EQ(ensemble->positionalAccuracy()->value(), "2.0");
     ASSERT_TRUE(!ensemble->domains().empty());
     auto domain = ensemble->domains()[0];
@@ -3263,7 +3263,7 @@ TEST(factory, createObjectsFromName) {
         // EPSG:4326 and the 6 WGS84 realizations
         // and EPSG:7881 'Tritan St. Helena'' whose alias is
         // 'WGS 84 Tritan St. Helena'
-        EXPECT_EQ(res.size(), 8U);
+        EXPECT_EQ(res.size(), 9U);
         if (!res.empty()) {
             EXPECT_EQ(res.front()->getEPSGCode(), 4326);
         }
