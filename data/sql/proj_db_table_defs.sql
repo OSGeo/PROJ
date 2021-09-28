@@ -539,6 +539,7 @@ BEGIN
             'EPSG_9836_Geocentric/topocentric conversions',
             'EPSG_9837_Geographic/topocentric conversions',
             'EPSG_9838_Vertical Perspective',
+            'EPSG_9840_Orthographic',
             'EPSG_9841_Mercator (1SP) (Spherical)',
             'EPSG_9842_Equidistant Cylindrical',
             'EPSG_9843_Axis Order Reversal (2D)',
