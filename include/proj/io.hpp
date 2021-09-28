@@ -922,7 +922,7 @@ class PROJ_GCC_DLL DatabaseContext {
                                              const std::string &version,
                                              std::string &versionedAuthNameOut);
 
-    PROJ_INTERNAL std::vector<std::string>
+    PROJ_DLL std::vector<std::string>
     getVersionedAuthoritiesFromName(const std::string &authName);
 
     //! @endcond
