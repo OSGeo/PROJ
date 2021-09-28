@@ -747,6 +747,53 @@ TEST(crs, EPSG_4268_geogcrs_deprecated_as_WKT1_GDAL) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, IAU_1000_as_WKT2) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "IAU_2015");
+    auto crs = factory->createCoordinateReferenceSystem("1000");
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019, dbContext));
+    auto wkt = crs->exportToWKT(f.get());
+    // Check that IAU_2015 is split into a authority name and version
+    EXPECT_TRUE(wkt.find("ID[\"IAU\",1000,2015]") != std::string::npos) << wkt;
+
+    auto obj = createFromUserInput(wkt, dbContext);
+    auto crs2 = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(crs2 != nullptr);
+    auto wkt2 = crs2->exportToWKT(f.get());
+    // Check that IAU_2015 is split into a authority name and version
+    EXPECT_TRUE(wkt2.find("ID[\"IAU\",1000,2015]") != std::string::npos)
+        << wkt2;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, IAU_1000_as_PROJJSON) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "IAU_2015");
+    auto crs = factory->createCoordinateReferenceSystem("1000");
+    auto projjson = crs->exportToJSON(JSONFormatter::create(dbContext).get());
+    // Check that IAU_2015 is split into a authority name and version
+    EXPECT_TRUE(projjson.find("\"authority\": \"IAU\",") != std::string::npos)
+        << projjson;
+    EXPECT_TRUE(projjson.find("\"code\": 1000,") != std::string::npos)
+        << projjson;
+    EXPECT_TRUE(projjson.find("\"version\": 2015") != std::string::npos)
+        << projjson;
+
+    auto obj = createFromUserInput(projjson, dbContext);
+    auto crs2 = nn_dynamic_pointer_cast<CRS>(obj);
+    ASSERT_TRUE(crs2 != nullptr);
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019, dbContext));
+    auto wkt2 = crs2->exportToWKT(f.get());
+    // Check that IAU_2015 is split into a authority name and version
+    EXPECT_TRUE(wkt2.find("ID[\"IAU\",1000,2015]") != std::string::npos)
+        << wkt2;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, EPSG_2008_projcrs_deprecated_as_WKT1_GDAL) {
     auto dbContext = DatabaseContext::create();
     auto factory = AuthorityFactory::create(dbContext, "EPSG");

@@ -512,6 +512,8 @@ class PROJ_GCC_DLL JSONFormatter {
         PROJ_INTERNAL CPLJSonStreamingWriter *
         writer() const;
 
+    PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
+
     struct ObjectContext {
         JSONFormatter &m_formatter;
 
@@ -911,6 +913,17 @@ class PROJ_GCC_DLL DatabaseContext {
     PROJ_INTERNAL static std::vector<operation::CoordinateOperationNNPtr>
     getTransformationsForGridName(const DatabaseContextNNPtr &databaseContext,
                                   const std::string &gridName);
+
+    PROJ_INTERNAL bool
+    getAuthorityAndVersion(const std::string &versionedAuthName,
+                           std::string &authNameOut, std::string &versionOut);
+
+    PROJ_INTERNAL bool getVersionedAuthority(const std::string &authName,
+                                             const std::string &version,
+                                             std::string &versionedAuthNameOut);
+
+    PROJ_INTERNAL std::vector<std::string>
+    getVersionedAuthoritiesFromName(const std::string &authName);
 
     //! @endcond
 

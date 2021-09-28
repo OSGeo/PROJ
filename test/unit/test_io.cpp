@@ -10495,6 +10495,8 @@ TEST(io, createFromUserInput) {
     EXPECT_NO_THROW(createFromUserInput("epsg:4326", dbContext));
     EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:crs:EPSG::4326", dbContext));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:ogc:def:crs:EPSG:10:4326", dbContext));
     EXPECT_THROW(createFromUserInput("urn:ogc:def:crs:EPSG::4326", nullptr),
                  ParsingException);
     EXPECT_NO_THROW(createFromUserInput(
@@ -10507,6 +10509,20 @@ TEST(io, createFromUserInput) {
         createFromUserInput("urn:ogc:def:meridian:EPSG::8901", dbContext));
     EXPECT_NO_THROW(
         createFromUserInput("urn:ogc:def:ellipsoid:EPSG::7030", dbContext));
+
+    EXPECT_NO_THROW(createFromUserInput("IAU:1000", dbContext));
+    EXPECT_NO_THROW(createFromUserInput("IAU_2015:1000", dbContext));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:ogc:def:crs:IAU::1000", dbContext));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:ogc:def:crs:IAU_2015::1000", dbContext));
+    EXPECT_NO_THROW(
+        createFromUserInput("urn:ogc:def:crs:IAU:2015:1000", dbContext));
+
+    EXPECT_THROW(createFromUserInput("urn:ogc:def:crs:IAU_2015::xxxx", nullptr),
+                 ParsingException);
+    EXPECT_THROW(createFromUserInput("urn:ogc:def:crs:IAU:xxxx:1000", nullptr),
+                 ParsingException);
 
     // Found as srsName in some GMLs...
     EXPECT_NO_THROW(

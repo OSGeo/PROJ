@@ -754,6 +754,14 @@ struct DatabaseContext::Private {
     // cppcheck-suppress functionStatic
     void cache(const std::string &code, const GridInfoCache &info);
 
+    struct VersionedAuthName {
+        std::string versionedAuthName{};
+        std::string authName{};
+        std::string version{};
+        int priority = 0;
+    };
+    const std::vector<VersionedAuthName> &getCacheAuthNameWithVersion();
+
   private:
     friend class DatabaseContext;
 
@@ -794,6 +802,8 @@ struct DatabaseContext::Private {
 
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
+
+    std::vector<VersionedAuthName> cacheAuthNameWithVersion_{};
 
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
@@ -3552,6 +3562,87 @@ DatabaseContext::getNonDeprecated(const std::string &tableName,
         const auto &replacement_auth_name = row[0];
         const auto &replacement_code = row[1];
         res.emplace_back(replacement_auth_name, replacement_code);
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::vector<DatabaseContext::Private::VersionedAuthName> &
+DatabaseContext::Private::getCacheAuthNameWithVersion() {
+    if (cacheAuthNameWithVersion_.empty()) {
+        const auto sqlRes =
+            run("SELECT versioned_auth_name, auth_name, version, priority "
+                "FROM versioned_auth_name_mapping");
+        for (const auto &row : sqlRes) {
+            VersionedAuthName van;
+            van.versionedAuthName = row[0];
+            van.authName = row[1];
+            van.version = row[2];
+            van.priority = atoi(row[3].c_str());
+            cacheAuthNameWithVersion_.emplace_back(std::move(van));
+        }
+    }
+    return cacheAuthNameWithVersion_;
+}
+
+// ---------------------------------------------------------------------------
+
+// From IAU_2015 returns (IAU,2015)
+bool DatabaseContext::getAuthorityAndVersion(
+    const std::string &versionedAuthName, std::string &authNameOut,
+    std::string &versionOut) {
+
+    for (const auto &van : d->getCacheAuthNameWithVersion()) {
+        if (van.versionedAuthName == versionedAuthName) {
+            authNameOut = van.authName;
+            versionOut = van.version;
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+// From IAU and 2015, returns IAU_2015
+bool DatabaseContext::getVersionedAuthority(const std::string &authName,
+                                            const std::string &version,
+                                            std::string &versionedAuthNameOut) {
+
+    for (const auto &van : d->getCacheAuthNameWithVersion()) {
+        if (van.authName == authName && van.version == version) {
+            versionedAuthNameOut = van.versionedAuthName;
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+// From IAU returns IAU_latest, ... IAU_2015
+std::vector<std::string>
+DatabaseContext::getVersionedAuthoritiesFromName(const std::string &authName) {
+
+    typedef std::pair<std::string, int> VersionedAuthNamePriority;
+    std::vector<VersionedAuthNamePriority> tmp;
+    for (const auto &van : d->getCacheAuthNameWithVersion()) {
+        if (van.authName == authName) {
+            tmp.emplace_back(
+                VersionedAuthNamePriority(van.versionedAuthName, van.priority));
+        }
+    }
+    std::vector<std::string> res;
+    if (!tmp.empty()) {
+        // Sort by decreasing priority
+        std::sort(tmp.begin(), tmp.end(),
+                  [](const VersionedAuthNamePriority &a,
+                     const VersionedAuthNamePriority &b) {
+                      return b.second > a.second;
+                  });
+        for (const auto &pair : tmp)
+            res.emplace_back(pair.first);
     }
     return res;
 }

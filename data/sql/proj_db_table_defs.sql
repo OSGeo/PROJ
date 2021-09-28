@@ -1515,3 +1515,14 @@ CREATE TABLE authority_to_authority_preference(
     allowed_authorities TEXT NOT NULL,  -- for example 'PROJ,EPSG,any'
     CONSTRAINT unique_authority_to_authority_preference UNIQUE (source_auth_name, target_auth_name)
 );
+
+-- Map 'IAU_2015' to auth_name=IAU and version=2015
+CREATE TABLE versioned_auth_name_mapping(
+    versioned_auth_name    TEXT NOT NULL PRIMARY KEY,
+    auth_name              TEXT NOT NULL,
+    version                TEXT NOT NULL,
+    priority               INTEGER NOT NULL,
+    CONSTRAINT unique_auth_name_version UNIQUE (auth_name, version),
+    CONSTRAINT unique_auth_name_priority UNIQUE (auth_name, priority)
+);
+

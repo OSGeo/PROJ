@@ -495,8 +495,8 @@ static void outputObject(
                 if (!outputOpt.quiet) {
                     std::cout << "WKT2:2015 string:" << std::endl;
                 }
-                auto formatter =
-                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2015);
+                auto formatter = WKTFormatter::create(
+                    WKTFormatter::Convention::WKT2_2015, dbContext);
                 formatter->setMultiLine(!outputOpt.singleLine);
                 formatter->setStrict(outputOpt.strict);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
@@ -520,7 +520,7 @@ static void outputObject(
                     std::cout << "WKT2:2015_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
-                    WKTFormatter::Convention::WKT2_2015_SIMPLIFIED);
+                    WKTFormatter::Convention::WKT2_2015_SIMPLIFIED, dbContext);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -545,8 +545,8 @@ static void outputObject(
                 if (!outputOpt.quiet) {
                     std::cout << "WKT2:2019 string:" << std::endl;
                 }
-                auto formatter =
-                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
+                auto formatter = WKTFormatter::create(
+                    WKTFormatter::Convention::WKT2_2019, dbContext);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -572,7 +572,7 @@ static void outputObject(
                     std::cout << "WKT2:2019_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
-                    WKTFormatter::Convention::WKT2_2019_SIMPLIFIED);
+                    WKTFormatter::Convention::WKT2_2019_SIMPLIFIED, dbContext);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
