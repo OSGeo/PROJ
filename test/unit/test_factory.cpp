@@ -1561,6 +1561,86 @@ TEST(factory, AuthorityFactory_getDescriptionText) {
 
 // ---------------------------------------------------------------------------
 
+TEST(factory, AuthorityFactory_IAU_2015) {
+    auto factory =
+        AuthorityFactory::create(DatabaseContext::create(), "IAU_2015");
+
+    {
+        auto crs = factory->createGeographicCRS("19900");
+        EXPECT_EQ(crs->nameStr(), "Mercury (2015) - Sphere / Ocentric");
+
+        const auto ellps = crs->ellipsoid();
+        EXPECT_TRUE(ellps->isSphere());
+        EXPECT_NEAR(ellps->semiMajorAxis().value(), 2440530.0, 1e-6);
+
+        const auto &axisList = crs->coordinateSystem()->axisList();
+        EXPECT_EQ(axisList.size(), 2U);
+
+        EXPECT_EQ(*(axisList[0]->name()->description()), "Geodetic latitude");
+        EXPECT_EQ(axisList[0]->abbreviation(), "Lat");
+        EXPECT_EQ(axisList[0]->direction(), AxisDirection::NORTH);
+        EXPECT_EQ(axisList[0]->unit(), UnitOfMeasure::DEGREE);
+
+        EXPECT_EQ(*(axisList[1]->name()->description()), "Geodetic longitude");
+        EXPECT_EQ(axisList[1]->abbreviation(), "Lon");
+        EXPECT_EQ(axisList[1]->direction(), AxisDirection::EAST);
+        EXPECT_EQ(axisList[1]->unit(), UnitOfMeasure::DEGREE);
+    }
+
+    {
+        auto crs = factory->createGeographicCRS("19901");
+        EXPECT_EQ(crs->nameStr(), "Mercury (2015) / Ographic");
+
+        const auto ellps = crs->ellipsoid();
+        EXPECT_TRUE(!ellps->isSphere());
+        EXPECT_NEAR(ellps->semiMajorAxis().value(), 2440530.0, 1e-6);
+        EXPECT_NEAR(ellps->computeSemiMinorAxis().value(), 2438260.0, 1e-6);
+
+        const auto &axisList = crs->coordinateSystem()->axisList();
+        EXPECT_EQ(axisList.size(), 2U);
+
+        EXPECT_EQ(*(axisList[0]->name()->description()), "Geodetic latitude");
+        EXPECT_EQ(axisList[0]->abbreviation(), "Lat");
+        EXPECT_EQ(axisList[0]->direction(), AxisDirection::NORTH);
+        EXPECT_EQ(axisList[0]->unit(), UnitOfMeasure::DEGREE);
+
+        EXPECT_EQ(*(axisList[1]->name()->description()), "Geodetic longitude");
+        EXPECT_EQ(axisList[1]->abbreviation(), "Lon");
+        EXPECT_EQ(axisList[1]->direction(), AxisDirection::WEST); // WEST !
+        EXPECT_EQ(axisList[1]->unit(), UnitOfMeasure::DEGREE);
+    }
+
+    {
+        auto crs = factory->createGeodeticCRS("19902");
+        EXPECT_EQ(crs->nameStr(), "Mercury (2015) / Ocentric");
+        EXPECT_TRUE(dynamic_cast<GeographicCRS *>(crs.get()) == nullptr);
+
+        const auto ellps = crs->ellipsoid();
+        EXPECT_TRUE(!ellps->isSphere());
+        EXPECT_NEAR(ellps->semiMajorAxis().value(), 2440530.0, 1e-6);
+        EXPECT_NEAR(ellps->computeSemiMinorAxis().value(), 2438260.0, 1e-6);
+
+        const auto &cs = crs->coordinateSystem();
+        EXPECT_TRUE(dynamic_cast<SphericalCS *>(cs.get()) != nullptr);
+        const auto &axisList = cs->axisList();
+        EXPECT_EQ(axisList.size(), 2U);
+
+        EXPECT_EQ(*(axisList[0]->name()->description()),
+                  "Planetocentric latitude");
+        EXPECT_EQ(axisList[0]->abbreviation(), "U");
+        EXPECT_EQ(axisList[0]->direction(), AxisDirection::NORTH);
+        EXPECT_EQ(axisList[0]->unit(), UnitOfMeasure::DEGREE);
+
+        EXPECT_EQ(*(axisList[1]->name()->description()),
+                  "Planetocentric longitude");
+        EXPECT_EQ(axisList[1]->abbreviation(), "V");
+        EXPECT_EQ(axisList[1]->direction(), AxisDirection::EAST);
+        EXPECT_EQ(axisList[1]->unit(), UnitOfMeasure::DEGREE);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 class FactoryWithTmpDatabase : public ::testing::Test {
   protected:
     void SetUp() override { sqlite3_open(":memory:", &m_ctxt); }
@@ -3950,10 +4030,9 @@ TEST(factory, objectInsertion) {
         const auto sql =
             ctxt->getInsertStatementsFor(crs, "HOBU", "XXXX", true);
         ASSERT_EQ(sql.size(), 5U);
-        EXPECT_EQ(
-            sql[0],
-            "INSERT INTO ellipsoid VALUES('HOBU','1','my "
-            "ellipsoid','','PROJ','EARTH',6378137,'EPSG','9001',295,NULL,0);");
+        EXPECT_EQ(sql[0], "INSERT INTO ellipsoid VALUES('HOBU','1','my "
+                          "ellipsoid','','IAU_2015','399',6378137,'EPSG','9001'"
+                          ",295,NULL,0);");
         const auto identified =
             crs->identify(AuthorityFactory::create(ctxt, std::string()));
         ASSERT_EQ(identified.size(), 1U);
@@ -3986,7 +4065,8 @@ TEST(factory, objectInsertion) {
         ASSERT_EQ(sql.size(), 5U);
         EXPECT_EQ(sql[0], "INSERT INTO ellipsoid "
                           "VALUES('HOBU','ELLPS_GEODETIC_DATUM_XXXX','my "
-                          "ellipsoid','','PROJ','EARTH',6378137,'EPSG','9001',"
+                          "ellipsoid','','IAU_2015','399',6378137,"
+                          "'EPSG','9001',"
                           "NULL,6378136,0);");
         const auto identified =
             crs->identify(AuthorityFactory::create(ctxt, std::string()));

@@ -4209,7 +4209,11 @@ AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
         throw FactoryException("no match found");
     }
     if (res.size() > 1) {
-        throw FactoryException("more than one match found");
+        for (const auto &row : res) {
+            if (row[0] != res.front()[0]) {
+                throw FactoryException("more than one match found");
+            }
+        }
     }
     return res.front()[0];
 }
