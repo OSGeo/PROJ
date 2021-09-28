@@ -4809,8 +4809,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
     }
     std::string sql("SELECT name, type, coordinate_system_auth_name, "
                     "coordinate_system_code, datum_auth_name, datum_code, "
-                    "text_definition, "
-                    "deprecated FROM "
+                    "text_definition, deprecated, description FROM "
                     "geodetic_crs WHERE auth_name = ? AND code = ?");
     if (geographicOnly) {
         sql += " AND type in (" GEOG_2D_SINGLE_QUOTED "," GEOG_3D_SINGLE_QUOTED
@@ -4831,9 +4830,10 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         const auto &datum_code = row[5];
         const auto &text_definition = row[6];
         const bool deprecated = row[7] == "1";
+        const auto &remarks = row[8];
 
         auto props = d->createPropertiesSearchUsages("geodetic_crs", code, name,
-                                                     deprecated);
+                                                     deprecated, remarks);
 
         if (!text_definition.empty()) {
             DatabaseContext::Private::RecursionDetector detector(d->context());
