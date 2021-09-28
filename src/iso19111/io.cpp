@@ -7868,6 +7868,32 @@ const std::string &PROJStringFormatter::toString() const {
                 continue;
             }
 
+            // axisswap order=2,-1 followed by axisswap order=-2,1 is a no-op
+            if (curStep.name == "axisswap" && prevStep.name == "axisswap" &&
+                curStepParamCount == 1 && prevStepParamCount == 1 &&
+                !prevStep.inverted &&
+                prevStep.paramValues[0].equals("order", "2,-1") &&
+                !curStep.inverted &&
+                curStep.paramValues[0].equals("order", "-2,1")) {
+                deletePrevAndCurIter();
+                continue;
+            }
+
+            // axisswap order=2,-1 followed by axisswap order=1,-2 is
+            // equivalent to axisswap order=2,1
+            if (curStep.name == "axisswap" && prevStep.name == "axisswap" &&
+                curStepParamCount == 1 && prevStepParamCount == 1 &&
+                !prevStep.inverted &&
+                prevStep.paramValues[0].equals("order", "2,-1") &&
+                !curStep.inverted &&
+                curStep.paramValues[0].equals("order", "1,-2")) {
+                prevStep.inverted = false;
+                prevStep.paramValues[0] = Step::KeyValue("order", "2,1");
+                // Delete this iter
+                iterCur = steps.erase(iterCur);
+                continue;
+            }
+
             // axisswap order=2,1 followed by axisswap order=2,-1 is
             // equivalent to axisswap order=1,-2
             // Same for axisswap order=-2,1 followed by axisswap order=2,1

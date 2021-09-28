@@ -7881,6 +7881,26 @@ TEST(io, projstringformatter_axisswap_minus_two_one_followed_two_one) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_axisswap_two_minus_one_followed_minus_two_one) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->ingestPROJString("+proj=pipeline "
+                          "+step +proj=axisswap +order=2,-1 "
+                          "+step +proj=axisswap +order=-2,1");
+    EXPECT_EQ(fmt->toString(), "+proj=noop");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projstringformatter_axisswap_two_minus_one_followed_one_minus_two) {
+    auto fmt = PROJStringFormatter::create();
+    fmt->ingestPROJString("+proj=pipeline "
+                          "+step +proj=axisswap +order=2,-1 "
+                          "+step +proj=axisswap +order=1,-2");
+    EXPECT_EQ(fmt->toString(), "+proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projstringformatter_unmodified) {
     const char *const strs[] = {"+proj=pipeline "
                                 "+step +proj=axisswap +order=2,-1 "
