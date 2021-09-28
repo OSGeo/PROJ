@@ -10,6 +10,7 @@ pkgdata_DATA = proj.ini GL27 nad.lst nad27 nad83 world other.extra \
 SQL_ORDERED_LIST = sql/begin.sql \
 		sql/proj_db_table_defs.sql \
 		sql/conversion_triggers.sql \
+		sql/customizations_early.sql \
 		sql/metadata.sql \
 		sql/unit_of_measure.sql \
 		sql/extent.sql \

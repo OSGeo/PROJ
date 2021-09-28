@@ -35,8 +35,6 @@ CREATE TABLE celestial_body (
     CONSTRAINT pk_celestial_body PRIMARY KEY (auth_name, code)
 ) WITHOUT ROWID;
 
-INSERT INTO celestial_body VALUES('PROJ', 'EARTH', 'Earth', 6378137.0);
-
 CREATE TABLE ellipsoid (
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code INTEGER_OR_TEXT NOT NULL CHECK (length(code) >= 1),
