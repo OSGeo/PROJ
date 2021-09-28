@@ -104,6 +104,7 @@ namespace io {
 #define GEOG_2D "geographic 2D"
 #define GEOG_3D "geographic 3D"
 #define GEOCENTRIC "geocentric"
+#define OTHER "other"
 #define PROJECTED "projected"
 #define VERTICAL "vertical"
 #define COMPOUND "compound"
@@ -4716,6 +4717,17 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         }
         throw FactoryException("invalid number of axis for CartesianCS");
     }
+    if (csType == "spherical") {
+        if (axisList.size() == 2) {
+            return cacheAndRet(
+                cs::SphericalCS::create(props, axisList[0], axisList[1]));
+        }
+        if (axisList.size() == 3) {
+            return cacheAndRet(cs::SphericalCS::create(
+                props, axisList[0], axisList[1], axisList[2]));
+        }
+        throw FactoryException("invalid number of axis for SphericalCS");
+    }
     if (csType == "vertical") {
         if (axisList.size() == 1) {
             return cacheAndRet(cs::VerticalCS::create(props, axisList[0]));
@@ -4869,6 +4881,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
+
         auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (type == GEOCENTRIC && geocentricCS) {
             auto crsRet = crs::GeodeticCRS::create(props, datum, datumEnsemble,
@@ -4876,6 +4889,15 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
+
+        auto sphericalCS = util::nn_dynamic_pointer_cast<cs::SphericalCS>(cs);
+        if (type == OTHER && sphericalCS) {
+            auto crsRet = crs::GeodeticCRS::create(props, datum, datumEnsemble,
+                                                   NN_NO_CHECK(sphericalCS));
+            d->context()->d->cache(cacheKey, crsRet);
+            return crsRet;
+        }
+
         throw FactoryException("unsupported (type, CS type) for geodeticCRS: " +
                                type + ", " + cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
@@ -5354,7 +5376,8 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                                            code);
     }
     const auto &type = res.front()[0];
-    if (type == GEOG_2D || type == GEOG_3D || type == GEOCENTRIC) {
+    if (type == GEOG_2D || type == GEOG_3D || type == GEOCENTRIC ||
+        type == OTHER) {
         return createGeodeticCRS(code);
     }
     if (type == VERTICAL) {
