@@ -2431,7 +2431,7 @@ GeodeticCRS::identify(const io::AuthorityFactoryPtr &authorityFactory) const {
                                     thisDatum->primeMeridian().get(),
                                     util::IComparable::Criterion::EQUIVALENT,
                                     dbContext) &&
-                                (!l_implicitCS ||
+                                (l_implicitCS ||
                                  coordinateSystem()->_isEquivalentTo(
                                      crs->coordinateSystem().get(),
                                      util::IComparable::Criterion::EQUIVALENT,
