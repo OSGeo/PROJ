@@ -15,7 +15,7 @@ Summary
 
 This RFC proposes to drop Autotools for PROJ 9.0, and to maintain CMake
 for build automation, testing and packaging. This will reduce the overall
-maintenance for PROJ, and will enable the library to be integrated into other
+maintenance for PROJ and will enable the library to be integrated into other
 projects that use CMake.
 
 Background
@@ -31,7 +31,7 @@ Here is a short timeline of the build tools used for PROJ:
 - In 2014, a CMake build setup was introduced by Howard Butler for
   PROJ 4.9.0RC1. The CMake configuration was improved for the 4.9.1 release,
   but not considered at feature parity with the Autotools builds at the time.
-- The NMake build setup was removed for PROJ 6.0.0, as it's functionality had
+- The NMake build setup was removed for PROJ 6.0.0, as its functionality had
   been replaced by CMake.
 
 Motivation
@@ -67,7 +67,7 @@ CMake is an open source cross-platform tool for build automation, testing and
 packaging of software. It does not directly compile the software, but manages
 the build process using generators, including Unix Makefiles and Ninja among
 other command-based and IDE tools. The CMake software has been under active
-development since it's origins in 2000. The CMake language is carefully
+development since its origins in 2000. The CMake language is carefully
 developed with backwards-compatible policies that aim to provide consistent
 behaviour across different versions. CMake is currently the preferred build
 tool for PROJ for the following reasons:
@@ -96,10 +96,10 @@ Potential impacts
 -------------------------------------------------------------------------------
 
 Binary packagers that currently rely on Autotools would obviously need to
-transition to building and testing PROJ with CMake. Issues related to
+transition building and testing PROJ with CMake. Issues related to
 multiarch builds of PROJ may become apparent, which can be patched and/or
 reported to PROJ developers. One feature of Autotools is that both static and
-dynamic (shared) libraries are built, which packagers may distribute. If this
+dynamic (shared) libraries are built, which packagers may distribute. This
 feature is currently not set-up for PROJ, as it would need to be configured
 and built twice.
 
