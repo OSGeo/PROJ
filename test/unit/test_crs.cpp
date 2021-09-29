@@ -5401,6 +5401,9 @@ TEST(crs, derivedProjectedCRS_WKT2_2019) {
     EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
     EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
     EXPECT_FALSE(crs->isEquivalentTo(createUnrelatedObject().get()));
+
+    auto geodCRS = crs->extractGeodeticCRS();
+    EXPECT_TRUE(geodCRS != nullptr);
 }
 
 // ---------------------------------------------------------------------------

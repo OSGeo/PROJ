@@ -201,6 +201,10 @@ const GeodeticCRS *CRS::extractGeodeticCRSRaw() const {
     if (boundCRS) {
         return boundCRS->baseCRS()->extractGeodeticCRSRaw();
     }
+    auto derivedProjectedCRS = dynamic_cast<const DerivedProjectedCRS *>(this);
+    if (derivedProjectedCRS) {
+        return derivedProjectedCRS->baseCRS()->extractGeodeticCRSRaw();
+    }
     return nullptr;
 }
 //! @endcond
