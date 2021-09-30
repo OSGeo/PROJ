@@ -1639,6 +1639,24 @@ TEST(crs, geodeticcrs_identify_db) {
     }
 
     {
+        // Test identification from PROJ string with just the ellipsoid
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=longlat +ellps=GRS80 +type=crs");
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        auto res = crs->identify(factory);
+        bool foundGDA2020 = false;
+        for (const auto &pair : res) {
+            // one among many others...
+            if (pair.first->getEPSGCode() == 7844) {
+                foundGDA2020 = true;
+                EXPECT_EQ(pair.second, 60);
+            }
+        }
+        EXPECT_TRUE(foundGDA2020);
+    }
+
+    {
         // Identify by code, but datum name is an alias of the official one
         auto wkt = "GEOGCRS[\"GDA2020\",\n"
                    "    DATUM[\"GDA2020\",\n"
