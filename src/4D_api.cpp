@@ -1285,7 +1285,7 @@ int proj_trans_bounds(PJ *P,
     }
 
     int side_pts = densify_pts + 1;  // add one because we are densifying
-    int boundary_len = side_pts * 4;
+    const int boundary_len = side_pts * 4;
     std::vector<double> x_boundary_array(boundary_len);
     std::vector<double> y_boundary_array(boundary_len);
     double delta_x = 0;
