@@ -1052,19 +1052,17 @@ but smalller than 240 to account for possible irregularities in distances
 when re-projecting. Also, 200 ensures latitudes are ignored for axis order handling.
 ******************************************************************************/
 static double antimeridian_min(const double* data, const int arr_len) {
-    int prev_iii = 0;
     double positive_min = HUGE_VAL;
     double min_value = HUGE_VAL;
-    double delta = 0;
     int crossed_meridian_count = 0;
     bool positive_meridian = false;
 
     for( int iii = 0; iii < arr_len; iii++ ) {
         if (data[iii] == HUGE_VAL)
             continue;
-        prev_iii = _find_previous_index(iii, data, arr_len);
+        int prev_iii = _find_previous_index(iii, data, arr_len);
         // check if crossed meridian
-        delta = data[prev_iii] - data[iii];
+        double delta = data[prev_iii] - data[iii];
         // 180 -> -180
         if (delta >= 200 && delta != HUGE_VAL) {
             if (crossed_meridian_count == 0)
@@ -1103,18 +1101,17 @@ static double antimeridian_min(const double* data, const int arr_len) {
 //       points per edge to correctly handle global extents.
 // See antimeridian_min docstring for reasoning.
 static double antimeridian_max(const double* data, const int arr_len) {
-    int prev_iii = 0;
     double negative_max = -HUGE_VAL;
     double max_value = -HUGE_VAL;
-    double delta = 0;
     bool negative_meridian = false;
     int crossed_meridian_count = 0;
+
     for( int iii = 0; iii < arr_len; iii++ ) {
         if (data[iii] == HUGE_VAL)
             continue;
-        prev_iii = _find_previous_index(iii, data, arr_len);
+        int prev_iii = _find_previous_index(iii, data, arr_len);
         // check if crossed meridian
-        delta = data[prev_iii] - data[iii];
+        double delta = data[prev_iii] - data[iii];
         // 180 -> -180
         if (delta >= 200 && delta != HUGE_VAL) {
             if (crossed_meridian_count == 0)
@@ -1256,8 +1253,8 @@ int proj_trans_bounds(PJ *P,
         proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         return false;
     }
-    if (densify_pts < 0) {
-        proj_log_error(P, _("densify_pts must be greater than 0."));
+    if (densify_pts < 0 || densify_pts > 10000) {
+        proj_log_error(P, _("densify_pts must be between 0-10000."));
         proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         return false;
     }
@@ -1286,8 +1283,19 @@ int proj_trans_bounds(PJ *P,
 
     int side_pts = densify_pts + 1;  // add one because we are densifying
     const int boundary_len = side_pts * 4;
-    std::vector<double> x_boundary_array(boundary_len);
-    std::vector<double> y_boundary_array(boundary_len);
+    std::vector<double> x_boundary_array;
+    std::vector<double> y_boundary_array;
+    try
+    {
+        x_boundary_array.resize(boundary_len);
+        y_boundary_array.resize(boundary_len);
+    }
+    catch( const std::exception & e ) // memory allocation failure
+    {
+        proj_log_error(P, e.what());
+        proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return false;
+    }
     double delta_x = 0;
     double delta_y = 0;
     bool north_pole_in_bounds = false;
@@ -1314,17 +1322,17 @@ int proj_trans_bounds(PJ *P,
 
     if (degree_input && right < left) {
         // handle antimeridian
-        delta_x = (right - left + 360.0) / ( (double) side_pts );
+        delta_x = (right - left + 360.0) / side_pts;
     } else {
-        delta_x = (right - left) / ( (double) side_pts );
+        delta_x = (right - left) / side_pts;
     }
     if (degree_input && top < bottom) {
         // handle antimeridian
         // depending on the axis order, longitude has the potential
         // to be on the y axis. It shouldn't reach here if it is latitude.
-        delta_y = (top - bottom + 360.0) / ( (double) side_pts );
+        delta_y = (top - bottom + 360.0) / side_pts;
     } else {
-        delta_y = (top - bottom) / ( (double) side_pts );
+        delta_y = (top - bottom) / side_pts;
     }
 
 
@@ -1333,17 +1341,17 @@ int proj_trans_bounds(PJ *P,
     for( int iii = 0; iii < side_pts; iii++ )
     {
         // left boundary
-        y_boundary_array[iii] = top - ((double) iii) * delta_y;
+        y_boundary_array[iii] = top - iii * delta_y;
         x_boundary_array[iii] = left;
         // bottom boundary
         y_boundary_array[iii + side_pts] = bottom;
-        x_boundary_array[iii + side_pts] = left + ((double) iii) * delta_x;
+        x_boundary_array[iii + side_pts] = left + iii * delta_x;
         // right boundary
-        y_boundary_array[iii + side_pts * 2] = bottom + ((double) iii) * delta_y;
+        y_boundary_array[iii + side_pts * 2] = bottom + iii * delta_y;
         x_boundary_array[iii + side_pts * 2] = right;
         // top boundary
         y_boundary_array[iii + side_pts * 3] = top;
-        x_boundary_array[iii + side_pts * 3] = right - ((double) iii) * delta_x;
+        x_boundary_array[iii + side_pts * 3] = right - iii * delta_x;
     }
     proj_trans_generic (
         P,
