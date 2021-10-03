@@ -5775,6 +5775,58 @@ TEST_F(CApi, proj_trans_bounds_normalized) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_trans_bounds_antimeridian_xy) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:4167",
+        "EPSG:3851",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto normalized_p = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper normal_keeper_P(normalized_p);
+    ASSERT_NE(normalized_p, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        m_ctxt, normalized_p, PJ_FWD,
+        160.6, -55.95, -171.2, -25.88,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, 1722483.900174921, 1);
+    EXPECT_NEAR(out_bottom, 5228058.6143420935, 1);
+    EXPECT_NEAR(out_right, 4624385.494808555, 1);
+    EXPECT_NEAR(out_top, 8692574.544944234, 1);
+    double out_left_inv;
+    double out_bottom_inv;
+    double out_right_inv;
+    double out_top_inv;
+    int success_inv = proj_trans_bounds(
+        m_ctxt, normalized_p, PJ_INV,
+        1722483.900174921, 5228058.6143420935, 4624385.494808555, 8692574.544944234,
+        &out_left_inv,
+        &out_bottom_inv,
+        &out_right_inv,
+        &out_top_inv,
+        21
+    );
+    EXPECT_TRUE(success_inv == 1);
+    EXPECT_NEAR(out_left_inv, 153.2799922, 1);
+    EXPECT_NEAR(out_bottom_inv, -56.7471249, 1);
+    EXPECT_NEAR(out_right_inv, -162.1813873, 1);
+    EXPECT_NEAR(out_top_inv, -24.6148194, 1);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_trans_bounds_antimeridian) {
     auto P = proj_create_crs_to_crs(
         m_ctxt,
