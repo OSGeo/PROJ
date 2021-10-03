@@ -5691,7 +5691,7 @@ TEST_F(CApi, proj_trans_bounds_densify_0) {
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        P, PJ_FWD,
+        m_ctxt, P, PJ_FWD,
         40, -120, 64, -80,
         &out_left,
         &out_bottom,
@@ -5723,7 +5723,7 @@ TEST_F(CApi, proj_trans_bounds_densify_100) {
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        P, PJ_FWD,
+        m_ctxt, P, PJ_FWD,
         40, -120, 64, -80,
         &out_left,
         &out_bottom,
@@ -5758,7 +5758,7 @@ TEST_F(CApi, proj_trans_bounds_normalized) {
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        normalized_p, PJ_FWD,
+        m_ctxt, normalized_p, PJ_FWD,
         -120, 40, -80, 64,
         &out_left,
         &out_bottom,
@@ -5789,7 +5789,7 @@ TEST_F(CApi, proj_trans_bounds_antimeridian) {
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        P, PJ_FWD,
+        m_ctxt, P, PJ_FWD,
         -55.95, 160.6, -25.88, -171.2,
         &out_left,
         &out_bottom,
@@ -5807,7 +5807,7 @@ TEST_F(CApi, proj_trans_bounds_antimeridian) {
     double out_right_inv;
     double out_top_inv;
     int success_inv = proj_trans_bounds(
-        P, PJ_INV,
+        m_ctxt, P, PJ_INV,
         5228058.6143420935, 1722483.900174921, 8692574.544944234, 4624385.494808555,
         &out_left_inv,
         &out_bottom_inv,
@@ -5842,7 +5842,7 @@ TEST_F(CApi, proj_trans_bounds_beyond_global_bounds) {
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        normalized_p, PJ_FWD,
+        m_ctxt, normalized_p, PJ_FWD,
         -17367531.3203125, -7314541.19921875, 17367531.3203125, 7314541.19921875,
         &out_left,
         &out_bottom,
@@ -5873,7 +5873,7 @@ TEST_F(CApi, proj_trans_bounds_ignore_inf) {
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        P, PJ_FWD,
+        m_ctxt, P, PJ_FWD,
         -180.0, -90.0, 180.0, 0.0,
         &out_left,
         &out_bottom,
@@ -5910,7 +5910,7 @@ TEST_F(CApi, proj_trans_bounds_ignore_inf_geographic) {
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        P, PJ_FWD,
+        m_ctxt, P, PJ_FWD,
         -15028000.0, 7515000.0, -14975000.0, 7556000.0,
         &out_left,
         &out_bottom,
@@ -5941,7 +5941,7 @@ TEST_F(CApi, proj_trans_bounds_noop_geographic) {
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        P, PJ_FWD,
+        m_ctxt, P, PJ_FWD,
         19.57, 35.14, -168.97, 81.91,
         &out_left,
         &out_bottom,
@@ -5958,7 +5958,7 @@ TEST_F(CApi, proj_trans_bounds_noop_geographic) {
 
 // ---------------------------------------------------------------------------
 
-TEST_F(CApi, proj_trans_bounds__north_pole) {
+TEST_F(CApi, proj_trans_bounds__north_pole_xy) {
     auto P = proj_create_crs_to_crs(
         m_ctxt,
         "EPSG:32661",
@@ -5975,7 +5975,7 @@ TEST_F(CApi, proj_trans_bounds__north_pole) {
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        normalized_p, PJ_FWD,
+        m_ctxt, normalized_p, PJ_FWD,
         -1371213.7625429356, -1405880.71737131, 5371213.762542935, 5405880.71737131,
         &out_left,
         &out_bottom,
@@ -5993,8 +5993,109 @@ TEST_F(CApi, proj_trans_bounds__north_pole) {
     double out_right_inv;
     double out_top_inv;
     int success_inv = proj_trans_bounds(
-        normalized_p, PJ_INV,
+        m_ctxt, normalized_p, PJ_INV,
         -180.0, 60.0, 180.0, 90.0,
+        &out_left_inv,
+        &out_bottom_inv,
+        &out_right_inv,
+        &out_top_inv,
+        21
+    );
+    EXPECT_TRUE(success_inv == 1);
+    EXPECT_NEAR(out_left_inv, -1371213.76, 1);
+    EXPECT_NEAR(out_bottom_inv, -1405880.72, 1);
+    EXPECT_NEAR(out_right_inv, 5371213.76, 1);
+    EXPECT_NEAR(out_top_inv, 5405880.72, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds__north_pole) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:32661",
+        "EPSG:4326",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        m_ctxt, P, PJ_FWD,
+        -1405880.71737131, -1371213.7625429356, 5405880.71737131, 5371213.762542935,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, 48.656, 1);
+    EXPECT_NEAR(out_bottom, -180.0, 1);
+    EXPECT_NEAR(out_right, 90.0, 1);
+    EXPECT_NEAR(out_top, 180.0, 1);
+    double out_left_inv;
+    double out_bottom_inv;
+    double out_right_inv;
+    double out_top_inv;
+    int success_inv = proj_trans_bounds(
+        m_ctxt, P, PJ_INV,
+        60.0, -180.0, 90.0, 180.0,
+        &out_left_inv,
+        &out_bottom_inv,
+        &out_right_inv,
+        &out_top_inv,
+        21
+    );
+    EXPECT_TRUE(success_inv == 1);
+    EXPECT_NEAR(out_left_inv, -1405880.72, 1);
+    EXPECT_NEAR(out_bottom_inv, -1371213.76, 1);
+    EXPECT_NEAR(out_right_inv, 5405880.72, 1);
+    EXPECT_NEAR(out_top_inv, 5371213.76, 1);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_trans_bounds__south_pole_xy) {
+    auto P = proj_create_crs_to_crs(
+        m_ctxt,
+        "EPSG:32761",
+        "EPSG:4326",
+        nullptr
+    );
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto normalized_p = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper normal_keeper_P(normalized_p);
+    ASSERT_NE(normalized_p, nullptr);
+    double out_left;
+    double out_bottom;
+    double out_right;
+    double out_top;
+    int success = proj_trans_bounds(
+        m_ctxt, normalized_p, PJ_FWD,
+        -1371213.7625429356, -1405880.71737131, 5371213.762542935, 5405880.71737131,
+        &out_left,
+        &out_bottom,
+        &out_right,
+        &out_top,
+        21
+    );
+    EXPECT_TRUE(success == 1);
+    EXPECT_NEAR(out_left, -180.0, 1);
+    EXPECT_NEAR(out_bottom, -90, 1);
+    EXPECT_NEAR(out_right, 180.0, 1);
+    EXPECT_NEAR(out_top, -48.656, 1);
+    double out_left_inv;
+    double out_bottom_inv;
+    double out_right_inv;
+    double out_top_inv;
+    int success_inv = proj_trans_bounds(
+        m_ctxt, normalized_p, PJ_INV,
+        -180.0, -90.0, 180.0, -60.0,
         &out_left_inv,
         &out_bottom_inv,
         &out_right_inv,
@@ -6020,16 +6121,13 @@ TEST_F(CApi, proj_trans_bounds__south_pole) {
     );
     ObjectKeeper keeper_P(P);
     ASSERT_NE(P, nullptr);
-    auto normalized_p = proj_normalize_for_visualization(m_ctxt, P);
-    ObjectKeeper normal_keeper_P(normalized_p);
-    ASSERT_NE(normalized_p, nullptr);
     double out_left;
     double out_bottom;
     double out_right;
     double out_top;
     int success = proj_trans_bounds(
-        normalized_p, PJ_FWD,
-        -1371213.7625429356, -1405880.71737131, 5371213.762542935, 5405880.71737131,
+        m_ctxt, P, PJ_FWD,
+        -1405880.71737131, -1371213.7625429356, 5405880.71737131, 5371213.762542935,
         &out_left,
         &out_bottom,
         &out_right,
@@ -6037,17 +6135,17 @@ TEST_F(CApi, proj_trans_bounds__south_pole) {
         21
     );
     EXPECT_TRUE(success == 1);
-    EXPECT_NEAR(out_left, -180.0, 1);
-    EXPECT_NEAR(out_bottom, -90, 1);
-    EXPECT_NEAR(out_right, 180.0, 1);
-    EXPECT_NEAR(out_top, -48.656, 1);
+    EXPECT_NEAR(out_left, -90.0, 1);
+    EXPECT_NEAR(out_bottom, -180.0, 1);
+    EXPECT_NEAR(out_right, -48.656, 1);
+    EXPECT_NEAR(out_top, 180.0, 1);
     double out_left_inv;
     double out_bottom_inv;
     double out_right_inv;
     double out_top_inv;
     int success_inv = proj_trans_bounds(
-        normalized_p, PJ_INV,
-        -180.0, -90.0, 180.0, -60.0,
+        m_ctxt, P, PJ_INV,
+        -90.0, -180.0, -60.0, 180.0,
         &out_left_inv,
         &out_bottom_inv,
         &out_right_inv,
@@ -6055,12 +6153,11 @@ TEST_F(CApi, proj_trans_bounds__south_pole) {
         21
     );
     EXPECT_TRUE(success_inv == 1);
-    EXPECT_NEAR(out_left_inv, -1371213.76, 1);
-    EXPECT_NEAR(out_bottom_inv, -1405880.72, 1);
-    EXPECT_NEAR(out_right_inv, 5371213.76, 1);
-    EXPECT_NEAR(out_top_inv, 5405880.72, 1);
+    EXPECT_NEAR(out_left_inv, -1405880.72, 1);
+    EXPECT_NEAR(out_bottom_inv, -1371213.76, 1);
+    EXPECT_NEAR(out_right_inv, 5405880.72, 1);
+    EXPECT_NEAR(out_top_inv, 5371213.76, 1);
 }
-
 
 // ---------------------------------------------------------------------------
 

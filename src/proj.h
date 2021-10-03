@@ -601,6 +601,7 @@ size_t PROJ_DLL proj_trans_generic (
 );
 
 int PROJ_DLL proj_trans_bounds(
+    PJ_CONTEXT* context,
     PJ *P,
     PJ_DIRECTION direction,
     const double left,

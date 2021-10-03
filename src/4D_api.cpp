@@ -1154,10 +1154,15 @@ static bool contains_north_pole(
     const double left,
     const double bottom,
     const double right,
-    const double top
+    const double top,
+    bool lon_lat_order
 ) {
     double pole_y = 90;
     double pole_x = 0;
+    if (!lon_lat_order) {
+        pole_y = 0;
+        pole_x = 90;
+    }
     proj_trans_generic(
         projobj,
         opposite_direction(pj_direction),
@@ -1182,10 +1187,15 @@ static bool contains_south_pole(
     const double left,
     const double bottom,
     const double right,
-    const double top
+    const double top,
+    bool lon_lat_order
 ) {
     double pole_y = -90;
     double pole_x = 0;
+    if (!lon_lat_order) {
+        pole_y = 0;
+        pole_x = -90;
+    }
     proj_trans_generic(
         projobj,
         opposite_direction(pj_direction),
@@ -1199,6 +1209,47 @@ static bool contains_south_pole(
     return false;
 }
 
+static int target_crs_lon_lat_order(
+    PJ_CONTEXT* transformer_ctx,
+    PJ* transformer_pj,
+    PJ_DIRECTION pj_direction
+) {
+    PJ* target_crs = nullptr;
+    if (pj_direction == PJ_FWD)
+        target_crs = proj_get_target_crs(transformer_ctx, transformer_pj);
+    else if (pj_direction == PJ_INV)
+        target_crs = proj_get_source_crs(transformer_ctx, transformer_pj);
+    if (target_crs == nullptr) {
+        proj_context_log_debug(transformer_ctx, "Unable to retrieve target CRS");
+        return -1;
+    }
+    PJ* coord_system_pj = proj_crs_get_coordinate_system(
+        transformer_ctx,
+        target_crs
+    );
+    proj_destroy(target_crs);
+    if (coord_system_pj == nullptr) {
+        proj_context_log_debug(transformer_ctx, "Unable to get target CRS coordinate system.");
+        return -1;
+    }
+    const char* abbrev = nullptr;
+    int success = proj_cs_get_axis_info(
+        transformer_ctx,
+        coord_system_pj,
+        0,
+        nullptr,
+        &abbrev,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr
+    );
+    proj_destroy(coord_system_pj);
+    if (success != 1)
+        return -1;
+    return strcmp(abbrev, "lon") == 0 || strcmp(abbrev, "Lon") == 0;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1216,6 +1267,7 @@ static bool contains_south_pole(
  * When projecting from polar projections to geographic,
  * lon, lat output order is required.
  *
+ * @param context The PJ_CONTEXT object.
  * @param P The PJ object representing the transformation.
  * @param direction The direction of the transformation.
  * @param left The input left bounding coordinate.
@@ -1231,7 +1283,8 @@ static bool contains_south_pole(
  * @return an integer. 1 if successful. 0 if failures encountered.
  * @since 8.2
  */
-int proj_trans_bounds(PJ *P,
+int proj_trans_bounds(PJ_CONTEXT* context,
+                      PJ *P,
                       PJ_DIRECTION direction,
                       const double left,
                       const double bottom,
@@ -1249,7 +1302,7 @@ int proj_trans_bounds(PJ *P,
     *out_top = HUGE_VAL;
 
     if (P == nullptr) {
-        proj_log_error(P, _("NULL P object not allowed,"));
+        proj_log_error(P, _("NULL P object not allowed."));
         proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         return false;
     }
@@ -1265,7 +1318,7 @@ int proj_trans_bounds(PJ *P,
         proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
         return false;
     }
-    if (strcmp(pj_info.id, "noop") == 0) {
+    if (strcmp(pj_info.id, "noop") == 0 || direction == PJ_IDENT) {
         *out_left = left;
         *out_right = right;
         *out_bottom = bottom;
@@ -1300,15 +1353,20 @@ int proj_trans_bounds(PJ *P,
     double delta_y = 0;
     bool north_pole_in_bounds = false;
     bool south_pole_in_bounds = false;
-
+    bool output_lon_lat_order = false;
     if (degree_output) {
+        int out_order_lon_lat = target_crs_lon_lat_order(context, P, direction);
+        if (out_order_lon_lat == -1)
+            return false;
+        output_lon_lat_order = out_order_lon_lat != 0;
         north_pole_in_bounds = contains_north_pole(
             P,
             direction,
             left,
             bottom,
             right,
-            top
+            top,
+            output_lon_lat_order
         );
         south_pole_in_bounds = contains_south_pole(
             P,
@@ -1316,7 +1374,8 @@ int proj_trans_bounds(PJ *P,
             left,
             bottom,
             right,
-            top
+            top,
+            output_lon_lat_order
         );
     }
 
@@ -1365,20 +1424,35 @@ int proj_trans_bounds(PJ *P,
     if (degree_output && (north_pole_in_bounds || south_pole_in_bounds)) {
         // only works with lon/lat axis order
         // need a way to test axis order to support both
-        if (north_pole_in_bounds) {
+        if (north_pole_in_bounds && output_lon_lat_order) {
+            *out_left = -180;
             *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
+            *out_right = 180;
             *out_top = 90;
-        } else {  // south_pole_in_bounds
+        } else if (north_pole_in_bounds) {
+            *out_left = simple_min(&x_boundary_array[0], boundary_len);
+            *out_bottom = -180;
+            *out_right = 90;
+            *out_top = 180;
+        } else if (output_lon_lat_order) {  // south_pole_in_bounds
+            *out_left = -180;
             *out_bottom = -90;
+            *out_right = 180;
             *out_top = simple_max(&y_boundary_array[0], boundary_len);
+        } else {  // south_pole_in_bounds
+            *out_left = -90;
+            *out_bottom = -180;
+            *out_right = simple_max(&x_boundary_array[0], boundary_len);
+            *out_top = 180;
         }
-        *out_left = -180;
-        *out_right = 180;
-    } else if (degree_output) {
+    } else if (degree_output && output_lon_lat_order) {
         *out_left = antimeridian_min(&x_boundary_array[0], boundary_len);
         *out_right = antimeridian_max(&x_boundary_array[0], boundary_len);
-        // depending on the axis order, longitude has the potential
-        // to be on the y axis. It shouldn't cause troubles if it is latitude.
+        *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
+        *out_top = simple_max(&y_boundary_array[0], boundary_len);
+    } else if (degree_output) {
+        *out_left = simple_min(&x_boundary_array[0], boundary_len);
+        *out_right = simple_max(&x_boundary_array[0], boundary_len);
         *out_bottom = antimeridian_min(&y_boundary_array[0], boundary_len);
         *out_top = antimeridian_max(&y_boundary_array[0], boundary_len);
     } else {
