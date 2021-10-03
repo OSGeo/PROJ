@@ -1209,6 +1209,11 @@ static bool contains_south_pole(
     return false;
 }
 
+
+// ---------------------------------------------------------------------------
+// Check if the target CRS of the transformation
+// has the longitude latitude axis order.
+// This assumes that the destination CRS is geographic.
 static int target_crs_lon_lat_order(
     PJ_CONTEXT* transformer_ctx,
     PJ* transformer_pj,
@@ -1258,26 +1263,37 @@ static int target_crs_lon_lat_order(
  * Transform boundary densifying the edges to account for nonlinear
  * transformations along these edges and extracting the outermost bounds.
  *
- * If the destination CRS is geographic and right < left then the bounds
- * crossed the antimeridian. In this scenario there are two polygons,
- * one on each side of the antimeridian. The first polygon should be
- * constructed with (left, bottom, 180, top) and the second with
- * (-180, bottom, top, right).
+ * If the destination CRS is geographic, the first axis is longitude,
+ * and right < left then the bounds crossed the antimeridian.
+ * In this scenario there are two polygons, one on each side of the antimeridian.
+ * The first polygon should be constructed with (left, bottom, 180, top)
+ * and the second with (-180, bottom, right, top).
  *
- * When projecting from polar projections to geographic,
- * lon, lat output order is required.
+ * If the destination CRS is geographic, the first axis is latitude,
+ * and top < bottom then the bounds crossed the antimeridian.
+ * In this scenario there are two polygons, one on each side of the antimeridian.
+ * The first polygon should be constructed with (bottom, left, top, 180)
+ * and the second with (bottom, -180, top, right).
  *
  * @param context The PJ_CONTEXT object.
  * @param P The PJ object representing the transformation.
  * @param direction The direction of the transformation.
- * @param left The input left bounding coordinate.
- * @param bottom The input bottom bounding coordinate.
- * @param right To input right bounding coordinate.
- * @param top The input top bounding coordinate.
- * @param out_left The output value for the left bounding coordinate.
- * @param out_bottom The output value for the bottim bounding coordinate.
- * @param out_right The output value for the right bounding coordinate.
- * @param out_top The output value for the top bounding coordinate.
+ * @param left Minimum bounding coordinate of the first axis in source CRS
+ *             (target CRS if direction is inverse).
+ * @param bottom Minimum bounding coordinate of the second axis in source CRS.
+ *             (target CRS if direction is inverse).
+ * @param right Maximum bounding coordinate of the first axis in source CRS.
+ *             (target CRS if direction is inverse).
+ * @param top Maximum bounding coordinate of the second axis in source CRS.
+ *             (target CRS if direction is inverse).
+ * @param out_left Minimum bounding coordinate of the first axis in target CRS
+ *             (source CRS if direction is inverse).
+ * @param out_bottom Minimum bounding coordinate of the second axis in target CRS.
+ *             (source CRS if direction is inverse).
+ * @param out_right Maximum bounding coordinate of the first axis in target CRS.
+ *             (source CRS if direction is inverse).
+ * @param out_top Maximum bounding coordinate of the second axis in target CRS.
+ *             (source CRS if direction is inverse).
  * @param densify_pts Recommended to use 21. This is the number of points
  *     to use to densify the bounding polygon in the transformation.
  * @return an integer. 1 if successful. 0 if failures encountered.
