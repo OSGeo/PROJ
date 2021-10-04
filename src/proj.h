@@ -604,14 +604,14 @@ int PROJ_DLL proj_trans_bounds(
     PJ_CONTEXT* context,
     PJ *P,
     PJ_DIRECTION direction,
-    const double left,
-    const double bottom,
-    const double right,
-    const double top,
-    double* out_left,
-    double* out_bottom,
-    double* out_right,
-    double* out_top,
+    const double xmin,
+    const double ymin,
+    const double xmax,
+    const double ymax,
+    double* out_xmin,
+    double* out_ymin,
+    double* out_xmax,
+    double* out_ymax,
     int densify_pts
 );
 

@@ -1151,10 +1151,10 @@ static double antimeridian_max(const double* data, const int arr_len) {
 static bool contains_north_pole(
     PJ* projobj,
     PJ_DIRECTION pj_direction,
-    const double left,
-    const double bottom,
-    const double right,
-    const double top,
+    const double xmin,
+    const double ymin,
+    const double xmax,
+    const double ymax,
     bool lon_lat_order
 ) {
     double pole_y = 90;
@@ -1171,7 +1171,7 @@ static bool contains_north_pole(
         nullptr, sizeof(double), 0,
         nullptr, sizeof(double), 0
     );
-    if (left < pole_x && pole_x < right && top > pole_y && pole_y > bottom)
+    if (xmin < pole_x && pole_x < xmax && ymax > pole_y && pole_y > ymin)
         return true;
     return false;
 }
@@ -1184,10 +1184,10 @@ static bool contains_north_pole(
 static bool contains_south_pole(
     PJ* projobj,
     PJ_DIRECTION pj_direction,
-    const double left,
-    const double bottom,
-    const double right,
-    const double top,
+    const double xmin,
+    const double ymin,
+    const double xmax,
+    const double ymax,
     bool lon_lat_order
 ) {
     double pole_y = -90;
@@ -1204,7 +1204,7 @@ static bool contains_south_pole(
         nullptr, sizeof(double), 0,
         nullptr, sizeof(double), 0
     );
-    if (left < pole_x && pole_x < right && top > pole_y && pole_y > bottom)
+    if (xmin < pole_x && pole_x < xmax && ymax > pole_y && pole_y > ymin)
         return true;
     return false;
 }
@@ -1264,35 +1264,35 @@ static int target_crs_lon_lat_order(
  * transformations along these edges and extracting the outermost bounds.
  *
  * If the destination CRS is geographic, the first axis is longitude,
- * and right < left then the bounds crossed the antimeridian.
+ * and xmax < xmin then the bounds crossed the antimeridian.
  * In this scenario there are two polygons, one on each side of the antimeridian.
- * The first polygon should be constructed with (left, bottom, 180, top)
- * and the second with (-180, bottom, right, top).
+ * The first polygon should be constructed with (xmin, ymin, 180, ymax)
+ * and the second with (-180, ymin, xmax, ymax).
  *
  * If the destination CRS is geographic, the first axis is latitude,
- * and top < bottom then the bounds crossed the antimeridian.
+ * and ymax < ymin then the bounds crossed the antimeridian.
  * In this scenario there are two polygons, one on each side of the antimeridian.
- * The first polygon should be constructed with (bottom, left, top, 180)
- * and the second with (bottom, -180, top, right).
+ * The first polygon should be constructed with (ymin, xmin, ymax, 180)
+ * and the second with (ymin, -180, ymax, xmax).
  *
  * @param context The PJ_CONTEXT object.
  * @param P The PJ object representing the transformation.
  * @param direction The direction of the transformation.
- * @param left Minimum bounding coordinate of the first axis in source CRS
+ * @param xmin Minimum bounding coordinate of the first axis in source CRS
  *             (target CRS if direction is inverse).
- * @param bottom Minimum bounding coordinate of the second axis in source CRS.
+ * @param ymin Minimum bounding coordinate of the second axis in source CRS.
  *             (target CRS if direction is inverse).
- * @param right Maximum bounding coordinate of the first axis in source CRS.
+ * @param xmax Maximum bounding coordinate of the first axis in source CRS.
  *             (target CRS if direction is inverse).
- * @param top Maximum bounding coordinate of the second axis in source CRS.
+ * @param ymax Maximum bounding coordinate of the second axis in source CRS.
  *             (target CRS if direction is inverse).
- * @param out_left Minimum bounding coordinate of the first axis in target CRS
+ * @param out_xmin Minimum bounding coordinate of the first axis in target CRS
  *             (source CRS if direction is inverse).
- * @param out_bottom Minimum bounding coordinate of the second axis in target CRS.
+ * @param out_ymin Minimum bounding coordinate of the second axis in target CRS.
  *             (source CRS if direction is inverse).
- * @param out_right Maximum bounding coordinate of the first axis in target CRS.
+ * @param out_xmax Maximum bounding coordinate of the first axis in target CRS.
  *             (source CRS if direction is inverse).
- * @param out_top Maximum bounding coordinate of the second axis in target CRS.
+ * @param out_ymax Maximum bounding coordinate of the second axis in target CRS.
  *             (source CRS if direction is inverse).
  * @param densify_pts Recommended to use 21. This is the number of points
  *     to use to densify the bounding polygon in the transformation.
@@ -1302,20 +1302,20 @@ static int target_crs_lon_lat_order(
 int proj_trans_bounds(PJ_CONTEXT* context,
                       PJ *P,
                       PJ_DIRECTION direction,
-                      const double left,
-                      const double bottom,
-                      const double right,
-                      const double top,
-                      double* out_left,
-                      double* out_bottom,
-                      double* out_right,
-                      double* out_top,
+                      const double xmin,
+                      const double ymin,
+                      const double xmax,
+                      const double ymax,
+                      double* out_xmin,
+                      double* out_ymin,
+                      double* out_xmax,
+                      double* out_ymax,
                       int densify_pts
 ) {
-    *out_left = HUGE_VAL;
-    *out_bottom = HUGE_VAL;
-    *out_right = HUGE_VAL;
-    *out_top = HUGE_VAL;
+    *out_xmin = HUGE_VAL;
+    *out_ymin = HUGE_VAL;
+    *out_xmax = HUGE_VAL;
+    *out_ymax = HUGE_VAL;
 
     if (P == nullptr) {
         proj_log_error(P, _("NULL P object not allowed."));
@@ -1335,10 +1335,10 @@ int proj_trans_bounds(PJ_CONTEXT* context,
         return false;
     }
     if (strcmp(pj_info.id, "noop") == 0 || direction == PJ_IDENT) {
-        *out_left = left;
-        *out_right = right;
-        *out_bottom = bottom;
-        *out_top = top;
+        *out_xmin = xmin;
+        *out_xmax = xmax;
+        *out_ymin = ymin;
+        *out_ymax = ymax;
         return true;
     }
 
@@ -1378,36 +1378,36 @@ int proj_trans_bounds(PJ_CONTEXT* context,
         north_pole_in_bounds = contains_north_pole(
             P,
             direction,
-            left,
-            bottom,
-            right,
-            top,
+            xmin,
+            ymin,
+            xmax,
+            ymax,
             output_lon_lat_order
         );
         south_pole_in_bounds = contains_south_pole(
             P,
             direction,
-            left,
-            bottom,
-            right,
-            top,
+            xmin,
+            ymin,
+            xmax,
+            ymax,
             output_lon_lat_order
         );
     }
 
-    if (degree_input && right < left) {
+    if (degree_input && xmax < xmin) {
         // handle antimeridian
-        delta_x = (right - left + 360.0) / side_pts;
+        delta_x = (xmax - xmin + 360.0) / side_pts;
     } else {
-        delta_x = (right - left) / side_pts;
+        delta_x = (xmax - xmin) / side_pts;
     }
-    if (degree_input && top < bottom) {
+    if (degree_input && ymax < ymin) {
         // handle antimeridian
         // depending on the axis order, longitude has the potential
         // to be on the y axis. It shouldn't reach here if it is latitude.
-        delta_y = (top - bottom + 360.0) / side_pts;
+        delta_y = (ymax - ymin + 360.0) / side_pts;
     } else {
-        delta_y = (top - bottom) / side_pts;
+        delta_y = (ymax - ymin) / side_pts;
     }
 
 
@@ -1415,18 +1415,18 @@ int proj_trans_bounds(PJ_CONTEXT* context,
     // Note: must be a linear ring for antimeridian logic
     for( int iii = 0; iii < side_pts; iii++ )
     {
-        // left boundary
-        y_boundary_array[iii] = top - iii * delta_y;
-        x_boundary_array[iii] = left;
-        // bottom boundary
-        y_boundary_array[iii + side_pts] = bottom;
-        x_boundary_array[iii + side_pts] = left + iii * delta_x;
-        // right boundary
-        y_boundary_array[iii + side_pts * 2] = bottom + iii * delta_y;
-        x_boundary_array[iii + side_pts * 2] = right;
-        // top boundary
-        y_boundary_array[iii + side_pts * 3] = top;
-        x_boundary_array[iii + side_pts * 3] = right - iii * delta_x;
+        // xmin boundary
+        y_boundary_array[iii] = ymax - iii * delta_y;
+        x_boundary_array[iii] = xmin;
+        // ymin boundary
+        y_boundary_array[iii + side_pts] = ymin;
+        x_boundary_array[iii + side_pts] = xmin + iii * delta_x;
+        // xmax boundary
+        y_boundary_array[iii + side_pts * 2] = ymin + iii * delta_y;
+        x_boundary_array[iii + side_pts * 2] = xmax;
+        // ymax boundary
+        y_boundary_array[iii + side_pts * 3] = ymax;
+        x_boundary_array[iii + side_pts * 3] = xmax - iii * delta_x;
     }
     proj_trans_generic (
         P,
@@ -1438,40 +1438,40 @@ int proj_trans_bounds(PJ_CONTEXT* context,
     );
 
     if (!degree_output) {
-        *out_left = simple_min(&x_boundary_array[0], boundary_len);
-        *out_right = simple_max(&x_boundary_array[0], boundary_len);
-        *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
-        *out_top = simple_max(&y_boundary_array[0], boundary_len);
+        *out_xmin = simple_min(&x_boundary_array[0], boundary_len);
+        *out_xmax = simple_max(&x_boundary_array[0], boundary_len);
+        *out_ymin = simple_min(&y_boundary_array[0], boundary_len);
+        *out_ymax = simple_max(&y_boundary_array[0], boundary_len);
     } else if (north_pole_in_bounds && output_lon_lat_order) {
-        *out_left = -180;
-        *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
-        *out_right = 180;
-        *out_top = 90;
+        *out_xmin = -180;
+        *out_ymin = simple_min(&y_boundary_array[0], boundary_len);
+        *out_xmax = 180;
+        *out_ymax = 90;
     } else if (north_pole_in_bounds) {
-        *out_left = simple_min(&x_boundary_array[0], boundary_len);
-        *out_bottom = -180;
-        *out_right = 90;
-        *out_top = 180;
+        *out_xmin = simple_min(&x_boundary_array[0], boundary_len);
+        *out_ymin = -180;
+        *out_xmax = 90;
+        *out_ymax = 180;
     } else if (south_pole_in_bounds && output_lon_lat_order) {
-        *out_left = -180;
-        *out_bottom = -90;
-        *out_right = 180;
-        *out_top = simple_max(&y_boundary_array[0], boundary_len);
+        *out_xmin = -180;
+        *out_ymin = -90;
+        *out_xmax = 180;
+        *out_ymax = simple_max(&y_boundary_array[0], boundary_len);
     } else if (south_pole_in_bounds) {
-        *out_left = -90;
-        *out_bottom = -180;
-        *out_right = simple_max(&x_boundary_array[0], boundary_len);
-        *out_top = 180;
+        *out_xmin = -90;
+        *out_ymin = -180;
+        *out_xmax = simple_max(&x_boundary_array[0], boundary_len);
+        *out_ymax = 180;
     } else if (output_lon_lat_order) {
-        *out_left = antimeridian_min(&x_boundary_array[0], boundary_len);
-        *out_right = antimeridian_max(&x_boundary_array[0], boundary_len);
-        *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
-        *out_top = simple_max(&y_boundary_array[0], boundary_len);
+        *out_xmin = antimeridian_min(&x_boundary_array[0], boundary_len);
+        *out_xmax = antimeridian_max(&x_boundary_array[0], boundary_len);
+        *out_ymin = simple_min(&y_boundary_array[0], boundary_len);
+        *out_ymax = simple_max(&y_boundary_array[0], boundary_len);
     } else {
-        *out_left = simple_min(&x_boundary_array[0], boundary_len);
-        *out_right = simple_max(&x_boundary_array[0], boundary_len);
-        *out_bottom = antimeridian_min(&y_boundary_array[0], boundary_len);
-        *out_top = antimeridian_max(&y_boundary_array[0], boundary_len);
+        *out_xmin = simple_min(&x_boundary_array[0], boundary_len);
+        *out_xmax = simple_max(&x_boundary_array[0], boundary_len);
+        *out_ymin = antimeridian_min(&y_boundary_array[0], boundary_len);
+        *out_ymax = antimeridian_max(&y_boundary_array[0], boundary_len);
     }
     return true;
 }
