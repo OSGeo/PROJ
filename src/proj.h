@@ -599,7 +599,7 @@ size_t PROJ_DLL proj_trans_generic (
     double *z, size_t sz, size_t nz,
     double *t, size_t st, size_t nt
 );
-
+/*! @endcond */
 int PROJ_DLL proj_trans_bounds(
     PJ_CONTEXT* context,
     PJ *P,
@@ -614,6 +614,7 @@ int PROJ_DLL proj_trans_bounds(
     double* out_ymax,
     int densify_pts
 );
+/*! @cond Doxygen_Suppress */
 
 /* Initializers */
 PJ_COORD PROJ_DLL proj_coord (double x, double y, double z, double t);
