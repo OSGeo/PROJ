@@ -1437,45 +1437,41 @@ int proj_trans_bounds(PJ_CONTEXT* context,
         nullptr, 0, 0
     );
 
-    if (degree_output && (north_pole_in_bounds || south_pole_in_bounds)) {
-        // only works with lon/lat axis order
-        // need a way to test axis order to support both
-        if (north_pole_in_bounds && output_lon_lat_order) {
-            *out_left = -180;
-            *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
-            *out_right = 180;
-            *out_top = 90;
-        } else if (north_pole_in_bounds) {
-            *out_left = simple_min(&x_boundary_array[0], boundary_len);
-            *out_bottom = -180;
-            *out_right = 90;
-            *out_top = 180;
-        } else if (output_lon_lat_order) {  // south_pole_in_bounds
-            *out_left = -180;
-            *out_bottom = -90;
-            *out_right = 180;
-            *out_top = simple_max(&y_boundary_array[0], boundary_len);
-        } else {  // south_pole_in_bounds
-            *out_left = -90;
-            *out_bottom = -180;
-            *out_right = simple_max(&x_boundary_array[0], boundary_len);
-            *out_top = 180;
-        }
-    } else if (degree_output && output_lon_lat_order) {
+    if (!degree_output) {
+        *out_left = simple_min(&x_boundary_array[0], boundary_len);
+        *out_right = simple_max(&x_boundary_array[0], boundary_len);
+        *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
+        *out_top = simple_max(&y_boundary_array[0], boundary_len);
+    } else if (north_pole_in_bounds && output_lon_lat_order) {
+        *out_left = -180;
+        *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
+        *out_right = 180;
+        *out_top = 90;
+    } else if (north_pole_in_bounds) {
+        *out_left = simple_min(&x_boundary_array[0], boundary_len);
+        *out_bottom = -180;
+        *out_right = 90;
+        *out_top = 180;
+    } else if (south_pole_in_bounds && output_lon_lat_order) {
+        *out_left = -180;
+        *out_bottom = -90;
+        *out_right = 180;
+        *out_top = simple_max(&y_boundary_array[0], boundary_len);
+    } else if (south_pole_in_bounds) {
+        *out_left = -90;
+        *out_bottom = -180;
+        *out_right = simple_max(&x_boundary_array[0], boundary_len);
+        *out_top = 180;
+    } else if (output_lon_lat_order) {
         *out_left = antimeridian_min(&x_boundary_array[0], boundary_len);
         *out_right = antimeridian_max(&x_boundary_array[0], boundary_len);
         *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
         *out_top = simple_max(&y_boundary_array[0], boundary_len);
-    } else if (degree_output) {
+    } else {
         *out_left = simple_min(&x_boundary_array[0], boundary_len);
         *out_right = simple_max(&x_boundary_array[0], boundary_len);
         *out_bottom = antimeridian_min(&y_boundary_array[0], boundary_len);
         *out_top = antimeridian_max(&y_boundary_array[0], boundary_len);
-    } else {
-        *out_left = simple_min(&x_boundary_array[0], boundary_len);
-        *out_right = simple_max(&x_boundary_array[0], boundary_len);
-        *out_bottom = simple_min(&y_boundary_array[0], boundary_len);
-        *out_top = simple_max(&y_boundary_array[0], boundary_len);
     }
     return true;
 }
