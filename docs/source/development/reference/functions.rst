@@ -391,6 +391,11 @@ Coordinate transformation
               reasons.
 
 
+
+.. doxygenfunction:: proj_trans_bounds
+   :project: doxygen_api
+
+
 Error reporting
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

@@ -1048,6 +1048,7 @@ proj_todeg
 proj_torad
 proj_trans
 proj_trans_array
+proj_trans_bounds
 proj_trans_generic
 proj_unit_list_destroy
 proj_uom_get_info_from_database
