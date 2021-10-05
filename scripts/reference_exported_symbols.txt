@@ -371,6 +371,7 @@ osgeo::proj::io::DatabaseContext::getInsertStatementsFor(dropbox::oxygen::nn<std
 osgeo::proj::io::DatabaseContext::getMetadata(char const*) const
 osgeo::proj::io::DatabaseContext::getPath() const
 osgeo::proj::io::DatabaseContext::getSqliteHandle() const
+osgeo::proj::io::DatabaseContext::getVersionedAuthoritiesFromName(std::string const&)
 osgeo::proj::io::DatabaseContext::lookForGridInfo(std::string const&, bool, std::string&, std::string&, std::string&, bool&, bool&, bool&) const
 osgeo::proj::io::DatabaseContext::startInsertStatementsSession()
 osgeo::proj::io::DatabaseContext::stopInsertStatementsSession()

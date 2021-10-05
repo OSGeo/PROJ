@@ -2766,10 +2766,19 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
     PROJ_CRS_INFO **ret = nullptr;
     int i = 0;
     try {
-        auto factory = AuthorityFactory::create(getDBcontext(ctx),
-                                                auth_name ? auth_name : "");
-        auto list = factory->getCRSInfoList();
-        ret = new PROJ_CRS_INFO *[list.size() + 1];
+        auto dbContext = getDBcontext(ctx);
+        const std::string authName = auth_name ? auth_name : "";
+        auto actualAuthNames =
+            dbContext->getVersionedAuthoritiesFromName(authName);
+        if (actualAuthNames.empty())
+            actualAuthNames.push_back(authName);
+        std::list<AuthorityFactory::CRSInfo> concatList;
+        for (const auto &actualAuthName : actualAuthNames) {
+            auto factory = AuthorityFactory::create(dbContext, actualAuthName);
+            auto list = factory->getCRSInfoList();
+            concatList.splice(concatList.end(), std::move(list));
+        }
+        ret = new PROJ_CRS_INFO *[concatList.size() + 1];
         GeographicBoundingBoxPtr bbox;
         if (params && params->bbox_valid) {
             bbox = GeographicBoundingBox::create(
@@ -2777,7 +2786,7 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                        params->east_lon_degree, params->north_lat_degree)
                        .as_nullable();
         }
-        for (const auto &info : list) {
+        for (const auto &info : concatList) {
             auto type = PJ_TYPE_CRS;
             if (info.type == AuthorityFactory::ObjectType::GEOGRAPHIC_2D_CRS) {
                 type = PJ_TYPE_GEOGRAPHIC_2D_CRS;

@@ -495,8 +495,8 @@ static void outputObject(
                 if (!outputOpt.quiet) {
                     std::cout << "WKT2:2015 string:" << std::endl;
                 }
-                auto formatter =
-                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2015);
+                auto formatter = WKTFormatter::create(
+                    WKTFormatter::Convention::WKT2_2015, dbContext);
                 formatter->setMultiLine(!outputOpt.singleLine);
                 formatter->setStrict(outputOpt.strict);
                 auto wkt = wktExportable->exportToWKT(formatter.get());
@@ -520,7 +520,7 @@ static void outputObject(
                     std::cout << "WKT2:2015_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
-                    WKTFormatter::Convention::WKT2_2015_SIMPLIFIED);
+                    WKTFormatter::Convention::WKT2_2015_SIMPLIFIED, dbContext);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -545,8 +545,8 @@ static void outputObject(
                 if (!outputOpt.quiet) {
                     std::cout << "WKT2:2019 string:" << std::endl;
                 }
-                auto formatter =
-                    WKTFormatter::create(WKTFormatter::Convention::WKT2_2019);
+                auto formatter = WKTFormatter::create(
+                    WKTFormatter::Convention::WKT2_2019, dbContext);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -572,7 +572,7 @@ static void outputObject(
                     std::cout << "WKT2:2019_SIMPLIFIED string:" << std::endl;
                 }
                 auto formatter = WKTFormatter::create(
-                    WKTFormatter::Convention::WKT2_2019_SIMPLIFIED);
+                    WKTFormatter::Convention::WKT2_2019_SIMPLIFIED, dbContext);
                 if (outputOpt.singleLine) {
                     formatter->setMultiLine(false);
                 }
@@ -968,7 +968,7 @@ int main(int argc, char **argv) {
     double minimumAccuracy = -1;
     bool outputAll = false;
     bool dumpDbStructure = false;
-    std::string listCRS;
+    std::string listCRSFilter;
     bool listCRSSpecified = false;
 
     for (int i = 1; i < argc; i++) {
@@ -1251,7 +1251,7 @@ int main(int argc, char **argv) {
             listCRSSpecified = true;
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 i++;
-                listCRS = argv[i];
+                listCRSFilter = argv[i];
             }
         } else if (ci_equal(arg, "--searchpaths")) {
 #ifdef _WIN32
@@ -1354,11 +1354,11 @@ int main(int argc, char **argv) {
     if (listCRSSpecified) {
         bool allow_deprecated = false;
         std::set<AuthorityFactory::ObjectType> types;
-        auto tokens = split(listCRS, ',');
-        if (listCRS.empty()) {
+        auto tokens = split(listCRSFilter, ',');
+        if (listCRSFilter.empty()) {
             tokens.clear();
         }
-        for (auto token : tokens) {
+        for (const auto &token : tokens) {
             if (ci_equal(token, "allow_deprecated")) {
                 allow_deprecated = true;
             } else if (ci_equal(token, "geodetic")) {
@@ -1397,44 +1397,50 @@ int main(int argc, char **argv) {
         }
         for (const auto &auth_name : allowedAuthorities) {
             try {
-                auto factory =
-                    AuthorityFactory::create(NN_NO_CHECK(dbContext), auth_name);
-                const auto list = factory->getCRSInfoList();
-                for (const auto &info : list) {
-                    if (!allow_deprecated && info.deprecated) {
-                        continue;
-                    }
-                    if (!types.empty() &&
-                        types.find(info.type) == types.end()) {
-                        continue;
-                    }
-                    if (bboxFilter) {
-                        if (!info.bbox_valid) {
+                auto actualAuthNames =
+                    dbContext->getVersionedAuthoritiesFromName(auth_name);
+                if (actualAuthNames.empty())
+                    actualAuthNames.push_back(auth_name);
+                for (const auto &actualAuthName : actualAuthNames) {
+                    auto factory = AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext), actualAuthName);
+                    const auto list = factory->getCRSInfoList();
+                    for (const auto &info : list) {
+                        if (!allow_deprecated && info.deprecated) {
                             continue;
                         }
-                        auto crsExtent = Extent::createFromBBOX(
-                            info.west_lon_degree, info.south_lat_degree,
-                            info.east_lon_degree, info.north_lat_degree);
-                        if (spatialCriterion ==
-                            CoordinateOperationContext::SpatialCriterion::
-                                STRICT_CONTAINMENT) {
-                            if (!bboxFilter->contains(crsExtent)) {
-                                continue;
-                            }
-                        } else {
-                            if (!bboxFilter->intersects(crsExtent)) {
-                                continue;
-                            }
+                        if (!types.empty() &&
+                            types.find(info.type) == types.end()) {
+                            continue;
                         }
-                    } else if (!area.empty() &&
-                               tolower(info.areaName).find(areaLower) ==
-                                   std::string::npos) {
-                        continue;
+                        if (bboxFilter) {
+                            if (!info.bbox_valid) {
+                                continue;
+                            }
+                            auto crsExtent = Extent::createFromBBOX(
+                                info.west_lon_degree, info.south_lat_degree,
+                                info.east_lon_degree, info.north_lat_degree);
+                            if (spatialCriterion ==
+                                CoordinateOperationContext::SpatialCriterion::
+                                    STRICT_CONTAINMENT) {
+                                if (!bboxFilter->contains(crsExtent)) {
+                                    continue;
+                                }
+                            } else {
+                                if (!bboxFilter->intersects(crsExtent)) {
+                                    continue;
+                                }
+                            }
+                        } else if (!area.empty() &&
+                                   tolower(info.areaName).find(areaLower) ==
+                                       std::string::npos) {
+                            continue;
+                        }
+                        std::cout << info.authName << ":" << info.code << " \""
+                                  << info.name << "\""
+                                  << (info.deprecated ? " [deprecated]" : "")
+                                  << std::endl;
                     }
-                    std::cout << info.authName << ":" << info.code << " \""
-                              << info.name << "\""
-                              << (info.deprecated ? " [deprecated]" : "")
-                              << std::endl;
                 }
             } catch (const std::exception &e) {
                 std::cerr << "ERROR: list-crs failed with: " << e.what()

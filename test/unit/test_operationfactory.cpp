@@ -7010,3 +7010,135 @@ TEST(operation,
                   "+proj=axisswap +order=1,-2");
     }
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    createOperation_ellipsoidal_ographic_west_to_projected_of_ellipsoidal_ographic_west) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "IAU_2015");
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        authFactory->createCoordinateReferenceSystem("19901"),
+        authFactory->createCoordinateReferenceSystem("19911"));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=-2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+              "+a=2440530 +b=2438260 "
+              "+step +proj=axisswap +order=-1,2");
+
+    // Inverse
+    auto op2 = CoordinateOperationFactory::create()->createOperation(
+        authFactory->createCoordinateReferenceSystem("19911"),
+        authFactory->createCoordinateReferenceSystem("19901"));
+    ASSERT_TRUE(op2 != nullptr);
+    EXPECT_EQ(op2->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=axisswap +order=-1,2 "
+              "+step +inv +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+              "+a=2440530 +b=2438260 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,-1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    createOperation_ellipsoidal_ographic_west_to_projected_of_ellipsoidal_ocentric) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "IAU_2015");
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        authFactory->createCoordinateReferenceSystem("19901"),
+        authFactory->createCoordinateReferenceSystem("19912"));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=-2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+              "+a=2440530 +b=2438260");
+
+    // Inverse
+    auto op2 = CoordinateOperationFactory::create()->createOperation(
+        authFactory->createCoordinateReferenceSystem("19912"),
+        authFactory->createCoordinateReferenceSystem("19901"));
+    ASSERT_TRUE(op2 != nullptr);
+    EXPECT_EQ(op2->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+              "+a=2440530 +b=2438260 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,-1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    createOperation_ellipsoidal_ocentric_to_projected_of_ellipsoidal_ocentric) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "IAU_2015");
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        authFactory->createCoordinateReferenceSystem("19902"),
+        authFactory->createCoordinateReferenceSystem("19912"));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=geoc +a=2440530 +b=2438260 "
+              "+step +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+              "+a=2440530 +b=2438260");
+
+    // Inverse
+    auto op2 = CoordinateOperationFactory::create()->createOperation(
+        authFactory->createCoordinateReferenceSystem("19912"),
+        authFactory->createCoordinateReferenceSystem("19902"));
+    ASSERT_TRUE(op2 != nullptr);
+    EXPECT_EQ(op2->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+              "+a=2440530 +b=2438260 "
+              "+step +proj=geoc +a=2440530 +b=2438260 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    createOperation_ellipsoidal_ocentric_to_projected_of_ellipsoidal_ographic_west) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "IAU_2015");
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        authFactory->createCoordinateReferenceSystem("19902"),
+        authFactory->createCoordinateReferenceSystem("19911"));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=geoc +a=2440530 +b=2438260 "
+              "+step +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+              "+a=2440530 +b=2438260 "
+              "+step +proj=axisswap +order=-1,2");
+
+    // Inverse
+    auto op2 = CoordinateOperationFactory::create()->createOperation(
+        authFactory->createCoordinateReferenceSystem("19911"),
+        authFactory->createCoordinateReferenceSystem("19902"));
+    ASSERT_TRUE(op2 != nullptr);
+    EXPECT_EQ(op2->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=axisswap +order=-1,2 "
+              "+step +inv +proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 "
+              "+a=2440530 +b=2438260 "
+              "+step +proj=geoc +a=2440530 +b=2438260 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}

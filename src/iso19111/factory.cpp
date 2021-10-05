@@ -104,6 +104,7 @@ namespace io {
 #define GEOG_2D "geographic 2D"
 #define GEOG_3D "geographic 3D"
 #define GEOCENTRIC "geocentric"
+#define OTHER "other"
 #define PROJECTED "projected"
 #define VERTICAL "vertical"
 #define COMPOUND "compound"
@@ -753,6 +754,14 @@ struct DatabaseContext::Private {
     // cppcheck-suppress functionStatic
     void cache(const std::string &code, const GridInfoCache &info);
 
+    struct VersionedAuthName {
+        std::string versionedAuthName{};
+        std::string authName{};
+        std::string version{};
+        int priority = 0;
+    };
+    const std::vector<VersionedAuthName> &getCacheAuthNameWithVersion();
+
   private:
     friend class DatabaseContext;
 
@@ -793,6 +802,8 @@ struct DatabaseContext::Private {
 
     lru11::Cache<std::string, std::list<std::string>> cacheAliasNames_{
         CACHE_SIZE};
+
+    std::vector<VersionedAuthName> cacheAuthNameWithVersion_{};
 
     static void insertIntoCache(LRUCacheOfObjects &cache,
                                 const std::string &code,
@@ -3557,6 +3568,87 @@ DatabaseContext::getNonDeprecated(const std::string &tableName,
 
 // ---------------------------------------------------------------------------
 
+const std::vector<DatabaseContext::Private::VersionedAuthName> &
+DatabaseContext::Private::getCacheAuthNameWithVersion() {
+    if (cacheAuthNameWithVersion_.empty()) {
+        const auto sqlRes =
+            run("SELECT versioned_auth_name, auth_name, version, priority "
+                "FROM versioned_auth_name_mapping");
+        for (const auto &row : sqlRes) {
+            VersionedAuthName van;
+            van.versionedAuthName = row[0];
+            van.authName = row[1];
+            van.version = row[2];
+            van.priority = atoi(row[3].c_str());
+            cacheAuthNameWithVersion_.emplace_back(std::move(van));
+        }
+    }
+    return cacheAuthNameWithVersion_;
+}
+
+// ---------------------------------------------------------------------------
+
+// From IAU_2015 returns (IAU,2015)
+bool DatabaseContext::getAuthorityAndVersion(
+    const std::string &versionedAuthName, std::string &authNameOut,
+    std::string &versionOut) {
+
+    for (const auto &van : d->getCacheAuthNameWithVersion()) {
+        if (van.versionedAuthName == versionedAuthName) {
+            authNameOut = van.authName;
+            versionOut = van.version;
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+// From IAU and 2015, returns IAU_2015
+bool DatabaseContext::getVersionedAuthority(const std::string &authName,
+                                            const std::string &version,
+                                            std::string &versionedAuthNameOut) {
+
+    for (const auto &van : d->getCacheAuthNameWithVersion()) {
+        if (van.authName == authName && van.version == version) {
+            versionedAuthNameOut = van.versionedAuthName;
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
+// From IAU returns IAU_latest, ... IAU_2015
+std::vector<std::string>
+DatabaseContext::getVersionedAuthoritiesFromName(const std::string &authName) {
+
+    typedef std::pair<std::string, int> VersionedAuthNamePriority;
+    std::vector<VersionedAuthNamePriority> tmp;
+    for (const auto &van : d->getCacheAuthNameWithVersion()) {
+        if (van.authName == authName) {
+            tmp.emplace_back(
+                VersionedAuthNamePriority(van.versionedAuthName, van.priority));
+        }
+    }
+    std::vector<std::string> res;
+    if (!tmp.empty()) {
+        // Sort by decreasing priority
+        std::sort(tmp.begin(), tmp.end(),
+                  [](const VersionedAuthNamePriority &a,
+                     const VersionedAuthNamePriority &b) {
+                      return b.second > a.second;
+                  });
+        for (const auto &pair : tmp)
+            res.emplace_back(pair.first);
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------
+
 std::vector<operation::CoordinateOperationNNPtr>
 DatabaseContext::getTransformationsForGridName(
     const DatabaseContextNNPtr &databaseContext, const std::string &gridName) {
@@ -4208,7 +4300,11 @@ AuthorityFactory::identifyBodyFromSemiMajorAxis(double semi_major_axis,
         throw FactoryException("no match found");
     }
     if (res.size() > 1) {
-        throw FactoryException("more than one match found");
+        for (const auto &row : res) {
+            if (row[0] != res.front()[0]) {
+                throw FactoryException("more than one match found");
+            }
+        }
     }
     return res.front()[0];
 }
@@ -4716,6 +4812,17 @@ AuthorityFactory::createCoordinateSystem(const std::string &code) const {
         }
         throw FactoryException("invalid number of axis for CartesianCS");
     }
+    if (csType == "spherical") {
+        if (axisList.size() == 2) {
+            return cacheAndRet(
+                cs::SphericalCS::create(props, axisList[0], axisList[1]));
+        }
+        if (axisList.size() == 3) {
+            return cacheAndRet(cs::SphericalCS::create(
+                props, axisList[0], axisList[1], axisList[2]));
+        }
+        throw FactoryException("invalid number of axis for SphericalCS");
+    }
     if (csType == "vertical") {
         if (axisList.size() == 1) {
             return cacheAndRet(cs::VerticalCS::create(props, axisList[0]));
@@ -4797,8 +4904,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
     }
     std::string sql("SELECT name, type, coordinate_system_auth_name, "
                     "coordinate_system_code, datum_auth_name, datum_code, "
-                    "text_definition, "
-                    "deprecated FROM "
+                    "text_definition, deprecated, description FROM "
                     "geodetic_crs WHERE auth_name = ? AND code = ?");
     if (geographicOnly) {
         sql += " AND type in (" GEOG_2D_SINGLE_QUOTED "," GEOG_3D_SINGLE_QUOTED
@@ -4819,9 +4925,10 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
         const auto &datum_code = row[5];
         const auto &text_definition = row[6];
         const bool deprecated = row[7] == "1";
+        const auto &remarks = row[8];
 
         auto props = d->createPropertiesSearchUsages("geodetic_crs", code, name,
-                                                     deprecated);
+                                                     deprecated, remarks);
 
         if (!text_definition.empty()) {
             DatabaseContext::Private::RecursionDetector detector(d->context());
@@ -4869,6 +4976,7 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
+
         auto geocentricCS = util::nn_dynamic_pointer_cast<cs::CartesianCS>(cs);
         if (type == GEOCENTRIC && geocentricCS) {
             auto crsRet = crs::GeodeticCRS::create(props, datum, datumEnsemble,
@@ -4876,6 +4984,15 @@ AuthorityFactory::createGeodeticCRS(const std::string &code,
             d->context()->d->cache(cacheKey, crsRet);
             return crsRet;
         }
+
+        auto sphericalCS = util::nn_dynamic_pointer_cast<cs::SphericalCS>(cs);
+        if (type == OTHER && sphericalCS) {
+            auto crsRet = crs::GeodeticCRS::create(props, datum, datumEnsemble,
+                                                   NN_NO_CHECK(sphericalCS));
+            d->context()->d->cache(cacheKey, crsRet);
+            return crsRet;
+        }
+
         throw FactoryException("unsupported (type, CS type) for geodeticCRS: " +
                                type + ", " + cs->getWKT2Type(true));
     } catch (const std::exception &ex) {
@@ -5354,7 +5471,8 @@ AuthorityFactory::createCoordinateReferenceSystem(const std::string &code,
                                            code);
     }
     const auto &type = res.front()[0];
-    if (type == GEOG_2D || type == GEOG_3D || type == GEOCENTRIC) {
+    if (type == GEOG_2D || type == GEOG_3D || type == GEOCENTRIC ||
+        type == OTHER) {
         return createGeodeticCRS(code);
     }
     if (type == VERTICAL) {

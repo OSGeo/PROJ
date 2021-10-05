@@ -35,8 +35,6 @@ CREATE TABLE celestial_body (
     CONSTRAINT pk_celestial_body PRIMARY KEY (auth_name, code)
 ) WITHOUT ROWID;
 
-INSERT INTO celestial_body VALUES('PROJ', 'EARTH', 'Earth', 6378137.0);
-
 CREATE TABLE ellipsoid (
     auth_name TEXT NOT NULL CHECK (length(auth_name) >= 1),
     code INTEGER_OR_TEXT NOT NULL CHECK (length(code) >= 1),
@@ -541,6 +539,7 @@ BEGIN
             'EPSG_9836_Geocentric/topocentric conversions',
             'EPSG_9837_Geographic/topocentric conversions',
             'EPSG_9838_Vertical Perspective',
+            'EPSG_9840_Orthographic',
             'EPSG_9841_Mercator (1SP) (Spherical)',
             'EPSG_9842_Equidistant Cylindrical',
             'EPSG_9843_Axis Order Reversal (2D)',
@@ -1516,3 +1515,14 @@ CREATE TABLE authority_to_authority_preference(
     allowed_authorities TEXT NOT NULL,  -- for example 'PROJ,EPSG,any'
     CONSTRAINT unique_authority_to_authority_preference UNIQUE (source_auth_name, target_auth_name)
 );
+
+-- Map 'IAU_2015' to auth_name=IAU and version=2015
+CREATE TABLE versioned_auth_name_mapping(
+    versioned_auth_name    TEXT NOT NULL PRIMARY KEY,
+    auth_name              TEXT NOT NULL,
+    version                TEXT NOT NULL,
+    priority               INTEGER NOT NULL,
+    CONSTRAINT unique_auth_name_version UNIQUE (auth_name, version),
+    CONSTRAINT unique_auth_name_priority UNIQUE (auth_name, priority)
+);
+

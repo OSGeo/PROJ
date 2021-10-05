@@ -1518,6 +1518,23 @@ IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
             codeSpace = codeSpace.substr(strlen("INVERSE("));
             codeSpace.resize(codeSpace.size() - 1);
         }
+
+        std::string version;
+        if (nodeChildren.size() >= 3 &&
+            nodeChildren[2]->GP()->childrenSize() == 0) {
+            version = stripQuotes(nodeChildren[2]);
+        }
+
+        // IAU + 2015 -> IAU_2015
+        if (dbContext_ && !version.empty()) {
+            std::string codeSpaceOut;
+            if (dbContext_->getVersionedAuthority(codeSpace, version,
+                                                  codeSpaceOut)) {
+                codeSpace = codeSpaceOut;
+                version.clear();
+            }
+        }
+
         auto code = stripQuotes(nodeChildren[1]);
         auto &citationNode = nodeP->lookForChild(WKTConstants::CITATION);
         auto &uriNode = nodeP->lookForChild(WKTConstants::URI);
@@ -1542,9 +1559,7 @@ IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
                                  stripQuotes(uriNodeP->children()[0]));
             }
         }
-        if (nodeChildren.size() >= 3 &&
-            nodeChildren[2]->GP()->childrenSize() == 0) {
-            auto version = stripQuotes(nodeChildren[2]);
+        if (!version.empty()) {
             propertiesId.set(Identifier::VERSION_KEY, version);
         }
         return Identifier::create(code, propertiesId);
@@ -5381,6 +5396,36 @@ IdentifierNNPtr JSONParser::buildId(const json &j, bool removeInverseOf) {
         codeSpace = codeSpace.substr(strlen("INVERSE("));
         codeSpace.resize(codeSpace.size() - 1);
     }
+
+    std::string version;
+    if (j.contains("version")) {
+        auto versionJ = j["version"];
+        if (versionJ.is_string()) {
+            version = versionJ.get<std::string>();
+        } else if (versionJ.is_number()) {
+            const double dblVersion = versionJ.get<double>();
+            if (dblVersion >= std::numeric_limits<int>::min() &&
+                dblVersion <= std::numeric_limits<int>::max() &&
+                static_cast<int>(dblVersion) == dblVersion) {
+                version = internal::toString(static_cast<int>(dblVersion));
+            } else {
+                version = internal::toString(dblVersion);
+            }
+        } else {
+            throw ParsingException("Unexpected type for value of \"version\"");
+        }
+    }
+
+    // IAU + 2015 -> IAU_2015
+    if (dbContext_ && !version.empty()) {
+        std::string codeSpaceOut;
+        if (dbContext_->getVersionedAuthority(codeSpace, version,
+                                              codeSpaceOut)) {
+            codeSpace = codeSpaceOut;
+            version.clear();
+        }
+    }
+
     propertiesId.set(metadata::Identifier::CODESPACE_KEY, codeSpace);
     propertiesId.set(metadata::Identifier::AUTHORITY_KEY, codeSpace);
     if (!j.contains("code")) {
@@ -5396,23 +5441,7 @@ IdentifierNNPtr JSONParser::buildId(const json &j, bool removeInverseOf) {
         throw ParsingException("Unexpected type for value of \"code\"");
     }
 
-    if (j.contains("version")) {
-        auto versionJ = j["version"];
-        std::string version;
-        if (versionJ.is_string()) {
-            version = versionJ.get<std::string>();
-        } else if (versionJ.is_number()) {
-            const double dblVersion = versionJ.get<double>();
-            if (dblVersion >= std::numeric_limits<int>::min() &&
-                dblVersion <= std::numeric_limits<int>::max() &&
-                static_cast<int>(dblVersion) == dblVersion) {
-                version = internal::toString(static_cast<int>(dblVersion));
-            } else {
-                version = internal::toString(dblVersion);
-            }
-        } else {
-            throw ParsingException("Unexpected type for value of \"version\"");
-        }
+    if (!version.empty()) {
         propertiesId.set(Identifier::VERSION_KEY, version);
     }
 
@@ -6392,6 +6421,61 @@ static CRSNNPtr importFromWMSAUTO(const std::string &text) {
 
 // ---------------------------------------------------------------------------
 
+static BaseObjectNNPtr createFromURNPart(const DatabaseContextPtr &dbContext,
+                                         const std::string &type,
+                                         const std::string &authName,
+                                         const std::string &version,
+                                         const std::string &code) {
+    if (!dbContext) {
+        throw ParsingException("no database context specified");
+    }
+    try {
+        auto factory =
+            AuthorityFactory::create(NN_NO_CHECK(dbContext), authName);
+        if (type == "crs") {
+            return factory->createCoordinateReferenceSystem(code);
+        }
+        if (type == "coordinateOperation") {
+            return factory->createCoordinateOperation(code, true);
+        }
+        if (type == "datum") {
+            return factory->createDatum(code);
+        }
+        if (type == "ensemble") {
+            return factory->createDatumEnsemble(code);
+        }
+        if (type == "ellipsoid") {
+            return factory->createEllipsoid(code);
+        }
+        if (type == "meridian") {
+            return factory->createPrimeMeridian(code);
+        }
+        throw ParsingException(concat("unhandled object type: ", type));
+    } catch (...) {
+        if (version.empty()) {
+            const auto authoritiesFromAuthName =
+                dbContext->getVersionedAuthoritiesFromName(authName);
+            for (const auto &authNameVersioned : authoritiesFromAuthName) {
+                try {
+                    return createFromURNPart(dbContext, type, authNameVersioned,
+                                             std::string(), code);
+                } catch (...) {
+                }
+            }
+            throw;
+        }
+        std::string authNameWithVersion;
+        if (!dbContext->getVersionedAuthority(authName, version,
+                                              authNameWithVersion)) {
+            throw;
+        }
+        return createFromURNPart(dbContext, type, authNameWithVersion,
+                                 std::string(), code);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 static BaseObjectNNPtr createFromUserInput(const std::string &text,
                                            const DatabaseContextPtr &dbContext,
                                            bool usePROJ4InitRules,
@@ -6481,8 +6565,19 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                 return factory->createCoordinateReferenceSystem(code);
             }
 
-            const auto authorities = dbContextNNPtr->getAuthorities();
-            for (const auto &authCandidate : authorities) {
+            const auto authoritiesFromAuthName =
+                dbContextNNPtr->getVersionedAuthoritiesFromName(authName);
+            for (const auto &authNameVersioned : authoritiesFromAuthName) {
+                factory =
+                    AuthorityFactory::create(dbContextNNPtr, authNameVersioned);
+                try {
+                    return factory->createCoordinateReferenceSystem(code);
+                } catch (...) {
+                }
+            }
+
+            const auto allAuthorities = dbContextNNPtr->getAuthorities();
+            for (const auto &authCandidate : allAuthorities) {
                 if (ci_equal(authCandidate, authName)) {
                     factory =
                         AuthorityFactory::create(dbContextNNPtr, authCandidate);
@@ -6740,42 +6835,14 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         return ConcatenatedOperation::createComputeMetadata(components, true);
     }
 
-    const auto createFromURNPart =
-        [&dbContext](const std::string &type, const std::string &authName,
-                     const std::string &code) -> BaseObjectNNPtr {
-        if (!dbContext) {
-            throw ParsingException("no database context specified");
-        }
-        auto factory =
-            AuthorityFactory::create(NN_NO_CHECK(dbContext), authName);
-        if (type == "crs") {
-            return factory->createCoordinateReferenceSystem(code);
-        }
-        if (type == "coordinateOperation") {
-            return factory->createCoordinateOperation(code, true);
-        }
-        if (type == "datum") {
-            return factory->createDatum(code);
-        }
-        if (type == "ensemble") {
-            return factory->createDatumEnsemble(code);
-        }
-        if (type == "ellipsoid") {
-            return factory->createEllipsoid(code);
-        }
-        if (type == "meridian") {
-            return factory->createPrimeMeridian(code);
-        }
-        throw ParsingException(concat("unhandled object type: ", type));
-    };
-
     // urn:ogc:def:crs:EPSG::4326
     if (tokens.size() == 7 && tolower(tokens[0]) == "urn") {
 
         const auto type = tokens[3] == "CRS" ? "crs" : tokens[3];
         const auto &authName = tokens[4];
+        const auto &version = tokens[5];
         const auto &code = tokens[6];
-        return createFromURNPart(type, authName, code);
+        return createFromURNPart(dbContext, type, authName, version, code);
     }
 
     // urn:ogc:def:crs:OGC::AUTO42001:-117:33
@@ -6790,8 +6857,9 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
     if (tokens.size() == 6 && tokens[0] == "urn" && tokens[2] != "def") {
         const auto &type = tokens[2];
         const auto &authName = tokens[3];
+        const auto &version = tokens[4];
         const auto &code = tokens[5];
-        return createFromURNPart(type, authName, code);
+        return createFromURNPart(dbContext, type, authName, version, code);
     }
 
     // Legacy urn:x-ogc:def:crs:EPSG:4326 (note the missing version)
@@ -6799,7 +6867,8 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         const auto &type = tokens[3];
         const auto &authName = tokens[4];
         const auto &code = tokens[5];
-        return createFromURNPart(type, authName, code);
+        return createFromURNPart(dbContext, type, authName, std::string(),
+                                 code);
     }
 
     if (dbContext) {
@@ -7796,6 +7865,32 @@ const std::string &PROJStringFormatter::toString() const {
                 curStep.paramValues[0].equals("order", "2,1") &&
                 prevStep.paramValues[0].equals("order", "2,1")) {
                 deletePrevAndCurIter();
+                continue;
+            }
+
+            // axisswap order=2,-1 followed by axisswap order=-2,1 is a no-op
+            if (curStep.name == "axisswap" && prevStep.name == "axisswap" &&
+                curStepParamCount == 1 && prevStepParamCount == 1 &&
+                !prevStep.inverted &&
+                prevStep.paramValues[0].equals("order", "2,-1") &&
+                !curStep.inverted &&
+                curStep.paramValues[0].equals("order", "-2,1")) {
+                deletePrevAndCurIter();
+                continue;
+            }
+
+            // axisswap order=2,-1 followed by axisswap order=1,-2 is
+            // equivalent to axisswap order=2,1
+            if (curStep.name == "axisswap" && prevStep.name == "axisswap" &&
+                curStepParamCount == 1 && prevStepParamCount == 1 &&
+                !prevStep.inverted &&
+                prevStep.paramValues[0].equals("order", "2,-1") &&
+                !curStep.inverted &&
+                curStep.paramValues[0].equals("order", "1,-2")) {
+                prevStep.inverted = false;
+                prevStep.paramValues[0] = Step::KeyValue("order", "2,1");
+                // Delete this iter
+                iterCur = steps.erase(iterCur);
                 continue;
             }
 
@@ -10781,6 +10876,12 @@ JSONFormatter::~JSONFormatter() = default;
 // ---------------------------------------------------------------------------
 
 CPLJSonStreamingWriter *JSONFormatter::writer() const { return &(d->writer_); }
+
+// ---------------------------------------------------------------------------
+
+const DatabaseContextPtr &JSONFormatter::databaseContext() const {
+    return d->dbContext_;
+}
 
 // ---------------------------------------------------------------------------
 
