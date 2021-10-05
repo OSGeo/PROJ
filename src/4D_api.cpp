@@ -1896,6 +1896,48 @@ PJ_FACTORS proj_factors(PJ *P, PJ_COORD lp) {
     if (nullptr==P)
         return factors;
 
+    const auto type = proj_get_type(P);
+
+    if( type == PJ_TYPE_PROJECTED_CRS )
+    {
+        // If it is a projected CRS, then compute the factors on the conversion
+        // associated to it. We need to start from a temporary geographic CRS
+        // using the same datum as the one of the projected CRS, and with
+        // input coordinates being in longitude, latitude order in radian,
+        // to be consistent with the expectations of the lp input parameter.
+
+        auto ctx = P->ctx;
+        auto geodetic_crs = proj_get_source_crs(ctx, P);
+        assert(geodetic_crs);
+        auto datum = proj_crs_get_datum(ctx, geodetic_crs);
+        auto datum_ensemble = proj_crs_get_datum_ensemble(ctx, geodetic_crs);
+        auto cs = proj_create_ellipsoidal_2D_cs(
+            ctx, PJ_ELLPS2D_LONGITUDE_LATITUDE, "Radian", 1.0);
+        auto temp = proj_create_geographic_crs_from_datum(
+            ctx, "unnamed crs", datum ? datum : datum_ensemble,
+            cs);
+        proj_destroy(datum);
+        proj_destroy(datum_ensemble);
+        proj_destroy(cs);
+        proj_destroy(geodetic_crs);
+        auto newOp = proj_create_crs_to_crs_from_pj(ctx, temp, P, nullptr, nullptr);
+        proj_destroy(temp);
+        assert(newOp);
+        auto ret = proj_factors(newOp, lp);
+        proj_destroy(newOp);
+        return ret;
+    }
+
+    if( type != PJ_TYPE_CONVERSION &&
+        type != PJ_TYPE_TRANSFORMATION &&
+        type != PJ_TYPE_CONCATENATED_OPERATION &&
+        type != PJ_TYPE_OTHER_COORDINATE_OPERATION )
+    {
+        proj_log_error(P, _("Invalid type for P object"));
+        proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return factors;
+    }
+
     if (pj_factors(lp.lp, P, 0.0, &f))
         return factors;
 
