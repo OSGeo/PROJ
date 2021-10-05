@@ -1369,7 +1369,16 @@ int proj_trans_bounds(PJ_CONTEXT* context,
     double delta_y = 0;
     bool north_pole_in_bounds = false;
     bool south_pole_in_bounds = false;
+    bool input_lon_lat_order = false;
     bool output_lon_lat_order = false;
+    if (degree_input) {
+        int in_order_lon_lat = target_crs_lon_lat_order(
+            context, P, opposite_direction(direction)
+        );
+        if (in_order_lon_lat == -1)
+            return false;
+        input_lon_lat_order = in_order_lon_lat != 0;
+    }
     if (degree_output) {
         int out_order_lon_lat = target_crs_lon_lat_order(context, P, direction);
         if (out_order_lon_lat == -1)
@@ -1396,15 +1405,23 @@ int proj_trans_bounds(PJ_CONTEXT* context,
     }
 
     if (degree_input && xmax < xmin) {
+        if (!input_lon_lat_order) {
+            proj_log_error(P, _("latitude max < latitude min."));
+            proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            return false;
+        }
         // handle antimeridian
         delta_x = (xmax - xmin + 360.0) / side_pts;
     } else {
         delta_x = (xmax - xmin) / side_pts;
     }
     if (degree_input && ymax < ymin) {
+        if (input_lon_lat_order) {
+            proj_log_error(P, _("latitude max < latitude min."));
+            proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            return false;
+        }
         // handle antimeridian
-        // depending on the axis order, longitude has the potential
-        // to be on the y axis. It shouldn't reach here if it is latitude.
         delta_y = (ymax - ymin + 360.0) / side_pts;
     } else {
         delta_y = (ymax - ymin) / side_pts;
