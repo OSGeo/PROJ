@@ -1646,6 +1646,49 @@ TEST_F(CApi, proj_create_operations) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_create_operations_prime_meridian_non_greenwich) {
+    auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+
+    auto source_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "27562", PJ_CATEGORY_CRS, false,
+        nullptr); // "NTF (Paris) / Lambert Centre France"
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+
+    auto target_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "4258", PJ_CATEGORY_CRS, false, nullptr); // ETRS89
+    ASSERT_NE(target_crs, nullptr);
+    ObjectKeeper keeper_target_crs(target_crs);
+
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+    auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
+    ASSERT_NE(res, nullptr);
+    ObjListKeeper keeper_res(res);
+
+    {
+        PJ_COORD coord;
+        // lat,lon=49,-4 if using grid
+        coord.xy.x = 136555.58288992;
+        coord.xy.y = 463344.51894296;
+        int idx = proj_get_suggested_operation(m_ctxt, res, PJ_FWD, coord);
+        ASSERT_GE(idx, 0);
+        auto op = proj_list_get(m_ctxt, res, idx);
+        ASSERT_NE(op, nullptr);
+        ObjectKeeper keeper_op(op);
+        // Transformation using grid
+        EXPECT_EQ(proj_coordoperation_get_grid_used_count(m_ctxt, op), 1);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_get_suggested_operation_with_operations_without_area_of_use) {
     auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
     ASSERT_NE(ctxt, nullptr);
