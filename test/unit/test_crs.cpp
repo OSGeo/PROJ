@@ -6707,3 +6707,23 @@ TEST(crs, projected_alterParametersLinearUnit_do_not_mess_deriving_conversion) {
     }
     EXPECT_EQ(projCRS->derivingConversion()->targetCRS().get(), projCRS.get());
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projected_is_equivalent_to_with_proj4_extension) {
+    const auto obj1 = PROJStringParser().createFromPROJString(
+        "+proj=omerc +lat_0=50 +alpha=50.0 +no_rot +a=6378144.0 +b=6356759.0 "
+        "+lon_0=8.0 +type=crs");
+    const auto crs1 = nn_dynamic_pointer_cast<ProjectedCRS>(obj1);
+    ASSERT_TRUE(crs1 != nullptr);
+
+    const auto wkt = crs1->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
+    const auto obj_from_wkt = WKTParser().createFromWKT(wkt);
+    const auto crs_from_wkt =
+        nn_dynamic_pointer_cast<ProjectedCRS>(obj_from_wkt);
+
+    // Check equivalence of the CRS from PROJ.4 and WKT
+    EXPECT_TRUE(crs1->isEquivalentTo(crs_from_wkt.get(),
+                                     IComparable::Criterion::EQUIVALENT));
+}
