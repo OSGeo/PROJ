@@ -899,6 +899,7 @@ proj_db_cursor = proj_db_conn.cursor()
 proj_db_cursor.execute('PRAGMA foreign_keys = 1;')
 
 ingest_sqlite_dump(proj_db_cursor, os.path.join(sql_dir_name, 'proj_db_table_defs.sql'))
+proj_db_cursor.execute("INSERT INTO celestial_body VALUES('PROJ', 'EARTH', 'Earth', 6378137.0);")
 
 # A bit messy, but to avoid churn in our existing .sql files, we temporarily
 # recreate the original conversion and helmert_transformation tables
