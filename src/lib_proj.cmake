@@ -272,6 +272,7 @@ set(HEADERS_LIBPROJ
   proj.h
   proj_experimental.h
   proj_constants.h
+  proj_symbol_rename.h
   geodesic.h
 )
 
