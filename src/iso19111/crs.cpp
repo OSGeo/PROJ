@@ -1394,6 +1394,7 @@ bool SingleCRS::baseIsEquivalentTo(
         return false;
     }
 
+    // Check datum
     if (criterion == util::IComparable::Criterion::STRICT) {
         const auto &thisDatum = d->datum;
         const auto &otherDatum = otherSingleCRS->d->datum;
@@ -1428,10 +1429,36 @@ bool SingleCRS::baseIsEquivalentTo(
         }
     }
 
-    return d->coordinateSystem->_isEquivalentTo(
-               otherSingleCRS->d->coordinateSystem.get(), criterion,
-               dbContext) &&
-           getExtensionProj4() == otherSingleCRS->getExtensionProj4();
+    // Check coordinate system
+    if (!(d->coordinateSystem->_isEquivalentTo(
+            otherSingleCRS->d->coordinateSystem.get(), criterion, dbContext))) {
+        return false;
+    }
+
+    // Now compare PROJ4 extensions
+
+    const auto &thisProj4 = getExtensionProj4();
+    const auto &otherProj4 = otherSingleCRS->getExtensionProj4();
+
+    if (thisProj4.empty() && otherProj4.empty()) {
+        return true;
+    }
+
+    if (!(thisProj4.empty() ^ otherProj4.empty())) {
+        return true;
+    }
+
+    // Asks for a "normalized" output during toString(), aimed at comparing two
+    // strings for equivalence.
+    auto formatter1 = io::PROJStringFormatter::create();
+    formatter1->setNormalizeOutput();
+    formatter1->ingestPROJString(thisProj4);
+
+    auto formatter2 = io::PROJStringFormatter::create();
+    formatter2->setNormalizeOutput();
+    formatter2->ingestPROJString(otherProj4);
+
+    return formatter1->toString() == formatter2->toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -4171,6 +4198,17 @@ ProjectedCRS::create(const util::PropertyMap &properties,
 bool ProjectedCRS::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
+    auto otherProjCRS = dynamic_cast<const ProjectedCRS *>(other);
+    if (otherProjCRS != nullptr &&
+        criterion == util::IComparable::Criterion::EQUIVALENT &&
+        (d->baseCRS_->hasImplicitCS() ||
+         otherProjCRS->d->baseCRS_->hasImplicitCS())) {
+        // If one of the 2 base CRS has implicit coordinate system, then
+        // relax the check. The axis order of the base CRS doesn't matter
+        // for most purposes.
+        criterion =
+            util::IComparable::Criterion::EQUIVALENT_EXCEPT_AXIS_ORDER_GEOGCRS;
+    }
     return other != nullptr && util::isOfExactType<ProjectedCRS>(*other) &&
            DerivedCRS::_isEquivalentTo(other, criterion, dbContext);
 }

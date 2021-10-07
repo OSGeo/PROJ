@@ -460,6 +460,8 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_INTERNAL void setLegacyCRSToCRSContext(bool legacyContext);
     PROJ_INTERNAL bool getLegacyCRSToCRSContext() const;
 
+    PROJ_INTERNAL PROJStringFormatter &setNormalizeOutput();
+
     PROJ_INTERNAL const DatabaseContextPtr &databaseContext() const;
 
     PROJ_INTERNAL Convention convention() const;

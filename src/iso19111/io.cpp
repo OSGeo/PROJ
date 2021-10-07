@@ -7436,6 +7436,7 @@ struct PROJStringFormatter::Private {
     bool crsExport_ = false;
     bool legacyCRSToCRSContext_ = false;
     bool multiLine_ = false;
+    bool normalizeOutput_ = false;
     int indentWidth_ = 2;
     int indentLevel_ = 0;
     int maxLineLength_ = 80;
@@ -7535,6 +7536,17 @@ const std::string &PROJStringFormatter::toString() const {
     d->result_.clear();
 
     auto &steps = d->steps_;
+
+    if (d->normalizeOutput_) {
+        // Sort +key=value options of each step in lexicographic order.
+        for (auto &step : steps) {
+            std::sort(step.paramValues.begin(), step.paramValues.end(),
+                      [](const Step::KeyValue &a, const Step::KeyValue &b) {
+                          return a.key < b.key;
+                      });
+        }
+    }
+
     for (auto iter = steps.begin(); iter != steps.end();) {
         // Remove no-op helmert
         auto &step = *iter;
@@ -8685,6 +8697,19 @@ void PROJStringFormatter::setLegacyCRSToCRSContext(bool legacyContext) {
 
 bool PROJStringFormatter::getLegacyCRSToCRSContext() const {
     return d->legacyCRSToCRSContext_;
+}
+
+// ---------------------------------------------------------------------------
+
+/** Asks for a "normalized" output during toString(), aimed at comparing two
+ * strings for equivalence.
+ *
+ * This consists for now in sorting the +key=value option in lexicographic
+ * order.
+ */
+PROJStringFormatter &PROJStringFormatter::setNormalizeOutput() {
+    d->normalizeOutput_ = true;
+    return *this;
 }
 
 // ---------------------------------------------------------------------------
