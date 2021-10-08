@@ -230,6 +230,6 @@ INSERT INTO "usage" VALUES(
     'grid_transformation',
     'PROJ',
     'EPSG_6364_TO_EPSG_5703',
-    'EPSG','1160', -- area of use: Mexico - onshore and offshore.
+    'EPSG','3278', -- area of use: Mexico - onshore
     'EPSG','1024'  -- unknown
 );
