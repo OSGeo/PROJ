@@ -3800,6 +3800,39 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
         tryToIdentifyWKT1Method ? getMappingFromWKT1(projectionName) : nullptr;
     if (mapping) {
         mapping = selectSphericalOrEllipsoidal(mapping, baseGeodCRS);
+    } else if (metadata::Identifier::isEquivalentName(
+                   projectionName.c_str(), "Lambert Conformal Conic")) {
+        // Lambert Conformal Conic or Lambert_Conformal_Conic are respectively
+        // used by Oracle WKT and Trimble for either LCC 1SP or 2SP, so we
+        // have to look at parameters to figure out the variant.
+        bool found2ndStdParallel = false;
+        bool foundScaleFactor = false;
+        for (const auto &childNode : projCRSNode->GP()->children()) {
+            if (ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER)) {
+                const auto &childNodeChildren = childNode->GP()->children();
+                if (childNodeChildren.size() < 2) {
+                    ThrowNotEnoughChildren(WKTConstants::PARAMETER);
+                }
+                const std::string wkt1ParameterName(
+                    stripQuotes(childNodeChildren[0]));
+                if (metadata::Identifier::isEquivalentName(
+                        wkt1ParameterName.c_str(), WKT1_STANDARD_PARALLEL_2)) {
+                    found2ndStdParallel = true;
+                } else if (metadata::Identifier::isEquivalentName(
+                               wkt1ParameterName.c_str(), WKT1_SCALE_FACTOR)) {
+                    foundScaleFactor = true;
+                }
+            }
+        }
+        if (found2ndStdParallel && !foundScaleFactor) {
+            mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP);
+        } else if (!found2ndStdParallel && foundScaleFactor) {
+            mapping = getMapping(EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_1SP);
+        } else if (found2ndStdParallel && foundScaleFactor) {
+            // Not sure if that happens
+            mapping = getMapping(
+                EPSG_CODE_METHOD_LAMBERT_CONIC_CONFORMAL_2SP_MICHIGAN);
+        }
     }
 
     // For Krovak, we need to look at axis to decide between the Krovak and
@@ -3833,7 +3866,7 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
         }
         foundParameters.resize(countParams);
     }
-    bool found2ndStdParallel = false;
+
     for (const auto &childNode : projCRSNode->GP()->children()) {
         if (ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER)) {
             const auto &childNodeChildren = childNode->GP()->children();
@@ -3886,10 +3919,6 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                     propertiesParameter.set(Identifier::CODESPACE_KEY,
                                             Identifier::EPSG);
                 }
-                if (paramMapping->epsg_code ==
-                    EPSG_CODE_PARAMETER_LATITUDE_2ND_STD_PARALLEL) {
-                    found2ndStdParallel = true;
-                }
             }
             propertiesParameter.set(IdentifiedObject::NAME_KEY, parameterName);
             parameters.push_back(
@@ -3904,14 +3933,6 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                     concat("unhandled parameter value type : ", paramValue));
             }
         }
-    }
-
-    // Oracle WKT: make sure that the 2nd std parallel parameter is found to
-    // select the LCC_2SP mapping
-    if (metadata::Identifier::isEquivalentName(wkt1ProjectionName.c_str(),
-                                               "Lambert Conformal Conic") &&
-        !found2ndStdParallel) {
-        propertiesMethod.set(IdentifiedObject::NAME_KEY, wkt1ProjectionName);
     }
 
     // Add back important parameters that should normally be present, but
