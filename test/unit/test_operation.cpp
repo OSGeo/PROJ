@@ -5429,6 +5429,20 @@ TEST(operation, normalizeForVisualization) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
 
+    const auto checkThroughWKTRoundtrip = [](const CoordinateOperationNNPtr
+                                                 &opRef) {
+        auto wkt = opRef->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
+        auto objFromWkt = WKTParser().createFromWKT(wkt);
+        auto opFromWkt =
+            nn_dynamic_pointer_cast<CoordinateOperation>(objFromWkt);
+        ASSERT_TRUE(opFromWkt != nullptr);
+        EXPECT_TRUE(opRef->_isEquivalentTo(opFromWkt.get()));
+        EXPECT_EQ(
+            opFromWkt->exportToPROJString(PROJStringFormatter::create().get()),
+            opRef->exportToPROJString(PROJStringFormatter::create().get()));
+    };
+
     // Source(geographic) must be inverted
     {
         auto src = authFactory->createCoordinateReferenceSystem("4326");
@@ -5443,6 +5457,7 @@ TEST(operation, normalizeForVisualization) {
                   "+proj=pipeline "
                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                   "+step +proj=utm +zone=31 +ellps=WGS84");
+        checkThroughWKTRoundtrip(opNormalized);
     }
 
     // Target(geographic) must be inverted
@@ -5459,6 +5474,7 @@ TEST(operation, normalizeForVisualization) {
                   "+proj=pipeline "
                   "+step +inv +proj=utm +zone=31 +ellps=WGS84 "
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+        checkThroughWKTRoundtrip(opNormalized);
     }
 
     // Source(geographic) and target(projected) must be inverted
@@ -5475,6 +5491,7 @@ TEST(operation, normalizeForVisualization) {
                   "+proj=pipeline "
                   "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                   "+step +proj=utm +zone=28 +ellps=GRS80");
+        checkThroughWKTRoundtrip(opNormalized);
     }
 
     // No inversion

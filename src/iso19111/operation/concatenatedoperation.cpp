@@ -37,6 +37,7 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include "proj/internal/crs_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
@@ -245,15 +246,44 @@ void ConcatenatedOperation::fixStepsDirection(
         return false;
     };
 
+    // Apply axis order reversal operation on first operation if needed
+    // to set CRSs on it
+    if (operationsInOut.size() >= 1) {
+        auto &op = operationsInOut.front();
+        auto l_sourceCRS = op->sourceCRS();
+        auto l_targetCRS = op->targetCRS();
+        auto conv = dynamic_cast<const Conversion *>(op.get());
+        if (conv && !l_sourceCRS && !l_targetCRS &&
+            isAxisOrderReversal(conv->method()->getEPSGCode())) {
+            auto reversedCRS = concatOpSourceCRS->applyAxisOrderReversal(
+                NORMALIZED_AXIS_ORDER_SUFFIX_STR);
+            op->setCRSs(concatOpSourceCRS, reversedCRS, nullptr);
+        }
+    }
+
+    // Apply axis order reversal operation on last operation if needed
+    // to set CRSs on it
+    if (operationsInOut.size() >= 2) {
+        auto &op = operationsInOut.back();
+        auto l_sourceCRS = op->sourceCRS();
+        auto l_targetCRS = op->targetCRS();
+        auto conv = dynamic_cast<const Conversion *>(op.get());
+        if (conv && !l_sourceCRS && !l_targetCRS &&
+            isAxisOrderReversal(conv->method()->getEPSGCode())) {
+            auto reversedCRS = concatOpTargetCRS->applyAxisOrderReversal(
+                NORMALIZED_AXIS_ORDER_SUFFIX_STR);
+            op->setCRSs(reversedCRS, concatOpTargetCRS, nullptr);
+        }
+    }
+
     for (size_t i = 0; i < operationsInOut.size(); ++i) {
         auto &op = operationsInOut[i];
         auto l_sourceCRS = op->sourceCRS();
         auto l_targetCRS = op->targetCRS();
         auto conv = dynamic_cast<const Conversion *>(op.get());
         if (conv && i == 0 && !l_sourceCRS && !l_targetCRS) {
-            auto derivedCRS =
-                dynamic_cast<const crs::DerivedCRS *>(concatOpSourceCRS.get());
-            if (derivedCRS) {
+            if (auto derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
+                    concatOpSourceCRS.get())) {
                 if (i + 1 < operationsInOut.size()) {
                     // use the sourceCRS of the next operation as our target CRS
                     l_targetCRS = operationsInOut[i + 1]->sourceCRS();

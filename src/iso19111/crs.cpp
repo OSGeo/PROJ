@@ -43,6 +43,7 @@
 #include "proj/util.hpp"
 
 #include "proj/internal/coordinatesystem_internal.hpp"
+#include "proj/internal/crs_internal.hpp"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 
@@ -887,51 +888,63 @@ void CRS::setProperties(
 
 //! @cond Doxygen_Suppress
 
-CRSNNPtr CRS::normalizeForVisualization() const {
+// ---------------------------------------------------------------------------
 
-    const auto createProperties = [this](const std::string &newName =
-                                             std::string()) {
-        auto props = util::PropertyMap().set(
-            common::IdentifiedObject::NAME_KEY,
-            !newName.empty()
-                ? newName
-                : nameStr() +
-                      " (with axis order normalized for visualization)");
-        const auto &l_domains = domains();
-        if (!l_domains.empty()) {
-            auto array = util::ArrayOfBaseObject::create();
-            for (const auto &domain : l_domains) {
-                array->add(domain);
+CRSNNPtr CRS::applyAxisOrderReversal(const char *nameSuffix) const {
+
+    const auto createProperties =
+        [this, nameSuffix](const std::string &newNameIn = std::string()) {
+            std::string newName(newNameIn);
+            if (newName.empty()) {
+                newName = nameStr();
+                if (ends_with(newName, NORMALIZED_AXIS_ORDER_SUFFIX_STR)) {
+                    newName.resize(newName.size() -
+                                   strlen(NORMALIZED_AXIS_ORDER_SUFFIX_STR));
+                } else if (ends_with(newName, AXIS_ORDER_REVERSED_SUFFIX_STR)) {
+                    newName.resize(newName.size() -
+                                   strlen(AXIS_ORDER_REVERSED_SUFFIX_STR));
+                } else {
+                    newName += nameSuffix;
+                }
             }
-            if (!array->empty()) {
-                props.set(common::ObjectUsage::OBJECT_DOMAIN_KEY, array);
+            auto props = util::PropertyMap().set(
+                common::IdentifiedObject::NAME_KEY, newName);
+            const auto &l_domains = domains();
+            if (!l_domains.empty()) {
+                auto array = util::ArrayOfBaseObject::create();
+                for (const auto &domain : l_domains) {
+                    array->add(domain);
+                }
+                if (!array->empty()) {
+                    props.set(common::ObjectUsage::OBJECT_DOMAIN_KEY, array);
+                }
             }
-        }
-        const auto &l_identifiers = identifiers();
-        const auto &l_remarks = remarks();
-        if (l_identifiers.size() == 1) {
-            std::string remarks("Axis order reversed compared to ");
-            remarks += *(l_identifiers[0]->codeSpace());
-            remarks += ':';
-            remarks += l_identifiers[0]->code();
-            if (!l_remarks.empty()) {
-                remarks += ". ";
-                remarks += l_remarks;
+            const auto &l_identifiers = identifiers();
+            const auto &l_remarks = remarks();
+            if (l_identifiers.size() == 1) {
+                std::string remarks("Axis order reversed compared to ");
+                if (!starts_with(l_remarks, remarks)) {
+                    remarks += *(l_identifiers[0]->codeSpace());
+                    remarks += ':';
+                    remarks += l_identifiers[0]->code();
+                    if (!l_remarks.empty()) {
+                        remarks += ". ";
+                        remarks += l_remarks;
+                    }
+                    props.set(common::IdentifiedObject::REMARKS_KEY, remarks);
+                }
+            } else if (!l_remarks.empty()) {
+                props.set(common::IdentifiedObject::REMARKS_KEY, l_remarks);
             }
-            props.set(common::IdentifiedObject::REMARKS_KEY, remarks);
-        } else if (!l_remarks.empty()) {
-            props.set(common::IdentifiedObject::REMARKS_KEY, l_remarks);
-        }
-        return props;
-    };
+            return props;
+        };
 
     const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
     if (compoundCRS) {
         const auto &comps = compoundCRS->componentReferenceSystems();
-        if (!comps.empty() &&
-            comps[0]->mustAxisOrderBeSwitchedForVisualization()) {
+        if (!comps.empty()) {
             std::vector<CRSNNPtr> newComps;
-            newComps.emplace_back(comps[0]->normalizeForVisualization());
+            newComps.emplace_back(comps[0]->applyAxisOrderReversal(nameSuffix));
             std::string l_name = newComps.back()->nameStr();
             for (size_t i = 1; i < comps.size(); i++) {
                 newComps.emplace_back(comps[i]);
@@ -946,16 +959,53 @@ CRSNNPtr CRS::normalizeForVisualization() const {
     const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
     if (geogCRS) {
         const auto &axisList = geogCRS->coordinateSystem()->axisList();
+        auto cs =
+            axisList.size() == 2
+                ? cs::EllipsoidalCS::create(util::PropertyMap(), axisList[1],
+                                            axisList[0])
+                : cs::EllipsoidalCS::create(util::PropertyMap(), axisList[1],
+                                            axisList[0], axisList[2]);
+        return util::nn_static_pointer_cast<CRS>(
+            GeographicCRS::create(createProperties(), geogCRS->datum(),
+                                  geogCRS->datumEnsemble(), cs));
+    }
+
+    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
+    if (projCRS) {
+        const auto &axisList = projCRS->coordinateSystem()->axisList();
+        auto cs =
+            axisList.size() == 2
+                ? cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                          axisList[0])
+                : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                          axisList[0], axisList[2]);
+        return util::nn_static_pointer_cast<CRS>(
+            ProjectedCRS::create(createProperties(), projCRS->baseCRS(),
+                                 projCRS->derivingConversion(), cs));
+    }
+
+    throw util::UnsupportedOperationException(
+        "axis order reversal not supported on this type of CRS");
+}
+
+// ---------------------------------------------------------------------------
+
+CRSNNPtr CRS::normalizeForVisualization() const {
+
+    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+    if (compoundCRS) {
+        const auto &comps = compoundCRS->componentReferenceSystems();
+        if (!comps.empty() &&
+            comps[0]->mustAxisOrderBeSwitchedForVisualization()) {
+            return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
+        }
+    }
+
+    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
+    if (geogCRS) {
+        const auto &axisList = geogCRS->coordinateSystem()->axisList();
         if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
-            auto cs = axisList.size() == 2
-                          ? cs::EllipsoidalCS::create(util::PropertyMap(),
-                                                      axisList[1], axisList[0])
-                          : cs::EllipsoidalCS::create(util::PropertyMap(),
-                                                      axisList[1], axisList[0],
-                                                      axisList[2]);
-            return util::nn_static_pointer_cast<CRS>(
-                GeographicCRS::create(createProperties(), geogCRS->datum(),
-                                      geogCRS->datumEnsemble(), cs));
+            return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
         }
     }
 
@@ -963,15 +1013,7 @@ CRSNNPtr CRS::normalizeForVisualization() const {
     if (projCRS) {
         const auto &axisList = projCRS->coordinateSystem()->axisList();
         if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
-            auto cs =
-                axisList.size() == 2
-                    ? cs::CartesianCS::create(util::PropertyMap(), axisList[1],
-                                              axisList[0])
-                    : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
-                                              axisList[0], axisList[2]);
-            return util::nn_static_pointer_cast<CRS>(
-                ProjectedCRS::create(createProperties(), projCRS->baseCRS(),
-                                     projCRS->derivingConversion(), cs));
+            return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
         }
     }
 
