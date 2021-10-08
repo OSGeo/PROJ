@@ -18,4 +18,4 @@ INSERT INTO "metadata" VALUES('PROJ.VERSION', '${PROJ_VERSION}');
 
 -- Version of the PROJ-data package with which this database is the most
 -- compatible.
-INSERT INTO "metadata" VALUES('PROJ_DATA.VERSION', '1.7');
+INSERT INTO "metadata" VALUES('PROJ_DATA.VERSION', '1.8');
