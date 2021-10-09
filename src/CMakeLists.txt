@@ -3,20 +3,23 @@
 include(lib_proj.cmake)
 
 # configure executable build
+option(BUILD_APPS
+  "Build PROJ applications (default value for BUILD_CCT, BUILD_CS2CS, etc.)" ON)
+
 option(BUILD_CCT
-  "Build cct (coordinate conversion and transformation tool)" ON)
+  "Build cct (coordinate conversion and transformation tool)" "${BUILD_APPS}")
 option(BUILD_CS2CS
-  "Build cs2cs (coordinate systems to coordinate systems translation tool)" ON)
+  "Build cs2cs (coordinate systems to coordinate systems translation tool)" "${BUILD_APPS}")
 option(BUILD_GEOD
-  "Build geod (computation of geodesic lines)" ON)
+  "Build geod (computation of geodesic lines)" "${BUILD_APPS}")
 option(BUILD_GIE
-  "Build gie (geospatial integrity investigation environment)" ON)
+  "Build gie (geospatial integrity investigation environment)" "${BUILD_APPS}")
 option(BUILD_PROJ
-  "Build proj (cartographic projection tool)" ON)
+  "Build proj (cartographic projection tool)" "${BUILD_APPS}")
 option(BUILD_PROJINFO
-  "Build projinfo (SRS and coordinate operation metadata/query tool)" ON)
+  "Build projinfo (SRS and coordinate operation metadata/query tool)" "${BUILD_APPS}")
 option(BUILD_PROJSYNC
-  "Build projsync (synchronize transformation support data)" ON)
+  "Build projsync (synchronize transformation support data)" "${BUILD_APPS}")
 
 if(NOT MSVC)
 

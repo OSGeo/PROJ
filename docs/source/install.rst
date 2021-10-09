@@ -322,33 +322,43 @@ CMake configure options
 Options to configure a CMake are provided using ``-D<var>=<value>``.
 All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
+.. option:: BUILD_APPS=ON
+
+    Build PROJ applications. Default is ON. Control the default value for
+    BUILD_CCT, BUILD_CS2CS, BUILD_GEOD, BUILD_GIE, BUILD_PROJ, BUILD_PROJINFO
+    and BUILD_PROJSYNC.
+    Note that changing its value after having configured once will not change
+    the value of the individual BUILD_CCT, ... options.
+
+    .. versionchanged:: 8.2
+
 .. option:: BUILD_CCT=ON
 
-    Build :ref:`cct`, default ON.
+    Build :ref:`cct`, default is the value of BUILD_APPS.
 
 .. option:: BUILD_CS2CS=ON
 
-    Build :ref:`cs2cs`, default ON.
+    Build :ref:`cs2cs`,default is the value of BUILD_APPS.
 
 .. option:: BUILD_GEOD=ON
 
-    Build :ref:`geod`, default ON.
+    Build :ref:`geod`, default is the value of BUILD_APPS.
 
 .. option:: BUILD_GIE=ON
 
-    Build :ref:`gie`, default ON.
+    Build :ref:`gie`, default is the value of BUILD_APPS.
 
 .. option:: BUILD_PROJ=ON
 
-    Build :ref:`proj`, default ON.
+    Build :ref:`proj`, default is the value of BUILD_APPS.
 
 .. option:: BUILD_PROJINFO=ON
 
-    Build :ref:`projinfo`, default ON.
+    Build :ref:`projinfo`, default is the value of BUILD_APPS.
 
 .. option:: BUILD_PROJSYNC=ON
 
-    Build :ref:`projsync`, default ON.
+    Build :ref:`projsync`, default is the value of BUILD_APPS.
 
 .. option:: BUILD_SHARED_LIBS
 
