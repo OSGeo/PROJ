@@ -1,0 +1,55 @@
+:
+# Script to test invproj exe
+#
+TEST_CLI_DIR=`dirname $0`
+EXE=$1
+
+usage()
+{
+    echo "Usage: ${0} <path to 'invproj' program>"
+    echo
+    exit 1
+}
+
+if test -z "${EXE}"; then
+    EXE=../../src/invproj
+fi
+
+if test ! -x ${EXE}; then
+    echo "*** ERROR: Can not find '${EXE}' program!"
+    exit 1
+fi
+
+if test -z "${PROJ_LIB}"; then
+    export PROJ_LIB="`dirname $0`/../../data"
+fi
+
+echo "============================================"
+echo "Running ${0} using ${EXE}:"
+echo "============================================"
+
+OUT=testinvproj_out
+#
+echo "doing tests into file ${OUT}, please wait"
+#
+$EXE +proj=tmerc +ellps=GRS80 -E -f '%.3f' >${OUT} <<EOF
+146339.48	5431555.61
+EOF
+
+#
+# do 'diff' with distribution results
+echo "diff ${OUT} with testinvproj_out.dist"
+diff -u -b ${OUT} ${TEST_CLI_DIR}/testinvproj_out.dist
+if [ $? -ne 0 ] ; then
+	echo  ""
+	echo "PROBLEMS HAVE OCCURRED"
+	echo "test file ${OUT} saved"
+    echo
+	exit 100
+else
+	echo "TEST OK"
+	echo "test file ${OUT} removed"
+    echo
+	/bin/rm -f ${OUT}
+	exit 0
+fi
