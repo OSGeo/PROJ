@@ -6394,6 +6394,37 @@ TEST(wkt_parse, wkt1_oracle) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_lcc_1sp_without_1sp_suffix) {
+    // WKT from Trimble
+    auto wkt = "PROJCS[\"TWM-Madison Co LDP\","
+               "GEOGCS[\"WGS 1984\","
+               "DATUM[\"WGS 1984\","
+               "SPHEROID[\"World Geodetic System 1984\","
+               "6378137,298.257223563]],"
+               "PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],"
+               "UNIT[\"Degree\",0.01745329251994,"
+               "AUTHORITY[\"EPSG\",\"9102\"]],"
+               "AXIS[\"Long\",EAST],AXIS[\"Lat\",NORTH]],"
+               "PROJECTION[\"Lambert_Conformal_Conic\"],"
+               "PARAMETER[\"False_Easting\",103000.0000035],"
+               "PARAMETER[\"False_Northing\",79000.00007055],"
+               "PARAMETER[\"Latitude_Of_Origin\",38.83333333333],"
+               "PARAMETER[\"Central_Meridian\",-89.93333333333],"
+               "PARAMETER[\"Scale_Factor\",1.000019129],"
+               "UNIT[\"Foot_US\",0.3048006096012,AUTHORITY[\"EPSG\",\"9003\"]],"
+               "AXIS[\"East\",EAST],AXIS[\"North\",NORTH]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
+              "Lambert Conic Conformal (1SP)");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
