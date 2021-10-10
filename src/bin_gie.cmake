@@ -11,8 +11,10 @@ add_executable(gie ${GIE_SRC} ${GIE_INCLUDE})
 target_link_libraries(gie PRIVATE ${PROJ_LIBRARIES})
 target_compile_options(gie PRIVATE ${PROJ_CXX_WARN_FLAGS})
 
-install(TARGETS gie
-  DESTINATION ${BINDIR})
+if(BUILD_GIE)
+  install(TARGETS gie
+    DESTINATION ${BINDIR})
+endif()
 
 if(MSVC AND BUILD_SHARED_LIBS)
   target_compile_definitions(gie PRIVATE PROJ_MSVC_DLL_IMPORT=1)
