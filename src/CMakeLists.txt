@@ -69,7 +69,8 @@ if(BUILD_PROJINFO)
   set(BIN_TARGETS ${BIN_TARGETS} binprojinfo)
 endif()
 
-if(BUILD_GIE)
+# Always build gie if testing is requested
+if(BUILD_GIE OR BUILD_TESTING)
   include(bin_gie.cmake)
   set(BIN_TARGETS ${BIN_TARGETS} gie)
 endif()
