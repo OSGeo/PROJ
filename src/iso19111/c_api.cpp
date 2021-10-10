@@ -8479,7 +8479,12 @@ PJ *proj_crs_get_datum_forced(PJ_CONTEXT *ctx, const PJ *crs) {
     const auto &datumEnsemble = l_crs->datumEnsemble();
     assert(datumEnsemble);
     auto dbContext = getDBcontextNoException(ctx, __FUNCTION__);
-    return pj_obj_create(ctx, datumEnsemble->asDatum(dbContext));
+    try {
+        return pj_obj_create(ctx, datumEnsemble->asDatum(dbContext));
+    } catch (const std::exception &e) {
+        proj_log_debug(ctx, __FUNCTION__, e.what());
+        return nullptr;
+    }
 }
 
 // ---------------------------------------------------------------------------
