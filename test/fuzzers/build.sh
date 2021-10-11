@@ -50,10 +50,20 @@ make -j$(nproc)
 make install
 cd ..
 
-./autogen.sh
-SQLITE3_CFLAGS=-I/usr/include SQLITE3_LIBS=-lsqlite3 TIFF_CFLAGS=-I$SRC/install/include TIFF_LIBS="-L$SRC/install/lib -ltiff" ./configure --disable-shared --with-curl=$SRC/install/bin/curl-config
+mkdir build
+cd build
+cmake .. -DBUILD_SHARED_LIBS:BOOL=OFF \
+        -DCURL_INCLUDE_DIR:PATH="$SRC/install/include" \
+        -DCURL_LIBRARY_RELEASE:FILEPATH="$SRC/install/lib/libcurl.a" \
+        -DTIFF_INCLUDE_DIR:PATH="$SRC/install/include" \
+        -DTIFF_LIBRARY_RELEASE:FILEPATH="$SRC/install/lib/libtiff.a" \
+        -DCMAKE_INSTALL_PREFIX=$SRC/install \
+        -DBUILD_APPS:BOOL=OFF \
+        -DBUILD_TESTING:BOOL=OFF
 make clean -s
 make -j$(nproc) -s
+make install
+cd ..
 
 EXTRA_LIBS="-lpthread -Wl,-Bstatic -lsqlite3 -L$SRC/install/lib -ltiff -lcurl -lssl -lcrypto -lz -Wl,-Bdynamic"
 
@@ -66,7 +76,7 @@ build_fuzzer()
     echo "Building fuzzer $fuzzerName"
     $CXX $CXXFLAGS -std=c++11 -fvisibility=hidden -Isrc -Iinclude \
         $sourceFilename $* -o $OUT/$fuzzerName \
-        $LIB_FUZZING_ENGINE src/.libs/libproj.a $EXTRA_LIBS
+        $LIB_FUZZING_ENGINE "$SRC/install/lib/libproj.a" $EXTRA_LIBS
 }
 
 build_fuzzer proj_crs_to_crs_fuzzer test/fuzzers/proj_crs_to_crs_fuzzer.cpp
