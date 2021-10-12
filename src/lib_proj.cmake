@@ -298,6 +298,60 @@ source_group("CMake Files" FILES CMakeLists.txt)
 # Embed PROJ_LIB data files location
 add_definitions(-DPROJ_LIB="${CMAKE_INSTALL_PREFIX}/${DATADIR}")
 
+
+###########################################################
+# targets to refresh wkt1_parser.cpp and wkt2_parser.cpp
+###########################################################
+
+# Those targets need to be run manually each time wkt1_grammar.y / wkt2_grammar.y
+# is modified.
+# We could of course run them automatically, but that would make building
+# PROJ harder.
+
+# This target checks that wkt1_grammar.y md5sum has not changed
+# If it has, then it should be updated and the generate_wkt1_parser target
+# should be manually run
+add_custom_target(check_wkt1_grammar_md5 ALL
+                  COMMAND ${CMAKE_COMMAND}
+                      "-DIN_FILE=wkt1_grammar.y"
+                      "-DTARGET=generate_wkt1_parser"
+                      "-DEXPECTED_MD5SUM=3a1720c3fa1b759719e33dd558603efb"
+                      -P "${CMAKE_CURRENT_SOURCE_DIR}/check_md5sum.cmake"
+                  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/wkt1_grammar.y"
+                  VERBATIM)
+
+add_custom_target(generate_wkt1_parser
+                  COMMAND ${CMAKE_COMMAND}
+                      "-DPREFIX=pj_wkt1_"
+                      "-DIN_FILE=wkt1_grammar.y"
+                      "-DOUT_FILE=wkt1_generated_parser.c"
+                      -P "${CMAKE_CURRENT_SOURCE_DIR}/generate_wkt_parser.cmake"
+                  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                  VERBATIM)
+
+# This target checks that wkt2_grammar.y md5sum has not changed
+# If it has, then it should be updated and the generate_wkt2_parser target
+# should be manually run
+add_custom_target(check_wkt2_grammar_md5 ALL
+                  COMMAND ${CMAKE_COMMAND}
+                      "-DIN_FILE=wkt2_grammar.y"
+                      "-DTARGET=generate_wkt2_parser"
+                      "-DEXPECTED_MD5SUM=1691b7d213073d5a1b49db2e080bc96e"
+                      -P "${CMAKE_CURRENT_SOURCE_DIR}/check_md5sum.cmake"
+                  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/wkt2_grammar.y"
+                  VERBATIM)
+
+add_custom_target(generate_wkt2_parser
+                  COMMAND ${CMAKE_COMMAND}
+                      "-DPREFIX=pj_wkt2_"
+                      "-DIN_FILE=wkt2_grammar.y"
+                      "-DOUT_FILE=wkt2_generated_parser.c"
+                      -P "${CMAKE_CURRENT_SOURCE_DIR}/generate_wkt_parser.cmake"
+                  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                  VERBATIM)
+
 #################################################
 ## targets: libproj and proj_config.h
 #################################################

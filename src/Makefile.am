@@ -14,7 +14,11 @@ include_HEADERS = proj.h proj_experimental.h proj_constants.h geodesic.h \
 
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	bin_geod.cmake bin_proj.cmake bin_projinfo.cmake \
-	lib_proj.cmake CMakeLists.txt bin_geodtest.cmake \
+	lib_proj.cmake \
+	check_md5sum.cmake \
+	generate_wkt_parser.cmake \
+	CMakeLists.txt \
+	bin_geodtest.cmake \
 	bin_projsync.cmake \
 	tests/geodtest.cpp \
 	wkt1_grammar.y wkt2_grammar.y apps/emess.h apps/utils.h \
