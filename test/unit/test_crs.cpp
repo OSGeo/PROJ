@@ -787,6 +787,37 @@ TEST(crs,
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, implicit_compound_ESRI_104971_to_3D_as_WKT1_ESRI_with_database) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "ESRI");
+    auto crs = factory->createGeographicCRS("104971")->promoteTo3D(
+        std::string(), dbContext);
+    WKTFormatterNNPtr f(WKTFormatter::create(
+        WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+    // Situation where there is no ESRI vertical CRS, but the GEOGCS does exist
+    // This will be only partly recognized by ESRI software.
+    // See https://github.com/OSGeo/PROJ/issues/2757
+    const char *wkt = "GEOGCS[\"Mars_2000_(Sphere)\","
+                      "DATUM[\"Mars_2000_(Sphere)\","
+                      "SPHEROID[\"Mars_2000_(Sphere)\",3396190.0,0.0]],"
+                      "PRIMEM[\"Reference_Meridian\",0.0],"
+                      "UNIT[\"Degree\",0.0174532925199433]],"
+                      "VERTCS[\"Mars_2000_(Sphere)\","
+                      "DATUM[\"Mars_2000_(Sphere)\","
+                      "SPHEROID[\"Mars_2000_(Sphere)\",3396190.0,0.0]],"
+                      "PARAMETER[\"Vertical_Shift\",0.0],"
+                      "PARAMETER[\"Direction\",1.0],"
+                      "UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(f.get()), wkt);
+
+    auto obj2 = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs2 = nn_dynamic_pointer_cast<GeographicCRS>(obj2);
+    ASSERT_TRUE(crs2 != nullptr);
+    EXPECT_EQ(crs2->coordinateSystem()->axisList().size(), 3U);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, IAU_1000_as_WKT2) {
     auto dbContext = DatabaseContext::create();
     auto factory = AuthorityFactory::create(dbContext, "IAU_2015");
