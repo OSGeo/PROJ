@@ -1828,15 +1828,16 @@ static bool exportAsESRIWktCompoundCRSWithEllipsoidalHeight(
         return false;
     }
     const auto l_datum = geodCRS->datumNonNull(formatter->databaseContext());
-    auto l_alias = dbContext->getAliasFromOfficialName(
+    auto l_esri_name = dbContext->getAliasFromOfficialName(
         l_datum->nameStr(), "geodetic_datum", "ESRI");
-    if (l_alias.empty()) {
-        return false;
+    if (l_esri_name.empty()) {
+        l_esri_name = l_datum->nameStr();
     }
     auto authFactory =
         io::AuthorityFactory::create(NN_NO_CHECK(dbContext), std::string());
     auto list = authFactory->createObjectsFromName(
-        l_alias, {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
+        l_esri_name,
+        {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME},
         false /* approximate=false*/);
     if (list.empty()) {
         return false;
@@ -1982,6 +1983,18 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                     l_name = l_alias;
                     aliasFound = true;
                 }
+            }
+            if (!aliasFound && dbContext) {
+                auto authFactory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), "ESRI");
+                aliasFound =
+                    authFactory
+                        ->createObjectsFromName(
+                            l_name,
+                            {io::AuthorityFactory::ObjectType::GEODETIC_CRS},
+                            false // approximateMatch
+                            )
+                        .size() == 1;
             }
             if (!aliasFound) {
                 l_name = io::WKTFormatter::morphNameToESRI(l_name);
@@ -3266,6 +3279,18 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                 aliasFound = true;
             }
         }
+        if (!aliasFound && dbContext) {
+            auto authFactory =
+                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI");
+            aliasFound =
+                authFactory
+                    ->createObjectsFromName(
+                        l_name,
+                        {io::AuthorityFactory::ObjectType::VERTICAL_CRS},
+                        false // approximateMatch
+                        )
+                    .size() == 1;
+        }
         if (!aliasFound) {
             l_name = io::WKTFormatter::morphNameToESRI(l_name);
         }
@@ -3966,10 +3991,24 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             "Projected 3D CRS can only be exported since WKT2:2019");
     }
 
-    std::string l_alias;
+    std::string l_esri_name;
     if (formatter->useESRIDialect() && dbContext) {
-        l_alias = dbContext->getAliasFromOfficialName(l_name, "projected_crs",
-                                                      "ESRI");
+        l_esri_name = dbContext->getAliasFromOfficialName(
+            l_name, "projected_crs", "ESRI");
+        if (l_esri_name.empty()) {
+            auto authFactory =
+                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI");
+            const bool found =
+                authFactory
+                    ->createObjectsFromName(
+                        l_name,
+                        {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
+                        false // approximateMatch
+                        )
+                    .size() == 1;
+            if (found)
+                l_esri_name = l_name;
+        }
     }
 
     if (!isWKT2 && formatter->useESRIDialect() && !l_identifiers.empty() &&
@@ -3991,12 +4030,12 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             }
         } catch (const std::exception &) {
         }
-    } else if (!isWKT2 && formatter->useESRIDialect() && !l_alias.empty()) {
+    } else if (!isWKT2 && formatter->useESRIDialect() && !l_esri_name.empty()) {
         try {
             auto res =
                 io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI")
                     ->createObjectsFromName(
-                        l_alias,
+                        l_esri_name,
                         {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
                         false);
             if (res.size() == 1) {
@@ -4075,10 +4114,10 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                          !l_identifiers.empty());
 
     if (formatter->useESRIDialect()) {
-        if (l_alias.empty()) {
+        if (l_esri_name.empty()) {
             l_name = io::WKTFormatter::morphNameToESRI(l_name);
         } else {
-            l_name = l_alias;
+            l_name = l_esri_name;
         }
     }
     if (!isWKT2 && !formatter->useESRIDialect() && isDeprecated()) {
