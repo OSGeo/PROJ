@@ -25,10 +25,12 @@ EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	apps/projsync.cpp
 
 proj_SOURCES = apps/proj.cpp apps/emess.cpp apps/utils.cpp
+invproj_SOURCES = $(proj_SOURCES)
 projinfo_SOURCES = apps/projinfo.cpp
 cs2cs_SOURCES = apps/cs2cs.cpp apps/emess.cpp apps/utils.cpp
 cct_SOURCES = apps/cct.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
 geod_SOURCES = apps/geod.cpp apps/geod_set.cpp apps/geod_interface.cpp apps/geod_interface.h apps/emess.cpp
+invgeod_SOURCES = $(geod_SOURCES)
 
 if HAVE_CURL
 projsync_SOURCES = apps/projsync.cpp
@@ -37,6 +39,7 @@ PROJSYNC_BIN = projsync
 endif
 
 bin_PROGRAMS =	proj geod cs2cs gie cct projinfo $(PROJSYNC_BIN)
+noinst_PROGRAMS = invproj invgeod
 
 gie_SOURCES = apps/gie.cpp apps/proj_strtod.cpp apps/proj_strtod.h apps/optargpm.h
 multistresstest_SOURCES = tests/multistresstest.cpp
@@ -45,7 +48,9 @@ geodtest_SOURCES = tests/geodtest.cpp
 cct_LDADD = libproj.la
 cs2cs_LDADD = libproj.la
 geod_LDADD = libproj.la
+invgeod_LDADD = $(geod_LDADD)
 proj_LDADD = libproj.la
+invproj_LDADD = $(proj_LDADD)
 projinfo_LDADD = libproj.la
 
 gie_LDADD = libproj.la
@@ -275,7 +280,6 @@ wkt2_parser:
 	bison --no-lines -d  -p pj_wkt2_ -o$(top_srcdir)/src/wkt2_generated_parser.c $(top_srcdir)/src/wkt2_grammar.y
 	sed "s/\*yyssp = yystate/\*yyssp = (yytype_int16)yystate/" < $(top_srcdir)/src/wkt2_generated_parser.c | sed "s/yyerrorlab:/#if 0\nyyerrorlab:/" | sed "s/yyerrlab1:/#endif\nyyerrlab1:/" | sed "s/for (yylen = 0; yystr\[yylen\]; yylen++)/for (yylen = 0; yystr \&\& yystr\[yylen\]; yylen++)/"| sed "s/return yystpcpy (yyres, yystr) - yyres;/return (YYPTRDIFF_T)(yystpcpy (yyres, yystr) - yyres);/" | sed "s/YYPTRDIFF_T yysize = yyssp - yyss + 1;/YYPTRDIFF_T yysize = (YYPTRDIFF_T)(yyssp - yyss + 1);/"> $(top_srcdir)/src/wkt2_generated_parser.c.tmp
 	mv $(top_srcdir)/src/wkt2_generated_parser.c.tmp $(top_srcdir)/src/wkt2_generated_parser.c
-
 
 install-exec-local: install-binPROGRAMS
 	rm -f $(DESTDIR)$(bindir)/invproj$(EXEEXT)

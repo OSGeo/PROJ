@@ -3,6 +3,7 @@ PROJ_LIB = ../../data/for_tests
 THIS_DIR = $(top_srcdir)/test/cli
 EXEPATH = ../../src
 PROJEXE = $(EXEPATH)/proj
+INVPROJEXE = $(EXEPATH)/invproj
 CS2CSEXE = $(EXEPATH)/cs2cs
 PROJINFOEXE = $(EXEPATH)/projinfo
 CCTEXE = $(EXEPATH)/cct
@@ -12,6 +13,7 @@ PROJSYNC_EXE = $(EXEPATH)/projsync
 TEST27 = $(THIS_DIR)/test27
 TEST83 = $(THIS_DIR)/test83
 TESTPROJ = $(THIS_DIR)/testproj
+TESTINVPROJ = $(THIS_DIR)/testinvproj
 TESTNTV2 = $(THIS_DIR)/testntv2
 TESTVARIOUS = $(THIS_DIR)/testvarious
 TESTFLAKY = $(THIS_DIR)/testflaky
@@ -28,6 +30,7 @@ EXTRA_DIST = pj_out27.dist pj_out83.dist td_out.dist \
 		testprojinfo testprojinfo_out.dist \
 		testcct testcct_out.dist \
 		testproj testproj_out.dist \
+		testinvproj testinvproj_out.dist \
 		test_projsync \
 		CMakeLists.txt
 
@@ -42,6 +45,9 @@ test83-check:
 
 testproj-check:
 	PROJ_LIB=$(PROJ_LIB) $(TESTPROJ) $(PROJEXE)
+
+testinvproj-check:
+	PROJ_LIB=$(PROJ_LIB) $(TESTINVPROJ) $(INVPROJEXE)
 
 testvarious-check:
 	PROJ_SKIP_READ_USER_WRITABLE_DIRECTORY=YES PROJ_LIB=$(PROJ_LIB) $(TESTVARIOUS) $(CS2CSEXE)
@@ -67,4 +73,4 @@ testprojsync-check:
 	echo "Skipping testprojsync-check"
 endif
 
-check-local: testprojinfo-check test27-check test83-check testproj-check testvarious-check testdatumfile-check testign-check testntv2-check testcct-check testprojsync-check
+check-local: testprojinfo-check test27-check test83-check testproj-check testinvproj-check testvarious-check testdatumfile-check testign-check testntv2-check testcct-check testprojsync-check
