@@ -211,3 +211,25 @@ INSERT INTO "usage" VALUES(
     'EPSG','1286', -- area of use: Europe - Liechtenstein and Switzerland
     'EPSG','1024'  -- unknown
 );
+
+-- Mexico
+
+INSERT INTO "grid_transformation" VALUES(
+    'PROJ','EPSG_6364_TO_EPSG_5703','Mexico ITRF2008 to NAVD88 height',
+    NULL,
+    'EPSG','9665','Geographic3D to GravityRelatedHeight (gtx)',
+    'EPSG','6364', -- source CRS (Mexico ITRF2008)
+    'EPSG','5703', -- target CRS (NAVD88 height)
+    NULL,
+    'EPSG','8666','Geoid (height correction) model file','GGM10.txt',
+    NULL,NULL,NULL,NULL,NULL,NULL,NULL,0);
+
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'EPSG_6364_TO_EPSG_5703_USAGE',
+    'grid_transformation',
+    'PROJ',
+    'EPSG_6364_TO_EPSG_5703',
+    'EPSG','3278', -- area of use: Mexico - onshore
+    'EPSG','1024'  -- unknown
+);

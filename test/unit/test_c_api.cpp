@@ -5716,6 +5716,7 @@ TEST_F(CApi, proj_get_geoid_models_from_database) {
     ListFreer freer(list);
     EXPECT_TRUE(findInList(list, "GEOID12B"));
     EXPECT_TRUE(findInList(list, "GEOID18"));
+    EXPECT_TRUE(findInList(list, "GGM10"));
     EXPECT_FALSE(findInList(list, "OSGM15"));
 }
 

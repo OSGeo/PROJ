@@ -257,6 +257,8 @@ INSERT INTO "geoid_model" SELECT 'GEOID18', auth_name, code FROM grid_transforma
 
 INSERT INTO "geoid_model" SELECT 'OSGM15', auth_name, code FROM grid_transformation WHERE auth_name = 'EPSG' AND grid_name LIKE '%OSGM15%' AND deprecated = 0;
 
+INSERT INTO "geoid_model" SELECT 'GGM10', auth_name, code FROM grid_transformation WHERE auth_name = 'PROJ' AND grid_name LIKE 'GGM10.txt' AND deprecated = 0;
+
 ---- PROJ historic +datum aliases -----
 
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6326','WGS84','PROJ');
