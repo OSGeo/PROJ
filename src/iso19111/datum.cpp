@@ -363,6 +363,18 @@ void PrimeMeridian::_exportToWKT(
                     aliasFound = true;
                 }
             }
+            if (!aliasFound && dbContext) {
+                auto authFactory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), "ESRI");
+                aliasFound =
+                    authFactory
+                        ->createObjectsFromName(
+                            l_name,
+                            {io::AuthorityFactory::ObjectType::PRIME_MERIDIAN},
+                            false // approximateMatch
+                            )
+                        .size() == 1;
+            }
             if (!aliasFound) {
                 l_name = io::WKTFormatter::morphNameToESRI(l_name);
             }
@@ -820,6 +832,18 @@ void Ellipsoid::_exportToWKT(
                             aliasFound = true;
                         }
                     }
+                    if (!aliasFound && dbContext) {
+                        auto authFactory = io::AuthorityFactory::create(
+                            NN_NO_CHECK(dbContext), "ESRI");
+                        aliasFound = authFactory
+                                         ->createObjectsFromName(
+                                             l_name,
+                                             {io::AuthorityFactory::ObjectType::
+                                                  ELLIPSOID},
+                                             false // approximateMatch
+                                             )
+                                         .size() == 1;
+                    }
                     if (!aliasFound) {
                         l_name = io::WKTFormatter::morphNameToESRI(l_name);
                     }
@@ -1246,6 +1270,18 @@ void GeodeticReferenceFrame::_exportToWKT(
                             aliasFound = true;
                         }
                     }
+                }
+                if (!aliasFound && dbContext) {
+                    auto authFactory = io::AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext), "ESRI");
+                    aliasFound = authFactory
+                                     ->createObjectsFromName(
+                                         l_name,
+                                         {io::AuthorityFactory::ObjectType::
+                                              GEODETIC_REFERENCE_FRAME},
+                                         false // approximateMatch
+                                         )
+                                     .size() == 1;
                 }
                 if (!aliasFound) {
                     l_name = io::WKTFormatter::morphNameToESRI(l_name);
@@ -1984,6 +2020,18 @@ void VerticalReferenceFrame::_exportToWKT(
                     l_name = l_alias;
                     aliasFound = true;
                 }
+            }
+            if (!aliasFound && dbContext) {
+                auto authFactory = io::AuthorityFactory::create(
+                    NN_NO_CHECK(dbContext), "ESRI");
+                aliasFound = authFactory
+                                 ->createObjectsFromName(
+                                     l_name,
+                                     {io::AuthorityFactory::ObjectType::
+                                          VERTICAL_REFERENCE_FRAME},
+                                     false // approximateMatch
+                                     )
+                                 .size() == 1;
             }
             if (!aliasFound) {
                 l_name = io::WKTFormatter::morphNameToESRI(l_name);
