@@ -39,7 +39,7 @@ endfunction()
 
 # Create user writable directory for tests
 add_custom_target(create_tmp_user_writable_dir ALL
-                  COMMAND ${CMAKE_COMMAND} -E make_directory {PROJ_BINARY_DIR}/tmp_user_writable_dir)
+                  COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJ_BINARY_DIR}/tmp_user_writable_dir)
 
 function(proj_add_gie_network_dependent_test TESTNAME TESTCASE)
 
