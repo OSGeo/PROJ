@@ -65,6 +65,7 @@ TEST(tinshift, basic) {
         EXPECT_EQ(f->formatVersion(), "1.0");
         EXPECT_EQ(f->inputCRS(), "EPSG:2393");
         EXPECT_EQ(f->outputCRS(), "EPSG:3067");
+        EXPECT_EQ(f->fallbackStrategy(), FALLBACK_NONE);
 
         auto eval = Evaluator(std::move(f));
         double x_out = 0;
@@ -205,6 +206,72 @@ TEST(tinshift, basic) {
         EXPECT_EQ(x_out, 0.5);
         EXPECT_EQ(y_out, 0.75);
         EXPECT_EQ(z_out, 1000.0);
+    }
+
+    // invalid fallback_strategy field with 1.0 version
+    {
+        auto j(jMinValid);
+        j["fallback_strategy"] = "none";
+        EXPECT_THROW(TINShiftFile::parse(j.dump()), ParsingException);
+    }
+
+    // invalid fallback_strategy field with 1.1 version
+    {
+        auto j(jMinValid);
+        j["format_version"] = "1.1";
+        j["fallback_strategy"] = "invalid";
+        EXPECT_THROW(TINShiftFile::parse(j.dump()), ParsingException);
+    }
+
+    // fail with no triangles and fallback nearest_side
+    {
+        auto j(jMinValid);
+        j["format_version"] = "1.1";
+        j["fallback_strategy"] = "nearest_side";
+        j["triangles"] = json::array(); // empty
+
+        auto f = TINShiftFile::parse(j.dump());
+        auto eval = Evaluator(std::move(f));
+        double x_out = 0;
+        double y_out = 0;
+        double z_out = 0;
+
+        EXPECT_FALSE(eval.forward(1.0, 1.0, 1.0, x_out, y_out, z_out));
+    }
+
+    // fail with only degenerate triangles (one size is zero length) and
+    // fallback nearest_side
+    {
+        auto j(jMinValid);
+        j["format_version"] = "1.1";
+        j["fallback_strategy"] = "nearest_side";
+        j["vertices"] = {{0, 0, 101, 101}, {0, 1, 100, 101}, {0, 1, 100, 100}};
+
+        auto f = TINShiftFile::parse(j.dump());
+        auto eval = Evaluator(std::move(f));
+        double x_out = 0;
+        double y_out = 0;
+        double z_out = 0;
+
+        EXPECT_FALSE(eval.forward(1.0, 1.0, 1.0, x_out, y_out, z_out));
+    }
+
+    // fail with only degenerate triangles (two angles are 0°) and fallback
+    // nearest_side
+    {
+        auto j(jMinValid);
+        j["format_version"] = "1.1";
+        j["fallback_strategy"] = "nearest_side";
+        j["vertices"] = {
+            {0, 0, 101, 101}, {0, 0.5, 100, 101}, {0, 1, 100, 100}};
+
+        auto f = TINShiftFile::parse(j.dump());
+        auto eval = Evaluator(std::move(f));
+        double x_out = 0;
+        double y_out = 0;
+        double z_out = 0;
+
+        EXPECT_FALSE(eval.forward(1.0, 1.0, 1.0, x_out, y_out, z_out));
     }
 }
 

@@ -93,6 +93,24 @@ std::unique_ptr<TINShiftFile> TINShiftFile::parse(const std::string &text) {
     tinshiftFile->mDescription = getOptString(j, "description");
     tinshiftFile->mPublicationDate = getOptString(j, "publication_date");
 
+    tinshiftFile->mFallbackStrategy = FALLBACK_NONE;
+    if (j.contains("fallback_strategy")) {
+        if (tinshiftFile->mFormatVersion != "1.1") {
+            throw ParsingException(
+                "fallback_strategy needs format_version 1.1");
+        }
+        const auto fallback_strategy = getOptString(j, "fallback_strategy");
+        if (fallback_strategy == "nearest_side") {
+            tinshiftFile->mFallbackStrategy = FALLBACK_NEAREST_SIDE;
+        } else if (fallback_strategy == "nearest_centroid") {
+            tinshiftFile->mFallbackStrategy = FALLBACK_NEAREST_CENTROID;
+        } else if (fallback_strategy == "none") {
+            tinshiftFile->mFallbackStrategy = FALLBACK_NONE;
+        } else {
+            throw ParsingException("invalid fallback_strategy");
+        }
+    }
+
     if (j.contains("authority")) {
         const json jAuthority = j["authority"];
         if (!jAuthority.is_object()) {
@@ -410,6 +428,28 @@ Evaluator::Evaluator(std::unique_ptr<TINShiftFile> &&fileIn)
 
 // ---------------------------------------------------------------------------
 
+static inline double sqr(double x) { return x * x; }
+static inline double squared_distance(double x1, double y1, double x2,
+                                      double y2) {
+    return sqr(x1 - x2) + sqr(y1 - y2);
+}
+static double distance_point_segment(double x, double y, double x1, double y1,
+                                     double x2, double y2, double dist12) {
+    // squared distance of point x/y to line segment x1/y1 -- x2/y2
+    double t = ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / dist12;
+    if (t <= 0) {
+        // closest to x1/y1
+        return squared_distance(x, y, x1, y1);
+    }
+    if (t >= 1) {
+        // closest to y2/y2
+        return squared_distance(x, y, x2, y2);
+    }
+
+    // closest to line segment x1/y1 -- x2/y2
+    return squared_distance(x, y, x1 + t * (x2 - x1), y1 + t * (y2 - y1));
+}
+
 static const TINShiftFile::VertexIndices *
 FindTriangle(const TINShiftFile &file,
              const NS_PROJ::QuadTree::QuadTree<unsigned> &quadtree,
@@ -453,7 +493,101 @@ FindTriangle(const TINShiftFile &file,
             }
         }
     }
-    return nullptr;
+    if (file.fallbackStrategy() == FALLBACK_NONE) {
+        return nullptr;
+    }
+    // find triangle with the shortest squared distance
+    //
+    // TODO: extend quadtree to support nearest neighbor search
+    double closest_dist = std::numeric_limits<double>::infinity();
+    double closest_dist2 = std::numeric_limits<double>::infinity();
+    size_t closest_i = 0;
+    for (size_t i = 0; i < triangles.size(); ++i) {
+        const auto &triangle = triangles[i];
+        const unsigned i1 = triangle.idx1;
+        const unsigned i2 = triangle.idx2;
+        const unsigned i3 = triangle.idx3;
+        const double x1 = vertices[i1 * colCount + idxX];
+        const double y1 = vertices[i1 * colCount + idxY];
+        const double x2 = vertices[i2 * colCount + idxX];
+        const double y2 = vertices[i2 * colCount + idxY];
+        const double x3 = vertices[i3 * colCount + idxX];
+        const double y3 = vertices[i3 * colCount + idxY];
+
+        // don't check this triangle if the query point plusminus the
+        // currently closest found distance is outside the triangle's AABB
+        if (x + closest_dist < std::min(x1, std::min(x2, x3)) ||
+            x - closest_dist > std::max(x1, std::max(x2, x3)) ||
+            y + closest_dist < std::min(y1, std::min(y2, y3)) ||
+            y - closest_dist > std::max(y1, std::max(y2, y3))) {
+            continue;
+        }
+
+        double dist12 = squared_distance(x1, y1, x2, y2);
+        double dist23 = squared_distance(x2, y2, x3, y3);
+        double dist13 = squared_distance(x1, y1, x3, y3);
+        if (dist12 < EPS || dist23 < EPS || dist13 < EPS) {
+            // do not use degenerate triangles
+            continue;
+        }
+        double dist2;
+        if (file.fallbackStrategy() == FALLBACK_NEAREST_SIDE) {
+            // we don't know whether the points of the triangle are given
+            // clockwise or counter-clockwise, so we have to check the distance
+            // of the point to all three sides of the triangle
+            dist2 = distance_point_segment(x, y, x1, y1, x2, y2, dist12);
+            if (dist2 < closest_dist2) {
+                closest_dist2 = dist2;
+                closest_dist = sqrt(dist2);
+                closest_i = i;
+            }
+            dist2 = distance_point_segment(x, y, x2, y2, x3, y3, dist23);
+            if (dist2 < closest_dist2) {
+                closest_dist2 = dist2;
+                closest_dist = sqrt(dist2);
+                closest_i = i;
+            }
+            dist2 = distance_point_segment(x, y, x1, y1, x3, y3, dist13);
+            if (dist2 < closest_dist2) {
+                closest_dist2 = dist2;
+                closest_dist = sqrt(dist2);
+                closest_i = i;
+            }
+        } else if (file.fallbackStrategy() == FALLBACK_NEAREST_CENTROID) {
+            double c_x = (x1 + x2 + x3) / 3.0;
+            double c_y = (y1 + y2 + y3) / 3.0;
+            dist2 = squared_distance(x, y, c_x, c_y);
+            if (dist2 < closest_dist2) {
+                closest_dist2 = dist2;
+                closest_dist = sqrt(dist2);
+                closest_i = i;
+            }
+        }
+    }
+    if (std::isinf(closest_dist)) {
+        // nothing was found due to empty triangle list or only degenerate
+        // triangles
+        return nullptr;
+    }
+    const auto &triangle = triangles[closest_i];
+    const unsigned i1 = triangle.idx1;
+    const unsigned i2 = triangle.idx2;
+    const unsigned i3 = triangle.idx3;
+    const double x1 = vertices[i1 * colCount + idxX];
+    const double y1 = vertices[i1 * colCount + idxY];
+    const double x2 = vertices[i2 * colCount + idxX];
+    const double y2 = vertices[i2 * colCount + idxY];
+    const double x3 = vertices[i3 * colCount + idxX];
+    const double y3 = vertices[i3 * colCount + idxY];
+    const double det_T = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3);
+    if (std::fabs(det_T) < EPS) {
+        // the nearest triangle is degenerate
+        return nullptr;
+    }
+    lambda1 = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / det_T;
+    lambda2 = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) / det_T;
+    lambda3 = 1 - lambda1 - lambda2;
+    return &triangle;
 }
 
 // ---------------------------------------------------------------------------

@@ -166,6 +166,20 @@ transformed_components
   vertical component is transformed.
 
 
+fallback_strategy
+  String identifying how to treat points that do not fall into any of the
+  specified triangles. This item is available for ``format_version`` >= 1.1.
+  Possible values are ``none``, ``nearest_side`` and ``nearest_centroid``. The
+  default is ``none`` and signifies, that points that fall outside the
+  specified triangles are not transformed. This is also the behaviour for
+  ``format_version`` before 1.1. If ``fallback_strategy`` is set to
+  ``nearest_side``, then points that do not fall into any triangle are 
+  transformed according to the triangle closest to them by euclidean distance.
+  If ``fallback_strategy`` is set to ``nearest_centroid``, then points that do
+  not fall into any triangle are transformed according to the triangle with the
+  closest centroid (intersection of its medians).
+
+
 vertices_columns
   Specify the name of the columns of the rows in the ``vertices``
   array. There must be exactly as many elements in ``vertices_columns`` as in a
