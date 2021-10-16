@@ -43,9 +43,6 @@ if(UNIX)
 else()
 
     add_executable(invproj ${PROJ_SRC})
-    set_target_properties(invproj
-      PROPERTIES
-      RUNTIME_OUTPUT_NAME proj)
     target_link_libraries(invproj PRIVATE ${PROJ_LIBRARIES})
     target_compile_options(invproj PRIVATE ${PROJ_CXX_WARN_FLAGS})
 
