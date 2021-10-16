@@ -4347,6 +4347,9 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
                     const bool heightDepthReversal =
                         ((srcIsUp && dstIsDown) || (srcIsDown && dstIsUp));
 
+                    if (convDst == 0)
+                        throw InvalidOperation(
+                            "Conversion factor of target unit is 0");
                     const double factor = convSrc / convDst;
                     auto conv = Conversion::createChangeVerticalUnit(
                         util::PropertyMap().set(
@@ -4460,6 +4463,8 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
     const bool heightDepthReversal =
         ((srcIsUp && dstIsDown) || (srcIsDown && dstIsUp));
 
+    if (convDst == 0)
+        throw InvalidOperation("Conversion factor of target unit is 0");
     const double factor = convSrc / convDst;
     if (!equivalentVDatum) {
         auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
@@ -4557,6 +4562,8 @@ void CoordinateOperationFactory::Private::createOperationsVertToGeogBallpark(
     const bool heightDepthReversal =
         ((srcIsUp && dstIsDown) || (srcIsDown && dstIsUp));
 
+    if (convDst == 0)
+        throw InvalidOperation("Conversion factor of target unit is 0");
     const double factor = convSrc / convDst;
 
     const auto &sourceCRSExtent = getExtent(sourceCRS);
