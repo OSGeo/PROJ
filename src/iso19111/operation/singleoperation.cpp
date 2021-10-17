@@ -2118,15 +2118,18 @@ bool SingleOperation::exportToPROJStringGeneric(
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_CHANGE_VERTICAL_UNIT) {
-        double convFactor = parameterValueNumericAsSI(
+        const double convFactor = parameterValueNumericAsSI(
             EPSG_CODE_PARAMETER_UNIT_CONVERSION_SCALAR);
-        auto uom = common::UnitOfMeasure(std::string(), convFactor,
-                                         common::UnitOfMeasure::Type::LINEAR)
-                       .exportToPROJString();
-        auto reverse_uom =
-            common::UnitOfMeasure(std::string(), 1.0 / convFactor,
+        const auto uom =
+            common::UnitOfMeasure(std::string(), convFactor,
                                   common::UnitOfMeasure::Type::LINEAR)
                 .exportToPROJString();
+        const auto reverse_uom =
+            convFactor == 0.0
+                ? std::string()
+                : common::UnitOfMeasure(std::string(), 1.0 / convFactor,
+                                        common::UnitOfMeasure::Type::LINEAR)
+                      .exportToPROJString();
         if (uom == "m") {
             // do nothing
         } else if (!uom.empty()) {
