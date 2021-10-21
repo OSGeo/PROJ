@@ -1310,7 +1310,7 @@ int proj_trans_bounds(PJ_CONTEXT* context,
                       double* out_ymin,
                       double* out_xmax,
                       double* out_ymax,
-                      int densify_pts
+                      const int densify_pts
 ) {
     *out_xmin = HUGE_VAL;
     *out_ymin = HUGE_VAL;
