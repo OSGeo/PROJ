@@ -83,7 +83,7 @@ INSERT INTO "extent" VALUES('EPSG','1103','Germany','Germany - onshore and offsh
 INSERT INTO "extent" VALUES('EPSG','1104','Ghana','Ghana - onshore and offshore.',1.4,11.16,-3.79,2.1,0);
 INSERT INTO "extent" VALUES('EPSG','1105','Gibraltar','Gibraltar - onshore and offshore.',36.0,36.16,-5.42,-4.89,0);
 INSERT INTO "extent" VALUES('EPSG','1106','Greece','Greece - onshore and offshore. Includes Aegean Islands, Ionian Islands, Dodecanese Islands, Crete, and Mount Athos.',33.26,41.75,18.26,30.23,0);
-INSERT INTO "extent" VALUES('EPSG','1107','Greenland','Greenland - onshore and offshore.',56.38,87.03,-75.0,7.99,0);
+INSERT INTO "extent" VALUES('EPSG','1107','Greenland','Greenland - onshore and offshore.',56.38,87.02,-75.0,7.99,0);
 INSERT INTO "extent" VALUES('EPSG','1108','Grenada','Grenada and southern Grenadine Islands - onshore and offshore.',11.36,13.4,-63.28,-60.82,0);
 INSERT INTO "extent" VALUES('EPSG','1109','Guadeloupe','Guadeloupe - onshore and offshore. Includes Grande Terre, Basse Terre, Marie Galante, Les Saintes, Iles de la Petite Terre, La Desirade; St Barthélemy, and northern St Martin.',15.06,18.54,-63.66,-57.54,0);
 INSERT INTO "extent" VALUES('EPSG','1110','Guam','Guam - onshore and offshore.',10.95,15.91,141.19,148.18,0);
@@ -158,7 +158,7 @@ INSERT INTO "extent" VALUES('EPSG','1178','Nigeria','Nigeria - onshore and offsh
 INSERT INTO "extent" VALUES('EPSG','1179','Niue','Niue - onshore and offshore.',-22.49,-16.58,-172.01,-166.31,0);
 INSERT INTO "extent" VALUES('EPSG','1180','Norfolk Island','Norfolk Island - onshore and offshore.',-32.48,-25.61,163.36,173.35,0);
 INSERT INTO "extent" VALUES('EPSG','1181','Northern Mariana Islands','Northern Mariana Islands - onshore and offshore.',12.38,23.9,141.33,149.55,0);
-INSERT INTO "extent" VALUES('EPSG','1182','Norway','Norway including Svalbard - onshore and offshore.',56.08,84.73,-3.35,38.0,0);
+INSERT INTO "extent" VALUES('EPSG','1182','Norway','Norway including Svalbard - onshore and offshore.',56.08,84.72,-3.34,38.0,0);
 INSERT INTO "extent" VALUES('EPSG','1183','Oman','Oman - onshore and offshore.',14.33,26.74,51.99,63.38,0);
 INSERT INTO "extent" VALUES('EPSG','1184','Pakistan','Pakistan - onshore and offshore.',21.05,37.07,60.86,77.83,0);
 INSERT INTO "extent" VALUES('EPSG','1185','Palau','Palau - onshore and offshore.',1.64,11.45,129.48,136.98,0);
@@ -1350,7 +1350,7 @@ INSERT INTO "extent" VALUES('EPSG','2370','Europe - former Yugoslavia onshore','
 INSERT INTO "extent" VALUES('EPSG','2371','Nigeria - south','Nigeria - onshore south.',4.22,6.95,4.35,9.45,0);
 INSERT INTO "extent" VALUES('EPSG','2372','Italy - mainland','Italy - mainland including San Marino and Vatican City State.',37.86,47.1,6.62,18.58,0);
 INSERT INTO "extent" VALUES('EPSG','2373','USA - Alaska including EEZ','United States (USA) - Alaska including EEZ.',47.88,74.71,167.65,-129.99,0);
-INSERT INTO "extent" VALUES('EPSG','2374','USA - CONUS including EEZ','United States (USA) - CONUS including EEZ -onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS.',23.81,49.38,-129.17,-65.69,0);
+INSERT INTO "extent" VALUES('EPSG','2374','USA - CONUS including EEZ','United States (USA) - CONUS including EEZ - onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS.',23.81,49.38,-129.16,-65.69,0);
 INSERT INTO "extent" VALUES('EPSG','2375','Canada - Saskatchewan','Canada - Saskatchewan.',49.0,60.01,-110.0,-101.34,0);
 INSERT INTO "extent" VALUES('EPSG','2376','Canada - Alberta','Canada - Alberta.',48.99,60.0,-120.0,-109.98,0);
 INSERT INTO "extent" VALUES('EPSG','2377','USA - Delaware and Maryland','United States (USA) - Delaware and Maryland.',37.97,39.85,-79.49,-74.97,0);
