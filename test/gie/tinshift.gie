@@ -47,4 +47,16 @@ accept      3210000.0000 6700000.0000   10.0
 expect      3210000.0000 6700000.0000   10.2886
 roundtrip   1
 
+# Test fallback strategy nearest_side
+operation   +proj=tinshift +file=tests/tinshift_fallback_nearest_side.json
+accept    2    3
+expect    4    6
+roundtrip 1
+
+# Test fallback strategy nearest_centroid
+operation   +proj=tinshift +file=tests/tinshift_fallback_nearest_centroid.json
+accept    3    0
+expect    3    0
+roundtrip 1
+
 </gie-strict>
