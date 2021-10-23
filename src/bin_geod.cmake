@@ -15,10 +15,6 @@ target_compile_options(geod PRIVATE ${PROJ_CXX_WARN_FLAGS})
 install(TARGETS geod
   DESTINATION ${BINDIR})
 
-if(MSVC AND BUILD_SHARED_LIBS)
-  target_compile_definitions(geod PRIVATE PROJ_MSVC_DLL_IMPORT=1)
-endif()
-
 # invgeod target: symlink or copy of geod executable
 
 if(UNIX)
@@ -47,9 +43,5 @@ else()
 
     install(TARGETS invgeod
       DESTINATION ${BINDIR})
-
-    if(MSVC AND BUILD_SHARED_LIBS)
-      target_compile_definitions(invgeod PRIVATE PROJ_MSVC_DLL_IMPORT=1)
-    endif()
 
 endif()

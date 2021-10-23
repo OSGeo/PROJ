@@ -12,10 +12,6 @@ target_compile_options(binprojinfo PRIVATE ${PROJ_CXX_WARN_FLAGS})
 install(TARGETS binprojinfo
   DESTINATION ${BINDIR})
 
-if(MSVC AND BUILD_SHARED_LIBS)
-  target_compile_definitions(binprojinfo PRIVATE PROJ_MSVC_DLL_IMPORT=1)
-endif()
-
 if(CURL_ENABLED)
   target_compile_definitions(binprojinfo PRIVATE -DCURL_ENABLED)
 endif()

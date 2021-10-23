@@ -477,9 +477,12 @@ if(CURL_ENABLED)
       $<$<CXX_COMPILER_ID:MSVC>:normaliz>)
 endif()
 
-if(MSVC AND BUILD_SHARED_LIBS)
-  target_compile_definitions(proj
-    PRIVATE PROJ_MSVC_DLL_EXPORT=1)
+if(BUILD_SHARED_LIBS)
+  if(MSVC)
+    target_compile_definitions(proj PRIVATE PROJ_MSVC_DLL_EXPORT=1)
+  endif()
+else()
+  target_compile_definitions(proj PUBLIC PROJ_DLL=)
 endif()
 
 ##############################################

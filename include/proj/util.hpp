@@ -50,43 +50,38 @@ namespace proj {}
 //! @cond Doxygen_Suppress
 
 #ifndef PROJ_DLL
-#ifdef PROJ_MSVC_DLL_EXPORT
-#define PROJ_DLL __declspec(dllexport)
-#elif defined(PROJ_MSVC_DLL_IMPORT)
-#define PROJ_DLL __declspec(dllimport)
-#elif defined(__GNUC__)
-#define PROJ_DLL __attribute__((visibility("default")))
-#else
-#define PROJ_DLL
-#endif
+#  if defined(_MSC_VER)
+#    ifdef PROJ_MSVC_DLL_EXPORT
+#      define PROJ_DLL __declspec(dllexport)
+#    else
+#      define PROJ_DLL __declspec(dllimport)
+#    endif
+#  elif defined(__GNUC__)
+#    define PROJ_DLL __attribute__ ((visibility("default")))
+#  else
+#    define PROJ_DLL
+#  endif
 #endif
 
 #ifndef PROJ_MSVC_DLL
-
-#ifdef PROJ_MSVC_DLL_EXPORT
-#define PROJ_MSVC_DLL PROJ_DLL
-#define PROJ_GCC_DLL
-#define PROJ_INTERNAL
-#elif defined(PROJ_MSVC_DLL_IMPORT)
-#define PROJ_MSVC_DLL PROJ_DLL
-#define PROJ_GCC_DLL
-#define PROJ_INTERNAL
-#elif defined(__GNUC__)
-#define PROJ_MSVC_DLL
-#define PROJ_GCC_DLL PROJ_DLL
-#if !defined(__MINGW32__)
-#define PROJ_INTERNAL __attribute__((visibility("hidden")))
-#else
-#define PROJ_INTERNAL
-#endif
-#else
-#define PROJ_MSVC_DLL
-#define PROJ_GCC_DLL
-#define PROJ_INTERNAL
-#endif
-
-#define PROJ_FOR_TEST PROJ_DLL
-
+#  if defined(_MSC_VER)
+#    define PROJ_MSVC_DLL PROJ_DLL
+#    define PROJ_GCC_DLL
+#    define PROJ_INTERNAL
+#  elif defined(__GNUC__)
+#    define PROJ_MSVC_DLL
+#    define PROJ_GCC_DLL PROJ_DLL
+#    if !defined(__MINGW32__)
+#      define PROJ_INTERNAL __attribute__((visibility("hidden")))
+#    else
+#      define PROJ_INTERNAL
+#    endif
+#  else
+#    define PROJ_MSVC_DLL
+#    define PROJ_GCC_DLL
+#    define PROJ_INTERNAL
+#  endif
+#  define PROJ_FOR_TEST PROJ_DLL
 #endif
 
 #include "nn.hpp"

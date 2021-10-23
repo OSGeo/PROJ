@@ -140,15 +140,17 @@ extern "C" {
 /*! @cond Doxygen_Suppress */
 
 #ifndef PROJ_DLL
-#ifdef PROJ_MSVC_DLL_EXPORT
-#define PROJ_DLL __declspec(dllexport)
-#elif defined(PROJ_MSVC_DLL_IMPORT)
-#define PROJ_DLL __declspec(dllimport)
-#elif defined(__GNUC__)
-#define PROJ_DLL __attribute__ ((visibility("default")))
-#else
-#define PROJ_DLL
-#endif
+#  if defined(_MSC_VER)
+#    ifdef PROJ_MSVC_DLL_EXPORT
+#      define PROJ_DLL __declspec(dllexport)
+#    else
+#      define PROJ_DLL __declspec(dllimport)
+#    endif
+#  elif defined(__GNUC__)
+#    define PROJ_DLL __attribute__ ((visibility("default")))
+#  else
+#    define PROJ_DLL
+#  endif
 #endif
 
 #ifdef PROJ_SUPPRESS_DEPRECATION_MESSAGE

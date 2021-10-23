@@ -15,7 +15,3 @@ if(BUILD_GIE)
   install(TARGETS gie
     DESTINATION ${BINDIR})
 endif()
-
-if(MSVC AND BUILD_SHARED_LIBS)
-  target_compile_definitions(gie PRIVATE PROJ_MSVC_DLL_IMPORT=1)
-endif()
