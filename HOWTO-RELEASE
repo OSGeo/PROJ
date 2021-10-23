@@ -51,8 +51,7 @@ the steps below to determine the next ABI version number:
 Update the following files with the new ABI version number:
 
     - `src/Makefile.am`     Update -version-info
-    - `CMakeLists.txt`:     Update PROJ_BUILD_VERSION (cur:rev:age) and
-                            PROJ_API_VERSION (current-age)
+    - `CMakeLists.txt`:     Update PROJ_LIBTOOL_CURRENT, PROJ_LIBTOOL_REVISON and PROJ_LIBTOOL_AGE
 
 *Commit the changes to master.*
 
