@@ -115,10 +115,33 @@ fi
 
 if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
 
-    # cmake build from generated tarball
+    cmake --version
+
+    # Build PROJ as a subproject
+    mkdir proj_as_subproject
+    cd proj_as_subproject
+    mkdir external
+    ln -s $PWD/.. external/PROJ
+
+    echo '#include "proj.h"' > mytest.c
+    echo 'int main() { proj_info(); return 0; }' >> mytest.c
+
+    echo 'cmake_minimum_required(VERSION 3.9)' > CMakeLists.txt
+    echo 'project(mytest)' >> CMakeLists.txt
+    echo 'add_subdirectory(external/PROJ)' >> CMakeLists.txt
+    echo 'add_executable(mytest mytest.c)' >> CMakeLists.txt
+    echo 'target_include_directories(mytest PRIVATE $<TARGET_PROPERTY:PROJ::proj,INTERFACE_INCLUDE_DIRECTORIES>)' >> CMakeLists.txt
+    echo 'target_link_libraries(mytest PRIVATE PROJ::proj)' >> CMakeLists.txt
+
     mkdir build_cmake
     cd build_cmake
-    cmake --version
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
+    VERBOSE=1 make >/dev/null
+    cd ../..
+
+    # Regular build
+    mkdir build_cmake
+    cd build_cmake
     cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
     VERBOSE=1 make >/dev/null
     make install >/dev/null
