@@ -51,10 +51,6 @@ endif()  # USE_EXTERNAL_GTEST
 # Build PROJ unit tests
 #
 
-if(MSVC AND BUILD_SHARED_LIBS)
-  add_definitions(-DPROJ_MSVC_DLL_IMPORT=1)
-endif()
-
 include_directories(${PROJ_SOURCE_DIR}/include)
 include_directories(${SQLITE3_INCLUDE_DIR})
 # Add the directory containing proj_config.h

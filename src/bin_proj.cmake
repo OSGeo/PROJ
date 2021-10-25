@@ -16,10 +16,6 @@ target_compile_options(binproj PRIVATE ${PROJ_CXX_WARN_FLAGS})
 install(TARGETS binproj
   DESTINATION ${BINDIR})
 
-if(MSVC AND BUILD_SHARED_LIBS)
-  target_compile_definitions(binproj PRIVATE PROJ_MSVC_DLL_IMPORT=1)
-endif()
-
 # invproj target: symlink or copy of proj executable
 
 if(UNIX)
@@ -48,9 +44,5 @@ else()
 
     install(TARGETS invproj
       DESTINATION ${BINDIR})
-
-    if(MSVC AND BUILD_SHARED_LIBS)
-      target_compile_definitions(invproj PRIVATE PROJ_MSVC_DLL_IMPORT=1)
-    endif()
 
 endif()

@@ -13,7 +13,3 @@ target_compile_options(cct PRIVATE ${PROJ_CXX_WARN_FLAGS})
 
 install(TARGETS cct
   DESTINATION ${BINDIR})
-
-if(MSVC AND BUILD_SHARED_LIBS)
-  target_compile_definitions(cct PRIVATE PROJ_MSVC_DLL_IMPORT=1)
-endif()
