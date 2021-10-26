@@ -1,8 +1,5 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CS2CS" "1" "Jul 1, 2021" "8.1.0" "PROJ"
-.SH NAME
-cs2cs \- Cartographic coordinate system filter
 .
 .nr rst2man-indent-level 0
 .
@@ -30,6 +27,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
+.TH "CS2CS" "1" "Nov 1, 2021" "8.2.0" "PROJ"
+.SH NAME
+cs2cs \- Cartographic coordinate system filter
 .SH SYNOPSIS
 .INDENT 0.0
 .INDENT 3.5
@@ -70,7 +70,7 @@ e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
 a OGC URN combining references for concatenated operations
 (e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
 .IP \(bu 2
-a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.2/projjson.schema.json\fP (\fIadded in 6.2\fP)
+a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP (\fIadded in 6.2\fP)
 .IP \(bu 2
 a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (\fIadded in 7.1\fP)
 .UNINDENT
@@ -317,7 +317,7 @@ The following script
 .nf
 .ft C
 cs2cs +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27 \-r <<EOF
-45d15\(aq33.1" 111.5W
+45°15\(aq33.1" 111.5W
 45d15.551666667N \-111d30
 +45.25919444444 111d30\(aq000w
 EOF
