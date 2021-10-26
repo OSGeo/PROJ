@@ -6,9 +6,9 @@ PROJ RFC 7: Drop Autotools, maintain CMake
 
 :Author: Mike Taves
 :Contact: mwtoews@gmail.com
-:Status: Proposed
+:Status: Adopted
 :Implementation target: PROJ 9.0
-:Last Updated: 2021-09-30
+:Last Updated: 2021-10-27
 
 Summary
 -------------------------------------------------------------------------------
@@ -124,4 +124,12 @@ Related issues will be tracked on GitHub with a tag
 Adoption status
 -------------------------------------------------------------------------------
 
-TBD
+The RFC was adopted on 2021-10-26 with +1's from the following PSC members
+
+* Kristian Evers
+* Even Rouault
+* Howard Butler
+* Thomas Knudsen
+* Kurt Schwehr
+* Charles Karney
+* Thomas Knudsen
