@@ -17,3 +17,4 @@ the project.
    rfc-4
    rfc-5
    rfc-6
+   rfc-7
