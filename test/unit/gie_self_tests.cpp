@@ -969,9 +969,6 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         auto output = proj_trans(P, PJ_FWD, input);
         auto output_notOver = proj_trans(P, PJ_FWD, input_notOver);
 
-        auto input_inv = proj_trans(P, PJ_INV, output);
-        auto input_notOver_inv = proj_trans(P, PJ_INV, output_notOver);
-
         EXPECT_GT(output.xyz.x, 0);
         EXPECT_GT(output_notOver.xyz.x, 0);
 
@@ -998,9 +995,6 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
 
         auto output = proj_trans(P, PJ_FWD, input);
         auto output_notOver = proj_trans(P, PJ_FWD, input_notOver);
-
-        auto input_inv = proj_trans(P, PJ_INV, output);
-        auto input_notOver_inv = proj_trans(P, PJ_INV, output_notOver);
 
         EXPECT_GT(output.xyz.x, 0);
         EXPECT_GT(output_notOver.xyz.x, 0);
