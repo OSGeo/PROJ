@@ -951,17 +951,6 @@ int proj_context_get_use_proj4_init_rules(PJ_CONTEXT *ctx, int from_legacy_code_
     return from_legacy_code_path;
 }
 
-/************************************************************************/
-/*                  proj_context_set_force_over()                       */
-/************************************************************************/
-
-void proj_context_set_force_over(PJ_CONTEXT* ctx, int enable) {
-    if (ctx == nullptr) {
-        ctx = pj_get_default_ctx();
-    }
-    ctx->forceOver = enable;
-}
-
 /** Adds a " +type=crs" suffix to a PROJ string (if it is a PROJ string) */
 std::string pj_add_type_crs_if_needed(const std::string& str)
 {
@@ -1854,6 +1843,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     const char* authority = nullptr;
     double accuracy = -1;
     bool allowBallparkTransformations = true;
+    int forceOver = 0;
     for (auto iter = options; iter && iter[0]; ++iter) {
         const char *value;
         if ((value = getOptionValue(*iter, "AUTHORITY="))) {
@@ -1870,13 +1860,19 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
                             "Invalid value for ALLOW_BALLPARK option.");
                 return nullptr;
             }
-        } else {
+        }
+        else if ((value = getOptionValue(*iter, "FORCEOVER="))) {
+            if (ci_equal(value, "yes")) {
+                forceOver = 1;
+            }
+        }
+        else {
             std::string msg("Unknown option :");
             msg += *iter;
             ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
             return nullptr;
         }
-    }
+    }    
 
     auto operation_ctx = proj_create_operation_factory_context(ctx, authority);
     if( !operation_ctx ) {
@@ -1924,13 +1920,16 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         return nullptr;
     }
 
+    ctx->forceOver = forceOver;
+
     PJ* P = proj_list_get(ctx, op_list, 0);
-    assert(P);
+    assert(P);    
 
     if( P == nullptr || op_count == 1 || (area && area->bbox_set) ||
         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
         proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS ) {
         proj_list_destroy(op_list);
+        ctx->forceOver = 0;
         return P;
     }
 
@@ -1941,6 +1940,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     if( preparedOpList.empty() )
     {
         proj_destroy(P);
+        ctx->forceOver = 0;
         return nullptr;
     }
 
@@ -1950,6 +1950,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         auto retP = preparedOpList[0].pj;
         preparedOpList[0].pj = nullptr;
         proj_destroy(P);
+        ctx->forceOver = 0;
         return retP;
     }
 
@@ -1962,7 +1963,8 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     P->fwd3d = nullptr;
     P->inv3d = nullptr;
     P->fwd4d = nullptr;
-    P->inv4d = nullptr;
+    P->inv4d = nullptr;    
+    ctx->forceOver = 0;
 
     return P;
 }

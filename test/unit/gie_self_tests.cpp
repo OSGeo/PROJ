@@ -890,16 +890,21 @@ TEST(gie, proj_trans_generic) {
     proj_destroy(P);
 }
 
-TEST(gie, proj_create_crs_to_crs_force_over) {
+TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
 
     PJ_CONTEXT* ctx;
 
     ctx = proj_context_create();
     ASSERT_TRUE(ctx != nullptr);
-    proj_context_set_force_over(ctx, 1);
-    ASSERT_TRUE(ctx->forceOver);
 
-    auto P = proj_create_crs_to_crs(ctx, "EPSG:4326", "EPSG:3857", nullptr);
+    auto src = proj_create(ctx, "EPSG:4326");
+    ASSERT_TRUE(src != nullptr);
+    
+    auto dst = proj_create(ctx, "EPSG:3857");
+    ASSERT_TRUE(dst != nullptr);
+
+    const char* const options[] = { "FORCEOVER=YES", nullptr };
+    auto P = proj_create_crs_to_crs_from_pj(ctx, src, dst, nullptr, options);
     ASSERT_TRUE(P != nullptr);
     PJ_COORD input;
     PJ_COORD input_over;

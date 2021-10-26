@@ -201,19 +201,11 @@ paragraph for more details.
     - ALLOW_BALLPARK=YES/NO: can be set to NO to disallow the use of
       :term:`Ballpark transformation` in the candidate coordinate operations.
 
+    - FORCEOVER=YES/NO: can be set to YES to force the +over flag on the transformation
+      returned by this function.
+
 .. doxygenfunction:: proj_normalize_for_visualization
    :project: doxygen_api
-
-.. c:function:: void proj_context_set_force_over(PJ_CONTEXT* ctx, int enable)
-
-   .. versionadded:: 8.0.0
-
-   Force the +over flag on transformations created with this threading-context.
-
-   :param ctx: Threading context.
-   :type ctx: :c:type:`PJ_CONTEXT` *
-   :param enable: Toggle the enabled flag.
-   :type enable: `int`
 
 .. c:function:: PJ* proj_destroy(PJ *P)
 
