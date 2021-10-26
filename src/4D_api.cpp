@@ -1872,7 +1872,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
             ctx->logger(ctx->logger_app_data, PJ_LOG_ERROR, msg.c_str());
             return nullptr;
         }
-    }    
+    }
 
     auto operation_ctx = proj_create_operation_factory_context(ctx, authority);
     if( !operation_ctx ) {
@@ -1923,7 +1923,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     ctx->forceOver = forceOver;
 
     PJ* P = proj_list_get(ctx, op_list, 0);
-    assert(P);    
+    assert(P);
 
     if( P == nullptr || op_count == 1 || (area && area->bbox_set) ||
         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
