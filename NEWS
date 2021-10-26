@@ -1,3 +1,134 @@
+8.2.0 Release Notes
+-------------------
+
+ Announcements
+ -------------
+
+ From PROJ 9.0.0 and onwards CMake will be the only build system bundled
+ with the PROJ package. As a consequence support for Autotools builds will
+ stop when the 8.2 branch of PROJ reaches end of life. We encourage
+ everyone to adjust their build workflows as soon as possible and report
+ any discrepancies discovered between Autotools and CMake builds.
+
+ Details about the build system unification can be found in PROJ RFC 7.
+
+
+ Updates
+ -------
+
+ o Added the S2 projection (#2749)
+
+ o Added support for Degree Sign on input (#2791)
+
+ o ESRI WKT: add support for import/export of (non interrupted)
+   Goode Homolosine (#2827)
+
+ o Make filemanager aware of UWP Win32 API (#2831)
+
+ o Add proj_create_conversion_pole_rotation_netcdf_cf_convention() to
+   address netCDF datasets using a pole rotation method (#2835)
+
+ o Emit better debug message when a grid isn't found (#2838)
+
+ o Add support for GeodeticCRS using a Spherical planetocentric
+   coordinate system (#2847)
+
+ o PROJJSON: support additional properties allowed in id object (version,
+   authority_citation, uri) for parity with WKT2:2019 (#2850)
+
+ o Database layout modified to include "anchor" field to geodetic_datum and
+   vertical_datum tables, consequently database layout version is increased
+   to 1.2 (#2859)
+
+ o proj_factors(): accept P to be a projected CRS (#2868)
+
+ o Add IAU_2015 CRS definitions (#2876)
+
+ o CRS::extractGeodeticCRS(): implement for DerivedProjectedCRS (#2877)
+
+ o Added proj_trans_bounds() (#2882)
+
+ o CMake: add a BUILD_APPS to be able to disable build of all applications (#2895)
+
+ o CMake: generate invproj/invgeod binaries (symlinks on Unix, copy otherwise)
+   (#2897)
+
+ o CMake build: add generate_wkt1_parser and generate_wkt2_parser manual
+   target, and logic to detect when they must be run (#2900)
+
+ o Add fallback strategy for tinshift transform to use closest triangle for
+   points not in any (#2907)
+
+ o Database: update to EPSG v10.038 (#2910)
+
+ o CMake: revise handling of symbol export and static builds (#2912)
+
+ Bug fixes
+ ---------
+
+ o Fix O(n^2) performance patterns where n is the number of steps of
+   a pipeline (#2820)
+
+ o Detect ESRI WKT better in certain circumstances (#2823)
+
+ o Fix performance issue on pipeline instanciation of huge (broken)
+   pipelines (#2824)
+
+ o Make sure to re-order projection parameters according to their canonical
+   order if needed (#2842)
+
+ o Fix database access across fork() when SQLite3 doesn't use pread[64]() (#2845)
+
+ o Fix error in implementation of Inverse ellipsoidal orthographic projection
+   that cause convergence to sometimes fail (#2853)
+
+ o Fix handling of edge-case coordinates in invers ortho ellipsoidal
+   oblique (#2855)
+
+ o proj_normalize_for_visualization(): set input and output units when there
+   are several alternative transformations (#2867)
+
+ o CRS::identify(): fix ignoring CS order when identifying a geodetic CRS
+   by a PROJ string with just the ellipsoid (#2881)
+
+ o Fix CRS Equality with PROJ parameter order (#2887)
+
+ o WKT concatenated operation parsing: fix when a axis order reversal conversion
+   is the first or last operation (#2891)
+
+ o WKT1 parser: recognize Lambert_Conformal_Conic as projection name for
+   LCC 1SP or 2SP (#2893)
+
+ o CMake: Always build gie if testing is requested (#2899)
+
+ o Geographic 3D CRS: allow to export to WKT1:ESRI if only the GEOGCS is known
+   (and thus extrapolating a VERTCS) (#2902)
+
+ o lib_proj.cmake: add a PROJ::proj alias and add BUILD_INTERFACE include
+   directories, so that proj can be used as a subdirectory of a larger
+   project (#2913)
+
+
+ THANKS TO
+ ---------
+
+ Thomas Knudsen
+ Alan D. Snow
+ Johannes Schauer Marin Rodrigues
+ Howard Butler
+ Geoff Evans
+ Joris Van den Bossche
+ marcus-elia
+ Waheed Barghouthi
+ snowman2
+ Ben Boeckel
+ Mike Taves
+ Javier Jimenez Shaw
+ Brendan Jurd
+ Kristian Evers
+ Even Rouault
+
+
 8.1.1 Release Notes
 -------------------
 
