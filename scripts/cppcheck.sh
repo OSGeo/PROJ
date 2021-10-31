@@ -17,11 +17,19 @@ esac
 
 TOPDIR="$SCRIPT_DIR/.."
 
+CPPCHECK_VERSION="$(cppcheck --version | awk '{print $2}')"
+CPPCHECK_VERSION_GT_2_7=$(expr "$CPPCHECK_VERSION" \>= 2.7 || /bin/true)
+if test "$CPPCHECK_VERSION_GT_2_7" = 1; then
+    POSIX="--library=posix"
+else
+    POSIX="--std=posix"
+fi
+
 echo "" > ${LOG_FILE}
 for dirname in ${TOPDIR}/src; do
     echo "Running cppcheck on $dirname... (can be long)"
     if ! cppcheck --inline-suppr --template='{file}:{line},{severity},{id},{message}' \
-        --enable=all --inconclusive --std=posix \
+        --enable=all --inconclusive "$POSIX" \
         -DCPPCHECK -D__cplusplus=201103L -DNAN \
         -I${TOPDIR}/src -I${TOPDIR}/include \
         "$dirname" \
