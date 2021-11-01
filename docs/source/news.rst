@@ -3,6 +3,117 @@
 News
 ###############################################################################
 
+8.2.0 Release Notes
++++++++++++++++++++
+
+Announcements
+-------------
+
+From PROJ 9.0.0 and onwards CMake will be the only build system bundled
+with the PROJ package. As a consequence support for Autotools builds will
+stop when the 8.2 branch of PROJ reaches end of life. We encourage
+everyone to adjust their build workflows as soon as possible and report
+any discrepancies discovered between Autotools and CMake builds.
+
+Details about the build system unification can be found in :ref:`RFC7`.
+
+
+Updates
+-------
+
+* Added the S2 projection (`#1 <https://github.com/OSGEO/PROJ/issues/2749>`_)
+
+* Added support for Degree Sign on input (`#1 <https://github.com/OSGEO/PROJ/issues/2791>`_)
+
+* ESRI WKT: add support for import/export of (non interrupted)
+  Goode Homolosine (`#1 <https://github.com/OSGEO/PROJ/issues/2827>`_)
+
+* Make filemanager aware of UWP Win32 API (`#1 <https://github.com/OSGEO/PROJ/issues/2831>`_)
+
+* Add :c:func:`proj_create_conversion_pole_rotation_netcdf_cf_convention()` to
+  address netCDF datasets using a pole rotation method (`#1 <https://github.com/OSGEO/PROJ/issues/2835>`_)
+
+* Emit better debug message when a grid isn't found (`#1 <https://github.com/OSGEO/PROJ/issues/2838>`_)
+
+* Add support for GeodeticCRS using a Spherical planetocentric
+  coordinate system (`#1 <https://github.com/OSGEO/PROJ/issues/2847>`_)
+
+* PROJJSON: support additional properties allowed in id object (version,
+  authority_citation, uri) for parity with WKT2:2019 (`#1 <https://github.com/OSGEO/PROJ/issues/2850>`_)
+
+* Database layout modified to include "anchor" field to ``geodetic_datum`` and
+  ``vertical_datum`` tables, consequently database layout version is increased
+  to 1.2 (`#1 <https://github.com/OSGEO/PROJ/issues/2859>`_)
+
+* :c:ref:`proj_factors()`: accept `P` to be a projected CRS (`#1 <https://github.com/OSGEO/PROJ/issues/2868>`_)
+
+* Add IAU_2015 CRS definitions (`#1 <https://github.com/OSGEO/PROJ/issues/2876>`_)
+
+* :cpp:func:`CRS::extractGeodeticCRS()`: implement for ``DerivedProjectedCRS`` (`#1 <https://github.com/OSGEO/PROJ/issues/2877>`_)
+
+* Added :c:func:`proj_trans_bounds()` (`#1 <https://github.com/OSGEO/PROJ/issues/2882>`_)
+
+* CMake: add a ``BUILD_APPS`` to be able to disable build of all applications (`#1 <https://github.com/OSGEO/PROJ/issues/2895>`_)
+
+* CMake: generate ``invproj``/``invgeod`` binaries (symlinks on Unix, copy otherwise)
+  (`#1 <https://github.com/OSGEO/PROJ/issues/2897>`_)
+
+* CMake build: add ``generate_wkt1_parser`` and ``generate_wkt2_parser manual
+  target, and logic to detect when they must be run (`#1 <https://github.com/OSGEO/PROJ/issues/2900>`_)
+
+* Add fallback strategy for tinshift transform to use closest triangle for
+  points not in any (`#1 <https://github.com/OSGEO/PROJ/issues/2907>`_)
+
+* Database: update to EPSG v10.038 (`#1 <https://github.com/OSGEO/PROJ/issues/2910>`_)
+
+* CMake: revise handling of symbol export and static builds (`#1 <https://github.com/OSGEO/PROJ/issues/2912>`_)
+
+Bug fixes
+---------
+
+* Fix O(n^2) performance patterns where n is the number of steps of
+  a pipeline (`#1 <https://github.com/OSGEO/PROJ/issues/2820>`_)
+
+* Detect ESRI WKT better in certain circumstances (`#1 <https://github.com/OSGEO/PROJ/issues/2823>`_)
+
+* Fix performance issue on pipeline instanciation of huge (broken)
+  pipelines (`#1 <https://github.com/OSGEO/PROJ/issues/2824>`_)
+
+* Make sure to re-order projection parameters according to their canonical
+  order if needed (`#1 <https://github.com/OSGEO/PROJ/issues/2842>`_)
+
+* Fix database access across fork() when SQLite3 doesn't use ``pread[64]()`` (`#1 <https://github.com/OSGEO/PROJ/issues/2845>`_)
+
+* Fix error in implementation of Inverse ellipsoidal orthographic projection
+  that cause convergence to sometimes fail (`#1 <https://github.com/OSGEO/PROJ/issues/2853>`_)
+
+* Fix handling of edge-case coordinates in invers ortho ellipsoidal
+  oblique (`#1 <https://github.com/OSGEO/PROJ/issues/2855>`_)
+
+* :c:func:`proj_normalize_for_visualization()`: set input and output units when there
+  are several alternative transformations (`#1 <https://github.com/OSGEO/PROJ/issues/2867>`_)
+
+* :cpp:func:``CRS::identify()`: fix ignoring CS order when identifying a geodetic CRS
+  by a PROJ string with just the ellipsoid (`#1 <https://github.com/OSGEO/PROJ/issues/2881>`_)
+
+* Fix CRS Equality with PROJ parameter order (`#1 <https://github.com/OSGEO/PROJ/issues/2887>`_)
+
+* WKT concatenated operation parsing: fix when a axis order reversal conversion
+  is the first or last operation (`#1 <https://github.com/OSGEO/PROJ/issues/2891>`_)
+
+* WKT1 parser: recognize Lambert_Conformal_Conic as projection name for
+  LCC 1SP or 2SP (`#1 <https://github.com/OSGEO/PROJ/issues/2893>`_)
+
+* CMake: Always build gie if testing is requested (`#1 <https://github.com/OSGEO/PROJ/issues/2899>`_)
+
+* Geographic 3D CRS: allow to export to WKT1:ESRI if only the GEOGCS is known
+  (and thus extrapolating a VERTCS) (`#1 <https://github.com/OSGEO/PROJ/issues/2902>`_)
+
+* ``lib_proj.cmake``: add a PROJ::proj alias and add BUILD_INTERFACE include
+  directories, so that proj can be used as a subdirectory of a larger
+  project (`#1 <https://github.com/OSGEO/PROJ/issues/2913>`_)
+
+
 8.1.1 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *September 1st 2021*
