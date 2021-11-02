@@ -897,16 +897,20 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
     ctx = proj_context_create();
     ASSERT_TRUE(ctx != nullptr);
 
-    auto src = proj_create(ctx, "EPSG:4326");
-    ASSERT_TRUE(src != nullptr);
+    auto epsg27700 = proj_create(ctx, "EPSG:27700");
+    ASSERT_TRUE(epsg27700 != nullptr);
+
+    auto epsg4326 = proj_create(ctx, "EPSG:4326");
+    ASSERT_TRUE(epsg4326 != nullptr);
     
-    auto dst = proj_create(ctx, "EPSG:3857");
-    ASSERT_TRUE(dst != nullptr);
+    auto epsg3857 = proj_create(ctx, "EPSG:3857");
+    ASSERT_TRUE(epsg3857 != nullptr);
 
     {
-        const char* const options[] = { "FORCEOVER=YES", nullptr };
-        auto P = proj_create_crs_to_crs_from_pj(ctx, src, dst, nullptr, options);
+        const char* const options[] = { "FORCE_OVER=YES", nullptr };
+        auto P = proj_create_crs_to_crs_from_pj(ctx, epsg4326, epsg3857, nullptr, options);
         ASSERT_TRUE(P != nullptr);
+        ASSERT_TRUE(P->over);
         PJ_COORD input;
         PJ_COORD input_over;
 
@@ -952,9 +956,10 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
 
     {
         //Try again with force over set to anything but YES to verify it didn't do anything.
-        const char* const options[] = { "FORCEOVER=NO", nullptr };
-        auto P = proj_create_crs_to_crs_from_pj(ctx, src, dst, nullptr, options);
+        const char* const options[] = { "FORCE_OVER=NO", nullptr };
+        auto P = proj_create_crs_to_crs_from_pj(ctx, epsg4326, epsg3857, nullptr, options);
         ASSERT_TRUE(P != nullptr);
+        ASSERT_FALSE(P->over);
         PJ_COORD input;
         PJ_COORD input_notOver;
 
@@ -980,8 +985,9 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
 
     {
         //Try again with no options to verify it didn't do anything.
-        auto P = proj_create_crs_to_crs_from_pj(ctx, src, dst, nullptr, nullptr);
+        auto P = proj_create_crs_to_crs_from_pj(ctx, epsg4326, epsg3857, nullptr, nullptr);
         ASSERT_TRUE(P != nullptr);
+        ASSERT_FALSE(P->over);
         PJ_COORD input;
         PJ_COORD input_notOver;
 
@@ -1001,6 +1007,63 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
 
         EXPECT_NEAR(output.xyz.x, 15584728.711058298, 1e-8);
         EXPECT_NEAR(output_notOver.xyz.x, 15584728.711058298, 1e-8);
+
+        proj_destroy(P);
+    }
+
+    {
+        //EPSG:4326 -> EPSG:27700 has more than one coordinate operation candidate.
+        const char* const options[] = { "FORCE_OVER=YES", nullptr };
+        auto P = proj_create_crs_to_crs_from_pj(ctx, epsg4326, epsg27700, nullptr, options);
+        ASSERT_TRUE(P != nullptr);
+        ASSERT_TRUE(P->over);
+        PJ_COORD input;
+        PJ_COORD input_over;
+
+        input.xyz.x = 0; // Lat in deg
+        input.xyz.y = 140;  // Long in deg
+        input.xyz.z = 0;
+
+        input_over.xyz.x = 0; // Lat in deg
+        input_over.xyz.y = -220;  // Long in deg
+        input_over.xyz.z = 0;
+
+        auto output = proj_trans(P, PJ_FWD, input);
+        auto output_over = proj_trans(P, PJ_FWD, input_over);
+
+        //Doesn't actually change the result for this tmerc transformation.
+        EXPECT_NEAR(output.xyz.x, 4980122.749364435, 1e-8);
+        EXPECT_NEAR(output.xyz.y, 14467212.882603768, 1e-8);
+        EXPECT_NEAR(output_over.xyz.x, 4980122.749364435, 1e-8);
+        EXPECT_NEAR(output_over.xyz.y, 14467212.882603768, 1e-8);
+        
+        proj_destroy(P);
+    }
+
+    {
+        //Negative test for 27700.
+        const char* const options[] = { "FORCE_OVER=NO", nullptr };
+        auto P = proj_create_crs_to_crs_from_pj(ctx, epsg4326, epsg27700, nullptr, options);
+        ASSERT_TRUE(P != nullptr);
+        ASSERT_FALSE(P->over);
+        PJ_COORD input;
+        PJ_COORD input_over;
+
+        input.xyz.x = 0; // Lat in deg
+        input.xyz.y = 140;  // Long in deg
+        input.xyz.z = 0;
+
+        input_over.xyz.x = 0; // Lat in deg
+        input_over.xyz.y = -220;  // Long in deg
+        input_over.xyz.z = 0;
+
+        auto output = proj_trans(P, PJ_FWD, input);
+        auto output_over = proj_trans(P, PJ_FWD, input_over);
+
+        EXPECT_NEAR(output.xyz.x, 4980122.749364435, 1e-8);
+        EXPECT_NEAR(output.xyz.y, 14467212.882603768, 1e-8);
+        EXPECT_NEAR(output_over.xyz.x, 4980122.749364435, 1e-8);
+        EXPECT_NEAR(output_over.xyz.y, 14467212.882603768, 1e-8);
 
         proj_destroy(P);
     }

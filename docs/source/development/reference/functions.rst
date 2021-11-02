@@ -201,7 +201,7 @@ paragraph for more details.
     - ALLOW_BALLPARK=YES/NO: can be set to NO to disallow the use of
       :term:`Ballpark transformation` in the candidate coordinate operations.
 
-    - FORCEOVER=YES/NO: can be set to YES to force the +over flag on the transformation
+    - FORCE_OVER=YES/NO: can be set to YES to force the +over flag on the transformation
       returned by this function.
 
 .. doxygenfunction:: proj_normalize_for_visualization

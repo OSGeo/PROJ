@@ -1843,7 +1843,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     const char* authority = nullptr;
     double accuracy = -1;
     bool allowBallparkTransformations = true;
-    int forceOver = 0;
+    bool forceOver = false;
     for (auto iter = options; iter && iter[0]; ++iter) {
         const char *value;
         if ((value = getOptionValue(*iter, "AUTHORITY="))) {
@@ -1861,9 +1861,9 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
                 return nullptr;
             }
         }
-        else if ((value = getOptionValue(*iter, "FORCEOVER="))) {
+        else if ((value = getOptionValue(*iter, "FORCE_OVER="))) {
             if (ci_equal(value, "yes")) {
-                forceOver = 1;
+                forceOver = true;
             }
         }
         else {
@@ -1929,18 +1929,19 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
         proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS ) {
         proj_list_destroy(op_list);
-        ctx->forceOver = 0;
+        ctx->forceOver = false;
         return P;
     }
 
     auto preparedOpList = pj_create_prepared_operations(ctx, source_crs, target_crs,
                                                    op_list);
+
+    ctx->forceOver = false;
     proj_list_destroy(op_list);
 
     if( preparedOpList.empty() )
     {
         proj_destroy(P);
-        ctx->forceOver = 0;
         return nullptr;
     }
 
@@ -1950,7 +1951,6 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
         auto retP = preparedOpList[0].pj;
         preparedOpList[0].pj = nullptr;
         proj_destroy(P);
-        ctx->forceOver = 0;
         return retP;
     }
 
@@ -1964,7 +1964,6 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     P->inv3d = nullptr;
     P->fwd4d = nullptr;
     P->inv4d = nullptr;    
-    ctx->forceOver = 0;
 
     return P;
 }
