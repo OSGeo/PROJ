@@ -4680,6 +4680,7 @@ TEST(crs, boundCRS_with_usage) {
     auto crs =
         nn_dynamic_pointer_cast<BoundCRS>(WKTParser().createFromWKT(wkt));
     ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(crs->nameStr(), "Monte Mario / Italy zone 2");
 
     auto got_wkt = crs->exportToWKT(
         WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());

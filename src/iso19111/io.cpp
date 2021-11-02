@@ -1262,7 +1262,8 @@ struct WKTParser::Private {
                           bool removeInverseOf);
 
     PropertyMap &buildProperties(const WKTNodeNNPtr &node,
-                                 bool removeInverseOf = false);
+                                 bool removeInverseOf = false,
+                                 bool hasName = true);
 
     ObjectDomainPtr buildObjectDomain(const WKTNodeNNPtr &node);
 
@@ -1577,7 +1578,8 @@ IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
 // ---------------------------------------------------------------------------
 
 PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
-                                                 bool removeInverseOf) {
+                                                 bool removeInverseOf,
+                                                 bool hasName) {
 
     if (propertyCount_ == MAX_PROPERTY_SIZE) {
         throw ParsingException("MAX_PROPERTY_SIZE reached");
@@ -1603,7 +1605,7 @@ PropertyMap &WKTParser::Private::buildProperties(const WKTNodeNNPtr &node,
         }
     }
 
-    if (!nodeChildren.empty()) {
+    if (hasName && !nodeChildren.empty()) {
         const auto &nodeName(nodeP->value());
         auto name(stripQuotes(nodeChildren[0]));
         if (removeInverseOf && starts_with(name, "Inverse of ")) {
@@ -4670,8 +4672,9 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
         NN_NO_CHECK(targetCRS), nullptr, buildProperties(methodNode),
         parameters, values, std::vector<PositionalAccuracyNNPtr>());
 
-    return BoundCRS::create(buildProperties(node), NN_NO_CHECK(sourceCRS),
-                            NN_NO_CHECK(targetCRS), transformation);
+    return BoundCRS::create(buildProperties(node, false, false),
+                            NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS),
+                            transformation);
 }
 
 // ---------------------------------------------------------------------------
