@@ -1963,7 +1963,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     P->fwd3d = nullptr;
     P->inv3d = nullptr;
     P->fwd4d = nullptr;
-    P->inv4d = nullptr;    
+    P->inv4d = nullptr;
 
     return P;
 }
