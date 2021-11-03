@@ -45,7 +45,7 @@ Updates
   ``vertical_datum`` tables, consequently database layout version is increased
   to 1.2 (`#2859 <https://github.com/OSGEO/PROJ/issues/2859>`_)
 
-* :c:ref:`proj_factors()`: accept `P` to be a projected CRS (`#2868 <https://github.com/OSGEO/PROJ/issues/2868>`_)
+* :c:func:`proj_factors()`: accept `P` to be a projected CRS (`#2868 <https://github.com/OSGEO/PROJ/issues/2868>`_)
 
 * Add IAU_2015 CRS definitions (`#2876 <https://github.com/OSGEO/PROJ/issues/2876>`_)
 
@@ -58,7 +58,7 @@ Updates
 * CMake: generate ``invproj``/``invgeod`` binaries (symlinks on Unix, copy otherwise)
   (`#2897 <https://github.com/OSGEO/PROJ/issues/2897>`_)
 
-* CMake build: add ``generate_wkt1_parser`` and ``generate_wkt2_parser manual
+* CMake build: add ``generate_wkt1_parser`` and ``generate_wkt2_parser manual``
   target, and logic to detect when they must be run (`#2900 <https://github.com/OSGEO/PROJ/issues/2900>`_)
 
 * Add fallback strategy for tinshift transform to use closest triangle for
@@ -93,7 +93,7 @@ Bug fixes
 * :c:func:`proj_normalize_for_visualization()`: set input and output units when there
   are several alternative transformations (`#2867 <https://github.com/OSGEO/PROJ/issues/2867>`_)
 
-* :cpp:func:``CRS::identify()`: fix ignoring CS order when identifying a geodetic CRS
+* :cpp:func:`CRS::identify()`: fix ignoring CS order when identifying a geodetic CRS
   by a PROJ string with just the ellipsoid (`#2881 <https://github.com/OSGEO/PROJ/issues/2881>`_)
 
 * Fix CRS Equality with PROJ parameter order (`#2887 <https://github.com/OSGEO/PROJ/issues/2887>`_)
