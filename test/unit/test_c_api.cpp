@@ -2106,7 +2106,7 @@ TEST_F(CApi, proj_context_guess_wkt_dialect) {
 
 TEST_F(CApi, proj_create_from_name) {
     /*
-        PJ_OBJ_LIST PROJ_DLL *proj_create_from_name(
+        PJ_OBJ_LIST *proj_create_from_name(
             PJ_CONTEXT *ctx,
             const char *auth_name,
             const char *searchedName,

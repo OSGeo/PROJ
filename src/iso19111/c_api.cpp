@@ -856,7 +856,7 @@ int proj_uom_get_info_from_database(PJ_CONTEXT *ctx, const char *auth_name,
  * grid is available at runtime. or NULL
  * @return TRUE in case of success.
  */
-int PROJ_DLL proj_grid_get_info_from_database(
+int proj_grid_get_info_from_database(
     PJ_CONTEXT *ctx, const char *grid_name, const char **out_full_name,
     const char **out_package_name, const char **out_url,
     int *out_direct_download, int *out_open_license, int *out_available) {
@@ -3670,7 +3670,7 @@ PJ *proj_create_compound_crs(PJ_CONTEXT *ctx, const char *crs_name,
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
  */
-PJ PROJ_DLL *proj_alter_name(PJ_CONTEXT *ctx, const PJ *obj, const char *name) {
+PJ *proj_alter_name(PJ_CONTEXT *ctx, const PJ *obj, const char *name) {
     SANITIZE_CTX(ctx);
     if (!obj || !name) {
         proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
@@ -3707,7 +3707,7 @@ PJ PROJ_DLL *proj_alter_name(PJ_CONTEXT *ctx, const PJ *obj, const char *name) {
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
  */
-PJ PROJ_DLL *proj_alter_id(PJ_CONTEXT *ctx, const PJ *obj,
+PJ *proj_alter_id(PJ_CONTEXT *ctx, const PJ *obj,
                            const char *auth_name, const char *code) {
     SANITIZE_CTX(ctx);
     if (!obj || !auth_name || !code) {
@@ -4143,7 +4143,7 @@ PJ *proj_crs_demote_to_2D(PJ_CONTEXT *ctx, const char *crs_2D_name,
  * @return Object that must be unreferenced with
  * proj_destroy(), or NULL in case of error.
  */
-PJ PROJ_DLL *proj_create_engineering_crs(PJ_CONTEXT *ctx,
+PJ *proj_create_engineering_crs(PJ_CONTEXT *ctx,
                                          const char *crs_name) {
     SANITIZE_CTX(ctx);
     try {
@@ -7779,7 +7779,7 @@ void proj_operation_factory_context_set_crs_extent_use(
  * @param factory_ctx Operation factory context. must not be NULL
  * @param criterion spatial criterion to use
  */
-void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
+void proj_operation_factory_context_set_spatial_criterion(
     PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
     PROJ_SPATIAL_CRITERION criterion) {
     SANITIZE_CTX(ctx);
@@ -7817,7 +7817,7 @@ void PROJ_DLL proj_operation_factory_context_set_spatial_criterion(
  * @param factory_ctx Operation factory context. must not be NULL
  * @param use how grid availability is used.
  */
-void PROJ_DLL proj_operation_factory_context_set_grid_availability_use(
+void proj_operation_factory_context_set_grid_availability_use(
     PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
     PROJ_GRID_AVAILABILITY_USE use) {
     SANITIZE_CTX(ctx);
@@ -7978,7 +7978,7 @@ void proj_operation_factory_context_set_allowed_intermediate_crs(
  * @param factory_ctx Operation factory context. must not be NULL
  * @param discard superseded crs or not
  */
-void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
+void proj_operation_factory_context_set_discard_superseded(
     PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx, int discard) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {
@@ -8002,7 +8002,7 @@ void PROJ_DLL proj_operation_factory_context_set_discard_superseded(
  * @param allow set to TRUE to allow ballpark transformations.
  * @since 7.1
  */
-void PROJ_DLL proj_operation_factory_context_set_allow_ballpark_transformations(
+void proj_operation_factory_context_set_allow_ballpark_transformations(
     PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx, int allow) {
     SANITIZE_CTX(ctx);
     if (!factory_ctx) {

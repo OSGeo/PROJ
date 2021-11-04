@@ -34,7 +34,7 @@ static const struct
     { PROJ_ERR_OTHER_NETWORK_ERROR,                      _("Network error when accessing a remote resource") },
 };
 
-const char PROJ_DLL * proj_context_errno_string(PJ_CONTEXT* ctx, int err)
+const char * proj_context_errno_string(PJ_CONTEXT* ctx, int err)
 {
     if( ctx == nullptr )
         ctx = pj_get_default_ctx();
