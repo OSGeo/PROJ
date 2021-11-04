@@ -2011,6 +2011,7 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
         "1100", // Geog3D to Geog2D+GravityRelatedHeight (PL txt)
         "1103", // Geog3D to Geog2D+GravityRelatedHeight (EGM)
         "1105", // Geog3D to Geog2D+GravityRelatedHeight (ITAL2005)
+        // "1110", // Geog3D to Geog2D+Depth (Gravsoft)  FIXME: to investigate how to map this to PROJ pipeline (depth vs height)
         "9661", // Geographic3D to GravityRelatedHeight (EGM)
         "9662", // Geographic3D to GravityRelatedHeight (Ausgeoid98)
         "9663", // Geographic3D to GravityRelatedHeight (OSGM-GB)
