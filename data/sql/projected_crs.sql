@@ -7425,10 +7425,14 @@ INSERT INTO "projected_crs" VALUES('EPSG','9864','UCS-2000 / LCS-80 Kyiv city',N
 INSERT INTO "usage" VALUES('EPSG','16922','projected_crs','EPSG','9864','EPSG','4623','EPSG','1207');
 INSERT INTO "projected_crs" VALUES('EPSG','9865','UCS-2000 / LCS-85 Sevastopol',NULL,'EPSG','4531','EPSG','5561','EPSG','9820',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','16836','projected_crs','EPSG','9865','EPSG','4649','EPSG','1207');
+INSERT INTO "projected_crs" VALUES('EPSG','9869','MHR21 Grid',NULL,'EPSG','4400','EPSG','9866','EPSG','9868',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','16939','projected_crs','EPSG','9869','EPSG','4652','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','9874','PNG94 / PNGMG94 zone 57',NULL,'EPSG','4400','EPSG','5546','EPSG','9872',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','16919','projected_crs','EPSG','9874','EPSG','4653','EPSG','1092');
 INSERT INTO "projected_crs" VALUES('EPSG','9875','PNG94 / PNGMG94 zone 58',NULL,'EPSG','4400','EPSG','5546','EPSG','9873',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','16920','projected_crs','EPSG','9875','EPSG','4654','EPSG','1092');
+INSERT INTO "projected_crs" VALUES('EPSG','9880','MOLDOR11 Grid',NULL,'EPSG','4400','EPSG','9871','EPSG','9879',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','16961','projected_crs','EPSG','9880','EPSG','4655','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','20004','Pulkovo 1995 / Gauss-Kruger zone 4',NULL,'EPSG','4530','EPSG','4200','EPSG','16204',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6177','projected_crs','EPSG','20004','EPSG','1763','EPSG','1211');
 INSERT INTO "projected_crs" VALUES('EPSG','20005','Pulkovo 1995 / Gauss-Kruger zone 5',NULL,'EPSG','4530','EPSG','4200','EPSG','16205',NULL,0);
