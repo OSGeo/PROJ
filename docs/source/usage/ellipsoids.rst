@@ -26,11 +26,11 @@ Ellipsoid size parameters
 
 .. option:: +R=<value>
 
-Radius of the sphere
+   Radius of the sphere, :math:`R`.
 
 .. option:: +a=<value>
 
-Semi-major axis of the ellipsoid
+   Semi-major axis of the ellipsoid, :math:`a`.
 
 .. _ellipsoid_shape_parameters:
 
@@ -39,23 +39,23 @@ Ellipsoid shape parameters
 
 .. option:: +rf=<value>
 
-Reverse flattening of the ellipsoid
+   Reverse flattening of the ellipsoid, :math:`1/f`.
 
 .. option:: +f=<value>
 
-Flattening of the ellipsoid
+   Flattening of the ellipsoid, :math:`f`.
 
 .. option:: +es=<value>
 
-Eccentricity squared
+   Eccentricity squared, :math:`e^2`.
 
 .. option:: +e=<value>
 
-Eccentricity
+   Eccentricity, :math:`e`.
 
 .. option:: +b=<value>
 
-Semi-minor axis
+   Semi-minor axis, :math:`b`.
 
 The ellipsoid definition may be augmented with a spherification flag, turning
 the ellipsoid into a sphere with features defined by the ellipsoid.
@@ -67,29 +67,33 @@ Ellipsoid spherification parameters
 
 .. option:: +R_A=<value>
 
-A sphere with the same surface area and volume as the ellipsoid
+   A sphere with the same surface area as the ellipsoid.
+
+.. option:: +R_V=<value>
+
+   A sphere with the same volume as the ellipsoid.
 
 .. option:: +R_a=<value>
 
-A sphere with R = (a + b)/2   (arithmetic mean)
+   A sphere with :math:`R = (a + b)/2` (arithmetic mean).
 
 .. option:: +R_g=<value>
 
-A sphere with R = sqrt(a*b)   (geometric mean)
+   A sphere with :math:`R = \sqrt{ab}` (geometric mean).
 
 .. option:: +R_h=<value>
 
-A sphere with R = 2*a*b/(a+b) (harmonic mean)
+   A sphere with :math:`R = 2ab/(a+b)` (harmonic mean).
 
 .. option:: +R_lat_a=<phi>
 
-A sphere with R being the arithmetic mean of the corresponding ellipsoid at
-latitude phi.
+   A sphere with :math:`R` being the arithmetic mean of the corresponding
+   ellipsoid at latitude :math:`\phi`.
 
 .. option:: +R_lat_g=<phi>
 
-A sphere with R being the geometric mean of the corresponding ellipsoid at
-latitude phi.
+   A sphere with :math:`R` being the geometric mean of the corresponding
+   ellipsoid at latitude :math:`\phi`.
 
 If :option:`+R` is given as size parameter, any shape and spherification
 parameters given are ignored.
