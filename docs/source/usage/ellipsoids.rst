@@ -3,10 +3,10 @@
 ================================================================================
 Ellipsoids
 ================================================================================
-A ellipsoid is the mathematically defined surface which approximates the geiod, surface of the earth's gravity field, which is approximately the same as mean sea level.
+A ellipsoid is the mathematically defined surface which approximates the geoid, surface of the earth's gravity field, which is approximately the same as mean sea level.
 
 
-.. figure:: ../../images/general_ellpsoid.png
+.. figure:: ../../images/general_ellipsoid.png
    :width: 500 px
    :align: center
    :alt:   Global and local fitting of the ellipsoid
