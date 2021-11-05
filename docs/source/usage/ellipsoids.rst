@@ -19,9 +19,10 @@ mean sea level.
 A complete ellipsoid definition comprises a size (primary) and a shape (secondary)
 parameter.
 
+.. _ellipsoid_size_parameters:
+
 Ellipsoid size parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. _ellipsoid_size_parameters:
 
 .. option:: +R=<value>
 
@@ -31,9 +32,10 @@ Radius of the sphere
 
 Semi-major axis of the ellipsoid
 
+.. _ellipsoid_shape_parameters:
+
 Ellipsoid shape parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. _ellipsoid_shape_parameters:
 
 .. option:: +rf=<value>
 
@@ -58,9 +60,10 @@ Semi-minor axis
 The ellipsoid definition may be augmented with a spherification flag, turning
 the ellipsoid into a sphere with features defined by the ellipsoid.
 
+.. _ellipsoid_spherification_parameters:
+
 Ellipsoid spherification parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. _ellipsoid_spherification_parameters:
 
 .. option:: +R_A=<value>
 
@@ -91,9 +94,10 @@ latitude phi.
 If :option:`+R` is given as size parameter, any shape and spherification
 parameters given are ignored.
 
-Local ellipsoid examples
+.. _ellipsoid_definitions:
+
+Built-in ellipsoid definitions
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. _ellipsoid_local_examples:
 
 The ``ellps=xxx`` parameter provides both size and shape for a number of
 built-in ellipsoid definitions.
@@ -120,9 +124,10 @@ While this may seem strange, it is in accordance with historical PROJ
 behavior. It can e.g. be used to define coordinates on the ellipsoid
 scaled to unit semimajor axis by specifying ``+ellps=xxx +a=1``
 
+.. _ellipsoid_transformation_examples:
+
 Transformation examples
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-.. _ellipsoid_transformation_examples:
 
 Spherical earth with radius 7000km:
 

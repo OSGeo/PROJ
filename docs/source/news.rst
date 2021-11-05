@@ -21,6 +21,8 @@ Details about the build system unification can be found in :ref:`RFC7`.
 Updates
 -------
 
+* Docs: add new page Usage/Ellipsoids to explain the usage of ellipsoidal parameters
+
 * Added the S2 projection (`#2749 <https://github.com/OSGEO/PROJ/issues/2749>`_)
 
 * Added support for Degree Sign on input (`#2791 <https://github.com/OSGEO/PROJ/issues/2791>`_)
