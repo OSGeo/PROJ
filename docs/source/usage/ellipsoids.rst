@@ -1,12 +1,12 @@
-.. _transformation:
+.. _ellipsoids:
 
 ================================================================================
-Ellipsoid  transformation
+Ellipsoids
 ================================================================================
 A ellipsoid is the mathematically defined surface which approximates the geiod, surface of the earth's gravity field, which is approximately the same as mean sea level.
 
 
-.. figure:: ./images/General_ellpsoid.png
+.. figure:: ../../images/general_ellpsoid.png
    :width: 500 px
    :align: center
    :alt:   Global and local fitting of the ellipsoid
