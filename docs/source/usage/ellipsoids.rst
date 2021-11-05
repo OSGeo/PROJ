@@ -25,11 +25,11 @@ Ellipsoid size parameters
 
 .. option:: +R=<value>
 
-Radius of a spherical planet
+Radius of the sphere
 
 .. option:: +a=<value>
 
-Semi-major axis of an ellipsoidal planet
+Semi-major axis of the ellipsoid
 
 Ellipsoid shape parameters
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
