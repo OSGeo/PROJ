@@ -373,6 +373,24 @@ const char *proj_context_get_database_path(PJ_CONTEXT *ctx) {
  * The returned pointer remains valid while ctx is valid, and until
  * proj_context_get_database_metadata() is called.
  *
+ * Available keys:
+ *
+ * - DATABASE.LAYOUT.VERSION.MAJOR
+ * - DATABASE.LAYOUT.VERSION.MINOR
+ * - EPSG.VERSION
+ * - EPSG.DATE
+ * - ESRI.VERSION
+ * - ESRI.DATE
+ * - IGNF.SOURCE
+ * - IGNF.VERSION
+ * - IGNF.DATE
+ * - NKG.SOURCE
+ * - NKG.VERSION
+ * - NKG.DATE
+ * - PROJ.VERSION
+ * - PROJ_DATA.VERSION : PROJ-data version most compatible with this database.
+ *
+ *
  * @param ctx PROJ context, or NULL for default context
  * @param key Metadata key. Must not be NULL
  * @return value, or nullptr
