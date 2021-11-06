@@ -718,3 +718,9 @@ INSERT INTO "compound_crs" VALUES('EPSG','9767','EWR2 Grid + ODN height',NULL,'E
 INSERT INTO "usage" VALUES('EPSG','16510','compound_crs','EPSG','9767','EPSG','4622','EPSG','1141');
 INSERT INTO "compound_crs" VALUES('EPSG','9785','RGF93 v2b + NGF-IGN69 height',NULL,'EPSG','9782','EPSG','5720',0);
 INSERT INTO "usage" VALUES('EPSG','16594','compound_crs','EPSG','9785','EPSG','1326','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','9870','MRH21 Grid + ODN height',NULL,'EPSG','9869','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','16942','compound_crs','EPSG','9870','EPSG','4652','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','9881','MOLDOR11 Grid + ODN height',NULL,'EPSG','9880','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','16985','compound_crs','EPSG','9881','EPSG','4655','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','9883','ETRS89 + CD Norway depth',NULL,'EPSG','4258','EPSG','9672',0);
+INSERT INTO "usage" VALUES('EPSG','16974','compound_crs','EPSG','9883','EPSG','4656','EPSG','1198');

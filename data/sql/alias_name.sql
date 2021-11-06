@@ -646,6 +646,8 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1195','NAD83(CSRS) 2002
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1196','NAD83(CSRS) 2005','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1197','NAD83(CSRS) 2010','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1198','NAD83(CSRS) 2010','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1314','MRH21-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1315','MOLDOR11-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7448,3 +7450,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9821','UA_UCS_2000 / LCS
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9860','UA_UCS_2000 / LCS_68','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9855','UA_UCS_2000 / LCS_56','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9864','UA_UCS_2000 / LCS_80','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9869','ETRS89 / MHR21 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9870','ETRS89 / MRH21 SnakeGrid + Newlyn height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9880','ETRS89 / MOLDOR11 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9881','ETRS89 / MOLDOR11 SnakeGrid + Newlyn height','EPSG');
