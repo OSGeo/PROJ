@@ -8,9 +8,15 @@ jobs:
     runs-on: windows-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
+    strategy:
+        fail-fast: false
+        matrix:
+            BUILD_TYPE: [Release, Debug]
+
     env:
         ARCH: x64
         BUILD_SHARED_LIBS: ON
+        BUILD_TYPE: ${{ matrix.BUILD_TYPE }}
 
     steps:
 
@@ -42,7 +48,7 @@ jobs:
             mkdir %PROJ_BUILD%
             cd %PROJ_BUILD%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
-            cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS="{{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
+            cmake -GNinja .. -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
             ninja -v
             ninja install
             dir %PROJ_DIR%\bin
@@ -55,10 +61,10 @@ jobs:
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
             set PROJ_BUILD=%GITHUB_WORKSPACE%\build
             cd %PROJ_BUILD%
-            ctest -V -C Release
+            ctest -V -C "${{ env.BUILD_TYPE }}"
             set PATH=%PROJ_DIR%\bin;%PATH%
-            call %GITHUB_WORKSPACE%\test\postinstall\test_cmake.bat %PROJ_DIR%
-            proj
+            if "${{ env.BUILD_TYPE }}"=="Release" call %GITHUB_WORKSPACE%\test\postinstall\test_cmake.bat %PROJ_DIR%
+            if "${{ env.BUILD_TYPE }}"=="Release" proj
 
   MSYS2:
     runs-on: windows-latest
