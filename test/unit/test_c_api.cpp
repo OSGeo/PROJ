@@ -47,6 +47,10 @@
 
 #include <sqlite3.h>
 
+#if !defined(_WIN32)
+#include <sys/resource.h>
+#endif
+
 #ifndef __MINGW32__
 #include <thread>
 #endif
@@ -6104,9 +6108,18 @@ TEST_F(CApi, open_plenty_of_contexts) {
     // database
     std::vector<FILE *> dummyFilePointers;
     std::vector<PJ_CONTEXT *> ctxts;
-    // 1024 is the number of file descriptors that can be opened simultaneously
-    // by a Linux process (by default)
-    for (int i = 0; i < 1024 - 50; i++) {
+    // The number of file descriptors that can be opened simultaneously by a
+    // process varies across platforms so we make use of getrlimit(2) to
+    // retrieve it.
+    struct rlimit open_max;
+    getrlimit(RLIMIT_NOFILE, &open_max);
+    // On some platforms fopen returned nullptrs before reaching limit - 50, we
+    // can avoid this by capping the limit to 1024.
+    if (open_max.rlim_cur > 1024) {
+      open_max.rlim_cur = 1024;
+      setrlimit(RLIMIT_NOFILE, &open_max);
+    }
+    for (rlim_t i = 0; i < open_max.rlim_cur - 50; i++) {
         FILE *f = fopen("/dev/null", "rb");
         ASSERT_TRUE(f != nullptr);
         dummyFilePointers.push_back(f);
