@@ -1068,6 +1068,9 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         proj_destroy(P);
     }
 
+    proj_destroy(epsg27700);
+    proj_destroy(epsg4326);
+    proj_destroy(epsg3857);
     proj_context_destroy(ctx);
 }
 
