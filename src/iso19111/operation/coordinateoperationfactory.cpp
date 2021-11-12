@@ -5250,8 +5250,10 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
     // and a geoid model for Belfast height referenced to ETRS89
     if (verticalTransforms.size() == 1 &&
         verticalTransforms.front()->hasBallparkTransformation()) {
-        auto dbContext =
-            context.context->getAuthorityFactory()->databaseContext();
+        const auto &authFactory = context.context->getAuthorityFactory();
+        auto dbContext = authFactory
+                             ? authFactory->databaseContext().as_nullable()
+                             : nullptr;
         const auto intermGeogSrc =
             srcGeog->promoteTo3D(std::string(), dbContext);
         const bool intermGeogSrcIsSameAsIntermGeogDst =
