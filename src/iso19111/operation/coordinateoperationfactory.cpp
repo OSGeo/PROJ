@@ -1624,6 +1624,9 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirect(
                         context.extent1, context.extent2);
                 res.insert(res.end(), resTmp.begin(), resTmp.end());
                 if (authName == "PROJ") {
+                    // Do not stop at the first transformations available in
+                    // the PROJ namespace, but allow the next authority to
+                    // continue
                     continue;
                 }
                 if (!res.empty()) {
@@ -1669,24 +1672,34 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirectTo(
 
         const auto authorities(getCandidateAuthorities(
             authFactory, targetAuthName, targetAuthName));
+        std::vector<CoordinateOperationNNPtr> res;
         for (const auto &authority : authorities) {
+            const auto authName =
+                authority == "any" ? std::string() : authority;
             const auto tmpAuthFactory = io::AuthorityFactory::create(
-                authFactory->databaseContext(),
-                authority == "any" ? std::string() : authority);
-            auto res = tmpAuthFactory->createFromCoordinateReferenceSystemCodes(
-                std::string(), std::string(), targetAuthName, targetCode,
-                context.context->getUsePROJAlternativeGridNames(),
+                authFactory->databaseContext(), authName);
+            auto resTmp =
+                tmpAuthFactory->createFromCoordinateReferenceSystemCodes(
+                    std::string(), std::string(), targetAuthName, targetCode,
+                    context.context->getUsePROJAlternativeGridNames(),
 
-                gridAvailabilityUse ==
-                        CoordinateOperationContext::GridAvailabilityUse::
-                            DISCARD_OPERATION_IF_MISSING_GRID ||
+                    gridAvailabilityUse ==
+                            CoordinateOperationContext::GridAvailabilityUse::
+                                DISCARD_OPERATION_IF_MISSING_GRID ||
+                        gridAvailabilityUse ==
+                            CoordinateOperationContext::GridAvailabilityUse::
+                                KNOWN_AVAILABLE,
                     gridAvailabilityUse ==
                         CoordinateOperationContext::GridAvailabilityUse::
                             KNOWN_AVAILABLE,
-                gridAvailabilityUse == CoordinateOperationContext::
-                                           GridAvailabilityUse::KNOWN_AVAILABLE,
-                context.context->getDiscardSuperseded(), true, true,
-                context.extent1, context.extent2);
+                    context.context->getDiscardSuperseded(), true, true,
+                    context.extent1, context.extent2);
+            res.insert(res.end(), resTmp.begin(), resTmp.end());
+            if (authName == "PROJ") {
+                // Do not stop at the first transformations available in
+                // the PROJ namespace, but allow the next authority to continue
+                continue;
+            }
             if (!res.empty()) {
                 auto resFiltered =
                     FilterResults(res, context.context, context.extent1,

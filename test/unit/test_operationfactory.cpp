@@ -4922,6 +4922,53 @@ TEST(operation, compoundCRS_to_geogCRS_3D_context) {
                   "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
                   "+step +proj=axisswap +order=2,1");
     }
+
+    // Check that we can handle vertical transformations where there is a
+    // mix of available ones in the PROJ namespace (mx_inegi_ggm10) and in
+    // in the EPSG namespace (us_noaa_g2018u0)
+    // This test might no longer test this scenario if mx_inegi_ggm10 is
+    // referenced one day by EPSG, but at least this tests a common use case.
+    {
+        auto authFactoryAll =
+            AuthorityFactory::create(DatabaseContext::create(), std::string());
+        auto ctxt =
+            CoordinateOperationContext::create(authFactoryAll, nullptr, 0.0);
+        ctxt->setSpatialCriterion(
+            CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+        ctxt->setGridAvailabilityUse(
+            CoordinateOperationContext::GridAvailabilityUse::
+                IGNORE_GRID_AVAILABILITY);
+        // NAD83(2011) + NAVD88 height
+        auto srcObj = createFromUserInput(
+            "EPSG:6318+5703", authFactory->databaseContext(), false);
+        auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+        ASSERT_TRUE(src != nullptr);
+        auto nnSrc = NN_NO_CHECK(src);
+
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            nnSrc,
+            authFactory->createCoordinateReferenceSystem("4979"), // WGS 84 3D
+            ctxt);
+        bool foundGeoid2018 = false;
+        bool foundGGM10 = false;
+        for (const auto &op : list) {
+            try {
+                const auto projString = op->exportToPROJString(
+                    PROJStringFormatter::create(
+                        PROJStringFormatter::Convention::PROJ_5,
+                        authFactory->databaseContext())
+                        .get());
+                if (projString.find("us_noaa_g2018u0.tif") != std::string::npos)
+                    foundGeoid2018 = true;
+                else if (projString.find("mx_inegi_ggm10.tif") !=
+                         std::string::npos)
+                    foundGGM10 = true;
+            } catch (const std::exception &) {
+            }
+        }
+        EXPECT_TRUE(foundGeoid2018);
+        EXPECT_TRUE(foundGGM10);
+    }
 }
 
 // ---------------------------------------------------------------------------
