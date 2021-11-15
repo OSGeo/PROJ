@@ -6116,8 +6116,8 @@ TEST_F(CApi, open_plenty_of_contexts) {
     // On some platforms fopen returned nullptrs before reaching limit - 50, we
     // can avoid this by capping the limit to 1024.
     if (open_max.rlim_cur > 1024) {
-      open_max.rlim_cur = 1024;
-      setrlimit(RLIMIT_NOFILE, &open_max);
+        open_max.rlim_cur = 1024;
+        setrlimit(RLIMIT_NOFILE, &open_max);
     }
     for (rlim_t i = 0; i < open_max.rlim_cur - 50; i++) {
         FILE *f = fopen("/dev/null", "rb");
