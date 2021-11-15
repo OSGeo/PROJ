@@ -2427,8 +2427,9 @@ CoordinateOperationFactory::Private::createOperationsGeogToGeog(
                                     util::IComparable::Criterion::EQUIVALENT)) {
         if (offset_pm.value() == 0 && !axisReversal2D && !axisReversal3D) {
             // If only by vertical units, use a Change of Vertical
-            // Unit
-            // transformation
+            // Unit transformation
+            if (vconvDst == 0)
+                throw InvalidOperation("Conversion factor of target unit is 0");
             const double factor = vconvSrc / vconvDst;
             auto conv = Conversion::createChangeVerticalUnit(
                 util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
