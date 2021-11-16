@@ -2140,6 +2140,10 @@ def import_geogtran():
                     reference_time = parsed_wkt2['COORDINATEOPERATION'][1]['Reference_Time'][0]
                     reference_time_cs_auth, reference_time_cs_code, reference_time_uom_code = get_cs_from_unit(
                         *parsed_wkt2['COORDINATEOPERATION'][1]['Reference_Time'][1]['SCALEUNIT'])
+                    if reference_time_cs_auth == 'EPSG' and reference_time_uom_code == '9201':
+                        # convert "Unity" values for Reference_Time to "years". The helmert_transformation table requires
+                        # a time type uom for epochs
+                        reference_time_uom_code = '1029'
 
                     if is_Time_Based_Helmert_Coordinate_Frame:
                         method_code = '1057'
