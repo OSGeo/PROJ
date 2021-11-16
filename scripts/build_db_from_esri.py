@@ -1027,7 +1027,7 @@ def import_projcs():
                         conv_name = esri_name + " (Gauss Kruger)"
 
                     cursor.execute(
-                        """SELECT code FROM conversion WHERE auth_name = 'EPSG' AND
+                        """SELECT code, deprecated FROM conversion WHERE auth_name = 'EPSG' AND
                         method_code = '9807' AND
                         param1_code = '8801' AND param1_value = ? AND param1_uom_code = ? AND
                         param2_code = '8802' AND param2_value = ? AND param2_uom_code = ? AND
@@ -1046,6 +1046,20 @@ def import_projcs():
                     if conv_name == 'unnamed' and src_row:
                         conv_auth_name = 'EPSG'
                         conv_code = src_row[0]
+                        conv_is_deprecated = bool(src_row[1])
+                        while not deprecated and conv_is_deprecated:
+                            # if we found a deprecated conversion but the CRS isn't deprecated, keep looking...
+                            src_row = cursor.fetchone()
+                            if not src_row:
+                                break
+
+                            conv_code = src_row[0]
+                            conv_is_deprecated = bool(src_row[1])
+
+                        if conv_is_deprecated and not deprecated:
+                            # if conversion is marked as deprecated, we have to deprecate the CRS also
+                            print('Flagging ESRI:{} ({}) as deprecated because conversion EPSG:{} is deprecated'.format(code, esri_name, conv_code))
+                            deprecated = True
                     else:
                         conv_auth_name = 'ESRI'
                         conv_code = code
