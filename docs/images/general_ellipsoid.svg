@@ -28,8 +28,8 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.85878227"
-     inkscape:cx="561.25984"
+     inkscape:zoom="1.031875"
+     inkscape:cx="374.70624"
      inkscape:cy="396.85039"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -37,8 +37,8 @@
      showgrid="false"
      inkscape:window-width="1598"
      inkscape:window-height="1027"
-     inkscape:window-x="1458"
-     inkscape:window-y="25"
+     inkscape:window-x="1856"
+     inkscape:window-y="35"
      inkscape:window-maximized="0" />
   <metadata
      id="metadata5">
@@ -78,6 +78,14 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <path
+       style="fill:none;stroke:#999999;stroke-width:0.750858;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.50172, 0.75085800000000003;stroke-dashoffset:0;stroke-opacity:0.40080971"
+       d="M 156.44319,186.24994 V 117.82622"
+       id="path1482" />
+    <path
+       style="fill:none;stroke:#999999;stroke-width:0.896;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.792, 0.89600000000000002;stroke-dashoffset:0;stroke-opacity:0.40080971"
+       d="m 58.96348,118.22975 h 97.33606"
+       id="path935" />
     <ellipse
        style="fill:none;fill-rule:evenodd;stroke:#1a1a1a;stroke-width:2.065;stroke-miterlimit:4;stroke-dasharray:none"
        id="path28"
@@ -86,12 +94,12 @@
        rx="97.51786"
        ry="69.16964" />
     <path
-       style="fill:none;stroke:#999999;stroke-width:1.065;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:2.13, 1.065;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 156.44319,187.05699 V 49.402501"
+       style="fill:none;stroke:#999999;stroke-width:0.750858;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.50172, 0.750858;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 156.44319,117.82622 V 49.402501"
        id="path853" />
     <path
-       style="fill:none;stroke:#999999;stroke-width:1.26557;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:2.53114, 1.26557;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 59.250781,118.22975 H 253.6356"
+       style="fill:none;stroke:#999999;stroke-width:0.895554;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.79111, 0.895554;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 156.29954,118.22975 H 253.6356"
        id="path855" />
     <text
        xml:space="preserve"
