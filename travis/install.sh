@@ -139,11 +139,24 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     VERBOSE=1 make >/dev/null
     cd ../..
 
+    # Use ccache if it's available
+    if command -v ccache &> /dev/null
+    then
+        USE_CCACHE=ON
+        ccache -s
+    else
+        USE_CCACHE=OFF
+    fi
+
     # Regular build
     mkdir build_cmake
     cd build_cmake
-    cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install
-    VERBOSE=1 make >/dev/null
+    cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install -DUSE_CCACHE=${USE_CCACHE}
+    make >/dev/null
+    if [ "$USE_CCACHE" = "ON" ]; then
+        ccache -s
+    fi
+
     make install >/dev/null
     ctest
     find /tmp/proj_cmake_install
