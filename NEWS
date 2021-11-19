@@ -108,6 +108,9 @@
    directories, so that proj can be used as a subdirectory of a larger
    project (#2913)
 
+ o Fix unreachable internal code in Icosahedral Snyder Equal Area projection
+   (#423)
+
 
  THANKS TO
  ---------

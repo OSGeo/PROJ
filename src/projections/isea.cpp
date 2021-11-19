@@ -887,26 +887,25 @@ static long isea_disn(struct isea_dgg *g, int quadz, struct isea_pt *di) {
  * d' = d << 4 + q, d = d' >> 4, q = d' & 0xf
  */
 /* convert a q2di to global hex coord */
-static int isea_hex(struct isea_dgg *g, int tri,
+static void isea_hex(struct isea_dgg *g, int tri,
                     struct isea_pt *pt, struct isea_pt *hex) {
     struct isea_pt v;
-#ifdef FIXME
     long sidelength;
     long d, i, x, y;
-#endif
     int quadz;
 
     quadz = isea_ptdi(g, tri, pt, &v);
 
-    if( v.x < (INT_MIN >> 4) || v.x > (INT_MAX >> 4) )
+    if(v.x < (INT_MIN >> 4) || v.x > (INT_MAX >> 4))
     {
         throw "Invalid shift";
     }
     hex->x = ((int)v.x * 16) + quadz;
     hex->y = v.y;
 
-    return 1;
-#ifdef FIXME
+    if (g->aperture < 3 || g->aperture > 4)
+        return;
+
     d = lround(floor(v.x));
     i = lround(floor(v.y));
 
@@ -932,7 +931,7 @@ static int isea_hex(struct isea_dgg *g, int tri,
 
         hex->x = x + offset / 3;
         hex->y = y + 2 * offset / 3;
-        return 1;
+        return;
     }
 
     /* aperture 3 even resolutions and aperture 4 */
@@ -949,8 +948,7 @@ static int isea_hex(struct isea_dgg *g, int tri,
         hex->y = i + sidelength * ((g->quad-1) % 5);
     }
 
-    return 1;
-#endif
+    return;
 }
 
 static struct isea_pt isea_forward(struct isea_dgg *g, struct isea_geo *in)
