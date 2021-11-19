@@ -145,7 +145,7 @@ Using the GRS80 ellipsoid:
 
     proj=laton ellps=GRS80
 
-Expressing ellipsoid by semi-major axis and reverse flattening (1/f):
+Expressing ellipsoid by semi-major axis and reverse flattening (:math:`1/f`):
 
 ::
 
