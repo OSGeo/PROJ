@@ -33,6 +33,11 @@
 #error Must have C++11 or newer.
 #endif
 
+// windows.h can confict with Criterion::STRICT
+#ifdef STRICT
+#undef STRICT
+#endif
+
 #include <exception>
 #include <map>
 #include <memory>
