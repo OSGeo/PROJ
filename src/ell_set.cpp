@@ -51,7 +51,7 @@ int pj_ellipsoid (PJ *P) {
 
     Spherification parameters supported are:
         R_A, which gives a sphere with the same surface area as the ellipsoid
-        R_A, which gives a sphere with the same volume as the ellipsoid
+        R_V, which gives a sphere with the same volume as the ellipsoid
 
         R_a, which gives a sphere with R = (a + b)/2   (arithmetic mean)
         R_g, which gives a sphere with R = sqrt(a*b)   (geometric mean)
