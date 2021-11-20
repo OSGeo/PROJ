@@ -34,6 +34,7 @@ import argparse
 import csv
 import os
 import sqlite3
+import re
 import sys
 from pathlib import Path
 
@@ -166,8 +167,8 @@ def import_linunit():
         idx_name = header.index('name')
         assert idx_name >= 0
 
-        idx_wkt = header.index('wkt')
-        assert idx_wkt >= 0
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
 
         idx_authority = header.index('authority')
         assert idx_authority >= 0
@@ -183,9 +184,9 @@ def import_linunit():
             authority = row[idx_authority]
             esri_name = row[idx_name]
 
-            wkt = row[idx_wkt]
-            assert wkt.startswith('UNIT[') and wkt.endswith(']')
-            tokens = wkt[len('UNIT['):len(wkt) - 1].split(',')
+            wkt = row[idx_wkt2]
+            assert wkt.startswith('LENGTHUNIT[') and wkt.endswith(']')
+            tokens = wkt[len('LENGTHUNIT['):len(wkt) - 1].split(',')
             assert len(tokens) == 2
             esri_conv_factor = float(tokens[1])
 
@@ -227,8 +228,8 @@ def import_spheroid():
         idx_description = header.index('description')
         assert idx_description >= 0
 
-        idx_wkt = header.index('wkt')
-        assert idx_wkt >= 0
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
 
         idx_authority = header.index('authority')
         assert idx_authority >= 0
@@ -268,12 +269,17 @@ def import_spheroid():
             else:
                 assert authority.upper() == 'ESRI', row
 
-                wkt = row[idx_wkt]
-                assert wkt.startswith('SPHEROID[') and wkt.endswith(']')
-                tokens = wkt[len('SPHEROID['):len(wkt) - 1].split(',')
-                assert len(tokens) == 3
-                a = tokens[1]
-                rf = tokens[2]
+                wkt2 = row[idx_wkt2]
+                wkt2_tokens_re = re.compile(r'ELLIPSOID\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?),(-?[\d]+(?:\.[\d]*)?),LENGTHUNIT\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?)]]')
+                match = wkt2_tokens_re.match(wkt2)
+                assert match, wkt2
+
+                a = match.group(2)
+                rf = match.group(3)
+                length_unit = match.group(4)
+                unit_size = float(match.group(5))
+                assert length_unit == 'Meter', 'Unhandled spheroid unit: {}'.format(length_unit)
+                assert unit_size == 1, 'Unhandled spheroid unit size: {}'.format(unit_size)
 
                 description = row[idx_description]
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
@@ -327,8 +333,8 @@ def import_prime_meridian():
         idx_description = header.index('description')
         assert idx_description >= 0
 
-        idx_wkt = header.index('wkt')
-        assert idx_wkt >= 0
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
 
         idx_authority = header.index('authority')
         assert idx_authority >= 0
@@ -366,11 +372,16 @@ def import_prime_meridian():
             else:
                 assert authority.upper() == 'ESRI', row
 
-                wkt = row[idx_wkt]
-                assert wkt.startswith('PRIMEM[') and wkt.endswith(']')
-                tokens = wkt[len('PRIMEM['):len(wkt) - 1].split(',')
-                assert len(tokens) == 2
-                value = tokens[1]
+                wkt2 = row[idx_wkt2]
+                wkt2_tokens_re = re.compile(r'PRIMEM\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?),ANGLEUNIT\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?)]]')
+                match = wkt2_tokens_re.match(wkt2)
+                assert match, wkt2
+
+                value = match.group(2)
+                angle_unit = match.group(3)
+                unit_size = float(match.group(4))
+                assert angle_unit == 'Degree', 'Unhandled prime meridian unit: {}'.format(length_unit)
+                assert unit_size == 0.0174532925199433, 'Unhandled prime meridian unit size: {}'.format(unit_size)
 
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
@@ -406,8 +417,8 @@ def import_datum():
         idx_description = header.index('description')
         assert idx_description >= 0
 
-        idx_wkt = header.index('wkt')
-        assert idx_wkt >= 0
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
 
         idx_authority = header.index('authority')
         assert idx_authority >= 0
@@ -457,14 +468,11 @@ def import_datum():
                 map_datum_esri_name_to_auth_code[esri_name] = [
                     'ESRI', code]
 
-                wkt = row[idx_wkt]
-                pos = wkt.find('SPHEROID["')
-                assert pos >= 0
-                pos += len('SPHEROID["')
-                end_pos = wkt[pos:].find('"')
-                assert end_pos >= 0
-                end_pos += pos
-                ellps_name = wkt[pos:end_pos]
+                wkt2 = row[idx_wkt2]
+                wkt2_tokens_re = re.compile(
+                    r'DATUM\[""?(.*?)""?,\s*ELLIPSOID\[""?(.*?)""?,\s*(-?[\d]+(?:\.[\d]*)?),\s*(-?[\d]+(?:\.[\d]*)?),\s*LENGTHUNIT\[""?(.*?)""?,\s*(-?[\d]+(?:\.[\d]*)?)]]]')
+                match = wkt2_tokens_re.match(wkt2)
+                ellps_name = match.group(2)
 
                 assert ellps_name in map_spheroid_esri_name_to_auth_code, (
                     ellps_name, row)
@@ -507,8 +515,8 @@ def import_geogcs():
         idx_description = header.index('description')
         assert idx_description >= 0
 
-        idx_wkt = header.index('wkt')
-        assert idx_wkt >= 0
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
 
         idx_authority = header.index('authority')
         assert idx_authority >= 0
@@ -562,32 +570,41 @@ def import_geogcs():
             else:
                 assert authority.upper() == 'ESRI', row
 
-                wkt = row[idx_wkt]
-                pos = wkt.find('DATUM["')
-                assert pos >= 0
-                pos += len('DATUM["')
-                end_pos = wkt[pos:].find('"')
-                assert end_pos >= 0
-                end_pos += pos
-                datum_name = wkt[pos:end_pos]
+                wkt2 = row[idx_wkt2]
+                wkt2_datum_re = re.compile(r'.*DATUM\[""?(.*?)""?.*')
+                match = wkt2_datum_re.match(wkt2)
+                assert match, wkt2
+                datum_name = match.group(1)
+
+                # strip datum out of wkt
+                wkt2 = re.sub(r'DATUM\[""?(.*?)""?,\s*ELLIPSOID\[""?(.*?)""?,\s*(-?[\d]+(?:\.[\d]*)?),\s*(-?[\d]+(?:\.[\d]*)?),\s*LENGTHUNIT\[""?(.*?)""?,\s*(-?[\d]+(?:\.[\d]*)?)]]],?', '', wkt2)
 
                 assert datum_name in map_datum_esri_name_to_auth_code, (
                     datum_name, row)
                 datum_auth_name, datum_code = map_datum_esri_name_to_auth_code[datum_name]
 
-                pos = wkt.find('PRIMEM["')
-                assert pos >= 0
-                pos += len('PRIMEM["')
-                end_pos = wkt[pos:].find('"')
-                assert end_pos >= 0
-                end_pos += pos
-                pm_name = wkt[pos:end_pos]
+                wkt2_datum_re = re.compile(r'.*PRIMEM\[""?(.*?)""?.*')
+                match = wkt2_datum_re.match(wkt2)
+                assert match, wkt2
+                pm_name = match.group(1)
+
+                # strip prime meridian out of wkt
+                wkt2 = re.sub(r'PRIMEM\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?),ANGLEUNIT\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?)]],?', '', wkt2)
 
                 assert pm_name in map_pm_esri_name_to_auth_code, (pm_name, row)
                 pm_auth_name, pm_code = map_pm_esri_name_to_auth_code[pm_name]
 
-                is_degree = 'UNIT["Degree' in wkt
-                is_grad = 'UNIT["Grad' in wkt
+                wkt2_angle_unit_re = re.compile(
+                    r'.*ANGLEUNIT\[""?(.*?)""?,(-?[\d]+(?:\.[\d]*)?)].*')
+                match = wkt2_angle_unit_re.match(wkt2)
+                assert match, wkt2
+
+                angle_unit = match.group(1)
+                assert angle_unit in ('Degree', 'Grad'), 'Unhandled angle unit {}'.format(angle_unit)
+
+                is_degree = angle_unit == 'Degree'
+                is_grad = angle_unit == 'Grad'
+
                 assert is_degree or is_grad, row
                 cs_code = '6422' if is_degree else '6403'
 
@@ -679,13 +696,14 @@ def parse_wkt_array(s, level=0):
     in_string = False
     cur_token = ''
     indent_level = 0
+
     for c in s:
         if in_string:
             if c == '"':
                 in_string = False
-            cur_token += c
+            else:
+                cur_token += c
         elif c == '"':
-            cur_token += c
             in_string = True
         elif c == '[':
             cur_token += c
@@ -704,37 +722,76 @@ def parse_wkt_array(s, level=0):
         ar.append(parse_wkt(cur_token, level + 1))
 
     if level == 0:
-        d = {}
-        for elt in ar:
-            assert isinstance(elt, dict)
-            assert len(elt) == 1
-            if 'PROJECTION' in elt:
-                assert len(elt['PROJECTION']) == 1, elt['PROJECTION']
-                assert 'PROJECTION' not in d
-                name = elt['PROJECTION'][0]
-                assert name[0] == '"' and name[-1] == '"', name
-                name = name[1:-1]
-                d['PROJECTION'] = name
-            elif 'PARAMETER' in elt:
-                assert len(elt['PARAMETER']) == 2, elt['PARAMETER']
-                name = elt['PARAMETER'][0]
-                assert name[0] == '"' and name[-1] == '"', name
-                name = name[1:-1]
-                assert name not in d
-                d[name] = elt['PARAMETER'][1]
-            elif 'UNIT' in elt:
-                assert len(elt['UNIT']) == 2, elt['UNIT']
-                name = elt['UNIT'][0]
-                assert name[0] == '"' and name[-1] == '"', name
-                name = name[1:-1]
-                assert 'UNIT_NAME' not in d
-                d['UNIT_NAME'] = name
-                d['UNIT_VALUE'] = elt['UNIT'][1]
-            else:
-                assert True
-        return d
+        return wkt_array_to_dict(ar)
     else:
         return ar
+
+
+def wkt_array_to_dict(ar):
+    d = {}
+    for elt in ar:
+        assert isinstance(elt, dict), elt
+        assert len(elt) == 1
+        if 'PROJECTION' in elt:
+            assert len(elt['PROJECTION']) == 1, elt['PROJECTION']
+            assert 'PROJECTION' not in d
+            name = elt['PROJECTION'][0]
+            d['PROJECTION'] = name
+        elif 'CONVERSION' in elt:
+            d['CONVERSION'] = [elt['CONVERSION'][0], wkt_array_to_dict(elt['CONVERSION'][1:])]
+        elif 'COORDINATEOPERATION' in elt:
+            d['COORDINATEOPERATION'] = [elt['COORDINATEOPERATION'][0], wkt_array_to_dict(elt['COORDINATEOPERATION'][1:])]
+        elif 'SOURCECRS' in elt:
+            assert len(elt['SOURCECRS']) == 1, elt['SOURCECRS']
+            d['SOURCECRS'] = elt['SOURCECRS'][0]
+        elif 'TARGETCRS' in elt:
+            assert len(elt['TARGETCRS']) == 1, elt['TARGETCRS']
+            d['TARGETCRS'] = elt['TARGETCRS'][0]
+        elif 'VERTCRS' in elt:
+            d['VERTCRS'] = [elt['VERTCRS'][0], wkt_array_to_dict(elt['VERTCRS'][1:])]
+        elif 'VDATUM' in elt:
+            assert len(elt['VDATUM']) == 1, elt['VDATUM']
+            d['VDATUM'] = elt['VDATUM'][0]
+        elif 'CS' in elt:
+            assert len(elt['CS']) == 2, elt['CS']
+            d['CS'] = elt['CS']
+        elif 'AXIS' in elt:
+            assert len(elt['AXIS']) == 3
+            d['AXIS'] = [elt['AXIS'][0], elt['AXIS'][1], wkt_array_to_dict(elt['AXIS'][2:])]
+        elif 'DATUM' in elt:
+            d['DATUM'] = [elt['DATUM'][0], wkt_array_to_dict(elt['DATUM'][1:])]
+        elif 'METHOD' in elt:
+            assert len(elt['METHOD']) == 1, elt['METHOD']
+            d['METHOD'] = elt['METHOD'][0]
+        elif 'PARAMETERFILE' in elt:
+            assert len(elt['PARAMETERFILE']) == 1, elt['PARAMETERFILE']
+            d['PARAMETERFILE'] = elt['PARAMETERFILE'][0]
+        elif 'OPERATIONACCURACY' in elt:
+            assert len(elt['OPERATIONACCURACY']) == 1, elt['OPERATIONACCURACY']
+            d['OPERATIONACCURACY'] = elt['OPERATIONACCURACY'][0]
+        #elif 'ELLIPSOID' in elt:
+        #    d['ELLIPSOID'] = [elt['ELLIPSOID'][0], wkt_array_to_dict(elt['ELLIPSOID'][1:])]
+        elif 'PARAMETER' in elt:
+            assert len(elt['PARAMETER']) >= 2, elt['PARAMETER']
+            name = elt['PARAMETER'][0]
+            assert name not in d
+            d[name] = elt['PARAMETER'][1] if len(elt['PARAMETER']) == 2 else elt['PARAMETER'][1:]
+        elif 'UNIT' in elt:
+            assert len(elt['UNIT']) == 2, elt['UNIT']
+            name = elt['UNIT'][0]
+            assert 'UNIT_NAME' not in d
+            d['UNIT_NAME'] = name
+            d['UNIT_VALUE'] = elt['UNIT'][1]
+        elif 'LENGTHUNIT' in elt:
+            assert len(elt['LENGTHUNIT']) == 2, elt['LENGTHUNIT']
+            name = elt['LENGTHUNIT'][0]
+            assert 'UNIT_NAME' not in d
+            d['UNIT_NAME'] = name
+            d['UNIT_VALUE'] = elt['LENGTHUNIT'][1]
+        else:
+            assert True
+    return d
+
 
 ########################
 
@@ -743,27 +800,71 @@ def get_cs(parsed_conv_wkt):
 
     UNIT_NAME = parsed_conv_wkt['UNIT_NAME']
     UNIT_VALUE = parsed_conv_wkt['UNIT_VALUE']
+    return get_cs_from_unit(UNIT_NAME, UNIT_VALUE)
 
+
+def get_cs_from_unit(UNIT_NAME, UNIT_VALUE, is_rate=False):
     if UNIT_NAME == 'Meter':
-        uom_code = '9001'
+        uom_code = '1042' if is_rate else '9001'
         cs_auth_name = 'EPSG'
         cs_code = '4400'
         assert UNIT_VALUE == '1.0', UNIT_VALUE
+    elif UNIT_NAME == 'Millimeter':
+        uom_code = '1027' if is_rate else '1025'
+        cs_auth_name = 'EPSG'
+        cs_code = None
+        assert UNIT_VALUE == '0.001', UNIT_VALUE
+    elif UNIT_NAME == 'Degree':
+        assert not is_rate
+        uom_code = '9102'
+        cs_auth_name = 'EPSG'
+        cs_code = None
+        assert UNIT_VALUE == '0.0174532925199433', UNIT_VALUE
+    elif UNIT_NAME == 'Arcsecond':
+        uom_code = '1043' if is_rate else '9104'
+        cs_auth_name = 'EPSG'
+        cs_code = None
+        assert UNIT_VALUE == '0.00000484813681109536', UNIT_VALUE
+    elif UNIT_NAME == 'Milliarcsecond':
+        uom_code = '1032' if is_rate else '1031'
+        cs_auth_name = 'EPSG'
+        cs_code = None
+        assert UNIT_VALUE == '4.84813681109536e-09', UNIT_VALUE
+    elif UNIT_NAME == 'Grad':
+        assert not is_rate
+        uom_code = '9105'
+        cs_auth_name = 'EPSG'
+        cs_code = None
+        assert UNIT_VALUE == '0.01570796326794897', UNIT_VALUE
     elif UNIT_NAME == 'Foot':
+        assert not is_rate
         uom_code = '9002'
         cs_auth_name = 'ESRI'
         cs_code = UNIT_NAME
         assert UNIT_VALUE == '0.3048', UNIT_VALUE
     elif UNIT_NAME == 'Foot_US':
+        assert not is_rate
         uom_code = '9003'
         cs_auth_name = 'ESRI'
         cs_code = UNIT_NAME
         assert UNIT_VALUE == '0.3048006096012192', UNIT_VALUE
     elif UNIT_NAME == 'Yard_Indian_1937':
+        assert not is_rate
         uom_code = '9085'
         cs_auth_name = 'ESRI'
         cs_code = UNIT_NAME
         assert UNIT_VALUE == '0.91439523', UNIT_VALUE
+    elif UNIT_NAME == 'Parts_Per_Million':
+        uom_code = '1041' if is_rate else '9202'
+        cs_auth_name = 'EPSG'
+        cs_code = None
+        assert UNIT_VALUE == '0.000001', UNIT_VALUE
+    elif UNIT_NAME == 'Unity':
+        assert not is_rate
+        uom_code = '9201'
+        cs_auth_name = 'EPSG'
+        cs_code = None
+        assert UNIT_VALUE == '1.0', UNIT_VALUE
     else:
         assert False, UNIT_NAME
 
@@ -806,6 +907,9 @@ def import_projcs():
 
         idx_wkt = header.index('wkt')
         assert idx_wkt >= 0
+
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
 
         idx_authority = header.index('authority')
         assert idx_authority >= 0
@@ -864,17 +968,16 @@ def import_projcs():
                 wkid_set.add(code)
 
                 wkt = row[idx_wkt]
-                pos = wkt.find('GEOGCS["')
-                assert pos >= 0
-                pos += len('GEOGCS["')
-                end_pos = wkt[pos:].find('"')
-                assert end_pos >= 0
-                end_pos += pos
-                geogcs_name = wkt[pos:end_pos]
 
-                pos = wkt.find('PROJECTION[')
+                wkt2 = row[idx_wkt2]
+                wkt2_basegeogcrs_re = re.compile(r'.*BASEGEOGCRS\[""?(.*?)""?.*')
+                match = wkt2_basegeogcrs_re.match(wkt2)
+                assert match, wkt2
+                geogcs_name = match.group(1)
+
+                pos = wkt2.find('CONVERSION[')
                 assert pos >= 0
-                parsed_conv_wkt = parse_wkt_array(wkt[pos:-1])
+                parsed_conv_wkt2 = parse_wkt_array(wkt2[pos:-1])
 
                 assert geogcs_name in map_geogcs_esri_name_to_auth_code, (
                     geogcs_name, row)
@@ -887,47 +990,88 @@ def import_projcs():
 
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
-                method = parsed_conv_wkt['PROJECTION']
-
-                if 'UNIT["Degree",' in wkt:
-                    ang_uom_code = '9102'
-                elif 'UNIT["Grad",' in wkt:
-                    ang_uom_code = '9105'
-                else:
-                    assert False, wkt
+                method = parsed_conv_wkt2['CONVERSION'][0]
 
                 if method in ('Transverse_Mercator', 'Gauss_Kruger'):
-                    assert len(parsed_conv_wkt) == 1 + 5 + 2
-                    False_Easting = parsed_conv_wkt['False_Easting']
-                    False_Northing = parsed_conv_wkt['False_Northing']
-                    Central_Meridian = parsed_conv_wkt['Central_Meridian']
-                    Scale_Factor = parsed_conv_wkt['Scale_Factor']
-                    Latitude_Of_Origin = parsed_conv_wkt['Latitude_Of_Origin']
+                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
+                    false_easting_cs_auth, false_easting_cs_code, false_easting_uom_code = get_cs_from_unit(parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
+                                     parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
 
-                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
+                    false_northing_cs_auth, false_northing_cs_code, false_northing_uom_code = get_cs_from_unit(parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
+                                     parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+
+                    assert false_easting_cs_auth == false_northing_cs_auth, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(false_easting_cs_auth, false_northing_cs_auth)
+                    cs_auth_name = false_easting_cs_auth
+
+                    assert false_easting_cs_code == false_northing_cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(false_easting_cs_code, false_northing_cs_code)
+                    cs_code = false_easting_cs_code
+
+                    Central_Meridian = parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][0]
+                    central_meridian_cs_auth, _, central_meridian_uom_code = get_cs_from_unit(parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][0],
+                                     parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][1])
+                    assert central_meridian_cs_auth == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(central_meridian_cs_auth)
+
+                    Scale_Factor = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][0]
+                    scale_unit = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][1]['SCALEUNIT']
+                    assert scale_unit[0] == 'Unity', 'Unhandled scale unit {}'.format(scale_unit[0])
+                    assert scale_unit[1] == '1.0', 'Unhandled scale size {}'.format(scale_unit[1])
+
+                    Latitude_Of_Origin = parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][0]
+                    latitude_of_origin_cs_auth, latitude_of_origin_cs_code2, latitude_of_origin_uom_code = get_cs_from_unit(parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][0],
+                                     parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][1])
+                    assert latitude_of_origin_cs_auth == 'EPSG', 'Unhandled Latitude_Of_Origin authority {}'.format(latitude_of_origin_cs_auth)
 
                     conv_name = 'unnamed'
                     if method == 'Gauss_Kruger' and 'GK_' not in esri_name and 'Gauss' not in esri_name:
                         conv_name = esri_name + " (Gauss Kruger)"
 
                     cursor.execute(
-                        """SELECT code FROM conversion WHERE auth_name = 'EPSG' AND
+                        """SELECT code, deprecated FROM conversion WHERE auth_name = 'EPSG' AND
                         method_code = '9807' AND
                         param1_code = '8801' AND param1_value = ? AND param1_uom_code = ? AND
                         param2_code = '8802' AND param2_value = ? AND param2_uom_code = ? AND
                         param3_code = '8805' AND param3_value = ? AND param3_uom_code = '9201' AND
                         param4_code = '8806' AND param4_value = ? AND param4_uom_code = ? AND
-                        param5_code = '8807' AND param5_value = ? AND param5_uom_code = ?""", (Latitude_Of_Origin, ang_uom_code, Central_Meridian, ang_uom_code, Scale_Factor, False_Easting, uom_code, False_Northing, uom_code))
+                        param5_code = '8807' AND param5_value = ? AND param5_uom_code = ?""", (Latitude_Of_Origin,
+                                                                                               latitude_of_origin_uom_code,
+                                                                                               Central_Meridian,
+                                                                                               central_meridian_uom_code,
+                                                                                               Scale_Factor,
+                                                                                               False_Easting,
+                                                                                               false_easting_uom_code,
+                                                                                               False_Northing,
+                                                                                               false_northing_uom_code))
                     src_row = cursor.fetchone()
                     if conv_name == 'unnamed' and src_row:
                         conv_auth_name = 'EPSG'
                         conv_code = src_row[0]
+                        conv_is_deprecated = bool(src_row[1])
+                        while not deprecated and conv_is_deprecated:
+                            # if we found a deprecated conversion but the CRS isn't deprecated, keep looking...
+                            src_row = cursor.fetchone()
+                            if not src_row:
+                                break
+
+                            conv_code = src_row[0]
+                            conv_is_deprecated = bool(src_row[1])
+
+                        if conv_is_deprecated and not deprecated:
+                            # if conversion is marked as deprecated, we have to deprecate the CRS also
+                            print('Flagging ESRI:{} ({}) as deprecated because conversion EPSG:{} is deprecated'.format(code, esri_name, conv_code))
+                            deprecated = True
                     else:
                         conv_auth_name = 'ESRI'
                         conv_code = code
 
                         sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',%s,'EPSG','%s','EPSG','8802','Longitude of natural origin',%s,'EPSG','%s','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                            code, conv_name, Latitude_Of_Origin, ang_uom_code, Central_Meridian, ang_uom_code, Scale_Factor, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+                            code, conv_name,
+                            Latitude_Of_Origin, latitude_of_origin_uom_code,
+                            Central_Meridian, central_meridian_uom_code,
+                            Scale_Factor,
+                            False_Easting, false_easting_uom_code,
+                            False_Northing, false_northing_uom_code,
+                            deprecated)
 
                         sql_extract = sql[sql.find('NULL'):]
                         if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
@@ -947,22 +1091,66 @@ def import_projcs():
                     all_sql.append(sql)
 
                 elif method == 'Hotine_Oblique_Mercator_Azimuth_Natural_Origin':
-                    assert len(parsed_conv_wkt) == 1 + 6 + 2
-                    False_Easting = parsed_conv_wkt['False_Easting']
-                    False_Northing = parsed_conv_wkt['False_Northing']
-                    Scale_Factor = parsed_conv_wkt['Scale_Factor']
-                    Azimuth = parsed_conv_wkt['Azimuth']
-                    Longitude_Of_Center = parsed_conv_wkt['Longitude_Of_Center']
-                    Latitude_Of_Center = parsed_conv_wkt['Latitude_Of_Center']
+                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
+                    false_easting_cs_auth, false_easting_cs_code, false_easting_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
 
-                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
+                    false_northing_cs_auth, false_northing_cs_code, false_northing_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+
+                    assert false_easting_cs_auth == false_northing_cs_auth, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        false_easting_cs_auth, false_northing_cs_auth)
+
+                    cs_auth_name = false_easting_cs_auth
+
+                    assert false_easting_cs_code == false_northing_cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        false_easting_cs_code, false_northing_cs_code)
+
+                    cs_code = false_easting_cs_code
+
+                    Azimuth = parsed_conv_wkt2['CONVERSION'][1]['Azimuth'][0]
+                    azimuth_cs_auth, _, azimuth_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Azimuth'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Azimuth'][1]['ANGLEUNIT'][1])
+                    assert azimuth_cs_auth == 'EPSG', 'Unhandled Azimuth authority {}'.format(
+                        central_meridian_cs_auth)
+
+                    Scale_Factor = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][0]
+                    scale_unit = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][1]['SCALEUNIT']
+                    assert scale_unit[0] == 'Unity', 'Unhandled scale unit {}'.format(scale_unit[0])
+                    assert scale_unit[1] == '1.0', 'Unhandled scale size {}'.format(scale_unit[1])
+
+                    Longitude_Of_Center = parsed_conv_wkt2['CONVERSION'][1]['Longitude_Of_Center'][0]
+                    longitude_of_center_cs_auth, longitude_of_center_cs_code2, longitude_of_center_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Longitude_Of_Center'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Longitude_Of_Center'][1]['ANGLEUNIT'][1])
+                    assert longitude_of_center_cs_auth == 'EPSG', 'Unhandled Longitude_Of_Center authority {}'.format(
+                        longitude_of_center_cs_auth)
+
+                    Latitude_Of_Center = parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Center'][0]
+                    latitude_of_center_cs_auth, latitude_of_center_cs_code2, latitude_of_center_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Center'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Center'][1]['ANGLEUNIT'][1])
+                    assert latitude_of_center_cs_auth == 'EPSG', 'Unhandled Latitude_Of_Center authority {}'.format(
+                        latitude_of_center_cs_auth)
 
                     conv_name = 'unnamed'
                     conv_auth_name = 'ESRI'
                     conv_code = code
 
                     sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','9812','Hotine Oblique Mercator (variant A)','EPSG','8811','Latitude of projection centre',%s,'EPSG','%s','EPSG','8812','Longitude of projection centre',%s,'EPSG','%s','EPSG','8813','Azimuth of initial line',%s,'EPSG','%s','EPSG','8814','Angle from Rectified to Skew Grid',%s,'EPSG','%s','EPSG','8815','Scale factor on initial line',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',%d);""" % (
-                        code, conv_name, Latitude_Of_Center, ang_uom_code, Longitude_Of_Center, ang_uom_code, Azimuth, ang_uom_code, Azimuth, ang_uom_code, Scale_Factor, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+                        code, conv_name,
+                        Latitude_Of_Center, latitude_of_center_uom_code,
+                        Longitude_Of_Center, longitude_of_center_uom_code,
+                        Azimuth, azimuth_uom_code,
+                        Azimuth, azimuth_uom_code,
+                        Scale_Factor,
+                        False_Easting, false_easting_uom_code,
+                        False_Northing, false_northing_uom_code,
+                        deprecated)
 
                     sql_extract = sql[sql.find('NULL'):]
                     if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
@@ -981,23 +1169,66 @@ def import_projcs():
                     sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
-                elif method == 'Lambert_Conformal_Conic' and 'Standard_Parallel_2' in parsed_conv_wkt:
-                    assert len(parsed_conv_wkt) == 1 + 6 + 2
-                    False_Easting = parsed_conv_wkt['False_Easting']
-                    False_Northing = parsed_conv_wkt['False_Northing']
-                    Central_Meridian = parsed_conv_wkt['Central_Meridian']
-                    Standard_Parallel_1 = parsed_conv_wkt['Standard_Parallel_1']
-                    Standard_Parallel_2 = parsed_conv_wkt['Standard_Parallel_2']
-                    Latitude_Of_Origin = parsed_conv_wkt['Latitude_Of_Origin']
+                elif method == 'Lambert_Conformal_Conic' and 'Standard_Parallel_2' in parsed_conv_wkt2['CONVERSION'][1]:
+                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
+                    false_easting_cs_auth, false_easting_cs_code, false_easting_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
 
-                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
+                    false_northing_cs_auth, false_northing_cs_code, false_northing_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+
+                    assert false_easting_cs_auth == false_northing_cs_auth, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        false_easting_cs_auth, false_northing_cs_auth)
+                    cs_auth_name = false_easting_cs_auth
+
+                    assert false_easting_cs_code == false_northing_cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        false_easting_cs_code, false_northing_cs_code)
+                    cs_code = false_easting_cs_code
+
+                    Central_Meridian = parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][0]
+                    central_meridian_cs_auth, _, central_meridian_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][1])
+                    assert central_meridian_cs_auth == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(
+                        central_meridian_cs_auth)
+
+                    Standard_Parallel_1 = parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][0]
+                    standard_parallel_1_cs_auth, standard_parallel_1_cs_code2, standard_parallel_1_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][1]['ANGLEUNIT'][1])
+                    assert standard_parallel_1_cs_auth == 'EPSG', 'Unhandled Standard_Parallel_1 authority {}'.format(
+                        standard_parallel_1_cs_auth)
+
+                    Standard_Parallel_2 = parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_2'][0]
+                    standard_parallel_2_cs_auth, standard_parallel_2_cs_code2, standard_parallel_2_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_2'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_2'][1]['ANGLEUNIT'][1])
+                    assert standard_parallel_2_cs_auth == 'EPSG', 'Unhandled Standard_Parallel_2 authority {}'.format(
+                        standard_parallel_2_cs_auth)
+
+                    Latitude_Of_Origin = parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][0]
+                    latitude_of_origin_cs_auth, latitude_of_origin_cs_code2, latitude_of_origin_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][1])
+                    assert latitude_of_origin_cs_auth == 'EPSG', 'Unhandled Latitude_Of_Origin authority {}'.format(
+                        latitude_of_origin_cs_auth)
 
                     conv_name = 'unnamed'
                     conv_auth_name = 'ESRI'
                     conv_code = code
 
                     sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',%s,'EPSG','%s','EPSG','8822','Longitude of false origin',%s,'EPSG','%s','EPSG','8823','Latitude of 1st standard parallel',%s,'EPSG','%s','EPSG','8824','Latitude of 2nd standard parallel',%s,'EPSG','%s','EPSG','8826','Easting at false origin',%s,'EPSG','%s','EPSG','8827','Northing at false origin',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        code, conv_name, Latitude_Of_Origin, ang_uom_code, Central_Meridian, ang_uom_code, Standard_Parallel_1, ang_uom_code, Standard_Parallel_2, ang_uom_code, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+                        code, conv_name,
+                        Latitude_Of_Origin, latitude_of_origin_uom_code,
+                        Central_Meridian, central_meridian_uom_code,
+                        Standard_Parallel_1, standard_parallel_1_uom_code,
+                        Standard_Parallel_2, standard_parallel_2_uom_code,
+                        False_Easting, false_easting_uom_code,
+                        False_Northing, false_northing_uom_code,
+                        deprecated)
 
                     sql_extract = sql[sql.find('NULL'):]
                     if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
@@ -1016,24 +1247,65 @@ def import_projcs():
                     sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
-                elif method == 'Lambert_Conformal_Conic' and 'Scale_Factor' in parsed_conv_wkt:
-                    assert len(parsed_conv_wkt) == 1 + 6 + 2
-                    False_Easting = parsed_conv_wkt['False_Easting']
-                    False_Northing = parsed_conv_wkt['False_Northing']
-                    Central_Meridian = parsed_conv_wkt['Central_Meridian']
-                    Standard_Parallel_1 = parsed_conv_wkt['Standard_Parallel_1']
-                    Scale_Factor = parsed_conv_wkt['Scale_Factor']
-                    Latitude_Of_Origin = parsed_conv_wkt['Latitude_Of_Origin']
-                    assert Standard_Parallel_1 == Latitude_Of_Origin
+                elif method == 'Lambert_Conformal_Conic' and 'Scale_Factor' in parsed_conv_wkt2['CONVERSION'][1]:
+                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
+                    false_easting_cs_auth, false_easting_cs_code, false_easting_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
 
-                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
+                    false_northing_cs_auth, false_northing_cs_code, false_northing_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+
+                    assert false_easting_cs_auth == false_northing_cs_auth, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        false_easting_cs_auth, false_northing_cs_auth)
+                    cs_auth_name = false_easting_cs_auth
+
+                    assert false_easting_cs_code == false_northing_cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        false_easting_cs_code, false_northing_cs_code)
+                    cs_code = false_easting_cs_code
+
+                    Central_Meridian = parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][0]
+                    central_meridian_cs_auth, _, central_meridian_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][1])
+                    assert central_meridian_cs_auth == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(
+                        central_meridian_cs_auth)
+
+                    Standard_Parallel_1 = parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][0]
+                    standard_parallel_1_cs_auth, standard_parallel_1_cs_code2, standard_parallel_1_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][1]['ANGLEUNIT'][1])
+                    assert standard_parallel_1_cs_auth == 'EPSG', 'Unhandled Standard_Parallel_1 authority {}'.format(
+                        standard_parallel_1_cs_auth)
+
+                    Scale_Factor = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][0]
+                    scale_unit = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][1]['SCALEUNIT']
+                    assert scale_unit[0] == 'Unity', 'Unhandled scale unit {}'.format(scale_unit[0])
+                    assert scale_unit[1] == '1.0', 'Unhandled scale size {}'.format(scale_unit[1])
+
+                    Latitude_Of_Origin = parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][0]
+                    latitude_of_origin_cs_auth, latitude_of_origin_cs_code2, latitude_of_origin_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][1])
+                    assert latitude_of_origin_cs_auth == 'EPSG', 'Unhandled Latitude_Of_Origin authority {}'.format(
+                        latitude_of_origin_cs_auth)
+
+                    assert Standard_Parallel_1 == Latitude_Of_Origin
 
                     conv_name = 'unnamed'
                     conv_auth_name = 'ESRI'
                     conv_code = code
 
                     sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',%s,'EPSG','%s','EPSG','8802','Longitude of natural origin',%s,'EPSG','%s','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        code, conv_name, Latitude_Of_Origin, ang_uom_code, Central_Meridian, ang_uom_code, Scale_Factor, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+                        code, conv_name,
+                        Latitude_Of_Origin, latitude_of_origin_uom_code,
+                        Central_Meridian, central_meridian_uom_code,
+                        Scale_Factor,
+                        False_Easting, false_easting_uom_code,
+                        False_Northing, false_northing_uom_code,
+                        deprecated)
 
                     sql_extract = sql[sql.find('NULL'):]
                     if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
@@ -1054,19 +1326,41 @@ def import_projcs():
                     all_sql.append(sql)
 
                 elif method == 'Equal_Earth':
-                    assert len(parsed_conv_wkt) == 1 + 3 + 2
-                    False_Easting = parsed_conv_wkt['False_Easting']
-                    False_Northing = parsed_conv_wkt['False_Northing']
-                    Central_Meridian = parsed_conv_wkt['Central_Meridian']
+                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
+                    false_easting_cs_auth, false_easting_cs_code, false_easting_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
 
-                    cs_auth_name, cs_code, uom_code = get_cs(parsed_conv_wkt)
+                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
+                    false_northing_cs_auth, false_northing_cs_code, false_northing_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+
+                    assert false_easting_cs_auth == false_northing_cs_auth, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        false_easting_cs_auth, false_northing_cs_auth)
+                    cs_auth_name = false_easting_cs_auth
+
+                    assert false_easting_cs_code == false_northing_cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        false_easting_cs_code, false_northing_cs_code)
+                    cs_code = false_easting_cs_code
+
+                    Central_Meridian = parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][0]
+                    central_meridian_cs_auth, _, central_meridian_uom_code = get_cs_from_unit(
+                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][0],
+                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][1])
+                    assert central_meridian_cs_auth == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(
+                        central_meridian_cs_auth)
 
                     conv_name = 'unnamed'
                     conv_auth_name = 'ESRI'
                     conv_code = code
 
                     sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','1078','Equal Earth','EPSG','8802','Longitude of natural origin',%s,'EPSG','%s','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        code, conv_name, Central_Meridian, ang_uom_code, False_Easting, uom_code, False_Northing, uom_code, deprecated)
+                        code, conv_name,
+                        Central_Meridian, central_meridian_uom_code,
+                        False_Easting, false_easting_uom_code,
+                        False_Northing, false_northing_uom_code,
+                        deprecated)
 
                     sql_extract = sql[sql.find('NULL'):]
                     if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
@@ -1087,6 +1381,7 @@ def import_projcs():
 
                 else:
 
+                    # TODO -- add more method mapping!
                     sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,NULL,NULL,'%s','%s',NULL,NULL,'%s',%d);""" % (
                         code, esri_name, geogcs_auth_name, geogcs_code, escape_literal(wkt), deprecated)
                     all_sql.append(sql)
@@ -1139,8 +1434,8 @@ def import_vdatum():
         idx_description = header.index('description')
         assert idx_description >= 0
 
-        idx_wkt = header.index('wkt')
-        assert idx_wkt >= 0
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
 
         idx_authority = header.index('authority')
         assert idx_authority >= 0
@@ -1217,6 +1512,9 @@ def import_vertcs():
         idx_wkt = header.index('wkt')
         assert idx_wkt >= 0
 
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
+
         idx_authority = header.index('authority')
         assert idx_authority >= 0
 
@@ -1277,16 +1575,14 @@ def import_vertcs():
             else:
                 assert authority.upper() == 'ESRI', row
 
-                wkt = row[idx_wkt]
+                wkt2 = row[idx_wkt2]
 
-                pos = wkt.find('VDATUM["')
+                vdatum_re = re.compile(r'.*VDATUM\[""?(.*?)""?.*')
+                match = vdatum_re.match(wkt2)
+
                 is_vdatum = True
-                if pos > 0:
-                    pos += len('VDATUM["')
-                    end_pos = wkt[pos:].find('"')
-                    assert end_pos >= 0
-                    end_pos += pos
-                    datum_name = wkt[pos:end_pos]
+                if match:
+                    datum_name = match.group(1)
                     if datum_name not in map_vdatum_esri_name_to_auth_code:
                         print('Skipping vertcs %s. Cannot find vertical datum %s' % (
                             str(row), datum_name))
@@ -1296,14 +1592,13 @@ def import_vertcs():
                         continue
                     datum_auth_name, datum_code = map_vdatum_esri_name_to_auth_code[datum_name]
                 else:
-                    pos = wkt.find(',DATUM[')
-                    assert pos > 0
-                    pos += len(',DATUM["')
+                    datum_re = re.compile(r'.*DATUM\[""?(.*?)""?.*')
+                    match = datum_re.match(wkt2)
+                    assert match
+
                     is_vdatum = False
-                    end_pos = wkt[pos:].find('"')
-                    assert end_pos >= 0
-                    end_pos += pos
-                    datum_name = wkt[pos:end_pos]
+                    datum_name = match.group(1)
+
                     if datum_name not in map_datum_esri_name_to_auth_code:
                         print('Skipping vertcs %s. Cannot find geodetic datum %s' % (
                             str(row), datum_name))
@@ -1312,8 +1607,6 @@ def import_vertcs():
                         all_sql.append(sql)
                         continue
                     datum_auth_name, datum_code = map_datum_esri_name_to_auth_code[datum_name]
-
-                assert 'PARAMETER["Vertical_Shift",0.0]' in wkt, row
 
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
@@ -1353,12 +1646,19 @@ def import_vertcs():
 
                 #map_vertcs_esri_name_to_auth_code[esri_name] = ['ESRI', code]
 
+                parsed_wkt2 = parse_wkt_array(wkt2)
+
+                assert not set(k for k in parsed_wkt2['VERTCRS'][1].keys() if k not in ('CS','AXIS','VDATUM','DATUM')), 'Unhandled parameter in VERTCRS: {}'.format(list(parsed_wkt2['VERTCRS'][1].keys()))
+                assert parsed_wkt2['VERTCRS'][1]['CS'] == ['vertical', '1'], 'Unhandled vertcrs CS: {}'.format(parsed_wkt2['VERTCRS'][1]['CS'])
+                assert parsed_wkt2['VERTCRS'][1]['AXIS'][:2] == ['Gravity-related height (H)', 'up'], 'Unhandled vertcrs AXIS: {}'.format(parsed_wkt2['VERTCRS'][1]['AXIS'])
+
+                vertical_unit = parsed_wkt2['VERTCRS'][1]['AXIS'][2]['UNIT_NAME']
                 cs_auth = 'EPSG'
-                if 'PARAMETER["Direction",1.0]' in wkt and 'UNIT["Meter"' in wkt:
+                if vertical_unit == 'Meter':
                     cs_code = 6499
-                elif 'PARAMETER["Direction",1.0]' in wkt and 'UNIT["Foot"' in wkt:
+                elif vertical_unit == 'Foot':
                     cs_code = 1030
-                elif 'PARAMETER["Direction",1.0]' in wkt and 'UNIT["Foot_US"' in wkt:
+                elif vertical_unit == 'Foot_US':
                     cs_code = 6497
                 else:
                     assert False, ('unknown coordinate system for %s' %
@@ -1408,8 +1708,8 @@ def import_hvcoordsys():
         idx_description = header.index('description')
         assert idx_description >= 0
 
-        idx_wkt = header.index('wkt')
-        assert idx_wkt >= 0
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
 
         idx_authority = header.index('authority')
         assert idx_authority >= 0
@@ -1498,6 +1798,9 @@ def import_geogtran():
         idx_wkt = header.index('wkt')
         assert idx_wkt >= 0
 
+        idx_wkt2 = header.index('wkt2')
+        assert idx_wkt2 >= 0
+
         idx_authority = header.index('authority')
         assert idx_authority >= 0
 
@@ -1532,7 +1835,7 @@ def import_geogtran():
             wkid = row[idx_wkid]
             authority = row[idx_authority]
             esri_name = row[idx_name]
-            wkt = row[idx_wkt]
+            wkt2 = row[idx_wkt2]
             deprecated = 1 if row[idx_deprecated] == 'yes' else 0
 
             if authority == 'EPSG':
@@ -1545,10 +1848,10 @@ def import_geogtran():
                 src_row = cursor.fetchone()
 
                 if not src_row:
-                    if 'Molodensky_Badekas' in wkt:
+                    if 'Molodensky_Badekas' in wkt2:
                         # print('Skipping GEOGTRAN %s (EPSG source) since it uses a non-supported yet suported method'% esri_name)
-                        continue
-                    if 'NADCON5' in wkt:
+                        assert False  # no longer present in db
+                    if 'NADCON5' in wkt2:
                         print('Skipping NADCON5 %s (EPSG source) since it uses a non-supported yet suported method' % esri_name)
                         continue
 
@@ -1563,23 +1866,11 @@ def import_geogtran():
                     # print('Skipping deprecated GEOGTRAN %s' % esri_name)
                     continue
 
-                assert wkt.startswith('GEOGTRAN')
+                parsed_wkt2 = parse_wkt_array(wkt2)
+                assert 'COORDINATEOPERATION' in parsed_wkt2
 
-                pos = wkt.find(',GEOGCS["')
-                assert pos >= 0
-                pos += len(',GEOGCS["')
-                end_pos = wkt[pos:].find('"')
-                assert end_pos >= 0
-                end_pos += pos
-                src_crs_name = wkt[pos:end_pos]
-
-                pos = wkt[end_pos:].find(',GEOGCS["')
-                assert pos >= 0
-                pos += end_pos + len(',GEOGCS["')
-                end_pos = wkt[pos:].find('"')
-                assert end_pos >= 0
-                end_pos += pos
-                dst_crs_name = wkt[pos:end_pos]
+                src_crs_name = parsed_wkt2['COORDINATEOPERATION'][1]['SOURCECRS']['GEOGCRS'][0]
+                dst_crs_name = parsed_wkt2['COORDINATEOPERATION'][1]['TARGETCRS']['GEOGCRS'][0]
 
                 assert src_crs_name in map_geogcs_esri_name_to_auth_code, (
                     src_crs_name, row)
@@ -1589,24 +1880,25 @@ def import_geogtran():
                     dst_crs_name, row)
                 dst_crs_auth_name, dst_crs_code = map_geogcs_esri_name_to_auth_code[dst_crs_name]
 
-                is_longitude_rotation = 'METHOD["Longitude_Rotation"]' in wkt
+                method = parsed_wkt2['COORDINATEOPERATION'][1]['METHOD']
+                is_longitude_rotation = method == "Longitude_Rotation"
                 if is_longitude_rotation:
                     # skip it as it is automatically handled by PROJ
                     continue
 
-                is_cf = 'METHOD["Coordinate_Frame"]' in wkt
-                is_pv = 'METHOD["Position_Vector"]' in wkt
-                is_geocentric_translation = 'METHOD["Geocentric_Translation"]' in wkt
-                is_geog2d_offset = 'METHOD["Geographic_2D_Offset"]' in wkt
-                is_null = 'METHOD["Null"]' in wkt
-                is_unitchange = 'METHOD["Unit_Change"]' in wkt
-                is_nadcon = 'METHOD["NADCON"]' in wkt
-                is_ntv2 = 'METHOD["NTv2"]' in wkt
-                is_geocon = 'METHOD["GEOCON"]' in wkt
-                is_harn = 'METHOD["HARN"]' in wkt
-                is_molodensky_badekas = 'METHOD["Molodensky_Badekas"]' in wkt
-                is_Time_Based_Helmert_Position_Vector = 'METHOD["Time_Based_Helmert_Position_Vector"]' in wkt
-                is_Time_Based_Helmert_Coordinate_Frame = 'METHOD["Time_Based_Helmert_Coordinate_Frame"]' in wkt
+                is_cf = method == "Coordinate_Frame"
+                is_pv = method == "Position_Vector"
+                is_geocentric_translation = method == "Geocentric_Translation"
+                is_geog2d_offset = method == "Geographic_2D_Offset"
+                is_null = method == "Null"
+                is_unitchange = method == "Unit_Change"
+                is_nadcon = method == "NADCON"
+                is_ntv2 = method == "NTv2"
+                is_geocon = method == "GEOCON"
+                is_harn = method == "HARN"
+                is_molodensky_badekas = method == "Molodensky_Badekas"
+                is_Time_Based_Helmert_Position_Vector = method == "Time_Based_Helmert_Position_Vector"
+                is_Time_Based_Helmert_Coordinate_Frame = method == "Time_Based_Helmert_Coordinate_Frame"
                 assert is_cf or is_pv or is_geocentric_translation or is_molodensky_badekas or is_nadcon or is_geog2d_offset or is_ntv2 or is_geocon or is_null or is_harn or is_unitchange or is_Time_Based_Helmert_Position_Vector or is_Time_Based_Helmert_Coordinate_Frame, row
 
                 extent_auth_name, extent_code = find_extent(
@@ -1617,14 +1909,30 @@ def import_geogtran():
                     accuracy = 'NULL'
 
                 if is_cf or is_pv:
-                    x = get_parameter(wkt, 'X_Axis_Translation')
-                    y = get_parameter(wkt, 'Y_Axis_Translation')
-                    z = get_parameter(wkt, 'Z_Axis_Translation')
-                    rx = get_parameter(wkt, 'X_Axis_Rotation')  # in arc second
-                    ry = get_parameter(wkt, 'Y_Axis_Rotation')
-                    rz = get_parameter(wkt, 'Z_Axis_Rotation')
-                    s = get_parameter(wkt, 'Scale_Difference')  # in ppm
-                    assert wkt.count('PARAMETER[') == 7
+                    x = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][0]
+                    x_cs_auth, x_cs_code, x_uom_code = get_cs_from_unit(*parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][1]['LENGTHUNIT'])
+                    y = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation'][0]
+                    y_cs_auth, y_cs_code, y_uom_code = get_cs_from_unit(*parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation'][1]['LENGTHUNIT'])
+                    z = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][0]
+                    z_cs_auth, z_cs_code, z_uom_code = get_cs_from_unit(*parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][1]['LENGTHUNIT'])
+                    assert x_cs_auth == y_cs_auth == z_cs_auth, 'Cannot handle different translation axis authorities'
+                    assert x_uom_code == y_uom_code == z_uom_code, 'Cannot handle different translation axis unit codes'
+
+                    rx = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation'][0]
+                    rx_cs_auth, rx_cs_code, rx_uom_code = get_cs_from_unit(
+                                *parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation'][1]['ANGLEUNIT'])
+                    ry = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Rotation'][0]
+                    ry_cs_auth, ry_cs_code, ry_uom_code = get_cs_from_unit(
+                                *parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Rotation'][1]['ANGLEUNIT'])
+                    rz = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][0]
+                    rz_cs_auth, rz_cs_code, rz_uom_code = get_cs_from_unit(
+                                *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][1]['ANGLEUNIT'])
+                    assert rx_cs_auth == ry_cs_auth == rz_cs_auth, 'Cannot handle different rotation axis authorities'
+                    assert rx_uom_code == ry_uom_code == rz_uom_code, 'Cannot handle different rotation axis unit codes'
+
+                    s = parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference'][0]
+                    s_cs_auth, s_cs_code, s_uom_code = get_cs_from_unit(
+                                *parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference'][1]['SCALEUNIT'])
 
                     if is_cf:
                         method_code = '9607'
@@ -1633,69 +1941,223 @@ def import_geogtran():
                         method_code = '9606'
                         method_name = 'Position Vector transformation (geog2D domain)'
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, accuracy, x, y, z, rx, ry, rz, s, deprecated)
+                    sql = "INSERT INTO \"helmert_transformation\" VALUES('ESRI','{code}','{name}',NULL,'EPSG','{method_code}','{method_name}','{source_crs_auth_name}'," \
+                            "'{source_crs_code}','{target_crs_auth_name}','{target_crs_code}',{accuracy},{tx},{ty},{tz},'{translation_uom_auth_name}','{translation_uom_code}'," \
+                            "{rx},{ry},{rz},'{rotation_uom_auth_name}','{rotation_uom_code}',{scale_difference},'{scale_difference_uom_auth_name}','{scale_difference_uom_code}'," \
+                            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,{deprecated});".format(
+                        code=wkid,
+                        name=esri_name,
+                        method_code=method_code,
+                        method_name=method_name,
+                        source_crs_auth_name=src_crs_auth_name,
+                        source_crs_code=src_crs_code,
+                        target_crs_auth_name=dst_crs_auth_name,
+                        target_crs_code=dst_crs_code,
+                        accuracy=accuracy,
+                        tx=x,
+                        ty=y,
+                        tz=z,
+                        translation_uom_auth_name=x_cs_auth,
+                        translation_uom_code=x_uom_code,
+                        rx=rx,
+                        ry=ry,
+                        rz=rz,
+                        rotation_uom_auth_name=rx_cs_auth,
+                        rotation_uom_code=rx_uom_code,
+                        scale_difference=s,
+                        scale_difference_uom_auth_name=s_cs_auth,
+                        scale_difference_uom_code=s_uom_code,
+                        deprecated=deprecated)
                     all_sql.append(sql)
                     sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','helmert_transformation','ESRI','%s','%s','%s','%s','%s');""" % (wkid, wkid, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
                 elif is_molodensky_badekas:
-                    x = get_parameter(wkt, 'X_Axis_Translation')
-                    y = get_parameter(wkt, 'Y_Axis_Translation')
-                    z = get_parameter(wkt, 'Z_Axis_Translation')
-                    rx = get_parameter(wkt, 'X_Axis_Rotation')  # in arc second
-                    ry = get_parameter(wkt, 'Y_Axis_Rotation')
-                    rz = get_parameter(wkt, 'Z_Axis_Rotation')
-                    s = get_parameter(wkt, 'Scale_Difference')  # in ppm
-                    px = get_parameter(wkt, 'X_Coordinate_of_Rotation_Origin')
-                    py = get_parameter(wkt, 'Y_Coordinate_of_Rotation_Origin')
-                    pz = get_parameter(wkt, 'Z_Coordinate_of_Rotation_Origin')
-                    assert wkt.count('PARAMETER[') == 10
+                    x = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][0]
+                    x_cs_auth, x_cs_code, x_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][1]['LENGTHUNIT'])
+                    y = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation'][0]
+                    y_cs_auth, y_cs_code, y_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation'][1]['LENGTHUNIT'])
+                    z = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][0]
+                    z_cs_auth, z_cs_code, z_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][1]['LENGTHUNIT'])
+                    assert x_cs_auth == y_cs_auth == z_cs_auth, 'Cannot handle different translation axis authorities'
+                    assert x_uom_code == y_uom_code == z_uom_code, 'Cannot handle different translation axis unit codes'
+
+                    rx = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation'][0]
+                    rx_cs_auth, rx_cs_code, rx_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation'][1]['ANGLEUNIT'])
+                    ry = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Rotation'][0]
+                    ry_cs_auth, ry_cs_code, ry_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Rotation'][1]['ANGLEUNIT'])
+                    rz = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][0]
+                    rz_cs_auth, rz_cs_code, rz_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][1]['ANGLEUNIT'])
+                    assert rx_cs_auth == ry_cs_auth == rz_cs_auth, 'Cannot handle different rotation axis authorities'
+                    assert rx_uom_code == ry_uom_code == rz_uom_code, 'Cannot handle different rotation axis unit codes'
+
+                    s = parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference'][0]
+                    s_cs_auth, s_cs_code, s_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference'][1]['SCALEUNIT'])
+
+                    px = parsed_wkt2['COORDINATEOPERATION'][1]['X_Coordinate_of_Rotation_Origin'][0]
+                    px_cs_auth, px_cs_code, px_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['X_Coordinate_of_Rotation_Origin'][1]['LENGTHUNIT'])
+                    py = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Coordinate_of_Rotation_Origin'][0]
+                    py_cs_auth, py_cs_code, py_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Y_Coordinate_of_Rotation_Origin'][1]['LENGTHUNIT'])
+                    pz = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Coordinate_of_Rotation_Origin'][0]
+                    pz_cs_auth, pz_cs_code, pz_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Coordinate_of_Rotation_Origin'][1]['LENGTHUNIT'])
+                    assert px_cs_auth == py_cs_auth == pz_cs_auth, 'Cannot handle different coordinate of rotation axis authorities'
+                    assert px_uom_code == py_uom_code == pz_uom_code, 'Cannot handle different coordinate of rotation axis unit codes'
 
                     # The ESRI naming is not really clear about the convention
                     # but it looks like it is Coordinate Frame when comparing ESRI:1066 (Amersfoort_To_ETRS_1989_MB) with EPSG:1066
                     method_code = '9636'
                     method_name = 'Molodensky-Badekas (CF geog2D domain)'
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%s,%s,%s,'EPSG','9001',NULL,%d);""" % (
-                        wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, accuracy, x, y, z, rx, ry, rz, s, px, py, pz, deprecated)
+                    sql = "INSERT INTO \"helmert_transformation\" VALUES('ESRI','{code}','{name}',NULL,'EPSG','{method_code}','{method_name}'," \
+                          "'{source_crs_auth_name}','{source_crs_code}','{target_crs_auth_name}','{target_crs_code}',{accuracy},{tx},{ty},{tz}," \
+                          "'{translation_uom_auth_name}','{translation_uom_code}',{rx},{ry},{rz},'{rotation_uom_auth_name}','{rotation_uom_code}'," \
+                          "{scale_difference},'{scale_difference_uom_auth_name}','{scale_difference_uom_code}',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL," \
+                            "NULL,NULL,NULL,NULL,{px},{py},{pz},'{pivot_uom_auth_name}','{pivot_uom_code}',NULL,{deprecated});".format(
+                        code=wkid,
+                        name=esri_name,
+                        method_code=method_code,
+                        method_name=method_name,
+                        source_crs_auth_name=src_crs_auth_name,
+                        source_crs_code=src_crs_code,
+                        target_crs_auth_name=dst_crs_auth_name,
+                        target_crs_code=dst_crs_code,
+                        accuracy=accuracy,
+                        tx=x,
+                        ty=y,
+                        tz=z,
+                        translation_uom_auth_name=x_cs_auth,
+                        translation_uom_code=x_uom_code,
+                        rx=rx,
+                        ry=ry,
+                        rz=rz,
+                        rotation_uom_auth_name=rx_cs_auth,
+                        rotation_uom_code=rx_uom_code,
+                        scale_difference=s,
+                        scale_difference_uom_auth_name=s_cs_auth,
+                        scale_difference_uom_code=s_uom_code,
+                        px=px,
+                        py=py,
+                        pz=pz,
+                        pivot_uom_auth_name=px_cs_auth,
+                        pivot_uom_code=px_uom_code,
+                        deprecated=deprecated)
                     all_sql.append(sql)
                     sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','helmert_transformation','ESRI','%s','%s','%s','%s','%s');""" % (wkid, wkid, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
                 elif is_geocentric_translation:
-                    x = get_parameter(wkt, 'X_Axis_Translation')
-                    y = get_parameter(wkt, 'Y_Axis_Translation')
-                    z = get_parameter(wkt, 'Z_Axis_Translation')
-                    assert wkt.count('PARAMETER[') == 3
+                    x = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][0]
+                    x_cs_auth, x_cs_code, x_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][1]['LENGTHUNIT'])
+                    y = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation'][0]
+                    y_cs_auth, y_cs_code, y_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation'][1]['LENGTHUNIT'])
+                    z = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][0]
+                    z_cs_auth, z_cs_code, z_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][1]['LENGTHUNIT'])
+                    assert x_cs_auth == y_cs_auth == z_cs_auth, 'Cannot handle different translation axis authorities'
+                    assert x_uom_code == y_uom_code == z_uom_code, 'Cannot handle different translation axis unit codes'
 
                     method_code = '9603'
                     method_name = 'Geocentric translations (geog2D domain)'
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, accuracy, x, y, z, deprecated)
+                    sql = "INSERT INTO \"helmert_transformation\" VALUES('ESRI','{code}','{name}',NULL,'EPSG','{method_code}','{method_name}','{source_crs_auth_name}'," \
+                          "'{source_crs_code}','{target_crs_auth_name}','{target_crs_code}',{accuracy},{tx},{ty},{tz},'{translation_uom_auth_name}','{translation_uom_code}',"\
+                            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL," \
+                            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,{deprecated});".format(
+                        code=wkid,
+                        name=esri_name,
+                        method_code=method_code,
+                        method_name=method_name,
+                        source_crs_auth_name=src_crs_auth_name,
+                        source_crs_code=src_crs_code,
+                        target_crs_auth_name=dst_crs_auth_name,
+                        target_crs_code=dst_crs_code,
+                        accuracy=accuracy,
+                        tx=x,
+                        ty=y,
+                        tz=z,
+                        translation_uom_auth_name=x_cs_auth,
+                        translation_uom_code=x_uom_code,
+                        deprecated=deprecated)
                     all_sql.append(sql)
                     sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','helmert_transformation','ESRI','%s','%s','%s','%s','%s');""" % (wkid, wkid, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
                 elif is_Time_Based_Helmert_Position_Vector or is_Time_Based_Helmert_Coordinate_Frame:
+                    x = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][0]
+                    x_cs_auth, x_cs_code, x_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation'][1]['LENGTHUNIT'])
+                    y = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation'][0]
+                    y_cs_auth, y_cs_code, y_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation'][1]['LENGTHUNIT'])
+                    z = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][0]
+                    z_cs_auth, z_cs_code, z_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][1]['LENGTHUNIT'])
+                    assert x_cs_auth == y_cs_auth == z_cs_auth, 'Cannot handle different translation axis authorities'
+                    assert x_uom_code == y_uom_code == z_uom_code, 'Cannot handle different translation axis unit codes'
 
-                    x = get_parameter(wkt, 'X_Axis_Translation')
-                    y = get_parameter(wkt, 'Y_Axis_Translation')
-                    z = get_parameter(wkt, 'Z_Axis_Translation')
-                    rx = get_parameter(wkt, 'X_Axis_Rotation')  # in arc second
-                    ry = get_parameter(wkt, 'Y_Axis_Rotation')
-                    rz = get_parameter(wkt, 'Z_Axis_Rotation')
-                    s = get_parameter(wkt, 'Scale_Difference')  # in ppm
-                    rate_x = get_parameter(wkt, 'X_Axis_Translation_Rate')
-                    rate_y = get_parameter(wkt, 'Y_Axis_Translation_Rate')
-                    rate_z = get_parameter(wkt, 'Z_Axis_Translation_Rate')
-                    rate_rx = get_parameter(wkt, 'X_Axis_Rotation_Rate')  # in arc second / year
-                    rate_ry = get_parameter(wkt, 'Y_Axis_Rotation_Rate')
-                    rate_rz = get_parameter(wkt, 'Z_Axis_Rotation_Rate')
-                    rate_s = get_parameter(wkt, 'Scale_Difference_Rate')  # in ppm / year
-                    reference_time = get_parameter(wkt, 'Reference_Time')
-                    assert wkt.count('PARAMETER[') == 15
+                    rx = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation'][0]
+                    rx_cs_auth, rx_cs_code, rx_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation'][1]['ANGLEUNIT'])
+                    ry = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Rotation'][0]
+                    ry_cs_auth, ry_cs_code, ry_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Rotation'][1]['ANGLEUNIT'])
+                    rz = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][0]
+                    rz_cs_auth, rz_cs_code, rz_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][1]['ANGLEUNIT'])
+                    assert rx_cs_auth == ry_cs_auth == rz_cs_auth, 'Cannot handle different rotation axis authorities'
+                    assert rx_uom_code == ry_uom_code == rz_uom_code, 'Cannot handle different rotation axis unit codes'
+
+                    s = parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference'][0]
+                    s_cs_auth, s_cs_code, s_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference'][1]['SCALEUNIT'])
+
+                    rate_x = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation_Rate'][0]
+                    rate_x_cs_auth, rate_x_cs_code, rate_x_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Translation_Rate'][1]['LENGTHUNIT'], is_rate=True)
+                    rate_y = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation_Rate'][0]
+                    rate_y_cs_auth, rate_y_cs_code, rate_y_uom_code= get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Translation_Rate'][1]['LENGTHUNIT'], is_rate=True)
+                    rate_z = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation_Rate'][0]
+                    rate_z_cs_auth, rate_z_cs_code, rate_z_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation_Rate'][1]['LENGTHUNIT'], is_rate=True)
+                    assert rate_x_cs_auth == rate_y_cs_auth == rate_z_cs_auth, 'Cannot handle different translation rate axis authorities'
+                    assert rate_x_uom_code == rate_y_uom_code == rate_z_uom_code, 'Cannot handle different translation rate axis unit codes'
+
+                    rate_rx = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation_Rate'][0]
+                    rate_rx_cs_auth, rate_rx_cs_code, rate_rx_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation_Rate'][1]['ANGLEUNIT'], is_rate=True)
+                    rate_ry = parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Rotation_Rate'][0]
+                    rate_ry_cs_auth, rate_ry_cs_code, rate_ry_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Y_Axis_Rotation_Rate'][1]['ANGLEUNIT'], is_rate=True)
+                    rate_rz = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation_Rate'][0]
+                    rate_rz_cs_auth, rate_rz_cs_code, rate_rz_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation_Rate'][1]['ANGLEUNIT'], is_rate=True)
+                    assert rate_rx_cs_auth == rate_ry_cs_auth == rate_rz_cs_auth, 'Cannot handle different rotation rate axis authorities'
+                    assert rate_rx_uom_code == rate_ry_uom_code == rate_rz_uom_code, 'Cannot handle different rotation rate axis unit codes'
+
+                    rate_s = parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference_Rate'][0]
+                    rate_s_cs_auth, rate_s_cs_code, rate_s_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference_Rate'][1]['SCALEUNIT'], is_rate=True)
+
+                    reference_time = parsed_wkt2['COORDINATEOPERATION'][1]['Reference_Time'][0]
+                    reference_time_cs_auth, reference_time_cs_code, reference_time_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Reference_Time'][1]['SCALEUNIT'])
+                    if reference_time_cs_auth == 'EPSG' and reference_time_uom_code == '9201':
+                        # convert "Unity" values for Reference_Time to "years". The helmert_transformation table requires
+                        # a time type uom for epochs
+                        reference_time_uom_code = '1029'
 
                     if is_Time_Based_Helmert_Coordinate_Frame:
                         method_code = '1057'
@@ -1704,25 +2166,92 @@ def import_geogtran():
                         method_code = '1054'
                         method_name = 'Time-dependent Position Vector tfm (geog2D)'
 
-                    sql = """INSERT INTO "helmert_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,'EPSG','9001',%s,%s,%s,'EPSG','9104',%s,'EPSG','9202',%s,%s,%s,'EPSG','1042',%s,%s,%s,'EPSG','1043',%s,'EPSG','1041',%s,'EPSG','1029',NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        wkid, esri_name, method_code, method_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, accuracy, x, y, z, rx, ry, rz, s, rate_x, rate_y, rate_z, rate_rx, rate_ry, rate_rz, rate_s, reference_time, deprecated)
+                    sql = "INSERT INTO \"helmert_transformation\" VALUES('ESRI','{code}','{name}',NULL,'EPSG','{method_code}','{method_name}'," \
+                                                              "'{source_crs_auth_name}','{source_crs_code}','{target_crs_auth_name}','{target_crs_code}'," \
+                                                              "{accuracy},{tx},{ty},{tz},'{translation_uom_auth_name}','{translation_uom_code}'," \
+                                                               "{rx},{ry},{rz},'{rotation_uom_auth_name}','{rotation_uom_code}',{scale_difference}," \
+                                                              "'{scale_difference_uom_auth_name}','{scale_difference_uom_code}',{rate_tx},{rate_ty},{rate_tz}," \
+                                                               "'{rate_translation_uom_auth_name}','{rate_translation_uom_code}',{rate_rx},{rate_ry},{rate_rz}," \
+                                                                 "'{rate_rotation_uom_auth_name}','{rate_rotation_uom_code}',{rate_scale_difference},"\
+                                                                "'{rate_scale_difference_uom_auth_name}','{rate_scale_difference_uom_code}',{epoch},"\
+                          "'{epoch_uom_auth_name}','{epoch_uom_code}',NULL,NULL,NULL,NULL,NULL,NULL,{deprecated});".format(
+                        code=wkid,
+                        name=esri_name,
+                        method_code=method_code,
+                        method_name=method_name,
+                        source_crs_auth_name=src_crs_auth_name,
+                        source_crs_code=src_crs_code,
+                        target_crs_auth_name=dst_crs_auth_name,
+                        target_crs_code=dst_crs_code,
+                        accuracy=accuracy,
+                        tx=x,
+                        ty=y,
+                        tz=z,
+                        translation_uom_auth_name=x_cs_auth,
+                        translation_uom_code=x_uom_code,
+                        rx=rx,
+                        ry=ry,
+                        rz=rz,
+                        rotation_uom_auth_name=rx_cs_auth,
+                        rotation_uom_code=rx_uom_code,
+                        scale_difference=s,
+                        scale_difference_uom_auth_name=s_cs_auth,
+                        scale_difference_uom_code=s_uom_code,
+                        rate_tx=rate_x,
+                        rate_ty=rate_y,
+                        rate_tz=rate_z,
+                        rate_translation_uom_auth_name=rate_x_cs_auth,
+                        rate_translation_uom_code=rate_x_uom_code,
+                        rate_rx=rate_rx,
+                        rate_ry=rate_ry,
+                        rate_rz=rate_rz,
+                        rate_rotation_uom_auth_name=rate_rx_cs_auth,
+                        rate_rotation_uom_code=rate_rx_uom_code,
+                        rate_scale_difference=rate_s,
+                        rate_scale_difference_uom_auth_name=rate_s_cs_auth,
+                        rate_scale_difference_uom_code=rate_s_uom_code,
+                        epoch=reference_time,
+                        epoch_uom_auth_name=reference_time_cs_auth,
+                        epoch_uom_code=reference_time_uom_code,
+                        deprecated=deprecated)
                     all_sql.append(sql)
                     sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','helmert_transformation','ESRI','%s','%s','%s','%s','%s');""" % (wkid, wkid, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
                 elif is_geog2d_offset:
 
-                    # The only occurence is quite boring: from NTF(Paris) to NTF.
+                    # The only occurrence is quite boring: from NTF(Paris) to NTF.
                     # But interestingly the longitude offset value is not
                     # completely exactly the value of the Paris prime meridian
 
-                    long_offset = get_parameter(
-                        wkt, 'Longitude_Offset')  # in arc second
-                    lat_offset = get_parameter(wkt, 'Latitude_Offset')
-                    assert wkt.count('PARAMETER[') == 2
+                    long_offset = parsed_wkt2['COORDINATEOPERATION'][1]['Longitude_Offset'][0]
+                    long_offset_cs_auth, long_offset_cs_code, long_offset_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Longitude_Offset'][1]['ANGLEUNIT'])
 
-                    sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','9619','Geographic2D offsets','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, accuracy, lat_offset, long_offset, deprecated)
+                    lat_offset = parsed_wkt2['COORDINATEOPERATION'][1]['Latitude_Offset'][0]
+                    lat_offset_cs_auth, lat_offset_cs_code, lat_offset_uom_code = get_cs_from_unit(
+                        *parsed_wkt2['COORDINATEOPERATION'][1]['Latitude_Offset'][1]['ANGLEUNIT'])
+
+                    sql = "INSERT INTO \"other_transformation\" VALUES('ESRI','{code}','{name}',NULL,'EPSG','9619','Geographic2D offsets',"\
+                          "'{source_crs_auth_name}','{source_crs_code}','{target_crs_auth_name}','{target_crs_code}',{accuracy},"\
+                          "'EPSG','8601','Latitude offset',{param1_value},'{param1_uom_auth_name}','{param1_uom_code}'," \
+                          "'EPSG','8602','Longitude offset',{param2_value},'{param2_uom_auth_name}','{param2_uom_code}',NULL,NULL,NULL,NULL,NULL,NULL,"\
+                            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,"\
+                            "NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,{deprecated});".format(
+                        code=wkid,
+                        name=esri_name,
+                        source_crs_auth_name=src_crs_auth_name,
+                        source_crs_code=src_crs_code,
+                        target_crs_auth_name=dst_crs_auth_name,
+                        target_crs_code=dst_crs_code,
+                        accuracy=accuracy,
+                        param1_value=lat_offset,
+                        param1_uom_auth_name=lat_offset_cs_auth,
+                        param1_uom_code=lat_offset_uom_code,
+                        param2_value=long_offset,
+                        param2_uom_auth_name=long_offset_cs_auth,
+                        param2_uom_code=long_offset_uom_code,
+                        deprecated=deprecated)
                     all_sql.append(sql)
                     sql = """INSERT INTO "usage" VALUES('ESRI', '%s_USAGE','other_transformation','ESRI','%s','%s','%s','%s','%s');""" % (wkid, wkid, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
@@ -1730,7 +2259,8 @@ def import_geogtran():
                 elif is_null:
                     long_offset = '0'
                     lat_offset = '0'
-                    assert wkt.count('PARAMETER[') == 0
+
+                    assert set(parsed_wkt2['COORDINATEOPERATION'][1].keys()) == {'SOURCECRS', 'METHOD', 'TARGETCRS', 'OPERATIONACCURACY'}, set(parsed_wkt2['COORDINATEOPERATION'][1].keys())
 
                     sql = """INSERT INTO "other_transformation" VALUES('ESRI','%s','%s',NULL,'EPSG','9619','Geographic2D offsets','%s','%s','%s','%s',%s,'EPSG','8601','Latitude offset',%s,'EPSG','9104','EPSG','8602','Longitude offset',%s,'EPSG','9104',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                         wkid, esri_name, src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, accuracy, lat_offset, long_offset, deprecated)
@@ -1744,17 +2274,9 @@ def import_geogtran():
                     continue
 
                 else:
-                    assert wkt.count('PARAMETER[') == 1
-                    needle = ',PARAMETER["'
-                    pos = wkt.find(needle)
-                    assert pos >= 0, wkt
-                    pos += len(needle)
-                    end_pos = wkt[pos:].find('"')
-                    assert end_pos >= 0, (wkt, wkt[pos:])
-                    end_pos += pos
-                    filename = wkt[pos:end_pos]
-                    assert filename.startswith('Dataset_')
-                    filename = filename[len('Dataset_'):]
+                    assert set(k for k in parsed_wkt2['COORDINATEOPERATION'][1].keys() if k != 'OPERATIONACCURACY') == {'SOURCECRS', 'METHOD', 'TARGETCRS', 'PARAMETERFILE'}, set(parsed_wkt2['COORDINATEOPERATION'][1].keys())
+
+                    filename = parsed_wkt2['COORDINATEOPERATION'][1]['PARAMETERFILE']
 
                     cursor.execute(
                         "SELECT g.name, g.grid_name FROM grid_transformation g JOIN usage u ON u.object_table_name = 'grid_transformation' AND u.object_auth_name = g.auth_name AND u.object_code = g.code JOIN extent e ON u.extent_auth_name = e.auth_name AND u.extent_code = e.code WHERE g.auth_name != 'ESRI' AND g.source_crs_auth_name = ? AND g.source_crs_code = ? AND g.target_crs_auth_name = ? AND g.target_crs_code = ? AND e.auth_name = ? AND e.code = ?", (src_crs_auth_name, src_crs_code, dst_crs_auth_name, dst_crs_code, extent_auth_name, extent_code))
