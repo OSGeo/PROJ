@@ -1411,6 +1411,58 @@ def import_projcs():
                     sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
+                elif method == 'Albers':
+                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
+
+                    assert params['False_Easting'].unit.cs_auth_name == params[
+                        'False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
+                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
+
+                    assert params['False_Easting'].unit.cs_code == params[
+                        'False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
+                    cs_code = params['False_Easting'].unit.cs_code
+
+                    conv_name = 'unnamed'
+                    conv_auth_name = 'ESRI'
+                    conv_code = code
+
+                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
+                                                epsg_code='9822', epsg_name='Albers Equal Area',
+                                                params=params,
+                                                param_mapping={
+                                                    8821: 'Latitude_Of_Origin',
+                                                    8822: 'Central_Meridian',
+                                                    8823: 'Standard_Parallel_1',
+                                                    8824: 'Standard_Parallel_2',
+                                                    8826: 'False_Easting',
+                                                    8827: 'False_Northing',
+                                                },
+                                                deprecated=bool(deprecated)
+                                                )
+
+                    sql_extract = sql[sql.find('NULL'):]
+                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
+                        all_sql.append(sql)
+
+                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (
+                            code, code, extent_auth_name, extent_code, 'EPSG', '1024')
+                        all_sql.append(sql)
+
+                        map_conversion_sql_to_code[sql_extract] = conv_code
+                    else:
+                        conv_code = map_conversion_sql_to_code[sql_extract]
+
+                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
+                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name,
+                        conv_code, deprecated)
+                    all_sql.append(sql)
+
+                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (
+                        code, code, extent_auth_name, extent_code, 'EPSG', '1024')
+                    all_sql.append(sql)
+
                 else:
 
                     # TODO -- add more method mapping!
