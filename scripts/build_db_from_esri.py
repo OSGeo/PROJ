@@ -839,14 +839,14 @@ def get_cs_from_unit(UNIT_NAME, UNIT_VALUE, is_rate=False):
     elif UNIT_NAME == 'Foot':
         assert not is_rate
         uom_code = '9002'
-        cs_auth_name = 'ESRI'
-        cs_code = UNIT_NAME
+        cs_auth_name = 'EPSG'
+        cs_code = '4495'
         assert UNIT_VALUE == '0.3048', UNIT_VALUE
     elif UNIT_NAME == 'Foot_US':
         assert not is_rate
         uom_code = '9003'
-        cs_auth_name = 'ESRI'
-        cs_code = UNIT_NAME
+        cs_auth_name = 'EPSG'
+        cs_code = '4497'
         assert UNIT_VALUE == '0.3048006096012192', UNIT_VALUE
     elif UNIT_NAME == 'Yard_Indian_1937':
         assert not is_rate
