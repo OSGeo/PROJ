@@ -382,7 +382,7 @@ def import_prime_meridian():
                 value = match.group(2)
                 angle_unit = match.group(3)
                 unit_size = float(match.group(4))
-                assert angle_unit == 'Degree', 'Unhandled prime meridian unit: {}'.format(length_unit)
+                assert angle_unit == 'Degree', 'Unhandled prime meridian unit: {}'.format(angle_unit)
                 assert unit_size == 0.0174532925199433, 'Unhandled prime meridian unit size: {}'.format(unit_size)
 
                 deprecated = 1 if row[idx_deprecated] == 'yes' else 0
@@ -994,7 +994,7 @@ EPSG_CONVERSION_PARAM_NAMES = {
 
 
 def insert_conversion_sql(esri_code: str, esri_name: str, epsg_code: str, epsg_name: str,
-                          params: dict[str, ParameterValue],
+                          params: Dict[str, ParameterValue],
                           param_mapping: Dict[int, str],
                           deprecated: bool = False) -> str:
     """
