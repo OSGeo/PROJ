@@ -822,6 +822,13 @@ def get_wkt_unit(UNIT_NAME, UNIT_VALUE, is_rate=False) -> Unit:
         cs_auth_name = 'EPSG'
         cs_code = None
         assert UNIT_VALUE == '0.001', UNIT_VALUE
+    elif UNIT_NAME == 'Chain':
+        uom_auth_name = 'EPSG'
+        assert not is_rate
+        uom_code = '9097'
+        cs_auth_name = 'EPSG'
+        cs_code = None
+        assert UNIT_VALUE == '20.1168', UNIT_VALUE
     elif UNIT_NAME == 'Degree':
         assert not is_rate
         uom_auth_name = 'EPSG'
@@ -965,6 +972,68 @@ map_projcs_esri_name_to_auth_code = {}
 set_esri_cs_code = set()
 map_conversion_sql_to_code = {}
 
+EPSG_CONVERSION_PARAM_NAMES = {
+    1039: 'Projection plane origin height',
+    8801: 'Latitude of natural origin',
+    8802: 'Longitude of natural origin',
+    8805: 'Scale factor at natural origin',
+    8806: 'False easting',
+    8807: 'False northing',
+    8811: 'Latitude of projection centre',
+    8812: 'Longitude of projection centre',
+    8813: 'Azimuth of initial line',
+    8814: 'Angle from Rectified to Skew Grid',
+    8815: 'Scale factor on initial line',
+    8821: 'Latitude of false origin',
+    8822: 'Longitude of false origin',
+    8823: 'Latitude of 1st standard parallel',
+    8824: 'Latitude of 2nd standard parallel',
+    8826: 'Easting at false origin',
+    8827: 'Northing at false origin'
+}
+
+
+def insert_conversion_sql(esri_code: str, esri_name: str, epsg_code: str, epsg_name: str,
+                          params: dict[str, ParameterValue],
+                          param_mapping: Dict[int, str],
+                          deprecated: bool = False) -> str:
+    """
+    Generates INSERT sql command for conversion
+    """
+    param_strings = []
+    for param_epsg_code, param_name in param_mapping.items():
+        param_strings.append("'EPSG','{}','{}',{},'{}','{}'".format(
+            param_epsg_code,
+            EPSG_CONVERSION_PARAM_NAMES[param_epsg_code],
+            params[param_name].value,
+            params[param_name].unit.uom_auth_name,
+            params[param_name].unit.uom_code
+        ))
+
+    if len(param_strings) < 7:
+        for _ in range(len(param_strings), 7):
+            param_strings.append('NULL,NULL,NULL,NULL,NULL,NULL')
+
+    assert len(param_strings) == 7, 'Too many parameters'
+
+    sql = "INSERT INTO \"conversion\" VALUES('ESRI','{code}','{name}',NULL,'{method_auth_name}','{method_code}','{method_name}'," \
+          "{param1},{param2},{param3},{param4},{param5},{param6},{param7},{deprecated});".format(
+        code=esri_code,
+        name=esri_name,
+        method_auth_name='EPSG',
+        method_code=epsg_code,
+        method_name=epsg_name,
+        param1=param_strings[0],
+        param2=param_strings[1],
+        param3=param_strings[2],
+        param4=param_strings[3],
+        param5=param_strings[4],
+        param6=param_strings[5],
+        param7=param_strings[6],
+        deprecated=1 if deprecated else 0)
+
+    return sql
+
 
 def import_projcs():
     with open(path_to_csv / 'pe_list_projcs.csv', 'rt') as csvfile:
@@ -1072,34 +1141,19 @@ def import_projcs():
                 method = parsed_conv_wkt2['CONVERSION'][0]
 
                 if method in ('Transverse_Mercator', 'Gauss_Kruger'):
-                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
-                    false_easting_unit = get_wkt_unit(parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
-                                                      parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
+                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
 
-                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
-                    false_northing_unit = get_wkt_unit(parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
-                                                       parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
+                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
 
-                    assert false_easting_unit.cs_auth_name == false_northing_unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(false_easting_unit.cs_auth_name, false_northing_unit.cs_auth_name)
-                    cs_auth_name = false_easting_unit.cs_auth_name
+                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
+                    cs_code = params['False_Easting'].unit.cs_code
 
-                    assert false_easting_unit.cs_code == false_northing_unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(false_easting_unit.cs_code, false_northing_unit.cs_code)
-                    cs_code = false_easting_unit.cs_code
+                    assert params['Central_Meridian'].unit.uom_auth_name == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(params['Central_Meridian'].unit.uom_auth_name)
 
-                    Central_Meridian = parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][0]
-                    central_meridian_unit = get_wkt_unit(parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][0],
-                                                         parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][1])
-                    assert central_meridian_unit.uom_auth_name == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(central_meridian_unit.uom_auth_name)
+                    assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale factor unit {}'.format(params['Scale_Factor'].unit.uom_code)
 
-                    Scale_Factor = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][0]
-                    scale_unit = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][1]['SCALEUNIT']
-                    assert scale_unit[0] == 'Unity', 'Unhandled scale unit {}'.format(scale_unit[0])
-                    assert scale_unit[1] == '1.0', 'Unhandled scale size {}'.format(scale_unit[1])
-
-                    Latitude_Of_Origin = parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][0]
-                    latitude_of_origin_unit = get_wkt_unit(parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][0],
-                                                           parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][1])
-                    assert latitude_of_origin_unit.uom_auth_name == 'EPSG', 'Unhandled Latitude_Of_Origin authority {}'.format(latitude_of_origin_unit.uom_auth_name)
+                    assert params['Latitude_Of_Origin'].unit.uom_auth_name == 'EPSG', 'Unhandled Latitude_Of_Origin authority {}'.format(params['Latitude_Of_Origin'].unit.uom_auth_name)
 
                     conv_name = 'unnamed'
                     if method == 'Gauss_Kruger' and 'GK_' not in esri_name and 'Gauss' not in esri_name:
@@ -1112,15 +1166,15 @@ def import_projcs():
                         param2_code = '8802' AND param2_value = ? AND param2_uom_code = ? AND
                         param3_code = '8805' AND param3_value = ? AND param3_uom_code = '9201' AND
                         param4_code = '8806' AND param4_value = ? AND param4_uom_code = ? AND
-                        param5_code = '8807' AND param5_value = ? AND param5_uom_code = ?""", (Latitude_Of_Origin,
-                                                                                               latitude_of_origin_unit.uom_code,
-                                                                                               Central_Meridian,
-                                                                                               central_meridian_unit.uom_code,
-                                                                                               Scale_Factor,
-                                                                                               False_Easting,
-                                                                                               false_easting_unit.uom_code,
-                                                                                               False_Northing,
-                                                                                               false_northing_unit.uom_code))
+                        param5_code = '8807' AND param5_value = ? AND param5_uom_code = ?""", (params['Latitude_Of_Origin'].value,
+                                                                                               params['Latitude_Of_Origin'].unit.uom_code,
+                                                                                               params['Central_Meridian'].value,
+                                                                                               params['Central_Meridian'].unit.uom_code,
+                                                                                               params['Scale_Factor'].value,
+                                                                                               params['False_Easting'].value,
+                                                                                               params['False_Easting'].unit.uom_code,
+                                                                                               params['False_Northing'].value,
+                                                                                               params['False_Northing'].unit.uom_code))
                     src_row = cursor.fetchone()
                     if conv_name == 'unnamed' and src_row:
                         conv_auth_name = 'EPSG'
@@ -1137,19 +1191,18 @@ def import_projcs():
 
                         if conv_is_deprecated and not deprecated:
                             # if conversion is marked as deprecated, we have to deprecate the CRS also
-                            print('Flagging ESRI:{} ({}) as deprecated because conversion EPSG:{} is deprecated'.format(code, esri_name, conv_code))
-                            deprecated = True
+                            assert False, 'ESRI:{} ({}) is NOT marked as deprecated but conversion EPSG:{} is deprecated'.format(code, esri_name, conv_code)
                     else:
                         conv_auth_name = 'ESRI'
                         conv_code = code
 
                         sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','9807','Transverse Mercator','EPSG','8801','Latitude of natural origin',%s,'EPSG','%s','EPSG','8802','Longitude of natural origin',%s,'EPSG','%s','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
                             code, conv_name,
-                            Latitude_Of_Origin, latitude_of_origin_unit.uom_code,
-                            Central_Meridian, central_meridian_unit.uom_code,
-                            Scale_Factor,
-                            False_Easting, false_easting_unit.uom_code,
-                            False_Northing, false_northing_unit.uom_code,
+                            params['Latitude_Of_Origin'].value, params['Latitude_Of_Origin'].unit.uom_code,
+                            params['Central_Meridian'].value, params['Central_Meridian'].unit.uom_code,
+                            params['Scale_Factor'].value,
+                            params['False_Easting'].value, params['False_Easting'].unit.uom_code,
+                            params['False_Northing'].value, params['False_Northing'].unit.uom_code,
                             deprecated)
 
                         sql_extract = sql[sql.find('NULL'):]
@@ -1170,66 +1223,36 @@ def import_projcs():
                     all_sql.append(sql)
 
                 elif method == 'Hotine_Oblique_Mercator_Azimuth_Natural_Origin':
-                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
-                    false_easting_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
+                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
 
-                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
-                    false_northing_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
+                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
 
-                    assert false_easting_unit.cs_auth_name == false_northing_unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        false_easting_unit.cs_auth_name, false_northing_unit.cs_auth_name)
+                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
+                    cs_code = params['False_Easting'].unit.cs_code
 
-                    cs_auth_name = false_easting_unit.cs_auth_name
-
-                    assert false_easting_unit.cs_code == false_northing_unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        false_easting_unit.cs_code, false_northing_unit.cs_code)
-
-                    cs_code = false_easting_unit.cs_code
-
-                    Azimuth = parsed_conv_wkt2['CONVERSION'][1]['Azimuth'][0]
-                    azimuth_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Azimuth'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Azimuth'][1]['ANGLEUNIT'][1])
-                    assert azimuth_unit.uom_auth_name == 'EPSG', 'Unhandled Azimuth authority {}'.format(
-                        azimuth_unit.uom_auth_name)
-
-                    Scale_Factor = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][0]
-                    scale_unit = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][1]['SCALEUNIT']
-                    assert scale_unit[0] == 'Unity', 'Unhandled scale unit {}'.format(scale_unit[0])
-                    assert scale_unit[1] == '1.0', 'Unhandled scale size {}'.format(scale_unit[1])
-
-                    Longitude_Of_Center = parsed_conv_wkt2['CONVERSION'][1]['Longitude_Of_Center'][0]
-                    longitude_of_center_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Longitude_Of_Center'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Longitude_Of_Center'][1]['ANGLEUNIT'][1])
-                    assert longitude_of_center_unit.uom_auth_name == 'EPSG', 'Unhandled Longitude_Of_Center authority {}'.format(
-                        longitude_of_center_unit.uom_auth_name)
-
-                    Latitude_Of_Center = parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Center'][0]
-                    latitude_of_center_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Center'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Center'][1]['ANGLEUNIT'][1])
-                    assert latitude_of_center_unit.uom_auth_name == 'EPSG', 'Unhandled Latitude_Of_Center authority {}'.format(
-                        latitude_of_center_unit.uom_auth_name)
+                    assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(params['Scale_Factor'].unit.uom_code)
 
                     conv_name = 'unnamed'
                     conv_auth_name = 'ESRI'
                     conv_code = code
 
-                    sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','9812','Hotine Oblique Mercator (variant A)','EPSG','8811','Latitude of projection centre',%s,'EPSG','%s','EPSG','8812','Longitude of projection centre',%s,'EPSG','%s','EPSG','8813','Azimuth of initial line',%s,'EPSG','%s','EPSG','8814','Angle from Rectified to Skew Grid',%s,'EPSG','%s','EPSG','8815','Scale factor on initial line',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',%d);""" % (
-                        code, conv_name,
-                        Latitude_Of_Center, latitude_of_center_unit.uom_code,
-                        Longitude_Of_Center, longitude_of_center_unit.uom_code,
-                        Azimuth, azimuth_unit.uom_code,
-                        Azimuth, azimuth_unit.uom_code,
-                        Scale_Factor,
-                        False_Easting, false_easting_unit.uom_code,
-                        False_Northing, false_northing_unit.uom_code,
-                        deprecated)
+                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
+                                                epsg_code='9812', epsg_name='Hotine Oblique Mercator (variant A)',
+                                                params=params,
+                                                param_mapping={
+                                                    8811: 'Latitude_Of_Center',
+                                                    8812: 'Longitude_Of_Center',
+                                                    8813: 'Azimuth',
+                                                    8814: 'Azimuth',
+                                                    8815: 'Scale_Factor',
+                                                    8806: 'False_Easting',
+                                                    8807: 'False_Northing'
+                                                },
+                                                deprecated=bool(deprecated)
+                                                )
 
                     sql_extract = sql[sql.find('NULL'):]
                     if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
@@ -1249,65 +1272,33 @@ def import_projcs():
                     all_sql.append(sql)
 
                 elif method == 'Lambert_Conformal_Conic' and 'Standard_Parallel_2' in parsed_conv_wkt2['CONVERSION'][1]:
-                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
-                    false_easting_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
+                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
 
-                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
-                    false_northing_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
+                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
 
-                    assert false_easting_unit.cs_auth_name == false_northing_unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        false_easting_unit.cs_auth_name, false_northing_unit.cs_auth_name)
-                    cs_auth_name = false_easting_unit.cs_auth_name
-
-                    assert false_easting_unit.cs_code == false_northing_unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        false_easting_unit.cs_code, false_northing_unit.cs_code)
-                    cs_code = false_easting_unit.cs_code
-
-                    Central_Meridian = parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][0]
-                    central_meridian_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][1])
-                    assert central_meridian_unit.uom_auth_name == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(
-                        central_meridian_unit.uom_auth_name)
-
-                    Standard_Parallel_1 = parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][0]
-                    standard_parallel_1_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][1]['ANGLEUNIT'][1])
-                    assert standard_parallel_1_unit.uom_auth_name == 'EPSG', 'Unhandled Standard_Parallel_1 authority {}'.format(
-                        standard_parallel_1_unit.uom_auth_name)
-
-                    Standard_Parallel_2 = parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_2'][0]
-                    standard_parallel_2_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_2'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_2'][1]['ANGLEUNIT'][1])
-                    assert standard_parallel_2_unit.uom_auth_name == 'EPSG', 'Unhandled Standard_Parallel_2 authority {}'.format(
-                        standard_parallel_2_unit.uom_auth_name)
-
-                    Latitude_Of_Origin = parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][0]
-                    latitude_of_origin_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][1])
-                    assert latitude_of_origin_unit.uom_auth_name == 'EPSG', 'Unhandled Latitude_Of_Origin authority {}'.format(
-                        latitude_of_origin_unit.uom_auth_name)
+                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
+                    cs_code = params['False_Easting'].unit.cs_code
 
                     conv_name = 'unnamed'
                     conv_auth_name = 'ESRI'
                     conv_code = code
 
-                    sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','9802','Lambert Conic Conformal (2SP)','EPSG','8821','Latitude of false origin',%s,'EPSG','%s','EPSG','8822','Longitude of false origin',%s,'EPSG','%s','EPSG','8823','Latitude of 1st standard parallel',%s,'EPSG','%s','EPSG','8824','Latitude of 2nd standard parallel',%s,'EPSG','%s','EPSG','8826','Easting at false origin',%s,'EPSG','%s','EPSG','8827','Northing at false origin',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        code, conv_name,
-                        Latitude_Of_Origin, latitude_of_origin_unit.uom_code,
-                        Central_Meridian, central_meridian_unit.uom_code,
-                        Standard_Parallel_1, standard_parallel_1_unit.uom_code,
-                        Standard_Parallel_2, standard_parallel_2_unit.uom_code,
-                        False_Easting, false_easting_unit.uom_code,
-                        False_Northing, false_northing_unit.uom_code,
-                        deprecated)
+                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
+                                                epsg_code='9802', epsg_name='Lambert Conic Conformal (2SP)',
+                                                params=params,
+                                                param_mapping={
+                                                    8821: 'Latitude_Of_Origin',
+                                                    8822: 'Central_Meridian',
+                                                    8823: 'Standard_Parallel_1',
+                                                    8824: 'Standard_Parallel_2',
+                                                    8826: 'False_Easting',
+                                                    8827: 'False_Northing'
+                                                },
+                                                deprecated=bool(deprecated)
+                                                )
 
                     sql_extract = sql[sql.find('NULL'):]
                     if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
@@ -1327,65 +1318,37 @@ def import_projcs():
                     all_sql.append(sql)
 
                 elif method == 'Lambert_Conformal_Conic' and 'Scale_Factor' in parsed_conv_wkt2['CONVERSION'][1]:
-                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
-                    false_easting_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
+                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
 
-                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
-                    false_northing_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
+                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
 
-                    assert false_easting_unit.cs_auth_name == false_northing_unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        false_easting_unit.cs_auth_name, false_northing_unit.cs_auth_name)
-                    cs_auth_name = false_easting_unit.cs_auth_name
+                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
+                    cs_code = params['False_Easting'].unit.cs_code
 
-                    assert false_easting_unit.cs_code == false_northing_unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        false_easting_unit.cs_code, false_northing_unit.cs_code)
-                    cs_code = false_easting_unit.cs_code
+                    assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(params['Scale_Factor'].unit.uom_code)
 
-                    Central_Meridian = parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][0]
-                    central_meridian_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][1])
-                    assert central_meridian_unit.uom_auth_name == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(
-                        central_meridian_unit.uom_auth_name)
-
-                    Standard_Parallel_1 = parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][0]
-                    standard_parallel_1_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Standard_Parallel_1'][1]['ANGLEUNIT'][1])
-                    assert standard_parallel_1_unit.uom_auth_name == 'EPSG', 'Unhandled Standard_Parallel_1 authority {}'.format(
-                        standard_parallel_1_unit.uom_auth_name)
-
-                    Scale_Factor = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][0]
-                    scale_unit = parsed_conv_wkt2['CONVERSION'][1]['Scale_Factor'][1]['SCALEUNIT']
-                    assert scale_unit[0] == 'Unity', 'Unhandled scale unit {}'.format(scale_unit[0])
-                    assert scale_unit[1] == '1.0', 'Unhandled scale size {}'.format(scale_unit[1])
-
-                    Latitude_Of_Origin = parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][0]
-                    latitude_of_origin_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Latitude_Of_Origin'][1]['ANGLEUNIT'][1])
-                    assert latitude_of_origin_unit.uom_auth_name == 'EPSG', 'Unhandled Latitude_Of_Origin authority {}'.format(
-                        latitude_of_origin_unit.uom_auth_name)
-
-                    assert Standard_Parallel_1 == Latitude_Of_Origin
-                    assert standard_parallel_1_unit.uom_code == latitude_of_origin_unit.uom_code
+                    assert params['Standard_Parallel_1'].value == params['Latitude_Of_Origin'].value
+                    assert params['Standard_Parallel_1'].unit.uom_code == params['Latitude_Of_Origin'].unit.uom_code
 
                     conv_name = 'unnamed'
                     conv_auth_name = 'ESRI'
                     conv_code = code
 
-                    sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','9801','Lambert Conic Conformal (1SP)','EPSG','8801','Latitude of natural origin',%s,'EPSG','%s','EPSG','8802','Longitude of natural origin',%s,'EPSG','%s','EPSG','8805','Scale factor at natural origin',%s,'EPSG','9201','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        code, conv_name,
-                        Latitude_Of_Origin, latitude_of_origin_unit.uom_code,
-                        Central_Meridian, central_meridian_unit.uom_code,
-                        Scale_Factor,
-                        False_Easting, false_easting_unit.uom_code,
-                        False_Northing, false_northing_unit.uom_code,
-                        deprecated)
+                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
+                                                epsg_code='9801', epsg_name='Lambert Conic Conformal (1SP)',
+                                                params=params,
+                                                param_mapping={
+                                                    8801: 'Latitude_Of_Origin',
+                                                    8802: 'Central_Meridian',
+                                                    8805: 'Scale_Factor',
+                                                    8806: 'False_Easting',
+                                                    8807: 'False_Northing'
+                                                },
+                                                deprecated=bool(deprecated)
+                                                )
 
                     sql_extract = sql[sql.find('NULL'):]
                     if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
@@ -1406,41 +1369,30 @@ def import_projcs():
                     all_sql.append(sql)
 
                 elif method == 'Equal_Earth':
-                    False_Easting = parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][0]
-                    false_easting_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Easting'][1]['LENGTHUNIT'][1])
+                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
 
-                    False_Northing = parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][0]
-                    false_northing_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['False_Northing'][1]['LENGTHUNIT'][1])
+                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
+                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
 
-                    assert false_easting_unit.cs_auth_name == false_northing_unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        false_easting_unit.cs_auth_name, false_northing_unit.cs_auth_name)
-                    cs_auth_name = false_easting_unit.cs_auth_name
-
-                    assert false_easting_unit.cs_code == false_northing_unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        false_easting_unit.cs_code, false_northing_unit.cs_code)
-                    cs_code = false_easting_unit.cs_code
-
-                    Central_Meridian = parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][0]
-                    central_meridian_unit = get_wkt_unit(
-                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][0],
-                        parsed_conv_wkt2['CONVERSION'][1]['Central_Meridian'][1]['ANGLEUNIT'][1])
-                    assert central_meridian_unit.uom_auth_name == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(
-                        central_meridian_unit.uom_auth_name)
+                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
+                    cs_code = params['False_Easting'].unit.cs_code
 
                     conv_name = 'unnamed'
                     conv_auth_name = 'ESRI'
                     conv_code = code
 
-                    sql = """INSERT INTO "conversion" VALUES('ESRI','%s','%s',NULL,'EPSG','1078','Equal Earth','EPSG','8802','Longitude of natural origin',%s,'EPSG','%s','EPSG','8806','False easting',%s,'EPSG','%s','EPSG','8807','False northing',%s,'EPSG','%s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,%d);""" % (
-                        code, conv_name,
-                        Central_Meridian, central_meridian_unit.uom_code,
-                        False_Easting, false_easting_unit.uom_code,
-                        False_Northing, false_northing_unit.uom_code,
-                        deprecated)
+                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
+                                                epsg_code='1078', epsg_name='Equal Earth',
+                                                params=params,
+                                                param_mapping={
+                                                    8802: 'Central_Meridian',
+                                                    8806: 'False_Easting',
+                                                    8807: 'False_Northing'
+                                                },
+                                                deprecated=bool(deprecated)
+                                                )
 
                     sql_extract = sql[sql.find('NULL'):]
                     if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
