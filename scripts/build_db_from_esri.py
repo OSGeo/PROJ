@@ -826,8 +826,8 @@ def get_wkt_unit(UNIT_NAME, UNIT_VALUE, is_rate=False) -> Unit:
         uom_auth_name = 'EPSG'
         assert not is_rate
         uom_code = '9097'
-        cs_auth_name = 'EPSG'
-        cs_code = None
+        cs_auth_name = 'ESRI'
+        cs_code = UNIT_NAME
         assert UNIT_VALUE == '20.1168', UNIT_VALUE
     elif UNIT_NAME == 'Degree':
         assert not is_rate
@@ -1463,6 +1463,59 @@ def import_projcs():
                         code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
+                elif method == 'Cassini':
+                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
+
+                    assert params['False_Easting'].unit.cs_auth_name == params[
+                        'False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
+                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
+
+                    assert params['False_Easting'].unit.cs_code == params[
+                        'False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
+                    cs_code = params['False_Easting'].unit.cs_code
+
+                    assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(params['Scale_Factor'].unit.uom_code)
+                    assert params['Scale_Factor'].value == '1.0'
+
+                    conv_name = 'unnamed'
+                    conv_auth_name = 'ESRI'
+                    conv_code = code
+
+                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
+                                                epsg_code='9806', epsg_name='Cassini-Soldner',
+                                                params=params,
+                                                param_mapping={
+                                                    8801: 'Latitude_Of_Origin',
+                                                    8802: 'Central_Meridian',
+                                                    8806: 'False_Easting',
+                                                    8807: 'False_Northing',
+                                                },
+                                                deprecated=bool(deprecated)
+                                                )
+
+                    sql_extract = sql[sql.find('NULL'):]
+                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
+                        all_sql.append(sql)
+
+                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (
+                            code, code, extent_auth_name, extent_code, 'EPSG', '1024')
+                        all_sql.append(sql)
+
+                        map_conversion_sql_to_code[sql_extract] = conv_code
+                    else:
+                        conv_code = map_conversion_sql_to_code[sql_extract]
+
+                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
+                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name,
+                        conv_code, deprecated)
+                    all_sql.append(sql)
+
+                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (
+                        code, code, extent_auth_name, extent_code, 'EPSG', '1024')
+                    all_sql.append(sql)
+
                 elif method == 'IGAC_Plano_Cartesiano':
                     params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
 
@@ -1565,8 +1618,9 @@ def import_projcs():
                     all_sql.append(sql)
 
                 else:
-
                     # TODO -- add more method mapping!
+                    print('Direct mapping for {} not yet implemented, falling back to default handling'.format(method))
+
                     sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,NULL,NULL,'%s','%s',NULL,NULL,'%s',%d);""" % (
                         code, esri_name, geogcs_auth_name, geogcs_code, escape_literal(wkt), deprecated)
                     all_sql.append(sql)
