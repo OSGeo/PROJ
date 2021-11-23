@@ -290,6 +290,21 @@ expect      1335.8339   7522.963
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
+# Test invalid pipelines
+-------------------------------------------------------------------------------
+# proj= before first step
+operation   +proj=pipeline +proj=merc +step +inv +proj=merc
+expect      failure pjd_err_malformed_pipeline
+
+# o_proj= before first step
+operation   +proj=pipeline +o_proj=merc +step +proj=ob_tran
+expect      failure pjd_err_malformed_pipeline
+
+# nested pipeline
+operation   +proj=pipeline +step +proj=pipeline +step +proj=merc
+expect      failure pjd_err_malformed_pipeline
+
+-------------------------------------------------------------------------------
 # Test Pipeline Coordinate Stack
 -------------------------------------------------------------------------------
 operation  +proj=pipeline \

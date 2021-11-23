@@ -452,7 +452,19 @@ PJ *OPERATION(pipeline,0) {
                 return destructor (P, PROJ_ERR_INVALID_OP_WRONG_SYNTAX); /* ERROR: nested pipelines */
             }
             i_pipeline = i;
+        } else if (0==nsteps && 0==strncmp(argv[i], "proj=", 5) ) {
+            // Non-sensical to have proj= in the general pipeline parameters.
+            // Would not be a big issue in itself, but this makes bad performance
+            // in parsing hostile pipelines more likely, such as the one of
+            // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=41290
+            proj_log_error (P, _("Pipeline: proj= operator before first step not allowed"));
+            return destructor (P, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
+        }  else if (0==nsteps && 0==strncmp(argv[i], "o_proj=", 7) ) {
+            // Same as above.
+            proj_log_error (P, _("Pipeline: o_proj= operator before first step not allowed"));
+            return destructor (P, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
         }
+
     }
     nsteps--; /* Last instance of +step is just a sentinel */
 
