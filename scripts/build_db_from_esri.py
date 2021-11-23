@@ -797,6 +797,14 @@ def wkt_array_to_dict(ar):
 
 ########################
 
+@dataclass
+class CoordinateSystem:
+    """
+    Encapsulates a coordinate system
+    """
+    auth_name: str
+    code: str
+
 
 @dataclass
 class Unit:
@@ -805,106 +813,86 @@ class Unit:
     """
     uom_auth_name: str
     uom_code: str
-    cs_auth_name: Optional[str] = None
-    cs_code: Optional[str] = None
+    cs: Optional[CoordinateSystem] = None
 
 
 def get_wkt_unit(UNIT_NAME, UNIT_VALUE, is_rate=False) -> Unit:
+    cs = None
     if UNIT_NAME == 'Meter':
         uom_auth_name = 'EPSG'
         uom_code = '1042' if is_rate else '9001'
-        cs_auth_name = 'EPSG'
-        cs_code = '4400'
+        cs = CoordinateSystem('EPSG', '4400')
         assert UNIT_VALUE == '1.0', UNIT_VALUE
     elif UNIT_NAME == 'Millimeter':
         uom_auth_name = 'EPSG'
         uom_code = '1027' if is_rate else '1025'
-        cs_auth_name = 'EPSG'
-        cs_code = None
         assert UNIT_VALUE == '0.001', UNIT_VALUE
     elif UNIT_NAME == 'Chain':
         uom_auth_name = 'EPSG'
         assert not is_rate
         uom_code = '9097'
-        cs_auth_name = 'ESRI'
-        cs_code = UNIT_NAME
+        cs = CoordinateSystem('ESRI', UNIT_NAME)
         assert UNIT_VALUE == '20.1168', UNIT_VALUE
     elif UNIT_NAME == 'Degree':
         assert not is_rate
         uom_auth_name = 'EPSG'
         uom_code = '9102'
-        cs_auth_name = 'EPSG'
-        cs_code = None
         assert UNIT_VALUE == '0.0174532925199433', UNIT_VALUE
     elif UNIT_NAME == 'Arcsecond':
         uom_auth_name = 'EPSG'
         uom_code = '1043' if is_rate else '9104'
-        cs_auth_name = 'EPSG'
-        cs_code = None
         assert UNIT_VALUE == '0.00000484813681109536', UNIT_VALUE
     elif UNIT_NAME == 'Milliarcsecond':
         uom_auth_name = 'EPSG'
         uom_code = '1032' if is_rate else '1031'
-        cs_auth_name = 'EPSG'
-        cs_code = None
         assert UNIT_VALUE == '4.84813681109536e-09', UNIT_VALUE
     elif UNIT_NAME == 'Grad':
         assert not is_rate
         uom_auth_name = 'EPSG'
         uom_code = '9105'
-        cs_auth_name = 'EPSG'
-        cs_code = None
         assert UNIT_VALUE == '0.01570796326794897', UNIT_VALUE
     elif UNIT_NAME == 'Foot':
         assert not is_rate
         uom_auth_name = 'EPSG'
         uom_code = '9002'
-        cs_auth_name = 'EPSG'
-        cs_code = '4495'
+        cs = CoordinateSystem('EPSG', '4495')
         assert UNIT_VALUE == '0.3048', UNIT_VALUE
     elif UNIT_NAME == 'Foot_US':
         assert not is_rate
         uom_auth_name = 'EPSG'
         uom_code = '9003'
-        cs_auth_name = 'EPSG'
-        cs_code = '4497'
+        cs = CoordinateSystem('EPSG', '4497')
         assert UNIT_VALUE == '0.3048006096012192', UNIT_VALUE
     elif UNIT_NAME == 'Yard_Indian_1937':
         assert not is_rate
         uom_auth_name = 'EPSG'
         uom_code = '9085'
-        cs_auth_name = 'ESRI'
-        cs_code = UNIT_NAME
+        cs = CoordinateSystem('ESRI', UNIT_NAME)
         assert UNIT_VALUE == '0.91439523', UNIT_VALUE
     elif UNIT_NAME == 'Parts_Per_Million':
         uom_auth_name = 'EPSG'
         uom_code = '1041' if is_rate else '9202'
-        cs_auth_name = 'EPSG'
-        cs_code = None
         assert UNIT_VALUE == '0.000001', UNIT_VALUE
     elif UNIT_NAME == 'Unity':
         assert not is_rate
         uom_auth_name = 'EPSG'
         uom_code = '9201'
-        cs_auth_name = 'EPSG'
-        cs_code = None
         assert UNIT_VALUE == '1.0', UNIT_VALUE
     else:
         assert False, UNIT_NAME
 
-    if cs_auth_name == 'ESRI' and cs_code not in set_esri_cs_code:
-        sql = """INSERT INTO "coordinate_system" VALUES('ESRI','%s','Cartesian',2);""" % cs_code
+    if cs is not None and cs.auth_name == 'ESRI' and cs.code not in set_esri_cs_code:
+        sql = f"""INSERT INTO "coordinate_system" VALUES('ESRI','{cs.code}','Cartesian',2);"""
         all_sql.append(sql)
-        sql = """INSERT INTO "axis" VALUES('ESRI','%d','Easting','E','east','ESRI','%s',1,'EPSG','%s');""" % (2 * len(set_esri_cs_code) + 1, cs_code, uom_code)
+        sql = f"""INSERT INTO "axis" VALUES('ESRI','{2 * len(set_esri_cs_code) + 1}','Easting','E','east','ESRI','{cs.code}',1,'EPSG','{uom_code}');"""
         all_sql.append(sql)
-        sql = """INSERT INTO "axis" VALUES('ESRI','%d','Northing','N','north','ESRI','%s',2,'EPSG','%s');""" % (2 * len(set_esri_cs_code) + 2, cs_code, uom_code)
+        sql = f"""INSERT INTO "axis" VALUES('ESRI','{2 * len(set_esri_cs_code) + 2}','Northing','N','north','ESRI','{cs.code}',2,'EPSG','{uom_code}');"""
         all_sql.append(sql)
-        set_esri_cs_code.add(cs_code)
+        set_esri_cs_code.add(cs.code)
 
     return Unit(uom_auth_name=uom_auth_name,
                 uom_code=uom_code,
-                cs_auth_name=cs_auth_name,
-                cs_code=cs_code)
+                cs=cs)
 
 
 class UnitType(Enum):
@@ -967,10 +955,26 @@ def get_parameter_values(wkt_definition: dict) -> Dict[str, ParameterValue]:
 
 ########################
 
+def get_cs_from_false_easting_and_northing(params: Dict[str, ParameterValue]) -> CoordinateSystem:
+    """
+    Extracts the CoordinateSystem from False_Easting and False_Northing parameters
+    """
+    assert params['False_Easting'].unit.cs.auth_name == params[
+        'False_Northing'].unit.cs.auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
+        params['False_Easting'].unit.cs.auth_name, params['False_Northing'].unit.cs.auth_name)
+    cs_auth_name = params['False_Easting'].unit.cs.auth_name
+
+    assert params['False_Easting'].unit.cs.code == params[
+        'False_Northing'].unit.cs.code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
+        params['False_Easting'].unit.cs.code, params['False_Northing'].unit.cs.code)
+    cs_code = params['False_Easting'].unit.cs.code
+
+    return CoordinateSystem(cs_auth_name, cs_code)
+
 
 map_projcs_esri_name_to_auth_code = {}
 set_esri_cs_code = set()
-map_conversion_sql_to_code = {}
+MAP_CONVERSION_SQL_TO_CODE = {}
 
 EPSG_CONVERSION_PARAM_NAMES = {
     1039: 'Projection plane origin height',
@@ -993,10 +997,121 @@ EPSG_CONVERSION_PARAM_NAMES = {
 }
 
 
+@dataclass
+class ConversionMapping:
+    """
+    Encapsulates a mapping from an ESRI projcs
+    """
+    epsg_code: str
+    epsg_name: str
+    param_mapping: Dict[int, str]
+
+
+MAPPED_PROJCS: Dict[str, ConversionMapping] = {
+    'Hotine_Oblique_Mercator_Azimuth_Natural_Origin': ConversionMapping(
+        epsg_code='9812',
+        epsg_name='Hotine Oblique Mercator (variant A)',
+        param_mapping={
+            8811: 'Latitude_Of_Center',
+            8812: 'Longitude_Of_Center',
+            8813: 'Azimuth',
+            8814: 'Azimuth',
+            8815: 'Scale_Factor',
+            8806: 'False_Easting',
+            8807: 'False_Northing'
+        }
+    ),
+    'Equal_Earth': ConversionMapping(
+        epsg_code='1078',
+        epsg_name='Equal Earth',
+        param_mapping={
+            8802: 'Central_Meridian',
+            8806: 'False_Easting',
+            8807: 'False_Northing'
+        }
+    ),
+    'Albers': ConversionMapping(
+        epsg_code='9822',
+        epsg_name='Albers Equal Area',
+        param_mapping={
+            8821: 'Latitude_Of_Origin',
+            8822: 'Central_Meridian',
+            8823: 'Standard_Parallel_1',
+            8824: 'Standard_Parallel_2',
+            8826: 'False_Easting',
+            8827: 'False_Northing',
+        }
+    ),
+    'Cassini': ConversionMapping(
+        epsg_code='9806',
+        epsg_name='Cassini-Soldner',
+        param_mapping={
+            8801: 'Latitude_Of_Origin',
+            8802: 'Central_Meridian',
+            8806: 'False_Easting',
+            8807: 'False_Northing',
+        }
+    ),
+    'IGAC_Plano_Cartesiano': ConversionMapping(
+        epsg_code='1052',
+        epsg_name='Colombia Urban',
+        param_mapping={
+            8801: 'Latitude_Of_Center',
+            8802: 'Longitude_Of_Center',
+            8806: 'False_Easting',
+            8807: 'False_Northing',
+            1039: 'Height'
+        }
+    ),
+    'Equidistant_Cylindrical': ConversionMapping(
+        epsg_code='1029',
+        epsg_name='Equidistant Cylindrical (Spherical)',
+        param_mapping={
+            8823: 'Standard_Parallel_1',
+            8802: 'Central_Meridian',
+            8806: 'False_Easting',
+            8807: 'False_Northing',
+        }
+    )
+}
+
+MAPPED_PROJCS_WITH_EXTRA_LOGIC: Dict[str, Dict[str, ConversionMapping]] = {
+    'Lambert_Conformal_Conic': {
+        'Lambert Conic Conformal (1SP)': ConversionMapping(
+            epsg_code='9801',
+            epsg_name='Lambert Conic Conformal (1SP)',
+            param_mapping={
+                8801: 'Latitude_Of_Origin',
+                8802: 'Central_Meridian',
+                8805: 'Scale_Factor',
+                8806: 'False_Easting',
+                8807: 'False_Northing'
+            }
+        ),
+        'Lambert Conic Conformal (2SP)': ConversionMapping(
+            epsg_code='9802',
+            epsg_name='Lambert Conic Conformal (2SP)',
+            param_mapping={
+                8821: 'Latitude_Of_Origin',
+                8822: 'Central_Meridian',
+                8823: 'Standard_Parallel_1',
+                8824: 'Standard_Parallel_2',
+                8826: 'False_Easting',
+                8827: 'False_Northing'
+            }
+        )
+    }
+
+}
+
+
 def insert_conversion_sql(esri_code: str, esri_name: str, epsg_code: str, epsg_name: str,
                           params: Dict[str, ParameterValue],
                           param_mapping: Dict[int, str],
-                          deprecated: bool = False) -> str:
+                          extent_auth_name: str, extent_code: str,
+                          geogcs_auth_name: str, geogcs_code: str,
+                          cs: CoordinateSystem,
+                          deprecated: bool = False) -> List[str]:
     """
     Generates INSERT sql command for conversion
     """
@@ -1019,7 +1134,7 @@ def insert_conversion_sql(esri_code: str, esri_name: str, epsg_code: str, epsg_n
     sql = "INSERT INTO \"conversion\" VALUES('ESRI','{code}','{name}',NULL,'{method_auth_name}','{method_code}','{method_name}'," \
           "{param1},{param2},{param3},{param4},{param5},{param6},{param7},{deprecated});".format(
         code=esri_code,
-        name=esri_name,
+        name='unnamed',
         method_auth_name='EPSG',
         method_code=epsg_code,
         method_name=epsg_name,
@@ -1032,7 +1147,29 @@ def insert_conversion_sql(esri_code: str, esri_name: str, epsg_code: str, epsg_n
         param7=param_strings[6],
         deprecated=1 if deprecated else 0)
 
-    return sql
+    conv_name = 'unnamed'
+    conv_auth_name = 'ESRI'
+    conv_code = esri_code
+
+    results = []
+    sql_extract = sql[sql.find('NULL'):]
+    if conv_name != 'unnamed' or sql_extract not in MAP_CONVERSION_SQL_TO_CODE:
+        results.append(sql)
+
+        sql = f"""INSERT INTO "usage" VALUES('ESRI', 'CONV_{esri_code}_USAGE','conversion','ESRI','{esri_code}','{extent_auth_name}','{extent_code}','EPSG','1024');"""
+        results.append(sql)
+
+        MAP_CONVERSION_SQL_TO_CODE[sql_extract] = conv_code
+    else:
+        conv_code = MAP_CONVERSION_SQL_TO_CODE[sql_extract]
+
+    sql = f"""INSERT INTO "projected_crs" VALUES('ESRI','{esri_code}','{esri_name}',NULL,'{cs.auth_name}','{cs.code}','{geogcs_auth_name}',""" \
+          f"""'{geogcs_code}','{conv_auth_name}','{conv_code}',NULL,{1 if deprecated else 0});"""
+    results.append(sql)
+    sql = f"""INSERT INTO "usage" VALUES('ESRI', 'PCRS_{esri_code}_USAGE','projected_crs','ESRI','{esri_code}','{extent_auth_name}','{extent_code}','EPSG','1024');"""
+    results.append(sql)
+
+    return results
 
 
 def import_projcs():
@@ -1142,17 +1279,10 @@ def import_projcs():
 
                 if method in ('Transverse_Mercator', 'Gauss_Kruger'):
                     params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
-
-                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
-                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
-
-                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
-                    cs_code = params['False_Easting'].unit.cs_code
+                    cs = get_cs_from_false_easting_and_northing(params)
 
                     assert params['Central_Meridian'].unit.uom_auth_name == 'EPSG', 'Unhandled Central_Meridian authority {}'.format(params['Central_Meridian'].unit.uom_auth_name)
-
                     assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale factor unit {}'.format(params['Scale_Factor'].unit.uom_code)
-
                     assert params['Latitude_Of_Origin'].unit.uom_auth_name == 'EPSG', 'Unhandled Latitude_Of_Origin authority {}'.format(params['Latitude_Of_Origin'].unit.uom_auth_name)
 
                     conv_name = 'unnamed'
@@ -1206,416 +1336,62 @@ def import_projcs():
                             deprecated)
 
                         sql_extract = sql[sql.find('NULL'):]
-                        if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
+                        if conv_name != 'unnamed' or sql_extract not in MAP_CONVERSION_SQL_TO_CODE:
                             all_sql.append(sql)
 
                             sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                             all_sql.append(sql)
 
-                            map_conversion_sql_to_code[sql_extract] = conv_code
+                            MAP_CONVERSION_SQL_TO_CODE[sql_extract] = conv_code
                         else:
-                            conv_code = map_conversion_sql_to_code[sql_extract]
+                            conv_code = MAP_CONVERSION_SQL_TO_CODE[sql_extract]
 
                     sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
-                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, deprecated)
+                        code, esri_name, cs.auth_name, cs.code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, deprecated)
                     all_sql.append(sql)
                     sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
-                elif method == 'Hotine_Oblique_Mercator_Azimuth_Natural_Origin':
+                elif method in MAPPED_PROJCS or method in MAPPED_PROJCS_WITH_EXTRA_LOGIC:
                     params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
+                    cs = get_cs_from_false_easting_and_northing(params)
+                    if method in MAPPED_PROJCS:
+                        conversion_mapping = MAPPED_PROJCS[method]
+                    elif method == 'Lambert_Conformal_Conic' and 'Scale_Factor' in params:
+                        conversion_mapping = MAPPED_PROJCS_WITH_EXTRA_LOGIC['Lambert_Conformal_Conic'][
+                            'Lambert Conic Conformal (1SP)']
+                        assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(
+                            params['Scale_Factor'].unit.uom_code)
+                        assert params['Standard_Parallel_1'].value == params['Latitude_Of_Origin'].value
+                        assert params['Standard_Parallel_1'].unit == params['Latitude_Of_Origin'].unit
 
-                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
-                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
+                    elif method == 'Lambert_Conformal_Conic' and 'Standard_Parallel_2' in params:
+                        conversion_mapping = MAPPED_PROJCS_WITH_EXTRA_LOGIC['Lambert_Conformal_Conic']['Lambert Conic Conformal (2SP)']
 
-                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
-                    cs_code = params['False_Easting'].unit.cs_code
+                    else:
+                        assert False
 
-                    assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(params['Scale_Factor'].unit.uom_code)
+                    # additional validation required for these methods:
+                    if method == 'Hotine_Oblique_Mercator_Azimuth_Natural_Origin':
+                        assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(params['Scale_Factor'].unit.uom_code)
+                    elif method == 'Cassini':
+                        assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(
+                            params['Scale_Factor'].unit.uom_code)
+                        assert params['Scale_Factor'].value == '1.0'
 
-                    conv_name = 'unnamed'
-                    conv_auth_name = 'ESRI'
-                    conv_code = code
-
-                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
-                                                epsg_code='9812', epsg_name='Hotine Oblique Mercator (variant A)',
+                    sql = insert_conversion_sql(esri_code=code, esri_name=esri_name,
+                                                epsg_code=conversion_mapping.epsg_code,
+                                                epsg_name=conversion_mapping.epsg_name,
                                                 params=params,
-                                                param_mapping={
-                                                    8811: 'Latitude_Of_Center',
-                                                    8812: 'Longitude_Of_Center',
-                                                    8813: 'Azimuth',
-                                                    8814: 'Azimuth',
-                                                    8815: 'Scale_Factor',
-                                                    8806: 'False_Easting',
-                                                    8807: 'False_Northing'
-                                                },
+                                                param_mapping=conversion_mapping.param_mapping,
+                                                extent_auth_name=extent_auth_name,
+                                                extent_code=extent_code,
+                                                geogcs_auth_name=geogcs_auth_name,
+                                                geogcs_code=geogcs_code,
+                                                cs=cs,
                                                 deprecated=bool(deprecated)
                                                 )
-
-                    sql_extract = sql[sql.find('NULL'):]
-                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
-                        all_sql.append(sql)
-
-                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                        all_sql.append(sql)
-
-                        map_conversion_sql_to_code[sql_extract] = conv_code
-                    else:
-                        conv_code = map_conversion_sql_to_code[sql_extract]
-
-                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
-                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, deprecated)
-                    all_sql.append(sql)
-                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                    all_sql.append(sql)
-
-                elif method == 'Lambert_Conformal_Conic' and 'Standard_Parallel_2' in parsed_conv_wkt2['CONVERSION'][1]:
-                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
-
-                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
-                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
-
-                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
-                    cs_code = params['False_Easting'].unit.cs_code
-
-                    conv_name = 'unnamed'
-                    conv_auth_name = 'ESRI'
-                    conv_code = code
-
-                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
-                                                epsg_code='9802', epsg_name='Lambert Conic Conformal (2SP)',
-                                                params=params,
-                                                param_mapping={
-                                                    8821: 'Latitude_Of_Origin',
-                                                    8822: 'Central_Meridian',
-                                                    8823: 'Standard_Parallel_1',
-                                                    8824: 'Standard_Parallel_2',
-                                                    8826: 'False_Easting',
-                                                    8827: 'False_Northing'
-                                                },
-                                                deprecated=bool(deprecated)
-                                                )
-
-                    sql_extract = sql[sql.find('NULL'):]
-                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
-                        all_sql.append(sql)
-
-                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                        all_sql.append(sql)
-
-                        map_conversion_sql_to_code[sql_extract] = conv_code
-                    else:
-                        conv_code = map_conversion_sql_to_code[sql_extract]
-
-                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
-                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, deprecated)
-                    all_sql.append(sql)
-                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                    all_sql.append(sql)
-
-                elif method == 'Lambert_Conformal_Conic' and 'Scale_Factor' in parsed_conv_wkt2['CONVERSION'][1]:
-                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
-
-                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
-                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
-
-                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
-                    cs_code = params['False_Easting'].unit.cs_code
-
-                    assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(params['Scale_Factor'].unit.uom_code)
-
-                    assert params['Standard_Parallel_1'].value == params['Latitude_Of_Origin'].value
-                    assert params['Standard_Parallel_1'].unit.uom_code == params['Latitude_Of_Origin'].unit.uom_code
-
-                    conv_name = 'unnamed'
-                    conv_auth_name = 'ESRI'
-                    conv_code = code
-
-                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
-                                                epsg_code='9801', epsg_name='Lambert Conic Conformal (1SP)',
-                                                params=params,
-                                                param_mapping={
-                                                    8801: 'Latitude_Of_Origin',
-                                                    8802: 'Central_Meridian',
-                                                    8805: 'Scale_Factor',
-                                                    8806: 'False_Easting',
-                                                    8807: 'False_Northing'
-                                                },
-                                                deprecated=bool(deprecated)
-                                                )
-
-                    sql_extract = sql[sql.find('NULL'):]
-                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
-                        all_sql.append(sql)
-
-                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                        all_sql.append(sql)
-
-                        map_conversion_sql_to_code[sql_extract] = conv_code
-                    else:
-                        conv_code = map_conversion_sql_to_code[sql_extract]
-
-                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
-                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, deprecated)
-                    all_sql.append(sql)
-
-                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                    all_sql.append(sql)
-
-                elif method == 'Equal_Earth':
-                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
-
-                    assert params['False_Easting'].unit.cs_auth_name == params['False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
-                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
-
-                    assert params['False_Easting'].unit.cs_code == params['False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
-                    cs_code = params['False_Easting'].unit.cs_code
-
-                    conv_name = 'unnamed'
-                    conv_auth_name = 'ESRI'
-                    conv_code = code
-
-                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
-                                                epsg_code='1078', epsg_name='Equal Earth',
-                                                params=params,
-                                                param_mapping={
-                                                    8802: 'Central_Meridian',
-                                                    8806: 'False_Easting',
-                                                    8807: 'False_Northing'
-                                                },
-                                                deprecated=bool(deprecated)
-                                                )
-
-                    sql_extract = sql[sql.find('NULL'):]
-                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
-                        all_sql.append(sql)
-
-                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                        all_sql.append(sql)
-
-                        map_conversion_sql_to_code[sql_extract] = conv_code
-                    else:
-                        conv_code = map_conversion_sql_to_code[sql_extract]
-
-                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
-                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name, conv_code, deprecated)
-                    all_sql.append(sql)
-                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                    all_sql.append(sql)
-
-                elif method == 'Albers':
-                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
-
-                    assert params['False_Easting'].unit.cs_auth_name == params[
-                        'False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
-                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
-
-                    assert params['False_Easting'].unit.cs_code == params[
-                        'False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
-                    cs_code = params['False_Easting'].unit.cs_code
-
-                    conv_name = 'unnamed'
-                    conv_auth_name = 'ESRI'
-                    conv_code = code
-
-                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
-                                                epsg_code='9822', epsg_name='Albers Equal Area',
-                                                params=params,
-                                                param_mapping={
-                                                    8821: 'Latitude_Of_Origin',
-                                                    8822: 'Central_Meridian',
-                                                    8823: 'Standard_Parallel_1',
-                                                    8824: 'Standard_Parallel_2',
-                                                    8826: 'False_Easting',
-                                                    8827: 'False_Northing',
-                                                },
-                                                deprecated=bool(deprecated)
-                                                )
-
-                    sql_extract = sql[sql.find('NULL'):]
-                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
-                        all_sql.append(sql)
-
-                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (
-                            code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                        all_sql.append(sql)
-
-                        map_conversion_sql_to_code[sql_extract] = conv_code
-                    else:
-                        conv_code = map_conversion_sql_to_code[sql_extract]
-
-                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
-                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name,
-                        conv_code, deprecated)
-                    all_sql.append(sql)
-
-                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (
-                        code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                    all_sql.append(sql)
-
-                elif method == 'Cassini':
-                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
-
-                    assert params['False_Easting'].unit.cs_auth_name == params[
-                        'False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
-                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
-
-                    assert params['False_Easting'].unit.cs_code == params[
-                        'False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
-                    cs_code = params['False_Easting'].unit.cs_code
-
-                    assert params['Scale_Factor'].unit.uom_code == '9201', 'Unhandled scale unit {}'.format(params['Scale_Factor'].unit.uom_code)
-                    assert params['Scale_Factor'].value == '1.0'
-
-                    conv_name = 'unnamed'
-                    conv_auth_name = 'ESRI'
-                    conv_code = code
-
-                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
-                                                epsg_code='9806', epsg_name='Cassini-Soldner',
-                                                params=params,
-                                                param_mapping={
-                                                    8801: 'Latitude_Of_Origin',
-                                                    8802: 'Central_Meridian',
-                                                    8806: 'False_Easting',
-                                                    8807: 'False_Northing',
-                                                },
-                                                deprecated=bool(deprecated)
-                                                )
-
-                    sql_extract = sql[sql.find('NULL'):]
-                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
-                        all_sql.append(sql)
-
-                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (
-                            code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                        all_sql.append(sql)
-
-                        map_conversion_sql_to_code[sql_extract] = conv_code
-                    else:
-                        conv_code = map_conversion_sql_to_code[sql_extract]
-
-                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
-                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name,
-                        conv_code, deprecated)
-                    all_sql.append(sql)
-
-                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (
-                        code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                    all_sql.append(sql)
-
-                elif method == 'IGAC_Plano_Cartesiano':
-                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
-
-                    assert params['False_Easting'].unit.cs_auth_name == params[
-                        'False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
-                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
-
-                    assert params['False_Easting'].unit.cs_code == params[
-                        'False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
-                    cs_code = params['False_Easting'].unit.cs_code
-
-                    conv_name = 'unnamed'
-                    conv_auth_name = 'ESRI'
-                    conv_code = code
-
-                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
-                                                epsg_code='1052', epsg_name='Colombia Urban',
-                                                params=params,
-                                                param_mapping={
-                                                    8801: 'Latitude_Of_Center',
-                                                    8802: 'Longitude_Of_Center',
-                                                    8806: 'False_Easting',
-                                                    8807: 'False_Northing',
-                                                    1039: 'Height'
-                                                },
-                                                deprecated=bool(deprecated)
-                                                )
-
-                    sql_extract = sql[sql.find('NULL'):]
-                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
-                        all_sql.append(sql)
-
-                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (
-                            code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                        all_sql.append(sql)
-
-                        map_conversion_sql_to_code[sql_extract] = conv_code
-                    else:
-                        conv_code = map_conversion_sql_to_code[sql_extract]
-
-                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
-                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name,
-                        conv_code, deprecated)
-                    all_sql.append(sql)
-
-                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (
-                        code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                    all_sql.append(sql)
-
-                elif method == 'Equidistant_Cylindrical':
-                    params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
-
-                    assert params['False_Easting'].unit.cs_auth_name == params[
-                        'False_Northing'].unit.cs_auth_name, 'Cannot handle False_Easting CS auth {} != False_Northing CS auth {}'.format(
-                        params['False_Easting'].unit.cs_auth_name, params['False_Northing'].unit.cs_auth_name)
-                    cs_auth_name = params['False_Easting'].unit.cs_auth_name
-
-                    assert params['False_Easting'].unit.cs_code == params[
-                        'False_Northing'].unit.cs_code, 'Cannot handle False_Easting CS code {} != False_Northing CS code {}'.format(
-                        params['False_Easting'].unit.cs_code, params['False_Northing'].unit.cs_code)
-                    cs_code = params['False_Easting'].unit.cs_code
-
-                    conv_name = 'unnamed'
-                    conv_auth_name = 'ESRI'
-                    conv_code = code
-
-                    sql = insert_conversion_sql(esri_code=code, esri_name=conv_name,
-                                                epsg_code='1029', epsg_name='Equidistant Cylindrical (Spherical)',
-                                                params=params,
-                                                param_mapping={
-                                                    8823: 'Standard_Parallel_1',
-                                                    8802: 'Central_Meridian',
-                                                    8806: 'False_Easting',
-                                                    8807: 'False_Northing',
-                                                },
-                                                deprecated=bool(deprecated)
-                                                )
-
-                    sql_extract = sql[sql.find('NULL'):]
-                    if conv_name != 'unnamed' or sql_extract not in map_conversion_sql_to_code:
-                        all_sql.append(sql)
-
-                        sql = """INSERT INTO "usage" VALUES('ESRI', 'CONV_%s_USAGE','conversion','ESRI','%s','%s','%s','%s','%s');""" % (
-                            code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                        all_sql.append(sql)
-
-                        map_conversion_sql_to_code[sql_extract] = conv_code
-                    else:
-                        conv_code = map_conversion_sql_to_code[sql_extract]
-
-                    sql = """INSERT INTO "projected_crs" VALUES('ESRI','%s','%s',NULL,'%s','%s','%s','%s','%s','%s',NULL,%d);""" % (
-                        code, esri_name, cs_auth_name, cs_code, geogcs_auth_name, geogcs_code, conv_auth_name,
-                        conv_code, deprecated)
-                    all_sql.append(sql)
-
-                    sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (
-                        code, code, extent_auth_name, extent_code, 'EPSG', '1024')
-                    all_sql.append(sql)
+                    all_sql.extend(sql)
 
                 else:
                     # TODO -- add more method mapping!
@@ -2233,7 +2009,7 @@ def import_geogtran():
                     rz = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][0]
                     z_axis_rotation_unit = get_wkt_unit(
                         *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][1]['ANGLEUNIT'])
-                    assert x_axis_rotation_unit.uom_auth_name == y_axis_rotation_unit.cs_auth_name == z_axis_rotation_unit.uom_auth_name, 'Cannot handle different rotation axis authorities'
+                    assert x_axis_rotation_unit.uom_auth_name == y_axis_rotation_unit.uom_auth_name == z_axis_rotation_unit.uom_auth_name, 'Cannot handle different rotation axis authorities'
                     assert x_axis_rotation_unit.uom_code == y_axis_rotation_unit.uom_code == z_axis_rotation_unit.uom_code, 'Cannot handle different rotation axis unit codes'
 
                     s = parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference'][0]
@@ -2304,7 +2080,7 @@ def import_geogtran():
                     z = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][0]
                     z_axis_translation_unit = get_wkt_unit(
                         *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][1]['LENGTHUNIT'])
-                    assert x_axis_translation_unit.cs_auth_name == y_axis_translation_unit.cs_auth_name == z_axis_translation_unit.cs_auth_name, 'Cannot handle different translation axis authorities'
+                    assert x_axis_translation_unit.cs.auth_name == y_axis_translation_unit.cs.auth_name == z_axis_translation_unit.cs.auth_name, 'Cannot handle different translation axis authorities'
                     assert x_axis_translation_unit.uom_code == y_axis_translation_unit.uom_code == z_axis_translation_unit.uom_code, 'Cannot handle different translation axis unit codes'
 
                     method_code = '9603'
@@ -2343,7 +2119,7 @@ def import_geogtran():
                     z = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][0]
                     z_axis_translation_unit = get_wkt_unit(
                         *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation'][1]['LENGTHUNIT'])
-                    assert x_axis_translation_unit.cs_auth_name == y_axis_translation_unit.cs_auth_name == z_axis_translation_unit.cs_auth_name, 'Cannot handle different translation axis authorities'
+                    assert x_axis_translation_unit.uom_auth_name == y_axis_translation_unit.uom_auth_name == z_axis_translation_unit.uom_auth_name, 'Cannot handle different translation axis authorities'
                     assert x_axis_translation_unit.uom_code == y_axis_translation_unit.uom_code == z_axis_translation_unit.uom_code, 'Cannot handle different translation axis unit codes'
 
                     rx = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation'][0]
@@ -2355,7 +2131,7 @@ def import_geogtran():
                     rz = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][0]
                     z_axis_rotation_unit = get_wkt_unit(
                         *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation'][1]['ANGLEUNIT'])
-                    assert x_axis_rotation_unit.cs_auth_name == y_axis_rotation_unit.cs_auth_name == z_axis_rotation_unit.cs_auth_name, 'Cannot handle different rotation axis authorities'
+                    assert x_axis_rotation_unit.uom_auth_name == y_axis_rotation_unit.uom_auth_name == z_axis_rotation_unit.uom_auth_name, 'Cannot handle different rotation axis authorities'
                     assert x_axis_rotation_unit.uom_code == y_axis_rotation_unit.uom_code == z_axis_rotation_unit.uom_code, 'Cannot handle different rotation axis unit codes'
 
                     s = parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference'][0]
@@ -2371,7 +2147,7 @@ def import_geogtran():
                     rate_z = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation_Rate'][0]
                     z_axis_translation_rate_unit = get_wkt_unit(
                         *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Translation_Rate'][1]['LENGTHUNIT'], is_rate=True)
-                    assert x_axis_translation_rate_unit.cs_auth_name == y_axis_translation_rate_unit.cs_auth_name == z_axis_translation_rate_unit.cs_auth_name, 'Cannot handle different translation rate axis authorities'
+                    assert x_axis_translation_rate_unit.uom_auth_name == y_axis_translation_rate_unit.uom_auth_name == z_axis_translation_rate_unit.uom_auth_name, 'Cannot handle different translation rate axis authorities'
                     assert x_axis_translation_rate_unit.uom_code == y_axis_translation_rate_unit.uom_code == z_axis_translation_rate_unit.uom_code, 'Cannot handle different translation rate axis unit codes'
 
                     rate_rx = parsed_wkt2['COORDINATEOPERATION'][1]['X_Axis_Rotation_Rate'][0]
@@ -2383,7 +2159,7 @@ def import_geogtran():
                     rate_rz = parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation_Rate'][0]
                     z_axis_rotation_rate_unit = get_wkt_unit(
                         *parsed_wkt2['COORDINATEOPERATION'][1]['Z_Axis_Rotation_Rate'][1]['ANGLEUNIT'], is_rate=True)
-                    assert x_axis_rotation_rate_unit.cs_auth_name == y_axis_rotation_rate_unit.cs_auth_name == z_axis_rotation_rate_unit.cs_auth_name, 'Cannot handle different rotation rate axis authorities'
+                    assert x_axis_rotation_rate_unit.uom_auth_name == y_axis_rotation_rate_unit.uom_auth_name == z_axis_rotation_rate_unit.uom_auth_name, 'Cannot handle different rotation rate axis authorities'
                     assert x_axis_rotation_rate_unit.uom_code == y_axis_rotation_rate_unit.uom_code == z_axis_rotation_rate_unit.uom_code, 'Cannot handle different rotation rate axis unit codes'
 
                     rate_s = parsed_wkt2['COORDINATEOPERATION'][1]['Scale_Difference_Rate'][0]
