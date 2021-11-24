@@ -1072,7 +1072,28 @@ MAPPED_PROJCS: Dict[str, ConversionMapping] = {
             8806: 'False_Easting',
             8807: 'False_Northing',
         }
-    )
+    ),
+    'Mercator': ConversionMapping(
+        epsg_code='9805',
+        epsg_name='Mercator (variant B)',
+        param_mapping={
+            8823: 'Standard_Parallel_1',
+            8802: 'Central_Meridian',
+            8806: 'False_Easting',
+            8807: 'False_Northing',
+        }
+    ),
+    'Polyconic': ConversionMapping(
+        epsg_code='9818',
+        epsg_name='American Polyconic',
+        param_mapping={
+            8801: 'Latitude_Of_Origin',
+            8802: 'Central_Meridian',
+            8806: 'False_Easting',
+            8807: 'False_Northing',
+        }
+    ),
+
 }
 
 MAPPED_PROJCS_WITH_EXTRA_LOGIC: Dict[str, Dict[str, ConversionMapping]] = {
