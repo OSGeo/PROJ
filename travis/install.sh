@@ -153,7 +153,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     cd build_cmake
     cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install -DUSE_CCACHE=${USE_CCACHE}
     make >/dev/null
-    if [ "$USE_CCACHE" = "ON" ]; then
+    if [ "${USE_CCACHE}" = "ON" ]; then
         ccache -s
     fi
 

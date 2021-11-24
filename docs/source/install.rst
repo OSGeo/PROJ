@@ -467,8 +467,9 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
 .. option:: USE_CCACHE=OFF
 
-    Configure CMake to use `ccache <https://ccache.dev/>`_ to build C/C++
-    objects.
+    Configure CMake to use `ccache <https://ccache.dev/>`_ (or
+    `clcache <https://github.com/frerich/clcache>`_ for MSVC)
+    to build C/C++ objects.
 
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
