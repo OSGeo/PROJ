@@ -2,11 +2,27 @@
 # CMake module to support ccache (or clcache for MSVC)
 #
 # Copyright (c) 2021, Mike Taves <mwtoews at gmail dot com>
+#
+# Usage:
+# Add "include(Ccache)" to CMakeLists.txt and enable
+# using the option -D USE_CCACHE=ON
 
 cmake_minimum_required(VERSION 3.4)
 
 
+option(USE_CCACHE
+  "Use ccache (or clcache for MSVC) to compile C/C++ objects" OFF)
+if(NOT USE_CCACHE)
+  # stop here and return to including file
+  return()
+endif()
+
+# Search priority:
+# 1. ccache for many compilers except MSVC
+# 2. clcache for MSVC
+
 find_program(CCACHE_PROGRAM NAMES ccache clcache)
+
 if(CCACHE_PROGRAM)
   message(STATUS "Configuring ccache with ${CCACHE_PROGRAM}")
 
