@@ -465,6 +465,12 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
     ``TIFF_LIBRARY_DEBUG`` can also be specified to a similar library for
     building Debug releases.
 
+.. option:: USE_CCACHE=OFF
+
+    Configure CMake to use `ccache <https://ccache.dev/>`_ (or
+    `clcache <https://github.com/frerich/clcache>`_ for MSVC)
+    to build C/C++ objects.
+
 
 Building on Windows with vcpkg and Visual Studio 2017 or 2019
 --------------------------------------------------------------------------------

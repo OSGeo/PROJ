@@ -122,6 +122,8 @@ set(PROJ_BUILD_VERSION "${PROJ_API_VERSION}.${PROJ_LIBTOOL_AGE}.${PROJ_LIBTOOL_R
 ################################################################################
 # Build features and variants
 ################################################################################
+
+include(Ccache)
 include(ProjConfig)
 include(ProjMac)
 include(policies)
