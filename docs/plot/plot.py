@@ -1,5 +1,6 @@
+#!/usr/bin/env python3
 '''
-Plot map data in different projections supported by PROJ.4
+Plot map data in different projections supported by PROJ.
 
 Call with:
 
@@ -41,30 +42,28 @@ or "line". The rest of the inputs are fairly free form.
 Change PROJ to path on your local system before running the script.
 '''
 
-from __future__ import print_function
-from __future__ import division
-
+import argparse
 import os
-import os.path
 import shutil
 import sys
 import json
 import subprocess
 import functools
+from pathlib import Path
 
+import geojson
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-import fiona
-from shapely.geometry import Polygon
-from shapely.geometry import MultiPolygon
+from shapely.geometry import MultiPolygon, Polygon, box as Box
 from shapely.geometry import shape
 from shapely.ops import transform
 from descartes import PolygonPatch
 
 PROJ_COMMAND = os.environ.get('PROJ_EXE', '../../src/proj')
 if not os.path.exists(PROJ_COMMAND):
-    PROJ = shutil.which(PROJ_COMMAND)
+    PROJ = shutil.which('proj')
+    if PROJ is None:
+        raise ValueError("specify PROJ_EXE or modify PATH to find proj")
 else:
     PROJ = PROJ_COMMAND
 PROJ_LIB = os.environ.get('PROJ_LIB', '../../data')
@@ -246,25 +245,19 @@ def plotproj(plotdef, data, outdir):
     '''
     axes = plt.axes()
 
-    bounds = (plotdef['lonmin'], plotdef['latmin'], plotdef['lonmax'], plotdef['latmax'])
-    for geom in data.filter(bbox=bounds):
-        temp_pol = shape(geom['geometry'])
-
-        box = Polygon([
-            (plotdef['lonmin'], plotdef['latmin']),
-            (plotdef['lonmin'], plotdef['latmax']),
-            (plotdef['lonmax'], plotdef['latmax']),
-            (plotdef['lonmax'], plotdef['latmin']),
-        ])
-        try:
-            temp_pol = temp_pol.intersection(box)
-        except Exception as e:
+    box = Box(
+        plotdef['lonmin'], plotdef['latmin'],
+        plotdef['lonmax'], plotdef['latmax'])
+    for feat in data["features"]:
+        geom = shape(feat["geometry"])
+        if not geom.intersects(box):
             continue
 
+        temp_pol = geom.intersection(box)
 
         if plotdef['type'] == 'poly':
             if isinstance(temp_pol, MultiPolygon):
-                polys = [resample_polygon(polygon) for polygon in temp_pol]
+                polys = [resample_polygon(polygon) for polygon in temp_pol.geoms]
                 pol = MultiPolygon(polys)
             else:
                 pol = resample_polygon(temp_pol)
@@ -326,9 +319,12 @@ def plotproj(plotdef, data, outdir):
     # Make sure the plot is not stretched
     axes.set_aspect('equal')
 
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-    plt.savefig(outdir + '/' + plotdef['filename'],
+    outdir = Path(outdir)
+    if not outdir.exists():
+        outdir.mkdir(parents=True)
+    if not outdir.is_dir():
+        raise OSError("outdir is not a directory")
+    plt.savefig(outdir / plotdef['filename'],
                 dpi=400,
                 bbox_inches='tight')
 
@@ -338,35 +334,21 @@ def plotproj(plotdef, data, outdir):
     plt.close()
 
 
-def main():
+def main(plotdefs, outdir, plots=[]):
     '''
     Main function of plotting script.
 
     Parses json-file with plot setups and runs the plotting
     for each plot setup.
     '''
+    plotdefs = json.loads(Path(plotdefs).read_text())
 
     data = {
-        ('line', 'low'): fiona.open(LINE_LOW),
-        ('line', 'med'): fiona.open(LINE_MED),
-        ('poly', 'low'): fiona.open(POLY_LOW),
-        ('poly', 'med'): fiona.open(POLY_MED),
+        ('line', 'low'): geojson.loads(Path(LINE_LOW).read_text()),
+        ('line', 'med'): geojson.loads(Path(LINE_MED).read_text()),
+        ('poly', 'low'): geojson.loads(Path(POLY_LOW).read_text()),
+        ('poly', 'med'): geojson.loads(Path(POLY_MED).read_text()),
     }
-
-    if os.path.exists(sys.argv[1]):
-        # first argument is the JSON plot definition setup file
-        with open(sys.argv[1]) as plotsetup:
-            plotdefs = json.load(plotsetup)
-    else:
-        raise ValueError('No plot definition file entered')
-
-    plots = []
-    # second argument is the output dir
-    outdir = sys.argv[2]
-
-    # subsecond arguments are (optional) names of plot in plotdef.json
-    if len(sys.argv) > 3:
-        plots = sys.argv[3:len(sys.argv)]
 
     for i, plotdef in enumerate(plotdefs):
         if plots != [] and plotdef['name'] not in plots:
@@ -379,9 +361,20 @@ def main():
 
         plotproj(plotdef, data[(plotdef['type'], plotdef['res'])], outdir)
 
-    for key in data:
-        data[key].close()
-
 
 if __name__ == "__main__":
-    sys.exit(main())
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        'plotdefs',
+        help='A JSON file with setup for each auto-generated plot')
+    parser.add_argument(
+        'outdir',
+        help='Directory to put the plots in.')
+    parser.add_argument(
+        'plots', nargs='*',
+        help='A list of plot names within the plotdefs file. '
+        'More than one plotname can be given at once.')
+    args = parser.parse_args()
+    sys.exit(main(**vars(args)))
