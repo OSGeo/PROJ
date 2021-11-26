@@ -31,14 +31,13 @@ fi
 export PROJ_DB_CACHE_DIR="$HOME/.ccache"
 
 sudo apt-get install -y --no-install-recommends \
-    ccache \
     binutils-mingw-w64-x86-64 \
     gcc-mingw-w64-x86-64 \
     g++-mingw-w64-x86-64 \
     g++-mingw-w64 \
     mingw-w64-tools \
     wine-stable \
-    make autoconf automake libtool zip \
+    cmake make ccache \
     sqlite3 \
     curl ca-certificates
 
@@ -52,7 +51,6 @@ ccache -s
 MINGW_ARCH=x86_64-w64-mingw32
 MINGW_PREFIX=/usr/lib/gcc/$MINGW_ARCH/7.3-posix
 
-export CCACHE_CPP2=yes
 export CC="ccache $MINGW_ARCH-gcc"
 export CXX="ccache $MINGW_ARCH-g++"
 export LD=$MINGW_ARCH-ld
@@ -74,12 +72,13 @@ ln -s /usr/$MINGW_ARCH/lib/libwinpthread-1.dll $WINE_SYSDIR
 # build zlib
 wget https://github.com/madler/zlib/archive/v1.2.11.tar.gz
 tar xzf v1.2.11.tar.gz
-(cd zlib-1.2.11 && sudo make install -fwin32/Makefile.gcc SHARED_MODE=1 PREFIX=x86_64-w64-mingw32- DESTDIR=/usr/$MINGW_ARCH/)
-sudo mkdir -p  /usr/$MINGW_ARCH/include
-sudo mkdir -p  /usr/$MINGW_ARCH/lib
-sudo cp /usr/$MINGW_ARCH/*.h  /usr/$MINGW_ARCH/include
-sudo cp /usr/$MINGW_ARCH/libz.* /usr/$MINGW_ARCH/lib
-ln -s /usr/$MINGW_ARCH/zlib1.dll $WINE_SYSDIR
+(cd zlib-1.2.11 && \
+  sudo make install -f win32/Makefile.gcc SHARED_MODE=1 \
+    PREFIX=${MINGW_ARCH}- \
+    prefix=/usr/${MINGW_ARCH} \
+    DESTDIR=/usr/${MINGW_ARCH}/ \
+    BINARY_PATH=bin INCLUDE_PATH=include LIBRARY_PATH=lib)
+ln -s /usr/$MINGW_ARCH/bin/zlib1.dll $WINE_SYSDIR
 
 # build libtiff
 wget http://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz
@@ -95,21 +94,30 @@ tar xzf sqlite-autoconf-3330000.tar.gz
 CFLAGS="-DSQLITE_DQS=0" ./configure --host=$MINGW_ARCH --prefix=/usr/$MINGW_ARCH && make && sudo make install)
 ln -s /usr/$MINGW_ARCH/bin/libsqlite3-0.dll $WINE_SYSDIR
 
-# prepare build files
-./autogen.sh
-# autoconf build
-mkdir build_autoconf
-cd build_autoconf
-CFLAGS="-Werror" CXXFLAGS="-Werror" ../configure --host=$MINGW_ARCH --prefix=/tmp/proj_autoconf_install --without-curl
+# build proj
+mkdir build
+cd build
+cmake -G "Unix Makefiles" \
+    -D CMAKE_SYSTEM_NAME=Windows \
+    -D CMAKE_CROSSCOMPILING_EMULATOR=/usr/bin/wine64 \
+    -D CMAKE_C_COMPILER=/usr/bin/${MINGW_ARCH}-gcc \
+    -D CMAKE_CXX_COMPILER=/usr/bin/${MINGW_ARCH}-g++ \
+    -D CMAKE_C_FLAGS="-Werror" \
+    -D CMAKE_CXX_FLAGS="-Werror" \
+    -D CMAKE_BUILD_TYPE=Release \
+    -D CMAKE_FIND_ROOT_PATH=/usr/${MINGW_ARCH} \
+    -D CMAKE_INSTALL_PREFIX=/tmp/proj_install \
+    -D ENABLE_CURL=OFF \
+    -D BUILD_PROJSYNC=OFF \
+    -D USE_CCACHE=ON \
+    ..
 make
+# Run a subset of tests that should pass
+ctest -R "proj_test_cpp_api|geodesic-test|proj_errno_string_test|proj_angular_io_test|proj_context_test|pj_phi2_test|gie_self_tests|test_network|test_defmodel|test_tinshift|test_misc|test_fork"
+# TODO: fix failing tests with .gie files; see #2168 and run
+# PROJ_LIB=./data/for_tests wine64 ./bin/gie.exe ../test/gie/more_builtins.gie
+
 make install
-make dist-all
-find /tmp/proj_autoconf_install
-(cd test; make)
-cp -r ../data/tests /tmp/proj_autoconf_install/share/proj
-cp ../data/tests/egm96_15_downsampled.gtx /tmp/proj_autoconf_install/share/proj/egm96_15.gtx
-cp ../data/tests/ntv2_0_downsampled.gsb /tmp/proj_autoconf_install/share/proj/ntv2_0.gsb
-wine64 test/unit/test_cpp_api.exe
 
 ccache -s
 
