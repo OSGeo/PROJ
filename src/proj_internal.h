@@ -573,6 +573,9 @@ struct PJconsts {
     mutable bool gridsNeededAsked = false;
     mutable std::vector<NS_PROJ::operation::GridDescription> gridsNeeded{};
 
+    // cache pj_get_type() result to help for repeated calls to proj_factors()
+    mutable PJ_TYPE type = PJ_TYPE_UNKNOWN;
+
     /*************************************************************************************
      proj_create_crs_to_crs() alternative coordinate operations
     **************************************************************************************/
