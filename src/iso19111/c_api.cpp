@@ -1150,98 +1150,106 @@ PJ_TYPE proj_get_type(const PJ *obj) {
     if (!obj || !obj->iso_obj) {
         return PJ_TYPE_UNKNOWN;
     }
-    auto ptr = obj->iso_obj.get();
-    if (dynamic_cast<Ellipsoid *>(ptr)) {
-        return PJ_TYPE_ELLIPSOID;
-    }
+    if (obj->type != PJ_TYPE_UNKNOWN)
+        return obj->type;
 
-    if (dynamic_cast<PrimeMeridian *>(ptr)) {
-        return PJ_TYPE_PRIME_MERIDIAN;
-    }
+    const auto getType = [&obj]() {
+        auto ptr = obj->iso_obj.get();
+        if (dynamic_cast<Ellipsoid *>(ptr)) {
+            return PJ_TYPE_ELLIPSOID;
+        }
 
-    if (dynamic_cast<DynamicGeodeticReferenceFrame *>(ptr)) {
-        return PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME;
-    }
-    if (dynamic_cast<GeodeticReferenceFrame *>(ptr)) {
-        return PJ_TYPE_GEODETIC_REFERENCE_FRAME;
-    }
-    if (dynamic_cast<DynamicVerticalReferenceFrame *>(ptr)) {
-        return PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME;
-    }
-    if (dynamic_cast<VerticalReferenceFrame *>(ptr)) {
-        return PJ_TYPE_VERTICAL_REFERENCE_FRAME;
-    }
-    if (dynamic_cast<DatumEnsemble *>(ptr)) {
-        return PJ_TYPE_DATUM_ENSEMBLE;
-    }
-    if (dynamic_cast<TemporalDatum *>(ptr)) {
-        return PJ_TYPE_TEMPORAL_DATUM;
-    }
-    if (dynamic_cast<EngineeringDatum *>(ptr)) {
-        return PJ_TYPE_ENGINEERING_DATUM;
-    }
-    if (dynamic_cast<ParametricDatum *>(ptr)) {
-        return PJ_TYPE_PARAMETRIC_DATUM;
-    }
+        if (dynamic_cast<PrimeMeridian *>(ptr)) {
+            return PJ_TYPE_PRIME_MERIDIAN;
+        }
 
-    {
-        auto crs = dynamic_cast<GeographicCRS *>(ptr);
-        if (crs) {
-            if (crs->coordinateSystem()->axisList().size() == 2) {
-                return PJ_TYPE_GEOGRAPHIC_2D_CRS;
-            } else {
-                return PJ_TYPE_GEOGRAPHIC_3D_CRS;
+        if (dynamic_cast<DynamicGeodeticReferenceFrame *>(ptr)) {
+            return PJ_TYPE_DYNAMIC_GEODETIC_REFERENCE_FRAME;
+        }
+        if (dynamic_cast<GeodeticReferenceFrame *>(ptr)) {
+            return PJ_TYPE_GEODETIC_REFERENCE_FRAME;
+        }
+        if (dynamic_cast<DynamicVerticalReferenceFrame *>(ptr)) {
+            return PJ_TYPE_DYNAMIC_VERTICAL_REFERENCE_FRAME;
+        }
+        if (dynamic_cast<VerticalReferenceFrame *>(ptr)) {
+            return PJ_TYPE_VERTICAL_REFERENCE_FRAME;
+        }
+        if (dynamic_cast<DatumEnsemble *>(ptr)) {
+            return PJ_TYPE_DATUM_ENSEMBLE;
+        }
+        if (dynamic_cast<TemporalDatum *>(ptr)) {
+            return PJ_TYPE_TEMPORAL_DATUM;
+        }
+        if (dynamic_cast<EngineeringDatum *>(ptr)) {
+            return PJ_TYPE_ENGINEERING_DATUM;
+        }
+        if (dynamic_cast<ParametricDatum *>(ptr)) {
+            return PJ_TYPE_PARAMETRIC_DATUM;
+        }
+
+        {
+            auto crs = dynamic_cast<GeographicCRS *>(ptr);
+            if (crs) {
+                if (crs->coordinateSystem()->axisList().size() == 2) {
+                    return PJ_TYPE_GEOGRAPHIC_2D_CRS;
+                } else {
+                    return PJ_TYPE_GEOGRAPHIC_3D_CRS;
+                }
             }
         }
-    }
 
-    {
-        auto crs = dynamic_cast<GeodeticCRS *>(ptr);
-        if (crs) {
-            if (crs->isGeocentric()) {
-                return PJ_TYPE_GEOCENTRIC_CRS;
-            } else {
-                return PJ_TYPE_GEODETIC_CRS;
+        {
+            auto crs = dynamic_cast<GeodeticCRS *>(ptr);
+            if (crs) {
+                if (crs->isGeocentric()) {
+                    return PJ_TYPE_GEOCENTRIC_CRS;
+                } else {
+                    return PJ_TYPE_GEODETIC_CRS;
+                }
             }
         }
-    }
 
-    if (dynamic_cast<VerticalCRS *>(ptr)) {
-        return PJ_TYPE_VERTICAL_CRS;
-    }
-    if (dynamic_cast<ProjectedCRS *>(ptr)) {
-        return PJ_TYPE_PROJECTED_CRS;
-    }
-    if (dynamic_cast<CompoundCRS *>(ptr)) {
-        return PJ_TYPE_COMPOUND_CRS;
-    }
-    if (dynamic_cast<TemporalCRS *>(ptr)) {
-        return PJ_TYPE_TEMPORAL_CRS;
-    }
-    if (dynamic_cast<EngineeringCRS *>(ptr)) {
-        return PJ_TYPE_ENGINEERING_CRS;
-    }
-    if (dynamic_cast<BoundCRS *>(ptr)) {
-        return PJ_TYPE_BOUND_CRS;
-    }
-    if (dynamic_cast<CRS *>(ptr)) {
-        return PJ_TYPE_OTHER_CRS;
-    }
+        if (dynamic_cast<VerticalCRS *>(ptr)) {
+            return PJ_TYPE_VERTICAL_CRS;
+        }
+        if (dynamic_cast<ProjectedCRS *>(ptr)) {
+            return PJ_TYPE_PROJECTED_CRS;
+        }
+        if (dynamic_cast<CompoundCRS *>(ptr)) {
+            return PJ_TYPE_COMPOUND_CRS;
+        }
+        if (dynamic_cast<TemporalCRS *>(ptr)) {
+            return PJ_TYPE_TEMPORAL_CRS;
+        }
+        if (dynamic_cast<EngineeringCRS *>(ptr)) {
+            return PJ_TYPE_ENGINEERING_CRS;
+        }
+        if (dynamic_cast<BoundCRS *>(ptr)) {
+            return PJ_TYPE_BOUND_CRS;
+        }
+        if (dynamic_cast<CRS *>(ptr)) {
+            return PJ_TYPE_OTHER_CRS;
+        }
 
-    if (dynamic_cast<Conversion *>(ptr)) {
-        return PJ_TYPE_CONVERSION;
-    }
-    if (dynamic_cast<Transformation *>(ptr)) {
-        return PJ_TYPE_TRANSFORMATION;
-    }
-    if (dynamic_cast<ConcatenatedOperation *>(ptr)) {
-        return PJ_TYPE_CONCATENATED_OPERATION;
-    }
-    if (dynamic_cast<CoordinateOperation *>(ptr)) {
-        return PJ_TYPE_OTHER_COORDINATE_OPERATION;
-    }
+        if (dynamic_cast<Conversion *>(ptr)) {
+            return PJ_TYPE_CONVERSION;
+        }
+        if (dynamic_cast<Transformation *>(ptr)) {
+            return PJ_TYPE_TRANSFORMATION;
+        }
+        if (dynamic_cast<ConcatenatedOperation *>(ptr)) {
+            return PJ_TYPE_CONCATENATED_OPERATION;
+        }
+        if (dynamic_cast<CoordinateOperation *>(ptr)) {
+            return PJ_TYPE_OTHER_COORDINATE_OPERATION;
+        }
 
-    return PJ_TYPE_UNKNOWN;
+        return PJ_TYPE_UNKNOWN;
+    };
+
+    obj->type = getType();
+    return obj->type;
 }
 
 // ---------------------------------------------------------------------------
