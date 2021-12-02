@@ -9,31 +9,6 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-static void unquote_string(char* param_str) {
-
-    size_t len = strlen(param_str);
-    // Remove leading and terminating spaces after equal sign
-    const char* equal = strstr(param_str, "=\"");
-    if( equal && equal - param_str + 1 > 2 && param_str[len-1] == '"' ) {
-        size_t dst = equal + 1 - param_str;
-        size_t src = dst + 1;
-        for( ; param_str[src]; dst++, src++)
-        {
-            if( param_str[src] == '"' ) {
-                if( param_str[src+1] == '"' ) {
-                    src++;
-                } else {
-                    break;
-                }
-            }
-            param_str[dst] = param_str[src];
-        }
-        param_str[dst] = '\0';
-    }
-
-}
-
-
 /* create parameter list entry */
 paralist *pj_mkparam(const char *str) {
     paralist *newitem;
@@ -44,7 +19,6 @@ paralist *pj_mkparam(const char *str) {
         if (*str == '+')
             ++str;
         (void)strcpy(newitem->param, str);
-        unquote_string(newitem->param);
     }
     return newitem;
 }
@@ -86,7 +60,6 @@ paralist *pj_mkparam_ws (const char *str, const char **next_str) {
     if (nullptr==newitem)
         return nullptr;
     memcpy(newitem->param, str, len);
-    unquote_string(newitem->param);
 
     newitem->used = 0;
     newitem->next = nullptr;

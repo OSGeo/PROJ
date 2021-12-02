@@ -10527,7 +10527,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                         expanded += pair.key;
                         if (!pair.value.empty()) {
                             expanded += '=';
-                            expanded += pair.value;
+                            expanded += pj_double_quote_string_param_if_needed(
+                                pair.value);
                         }
                     }
                     expanded += ' ';
@@ -10583,7 +10584,7 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             expanded += pair.key;
             if (!pair.value.empty()) {
                 expanded += '=';
-                expanded += pair.value;
+                expanded += pj_double_quote_string_param_if_needed(pair.value);
             }
         }
 
