@@ -8248,58 +8248,43 @@ static void
 PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                        std::vector<Step::KeyValue> &globalParamValues,
                        std::string &title) {
-    const char *c_str = projString.c_str();
     std::vector<std::string> tokens;
 
     bool hasProj = false;
     bool hasInit = false;
     bool hasPipeline = false;
-    {
-        size_t i = 0;
-        while (true) {
-            for (; isspace(static_cast<unsigned char>(c_str[i])); i++) {
-            }
-            std::string token;
-            bool in_string = false;
-            for (; c_str[i]; i++) {
-                if (in_string) {
-                    if (c_str[i] == '"' && c_str[i + 1] == '"') {
-                        i++;
-                    } else if (c_str[i] == '"') {
-                        in_string = false;
-                        continue;
-                    }
-                } else if (c_str[i] == '=' && c_str[i + 1] == '"') {
-                    in_string = true;
-                    token += c_str[i];
-                    i++;
-                    continue;
-                } else if (isspace(static_cast<unsigned char>(c_str[i]))) {
-                    break;
-                }
-                token += c_str[i];
-            }
-            if (in_string) {
-                throw ParsingException("Unbalanced double quote");
-            }
-            if (token.empty()) {
-                break;
-            }
-            if (!hasPipeline &&
-                (token == "proj=pipeline" || token == "+proj=pipeline")) {
-                hasPipeline = true;
-            } else if (!hasProj && (starts_with(token, "proj=") ||
-                                    starts_with(token, "+proj="))) {
-                hasProj = true;
-            } else if (!hasInit && (starts_with(token, "init=") ||
-                                    starts_with(token, "+init="))) {
-                hasInit = true;
-            }
-            tokens.emplace_back(token);
+
+    std::string projStringModified(projString);
+
+    // Special case for "+title=several words +foo=bar"
+    if (starts_with(projStringModified, "+title=") &&
+        projStringModified.size() > 7 && projStringModified[7] != '"') {
+        const auto plusPos = projStringModified.find(" +", 1);
+        const auto spacePos = projStringModified.find(' ');
+        if (plusPos != std::string::npos && spacePos != std::string::npos &&
+            spacePos < plusPos) {
+            std::string tmp("+title=");
+            tmp += pj_double_quote_string_param_if_needed(
+                projStringModified.substr(7, plusPos - 7));
+            tmp += projStringModified.substr(plusPos);
+            projStringModified = std::move(tmp);
         }
     }
 
-    bool prevWasTitle = false;
+    size_t argc = pj_trim_argc(&projStringModified[0]);
+    char **argv = pj_trim_argv(argc, &projStringModified[0]);
+    for (size_t i = 0; i < argc; i++) {
+        std::string token(argv[i]);
+        if (!hasPipeline && token == "proj=pipeline") {
+            hasPipeline = true;
+        } else if (!hasProj && starts_with(token, "proj=")) {
+            hasProj = true;
+        } else if (!hasInit && starts_with(token, "init=")) {
+            hasInit = true;
+        }
+        tokens.emplace_back(token);
+    }
+    free(argv);
 
     if (!hasPipeline) {
         if (hasProj || hasInit) {
@@ -8307,16 +8292,8 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
         }
 
         for (auto &word : tokens) {
-            if (word[0] == '+') {
-                word = word.substr(1);
-            } else if (prevWasTitle && word.find('=') == std::string::npos) {
-                title += " ";
-                title += word;
-                continue;
-            }
-
-            prevWasTitle = false;
-            if (starts_with(word, "proj=") && !hasInit) {
+            if (starts_with(word, "proj=") && !hasInit &&
+                steps.back().name.empty()) {
                 assert(hasProj);
                 auto stepName = word.substr(strlen("proj="));
                 steps.back().name = stepName;
@@ -8331,7 +8308,6 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
                 }
             } else if (starts_with(word, "title=")) {
                 title = word.substr(strlen("title="));
-                prevWasTitle = true;
             } else if (word != "step") {
                 const auto pos = word.find('=');
                 auto key = word.substr(0, pos);
@@ -8352,15 +8328,6 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
     bool inPipeline = false;
     bool invGlobal = false;
     for (auto &word : tokens) {
-        if (word[0] == '+') {
-            word = word.substr(1);
-        } else if (prevWasTitle && word.find('=') == std::string::npos) {
-            title += " ";
-            title += word;
-            continue;
-        }
-
-        prevWasTitle = false;
         if (word == "proj=pipeline") {
             if (inPipeline) {
                 throw ParsingException("nested pipeline not supported");
@@ -8388,7 +8355,6 @@ PROJStringSyntaxParser(const std::string &projString, std::vector<Step> &steps,
             steps.back().isInit = true;
         } else if (!inPipeline && starts_with(word, "title=")) {
             title = word.substr(strlen("title="));
-            prevWasTitle = true;
         } else {
             const auto pos = word.find('=');
             auto key = word.substr(0, pos);
@@ -10518,7 +10484,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     std::string expanded;
                     if (!d->title_.empty()) {
                         expanded = "title=";
-                        expanded += d->title_;
+                        expanded +=
+                            pj_double_quote_string_param_if_needed(d->title_);
                     }
                     for (const auto &pair : d->steps_[0].paramValues) {
                         if (!expanded.empty())
@@ -10558,7 +10525,8 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         }
         std::string expanded;
         if (!d->title_.empty()) {
-            expanded = "title=" + d->title_;
+            expanded =
+                "title=" + pj_double_quote_string_param_if_needed(d->title_);
         }
         bool first = true;
         bool has_init_term = false;
