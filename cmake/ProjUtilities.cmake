@@ -76,21 +76,25 @@ function(configure_proj_pc)
   set(datadir "$\{datarootdir\}")
   set(PACKAGE "proj")
   set(VERSION ${PROJ_VERSION})
-  set(SQLITE3_LIBS -lsqlite3)
+  # Build list for Libs.private
+  set(EXTRA_LIBS
+    -lstdc++
+    -lsqlite3
+    ${CMAKE_THREAD_LIBS_INIT}
+  )
   if(TIFF_ENABLED)
-    set(TIFF_LIBS -ltiff)
+    list(APPEND EXTRA_LIBS -ltiff)
   endif()
   if(CURL_ENABLED)
-    set(CURL_LIBS -lcurl)
+    list(APPEND EXTRA_LIBS -lcurl)
   endif()
-  set(EXTRA_LIBS "-lstdc++")
   if(HAVE_LIBM)
-    list(APPEND EXTRA_LIBS "-lm")
+    list(APPEND EXTRA_LIBS -lm)
   endif()
   if(HAVE_LIBDL)
-    list(APPEND EXTRA_LIBS "-ldl")
+    list(APPEND EXTRA_LIBS -ldl)
   endif()
-  # Join list with a space
+  # Join list with a space; list(JOIN) added CMake 3.12
   string(REPLACE ";" " " _tmp_str "${EXTRA_LIBS}")
   set(EXTRA_LIBS "${_tmp_str}")
 
