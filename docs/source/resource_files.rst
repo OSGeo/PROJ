@@ -305,7 +305,7 @@ Getting :file:`crs2crs2grid.py`
 ................................................................................
 
 The :file:`crs2crs2grid.py` script can be found at
-https://github.com/OSGeo/gdal/tree/master/gdal/swig/python/samples/crs2crs2grid.py
+https://github.com/OSGeo/gdal/blob/master/swig/python/gdal-utils/osgeo_utils/samples/crs2crs2grid.py
 
 The script depends on having the GDAL Python bindings operational; if they are not you
 will get an error such as:
