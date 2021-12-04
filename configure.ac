@@ -325,7 +325,16 @@ dnl ---------------------------------------------------------------------------
 dnl Check for extra libraries, required for static linking with pkg-config
 dnl ---------------------------------------------------------------------------
 
-EXTRA_LIBS="-lstdc++"
+EXTRA_LIBS="-lstdc++ -lsqlite3"
+if test "no$THREAD_LIB" != "no"; then
+  EXTRA_LIBS="$EXTRA_LIBS $THREAD_LIB"
+fi
+if test "x$enable_tiff" != "xno" -o "x$enable_tiff" = ""; then
+  EXTRA_LIBS="$EXTRA_LIBS -ltiff"
+fi
+if test "$FOUND_CURL" = "yes" ; then
+  EXTRA_LIBS="$EXTRA_LIBS -lcurl"
+fi
 if test "$HAVE_LIBM" != "no" ; then
   EXTRA_LIBS="$EXTRA_LIBS -lm"
 fi
