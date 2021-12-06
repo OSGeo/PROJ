@@ -64,8 +64,15 @@ fi
 make check
 make install
 find /tmp/proj_autoconf_install_from_dist_all
-if [ $BUILD_NAME = "linux_gcc" ] || [ $BUILD_NAME = "osx" ]; then
-    $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_autoconf_install_from_dist_all
+if [ $BUILD_NAME = "linux_gcc" ]; then
+    $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_autoconf_install_from_dist_all shared
+    $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_autoconf_install_from_dist_all static
+    $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all shared
+    $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all static
+elif [ $BUILD_NAME = "osx" ]; then
+    # skip static builds, as macOS shows: ld: unknown option: -Bstatic
+    $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_autoconf_install_from_dist_all shared
+    $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all shared
 else
     echo "Skipping test_pkg-config.sh test for $BUILD_NAME"
 fi
@@ -107,7 +114,10 @@ if [ $TRAVIS_OS_NAME != "osx" ]; then
     LD_LIBRARY_PATH=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null | grep "Downloading from https://cdn.proj.org into /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/share/proj"
     sed -i '1cprefix=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir' /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib/pkgconfig/proj.pc
     if [ $BUILD_NAME = "linux_gcc" ]; then
-        $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_autoconf_install_from_dist_all_renamed/subdir
+        $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_autoconf_install_from_dist_all_renamed/subdir shared
+        PROJ_LIB=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/share/proj $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_autoconf_install_from_dist_all_renamed/subdir static
+        $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all_renamed/subdir shared
+        PROJ_LIB=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/share/proj $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all_renamed/subdir static
     else
         echo "Skipping test_pkg-config.sh test for $BUILD_NAME"
     fi
@@ -161,8 +171,9 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     ctest
     find /tmp/proj_cmake_install
     if [ $BUILD_NAME = "linux_gcc" ] || [ $BUILD_NAME = "osx" ]; then
-        $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_cmake_install
-        $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_cmake_install
+        $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_cmake_install shared
+        $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_cmake_install shared
+        $TRAVIS_BUILD_DIR/test/postinstall/test_pkg-config.sh /tmp/proj_cmake_install shared
     else
         echo "Skipping test_cmake.sh test for $BUILD_NAME"
     fi

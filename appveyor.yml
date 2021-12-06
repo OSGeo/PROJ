@@ -9,11 +9,13 @@ environment:
   - platform: x86
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     BUILD_SHARED_LIBS: OFF
+    CMAKE_GENERATOR: Ninja
 
 # VS 2017
 #  - platform: x64
 #    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 #    BUILD_SHARED_LIBS: ON
+#    CMAKE_GENERATOR: Ninja
 
 shallow_clone: true
 
@@ -21,11 +23,12 @@ cache:
   - C:\Tools\vcpkg\installed\ -> appveyor.yml
 
 build_script:
-  - set VCPKG_INSTALLED=C:\Tools\vcpkg\installed\%platform%-windows
+  - set VCPKG_ROOT=C:\Tools\vcpkg
+  - set VCPKG_INSTALLED=%VCPKG_ROOT%\installed\%platform%-windows
   # If cached directory does not exist, update vcpkg and install dependencies
   # The checkout of a precise sha1 for VS2015 is a workaround for https://github.com/microsoft/vcpkg/issues/11666
   - if not exist %VCPKG_INSTALLED%\bin (
-      cd "C:\Tools\vcpkg" &
+      cd "%VCPKG_ROOT%" &
       git pull > nul &
       (if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" (git checkout a64dc07690bc8806e717e190f62eb58e198b599c)) &
       .\bootstrap-vcpkg.bat -disableMetrics &
@@ -46,7 +49,14 @@ build_script:
   - mkdir %PROJ_BUILD%
   - cd %PROJ_BUILD%
   - set PROJ_DIR=%APPVEYOR_BUILD_FOLDER%\proj_dir
-  - cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS="%BUILD_SHARED_LIBS%" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
+  - >-
+    cmake ..
+    -D CMAKE_BUILD_TYPE=Release
+    -D BUILD_SHARED_LIBS="%BUILD_SHARED_LIBS%"
+    -D CMAKE_C_FLAGS="/WX"
+    -D CMAKE_CXX_FLAGS="/WX"
+    -D CMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake
+    -D CMAKE_INSTALL_PREFIX="%PROJ_DIR%"
   - ninja -v
   - ninja install
   - dir %PROJ_DIR%\bin
@@ -57,7 +67,9 @@ test_script:
   - cd %PROJ_BUILD%
   - ctest -V -C Release
   - set PATH=%PROJ_DIR%\bin;%PATH%
-  - call %APPVEYOR_BUILD_FOLDER%\test\postinstall\test_cmake.bat %PROJ_DIR%
+  - set BUILD_MODE=shared
+  - if BUILD_SHARED_LIBS==OFF (set BUILD_MODE=static)
+  - call %APPVEYOR_BUILD_FOLDER%\test\postinstall\test_cmake.bat %PROJ_DIR% %BUILD_MODE%
   - proj
 
 deploy: off

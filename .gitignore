@@ -26,18 +26,19 @@ build.local.sh
 
 # Autotools
 autom4te.cache
-/aclocal.m4
-/compile
-/config.cache
-/config.guess
-/config.log
-/config.status
-/config.sub
-/configure
-/depcomp
-/install-sh
-/ltmain.sh
-/missing
+aclocal.m4
+compile
+config.cache
+config.guess
+config.log
+config.status
+config.sub
+configure
+depcomp
+test-driver
+install-sh
+ltmain.sh
+missing
 libtool
 .deps
 .dirstamp
@@ -61,7 +62,6 @@ install_manifest.txt
 /bin
 /lib
 /proj.pc
-/test-driver
 /Testing
 
 # data
