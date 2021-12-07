@@ -278,7 +278,9 @@ def fill_geodetic_crs(proj_db_cursor):
 
     #proj_db_cursor.execute(
     #    "INSERT INTO crs SELECT ?, coord_ref_sys_code, coord_ref_sys_kind FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric') AND datum_code IS NOT NULL", (EPSG_AUTHORITY,))
-    proj_db_cursor.execute("INSERT INTO geodetic_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, coord_ref_sys_kind, ?, coord_sys_code, ?, datum_code, NULL, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric') AND datum_code IS NOT NULL", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+    # There are a few deprecated records of code 61 000 000 that we have never imported in versions <= 10.039 because
+    # they lacked a datum code. We will continue to ignore them.
+    proj_db_cursor.execute("INSERT INTO geodetic_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, coord_ref_sys_kind, ?, coord_sys_code, ?, datum_code, NULL, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric') AND datum_code IS NOT NULL AND NOT (coord_ref_sys_code > 61000000 AND deprecated)", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
 
 
 def fill_vertical_crs(proj_db_cursor):
