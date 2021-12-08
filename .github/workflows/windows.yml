@@ -11,12 +11,14 @@ jobs:
     strategy:
         fail-fast: false
         matrix:
+            BUILD_SHARED_LIBS: [ON, OFF]
             BUILD_TYPE: [Release, Debug]
 
     env:
         ARCH: x64
-        BUILD_SHARED_LIBS: ON
+        BUILD_SHARED_LIBS: ${{ matrix.BUILD_SHARED_LIBS }}
         BUILD_TYPE: ${{ matrix.BUILD_TYPE }}
+        CMAKE_GENERATOR: Ninja
 
     steps:
 
@@ -48,7 +50,7 @@ jobs:
             mkdir %PROJ_BUILD%
             cd %PROJ_BUILD%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
-            cmake -GNinja .. -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%"
+            cmake -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%" ..
             ninja -v
             ninja install
             dir %PROJ_DIR%\bin
@@ -56,14 +58,18 @@ jobs:
       - name: Run tests
         shell: cmd
         run: |
-            set VCPKG_INSTALLED=c:\vcpkg\installed\${{ env.ARCH }}-windows
+            set VCPKG_ROOT=c:\vcpkg
+            set platform=${{ env.ARCH }}
+            set VCPKG_INSTALLED=%VCPKG_ROOT%\installed\%platform%-windows
             set PATH=%VCPKG_INSTALLED%\bin;%PATH%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
             set PROJ_BUILD=%GITHUB_WORKSPACE%\build
             cd %PROJ_BUILD%
             ctest -V -C "${{ env.BUILD_TYPE }}"
             set PATH=%PROJ_DIR%\bin;%PATH%
-            if "${{ env.BUILD_TYPE }}"=="Release" call %GITHUB_WORKSPACE%\test\postinstall\test_cmake.bat %PROJ_DIR%
+            set BUILD_MODE=shared
+            if "${{ env.BUILD_SHARED_LIBS }}"=="OFF" (set BUILD_MODE=static)
+            if "${{ env.BUILD_TYPE }}"=="Release" call %GITHUB_WORKSPACE%\test\postinstall\test_cmake.bat %PROJ_DIR% %BUILD_MODE%
             if "${{ env.BUILD_TYPE }}"=="Release" proj
 
   MSYS2:
@@ -74,12 +80,26 @@ jobs:
       run:
         shell: msys2 {0}
 
+    strategy:
+        fail-fast: false
+        matrix:
+            BUILD_SHARED_LIBS: [ON, OFF]
+
     env:
+        BUILD_SHARED_LIBS: ${{ matrix.BUILD_SHARED_LIBS }}
+        BUILD_TYPE: Release
         CMAKE_GENERATOR: "MSYS Makefiles"
 
     steps:
 
       - uses: actions/checkout@v2
+
+      - name: Cache
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-cache-msys-${{ hashFiles('.github/workflows/windows.yml') }}
 
       - uses: msys2/setup-msys2@v2
         with:
@@ -89,6 +109,7 @@ jobs:
             git
             make
             mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ccache
             mingw-w64-x86_64-curl
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-libtiff
@@ -96,14 +117,17 @@ jobs:
 
       - name: Build
         run: |
+            ccache -M 500M
+            ccache -s
             PROJ_BUILD=${GITHUB_WORKSPACE}/build
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             mkdir ${PROJ_BUILD}
             cd ${PROJ_BUILD}
-            cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" ..
+            cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" -DUSE_CCACHE=ON ..
             make -j 2
             make install
             ls ${PROJ_DIR}/bin
+            ccache -s
 
       - name: Run tests
         run: |
@@ -112,6 +136,8 @@ jobs:
             cd ${PROJ_BUILD}
             ctest --output-on-failure
             export PATH=${PROJ_DIR}/bin:${PATH}
-            ../test/postinstall/test_cmake.sh ${PROJ_DIR}
-            ../test/postinstall/test_pkg-config.sh ${PROJ_DIR}
+            BUILD_MODE=shared
+            if [ ${{ env.BUILD_SHARED_LIBS }} == "OFF" ]; then BUILD_MODE=static; fi
+            ../test/postinstall/test_cmake.sh ${PROJ_DIR} ${BUILD_MODE}
+            ../test/postinstall/test_pkg-config.sh ${PROJ_DIR} ${BUILD_MODE}
             proj

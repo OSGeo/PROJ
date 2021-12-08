@@ -1,43 +1,40 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # Post-install tests with CMake
 #
 # First required argument is the installed prefix, which
-# is used to set CMAKE_PREFIX_PATH
-
-set -e
-
-echo "Running post-install tests with CMake"
-
-CMAKE_PREFIX_PATH=$1
-if [ -z "$CMAKE_PREFIX_PATH" ]; then
-    echo "First positional argument CMAKE_PREFIX_PATH required"
-    exit 1
-fi
-
-echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
-
+# is used to set CMAKE_PREFIX_PATH and
+# LD_LIBRARY_PATH/DYLD_LIBRARY_PATH for shared builds
+# Second argument is either shared (default) or static
 cd $(dirname $0)
+. ./common.sh
+main_setup $1 $2
 
-cd testappprojinfo
-rm -rf build
+echo "Running post-install tests with CMake (${BUILD_MODE})"
 
-# Check CMake project name PROJ
-mkdir build
-cd build
-cmake -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH -DUSE_PROJ_NAME=PROJ -DCMAKE_VERBOSE_MAKEFILE=ON ..
-cmake --build .
-ctest -VV .
+cmake_make_ctest(){
+  rm -rf build
+  mkdir build
+  cd build
+
+  cmake -DCMAKE_PREFIX_PATH=${prefix} -DUSE_PROJ_NAME=$1 ..
+  VERBOSE=1 make
+  ctest --output-on-failure -V
+
+  cd ..
+  rm -rf build
+}
+
+echo "Testing C app"
+cd c_app
+cmake_make_ctest PROJ
+cmake_make_ctest PROJ4
 cd ..
-rm -rf build
 
-# Check legacy CMake project name PROJ4
-mkdir build
-cd build
-cmake -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH -DUSE_PROJ_NAME=PROJ4 -DCMAKE_VERBOSE_MAKEFILE=ON ..
-cmake --build .
-ctest -VV .
+echo "Testing C++ app"
+cd cpp_app
+cmake_make_ctest PROJ
+cmake_make_ctest PROJ4
 cd ..
-rm -rf build
 
-cd ..
+echo "Finished running post-install tests CMake (${BUILD_MODE})"
