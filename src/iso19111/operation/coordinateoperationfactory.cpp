@@ -729,10 +729,12 @@ struct PrecomputedOpCharacteristics {
 struct SortFunction {
 
     const std::map<CoordinateOperation *, PrecomputedOpCharacteristics> &map;
+    const std::string BALLPARK_GEOGRAPHIC_OFFSET_FROM;
 
     explicit SortFunction(const std::map<CoordinateOperation *,
                                          PrecomputedOpCharacteristics> &mapIn)
-        : map(mapIn) {}
+        : map(mapIn), BALLPARK_GEOGRAPHIC_OFFSET_FROM(
+                          std::string(BALLPARK_GEOGRAPHIC_OFFSET) + " from ") {}
 
     // Sorting function
     // Return true if a < b
@@ -860,6 +862,48 @@ struct SortFunction {
 
         const auto &a_name = a->nameStr();
         const auto &b_name = b->nameStr();
+
+        // Make sure that
+        // "Ballpark geographic offset from NAD83(CSRS)v6 to NAD83(CSRS)"
+        // has more priority than
+        // "Ballpark geographic offset from ITRF2008 to NAD83(CSRS)"
+        const auto posA = a_name.find(BALLPARK_GEOGRAPHIC_OFFSET_FROM);
+        const auto posB = b_name.find(BALLPARK_GEOGRAPHIC_OFFSET_FROM);
+        if (posA != std::string::npos && posB != std::string::npos) {
+            const auto pos2A = a_name.find(" to ", posA);
+            const auto pos2B = b_name.find(" to ", posB);
+            if (pos2A != std::string::npos && pos2B != std::string::npos) {
+                const auto pos3A = a_name.find(" + ", pos2A);
+                const auto pos3B = b_name.find(" + ", pos2B);
+                const std::string fromA = a_name.substr(
+                    posA + BALLPARK_GEOGRAPHIC_OFFSET_FROM.size(),
+                    pos2A - (posA + BALLPARK_GEOGRAPHIC_OFFSET_FROM.size()));
+                const std::string toA =
+                    a_name.substr(pos2A + strlen(" to "),
+                                  pos3A == std::string::npos
+                                      ? pos3A
+                                      : pos3A - (pos2A + strlen(" to ")));
+                const std::string fromB = b_name.substr(
+                    posB + BALLPARK_GEOGRAPHIC_OFFSET_FROM.size(),
+                    pos2B - (posB + BALLPARK_GEOGRAPHIC_OFFSET_FROM.size()));
+                const std::string toB =
+                    b_name.substr(pos2B + strlen(" to "),
+                                  pos3B == std::string::npos
+                                      ? pos3B
+                                      : pos3B - (pos2B + strlen(" to ")));
+                const bool similarCRSInA =
+                    (fromA.find(toA) == 0 || toA.find(fromA) == 0);
+                const bool similarCRSInB =
+                    (fromB.find(toB) == 0 || toB.find(fromB) == 0);
+                if (similarCRSInA && !similarCRSInB) {
+                    return true;
+                }
+                if (!similarCRSInA && similarCRSInB) {
+                    return false;
+                }
+            }
+        }
+
         // The shorter name, the better ?
         if (a_name.size() < b_name.size()) {
             return true;
@@ -1240,7 +1284,7 @@ struct FilterResults {
                 area, getAccuracy(op), isPROJExportable, hasGrids,
                 gridsAvailable, gridsKnown, stepCount,
                 op->hasBallparkTransformation(),
-                op->nameStr().find("ballpark vertical transformation") !=
+                op->nameStr().find(BALLPARK_VERTICAL_TRANSFORMATION) !=
                     std::string::npos,
                 isNullTransformation(op->nameStr()));
         }
@@ -4482,7 +4526,9 @@ void CoordinateOperationFactory::Private::createOperationsVertToVert(
     const double factor = convSrc / convDst;
     if (!equivalentVDatum) {
         auto name = buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr());
+        name += " (";
         name += BALLPARK_VERTICAL_TRANSFORMATION;
+        name += ')';
         auto conv = Transformation::createChangeVerticalUnit(
             util::PropertyMap().set(common::IdentifiedObject::NAME_KEY, name),
             sourceCRS, targetCRS,
@@ -4588,9 +4634,12 @@ void CoordinateOperationFactory::Private::createOperationsVertToGeogBallpark(
             targetCRSExtent.get(), util::IComparable::Criterion::EQUIVALENT);
 
     util::PropertyMap map;
-    map.set(common::IdentifiedObject::NAME_KEY,
-            buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr()) +
-                BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT)
+    std::string transfName(
+        buildTransfName(sourceCRS->nameStr(), targetCRS->nameStr()));
+    transfName += " (";
+    transfName += BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT;
+    transfName += ')';
+    map.set(common::IdentifiedObject::NAME_KEY, transfName)
         .set(common::ObjectUsage::DOMAIN_OF_VALIDITY_KEY,
              sameExtent ? NN_NO_CHECK(sourceCRSExtent)
                         : metadata::Extent::WORLD);
@@ -5280,45 +5329,84 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
             createOperations(sourceCRS, intermGeogSrc, context);
         const auto opsGeogToTarget =
             createOperations(intermGeogDst, targetCRS, context);
+
+        // We preferably accept using an intermediate if the operations
+        // to it do not include ballpark operations, but if they do include
+        // grids, using such operations result will be better than nothing.
+        // This will help for example for "NAD83(CSRS) + CGVD28 height" to
+        // "NAD83(CSRS) + CGVD2013(CGG2013) height" where the transformation
+        // between "CGVD2013(CGG2013) height" and "NAD83(CSRS)" actually
+        // involves going through NAD83(CSRS)v6
+        const auto hasKnownGrid =
+            [&dbContext](const CoordinateOperationNNPtr &op) {
+                const auto grids = op->gridsNeeded(dbContext, true);
+                if (grids.empty()) {
+                    return false;
+                }
+                for (const auto &grid : grids) {
+                    if (grid.available) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
         const bool hasNonTrivialSrcTransf =
             !opsSrcToGeog.empty() &&
-            !opsSrcToGeog.front()->hasBallparkTransformation();
+            (!opsSrcToGeog.front()->hasBallparkTransformation() ||
+             hasKnownGrid(opsSrcToGeog.front()));
         const bool hasNonTrivialTargetTransf =
             !opsGeogToTarget.empty() &&
-            !opsGeogToTarget.front()->hasBallparkTransformation();
+            (!opsGeogToTarget.front()->hasBallparkTransformation() ||
+             hasKnownGrid(opsGeogToTarget.front()));
         if (hasNonTrivialSrcTransf && hasNonTrivialTargetTransf) {
             const auto opsGeogSrcToGeogDst =
                 createOperations(intermGeogSrc, intermGeogDst, context);
-            for (const auto &op1 : opsSrcToGeog) {
-                if (op1->hasBallparkTransformation()) {
-                    // std::cerr << "excluded " << op1->nameStr() << std::endl;
-                    continue;
-                }
-                for (const auto &op2 : opsGeogSrcToGeogDst) {
-                    for (const auto &op3 : opsGeogToTarget) {
-                        if (op3->hasBallparkTransformation()) {
-                            // std::cerr << "excluded " << op3->nameStr() <<
-                            // std::endl;
-                            continue;
-                        }
-                        try {
-                            res.emplace_back(
-                                ConcatenatedOperation::createComputeMetadata(
-                                    intermGeogSrcIsSameAsIntermGeogDst
-                                        ? std::vector<
-                                              CoordinateOperationNNPtr>{op1,
-                                                                        op3}
-                                        : std::vector<
-                                              CoordinateOperationNNPtr>{op1,
-                                                                        op2,
-                                                                        op3},
-                                    disallowEmptyIntersection));
-                        } catch (const std::exception &) {
+            // In first pass, exclude (horizontal) ballpark operations, but
+            // accept them in second pass.
+            for (int pass = 0; pass <= 1 && res.empty(); pass++) {
+                for (const auto &op1 : opsSrcToGeog) {
+                    if (pass == 0 && op1->hasBallparkTransformation()) {
+                        // std::cerr << "excluded " << op1->nameStr() <<
+                        // std::endl;
+                        continue;
+                    }
+                    if (op1->nameStr().find(BALLPARK_VERTICAL_TRANSFORMATION) !=
+                        std::string::npos) {
+                        continue;
+                    }
+                    for (const auto &op2 : opsGeogSrcToGeogDst) {
+                        for (const auto &op3 : opsGeogToTarget) {
+                            if (pass == 0 && op3->hasBallparkTransformation()) {
+                                // std::cerr << "excluded " << op3->nameStr() <<
+                                // std::endl;
+                                continue;
+                            }
+                            if (op3->nameStr().find(
+                                    BALLPARK_VERTICAL_TRANSFORMATION) !=
+                                std::string::npos) {
+                                continue;
+                            }
+                            try {
+                                res.emplace_back(
+                                    ConcatenatedOperation::createComputeMetadata(
+                                        intermGeogSrcIsSameAsIntermGeogDst
+                                            ? std::vector<
+                                                  CoordinateOperationNNPtr>{op1,
+                                                                            op3}
+                                            : std::vector<
+                                                  CoordinateOperationNNPtr>{op1,
+                                                                            op2,
+                                                                            op3},
+                                        disallowEmptyIntersection));
+                            } catch (const std::exception &) {
+                            }
                         }
                     }
                 }
             }
         }
+
         if (!res.empty()) {
             return;
         }
