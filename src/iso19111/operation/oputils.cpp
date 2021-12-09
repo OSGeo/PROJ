@@ -61,10 +61,10 @@ const char *NULL_GEOGRAPHIC_OFFSET = "Null geographic offset";
 const char *NULL_GEOCENTRIC_TRANSLATION = "Null geocentric translation";
 const char *BALLPARK_GEOGRAPHIC_OFFSET = "Ballpark geographic offset";
 const char *BALLPARK_VERTICAL_TRANSFORMATION =
-    " (ballpark vertical transformation)";
+    "ballpark vertical transformation";
 const char *BALLPARK_VERTICAL_TRANSFORMATION_NO_ELLIPSOID_VERT_HEIGHT =
-    " (ballpark vertical transformation, without ellipsoid height to vertical "
-    "height correction)";
+    "ballpark vertical transformation, without ellipsoid height to vertical "
+    "height correction";
 
 // ---------------------------------------------------------------------------
 
