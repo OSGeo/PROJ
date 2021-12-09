@@ -6,6 +6,11 @@
 * PROJ by Kristian Evers. Original code found in file src/proj_guyou.c, see
 * https://github.com/rouault/libproj4/blob/master/libproject-1.01/src/proj_guyou.c
 * for reference.
+* Corrections added for Peirce Quincuncial projection by Toby C. Wilkinson to
+* correctly flip out southern hemisphere into the four triangles of Peirce's
+* quincunx. The fix inspired by a similar rotate and translate solution applied
+* by Jonathan Feinberg for cartopy, see
+* https://github.com/jonathf/cartopy/blob/8172cac7fc45cafc86573d408ce85b74258a9c28/lib/cartopy/peircequincuncial.py
 *
 * Copyright (c) 2005, 2006, 2009 Gerald I. Evenden
 * Copyright (c) 2020 Kristian Evers
@@ -33,7 +38,8 @@
 #include "proj_internal.h"
 
 PROJ_HEAD(guyou, "Guyou") "\n\tMisc Sph No inv";
-PROJ_HEAD(peirce_q, "Peirce Quincuncial") "\n\tMisc Sph No inv";
+PROJ_HEAD(peirce_q, "Peirce Quincuncial (Square)") "\n\tMisc Sph No inv";
+PROJ_HEAD(peirce_q_d, "Peirce Quincuncial (Diamond)") "\n\tMisc Sph No inv";
 PROJ_HEAD(adams_hemi, "Adams Hemisphere in a Square") "\n\tMisc Sph No inv";
 PROJ_HEAD(adams_ws1, "Adams World in a Square I") "\n\tMisc Sph No inv";
 PROJ_HEAD(adams_ws2, "Adams World in a Square II") "\n\tMisc Sph No inv";
@@ -43,6 +49,7 @@ namespace { // anonymous namespace
 enum projection_type {
     GUYOU,
     PEIRCE_Q,
+    PEIRCE_Q_D,
     ADAMS_HEMI,
     ADAMS_WS1,
     ADAMS_WS2,
@@ -117,11 +124,9 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
             sn = lp.phi < 0.;
         }
         break;
+    case PEIRCE_Q_D:
     case PEIRCE_Q: {
-            if( lp.phi < -TOL ) {
-                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-                return proj_coord_error().xy;
-            }
+      /* Note that the original Peirce model used a central meridian of around -70, but the default for proj is, atypically, +lon0=0 */
             const double sl = sin(lp.lam);
             const double cl = cos(lp.lam);
             const double cp = cos(lp.phi);
@@ -173,7 +178,21 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     xy.x = ell_int_5(m);
     xy.y = ell_int_5(n);
 
-    if (Q->mode == ADAMS_HEMI || Q->mode == ADAMS_WS2) { /* rotate by 45deg. */
+    if (Q->mode == PEIRCE_Q || Q->mode == PEIRCE_Q_D) {
+      /* For Quincuncial projections, spin out southern hemisphere to triangular segments of quincunx */
+      if (true && (lp.phi < 0.)) {
+        /* Constant complete elliptic integral of the first kind with m=0.5 https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipk.html as shift distance */
+        double shd = 1.8540746773013719 * 2;
+
+        if (lp.lam < ( -0.75 * M_PI )) xy.y = shd - xy.y; /* top left segment, shift up and reflect y */
+        if ( (lp.lam < (-0.25 * M_PI)) && (lp.lam >= ( -0.75 * M_PI ))) xy.x = - shd - xy.x; /* left segment, shift left and reflect x */
+        if ( (lp.lam < (0.25 * M_PI)) && (lp.lam >= ( -0.25 * M_PI ))) xy.y = - shd - xy.y; /* bottom segment, shift down and reflect y */
+        if ( (lp.lam < (0.75 * M_PI)) && (lp.lam >= ( 0.25 * M_PI ))) xy.x = shd - xy.x; /* right segment, shift right and reflect x */
+        if (lp.lam >= (0.75 * M_PI)) xy.y = shd - xy.y; /* top right segment, shift up and reflect y */
+      }
+    }
+
+    if (Q->mode == ADAMS_HEMI || Q->mode == ADAMS_WS2 || Q->mode == PEIRCE_Q ) { /* rotate by 45deg. */
         const double temp = xy.x;
         xy.x = RSQRT2 * (xy.x - xy.y);
         xy.y = RSQRT2 * (temp + xy.y);
@@ -228,6 +247,10 @@ PJ *PROJECTION(guyou) {
 
 PJ *PROJECTION(peirce_q) {
     return setup(P, PEIRCE_Q);
+}
+
+PJ *PROJECTION(peirce_q_d) {
+    return setup(P, PEIRCE_Q_D);
 }
 
 PJ *PROJECTION(adams_hemi) {

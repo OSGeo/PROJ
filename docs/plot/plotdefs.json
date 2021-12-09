@@ -1053,11 +1053,22 @@
     {
         "filename": "peirce_q.png",
         "latmax": 90,
-        "latmin": 0,
+        "latmin": -90,
         "lonmax": 180,
         "lonmin": -180,
         "name": "peirce_q",
-        "projstring": "+proj=peirce_q",
+        "projstring": "+proj=peirce_q +lon_0=25",
+        "res": "low",
+        "type": "poly"
+    },
+    {
+        "filename": "peirce_q_d.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "peirce_q_d",
+        "projstring": "+proj=peirce_q_d +lon_0=25",
         "res": "low",
         "type": "poly"
     },
