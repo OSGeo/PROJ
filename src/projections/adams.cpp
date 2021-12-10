@@ -180,9 +180,9 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
 
     if (Q->mode == PEIRCE_Q || Q->mode == PEIRCE_Q_D) {
       /* For Quincuncial projections, spin out southern hemisphere to triangular segments of quincunx */
-      if (true && (lp.phi < 0.)) {
+      if (lp.phi < 0.) {
         /* Constant complete elliptic integral of the first kind with m=0.5 https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipk.html as shift distance */
-        double shd = 1.8540746773013719 * 2;
+        constexpr double shd = 1.8540746773013719 * 2;
 
         if (lp.lam < ( -0.75 * M_PI )) xy.y = shd - xy.y; /* top left segment, shift up and reflect y */
         if ( (lp.lam < (-0.25 * M_PI)) && (lp.lam >= ( -0.75 * M_PI ))) xy.x = - shd - xy.x; /* left segment, shift left and reflect x */
