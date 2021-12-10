@@ -1,7 +1,7 @@
-.. _peirce_q:
+.. _peirce_q_d:
 
 ********************************************************************************
-Peirce Quincuncial (Square)
+Peirce Quincuncial (Diamond)
 ********************************************************************************
 
 The Peirce Quincuncial projection is a conformal map projection
@@ -14,8 +14,7 @@ defaults to a central meridian of 0, it is more common to use a central
 meridian of around 25 to optimise the distortions. Peirce's original
 published map from 1879 used a central meridian of approx -70.
 
-Use Peirce Quincuncial (Diamond) to skip the rotation of the diamond to
-a square.
+Use Peirce Quincuncial (Square) to rotate diamond to a square.
 
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Miscellaneous                                            |
@@ -24,7 +23,7 @@ a square.
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | peirce_q                                                 |
+| **Alias**           | peirce_q_d                                                 |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
@@ -34,12 +33,12 @@ a square.
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/peirce_q.png
+.. figure:: ./images/peirce_q_d.png
    :width: 500 px
    :align: center
-   :alt:   Peirce Quincuncial (Square)
+   :alt:   Peirce Quincuncial (Diamond)
 
-   proj-string: ``+proj=peirce_q +lon_0=25``
+   proj-string: ``+proj=peirce_q_d +lon_0=25``
 
 Parameters
 ################################################################################
