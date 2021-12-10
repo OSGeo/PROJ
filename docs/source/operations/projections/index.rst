@@ -111,6 +111,7 @@ Projections map the spherical 3D space to a flat 2D space.
    patterson
    pconic
    peirce_q
+   peirce_q_d
    poly
    putp1
    putp2
