@@ -9,7 +9,7 @@ export TRAVIS_BUILD_DIR="$WORK_DIR"
 apt update -y
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    autoconf automake libtool g++-4.8 sqlite3 \
+    autoconf automake libtool g++ sqlite3 \
     python3-pip python3-setuptools \
     make cmake ccache pkg-config tar zip \
     libsqlite3-dev libtiff-dev libcurl4-openssl-dev \
@@ -23,8 +23,8 @@ python3 -m pip install --user cmake==3.9.6
 
 export PATH=$HOME/.local/bin:$PATH
 
-export CC="ccache gcc-4.8"
-export CXX="ccache g++-4.8"
+export CC="ccache gcc"
+export CXX="ccache g++"
 
 NPROC=$(nproc)
 echo "NPROC=${NPROC}"
