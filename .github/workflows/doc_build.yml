@@ -12,12 +12,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
+
+      - name: Install PROJ build dependencies
+        run: |
+            DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends -o APT::Immediate-Configure=0  \
+                cmake g++ sqlite3 pkg-config libsqlite3-dev libtiff-dev libcurl4-openssl-dev
+
+      - name: Build PROJ
+        run: |
+            mkdir build
+            cd build
+            cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/opt/proj
+            make -j$(nproc)
+            sudo mkdir -p /opt/proj
+            sudo make install
+            cd ..
+
+      - name: Install plot dependencies
+        uses: conda-incubator/setup-miniconda@v2
         with:
           environment-file: docs/plot/environment.yml
+
       - name: Plot
         working-directory: ./docs/plot
-        run: ./plot.py plotdefs.json images/
+        run: |
+            export PATH=/opt/proj/bin:$PATH
+            export LD_LIBRARY_PATH=/opt/proj/lib
+            export PROJ_LIB=/opt/proj/share/proj
+            ./plot.py plotdefs.json images/
 
       - uses: actions/upload-artifact@v2
         with:
