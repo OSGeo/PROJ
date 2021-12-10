@@ -913,8 +913,8 @@ static void isea_hex(struct isea_dgg *g, int tri,
     if (g->aperture == 3 && g->resolution % 2 != 0) {
         long offset = lround((pow(3.0, g->resolution - 1) + 0.5));
 
-        d += offset * ((g->quadz-1) % 5);
-        i += offset * ((g->quadz-1) % 5);
+        d += offset * ((g->quad-1) % 5);
+        i += offset * ((g->quad-1) % 5);
 
         if (quadz == 0) {
             d = 0;
