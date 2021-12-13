@@ -292,8 +292,6 @@ Bug fixes
 * :c:func:`createOperations()`: fix incorrect height transformation between 3D promoted RGF93 and CH1903+ (`#2555 <https://github.com/OSGeo/PROJ/issues/2555>`_)
 
 
-
->>>>>>> Stashed changes
 8.0.0 Release Notes
 ++++++++++++++++++++++++++++++++++++++++
 *March 1st 2021*
