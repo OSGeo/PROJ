@@ -5,5 +5,4 @@ dependencies:
   - descartes
   - geojson
   - matplotlib
-  - proj
   - shapely < 1.8
