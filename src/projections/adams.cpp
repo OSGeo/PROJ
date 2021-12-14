@@ -38,8 +38,7 @@
 #include "proj_internal.h"
 
 PROJ_HEAD(guyou, "Guyou") "\n\tMisc Sph No inv";
-PROJ_HEAD(peirce_q, "Peirce Quincuncial (Square)") "\n\tMisc Sph No inv";
-PROJ_HEAD(peirce_q_d, "Peirce Quincuncial (Diamond)") "\n\tMisc Sph No inv";
+PROJ_HEAD(peirce_q, "Peirce Quincuncial") "\n\tMisc Sph No inv";
 PROJ_HEAD(adams_hemi, "Adams Hemisphere in a Square") "\n\tMisc Sph No inv";
 PROJ_HEAD(adams_ws1, "Adams World in a Square I") "\n\tMisc Sph No inv";
 PROJ_HEAD(adams_ws2, "Adams World in a Square II") "\n\tMisc Sph No inv";
@@ -49,14 +48,25 @@ namespace { // anonymous namespace
 enum projection_type {
     GUYOU,
     PEIRCE_Q,
-    PEIRCE_Q_D,
     ADAMS_HEMI,
     ADAMS_WS1,
     ADAMS_WS2,
 };
 
+enum peirce_type {
+  PEIRCE_Q_SQUARE,
+  PEIRCE_Q_DIAMOND,
+  PEIRCE_Q_NHEMISPHERE,
+  PEIRCE_Q_SHEMISPHERE,
+  PEIRCE_Q_HORIZONTAL,
+  PEIRCE_Q_VERTICAL,
+};
+
 struct pj_opaque {
     projection_type mode;
+    peirce_type pqtype;
+    double scrollx;
+    double scrolly;
 };
 
 } // anonymous namespace
@@ -97,6 +107,22 @@ static double ell_int_5(double phi) {
 
 }
 
+// static double constrainParallel(double x){
+//    /* 90+45=135 */
+//    double y = x;
+//    if ((x > M_HALFPI)) {
+//      y = x - 90;
+//    } else if (( x < -M_HALFPI)) {
+//      y = x + 90;
+//    }
+//    return y;
+//     // if ((x >= -M_HALFPI) && (x <= M_HALFPI)) return x;
+//     // x = fmod(x + M_HALFPI,M_PI);
+//     // if (x > 0)
+//     //     x -= M_PI;
+//     // return x + M_HALFPI;
+// }
+
 static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     double a=0., b=0.;
     bool sm=false, sn=false;
@@ -124,9 +150,20 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
             sn = lp.phi < 0.;
         }
         break;
-    case PEIRCE_Q_D:
     case PEIRCE_Q: {
-      /* Note that the original Peirce model used a central meridian of around -70, but the default for proj is, atypically, +lon0=0 */
+            /* lam0 - note that the original Peirce model used a central meridian of around -70deg, but the default within proj is +lon0=0 */
+            if (Q->pqtype == PEIRCE_Q_NHEMISPHERE) {
+              if( lp.phi < -TOL ) {
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+                return proj_coord_error().xy;
+              }
+            }
+            if (Q->pqtype == PEIRCE_Q_SHEMISPHERE) {
+              if( lp.phi > -TOL ) {
+                proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+                return proj_coord_error().xy;
+              }
+            }
             const double sl = sin(lp.lam);
             const double cl = cos(lp.lam);
             const double cp = cos(lp.phi);
@@ -178,21 +215,71 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     xy.x = ell_int_5(m);
     xy.y = ell_int_5(n);
 
-    if (Q->mode == PEIRCE_Q || Q->mode == PEIRCE_Q_D) {
-      /* For Quincuncial projections, spin out southern hemisphere to triangular segments of quincunx */
-      if (lp.phi < 0.) {
-        /* Constant complete elliptic integral of the first kind with m=0.5 https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipk.html as shift distance */
-        constexpr double shd = 1.8540746773013719 * 2;
+    if (Q->mode == PEIRCE_Q) {
+      /* Constant complete elliptic integral of the first kind with m=0.5, calculated using https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.ellipk.html . Used as basic as scaled shift distance */
+      constexpr double shd = 1.8540746773013719 * 2;
 
-        if (lp.lam < ( -0.75 * M_PI )) xy.y = shd - xy.y; /* top left segment, shift up and reflect y */
-        if ( (lp.lam < (-0.25 * M_PI)) && (lp.lam >= ( -0.75 * M_PI ))) xy.x = - shd - xy.x; /* left segment, shift left and reflect x */
-        if ( (lp.lam < (0.25 * M_PI)) && (lp.lam >= ( -0.25 * M_PI ))) xy.y = - shd - xy.y; /* bottom segment, shift down and reflect y */
-        if ( (lp.lam < (0.75 * M_PI)) && (lp.lam >= ( 0.25 * M_PI ))) xy.x = shd - xy.x; /* right segment, shift right and reflect x */
-        if (lp.lam >= (0.75 * M_PI)) xy.y = shd - xy.y; /* top right segment, shift up and reflect y */
+      /* For square and diamond Quincuncial projections, spin out southern hemisphere to triangular segments of quincunx (before rotation for square)*/
+      if( Q->pqtype == PEIRCE_Q_SQUARE || ( Q->pqtype == PEIRCE_Q_DIAMOND )) {
+        if (lp.phi < 0.)  { /* fold out segments */
+          if (lp.lam < ( -0.75 * M_PI )) xy.y = shd - xy.y; /* top left segment, shift up and reflect y */
+          if ( (lp.lam < (-0.25 * M_PI)) && (lp.lam >= ( -0.75 * M_PI ))) xy.x = - shd - xy.x; /* left segment, shift left and reflect x */
+          if ( (lp.lam < (0.25 * M_PI)) && (lp.lam >= ( -0.25 * M_PI ))) xy.y = - shd - xy.y; /* bottom segment, shift down and reflect y */
+          if ( (lp.lam < (0.75 * M_PI)) && (lp.lam >= ( 0.25 * M_PI ))) xy.x = shd - xy.x; /* right segment, shift right and reflect x */
+          if (lp.lam >= (0.75 * M_PI)) xy.y = shd - xy.y; /* top right segment, shift up and reflect y */
+        }
       }
-    }
 
-    if (Q->mode == ADAMS_HEMI || Q->mode == ADAMS_WS2 || Q->mode == PEIRCE_Q ) { /* rotate by 45deg. */
+      /* For square types rotate xy by 45 deg */
+      if( Q->pqtype == PEIRCE_Q_SQUARE ) {
+            const double temp = xy.x;
+            xy.x = RSQRT2 * (xy.x - xy.y);
+            xy.y = RSQRT2 * (temp + xy.y);
+      }
+
+      /* For rectangle Quincuncial projs, spin out southern hemisphere to east (horizontal) or north (vertical) after rotation */
+      if( Q->pqtype == PEIRCE_Q_HORIZONTAL ) {
+        if (lp.phi < 0.)  {
+          xy.x = shd - xy.x; /* reflect x to east */
+        }
+        xy.x = xy.x - (shd / 2); /* shift everything so origin is in middle of two hemispheres */
+      }
+      if( Q->pqtype == PEIRCE_Q_VERTICAL ) {
+        if (lp.phi < 0.)  {
+          xy.y = shd - xy.y; /* reflect y to north */
+        }
+        xy.y = xy.y - (shd / 2); /* shift everything so origin is in middle of two hemispheres */
+      }
+
+      //if o_scrollx param present, scroll x
+      if (Q->scrollx && (Q->pqtype == PEIRCE_Q_HORIZONTAL) ) {
+        double xscale = 2.0;
+        double xthresh = shd / 2;
+        xy.x = xy.x + (Q->scrollx * (xthresh * 2 * xscale)); /*shift relative to proj width*/
+        if(xy.x >= (xthresh * xscale)) {
+          xy.x = xy.x - (shd * xscale);
+        }
+        else if (xy.x < -(xthresh * xscale)) {
+          xy.x = xy.x + (shd * xscale);
+        }
+      }
+
+      //if o_scrolly param present, scroll y
+      if (Q->scrolly && (Q->pqtype == PEIRCE_Q_VERTICAL)) {
+        double yscale = 2.0;
+        double ythresh = shd / 2;
+        xy.y = xy.y + (Q->scrolly * (ythresh * 2 * yscale)); /*shift relative to proj height*/
+        if(xy.y >= (ythresh * yscale)) {
+          xy.y = xy.y - (shd * yscale);
+        }
+        else if (xy.y < -(ythresh * yscale)) {
+          xy.y = xy.y + (shd * yscale);
+        }
+      }
+
+  }
+
+    if (Q->mode == ADAMS_HEMI || Q->mode == ADAMS_WS2 ) { /* rotate by 45deg. */
         const double temp = xy.x;
         xy.x = RSQRT2 * (xy.x - xy.y);
         xy.y = RSQRT2 * (temp + xy.y);
@@ -237,6 +324,57 @@ static PJ *setup(PJ *P, projection_type mode) {
     if( mode == ADAMS_WS2 )
         P->inv = adams_inverse;
 
+    if( mode == PEIRCE_Q) {
+      // Quincuncial projections type options: square, diamond, hemisphere, horizontal (rectangle) or vertical (rectangle)
+      const char* pqtype = pj_param (P->ctx, P->params, "stype").s;
+      if (!pqtype) pqtype = "nhemisphere"; /* default if type value not supplied */
+      if (strcmp(pqtype, "square") == 0) {
+        Q->pqtype = PEIRCE_Q_SQUARE;
+      }
+      else if (strcmp(pqtype, "diamond") == 0) {
+        Q->pqtype = PEIRCE_Q_DIAMOND;
+      }
+      else if (strcmp(pqtype, "nhemisphere") == 0) {
+        Q->pqtype = PEIRCE_Q_NHEMISPHERE;
+      }
+      else if (strcmp(pqtype, "shemisphere") == 0) {
+        Q->pqtype = PEIRCE_Q_SHEMISPHERE;
+      }
+      else if (strcmp(pqtype, "horizontal") == 0) {
+        Q->pqtype = PEIRCE_Q_HORIZONTAL;
+        if (pj_param(P->ctx, P->params, "to_scrollx").i) {
+          double scrollx;
+          scrollx = pj_param(P->ctx, P->params, "do_scrollx").f;
+          if (scrollx > 1 || scrollx < -1) {
+              proj_log_error(P, _("Invalid value for o_scrollx: |o_scrollx| should between -1 and 1"));
+              return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+          }
+          Q->scrollx = scrollx;
+        }
+      }
+      else if (strcmp(pqtype, "vertical") == 0) {
+        Q->pqtype = PEIRCE_Q_VERTICAL;
+        if (pj_param(P->ctx, P->params, "to_scrolly").i) {
+          double scrolly;
+          scrolly = pj_param(P->ctx, P->params, "do_scrolly").f;
+          if (scrolly > 1 || scrolly < -1) {
+              proj_log_error(P, _("Invalid value for o_scrolly: |o_scrolly| should between -1 and 1"));
+              return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+          }
+          Q->scrolly = scrolly;
+        }
+      }
+      else {
+            proj_log_error (P, _("peirce_q: invalid value for 'type' argument"));
+            return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+      }
+
+
+
+
+
+    }
+
     return P;
 }
 
@@ -247,10 +385,6 @@ PJ *PROJECTION(guyou) {
 
 PJ *PROJECTION(peirce_q) {
     return setup(P, PEIRCE_Q);
-}
-
-PJ *PROJECTION(peirce_q_d) {
-    return setup(P, PEIRCE_Q_D);
 }
 
 PJ *PROJECTION(adams_hemi) {
