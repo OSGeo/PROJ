@@ -78,7 +78,7 @@ Parameters
 
     .. versionadded:: 8.2.1
 
-    *Defaults to nhemisphere.*
+    *Defaults to diamond.*
 
     Indicates the type of transformation applied to the southern hemisphere: ``square`` and
     ``diamond`` represent the traditional quincuncial form suggested by Peirce with the

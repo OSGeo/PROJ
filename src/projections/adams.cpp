@@ -6,14 +6,21 @@
 * PROJ by Kristian Evers. Original code found in file src/proj_guyou.c, see
 * https://github.com/rouault/libproj4/blob/master/libproject-1.01/src/proj_guyou.c
 * for reference.
-* Corrections added for Peirce Quincuncial projection by Toby C. Wilkinson to
+* Fix for Peirce Quincuncial projection to diamond or square by Toby C. Wilkinson to
 * correctly flip out southern hemisphere into the four triangles of Peirce's
 * quincunx. The fix inspired by a similar rotate and translate solution applied
 * by Jonathan Feinberg for cartopy, see
 * https://github.com/jonathf/cartopy/blob/8172cac7fc45cafc86573d408ce85b74258a9c28/lib/cartopy/peircequincuncial.py
+* Added original code for horizontal and vertical arrangement of hemispheres by Toby
+* C. Wilkinson to allow creation of lateral quincuncial projections, such as Grieger's
+* Triptychial, see, e.g.:
+* - Grieger, B. (2020). “Optimized global map projections for specific applications:
+* the triptychial projection and the Spilhaus projection”. EGU2020-9885.
+* https://doi.org/10.5194/egusphere-egu2020-9885
 *
 * Copyright (c) 2005, 2006, 2009 Gerald I. Evenden
 * Copyright (c) 2020 Kristian Evers
+* Copyright (c) 2021 Toby C Wilkinson
 *
 * Related material
 * ----------------
@@ -327,7 +334,9 @@ static PJ *setup(PJ *P, projection_type mode) {
     if( mode == PEIRCE_Q) {
       // Quincuncial projections type options: square, diamond, hemisphere, horizontal (rectangle) or vertical (rectangle)
       const char* pqtype = pj_param (P->ctx, P->params, "stype").s;
-      if (!pqtype) pqtype = "nhemisphere"; /* default if type value not supplied */
+      
+      if (!pqtype) pqtype = "diamond"; /* default if type value not supplied */
+
       if (strcmp(pqtype, "square") == 0) {
         Q->pqtype = PEIRCE_Q_SQUARE;
       }
@@ -368,10 +377,6 @@ static PJ *setup(PJ *P, projection_type mode) {
             proj_log_error (P, _("peirce_q: invalid value for 'type' argument"));
             return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
       }
-
-
-
-
 
     }
 
