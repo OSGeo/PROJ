@@ -65,8 +65,8 @@ enum peirce_type {
 struct pj_opaque {
     projection_type mode;
     peirce_type pqtype;
-    double scrollx;
-    double scrolly;
+    double scrollx = 0.0;
+    double scrolly = 0.0;
 };
 
 } // anonymous namespace
@@ -252,7 +252,7 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
       }
 
       //if o_scrollx param present, scroll x
-      if (Q->scrollx && (Q->pqtype == PEIRCE_Q_HORIZONTAL) ) {
+      if (!(Q->scrollx == 0.0) && (Q->pqtype == PEIRCE_Q_HORIZONTAL) ) {
         double xscale = 2.0;
         double xthresh = shd / 2;
         xy.x = xy.x + (Q->scrollx * (xthresh * 2 * xscale)); /*shift relative to proj width*/
@@ -265,7 +265,7 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
       }
 
       //if o_scrolly param present, scroll y
-      if (Q->scrolly && (Q->pqtype == PEIRCE_Q_VERTICAL)) {
+      if (!(Q->scrolly == 0.0) && (Q->pqtype == PEIRCE_Q_VERTICAL)) {
         double yscale = 2.0;
         double ythresh = shd / 2;
         xy.y = xy.y + (Q->scrolly * (ythresh * 2 * yscale)); /*shift relative to proj height*/
