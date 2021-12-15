@@ -114,22 +114,6 @@ static double ell_int_5(double phi) {
 
 }
 
-// static double constrainParallel(double x){
-//    /* 90+45=135 */
-//    double y = x;
-//    if ((x > M_HALFPI)) {
-//      y = x - 90;
-//    } else if (( x < -M_HALFPI)) {
-//      y = x + 90;
-//    }
-//    return y;
-//     // if ((x >= -M_HALFPI) && (x <= M_HALFPI)) return x;
-//     // x = fmod(x + M_HALFPI,M_PI);
-//     // if (x > 0)
-//     //     x -= M_PI;
-//     // return x + M_HALFPI;
-// }
-
 static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
     double a=0., b=0.;
     bool sm=false, sn=false;
@@ -334,7 +318,7 @@ static PJ *setup(PJ *P, projection_type mode) {
     if( mode == PEIRCE_Q) {
       // Quincuncial projections type options: square, diamond, hemisphere, horizontal (rectangle) or vertical (rectangle)
       const char* pqtype = pj_param (P->ctx, P->params, "stype").s;
-      
+
       if (!pqtype) pqtype = "diamond"; /* default if type value not supplied */
 
       if (strcmp(pqtype, "square") == 0) {
@@ -351,11 +335,11 @@ static PJ *setup(PJ *P, projection_type mode) {
       }
       else if (strcmp(pqtype, "horizontal") == 0) {
         Q->pqtype = PEIRCE_Q_HORIZONTAL;
-        if (pj_param(P->ctx, P->params, "to_scrollx").i) {
+        if (pj_param(P->ctx, P->params, "tscrollx").i) {
           double scrollx;
-          scrollx = pj_param(P->ctx, P->params, "do_scrollx").f;
+          scrollx = pj_param(P->ctx, P->params, "dscrollx").f;
           if (scrollx > 1 || scrollx < -1) {
-              proj_log_error(P, _("Invalid value for o_scrollx: |o_scrollx| should between -1 and 1"));
+              proj_log_error(P, _("Invalid value for scrollx: |scrollx| should between -1 and 1"));
               return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
           }
           Q->scrollx = scrollx;
@@ -363,18 +347,18 @@ static PJ *setup(PJ *P, projection_type mode) {
       }
       else if (strcmp(pqtype, "vertical") == 0) {
         Q->pqtype = PEIRCE_Q_VERTICAL;
-        if (pj_param(P->ctx, P->params, "to_scrolly").i) {
+        if (pj_param(P->ctx, P->params, "tscrolly").i) {
           double scrolly;
-          scrolly = pj_param(P->ctx, P->params, "do_scrolly").f;
+          scrolly = pj_param(P->ctx, P->params, "dscrolly").f;
           if (scrolly > 1 || scrolly < -1) {
-              proj_log_error(P, _("Invalid value for o_scrolly: |o_scrolly| should between -1 and 1"));
+              proj_log_error(P, _("Invalid value for scrolly: |scrolly| should between -1 and 1"));
               return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
           }
           Q->scrolly = scrolly;
         }
       }
       else {
-            proj_log_error (P, _("peirce_q: invalid value for 'type' argument"));
+            proj_log_error (P, _("peirce_q: invalid value for 'type' parameter"));
             return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
       }
 
