@@ -15,7 +15,6 @@ meridian of around 25 to optimise the distortions. Peirce's original
 published map from 1879 used a central meridian of approx -70.
 The diamond and square versions can be produced using the
 ``+type=diamond`` and ``+type=square`` options respectively.
-
 This implementation includes an alternative lateral projection
 which places hemispheres side-by-side (``+type=horizontal`` or
 ``+type=vertical``). Combined with a general oblique transformation,
@@ -60,12 +59,12 @@ this can be used to produced a Grieger Triptychial projection
 
    proj-string: ``+proj=peirce_q +lon_0=25 +type=horizontal``
 
-   .. figure:: ./images/grieger_triptychial.png
-      :width: 500 px
-      :align: center
-      :alt:   Grieger Triptychial
+.. figure:: ./images/grieger_triptychial.png
+   :width: 500 px
+   :align: center
+   :alt:   Grieger Triptychial
 
-      proj-string: ``+proj=pipeline +step +proj=ob_tran +o_proj=peirce_q +o_lat_p=-45 +o_lon_p=45 +type=horizontal +o_scrollx=-0.25 +step +proj=affine +s11=-1 +s12=0 +s21=0 +s22=-1``
+   proj-string: ``+proj=pipeline +step +proj=ob_tran +o_proj=peirce_q +o_lat_p=-45 +o_lon_p=45 +o_type=horizontal +o_scrollx=-0.25 +step +proj=affine +s11=-1 +s12=0 +s21=0 +s22=-1``
 
 Parameters
 ################################################################################
@@ -80,31 +79,32 @@ Parameters
 
     *Defaults to diamond.*
 
-    Indicates the type of transformation applied to the southern hemisphere: ``square`` and
-    ``diamond`` represent the traditional quincuncial form suggested by Peirce with the
-    southern hemisphere divided into 4 triangles and reflected outward from the northern
-    hemisphere. The ``square`` type is rotated by 45 degrees to produce the conventional
-    square presentation. The origin lies at the centre of the square or diamond.
+    Indicates the type of transformation applied to the southern hemisphere:
+    ``square`` and ``diamond`` represent the traditional quincuncial form suggested
+    by Peirce with the southern hemisphere divided into 4 triangles and reflected
+    outward from the northern hemisphere. The ``square`` type is rotated by 45
+    degrees to produce the conventional square presentation. The origin lies at
+    the centre of the square or diamond.
 
-    By contrast, the ``horizontal`` and ``vertical`` forms reflect the southern hemisphere
-    laterally across the x or y axis respectively to produce a rectangular form. The origin
-    lies at the centre of the rectangle.
+    By contrast, the ``horizontal`` and ``vertical`` forms reflect the southern
+    hemisphere laterally across the x or y axis respectively to produce a rectangular
+    form. The origin lies at the centre of the rectangle.
 
     The other two types, ``nhemisphere`` and ``shemisphere``, discard latitudes of less
     than 0 or more than 0, respectively, to allow single hemispheres to be selected.
     The origin lies at the centre of the square or diamond.
 
-.. option:: +o_scrollx=<value>
+.. option:: +scrollx=<value>
 
-    For ``horizontal`` type allows a scalar circular scroll of resulting x coordinates to shift
-    sections of the projection to the other horizontal side of the map.
+    For ``horizontal`` type allows a scalar circular scroll of resulting x coordinates
+    to shift sections of the projection to the other horizontal side of the map.
 
     *Defaults to 0.0. Must be a scale between -1.0 and 1.0.*
 
-.. option:: +o_scrolly=<value>
+.. option:: +scrolly=<value>
 
-    For ``vertical`` type allows a scalar circular scroll of resulting y coordinates to shift
-    sections of the projection to the other vertical side of the map.
+    For ``vertical`` type allows a scalar circular scroll of resulting y coordinates
+    to shift sections of the projection to the other vertical side of the map.
 
     *Defaults to 0.0. Must be a scale between -1.0 and 1.0.*
 
