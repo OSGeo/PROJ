@@ -3894,13 +3894,12 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
             if (mapping &&
                 mapping->epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
                 ci_equal(parameterName, "latitude_of_origin")) {
-                for (size_t idx = 0; mapping->params[idx] != nullptr; ++idx) {
-                    if (mapping->params[idx]->epsg_code ==
-                        EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) {
-                        foundParameters[idx] = true;
-                        break;
-                    }
-                }
+                // Some illegal formulations of Mercator_2SP have a unexpected
+                // latitude_of_origin parameter. We accept it on import, but
+                // do not accept it when exporting to PROJ string, unless it is
+                // zero.
+                // No need to try to update foundParameters[] as this is a
+                // unexpected one.
                 parameterName = EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN;
                 propertiesParameter.set(
                     Identifier::CODE_KEY,
