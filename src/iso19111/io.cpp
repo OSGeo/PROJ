@@ -3894,13 +3894,12 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
             if (mapping &&
                 mapping->epsg_code == EPSG_CODE_METHOD_MERCATOR_VARIANT_B &&
                 ci_equal(parameterName, "latitude_of_origin")) {
-                for (size_t idx = 0; mapping->params[idx] != nullptr; ++idx) {
-                    if (mapping->params[idx]->epsg_code ==
-                        EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN) {
-                        foundParameters[idx] = true;
-                        break;
-                    }
-                }
+                // Some illegal formulations of Mercator_2SP have a unexpected
+                // latitude_of_origin parameter. We accept it on import, but
+                // do not accept it when exporting to PROJ string, unless it is
+                // zero.
+                // No need to try to update foundParameters[] as this is a
+                // unexpected one.
                 parameterName = EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN;
                 propertiesParameter.set(
                     Identifier::CODE_KEY,
@@ -3965,6 +3964,48 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
                     OperationParameter::create(propertiesParameter));
                 values.push_back(ParameterValue::create(
                     Measure(1.0, UnitOfMeasure::SCALE_UNITY)));
+            }
+        }
+    }
+
+    if (mapping && (mapping->epsg_code ==
+                        EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A ||
+                    mapping->epsg_code ==
+                        EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B)) {
+        // Special case when importing some GDAL WKT of Hotine Oblique Mercator
+        // that have a Azimuth parameter but lacks the Rectified Grid Angle.
+        // We have code in the exportToPROJString() to deal with that situation,
+        // but also adds the rectified grid angle from the azimuth on import.
+        bool foundAngleRecifiedToSkewGrid = false;
+        bool foundAzimuth = false;
+        for (size_t idx = 0; mapping->params[idx] != nullptr; ++idx) {
+            if (foundParameters[idx] &&
+                mapping->params[idx]->epsg_code ==
+                    EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID) {
+                foundAngleRecifiedToSkewGrid = true;
+            } else if (foundParameters[idx] &&
+                       mapping->params[idx]->epsg_code ==
+                           EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) {
+                foundAzimuth = true;
+            }
+        }
+        if (!foundAngleRecifiedToSkewGrid && foundAzimuth) {
+            for (size_t idx = 0; idx < parameters.size(); ++idx) {
+                if (parameters[idx]->getEPSGCode() ==
+                    EPSG_CODE_PARAMETER_AZIMUTH_INITIAL_LINE) {
+                    PropertyMap propertiesParameter;
+                    propertiesParameter.set(
+                        Identifier::CODE_KEY,
+                        EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID);
+                    propertiesParameter.set(Identifier::CODESPACE_KEY,
+                                            Identifier::EPSG);
+                    propertiesParameter.set(
+                        IdentifiedObject::NAME_KEY,
+                        EPSG_NAME_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID);
+                    parameters.push_back(
+                        OperationParameter::create(propertiesParameter));
+                    values.push_back(values[idx]);
+                }
             }
         }
     }

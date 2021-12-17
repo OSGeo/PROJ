@@ -4005,6 +4005,16 @@ void Conversion::_exportToPROJString(
                         EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN) {
                         valueConverted = 1.0;
                     }
+                    if ((mapping->epsg_code ==
+                             EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_A ||
+                         mapping->epsg_code ==
+                             EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B) &&
+                        param->epsg_code ==
+                            EPSG_CODE_PARAMETER_ANGLE_RECTIFIED_TO_SKEW_GRID) {
+                        // Do not use 0 as the default value for +gamma of
+                        // proj=omerc
+                        continue;
+                    }
                 } else if (param->unit_type ==
                            common::UnitOfMeasure::Type::ANGULAR) {
                     valueConverted =
