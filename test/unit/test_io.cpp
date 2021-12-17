@@ -1770,6 +1770,126 @@ TEST(wkt_parse, wkt1_Spherical_Cross_Track_Height) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_hotine_oblique_mercator_without_rectified_grid_angle) {
+    auto wkt = "PROJCS[\"NAD_1983_Michigan_GeoRef_Meters\","
+               "GEOGCS[\"NAD83(1986)\","
+               "DATUM[\"North_American_Datum_1983\","
+               "SPHEROID[\"GRS_1980\",6378137,298.257222101]],"
+               "PRIMEM[\"Greenwich\",0],"
+               "UNIT[\"Degree\",0.017453292519943295]],"
+               "PROJECTION[\"Hotine_Oblique_Mercator\"],"
+               "PARAMETER[\"false_easting\",2546731.496],"
+               "PARAMETER[\"false_northing\",-4354009.816],"
+               "PARAMETER[\"latitude_of_center\",45.30916666666666],"
+               "PARAMETER[\"longitude_of_center\",-86],"
+               "PARAMETER[\"azimuth\",-22.74444],"
+               "PARAMETER[\"scale_factor\",0.9996],"
+               "UNIT[\"Meter\",1]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    // Check that we have added automatically rectified_grid_angle
+    auto got_wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    EXPECT_TRUE(got_wkt.find("PARAMETER[\"rectified_grid_angle\",-22.74444]") !=
+                std::string::npos)
+        << got_wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_hotine_oblique_mercator_with_rectified_grid_angle) {
+    auto wkt = "PROJCS[\"NAD_1983_Michigan_GeoRef_Meters\","
+               "GEOGCS[\"NAD83(1986)\","
+               "DATUM[\"North_American_Datum_1983\","
+               "SPHEROID[\"GRS_1980\",6378137,298.257222101]],"
+               "PRIMEM[\"Greenwich\",0],"
+               "UNIT[\"Degree\",0.017453292519943295]],"
+               "PROJECTION[\"Hotine_Oblique_Mercator\"],"
+               "PARAMETER[\"false_easting\",2546731.496],"
+               "PARAMETER[\"false_northing\",-4354009.816],"
+               "PARAMETER[\"latitude_of_center\",45.30916666666666],"
+               "PARAMETER[\"longitude_of_center\",-86],"
+               "PARAMETER[\"azimuth\",-22.74444],"
+               "PARAMETER[\"rectified_grid_angle\",-23],"
+               "PARAMETER[\"scale_factor\",0.9996],"
+               "UNIT[\"Meter\",1]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    // Check that we have not overriden rectified_grid_angle
+    auto got_wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    EXPECT_TRUE(got_wkt.find("PARAMETER[\"rectified_grid_angle\",-23]") !=
+                std::string::npos)
+        << got_wkt;
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(proj_export, wkt2_hotine_oblique_mercator_without_rectified_grid_angle) {
+    auto wkt = "PROJCRS[\"NAD_1983_Michigan_GeoRef_Meters\",\n"
+               "    BASEGEOGCRS[\"NAD83(1986)\",\n"
+               "        DATUM[\"North American Datum 1983\",\n"
+               "            ELLIPSOID[\"GRS_1980\",6378137,298.257222101,\n"
+               "                LENGTHUNIT[\"metre\",1]],\n"
+               "            ID[\"EPSG\",6269]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            ANGLEUNIT[\"Degree\",0.0174532925199433]]],\n"
+               "    CONVERSION[\"unnamed\",\n"
+               "        METHOD[\"Hotine Oblique Mercator (variant A)\",\n"
+               "            ID[\"EPSG\",9812]],\n"
+               "        PARAMETER[\"False easting\",2546731.496,\n"
+               "            LENGTHUNIT[\"Meter\",1],\n"
+               "            ID[\"EPSG\",8806]],\n"
+               "        PARAMETER[\"False northing\",-4354009.816,\n"
+               "            LENGTHUNIT[\"Meter\",1],\n"
+               "            ID[\"EPSG\",8807]],\n"
+               "        PARAMETER[\"Latitude of projection centre\","
+               "                  45.3091666666667,\n"
+               "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8811]],\n"
+               "        PARAMETER[\"Longitude of projection centre\",-86,\n"
+               "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8812]],\n"
+               "        PARAMETER[\"Azimuth of initial line\",-22.74444,\n"
+               "            ANGLEUNIT[\"Degree\",0.0174532925199433],\n"
+               "            ID[\"EPSG\",8813]],\n"
+               "        PARAMETER[\"Scale factor on initial line\",0.9996,\n"
+               "            SCALEUNIT[\"unity\",1],\n"
+               "            ID[\"EPSG\",8815]]],\n"
+               "    CS[Cartesian,2],\n"
+               "        AXIS[\"(E)\",east,\n"
+               "            ORDER[1],\n"
+               "            LENGTHUNIT[\"Meter\",1]],\n"
+               "        AXIS[\"(N)\",north,\n"
+               "            ORDER[2],\n"
+               "            LENGTHUNIT[\"Meter\",1]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    // We don't do any particular handling of missing Angle from Rectified
+    // to Skew Grid on import, but on export to PROJ string,
+    // check that we don't add a dummy gamma value.
+    auto expectedPROJString = "+proj=omerc +no_uoff +lat_0=45.3091666666667 "
+                              "+lonc=-86 +alpha=-22.74444 "
+                              "+k=0.9996 +x_0=2546731.496 +y_0=-4354009.816 "
+                              "+datum=NAD83 +units=m +no_defs +type=crs";
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        expectedPROJString);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt2_projected) {
     auto wkt = "PROJCRS[\"WGS 84 / UTM zone 31N\",\n"
                "    BASEGEODCRS[\"WGS 84\",\n"
