@@ -13,8 +13,8 @@ distribution of the source code and various resource file archives. See
 Current Release
 --------------------------------------------------------------------------------
 
-* **2021-09-01** `proj-8.2.0.tar.gz`_ (`md5`_)
-* **2021-07-01** `proj-data-1.8.tar.gz`_
+* **2021-11-01** `proj-8.2.0.tar.gz`_ (`md5`_)
+* **2021-11-01** `proj-data-1.8.tar.gz`_
 * **PDF Manual** `proj.pdf`_
 
 .. note::
