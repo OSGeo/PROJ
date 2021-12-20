@@ -1,10 +1,10 @@
-name: Linux GCC 4.8
+name: Linux GCC 5.4
 
 on: [push, pull_request]
 
 jobs:
 
-  linux_gcc_4_8:
+  linux_gcc_5_4:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     steps:
@@ -17,11 +17,11 @@ jobs:
         with:
           path: |
                 ${{ github.workspace }}/ccache.tar.gz
-          key: ${{ runner.os }}-cache-gcc-4-8-${{ github.run_id }}
-          restore-keys: ${{ runner.os }}-cache-gcc-4-8-
+          key: ${{ runner.os }}-cache-gcc-5-4-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-cache-gcc-5-4-
 
       - name: Run
-        run: docker run -e CI -e WORK_DIR="$PWD" -v $PWD:$PWD ubuntu:16.04 $PWD/.github/workflows/linux_gcc_4_8/start.sh
+        run: docker run -e CI -e WORK_DIR="$PWD" -v $PWD:$PWD ubuntu:16.04 $PWD/.github/workflows/linux_gcc_5_4/start.sh
 
       - name: Coveralls
         uses: coverallsapp/github-action@v1.1.2
