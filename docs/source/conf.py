@@ -206,7 +206,7 @@ html_context = {
     'github_user': 'OSGeo',
     'github_repo': 'PROJ',
     # TODO: edit when switching active branch
-    'github_version': '/8.0/docs/source/',
+    'github_version': '8.2/docs/source/',
 }
 
 # Add any extra paths that contain custom files (such as robots.txt or
