@@ -1051,13 +1051,46 @@
         "type": "poly"
     },
     {
-        "filename": "peirce_q.png",
+        "filename": "peirce_q_square.png",
         "latmax": 90,
-        "latmin": 0,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "peirce_q_square",
+        "projstring": "+proj=peirce_q +lon_0=25 +type=square",
+        "res": "low",
+        "type": "poly"
+    },
+    {
+        "filename": "peirce_q_diamond.png",
+        "latmax": 90,
+        "latmin": -90,
         "lonmax": 180,
         "lonmin": -180,
         "name": "peirce_q",
-        "projstring": "+proj=peirce_q",
+        "projstring": "+proj=peirce_q +lon_0=25 +type=diamond",
+        "res": "low",
+        "type": "poly"
+    },
+    {
+        "filename": "peirce_q_horizontal.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "peirce_q_horizontal",
+        "projstring": "+proj=peirce_q +lon_0=25 +type=horizontal",
+        "res": "low",
+        "type": "line"
+    },
+    {
+        "filename": "grieger_triptychial.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "grieger_triptychial",
+        "projstring": "+proj=pipeline +step +proj=ob_tran +o_proj=peirce_q +o_lat_p=-45 +o_lon_p=45 +type=horizontal +scrollx=-0.25 +step +proj=affine +s11=-1 +s12=0 +s21=0 +s22=-1",
         "res": "low",
         "type": "poly"
     },
