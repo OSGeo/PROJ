@@ -1,3 +1,42 @@
+8.2.1 Release Notes
+-------------------
+
+ Updates
+ -------
+
+ o Database updated with EPSG v. 10.041 (#2974)
+
+ Bug fixes
+ ---------
+
+ o BoundCRS WKT import: fix setting of name (#2917)
+
+ o PROJStringFormatter::toString(): avoid invalid iterator increment (#2932)
+
+ o Ensure CApi test are cross-platform (#2934)
+
+ o createOperations(): do not stop at the first operation in the PROJ namespace
+   for vertical transformations (#2937)
+
+ o createOperationsCompoundToCompound(): fix null pointer dereference when
+   connection to proj.db doesn't exist. (#2938)
+
+ o Fix windows.h conflict with Criterion::STRICT (#2950)
+
+ o Cache result of proj_get_type() to help for performance of
+   proj_factors() (#2967)
+
+ o createOperations(): improvement for "NAD83(CSRS) + CGVD28 height" to
+   "NAD83(CSRS) + CGVD2013(CGG2013) height" (#2977)
+
+ o WKT1 import: correctly deal with missing rectified_grid_angle
+   parameter (#2986)
+
+ o Fix and additional options for Peirce Quincuncial projections (#2978)
+
+ o Fix build with Intel C++ compiler (#2995)
+
+
 8.2.0 Release Notes
 -------------------
 
