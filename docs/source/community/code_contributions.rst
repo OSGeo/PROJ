@@ -111,10 +111,10 @@ possible, you can add a comment in the code like
 in the preceding line. Replace
 duplicateBreak with the actual name of the violated rule emitted by cppcheck.
 
-CLang Static Analyzer (CSA)
+Clang Static Analyzer (CSA)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-CSA is run by the ``travis/csa`` build configuration. You may also run it locally.
+CSA is run by a GitHub Actions workflow. You may also run it locally.
 
 Preliminary step: install clang. For example:
 
@@ -123,27 +123,29 @@ Preliminary step: install clang. For example:
     wget https://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
     tar xJf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
     mv clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04 clang+llvm-9
+    export PATH=$PWD/clang+llvm-9/bin:$PATH
 
-Run configure under the scan-build utility of clang:
+Configure PROJ with the :program:`scan-build` utility of clang:
+
+::
+    mkdir csa_build
+    cd csa_build
+    scan-build cmake ..
+
+Build using :program:`scan-build`:
 
 ::
 
-    ./clang+llvm-9/bin/scan-build ./configure
-
-Build under scan-build:
-
-::
-
-    ./clang+llvm-9/bin/scan-build make [-j8]
+    scan-build make [-j8]
 
 If CSA finds errors, they will be emitted during the build. And in which case,
-at the end of the build process, scan-build will emit a warning message
+at the end of the build process, :program:`scan-build` will emit a warning message
 indicating errors have been found and how to display the error report. This
 is with something like
 
 ::
 
-    ./clang+llvm-9/bin/scan-view /tmp/scan-build-2021-03-15-121416-17476-1
+    scan-view /tmp/scan-build-2021-03-15-121416-17476-1
 
 
 This will open a web browser with the interactive report.
