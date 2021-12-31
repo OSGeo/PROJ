@@ -6,7 +6,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-PROJ_HEAD(labrd, "Laborde") "\n\tCyl, Sph\n\tSpecial for Madagascar";
+PROJ_HEAD(labrd, "Laborde") "\n\tCyl, Sph\n\tlat_0= Special for Madagascar";
 #define EPS 1.e-10
 
 namespace { // anonymous namespace
