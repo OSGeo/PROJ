@@ -3,8 +3,47 @@
 News
 ###############################################################################
 
+8.2.1 Release Notes
++++++++++++++++++++
+*January 1st 2022*
+
+
+Updates
+-------
+
+* Database updated with EPSG v. 10.041 (`#2974 <https://github.com/OSGeo/PROJ/issues/2974>`_)
+
+Bug fixes
+---------
+
+* BoundCRS WKT import: fix setting of name (`#2917 <https://github.com/OSGeo/PROJ/issues/2917>`_)
+
+* :cpp:func:`PROJStringFormatter::toString()`: avoid invalid iterator increment (`#2932 <https://github.com/OSGeo/PROJ/issues/2932>`_)
+
+* Ensure CApi test are cross-platform (`#2934 <https://github.com/OSGeo/PROJ/issues/2934>`_)
+
+* :cpp:func:`createOperations()`: do not stop at the first operation in the PROJ namespace for vertical transformations (`#2937 <https://github.com/OSGeo/PROJ/issues/2937>`_)
+
+* :cpp:func:`createOperationsCompoundToCompound()`: fix null pointer dereference when connection to ``proj.db`` doesn't exist. (`#2938 <https://github.com/OSGeo/PROJ/issues/2938>`_)
+
+* Fix ``windows.h`` conflict with ``Criterion::STRICT`` (`#2950 <https://github.com/OSGeo/PROJ/issues/2950>`_)
+
+* Cache result of :c:func:`proj_get_type()` to help for performance of :c:func:`proj_factors()` (`#2967 <https://github.com/OSGeo/PROJ/issues/2967>`_)
+
+* :cpp:func:`createOperations()`: improvement for "NAD83(CSRS) + CGVD28 height" to "NAD83(CSRS) + CGVD2013(CGG2013) height" (`#2977 <https://github.com/OSGeo/PROJ/issues/2977>`_)
+
+* WKT1 import: correctly deal with missing rectified_grid_angle parameter (`#2986 <https://github.com/OSGeo/PROJ/issues/2986>`_)
+
+* Fix and additional options for Peirce Quincuncial projections (`#2978 <https://github.com/OSGeo/PROJ/issues/2978>`_)
+
+* Fix build with Intel C++ compiler (`#2995 <https://github.com/OSGeo/PROJ/issues/2995>`_)
+
+
+
 8.2.0 Release Notes
 +++++++++++++++++++
+*November 1st 2021*
+
 
 Announcements
 -------------
