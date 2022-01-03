@@ -2,39 +2,44 @@
 
 include(CTest)
 
-macro(add_test_ldd EXE)
+macro(add_test_libpath EXE)
   set(EXEPATH ${CMAKE_BINARY_DIR}/${EXE})
+  set(HAS_TOOL TRUE)
   if(APPLE)
-    set(LDD_CL "otool -L")
-    set(EXPECTED_LDD_CL_OUT "@rpath/libproj")
+    set(EXPECTED_SUBSTR "${CMAKE_PREFIX_PATH}/lib")
   elseif(UNIX)
-    set(LDD_CL "ldd")
-    set(EXPECTED_LDD_CL_OUT "${CMAKE_PREFIX_PATH}/lib/libproj")
+    set(EXPECTED_SUBSTR "${CMAKE_PREFIX_PATH}/lib/libproj")
   elseif(CMAKE_GENERATOR STREQUAL "MSYS Makefiles")
-    set(LDD_CL "ldd")
     # Convert to Unix-style path
     execute_process(
-      COMMAND cygpath -u ${CMAKE_PREFIX_PATH}/bin/libproj
-        OUTPUT_VARIABLE EXPECTED_LDD_CL_OUT
+      COMMAND cygpath -u "${CMAKE_PREFIX_PATH}/bin/libproj"
+        OUTPUT_VARIABLE EXPECTED_SUBSTR
         OUTPUT_STRIP_TRAILING_WHITESPACE)
+  else()
+    set(HAS_TOOL FALSE)
   endif()
-  if(LDD_CL)
-    add_test(NAME test_ldd
-      COMMAND sh -c "${LDD_CL} ${EXEPATH} | grep proj")
+  if(HAS_TOOL)
+    if(APPLE)
+      add_test(NAME test_libpath
+        COMMAND sh -c "otool -l ${EXEPATH} | grep -m1 \"${EXPECTED_SUBSTR}\"")
+    else()
+      add_test(NAME test_libpath
+        COMMAND sh -c "ldd ${EXEPATH} | grep -m1 proj")
+    endif()
     if($ENV{BUILD_MODE} STREQUAL "static")
-      set_tests_properties(test_ldd PROPERTIES
+      set_tests_properties(test_libpath PROPERTIES
         PASS_REGULAR_EXPRESSION "^$"
-        FAIL_REGULAR_EXPRESSION "${EXPECTED_LDD_CL_OUT};not found"
+        FAIL_REGULAR_EXPRESSION "${EXPECTED_SUBSTR};not found"
       )
     else()
-      set_tests_properties(test_ldd PROPERTIES
-        PASS_REGULAR_EXPRESSION "${EXPECTED_LDD_CL_OUT}"
+      set_tests_properties(test_libpath PROPERTIES
+        PASS_REGULAR_EXPRESSION "${EXPECTED_SUBSTR}"
         FAIL_REGULAR_EXPRESSION "not found"
       )
     endif()
   else()
-    add_test(NAME test_ldd COMMAND ${EXEPATH})
-    set_tests_properties(test_ldd PROPERTIES SKIP_RETURN_CODE 1)
+    add_test(NAME test_libpath COMMAND ${EXEPATH})
+    set_tests_properties(test_libpath PROPERTIES SKIP_RETURN_CODE 1)
   endif()
 endmacro()
 

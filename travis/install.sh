@@ -169,17 +169,17 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
         $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_cmake_install shared
         $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_cmake_install shared
     else
-        echo "Skipping test_autotools.sh test for $BUILD_NAME"
+        echo "Skipping test_cmake.sh and test_autotools.sh for $BUILD_NAME"
     fi
     cd ..
 
-    if [ $TRAVIS_OS_NAME != "osx" ]; then
-        # Check that we can retrieve the resource directory in a relative way after renaming the installation prefix
-        mkdir /tmp/proj_cmake_install_renamed
-        mv /tmp/proj_cmake_install /tmp/proj_cmake_install_renamed/subdir
-        /tmp/proj_cmake_install_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory || /bin/true
-        /tmp/proj_cmake_install_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null | grep "Downloading from https://cdn.proj.org into /tmp/proj_cmake_install_renamed/subdir/share/proj"
-    fi
+    # Check that we can retrieve the resource directory in a relative way after renaming the installation prefix
+    mkdir /tmp/proj_cmake_install_renamed
+    mv /tmp/proj_cmake_install /tmp/proj_cmake_install_renamed/subdir
+    set +e
+    /tmp/proj_cmake_install_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory
+    /tmp/proj_cmake_install_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null | grep "Downloading from https://cdn.proj.org into /tmp/proj_cmake_install_renamed/subdir/share/proj"
+    set -e
 
     # return to root
     cd ../..

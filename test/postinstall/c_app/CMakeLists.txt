@@ -28,7 +28,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/..)
 include(common)
-add_test_ldd(c_app proj)
+add_test_libpath(c_app proj)
 add_test_transform(c_app)
 add_test_searchpath(c_app)
 add_test_version(c_app)

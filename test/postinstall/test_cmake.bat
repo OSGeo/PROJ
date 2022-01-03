@@ -72,7 +72,7 @@ cmake -DCMAKE_BUILD_TYPE=Release ^
   -DUSE_PROJ_NAME=%1 .. || Exit /B 1
 
 cmake --build . --config Release || Exit /B 1
-ctest --output-on-failure -V -C Release || Exit /B 1
+ctest --output-on-failure -C Release || Exit /B 1
 
 Cd ..
 Rd /s /q build

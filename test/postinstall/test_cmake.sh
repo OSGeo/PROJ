@@ -3,14 +3,14 @@
 # Post-install tests with CMake
 #
 # First required argument is the installed prefix, which
-# is used to set CMAKE_PREFIX_PATH and
-# LD_LIBRARY_PATH/DYLD_LIBRARY_PATH for shared builds
+# is used to set CMAKE_PREFIX_PATH
 # Second argument is either shared (default) or static
 cd $(dirname $0)
 . ./common.sh
 main_setup $1 $2
 
 echo "Running post-install tests with CMake (${BUILD_MODE})"
+
 
 cmake_make_ctest(){
   rm -rf build
@@ -19,7 +19,7 @@ cmake_make_ctest(){
 
   cmake -DCMAKE_PREFIX_PATH=${prefix} -DUSE_PROJ_NAME=$1 ..
   VERBOSE=1 make
-  ctest --output-on-failure -V
+  ctest --output-on-failure
 
   cd ..
   rm -rf build

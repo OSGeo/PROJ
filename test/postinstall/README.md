@@ -34,7 +34,7 @@ Two build modes are tested with each configure method:
 
 All configure methods share the same suite of tests for `c_app` and `cpp_app`:
 
-- `test_ldd` - examines the shared object dependencies to see if "libproj" is found with the correct path (for `shared` build mode), or not listed as a dependency for builds with static libproj.
+- `test_libpath` - examines the shared object dependencies to see if "libproj" is found with the correct path (for `shared` build mode), or not listed as a dependency for builds with static libproj.
 - `test_transform` - example coordinate transform to ensure basic functions work as expected.
 - `test_searchpath` - compares `searchpath` (from `proj_info()`) to either `datadir` via pkg-config or relative path `PROJ_DIR/../../../share/proj` via CMake.
 - `test_version` - compares PROJ version components from `proj_info()` to the version from pkg-config or CMake.
