@@ -56,6 +56,8 @@ any discrepancies discovered between Autotools and CMake builds.
 
 Details about the build system unification can be found in :ref:`RFC7`.
 
+Note also that the "CMake: revise handling of symbol export and static builds"
+change mentioned below may require changes for users of the library on Windows.
 
 Updates
 -------
@@ -106,6 +108,12 @@ Updates
 * Database: update to EPSG v10.038 (`#2910 <https://github.com/OSGEO/PROJ/issues/2910>`_)
 
 * CMake: revise handling of symbol export and static builds (`#2912 <https://github.com/OSGEO/PROJ/issues/2912>`_)
+
+  This requires changes for users of static builds on Windows that do not use CMake
+  config files. The empty ``PROJ_DLL=`` definition must now be defined when building
+  against a static build of PROJ.
+  For users of dynamic builds on Windows, the ``PROJ_MSVC_DLL_IMPORT`` definition is
+  no longer needed.
 
 Bug fixes
 ---------
