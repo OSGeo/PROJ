@@ -61,4 +61,4 @@ Parameters
 Further reading
 ################################################################################
 
-#. Philippe Rivière (2017). `Bertin Projection (1953) <https://visionscarto.net/bertin-projection-1953>`, Visionscarto.net.
+#. `Bertin Projection (1953) <https://visionscarto.net/bertin-projection-1953>`_
