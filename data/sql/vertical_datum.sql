@@ -228,6 +228,10 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1306','Catania 1965',NULL,'1965-01-0
 INSERT INTO "usage" VALUES('EPSG','15330','vertical_datum','EPSG','1306','EPSG','2340','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1307','Cagliari 1956',NULL,'1956-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','15331','vertical_datum','EPSG','1307','EPSG','2339','EPSG','1178');
+INSERT INTO "vertical_datum" VALUES('EPSG','1316','GNTRANS',NULL,'2003-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17277','vertical_datum','EPSG','1316','EPSG','3339','EPSG','1141');
+INSERT INTO "vertical_datum" VALUES('EPSG','1318','GNTRANS2016',NULL,'2016-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17278','vertical_datum','EPSG','1318','EPSG','3339','EPSG','1141');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,0);
@@ -370,7 +374,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','5170','Stewart Island 1977',NULL,'19
 INSERT INTO "usage" VALUES('EPSG','13376','vertical_datum','EPSG','5170','EPSG','3338','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','5171','EGM96 geoid',NULL,'1996-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13377','vertical_datum','EPSG','5171','EPSG','1262','EPSG','1027');
-INSERT INTO "vertical_datum" VALUES('EPSG','5172','Nivellement General du Luxembourg',NULL,'1995-01-01',NULL,NULL,NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','5172','Nivellement General du Luxembourg 1995',NULL,'1995-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13378','vertical_datum','EPSG','5172','EPSG','1146','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','5173','Antalya',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13379','vertical_datum','EPSG','5173','EPSG','3322','EPSG','1178');

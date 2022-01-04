@@ -248,8 +248,6 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','4179','Pulkovo 1942(58)',NULL,'geograp
 INSERT INTO "usage" VALUES('EPSG','3063','geodetic_crs','EPSG','4179','EPSG','3574','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4180','EST97',NULL,'geographic 2D','EPSG','6422','EPSG','6180',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3064','geodetic_crs','EPSG','4180','EPSG','1090','EPSG','1183');
-INSERT INTO "geodetic_crs" VALUES('EPSG','4181','Luxembourg 1930',NULL,'geographic 2D','EPSG','6422','EPSG','6181',NULL,0);
-INSERT INTO "usage" VALUES('EPSG','3065','geodetic_crs','EPSG','4181','EPSG','1146','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4182','Azores Occidental 1939',NULL,'geographic 2D','EPSG','6422','EPSG','6182',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','3066','geodetic_crs','EPSG','4182','EPSG','1344','EPSG','1027');
 INSERT INTO "geodetic_crs" VALUES('EPSG','4183','Azores Central 1948',NULL,'geographic 2D','EPSG','6422','EPSG','6183',NULL,0);
@@ -2162,3 +2160,9 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','9866','MRH21-IRF',NULL,'geographic 2D'
 INSERT INTO "usage" VALUES('EPSG','16934','geodetic_crs','EPSG','9866','EPSG','4652','EPSG','1141');
 INSERT INTO "geodetic_crs" VALUES('EPSG','9871','MOLDOR11-IRF',NULL,'geographic 2D','EPSG','6422','EPSG','1315',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','16960','geodetic_crs','EPSG','9871','EPSG','4655','EPSG','1141');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9892','LUREF',NULL,'geocentric','EPSG','6500','EPSG','6181',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17243','geodetic_crs','EPSG','9892','EPSG','1146','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','4181','LUREF',NULL,'geographic 2D','EPSG','6422','EPSG','6181',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','3065','geodetic_crs','EPSG','4181','EPSG','1146','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9893','LUREF',NULL,'geographic 3D','EPSG','6423','EPSG','6181',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17309','geodetic_crs','EPSG','9893','EPSG','1146','EPSG','1027');

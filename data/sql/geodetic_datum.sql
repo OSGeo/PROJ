@@ -90,7 +90,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1077','Ukraine 2000',NULL,'EPSG','70
 INSERT INTO "usage" VALUES('EPSG','13129','geodetic_datum','EPSG','1077','EPSG','1242','EPSG','1027');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1078','Fehmarnbelt Datum 2010',NULL,'EPSG','7019','EPSG','8901','2010-02-21',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13130','geodetic_datum','EPSG','1078','EPSG','3889','EPSG','1139');
-INSERT INTO "geodetic_datum" VALUES('EPSG','1081','Deutsche Bahn Reference System',NULL,'EPSG','7004','EPSG','8901',NULL,NULL,NULL,NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','1081','Deutsche Bahn Reference System',NULL,'EPSG','7004','EPSG','8901','2001-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13133','geodetic_datum','EPSG','1081','EPSG','3339','EPSG','1141');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1095','Tonga Geodetic Datum 2005',NULL,'EPSG','7019','EPSG','8901','2005-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13147','geodetic_datum','EPSG','1095','EPSG','1234','EPSG','1181');
@@ -552,7 +552,7 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','6179','Pulkovo 1942(58)',NULL,'EPSG'
 INSERT INTO "usage" VALUES('EPSG','13523','geodetic_datum','EPSG','6179','EPSG','3574','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6180','Estonia 1997',NULL,'EPSG','7019','EPSG','8901','1997-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13524','geodetic_datum','EPSG','6180','EPSG','1090','EPSG','1181');
-INSERT INTO "geodetic_datum" VALUES('EPSG','6181','Luxembourg 1930',NULL,'EPSG','7022','EPSG','8901','1930-01-01',NULL,NULL,NULL,0);
+INSERT INTO "geodetic_datum" VALUES('EPSG','6181','Luxembourg Reference Frame',NULL,'EPSG','7022','EPSG','8901','1930-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13525','geodetic_datum','EPSG','6181','EPSG','1146','EPSG','1181');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6182','Azores Occidental Islands 1939',NULL,'EPSG','7022','EPSG','8901','1939-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13526','geodetic_datum','EPSG','6182','EPSG','1344','EPSG','1153');
