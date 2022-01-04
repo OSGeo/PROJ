@@ -1477,7 +1477,6 @@ createApproximateInverseIfPossible(const Transformation *op) {
 
     return nullptr;
 }
-//! @endcond
 
 // ---------------------------------------------------------------------------
 

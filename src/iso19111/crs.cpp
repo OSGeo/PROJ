@@ -5879,6 +5879,7 @@ BoundCRS::_identify(const io::AuthorityFactoryPtr &authorityFactory) const {
     }
     return !resMatchOfTransfToWGS84.empty() ? resMatchOfTransfToWGS84 : res;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
