@@ -2077,8 +2077,6 @@ int proj_context_is_network_enabled(PJ_CONTEXT *ctx) {
     return ctx->networking.enabled;
 }
 
-//! @endcond
-
 // ---------------------------------------------------------------------------
 
 /** Define the URL endpoint to query for remote grids.

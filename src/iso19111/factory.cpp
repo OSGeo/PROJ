@@ -8797,6 +8797,7 @@ std::list<datum::EllipsoidNNPtr> AuthorityFactory::createEllipsoidFromExisting(
     }
     return res;
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -9308,7 +9309,6 @@ AuthorityFactory::createCompoundCRSFromExisting(
 
 // ---------------------------------------------------------------------------
 
-//! @cond Doxygen_Suppress
 std::vector<operation::CoordinateOperationNNPtr>
 AuthorityFactory::getTransformationsForGeoid(
     const std::string &geoidName, bool usePROJAlternativeGridNames) const {

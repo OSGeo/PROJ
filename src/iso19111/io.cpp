@@ -866,6 +866,8 @@ void WKTFormatter::stopInversion() {
 bool WKTFormatter::isInverted() const { return d->inversionStack_.back(); }
 #endif
 
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
@@ -1411,6 +1413,7 @@ struct WKTParser::Private {
     ConcatenatedOperationNNPtr
     buildConcatenatedOperation(const WKTNodeNNPtr &node);
 };
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
@@ -8866,6 +8869,8 @@ struct PROJStringParser::Private {
     SphericalCSNNPtr buildSphericalCS(int iStep, int iUnitConvert,
                                       int iAxisSwap, bool ignorePROJAxis);
 };
+
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
