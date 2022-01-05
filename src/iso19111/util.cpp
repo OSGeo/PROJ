@@ -293,6 +293,8 @@ const BaseObjectNNPtr *PropertyMap::get(const std::string &key) const {
     }
     return nullptr;
 }
+//! @endcond
+
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress

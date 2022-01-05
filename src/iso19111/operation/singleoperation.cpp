@@ -533,6 +533,7 @@ void OperationMethod::_exportToJSON(
         formatID(formatter);
     }
 }
+//! @endcond
 
 // ---------------------------------------------------------------------------
 
