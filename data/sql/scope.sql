@@ -254,3 +254,7 @@ INSERT INTO "scope" VALUES('EPSG','1274','Spatial referencing including water re
 INSERT INTO "scope" VALUES('EPSG','1275','Alignment of datasets referenced to WGS 84 which have been derived from GDA2020 via the null transformation EPSG::8450 with GDA94 datasets.',0);
 INSERT INTO "scope" VALUES('EPSG','1276','Alignment of datasets referenced to WGS 84 which have been derived from GDA94 via the null transformation EPSG::1150 with GDA2020 datasets.',0);
 INSERT INTO "scope" VALUES('EPSG','1277','Derivation of depths from GNSS observations.',0);
+INSERT INTO "scope" VALUES('EPSG','1280','Readjustment of coordinates to account for ground deformation caused by 2011 Tohoku earthquake.',0);
+INSERT INTO "scope" VALUES('EPSG','1281','Geodesy. Defines LUREF from 2006 to 2014.',0);
+INSERT INTO "scope" VALUES('EPSG','1282','Geodesy. Defines LUREF from 2014 to 2020.',0);
+INSERT INTO "scope" VALUES('EPSG','1283','Geodesy. Defines LUREF from 2020.',0);

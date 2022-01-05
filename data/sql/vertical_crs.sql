@@ -210,7 +210,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','5772','Stewart Island 1977 height',NUL
 INSERT INTO "usage" VALUES('EPSG','4215','vertical_crs','EPSG','5772','EPSG','3338','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','5773','EGM96 height',NULL,'EPSG','6499','EPSG','5171',0);
 INSERT INTO "usage" VALUES('EPSG','4216','vertical_crs','EPSG','5773','EPSG','1262','EPSG','1027');
-INSERT INTO "vertical_crs" VALUES('EPSG','5774','NG-L height',NULL,'EPSG','6499','EPSG','5172',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','5774','NG95 height',NULL,'EPSG','6499','EPSG','5172',0);
 INSERT INTO "usage" VALUES('EPSG','4217','vertical_crs','EPSG','5774','EPSG','1146','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','5775','Antalya height',NULL,'EPSG','6499','EPSG','5173',0);
 INSERT INTO "usage" VALUES('EPSG','4218','vertical_crs','EPSG','5775','EPSG','3322','EPSG','1178');
@@ -504,3 +504,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9721','Catania 1965 height',NULL,'EPSG
 INSERT INTO "usage" VALUES('EPSG','15276','vertical_crs','EPSG','9721','EPSG','2340','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','9722','Cagliari 1956 height',NULL,'EPSG','6499','EPSG','1307',0);
 INSERT INTO "usage" VALUES('EPSG','15278','vertical_crs','EPSG','9722','EPSG','2339','EPSG','1178');
+INSERT INTO "vertical_crs" VALUES('EPSG','9923','GNTRANS height',NULL,'EPSG','6499','EPSG','1316',0);
+INSERT INTO "usage" VALUES('EPSG','17285','vertical_crs','EPSG','9923','EPSG','3339','EPSG','1141');
+INSERT INTO "vertical_crs" VALUES('EPSG','9927','GNTRANS2016 height',NULL,'EPSG','6499','EPSG','1318',0);
+INSERT INTO "usage" VALUES('EPSG','17286','vertical_crs','EPSG','9927','EPSG','3339','EPSG','1141');

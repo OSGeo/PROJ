@@ -561,6 +561,10 @@ static const MethodMapping projectionMethodMappings[] = {
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR, EPSG_CODE_METHOD_TRANSVERSE_MERCATOR,
      "Transverse_Mercator", "tmerc", nullptr, paramsNatOriginScaleK},
 
+    {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_3D,
+     EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_3D, "Transverse_Mercator", "tmerc",
+     nullptr, paramsNatOriginScaleK},
+
     {EPSG_NAME_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
      EPSG_CODE_METHOD_TRANSVERSE_MERCATOR_SOUTH_ORIENTATED,
      "Transverse_Mercator_South_Orientated", "tmerc", "axis=wsu",

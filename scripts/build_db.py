@@ -282,6 +282,9 @@ def fill_geodetic_crs(proj_db_cursor):
     # they lacked a datum code. We will continue to ignore them.
     proj_db_cursor.execute("INSERT INTO geodetic_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, coord_ref_sys_kind, ?, coord_sys_code, ?, datum_code, NULL, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric') AND datum_code IS NOT NULL AND NOT (coord_ref_sys_code > 61000000 AND deprecated)", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
 
+    # FIXME: remove me for EPSG > 10.044 where the issue with EPSG:4181 and EPSG:9893 having a null datum_code has been solved.
+    proj_db_cursor.execute("INSERT INTO geodetic_crs SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, coord_ref_sys_kind, ?, coord_sys_code, ?, 6181, NULL, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('geographic 2D', 'geographic 3D', 'geocentric') AND datum_code IS NULL AND coord_ref_sys_code IN (4181, 9893)", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
+
 
 def fill_vertical_crs(proj_db_cursor):
     #proj_db_cursor.execute(

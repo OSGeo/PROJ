@@ -502,6 +502,7 @@ BEGIN
             'EPSG_1069_Change of Vertical Unit',
             'EPSG_1104_Change of Vertical Unit',
             'EPSG_1078_Equal Earth',
+            'EPSG_1111_Transverse Mercator 3D',
             'EPSG_9602_Geographic/geocentric conversions',
             'EPSG_9659_Geographic3D to 2D conversion',
             'EPSG_9801_Lambert Conic Conformal (1SP)',
@@ -731,9 +732,9 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system.type must be ''cartesian''')
         WHERE (SELECT type FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 'Cartesian';
 
-    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system.dimension must be 2')
+    SELECT RAISE(ABORT, 'insert on projected_crs violates constraint: coordinate_system.dimension must be 2 or 3')
     -- EPSG:4461 is topocentric
-        WHERE NOT(NEW.coordinate_system_auth_name = 'EPSG' AND NEW.coordinate_system_code = '4461') AND (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) != 2;
+        WHERE NOT(NEW.coordinate_system_auth_name = 'EPSG' AND NEW.coordinate_system_code = '4461') AND (SELECT dimension FROM coordinate_system WHERE coordinate_system.auth_name = NEW.coordinate_system_auth_name AND coordinate_system.code = NEW.coordinate_system_code) NOT IN (2,3);
 END;
 
 CREATE TABLE compound_crs(
