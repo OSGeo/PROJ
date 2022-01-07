@@ -34,9 +34,10 @@ Parameters
 Required
 --------------------------------------------------------------------------------
 
-.. include:: ../options/lon_0.rst
+.. option:: +lat_0=<value>
 
-.. include:: ../options/lat_0.rst
+    Latitude of projection center. Must not be zero.
+
 
 Optional
 --------------------------------------------------------------------------------
@@ -46,6 +47,8 @@ Optional
     Azimuth of the central line.
 
     *Defaults to 0.0*
+
+.. include:: ../options/lon_0.rst
 
 .. include:: ../options/R.rst
 
