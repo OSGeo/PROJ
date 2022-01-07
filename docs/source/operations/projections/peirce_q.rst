@@ -14,10 +14,10 @@ defaults to a central meridian of 0, it is more common to use a central
 meridian of around 25 to optimise the distortions. Peirce's original
 published map from 1879 used a central meridian of approx -70.
 The diamond and square versions can be produced using the
-``+type=diamond`` and ``+type=square`` options respectively.
+``+shape=diamond`` and ``+shape=square`` options respectively.
 This implementation includes an alternative lateral projection
-which places hemispheres side-by-side (``+type=horizontal`` or
-``+type=vertical``). Combined with a general oblique transformation,
+which places hemispheres side-by-side (``+shape=horizontal`` or
+``+shape=vertical``). Combined with a general oblique transformation,
 this can be used to produced a Grieger Triptychial projection
 (see example below).
 
@@ -43,21 +43,21 @@ this can be used to produced a Grieger Triptychial projection
    :align: center
    :alt:   Peirce Quincuncial (Square)
 
-   proj-string: ``+proj=peirce_q +lon_0=25 +type=square``
+   proj-string: ``+proj=peirce_q +lon_0=25 +shape=square``
 
 .. figure:: ./images/peirce_q_diamond.png
    :width: 500 px
    :align: center
    :alt:   Peirce Quincuncial (Diamond)
 
-   proj-string: ``+proj=peirce_q +lon_0=25 +type=diamond``
+   proj-string: ``+proj=peirce_q +lon_0=25 +shape=diamond``
 
 .. figure:: ./images/peirce_q_horizontal.png
    :width: 500 px
    :align: center
    :alt:   Peirce Quincuncial (Horizontal)
 
-   proj-string: ``+proj=peirce_q +lon_0=25 +type=horizontal``
+   proj-string: ``+proj=peirce_q +lon_0=25 +shape=horizontal``
 
 .. figure:: ./images/grieger_triptychial.png
    :width: 500 px
@@ -73,16 +73,20 @@ Parameters
 
 .. include:: ../options/lon_0.rst
 
-.. option:: +type=square/diamond/horizontal/vertical/nhemisphere/shemisphere
+.. option:: +shape=square/diamond/horizontal/vertical/nhemisphere/shemisphere
 
-    .. versionadded:: 8.2.1
+    .. versionadded:: 9.0
 
     *Defaults to diamond.*
 
-    Indicates the type of transformation applied to the southern hemisphere:
+    .. warning:: This option was wrongly introduced introduced in 8.2.1 with the
+                 ``type`` name, which was inappropriate as it conflicted with
+                 the ``+type=crs`` general hint.
+
+    Indicates the shape of transformation applied to the southern hemisphere:
     ``square`` and ``diamond`` represent the traditional quincuncial form suggested
     by Peirce with the southern hemisphere divided into 4 triangles and reflected
-    outward from the northern hemisphere. The ``square`` type is rotated by 45
+    outward from the northern hemisphere. The ``square`` shape is rotated by 45
     degrees to produce the conventional square presentation. The origin lies at
     the centre of the square or diamond.
 
@@ -96,14 +100,14 @@ Parameters
 
 .. option:: +scrollx=<value>
 
-    For ``horizontal`` type allows a scalar circular scroll of resulting x coordinates
+    For ``horizontal`` shape allows a scalar circular scroll of resulting x coordinates
     to shift sections of the projection to the other horizontal side of the map.
 
     *Defaults to 0.0. Must be a scale between -1.0 and 1.0.*
 
 .. option:: +scrolly=<value>
 
-    For ``vertical`` type allows a scalar circular scroll of resulting y coordinates
+    For ``vertical`` shape allows a scalar circular scroll of resulting y coordinates
     to shift sections of the projection to the other vertical side of the map.
 
     *Defaults to 0.0. Must be a scale between -1.0 and 1.0.*
