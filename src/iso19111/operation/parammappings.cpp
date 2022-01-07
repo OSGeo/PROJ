@@ -793,6 +793,12 @@ static const MethodMapping projectionMethodMappings[] = {
     {PROJ_WKT2_NAME_METHOD_ROBINSON, 0, "Robinson", "robin", nullptr,
      paramsLonNatOriginLongitudeCentre},
 
+    {PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_SQUARE, 0, nullptr, "peirce_q",
+     "shape=square", paramsNatOriginScale},
+
+    {PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_DIAMOND, 0, nullptr, "peirce_q",
+     "shape=diamond", paramsNatOriginScale},
+
     {PROJ_WKT2_NAME_METHOD_SINUSOIDAL, 0, "Sinusoidal", "sinu", nullptr,
      paramsLonNatOriginLongitudeCentre},
 

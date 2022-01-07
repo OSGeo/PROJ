@@ -10209,6 +10209,8 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                 }
             } else if (param->unit_type == UnitOfMeasure::Type::SCALE) {
                 value = 1;
+            } else if (step.name == "peirce_q" && proj_name == "lat_0") {
+                value = 90;
             }
 
             PropertyMap propertiesParameter;

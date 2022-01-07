@@ -947,6 +947,33 @@ static const ESRIParamMapping paramsESRI_Equal_Earth[] = {
      EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
     {nullptr, nullptr, 0, "0.0", false}};
 
+static const ESRIParamMapping paramsESRI_Peirce_Quincuncial_alt1[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Scale_Factor", EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, "0.0", false},
+    {"Latitude_Of_Origin", EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Option", nullptr, 0, "0.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+static const ESRIParamMapping paramsESRI_Peirce_Quincuncial_alt2[] = {
+    {"False_Easting", EPSG_NAME_PARAMETER_FALSE_EASTING,
+     EPSG_CODE_PARAMETER_FALSE_EASTING, "0.0", false},
+    {"False_Northing", EPSG_NAME_PARAMETER_FALSE_NORTHING,
+     EPSG_CODE_PARAMETER_FALSE_NORTHING, "0.0", false},
+    {"Central_Meridian", EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Scale_Factor", EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN, "0.0", false},
+    {"Latitude_Of_Origin", EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+     EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN, "0.0", false},
+    {"Option", nullptr, 0, "1.0", false},
+    {nullptr, nullptr, 0, "0.0", false}};
+
 static const ESRIMethodMapping esriMappings[] = {
     {"Plate_Carree", EPSG_NAME_METHOD_EQUIDISTANT_CYLINDRICAL,
      EPSG_CODE_METHOD_EQUIDISTANT_CYLINDRICAL, paramsESRI_Plate_Carree},
@@ -1115,6 +1142,10 @@ static const ESRIMethodMapping esriMappings[] = {
      EPSG_CODE_METHOD_COLOMBIA_URBAN, paramsESRI_IGAC_Plano_Cartesiano},
     {"Equal_Earth", EPSG_NAME_METHOD_EQUAL_EARTH, EPSG_CODE_METHOD_EQUAL_EARTH,
      paramsESRI_Equal_Earth},
+    {"Peirce_Quincuncial", PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_SQUARE, 0,
+     paramsESRI_Peirce_Quincuncial_alt1},
+    {"Peirce_Quincuncial", PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_DIAMOND, 0,
+     paramsESRI_Peirce_Quincuncial_alt2},
 };
 
 // ---------------------------------------------------------------------------
