@@ -3570,16 +3570,22 @@ TEST(factory, getCRSInfoList) {
         bool foundEPSG = false;
         bool foundIGNF = false;
         bool found4326 = false;
+        bool foundIAU_2015_19902 = false;
         for (const auto &info : list) {
             foundEPSG |= info.authName == "EPSG";
             foundIGNF |= info.authName == "IGNF";
             if (info.authName == "EPSG" && info.code == "4326") {
                 found4326 = true;
+            } else if (info.authName == "IAU_2015" && info.code == "19902") {
+                foundIAU_2015_19902 = true;
+                EXPECT_EQ(info.type,
+                          AuthorityFactory::ObjectType::GEODETIC_CRS);
             }
         }
         EXPECT_TRUE(foundEPSG);
         EXPECT_TRUE(foundIGNF);
         EXPECT_TRUE(found4326);
+        EXPECT_TRUE(foundIAU_2015_19902);
     }
     {
         auto factory = AuthorityFactory::create(ctxt, "EPSG");

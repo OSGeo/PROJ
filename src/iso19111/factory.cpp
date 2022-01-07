@@ -7969,6 +7969,8 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
             info.type = AuthorityFactory::ObjectType::GEOGRAPHIC_3D_CRS;
         } else if (type == GEOCENTRIC) {
             info.type = AuthorityFactory::ObjectType::GEOCENTRIC_CRS;
+        } else if (type == OTHER) {
+            info.type = AuthorityFactory::ObjectType::GEODETIC_CRS;
         } else if (type == PROJECTED) {
             info.type = AuthorityFactory::ObjectType::PROJECTED_CRS;
         } else if (type == VERTICAL) {

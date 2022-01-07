@@ -3787,22 +3787,27 @@ TEST_F(CApi, proj_get_crs_info_list_from_database) {
         params->typesCount = 1;
         auto type = PJ_TYPE_GEODETIC_CRS;
         params->types = &type;
-        auto list = proj_get_crs_info_list_from_database(m_ctxt, "EPSG", params,
-                                                         &result_count);
+        auto list = proj_get_crs_info_list_from_database(m_ctxt, nullptr,
+                                                         params, &result_count);
         bool foundGeog2D = false;
         bool foundGeog3D = false;
         bool foundGeocentric = false;
+        bool foundGeodeticCRS =
+            false; // for now, only -ocentric ellipsoidal IAU CRS
         for (int i = 0; i < result_count; i++) {
             foundGeog2D |= list[i]->type == PJ_TYPE_GEOGRAPHIC_2D_CRS;
             foundGeog3D |= list[i]->type == PJ_TYPE_GEOGRAPHIC_3D_CRS;
             foundGeocentric |= list[i]->type == PJ_TYPE_GEOCENTRIC_CRS;
+            foundGeodeticCRS |= list[i]->type == PJ_TYPE_GEODETIC_CRS;
             EXPECT_TRUE(list[i]->type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
                         list[i]->type == PJ_TYPE_GEOGRAPHIC_3D_CRS ||
-                        list[i]->type == PJ_TYPE_GEOCENTRIC_CRS);
+                        list[i]->type == PJ_TYPE_GEOCENTRIC_CRS ||
+                        list[i]->type == PJ_TYPE_GEODETIC_CRS);
         }
         EXPECT_TRUE(foundGeog2D);
         EXPECT_TRUE(foundGeog3D);
         EXPECT_TRUE(foundGeocentric);
+        EXPECT_TRUE(foundGeodeticCRS);
         proj_get_crs_list_parameters_destroy(params);
         proj_crs_info_list_destroy(list);
     }

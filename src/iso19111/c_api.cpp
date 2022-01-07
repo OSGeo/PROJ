@@ -2828,6 +2828,9 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                        AuthorityFactory::ObjectType::GEOCENTRIC_CRS) {
                 type = PJ_TYPE_GEOCENTRIC_CRS;
             } else if (info.type ==
+                       AuthorityFactory::ObjectType::GEODETIC_CRS) {
+                type = PJ_TYPE_GEODETIC_CRS;
+            } else if (info.type ==
                        AuthorityFactory::ObjectType::PROJECTED_CRS) {
                 type = PJ_TYPE_PROJECTED_CRS;
             } else if (info.type ==
@@ -2850,6 +2853,7 @@ proj_get_crs_info_list_from_database(PJ_CONTEXT *ctx, const char *auth_name,
                         break;
                     } else if (params->types[j] == PJ_TYPE_GEODETIC_CRS &&
                                (type == PJ_TYPE_GEOCENTRIC_CRS ||
+                                type == PJ_TYPE_GEODETIC_CRS ||
                                 type == PJ_TYPE_GEOGRAPHIC_2D_CRS ||
                                 type == PJ_TYPE_GEOGRAPHIC_3D_CRS)) {
                         typeValid = true;
