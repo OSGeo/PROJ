@@ -299,6 +299,91 @@ static PJ_LP adams_inverse(PJ_XY xy, PJ *P)
     return pj_generic_inverse_2d(xy, P, lp);
 }
 
+static PJ_LP peirce_q_square_inverse(PJ_XY xy, PJ *P)
+{
+    /* Heuristics based on trial and repeat process */
+    PJ_LP lp;
+    lp.phi = 0;
+    if( xy.x == 0 && xy.y < 0 )
+    {
+        lp.lam = -M_PI / 4;
+        if( fabs(xy.y) < 2.622057580396 )
+            lp.phi = M_PI / 4;
+    }
+    else if( xy.x > 0 && fabs(xy.y) < 1e-7 )
+        lp.lam = M_PI / 4;
+    else if( xy.x < 0 && fabs(xy.y) < 1e-7 )
+    {
+        lp.lam = -3 * M_PI / 4;
+        lp.phi = M_PI / 2 / 2.622057574224 * xy.x + M_PI / 2;
+    }
+    else if( fabs(xy.x) < 1e-7 && xy.y > 0 )
+        lp.lam = 3 * M_PI / 4;
+    else if( xy.x >= 0 && xy.y <= 0 )
+    {
+        lp.lam = 0;
+        if( xy.x == 0 && xy.y == 0 )
+        {
+            lp.phi = M_PI / 2;
+            return lp;
+        }
+    }
+    else if( xy.x >= 0 && xy.y >= 0 )
+        lp.lam = M_PI / 2;
+    else if( xy.x <= 0 && xy.y >= 0 )
+    {
+        if( fabs(xy.x) < fabs(xy.y) )
+            lp.lam = M_PI * 0.9;
+        else
+            lp.lam = -M_PI * 0.9;
+    }
+    else /* if( xy.x <= 0 && xy.y <= 0 ) */
+        lp.lam = -M_PI / 2;
+    return pj_generic_inverse_2d(xy, P, lp);
+}
+
+static PJ_LP peirce_q_diamond_inverse(PJ_XY xy, PJ *P)
+{
+    /* Heuristics based on a trial and repeat process */
+    PJ_LP lp;
+    lp.phi = 0;
+    if( xy.x >= 0 && xy.y <= 0 )
+    {
+        lp.lam = M_PI / 4;
+        if( xy.x > 0 && xy.y == 0 )
+        {
+            lp.lam = M_PI / 2;
+            lp.phi = 0;
+        }
+        else if( xy.x == 0 && xy.y == 0 )
+        {
+            lp.lam = 0;
+            lp.phi = M_PI / 2;
+            return lp;
+        }
+        else if( xy.x == 0 && xy.y < 0 )
+        {
+            lp.lam = 0;
+            lp.phi = M_PI / 4;
+        }
+    }
+    else if( xy.x >= 0 && xy.y >= 0 )
+        lp.lam = 3 * M_PI / 4;
+    else if( xy.x <= 0 && xy.y >= 0 )
+    {
+        lp.lam = -3 * M_PI / 4;
+    }
+    else /* if( xy.x <= 0 && xy.y <= 0 ) */
+        lp.lam = -M_PI / 4;
+
+    if( fabs(xy.x) > 1.8540746773013719 + 1e-3 ||
+        fabs(xy.y) > 1.8540746773013719 + 1e-3 )
+    {
+        lp.phi = -M_PI / 4;
+    }
+
+    return pj_generic_inverse_2d(xy, P, lp);
+}
 
 static PJ *setup(PJ *P, projection_type mode) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(
@@ -323,9 +408,11 @@ static PJ *setup(PJ *P, projection_type mode) {
 
       if (strcmp(pqshape, "square") == 0) {
         Q->pqshape = PEIRCE_Q_SQUARE;
+        P->inv = peirce_q_square_inverse;
       }
       else if (strcmp(pqshape, "diamond") == 0) {
         Q->pqshape = PEIRCE_Q_DIAMOND;
+        P->inv = peirce_q_diamond_inverse;
       }
       else if (strcmp(pqshape, "nhemisphere") == 0) {
         Q->pqshape = PEIRCE_Q_NHEMISPHERE;
