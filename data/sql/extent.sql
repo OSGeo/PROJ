@@ -3634,3 +3634,4 @@ INSERT INTO "extent" VALUES('EPSG','4655','UK - Manchester to Dore','United King
 INSERT INTO "extent" VALUES('EPSG','4656','Norway - inshore and nearshore','Norway - inshore and nearshore.',57.75,71.38,4.08,31.77,0);
 INSERT INTO "extent" VALUES('EPSG','4657','St Martin','St Martin - onshore and offshore.',17.87,18.19,-63.66,-62.73,0);
 INSERT INTO "extent" VALUES('EPSG','4658','St Barthelemy','St Barthélemy - onshore and offshore.',17.64,18.31,-63.1,-62.21,0);
+INSERT INTO "extent" VALUES('EPSG','4659','Italy - mainland west of 16°E','Italy - mainland northwest of approximately 16°E, including San Marino and Vatican City State.',39.65,47.09,6.62,16.52,0);
