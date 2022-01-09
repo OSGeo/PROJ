@@ -381,7 +381,7 @@ SQLResultSet SQLiteHandle::run(sqlite3_stmt *stmt, const std::string &sql,
                                bool useMaxFloatPrecision) {
     int nBindField = 1;
     for (const auto &param : parameters) {
-        const auto paramType = param.type();
+        const auto &paramType = param.type();
         if (paramType == SQLValues::Type::STRING) {
             auto strValue = param.stringValue();
             sqlite3_bind_text(stmt, nBindField, strValue.c_str(),

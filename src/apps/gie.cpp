@@ -1113,8 +1113,7 @@ static int dispatch (const char *cmnd, const char *args) {
 
 
 namespace { // anonymous namespace
-struct errno_vs_err_const {const char *the_err_const; int the_errno;};
-static const struct errno_vs_err_const lookup[] = {
+static const struct {const char *the_err_const; int the_errno;} lookup[] = {
 
     { "invalid_op",                              PROJ_ERR_INVALID_OP },
     { "invalid_op_wrong_syntax",                 PROJ_ERR_INVALID_OP_WRONG_SYNTAX },
