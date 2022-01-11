@@ -60,7 +60,7 @@ enum projection_type {
     ADAMS_WS2,
 };
 
-enum peirce_type {
+enum peirce_shape {
   PEIRCE_Q_SQUARE,
   PEIRCE_Q_DIAMOND,
   PEIRCE_Q_NHEMISPHERE,
@@ -71,7 +71,7 @@ enum peirce_type {
 
 struct pj_opaque {
     projection_type mode;
-    peirce_type pqtype;
+    peirce_shape pqshape;
     double scrollx = 0.0;
     double scrolly = 0.0;
 };
@@ -143,13 +143,13 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
         break;
     case PEIRCE_Q: {
             /* lam0 - note that the original Peirce model used a central meridian of around -70deg, but the default within proj is +lon0=0 */
-            if (Q->pqtype == PEIRCE_Q_NHEMISPHERE) {
+            if (Q->pqshape == PEIRCE_Q_NHEMISPHERE) {
               if( lp.phi < -TOL ) {
                 proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return proj_coord_error().xy;
               }
             }
-            if (Q->pqtype == PEIRCE_Q_SHEMISPHERE) {
+            if (Q->pqshape == PEIRCE_Q_SHEMISPHERE) {
               if( lp.phi > -TOL ) {
                 proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
                 return proj_coord_error().xy;
@@ -211,7 +211,7 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
       constexpr double shd = 1.8540746773013719 * 2;
 
       /* For square and diamond Quincuncial projections, spin out southern hemisphere to triangular segments of quincunx (before rotation for square)*/
-      if( Q->pqtype == PEIRCE_Q_SQUARE || ( Q->pqtype == PEIRCE_Q_DIAMOND )) {
+      if( Q->pqshape == PEIRCE_Q_SQUARE || ( Q->pqshape == PEIRCE_Q_DIAMOND )) {
         if (lp.phi < 0.)  { /* fold out segments */
           if (lp.lam < ( -0.75 * M_PI )) xy.y = shd - xy.y; /* top left segment, shift up and reflect y */
           if ( (lp.lam < (-0.25 * M_PI)) && (lp.lam >= ( -0.75 * M_PI ))) xy.x = - shd - xy.x; /* left segment, shift left and reflect x */
@@ -222,20 +222,20 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
       }
 
       /* For square types rotate xy by 45 deg */
-      if( Q->pqtype == PEIRCE_Q_SQUARE ) {
+      if( Q->pqshape == PEIRCE_Q_SQUARE ) {
             const double temp = xy.x;
             xy.x = RSQRT2 * (xy.x - xy.y);
             xy.y = RSQRT2 * (temp + xy.y);
       }
 
       /* For rectangle Quincuncial projs, spin out southern hemisphere to east (horizontal) or north (vertical) after rotation */
-      if( Q->pqtype == PEIRCE_Q_HORIZONTAL ) {
+      if( Q->pqshape == PEIRCE_Q_HORIZONTAL ) {
         if (lp.phi < 0.)  {
           xy.x = shd - xy.x; /* reflect x to east */
         }
         xy.x = xy.x - (shd / 2); /* shift everything so origin is in middle of two hemispheres */
       }
-      if( Q->pqtype == PEIRCE_Q_VERTICAL ) {
+      if( Q->pqshape == PEIRCE_Q_VERTICAL ) {
         if (lp.phi < 0.)  {
           xy.y = shd - xy.y; /* reflect y to north */
         }
@@ -243,7 +243,7 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
       }
 
       //if o_scrollx param present, scroll x
-      if (!(Q->scrollx == 0.0) && (Q->pqtype == PEIRCE_Q_HORIZONTAL) ) {
+      if (!(Q->scrollx == 0.0) && (Q->pqshape == PEIRCE_Q_HORIZONTAL) ) {
         double xscale = 2.0;
         double xthresh = shd / 2;
         xy.x = xy.x + (Q->scrollx * (xthresh * 2 * xscale)); /*shift relative to proj width*/
@@ -256,7 +256,7 @@ static PJ_XY adams_forward(PJ_LP lp, PJ *P) {
       }
 
       //if o_scrolly param present, scroll y
-      if (!(Q->scrolly == 0.0) && (Q->pqtype == PEIRCE_Q_VERTICAL)) {
+      if (!(Q->scrolly == 0.0) && (Q->pqshape == PEIRCE_Q_VERTICAL)) {
         double yscale = 2.0;
         double ythresh = shd / 2;
         xy.y = xy.y + (Q->scrolly * (ythresh * 2 * yscale)); /*shift relative to proj height*/
@@ -299,6 +299,91 @@ static PJ_LP adams_inverse(PJ_XY xy, PJ *P)
     return pj_generic_inverse_2d(xy, P, lp);
 }
 
+static PJ_LP peirce_q_square_inverse(PJ_XY xy, PJ *P)
+{
+    /* Heuristics based on trial and repeat process */
+    PJ_LP lp;
+    lp.phi = 0;
+    if( xy.x == 0 && xy.y < 0 )
+    {
+        lp.lam = -M_PI / 4;
+        if( fabs(xy.y) < 2.622057580396 )
+            lp.phi = M_PI / 4;
+    }
+    else if( xy.x > 0 && fabs(xy.y) < 1e-7 )
+        lp.lam = M_PI / 4;
+    else if( xy.x < 0 && fabs(xy.y) < 1e-7 )
+    {
+        lp.lam = -3 * M_PI / 4;
+        lp.phi = M_PI / 2 / 2.622057574224 * xy.x + M_PI / 2;
+    }
+    else if( fabs(xy.x) < 1e-7 && xy.y > 0 )
+        lp.lam = 3 * M_PI / 4;
+    else if( xy.x >= 0 && xy.y <= 0 )
+    {
+        lp.lam = 0;
+        if( xy.x == 0 && xy.y == 0 )
+        {
+            lp.phi = M_PI / 2;
+            return lp;
+        }
+    }
+    else if( xy.x >= 0 && xy.y >= 0 )
+        lp.lam = M_PI / 2;
+    else if( xy.x <= 0 && xy.y >= 0 )
+    {
+        if( fabs(xy.x) < fabs(xy.y) )
+            lp.lam = M_PI * 0.9;
+        else
+            lp.lam = -M_PI * 0.9;
+    }
+    else /* if( xy.x <= 0 && xy.y <= 0 ) */
+        lp.lam = -M_PI / 2;
+    return pj_generic_inverse_2d(xy, P, lp);
+}
+
+static PJ_LP peirce_q_diamond_inverse(PJ_XY xy, PJ *P)
+{
+    /* Heuristics based on a trial and repeat process */
+    PJ_LP lp;
+    lp.phi = 0;
+    if( xy.x >= 0 && xy.y <= 0 )
+    {
+        lp.lam = M_PI / 4;
+        if( xy.x > 0 && xy.y == 0 )
+        {
+            lp.lam = M_PI / 2;
+            lp.phi = 0;
+        }
+        else if( xy.x == 0 && xy.y == 0 )
+        {
+            lp.lam = 0;
+            lp.phi = M_PI / 2;
+            return lp;
+        }
+        else if( xy.x == 0 && xy.y < 0 )
+        {
+            lp.lam = 0;
+            lp.phi = M_PI / 4;
+        }
+    }
+    else if( xy.x >= 0 && xy.y >= 0 )
+        lp.lam = 3 * M_PI / 4;
+    else if( xy.x <= 0 && xy.y >= 0 )
+    {
+        lp.lam = -3 * M_PI / 4;
+    }
+    else /* if( xy.x <= 0 && xy.y <= 0 ) */
+        lp.lam = -M_PI / 4;
+
+    if( fabs(xy.x) > 1.8540746773013719 + 1e-3 ||
+        fabs(xy.y) > 1.8540746773013719 + 1e-3 )
+    {
+        lp.phi = -M_PI / 4;
+    }
+
+    return pj_generic_inverse_2d(xy, P, lp);
+}
 
 static PJ *setup(PJ *P, projection_type mode) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(
@@ -316,25 +401,27 @@ static PJ *setup(PJ *P, projection_type mode) {
         P->inv = adams_inverse;
 
     if( mode == PEIRCE_Q) {
-      // Quincuncial projections type options: square, diamond, hemisphere, horizontal (rectangle) or vertical (rectangle)
-      const char* pqtype = pj_param (P->ctx, P->params, "stype").s;
+      // Quincuncial projections shape options: square, diamond, hemisphere, horizontal (rectangle) or vertical (rectangle)
+      const char* pqshape = pj_param (P->ctx, P->params, "sshape").s;
 
-      if (!pqtype) pqtype = "diamond"; /* default if type value not supplied */
+      if (!pqshape) pqshape = "diamond"; /* default if shape value not supplied */
 
-      if (strcmp(pqtype, "square") == 0) {
-        Q->pqtype = PEIRCE_Q_SQUARE;
+      if (strcmp(pqshape, "square") == 0) {
+        Q->pqshape = PEIRCE_Q_SQUARE;
+        P->inv = peirce_q_square_inverse;
       }
-      else if (strcmp(pqtype, "diamond") == 0) {
-        Q->pqtype = PEIRCE_Q_DIAMOND;
+      else if (strcmp(pqshape, "diamond") == 0) {
+        Q->pqshape = PEIRCE_Q_DIAMOND;
+        P->inv = peirce_q_diamond_inverse;
       }
-      else if (strcmp(pqtype, "nhemisphere") == 0) {
-        Q->pqtype = PEIRCE_Q_NHEMISPHERE;
+      else if (strcmp(pqshape, "nhemisphere") == 0) {
+        Q->pqshape = PEIRCE_Q_NHEMISPHERE;
       }
-      else if (strcmp(pqtype, "shemisphere") == 0) {
-        Q->pqtype = PEIRCE_Q_SHEMISPHERE;
+      else if (strcmp(pqshape, "shemisphere") == 0) {
+        Q->pqshape = PEIRCE_Q_SHEMISPHERE;
       }
-      else if (strcmp(pqtype, "horizontal") == 0) {
-        Q->pqtype = PEIRCE_Q_HORIZONTAL;
+      else if (strcmp(pqshape, "horizontal") == 0) {
+        Q->pqshape = PEIRCE_Q_HORIZONTAL;
         if (pj_param(P->ctx, P->params, "tscrollx").i) {
           double scrollx;
           scrollx = pj_param(P->ctx, P->params, "dscrollx").f;
@@ -345,8 +432,8 @@ static PJ *setup(PJ *P, projection_type mode) {
           Q->scrollx = scrollx;
         }
       }
-      else if (strcmp(pqtype, "vertical") == 0) {
-        Q->pqtype = PEIRCE_Q_VERTICAL;
+      else if (strcmp(pqshape, "vertical") == 0) {
+        Q->pqshape = PEIRCE_Q_VERTICAL;
         if (pj_param(P->ctx, P->params, "tscrolly").i) {
           double scrolly;
           scrolly = pj_param(P->ctx, P->params, "dscrolly").f;
@@ -358,7 +445,7 @@ static PJ *setup(PJ *P, projection_type mode) {
         }
       }
       else {
-            proj_log_error (P, _("peirce_q: invalid value for 'type' parameter"));
+            proj_log_error (P, _("peirce_q: invalid value for 'shape' parameter"));
             return pj_default_destructor (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
       }
 

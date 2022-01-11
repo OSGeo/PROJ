@@ -14,7 +14,7 @@
 ------------------------------------------------------------
 
 ------------------------------------------------------------
-operation  +proj=peirce_q +R=6370997 +type=square
+operation  +proj=peirce_q +R=6370997 +shape=square
 tolerance  10 mm
 ------------------------------------------------------------
 
@@ -138,7 +138,7 @@ accept      170.3972098164   87.6222109978
 expect        -153172.25	215556.52
 
  ------------------------------------------------------------
- operation  +proj=peirce_q +R=6370997 +type=diamond
+ operation  +proj=peirce_q +R=6370997 +shape=diamond
  tolerance  10 mm
  ------------------------------------------------------------
 
@@ -262,7 +262,7 @@ accept       170.3972098164   87.6222109978
 expect        44112.34	260730.62
 
 ------------------------------------------------------------
-operation  +proj=peirce_q +R=6370997 +type=horizontal
+operation  +proj=peirce_q +R=6370997 +shape=horizontal
 tolerance  10 mm
 ------------------------------------------------------------
 
@@ -386,7 +386,7 @@ accept      170.3972098164   87.6222109978
 expect        -11768191.87	260730.62
 
  ------------------------------------------------------------
- operation  +proj=peirce_q +R=6370997 +type=horizontal +scrollx=0.75
+ operation  +proj=peirce_q +R=6370997 +shape=horizontal +scrollx=0.75
  tolerance  10 mm
  ------------------------------------------------------------
 
@@ -510,7 +510,7 @@ accept       170.3972098164   87.6222109978
 expect        -23580496.07	260730.62
 
  ------------------------------------------------------------
- operation  +proj=peirce_q +R=6370997 +type=vertical
+ operation  +proj=peirce_q +R=6370997 +shape=vertical
  tolerance  10 mm
  ------------------------------------------------------------
 
@@ -634,7 +634,7 @@ accept       170.3972098164   87.6222109978
 expect        44112.34	-11551573.59
 
  ------------------------------------------------------------
- operation  +proj=peirce_q +R=6370997 +type=vertical +scrolly=-0.25
+ operation  +proj=peirce_q +R=6370997 +shape=vertical +scrolly=-0.25
  tolerance  10 mm
  ------------------------------------------------------------
 
@@ -758,7 +758,7 @@ accept       170.3972098164   87.6222109978
 expect        44112.34	-23363877.80
 
  ------------------------------------------------------------
- operation  +proj=peirce_q +R=6370997 +type=nhemisphere
+ operation  +proj=peirce_q +R=6370997 +shape=nhemisphere
  tolerance  10 mm
  ------------------------------------------------------------
 
@@ -882,7 +882,7 @@ accept       170.3972098164   87.6222109978
 expect        44112.34	260730.62
 
  ------------------------------------------------------------
- operation  +proj=peirce_q +R=6370997 +type=shemisphere
+ operation  +proj=peirce_q +R=6370997 +shape=shemisphere
  tolerance  10 mm
  ------------------------------------------------------------
 
@@ -1004,5 +1004,331 @@ accept       150.8488588999   85.8764976286
 expect        failure errno coord_transfm_outside_projection_domain
 accept       170.3972098164   87.6222109978
 expect        failure errno coord_transfm_outside_projection_domain
+
+# Test inverse
+------------------------------------------------------------
+operation  +proj=peirce_q +shape=square
+------------------------------------------------------------
+
+#tolerance   1 mm
+# has to bump to this for i386
+tolerance   150 mm
+
+accept      0 90
+expect      0 0
+roundtrip   1
+
+accept      0 0
+expect      8361921.234827487729   -8361921.234827487729
+roundtrip   1
+
+accept      0 -90
+expect      16723842.303160080686   -16723842.303160080686
+#tolerance   2 mm
+roundtrip   1
+#tolerance   1 mm
+
+accept      0 45
+expect      3725360.212758612353   -3725360.212758612353
+roundtrip   1
+
+accept      0 -45
+expect      12998482.090401465073   -12998482.090401465073
+roundtrip   1
+
+accept      45 0
+tolerance   200 mm
+expect      16723842.564696932212   -0.095041956369
+roundtrip   1
+tolerance   150 mm
+
+accept      -45 0
+expect      0   -16723842.469654975459
+#roundtrip   1
+
+accept      90 0
+expect      8361921.329869444482   8361921.329869444482
+roundtrip   1
+
+accept      -90 0
+expect      -8361921.234827487729   -8361921.234827487729
+roundtrip   1
+
+accept      135 0
+expect      0.095041956369   16723842.564696932212
+roundtrip   1
+
+accept      -135 0
+expect      -16723842.430287310854   -0.039367665210
+#roundtrip   1
+
+accept      179.99 0
+expect      -8360808.039828131907   8363034.429826845415
+#roundtrip   1
+
+accept      -179.99 0
+expect      -8363034.429826845415   8360808.039828131907
+#roundtrip   1
+
+accept      45 45
+expect      5299570.257319082506   0
+roundtrip   1
+
+accept      -45 45
+expect      0   -5299570.257319079712
+roundtrip   1
+
+accept      90 45
+expect      3725360.212758610491   3725360.212758610491
+roundtrip   1
+
+accept      -90 45
+expect      -3725360.212758613285   -3725360.212758613285
+roundtrip   1
+
+accept      135 45
+expect      0   5299570.257319079712
+roundtrip   1
+
+accept      -135 45
+expect      -5299570.257319079712   0
+#roundtrip   1
+
+accept      179.99 45
+expect      -3724717.456456150394   3726002.863303491380
+roundtrip   1
+
+accept      -179.99 45
+expect      -3726002.863303492777   3724717.456456151791
+roundtrip   1
+
+accept      45 -45
+expect      16723842.303160080686   11424272.045840997249
+roundtrip   1
+
+accept      -45 -45
+expect      11424272.045840999112   -16723842.303160080686
+roundtrip   1
+
+accept      90 -45
+expect      12998482.090401468799   12998482.090401468799
+roundtrip   1
+
+accept      -90 -45
+expect      -12998482.090401465073   -12998482.090401465073
+roundtrip   1
+
+accept      135 -45
+expect      -11424272.045840999112   16723842.303160080686
+roundtrip   1
+
+accept      -135 -45
+expect      -16723842.303160080686   -11424272.045840999112
+roundtrip   1
+
+accept      179.99 -45
+expect      -12997839.439856586978   12999124.846703927964
+roundtrip   1
+
+accept      -179.99 -45
+expect      -12999124.846703927964   12997839.439856585115
+roundtrip   1
+
+accept      45 -89.999
+expect      16723842.303160080686   16723730.983657168224
+#roundtrip   1
+
+accept      -45 -89.999
+expect      16723730.983657168224   -16723842.303160080686
+#roundtrip   1
+
+accept      90 -89.999
+expect      16723763.588384689763   16723763.588384689763
+roundtrip   1
+
+accept      -90 -89.999
+expect      -16723763.588384689763   -16723763.588384689763
+roundtrip   1
+
+accept      135 -89.999
+expect      -16723730.983657168224   16723842.303160080686
+#roundtrip   1
+
+accept      -135 -89.999
+expect      -16723842.303160080686   -16723730.983657168224
+#roundtrip   1
+
+accept      179.99 -89.999
+expect      -16723763.588384689763   16723763.588384689763
+#roundtrip   1
+
+accept      -179.99 -89.999
+expect      -16723763.588384689763   16723763.588384689763
+#roundtrip   1
+
+# Test inverse
+------------------------------------------------------------
+operation  +proj=peirce_q +shape=diamond
+------------------------------------------------------------
+
+#tolerance   1 mm
+# has to bump to this for i386
+tolerance   150 mm
+
+accept      0 90
+expect      0 0
+roundtrip   1
+
+accept      0 -90
+#tolerance   10 mm
+expect      0 -23651084.600117880851
+roundtrip   1
+#tolerance   1 mm
+
+accept      0 45
+expect      0 -5268454.937608348206
+roundtrip   1
+
+accept      0 -45
+expect      0 -18382629.662509534508
+roundtrip   1
+
+accept      45 0
+tolerance   200 mm
+expect      11825542.417788611725   -11825542.552198234946
+roundtrip   1
+tolerance   150 mm
+
+accept      -45 0
+expect      -11825542.417788611725   -11825542.417788611725
+roundtrip   1
+
+accept      90 0
+expect      11825542.552198234946   0.000000000000
+roundtrip   1
+
+accept      -90 0
+expect      -11825542.417788611725   0.000000000000
+#tolerance   20 mm
+#roundtrip   1
+#tolerance   1 mm
+
+accept      135 0
+expect      11825542.552198234946   11825542.417788611725
+roundtrip   1
+
+accept      -135 0
+expect      -11825542.417788611725   11825542.362114325166
+roundtrip   1
+
+accept      179.99 0
+expect      1574.295465656175   11825542.417788611725
+#tolerance   200 mm
+#roundtrip   1
+#tolerance   1 mm
+
+accept      -179.99 0
+expect      -1574.295465656175   11825542.417788611725
+#tolerance   30 mm
+#roundtrip   1
+#tolerance   1 mm
+
+accept      45 45
+expect      3747362.066324858926   -3747362.066324859392
+roundtrip   1
+
+accept      -45 45
+expect      -3747362.066324857529   -3747362.066324857995
+roundtrip   1
+
+accept      90 45
+expect      5268454.937608345412   0.000000000000
+#roundtrip   1
+
+accept      -90 45
+expect      -5268454.937608350068   0.000000000000
+#roundtrip   1
+
+accept      135 45
+expect      3747362.066324858926   3747362.066324857995
+roundtrip   1
+
+accept      -135 45
+expect      -3747362.066324857529   3747362.066324857529
+roundtrip   1
+
+accept      179.99 45
+expect      908.919898338959   5268454.862826444209
+roundtrip   1
+
+accept      -179.99 45
+expect      -908.919898338959   5268454.862826446071
+roundtrip   1
+
+accept      45 -45
+expect      19903722.533793020993   -3747362.066324859392
+roundtrip   1
+
+accept      -45 -45
+expect      -3747362.066324857529   -19903722.533793020993
+roundtrip   1
+
+accept      90 -45
+expect      18382629.662509534508   0.000000000000
+roundtrip   1
+
+accept      -90 -45
+expect      -18382629.662509530783   0.000000000000
+#tolerance   3 mm
+#roundtrip   1
+#tolerance   1 mm
+
+accept      135 -45
+expect      3747362.066324858926   19903722.533793020993
+roundtrip   1
+
+accept      -135 -45
+expect      -19903722.533793020993   3747362.066324857529
+roundtrip   1
+
+accept      179.99 -45
+expect      908.919898338959   18382629.737291436642
+#roundtrip   1
+
+accept      -179.99 -45
+expect      -908.919898338959   18382629.737291432917
+roundtrip   1
+
+accept      45 -89.999
+expect      23651005.885342493653   -78.714775386137
+#roundtrip   1
+
+accept      -45 -89.999
+expect      -78.714775386137   -23651005.885342493653
+#roundtrip   1
+
+accept      90 -89.999
+expect      23650973.280614964664   0.000000000000
+#roundtrip   1
+
+accept      -90 -89.999
+expect      -23650973.280614964664   0.000000000000
+#roundtrip   1
+
+accept      135 -89.999
+expect      78.714775386137   23651005.885342493653
+#roundtrip   1
+
+accept      -135 -89.999
+expect      -23651005.885342493653   78.714775386137
+#roundtrip   1
+
+accept      179.99 -89.999
+expect      0.000000000000   23650973.280614964664
+#roundtrip   1
+
+accept      -179.99 -89.999
+expect      0.000000000000   23650973.280614964664
+#roundtrip   1
 
 </gie-strict>

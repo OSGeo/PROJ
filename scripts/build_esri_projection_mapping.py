@@ -710,6 +710,24 @@ config_str = """
         - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
         - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
 
+- Peirce_Quincuncial:
+    -   WKT2_name: PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_SQUARE
+        Params:
+            - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+            - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+            - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+            - Scale_Factor: EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
+            - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
+            - Option: 0.0
+
+    -   WKT2_name: PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_DIAMOND
+        Params:
+            - False_Easting: EPSG_NAME_PARAMETER_FALSE_EASTING
+            - False_Northing: EPSG_NAME_PARAMETER_FALSE_NORTHING
+            - Central_Meridian: EPSG_NAME_PARAMETER_LONGITUDE_OF_NATURAL_ORIGIN
+            - Scale_Factor: EPSG_NAME_PARAMETER_SCALE_FACTOR_AT_NATURAL_ORIGIN
+            - Latitude_Of_Origin: EPSG_NAME_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN
+            - Option: 1.0
 
 # Missing/unclear mappings
 
@@ -748,7 +766,6 @@ config_str = """
 # Polar_Stereographic_Variant_C
 # Quartic_Authalic_Ellipsoidal
 # Adams_Square_II
-# Peirce_Quincuncial
 
 """
 

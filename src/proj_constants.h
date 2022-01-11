@@ -248,6 +248,9 @@
 #define EPSG_CODE_METHOD_COLOMBIA_URBAN 1052
 #define EPSG_NAME_METHOD_COLOMBIA_URBAN "Colombia Urban"
 
+#define PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_SQUARE "Peirce Quincuncial (Square)"
+#define PROJ_WKT2_NAME_METHOD_PEIRCE_QUINCUNCIAL_DIAMOND "Peirce Quincuncial (Diamond)"
+
 /* ------------------------------------------------------------------------ */
 
 /* Projection parameters */
