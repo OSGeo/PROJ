@@ -3850,16 +3850,14 @@ void Conversion::_exportToPROJString(
             throw io::FormattingException(
                 "Only scale factor = 1 handled for Peirce Quincuncial");
         }
-        const double latitudeOfOriginDeg =
-            parameterValue(EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN)
-                        ->value()
-                        .unit()
-                        .type() != common::UnitOfMeasure::Type::UNKNOWN
-                ? parameterValueNumeric(
-                      EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
-                      common::UnitOfMeasure::DEGREE)
-                : 90.0;
-        if (std::fabs(latitudeOfOriginDeg - 90.0) > 1e-10) {
+        const auto &latitudeOfOriginDeg = parameterValueMeasure(
+            EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN);
+        if (latitudeOfOriginDeg.unit().type() !=
+                common::UnitOfMeasure::Type::UNKNOWN &&
+            std::fabs(parameterValueNumeric(
+                          EPSG_CODE_PARAMETER_LATITUDE_OF_NATURAL_ORIGIN,
+                          common::UnitOfMeasure::DEGREE) -
+                      90.0) > 1e-10) {
             throw io::FormattingException("Only latitude of natural origin = "
                                           "90 handled for Peirce Quincuncial");
         }
