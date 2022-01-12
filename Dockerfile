@@ -18,8 +18,9 @@ RUN apt-get update -y \
 COPY . /PROJ
 
 RUN cd /PROJ \
-    && ./autogen.sh \
-    && ./configure --prefix=/usr \
+    && mkdir build \
+    && cd build \
+    && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
     && make -j$(nproc) \
     && make install
 
