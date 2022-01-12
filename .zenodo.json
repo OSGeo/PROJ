@@ -1,0 +1,67 @@
+{
+    "creators": [
+        {
+            "affiliation": "Spatialys",
+            "name": "Rouault, Even",
+            "orcid": "0000-0002-5068-0476"
+        },
+        {
+            "affiliation": "Planet Labs Inc",
+            "name": "Warmerdam, Frank"
+        },
+        {
+            "affiliation": "SDFE.dk",
+            "name": "Evers, Kristian"
+        },
+        {
+            "affiliation": "SDFE.dk",
+            "name": "Knudsen, Thomas"
+        },
+        {
+            "affiliation": "Hobu Inc",
+            "name": "Butler, Howard",
+            "orcid": "0000-0002-5340-1380"
+        },
+        {
+            "affiliation": "GNS Science",
+            "name": "Taves, Mike"
+        },
+        {
+            "affiliation": "Google Inc",
+            "name": "Schwehr, Kurt",
+            "orcid": "0000-0002-5624-8190"
+        },
+        {
+            "name": "Sales de Andrade, Elliott"
+        },
+        {
+            "affiliation": "SRI International",
+            "name": "Karney, Charles",
+            "orcid": "0000-0002-5006-5836"
+        },
+        {
+            "name": "Couwenberg, Sebastiaan"
+        },
+        {
+            "affiliation": "North Road",
+            "name": "Dawson, Nyall"
+        },
+        {
+            "affiliation": "Corteva",
+            "name": "Snow, Alan D."
+        }
+    ],
+    "description": "PROJ is a generic coordinate transformation software that transforms geospatial coordinates from one coordinate reference system (CRS) to another. This includes cartographic projections as well as geodetic transformations.",
+    "keywords": [
+        "PROJ",
+        "geodesy",
+        "cartography",
+        "coordinates",
+        "projections",
+        "conversion"
+    ],
+    "license": {
+        "id": "MIT"
+    },
+    "title": "PROJ"
+}
