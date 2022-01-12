@@ -2010,8 +2010,8 @@ isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
         "1100", // Geog3D to Geog2D+GravityRelatedHeight (PL txt)
         "1103", // Geog3D to Geog2D+GravityRelatedHeight (EGM)
         "1105", // Geog3D to Geog2D+GravityRelatedHeight (ITAL2005)
-        // "1110", // Geog3D to Geog2D+Depth (Gravsoft)  FIXME: to investigate
-        // how to map this to PROJ pipeline (depth vs height)
+        "1109", // Geographic3D to Depth (Gravsoft)
+        "1110", // Geog3D to Geog2D+Depth (Gravsoft)
         "9661", // Geographic3D to GravityRelatedHeight (EGM)
         "9662", // Geographic3D to GravityRelatedHeight (Ausgeoid98)
         "9663", // Geographic3D to GravityRelatedHeight (OSGM-GB)
@@ -3163,6 +3163,13 @@ void Transformation::_exportToPROJString(
                     concat("Can apply ", methodName, " only to GeographicCRS"));
             }
 
+            auto targetVertCRS = targetCRS()->extractVerticalCRS();
+            if (!targetVertCRS) {
+                throw io::FormattingException(
+                    concat("Can apply ", methodName,
+                           " only to a target CRS that has a VerticalCRS"));
+            }
+
             if (!formatter->omitHorizontalConversionInVertTransformation()) {
                 formatter->startInversion();
                 formatter->pushOmitZUnitConversion();
@@ -3177,6 +3184,15 @@ void Transformation::_exportToPROJString(
             if (doInversion) {
                 formatter->startInversion();
             }
+
+            // For Geographic3D to Depth methods, we rely on the vertical axis
+            // direction instead of the name/code of the transformation method.
+            if (targetVertCRS->coordinateSystem()->axisList()[0]->direction() ==
+                cs::AxisDirection::DOWN) {
+                formatter->addStep("axisswap");
+                formatter->addParam("order", "1,2,-3");
+            }
+
             formatter->addStep("vgridshift");
             formatter->addParam("grids", filename);
             formatter->addParam("multiplier", 1.0);

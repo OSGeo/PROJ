@@ -7674,6 +7674,13 @@ const std::string &PROJStringFormatter::toString() const {
             continue;
         }
 
+        // axisswap order=1,2,-3 is its own inverse
+        if (step.name == "axisswap" && paramCount == 1 &&
+            step.paramValues[0].equals("order", "1,2,-3")) {
+            step.inverted = false;
+            continue;
+        }
+
         // handle unitconvert inverse
         if (step.name == "unitconvert" && paramCount == 2 &&
             step.paramValues[0].keyEquals("xy_in") &&
