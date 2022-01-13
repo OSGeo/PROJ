@@ -18,3 +18,19 @@ jobs:
 
       - name: Run cppcheck test
         run: ./scripts/cppcheck.sh
+
+  other_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Requirements
+        run: |
+            sudo apt install python3-pip wget
+            sudo pip3 install jsonschema
+
+      - name: Check json files
+        run: |
+            wget https://raw.githubusercontent.com/rouault/zenodo_json_schema/master/zenodo-json-schema.json
+            jsonschema -i .zenodo.json zenodo-json-schema.json
