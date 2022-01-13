@@ -28,7 +28,8 @@
         },
         {
             "affiliation": "GNS Science",
-            "name": "Taves, Mike"
+            "name": "Taves, Mike",
+            "orcid": "0000-0003-3657-7963"
         },
         {
             "affiliation": "Google Inc",
@@ -36,7 +37,8 @@
             "orcid": "0000-0002-5624-8190"
         },
         {
-            "name": "Sales de Andrade, Elliott"
+            "name": "Sales de Andrade, Elliott",
+            "orcid": "0000-0001-7310-8942"
         },
         {
             "affiliation": "SRI International",
@@ -53,7 +55,8 @@
         },
         {
             "affiliation": "Corteva",
-            "name": "Snow, Alan D."
+            "name": "Snow, Alan D.",
+            "orcid": "0000-0002-7333-3100"
         }
     ],
     "description": "PROJ is a generic coordinate transformation software that transforms geospatial coordinates from one coordinate reference system (CRS) to another. This includes cartographic projections as well as geodetic transformations.",
