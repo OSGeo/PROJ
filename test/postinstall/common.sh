@@ -16,64 +16,59 @@ main_setup(){
       echo "Second argument must be either shared (default) or static"
       exit 1 ;;
   esac
-
-  if [ ${BUILD_MODE} = shared ]; then
-    case $(uname) in
-      MINGW* | MSYS*)
-        prefix=$(cygpath -u ${prefix})
-        export LD_LIBRARY_PATH=${prefix}/bin
-        ;;
-      Darwin*)
-        export DYLD_LIBRARY_PATH=${prefix}/lib
-        export LDFLAGS="${LDFLAGS} -Wl,-rpath,${prefix}/lib"
-        ;;
-      *)
-        export LD_LIBRARY_PATH=${prefix}/lib
-        ;;
-    esac
-  fi
 }
 
-test_ldd(){
-  # usage: test_ldd ${PROGRAM} ${LIBNAME}
-  # use optional 'BUILD_MODE=static' to to pass if LIBNAME is not found
-  if [ ! $(which ldd) ]; then
-    UNAME=$(uname)
-    case ${UNAME} in
-      Darwin*) alias ldd="otool -L" ;;
-      *)
-        echo "no ldd equivalent found for UNAME=${UNAME}"
-        return 77 ;;  # skip
-    esac
-  fi
-  if [ -n "${LD_LIBRARY_PATH}" ]; then
-    EXPECTED_LDD_SUBSTR="${LD_LIBRARY_PATH}/$2"
-  elif [ -n "${DYLD_LIBRARY_PATH}" ]; then
-    EXPECTED_LDD_SUBSTR="${DYLD_LIBRARY_PATH}/$2"
-  else
-    EXPECTED_LDD_SUBSTR=$2
-  fi
-  printf "Testing expected ldd output "
+test_libpath(){
+  # usage: test_libpath ${PROGRAM} ${LIBPATH} ${LIBNAME}
+  # use optional 'BUILD_MODE=static' to pass if match is not found
+  UNAME=$(uname)
+  case ${UNAME} in
+    Darwin*)
+      USE_OTOOL=yes
+      EXPECTED_SUBSTR=$2
+      ;;
+    MINGW* | MSYS*)
+      EXPECTED_SUBSTR=$(cygpath -u "$2/$3" | sed 's/\/lib\//\/bin\//')
+      ;;
+    Linux*)
+      EXPECTED_SUBSTR=$2/$3
+      ;;
+    *)
+      echo "test_libpath not set-up for UNAME=${UNAME}"
+      return 77  # skip
+      ;;
+  esac
+  printf "Testing expected libpath output "
   if [ "x${BUILD_MODE}" = xstatic ]; then
     printf "not "
   fi
-  printf "containing '${EXPECTED_LDD_SUBSTR}' ... "
-  LDD_OUTPUT=$(ldd ./$1 | grep "$3")
-  case "${LDD_OUTPUT}" in
+  printf "containing '${EXPECTED_SUBSTR}' ... "
+  if [ "x${USE_OTOOL}" = xyes ]; then
+    CMD_OUTPUT=$(otool -l ./$1 | grep -m1 "$2")
+  else
+    CMD_OUTPUT=$(ldd ./$1 | grep -m1 "$3")
+  fi
+  case "${CMD_OUTPUT}" in
     *"not found"*)
-      echo "failed: ${LDD_OUTPUT}"
+      echo "failed: ${CMD_OUTPUT}"
       return 1 ;;
-    *${EXPECTED_LDD_SUBSTR}*) found=yes ;;
+    *${EXPECTED_SUBSTR}*) found=yes ;;
     *) found=no ;;
   esac
   if [ "x${BUILD_MODE}" = xstatic ]; then
     if [ "x${found}" = "xyes" ] ; then
-      echo "failed: ${LDD_OUTPUT}"
+      echo "failed: ${CMD_OUTPUT}"
       return 1
     fi
   elif [ "x${found}" = "xno" ] ; then
     echo "failed:"
-    ldd ./$1
+    if [ "x${USE_OTOOL}" = xyes ]; then
+      echo "otool -l ./$1:"
+      otool -l ./$1
+    else
+      echo "ldd ./$1:"
+      ldd ./$1
+    fi
     return 1
   fi
   echo "passed"

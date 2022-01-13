@@ -28,7 +28,7 @@ target_link_libraries(cpp_app PRIVATE ${USE_PROJ_NAME}::proj)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/..)
 include(common)
-add_test_ldd(cpp_app)
+add_test_libpath(cpp_app)
 add_test_transform(cpp_app)
 add_test_searchpath(cpp_app)
 add_test_version(cpp_app)

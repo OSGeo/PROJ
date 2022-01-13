@@ -37,7 +37,6 @@ jobs:
         working-directory: ./docs/plot
         run: |
             export PATH=/opt/proj/bin:$PATH
-            export LD_LIBRARY_PATH=/opt/proj/lib
             export PROJ_LIB=/opt/proj/share/proj
             ./plot.py plotdefs.json images/
 

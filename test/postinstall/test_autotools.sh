@@ -3,8 +3,7 @@
 # Post-install tests with autotools/pkg-config
 #
 # First required argument is the installed prefix, which
-# is used to set PKG_CONFIG_PATH and
-# LD_LIBRARY_PATH/DYLD_LIBRARY_PATH for shared builds
+# is used to set PKG_CONFIG_PATH and rpath for shared.
 # Second argument is either shared (default) or static
 cd $(dirname $0)
 . ./common.sh
@@ -19,7 +18,12 @@ else
   export PKG_CONFIG="pkg-config --static"
   ENABLE_STATIC_PROJ=yes
 fi
+
 export PKG_CONFIG_PATH=${prefix}/lib/pkgconfig
+
+if [ ${BUILD_MODE} = shared ]; then
+  export LDFLAGS="${LDFLAGS} -Wl,-rpath,$(pkg-config proj --variable=libdir)"
+fi
 
 autogen_configure_check_clean(){
   set -e

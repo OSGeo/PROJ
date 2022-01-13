@@ -1,7 +1,7 @@
 PROGRAM = c_app
 OBJECTS = $(addsuffix .o,$(PROGRAM))
 TESTS = \
-  test_ldd.sh \
+  test_libpath.sh \
   test_transform.sh \
   test_searchpath.sh \
   test_version.sh
