@@ -29,23 +29,28 @@ if test "x${CMAKE_BUILD_TYPE}" = "x"; then
     CMAKE_BUILD_TYPE=Release
 fi
 
-echo "Make dist tarball, and check consistency"
-mkdir build_dist
-cd build_dist
-cmake -D BUILD_TESTING=OFF ..
-make dist
+# For some odd reason the tar xzvf $TAR_FILENAME doesn't work on Travis-CI ...
+if test "$TRAVIS" = ""; then
+    echo "Make dist tarball, and check consistency"
+    mkdir build_dist
+    cd build_dist
+    cmake -D BUILD_TESTING=OFF ..
+    make dist
 
-TAR_FILENAME=$(ls *.tar.gz)
-TAR_DIRECTORY=$(basename $TAR_FILENAME .tar.gz)
-mkdir ../build_from_dist
-cd ../build_from_dist
-tar xvzf ../build_dist/$TAR_FILENAME
+    TAR_FILENAME=$(ls *.tar.gz)
+    TAR_DIRECTORY=$(basename $TAR_FILENAME .tar.gz)
+    mkdir ../build_from_dist
+    cd ../build_from_dist
+    tar xvzf ../build_dist/$TAR_FILENAME
+
+    # continue build from dist tarball
+    cd $TAR_DIRECTORY
+fi
 
 # There's a nasty #define CS in a Solaris system header. Avoid being caught about that again
 CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"
 
 echo "Build shared ${CMAKE_BUILD_TYPE} configuration from generated tarball"
-cd $TAR_DIRECTORY
 mkdir shared_build
 cd shared_build
 cmake \
@@ -189,7 +194,10 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     make
 
     # return to root
-    cd ../../../..
+    cd ../..
+    if test "$TRAVIS" = ""; then
+        cd ../..
+    fi
 
     echo "Build coverage as in-source build"
     # There's an issue with the clang on Travis + coverage + cpp code
