@@ -106,8 +106,8 @@ test_projjson(){
   esac
   # cat out.json
   if [ $(jsonschema --version) = "3.2.0" ]; then
-    # workaround for this version, which does validate UTf-8
-    iconv -f UTF-8 -t ascii//TRANSLIT out.json > out.ascii
+    # workaround for this version, which does not validate UTF-8
+    tr -cd '\11\12\15\40-\176' < out.json > out.ascii
     mv out.ascii out.json
   fi
   jsonschema -i out.json /tmp/proj_shared_install_from_dist/share/proj/projjson.schema.json
