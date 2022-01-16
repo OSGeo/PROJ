@@ -10,7 +10,7 @@ https://bugs.chromium.org/p/oss-fuzz/issues/list?q=proj4
 
 - Build standard_fuzzer in a standalone mode:
 
-    $ g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -fvisibility=hidden -DSTANDALONE ../../src/.libs/libproj.a -lpthread -lsqlite3 -I../../src -I../../include
+    $ g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -fvisibility=hidden -DSTANDALONE ../../build/lib/libproj.a -lpthread -lsqlite3 -I../../src -I../../include
 
   Run it:
     $ PROJ_LIB=../../data ./standard_fuzzer {file_generated_by_oss_fuzz}

@@ -51,8 +51,8 @@ ccache -s
 MINGW_ARCH=x86_64-w64-mingw32
 MINGW_PREFIX=/usr/lib/gcc/$MINGW_ARCH/7.3-posix
 
-export CC="ccache $MINGW_ARCH-gcc"
-export CXX="ccache $MINGW_ARCH-g++"
+export CC="$MINGW_ARCH-gcc"
+export CXX="$MINGW_ARCH-g++"
 export LD=$MINGW_ARCH-ld
 
 UNAME="$(uname)" || UNAME=""

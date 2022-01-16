@@ -37,7 +37,7 @@
 #include "proj.h"
 
 /* Standalone build:
-g++ -g -std=c++11 proj_crs_to_crs_fuzzer.cpp -o proj_crs_to_crs_fuzzer -fvisibility=hidden -DSTANDALONE ../../src/.libs/libproj.a -lpthread -lsqlite3 -I../../src -I../../include
+g++ -g -std=c++11 proj_crs_to_crs_fuzzer.cpp -o proj_crs_to_crs_fuzzer -fvisibility=hidden -DSTANDALONE ../../build/lib/libproj.a -lpthread -lsqlite3 -I../../src -I../../include
 */
 
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv);

@@ -21,18 +21,12 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends  -o AP
 python3 -m pip install --user jsonschema
 export PATH=$HOME/.local/bin:$PATH
 
-export CXXFLAGS='-g -O2 -m32 -D_GLIBCXX_ASSERTIONS'
-export CFLAGS='-g -O2 -m32'
+export CXXFLAGS='-m32 -D_GLIBCXX_ASSERTIONS'
+export CFLAGS='-m32'
 export TIFF_CFLAGS=-I/usr/include/i386-linux-gnu
 export TIFF_LIBS="-L/usr/lib/i386-linux-gnu -ltiff"
 export SQLITE3_CFLAGS=-I/usr/include/i386-linux-gnu
 export SQLITE3_LIBS="-L/usr/lib/i386-linux-gnu -lsqlite3"
-export CC="ccache gcc"
-export CXX="ccache g++"
-
-NPROC=$(nproc)
-echo "NPROC=${NPROC}"
-export MAKEFLAGS="-j ${NPROC}"
 
 cd "$WORK_DIR"
 
@@ -41,15 +35,11 @@ if test -f "$WORK_DIR/ccache.tar.gz"; then
     (cd $HOME && tar xzf "$WORK_DIR/ccache.tar.gz")
 fi
 
-export CCACHE_CPP2=yes
 export PROJ_DB_CACHE_DIR="$HOME/.ccache"
 
 ccache -M 500M
-ccache -s
 
-CFLAGS="-Werror $CFLAGS" CXXFLAGS="-Werror $CXXFLAGS" ./travis/install.sh
-
-ccache -s
+CFLAGS="-Werror $CFLAGS" CXXFLAGS="-Werror $CXXFLAGS" CMAKE_BUILD_TYPE=RelWithDebInfo ./travis/install.sh
 
 echo "Saving ccache..."
 rm -f "$WORK_DIR/ccache.tar.gz"

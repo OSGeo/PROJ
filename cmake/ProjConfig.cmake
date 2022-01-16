@@ -10,12 +10,25 @@
 include(CheckLibraryExists)
 include(CheckFunctionExists)
 
+# if C flags have -Werror, temporarily remove these while running some checks
+string(FIND "${CMAKE_C_FLAGS}" "-Werror" FIND_WERROR)
+if(FIND_WERROR GREATER_EQUAL 0)
+  string(REPLACE "-Werror" "" _tmp_CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+  set(_prev_CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  set(CMAKE_C_FLAGS "${_tmp_CMAKE_C_FLAGS}")
+endif()
+
 # check needed include file
 check_function_exists(localeconv HAVE_LOCALECONV)
 check_function_exists(strerror HAVE_STRERROR)
 if(NOT WIN32)
-    check_library_exists(dl dladdr "" HAVE_LIBDL)
-    check_library_exists(m exp "" HAVE_LIBM)
+  check_library_exists(dl dladdr "" HAVE_LIBDL)
+  check_library_exists(m exp "" HAVE_LIBM)
+endif()
+
+# restore CMAKE_C_FLAGS as before
+if(FIND_WERROR GREATER_EQUAL 0)
+  set(CMAKE_C_FLAGS "${_prev_CMAKE_C_FLAGS}")
 endif()
 
 set(PACKAGE "proj")

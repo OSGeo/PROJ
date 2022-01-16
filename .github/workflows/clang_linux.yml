@@ -1,4 +1,4 @@
-name: CLang Linux
+name: Clang Linux
 
 on: [push, pull_request]
 
