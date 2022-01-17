@@ -30,6 +30,11 @@
 #endif
 #define LRU11_DO_NOT_DEFINE_OUT_OF_CLASS_METHODS
 
+#if defined(HAVE_LIBDL) && !defined(_GNU_SOURCE)
+// Required for dladdr() on Cygwin
+#define _GNU_SOURCE
+#endif
+
 #include <errno.h>
 #include <stdlib.h>
 
