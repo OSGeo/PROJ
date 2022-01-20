@@ -2763,6 +2763,47 @@ TEST_F(FactoryWithTmpDatabase, lookForGridInfo) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(FactoryWithTmpDatabase,
+       lookForGridInfo_from_old_name_with_new_grid_available) {
+    createStructure();
+
+    ASSERT_TRUE(execute("INSERT INTO grid_alternatives(original_grid_name,"
+                        "proj_grid_name, "
+                        "old_proj_grid_name, "
+                        "proj_grid_format, "
+                        "proj_method, "
+                        "inverse_direction, "
+                        "package_name, "
+                        "url, direct_download, open_license, directory) "
+                        "VALUES ("
+                        "'NOT-YET-IN-GRID-TRANSFORMATION-original_grid_name', "
+                        "'tests/egm96_15_uncompressed_truncated.tif', "
+                        "'old_name.gtx', "
+                        "'NTv2', "
+                        "'hgridshift', "
+                        "0, "
+                        "NULL, "
+                        "'url', 1, 1, NULL);"))
+        << last_error();
+
+    std::string fullFilename;
+    std::string packageName;
+    std::string url;
+    bool directDownload = false;
+    bool openLicense = false;
+    bool gridAvailable = false;
+    EXPECT_TRUE(DatabaseContext::create(m_ctxt)->lookForGridInfo(
+        "old_name.gtx", false, fullFilename, packageName, url, directDownload,
+        openLicense, gridAvailable));
+    EXPECT_TRUE(
+        fullFilename.find("tests/egm96_15_uncompressed_truncated.tif") !=
+        std::string::npos)
+        << fullFilename;
+    EXPECT_EQ(gridAvailable, true);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(FactoryWithTmpDatabase, custom_geodetic_crs) {
     createStructure();
     populateWithFakeEPSG();
