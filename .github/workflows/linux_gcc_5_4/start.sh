@@ -23,13 +23,6 @@ python3 -m pip install --user cmake==3.9.6
 
 export PATH=$HOME/.local/bin:$PATH
 
-export CC="ccache gcc"
-export CXX="ccache g++"
-
-NPROC=$(nproc)
-echo "NPROC=${NPROC}"
-export MAKEFLAGS="-j ${NPROC}"
-
 cd "$WORK_DIR"
 
 if test -f "$WORK_DIR/ccache.tar.gz"; then
@@ -37,15 +30,11 @@ if test -f "$WORK_DIR/ccache.tar.gz"; then
     (cd $HOME && tar xzf "$WORK_DIR/ccache.tar.gz")
 fi
 
-export CCACHE_CPP2=yes
 export PROJ_DB_CACHE_DIR="$HOME/.ccache"
 
 ccache -M 500M
-ccache -s
 
 CFLAGS="-Werror $CFLAGS" CXXFLAGS="-Werror $CXXFLAGS" ./travis/install.sh
-
-ccache -s
 
 echo "Saving ccache..."
 rm -f "$WORK_DIR/ccache.tar.gz"

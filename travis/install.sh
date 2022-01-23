@@ -16,113 +16,163 @@ fi
 echo "NPROC=${NPROC}"
 export MAKEFLAGS="-j ${NPROC}"
 
-# prepare build files
-./autogen.sh
+# Use ccache if it's available
+if command -v ccache &> /dev/null
+then
+    USE_CCACHE=ON
+    ccache -s
+else
+    USE_CCACHE=OFF
+fi
 
-# autoconf build
-mkdir build_autoconf
-cd build_autoconf
-../configure
-make dist-all >/dev/null
-# Check consistency of generated tarball
-TAR_FILENAME=`ls *.tar.gz`
-TAR_DIRECTORY=`basename $TAR_FILENAME .tar.gz`
-tar xvzf $TAR_FILENAME
-cd ..
+if test "x${CMAKE_BUILD_TYPE}" = "x"; then
+    CMAKE_BUILD_TYPE=Release
+fi
 
-# compare with CMake's dist
-mkdir build_cmake
-cd build_cmake
-cmake -DBUILD_TESTING=OFF ..
-make dist
-tar xzf $TAR_FILENAME
-cd ..
-diff -qr build_autoconf/$TAR_DIRECTORY build_cmake/$TAR_DIRECTORY || true
+# For some odd reason the tar xzvf $TAR_FILENAME doesn't work on Travis-CI ...
+if test "$TRAVIS" = ""; then
+    echo "Make dist tarball, and check consistency"
+    mkdir build_dist
+    cd build_dist
+    cmake -D BUILD_TESTING=OFF ..
+    make dist
 
-# continue build from autoconf
-cd build_autoconf/$TAR_DIRECTORY
+    TAR_FILENAME=$(ls *.tar.gz)
+    TAR_DIRECTORY=$(basename $TAR_FILENAME .tar.gz)
+    mkdir ../build_from_dist
+    cd ../build_from_dist
+    tar xvzf ../build_dist/$TAR_FILENAME
+
+    # continue build from dist tarball
+    cd $TAR_DIRECTORY
+fi
 
 # There's a nasty #define CS in a Solaris system header. Avoid being caught about that again
 CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"
 
-# autoconf build from generated tarball
-mkdir build_autoconf
-cd build_autoconf
-../configure --prefix=/tmp/proj_autoconf_install_from_dist_all
+echo "Build shared ${CMAKE_BUILD_TYPE} configuration from generated tarball"
+mkdir shared_build
+cd shared_build
+cmake \
+  -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+  -D USE_CCACHE=${USE_CCACHE} \
+  -D BUILD_SHARED_LIBS=ON \
+  -D CMAKE_INSTALL_PREFIX=/tmp/proj_shared_install_from_dist \
+  ..
+make
 
-make >/dev/null
-
-if [ "$(uname)" == "Linux" -a -f src/.libs/libproj.so ]; then
-if objdump -TC "src/.libs/libproj.so" | grep "elf64-x86-64">/dev/null; then
+if [ "$(uname)" == "Linux" -a -f lib/libproj.so ]; then
+if objdump -TC "lib/libproj.so" | grep "elf64-x86-64">/dev/null; then
     echo "Checking exported symbols..."
     cat $TRAVIS_BUILD_DIR/scripts/reference_exported_symbols.txt | sort > /tmp/reference_exported_symbols.txt
-    $TRAVIS_BUILD_DIR/scripts/dump_exported_symbols.sh src/.libs/libproj.so | sort > /tmp/got_symbols.txt
-    diff -u /tmp/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh src/.libs/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
+    $TRAVIS_BUILD_DIR/scripts/dump_exported_symbols.sh lib/libproj.so | sort > /tmp/got_symbols.txt
+    diff -u /tmp/reference_exported_symbols.txt /tmp/got_symbols.txt || (echo "Difference(s) found in exported symbols. If intended, refresh scripts/reference_exported_symbols.txt with 'scripts/dump_exported_symbols.sh lib/libproj.so > scripts/reference_exported_symbols.txt'"; exit 1)
 fi
 fi
 
-make check
+ctest
 make install
-find /tmp/proj_autoconf_install_from_dist_all
+# find /tmp/proj_shared_install_from_dist
+$TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_shared_install_from_dist shared
+$TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_shared_install_from_dist shared
+
+echo "Build static ${CMAKE_BUILD_TYPE} configuration from generated tarball"
+cd ..
+mkdir static_build
+cd static_build
+cmake \
+  -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+  -D USE_CCACHE=${USE_CCACHE} \
+  -D BUILD_SHARED_LIBS=OFF \
+  -D CMAKE_INSTALL_PREFIX=/tmp/proj_static_install_from_dist \
+  ..
+make
+
+ctest
+make install
+# find /tmp/proj_static_install_from_dist
+$TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_static_install_from_dist static
+$TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_static_install_from_dist static
+
+echo "Run PROJJSON tests only with shared configuration"
+
+test_projjson(){
+  printf "Testing PROJJSON output with $* ... "
+  case "$1" in
+    \+*)
+      /tmp/proj_shared_install_from_dist/bin/projinfo "$@" -o PROJJSON -q > out.json ;;
+    *)
+      /tmp/proj_shared_install_from_dist/bin/projinfo $* -o PROJJSON -q > out.json ;;
+  esac
+  # cat out.json
+  if [ $(jsonschema --version) = "3.2.0" ]; then
+    # workaround for this version, which does not validate UTF-8
+    tr -cd '\11\12\15\40-\176' < out.json > out.ascii
+    mv out.ascii out.json
+  fi
+  jsonschema -i out.json /tmp/proj_shared_install_from_dist/share/proj/projjson.schema.json
+  ret=$?
+  if [ $ret != 0 ]; then
+    return $ret
+  else
+    echo "Valid!"
+  fi
+  /tmp/proj_shared_install_from_dist/bin/projinfo @out.json -o PROJJSON -q > out2.json
+  diff -u out.json out2.json
+  ret=$?
+  rm -f out.json out2.json
+  return $ret
+}
+
+test_projjson EPSG:32631
+test_projjson EPSG:4326+3855
+test_projjson "+proj=longlat +ellps=GRS80 +nadgrids=@foo +type=crs"
+test_projjson -s EPSG:3111 -t GDA2020
+
+cd ..
+
+echo "Check that we can retrieve the resource directory in a relative way after renaming the installation prefix"
+
+mkdir /tmp/proj_shared_install_from_dist_renamed
+mkdir /tmp/proj_static_install_from_dist_renamed
+mv /tmp/proj_shared_install_from_dist /tmp/proj_shared_install_from_dist_renamed/subdir
+mv /tmp/proj_static_install_from_dist /tmp/proj_static_install_from_dist_renamed/subdir
+set +e
+/tmp/proj_shared_install_from_dist_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null 1>shared.out
+/tmp/proj_static_install_from_dist_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null 1>static.out
+set -e
+if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+    # on macOS /tmp is a symblink to /private/tmp only for the shared build
+    INST=/private/tmp
+else
+    INST=/tmp
+fi
+cat shared.out
+grep "Downloading from https://cdn.proj.org into $INST/proj_shared_install_from_dist_renamed/subdir/share/proj" shared.out
+cat static.out
+grep "Downloading from https://cdn.proj.org into /tmp/proj_static_install_from_dist_renamed/subdir/share/proj" static.out
+rm shared.out static.out
+
+sed -i'.bak' -e '1c\
+prefix='"$INST"'/proj_shared_install_from_dist_renamed/subdir' $INST/proj_shared_install_from_dist_renamed/subdir/lib/pkgconfig/proj.pc
+# cat $INST/proj_shared_install_from_dist_renamed/subdir/lib/pkgconfig/proj.pc
+
+sed -i'.bak' -e '1c\
+prefix=/tmp/proj_static_install_from_dist_renamed/subdir' /tmp/proj_static_install_from_dist_renamed/subdir/lib/pkgconfig/proj.pc
+# cat /tmp/proj_static_install_from_dist_renamed/subdir/lib/pkgconfig/proj.pc
+
 if [ $BUILD_NAME = "linux_gcc" ]; then
-    $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all shared
-    $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all static
-elif [ $BUILD_NAME = "osx" ]; then
-    # skip static builds, as macOS shows: ld: unknown option: -Bstatic
-    $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all shared
+    $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_shared_install_from_dist_renamed/subdir shared
+    PROJ_LIB=/tmp/proj_static_install_from_dist_renamed/subdir/share/proj $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_static_install_from_dist_renamed/subdir static
 else
     echo "Skipping test_autotools.sh test for $BUILD_NAME"
 fi
 
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:32631 -o PROJJSON -q > out.json
-cat out.json
-echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
-
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo EPSG:4326+3855 -o PROJJSON -q > out.json
-cat out.json
-echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
-
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo "+proj=longlat +ellps=GRS80 +nadgrids=@foo +type=crs" -o PROJJSON -q > out.json
-cat out.json
-echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo @out.json -o PROJJSON -q > out2.json
-diff -u out.json out2.json
-
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo -s EPSG:3111 -t GDA2020 -o PROJJSON -o PROJJSON -q > out.json
-cat out.json
-echo "Validating JSON"
-jsonschema -i out.json /tmp/proj_autoconf_install_from_dist_all/share/proj/projjson.schema.json && echo "Valid !"
-/tmp/proj_autoconf_install_from_dist_all/bin/projinfo @out.json -o PROJJSON -q > out2.json
-diff -u out.json out2.json
-
-# Test make clean target
-make clean > /dev/null
-
-cd ..
-
-if [ $TRAVIS_OS_NAME != "osx" ]; then
-    # Check that we can retrieve the resource directory in a relative way after renaming the installation prefix
-    mkdir /tmp/proj_autoconf_install_from_dist_all_renamed
-    mv /tmp/proj_autoconf_install_from_dist_all /tmp/proj_autoconf_install_from_dist_all_renamed/subdir
-    LD_LIBRARY_PATH=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory || /bin/true
-    LD_LIBRARY_PATH=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null | grep "Downloading from https://cdn.proj.org into /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/share/proj"
-    sed -i '1cprefix=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir' /tmp/proj_autoconf_install_from_dist_all_renamed/subdir/lib/pkgconfig/proj.pc
-    if [ $BUILD_NAME = "linux_gcc" ]; then
-        $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all_renamed/subdir shared
-        PROJ_LIB=/tmp/proj_autoconf_install_from_dist_all_renamed/subdir/share/proj $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_autoconf_install_from_dist_all_renamed/subdir static
-    else
-        echo "Skipping test_autotools.sh test for $BUILD_NAME"
-    fi
-fi
+$TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_shared_install_from_dist_renamed/subdir shared
+PROJ_LIB=/tmp/proj_static_install_from_dist_renamed/subdir/share/proj $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_static_install_from_dist_renamed/subdir static
 
 if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
-
-    cmake --version
-
-    # Build PROJ as a subproject
+    echo "Build PROJ as a subproject"
     mkdir proj_as_subproject
     cd proj_as_subproject
     mkdir external
@@ -140,61 +190,44 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
 
     mkdir build_cmake
     cd build_cmake
-    cmake .. -DCMAKE_BUILD_TYPE=Debug
-    VERBOSE=1 make >/dev/null
-    cd ../..
-
-    # Use ccache if it's available
-    if command -v ccache &> /dev/null
-    then
-        USE_CCACHE=ON
-        ccache -s
-    else
-        USE_CCACHE=OFF
-    fi
-
-    # Regular build
-    mkdir build_cmake
-    cd build_cmake
-    cmake .. -DCMAKE_INSTALL_PREFIX=/tmp/proj_cmake_install -DUSE_CCACHE=${USE_CCACHE}
-    make >/dev/null
-    if [ "${USE_CCACHE}" = "ON" ]; then
-        ccache -s
-    fi
-
-    make install >/dev/null
-    ctest
-    find /tmp/proj_cmake_install
-    if [ $BUILD_NAME = "linux_gcc" ] || [ $BUILD_NAME = "osx" ]; then
-        $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_cmake_install shared
-        $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_cmake_install shared
-    else
-        echo "Skipping test_cmake.sh and test_autotools.sh for $BUILD_NAME"
-    fi
-    cd ..
-
-    # Check that we can retrieve the resource directory in a relative way after renaming the installation prefix
-    mkdir /tmp/proj_cmake_install_renamed
-    mv /tmp/proj_cmake_install /tmp/proj_cmake_install_renamed/subdir
-    set +e
-    /tmp/proj_cmake_install_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory
-    /tmp/proj_cmake_install_renamed/subdir/bin/projsync --source-id ? --dry-run --system-directory 2>/dev/null | grep "Downloading from https://cdn.proj.org into /tmp/proj_cmake_install_renamed/subdir/share/proj"
-    set -e
+    cmake -D USE_CCACHE=${USE_CCACHE} ..
+    make
 
     # return to root
     cd ../..
+    if test "$TRAVIS" = ""; then
+        cd ../..
+    fi
 
+    echo "Build coverage as in-source build"
     # There's an issue with the clang on Travis + coverage + cpp code
     if [ "$BUILD_NAME" != "linux_clang" ]; then
-        # autoconf build with grids and coverage
+        # build with grids and coverage
         if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-            CFLAGS="--coverage" CXXFLAGS="--coverage" ./configure;
+            cmake \
+              -D CMAKE_BUILD_TYPE=Debug \
+              -D USE_CCACHE=${USE_CCACHE} \
+              -D CMAKE_C_FLAGS="--coverage" \
+              -D CMAKE_CXX_FLAGS="--coverage" \
+              . ;
         else
-            CFLAGS="$CFLAGS --coverage" CXXFLAGS="$CXXFLAGS --coverage" LDFLAGS="$LDFLAGS -lgcov" ./configure;
+            LDFLAGS="$LDFLAGS -lgcov" cmake \
+              -D CMAKE_BUILD_TYPE=Debug \
+              -D USE_CCACHE=${USE_CCACHE} \
+              -D CMAKE_C_FLAGS="$CFLAGS --coverage" \
+              -D CMAKE_CXX_FLAGS="$CXXFLAGS --coverage" \
+              . ;
         fi
     else
-        ./configure
+        cmake \
+          -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+          -D USE_CCACHE=${USE_CCACHE} \
+          . ;
     fi
-    make >/dev/null
-    make check
+    make
+    ctest
+fi
+
+if [ "${USE_CCACHE}" = "ON" ]; then
+    ccache -s
 fi
