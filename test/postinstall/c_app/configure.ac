@@ -1,7 +1,7 @@
 AC_INIT([c_app], [0.1])
 AM_INIT_AUTOMAKE
 AC_PROG_CC
-AC_CONFIG_MACRO_DIR([../../../m4])
+AC_CONFIG_MACRO_DIR([../m4])
 
 PKG_CHECK_MODULES([PROJ], [proj])
 
