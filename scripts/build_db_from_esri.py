@@ -1007,6 +1007,12 @@ class ConversionMapping:
     param_mapping: Dict[int, str]
 
 
+# special cases
+
+REQUIRES_ORIGINAL_WKT_DEF = {
+    '102113'  # see https://github.com/OSGeo/PROJ/pull/2954#issuecomment-977771912 for rationale
+}
+
 MAPPED_PROJCS: Dict[str, ConversionMapping] = {
     'Hotine_Oblique_Mercator_Azimuth_Natural_Origin': ConversionMapping(
         epsg_code='9812',
@@ -1373,7 +1379,7 @@ def import_projcs():
                     sql = """INSERT INTO "usage" VALUES('ESRI', 'PCRS_%s_USAGE','projected_crs','ESRI','%s','%s','%s','%s','%s');""" % (code, code, extent_auth_name, extent_code, 'EPSG', '1024')
                     all_sql.append(sql)
 
-                elif method in MAPPED_PROJCS or method in MAPPED_PROJCS_WITH_EXTRA_LOGIC:
+                elif (method in MAPPED_PROJCS or method in MAPPED_PROJCS_WITH_EXTRA_LOGIC) and code not in REQUIRES_ORIGINAL_WKT_DEF:
                     params = get_parameter_values(parsed_conv_wkt2['CONVERSION'][1])
                     cs = get_cs_from_false_easting_and_northing(params)
                     if method in MAPPED_PROJCS:

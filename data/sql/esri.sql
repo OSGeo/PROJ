@@ -9102,9 +9102,7 @@ INSERT INTO "conversion" VALUES('ESRI','102112','unnamed',NULL,'EPSG','9807','Tr
 INSERT INTO "usage" VALUES('ESRI', 'CONV_102112_USAGE','conversion','ESRI','102112','EPSG','2889','EPSG','1024');
 INSERT INTO "projected_crs" VALUES('ESRI','102112','NZGD_2000_Chatham_Island_Circuit',NULL,'EPSG','4400','EPSG','4167','ESRI','102112',NULL,1);
 INSERT INTO "usage" VALUES('ESRI', 'PCRS_102112_USAGE','projected_crs','ESRI','102112','EPSG','2889','EPSG','1024');
-INSERT INTO "conversion" VALUES('ESRI','102113','unnamed',NULL,'EPSG','9805','Mercator (variant B)','EPSG','8823','Latitude of 1st standard parallel',0.0,'EPSG','9102','EPSG','8802','Longitude of natural origin',0.0,'EPSG','9102','EPSG','8806','False easting',0.0,'EPSG','9001','EPSG','8807','False northing',0.0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1);
-INSERT INTO "usage" VALUES('ESRI', 'CONV_102113_USAGE','conversion','ESRI','102113','EPSG','3544','EPSG','1024');
-INSERT INTO "projected_crs" VALUES('ESRI','102113','WGS_1984_Web_Mercator',NULL,'EPSG','4400','EPSG','4055','ESRI','102113',NULL,1);
+INSERT INTO "projected_crs" VALUES('ESRI','102113','WGS_1984_Web_Mercator',NULL,NULL,NULL,'EPSG','4055',NULL,NULL,'PROJCS["WGS_1984_Web_Mercator",GEOGCS["GCS_WGS_1984_Major_Auxiliary_Sphere",DATUM["D_WGS_1984_Major_Auxiliary_Sphere",SPHEROID["WGS_1984_Major_Auxiliary_Sphere",6378137.0,0.0]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Mercator"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],UNIT["Meter",1.0]]',1);
 INSERT INTO "usage" VALUES('ESRI', 'PCRS_102113_USAGE','projected_crs','ESRI','102113','EPSG','3544','EPSG','1024');
 INSERT INTO "projected_crs" VALUES('ESRI','102114','Old_Hawaiian_UTM_Zone_4N',NULL,'EPSG','4400','EPSG','4135','EPSG','16004',NULL,0);
 INSERT INTO "usage" VALUES('ESRI', 'PCRS_102114_USAGE','projected_crs','ESRI','102114','EPSG','3488','EPSG','1024');
