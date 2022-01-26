@@ -432,6 +432,10 @@ def fill_compound_crs(proj_db_cursor):
     proj_db_cursor.execute("SELECT ?, coord_ref_sys_code, coord_ref_sys_name, NULL, ?, cmpd_horizcrs_code, ?, cmpd_vertcrs_code, deprecated FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind IN ('compound') AND cmpd_horizcrs_code NOT IN (SELECT coord_ref_sys_code FROM epsg.epsg_coordinatereferencesystem WHERE coord_ref_sys_kind = 'engineering')", (EPSG_AUTHORITY, EPSG_AUTHORITY, EPSG_AUTHORITY))
     for auth_name, code, name, description, horiz_auth_name, horiz_code, vert_auth_name, vert_code, deprecated in proj_db_cursor.fetchall():
         try:
+            # FIXME: dummy test record of EPSG 10.051 that should be removed in later versoins
+            if code == 9912 and name == 'test':
+                print('Skip EPSG:9912 test record')
+                continue
             proj_db_cursor.execute("INSERT INTO compound_crs VALUES (?,?,?,?,?,?,?,?,?)", (auth_name, code, name, description, horiz_auth_name, horiz_code, vert_auth_name, vert_code, deprecated))
         except sqlite3.IntegrityError as e:
             print(e)
