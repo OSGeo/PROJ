@@ -7508,3 +7508,5 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5830','DB_REF2003','EPSG'
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5830','DB_REF2016','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5828','DB_REF2003','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5828','DB_REF2016','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9920','British National Grid + BI height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9922','IRENET95 / ITM + BI height','EPSG');
