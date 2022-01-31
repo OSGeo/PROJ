@@ -636,7 +636,7 @@ It contains 5 subgrids. All essential metadata to list the subgrids and their
 georeferencing is contained within the first 3 KB of the file.
 
 The file size is 4.8 MB using DEFLATE compression and floating-point predictor.
-To be compared with the 83 MB of the original .gsb file.
+To be compared with the 83 MB of the original .gsb file that is lossless with it.
 
 https://github.com/OSGeo/PROJ-data/blob/master/ca_nrc/ca_nrc_ntv2_0.tif has
 been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/north-america/ntv2_0.gsb
