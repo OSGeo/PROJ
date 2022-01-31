@@ -1420,6 +1420,21 @@ static void *pj_open_lib_internal(
         if (out_full_filename != nullptr && out_full_filename_size > 0)
             out_full_filename[0] = '\0';
 
+        auto open_lib_from_paths = [&ctx, open_file, &name, &fname, &sysname, &mode](const std::string & projLib) {
+            void *fid = nullptr;
+            auto paths = NS_PROJ::internal::split(projLib, dirSeparator);
+            for (const auto& path : paths) {
+                fname = NS_PROJ::internal::stripQuotes(path);;
+                fname += DIR_CHAR;
+                fname += name;
+                sysname = fname.c_str();
+                fid = open_file(ctx, sysname, mode);
+                if (fid)
+                    break;
+            }
+            return fid;
+        };
+
         /* check if ~/name */
         if (is_tilde_slash(name))
             if ((sysname = getenv("HOME")) != nullptr) {
@@ -1487,16 +1502,7 @@ static void *pj_open_lib_internal(
         else if (!gbPROJ_LIB_ENV_VAR_TRIED_LAST &&
                  !(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
                       .empty()) {
-            auto paths = NS_PROJ::internal::split(projLib, dirSeparator);
-            for (const auto &path : paths) {
-                fname = path;
-                fname += DIR_CHAR;
-                fname += name;
-                sysname = fname.c_str();
-                fid = open_file(ctx, sysname, mode);
-                if (fid)
-                    break;
-            }
+            fid = open_lib_from_paths(projLib);
         }
 
         else if ((sysname = get_path_from_relative_share_proj(
@@ -1519,16 +1525,7 @@ static void *pj_open_lib_internal(
         else if (gbPROJ_LIB_ENV_VAR_TRIED_LAST &&
                  !(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
                       .empty()) {
-            auto paths = NS_PROJ::internal::split(projLib, dirSeparator);
-            for (const auto &path : paths) {
-                fname = path;
-                fname += DIR_CHAR;
-                fname += name;
-                sysname = fname.c_str();
-                fid = open_file(ctx, sysname, mode);
-                if (fid)
-                    break;
-            }
+            fid = open_lib_from_paths(projLib);
         }
 
         else {
