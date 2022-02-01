@@ -1420,9 +1420,9 @@ static void *pj_open_lib_internal(
         if (out_full_filename != nullptr && out_full_filename_size > 0)
             out_full_filename[0] = '\0';
 
-        auto open_lib_from_paths = [&ctx, open_file, &name, &fname, &sysname, &mode](const std::string & projLib) {
+        auto open_lib_from_paths = [&ctx, open_file, &name, &fname, &sysname, &mode](const std::string & projLibPaths) {
             void *fid = nullptr;
-            auto paths = NS_PROJ::internal::split(projLib, dirSeparator);
+            auto paths = NS_PROJ::internal::split(projLibPaths, dirSeparator);
             for (const auto& path : paths) {
                 fname = NS_PROJ::internal::stripQuotes(path);;
                 fname += DIR_CHAR;
