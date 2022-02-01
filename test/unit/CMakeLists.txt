@@ -1,11 +1,27 @@
 # CMake configuration for PROJ unit tests
 
-option(USE_EXTERNAL_GTEST "Compile against external GTest" OFF)
+find_package(GTest 1.8.1)
+if(GTest_FOUND)
+  option(USE_EXTERNAL_GTEST "Compile against external GTest" ON)
+else()
+  option(USE_EXTERNAL_GTEST "Compile against external GTest" OFF)
+endif()
 
 if(USE_EXTERNAL_GTEST)
 
+if(NOT GTest_FOUND)
+    message(FATAL_ERROR "External GTest >= 1.8.1 not found")
+endif()
 message(STATUS "Using external GTest")
-find_package(GTest 1.8.1 CONFIG REQUIRED)
+
+# CMake < 3.20.0 uses GTest::GTest
+# CMake >= 3.20 uses GTest::gtest, and deprecates GTest::GTest
+# so for older CMake, create an alias from GTest::GTest to GTest::gtest
+if(NOT TARGET GTest::gtest)
+    add_library(GTest::gtest INTERFACE IMPORTED)
+    set_target_properties(GTest::gtest PROPERTIES
+                          INTERFACE_LINK_LIBRARIES "GTest::GTest")
+endif()
 
 else()
 
