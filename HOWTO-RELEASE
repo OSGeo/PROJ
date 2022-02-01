@@ -31,27 +31,22 @@ list. The PROJ PSC guidelines describes the rules for passing a motion.
 -------------------------------------------------------------------------------
 
 In case of a un-planned maintenance release, make sure that version numbers are
-propertly updated: see 3.1
+properly updated: see 3.1
 
 Determine the ABI version number. It consists of "current:revision:age". Follow
-the steps below to determine the next ABI version number:
+the steps below to determine the values in CMakeLists.txt:
 
    - If the library source code has changed at all since the last update,
-     then increment revision (c:r:a becomes c:r+1:a).
+     then increment PROJ_LIBTOOL_REVISION (c:r:a becomes c:r+1:a).
 
    - If any interfaces have been added, removed, or changed since the last
-     update, increment current, and set revision to 0.
+     update, increment PROJ_LIBTOOL_CURRENT and set PROJ_LIBTOOL_REVISION to 0.
 
    - If any interfaces have been added since the last public release, then
-     increment age.
+     increment PROJ_LIBTOOL_AGE.
 
    - If any interfaces have been removed since the last public release, then
-     set age to 0.
-
-Update the following files with the new ABI version number:
-
-    - `src/Makefile.am`     Update -version-info
-    - `CMakeLists.txt`:     Update PROJ_LIBTOOL_CURRENT, PROJ_LIBTOOL_REVISON and PROJ_LIBTOOL_AGE
+     set PROJ_LIBTOOL_AGE to 0.
 
 *Commit the changes to master.*
 
@@ -128,14 +123,17 @@ subsequently cherry-picked to the maintenance branch.
 1.7 Prepare and upload archives
 -------------------------------------------------------------------------------
 
-Run autoconf and configure the build:
+Checkout the GitHub repo to an isolated local directory to package files only
+tracked in git. Then, run CMake and build source distributions:
 
 ```
-./autogen.sh
-mkdir build
-cd build
-../configure
-make dist
+BRANCH_NAME=master
+git clone --depth 1 --branch $BRANCH_NAME \
+         https://github.com/OSGeo/PROJ.git PROJ-$BRANCH_NAME
+cd PROJ-$BRANCH_NAME
+mkdir _build && cd _build
+cmake -D BUILD_TESTING=OFF ..
+cmake --build . --target dist
 ```
 
 Rename the archives and generate MD5 sum files:
@@ -240,12 +238,11 @@ PROJ uses [semantic versioning](http://semver.org/). Depending on the changes
 in the release will be either a major, minor or patch release. Update the
 version numbers in the files.
 
-  - configure.ac:         Update the version number in AC_INIT().
   - src/proj.h:           Update PROJ_VERSION_MAJOR, PROJ_VERSION_MINOR and
                           PROJ_VERSION_PATCH.
   - src/release.cpp:      Update date to the scheduled release date.
   - CMakeLists.txt:       Update proj_version()
-  - docs/source/conf.py:   Update version number
+  - docs/source/conf.py:  Update version number
 
 
 *Commit changes. Either to master or maintenance branch depending on the nature
