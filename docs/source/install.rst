@@ -132,129 +132,25 @@ Compilation and installation from source code
 The classic way of installing PROJ is via the source code distribution. The
 most recent version is available from the :ref:`download page<current_release>`.
 
-The following guides show how to compile and install the software using the
-Autotools and CMake build systems.
+The following guides show how to compile and install the software using CMake.
+
+  .. note::
+
+    Support for Autotools was maintained until PROJ 8.2 (see :ref:`RFC7`).
+    PROJ 9.0 and later releases only support builds using CMake.
+
 
 Build requirements
 --------------------------------------------------------------------------------
 
 - C99 compiler
 - C++11 compiler
+- CMake >= 3.9
 - SQLite3 >= 3.11 (headers, library and executable)
 - libtiff >= 4.0 (headers and library)
 - optional (but recommended): curl >= 7.29.0
-- GNU make for autotools build or CMake >= 3.9
 
-Autotools
---------------------------------------------------------------------------------
-
-FSF's configuration procedure is used to ease installation of the PROJ system.
-
-.. note::
-    The Autotools build system is only available on UNIX-like systems.
-    Follow the CMake installation guide if you are not using a UNIX-like
-    operating system.
-
-If you are building from the git repository you have to first run::
-
-    ./autogen.sh
-
-which will generate a ``configure`` script that can be used in the next step.
-
-The default destination path prefix for installed files is ``/usr/local``.
-Results from the installation script will be placed into subdirectories ``bin``,
-``include``, ``lib``, and ``man/man1``. If this default path prefix
-is proper, then execute::
-
-    ./configure
-
-If another path prefix is required, then execute::
-
-    ./configure --prefix=/my/path
-
-In either case, the directory of the prefix path must exist and be writable by
-the installer.
-
-With the data files in place we can now build and install PROJ::
-
-    make
-    make install
-
-The install target will create, if necessary, all required sub-directories.
-
-Tests are run with::
-
-    make check
-
-With a successful install of PROJ we can now install data files using the
-:program:`projsync` utility::
-
-    projsync --system-directory --all
-
-which will download all resource files currently available for PROJ. If less than
-the entire collection of resource files is needed the call to :program:`projsync`
-can be modified to suit the users needs. See :ref:`projsync` for more options.
-
-.. note::
-
-    The use of :program:`projsync` requires that network support is enabled (the
-    default option). If the resource files are not installed using
-    :program:`projsync` PROJ will attempt to fetch them automatically when a
-    transformation needs a specific data file. This  requires that
-    :envvar:`PROJ_NETWORK` is set to ``ON``.
-
-    As an alternative on systems where network access is disabled, the
-    :ref:`proj-data <datumgrid>`
-    package can be downloaded and added to the :envvar:`PROJ_LIB` directory.
-
-
-
-Autotools configure options
-+++++++++++++++++++++++++++
-
-Most POSIX systems may not require any options to ``./configure`` if all
-PROJ requirements are met, installed into common directories, and a
-"default" behavior is desired.
-
-Some influential environment variables are used by ``./configure``,
-with no expected defaults:
-
-.. envvar:: CC
-
-    C compiler command.
-
-.. envvar:: CFLAGS
-
-    C compiler flags.
-
-.. envvar:: CXX
-
-    C++ compiler command.
-
-.. envvar:: CXXFLAGS
-
-    C++ compiler flags
-
-See ``./configure --help`` for all options, here are a few key options:
-
-.. option:: --enable-lto
-
-    Enable compiler's Link Time Optimization, default disabled.
-
-.. option:: --disable-tiff
-
-    TIFF support is enabled by default to use PROJ-data resource files,
-    but this can be disabled, if required.
-
-.. option:: --with-curl=ARG
-
-    Enable CURL support (``ARG=path`` to ``curl-config``).
-
-.. option:: --without-mutex
-
-    Disable real mutex locks (lacking pthreads).
-
-CMake
+Build steps
 --------------------------------------------------------------------------------
 
 With the CMake build system you can compile and install PROJ on more or less any
@@ -317,7 +213,7 @@ can be modified to suit the users needs. See :ref:`projsync` for more options.
 
 
 CMake configure options
-+++++++++++++++++++++++
+--------------------------------------------------------------------------------
 
 Options to configure a CMake are provided using ``-D<var>=<value>``.
 All cached entries can be viewed using ``cmake -LAH`` from a build directory.
