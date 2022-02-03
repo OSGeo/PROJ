@@ -1424,7 +1424,7 @@ static void *pj_open_lib_internal(
             void *fid = nullptr;
             auto paths = NS_PROJ::internal::split(projLibPaths, dirSeparator);
             for (const auto& path : paths) {
-                fname = NS_PROJ::internal::stripQuotes(path);;
+                fname = NS_PROJ::internal::stripQuotes(path);
                 fname += DIR_CHAR;
                 fname += name;
                 sysname = fname.c_str();
