@@ -1421,18 +1421,18 @@ static void *pj_open_lib_internal(
             out_full_filename[0] = '\0';
 
         auto open_lib_from_paths = [&ctx, open_file, &name, &fname, &sysname, &mode](const std::string & projLibPaths) {
-            void *fid = nullptr;
+            void *lib_fid = nullptr;
             auto paths = NS_PROJ::internal::split(projLibPaths, dirSeparator);
             for (const auto& path : paths) {
                 fname = NS_PROJ::internal::stripQuotes(path);
                 fname += DIR_CHAR;
                 fname += name;
                 sysname = fname.c_str();
-                fid = open_file(ctx, sysname, mode);
-                if (fid)
+                lib_fid = open_file(ctx, sysname, mode);
+                if (lib_fid)
                     break;
             }
-            return fid;
+            return lib_fid;
         };
 
         /* check if ~/name */
