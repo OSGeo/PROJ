@@ -533,11 +533,11 @@ expect      0 0 1
 roundtrip   1
 
 -------------------------------------------------------------------------------
-# Check that proj_create() returns a generic error when an exception is caught
+# Check that proj_create() returns a syntax error when an exception is caught
 # in the creation of a PJ object.
 -------------------------------------------------------------------------------
-operation   this is a bogus CRS meant to trigger a generic error in proj_create()
-expect      failure   errno other
+operation   this is a bogus CRS meant to trigger a syntax error in proj_create()
+expect      failure   errno invalid_op_wrong_syntax
 
 -------------------------------------------------------------------------------
 # Test proj=set

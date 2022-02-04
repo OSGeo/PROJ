@@ -572,6 +572,11 @@ PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
         if (identifiedObject) {
             return pj_obj_create(ctx, NN_NO_CHECK(identifiedObject));
         }
+    } catch (const io::ParsingException &e) {
+        if (proj_context_errno(ctx) == 0) {
+            proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP_WRONG_SYNTAX);
+        }
+        proj_log_error(ctx, __FUNCTION__, e.what());
     } catch (const std::exception &e) {
         proj_log_error(ctx, __FUNCTION__, e.what());
     }
