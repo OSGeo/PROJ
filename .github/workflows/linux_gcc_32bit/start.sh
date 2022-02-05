@@ -9,14 +9,14 @@ export TRAVIS_BUILD_DIR="$WORK_DIR"
 ARCH=i386
 
 dpkg --add-architecture i386
-apt update -y
+apt-get update -y
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends  -o APT::Immediate-Configure=0  \
-    autoconf automake libtool gcc-multilib g++-multilib g++ sqlite3 \
-    python3-pip \
-    make cmake ccache pkg-config tar zip \
-    libsqlite3-dev:$ARCH libtiff-dev:$ARCH libcurl4-openssl-dev:$ARCH \
-    jq
+    autoconf automake libtool make cmake ccache pkg-config python3-pip sqlite3 tar zip \
+    gcc-multilib g++-multilib g++ jq dpkg-dev \
+    libsqlite3-dev:$ARCH \
+    libtiff-dev:$ARCH \
+    libcurl4-openssl-dev:$ARCH
 
 python3 -m pip install --user jsonschema
 export PATH=$HOME/.local/bin:$PATH

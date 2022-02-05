@@ -4,8 +4,12 @@ set -e
 
 apt-get update -y
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    sudo autoconf automake libtool clang++-10 python3-clang-10 make cmake ccache pkg-config tar zip \
-    sqlite3 libsqlite3-dev libtiff-dev libcurl4-openssl-dev jq python3-pip nlohmann-json3-dev libgtest-dev
+    autoconf automake libtool make cmake ccache pkg-config python3-pip sqlite3 tar zip \
+    clang++-10 jq python3-clang-10 \
+    libsqlite3-dev \
+    libtiff-dev \
+    libcurl4-openssl-dev \
+    nlohmann-json3-dev libgtest-dev
 
 python3 -m pip install --user jsonschema
 export PATH=$HOME/.local/bin:$PATH
