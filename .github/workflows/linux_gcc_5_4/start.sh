@@ -13,7 +13,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     g++ jq lcov python3-setuptools \
     libsqlite3-dev \
     libtiff-dev \
-    libcurl4-openssl-dev
+    libcurl4-openssl-dev libidn11-dev librtmp-dev libssl-dev libkrb5-dev comerr-dev libldap2-dev
 
 python3 -m pip install --user --upgrade "pip < 21.0"
 echo `python3 -m pip --version`
