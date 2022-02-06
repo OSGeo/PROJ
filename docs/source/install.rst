@@ -146,9 +146,9 @@ Build requirements
 - C99 compiler
 - C++11 compiler
 - CMake >= 3.9
-- SQLite3 >= 3.11 (headers, library and executable)
-- libtiff >= 4.0 (headers and library)
-- optional (but recommended): curl >= 7.29.0
+- SQLite3 >= 3.11: headers and library for target architecture, and sqlite3 executable for build architecture.
+- libtiff >= 4.0 (optional but recommended)
+- curl >= 7.29.0 (optional but recommended)
 
 Build steps
 --------------------------------------------------------------------------------
