@@ -258,13 +258,14 @@ All cached entries can be viewed using ``cmake -LAH`` from a build directory.
 
 .. option:: BUILD_SHARED_LIBS
 
-    Build PROJ library shared. Default for Windows is OFF, building only
-    a static library. Default for all others is ON. See also the CMake
+    Build PROJ library shared. Default is ON. See also the CMake
     documentation for `BUILD_SHARED_LIBS
     <https://cmake.org/cmake/help/v3.9/variable/BUILD_SHARED_LIBS.html>`_.
 
     .. versionchanged:: 7.0
         Renamed from ``BUILD_LIBPROJ_SHARED``
+
+    .. note:: before PROJ 9.0, the default was OFF for Windows builds.
 
 .. option:: BUILD_TESTING=ON
 
