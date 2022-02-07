@@ -459,22 +459,20 @@ the ellipsoid as in the following example
     +init=epsg:25832 +ellps=intl
 
 where the Hayford ellipsoid is used instead of the predefined GRS80 ellipsoid.
+
 It is also possible to add additional parameters not specified in the init file,
-for instance by adding an observation epoch when transforming from ITRF2000 to
-ITRF2005:
+for instance by adding a central epoch when applying the ITRF2014:NOAM plate
+motion model:
 
 ::
 
-    +init=ITRF2000:ITRF2005 +t_obs=2010.5
+    +init=ITRF2014:NOAM +t_epoch=2010.0
 
 which then expands to
 
 ::
 
-    +proj=helmert +x=-0.0001 +y=0.0008 +z=0.0058 +s=-0.0004
-    +dx=0.0002 +dy=-0.0001 +dz=0.0018 +ds=-0.000008
-    +t_epoch=2000.0 +convention=position_vector
-    +t_obs=2010.5
+    +proj=helmert +drx=0.000024 +dry=-0.000694 +drz=-0.000063 +convention=position_vector +t_epoch=2010.0
 
 Below is a list of the init files that are packaged with PROJ.
 
