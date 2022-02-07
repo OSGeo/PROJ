@@ -6,14 +6,14 @@ export TRAVIS_OS_NAME=linux
 export BUILD_NAME=linux_gcc
 export TRAVIS_BUILD_DIR="$WORK_DIR"
 
-apt update -y
+apt-get update -y
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    autoconf automake libtool g++ sqlite3 \
-    python3-pip python3-setuptools \
-    make cmake ccache pkg-config tar zip \
-    libsqlite3-dev libtiff-dev libcurl4-openssl-dev \
-    jq lcov
+    autoconf automake libtool make cmake ccache pkg-config python3-pip sqlite3 tar zip \
+    g++ jq lcov python3-setuptools \
+    libsqlite3-dev \
+    libtiff-dev \
+    libcurl4-openssl-dev libidn11-dev librtmp-dev libssl-dev libkrb5-dev comerr-dev libldap2-dev
 
 python3 -m pip install --user --upgrade "pip < 21.0"
 echo `python3 -m pip --version`

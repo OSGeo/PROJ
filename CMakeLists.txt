@@ -338,13 +338,11 @@ install(FILES ${docfiles}
 ################################################################################
 # pkg-config support
 ################################################################################
-if(UNIX OR MINGW)
-  configure_proj_pc()
+configure_proj_pc()
 
-  install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-endif()
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 ################################################################################
 # "make dist" workalike

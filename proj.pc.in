@@ -11,4 +11,5 @@ Requires:
 Version: @VERSION@
 Libs: -L${libdir} -lproj
 Libs.private: @EXTRA_LIBS@
+Requires.private: @EXTRA_REQUIRES@
 Cflags: -I${includedir}

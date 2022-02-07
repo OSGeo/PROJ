@@ -11,6 +11,7 @@ main_setup $1 $2
 
 echo "Running post-install tests with pkg-config (${BUILD_MODE})"
 
+export PKG_CONFIG="${PKG_CONFIG:-pkg-config}"
 export PKG_CONFIG_PATH=${prefix}/lib/pkgconfig
 
 if [ ${BUILD_MODE} = shared ]; then
