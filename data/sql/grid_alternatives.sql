@@ -34,6 +34,7 @@ VALUES
 
 -- be_ign - IGN Belgium
 ('bd72lb72_etrs89lb08.gsb','be_ign_bd72lb72_etrs89lb08.tif','bd72lb72_etrs89lb08.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/be_ign_bd72lb72_etrs89lb08.tif',1,1,NULL),
+('hBG18.dat', 'be_ign_hBG18.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/be_ign_hBG18.tif',1,1,NULL),
 
 -- br_ibge - Instituto Brasileiro de Geografia e Estatistica (IBGE)
 ('CA61_003.gsb','br_ibge_CA61_003.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/br_ibge_CA61_003.tif',1,1,NULL),
