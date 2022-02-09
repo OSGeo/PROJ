@@ -28,3 +28,7 @@ Parameters
 .. include:: ../options/x_0.rst
 
 .. include:: ../options/y_0.rst
+
+.. option:: +latc=<value>
+
+   Normal latitude of the ellipsoid

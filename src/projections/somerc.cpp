@@ -70,21 +70,31 @@ static PJ_LP somerc_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inver
 
 
 PJ *PROJECTION(somerc) {
-    double cp, phip0, sp;
+    double cp, phip0, sp, sinp0;
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
     if (nullptr==Q)
         return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
-
     Q->hlf_e = 0.5 * P->e;
-    cp = cos (P->phi0);
+    cp = cos(P->phi0);
     cp *= cp;
-    Q->c = sqrt (1 + P->es * cp * cp * P->rone_es);
-    sp = sin (P->phi0);
-    Q->sinp0 = sp / Q->c;
-    phip0 = aasin (P->ctx, Q->sinp0);
-    Q->cosp0 = cos(phip0);
+    Q->c = sqrt(1 + P->es * cp * cp * P->rone_es);
+    sp = sin(P->phi0);
+
+    sinp0 = sp / Q->c;
+    phip0 = aasin (P->ctx, sinp0);
+    
+    if (pj_param(P->ctx, P->params, "tlatc").i) {
+        double latc;
+        latc = pj_param(P->ctx, P->params, "rlatc").f;
+        Q->sinp0 = sin(latc);
+        Q->cosp0 = cos(latc);
+    } else {
+        Q->sinp0 = sinp0;
+        Q->cosp0 = cos(phip0);
+    }
+
     sp *= P->e;
     Q->K = log (tan (M_FORTPI + 0.5 * phip0)) - Q->c * (
         log (tan (M_FORTPI + 0.5 * P->phi0)) - Q->hlf_e *
