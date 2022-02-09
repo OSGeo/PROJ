@@ -2460,10 +2460,15 @@ static void setupPROJGeodeticSourceCRS(io::PROJStringFormatter *formatter,
         formatter->stopInversion();
         if (util::isOfExactType<crs::DerivedGeographicCRS>(
                 *(sourceCRSGeog.get()))) {
+            const auto derivedGeogCRS =
+                dynamic_cast<const crs::DerivedGeographicCRS *>(
+                    sourceCRSGeog.get());
             // The export of a DerivedGeographicCRS in non-CRS mode adds
-            // unit conversion and axis swapping. We must compensate for that
+            // unit conversion and axis swapping to the base CRS.
+            // We must compensate for that formatter->startInversion();
             formatter->startInversion();
-            sourceCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+            derivedGeogCRS->baseCRS()->addAngularUnitConvertAndAxisSwap(
+                formatter);
             formatter->stopInversion();
         }
 
@@ -2502,8 +2507,13 @@ static void setupPROJGeodeticTargetCRS(io::PROJStringFormatter *formatter,
         if (util::isOfExactType<crs::DerivedGeographicCRS>(
                 *(targetCRSGeog.get()))) {
             // The export of a DerivedGeographicCRS in non-CRS mode adds
-            // unit conversion and axis swapping. We must compensate for that
-            targetCRSGeog->addAngularUnitConvertAndAxisSwap(formatter);
+            // unit conversion and axis swapping to the base CRS.
+            // We must compensate for that formatter->startInversion();
+            const auto derivedGeogCRS =
+                dynamic_cast<const crs::DerivedGeographicCRS *>(
+                    targetCRSGeog.get());
+            derivedGeogCRS->baseCRS()->addAngularUnitConvertAndAxisSwap(
+                formatter);
         }
         targetCRSGeog->_exportToPROJString(formatter);
     } else {
