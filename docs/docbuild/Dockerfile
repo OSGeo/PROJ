@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-dev python3-pip g++ doxygen dvipng latexmk \
