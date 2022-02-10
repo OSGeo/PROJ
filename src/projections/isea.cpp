@@ -947,8 +947,6 @@ static void isea_hex(struct isea_dgg *g, int tri,
         if (g->quad > 5) hex->x += sidelength;
         hex->y = i + sidelength * ((g->quad-1) % 5);
     }
-
-    return;
 }
 
 static struct isea_pt isea_forward(struct isea_dgg *g, struct isea_geo *in)
