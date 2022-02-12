@@ -1,16 +1,15 @@
 set(GEOD_SRC
-  apps/geod.cpp
-  apps/geod_set.cpp
-  apps/geod_interface.cpp
-  apps/emess.cpp
+  geod.cpp
+  geod_set.cpp
+  geod_interface.cpp
+  emess.cpp
 )
-set(GEOD_INCLUDE apps/geod_interface.h)
+set(GEOD_INCLUDE geod_interface.h)
 
 source_group("Source Files\\Bin" FILES ${GEOD_SRC} ${GEOD_INCLUDE})
 
 add_executable(geod ${GEOD_SRC} ${GEOD_INCLUDE})
 target_link_libraries(geod PRIVATE ${PROJ_LIBRARIES})
-target_compile_options(geod PRIVATE ${PROJ_CXX_WARN_FLAGS})
 
 install(TARGETS geod
   DESTINATION ${BINDIR})
@@ -39,7 +38,6 @@ else()
 
     add_executable(invgeod ${GEOD_SRC} ${GEOD_INCLUDE})
     target_link_libraries(invgeod PRIVATE ${PROJ_LIBRARIES})
-    target_compile_options(invgeod PRIVATE ${PROJ_CXX_WARN_FLAGS})
 
     install(TARGETS invgeod
       DESTINATION ${BINDIR})
