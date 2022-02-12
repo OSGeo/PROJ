@@ -1513,8 +1513,7 @@ struct CurlFileHandle {
     CurlFileHandle(const CurlFileHandle &) = delete;
     CurlFileHandle &operator=(const CurlFileHandle &) = delete;
 
-    explicit CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle,
-                            const char *ca_bundle_path);
+    explicit CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle);
     ~CurlFileHandle();
 
     static PROJ_NETWORK_HANDLE *
@@ -1596,8 +1595,14 @@ static void checkRet(PJ_CONTEXT *ctx, CURLcode code, int line) {
 
 // ---------------------------------------------------------------------------
 
-CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle,
-                               const char *ca_bundle_path)
+static std::string pj_context_get_bundle_path(PJ_CONTEXT *ctx) {
+    pj_load_ini(ctx);
+    return ctx->ca_bundle_path;
+}
+
+// ---------------------------------------------------------------------------
+
+CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle)
     : m_url(url), m_handle(handle) {
     CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_URL, m_url.c_str()));
 
@@ -1619,22 +1624,10 @@ CurlFileHandle::CurlFileHandle(PJ_CONTEXT *ctx, const char *url, CURL *handle,
         CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, 0L));
     }
 
-    // Custom path to SSL certificates.
-    if (ca_bundle_path == nullptr) {
-        ca_bundle_path = getenv("PROJ_CURL_CA_BUNDLE");
-    }
-    if (ca_bundle_path == nullptr) {
-        // Name of environment variable used by the curl binary
-        ca_bundle_path = getenv("CURL_CA_BUNDLE");
-    }
-    if (ca_bundle_path == nullptr) {
-        // Name of environment variable used by the curl binary (tested
-        // after CURL_CA_BUNDLE
-        ca_bundle_path = getenv("SSL_CERT_FILE");
-    }
-    if (ca_bundle_path != nullptr) {
-        CHECK_RET(ctx,
-                  curl_easy_setopt(handle, CURLOPT_CAINFO, ca_bundle_path));
+    const auto ca_bundle_path = pj_context_get_bundle_path(ctx);
+    if (!ca_bundle_path.empty()) {
+        CHECK_RET(ctx, curl_easy_setopt(handle, CURLOPT_CAINFO,
+                                        ca_bundle_path.c_str()));
     }
 
     CHECK_RET(ctx,
@@ -1706,9 +1699,8 @@ PROJ_NETWORK_HANDLE *CurlFileHandle::open(PJ_CONTEXT *ctx, const char *url,
     if (!hCurlHandle)
         return nullptr;
 
-    auto file = std::unique_ptr<CurlFileHandle>(new CurlFileHandle(
-        ctx, url, hCurlHandle,
-        ctx->ca_bundle_path.empty() ? nullptr : ctx->ca_bundle_path.c_str()));
+    auto file = std::unique_ptr<CurlFileHandle>(
+        new CurlFileHandle(ctx, url, hCurlHandle));
 
     double oldDelay = MIN_RETRY_DELAY_MS;
     std::string headers;
@@ -2046,7 +2038,6 @@ int proj_context_set_enable_network(PJ_CONTEXT *ctx, int enable) {
     }
     // Load ini file, now so as to override its network settings
     pj_load_ini(ctx);
-    ctx->networking.enabled_env_variable_checked = true;
     ctx->networking.enabled = enable != FALSE;
 #ifdef CURL_ENABLED
     return ctx->networking.enabled;
@@ -2068,17 +2059,7 @@ int proj_context_is_network_enabled(PJ_CONTEXT *ctx) {
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
     }
-    if (ctx->networking.enabled_env_variable_checked) {
-        return ctx->networking.enabled;
-    }
-    const char *enabled = getenv("PROJ_NETWORK");
-    if (enabled && enabled[0] != '\0') {
-        ctx->networking.enabled = ci_equal(enabled, "ON") ||
-                                  ci_equal(enabled, "YES") ||
-                                  ci_equal(enabled, "TRUE");
-    }
     pj_load_ini(ctx);
-    ctx->networking.enabled_env_variable_checked = true;
     return ctx->networking.enabled;
 }
 
