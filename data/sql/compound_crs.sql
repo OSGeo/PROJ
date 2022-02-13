@@ -726,6 +726,8 @@ INSERT INTO "compound_crs" VALUES('EPSG','9883','ETRS89 + CD Norway depth',NULL,
 INSERT INTO "usage" VALUES('EPSG','16974','compound_crs','EPSG','9883','EPSG','4656','EPSG','1198');
 INSERT INTO "compound_crs" VALUES('EPSG','9897','LUREF / Luxembourg TM + NG95 height',NULL,'EPSG','2169','EPSG','5774',0);
 INSERT INTO "usage" VALUES('EPSG','17304','compound_crs','EPSG','9897','EPSG','1146','EPSG','1029');
+INSERT INTO "compound_crs" VALUES('EPSG','9907','ETRS89 + Ostend height',NULL,'EPSG','4258','EPSG','5710',0);
+INSERT INTO "usage" VALUES('EPSG','17371','compound_crs','EPSG','9907','EPSG','1347','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9920','OSGB36 / British National Grid + BI height',NULL,'EPSG','27700','EPSG','9451',0);
 INSERT INTO "usage" VALUES('EPSG','17332','compound_crs','EPSG','9920','EPSG','4390','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9922','ETRS89 / ITM + BI height',NULL,'EPSG','2157','EPSG','9451',0);
@@ -748,3 +750,5 @@ INSERT INTO "compound_crs" VALUES('EPSG','9934','DB_REF2016 zone 4',NULL,'EPSG',
 INSERT INTO "usage" VALUES('EPSG','17295','compound_crs','EPSG','9934','EPSG','3996','EPSG','1141');
 INSERT INTO "compound_crs" VALUES('EPSG','9935','DB_REF2016 zone 5',NULL,'EPSG','5685','EPSG','9927',0);
 INSERT INTO "usage" VALUES('EPSG','17296','compound_crs','EPSG','9935','EPSG','3998','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','9944','EBBWV14 Grid + ODN height',NULL,'EPSG','9943','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','17350','compound_crs','EPSG','9944','EPSG','4661','EPSG','1141');

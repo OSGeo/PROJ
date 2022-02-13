@@ -654,6 +654,7 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6181','NTL','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6181','Nouvelle Triangulation du Luxembourg','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5172','Nivellement General du Luxembourg','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1316','GNTRANS2003','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1319','EBBWV14-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7456,7 +7457,7 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9821','UA_UCS_2000 / LCS
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9860','UA_UCS_2000 / LCS_68','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9855','UA_UCS_2000 / LCS_56','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9864','UA_UCS_2000 / LCS_80','EPSG');
-INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9869','ETRS89 / MHR21 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9869','ETRS89 / MRH21 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9870','ETRS89 / MRH21 SnakeGrid + Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9880','ETRS89 / MOLDOR11 SnakeGrid','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9881','ETRS89 / MOLDOR11 SnakeGrid + Newlyn height','EPSG');
@@ -7510,3 +7511,7 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5828','DB_REF2003','EPSG'
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','5828','DB_REF2016','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9920','British National Grid + BI height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9922','IRENET95 / ITM + BI height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9943','ETRS89 / EBBWV14 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9944','ETRS89 / EBBWV14 SnakeGrid + Newlyn height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6190','BD72 / Belgian Lambert 72 + Oostende height','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9907','ETRS89 + Oostende height','EPSG');
