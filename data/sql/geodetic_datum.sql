@@ -346,6 +346,8 @@ INSERT INTO "geodetic_datum" VALUES('EPSG','1314','MRH21 Intermediate Reference 
 INSERT INTO "usage" VALUES('EPSG','16933','geodetic_datum','EPSG','1314','EPSG','4652','EPSG','1141');
 INSERT INTO "geodetic_datum" VALUES('EPSG','1315','MOLDOR11 Intermediate Reference Frame',NULL,'EPSG','7019','EPSG','8901','2021-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','16950','geodetic_datum','EPSG','1315','EPSG','4655','EPSG','1141');
+INSERT INTO "geodetic_datum" VALUES('EPSG','1319','EBBWV14 Intermediate Reference Frame',NULL,'EPSG','7019','EPSG','8901','2021-01-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17343','geodetic_datum','EPSG','1319','EPSG','4661','EPSG','1141');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6001','Not specified (based on Airy 1830 ellipsoid)',NULL,'EPSG','7001','EPSG','8901',NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13422','geodetic_datum','EPSG','6001','EPSG','1263','EPSG','1213');
 INSERT INTO "geodetic_datum" VALUES('EPSG','6002','Not specified (based on Airy Modified 1849 ellipsoid)',NULL,'EPSG','7002','EPSG','8901',NULL,NULL,NULL,NULL,0);
