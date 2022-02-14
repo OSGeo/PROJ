@@ -370,11 +370,6 @@ add_library(proj
 )
 add_library(PROJ::proj ALIAS proj)
 
-target_compile_options(proj
-  PRIVATE $<$<COMPILE_LANGUAGE:C>:${PROJ_C_WARN_FLAGS}>
-  PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>
-)
-
 if(MSVC OR MINGW)
     target_compile_definitions(proj PRIVATE -DNOMINMAX)
 endif()
