@@ -98,20 +98,36 @@ struct CRS::Private {
     BoundCRSPtr canonicalBoundCRS_{};
     std::string extensionProj4_{};
     bool implicitCS_ = false;
+    bool over_ = false;
 
     bool allowNonConformantWKT1Export_ = false;
     // for what was initially a COMPD_CS with a VERT_CS with a datum type ==
     // ellipsoidal height / 2002
     CompoundCRSPtr originalCompoundCRS_{};
 
-    void setImplicitCS(const util::PropertyMap &properties) {
-        const auto pVal = properties.get("IMPLICIT_CS");
-        if (pVal) {
-            if (const auto genVal =
-                    dynamic_cast<const util::BoxedValue *>(pVal->get())) {
-                if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
-                    genVal->booleanValue()) {
-                    implicitCS_ = true;
+    void setNonStandardProperties(const util::PropertyMap &properties) {
+        {
+            const auto pVal = properties.get("IMPLICIT_CS");
+            if (pVal) {
+                if (const auto genVal =
+                        dynamic_cast<const util::BoxedValue *>(pVal->get())) {
+                    if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
+                        genVal->booleanValue()) {
+                        implicitCS_ = true;
+                    }
+                }
+            }
+        }
+
+        {
+            const auto pVal = properties.get("OVER");
+            if (pVal) {
+                if (const auto genVal =
+                        dynamic_cast<const util::BoxedValue *>(pVal->get())) {
+                    if (genVal->type() == util::BoxedValue::Type::BOOLEAN &&
+                        genVal->booleanValue()) {
+                        over_ = true;
+                    }
                 }
             }
         }
@@ -141,6 +157,9 @@ CRS::~CRS() = default;
 /** \brief Return whether the CRS has an implicit coordinate system
  * (e.g from ESRI WKT) */
 bool CRS::hasImplicitCS() const { return d->implicitCS_; }
+
+/** \brief Return whether the CRS has a +over flag */
+bool CRS::hasOver() const { return d->over_; }
 
 //! @endcond
 
@@ -2854,7 +2873,7 @@ GeographicCRS::create(const util::PropertyMap &properties,
         GeographicCRS::nn_make_shared<GeographicCRS>(datum, datumEnsemble, cs));
     crs->assignSelf(crs);
     crs->setProperties(properties);
-    crs->CRS::getPrivate()->setImplicitCS(properties);
+    crs->CRS::getPrivate()->setNonStandardProperties(properties);
     return crs;
 }
 
@@ -3121,6 +3140,9 @@ void GeographicCRS::_exportToPROJString(
     }
     if (!formatter->getCRSExport()) {
         addAngularUnitConvertAndAxisSwap(formatter);
+    }
+    if (hasOver()) {
+        formatter->addParam("over");
     }
 }
 //! @endcond
@@ -4298,7 +4320,7 @@ ProjectedCRS::create(const util::PropertyMap &properties,
     crs->assignSelf(crs);
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
-    crs->CRS::getPrivate()->setImplicitCS(properties);
+    crs->CRS::getPrivate()->setNonStandardProperties(properties);
     return crs;
 }
 

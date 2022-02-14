@@ -10489,9 +10489,12 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                 auto crs = dynamic_cast<CRS *>(obj.get());
 
                 bool hasSignificantParamValues = false;
+                bool hasOver = false;
                 for (const auto &kv : d->steps_[0].paramValues) {
-                    if (!((kv.key == "type" && kv.value == "crs") ||
-                          kv.key == "wktext" || kv.key == "no_defs")) {
+                    if (kv.key == "over") {
+                        hasOver = true;
+                    } else if (!((kv.key == "type" && kv.value == "crs") ||
+                                 kv.key == "wktext" || kv.key == "no_defs")) {
                         hasSignificantParamValues = true;
                         break;
                     }
@@ -10502,6 +10505,9 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     properties.set(IdentifiedObject::NAME_KEY,
                                    d->title_.empty() ? crs->nameStr()
                                                      : d->title_);
+                    if (hasOver) {
+                        properties.set("OVER", true);
+                    }
                     const auto &extent = getExtent(crs);
                     if (extent) {
                         properties.set(
