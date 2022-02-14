@@ -48,11 +48,11 @@
 
 <NAZC> +proj=helmert +drx=-0.000330 +dry=-0.001551 +drz=0.001625 +convention=position_vector
 
-<NOAM> +proj=helmert +drx=0.000035 +dry=-0.000662 +drz=0.0001 +convention=position_vector
+<NOAM> +proj=helmert +drx=0.000035 +dry=-0.000662 +drz=-0.0001 +convention=position_vector
 
 <NUBI> +proj=helmert +drx=0.000095 +dry=-0.000598 +drz=0.000723 +convention=position_vector
 
-<PCFC> +proj=helmert +drx=0.000411 +dry=0.001036 +drz=-0.002166 +convention=position_vector
+<PCFC> +proj=helmert +drx=-0.000411 +dry=0.001036 +drz=-0.002166 +convention=position_vector
 
 <SOAM> +proj=helmert +drx=-0.000243 +dry=-0.000311 +drz=-0.000154 +convention=position_vector
 
