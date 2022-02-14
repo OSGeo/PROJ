@@ -9907,10 +9907,16 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
 
     if (mappings.size() >= 2) {
         // To distinguish for example +ortho from +ortho +f=0
+        bool allMappingsHaveAuxParam = true;
+        bool foundStrictlyMatchingMapping = false;
         for (const auto *mappingIter : mappings) {
+            if (mappingIter->proj_name_aux == nullptr) {
+                allMappingsHaveAuxParam = false;
+            }
             if (mappingIter->proj_name_aux != nullptr &&
                 strchr(mappingIter->proj_name_aux, '=') == nullptr &&
                 hasParamValue(step, mappingIter->proj_name_aux)) {
+                foundStrictlyMatchingMapping = true;
                 mapping = mappingIter;
                 break;
             } else if (mappingIter->proj_name_aux != nullptr &&
@@ -9918,10 +9924,14 @@ PROJStringParser::Private::buildProjectedCRS(int iStep,
                 const auto tokens = split(mappingIter->proj_name_aux, '=');
                 if (tokens.size() == 2 &&
                     getParamValue(step, tokens[0]) == tokens[1]) {
+                    foundStrictlyMatchingMapping = true;
                     mapping = mappingIter;
                     break;
                 }
             }
+        }
+        if (allMappingsHaveAuxParam && !foundStrictlyMatchingMapping) {
+            mapping = nullptr;
         }
     }
 
