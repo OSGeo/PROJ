@@ -644,7 +644,6 @@ struct projCppContext;
 struct projNetworkCallbacksAndData
 {
     bool enabled = false;
-    bool enabled_env_variable_checked = false; // whereas we have checked PROJ_NETWORK env variable
     proj_network_open_cbk_type open = nullptr;
     proj_network_close_cbk_type close = nullptr;
     proj_network_get_header_value_cbk_type get_header_value = nullptr;
@@ -688,7 +687,6 @@ struct pj_ctx{
     int     use_proj4_init_rules = -1; /* -1 = unknown, 0 = no, 1 = yes */
     bool     forceOver = false; 
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
-    std::string ca_bundle_path{};
 
     std::string env_var_proj_lib{}; // content of PROJ_LIB environment variable. Use Filemanager::getProjLibEnvVar() to access
     std::vector<std::string> search_paths{};
@@ -708,6 +706,7 @@ struct pj_ctx{
     bool iniFileLoaded = false;
     std::string endpoint{};
     projNetworkCallbacksAndData networking{};
+    std::string ca_bundle_path{};
     projGridChunkCache gridChunkCache{};
     TMercAlgo defaultTmercAlgo = TMercAlgo::PODER_ENGSAGER; // can be overridden by content of proj.ini
     // END ini file settings

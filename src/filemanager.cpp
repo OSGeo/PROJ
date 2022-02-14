@@ -1789,9 +1789,35 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
     if (ctx->iniFileLoaded)
         return;
 
+    // Start reading environment variables that have priority over the
+    // .ini file
+    const char *proj_network = getenv("PROJ_NETWORK");
+    if (proj_network && proj_network[0] != '\0') {
+        ctx->networking.enabled = ci_equal(proj_network, "ON") ||
+                                  ci_equal(proj_network, "YES") ||
+                                  ci_equal(proj_network, "TRUE");
+    } else {
+        proj_network = nullptr;
+    }
+
     const char *endpoint_from_env = getenv("PROJ_NETWORK_ENDPOINT");
     if (endpoint_from_env && endpoint_from_env[0] != '\0') {
         ctx->endpoint = endpoint_from_env;
+    }
+
+    // Custom path to SSL certificates.
+    const char *ca_bundle_path = getenv("PROJ_CURL_CA_BUNDLE");
+    if (ca_bundle_path == nullptr) {
+        // Name of environment variable used by the curl binary
+        ca_bundle_path = getenv("CURL_CA_BUNDLE");
+    }
+    if (ca_bundle_path == nullptr) {
+        // Name of environment variable used by the curl binary (tested
+        // after CURL_CA_BUNDLE
+        ca_bundle_path = getenv("SSL_CERT_FILE");
+    }
+    if (ca_bundle_path != nullptr) {
+        ctx->ca_bundle_path = ca_bundle_path;
     }
 
     ctx->iniFileLoaded = true;
@@ -1825,13 +1851,10 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
                 trim(content.substr(equal + 1, eol - (equal + 1)));
             if (ctx->endpoint.empty() && key == "cdn_endpoint") {
                 ctx->endpoint = value;
-            } else if (key == "network") {
-                const char *enabled = getenv("PROJ_NETWORK");
-                if (enabled == nullptr || enabled[0] == '\0') {
-                    ctx->networking.enabled = ci_equal(value, "ON") ||
-                                              ci_equal(value, "YES") ||
-                                              ci_equal(value, "TRUE");
-                }
+            } else if (proj_network == nullptr && key == "network") {
+                ctx->networking.enabled = ci_equal(value, "ON") ||
+                                          ci_equal(value, "YES") ||
+                                          ci_equal(value, "TRUE");
             } else if (key == "cache_enabled") {
                 ctx->gridChunkCache.enabled = ci_equal(value, "ON") ||
                                               ci_equal(value, "YES") ||
@@ -1854,6 +1877,8 @@ void pj_load_ini(PJ_CONTEXT *ctx) {
                         ctx, PJ_LOG_ERROR,
                         "pj_load_ini(): Invalid value for tmerc_default_algo");
                 }
+            } else if (ca_bundle_path == nullptr && key == "ca_bundle_path") {
+                ctx->ca_bundle_path = value;
             }
         }
 
@@ -1957,6 +1982,7 @@ void proj_context_set_ca_bundle_path(PJ_CONTEXT *ctx, const char *path) {
         ctx = pj_get_default_ctx();
     if (!ctx)
         return;
+    pj_load_ini(ctx);
     try {
         ctx->set_ca_bundle_path(path != nullptr ? path : "");
     } catch (const std::exception &) {

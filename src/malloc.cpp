@@ -183,7 +183,9 @@ void proj_cleanup() {
 /*****************************************************************************/
 
   // Close the database context of the default PJ_CONTEXT
-  auto cpp_context = pj_get_default_ctx()->cpp_context;
+  auto ctx = pj_get_default_ctx();
+  ctx->iniFileLoaded = false;
+  auto cpp_context = ctx->cpp_context;
   if( cpp_context ) {
       cpp_context->closeDb();
   }

@@ -131,9 +131,8 @@ TEST(networking, basic) {
 
 #ifdef CURL_ENABLED
     // enable through env variable
-    ctx = proj_context_create();
-    proj_grid_cache_set_enable(ctx, false);
     putenv(const_cast<char *>("PROJ_NETWORK=ON"));
+    ctx = proj_context_create();
     P = proj_create(ctx, pipeline);
     if (networkAccessOK) {
         ASSERT_NE(P, nullptr);
