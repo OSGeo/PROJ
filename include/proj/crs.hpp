@@ -158,6 +158,8 @@ class PROJ_GCC_DLL CRS : public common::ObjectUsage,
 
     PROJ_INTERNAL bool hasImplicitCS() const;
 
+    PROJ_INTERNAL bool hasOver() const;
+
     PROJ_INTERNAL static CRSNNPtr
     getResolvedCRS(const CRSNNPtr &crs,
                    const io::AuthorityFactoryPtr &authFactory,

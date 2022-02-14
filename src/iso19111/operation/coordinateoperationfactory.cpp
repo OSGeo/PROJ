@@ -5645,6 +5645,9 @@ namespace crs {
 crs::CRSNNPtr CRS::getResolvedCRS(const crs::CRSNNPtr &crs,
                                   const io::AuthorityFactoryPtr &authFactory,
                                   metadata::ExtentPtr &extentOut) {
+    if (crs->hasOver()) {
+        return crs;
+    }
     const auto &ids = crs->identifiers();
     const auto &name = crs->nameStr();
 

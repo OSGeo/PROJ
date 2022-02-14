@@ -3320,6 +3320,9 @@ static bool createPROJ4WebMercator(const Conversion *conv,
     formatter->addParam("k", 1.0);
     formatter->addParam("units", units);
     formatter->addParam("nadgrids", "@null");
+    if (targetProjCRS && targetProjCRS->hasOver()) {
+        formatter->addParam("over");
+    }
     formatter->addParam("wktext");
     formatter->addParam("no_defs");
     return true;
@@ -4095,6 +4098,9 @@ void Conversion::_exportToPROJString(
             formatter->pushOmitZUnitConversion();
             projCRS->addUnitConvertAndAxisSwap(formatter, bAxisSpecFound);
             formatter->popOmitZUnitConversion();
+            if (projCRS->hasOver()) {
+                formatter->addParam("over");
+            }
         }
 
         auto derivedGeographicCRS =

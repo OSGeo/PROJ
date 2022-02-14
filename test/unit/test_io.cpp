@@ -10531,13 +10531,13 @@ TEST(io, projparse_init) {
     }
 
     {
-        auto obj = createFromUserInput("+title=mytitle +over +init=epsg:4326",
+        auto obj = createFromUserInput("+title=mytitle +init=epsg:4326 +over",
                                        dbContext, true);
         auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
         ASSERT_TRUE(crs != nullptr);
         EXPECT_EQ(crs->nameStr(), "mytitle");
         EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-                  "+proj=longlat +over +datum=WGS84 +no_defs +type=crs");
+                  "+proj=longlat +datum=WGS84 +over +no_defs +type=crs");
     }
 
     {

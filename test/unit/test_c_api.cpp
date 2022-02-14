@@ -5392,6 +5392,44 @@ TEST_F(CApi, use_proj4_init_rules) {
     PJ_CONTEXT *ctx = proj_context_create();
     proj_context_use_proj4_init_rules(ctx, true);
     ASSERT_TRUE(proj_context_get_use_proj4_init_rules(ctx, true));
+
+    {
+        // Test +over
+        auto crs = proj_create(ctx, "+init=epsg:28992 +over");
+        ObjectKeeper keeper_crs(crs);
+        ASSERT_NE(crs, nullptr);
+
+        auto datum = proj_crs_get_datum(ctx, crs);
+        ASSERT_NE(datum, nullptr);
+        ObjectKeeper keeper_datum(datum);
+
+        auto datum_name = proj_get_name(datum);
+        ASSERT_TRUE(datum_name != nullptr);
+        EXPECT_EQ(datum_name, std::string("Amersfoort"));
+
+        auto proj_5 = proj_as_proj_string(ctx, crs, PJ_PROJ_5, nullptr);
+        ASSERT_NE(proj_5, nullptr);
+        EXPECT_EQ(std::string(proj_5),
+                  "+proj=sterea +lat_0=52.1561605555556 "
+                  "+lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 "
+                  "+y_0=463000 +ellps=bessel +units=m +over "
+                  "+no_defs +type=crs");
+    }
+
+    {
+        // Test +over on epsg:3857
+        auto crs = proj_create(ctx, "+init=epsg:3857 +over");
+        ObjectKeeper keeper_crs(crs);
+        ASSERT_NE(crs, nullptr);
+
+        auto proj_5 = proj_as_proj_string(ctx, crs, PJ_PROJ_5, nullptr);
+        ASSERT_NE(proj_5, nullptr);
+        EXPECT_EQ(std::string(proj_5),
+                  "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 "
+                  "+y_0=0 +k=1 +units=m +nadgrids=@null +over +wktext "
+                  "+no_defs +type=crs");
+    }
+
     proj_context_use_proj4_init_rules(ctx, false);
     ASSERT_TRUE(!proj_context_get_use_proj4_init_rules(ctx, true));
     proj_context_destroy(ctx);
