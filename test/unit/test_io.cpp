@@ -9963,7 +9963,7 @@ TEST(io, projparse_ortho_spherical_on_sphere) {
 
 // ---------------------------------------------------------------------------
 
-TEST(io, projparse_peirce_q) {
+TEST(io, projparse_peirce_q_square) {
     std::string input("+proj=peirce_q +shape=square +type=crs");
     auto obj = PROJStringParser().createFromPROJString(input);
     auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
@@ -9974,6 +9974,36 @@ TEST(io, projparse_peirce_q) {
                 .get()),
         "+proj=peirce_q +shape=square +lat_0=90 +lon_0=0 +k_0=1 +x_0=0 +y_0=0 "
         "+datum=WGS84 +units=m +no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_peirce_q_diamond) {
+    std::string input("+proj=peirce_q +shape=diamond +type=crs");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        "+proj=peirce_q +shape=diamond +lat_0=90 +lon_0=0 +k_0=1 +x_0=0 +y_0=0 "
+        "+datum=WGS84 +units=m +no_defs +type=crs");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(io, projparse_peirce_q_horizontal) {
+    std::string input("+proj=peirce_q +shape=horizontal +datum=WGS84 +units=m "
+                      "+no_defs +type=crs");
+    auto obj = PROJStringParser().createFromPROJString(input);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    EXPECT_EQ(
+        crs->exportToPROJString(
+            PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
+                .get()),
+        input);
 }
 
 // ---------------------------------------------------------------------------
