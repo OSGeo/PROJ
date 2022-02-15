@@ -110,7 +110,7 @@ message(STATUS "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 8 MINOR 2 PATCH 0)
+proj_version(MAJOR 9 MINOR 0 PATCH 0)
 # Use libtool convention to build the CMake's VERSION and SOVERSION
 # See https://github.com/pvanhoof/dir-examples#cmake-in-the-cmake-example
 set(PROJ_LIBTOOL_CURRENT    25)

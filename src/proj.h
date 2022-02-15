@@ -172,8 +172,8 @@ extern "C" {
 #endif
 
 /* The version numbers should be updated with every release! **/
-#define PROJ_VERSION_MAJOR 8
-#define PROJ_VERSION_MINOR 2
+#define PROJ_VERSION_MAJOR 9
+#define PROJ_VERSION_MINOR 0
 #define PROJ_VERSION_PATCH 0
 
 /* Note: the following 3 defines have been introduced in PROJ 8.0.1 */
@@ -454,7 +454,7 @@ void PROJ_DLL proj_context_set_sqlite3_vfs_name(PJ_CONTEXT* ctx, const char* nam
 typedef struct PROJ_NETWORK_HANDLE PROJ_NETWORK_HANDLE;
 
 /** Network access: open callback
- * 
+ *
  * Should try to read the size_to_read first bytes at the specified offset of
  * the file given by URL url,
  * and write them to buffer. *out_size_read should be updated with the actual
