@@ -59,3 +59,36 @@
 <SOMA> +proj=helmert +drx=-0.000080 +dry=-0.000745 +drz=0.000897 +convention=position_vector
 
 <SUND> +proj=helmert +drx=0.000047 +dry=-0.001 +drz=0.000975 +convention=position_vector
+
+
+# Plate names suffixed by _T (for Translation) that includes the translation
+# rates +dx=0.00041 +dy=0.00022 +dz=0.00041 given by Table 2 of the ITRF2008 plate motion model
+# paper
+
+<AMUR_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=-0.000190 +dry=-0.000442 +drz=0.000915 +convention=position_vector
+
+<ANTA_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=-0.000252 +dry=-0.000302 +drz=0.000643 +convention=position_vector
+
+<ARAB_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=0.001202 +dry=-0.000054 +drz=0.001485 +convention=position_vector
+
+<AUST_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=0.001504 +dry=0.001172 +drz=0.001228 +convention=position_vector
+
+<CARB_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=0.000049 +dry=-0.001088 +drz=0.000664 +convention=position_vector
+
+<EURA_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=-0.000083 +dry=0.000534 +drz=0.000750 +convention=position_vector
+
+<INDI_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=0.001232 +dry=0.000303 +drz=0.001540 +convention=position_vector
+
+<NAZC_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=-0.000330 +dry=-0.001551 +drz=0.001625 +convention=position_vector
+
+<NOAM_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=0.000035 +dry=-0.000662 +drz=-0.0001 +convention=position_vector
+
+<NUBI_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=0.000095 +dry=-0.000598 +drz=0.000723 +convention=position_vector
+
+<PCFC_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=-0.000411 +dry=0.001036 +drz=-0.002166 +convention=position_vector
+
+<SOAM_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=-0.000243 +dry=-0.000311 +drz=-0.000154 +convention=position_vector
+
+<SOMA_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=-0.000080 +dry=-0.000745 +drz=0.000897 +convention=position_vector
+
+<SUND_T> +proj=helmert +dx=0.00041 +dy=0.00022 +dz=0.00041 +drx=0.000047 +dry=-0.001 +drz=0.000975 +convention=position_vector
