@@ -42,6 +42,10 @@ It is used in several British atlases, but seldom in the United States.
 The Gall projection is neither conformal nor equal-area, but has a blend of various features.
 Unlike the Mercator, the Gall shows the poles as lines running across the top and bottom of the map.
 
+.. note::
+
+    The Gall projection must not be confused with the Gall-Peters one, the later
+    being a specialization of :ref:`cea`.
 
 Example using Gall Stereographic  ::
 
