@@ -4,6 +4,11 @@
 Equal Area Cylindrical
 ********************************************************************************
 
+Equal area cylindrical has a number of named specializations, 
+such as `Gall–Peters https://en.wikipedia.org/wiki/Gall%E2%80%93Peters_projection`_ (lat_ts=45), 
+`Behrmann https://en.wikipedia.org/wiki/Behrmann_projection`_ (lat_ts=30), and 
+`Lambert cylindrical equal-area https://en.wikipedia.org/wiki/Lambert_cylindrical_equal-area_projection`_ (lat_ts=0).
+
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Cylindrical                                              |
 +---------------------+----------------------------------------------------------+
