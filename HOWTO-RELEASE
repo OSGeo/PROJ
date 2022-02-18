@@ -33,7 +33,10 @@ list. The PROJ PSC guidelines describes the rules for passing a motion.
 In case of a un-planned maintenance release, make sure that version numbers are
 properly updated: see 3.1
 
-For each release version, increment PROJ_SOVERSION in in CMakeLists.txt.
+For each release version, increment PROJ_SOVERSION in CMakeLists.txt if the 
+ABI is not backwards compatible, i.e. any interfaces have been removed, or 
+changed since the last release. See also:
+https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B
 
 *Commit the changes to master.*
 
