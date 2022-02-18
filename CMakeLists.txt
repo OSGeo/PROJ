@@ -111,13 +111,7 @@ message(STATUS "Configuring PROJ:")
 ################################################################################
 include(ProjVersion)
 proj_version(MAJOR 9 MINOR 0 PATCH 0)
-# Use libtool convention to build the CMake's VERSION and SOVERSION
-# See https://github.com/pvanhoof/dir-examples#cmake-in-the-cmake-example
-set(PROJ_LIBTOOL_CURRENT    25)
-set(PROJ_LIBTOOL_REVISION   0)
-set(PROJ_LIBTOOL_AGE        0)
-math(EXPR PROJ_API_VERSION "${PROJ_LIBTOOL_CURRENT} - ${PROJ_LIBTOOL_AGE}")
-set(PROJ_BUILD_VERSION "${PROJ_API_VERSION}.${PROJ_LIBTOOL_AGE}.${PROJ_LIBTOOL_REVISION}")
+set(PROJ_SOVERSION 25)
 
 ################################################################################
 # Build features and variants

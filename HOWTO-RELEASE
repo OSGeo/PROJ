@@ -33,20 +33,7 @@ list. The PROJ PSC guidelines describes the rules for passing a motion.
 In case of a un-planned maintenance release, make sure that version numbers are
 properly updated: see 3.1
 
-Determine the ABI version number. It consists of "current:revision:age". Follow
-the steps below to determine the values in CMakeLists.txt:
-
-   - If the library source code has changed at all since the last update,
-     then increment PROJ_LIBTOOL_REVISION (c:r:a becomes c:r+1:a).
-
-   - If any interfaces have been added, removed, or changed since the last
-     update, increment PROJ_LIBTOOL_CURRENT and set PROJ_LIBTOOL_REVISION to 0.
-
-   - If any interfaces have been added since the last public release, then
-     increment PROJ_LIBTOOL_AGE.
-
-   - If any interfaces have been removed since the last public release, then
-     set PROJ_LIBTOOL_AGE to 0.
+For each release version, increment PROJ_SOVERSION in in CMakeLists.txt.
 
 *Commit the changes to master.*
 
