@@ -1886,7 +1886,7 @@ def import_geogtran():
                     'EPSG', wkid]
 
                 cursor.execute(
-                    "SELECT name FROM coordinate_operation_view WHERE auth_name = 'EPSG' AND code = ?", (wkid,))
+                    "SELECT name, table_name FROM coordinate_operation_view WHERE auth_name = 'EPSG' AND code = ?", (wkid,))
                 src_row = cursor.fetchone()
 
                 if not src_row:
@@ -1897,8 +1897,12 @@ def import_geogtran():
                         print('Skipping NADCON5 %s (EPSG source) since it uses a non-supported yet suported method' % esri_name)
                         continue
 
-                # Don't do anything particular except checking we know it
                 assert src_row, row
+
+                _, table_name = src_row
+                # Insert alias
+                sql = f"INSERT INTO \"alias_name\" VALUES('{table_name}','EPSG',{wkid},'{esri_name}','ESRI');"
+                all_sql.append(sql)
 
             else:
 
