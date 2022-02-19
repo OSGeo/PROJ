@@ -415,6 +415,9 @@ OPTARGS *opt_parse (int argc, char **argv, const char *flags, const char *keys, 
     int free_format;
     OPTARGS *o;
 
+    if( argc == 0 )
+        return nullptr;
+
     o = (OPTARGS *) calloc (1, sizeof(OPTARGS));
     if (nullptr==o)
         return nullptr;

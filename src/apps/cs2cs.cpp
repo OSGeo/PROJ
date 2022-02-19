@@ -346,6 +346,10 @@ int main(int argc, char **argv) {
     int have_to_flag = 0, inverse = 0;
     int use_env_locale = 0;
 
+    if( argc == 0 ) {
+        exit(1);
+    }
+
     /* This is just to check that pj_init() is locale-safe */
     /* Used by nad/testvarious */
     if (getenv("PROJ_USE_ENV_LOCALE") != nullptr)
