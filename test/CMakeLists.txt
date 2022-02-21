@@ -1,6 +1,43 @@
 set(GIE_BIN "gie")
 
-option(RUN_NETWORK_DEPENDENT_TESTS "Whether to run tests dependent on network availability" ON)
+if(CURL_ENABLED AND NOT DEFINED RUN_NETWORK_DEPENDENT_TESTS)
+    message(STATUS "Checking if network is available...")
+    # First try with curl as we can get an 'instant' answer if it is there
+    execute_process(
+            COMMAND curl -I https://www.google.com
+            OUTPUT_QUIET
+            ERROR_QUIET
+            RESULT_VARIABLE NO_CONNECTION
+    )
+    if(NOT NO_CONNECTION EQUAL 0)
+        # Then fallback to ping
+        # From https://stackoverflow.com/questions/62214621/how-to-check-for-internet-connection-with-cmake-automatically-prevent-fails-if/68376537#68376537
+        if(WIN32)
+            execute_process(
+                COMMAND ping www.google.com -n 2
+                OUTPUT_QUIET
+                ERROR_QUIET
+                RESULT_VARIABLE NO_CONNECTION
+            )
+        else()
+            execute_process(
+                COMMAND ping www.google.com -c 2
+                OUTPUT_QUIET
+                ERROR_QUIET
+                RESULT_VARIABLE NO_CONNECTION
+            )
+        endif()
+    endif()
+
+    if(NOT NO_CONNECTION EQUAL 0)
+        message(WARNING "... no. Skipping network dependent tests.")
+        set(RUN_NETWORK_DEPENDENT_TESTS_DEFAULT_VAL OFF)
+    else()
+        message(STATUS "... yes")
+        set(RUN_NETWORK_DEPENDENT_TESTS_DEFAULT_VAL ON)
+    endif()
+    option(RUN_NETWORK_DEPENDENT_TESTS "Whether to run tests dependent on network availability" ${RUN_NETWORK_DEPENDENT_TESTS_DEFAULT_VAL})
+endif()
 
 # Regression tests
 proj_add_gie_test("Builtins" "gie/builtins.gie")
