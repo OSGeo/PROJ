@@ -300,6 +300,10 @@ int main(int argc, char **argv) {
     FILE *fid;
     int eargc = 0, mon = 0;
 
+    if( argc == 0 ) {
+        exit(1);
+    }
+
     if ( (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != nullptr)
         ++emess_dat.Prog_name;
     else emess_dat.Prog_name = *argv;
