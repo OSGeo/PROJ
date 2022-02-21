@@ -28,6 +28,22 @@ Equal Area Cylindrical
 
    proj-string: ``+proj=cea``
 
+Named specializations
+################################################################################
+
+The Equal Area Cylindrical projection is sometimes known under other names when
+it is instanciated with particular values of the ``lat_ts`` parameter:
+
++----------------------------------+------------+
+| **Name**                         | **lat_ts** |
++----------------------------------+------------+
+| Lambert cylindrical equal-area   |      0     |
++----------------------------------+------------+
+| Behrmann                         |     30     |
++----------------------------------+------------+
+| Gall-Peters                      |     45     |
++----------------------------------+------------+
+
 Parameters
 ################################################################################
 
@@ -52,3 +68,12 @@ Parameters
     ``lat_ts`` and ``k_0`` are mutually exclusive. If ``lat_ts``
     is specified, it is equivalent to setting ``k_0`` to
     :math:`\frac{\cos \phi_{ts}}{\sqrt{1 - e^2 \sin^2 \phi_{ts}}}`
+
+Further reading
+###############
+
+#. `Wikipedia: Lambert cylindrical equal-area <https://en.wikipedia.org/wiki/Lambert_cylindrical_equal-area_projection>`_
+
+#. `Wikipedia: Gall-Peters <https://en.wikipedia.org/wiki/Gall%E2%80%93Peters_projection>`_
+
+#. `Wikipedia: Behrmann <https://en.wikipedia.org/wiki/Behrmann_projection>`_
