@@ -4072,7 +4072,7 @@ WKTParser::Private::buildProjectedCRS(const WKTNodeNNPtr &node) {
             props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS North (E,N)");
         } else if (projCRSName == "UPS_South") {
             props.set(IdentifiedObject::NAME_KEY, "WGS 84 / UPS South (E,N)");
-        } else {
+        } else if (cartesianCS) {
             std::string outTableName;
             std::string authNameFromAlias;
             std::string codeFromAlias;
