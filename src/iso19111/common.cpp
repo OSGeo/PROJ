@@ -120,8 +120,9 @@ UnitOfMeasure &UnitOfMeasure::operator=(const UnitOfMeasure &other) {
 
 //! @cond Doxygen_Suppress
 UnitOfMeasure &UnitOfMeasure::operator=(UnitOfMeasure &&other) {
-    BaseObject::operator=(std::move(static_cast<BaseObject &&>(other)));
     *d = std::move(*(other.d));
+    other.d = nullptr;
+    BaseObject::operator=(std::move(static_cast<BaseObject &&>(other)));
     return *this;
 }
 //! @endcond
