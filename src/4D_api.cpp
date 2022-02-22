@@ -2276,24 +2276,25 @@ PJ_GRID_INFO proj_grid_info(const char *gridname) {
         strncpy (grinfo.gridname, gridname, sizeof(grinfo.gridname) - 1);
 
         /* full path of grid */
-        pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1);
+        if( pj_find_file(ctx, gridname, grinfo.filename, sizeof(grinfo.filename) - 1) )
+        {
+            /* grid format */
+            strncpy (grinfo.format, format.c_str(), sizeof(grinfo.format) - 1);
 
-        /* grid format */
-        strncpy (grinfo.format, format.c_str(), sizeof(grinfo.format) - 1);
+            /* grid size */
+            grinfo.n_lon = grid.width();
+            grinfo.n_lat = grid.height();
 
-        /* grid size */
-        grinfo.n_lon = grid.width();
-        grinfo.n_lat = grid.height();
+            /* cell size */
+            grinfo.cs_lon = extent.resX;
+            grinfo.cs_lat = extent.resY;
 
-        /* cell size */
-        grinfo.cs_lon = extent.resX;
-        grinfo.cs_lat = extent.resY;
-
-        /* bounds of grid */
-        grinfo.lowerleft.lam  = extent.west;
-        grinfo.lowerleft.phi  = extent.south;
-        grinfo.upperright.lam = extent.east;
-        grinfo.upperright.phi = extent.north;
+            /* bounds of grid */
+            grinfo.lowerleft.lam  = extent.west;
+            grinfo.lowerleft.phi  = extent.south;
+            grinfo.upperright.lam = extent.east;
+            grinfo.upperright.phi = extent.north;
+        }
     };
 
     {
