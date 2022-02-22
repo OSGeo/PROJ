@@ -1,7 +1,7 @@
 .. _wag1:
 
 ********************************************************************************
-Wagner I (Kavraisky VI)
+Wagner I (Kavrayskiy VI)
 ********************************************************************************
 
 +---------------------+----------------------------------------------------------+
@@ -24,9 +24,11 @@ Wagner I (Kavraisky VI)
 .. figure:: ./images/wag1.png
    :width: 500 px
    :align: center
-   :alt:   Wagner I (Kavraisky VI)
+   :alt:   Wagner I (Kavrayskiy VI)
 
    proj-string: ``+proj=wag1``
+
+.. note:: This projection name may also be transliterated as Kavraisky VI.
 
 Parameters
 ################################################################################

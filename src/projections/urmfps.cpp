@@ -7,7 +7,7 @@
 #include "proj_internal.h"
 
 PROJ_HEAD(urmfps, "Urmaev Flat-Polar Sinusoidal") "\n\tPCyl, Sph\n\tn=";
-PROJ_HEAD(wag1, "Wagner I (Kavraisky VI)") "\n\tPCyl, Sph";
+PROJ_HEAD(wag1, "Wagner I (Kavrayskiy VI)") "\n\tPCyl, Sph";
 
 namespace { // anonymous namespace
 struct pj_opaque {

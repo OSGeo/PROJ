@@ -9,7 +9,7 @@
 PROJ_HEAD(eck3, "Eckert III") "\n\tPCyl, Sph";
 PROJ_HEAD(putp1, "Putnins P1") "\n\tPCyl, Sph";
 PROJ_HEAD(wag6, "Wagner VI") "\n\tPCyl, Sph";
-PROJ_HEAD(kav7, "Kavraisky VII") "\n\tPCyl, Sph";
+PROJ_HEAD(kav7, "Kavrayskiy VII") "\n\tPCyl, Sph";
 
 namespace { // anonymous namespace
 struct pj_opaque {
