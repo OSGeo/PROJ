@@ -1747,6 +1747,7 @@ CTable2Grid *CTable2Grid::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
     }
     extent.east = extent.west + (width - 1) * extent.resX;
     extent.north = extent.south + (height - 1) * extent.resX;
+    extent.computeInvRes();
 
     return new CTable2Grid(ctx, std::move(fp), filename, width, height, extent);
 }
