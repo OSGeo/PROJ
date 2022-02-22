@@ -4059,50 +4059,50 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             if (found)
                 l_esri_name = l_name;
         }
-    }
 
-    if (!isWKT2 && formatter->useESRIDialect() && !l_identifiers.empty() &&
-        *(l_identifiers[0]->codeSpace()) == "ESRI" && dbContext) {
-        try {
-            const auto definition = dbContext->getTextDefinition(
-                "projected_crs", "ESRI", l_identifiers[0]->code());
-            if (starts_with(definition, "PROJCS")) {
-                auto crsFromFromDef = io::WKTParser()
-                                          .attachDatabaseContext(dbContext)
-                                          .createFromWKT(definition);
-                if (_isEquivalentTo(
-                        dynamic_cast<IComparable *>(crsFromFromDef.get()),
-                        util::IComparable::Criterion::EQUIVALENT)) {
-                    formatter->ingestWKTNode(
-                        io::WKTNode::createFrom(definition));
-                    return;
-                }
-            }
-        } catch (const std::exception &) {
-        }
-    } else if (!isWKT2 && formatter->useESRIDialect() && !l_esri_name.empty()) {
-        try {
-            auto res =
-                io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI")
-                    ->createObjectsFromName(
-                        l_esri_name,
-                        {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
-                        false);
-            if (res.size() == 1) {
+        if (!isWKT2 && !l_identifiers.empty() &&
+            *(l_identifiers[0]->codeSpace()) == "ESRI") {
+            try {
                 const auto definition = dbContext->getTextDefinition(
-                    "projected_crs", "ESRI",
-                    res.front()->identifiers()[0]->code());
+                    "projected_crs", "ESRI", l_identifiers[0]->code());
                 if (starts_with(definition, "PROJCS")) {
+                    auto crsFromFromDef = io::WKTParser()
+                                              .attachDatabaseContext(dbContext)
+                                              .createFromWKT(definition);
                     if (_isEquivalentTo(
-                            dynamic_cast<IComparable *>(res.front().get()),
+                            dynamic_cast<IComparable *>(crsFromFromDef.get()),
                             util::IComparable::Criterion::EQUIVALENT)) {
                         formatter->ingestWKTNode(
                             io::WKTNode::createFrom(definition));
                         return;
                     }
                 }
+            } catch (const std::exception &) {
             }
-        } catch (const std::exception &) {
+        } else if (!isWKT2 && !l_esri_name.empty()) {
+            try {
+                auto res =
+                    io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI")
+                        ->createObjectsFromName(
+                            l_esri_name,
+                            {io::AuthorityFactory::ObjectType::PROJECTED_CRS},
+                            false);
+                if (res.size() == 1) {
+                    const auto definition = dbContext->getTextDefinition(
+                        "projected_crs", "ESRI",
+                        res.front()->identifiers()[0]->code());
+                    if (starts_with(definition, "PROJCS")) {
+                        if (_isEquivalentTo(
+                                dynamic_cast<IComparable *>(res.front().get()),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+                            formatter->ingestWKTNode(
+                                io::WKTNode::createFrom(definition));
+                            return;
+                        }
+                    }
+                }
+            } catch (const std::exception &) {
+            }
         }
     }
 
