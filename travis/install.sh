@@ -34,7 +34,7 @@ if test "$TRAVIS" = ""; then
     echo "Make dist tarball, and check consistency"
     mkdir build_dist
     cd build_dist
-    cmake -D BUILD_TESTING=OFF ..
+    cmake -Werror=dev -D BUILD_TESTING=OFF ..
     make dist
 
     TAR_FILENAME=$(ls *.tar.gz)
@@ -53,7 +53,7 @@ CXXFLAGS="-DCS=do_not_use_CS_for_solaris_compat $CXXFLAGS"
 echo "Build shared ${CMAKE_BUILD_TYPE} configuration from generated tarball"
 mkdir shared_build
 cd shared_build
-cmake \
+cmake -Werror=dev \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D USE_CCACHE=${USE_CCACHE} \
   -D BUILD_SHARED_LIBS=ON \
@@ -80,7 +80,7 @@ echo "Build static ${CMAKE_BUILD_TYPE} configuration from generated tarball"
 cd ..
 mkdir static_build
 cd static_build
-cmake \
+cmake -Werror=dev \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D USE_CCACHE=${USE_CCACHE} \
   -D BUILD_SHARED_LIBS=OFF \
@@ -190,7 +190,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
 
     mkdir build_cmake
     cd build_cmake
-    cmake -D USE_CCACHE=${USE_CCACHE} ..
+    cmake -Werror=dev -D USE_CCACHE=${USE_CCACHE} ..
     make
 
     # return to root
@@ -204,14 +204,14 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     if [ "$BUILD_NAME" != "linux_clang" ]; then
         # build with grids and coverage
         if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-            cmake \
+            cmake -Werror=dev \
               -D CMAKE_BUILD_TYPE=Debug \
               -D USE_CCACHE=${USE_CCACHE} \
               -D CMAKE_C_FLAGS="--coverage" \
               -D CMAKE_CXX_FLAGS="--coverage" \
               . ;
         else
-            LDFLAGS="$LDFLAGS -lgcov" cmake \
+            LDFLAGS="$LDFLAGS -lgcov" cmake -Werror=dev \
               -D CMAKE_BUILD_TYPE=Debug \
               -D USE_CCACHE=${USE_CCACHE} \
               -D CMAKE_C_FLAGS="$CFLAGS --coverage" \
@@ -219,7 +219,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
               . ;
         fi
     else
-        cmake \
+        cmake -Werror=dev \
           -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
           -D USE_CCACHE=${USE_CCACHE} \
           . ;

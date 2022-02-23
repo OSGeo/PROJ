@@ -50,7 +50,7 @@ jobs:
             mkdir %PROJ_BUILD%
             cd %PROJ_BUILD%
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
-            cmake -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%" ..
+            cmake -Werror=dev -DCMAKE_BUILD_TYPE="${{ env.BUILD_TYPE }}" -DBUILD_SHARED_LIBS="${{ env.BUILD_SHARED_LIBS }}" -DCMAKE_C_FLAGS="/WX" -DCMAKE_CXX_FLAGS="/WX" -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_INSTALL_PREFIX="%PROJ_DIR%" ..
             ninja -v
             ninja install
             dir %PROJ_DIR%\bin
@@ -123,7 +123,7 @@ jobs:
             PROJ_DIR=${GITHUB_WORKSPACE}/proj_dir
             mkdir ${PROJ_BUILD}
             cd ${PROJ_BUILD}
-            cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" -DUSE_CCACHE=ON ..
+            cmake -Werror=dev -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DBUILD_SHARED_LIBS=${{ env.BUILD_SHARED_LIBS }} -DCMAKE_INSTALL_PREFIX="${PROJ_DIR}" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_CXX_FLAGS="-Werror" -DUSE_CCACHE=ON ..
             make -j 2
             make install
             ls ${PROJ_DIR}/bin
