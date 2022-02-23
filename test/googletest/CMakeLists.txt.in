@@ -15,4 +15,5 @@ ExternalProject_Add(googletest
   TEST_COMMAND      ""
   # Disable install step
   INSTALL_COMMAND   ""
+  CMAKE_ARGS        -Wno-dev -Wno-error=dev
 )
