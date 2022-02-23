@@ -112,6 +112,7 @@ message(STATUS "Configuring PROJ:")
 include(ProjVersion)
 proj_version(MAJOR 9 MINOR 0 PATCH 0)
 set(PROJ_SOVERSION 25)
+set(PROJ_BUILD_VERSION "${PROJ_SOVERSION}.${PROJ_VERSION}")
 
 ################################################################################
 # Build features and variants

@@ -415,7 +415,7 @@ elseif(BUILD_FRAMEWORKS_AND_BUNDLE)
 else()
   set_target_properties(proj
     PROPERTIES
-    VERSION "${PROJ_VERSION}"
+    VERSION "${PROJ_BUILD_VERSION}"
     SOVERSION "${PROJ_SOVERSION}"
     CLEAN_DIRECT_OUTPUT 1)
 endif()
