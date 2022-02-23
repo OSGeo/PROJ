@@ -1,7 +1,7 @@
 .. _kav7:
 
 ********************************************************************************
-Kavraisky VII
+Kavrayskiy VII
 ********************************************************************************
 
 +---------------------+----------------------------------------------------------+
@@ -24,14 +24,18 @@ Kavraisky VII
 .. figure:: ./images/kav7.png
    :width: 500 px
    :align: center
-   :alt:   Kavraisky VII
+   :alt:   Kavrayskiy VII
 
    proj-string: ``+proj=kav7``
+
+.. note:: This projection name may also be transliterated as Kavraisky VII.
+
+Created by Soviet cartographer Vladimir V. Kavrayskiy  in 1939 :cite:`Snyder1993`.
 
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the Kavraisky VII projection.
+.. note:: All parameters are optional for the Kavrayskiy VII projection.
 
 .. include:: ../options/lon_0.rst
 

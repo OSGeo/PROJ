@@ -6,7 +6,7 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-PROJ_HEAD(kav5,    "Kavraisky V")         "\n\tPCyl, Sph";
+PROJ_HEAD(kav5,    "Kavrayskiy V")        "\n\tPCyl, Sph";
 PROJ_HEAD(qua_aut, "Quartic Authalic")    "\n\tPCyl, Sph";
 PROJ_HEAD(fouc,    "Foucaut")             "\n\tPCyl, Sph";
 PROJ_HEAD(mbt_s,   "McBryde-Thomas Flat-Polar Sine (No. 1)") "\n\tPCyl, Sph";

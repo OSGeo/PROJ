@@ -178,6 +178,7 @@ horner
 Hotine
 Karney
 Kavraisky
+Kavrayskiy
 Krovak
 krovak
 Krüger

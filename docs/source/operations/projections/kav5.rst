@@ -1,7 +1,7 @@
 .. _kav5:
 
 ********************************************************************************
-Kavraisky V
+Kavrayskiy V
 ********************************************************************************
 
 +---------------------+----------------------------------------------------------+
@@ -24,14 +24,18 @@ Kavraisky V
 .. figure:: ./images/kav5.png
    :width: 500 px
    :align: center
-   :alt:   Kavraisky V
+   :alt:   Kavrayskiy V
 
    proj-string: ``+proj=kav5``
+
+.. note:: This projection name may also be transliterated as Kavraisky V.
+
+Created by Soviet cartographer Vladimir V. Kavrayskiy  in 1933 :cite:`Snyder1993`.
 
 Parameters
 ################################################################################
 
-.. note:: All parameters are optional for the Kavraisky V projection.
+.. note:: All parameters are optional for the Kavrayskiy V projection.
 
 .. include:: ../options/lon_0.rst
 
