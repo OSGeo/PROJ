@@ -2399,6 +2399,30 @@ operation +proj=isea   +mode=hex +resolution=31
 accept  0 0
 expect  failure
 
+operation +proj=isea   +mode=hex +aperture=3 +resolution=5
+accept  0 0
+expect  542141645.00 707973207.00
+accept  2 1
+expect  542141645.00 714351344.00
+accept  2 -1
+expect  542141645.00 714351344.00
+accept  -2 1
+expect  535763508.00 714351344.00
+accept  -2 -1
+expect  542141645.00 707973207.00
+
+operation +proj=isea   +mode=hex +aperture=4 +resolution=4
+accept  0 0
+expect  235991069.00	235991069.00
+accept  2 1
+expect  242369206.00	242369206.00
+accept  2 -1
+expect  242369206.00	242369206.00
+accept  -2 1
+expect  235991069.00	235991069.00
+accept  -2 -1
+expect  235991069.00	235991069.00
+
 ===============================================================================
 # Kavraisky V
 # 	PCyl., Sph.
