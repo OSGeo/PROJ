@@ -158,6 +158,13 @@ Time units
 
 In the table below all time units supported by PROJ are listed.
 
+    .. note::
+
+        PROJ internally treats all date values as datetimes with a time value
+        of 00:00 (midnight).  This can lead to surprising behaviours if you
+        convert between date units and datetime units.
+
+
 +--------------+-----------------------------+
 | Label        | Name                        |
 +==============+=============================+
