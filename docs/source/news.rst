@@ -3,6 +3,70 @@
 News
 ###############################################################################
 
+9.0.0 Release Notes
++++++++++++++++++++
+*March 1st 2022*
+
+
+Breaking Changes
+----------------
+
+* Support for the autotools build system has been removed (`#3027 <https://github.com/OSGeo/PROJ/issues/3027>`_)
+  See RFC7 for details: https://proj.org/community/rfc/rfc-7.html
+
+Updates
+--------
+
+* Database updates:
+
+    * ESRI projection engine db to version 12.9 (`#2943 <https://github.com/OSGeo/PROJ/issues/2943>`_)
+
+    * EPSG v10.054 (`#3051 <https://github.com/OSGeo/PROJ/issues/3051>`_)
+
+    * Vertical grid files for PL-geoid-2011, Polish geoid model (`#2960 <https://github.com/OSGeo/PROJ/issues/2960>`_)
+
+    * Belgian geoid model hBG18 to grid alternatives (`#3044 <https://github.com/OSGeo/PROJ/issues/3044>`_)
+
+* Add new option to :c:func:`proj_create_crs_to_crs_from_pj` method to force ``+over`` on
+  transformation operations (`#2914 <https://github.com/OSGeo/PROJ/issues/2914>`_)
+
+* Specify ``CMAKE_INSTALL_RPATH`` for macOS; use ``-rpath LDFLAGS`` for tests (`#3009 <https://github.com/OSGeo/PROJ/issues/3009>`_)
+
+* Implement Geographic3D to Depth/Geog2D+Depth as used by ETRS89 to CD Norway
+  depth (`#3010 <https://github.com/OSGeo/PROJ/issues/3010>`_)
+
+* Allow ``PROJ_LIB`` paths wrapped with double quotes (`#3031 <https://github.com/OSGeo/PROJ/issues/3031>`_)
+
+* Use external gtest by default when possible (`#3035 <https://github.com/OSGeo/PROJ/issues/3035>`_)
+
+* CMake: make ``BUILD_SHARED_LIBS=ON`` the default even on Windows (`#3042 <https://github.com/OSGeo/PROJ/issues/3042>`_)
+
+* ``proj.ini``: add a ``ca_bundle_path`` variable (`#3049 <https://github.com/OSGeo/PROJ/issues/3049>`_)
+
+
+Bug fixes
+----------
+
+* Fix extremely long parsing time on hostile PROJ strings (`#2968 <https://github.com/OSGeo/PROJ/issues/2968>`_)
+
+* CMake: fix warning with external googletest (`#2980 <https://github.com/OSGeo/PROJ/issues/2980>`_)
+
+* :c:func:`proj_get_crs_info_list_from_database()``: report ``PJ_TYPE_GEODETIC_CRS`` for
+  IAU_2015 -ocentric geodetic CRS (`#3013 <https://github.com/OSGeo/PROJ/issues/3013>`_)
+
+* peirce_q: rename ``+type`` parameter wrongly introduced in 8.2.1 to ``+shape`` (`#3014 <https://github.com/OSGeo/PROJ/issues/3014>`_)
+
+* Set more precise error code for parsing errors in :c:func:`proj_create()`` (`#3037 <https://github.com/OSGeo/PROJ/issues/3037>`_)
+
+* :cpp:func:``createOperations()``: fix transformations from/to a BoundCRS of a
+  DerivedGeographicCRS coming from WKT (`#3046 <https://github.com/OSGeo/PROJ/issues/3046>`_)
+
+* Better deal with importing strings like ``+init=epsg:XXXX +over`` (`#3055 <https://github.com/OSGeo/PROJ/issues/3055>`_)
+
+* Fix importing CRS definition with ``+proj=peirce_q`` and ``+shape`` different from
+  square or diamond (`#3057 <https://github.com/OSGeo/PROJ/issues/3057>`_)
+
+
 8.2.1 Release Notes
 +++++++++++++++++++
 *January 1st 2022*
