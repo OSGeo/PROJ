@@ -51,14 +51,14 @@ Bug fixes
 
 * CMake: fix warning with external googletest (`#2980 <https://github.com/OSGeo/PROJ/issues/2980>`_)
 
-* :c:func:`proj_get_crs_info_list_from_database()``: report ``PJ_TYPE_GEODETIC_CRS`` for
+* :c:func:`proj_get_crs_info_list_from_database()`: report ``PJ_TYPE_GEODETIC_CRS`` for
   IAU_2015 -ocentric geodetic CRS (`#3013 <https://github.com/OSGeo/PROJ/issues/3013>`_)
 
 * peirce_q: rename ``+type`` parameter wrongly introduced in 8.2.1 to ``+shape`` (`#3014 <https://github.com/OSGeo/PROJ/issues/3014>`_)
 
-* Set more precise error code for parsing errors in :c:func:`proj_create()`` (`#3037 <https://github.com/OSGeo/PROJ/issues/3037>`_)
+* Set more precise error code for parsing errors in :c:func:`proj_create()` (`#3037 <https://github.com/OSGeo/PROJ/issues/3037>`_)
 
-* :cpp:func:``createOperations()``: fix transformations from/to a BoundCRS of a
+* :cpp:func:`createOperations()`: fix transformations from/to a BoundCRS of a
   DerivedGeographicCRS coming from WKT (`#3046 <https://github.com/OSGeo/PROJ/issues/3046>`_)
 
 * Better deal with importing strings like ``+init=epsg:XXXX +over`` (`#3055 <https://github.com/OSGeo/PROJ/issues/3055>`_)
