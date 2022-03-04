@@ -3602,14 +3602,14 @@ roundtrip 1
 accept  0.0 89.99
 expect  0.00 9050917.562466157600
 roundtrip 1
-accept  0.0 90.0
-expect  0.00 9050966.799011318013
+accept  0.0 89.999
+expect  0.00 9050964.513822982088
 roundtrip 1
 accept  0.0 -89.99
 expect  0.0 -9050917.562466157600
 roundtrip 1
-accept  0.0 -90.0
-expect  0.00 -9050966.799011318013
+accept  0.0 -89.999
+expect  0.00 -9050964.513822982088
 roundtrip 1
 
 direction inverse
