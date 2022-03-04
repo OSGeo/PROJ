@@ -65,7 +65,7 @@ jobs:
             set PROJ_DIR=%GITHUB_WORKSPACE%\proj_dir
             set PROJ_BUILD=%GITHUB_WORKSPACE%\build
             cd %PROJ_BUILD%
-            ctest -V -C "${{ env.BUILD_TYPE }}"
+            ctest --output-on-failure -C "${{ env.BUILD_TYPE }}"
             set PATH=%PROJ_DIR%\bin;%PATH%
             set BUILD_MODE=shared
             if "${{ env.BUILD_SHARED_LIBS }}"=="OFF" (set BUILD_MODE=static)
