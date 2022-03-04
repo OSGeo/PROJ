@@ -65,7 +65,7 @@ test_script:
   - echo test_script
   - set PROJ_LIB=%PROJ_DIR%\share\proj
   - cd %PROJ_BUILD%
-  - ctest -V -C Release
+  - ctest --output-on-failure -C Release
   - set PATH=%PROJ_DIR%\bin;%PATH%
   - set BUILD_MODE=shared
   - if BUILD_SHARED_LIBS==OFF (set BUILD_MODE=static)

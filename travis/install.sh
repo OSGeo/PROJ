@@ -70,7 +70,7 @@ if objdump -TC "lib/libproj.so" | grep "elf64-x86-64">/dev/null; then
 fi
 fi
 
-ctest
+ctest --output-on-failure
 make install
 # find /tmp/proj_shared_install_from_dist
 $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_shared_install_from_dist shared
@@ -88,7 +88,7 @@ cmake \
   ..
 make
 
-ctest
+ctest --output-on-failure
 make install
 # find /tmp/proj_static_install_from_dist
 $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_static_install_from_dist static
@@ -225,7 +225,7 @@ if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
           . ;
     fi
     make
-    ctest
+    ctest --output-on-failure
 fi
 
 if [ "${USE_CCACHE}" = "ON" ]; then
