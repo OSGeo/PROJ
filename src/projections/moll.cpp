@@ -10,7 +10,7 @@ PROJ_HEAD(moll, "Mollweide") "\n\tPCyl, Sph";
 PROJ_HEAD(wag4, "Wagner IV") "\n\tPCyl, Sph";
 PROJ_HEAD(wag5, "Wagner V") "\n\tPCyl, Sph";
 
-#define MAX_ITER    10
+#define MAX_ITER    30
 #define LOOP_TOL    1e-7
 
 namespace { // anonymous namespace
