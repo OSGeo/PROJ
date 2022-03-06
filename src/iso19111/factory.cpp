@@ -252,7 +252,7 @@ class SQLiteHandle {
     }
 
     // cppcheck-suppress functionStatic
-    void registerFunctions();
+    void initialize();
 
     SQLResultSet run(const std::string &sql,
                      const ListOfParams &parameters = ListOfParams(),
@@ -344,7 +344,7 @@ std::shared_ptr<SQLiteHandle> SQLiteHandle::open(PJ_CONTEXT *ctx,
 #ifdef ENABLE_CUSTOM_LOCKLESS_VFS
     handle->vfs_ = std::move(vfs);
 #endif
-    handle->registerFunctions();
+    handle->initialize();
     handle->checkDatabaseLayout(path, path, std::string());
     return handle;
 }
@@ -359,7 +359,7 @@ SQLiteHandle::initFromExisting(sqlite3 *sqlite_handle, bool close_handle,
         new SQLiteHandle(sqlite_handle, close_handle));
     handle->nLayoutVersionMajor_ = nLayoutVersionMajor;
     handle->nLayoutVersionMinor_ = nLayoutVersionMinor;
-    handle->registerFunctions();
+    handle->initialize();
     return handle;
 }
 
@@ -370,7 +370,7 @@ SQLiteHandle::initFromExistingUniquePtr(sqlite3 *sqlite_handle,
                                         bool close_handle) {
     auto handle = std::unique_ptr<SQLiteHandle>(
         new SQLiteHandle(sqlite_handle, close_handle));
-    handle->registerFunctions();
+    handle->initialize();
     return handle;
 }
 
@@ -547,7 +547,18 @@ void SQLiteHandle::checkDatabaseLayout(const std::string &mainDbPath,
 #define SQLITE_DETERMINISTIC 0
 #endif
 
-void SQLiteHandle::registerFunctions() {
+void SQLiteHandle::initialize() {
+
+    // There is a bug in sqlite 3.38.0 with some complex queries.
+    // Cf https://github.com/OSGeo/PROJ/issues/3077
+    // Disabling Bloom-filter pull-down optimization as suggested in
+    // https://sqlite.org/forum/forumpost/7d3a75438c
+    const int sqlite3VersionNumber = sqlite3_libversion_number();
+    if (sqlite3VersionNumber == 3 * 1000000 + 38 * 1000) {
+        sqlite3_test_control(SQLITE_TESTCTRL_OPTIMIZATIONS, sqlite_handle_,
+                             0x100000);
+    }
+
     sqlite3_create_function(sqlite_handle_, "pseudo_area_from_swne", 4,
                             SQLITE_UTF8 | SQLITE_DETERMINISTIC, nullptr,
                             PROJ_SQLITE_pseudo_area_from_swne, nullptr,
