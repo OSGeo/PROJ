@@ -6,4 +6,4 @@ install(FILES
   man1/gie.1
   man1/projinfo.1
   man1/projsync.1
-  DESTINATION share/man/man1)
+  DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
