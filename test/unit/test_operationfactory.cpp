@@ -3002,6 +3002,69 @@ TEST(operation, nadgrids_with_pm) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, towgs84_pm_3d) {
+    // Test fix for https://github.com/OSGeo/gdal/issues/5408
+
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=tmerc +lat_0=0 +lon_0=34 +k=1 +x_0=0 +y_0=-5000000 "
+        "+ellps=bessel +pm=ferro "
+        "+towgs84=1,2,3,4,5,6,7 "
+        "+units=m +no_defs +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto src3D = src->promoteTo3D(std::string(), dbContext);
+
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+    auto dst3D = dst->promoteTo3D(std::string(), dbContext);
+
+    // Import thing to check is that there's no push/pop v_3
+    const std::string expected_pipeline =
+        "+proj=pipeline "
+        "+step +inv +proj=tmerc +lat_0=0 +lon_0=34 +k=1 +x_0=0 +y_0=-5000000 "
+        "+ellps=bessel +pm=ferro "
+        "+step +proj=cart +ellps=bessel "
+        "+step +proj=helmert +x=1 +y=2 +z=3 +rx=4 "
+        "+ry=5 +rz=6 +s=7 +convention=position_vector "
+        "+step +inv +proj=cart +ellps=GRS80 "
+        "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m";
+
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            src3D, dst3D, ctxt);
+        ASSERT_EQ(list.size(), 1U);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            expected_pipeline);
+    }
+
+    // Retry when creating objects from WKT
+    {
+        auto objSrcFromWkt = WKTParser().createFromWKT(src3D->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()));
+        auto srcFromWkt = nn_dynamic_pointer_cast<CRS>(objSrcFromWkt);
+        ASSERT_TRUE(srcFromWkt != nullptr);
+        auto objDstFromWkt = WKTParser().createFromWKT(dst3D->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()));
+        auto dstFromWkt = nn_dynamic_pointer_cast<CRS>(objDstFromWkt);
+        ASSERT_TRUE(dstFromWkt != nullptr);
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(srcFromWkt), NN_NO_CHECK(dstFromWkt), ctxt);
+        ASSERT_EQ(list.size(), 1U);
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            expected_pipeline);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, WGS84_G1762_to_compoundCRS_with_bound_vertCRS) {
     auto authFactoryEPSG =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");

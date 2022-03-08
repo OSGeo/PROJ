@@ -4341,10 +4341,10 @@ createBoundCRSSourceTransformationCRS(const crs::CRSPtr &sourceCRS,
             sourceCRS->extractGeographicCRS();
         sourceTransformationCRS = sourceGeographicCRS;
         if (sourceGeographicCRS) {
-            if (sourceGeographicCRS->datum() != nullptr &&
-                sourceGeographicCRS->primeMeridian()
-                        ->longitude()
-                        .getSIValue() != 0.0) {
+            const auto &sourceDatum = sourceGeographicCRS->datum();
+            if (sourceDatum != nullptr && sourceGeographicCRS->primeMeridian()
+                                                  ->longitude()
+                                                  .getSIValue() != 0.0) {
                 sourceTransformationCRS =
                     GeographicCRS::create(
                         util::PropertyMap().set(
@@ -4354,13 +4354,12 @@ createBoundCRSSourceTransformationCRS(const crs::CRSPtr &sourceCRS,
                         datum::GeodeticReferenceFrame::create(
                             util::PropertyMap().set(
                                 common::IdentifiedObject::NAME_KEY,
-                                sourceGeographicCRS->datum()->nameStr() +
+                                sourceDatum->nameStr() +
                                     " (with Greenwich prime meridian)"),
-                            sourceGeographicCRS->datum()->ellipsoid(),
+                            sourceDatum->ellipsoid(),
                             util::optional<std::string>(),
                             datum::PrimeMeridian::GREENWICH),
-                        cs::EllipsoidalCS::createLatitudeLongitude(
-                            common::UnitOfMeasure::DEGREE))
+                        sourceGeographicCRS->coordinateSystem())
                         .as_nullable();
             }
         } else {
