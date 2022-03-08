@@ -5,23 +5,18 @@ Using PROJ in CMake projects
 ********************************************************************************
 
 The recommended way to use the PROJ library in a CMake project is to
-link to the imported library target ``${PROJ_LIBRARIES}`` provided by
+link to the imported library target ``PROJ::proj`` provided by
 the CMake configuration which comes with the library. Typical usage is:
 
 .. code::
 
-    find_package(PROJ)
+    find_package(PROJ CONFIG REQUIRED)
 
-    target_link_libraries(MyApp PRIVATE ${PROJ_LIBRARIES})
+    target_link_libraries(MyApp PRIVATE PROJ::proj)
 
-By adding the imported library target ``${PROJ_LIBRARIES}`` to the
+By adding the imported library target ``PROJ::proj`` to the
 target link libraries, CMake will also pass the include directories to
-the compiler.  This requires that you use CMake version 2.8.11 or later.
-If you are using an older version of CMake, then add
-
-.. code::
-
-    include_directories(${PROJ_INCLUDE_DIRS})
+the compiler.
 
 The CMake command ``find_package`` will look for the configuration in a
 number of places. The lookup can be adjusted for all packages by setting
