@@ -9925,6 +9925,8 @@ INSERT INTO "projected_crs" VALUES('EPSG','32157','NAD83 / Wyoming West Central'
 INSERT INTO "usage" VALUES('EPSG','7244','projected_crs','EPSG','32157','EPSG','2272','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','32158','NAD83 / Wyoming West',NULL,'EPSG','4499','EPSG','4269','EPSG','14934',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','7245','projected_crs','EPSG','32158','EPSG','2271','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','32159','NAD83 / Wyoming Lambert',NULL,'EPSG','4499','EPSG','4269','EPSG','14930',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17409','projected_crs','EPSG','32159','EPSG','1419','EPSG','1135');
 INSERT INTO "projected_crs" VALUES('EPSG','32161','NAD83 / Puerto Rico & Virgin Is.',NULL,'EPSG','4499','EPSG','4269','EPSG','15230',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','7246','projected_crs','EPSG','32161','EPSG','2251','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','32164','NAD83 / BLM 14N (ftUS)',NULL,'EPSG','4497','EPSG','4269','EPSG','15914',NULL,0);
