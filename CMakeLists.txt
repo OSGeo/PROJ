@@ -330,7 +330,7 @@ configure_proj_pc()
 
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  DESTINATION ${LIBDIR}/pkgconfig)
 
 ################################################################################
 # "make dist" workalike
