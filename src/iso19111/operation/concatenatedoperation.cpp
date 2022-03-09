@@ -276,14 +276,28 @@ void ConcatenatedOperation::fixStepsDirection(
         }
     }
 
+    const auto extractDerivedCRS =
+        [](const crs::CRS *crs) -> const crs::DerivedCRS * {
+        auto derivedCRS = dynamic_cast<const crs::DerivedCRS *>(crs);
+        if (derivedCRS)
+            return derivedCRS;
+        auto compoundCRS = dynamic_cast<const crs::CompoundCRS *>(crs);
+        if (compoundCRS) {
+            derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
+                compoundCRS->componentReferenceSystems().front().get());
+            if (derivedCRS)
+                return derivedCRS;
+        }
+        return nullptr;
+    };
+
     for (size_t i = 0; i < operationsInOut.size(); ++i) {
         auto &op = operationsInOut[i];
         auto l_sourceCRS = op->sourceCRS();
         auto l_targetCRS = op->targetCRS();
         auto conv = dynamic_cast<const Conversion *>(op.get());
         if (conv && i == 0 && !l_sourceCRS && !l_targetCRS) {
-            if (auto derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
-                    concatOpSourceCRS.get())) {
+            if (auto derivedCRS = extractDerivedCRS(concatOpSourceCRS.get())) {
                 if (i + 1 < operationsInOut.size()) {
                     // use the sourceCRS of the next operation as our target CRS
                     l_targetCRS = operationsInOut[i + 1]->sourceCRS();
@@ -323,8 +337,7 @@ void ConcatenatedOperation::fixStepsDirection(
             }
         } else if (conv && i + 1 == operationsInOut.size() && !l_sourceCRS &&
                    !l_targetCRS) {
-            auto derivedCRS =
-                dynamic_cast<const crs::DerivedCRS *>(concatOpTargetCRS.get());
+            auto derivedCRS = extractDerivedCRS(concatOpTargetCRS.get());
             if (derivedCRS) {
                 if (i >= 1) {
                     // use the sourceCRS of the previous operation as our source
@@ -350,8 +363,7 @@ void ConcatenatedOperation::fixStepsDirection(
             } else if (i >= 1) {
                 l_sourceCRS = operationsInOut[i - 1]->targetCRS();
                 if (l_sourceCRS) {
-                    derivedCRS = dynamic_cast<const crs::DerivedCRS *>(
-                        l_sourceCRS.get());
+                    derivedCRS = extractDerivedCRS(l_sourceCRS.get());
                     if (derivedCRS &&
                         conv->isEquivalentTo(
                             derivedCRS->derivingConversion().get(),
