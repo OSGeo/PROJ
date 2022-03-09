@@ -6569,6 +6569,32 @@ TEST(operation, createOperation_on_crs_with_bound_crs_and_wktext) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation,
+     createOperation_fallback_to_proj4_strings_with_axis_inverted_projCRS) {
+    auto objSrc =
+        createFromUserInput("EPSG:2193", DatabaseContext::create(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=WGS84 +lon_wrap=180 +type=crs");
+    auto dest = nn_dynamic_pointer_cast<GeographicCRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dest));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +inv +proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 "
+              "+x_0=1600000 +y_0=10000000 +ellps=GRS80 "
+              "+step +proj=longlat +ellps=WGS84 +lon_wrap=180 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_to_proj_string_with_non_metre_height) {
     auto objSrc =
         createFromUserInput("EPSG:6318+5703", DatabaseContext::create(), false);
