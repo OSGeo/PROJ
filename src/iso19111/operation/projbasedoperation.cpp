@@ -232,15 +232,13 @@ void PROJBasedOperation::_exportToJSON(
     method()->_exportToJSON(formatter);
 
     const auto &l_parameterValues = parameterValues();
-    if (!l_parameterValues.empty()) {
-        writer->AddObjKey("parameters");
-        {
-            auto parametersContext(writer->MakeArrayContext(false));
-            for (const auto &genOpParamvalue : l_parameterValues) {
-                formatter->setAllowIDInImmediateChild();
-                formatter->setOmitTypeInImmediateChild();
-                genOpParamvalue->_exportToJSON(formatter);
-            }
+    writer->AddObjKey("parameters");
+    {
+        auto parametersContext(writer->MakeArrayContext(false));
+        for (const auto &genOpParamvalue : l_parameterValues) {
+            formatter->setAllowIDInImmediateChild();
+            formatter->setOmitTypeInImmediateChild();
+            genOpParamvalue->_exportToJSON(formatter);
         }
     }
 }
