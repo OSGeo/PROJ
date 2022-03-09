@@ -45,7 +45,8 @@ jobs:
         run: |
             set VCPKG_INSTALLED=c:\vcpkg\installed\${{ env.ARCH }}-windows
             dir %VCPKG_INSTALLED%\bin
-            set PATH=%VCPKG_INSTALLED%\bin;%PATH%
+            dir %VCPKG_INSTALLED%\tools
+            set PATH=%VCPKG_INSTALLED%\bin;%VCPKG_INSTALLED%\tools;%PATH%
             set PROJ_BUILD=%GITHUB_WORKSPACE%\build
             mkdir %PROJ_BUILD%
             cd %PROJ_BUILD%
