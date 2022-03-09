@@ -7515,3 +7515,4 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9943','ETRS89 / EBBWV14 
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9944','ETRS89 / EBBWV14 SnakeGrid + Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6190','BD72 / Belgian Lambert 72 + Oostende height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9907','ETRS89 + Oostende height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','32159','NAD83 / WyLam','EPSG');
