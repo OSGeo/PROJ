@@ -4404,7 +4404,8 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
         formatter->addParam("units", "m");
     }
 
-    if (!axisSpecFound && !formatter->getCRSExport()) {
+    if (!axisSpecFound &&
+        (!formatter->getCRSExport() || formatter->getLegacyCRSToCRSContext())) {
         const auto &dir0 = axisList[0]->direction();
         const auto &dir1 = axisList[1]->direction();
         if (!(&dir0 == &cs::AxisDirection::EAST &&
