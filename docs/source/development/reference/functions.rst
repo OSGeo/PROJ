@@ -880,7 +880,13 @@ Setting custom I/O functions
 .. doxygenfunction:: proj_context_set_sqlite3_vfs_name
    :project: doxygen_api
 
+.. doxygenfunction:: proj_context_set_file_finder
+   :project: doxygen_api
+
 .. doxygenfunction:: proj_context_set_search_paths
+   :project: doxygen_api
+
+.. doxygenfunction:: proj_context_set_ca_bundle_path
    :project: doxygen_api
 
 
