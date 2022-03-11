@@ -254,20 +254,20 @@ static double mjd_to_yyyymmdd(double mjd) {
 /************************************************************************
     Date returned in YYYY-MM-DD format.
 ************************************************************************/
-    unsigned int mjd_iter = 14 + 31;
+    unsigned int date_iter = 14 + 31;
     unsigned int year = 1859, month = 0, day = 0;
     unsigned int date = (int) lround(mjd);
 
-    for (; date >= mjd_iter; year++) {
-        mjd_iter += days_in_year(year);
+    for (; date >= date_iter; year++) {
+        date_iter += days_in_year(year);
     }
     year--;
-    mjd_iter -= days_in_year(year);
+    date_iter -= days_in_year(year);
 
-    for (month=1; mjd_iter + days_in_month(year, month) <= date; month++)
-        mjd_iter += days_in_month(year, month);
+    for (month=1; date_iter + days_in_month(year, month) <= date; month++)
+        date_iter += days_in_month(year, month);
 
-    day = date - mjd_iter + 1;
+    day = date - date_iter + 1;
 
     return year*10000.0 + month*100.0 + day;
 }
