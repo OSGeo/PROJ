@@ -618,7 +618,6 @@ static void test_time(const char *args, double tol, double t_in, double t_exp) {
 // ---------------------------------------------------------------------------
 
 TEST(gie, unitconvert_selftest) {
-
     char args1[] = "+proj=unitconvert +t_in=decimalyear +t_out=decimalyear";
     double in1 = 2004.25;
 
@@ -639,6 +638,36 @@ TEST(gie, unitconvert_selftest) {
     test_time(args3, 1e-6, in3, in3);
     test_time(args4, 1e-6, in4, exp4);
     test_time(args5, 1e-6, in5, in5);
+}
+
+static void test_date(const char *args, double tol, double t_in, double t_exp) {
+    PJ_COORD in, out;
+    PJ *P = proj_create(PJ_DEFAULT_CTX, args);
+
+    ASSERT_TRUE(P != 0);
+
+    in = proj_coord(0.0, 0.0, 0.0, t_in);
+
+    out = proj_trans(P, PJ_FWD, in);
+    EXPECT_NEAR(out.xyzt.t, t_exp, tol);
+
+    proj_destroy(P);
+
+    proj_log_level(NULL, PJ_LOG_NONE);
+}
+
+TEST(gie, unitconvert_selftest_date) {
+    char args[] = "+proj=unitconvert +t_in=decimalyear +t_out=yyyymmdd";
+    test_date(args, 1e-6, 2022.0027, 20220102);
+    test_date(args, 1e-6, 1990.0, 19900101);
+    test_date(args, 1e-6, 2004.1612, 20040229);
+    test_date(args, 1e-6, 1899.999, 19000101);
+
+    strcpy(&args[18], "+t_in=yyyymmdd +t_out=decimalyear");
+    test_date(args, 1e-6, 20220102, 2022.0027397);
+    test_date(args, 1e-6, 19900101, 1990.0);
+    test_date(args, 1e-6, 20040229, 2004.1612022);
+    test_date(args, 1e-6, 18991231, 1899.9972603);
 }
 
 static const char tc32_utm32[] = {
