@@ -158,6 +158,16 @@ Time units
 
 In the table below all time units supported by PROJ are listed.
 
+    .. note::
+
+        When converting time units from a date-only format (`yyyymmdd`), PROJ
+        assumes a time value of 00:00 midnight.  When converting time units
+        to a date-only format, PROJ rounds to the *nearest* date at 00:00
+        midnight.  That is, any time values less than 12:00 noon will round to
+        00:00 on the same day.  Time values greater than or equal to 12:00 noon
+        will round to 00:00 on the following day.
+
+
 +--------------+-----------------------------+
 | Label        | Name                        |
 +==============+=============================+
