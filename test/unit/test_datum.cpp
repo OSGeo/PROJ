@@ -287,6 +287,33 @@ TEST(datum, dynamic_geodetic_reference_frame) {
         drf->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected_wtk2_2019);
+
+    EXPECT_TRUE(drf->isEquivalentTo(drf.get()));
+    EXPECT_TRUE(
+        drf->isEquivalentTo(drf.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(drf->isEquivalentTo(createUnrelatedObject().get()));
+
+    // "Same" datum, except that it is a non-dynamic one
+    auto datum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "test"), Ellipsoid::WGS84,
+        optional<std::string>("My anchor"), PrimeMeridian::GREENWICH);
+    EXPECT_FALSE(datum->isEquivalentTo(drf.get()));
+    EXPECT_FALSE(drf->isEquivalentTo(datum.get()));
+    EXPECT_TRUE(
+        datum->isEquivalentTo(drf.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        drf->isEquivalentTo(datum.get(), IComparable::Criterion::EQUIVALENT));
+
+    auto unrelated_datum = GeodeticReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "test2"),
+        Ellipsoid::WGS84, optional<std::string>("My anchor"),
+        PrimeMeridian::GREENWICH);
+    EXPECT_FALSE(unrelated_datum->isEquivalentTo(drf.get()));
+    EXPECT_FALSE(drf->isEquivalentTo(unrelated_datum.get()));
+    EXPECT_FALSE(unrelated_datum->isEquivalentTo(
+        drf.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(drf->isEquivalentTo(unrelated_datum.get(),
+                                     IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
@@ -395,6 +422,32 @@ TEST(datum, dynamic_vertical_reference_frame) {
         drf->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get()),
         expected_wtk2_2019);
+
+    EXPECT_TRUE(drf->isEquivalentTo(drf.get()));
+    EXPECT_TRUE(
+        drf->isEquivalentTo(drf.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(drf->isEquivalentTo(createUnrelatedObject().get()));
+
+    // "Same" datum, except that it is a non-dynamic one
+    auto datum = VerticalReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "test"),
+        optional<std::string>("My anchor"), optional<RealizationMethod>());
+    EXPECT_FALSE(datum->isEquivalentTo(drf.get()));
+    EXPECT_FALSE(drf->isEquivalentTo(datum.get()));
+    EXPECT_TRUE(
+        datum->isEquivalentTo(drf.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_TRUE(
+        drf->isEquivalentTo(datum.get(), IComparable::Criterion::EQUIVALENT));
+
+    auto unrelated_datum = VerticalReferenceFrame::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "test2"),
+        optional<std::string>("My anchor"), optional<RealizationMethod>());
+    EXPECT_FALSE(unrelated_datum->isEquivalentTo(drf.get()));
+    EXPECT_FALSE(drf->isEquivalentTo(unrelated_datum.get()));
+    EXPECT_FALSE(unrelated_datum->isEquivalentTo(
+        drf.get(), IComparable::Criterion::EQUIVALENT));
+    EXPECT_FALSE(drf->isEquivalentTo(unrelated_datum.get(),
+                                     IComparable::Criterion::EQUIVALENT));
 }
 
 // ---------------------------------------------------------------------------
