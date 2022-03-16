@@ -148,8 +148,8 @@ echo "Testing -s EPSG:4936 -t EPSG:4978 --spatial-test intersects --summary wher
 $EXE -s EPSG:4936 -t EPSG:4978 --spatial-test intersects --summary >>${OUT} 2>&1
 echo "" >>${OUT}
 
-echo "Testing -s "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs" -t EPSG:4326 -o PROJ -q" >> ${OUT}
-$EXE -s "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs" -t EPSG:4326 -o PROJ -q >>${OUT} 2>&1
+echo "Testing -s "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs" -t EPSG:4979 -o PROJ -q" >> ${OUT}
+$EXE -s "+proj=longlat +datum=WGS84 +geoidgrids=@foo.gtx +type=crs" -t EPSG:4979 -o PROJ -q >>${OUT} 2>&1
 echo "" >>${OUT}
 
 echo 'Testing -s "AGD66" -t "WGS 84 (G1762)" --spatial-test intersects --summary. Should include a transformation through GDA2020' >> ${OUT}

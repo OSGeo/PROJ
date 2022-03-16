@@ -124,9 +124,25 @@ EOF
 
 #
 echo "##############################################################" >> ${OUT}
-echo "WGS84 -> WGS84+EGM96" >> ${OUT}
+echo "WGS84 (2D) -> WGS84+EGM96" >> ${OUT}
 #
 $EXE +init=epsg:4326 +to +init=epsg:4326 +geoidgrids=egm96_15.gtx -E >>${OUT} <<EOF
+2dE 49dN 0
+EOF
+
+#
+echo "##############################################################" >> ${OUT}
+echo "WGS84 (3D) -> WGS84+EGM96" >> ${OUT}
+#
+$EXE +init=epsg:4979 +to +init=epsg:4326 +geoidgrids=egm96_15.gtx -E >>${OUT} <<EOF
+2dE 49dN 0
+EOF
+
+#
+echo "##############################################################" >> ${OUT}
+echo "WGS84 (2D), promoted to 3D -> WGS84+EGM96" >> ${OUT}
+#
+$EXE --3d +init=epsg:4326 +to +init=epsg:4326 +geoidgrids=egm96_15.gtx -E >>${OUT} <<EOF
 2dE 49dN 0
 EOF
 
