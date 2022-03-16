@@ -432,6 +432,10 @@ class PROJ_GCC_DLL GeodeticReferenceFrame : public Datum {
         util::IComparable::Criterion criterion =
             util::IComparable::Criterion::STRICT,
         const io::DatabaseContextPtr &dbContext = nullptr) const override;
+
+    PROJ_INTERNAL bool isEquivalentToNoExactTypeCheck(
+        const util::IComparable *other, util::IComparable::Criterion criterion,
+        const io::DatabaseContextPtr &dbContext) const;
     //! @endcond
 
   protected:
@@ -586,6 +590,10 @@ class PROJ_GCC_DLL VerticalReferenceFrame : public Datum {
         util::IComparable::Criterion criterion =
             util::IComparable::Criterion::STRICT,
         const io::DatabaseContextPtr &dbContext = nullptr) const override;
+
+    PROJ_INTERNAL bool isEquivalentToNoExactTypeCheck(
+        const util::IComparable *other, util::IComparable::Criterion criterion,
+        const io::DatabaseContextPtr &dbContext) const;
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
