@@ -4926,6 +4926,19 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
             }
         }
 
+        // Only do a vertical transformation if the target CRS is 3D.
+        const auto dstSingle = dynamic_cast<crs::SingleCRS *>(targetCRS.get());
+        if (dstSingle &&
+            dstSingle->coordinateSystem()->axisList().size() == 2) {
+            auto tmp = createOperations(componentsSrc[0], targetCRS, context);
+            for (const auto &op : tmp) {
+                auto opClone = op->shallowClone();
+                setCRSs(opClone.get(), sourceCRS, targetCRS);
+                res.emplace_back(opClone);
+            }
+            return;
+        }
+
         std::vector<CoordinateOperationNNPtr> horizTransforms;
         auto srcGeogCRS = componentsSrc[0]->extractGeographicCRS();
         if (srcGeogCRS) {

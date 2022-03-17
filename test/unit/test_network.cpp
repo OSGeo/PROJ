@@ -1146,7 +1146,7 @@ TEST(networking, curl_vgridshift) {
 
     // WGS84 to EGM2008 height. Using egm08_25.tif
     auto P =
-        proj_create_crs_to_crs(ctx, "EPSG:4326", "EPSG:4326+3855", nullptr);
+        proj_create_crs_to_crs(ctx, "EPSG:4979", "EPSG:4326+3855", nullptr);
     ASSERT_NE(P, nullptr);
 
     PJ_COORD c;

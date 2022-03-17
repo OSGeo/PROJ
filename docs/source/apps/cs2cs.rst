@@ -13,7 +13,7 @@ Synopsis
 
     | **cs2cs** [**-eEfIlrstvwW** [args]]
     |           [[--area <name_or_code>] | [--bbox <west_long,south_lat,east_long,north_lat>]]
-    |           [--authority <name>] [--no-ballpark] [--accuracy <accuracy>]
+    |           [--authority <name>] [--no-ballpark] [--accuracy <accuracy>] [--3d]
     |           ([*+opt[=arg]* ...] [+to *+opt[=arg]* ...] | {source_crs} {target_crs})
     |           file ...
 
@@ -193,6 +193,17 @@ The following control parameters can appear in any order:
     will be searched only in that authority namespace (e.g ``EPSG``).
 
     This option is mutually exclusive with :option:`--bbox`.
+
+.. option:: --3d
+
+    .. versionadded:: 9.1
+
+    "Promote" 2D CRS(s) to their 3D version, where the vertical axis is the
+    ellipsoidal height in metres, using the ellipsoid of the base geodetic CRS.
+    Depending on PROJ versions and the exact nature of the CRS involved,
+    especially before PROJ 9.1, a mix of 2D and 3D CRS could lead to 2D or 3D
+    transformations. Starting with PROJ 9.1, both CRS need to be 3D for vertical
+    transformation to possibly happen.
 
 .. only:: man
 

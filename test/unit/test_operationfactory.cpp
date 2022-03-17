@@ -5441,7 +5441,9 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
     auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
     ASSERT_TRUE(src != nullptr);
     auto nnSrc = NN_NO_CHECK(src);
-    auto dst = authFactory->createCoordinateReferenceSystem("4269"); // NAD83
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("4269")->promoteTo3D(
+            std::string(), authFactory->databaseContext()); // NAD83
 
     auto listCompoundToGeog2D =
         CoordinateOperationFactory::create()->createOperations(nnSrc, dst,
@@ -5454,18 +5456,11 @@ TEST(operation, compoundCRS_to_geogCRS_2D_promote_to_3D_context) {
         CoordinateOperationFactory::create()->createOperations(dst, nnSrc,
                                                                ctxt);
     EXPECT_EQ(listGeog2DToCompound.size(), listCompoundToGeog2D.size());
-
-    auto listCompoundToGeog3D =
-        CoordinateOperationFactory::create()->createOperations(
-            nnSrc,
-            dst->promoteTo3D(std::string(), authFactory->databaseContext()),
-            ctxt);
-    EXPECT_EQ(listCompoundToGeog3D.size(), listCompoundToGeog2D.size());
 }
 
 // ---------------------------------------------------------------------------
 
-TEST(operation, compoundCRS_of_projCRS_to_geogCRS_2D_context) {
+TEST(operation, compoundCRS_of_projCRS_to_geogCRS_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
@@ -5480,7 +5475,9 @@ TEST(operation, compoundCRS_of_projCRS_to_geogCRS_2D_context) {
     auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
     ASSERT_TRUE(src != nullptr);
     auto nnSrc = NN_NO_CHECK(src);
-    auto dst = authFactory->createCoordinateReferenceSystem("4269"); // NAD83
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("4269")->promoteTo3D(
+            std::string(), authFactory->databaseContext()); // NAD83
 
     auto list = CoordinateOperationFactory::create()->createOperations(
         nnSrc, dst, ctxt);
@@ -5945,7 +5942,9 @@ TEST(operation, compoundCRS_of_vertCRS_with_geoid_model_to_geogCRS) {
         createFromUserInput(wkt, authFactory->databaseContext(), false);
     auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
     ASSERT_TRUE(src != nullptr);
-    auto dst = authFactory->createCoordinateReferenceSystem("4269"); // NAD83
+    auto dst =
+        authFactory->createCoordinateReferenceSystem("4269")->promoteTo3D(
+            std::string(), authFactory->databaseContext()); // NAD83
 
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(src), dst, ctxt);
@@ -6153,7 +6152,7 @@ TEST(operation, compoundCRS_with_non_meter_horiz_and_vertical_to_geog) {
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
     auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
     auto list = CoordinateOperationFactory::create()->createOperations(
-        NN_NO_CHECK(src), authFactory->createCoordinateReferenceSystem("4326"),
+        NN_NO_CHECK(src), authFactory->createCoordinateReferenceSystem("4979"),
         ctxt);
     ASSERT_EQ(list.size(), 1U);
     // Check that vertical unit conversion is done just once

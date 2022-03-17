@@ -10525,12 +10525,18 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                     }
                     auto geogCRS = dynamic_cast<GeographicCRS *>(crs);
                     if (geogCRS) {
+                        const auto &cs = geogCRS->coordinateSystem();
                         // Override with longitude latitude in degrees
                         return GeographicCRS::create(
                             properties, geogCRS->datum(),
                             geogCRS->datumEnsemble(),
-                            EllipsoidalCS::createLongitudeLatitude(
-                                UnitOfMeasure::DEGREE));
+                            cs->axisList().size() == 2
+                                ? EllipsoidalCS::createLongitudeLatitude(
+                                      UnitOfMeasure::DEGREE)
+                                : EllipsoidalCS::
+                                      createLongitudeLatitudeEllipsoidalHeight(
+                                          UnitOfMeasure::DEGREE,
+                                          cs->axisList()[2]->unit()));
                     }
                     auto projCRS = dynamic_cast<ProjectedCRS *>(crs);
                     if (projCRS) {

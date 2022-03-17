@@ -78,7 +78,7 @@ static const char *oterr = "*\t*"; /* output line for unprojectable input */
 static const char *usage =
     "%s\nusage: %s [-dDeEfIlrstvwW [args]]\n"
     "              [[--area name_or_code] | [--bbox west_long,south_lat,east_long,north_lat]]\n"
-    "              [--authority {name}] [--accuracy {accuracy}] [--no-ballpark]\n"
+    "              [--authority {name}] [--accuracy {accuracy}] [--no-ballpark] [--3d]\n"
     "              [+opt[=arg] ...] [+to +opt[=arg] ...] [file ...]\n";
 
 static double (*informat)(const char *,
@@ -384,6 +384,7 @@ int main(int argc, char **argv) {
     const char* authority = nullptr;
     double accuracy = -1;
     bool allowBallpark = true;
+    bool promoteTo3D = false;
 
     /* process run line arguments */
     while (--argc > 0) { /* collect run line arguments */
@@ -448,6 +449,9 @@ int main(int argc, char **argv) {
         }
         else if (strcmp(*argv, "--no-ballpark") == 0 ) {
             allowBallpark = false;
+        }
+        else if (strcmp(*argv, "--3d") == 0 ) {
+            promoteTo3D = true;
         }
         else if (**argv == '-') {
             for (arg = *argv;;) {
@@ -785,8 +789,7 @@ int main(int argc, char **argv) {
     src = proj_create(nullptr, pj_add_type_crs_if_needed(fromStr).c_str());
     dst = proj_create(nullptr, pj_add_type_crs_if_needed(toStr).c_str());
 
-    if( proj_get_type(src) == PJ_TYPE_COMPOUND_CRS ||
-        proj_get_type(dst) == PJ_TYPE_COMPOUND_CRS ) {
+    if( promoteTo3D ) {
         auto src3D = proj_crs_promote_to_3D(nullptr, nullptr, src);
         if( src3D ) {
             proj_destroy(src);

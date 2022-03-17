@@ -300,12 +300,12 @@ The following control parameters can appear in any order:
 
     .. versionadded:: 6.3
 
-    "Promote" the CRS(s) to their 3D version. In the context of researching
-    available coordinate transformations, explicitly specifying this option is
-    not necessary, because when one of the source or target CRS has a vertical
-    component but not the other one, the one that has no vertical component is
-    automatically promoted to a 3D version, where its vertical axis is the
+    "Promote" 2D CRS(s) to their 3D version, where the vertical axis is the
     ellipsoidal height in metres, using the ellipsoid of the base geodetic CRS.
+    Depending on PROJ versions and the exact nature of the CRS involved,
+    especially before PROJ 9.1, a mix of 2D and 3D CRS could lead to 2D or 3D
+    transformations. Starting with PROJ 9.1, both CRS need to be 3D for vertical
+    transformation to possibly happen.
 
 .. option:: --output-id=AUTH:NAME
 
