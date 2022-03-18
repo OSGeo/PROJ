@@ -5097,6 +5097,28 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                         componentsSrc[0], NN_NO_CHECK(interpolationGeogCRS),
                         context);
 
+                    // e.g when doing COMPOUND_CRS[
+                    //      NAD83(CRS)+TOWGS84[0,0,0],
+                    //      CGVD28 height + EXTENSION["PROJ4_GRIDS","HT2_0.gtx"]
+                    // to NAD83(CRS) 3D
+                    const auto boundSrc =
+                        dynamic_cast<crs::BoundCRS *>(componentsSrc[0].get());
+                    if (boundSrc &&
+                        boundSrc->baseCRS()->isEquivalentTo(
+                            targetCRS->demoteTo2D(std::string(), dbContext)
+                                .get(),
+                            util::IComparable::Criterion::EQUIVALENT) &&
+                        boundSrc->hubCRS()->isEquivalentTo(
+                            interpolationGeogCRS
+                                ->demoteTo2D(std::string(), dbContext)
+                                .get(),
+                            util::IComparable::Criterion::EQUIVALENT)) {
+                        // Make sure to use the same horizontal transformation
+                        // (likely a null shift)
+                        interpToTargetOps = applyInverse(srcToInterpOps);
+                        return;
+                    }
+
                     // But do the interpolation CRS to targetCRS in 3D
                     // to have proper ellipsoid height transformation.
                     // We need to force the vertical axis of this 3D'ified
