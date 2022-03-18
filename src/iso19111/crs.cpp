@@ -1460,7 +1460,8 @@ bool SingleCRS::baseIsEquivalentTo(
         const auto &thisDatum = d->datum;
         const auto &otherDatum = otherSingleCRS->d->datum;
         if (thisDatum) {
-            if (!thisDatum->_isEquivalentTo(otherDatum.get(), criterion,
+            if (otherDatum == nullptr ||
+                !thisDatum->_isEquivalentTo(otherDatum.get(), criterion,
                                             dbContext)) {
                 return false;
             }
@@ -1473,7 +1474,8 @@ bool SingleCRS::baseIsEquivalentTo(
         const auto &thisDatumEnsemble = d->datumEnsemble;
         const auto &otherDatumEnsemble = otherSingleCRS->d->datumEnsemble;
         if (thisDatumEnsemble) {
-            if (!thisDatumEnsemble->_isEquivalentTo(otherDatumEnsemble.get(),
+            if (otherDatumEnsemble == nullptr ||
+                !thisDatumEnsemble->_isEquivalentTo(otherDatumEnsemble.get(),
                                                     criterion, dbContext)) {
                 return false;
             }
