@@ -5970,6 +5970,61 @@ TEST(operation, compoundCRS_of_vertCRS_with_geoid_model_to_geogCRS) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation,
+     compoundCRS_of_horizCRS_with_TOWGS84_vertCRS_with_geoid_model_to_geogCRS) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto wkt = "COMPD_CS[\"NAD83(CSRS) + CGVD28 height - HT2_0\",\n"
+               "    GEOGCS[\"NAD83(CSRS)\",\n"
+               "        DATUM[\"NAD83_Canadian_Spatial_Reference_System\",\n"
+               "            SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+               "                AUTHORITY[\"EPSG\",\"7019\"]],\n"
+               "            TOWGS84[0,0,0,0,0,0,0],\n"
+               "            AUTHORITY[\"EPSG\",\"6140\"]],\n"
+               "        PRIMEM[\"Greenwich\",0,\n"
+               "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+               "        UNIT[\"degree\",0.0174532925199433,\n"
+               "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+               "        AUTHORITY[\"EPSG\",\"4617\"]],\n"
+               "    VERT_CS[\"CGVD28 height - HT2_0\",\n"
+               "        VERT_DATUM[\"Canadian Geodetic Vertical Datum of "
+               "1928\",2005,\n"
+               "            EXTENSION[\"PROJ4_GRIDS\",\"HT2_0.gtx\"],\n"
+               "            AUTHORITY[\"EPSG\",\"5114\"]],\n"
+               "        UNIT[\"metre\",1,\n"
+               "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+               "        AXIS[\"Gravity-related height\",UP],\n"
+               "        AUTHORITY[\"EPSG\",\"5713\"]]]";
+    auto srcObj =
+        createFromUserInput(wkt, authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    // NAD83(CSRS) 3D
+    auto dst = authFactory->createCoordinateReferenceSystem("4955");
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    auto op_proj =
+        list[0]->exportToPROJString(PROJStringFormatter::create().get());
+    EXPECT_EQ(op_proj, "+proj=pipeline "
+                       "+step +proj=push +v_1 +v_2 "
+                       "+step +proj=axisswap +order=2,1 "
+                       "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                       "+step +proj=vgridshift +grids=HT2_0.gtx +multiplier=1 "
+                       "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+                       "+step +proj=axisswap +order=2,1 "
+                       "+step +proj=pop +v_1 +v_2");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_from_WKT2_to_geogCRS_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
