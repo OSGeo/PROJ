@@ -9852,7 +9852,9 @@ TEST(io, projparse_merc_not_quite_google_mercator) {
     EXPECT_TRUE(wkt.find("METHOD[\"Popular Visualisation Pseudo "
                          "Mercator\",ID[\"EPSG\",1024]") != std::string::npos)
         << wkt;
-    EXPECT_TRUE(wkt.find("DATUM[\"unknown\",") != std::string::npos) << wkt;
+    EXPECT_TRUE(wkt.find("DATUM[\"unknown using nadgrids=@null\",") !=
+                std::string::npos)
+        << wkt;
 
     EXPECT_EQ(
         replaceAll(crs->exportToPROJString(PROJStringFormatter::create().get()),
