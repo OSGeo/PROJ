@@ -171,6 +171,7 @@ struct WKTFormatter::Private {
     std::vector<double> toWGS84Parameters_{};
     std::string hDatumExtension_{};
     std::string vDatumExtension_{};
+    crs::GeographicCRSPtr geogCRSOfCompoundCRS_{};
     std::vector<bool> inversionStack_{false};
     std::string result_{};
 
@@ -804,6 +805,18 @@ const std::string &WKTFormatter::getHDatumExtension() const {
 
 // ---------------------------------------------------------------------------
 
+void WKTFormatter::setGeogCRSOfCompoundCRS(const crs::GeographicCRSPtr &crs) {
+    d->geogCRSOfCompoundCRS_ = crs;
+}
+
+// ---------------------------------------------------------------------------
+
+const crs::GeographicCRSPtr &WKTFormatter::getGeogCRSOfCompoundCRS() const {
+    return d->geogCRSOfCompoundCRS_;
+}
+
+// ---------------------------------------------------------------------------
+
 std::string WKTFormatter::morphNameToESRI(const std::string &name) {
 
     for (const auto *suffix : {"(m)", "(ftUS)", "(E-N)", "(N-E)"}) {
@@ -1248,6 +1261,7 @@ struct WKTParser::Private {
     bool esriStyle_ = false;
     bool maybeEsriStyle_ = false;
     DatabaseContextPtr dbContext_{};
+    crs::GeographicCRSPtr geogCRSOfCompoundCRS_{};
 
     static constexpr int MAX_PROPERTY_SIZE = 1024;
     PropertyMap **properties_{};
@@ -4680,21 +4694,31 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
                     gridName != "g2012a_conus.gtx,g2012a_alaska.gtx,"
                                 "g2012a_guam.gtx,g2012a_hawaii.gtx,"
                                 "g2012a_puertorico.gtx,g2012a_samoa.gtx") {
+                    auto geogCRS =
+                        geogCRSOfCompoundCRS_ &&
+                                geogCRSOfCompoundCRS_->primeMeridian()
+                                        ->longitude()
+                                        .getSIValue() == 0 &&
+                                geogCRSOfCompoundCRS_->coordinateSystem()
+                                        ->axisList()[0]
+                                        ->unit() == UnitOfMeasure::DEGREE
+                            ? geogCRSOfCompoundCRS_->promoteTo3D(std::string(),
+                                                                 dbContext_)
+                            : GeographicCRS::EPSG_4979;
+
                     auto sourceTransformationCRS =
                         createBoundCRSSourceTransformationCRS(
-                            crs.as_nullable(),
-                            GeographicCRS::EPSG_4979.as_nullable());
+                            crs.as_nullable(), geogCRS.as_nullable());
                     auto transformation = Transformation::
                         createGravityRelatedHeightToGeographic3D(
                             PropertyMap().set(
                                 IdentifiedObject::NAME_KEY,
-                                sourceTransformationCRS->nameStr() +
-                                    " to WGS84 ellipsoidal height"),
-                            sourceTransformationCRS, GeographicCRS::EPSG_4979,
-                            nullptr, gridName,
+                                sourceTransformationCRS->nameStr() + " to " +
+                                    geogCRS->nameStr() + " ellipsoidal height"),
+                            sourceTransformationCRS, geogCRS, nullptr, gridName,
                             std::vector<PositionalAccuracyNNPtr>());
-                    return nn_static_pointer_cast<CRS>(BoundCRS::create(
-                        crs, GeographicCRS::EPSG_4979, transformation));
+                    return nn_static_pointer_cast<CRS>(
+                        BoundCRS::create(crs, geogCRS, transformation));
                 }
             }
         }
@@ -4744,9 +4768,14 @@ WKTParser::Private::buildDerivedVerticalCRS(const WKTNodeNNPtr &node) {
 
 CRSNNPtr WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
     std::vector<CRSNNPtr> components;
+    bool bFirstNode = true;
     for (const auto &child : node->GP()->children()) {
         auto crs = buildCRS(child);
         if (crs) {
+            if (bFirstNode) {
+                geogCRSOfCompoundCRS_ = crs->extractGeographicCRS();
+                bFirstNode = false;
+            }
             components.push_back(NN_NO_CHECK(crs));
         }
     }
@@ -7582,6 +7611,7 @@ struct PROJStringFormatter::Private {
     std::vector<double> toWGS84Parameters_{};
     std::string vDatumExtension_{};
     std::string hDatumExtension_{};
+    crs::GeographicCRSPtr geogCRSOfCompoundCRS_{};
 
     std::list<Step> steps_{};
     std::vector<Step::KeyValue> globalParamValues_{};
@@ -8892,6 +8922,20 @@ void PROJStringFormatter::setHDatumExtension(const std::string &filename) {
 
 const std::string &PROJStringFormatter::getHDatumExtension() const {
     return d->hDatumExtension_;
+}
+
+// ---------------------------------------------------------------------------
+
+void PROJStringFormatter::setGeogCRSOfCompoundCRS(
+    const crs::GeographicCRSPtr &crs) {
+    d->geogCRSOfCompoundCRS_ = crs;
+}
+
+// ---------------------------------------------------------------------------
+
+const crs::GeographicCRSPtr &
+PROJStringFormatter::getGeogCRSOfCompoundCRS() const {
+    return d->geogCRSOfCompoundCRS_;
 }
 
 // ---------------------------------------------------------------------------

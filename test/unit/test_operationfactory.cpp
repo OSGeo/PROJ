@@ -3710,9 +3710,9 @@ TEST(operation,
               "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
-              "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=rad +z_in=m "
-              "+xy_out=deg +z_out=us-ft");
+              "+xy_out=deg +z_out=us-ft "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -3789,9 +3789,9 @@ TEST(
               "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
-              "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=rad +z_in=m "
-              "+xy_out=deg +z_out=us-ft");
+              "+xy_out=deg +z_out=us-ft "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -3867,9 +3867,9 @@ TEST(
               "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
-              "+step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=rad +z_in=m "
-              "+xy_out=deg +z_out=us-ft");
+              "+xy_out=deg +z_out=us-ft "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -6279,13 +6279,11 @@ TEST(operation,
     auto op_proj =
         list[0]->exportToPROJString(PROJStringFormatter::create().get());
     EXPECT_EQ(op_proj, "+proj=pipeline "
-                       "+step +proj=push +v_1 +v_2 "
                        "+step +proj=axisswap +order=2,1 "
                        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
                        "+step +proj=vgridshift +grids=HT2_0.gtx +multiplier=1 "
                        "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-                       "+step +proj=axisswap +order=2,1 "
-                       "+step +proj=pop +v_1 +v_2");
+                       "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
