@@ -5099,7 +5099,7 @@ TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_WKT2) {
         "                    ORDER[3],\n"
         "                    LENGTHUNIT[\"metre\",1]],\n"
         "            ID[\"EPSG\",4979]]],\n"
-        "    ABRIDGEDTRANSFORMATION[\"EGM2008 geoid height to WGS84 "
+        "    ABRIDGEDTRANSFORMATION[\"EGM2008 geoid height to WGS 84 "
         "ellipsoidal height\",\n"
         "        METHOD[\"GravityRelatedHeight to Geographic3D\"],\n"
         "        PARAMETERFILE[\"Geoid (height correction) model "

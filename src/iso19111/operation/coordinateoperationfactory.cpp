@@ -5513,6 +5513,54 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
         authFactory ? authFactory->databaseContext().as_nullable() : nullptr;
 
     const auto &componentsDst = compoundDst->componentReferenceSystems();
+
+    // Case of BOUND[NAD83_3D,TOWGS84] to
+    // COMPOUND[BOUND[NAD83_2D,TOWGS84],BOUND[VERT[NAVD88],HUB=NAD83_3D,GRID]]
+    // ==> We can ignore the TOWGS84 BOUND aspect and just ask for
+    // NAD83_3D to COMPOUND[NAD83_2D,BOUND[VERT[NAVD88],HUB=NAD83_3D,GRID]]
+    if (componentsDst.size() >= 2) {
+        auto srcGeogCRS = boundSrc->baseCRS()->extractGeodeticCRS();
+        auto compDst0BoundCrs =
+            util::nn_dynamic_pointer_cast<crs::BoundCRS>(componentsDst[0]);
+        auto compDst1BoundCrs =
+            dynamic_cast<crs::BoundCRS *>(componentsDst[1].get());
+        if (srcGeogCRS && compDst0BoundCrs && compDst1BoundCrs) {
+            auto compDst0Geog = compDst0BoundCrs->extractGeographicCRS();
+            auto compDst1Vert = dynamic_cast<const crs::VerticalCRS *>(
+                compDst1BoundCrs->baseCRS().get());
+            auto compDst1BoundCrsHubCrsGeog =
+                dynamic_cast<const crs::GeographicCRS *>(
+                    compDst1BoundCrs->hubCRS().get());
+            if (compDst1BoundCrsHubCrsGeog) {
+                auto hubDst1Datum =
+                    compDst1BoundCrsHubCrsGeog->datumNonNull(dbContext);
+                if (compDst0Geog && compDst1Vert &&
+                    srcGeogCRS->datumNonNull(dbContext)->isEquivalentTo(
+                        hubDst1Datum.get(),
+                        util::IComparable::Criterion::EQUIVALENT) &&
+                    compDst0Geog->datumNonNull(dbContext)->isEquivalentTo(
+                        hubDst1Datum.get(),
+                        util::IComparable::Criterion::EQUIVALENT)) {
+                    auto srcNew = boundSrc->baseCRS();
+                    auto properties = util::PropertyMap().set(
+                        common::IdentifiedObject::NAME_KEY,
+                        compDst0BoundCrs->nameStr() + " + " +
+                            componentsDst[1]->nameStr());
+                    auto dstNew = crs::CompoundCRS::create(
+                        properties,
+                        {NN_NO_CHECK(compDst0BoundCrs), componentsDst[1]});
+                    auto tmpRes = createOperations(srcNew, dstNew, context);
+                    for (const auto &op : tmpRes) {
+                        auto opClone = op->shallowClone();
+                        setCRSs(opClone.get(), sourceCRS, targetCRS);
+                        res.emplace_back(opClone);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
     if (!componentsDst.empty()) {
         auto compDst0BoundCrs =
             dynamic_cast<crs::BoundCRS *>(componentsDst[0].get());
