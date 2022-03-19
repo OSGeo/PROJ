@@ -10107,6 +10107,17 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
             VerticalCRS::create(createMapWithUnknownName(), vdatum,
                                 VerticalCS::createGravityRelatedHeight(unit));
 
+        auto geogCRSOfCompoundCRS = crs->extractGeographicCRS();
+        auto geogCRS =
+            geogCRSOfCompoundCRS &&
+                    geogCRSOfCompoundCRS->primeMeridian()
+                            ->longitude()
+                            .getSIValue() == 0 &&
+                    geogCRSOfCompoundCRS->coordinateSystem()
+                            ->axisList()[0]
+                            ->unit() == UnitOfMeasure::DEGREE
+                ? geogCRSOfCompoundCRS->promoteTo3D(std::string(), nullptr)
+                : GeographicCRS::EPSG_4979;
         auto transformation =
             Transformation::createGravityRelatedHeightToGeographic3D(
                 PropertyMap().set(IdentifiedObject::NAME_KEY,
@@ -10114,10 +10125,9 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
                 VerticalCRS::create(createMapWithUnknownName(), vdatum,
                                     VerticalCS::createGravityRelatedHeight(
                                         common::UnitOfMeasure::METRE)),
-                GeographicCRS::EPSG_4979, nullptr, geoidgrids,
+                geogCRS, nullptr, geoidgrids,
                 std::vector<PositionalAccuracyNNPtr>());
-        auto boundvcrs =
-            BoundCRS::create(vcrs, GeographicCRS::EPSG_4979, transformation);
+        auto boundvcrs = BoundCRS::create(vcrs, geogCRS, transformation);
 
         crs = CompoundCRS::create(createMapWithUnknownName(),
                                   std::vector<CRSNNPtr>{crs, boundvcrs});
