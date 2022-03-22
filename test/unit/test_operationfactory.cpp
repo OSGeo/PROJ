@@ -4230,6 +4230,53 @@ TEST(
 
 TEST(
     operation,
+    compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert_same_ellsp_but_different_towgs84_different_geoidgrids) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +towgs84=1,2,3 +geoidgrids=@foo.gtx "
+        "+type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=longlat +ellps=GRS80 +towgs84=4,5,6 +geoidgrids=@bar.gtx "
+        "+type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto srcGeog = src->extractGeographicCRS();
+    ASSERT_TRUE(srcGeog != nullptr);
+    ASSERT_TRUE(srcGeog->datum() != nullptr);
+    auto dstGeog = dst->extractGeographicCRS();
+    ASSERT_TRUE(dstGeog != nullptr);
+    ASSERT_TRUE(dstGeog->datum() != nullptr);
+    EXPECT_FALSE(srcGeog->datum()->isEquivalentTo(
+        dstGeog->datum().get(), IComparable::Criterion::EQUIVALENT));
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+    ASSERT_TRUE(op != nullptr);
+    // Check there's no proj=push +v_1 +v_2
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=GRS80 "
+              "+step +proj=helmert +x=1 +y=2 +z=3 "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=vgridshift +grids=@foo.gtx +multiplier=1 "
+              "+step +inv +proj=vgridshift +grids=@bar.gtx +multiplier=1 "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +proj=helmert +x=-4 +y=-5 +z=-6 "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
     compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert_WKT1_same_geoidgrids_context) {
     auto objSrc = WKTParser().createFromWKT(
         "COMPD_CS[\"NAD83 / Alabama West + NAVD88 height - Geoid12B "
