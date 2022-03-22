@@ -1829,7 +1829,7 @@ INSERT INTO "extent" VALUES('EPSG','2849','Sweden - 2.5 gon E','Sweden - commune
 INSERT INTO "extent" VALUES('EPSG','2850','Sweden - 5 gon E','Sweden - east of approximately 21°26''E. See information source for map.',65.24,68.58,21.34,24.17,0);
 INSERT INTO "extent" VALUES('EPSG','2851','Iceland - mainland west of 24°W','Iceland - mainland west of 24°W.',64.71,65.85,-24.66,-24.0,0);
 INSERT INTO "extent" VALUES('EPSG','2852','Iceland - mainland 24°W to 18°W','Iceland - mainland between 24°W and 18°W.',63.34,66.52,-24.0,-18.0,0);
-INSERT INTO "extent" VALUES('EPSG','2853','Iceland - mainland east of 18°W','Iceland - mainland east of 18°W.',-63.45,66.59,-18.0,-13.38,0);
+INSERT INTO "extent" VALUES('EPSG','2853','Iceland - mainland east of 18°W','Iceland - mainland east of 18°W.',63.45,66.59,-18.0,-13.38,0);
 INSERT INTO "extent" VALUES('EPSG','2854','Europe - 36°W to 30°W','Europe - between 36°W and 30°W.',39.3,39.85,-36.0,-30.0,1);
 INSERT INTO "extent" VALUES('EPSG','2855','Europe - 30°W to 24°W','Europe - between 30°W and 24°W.',25.1,65.8,-30.0,-24.0,1);
 INSERT INTO "extent" VALUES('EPSG','2856','Europe - 24°W to 18°W','Europe - between 24°W and 18°W.',27.6,66.5,-24.0,-18.0,1);
