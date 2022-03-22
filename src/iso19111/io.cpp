@@ -9200,13 +9200,22 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
     PrimeMeridianNNPtr pm(buildPrimeMeridian(step));
     PropertyMap grfMap;
 
+    const auto &nadgrids = getParamValue(step, "nadgrids");
+    const auto &towgs84 = getParamValue(step, "towgs84");
+    std::string datumNameSuffix;
+    if (!nadgrids.empty()) {
+        datumNameSuffix = " using nadgrids=" + nadgrids;
+    } else if (!towgs84.empty()) {
+        datumNameSuffix = " using towgs84=" + towgs84;
+    }
+
     // It is arguable that we allow the prime meridian of a datum defined by
     // its name to be overridden, but this is found at least in a regression
     // test
     // of GDAL. So let's keep the ellipsoid part of the datum in that case and
     // use the specified prime meridian.
     const auto overridePmIfNeeded =
-        [&pm](const GeodeticReferenceFrameNNPtr &grf) {
+        [&pm, &datumNameSuffix](const GeodeticReferenceFrameNNPtr &grf) {
             if (pm->_isEquivalentTo(PrimeMeridian::GREENWICH.get())) {
                 return grf;
             } else {
@@ -9214,7 +9223,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                     PropertyMap().set(IdentifiedObject::NAME_KEY,
                                       "Unknown based on " +
                                           grf->ellipsoid()->nameStr() +
-                                          " ellipsoid"),
+                                          " ellipsoid" + datumNameSuffix),
                     grf->ellipsoid(), grf->anchorDefinition(), pm);
             }
         };
@@ -9231,7 +9240,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                                                  Length(R), guessBodyName(R));
         return GeodeticReferenceFrame::create(
             grfMap.set(IdentifiedObject::NAME_KEY,
-                       title.empty() ? "unknown" : title.c_str()),
+                       title.empty() ? "unknown" + datumNameSuffix : title),
             ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
@@ -9280,21 +9289,23 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
     }
 
     else if (!ellpsStr.empty()) {
-        auto l_datum = [&ellpsStr, &title, &grfMap, &optionalEmptyString,
-                        &pm]() {
+        auto l_datum = [&ellpsStr, &title, &grfMap, &optionalEmptyString, &pm,
+                        &datumNameSuffix]() {
             if (ellpsStr == "WGS84") {
                 return GeodeticReferenceFrame::create(
                     grfMap.set(IdentifiedObject::NAME_KEY,
                                title.empty()
-                                   ? "Unknown based on WGS84 ellipsoid"
-                                   : title.c_str()),
+                                   ? "Unknown based on WGS84 ellipsoid" +
+                                         datumNameSuffix
+                                   : title),
                     Ellipsoid::WGS84, optionalEmptyString, pm);
             } else if (ellpsStr == "GRS80") {
                 return GeodeticReferenceFrame::create(
                     grfMap.set(IdentifiedObject::NAME_KEY,
                                title.empty()
-                                   ? "Unknown based on GRS80 ellipsoid"
-                                   : title.c_str()),
+                                   ? "Unknown based on GRS80 ellipsoid" +
+                                         datumNameSuffix
+                                   : title),
                     Ellipsoid::GRS1980, optionalEmptyString, pm);
             } else {
                 auto proj_ellps = proj_list_ellps();
@@ -9330,7 +9341,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                                        title.empty()
                                            ? std::string("Unknown based on ") +
                                                  proj_ellps[i].name +
-                                                 " ellipsoid"
+                                                 " ellipsoid" + datumNameSuffix
                                            : title),
                             NN_NO_CHECK(ellipsoid), optionalEmptyString, pm);
                     }
@@ -9357,6 +9368,15 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
         }
     }
 
+    const auto createGRF = [&grfMap, &title, &optionalEmptyString,
+                            &datumNameSuffix,
+                            &pm](const EllipsoidNNPtr &ellipsoid) {
+        return GeodeticReferenceFrame::create(
+            grfMap.set(IdentifiedObject::NAME_KEY,
+                       title.empty() ? "unknown" + datumNameSuffix : title),
+            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+    };
+
     if (a > 0 && (b > 0 || !bStr.empty())) {
         if (!bStr.empty()) {
             try {
@@ -9369,10 +9389,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
             Ellipsoid::createTwoAxis(createMapWithUnknownName(), Length(a),
                                      Length(b), guessBodyName(a))
                 ->identify();
-        return GeodeticReferenceFrame::create(
-            grfMap.set(IdentifiedObject::NAME_KEY,
-                       title.empty() ? "unknown" : title.c_str()),
-            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+        return createGRF(ellipsoid);
     }
 
     else if (a > 0 && (rf >= 0 || !rfStr.empty())) {
@@ -9387,10 +9404,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                              createMapWithUnknownName(), Length(a), Scale(rf),
                              guessBodyName(a))
                              ->identify();
-        return GeodeticReferenceFrame::create(
-            grfMap.set(IdentifiedObject::NAME_KEY,
-                       title.empty() ? "unknown" : title.c_str()),
-            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+        return createGRF(ellipsoid);
     }
 
     else if (a > 0 && !fStr.empty()) {
@@ -9404,10 +9418,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                              createMapWithUnknownName(), Length(a),
                              Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
                              ->identify();
-        return GeodeticReferenceFrame::create(
-            grfMap.set(IdentifiedObject::NAME_KEY,
-                       title.empty() ? "unknown" : title.c_str()),
-            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+        return createGRF(ellipsoid);
     }
 
     else if (a > 0 && !eStr.empty()) {
@@ -9423,10 +9434,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                              createMapWithUnknownName(), Length(a),
                              Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
                              ->identify();
-        return GeodeticReferenceFrame::create(
-            grfMap.set(IdentifiedObject::NAME_KEY,
-                       title.empty() ? "unknown" : title.c_str()),
-            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+        return createGRF(ellipsoid);
     }
 
     else if (a > 0 && !esStr.empty()) {
@@ -9441,10 +9449,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
                              createMapWithUnknownName(), Length(a),
                              Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
                              ->identify();
-        return GeodeticReferenceFrame::create(
-            grfMap.set(IdentifiedObject::NAME_KEY,
-                       title.empty() ? "unknown" : title.c_str()),
-            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+        return createGRF(ellipsoid);
     }
 
     // If only a is specified, create a sphere
@@ -9452,10 +9457,7 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
         esStr.empty()) {
         auto ellipsoid = Ellipsoid::createSphere(createMapWithUnknownName(),
                                                  Length(a), guessBodyName(a));
-        return GeodeticReferenceFrame::create(
-            grfMap.set(IdentifiedObject::NAME_KEY,
-                       title.empty() ? "unknown" : title.c_str()),
-            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
+        return createGRF(ellipsoid);
     }
 
     if (!bStr.empty() && aStr.empty()) {
@@ -9833,8 +9835,9 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
 
     const auto &geoidgrids = getParamValue(step, "geoidgrids");
     if (!geoidgrids.empty()) {
-        auto vdatum =
-            VerticalReferenceFrame::create(createMapWithUnknownName());
+        auto vdatum = VerticalReferenceFrame::create(
+            PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                              "unknown using geoidgrids=" + geoidgrids));
 
         const UnitOfMeasure unit = buildUnit(step, "vunits", "vto_meter");
 
