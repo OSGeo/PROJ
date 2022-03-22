@@ -133,7 +133,7 @@ INSERT INTO "usage" VALUES('EPSG','13228','vertical_datum','EPSG','1176','EPSG',
 INSERT INTO "vertical_datum" VALUES('EPSG','1177','St. Helena Vertical Datum 2015',NULL,'2015-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13229','vertical_datum','EPSG','1177','EPSG','3183','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1190','Landshaedarkerfi Islands 2004',NULL,'2004-08-07',NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','13242','vertical_datum','EPSG','1190','EPSG','3262','EPSG','1180');
+INSERT INTO "usage" VALUES('EPSG','13242','vertical_datum','EPSG','1190','EPSG','4662','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1199','Greenland Vertical Reference 2000',NULL,'2000-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13251','vertical_datum','EPSG','1199','EPSG','4461','EPSG','1153');
 INSERT INTO "vertical_datum" VALUES('EPSG','1200','Greenland Vertical Reference 2016',NULL,'2016-01-01',NULL,NULL,NULL,0);

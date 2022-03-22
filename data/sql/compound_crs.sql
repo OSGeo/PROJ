@@ -752,3 +752,15 @@ INSERT INTO "compound_crs" VALUES('EPSG','9935','DB_REF2016 zone 5',NULL,'EPSG',
 INSERT INTO "usage" VALUES('EPSG','17296','compound_crs','EPSG','9935','EPSG','3998','EPSG','1141');
 INSERT INTO "compound_crs" VALUES('EPSG','9944','EBBWV14 Grid + ODN height',NULL,'EPSG','9943','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','17350','compound_crs','EPSG','9944','EPSG','4661','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','9948','ISN93 + ISH2004 height ',NULL,'EPSG','4659','EPSG','8089',0);
+INSERT INTO "usage" VALUES('EPSG','17415','compound_crs','EPSG','9948','EPSG','4662','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','9949','ISN2004 + ISH2004 height',NULL,'EPSG','5324','EPSG','8089',0);
+INSERT INTO "usage" VALUES('EPSG','17390','compound_crs','EPSG','9949','EPSG','4662','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','9950','ISN2016 + ISH2004 height',NULL,'EPSG','8086','EPSG','8089',0);
+INSERT INTO "usage" VALUES('EPSG','17381','compound_crs','EPSG','9950','EPSG','4662','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','9951','ISN93 / Lambert 1993 + ISH2004 height',NULL,'EPSG','3057','EPSG','8089',0);
+INSERT INTO "usage" VALUES('EPSG','17382','compound_crs','EPSG','9951','EPSG','4662','EPSG','1056');
+INSERT INTO "compound_crs" VALUES('EPSG','9952','ISN2004 / Lambert 2004 + ISH2004 height',NULL,'EPSG','5325','EPSG','8089',0);
+INSERT INTO "usage" VALUES('EPSG','17383','compound_crs','EPSG','9952','EPSG','4662','EPSG','1056');
+INSERT INTO "compound_crs" VALUES('EPSG','9953','ISN2016 / Lambert 2016 + ISH2004 height',NULL,'EPSG','8088','EPSG','8089',0);
+INSERT INTO "usage" VALUES('EPSG','17384','compound_crs','EPSG','9953','EPSG','4662','EPSG','1056');

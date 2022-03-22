@@ -687,7 +687,7 @@ INSERT INTO "extent" VALUES('EPSG','1707','Austria - 11°50''E to 14°50''E','Au
 INSERT INTO "extent" VALUES('EPSG','1708','Austria - east of 14°50''E','Austria east of 14°50''E of Greenwich (32°30''E of Ferro).',46.56,49.02,14.83,17.17,0);
 INSERT INTO "extent" VALUES('EPSG','1709','Europe - former Yugoslavia onshore west of 16.5°E','Bosnia and Herzegovina - west of 16°30''E; Croatia - onshore west of 16°30''E; Slovenia - onshore.',42.95,46.88,13.38,16.5,0);
 INSERT INTO "extent" VALUES('EPSG','1710','Europe - former Yugoslavia onshore 16.5°E to 19.5°E','Bosnia and Herzegovina - between 16°30''E and 19°30''E; Croatia - onshore east of 16°30''E; Montenegro - onshore west of 19°30''E; Serbia - west of 19°30''E.',41.79,46.55,16.5,19.51,0);
-INSERT INTO "extent" VALUES('EPSG','1711','Europe - former Yugoslavia onshore 19.5°E to 22.5°E','Bosnia and Herzegovina - east of 19°30''E; Kosovo; Montenegro - east of 19°30''E; North Macedonia - west of 22°30''E; Serbia - between 19°30''E and 22°30''E.',40.85,46.19,19.5,22.51,0);
+INSERT INTO "extent" VALUES('EPSG','1711','Europe - former Yugoslavia onshore 19.5°E to 22.5°E','Bosnia and Herzegovina - east of 19°30''E; Kosovo; Montenegro - east of 19°30''E; Serbia - between 19°30''E and 22°30''E.',41.85,46.18,19.5,22.5,0);
 INSERT INTO "extent" VALUES('EPSG','1712','Europe - former Yugoslavia onshore east of 22.5°E','North Macedonia - east of 22°30''E; Serbia - east of 22°30''E.',41.11,44.7,22.5,23.04,0);
 INSERT INTO "extent" VALUES('EPSG','1713','Nigeria - east of 10.5°E','Nigeria east of 10°30''E.',6.43,13.72,10.49,14.65,0);
 INSERT INTO "extent" VALUES('EPSG','1714','Nigeria - 6.5°E to 10.5°E','Nigeria between 6°30''E and 10°30''E, onshore and offshore shelf.',3.57,13.53,6.5,10.51,0);
@@ -1827,9 +1827,9 @@ INSERT INTO "extent" VALUES('EPSG','2847','Sweden - 2.5 gon W','Sweden - commune
 INSERT INTO "extent" VALUES('EPSG','2848','Sweden - 0 gon','Sweden - communes between approximately 16°55''E and 19°10''E; Gotland. See information source for map.',56.86,68.54,16.08,20.22,0);
 INSERT INTO "extent" VALUES('EPSG','2849','Sweden - 2.5 gon E','Sweden - communes between approximately 19°10''E and 21°25''E. See information source for map.',63.37,69.07,18.4,22.2,0);
 INSERT INTO "extent" VALUES('EPSG','2850','Sweden - 5 gon E','Sweden - east of approximately 21°26''E. See information source for map.',65.24,68.58,21.34,24.17,0);
-INSERT INTO "extent" VALUES('EPSG','2851','Iceland - onshore west of 24°W','Iceland - onshore west of 24°W.',64.71,65.86,-24.66,-24.0,0);
-INSERT INTO "extent" VALUES('EPSG','2852','Iceland - onshore 24°W to 18°W','Iceland - onshore between 24°W and 18°W.',63.34,66.52,-24.0,-18.0,0);
-INSERT INTO "extent" VALUES('EPSG','2853','Iceland - onshore east of 18°W','Iceland - onshore east of 18°W.',63.45,66.59,-18.0,-13.38,0);
+INSERT INTO "extent" VALUES('EPSG','2851','Iceland - mainland west of 24°W','Iceland - mainland west of 24°W.',64.71,65.85,-24.66,-24.0,0);
+INSERT INTO "extent" VALUES('EPSG','2852','Iceland - mainland 24°W to 18°W','Iceland - mainland between 24°W and 18°W.',63.34,66.52,-24.0,-18.0,0);
+INSERT INTO "extent" VALUES('EPSG','2853','Iceland - mainland east of 18°W','Iceland - mainland east of 18°W.',-63.45,66.59,-18.0,-13.38,0);
 INSERT INTO "extent" VALUES('EPSG','2854','Europe - 36°W to 30°W','Europe - between 36°W and 30°W.',39.3,39.85,-36.0,-30.0,1);
 INSERT INTO "extent" VALUES('EPSG','2855','Europe - 30°W to 24°W','Europe - between 30°W and 24°W.',25.1,65.8,-30.0,-24.0,1);
 INSERT INTO "extent" VALUES('EPSG','2856','Europe - 24°W to 18°W','Europe - between 24°W and 18°W.',27.6,66.5,-24.0,-18.0,1);
@@ -2238,7 +2238,7 @@ INSERT INTO "extent" VALUES('EPSG','3258','Guinea-Bissau - onshore','Guinea-Biss
 INSERT INTO "extent" VALUES('EPSG','3259','Guyana - onshore','Guyana - onshore.',1.18,8.58,-61.39,-56.47,0);
 INSERT INTO "extent" VALUES('EPSG','3260','Haiti - onshore','Haiti - onshore.',17.97,20.15,-74.52,-71.62,0);
 INSERT INTO "extent" VALUES('EPSG','3261','Honduras - onshore','Honduras - onshore.',12.98,16.49,-89.36,-83.08,0);
-INSERT INTO "extent" VALUES('EPSG','3262','Iceland - onshore','Iceland - onshore.',63.34,66.59,-24.66,-13.38,0);
+INSERT INTO "extent" VALUES('EPSG','3262','Iceland - mainland','Iceland - mainland.',63.34,66.59,-24.66,-13.38,0);
 INSERT INTO "extent" VALUES('EPSG','3263','Japan - onshore mainland','Japan - onshore mainland - Hokkaido, Honshu, Shikoku, Kyushu.',30.94,45.54,129.3,145.87,0);
 INSERT INTO "extent" VALUES('EPSG','3264','Kenya - onshore','Kenya - onshore.',-4.72,4.63,33.9,41.91,0);
 INSERT INTO "extent" VALUES('EPSG','3265','Korea, Democratic People''s Republic of (North Korea) - onshore','Democratic People''s Republic of Korea (North Korea) - onshore.',37.62,43.01,124.27,130.75,0);
@@ -3637,3 +3637,4 @@ INSERT INTO "extent" VALUES('EPSG','4658','St Barthelemy','St Barthélemy - onsh
 INSERT INTO "extent" VALUES('EPSG','4659','Italy - mainland west of 16°E','Italy - mainland northwest of approximately 16°E, including San Marino and Vatican City State.',39.65,47.09,6.62,16.52,0);
 INSERT INTO "extent" VALUES('EPSG','4660','Germany - Hesse','Germany - Hesse.',49.39,51.66,7.77,10.24,0);
 INSERT INTO "extent" VALUES('EPSG','4661','UK - Newport to Ebbw Vale','United Kingdom (UK) - on or related to the rail route from Newport (Park Junction) to Ebbw Vale.',51.5,51.85,-3.3,-2.89,0);
+INSERT INTO "extent" VALUES('EPSG','4662','Iceland - onshore','Iceland - onshore.',63.24,66.62,-24.66,-13.38,0);
