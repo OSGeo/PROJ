@@ -99,6 +99,8 @@ struct horner {
     int    order;    /* maximum degree of polynomium */
     int    coefs;    /* number of coefficients for each polynomium  */
     double range;    /* radius of the region of validity */
+    int    has_only_real_fwd; /* in case of real coefficients, has only fwd, inverse is done by gauss-newton iteration */
+    double inverse_tolerance; /* in the units of the destination coords, specifies when to stop iterating if has_only_read_fwd and direction is reverse */
 
     double *fwd_u;   /* coefficients for the forward transformations */
     double *fwd_v;   /* i.e. latitude/longitude to northing/easting  */
@@ -244,6 +246,7 @@ summing the tiny high order elements first.
     sz    =  horner_number_of_coefficients(transformation->order);
     range =  transformation->range;
 
+    const bool iterative_inverse = direction == PJ_INV && transformation->has_only_real_fwd;
 
     if (direction==PJ_FWD) {                              /* forward */
         tcx = transformation->fwd_u + sz;
@@ -251,17 +254,73 @@ summing the tiny high order elements first.
         e   = position.u - transformation->fwd_origin->u;
         n   = position.v - transformation->fwd_origin->v;
     } else {                                              /* inverse */
-        tcx = transformation->inv_u + sz;
-        tcy = transformation->inv_v + sz;
-        e   = position.u - transformation->inv_origin->u;
-        n   = position.v - transformation->inv_origin->v;
+        if (!iterative_inverse) {
+            tcx = transformation->inv_u + sz;
+            tcy = transformation->inv_v + sz;
+            e   = position.u - transformation->inv_origin->u;
+            n   = position.v - transformation->inv_origin->v;
+        } else {
+            // in this case fwd_origin needs to be added in the end
+            e = position.u;
+            n = position.v;
+        }
     }
 
     if ((fabs(n) > range) || (fabs(e) > range)) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return uv_error;
+    } else if (iterative_inverse) {
+        /*
+         * solve iteratively
+         *
+         * | E |   | u00 |   | u01 + u02*x + ...         ' u10 + u11*x + u20*y + ... | | x |
+         * |   | = |     | + |-------------------------- ' --------------------------| |   |
+         * | N |   | v00 |   | v10 + v11*y + v20*x + ... ' v01 + v02*y + ...         | | y |
+         *
+         * | x |   | Ma ' Mb |-1 | E-u00 |
+         * |   | = |-------- |   |       |
+         * | y |   | Mc ' Md |   | N-v00 |
+         */
+        const int order = transformation->order;
+        const double tol = transformation->inverse_tolerance;
+        double de = e - transformation->fwd_u[0];
+        double dn = n - transformation->fwd_v[0];
+        double x0 = 0.0;
+        double y0 = 0.0;
+        int loops = 32; // usually converges really fast (1-2 loops)
+        while (loops-- > 0) {
+            double Ma = 0.0;
+            double Mb = 0.0;
+            double Mc = 0.0;
+            double Md = 0.0;
+            tcx = transformation->fwd_u;
+            tcy = transformation->fwd_v;
+            for (int i = 0; i <= order; ++i) {
+                for (int j = 0; j <= (order-i); ++j) {
+                    if (i == 0 && j == 0) {
+                        // do nothing
+                    } else if (i == 0) {
+                        Ma += (*tcx) * pow(x0, j-1);
+                        Md += (*tcy) * pow(y0, j-1);
+                    } else {
+                        Mb += (*tcx) * pow(y0, i-1) * pow(x0, j);
+                        Mc += (*tcy) * pow(x0, i-1) * pow(y0, j);
+                    }
+                    tcx++;
+                    tcy++;
+                }
+            }
+            double idet = 1.0 / (Ma*Md - Mb*Mc);
+            double x = idet * (Md*de - Mb*dn);
+            double y = idet * (Ma*dn - Mc*de);
+            bool ok = (fabs(x-x0) < tol) && (fabs(y-y0) < tol);
+            x0 = x;
+            y0 = y;
+            if (ok) break;
+        }
+        position.u = x0 + transformation->fwd_origin->u;
+        position.v = y0 + transformation->fwd_origin->v;
     }
-
     /* The melody of this block is straight out of the great Engsager/Poder songbook */
     else {
         int g =  transformation->order;
@@ -443,6 +502,7 @@ static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
 PJ *PROJECTION(horner) {
 /*********************************************************************/
     int   degree = 0, n, complex_polynomia = 0;
+    int has_only_real_fwd = 0;
     HORNER *Q;
     P->fwd4d  = horner_forward_4d;
     P->inv4d  = horner_reverse_4d;
@@ -473,6 +533,14 @@ PJ *PROJECTION(horner) {
     if (Q == nullptr)
         return horner_freeup (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
+
+    if (!complex_polynomia) {
+        has_only_real_fwd =
+            !pj_param_exists(P->params, "inv_u") &&
+            !pj_param_exists(P->params, "inv_v") &&
+            !pj_param_exists(P->params, "inv_origin");
+    }
+    Q->has_only_real_fwd = has_only_real_fwd;
 
     if (complex_polynomia) {
         /* Westings and/or southings? */
@@ -506,12 +574,12 @@ PJ *PROJECTION(horner) {
             proj_log_error (P, _("missing fwd_v"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
-        if (0==parse_coefs (P, Q->inv_u, "inv_u", n))
+        if (!has_only_real_fwd && 0==parse_coefs (P, Q->inv_u, "inv_u", n))
         {
             proj_log_error (P, _("missing inv_u"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
-        if (0==parse_coefs (P, Q->inv_v, "inv_v", n))
+        if (!has_only_real_fwd && 0==parse_coefs (P, Q->inv_v, "inv_v", n))
         {
             proj_log_error (P, _("missing inv_v"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
@@ -523,13 +591,15 @@ PJ *PROJECTION(horner) {
         proj_log_error (P, _("missing fwd_origin"));
         return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
-    if (0==parse_coefs (P, (double *)(Q->inv_origin), "inv_origin", 2))
+    if (!has_only_real_fwd && 0==parse_coefs (P, (double *)(Q->inv_origin), "inv_origin", 2))
     {
         proj_log_error (P, _("missing inv_origin"));
         return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
     if (0==parse_coefs (P, &Q->range, "range", 1))
         Q->range = 500000;
+    if (0==parse_coefs (P, &Q->inverse_tolerance, "inv_tolerance", 1))
+        Q->inverse_tolerance = 0.001;
 
     return P;
 }

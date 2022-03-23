@@ -763,6 +763,80 @@ TEST(gie, horner_selftest) {
     proj_destroy(P);
 }
 
+static const char tc32_utm32_fwd_only[] = {
+    " +proj=horner"
+    " +ellps=intl"
+    " +range=10000000"
+    " +fwd_origin=877605.269066,6125810.306769"
+    " +deg=4"
+    " +fwd_v=6.1258112678e+06,9.9999971567e-01,1.5372750011e-10,5.9300860915e-"
+    "15,2.2609497633e-19,4.3188227445e-05,2.8225130416e-10,7.8740007114e-16,-1."
+    "7453997279e-19,1.6877465415e-10,-1.1234649773e-14,-1.7042333358e-18,-7."
+    "9303467953e-15,-5.2906832535e-19,3.9984284847e-19"
+    " +fwd_u=8.7760574982e+05,9.9999752475e-01,2.8817299305e-10,5.5641310680e-"
+    "15,-1.5544700949e-18,-4.1357045890e-05,4.2106213519e-11,2.8525551629e-14,-"
+    "1.9107771273e-18,3.3615590093e-10,2.4380247154e-14,-2.0241230315e-18,1."
+    "2429019719e-15,5.3886155968e-19,-1.0167505000e-18" };
+
+static const char hatt_to_ggrs[] = {
+    " +proj=horner"
+    " +ellps=bessel"
+    " +fwd_origin=0.0, 0.0"
+    " +deg=2"
+    " +range=10000000"
+    " +fwd_u=370552.68, 0.9997155, -1.08e-09, 0.0175123, 2.04e-09, 1.63e-09"
+    " +fwd_v=4511927.23, 0.9996979, 5.60e-10, -0.0174755, -1.65e-09, -6.50e-10" };
+
+TEST(gie, horner_only_fwd_selftest) {
+
+    {
+        PJ *P = proj_create(PJ_DEFAULT_CTX, tc32_utm32_fwd_only);
+        ASSERT_TRUE(P != nullptr);
+
+        PJ_COORD a = proj_coord(0, 0, 0, 0);
+        a.uv.v = 6125305.4245;
+        a.uv.u = 878354.8539;
+
+        /* Check roundtrip precision for 1 iteration each way, starting in forward
+         * direction */
+        double dist = proj_roundtrip(P, PJ_FWD, 1, &a);
+        EXPECT_LE(dist, 0.01);
+
+        proj_destroy(P);
+    }
+
+    {
+        PJ_COORD a;
+        a = proj_coord(0, 0, 0, 0);
+        a.xy.x = -10157.950;
+        a.xy.y = -21121.093;
+        PJ_COORD c;
+        c = proj_coord(0, 0, 0, 0);
+        c.enu.e = 360028.794;
+        c.enu.n = 4490989.862;
+
+        PJ *P = proj_create(PJ_DEFAULT_CTX, hatt_to_ggrs);
+        ASSERT_TRUE(P != nullptr);
+
+        /* Forward projection */
+        PJ_COORD b = proj_trans(P, PJ_FWD, a);
+        double dist = proj_xy_dist(b, c);
+        EXPECT_LE(dist, 0.001);
+
+        /* Inverse projection */
+        b = proj_trans(P, PJ_INV, c);
+        dist = proj_xy_dist(b, a);
+        EXPECT_LE(dist, 0.001);
+
+        /* Check roundtrip precision for 1 iteration each way, starting in forward
+         * direction */
+        dist = proj_roundtrip(P, PJ_FWD, 1, &a);
+        EXPECT_LE(dist, 0.01);
+
+        proj_destroy(P);
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 TEST(gie, proj_create_crs_to_crs_PULKOVO42_ETRS89) {
