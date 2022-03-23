@@ -879,4 +879,30 @@ expect      5.875      55.375      0
 -------------------------------------------------------------------------------
 
 
+
+-------------------------------------------------------------------------------
+# Test inverse pipeline with noninvertible affine transformation. We define an
+# affine transformation that's not invertible and omit the inverse path. We
+# also define a step that handles the inverse and omits the forward path.
+#
+# Because the first affine matrix is not invertible, we specify omit_inv to
+# disable executing in reverse.
+#
+# Now we need another affine to actually make the inverse operation.
+#
+# The second affine has omit_fwd and inv. We don't execute this when running
+# forwards. When doing inverse, we call the inverse of the inverted affine which
+# means that we actually do the forward of the specified affine. As it happens,
+# the forward of this affine actually undoes what the first affine did in forward
+# path.
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+operation   proj=pipeline step proj=affine omit_inv s11=2 s22=0 s33=0 step proj=affine omit_fwd inv s11=0.5 s22=0 s33=0
+-------------------------------------------------------------------------------
+
+accept      10 0 0
+expect      20 0 0
+roundtrip
+
 </gie-strict>
