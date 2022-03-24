@@ -283,7 +283,8 @@ summing the tiny high order elements first.
         double x0 = 0.0;
         double y0 = 0.0;
         int loops = 32; // usually converges really fast (1-2 loops)
-        while (loops-- > 0) {
+        bool converged = false;
+        while (loops-- > 0 && !converged) {
             double Ma = 0.0;
             double Mb = 0.0;
             double Mc = 0.0;
@@ -309,13 +310,19 @@ summing the tiny high order elements first.
             double idet = 1.0 / (Ma*Md - Mb*Mc);
             double x = idet * (Md*de - Mb*dn);
             double y = idet * (Ma*dn - Mc*de);
-            bool ok = (fabs(x-x0) < tol) && (fabs(y-y0) < tol);
+            converged = (fabs(x-x0) < tol) && (fabs(y-y0) < tol);
             x0 = x;
             y0 = y;
-            if (ok) break;
         }
-        position.u = x0 + transformation->fwd_origin->u;
-        position.v = y0 + transformation->fwd_origin->v;
+        // if loops have been exhausted and we have not converged yet,
+        // we are never going to converge
+        if (!converged) {
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM);
+            return uv_error;
+        } else {
+            position.u = x0 + transformation->fwd_origin->u;
+            position.v = y0 + transformation->fwd_origin->v;
+        }
     }
     /* The melody of this block is straight out of the great Engsager/Poder songbook */
     else {
