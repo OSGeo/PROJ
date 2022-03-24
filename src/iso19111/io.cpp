@@ -1408,6 +1408,10 @@ struct WKTParser::Private {
 
     CRSPtr buildCRS(const WKTNodeNNPtr &node);
 
+    CRSPtr dealWithEPSGCodeForInterpolationCRSParameter(
+        std::vector<OperationParameterNNPtr> &parameters,
+        std::vector<ParameterValueNNPtr> &values);
+
     TransformationNNPtr buildCoordinateOperation(const WKTNodeNNPtr &node);
 
     ConcatenatedOperationNNPtr
@@ -3261,6 +3265,37 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
 
 // ---------------------------------------------------------------------------
 
+CRSPtr WKTParser::Private::dealWithEPSGCodeForInterpolationCRSParameter(
+    std::vector<OperationParameterNNPtr> &parameters,
+    std::vector<ParameterValueNNPtr> &values) {
+    // Transform EPSG hacky PARAMETER["EPSG code for Interpolation CRS",
+    // crs_epsg_code] into proper interpolation CRS
+    if (dbContext_ != nullptr) {
+        for (size_t i = 0; i < parameters.size(); ++i) {
+            if (parameters[i]->nameStr() ==
+                EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS) {
+                const int code =
+                    static_cast<int>(values[i]->value().getSIValue());
+                try {
+                    auto authFactory = AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext_), Identifier::EPSG);
+                    auto interpolationCRS =
+                        authFactory
+                            ->createGeographicCRS(internal::toString(code))
+                            .as_nullable();
+                    parameters.erase(parameters.begin() + i);
+                    values.erase(values.begin() + i);
+                    return interpolationCRS;
+                } catch (const util::Exception &) {
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
 TransformationNNPtr
 WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
@@ -3304,6 +3339,10 @@ WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
     auto defaultAngularUnit = UnitOfMeasure::NONE;
     consumeParameters(node, false, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
+
+    if (interpolationCRS == nullptr)
+        interpolationCRS =
+            dealWithEPSGCodeForInterpolationCRSParameter(parameters, values);
 
     std::vector<PositionalAccuracyNNPtr> accuracies;
     auto &accuracyNode = nodeP->lookForChild(WKTConstants::OPERATIONACCURACY);
@@ -4708,11 +4747,14 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
     consumeParameters(abridgedNode, true, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
+    auto interpolationCRS =
+        dealWithEPSGCodeForInterpolationCRSParameter(parameters, values);
+
     const auto sourceTransformationCRS(
         createBoundCRSSourceTransformationCRS(sourceCRS, targetCRS));
     auto transformation = Transformation::create(
         buildProperties(abridgedNode), sourceTransformationCRS,
-        NN_NO_CHECK(targetCRS), nullptr, buildProperties(methodNode),
+        NN_NO_CHECK(targetCRS), interpolationCRS, buildProperties(methodNode),
         parameters, values, std::vector<PositionalAccuracyNNPtr>());
 
     return BoundCRS::create(buildProperties(node, false, false),

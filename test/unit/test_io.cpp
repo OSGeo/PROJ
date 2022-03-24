@@ -3204,6 +3204,102 @@ TEST(wkt_parse, COORDINATEOPERATION) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, COORDINATEOPERATION_with_interpolation_as_parameter) {
+    auto wkt =
+        "COORDINATEOPERATION[\"SHGD2015 to SHGD2015 + SHVD2015 height (1)\",\n"
+        "    VERSION[\"ENRD-Shn Hel\"],\n"
+        "    SOURCECRS[\n"
+        "        GEOGCRS[\"SHGD2015\",\n"
+        "            DATUM[\"St. Helena Geodetic Datum 2015\",\n"
+        "                ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"latitude\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"longitude\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",7885]]],\n"
+        "    TARGETCRS[\n"
+        "        COMPOUNDCRS[\"SHMG2015 + SHVD2015 height\",\n"
+        "            PROJCRS[\"SHMG2015\",\n"
+        "                BASEGEOGCRS[\"SHGD2015\",\n"
+        "                    DATUM[\"St. Helena Geodetic Datum 2015\",\n"
+        "                        ELLIPSOID[\"GRS "
+        "1980\",6378137,298.257222101,\n"
+        "                            LENGTHUNIT[\"metre\",1]]],\n"
+        "                    PRIMEM[\"Greenwich\",0,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                    ID[\"EPSG\",7886]],\n"
+        "                CONVERSION[\"UTM zone 30S\",\n"
+        "                    METHOD[\"Transverse Mercator\",\n"
+        "                        ID[\"EPSG\",9807]],\n"
+        "                    PARAMETER[\"Latitude of natural origin\",0,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8801]],\n"
+        "                    PARAMETER[\"Longitude of natural origin\",-3,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8802]],\n"
+        "                    PARAMETER[\"Scale factor at natural "
+        "origin\",0.9996,\n"
+        "                        SCALEUNIT[\"unity\",1],\n"
+        "                        ID[\"EPSG\",8805]],\n"
+        "                    PARAMETER[\"False easting\",500000,\n"
+        "                        LENGTHUNIT[\"metre\",1],\n"
+        "                        ID[\"EPSG\",8806]],\n"
+        "                    PARAMETER[\"False northing\",10000000,\n"
+        "                        LENGTHUNIT[\"metre\",1],\n"
+        "                        ID[\"EPSG\",8807]]],\n"
+        "                CS[Cartesian,2],\n"
+        "                    AXIS[\"(E)\",east,\n"
+        "                        ORDER[1],\n"
+        "                        LENGTHUNIT[\"metre\",1]],\n"
+        "                    AXIS[\"(N)\",north,\n"
+        "                        ORDER[2],\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "            VERTCRS[\"SHVD2015 height\",\n"
+        "                VDATUM[\"St. Helena Vertical Datum 2015\"],\n"
+        "                CS[vertical,1],\n"
+        "                    AXIS[\"gravity-related height (H)\",up,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "            ID[\"EPSG\",7956]]],\n"
+        "    METHOD[\"Geog3D to Geog2D+GravityRelatedHeight (EGM2008)\",\n"
+        "        ID[\"EPSG\",1092]],\n"
+        "    PARAMETERFILE[\"Geoid (height correction) model file\","
+        "\"Und_min2.5x2.5_egm2008_isw=82_WGS84_TideFree.gz\"],\n"
+        "    PARAMETER[\"EPSG code for Interpolation CRS\",7886,\n"
+        "        ID[\"EPSG\",1048]],\n"
+        "    OPERATIONACCURACY[0],\n"
+        "    ID[\"EPSG\",9617]]";
+
+    {
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+        ASSERT_TRUE(transf != nullptr);
+        EXPECT_TRUE(transf->interpolationCRS() == nullptr);
+        EXPECT_EQ(transf->parameterValues().size(), 2U);
+    }
+
+    {
+        auto dbContext = DatabaseContext::create();
+        // Need a database so that the interpolation CRS EPSG:7886 is resolved
+        auto obj =
+            WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+        auto transf = nn_dynamic_pointer_cast<Transformation>(obj);
+        ASSERT_TRUE(transf != nullptr);
+        EXPECT_TRUE(transf->interpolationCRS() != nullptr);
+        EXPECT_EQ(transf->parameterValues().size(), 1U);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, COORDINATEOPERATION_wkt2_2019) {
 
     std::string src_wkt;
@@ -4115,6 +4211,73 @@ TEST(wkt_parse, BOUNDCRS_transformation_from_codes) {
     ASSERT_EQ(params.size(), expected.size());
     for (int i = 0; i < 7; i++) {
         EXPECT_NEAR(params[i], expected[i], 1e-10);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, BOUNDCRS_with_interpolation_as_parameter) {
+    auto wkt =
+        "BOUNDCRS[\n"
+        "    SOURCECRS[\n"
+        "        VERTCRS[\"unknown\",\n"
+        "            VDATUM[\"unknown using geoidgrids=@foo.gtx\"],\n"
+        "            CS[vertical,1],\n"
+        "                AXIS[\"gravity-related height (H)\",up,\n"
+        "                    LENGTHUNIT[\"metre\",1,\n"
+        "                        ID[\"EPSG\",9001]]]]],\n"
+        "    TARGETCRS[\n"
+        "        GEOGCRS[\"WGS 84\",\n"
+        "            DATUM[\"World Geodetic System 1984\",\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"latitude\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"longitude\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",4979]]],\n"
+        "    ABRIDGEDTRANSFORMATION[\"unknown to WGS84 ellipsoidal height\",\n"
+        "        METHOD[\"GravityRelatedHeight to Geographic3D\"],\n"
+        "        PARAMETERFILE[\"Geoid (height correction) model "
+        "file\",\"@foo.gtx\",\n"
+        "            ID[\"EPSG\",8666]],\n"
+        "        PARAMETER[\"EPSG code for Interpolation CRS\",7886]]]";
+
+    {
+        auto obj = WKTParser().createFromWKT(wkt);
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_TRUE(boundCRS->transformation()->interpolationCRS() == nullptr);
+        EXPECT_EQ(boundCRS->transformation()->parameterValues().size(), 2U);
+    }
+
+    {
+        auto dbContext = DatabaseContext::create();
+        // Need a database so that the interpolation CRS EPSG:7886 is resolved
+        auto obj =
+            WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+        auto boundCRS = nn_dynamic_pointer_cast<BoundCRS>(obj);
+        ASSERT_TRUE(boundCRS != nullptr);
+        EXPECT_TRUE(boundCRS->transformation()->interpolationCRS() != nullptr);
+        EXPECT_EQ(boundCRS->transformation()->parameterValues().size(), 1U);
+
+        // Check that on export, the interpolation CRS is exported as a
+        // parameter
+        auto exportedWKT = boundCRS->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT2_2019).get());
+        EXPECT_TRUE(
+            exportedWKT.find(
+                "PARAMETER[\"EPSG code for Interpolation CRS\",7886,") !=
+            std::string::npos)
+            << exportedWKT;
     }
 }
 
