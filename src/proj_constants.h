@@ -555,6 +555,10 @@
 #define EPSG_NAME_PARAMETER_GEOCENTRIC_TRANSLATION_FILE \
     "Geocentric translation file"
 
+#define EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS \
+    "EPSG code for Interpolation CRS"
+#define EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS 1048
+
 /* ------------------------------------------------------------------------ */
 
 #define PROJ_WKT2_NAME_METHOD_HEIGHT_TO_GEOG3D \
