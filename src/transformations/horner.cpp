@@ -222,7 +222,6 @@ summing the tiny high order elements first.
 
     /* These variable names follow the Engsager/Poder  implementation */
     int     sz;              /* Number of coefficients per polynomial */
-    double *tcx, *tcy;                        /* Coefficient pointers */
     double  range; /* Equivalent to the gen_pol's FLOATLIMIT constant */
     double  n, e;
     PJ_UV uv_error;
@@ -249,14 +248,10 @@ summing the tiny high order elements first.
     const bool iterative_inverse = direction == PJ_INV && transformation->has_only_real_fwd;
 
     if (direction==PJ_FWD) {                              /* forward */
-        tcx = transformation->fwd_u + sz;
-        tcy = transformation->fwd_v + sz;
         e   = position.u - transformation->fwd_origin->u;
         n   = position.v - transformation->fwd_origin->v;
     } else {                                              /* inverse */
         if (!iterative_inverse) {
-            tcx = transformation->inv_u + sz;
-            tcy = transformation->inv_v + sz;
             e   = position.u - transformation->inv_origin->u;
             n   = position.v - transformation->inv_origin->v;
         } else {
@@ -283,8 +278,8 @@ summing the tiny high order elements first.
          */
         const int order = transformation->order;
         const double tol = transformation->inverse_tolerance;
-        double de = e - transformation->fwd_u[0];
-        double dn = n - transformation->fwd_v[0];
+        const double de = e - transformation->fwd_u[0];
+        const double dn = n - transformation->fwd_v[0];
         double x0 = 0.0;
         double y0 = 0.0;
         int loops = 32; // usually converges really fast (1-2 loops)
@@ -293,8 +288,9 @@ summing the tiny high order elements first.
             double Mb = 0.0;
             double Mc = 0.0;
             double Md = 0.0;
-            tcx = transformation->fwd_u;
-            tcy = transformation->fwd_v;
+            /* Coefficient pointers */
+            double *tcx = transformation->fwd_u;
+            double *tcy = transformation->fwd_v;
             for (int i = 0; i <= order; ++i) {
                 for (int j = 0; j <= (order-i); ++j) {
                     if (i == 0 && j == 0) {
@@ -326,6 +322,9 @@ summing the tiny high order elements first.
         int g =  transformation->order;
         int r = g, c;
         double u, v, N, E;
+        /* Coefficient pointers */
+        double *tcx = direction == PJ_FWD ? (transformation->fwd_u + sz) : (transformation->inv_u + sz);
+        double *tcy = direction == PJ_FWD ? (transformation->fwd_v + sz) : (transformation->inv_v + sz);
 
         /* Double Horner's scheme: N = n*Cy*e -> yout, E = e*Cx*n -> xout */
         N = *--tcy;
