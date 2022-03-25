@@ -13,8 +13,9 @@ jobs:
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
-            channels: conda-forge
-            auto-update-conda: true
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
 
       - name: Cache
         uses: actions/cache@v2

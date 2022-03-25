@@ -22,7 +22,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/opt/proj
+            cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/opt/proj ..
             make -j$(nproc)
             sudo mkdir -p /opt/proj
             sudo make install
@@ -31,7 +31,11 @@ jobs:
       - name: Install plot dependencies
         uses: conda-incubator/setup-miniconda@v2
         with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
           environment-file: docs/plot/environment.yml
+          activate-environment: proj
 
       - name: Plot
         working-directory: ./docs/plot
