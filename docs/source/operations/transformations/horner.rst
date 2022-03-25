@@ -5,6 +5,7 @@ Horner polynomial evaluation
 ================================================================================
 
 .. versionadded:: 5.0.0
+.. versionadded:: 9.1.0 Iterative real polynormal inversion
 
 +-----------------+-------------------------------------------------------------------+
 | **Alias**       | horner                                                            |
@@ -61,7 +62,59 @@ The final coordinates are determined as
     Y_{out} = Y_{in} + \Delta Y
 
 The inverse transform is the same as the above but requires a different set of
-coefficients.
+coefficients. If only the forward set of coefficients and origin is known the inverse transform can
+be done by iteratively solving a system of equations. By writing :eq:`real_poly` as:
+
+.. math::
+    :label: real_poly_iterative_inversion
+
+    \begin{align}
+        \begin{bmatrix}
+            \Delta X \\
+            \Delta Y \\
+        \end{bmatrix} =
+        \begin{bmatrix}
+            u_{0,0} \\
+            v_{0,0} \\
+        \end{bmatrix} +
+        \begin{bmatrix}
+             u_{0,1} + u_{0,2} U + ... & u_{1,0} + u_{1,1} U + u_{2,0} V + ... \\
+             v_{1,0} + v_{1,1} V + v_{2,0} U + ... & v_{0,1} + v_{0,2} V \\
+        \end{bmatrix}
+        \begin{bmatrix}
+            U \\
+            V \\
+        \end{bmatrix} =
+        \begin{bmatrix}
+            u_{0,0} \\
+            v_{0,0} \\
+        \end{bmatrix} +
+        \begin{bmatrix}
+             MA & MB \\
+             MC & MD \\
+        \end{bmatrix}
+        \begin{bmatrix}
+            U \\
+            V \\
+        \end{bmatrix}
+    \end{align}
+
+    \begin{align}
+        \begin{bmatrix}
+            U \\
+            V \\
+        \end{bmatrix} =
+        \begin{bmatrix}
+             MA & MB \\
+             MC & MD \\
+        \end{bmatrix}^-1
+        \begin{bmatrix}
+            \Delta X - u_{0,0} \\
+            \Delta Y - v_{0,0} \\
+        \end{bmatrix}
+    \end{align}
+
+We can iteratively solve with initial values of :math:`U = 0` and :math:`V = 0` and find :math:`U` and :math:`V`.
 
 Evaluation of the complex polynomials are defined by the following equations:
 
@@ -133,7 +186,7 @@ describing real and complex polynomials can't be mixed.
 
 .. option:: +inv_origin=<northing,easting>
 
-    Coordinate of origin for the inverse mapping
+    Coordinate of origin for the inverse mapping. Not required for iterative inversion.
 
 Real polynomials
 ..............................................................................
@@ -160,12 +213,12 @@ of the polynomial:
 .. option:: +inv_u=<u_11,u_12,...,u_ij,..,u_mn>
 
     Coefficients for the inverse transformation i.e. latitude to northing
-    as described in :eq:`real_poly`.
+    as described in :eq:`real_poly`. Not required for iterative inversion.
 
 .. option:: +inv_v=<v_11,v_12,...,v_ij,..,v_mn>
 
     Coefficients for the inverse transformation i.e. longitude to easting
-    as described in :eq:`real_poly`.
+    as described in :eq:`real_poly`. Not required for iterative inversion.
 
 
 
@@ -206,6 +259,14 @@ Optional
 
     Express longitude as westing. Only applies for complex polynomials.
 
+.. option:: +inv_tolerance=<value>
+
+    Only applies to real polynomials and iterative inversion.
+    The procedure converges to the correct results with each step.
+    Iteration stops when the result differs from the previous calculated
+    result by less than <value>.
+    <value> should be the same units as :math:`U` and :math:`V` of :eq:`UV`
+    Defaults to 0.001 meters.
 
 Further reading
 ################################################################################
