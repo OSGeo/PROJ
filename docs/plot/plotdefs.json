@@ -573,6 +573,34 @@
         "delta_cut": 7e5
     },
     {
+        "filename": "imoll.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "imoll",
+        "projstring": "+proj=imoll",
+        "res": "low",
+        "type": "line",
+        "top_interrupted_lons": [-40.0],
+        "bottom_interrupted_lons": [80.0, -20.0, -100.0],
+        "delta_cut": 7e5
+    },
+    {
+        "filename": "imoll_o.png",
+        "latmax": 90,
+        "latmin": -90,
+        "lonmax": 180,
+        "lonmin": -180,
+        "name": "imoll_o",
+        "projstring": "+proj=imoll_o +lon_0=-160",
+        "res": "low",
+        "type": "line",
+        "top_interrupted_lons": [110.0, 20.0, -100.0],
+        "bottom_interrupted_lons": [-70.0, 20.0, 140.0],
+        "delta_cut": 3e5
+    },
+    {
         "filename": "imw_p.png",
         "latmax": 90,
         "latmin": -90,

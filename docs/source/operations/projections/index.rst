@@ -66,6 +66,8 @@ Projections map the spherical 3D space to a flat 2D space.
    rhealpix
    igh
    igh_o
+   imoll
+   imoll_o
    imw_p
    isea
    kav5
