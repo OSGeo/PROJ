@@ -878,5 +878,147 @@ accept      4.5        52.5        0
 expect      5.875      55.375      0
 -------------------------------------------------------------------------------
 
+===============================================================================
+# Tests for testing that +omit_fwd, +omit_inv and +inv work together like they
+# should.
+#
+# +omit_fwd specifies that a step should be omitted when running forwards.
+#
+# +omit_inv specifies that a step should be omitted when running backwards.
+#
+# +inv specifies that a step should be inverted. The forward path would do
+# inverse operation and inverse path would do forward operation.
+#
+# |                |       invertible step       |     non-invertible step     |
+# | flags          | forward path | inverse path | forward path | inverse path |
+# | -------------- | ------------ | ------------ | ------------ | ------------ |
+# | +omit_fwd      | omit         | inv          | omit         | undefined    |
+# | +omit_fwd +inv | omit         | fwd          | omit         | fwd          |
+# | +omit_inv      | fwd          | omit         | fwd          | omit         |
+# | +omit_inv +inv | inv          | omit         | undefined    | omit         |
+#
+# From the table we can see that invertible steps should work pretty much all
+# the time. Non-invertible steps on the other hand make either the forward path
+# or inverse path undefined depending on which flags the step has.
+#
+# A non-invertible step is for example an affine transformation where we cannot
+# calculate the inverse of the matrix.
+===============================================================================
+
+-------------------------------------------------------------------------------
+# Test that +omit_fwd, +omit_inv and +inv work correctly with an invertible step.
+-------------------------------------------------------------------------------
+
+# Test that forward path does nothing and inverse path does inverse transformation
+
+operation   proj=pipeline step proj=affine s11=2 omit_fwd
+
+direction forward
+accept 1 2 3
+expect 1 2 3
+
+direction inverse
+accept 1 2 3
+expect 0.5 2 3
+
+# Test that forward path does nothing and inverse path does forward transformation
+
+operation   proj=pipeline step proj=affine s11=2 omit_fwd inv
+
+direction forward
+accept 1 2 3
+expect 1 2 3
+
+direction inverse
+accept 1 2 3
+expect 2 2 3
+
+# Test that forward path does forward transformation and inverse path does nothing
+
+operation   proj=pipeline step proj=affine s11=2 omit_inv
+
+direction forward
+accept 1 2 3
+expect 2 2 3
+
+direction inverse
+accept 1 2 3
+expect 1 2 3
+
+# Test that forward path does inverse transformation and inverse path does nothing
+
+operation   proj=pipeline step proj=affine s11=2 omit_inv inv
+
+direction forward
+accept 1 2 3
+expect 0.5 2 3
+
+direction inverse
+accept 1 2 3
+expect 1 2 3
+
+-------------------------------------------------------------------------------
+# Test that +omit_fwd, +omit_inv and +inv work correctly with a non-invertible step.
+-------------------------------------------------------------------------------
+
+# Test that forward path does nothing and inverse path is not defined.
+#
+# The affine transformation is not invertible so this pipeline cannot be executed in
+# reverse.
+
+operation proj=pipeline step proj=affine s11=1 s12=1 s13=1 s22=0 s33=0 omit_fwd
+
+direction forward
+accept 1 2 3
+expect 1 2 3
+
+direction inverse
+accept 1 2 3
+expect failure errno no_inverse_op
+
+# Test that forward path does nothing and inverse path does forward transformation.
+#
+# The affine transformation does not have an inverse, but inv specifies that the
+# step should be done in inverse order relative to our pipeline direction. When
+# we execute the pipeline in reverse, we should call the forward transformation of
+# the step which is defined so the pipeline should be valid in reverse.
+
+operation proj=pipeline step proj=affine s11=1 s12=1 s13=1 s22=0 s33=0 omit_fwd inv
+
+direction forward
+accept 1 2 3
+expect 1 2 3
+
+direction inverse
+accept 1 2 3
+expect 6 0 0
+
+# Test that the forward path does forward transformation and inverse path does nothing.
+
+operation proj=pipeline step proj=affine s11=1 s12=1 s13=1 s22=0 s33=0 omit_inv
+
+direction forward
+accept 1 2 3
+expect 6 0 0
+
+direction inverse
+accept 1 2 3
+expect 1 2 3
+
+# Test that the forward path is not defined and inverse path does nothing.
+#
+# When going through the forward path, inv specifies that we should execute the
+# step in reverse. Because the affine transformation does not have an inverse,
+# this means that the forward path does not exist.
+
+operation proj=pipeline step proj=affine s11=1 s12=1 s13=1 s22=0 s33=0 omit_inv inv
+
+direction forward
+accept 1 2 3
+expect failure errno no_inverse_op
+
+direction inverse
+accept 1 2 3
+expect 1 2 3
 
 </gie-strict>
