@@ -550,7 +550,7 @@ PJ *OPERATION(pipeline,0) {
     /* determine if an inverse operation is possible */
     for( auto& step: pipeline->steps) {
         PJ *Q = step.pj;
-        if ( pj_has_inverse(Q) ) {
+        if ( step.omit_inv || pj_has_inverse(Q) ) {
             continue;
         } else {
             P->inv   = nullptr;
