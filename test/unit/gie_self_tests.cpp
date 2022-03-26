@@ -778,6 +778,16 @@ static const char tc32_utm32_fwd_only[] = {
     "1.9107771273e-18,3.3615590093e-10,2.4380247154e-14,-2.0241230315e-18,1."
     "2429019719e-15,5.3886155968e-19,-1.0167505000e-18" };
 
+static const char sb_utm32_fwd_only[] = {
+    " +proj=horner"
+    " +ellps=intl"
+    " +range=10000000"
+    " +fwd_origin=4.94690026817276e+05,6.13342113183056e+06"
+    " +deg=3"
+    " +fwd_c=6.13258562111350e+06,6.19480105709997e+05,9.99378966275206e-01,-2."
+    "82153291753490e-02,-2.27089979140026e-10,-1.77019590701470e-09,1."
+    "08522286274070e-14,2.11430298751604e-15" };
+
 static const char hatt_to_ggrs[] = {
     " +proj=horner"
     " +ellps=bessel"
@@ -834,6 +844,33 @@ TEST(gie, horner_only_fwd_selftest) {
         EXPECT_LE(dist, 0.01);
 
         proj_destroy(P);
+    }
+
+    {
+        PJ *P = proj_create(PJ_DEFAULT_CTX, sb_utm32_fwd_only);
+        ASSERT_TRUE(P != nullptr);
+
+        PJ_COORD a = proj_coord(0, 0, 0, 0);
+        PJ_COORD b = proj_coord(0, 0, 0, 0);
+        PJ_COORD c = proj_coord(0, 0, 0, 0);
+        a.uv.v = 6130821.2945;
+        a.uv.u = 495136.8544;
+        c.uv.v = 6130000.0000;
+        c.uv.u = 620000.0000;
+
+        /* Forward projection */
+        b = proj_trans(P, PJ_FWD, a);
+        double dist = proj_xy_dist(b, c);
+        EXPECT_LE(dist, 0.001);
+
+        /* Inverse projection */
+        b = proj_trans(P, PJ_INV, c);
+        dist = proj_xy_dist(b, a);
+        EXPECT_LE(dist, 0.001);
+
+        /* Check roundtrip precision for 1 iteration each way */
+        dist = proj_roundtrip(P, PJ_FWD, 1, &a);
+        EXPECT_LE(dist, 0.01);
     }
 }
 

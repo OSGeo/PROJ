@@ -82,6 +82,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include <complex>
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -99,8 +100,8 @@ struct horner {
     int    order;    /* maximum degree of polynomium */
     int    coefs;    /* number of coefficients for each polynomium  */
     double range;    /* radius of the region of validity */
-    int    has_only_real_fwd; /* in case of real coefficients, has only fwd, inverse is done by gauss-newton iteration */
-    double inverse_tolerance; /* in the units of the destination coords, specifies when to stop iterating if has_only_read_fwd and direction is reverse */
+    int    has_only_fwd; /* inv parameters are not specified, inverse is done by gauss-newton iteration */
+    double inverse_tolerance; /* in the units of the destination coords, specifies when to stop iterating if has_only_fwd and direction is reverse */
 
     double *fwd_u;   /* coefficients for the forward transformations */
     double *fwd_v;   /* i.e. latitude/longitude to northing/easting  */
@@ -245,7 +246,7 @@ summing the tiny high order elements first.
     sz    =  horner_number_of_coefficients(transformation->order);
     range =  transformation->range;
 
-    const bool iterative_inverse = direction == PJ_INV && transformation->has_only_real_fwd;
+    const bool iterative_inverse = direction == PJ_INV && transformation->has_only_fwd;
 
     if (direction==PJ_FWD) {                              /* forward */
         e   = position.u - transformation->fwd_origin->u;
@@ -384,7 +385,6 @@ polynomial evaluation engine.
 
     /* These variable names follow the Engsager/Poder  implementation */
     int     sz;                             /* Number of coefficients */
-    double *c, *cb;                           /* Coefficient pointers */
     double  range; /* Equivalent to the gen_pol's FLOATLIMIT constant */
     double  n, e, w, N, E;
     PJ_UV uv_error;
@@ -408,9 +408,9 @@ polynomial evaluation engine.
     sz    =  2*transformation->order + 2;
     range =  transformation->range;
 
+    const bool iterative_inverse = direction == PJ_INV && transformation->has_only_fwd;
+
     if (direction==PJ_FWD) {                              /* forward */
-        cb =  transformation->fwd_c;
-        c  =  cb + sz;
         e  =  position.u - transformation->fwd_origin->u;
         n  =  position.v - transformation->fwd_origin->v;
         if (transformation->uneg)
@@ -418,20 +418,69 @@ polynomial evaluation engine.
         if (transformation->vneg)
             n  =  -n;
     } else {                                              /* inverse */
-        cb =  transformation->inv_c;
-        c  =  cb + sz;
-        e  =  position.u - transformation->inv_origin->u;
-        n  =  position.v - transformation->inv_origin->v;
-        if (transformation->uneg)
-            e  =  -e;
-        if (transformation->vneg)
-            n  =  -n;
+        if (!iterative_inverse) {
+            e  =  position.u - transformation->inv_origin->u;
+            n  =  position.v - transformation->inv_origin->v;
+            if (transformation->uneg)
+                e  =  -e;
+            if (transformation->vneg)
+                n  =  -n;
+        } else {
+            // in this case fwd_origin and any existing flipping needs to be added in the end
+            e = position.u;
+            n = position.v;
+        }
     }
 
     if ((fabs(n) > range) || (fabs(e) > range)) {
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return uv_error;
     }
+
+    if (iterative_inverse) {
+        const int order = transformation->order;
+        const double tol = transformation->inverse_tolerance;
+        const std::complex<double> dZ(n-transformation->fwd_c[0], e-transformation->fwd_c[1]);
+        std::complex<double> w0(0.0, 0.0);
+        int loops = 32; // usually converges really fast (1-2 loops)
+        bool converged = false;
+        while (loops-- > 0 && !converged) {
+            double *cb = transformation->fwd_c + 2; // coefficient pointers after c0
+            std::complex<double> det(0.0, 0.0);
+            for (int i = 1; i <= order; ++i) {
+                double cbn = *cb++;
+                double cbe = *cb++;
+                if (i == 1) {
+                    det += std::complex<double>(cbn, cbe);
+                } else {
+                    det += std::complex<double>(cbn, cbe) * std::pow(w0, double(i-1));
+                }
+            }
+            std::complex<double> w1 = dZ / det;
+            converged = (fabs(w1.real()-w0.real()) < tol) && (fabs(w1.imag()-w0.imag()) < tol);
+            w0 = w1;
+        }
+        // if loops have been exhausted and we have not converged yet,
+        // we are never going to converge
+        if (!converged) {
+            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM);
+            position = uv_error;
+        } else {
+            E = w0.imag();
+            N = w0.real();
+            if (transformation->uneg)
+                E = -E;
+            if (transformation->vneg)
+                N = -N;
+            position.u = E + transformation->fwd_origin->u;
+            position.v = N + transformation->fwd_origin->v;
+        }
+        return position;
+    }
+
+    // coefficient pointers
+    double *cb = direction == PJ_FWD ? transformation->fwd_c : transformation->inv_c;
+    double *c = cb + sz;
 
     /* Everything's set up properly - now do the actual polynomium evaluation */
     E = *--c;
@@ -441,7 +490,6 @@ polynomial evaluation engine.
         N = n*N - e*E + *--c;
         E = w;
     }
-
     position.u = E;
     position.v = N;
     return position;
@@ -508,7 +556,7 @@ static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
 PJ *PROJECTION(horner) {
 /*********************************************************************/
     int   degree = 0, n, complex_polynomia = 0;
-    int has_only_real_fwd = 0;
+    int has_only_fwd = 0;
     HORNER *Q;
     P->fwd4d  = horner_forward_4d;
     P->inv4d  = horner_reverse_4d;
@@ -541,12 +589,16 @@ PJ *PROJECTION(horner) {
     P->opaque = Q;
 
     if (!complex_polynomia) {
-        has_only_real_fwd =
+        has_only_fwd =
             !pj_param_exists(P->params, "inv_u") &&
             !pj_param_exists(P->params, "inv_v") &&
             !pj_param_exists(P->params, "inv_origin");
+    } else {
+        has_only_fwd =
+            !pj_param_exists(P->params, "inv_c") &&
+            !pj_param_exists(P->params, "inv_origin");
     }
-    Q->has_only_real_fwd = has_only_real_fwd;
+    Q->has_only_fwd = has_only_fwd;
 
     if (complex_polynomia) {
         /* Westings and/or southings? */
@@ -559,7 +611,7 @@ PJ *PROJECTION(horner) {
             proj_log_error (P, _("missing fwd_c"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
-        if (0==parse_coefs (P, Q->inv_c, "inv_c", n))
+        if (!has_only_fwd && 0==parse_coefs (P, Q->inv_c, "inv_c", n))
         {
             proj_log_error (P, _("missing inv_c"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
@@ -580,12 +632,12 @@ PJ *PROJECTION(horner) {
             proj_log_error (P, _("missing fwd_v"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
-        if (!has_only_real_fwd && 0==parse_coefs (P, Q->inv_u, "inv_u", n))
+        if (!has_only_fwd && 0==parse_coefs (P, Q->inv_u, "inv_u", n))
         {
             proj_log_error (P, _("missing inv_u"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
-        if (!has_only_real_fwd && 0==parse_coefs (P, Q->inv_v, "inv_v", n))
+        if (!has_only_fwd && 0==parse_coefs (P, Q->inv_v, "inv_v", n))
         {
             proj_log_error (P, _("missing inv_v"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
@@ -597,7 +649,7 @@ PJ *PROJECTION(horner) {
         proj_log_error (P, _("missing fwd_origin"));
         return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
-    if (!has_only_real_fwd && 0==parse_coefs (P, (double *)(Q->inv_origin), "inv_origin", 2))
+    if (!has_only_fwd && 0==parse_coefs (P, (double *)(Q->inv_origin), "inv_origin", 2))
     {
         proj_log_error (P, _("missing inv_origin"));
         return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);

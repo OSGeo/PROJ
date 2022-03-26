@@ -5,7 +5,7 @@ Horner polynomial evaluation
 ================================================================================
 
 .. versionadded:: 5.0.0
-.. versionchanged:: 9.1.0 Iterative real polynormal inversion
+.. versionchanged:: 9.1.0 Iterative polynormal inversion
 
 +-----------------+-------------------------------------------------------------------+
 | **Alias**       | horner                                                            |
@@ -126,7 +126,7 @@ Evaluation of the complex polynomials are defined by the following equations:
 
 Where :math:`n` is the degree of the polynomial. :math:`U` and :math:`V` are
 defined as in :eq:`UV` and the resulting coordinates are again determined
-by :eq:`xy_out`.
+by :eq:`xy_out`. Complex polynomials can be solved iteratively similar to real polynomials.
 
 Examples
 ################################################################################
@@ -185,10 +185,6 @@ describing real and complex polynomials can't be mixed.
 
     Coordinate of origin for the forward mapping
 
-.. option:: +inv_origin=<northing,easting>
-
-    Coordinate of origin for the inverse mapping. Not required for iterative inversion.
-
 Real polynomials
 ..............................................................................
 
@@ -228,13 +224,16 @@ of the polynomial:
     Coefficients for the complex forward transformation
     as described in :eq:`complex_poly`.
 
-.. option:: +inv_c=<c_1,c_2,...,c_N>
-
-    Coefficients for the complex inverse transformation
-    as described in :eq:`complex_poly`.
-
 Optional
 -------------------------------------------------------------------------------
+
+.. option:: +inv_origin=<northing,easting>
+
+    .. versionchanged:: 9.1.0
+
+    Coordinate of origin for the inverse mapping.
+    Without this option iterative polynomial evaluation is used for
+    the inverse tranformation.
 
 .. option:: +inv_u=<u_11,u_12,...,u_ij,..,u_mn>
 
@@ -242,7 +241,7 @@ Optional
 
     Coefficients for the inverse transformation i.e. latitude to northing
     as described in :eq:`real_poly`. Only applies for real polynomials.
-    Without this option iterative real polynomial evaluation is used for
+    Without this option iterative polynomial evaluation is used for
     the inverse tranformation.
 
 .. option:: +inv_v=<v_11,v_12,...,v_ij,..,v_mn>
@@ -251,7 +250,16 @@ Optional
 
     Coefficients for the inverse transformation i.e. longitude to easting
     as described in :eq:`real_poly`. Only applies for real polynomials.
-    Without this option iterative real polynomial evaluation is used for
+    Without this option iterative polynomial evaluation is used for
+    the inverse tranformation.
+
+.. option:: +inv_c=<c_1,c_2,...,c_N>
+
+    .. versionchanged:: 9.1.0
+
+    Coefficients for the complex inverse transformation
+    as described in :eq:`complex_poly`. Only applies for complex polynomials.
+    Without this option iterative polynomial evaluation is used for
     the inverse tranformation.
 
 .. option:: +range=<value>
@@ -270,7 +278,7 @@ Optional
 
     .. versionadded:: 9.1.0
 
-    Only applies to real polynomials and iterative inversion.
+    Only applies to cases of iterative inversion.
     The procedure converges to the correct results with each step.
     Iteration stops when the result differs from the previous calculated
     result by less than <value>.
