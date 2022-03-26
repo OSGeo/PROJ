@@ -5,7 +5,7 @@ Horner polynomial evaluation
 ================================================================================
 
 .. versionadded:: 5.0.0
-.. versionadded:: 9.1.0 Iterative real polynormal inversion
+.. versionchanged:: 9.1.0 Iterative real polynormal inversion
 
 +-----------------+-------------------------------------------------------------------+
 | **Alias**       | horner                                                            |
@@ -66,9 +66,6 @@ coefficients. If only the forward set of coefficients and origin is known the in
 be done by iteratively solving a system of equations. By writing :eq:`real_poly` as:
 
 .. math::
-    :label: real_poly_iterative_inversion
-
-    \begin{align}
         \begin{bmatrix}
             \Delta X \\
             \Delta Y \\
@@ -84,6 +81,12 @@ be done by iteratively solving a system of equations. By writing :eq:`real_poly`
         \begin{bmatrix}
             U \\
             V \\
+        \end{bmatrix} \\
+
+.. math::
+        \begin{bmatrix}
+            \Delta X \\
+            \Delta Y \\
         \end{bmatrix} =
         \begin{bmatrix}
             u_{0,0} \\
@@ -96,10 +99,9 @@ be done by iteratively solving a system of equations. By writing :eq:`real_poly`
         \begin{bmatrix}
             U \\
             V \\
-        \end{bmatrix}
-    \end{align}
+        \end{bmatrix} \\
 
-    \begin{align}
+.. math::
         \begin{bmatrix}
             U \\
             V \\
@@ -107,12 +109,11 @@ be done by iteratively solving a system of equations. By writing :eq:`real_poly`
         \begin{bmatrix}
              MA & MB \\
              MC & MD \\
-        \end{bmatrix}^-1
+        \end{bmatrix}^{-1}
         \begin{bmatrix}
             \Delta X - u_{0,0} \\
             \Delta Y - v_{0,0} \\
         \end{bmatrix}
-    \end{align}
 
 We can iteratively solve with initial values of :math:`U = 0` and :math:`V = 0` and find :math:`U` and :math:`V`.
 
@@ -210,18 +211,6 @@ of the polynomial:
     Coefficients for the forward transformation i.e. longitude to easting
     as described in :eq:`real_poly`.
 
-.. option:: +inv_u=<u_11,u_12,...,u_ij,..,u_mn>
-
-    Coefficients for the inverse transformation i.e. latitude to northing
-    as described in :eq:`real_poly`. Not required for iterative inversion.
-
-.. option:: +inv_v=<v_11,v_12,...,v_ij,..,v_mn>
-
-    Coefficients for the inverse transformation i.e. longitude to easting
-    as described in :eq:`real_poly`. Not required for iterative inversion.
-
-
-
 Complex polynomials
 ..............................................................................
 
@@ -247,6 +236,24 @@ of the polynomial:
 Optional
 -------------------------------------------------------------------------------
 
+.. option:: +inv_u=<u_11,u_12,...,u_ij,..,u_mn>
+
+    .. versionchanged:: 9.1.0
+
+    Coefficients for the inverse transformation i.e. latitude to northing
+    as described in :eq:`real_poly`. Only applies for real polynomials.
+    Without this option iterative real polynomial evaluation is used for
+    the inverse tranformation.
+
+.. option:: +inv_v=<v_11,v_12,...,v_ij,..,v_mn>
+
+    .. versionchanged:: 9.1.0
+
+    Coefficients for the inverse transformation i.e. longitude to easting
+    as described in :eq:`real_poly`. Only applies for real polynomials.
+    Without this option iterative real polynomial evaluation is used for
+    the inverse tranformation.
+
 .. option:: +range=<value>
 
     Radius of the region of validity.
@@ -261,12 +268,15 @@ Optional
 
 .. option:: +inv_tolerance=<value>
 
+    .. versionadded:: 9.1.0
+
     Only applies to real polynomials and iterative inversion.
     The procedure converges to the correct results with each step.
     Iteration stops when the result differs from the previous calculated
     result by less than <value>.
     <value> should be the same units as :math:`U` and :math:`V` of :eq:`UV`
-    Defaults to 0.001 meters.
+
+    *Defaults to 0.001.*
 
 Further reading
 ################################################################################
