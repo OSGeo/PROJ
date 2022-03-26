@@ -28,6 +28,16 @@ Interrupted Goode Homolosine
 
    proj-string: ``+proj=igh``
 
+
+The Interrupted Goode Homolosine projection is an equal-area composite
+projection intended for making world maps. Low latitudes are comprised of six
+separate Sinusoidal projection regions, and high latitudes are comprised of
+six separate Mollweide (``homolographic``) projections. The transition latitude
+is at 40d 44' 11.8", where the Sinusoidal and Mollweide scales are equal. The
+lobes in this projection are chosen to emphasize the land area of the Earth. This
+projection was first published in 1925 by J. P. Goode :cite:`Goode1925`.
+
+
 Parameters
 ################################################################################
 
