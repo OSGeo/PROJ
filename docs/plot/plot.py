@@ -239,6 +239,26 @@ def resample_polygon(polygon):
     return Polygon(ext, rings)
 
 
+def plot_with_interruptions(axes, x, y, **kwargs):
+    """
+    Plot x/y with proper splitting for interrupted projections.
+    """
+    _x = np.atleast_1d(x)
+    _y = np.atleast_1d(y)
+
+    dx = _x[1: ] - _x[0: -1]
+    split, = (np.abs(dx) > 1e6).nonzero()
+    split = np.append(split, _x.size - 1)
+    split += 1
+
+    last_part = 0
+    for part in split:
+        axes.plot(x[last_part: part],
+                  y[last_part: part],
+                  **kwargs)
+        last_part = part
+
+
 def plotproj(plotdef, data, outdir):
     '''
     Plot map.
@@ -275,7 +295,7 @@ def plotproj(plotdef, data, outdir):
                 pass
         else:
             x, y = proj_geom.xy
-            axes.plot(x, y, color=COLOR_COAST, linewidth=0.5)
+            plot_with_interruptions(axes, x, y, color=COLOR_COAST, linewidth=0.5)
 
     # Plot frame
     frame = [
@@ -286,7 +306,7 @@ def plotproj(plotdef, data, outdir):
         line = project(line, plotdef['projstring'])
         x = line[:, 0]
         y = line[:, 1]
-        axes.plot(x, y, '-k')
+        plot_with_interruptions(axes, x, y, color='black', linestyle='-')
 
     graticule = build_graticule(
         plotdef['lonmin'],
@@ -300,7 +320,26 @@ def plotproj(plotdef, data, outdir):
         feature = project(feature, plotdef['projstring'])
         x = feature[:, 0]
         y = feature[:, 1]
-        axes.plot(x, y, color=COLOR_GRAT, linewidth=0.4)
+        plot_with_interruptions(axes, x, y, color=COLOR_GRAT, linewidth=0.4)
+
+    # Plot interrupted boundaries if necessary
+    interrupted_lines = []
+    if 'top_interrupted_lons' in plotdef:
+        for lon in plotdef['top_interrupted_lons']:
+            for delta in [-0.0001, 0.0001]:
+                merid = meridian(lon + delta, 0.0, plotdef['latmax'])
+                interrupted_lines.append(project(merid, plotdef['projstring']))
+
+    if 'bottom_interrupted_lons' in plotdef:
+        for lon in plotdef['bottom_interrupted_lons']:
+            for delta in [-0.0001, 0.0001]:
+                merid = meridian(lon + delta, plotdef['latmin'], 0)
+                interrupted_lines.append(project(merid, plotdef['projstring']))
+
+    for line in interrupted_lines:
+        x = line[:, 0]
+        y = line[:, 1]
+        plot_with_interruptions(axes, x, y, color=COLOR_GRAT, linewidth=0.4)
 
     # Switch off the axis lines...
     plt.axis('off')
