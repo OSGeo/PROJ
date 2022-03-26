@@ -386,7 +386,7 @@ polynomial evaluation engine.
     /* These variable names follow the Engsager/Poder  implementation */
     int     sz;                             /* Number of coefficients */
     double  range; /* Equivalent to the gen_pol's FLOATLIMIT constant */
-    double  n, e, w, N, E;
+    double  n, e;
     PJ_UV uv_error;
     uv_error.u = uv_error.v = HUGE_VAL;
 
@@ -438,24 +438,23 @@ polynomial evaluation engine.
     }
 
     if (iterative_inverse) {
-        const int order = transformation->order;
         const double tol = transformation->inverse_tolerance;
         const std::complex<double> dZ(n-transformation->fwd_c[0], e-transformation->fwd_c[1]);
         std::complex<double> w0(0.0, 0.0);
         int loops = 32; // usually converges really fast (1-2 loops)
         bool converged = false;
         while (loops-- > 0 && !converged) {
-            double *cb = transformation->fwd_c + 2; // coefficient pointers after c0
-            std::complex<double> det(0.0, 0.0);
-            for (int i = 1; i <= order; ++i) {
-                double cbn = *cb++;
-                double cbe = *cb++;
-                if (i == 1) {
-                    det += std::complex<double>(cbn, cbe);
-                } else {
-                    det += std::complex<double>(cbn, cbe) * std::pow(w0, double(i-1));
-                }
+            // coefficient pointers from back to front until the first complex pair (fwd_c0+i*fwd_c1)
+            double *cb = transformation->fwd_c + 2;
+            double *c = cb + sz;
+            double E = *--c;
+            double N = *--c;
+            while (c > cb) {
+                double w = w0.real()*E + w0.imag()*N + *--c;
+                       N = w0.real()*N - w0.imag()*E + *--c;
+                       E = w;
             }
+            std::complex<double> det(N, E);
             std::complex<double> w1 = dZ / det;
             converged = (fabs(w1.real()-w0.real()) < tol) && (fabs(w1.imag()-w0.imag()) < tol);
             w0 = w1;
@@ -466,8 +465,8 @@ polynomial evaluation engine.
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM);
             position = uv_error;
         } else {
-            E = w0.imag();
-            N = w0.real();
+            double E = w0.imag();
+            double N = w0.real();
             if (transformation->uneg)
                 E = -E;
             if (transformation->vneg)
@@ -483,8 +482,9 @@ polynomial evaluation engine.
     double *c = cb + sz;
 
     /* Everything's set up properly - now do the actual polynomium evaluation */
-    E = *--c;
-    N = *--c;
+    double E = *--c;
+    double N = *--c;
+    double w;
     while (c > cb) {
         w = n*E + e*N + *--c;
         N = n*N - e*E + *--c;
