@@ -445,8 +445,9 @@ polynomial evaluation engine.
         bool converged = false;
         while (loops-- > 0 && !converged) {
             // coefficient pointers from back to front until the first complex pair (fwd_c0+i*fwd_c1)
-            double *cb = transformation->fwd_c + 2;
+            double *cb = transformation->fwd_c;
             double *c = cb + sz;
+            cb += 2;
             double E = *--c;
             double N = *--c;
             while (c > cb) {

@@ -871,6 +871,8 @@ TEST(gie, horner_only_fwd_selftest) {
         /* Check roundtrip precision for 1 iteration each way */
         dist = proj_roundtrip(P, PJ_FWD, 1, &a);
         EXPECT_LE(dist, 0.01);
+
+        proj_destroy(P);
     }
 }
 
