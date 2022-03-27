@@ -1345,7 +1345,8 @@
         "name": "tcea",
         "projstring": "+proj=tcea",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "times.png",
