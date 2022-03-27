@@ -1322,7 +1322,8 @@
         "name": "gstmerc",
         "projstring": "+proj=gstmerc",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e7
     },
     {
         "filename": "tcc.png",
