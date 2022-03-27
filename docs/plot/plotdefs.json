@@ -1013,7 +1013,8 @@
         "name": "omerc",
         "projstring": "+proj=omerc +lat_1=45 +lat_2=55",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "ortel.png",
