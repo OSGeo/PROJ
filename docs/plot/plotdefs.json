@@ -554,7 +554,8 @@
         "res": "low",
         "type": "line",
         "top_interrupted_lons": [-40.0],
-        "bottom_interrupted_lons": [80.0, -20.0, -100.0]
+        "bottom_interrupted_lons": [80.0, -20.0, -100.0],
+        "delta_cut": 7e5
     },
     {
         "filename": "igh_o.png",
@@ -567,7 +568,8 @@
         "res": "low",
         "type": "line",
         "top_interrupted_lons": [110.0, 20.0, -100.0],
-        "bottom_interrupted_lons": [-70.0, 20.0, 140.0]
+        "bottom_interrupted_lons": [-70.0, 20.0, 140.0],
+        "delta_cut": 7e5
     },
     {
         "filename": "imw_p.png",
