@@ -747,7 +747,8 @@
         "name": "lsat",
         "projstring": "+proj=lsat +ellps=GRS80 +lat_1=-60 +lat_2=60 +lsat=2 +path=2",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "mbt_s.png",
