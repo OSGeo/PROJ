@@ -973,7 +973,7 @@
         "lonmax": 180,
         "lonmin": -180,
         "name": "ob_tran",
-        "projstring": "+proj=ob_tran +o_proj=mill +o_lon_p=40 +o_lat_p=50 +lon_0=60",
+        "projstring": "+proj=ob_tran +o_proj=moll +o_lon_p=40 +o_lat_p=50 +lon_0=60",
         "res": "low",
         "type": "poly"
     },
