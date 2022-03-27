@@ -145,7 +145,8 @@
         "name": "bipc",
         "projstring": "+proj=bipc +ns",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "boggs.png",
