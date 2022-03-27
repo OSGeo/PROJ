@@ -239,15 +239,16 @@ def resample_polygon(polygon):
     return Polygon(ext, rings)
 
 
-def plot_with_interruptions(axes, x, y, **kwargs):
+def plot_with_interruptions(axes, x, y, delta_cut=1e100, **kwargs):
     """
     Plot x/y with proper splitting for interrupted projections.
     """
     _x = np.atleast_1d(x)
     _y = np.atleast_1d(y)
 
-    dx = _x[1: ] - _x[0: -1]
-    split, = (np.abs(dx) > 7e5).nonzero()
+    dx = np.nan_to_num(_x[1: ]) - np.nan_to_num(_x[0: -1])
+    dy = np.nan_to_num(_y[1: ]) - np.nan_to_num(_y[0: -1])
+    split, = ((np.abs(dx) > delta_cut) | (np.abs(dy) > delta_cut)).nonzero()
     split = np.append(split, _x.size - 1)
     split += 1
 
@@ -295,7 +296,8 @@ def plotproj(plotdef, data, outdir):
                 pass
         else:
             x, y = proj_geom.xy
-            plot_with_interruptions(axes, x, y, color=COLOR_COAST, linewidth=0.5)
+            plot_with_interruptions(axes, x, y, color=COLOR_COAST, linewidth=0.5,
+                                    delta_cut=plotdef.get('delta_cut', 1e100))
 
     # Plot frame
     frame = [
@@ -306,7 +308,8 @@ def plotproj(plotdef, data, outdir):
         line = project(line, plotdef['projstring'])
         x = line[:, 0]
         y = line[:, 1]
-        plot_with_interruptions(axes, x, y, color='black', linestyle='-')
+        plot_with_interruptions(axes, x, y, color='black', linestyle='-',
+                                delta_cut=plotdef.get('delta_cut', 1e100))
 
     graticule = build_graticule(
         plotdef['lonmin'],
@@ -320,7 +323,8 @@ def plotproj(plotdef, data, outdir):
         feature = project(feature, plotdef['projstring'])
         x = feature[:, 0]
         y = feature[:, 1]
-        plot_with_interruptions(axes, x, y, color=COLOR_GRAT, linewidth=0.4)
+        plot_with_interruptions(axes, x, y, color=COLOR_GRAT, linewidth=0.4,
+                                delta_cut=plotdef.get('delta_cut', 1e100))
 
     # Plot interrupted boundaries if necessary
     interrupted_lines = []
@@ -339,7 +343,8 @@ def plotproj(plotdef, data, outdir):
     for line in interrupted_lines:
         x = line[:, 0]
         y = line[:, 1]
-        plot_with_interruptions(axes, x, y, color=COLOR_GRAT, linewidth=0.4)
+        plot_with_interruptions(axes, x, y, color=COLOR_GRAT, linewidth=0.4,
+                                delta_cut=plotdef.get('delta_cut', 1e100))
 
     # Switch off the axis lines...
     plt.axis('off')
