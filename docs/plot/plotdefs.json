@@ -552,7 +552,9 @@
         "name": "igh",
         "projstring": "+proj=igh",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "top_interrupted_lons": [-40.0],
+        "bottom_interrupted_lons": [80.0, -20.0, -100.0]
     },
     {
         "filename": "igh_o.png",
@@ -563,7 +565,9 @@
         "name": "igh_o",
         "projstring": "+proj=igh_o +lon_0=-160",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "top_interrupted_lons": [110.0, 20.0, -100.0],
+        "bottom_interrupted_lons": [-70.0, 20.0, 140.0]
     },
     {
         "filename": "imw_p.png",
