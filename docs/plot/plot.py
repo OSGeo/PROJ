@@ -247,7 +247,7 @@ def plot_with_interruptions(axes, x, y, **kwargs):
     _y = np.atleast_1d(y)
 
     dx = _x[1: ] - _x[0: -1]
-    split, = (np.abs(dx) > 1e6).nonzero()
+    split, = (np.abs(dx) > 7e5).nonzero()
     split = np.append(split, _x.size - 1)
     split += 1
 
