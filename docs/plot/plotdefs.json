@@ -847,7 +847,8 @@
         "name": "misrsom",
         "projstring": "+proj=misrsom +path=1",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e7
     },
     {
         "filename": "moll.png",
