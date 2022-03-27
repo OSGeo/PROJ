@@ -309,7 +309,7 @@ def plotproj(plotdef, data, outdir):
         x = line[:, 0]
         y = line[:, 1]
         plot_with_interruptions(axes, x, y, color='black', linestyle='-',
-                                delta_cut=plotdef.get('delta_cut', 1e100))
+                                delta_cut=plotdef.get('delta_cut', 1e6))
 
     graticule = build_graticule(
         plotdef['lonmin'],
@@ -324,7 +324,7 @@ def plotproj(plotdef, data, outdir):
         x = feature[:, 0]
         y = feature[:, 1]
         plot_with_interruptions(axes, x, y, color=COLOR_GRAT, linewidth=0.4,
-                                delta_cut=plotdef.get('delta_cut', 1e100))
+                                delta_cut=plotdef.get('delta_cut', 1e6))
 
     # Plot interrupted boundaries if necessary
     interrupted_lines = []
