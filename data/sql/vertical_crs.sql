@@ -363,7 +363,7 @@ INSERT INTO "usage" VALUES('EPSG','5532','vertical_crs','EPSG','7890','EPSG','31
 INSERT INTO "vertical_crs" VALUES('EPSG','7979','KOC WD height',NULL,'EPSG','6499','EPSG','5187',0);
 INSERT INTO "usage" VALUES('EPSG','5571','vertical_crs','EPSG','7979','EPSG','3267','EPSG','1205');
 INSERT INTO "vertical_crs" VALUES('EPSG','8089','ISH2004 height',NULL,'EPSG','6499','EPSG','1190',0);
-INSERT INTO "usage" VALUES('EPSG','5616','vertical_crs','EPSG','8089','EPSG','3262','EPSG','1178');
+INSERT INTO "usage" VALUES('EPSG','5616','vertical_crs','EPSG','8089','EPSG','4662','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','8266','GVR2000 height',NULL,'EPSG','6499','EPSG','1199',0);
 INSERT INTO "usage" VALUES('EPSG','5758','vertical_crs','EPSG','8266','EPSG','4461','EPSG','1153');
 INSERT INTO "vertical_crs" VALUES('EPSG','8267','GVR2016 height',NULL,'EPSG','6499','EPSG','1200',0);
