@@ -26,7 +26,7 @@ General Oblique Transformation
    :align: center
    :alt:   General Oblique Transformation
 
-   proj-string: ``+proj=ob_tran +o_proj=mill +o_lon_p=40 +o_lat_p=50 +lon_0=60``
+   proj-string: ``+proj=ob_tran +o_proj=moll +o_lon_p=40 +o_lat_p=50 +lon_0=60``
 
 Usage
 ################################################################################
