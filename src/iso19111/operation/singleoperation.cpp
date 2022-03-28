@@ -2008,8 +2008,27 @@ void SingleOperation::exportTransformationToWKT(
         paramValue->_exportToWKT(formatter, nullptr);
     }
 
-    if (!formatter->abridgedTransformation()) {
-        if (interpolationCRS()) {
+    const auto l_interpolactionCRS = interpolationCRS();
+    if (formatter->abridgedTransformation()) {
+        // If we have an interpolation CRS that has a EPSG code, then
+        // we can export it as a PARAMETER[]
+        if (l_interpolactionCRS) {
+            const auto code = l_interpolactionCRS->getEPSGCode();
+            if (code != 0) {
+                formatter->startNode(io::WKTConstants::PARAMETER, false);
+                formatter->addQuotedString(
+                    EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS);
+                formatter->add(code);
+                formatter->startNode(io::WKTConstants::ID, false);
+                formatter->addQuotedString(metadata::Identifier::EPSG);
+                formatter->add(
+                    EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS);
+                formatter->endNode();
+                formatter->endNode();
+            }
+        }
+    } else {
+        if (l_interpolactionCRS) {
             formatter->startNode(io::WKTConstants::INTERPOLATIONCRS, false);
             interpolationCRS()->_exportToWKT(formatter);
             formatter->endNode();
