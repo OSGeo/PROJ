@@ -1,7 +1,7 @@
-.. _igh:
+.. _imoll:
 
 ********************************************************************************
-Interrupted Goode Homolosine
+Interrupted Mollweide
 ********************************************************************************
 
 +---------------------+----------------------------------------------------------+
@@ -11,7 +11,7 @@ Interrupted Goode Homolosine
 +---------------------+----------------------------------------------------------+
 | **Defined area**    | Global                                                   |
 +---------------------+----------------------------------------------------------+
-| **Alias**           | igh                                                      |
+| **Alias**           | imoll                                                    |
 +---------------------+----------------------------------------------------------+
 | **Domain**          | 2D                                                       |
 +---------------------+----------------------------------------------------------+
@@ -21,21 +21,21 @@ Interrupted Goode Homolosine
 +---------------------+----------------------------------------------------------+
 
 
-.. figure:: ./images/igh.png
+.. figure:: ./images/imoll.png
    :width: 500 px
    :align: center
-   :alt:   Interrupted Goode Homolosine
+   :alt:   Interrupted Mollweide
 
-   proj-string: ``+proj=igh``
+   proj-string: ``+proj=imoll``
 
 
-The Interrupted Goode Homolosine projection is an equal-area composite
-projection intended for making world maps. Low latitudes are comprised of six
-separate Sinusoidal projection regions, and high latitudes are comprised of
-six separate Mollweide (``homolographic``) projections. The transition latitude
-is at 40d 44' 11.8", where the Sinusoidal and Mollweide scales are equal. The
-lobes in this projection are chosen to emphasize the land area of the Earth. This
-projection was first published in 1925 by J. P. Goode :cite:`Goode1925`.
+The Interrupted Mollweide projection is an equal-area projection intended for
+making world maps. The projection is comprised of six separate Mollweide
+(``homolographic``) projection regions. In contrast with the Interrupted Goode
+Homolosine projection, there is no transition latitude, which gives greater
+continuity at the cost of greater equatorial distortion. The lobes in this
+projection are chosen to emphasize the land area of the Earth. This projection
+was first published in 1919 by J. P. Goode :cite:`Goode1919`.
 
 
 Parameters
