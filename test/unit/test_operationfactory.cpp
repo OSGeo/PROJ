@@ -3920,7 +3920,8 @@ TEST(operation,
     // NAD83(CSRS) 3D
     auto dstCRS = authFactoryEPSG->createCoordinateReferenceSystem("4955");
 
-    auto ctxt = CoordinateOperationContext::create(authFactoryEPSG, nullptr, 0.0);
+    auto ctxt =
+        CoordinateOperationContext::create(authFactoryEPSG, nullptr, 0.0);
     ctxt->setGridAvailabilityUse(
         CoordinateOperationContext::GridAvailabilityUse::
             IGNORE_GRID_AVAILABILITY);
@@ -3934,15 +3935,9 @@ TEST(operation,
               "+step +inv +proj=tmerc +lat_0=49.351346659616 "
               "+lon_0=-123.20266499149 +k=1 "
               "+x_0=15307.188 +y_0=6540.975 +ellps=GRS80 "
-              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-              "+step +proj=axisswap +order=2,1 "
-              "+step +proj=push +v_1 +v_2 "
-              "+step +proj=axisswap +order=2,1 "
-              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=vgridshift +grids=HT2_0.gtx +multiplier=1 "
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
-              "+step +proj=axisswap +order=2,1 "
-              "+step +proj=pop +v_1 +v_2");
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
