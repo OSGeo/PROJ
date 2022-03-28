@@ -7516,3 +7516,6 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9944','ETRS89 / EBBWV14 S
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6190','BD72 / Belgian Lambert 72 + Oostende height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9907','ETRS89 + Oostende height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','32159','NAD83 / WyLam','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9945','MGI 1901 / Macedonia GK truncated','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9945','MGI 1901 / Macedonia Gauss-Kruger truncated','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9945','MSCS truncated','EPSG');

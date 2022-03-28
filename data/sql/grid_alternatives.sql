@@ -169,9 +169,9 @@ VALUES
 ('GGSPM06v1.mnt','fr_ign_ggspm06v1.tif','ggspm06v1.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_ggspm06v1.tif',1,1,NULL),
 
 -- is_lmi - National Land Survey of Iceland
-('Icegeoid_ISN2004.gtx','is_lmi_Icegeoid_ISN2004.tif','Icegeoid_ISN2004.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/is_lmi_Icegeoid_ISN2004.tif',1,1,NULL),
-('Icegeoid_ISN93.gtx','is_lmi_Icegeoid_ISN93.tif','Icegeoid_ISN93.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/is_lmi_Icegeoid_ISN93.tif',1,1,NULL),
-('Icegeoid_ISN2016.gtx','is_lmi_Icegeoid_ISN2016.tif','Icegeoid_ISN2016.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/is_lmi_Icegeoid_ISN2016.tif',1,1,NULL),
+('Icegeoid_ISN2004.gri','is_lmi_Icegeoid_ISN2004.tif','Icegeoid_ISN2004.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/is_lmi_Icegeoid_ISN2004.tif',1,1,NULL),
+('Icegeoid_ISN93.gri','is_lmi_Icegeoid_ISN93.tif','Icegeoid_ISN93.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/is_lmi_Icegeoid_ISN93.tif',1,1,NULL),
+('Icegeoid_ISN2016.gri','is_lmi_Icegeoid_ISN2016.tif','Icegeoid_ISN2016.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/is_lmi_Icegeoid_ISN2016.tif',1,1,NULL),
 ('ISN93_ISN2016.gsb','is_lmi_ISN93_ISN2016.tif','ISN93_ISN2016.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/is_lmi_ISN93_ISN2016.tif',1,1,NULL),
 ('ISN2004_ISN2016.gsb','is_lmi_ISN2004_ISN2016.tif','ISN2004_ISN2016.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/is_lmi_ISN2004_ISN2016.tif',1,1,NULL),
 
