@@ -1458,7 +1458,8 @@
         "name": "utm",
         "projstring": "+proj=utm",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "vandg.png",
