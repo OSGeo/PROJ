@@ -592,7 +592,8 @@
         "name": "isea",
         "projstring": "+proj=isea",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "kav5.png",
