@@ -47,14 +47,10 @@ Traditionally two geodesic problems are considered:
   :math:`\alpha_2`.
 
 PROJ incorporates `C library for Geodesics
-<https://geographiclib.sourceforge.io/1.52/C/>`_ from `GeographicLib
-<https://geographiclib.sourceforge.io>`_.  This library provides
+<https://geographiclib.sourceforge.io/C/doc>`_.  This library provides
 routines to solve the direct and inverse geodesic problems.  Full double
 precision accuracy is maintained provided that
-:math:`\lvert f\rvert<\frac1{50}`.  Refer to the `application programming interface
-<https://geographiclib.sourceforge.io/1.52/C/geodesic_8h.html>`_
-for full documentation.  A brief summary of the routines is given in
-geodesic(3).
+:math:`\lvert f\rvert<\frac1{50}`.
 
 The interface to the geodesic routines differ in two respects from the
 rest of PROJ:
@@ -145,11 +141,21 @@ catalog of those cases:
   :math:`[\alpha_1,\alpha_2]\leftarrow[\alpha_1,\alpha_2]+[\delta,\delta]`,
   for arbitrary :math:`\delta`.
 
+Area of a polygon
+-----------------
+
+The area of a geodesic polygon can be determined by summing :math:`-S_{12}`
+for successive edges of the polygon (:math:`S_{12}` is negated so that
+clockwise traversal of a polygon gives a positive area).  However, if
+the polygon encircles a pole, the sum must be adjusted by
+:math:`\pm A/2`, where :math:`A` is the area of the full ellipsoid, with
+the sign chosen to place the result in :math:`(-A/2, A/2]`.
+
 Background
 ----------
 
 The algorithms implemented by this package are given in :cite:`Karney2013`
-(`addenda <https://geographiclib.sourceforge.io/geod-addenda.html>`_)
+(`addenda <https://geographiclib.sourceforge.io/misc/geod-addenda.html>`_)
 and are based on :cite:`Bessel1825` and :cite:`Helmert1880`; the algorithm for
 areas is based on :cite:`Danielsen1989`.  These improve on the work of
 :cite:`Vincenty1975` in the following respects:
@@ -167,4 +173,4 @@ Additional background material is provided in GeographicLib's `geodesic
 bibliography <https://geographiclib.sourceforge.io/geodesic-papers/biblio.html>`_,
 Wikipedia's article "`Geodesics on an ellipsoid
 <https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid>`_", and :cite:`Karney2011`
-(`errata <https://geographiclib.sourceforge.io/geod-addenda.html#geod-errata>`_).
+(`errata <https://geographiclib.sourceforge.io/misc/geod-addenda.html#geod-errata>`_).

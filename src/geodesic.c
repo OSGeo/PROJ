@@ -14,18 +14,17 @@
  *   Algorithms for geodesics,
  *   J. Geodesy <b>87</b>, 43--55 (2013);
  *   https://doi.org/10.1007/s00190-012-0578-z
- *   Addenda: https://geographiclib.sourceforge.io/geod-addenda.html
+ *   Addenda: https://geographiclib.sourceforge.io/misc/geod-addenda.html
  *
  * See the comments in geodesic.h for documentation.
  *
- * Copyright (c) Charles Karney (2012-2021) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2012-2022) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
  */
 
 #include "geodesic.h"
 #include <math.h>
-#include <limits.h>
 #include <float.h>
 
 #if !defined(__cplusplus)
@@ -103,7 +102,7 @@ static real sumx(real u, real v, real* t) {
   volatile real vpp = s - up;
   up -= u;
   vpp -= v;
-  if (t) *t = -(up + vpp);
+  if (t) *t = s ? 0 - (up + vpp) : s;
   /* error-free sum:
    * u + v =       s      + t
    *       = round(u + v) + t */
@@ -115,13 +114,6 @@ static real polyval(int N, const real p[], real x) {
   while (--N >= 0) y = y * x + *p++;
   return y;
 }
-
-/* mimic C++ std::min and std::max */
-static real minx(real a, real b)
-{ return (b < a) ? b : a; }
-
-static real maxx(real a, real b)
-{ return (a < b) ? b : a; }
 
 static void swapx(real* x, real* y)
 { real t = *x; *x = *y; *y = t; }
@@ -145,39 +137,43 @@ static void norm2(real* sinx, real* cosx) {
 }
 
 static real AngNormalize(real x) {
-  x = remainder(x, (real)(360));
-  return x != -180 ? x : 180;
+  real y = remainder(x, 360.0);
+  return fabs(y) == 180.0 ? copysign(180.0, x) : y;
 }
 
 static real LatFix(real x)
 { return fabs(x) > 90 ? NaN : x; }
 
 static real AngDiff(real x, real y, real* e) {
-  real t, d = AngNormalize(sumx(AngNormalize(-x), AngNormalize(y), &t));
-  /* Here y - x = d + t (mod 360), exactly, where d is in (-180,180] and
-   * abs(t) <= eps (eps = 2^-45 for doubles).  The only case where the
-   * addition of t takes the result outside the range (-180,180] is d = 180
-   * and t > 0.  The case, d = -180 + eps, t = -eps, can't happen, since
-   * sum would have returned the exact result in such a case (i.e., given t
-   * = 0). */
-  return sumx(d == 180 && t > 0 ? -180 : d, t, e);
+  /* Use remainder instead of AngNormalize, since we treat boundary cases
+   * later taking account of the error */
+  real t, d = sumx(remainder(-x, 360.0), remainder( y, 360.0), &t);
+  /* This second sum can only change d if abs(d) < 128, so don't need to
+   * apply remainder yet again. */
+  d = sumx(remainder(d, 360.0), t, &t);
+  /* Fix the sign if d = -180, 0, 180. */
+  if (d == 0 || fabs(d) == 180)
+    /* If t == 0, take sign from y - x
+     * else (t != 0, implies d = +/-180), d and t must have opposite signs */
+    d = copysign(d, t == 0 ? y - x : -t);
+  if (e) *e = t;
+  return d;
 }
 
 static real AngRound(real x) {
-  const real z = 1/(real)(16);
-  volatile real y;
-  if (x == 0) return 0;
-  y = fabs(x);
+  /* False positive in cppcheck requires "1.0" instead of "1" */
+  const real z = 1.0/16.0;
+  volatile real y = fabs(x);
   /* The compiler mustn't "simplify" z - (z - y) to y */
   y = y < z ? z - (z - y) : y;
-  return x < 0 ? -y : y;
+  return copysign(y, x);
 }
 
 static void sincosdx(real x, real* sinx, real* cosx) {
   /* In order to minimize round-off errors, this function exactly reduces
    * the argument to the range [-45, 45] before converting it to radians. */
   real r, s, c; int q = 0;
-  r = remquo(x, (real)(90), &q);
+  r = remquo(x, 90.0, &q);
   /* now abs(r) <= 45 */
   r *= degree;
   /* Possibly could call the gnu extension sincos */
@@ -188,7 +184,31 @@ static void sincosdx(real x, real* sinx, real* cosx) {
   case 2U: *sinx = -s; *cosx = -c; break;
   default: *sinx = -c; *cosx =  s; break; /* case 3U */
   }
-  if (x != 0) { *sinx += (real)(0); *cosx += (real)(0); }
+  /* http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1950.pdf */
+  *cosx += 0;                   /* special values from F.10.1.12 */
+  /* special values from F.10.1.13 */
+  if (*sinx == 0) *sinx = copysign(*sinx, x);
+}
+
+static void sincosde(real x, real t, real* sinx, real* cosx) {
+  /* In order to minimize round-off errors, this function exactly reduces
+   * the argument to the range [-45, 45] before converting it to radians. */
+  real r, s, c; int q = 0;
+  r = AngRound(remquo(x, 90.0, &q) + t);
+  /* now abs(r) <= 45 */
+  r *= degree;
+  /* Possibly could call the gnu extension sincos */
+  s = sin(r); c = cos(r);
+  switch ((unsigned)q & 3U) {
+  case 0U: *sinx =  s; *cosx =  c; break;
+  case 1U: *sinx =  c; *cosx = -s; break;
+  case 2U: *sinx = -s; *cosx = -c; break;
+  default: *sinx = -c; *cosx =  s; break; /* case 3U */
+  }
+  /* http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1950.pdf */
+  *cosx += 0;                   /* special values from F.10.1.12 */
+  /* special values from F.10.1.13 */
+  if (*sinx == 0) *sinx = copysign(*sinx, x);
 }
 
 static real atan2dx(real y, real x) {
@@ -198,18 +218,13 @@ static real atan2dx(real y, real x) {
    * quadrant. */
   int q = 0; real ang;
   if (fabs(y) > fabs(x)) { swapx(&x, &y); q = 2; }
-  if (x < 0) { x = -x; ++q; }
+  if (signbit(x)) { x = -x; ++q; }
   /* here x >= 0 and x >= abs(y), so angle is in [-pi/4, pi/4] */
   ang = atan2(y, x) / degree;
   switch (q) {
-    /* Note that atan2d(-0.0, 1.0) will return -0.  However, we expect that
-     * atan2d will not be called with y = -0.  If need be, include
-     *
-     *   case 0: ang = 0 + ang; break;
-     */
-  case 1: ang = (y >= 0 ? 180 : -180) - ang; break;
-  case 2: ang =  90 - ang; break;
-  case 3: ang = -90 + ang; break;
+  case 1: ang = copysign(180.0, y) - ang; break;
+  case 2: ang =           90       - ang; break;
+  case 3: ang =          -90       + ang; break;
   default: break;
   }
   return ang;
@@ -300,7 +315,7 @@ void geod_init(struct geod_geodesic* g, real a, real f) {
    * 0.1 is a safety factor (error decreased by 100) and max(0.001, abs(f))
    * stops etol2 getting too large in the nearly spherical case. */
   g->etol2 = 0.1 * tol2 /
-    sqrt( maxx((real)(0.001), fabs(g->f)) * minx((real)(1), 1 - g->f/2) / 2 );
+    sqrt( fmax(0.001, fabs(g->f)) * fmin(1.0, 1 - g->f/2) / 2 );
 
   A3coeff(g);
   C3coeff(g);
@@ -331,7 +346,7 @@ static void geod_lineinit_int(struct geod_geodesicline* l,
 
   sincosdx(AngRound(l->lat1), &sbet1, &cbet1); sbet1 *= l->f1;
   /* Ensure cbet1 = +epsilon at poles */
-  norm2(&sbet1, &cbet1); cbet1 = maxx(tiny, cbet1);
+  norm2(&sbet1, &cbet1); cbet1 = fmax(tiny, cbet1);
   l->dn1 = sqrt(1 + g->ep2 * sq(sbet1));
 
   /* Evaluate alp0 from sin(alp1) * cos(bet1) = sin(alp0), */
@@ -593,8 +608,8 @@ real geod_genposition(const struct geod_geodesicline* l,
    *   if ((outmask & GEOD_XX) && pYY)
    *     *pYY = YY;
    *
-   * the second check "&& pYY" is redundant.  It's there to make the Clang
-   * Static Analyzer happy.
+   * the second check "&& pYY" is redundant.  It's there to make the CLang
+   * static analyzer happy.
    */
   if ((outmask & GEOD_LATITUDE) && plat2)
     *plat2 = lat2;
@@ -703,29 +718,25 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
    * east-going and meridional geodesics. */
   lon12 = AngDiff(lon1, lon2, &lon12s);
   /* Make longitude difference positive. */
-  lonsign = lon12 >= 0 ? 1 : -1;
-  /* If very close to being on the same half-meridian, then make it so. */
-  lon12 = lonsign * AngRound(lon12);
-  lon12s = AngRound((180 - lon12) - lonsign * lon12s);
+  lonsign = signbit(lon12) ? -1 : 1;
+  lon12 *= lonsign; lon12s *= lonsign;
   lam12 = lon12 * degree;
-  if (lon12 > 90) {
-    sincosdx(lon12s, &slam12, &clam12);
-    clam12 = -clam12;
-  } else
-    sincosdx(lon12, &slam12, &clam12);
+  /* Calculate sincos of lon12 + error (this applies AngRound internally). */
+  sincosde(lon12, lon12s, &slam12, &clam12);
+  lon12s = (180 - lon12) - lon12s; /* the supplementary longitude difference */
 
   /* If really close to the equator, treat as on equator. */
   lat1 = AngRound(LatFix(lat1));
   lat2 = AngRound(LatFix(lat2));
   /* Swap points so that point with higher (abs) latitude is point 1
    * If one latitude is a nan, then it becomes lat1. */
-  swapp = fabs(lat1) < fabs(lat2) ? -1 : 1;
+  swapp = fabs(lat1) < fabs(lat2) || lat2 != lat2 ? -1 : 1;
   if (swapp < 0) {
     lonsign *= -1;
     swapx(&lat1, &lat2);
   }
   /* Make lat1 <= 0 */
-  latsign = lat1 < 0 ? 1 : -1;
+  latsign = signbit(lat1) ? 1 : -1;
   lat1 *= latsign;
   lat2 *= latsign;
   /* Now we have
@@ -742,11 +753,11 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
 
   sincosdx(lat1, &sbet1, &cbet1); sbet1 *= g->f1;
   /* Ensure cbet1 = +epsilon at poles */
-  norm2(&sbet1, &cbet1); cbet1 = maxx(tiny, cbet1);
+  norm2(&sbet1, &cbet1); cbet1 = fmax(tiny, cbet1);
 
   sincosdx(lat2, &sbet2, &cbet2); sbet2 *= g->f1;
   /* Ensure cbet2 = +epsilon at poles */
-  norm2(&sbet2, &cbet2); cbet2 = maxx(tiny, cbet2);
+  norm2(&sbet2, &cbet2); cbet2 = fmax(tiny, cbet2);
 
   /* If cbet1 < -sbet1, then cbet2 - cbet1 is a sensitive measure of the
    * |bet1| - |bet2|.  Alternatively (cbet1 >= -sbet1), abs(sbet2) + sbet1 is
@@ -758,7 +769,7 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
 
   if (cbet1 < -sbet1) {
     if (cbet2 == cbet1)
-      sbet2 = sbet2 < 0 ? sbet1 : -sbet1;
+      sbet2 = copysign(sbet1, sbet2);
   } else {
     if (fabs(sbet2) == -sbet1)
       cbet2 = cbet1;
@@ -783,8 +794,8 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
     ssig2 = sbet2; csig2 = calp2 * cbet2;
 
     /* sig12 = sig2 - sig1 */
-    sig12 = atan2(maxx((real)(0), csig1 * ssig2 - ssig1 * csig2),
-                                  csig1 * csig2 + ssig1 * ssig2);
+    sig12 = atan2(fmax(0.0, csig1 * ssig2 - ssig1 * csig2) + 0,
+                            csig1 * csig2 + ssig1 * ssig2);
     Lengths(g, g->n, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
             cbet1, cbet2, &s12x, &m12x, nullptr,
             (outmask & GEOD_GEODESICSCALE) ? &M12 : nullptr,
@@ -800,7 +811,7 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
     if (sig12 < 1 || m12x >= 0) {
       /* Need at least 2, to handle 90 0 90 180 */
       if (sig12 < 3 * tiny ||
-          // Prevent negative s12 or m12 for short lines
+          /* Prevent negative s12 or m12 for short lines */
           (sig12 < tol0 && (s12x < 0 || m12x < 0)))
         sig12 = m12x = s12x = 0;
       m12x *= g->b;
@@ -965,8 +976,8 @@ static real geod_geninverse_int(const struct geod_geodesic* g,
 
     if (!meridian &&
         /* omg12 < 3/4 * pi */
-        comg12 > -(real)(0.7071) &&     /* Long difference not too big */
-        sbet2 - sbet1 < (real)(1.75)) { /* Lat difference not too big */
+        comg12 > -0.7071 &&     /* Long difference not too big */
+        sbet2 - sbet1 < 1.75) { /* Lat difference not too big */
       /* Use tan(Gamma/2) = tan(omg12/2)
        * * (tan(bet1/2)+tan(bet2/2))/(1+tan(bet1/2)*tan(bet2/2))
        * with tan(x/2) = sin(x)/(1+cos(x)) */
@@ -1219,8 +1230,7 @@ real InverseStart(const struct geod_geodesic* g,
     sbet12 = sbet2 * cbet1 - cbet2 * sbet1,
     cbet12 = cbet2 * cbet1 + sbet2 * sbet1;
   real sbet12a;
-  boolx shortline = cbet12 >= 0 && sbet12 < (real)(0.5) &&
-    cbet2 * lam12 < (real)(0.5);
+  boolx shortline = cbet12 >= 0 && sbet12 < 0.5 && cbet2 * lam12 < 0.5;
   real somg12, comg12, ssig12, csig12;
   sbet12a = sbet2 * cbet1 + cbet2 * sbet1;
   if (shortline) {
@@ -1251,18 +1261,14 @@ real InverseStart(const struct geod_geodesic* g,
     norm2(&salp2, &calp2);
     /* Set return value */
     sig12 = atan2(ssig12, csig12);
-  } else if (fabs(g->n) > (real)(0.1) || /* No astroid calc if too eccentric */
+  } else if (fabs(g->n) > 0.1 || /* No astroid calc if too eccentric */
              csig12 >= 0 ||
              ssig12 >= 6 * fabs(g->n) * pi * sq(cbet1)) {
     /* Nothing to do, zeroth order spherical approximation is OK */
   } else {
     /* Scale lam12 and bet2 to x, y coordinate system where antipodal point
      * is at origin and singular point is at y = 0, x = -1. */
-    real y, lamscale, betscale;
-    /* Volatile declaration needed to fix inverse case
-     * 56.320923501171 0 -56.320923501171 179.664747671772880215
-     * which otherwise fails with g++ 4.4.4 x86 -O3 */
-    volatile real x;
+    real x, y, lamscale, betscale;
     real lam12x = atan2(-slam12, -clam12); /* lam12 - pi */
     if (g->f >= 0) {            /* In fact f == 0 does not get here */
       /* x = dlong, y = dlat */
@@ -1288,7 +1294,7 @@ real InverseStart(const struct geod_geodesic* g,
               sbet1, -cbet1, dn1, sbet2, cbet2, dn2,
               cbet1, cbet2, nullptr, &m12b, &m0, nullptr, nullptr, Ca);
       x = -1 + m12b / (cbet1 * cbet2 * m0 * pi);
-      betscale = x < -(real)(0.01) ? sbet12a / x :
+      betscale = x < -0.01 ? sbet12a / x :
         -g->f * sq(cbet1) * pi;
       lamscale = betscale / cbet1;
       y = lam12x / lamscale;
@@ -1297,9 +1303,9 @@ real InverseStart(const struct geod_geodesic* g,
     if (y > -tol1 && x > -1 - xthresh) {
       /* strip near cut */
       if (g->f >= 0) {
-        salp1 = minx((real)(1), -(real)(x)); calp1 = - sqrt(1 - sq(salp1));
+        salp1 = fmin(1.0, -x); calp1 = - sqrt(1 - sq(salp1));
       } else {
-        calp1 = maxx((real)(x > -tol1 ? 0 : -1), (real)(x));
+        calp1 = fmax(x > -tol1 ? 0.0 : -1.0, x);
         salp1 = sqrt(1 - sq(calp1));
       }
     } else {
@@ -1424,12 +1430,12 @@ real Lambda12(const struct geod_geodesic* g,
   /* norm2(&somg2, &comg2); -- don't need to normalize! */
 
   /* sig12 = sig2 - sig1, limit to [0, pi] */
-  sig12 = atan2(maxx((real)(0), csig1 * ssig2 - ssig1 * csig2),
-                                csig1 * csig2 + ssig1 * ssig2);
+  sig12 = atan2(fmax(0.0, csig1 * ssig2 - ssig1 * csig2) + 0,
+                          csig1 * csig2 + ssig1 * ssig2);
 
   /* omg12 = omg2 - omg1, limit to [0, pi] */
-  somg12 = maxx((real)(0), comg1 * somg2 - somg1 * comg2);
-  comg12 =                 comg1 * comg2 + somg1 * somg2;
+  somg12 = fmax(0.0, comg1 * somg2 - somg1 * comg2) + 0;
+  comg12 =           comg1 * comg2 + somg1 * somg2;
   /* eta = omg12 - lam120 */
   eta = atan2(somg12 * clam120 - comg12 * slam120,
               comg12 * clam120 + somg12 * slam120);
@@ -1732,20 +1738,21 @@ int transit(real lon1, real lon2) {
   /* Return 1 or -1 if crossing prime meridian in east or west direction.
    * Otherwise return zero. */
   /* Compute lon12 the same way as Geodesic::Inverse. */
+  lon12 = AngDiff(lon1, lon2, nullptr);
   lon1 = AngNormalize(lon1);
   lon2 = AngNormalize(lon2);
-  lon12 = AngDiff(lon1, lon2, nullptr);
-  return lon1 <= 0 && lon2 > 0 && lon12 > 0 ? 1 :
-    (lon2 <= 0 && lon1 > 0 && lon12 < 0 ? -1 : 0);
+  return
+    lon12 > 0 && ((lon1 < 0 && lon2 >= 0) ||
+                  (lon1 > 0 && lon2 == 0)) ? 1 :
+    (lon12 < 0 && lon1 >= 0 && lon2 < 0 ? -1 : 0);
 }
 
 int transitdirect(real lon1, real lon2) {
   /* Compute exactly the parity of
-     int(ceil(lon2 / 360)) - int(ceil(lon1 / 360)) */
-  lon1 = remainder(lon1, (real)(720));
-  lon2 = remainder(lon2, (real)(720));
-  return ( (lon2 <= 0 && lon2 > -360 ? 1 : 0) -
-           (lon1 <= 0 && lon1 > -360 ? 1 : 0) );
+   *   int(floor(lon2 / 360)) - int(floor(lon1 / 360)) */
+  lon1 = remainder(lon1, 720.0); lon2 = remainder(lon2, 720.0);
+  return ( (lon2 >= 0 && lon2 < 360 ? 0 : 1) -
+           (lon1 >= 0 && lon1 < 360 ? 0 : 1) );
 }
 
 void accini(real s[]) {
@@ -1784,7 +1791,7 @@ void accneg(real s[]) {
 void accrem(real s[], real y) {
   /* Reduce to [-y/2, y/2]. */
   s[0] = remainder(s[0], y);
-  accadd(s, (real)(0));
+  accadd(s, 0.0);
 }
 
 void geod_polygon_init(struct geod_polygon* p, boolx polylinep) {
@@ -1802,7 +1809,6 @@ void geod_polygon_clear(struct geod_polygon* p) {
 void geod_polygon_addpoint(const struct geod_geodesic* g,
                            struct geod_polygon* p,
                            real lat, real lon) {
-  lon = AngNormalize(lon);
   if (p->num == 0) {
     p->lat0 = p->lat = lat;
     p->lon0 = p->lon = lon;
@@ -1826,7 +1832,7 @@ void geod_polygon_addedge(const struct geod_geodesic* g,
                           real azi, real s) {
   if (p->num) {              /* Do nothing is num is zero */
     /* Initialize S12 to stop Visual Studio warning.  Initialization of lat and
-     * lon is to make Clang Static Analyzer happy. */
+     * lon is to make CLang static analyzer happy. */
     real lat = 0, lon = 0, S12 = 0;
     geod_gendirect(g, p->lat, p->lon, azi, GEOD_LONG_UNROLL, s,
                    &lat, &lon, nullptr,
@@ -1928,7 +1934,7 @@ unsigned geod_polygon_testedge(const struct geod_geodesic* g,
   tempsum = p->A[0];
   crossings = p->crossings;
   {
-    /* Initialization of lat, lon, and S12 is to make Clang Static Analyzer
+    /* Initialization of lat, lon, and S12 is to make CLang static analyzer
      * happy. */
     real lat = 0, lon = 0, s12, S12 = 0;
     geod_gendirect(g, p->lat, p->lon, azi, GEOD_LONG_UNROLL, s,
