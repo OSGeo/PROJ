@@ -45,7 +45,6 @@
 #define nC4x  ((nC4 * (nC4 + 1)) / 2)
 #define nC    (GEOGRAPHICLIB_GEODESIC_ORDER + 1)
 
-typedef double real;
 typedef int boolx;
 
 static unsigned init = 0;
