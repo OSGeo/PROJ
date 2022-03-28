@@ -1092,7 +1092,8 @@
         "name": "peirce_q_horizontal",
         "projstring": "+proj=peirce_q +lon_0=25 +shape=horizontal",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "grieger_triptychial.png",
