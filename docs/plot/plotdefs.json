@@ -145,7 +145,8 @@
         "name": "bipc",
         "projstring": "+proj=bipc +ns",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "boggs.png",
@@ -552,7 +553,10 @@
         "name": "igh",
         "projstring": "+proj=igh",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "top_interrupted_lons": [-40.0],
+        "bottom_interrupted_lons": [80.0, -20.0, -100.0],
+        "delta_cut": 7e5
     },
     {
         "filename": "igh_o.png",
@@ -563,7 +567,10 @@
         "name": "igh_o",
         "projstring": "+proj=igh_o +lon_0=-160",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "top_interrupted_lons": [110.0, 20.0, -100.0],
+        "bottom_interrupted_lons": [-70.0, 20.0, 140.0],
+        "delta_cut": 7e5
     },
     {
         "filename": "imw_p.png",
@@ -585,7 +592,8 @@
         "name": "isea",
         "projstring": "+proj=isea",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "kav5.png",
@@ -740,7 +748,8 @@
         "name": "lsat",
         "projstring": "+proj=lsat +ellps=GRS80 +lat_1=-60 +lat_2=60 +lsat=2 +path=2",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "mbt_s.png",
@@ -839,7 +848,8 @@
         "name": "misrsom",
         "projstring": "+proj=misrsom +path=1",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e7
     },
     {
         "filename": "moll.png",
@@ -969,7 +979,7 @@
         "lonmax": 180,
         "lonmin": -180,
         "name": "ob_tran",
-        "projstring": "+proj=ob_tran +o_proj=mill +o_lon_p=40 +o_lat_p=50 +lon_0=60",
+        "projstring": "+proj=ob_tran +o_proj=moll +o_lon_p=40 +o_lat_p=50 +lon_0=60",
         "res": "low",
         "type": "poly"
     },
@@ -1004,7 +1014,8 @@
         "name": "omerc",
         "projstring": "+proj=omerc +lat_1=45 +lat_2=55",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "ortel.png",
@@ -1081,7 +1092,8 @@
         "name": "peirce_q_horizontal",
         "projstring": "+proj=peirce_q +lon_0=25 +shape=horizontal",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "grieger_triptychial.png",
@@ -1312,7 +1324,8 @@
         "name": "gstmerc",
         "projstring": "+proj=gstmerc",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e7
     },
     {
         "filename": "tcc.png",
@@ -1334,7 +1347,8 @@
         "name": "tcea",
         "projstring": "+proj=tcea",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "times.png",
@@ -1444,7 +1458,8 @@
         "name": "utm",
         "projstring": "+proj=utm",
         "res": "low",
-        "type": "line"
+        "type": "line",
+        "delta_cut": 1e6
     },
     {
         "filename": "vandg.png",
