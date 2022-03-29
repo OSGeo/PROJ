@@ -34,8 +34,8 @@
 /* Undocumented macros, especially those whose name start with YY_,
    are private implementation details.  Do not rely on them.  */
 
-#ifndef YY_PJ_WKT2_SRC_WKT2_GENERATED_PARSER_H_INCLUDED
-# define YY_PJ_WKT2_SRC_WKT2_GENERATED_PARSER_H_INCLUDED
+#ifndef YY_PJ_WKT2_WKT2_GENERATED_PARSER_H_INCLUDED
+# define YY_PJ_WKT2_WKT2_GENERATED_PARSER_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -195,7 +195,8 @@ extern int pj_wkt2_debug;
     T_PAST = 400,
     T_UNSPECIFIED = 401,
     T_STRING = 402,
-    T_UNSIGNED_INTEGER_DIFFERENT_ONE_TWO_THREE = 403
+    T_UNSIGNED_INTEGER_DIFFERENT_ONE_TWO_THREE = 403,
+    T_EPSG_CODE_FOR_INTERPOLATION = 404
   };
 #endif
 
@@ -210,4 +211,4 @@ typedef int YYSTYPE;
 
 int pj_wkt2_parse (pj_wkt2_parse_context *context);
 
-#endif /* !YY_PJ_WKT2_SRC_WKT2_GENERATED_PARSER_H_INCLUDED  */
+#endif /* !YY_PJ_WKT2_WKT2_GENERATED_PARSER_H_INCLUDED  */
