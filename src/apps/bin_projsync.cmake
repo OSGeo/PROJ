@@ -6,4 +6,4 @@ add_executable(projsync ${PROJSYNC_SRC})
 target_link_libraries(projsync PRIVATE ${PROJ_LIBRARIES})
 
 install(TARGETS projsync
-  DESTINATION ${BINDIR})
+  DESTINATION ${CMAKE_INSTALL_BINDIR})

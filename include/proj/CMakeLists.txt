@@ -1,4 +1,4 @@
-set(installdest ${INCLUDEDIR}/proj)
+set(installdest ${CMAKE_INSTALL_INCLUDEDIR}/proj)
 
 install(
   FILES util.hpp metadata.hpp common.hpp crs.hpp datum.hpp

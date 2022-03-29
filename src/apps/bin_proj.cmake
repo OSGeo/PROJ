@@ -13,7 +13,7 @@ set_target_properties(binproj
 target_link_libraries(binproj PRIVATE ${PROJ_LIBRARIES})
 
 install(TARGETS binproj
-  DESTINATION ${BINDIR})
+  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # invproj target: symlink or copy of proj executable
 
@@ -33,7 +33,7 @@ if(UNIX)
 
     add_custom_target(invproj ALL DEPENDS ${link_target})
 
-    install(FILES ${link_target} DESTINATION ${BINDIR})
+    install(FILES ${link_target} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 else()
 
@@ -41,6 +41,6 @@ else()
     target_link_libraries(invproj PRIVATE ${PROJ_LIBRARIES})
 
     install(TARGETS invproj
-      DESTINATION ${BINDIR})
+      DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 endif()

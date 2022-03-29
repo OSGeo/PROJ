@@ -294,7 +294,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 source_group("CMake Files" FILES CMakeLists.txt)
 
 # Embed PROJ_LIB data files location
-add_definitions(-DPROJ_LIB="${CMAKE_INSTALL_PREFIX}/${DATADIR}")
+add_definitions(-DPROJ_LIB="${PROJ_LIB_PATH}")
 
 
 ###########################################################
@@ -399,7 +399,7 @@ endif()
 target_include_directories(proj INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${PROJ_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:${INCLUDEDIR}>)
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 if(WIN32)
   set_target_properties(proj
@@ -487,14 +487,14 @@ endif()
 ##############################################
 install(TARGETS proj
   EXPORT targets
-  RUNTIME DESTINATION ${BINDIR}
-  LIBRARY DESTINATION ${LIBDIR}
-  ARCHIVE DESTINATION ${LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   FRAMEWORK DESTINATION ${FRAMEWORKDIR})
 
 if(NOT BUILD_FRAMEWORKS_AND_BUNDLE)
   install(FILES ${ALL_LIBPROJ_HEADERS}
-    DESTINATION ${INCLUDEDIR})
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 
 ##############################################

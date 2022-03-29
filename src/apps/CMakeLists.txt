@@ -29,9 +29,9 @@ if(NOT MSVC)
 
   # Use relative path so that package is relocatable
   if(APPLE)
-    set(CMAKE_INSTALL_RPATH "@loader_path/../${LIBDIR}")
+    set(CMAKE_INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
   else()
-    set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${LIBDIR}")
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
   endif()
   # Other apps can link to libproj using e.g. LDFLAGS -Wl,-rpath,${prefix}/lib
 

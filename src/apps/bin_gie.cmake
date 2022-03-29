@@ -12,5 +12,5 @@ target_link_libraries(gie PRIVATE ${PROJ_LIBRARIES})
 
 if(BUILD_GIE)
   install(TARGETS gie
-    DESTINATION ${BINDIR})
+    DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()

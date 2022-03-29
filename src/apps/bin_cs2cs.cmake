@@ -10,4 +10,4 @@ add_executable(cs2cs ${CS2CS_SRC} ${CS2CS_INCLUDE})
 target_link_libraries(cs2cs PRIVATE ${PROJ_LIBRARIES})
 
 install(TARGETS cs2cs
-  DESTINATION ${BINDIR})
+  DESTINATION ${CMAKE_INSTALL_BINDIR})

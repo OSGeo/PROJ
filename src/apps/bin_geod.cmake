@@ -12,7 +12,7 @@ add_executable(geod ${GEOD_SRC} ${GEOD_INCLUDE})
 target_link_libraries(geod PRIVATE ${PROJ_LIBRARIES})
 
 install(TARGETS geod
-  DESTINATION ${BINDIR})
+  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # invgeod target: symlink or copy of geod executable
 
@@ -32,7 +32,7 @@ if(UNIX)
 
     add_custom_target(invgeod ALL DEPENDS ${link_target})
 
-    install(FILES ${link_target} DESTINATION ${BINDIR})
+    install(FILES ${link_target} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 else()
 
@@ -40,6 +40,6 @@ else()
     target_link_libraries(invgeod PRIVATE ${PROJ_LIBRARIES})
 
     install(TARGETS invgeod
-      DESTINATION ${BINDIR})
+      DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 endif()
