@@ -5374,16 +5374,65 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
 
     // If we didn't find a non-ballpark transformation between
     // the 2 vertical CRS, then try through intermediate geographic CRS
-    // For example
-    // WGS 84 + EGM96 --> ETRS89 + Belfast height where
-    // there is a geoid model for EGM96 referenced to WGS 84
-    // and a geoid model for Belfast height referenced to ETRS89
     if (verticalTransforms.size() == 1 &&
         verticalTransforms.front()->hasBallparkTransformation()) {
         const auto &authFactory = context.context->getAuthorityFactory();
         auto dbContext = authFactory
                              ? authFactory->databaseContext().as_nullable()
                              : nullptr;
+
+        const auto createWithIntermediateCRS =
+            [&sourceCRS, &targetCRS, &context,
+             &res](const crs::CRSNNPtr &intermCRS) {
+                const auto ops1 =
+                    createOperations(sourceCRS, intermCRS, context);
+                const auto ops2 =
+                    createOperations(intermCRS, targetCRS, context);
+                for (const auto &op1 : ops1) {
+                    for (const auto &op2 : ops2) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {op1, op2}, disallowEmptyIntersection));
+                        } catch (const std::exception &) {
+                        }
+                    }
+                }
+            };
+
+        const auto boundSrcHorizontal =
+            dynamic_cast<const crs::BoundCRS *>(componentsSrc[0].get());
+        const auto boundDstHorizontal =
+            dynamic_cast<const crs::BoundCRS *>(componentsDst[0].get());
+
+        // CompoundCRS[something_with_TOWGS84, ...] to CompoundCRS[WGS84, ...]
+        if (boundSrcHorizontal != nullptr && boundDstHorizontal == nullptr &&
+            boundSrcHorizontal->hubCRS()->_isEquivalentTo(
+                componentsDst[0].get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
+            createWithIntermediateCRS(
+                componentsDst[0]->promoteTo3D(std::string(), dbContext));
+            if (!res.empty()) {
+                return;
+            }
+        }
+        // Inverse of above
+        else if (boundDstHorizontal != nullptr &&
+                 boundSrcHorizontal == nullptr &&
+                 boundDstHorizontal->hubCRS()->_isEquivalentTo(
+                     componentsSrc[0].get(),
+                     util::IComparable::Criterion::EQUIVALENT)) {
+            createWithIntermediateCRS(
+                componentsSrc[0]->promoteTo3D(std::string(), dbContext));
+            if (!res.empty()) {
+                return;
+            }
+        }
+
+        // Deal with situation like
+        // WGS 84 + EGM96 --> ETRS89 + Belfast height where
+        // there is a geoid model for EGM96 referenced to WGS 84
+        // and a geoid model for Belfast height referenced to ETRS89
         const auto intermGeogSrc =
             srcGeog->promoteTo3D(std::string(), dbContext);
         const bool intermGeogSrcIsSameAsIntermGeogDst =
