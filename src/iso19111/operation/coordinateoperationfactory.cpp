@@ -4924,6 +4924,41 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToGeog(
                 }
                 return;
             }
+
+            auto boundSrc =
+                dynamic_cast<const crs::BoundCRS *>(componentsSrc[0].get());
+            if (boundSrc) {
+                derivedHSrc = dynamic_cast<const crs::DerivedCRS *>(
+                    boundSrc->baseCRS().get());
+                if (derivedHSrc) {
+                    std::vector<crs::CRSNNPtr> intermComponents{
+                        crs::BoundCRS::create(derivedHSrc->baseCRS(),
+                                              boundSrc->hubCRS(),
+                                              boundSrc->transformation()),
+                        componentsSrc[1]};
+                    auto properties = util::PropertyMap().set(
+                        common::IdentifiedObject::NAME_KEY,
+                        intermComponents[0]->nameStr() + " + " +
+                            intermComponents[1]->nameStr());
+                    auto intermCompound =
+                        crs::CompoundCRS::create(properties, intermComponents);
+                    auto opsFirst =
+                        createOperations(sourceCRS, intermCompound, context);
+                    assert(!opsFirst.empty());
+                    auto opsLast =
+                        createOperations(intermCompound, targetCRS, context);
+                    for (const auto &opLast : opsLast) {
+                        try {
+                            res.emplace_back(
+                                ConcatenatedOperation::createComputeMetadata(
+                                    {opsFirst.front(), opLast},
+                                    disallowEmptyIntersection));
+                        } catch (const std::exception &) {
+                        }
+                    }
+                    return;
+                }
+            }
         }
 
         std::vector<CoordinateOperationNNPtr> horizTransforms;
