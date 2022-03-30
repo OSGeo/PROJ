@@ -5616,6 +5616,44 @@ void CoordinateOperationFactory::Private::createOperationsBoundToCompound(
                 }
             }
         }
+
+        // e.g transforming from a Bound[something_not_WGS84_but_with_TOWGS84]
+        // to a CompoundCRS[WGS84, ...]
+        const auto srcBaseSingleCRS =
+            dynamic_cast<const crs::SingleCRS *>(boundSrc->baseCRS().get());
+        const auto srcGeogCRS = boundSrc->extractGeographicCRS();
+        const auto boundSrcHubAsGeogCRS =
+            dynamic_cast<const crs::GeographicCRS *>(boundSrc->hubCRS().get());
+        const auto comp0Geog = componentsDst[0]->extractGeographicCRS();
+        if (srcBaseSingleCRS &&
+            srcBaseSingleCRS->coordinateSystem()->axisList().size() == 3 &&
+            srcGeogCRS && boundSrcHubAsGeogCRS && comp0Geog &&
+            boundSrcHubAsGeogCRS->coordinateSystem()->axisList().size() == 3 &&
+            !srcGeogCRS->datumNonNull(dbContext)->isEquivalentTo(
+                comp0Geog->datumNonNull(dbContext).get(),
+                util::IComparable::Criterion::EQUIVALENT) &&
+            boundSrcHubAsGeogCRS &&
+            boundSrcHubAsGeogCRS->datumNonNull(dbContext)->isEquivalentTo(
+                comp0Geog->datumNonNull(dbContext).get(),
+                util::IComparable::Criterion::EQUIVALENT)) {
+            const auto ops1 =
+                createOperations(sourceCRS, boundSrc->hubCRS(), context);
+            const auto ops2 =
+                createOperations(boundSrc->hubCRS(), targetCRS, context);
+            for (const auto &op1 : ops1) {
+                for (const auto &op2 : ops2) {
+                    try {
+                        res.emplace_back(
+                            ConcatenatedOperation::createComputeMetadata(
+                                {op1, op2}, disallowEmptyIntersection));
+                    } catch (const std::exception &) {
+                    }
+                }
+            }
+            if (!res.empty()) {
+                return;
+            }
+        }
     }
 
     // There might be better things to do, but for now just ignore the
