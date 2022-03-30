@@ -3568,6 +3568,11 @@ void Conversion::_exportToPROJString(
             const auto &components = compound->componentReferenceSystems();
             if (!components.empty()) {
                 horiz = components.front().as_nullable();
+                const auto boundCRS =
+                    dynamic_cast<const crs::BoundCRS *>(horiz.get());
+                if (boundCRS) {
+                    horiz = boundCRS->baseCRS().as_nullable();
+                }
             }
         }
 
@@ -3986,6 +3991,11 @@ void Conversion::_exportToPROJString(
                             compound->componentReferenceSystems();
                         if (!components.empty()) {
                             horiz = components.front().get();
+                            const auto boundCRS =
+                                dynamic_cast<const crs::BoundCRS *>(horiz);
+                            if (boundCRS) {
+                                horiz = boundCRS->baseCRS().get();
+                            }
                         }
                     }
 
@@ -4073,10 +4083,16 @@ void Conversion::_exportToPROJString(
             const auto &components = compound->componentReferenceSystems();
             if (!components.empty()) {
                 horiz = components.front().get();
+                const auto boundCRS =
+                    dynamic_cast<const crs::BoundCRS *>(horiz);
+                if (boundCRS) {
+                    horiz = boundCRS->baseCRS().get();
+                }
             }
         }
 
-        if (!bEllipsoidParametersDone) {
+        // horiz != nullptr: only to make clang static analyzer happy
+        if (!bEllipsoidParametersDone && horiz != nullptr) {
             auto targetGeodCRS = horiz->extractGeodeticCRS();
             auto targetGeogCRS =
                 std::dynamic_pointer_cast<crs::GeographicCRS>(targetGeodCRS);

@@ -3875,6 +3875,74 @@ TEST(
 // ---------------------------------------------------------------------------
 
 TEST(operation,
+     compoundCRS_with_bound_of_projected_and_bound_of_vertical_to_geog3D) {
+
+    auto dbContext = DatabaseContext::create();
+
+    const char *wktSrc =
+        "COMPD_CS[\"TempTM + CGVD28 height - HT2_0\",\n"
+        "    PROJCS[\"Custom\",\n"
+        "        GEOGCS[\"NAD83(CSRS)\",\n"
+        "            DATUM[\"NAD83_Canadian_Spatial_Reference_System\",\n"
+        "                SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                    AUTHORITY[\"EPSG\",\"7019\"]],\n"
+        "                TOWGS84[0,0,0,0,0,0,0],\n"
+        "                AUTHORITY[\"EPSG\",\"6140\"]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "            UNIT[\"degree\",0.0174532925199433,\n"
+        "                AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "            AUTHORITY[\"EPSG\",\"4617\"]],\n"
+        "        PROJECTION[\"Transverse_Mercator\"],\n"
+        "        PARAMETER[\"latitude_of_origin\",49.351346659616],\n"
+        "        PARAMETER[\"central_meridian\",-123.20266499149],\n"
+        "        PARAMETER[\"scale_factor\",1],\n"
+        "        PARAMETER[\"false_easting\",15307.188],\n"
+        "        PARAMETER[\"false_northing\",6540.975],\n"
+        "        UNIT[\"Meters\",1],\n"
+        "        AXIS[\"Easting\",EAST],\n"
+        "        AXIS[\"Northing\",NORTH]],\n"
+        "    VERT_CS[\"CGVD28 height - HT2_0\",\n"
+        "        VERT_DATUM[\"Canadian Geodetic Vertical Datum of "
+        "1928\",2005,\n"
+        "            EXTENSION[\"PROJ4_GRIDS\",\"HT2_0.gtx\"],\n"
+        "            AUTHORITY[\"EPSG\",\"5114\"]],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "        AXIS[\"Gravity-related height\",UP],\n"
+        "        AUTHORITY[\"EPSG\",\"5713\"]]]";
+    auto objSrc =
+        WKTParser().attachDatabaseContext(dbContext).createFromWKT(wktSrc);
+    auto srcCRS = nn_dynamic_pointer_cast<CompoundCRS>(objSrc);
+    ASSERT_TRUE(srcCRS != nullptr);
+
+    auto authFactoryEPSG = AuthorityFactory::create(dbContext, "EPSG");
+    // NAD83(CSRS) 3D
+    auto dstCRS = authFactoryEPSG->createCoordinateReferenceSystem("4955");
+
+    auto ctxt =
+        CoordinateOperationContext::create(authFactoryEPSG, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(srcCRS), dstCRS, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=tmerc +lat_0=49.351346659616 "
+              "+lon_0=-123.20266499149 +k=1 "
+              "+x_0=15307.188 +y_0=6540.975 +ellps=GRS80 "
+              "+step +proj=vgridshift +grids=HT2_0.gtx +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
      compoundCRS_with_boundGeogCRS_and_geoid_to_geodCRS_NAD2011_ctxt) {
 
     auto dbContext = DatabaseContext::create();
