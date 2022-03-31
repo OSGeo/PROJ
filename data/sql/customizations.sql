@@ -33,6 +33,19 @@ INSERT INTO "usage" VALUES(
     'EPSG','1024'  -- unknown
 );
 
+-- Defined in http://www.opengis.net/def/crs/OGC/0/CRS84h . Same as EPSG:4979 except axis order
+INSERT INTO "geodetic_crs" VALUES('OGC','CRS84h','WGS 84 longitude-latitude-height',NULL,'geographic 3D','EPSG','6426','EPSG','6326',NULL,0);
+INSERT INTO "scope" VALUES('PROJ','OGC_CRS84h','3D system frequently used in GIS, Web APIs and Web applications',0);
+INSERT INTO "usage" VALUES(
+    'PROJ',
+    'OGC_CRS84h_USAGE',
+    'geodetic_crs',
+    'OGC',
+    'CRS84h',
+    'EPSG','1262', -- extent ('World')
+    'PROJ','OGC_CRS84h'  -- scope
+);
+
 INSERT INTO "geodetic_crs" VALUES('OGC','CRS27','NAD27 (CRS27)',NULL,'geographic 2D','EPSG','6424','EPSG','6267',NULL,0);
 INSERT INTO "usage" VALUES(
     'PROJ',
