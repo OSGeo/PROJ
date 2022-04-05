@@ -1622,18 +1622,20 @@ Candidate operations found: 2
 unknown id, Inverse of UTM zone 30N + ED50 to ETRS89 (12) + UTM zone 30N, 0.2 m, Spain - mainland, Balearic Islands, Ceuta and Melila - onshore.
 unknown id, Inverse of UTM zone 30N + ED50 to ETRS89 (7) + UTM zone 30N, 1.5 m, Spain - onshore mainland except northwest (north of 41°30'N and west of 4°30'W).
 
-Testing --list-crs | grep "EPSG:32632\|ESRI:103668\|OGC" | sort
+Testing --list-crs | grep "EPSG:32632\|ESRI:103668\|OGC"
 EPSG:32632 "WGS 84 / UTM zone 32N"
 ESRI:103668 "NAD_1983_HARN_Adj_MN_Ramsey_Meters"
 OGC:CRS27 "NAD27 (CRS27)"
 OGC:CRS83 "NAD83 (CRS83)"
 OGC:CRS84 "WGS 84 (CRS84)"
+OGC:CRS84h "WGS 84 longitude-latitude-height"
 
-Testing --list-crs --authority OGC,EPSG | grep "EPSG:4326\|OGC" | sort
-EPSG:4326 "WGS 84"
+Testing --list-crs --authority OGC,EPSG | grep "EPSG:4326\|OGC"
 OGC:CRS27 "NAD27 (CRS27)"
 OGC:CRS83 "NAD83 (CRS83)"
 OGC:CRS84 "WGS 84 (CRS84)"
+OGC:CRS84h "WGS 84 longitude-latitude-height"
+EPSG:4326 "WGS 84"
 
 Testing --list-crs | grep deprecated | sort
 
