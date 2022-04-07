@@ -9,5 +9,5 @@ add_subdirectory(tests)
 
 if(APPLE)
   # Directory name for installed targets
-  set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${LIBDIR}")
+  set(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
 endif()

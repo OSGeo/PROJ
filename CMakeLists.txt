@@ -286,18 +286,8 @@ link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 # Installation
 ################################################################################
 include(ProjInstallPath)
-set(BINDIR "${DEFAULT_BINDIR}"
-  CACHE PATH "The directory to install binaries into.")
-set(LIBDIR "${DEFAULT_LIBDIR}"
-  CACHE PATH "The directory to install libraries into.")
-set(DATADIR "${DEFAULT_DATADIR}"
-  CACHE PATH "The directory to install data files into.")
-set(DOCDIR "${DEFAULT_DOCDIR}"
-  CACHE PATH "The directory to install doc files into.")
-set(INCLUDEDIR "${DEFAULT_INCLUDEDIR}"
-  CACHE PATH "The directory to install includes into.")
-set(CMAKECONFIGDIR "${DEFAULT_CMAKEDIR}"
-  CACHE PATH "Parent of the directory to install cmake config files into.")
+include(GNUInstallDirs)
+set(PROJ_LIB_PATH "${CMAKE_INSTALL_FULL_DATADIR}/proj")
 
 ################################################################################
 # Tests
@@ -326,7 +316,7 @@ endif()
 
 set(docfiles COPYING NEWS AUTHORS)
 install(FILES ${docfiles}
-        DESTINATION "${DOCDIR}")
+        DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
 ################################################################################
 # pkg-config support
@@ -335,7 +325,7 @@ configure_proj_pc()
 
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/proj.pc
-  DESTINATION ${LIBDIR}/pkgconfig)
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 ################################################################################
 # "make dist" workalike

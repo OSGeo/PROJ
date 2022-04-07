@@ -6,7 +6,7 @@ add_executable(projinfo ${PROJINFO_SRC})
 target_link_libraries(projinfo PRIVATE ${PROJ_LIBRARIES})
 
 install(TARGETS projinfo
-  DESTINATION ${BINDIR})
+  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(CURL_ENABLED)
   target_compile_definitions(projinfo PRIVATE -DCURL_ENABLED)

@@ -68,10 +68,9 @@ endfunction()
 #
 
 function(configure_proj_pc)
-  set(prefix "${CMAKE_INSTALL_PREFIX}")
-  set(exec_prefix "$\{prefix\}")
-  set(libdir "$\{exec_prefix\}/${PROJ_LIB_SUBDIR}")
-  set(includedir "$\{prefix\}/${PROJ_INCLUDE_SUBDIR}")
+  set(prefix ${CMAKE_INSTALL_PREFIX})
+  set(libdir "$\{prefix\}/${CMAKE_INSTALL_LIBDIR}")
+  set(includedir "$\{prefix\}/${CMAKE_INSTALL_INCLUDEDIR}")
   set(datarootdir "$\{prefix\}/${CMAKE_INSTALL_DATAROOTDIR}")
   set(datadir "$\{datarootdir\}")
   set(PACKAGE "proj")

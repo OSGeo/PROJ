@@ -11,9 +11,10 @@
 # Tell the user project where to find our headers and libraries
 get_filename_component (_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
 get_filename_component (_ROOT "${_DIR}/@PROJECT_ROOT_DIR@" ABSOLUTE)
-set (@PROJECT_VARIANT_NAME@_INCLUDE_DIRS "${_ROOT}/@INCLUDEDIR@")
-set (@PROJECT_VARIANT_NAME@_LIBRARY_DIRS "${_ROOT}/@LIBDIR@")
-set (@PROJECT_VARIANT_NAME@_BINARY_DIRS "${_ROOT}/@BINDIR@")
+# Use _ROOT as prefix here for the possibility of relocation after installation.
+set (@PROJECT_VARIANT_NAME@_INCLUDE_DIRS "${_ROOT}/@CMAKE_INSTALL_INCLUDEDIR@")
+set (@PROJECT_VARIANT_NAME@_LIBRARY_DIRS "${_ROOT}/@CMAKE_INSTALL_LIBDIR@")
+set (@PROJECT_VARIANT_NAME@_BINARY_DIRS "${_ROOT}/@CMAKE_INSTALL_BINDIR@")
 
 set (@PROJECT_VARIANT_NAME@_LIBRARIES @PROJECT_VARIANT_NAME@::proj)
 # Read in the exported definition of the library

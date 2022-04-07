@@ -22,7 +22,9 @@ if(APPLE)
   option(BUILD_FRAMEWORKS_AND_BUNDLE
     "if set to ON, build a library framework and application bundle, \
 otherwise install classical UNIX bin/lib" OFF)
-  set(DEFAULT_BINDIR ${BUNDLEDIR})
+  if(BUILD_FRAMEWORKS_AND_BUNDLE)
+    set(CMAKE_INSTALL_BINDIR ${BUNDLEDIR})
+  endif()
   print_variable(BUNDLEDIR)
   print_variable(PROJ_INSTALL_NAME_DIR)
   print_variable(FRAMEWORKDIR)

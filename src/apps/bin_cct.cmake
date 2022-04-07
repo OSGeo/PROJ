@@ -11,4 +11,4 @@ add_executable(cct ${CCT_SRC} ${CCT_INCLUDE})
 target_link_libraries(cct PRIVATE ${PROJ_LIBRARIES})
 
 install(TARGETS cct
-  DESTINATION ${BINDIR})
+  DESTINATION ${CMAKE_INSTALL_BINDIR})

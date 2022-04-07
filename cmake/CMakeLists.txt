@@ -64,9 +64,6 @@ string (TOLOWER "${PROJECT_LEGACY_NAME}" PROJECT_LEGACY_LOWER)
 #
 # At some more distant date, the PROJ4::proj target will be retired.
 #
-# To support this change, the CACHE variables PROJ_CMAKE_SUBDIR (and
-# CMAKECONFIGDIR) is now the "Parent of directory to install cmake
-# config files into".
 #
 # All this messiness is confined to
 #
@@ -95,7 +92,7 @@ endif ()
 
 foreach (PROJECT_VARIANT_NAME ${PROJECT_NAME} ${PROJECT_LEGACY_NAME})
   string (TOLOWER "${PROJECT_VARIANT_NAME}" PROJECT_VARIANT_LOWER)
-  set (CMAKECONFIGSUBDIR "${CMAKECONFIGDIR}/${PROJECT_VARIANT_LOWER}")
+  set (CMAKECONFIGSUBDIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_VARIANT_LOWER}")
   # proj-config.cmake for the install tree.  It's installed in
   # ${CMAKECONFIGSUBDIR} and @PROJECT_ROOT_DIR@ is the relative
   # path to the root from there.  (Note that the whole install tree can
