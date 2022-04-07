@@ -574,6 +574,8 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                 operation::CoordinateOperationFactory::create()
                     ->createOperations(NN_NO_CHECK(geodCRS), hubCRS, ctxt);
             CRSPtr candidateBoundCRS;
+            int candidateCount = 0;
+            bool candidateHasExactlyMachingExtent = false;
             for (const auto &op : list) {
                 auto transf =
                     util::nn_dynamic_pointer_cast<operation::Transformation>(
@@ -584,13 +586,31 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                     } catch (const std::exception &) {
                         continue;
                     }
+                    bool unused = false;
+                    auto opExtent =
+                        getExtent(NN_NO_CHECK(transf), false, unused);
+                    const bool exactlyMatchingExtent =
+                        opExtent && extentResolved &&
+                        opExtent->contains(NN_NO_CHECK(extentResolved)) &&
+                        extentResolved->contains(NN_NO_CHECK(opExtent));
                     if (candidateBoundCRS) {
-                        candidateBoundCRS = nullptr;
-                        break;
+                        if (exactlyMatchingExtent &&
+                            !candidateHasExactlyMachingExtent) {
+                            candidateBoundCRS = nullptr;
+                        } else if (exactlyMatchingExtent ==
+                                   candidateHasExactlyMachingExtent) {
+                            candidateCount++;
+                        }
                     }
-                    candidateBoundCRS =
-                        BoundCRS::create(thisAsCRS, hubCRS, NN_NO_CHECK(transf))
-                            .as_nullable();
+                    if (candidateBoundCRS == nullptr) {
+                        candidateCount = 1;
+                        candidateHasExactlyMachingExtent =
+                            exactlyMatchingExtent;
+                        candidateBoundCRS =
+                            BoundCRS::create(thisAsCRS, hubCRS,
+                                             NN_NO_CHECK(transf))
+                                .as_nullable();
+                    }
                 } else {
                     auto concatenated =
                         dynamic_cast<const operation::ConcatenatedOperation *>(
@@ -621,21 +641,42 @@ CRSNNPtr CRS::createBoundCRSToWGS84IfPossible(
                                     } catch (const std::exception &) {
                                         continue;
                                     }
+                                    bool unused = false;
+                                    auto opExtent = getExtent(
+                                        NN_NO_CHECK(transf), false, unused);
+                                    const bool exactlyMatchingExtent =
+                                        opExtent && extentResolved &&
+                                        opExtent->contains(
+                                            NN_NO_CHECK(extentResolved)) &&
+                                        extentResolved->contains(
+                                            NN_NO_CHECK(opExtent));
                                     if (candidateBoundCRS) {
-                                        candidateBoundCRS = nullptr;
-                                        break;
+                                        if (exactlyMatchingExtent &&
+                                            !candidateHasExactlyMachingExtent) {
+                                            candidateBoundCRS = nullptr;
+                                        } else if (
+                                            exactlyMatchingExtent ==
+                                            candidateHasExactlyMachingExtent) {
+                                            candidateCount++;
+                                        }
                                     }
-                                    candidateBoundCRS =
-                                        BoundCRS::create(thisAsCRS, hubCRS,
-                                                         NN_NO_CHECK(transf))
-                                            .as_nullable();
+                                    if (candidateBoundCRS == nullptr) {
+                                        candidateCount = 1;
+                                        candidateHasExactlyMachingExtent =
+                                            exactlyMatchingExtent;
+                                        candidateBoundCRS =
+                                            BoundCRS::create(
+                                                thisAsCRS, hubCRS,
+                                                NN_NO_CHECK(transf))
+                                                .as_nullable();
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-            if (candidateBoundCRS) {
+            if (candidateCount == 1 && candidateBoundCRS) {
                 return NN_NO_CHECK(candidateBoundCRS);
             }
         } catch (const std::exception &) {
