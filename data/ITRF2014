@@ -9,9 +9,9 @@
 
 <ITRF97> +proj=helmert +x=0.0074 +y=-0.0005 +z=-0.0628 +d=0.0038 +rz=0.00026 +dx0.0001	+dy=-0.0005 +dz=-0.0033	+ds=0.00012 +drz=0.00002 +t_epoch=2010.0 +convention=position_vector
 
-<ITRF96> +proj=helmert +x=0.0074 +y=-0.0005 +z=-0.0628 +s=0.0038 +rz=0.00026 +dx=0.0001 +dy=-0.0005 +dz=-0.0033 +ds=0.00012 +t_epoch=2010.0 +convention=position_vector
+<ITRF96> +proj=helmert +x=0.0074 +y=-0.0005 +z=-0.0628 +s=0.0038 +rz=0.00026 +dx=0.0001 +dy=-0.0005 +dz=-0.0033 +ds=0.00012 +drz=0.00002 +t_epoch=2010.0 +convention=position_vector
 
-<ITRF94> +proj=helmert +x=0.0074 +y=-0.0005 +z=-0.0628 +s=0.0038 +rz=0.00026 +dx=0.0001 +dy=-0.0005 +dz=-0.0033 +ds=0.00012 +t_epoch=2010.0 +convention=position_vector
+<ITRF94> +proj=helmert +x=0.0074 +y=-0.0005 +z=-0.0628 +s=0.0038 +rz=0.00026 +dx=0.0001 +dy=-0.0005 +dz=-0.0033 +ds=0.00012 +drz=0.00002 +t_epoch=2010.0 +convention=position_vector
 
 <ITRF93> +proj=helmert +x=-0.0504 +y=0.0033 +z=-0.0602 +s=0.00429 +rx=-0.00281 +ry=-0.00338 +rz=0.0004 +dx=-0.0028 +dy=-0.0001 +dz=-0.0025 +ds=0.00012 +drx=-0.00011 +dry=-0.00019 +drz=0.00007 +t_epoch=2010.0 +convention=position_vector
 
@@ -23,7 +23,7 @@
 
 <ITRF89> +proj=helmert +x=0.0304 +y=0.0355 +z=-0.1308 +s=0.00819 +rz=0.00026 +dx=0.0001 +dy=-0.0005 +dz=-0.0033 +ds=0.00012 +drz=0.00002 +t_epoch=2010.0 +convention=position_vector
 
-<ITRF88> +proj=helmert +x=0.0254 +y=-0.0005 +z=-0.1548 +s=0.01129 +rx=0.0001 +rz= +dx=0.00026 +dy=0.0001 +dx=-0.0005 +dz=-0.0033 +ds=0.00012 +drz=0.00002 +t_epoch=2010.0 +convention=position_vector
+<ITRF88> +proj=helmert +x=0.0254 +y=-0.0005 +z=-0.1548 +s=0.01129 +rx=0.0001 +rz=0.00026 +dx=0.0001 +dy=-0.0005 +dz=-0.0033 +ds=0.00012 +drz=0.00002 +t_epoch=2010.0 +convention=position_vector
 
 # ITRF2014 Plate Motion Model parameters
 #
