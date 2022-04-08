@@ -376,6 +376,13 @@ echo 'Testing --list-crs projected --area France | grep "RGF93 v1 / Lambert-93\|
 $EXE --list-crs projected --area France | grep "RGF93 v1 / Lambert-93\|UTM zone 11N" | sort >> ${OUT}
 echo "" >>${OUT}
 
+# Test North-Macedonia CRS for which there are several MGI 1901 -> WGS 84 Helmert transformations
+# but only one matches the extent of the CRS
+echo 'Testing EPSG:9945 -o PROJ -q' >> ${OUT}
+$EXE EPSG:9945 -o PROJ -q >> ${OUT}
+echo "" >>${OUT}
+
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testprojinfo_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testprojinfo_out.dist
