@@ -4867,6 +4867,157 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_to_compoundCRS_issue_3152_ch1903lv03_ln02_bound) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto wkt =
+        "COMPOUNDCRS[\"CH1903 / LV03 + LN02 height\",\n"
+        "    BOUNDCRS[\n"
+        "        SOURCECRS[\n"
+        "            PROJCRS[\"CH1903 / LV03\",\n"
+        "                BASEGEOGCRS[\"CH1903\",\n"
+        "                    DATUM[\"CH1903\",\n"
+        "                        ELLIPSOID[\"Bessel "
+        "1841\",6377397.155,299.1528128,\n"
+        "                            LENGTHUNIT[\"metre\",1]]],\n"
+        "                    PRIMEM[\"Greenwich\",0,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                    ID[\"EPSG\",4149]],\n"
+        "                CONVERSION[\"Map projection of CH1903 / LV03\",\n"
+        "                    METHOD[\"Hotine Oblique Mercator (variant B)\",\n"
+        "                        ID[\"EPSG\",9815]],\n"
+        "                    PARAMETER[\"Latitude of projection "
+        "centre\",46.9524055555556,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8811]],\n"
+        "                    PARAMETER[\"Longitude of projection "
+        "centre\",7.43958333333333,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8812]],\n"
+        "                    PARAMETER[\"Azimuth of initial line\",90,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8813]],\n"
+        "                    PARAMETER[\"Angle from Rectified to Skew "
+        "Grid\",90,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8814]],\n"
+        "                    PARAMETER[\"Scale factor on initial line\",1,\n"
+        "                        SCALEUNIT[\"unity\",1],\n"
+        "                        ID[\"EPSG\",8815]],\n"
+        "                    PARAMETER[\"Easting at projection "
+        "centre\",600000,\n"
+        "                        LENGTHUNIT[\"metre\",1],\n"
+        "                        ID[\"EPSG\",8816]],\n"
+        "                    PARAMETER[\"Northing at projection "
+        "centre\",200000,\n"
+        "                        LENGTHUNIT[\"metre\",1],\n"
+        "                        ID[\"EPSG\",8817]]],\n"
+        "                CS[Cartesian,2],\n"
+        "                    AXIS[\"easting\",east,\n"
+        "                        ORDER[1],\n"
+        "                        LENGTHUNIT[\"metre\",1]],\n"
+        "                    AXIS[\"northing\",north,\n"
+        "                        ORDER[2],\n"
+        "                        LENGTHUNIT[\"metre\",1]],\n"
+        "                ID[\"EPSG\",21781]]],\n"
+        "        TARGETCRS[\n"
+        "            GEOGCRS[\"WGS 84\",\n"
+        "                DATUM[\"World Geodetic System 1984\",\n"
+        "                    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                CS[ellipsoidal,2],\n"
+        "                    AXIS[\"latitude\",north,\n"
+        "                        ORDER[1],\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                    AXIS[\"longitude\",east,\n"
+        "                        ORDER[2],\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                ID[\"EPSG\",4326]]],\n"
+        "        ABRIDGEDTRANSFORMATION[\"MyTransformation from CH1903 to "
+        "WGS84\",\n"
+        "            METHOD[\"Position Vector transformation (geog2D "
+        "domain)\",\n"
+        "                ID[\"EPSG\",9606]],\n"
+        "            PARAMETER[\"X-axis translation\",674.374,\n"
+        "                ID[\"EPSG\",8605]],\n"
+        "            PARAMETER[\"Y-axis translation\",15.056,\n"
+        "                ID[\"EPSG\",8606]],\n"
+        "            PARAMETER[\"Z-axis translation\",405.346,\n"
+        "                ID[\"EPSG\",8607]],\n"
+        "            PARAMETER[\"X-axis rotation\",0,\n"
+        "                ID[\"EPSG\",8608]],\n"
+        "            PARAMETER[\"Y-axis rotation\",0,\n"
+        "                ID[\"EPSG\",8609]],\n"
+        "            PARAMETER[\"Z-axis rotation\",0,\n"
+        "                ID[\"EPSG\",8610]],\n"
+        "            PARAMETER[\"Scale difference\",1,\n"
+        "                ID[\"EPSG\",8611]]]],\n"
+        "    VERTCRS[\"LN02 height\",\n"
+        "        VDATUM[\"Landesnivellement 1902\"],\n"
+        "        CS[vertical,1],\n"
+        "            AXIS[\"gravity-related height\",up,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "        ID[\"EPSG\",5728]]]";
+    auto srcObj = createFromUserInput(wkt, dbContext, false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto authFactoryEPSG =
+        AuthorityFactory::create(dbContext, std::string("EPSG"));
+    auto dst = authFactoryEPSG->createCoordinateReferenceSystem(
+        "9518"); // "WGS 84 + EGM2008 height"
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    // Check that BoundCRS helmert transformation is used
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of Map projection of CH1903 / LV03 + "
+              "MyTransformation from CH1903 to WGS84 + "
+              "Inverse of ETRS89 to WGS 84 (1) + "
+              "Inverse of ETRS89 to LN02 height + "
+              "ETRS89 to WGS 84 (1) + "
+              "WGS 84 to EGM2008 height (1)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=somerc +lat_0=46.9524055555556 "
+              "+lon_0=7.43958333333333 +k_0=1 "
+              "+x_0=600000 +y_0=200000 +ellps=bessel "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=bessel "
+              "+step +proj=helmert +x=674.374 +y=15.056 +z=405.346 "
+              "+rx=0 +ry=0 +rz=0 +s=0 +convention=position_vector "
+              "+step +inv +proj=cart +ellps=GRS80 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=vgridshift "
+              "+grids=ch_swisstopo_chgeo2004_ETRS89_LN02.tif "
+              "+multiplier=1 "
+              "+step +inv +proj=vgridshift +grids=us_nga_egm08_25.tif "
+              "+multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+
+    auto listInv = CoordinateOperationFactory::create()->createOperations(
+        dst, NN_NO_CHECK(src), ctxt);
+    ASSERT_GE(listInv.size(), 1U);
+    EXPECT_EQ(listInv[0]->nameStr(),
+              "Inverse of WGS 84 to EGM2008 height (1) + "
+              "Inverse of ETRS89 to WGS 84 (1) + "
+              "ETRS89 to LN02 height + "
+              "ETRS89 to WGS 84 (1) + "
+              "Inverse of MyTransformation from CH1903 to WGS84 + "
+              "Map projection of CH1903 / LV03");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, vertCRS_to_vertCRS) {
 
     auto vertcrs_m_obj = PROJStringParser().createFromPROJString("+vunits=m");
@@ -6364,6 +6515,139 @@ TEST(operation, boundCRS_to_compoundCRS) {
         NN_CHECK_ASSERT(dst), NN_CHECK_ASSERT(src));
     ASSERT_TRUE(opInverse != nullptr);
     EXPECT_TRUE(opInverse->inverse()->_isEquivalentTo(op.get()));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     boundCRS_to_compoundCRS_with_hubCRS_same_as_compound_geographicCRS) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto wkt =
+        "BOUNDCRS[\n"
+        "    SOURCECRS[\n"
+        "        PROJCRS[\"CH1903 / LV03\",\n"
+        "            BASEGEOGCRS[\"CH1903\",\n"
+        "                DATUM[\"CH1903\",\n"
+        "                    ELLIPSOID[\"Bessel "
+        "1841\",6377397.155,299.1528128,\n"
+        "                        LENGTHUNIT[\"metre\",1]],\n"
+        "                    ID[\"EPSG\",6149]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8901]]],\n"
+        "            CONVERSION[\"unnamed\",\n"
+        "                METHOD[\"Hotine Oblique Mercator (variant B)\",\n"
+        "                    ID[\"EPSG\",9815]],\n"
+        "                PARAMETER[\"Latitude of projection "
+        "centre\",46.9524055555556,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8811]],\n"
+        "                PARAMETER[\"Longitude of projection "
+        "centre\",7.43958333333333,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8812]],\n"
+        "                PARAMETER[\"Azimuth of initial line\",90,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8813]],\n"
+        "                PARAMETER[\"Angle from Rectified to Skew Grid\",90,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8814]],\n"
+        "                PARAMETER[\"Scale factor on initial line\",1,\n"
+        "                    SCALEUNIT[\"unity\",1],\n"
+        "                    ID[\"EPSG\",8815]],\n"
+        "                PARAMETER[\"Easting at projection centre\",600000,\n"
+        "                    LENGTHUNIT[\"metre\",1],\n"
+        "                    ID[\"EPSG\",8816]],\n"
+        "                PARAMETER[\"Northing at projection centre\",200000,\n"
+        "                    LENGTHUNIT[\"metre\",1],\n"
+        "                    ID[\"EPSG\",8817]]],\n"
+        "            CS[Cartesian,3],\n"
+        "                AXIS[\"y\",east,\n"
+        "                    ORDER[1],\n"
+        "                    LENGTHUNIT[\"metre\",1,\n"
+        "                        ID[\"EPSG\",9001]]],\n"
+        "                AXIS[\"x\",north,\n"
+        "                    ORDER[2],\n"
+        "                    LENGTHUNIT[\"metre\",1,\n"
+        "                        ID[\"EPSG\",9001]]],\n"
+        "                AXIS[\"ellipsoidal height (h)\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1,\n"
+        "                        ID[\"EPSG\",9001]]]]],\n"
+        "    TARGETCRS[\n"
+        "        GEOGCRS[\"WGS 84\",\n"
+        "            ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n"
+        "                MEMBER[\"World Geodetic System 1984 (Transit)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G730)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G873)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G1150)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G1674)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G1762)\"],\n"
+        "                MEMBER[\"World Geodetic System 1984 (G2139)\"],\n"
+        "                ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "                ENSEMBLEACCURACY[2.0]],\n"
+        "            PRIMEM[\"Greenwich\",0,\n"
+        "                ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                AXIS[\"ellipsoidal height (h)\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",4979]]],\n"
+        "    ABRIDGEDTRANSFORMATION[\"Transformation from CH1903 to WGS84\",\n"
+        "        METHOD[\"Position Vector transformation (geog2D domain)\",\n"
+        "            ID[\"EPSG\",9606]],\n"
+        "        PARAMETER[\"X-axis translation\",674.4,\n"
+        "            ID[\"EPSG\",8605]],\n"
+        "        PARAMETER[\"Y-axis translation\",15.1,\n"
+        "            ID[\"EPSG\",8606]],\n"
+        "        PARAMETER[\"Z-axis translation\",405.3,\n"
+        "            ID[\"EPSG\",8607]],\n"
+        "        PARAMETER[\"X-axis rotation\",0,\n"
+        "            ID[\"EPSG\",8608]],\n"
+        "        PARAMETER[\"Y-axis rotation\",0,\n"
+        "            ID[\"EPSG\",8609]],\n"
+        "        PARAMETER[\"Z-axis rotation\",0,\n"
+        "            ID[\"EPSG\",8610]],\n"
+        "        PARAMETER[\"Scale difference\",1,\n"
+        "            ID[\"EPSG\",8611]]]]";
+    auto srcObj =
+        createFromUserInput(wkt, authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto dst = authFactory->createCoordinateReferenceSystem(
+        "9518"); // "WGS 84 + EGM2008 height"
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    ASSERT_GE(list.size(), 1U);
+    // Check that BoundCRS helmert transformation is used
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +inv +proj=somerc +lat_0=46.9524055555556 "
+              "+lon_0=7.43958333333333 +k_0=1 "
+              "+x_0=600000 +y_0=200000 +ellps=bessel "
+              "+step +proj=cart +ellps=bessel "
+              "+step +proj=helmert +x=674.4 +y=15.1 +z=405.3 +rx=0 +ry=0 +rz=0 "
+              "+s=0 +convention=position_vector "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +inv +proj=vgridshift +grids=us_nga_egm08_25.tif "
+              "+multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
