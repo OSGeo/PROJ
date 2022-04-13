@@ -7,6 +7,9 @@
 #  @PROJECT_VARIANT_NAME@_LIBRARY_DIRS = /usr/local/lib
 #  @PROJECT_VARIANT_NAME@_BINARY_DIRS = /usr/local/bin
 #  @PROJECT_VARIANT_NAME@_VERSION = 4.9.1 (for example)
+if(@PROJECT_VARIANT_NAME@ STREQUAL "PROJ4")
+  message(DEPRECATION "find_package(PROJ4) is deprecated and will be retired soon. Please use find_package(PROJ) instead.")
+endif()
 
 # Tell the user project where to find our headers and libraries
 get_filename_component (_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
