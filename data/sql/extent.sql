@@ -1829,7 +1829,7 @@ INSERT INTO "extent" VALUES('EPSG','2849','Sweden - 2.5 gon E','Sweden - commune
 INSERT INTO "extent" VALUES('EPSG','2850','Sweden - 5 gon E','Sweden - east of approximately 21°26''E. See information source for map.',65.24,68.58,21.34,24.17,0);
 INSERT INTO "extent" VALUES('EPSG','2851','Iceland - mainland west of 24°W','Iceland - mainland west of 24°W.',64.71,65.85,-24.66,-24.0,0);
 INSERT INTO "extent" VALUES('EPSG','2852','Iceland - mainland 24°W to 18°W','Iceland - mainland between 24°W and 18°W.',63.34,66.52,-24.0,-18.0,0);
-INSERT INTO "extent" VALUES('EPSG','2853','Iceland - mainland east of 18°W','Iceland - mainland east of 18°W.',63.45,66.59,-18.0,-13.38,0);
+INSERT INTO "extent" VALUES('EPSG','2853','Iceland - mainland east of 18°W','Iceland - mainland east of 18°W.',63.45,66.58,-18.0,-13.38,0);
 INSERT INTO "extent" VALUES('EPSG','2854','Europe - 36°W to 30°W','Europe - between 36°W and 30°W.',39.3,39.85,-36.0,-30.0,1);
 INSERT INTO "extent" VALUES('EPSG','2855','Europe - 30°W to 24°W','Europe - between 30°W and 24°W.',25.1,65.8,-30.0,-24.0,1);
 INSERT INTO "extent" VALUES('EPSG','2856','Europe - 24°W to 18°W','Europe - between 24°W and 18°W.',27.6,66.5,-24.0,-18.0,1);
@@ -3635,6 +3635,9 @@ INSERT INTO "extent" VALUES('EPSG','4656','Norway - inshore and nearshore','Norw
 INSERT INTO "extent" VALUES('EPSG','4657','St Martin','St Martin - onshore and offshore.',17.87,18.19,-63.66,-62.73,0);
 INSERT INTO "extent" VALUES('EPSG','4658','St Barthelemy','St Barthélemy - onshore and offshore.',17.64,18.31,-63.1,-62.21,0);
 INSERT INTO "extent" VALUES('EPSG','4659','Italy - mainland west of 16°E','Italy - mainland northwest of approximately 16°E, including San Marino and Vatican City State.',39.65,47.09,6.62,16.52,0);
-INSERT INTO "extent" VALUES('EPSG','4660','Germany - Hesse','Germany - Hesse.',49.39,51.66,7.77,10.24,0);
+INSERT INTO "extent" VALUES('EPSG','4660','Germany - Hessen','Germany - Hessen.',49.39,51.66,7.77,10.24,0);
 INSERT INTO "extent" VALUES('EPSG','4661','UK - Newport to Ebbw Vale','United Kingdom (UK) - on or related to the rail route from Newport (Park Junction) to Ebbw Vale.',51.5,51.85,-3.3,-2.89,0);
 INSERT INTO "extent" VALUES('EPSG','4662','Iceland - onshore','Iceland - onshore.',63.24,66.62,-24.66,-13.38,0);
+INSERT INTO "extent" VALUES('EPSG','4663','UK - Leeds to Hull','United Kingdom (UK) - on or related to the rail route from the Morley tunnel through Leeds to Hull.',53.6,53.9,-1.69,-0.27,0);
+INSERT INTO "extent" VALUES('EPSG','4664','UK - Inverness to Thurso','United Kingdom (UK) - on or related to the rail route from Inverness to Thurso and Wick.',57.4,58.65,-4.6,-3.0,0);
+INSERT INTO "extent" VALUES('EPSG','4665','UK - Motherwell to Inverness','United Kingdom (UK) - on or related to the Scottish central mainline rail route from Motherwell through Perth and Pitlochry to Inverness.',55.7,57.55,-4.4,-3.3,0);
