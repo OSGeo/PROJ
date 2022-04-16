@@ -117,6 +117,9 @@ be done by iteratively solving a system of equations. By writing :eq:`real_poly`
 
 We can iteratively solve with initial values of :math:`U = 0` and :math:`V = 0` and find :math:`U` and :math:`V`.
 
+.. note::
+    This iterative inverse transformation is a more general solution to *reversible polynormials of degree n* as presented in :cite:`IOGP2019`. These can provide a satisfactory solution in a single step when certain conditions are met.
+
 Evaluation of the complex polynomials are defined by the following equations:
 
 .. math::
