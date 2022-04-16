@@ -655,6 +655,9 @@ INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','6181','Nouvelle Triangu
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','5172','Nivellement General du Luxembourg','EPSG');
 INSERT INTO "alias_name" VALUES('vertical_datum','EPSG','1316','GNTRANS2003','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1319','EBBWV14-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1317','HULLEE13-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1320','SCM22-IRF','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_datum','EPSG','1321','FNL22-IRF','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','21100','Genuk / NEIEZ','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2140','NAD83(CSRS98) / SCoPQ zone 3','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','2141','NAD83(CSRS98) / SCoPQ zone 4','EPSG');
@@ -7516,6 +7519,12 @@ INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9944','ETRS89 / EBBWV14 S
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','6190','BD72 / Belgian Lambert 72 + Oostende height','EPSG');
 INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9907','ETRS89 + Oostende height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','32159','NAD83 / WyLam','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9967','ETRS89 / HULLEE13 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9968','ETRS89 / HULLEE13 SnakeGrid + Newlyn height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9972','ETRS89 / SCM22 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9973','ETRS89 / SCM22 SnakeGrid + Newlyn height','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9977','ETRS89 / FNL22 SnakeGrid','EPSG');
+INSERT INTO "alias_name" VALUES('compound_crs','EPSG','9978','ETRS89 / FNL22 SnakeGrid + Newlyn height','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9945','MGI 1901 / Macedonia GK truncated','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9945','MGI 1901 / Macedonia Gauss-Kruger truncated','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','9945','MSCS truncated','EPSG');
