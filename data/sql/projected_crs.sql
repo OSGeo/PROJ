@@ -7442,6 +7442,12 @@ INSERT INTO "projected_crs" VALUES('EPSG','9945','Macedonia State Coordinate Sys
 INSERT INTO "usage" VALUES('EPSG','17461','projected_crs','EPSG','9945','EPSG','1148','EPSG','1028');
 INSERT INTO "projected_crs" VALUES('EPSG','9947','ISN2004 / LAEA Iceland',NULL,'EPSG','4400','EPSG','5324','EPSG','9946',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','17376','projected_crs','EPSG','9947','EPSG','1120','EPSG','1162');
+INSERT INTO "projected_crs" VALUES('EPSG','9967','HULLEE13 Grid',NULL,'EPSG','4400','EPSG','9964','EPSG','9966',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17429','projected_crs','EPSG','9967','EPSG','4663','EPSG','1141');
+INSERT INTO "projected_crs" VALUES('EPSG','9972','SCM22 Grid',NULL,'EPSG','4400','EPSG','9969','EPSG','9971',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17441','projected_crs','EPSG','9972','EPSG','4665','EPSG','1141');
+INSERT INTO "projected_crs" VALUES('EPSG','9977','FNL22 Grid',NULL,'EPSG','4400','EPSG','9974','EPSG','9976',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17456','projected_crs','EPSG','9977','EPSG','4664','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','20004','Pulkovo 1995 / Gauss-Kruger zone 4',NULL,'EPSG','4530','EPSG','4200','EPSG','16204',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','6177','projected_crs','EPSG','20004','EPSG','1763','EPSG','1211');
 INSERT INTO "projected_crs" VALUES('EPSG','20005','Pulkovo 1995 / Gauss-Kruger zone 5',NULL,'EPSG','4530','EPSG','4200','EPSG','16205',NULL,0);

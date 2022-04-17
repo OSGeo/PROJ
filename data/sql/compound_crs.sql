@@ -764,3 +764,9 @@ INSERT INTO "compound_crs" VALUES('EPSG','9952','ISN2004 / Lambert 2004 + ISH200
 INSERT INTO "usage" VALUES('EPSG','17383','compound_crs','EPSG','9952','EPSG','4662','EPSG','1056');
 INSERT INTO "compound_crs" VALUES('EPSG','9953','ISN2016 / Lambert 2016 + ISH2004 height',NULL,'EPSG','8088','EPSG','8089',0);
 INSERT INTO "usage" VALUES('EPSG','17384','compound_crs','EPSG','9953','EPSG','4662','EPSG','1056');
+INSERT INTO "compound_crs" VALUES('EPSG','9968','HULLEE13 Grid + ODN height',NULL,'EPSG','9967','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','17430','compound_crs','EPSG','9968','EPSG','4663','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','9973','SCM22 Grid + ODN height',NULL,'EPSG','9972','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','17442','compound_crs','EPSG','9973','EPSG','4665','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','9978','FNL22 Grid + ODN height',NULL,'EPSG','9977','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','17459','compound_crs','EPSG','9978','EPSG','4664','EPSG','1141');
