@@ -11,6 +11,12 @@ if(@PROJECT_VARIANT_NAME@ STREQUAL "PROJ4")
   message(DEPRECATION "find_package(PROJ4) is deprecated and will be retired soon. Please use find_package(PROJ) instead.")
 endif()
 
+include(CMakeFindDependencyMacro)
+if("@CURL_ENABLED@" STREQUAL "TRUE")
+  # Chainload CURL usage requirements
+  find_dependency(CURL)
+endif()
+
 # Tell the user project where to find our headers and libraries
 get_filename_component (_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
 get_filename_component (_ROOT "${_DIR}/@PROJECT_ROOT_DIR@" ABSOLUTE)
