@@ -463,10 +463,10 @@ endif()
 
 if(CURL_ENABLED)
   target_compile_definitions(proj PRIVATE -DCURL_ENABLED)
-  target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIR})
+  target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIRS})
   target_link_libraries(proj
     PRIVATE
-      ${CURL_LIBRARY}
+      ${CURL_LIBRARIES}
       $<$<CXX_COMPILER_ID:MSVC>:ws2_32>
       $<$<CXX_COMPILER_ID:MSVC>:wldap32>
       $<$<CXX_COMPILER_ID:MSVC>:advapi32>
