@@ -776,7 +776,7 @@ static const char tc32_utm32_fwd_only[] = {
     " +fwd_u=8.7760574982e+05,9.9999752475e-01,2.8817299305e-10,5.5641310680e-"
     "15,-1.5544700949e-18,-4.1357045890e-05,4.2106213519e-11,2.8525551629e-14,-"
     "1.9107771273e-18,3.3615590093e-10,2.4380247154e-14,-2.0241230315e-18,1."
-    "2429019719e-15,5.3886155968e-19,-1.0167505000e-18" };
+    "2429019719e-15,5.3886155968e-19,-1.0167505000e-18"};
 
 static const char sb_utm32_fwd_only[] = {
     " +proj=horner"
@@ -786,7 +786,7 @@ static const char sb_utm32_fwd_only[] = {
     " +deg=3"
     " +fwd_c=6.13258562111350e+06,6.19480105709997e+05,9.99378966275206e-01,-2."
     "82153291753490e-02,-2.27089979140026e-10,-1.77019590701470e-09,1."
-    "08522286274070e-14,2.11430298751604e-15" };
+    "08522286274070e-14,2.11430298751604e-15"};
 
 static const char hatt_to_ggrs[] = {
     " +proj=horner"
@@ -795,7 +795,8 @@ static const char hatt_to_ggrs[] = {
     " +deg=2"
     " +range=10000000"
     " +fwd_u=370552.68, 0.9997155, -1.08e-09, 0.0175123, 2.04e-09, 1.63e-09"
-    " +fwd_v=4511927.23, 0.9996979, 5.60e-10, -0.0174755, -1.65e-09, -6.50e-10" };
+    " +fwd_v=4511927.23, 0.9996979, 5.60e-10, -0.0174755, -1.65e-09, "
+    "-6.50e-10"};
 
 TEST(gie, horner_only_fwd_selftest) {
 
@@ -807,8 +808,8 @@ TEST(gie, horner_only_fwd_selftest) {
         a.uv.v = 6125305.4245;
         a.uv.u = 878354.8539;
 
-        /* Check roundtrip precision for 1 iteration each way, starting in forward
-         * direction */
+        /* Check roundtrip precision for 1 iteration each way, starting in
+         * forward direction */
         double dist = proj_roundtrip(P, PJ_FWD, 1, &a);
         EXPECT_LE(dist, 0.01);
 
@@ -838,8 +839,8 @@ TEST(gie, horner_only_fwd_selftest) {
         dist = proj_xy_dist(b, a);
         EXPECT_LE(dist, 0.001);
 
-        /* Check roundtrip precision for 1 iteration each way, starting in forward
-         * direction */
+        /* Check roundtrip precision for 1 iteration each way, starting in
+         * forward direction */
         dist = proj_roundtrip(P, PJ_FWD, 1, &a);
         EXPECT_LE(dist, 0.01);
 
