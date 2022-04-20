@@ -10980,6 +10980,49 @@ TEST(io, projparse_errors) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projparse_duplicated_ellipsoidal_specifiers) {
+
+    // Incompatible +ellps w.r.t +datum
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "+proj=longlat +datum=WGS84 +ellps=GRS80 +type=crs"),
+                 ParsingException);
+
+    // Incompatible +a w.r.t +datum
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "+proj=longlat +datum=WGS84 +a=1 +type=crs"),
+                 ParsingException);
+
+    // Incompatible +a and +b w.r.t +ellps
+    EXPECT_THROW(PROJStringParser().createFromPROJString(
+                     "+proj=longlat +ellps=WGS84 +a=1 +b=0.5 +type=crs"),
+                 ParsingException);
+
+    // +ellps compatible of +datum
+    {
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=longlat +datum=WGS84 +ellps=WGS84 +type=crs");
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        ASSERT_TRUE(crs->datum() != nullptr);
+        EXPECT_TRUE(crs->datum()->isEquivalentTo(
+            GeodeticReferenceFrame::EPSG_6326.get()));
+    }
+
+    // +a and +rf compatible of +datum
+    {
+        auto obj = PROJStringParser().createFromPROJString(
+            "+proj=longlat +datum=WGS84 +a=6378137.0 +rf=298.257223563 "
+            "+type=crs");
+        auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+        ASSERT_TRUE(crs->datum() != nullptr);
+        EXPECT_TRUE(crs->datum()->isEquivalentTo(
+            GeodeticReferenceFrame::EPSG_6326.get()));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat_errors) {
     EXPECT_THROW(PROJStringParser().createFromPROJString(
                      "+proj=longlat +datum=unknown +type=crs"),

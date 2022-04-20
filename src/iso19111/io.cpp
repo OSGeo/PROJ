@@ -9345,9 +9345,6 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
     const auto &fStr = getParamValue(step, "f");
     const auto &esStr = getParamValue(step, "es");
     const auto &eStr = getParamValue(step, "e");
-    double a = -1.0;
-    double b = -1.0;
-    double rf = -1.0;
     const util::optional<std::string> optionalEmptyString{};
     const bool numericParamPresent =
         !RStr.empty() || !aStr.empty() || !bStr.empty() || !rfStr.empty() ||
@@ -9405,6 +9402,190 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
             ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
     }
 
+    const auto createDatumFromNumericParams =
+        [&](double a, double rf) -> GeodeticReferenceFrameNNPtr {
+        if (!aStr.empty()) {
+            try {
+                a = c_locale_stod(aStr);
+            } catch (const std::invalid_argument &) {
+                throw ParsingException("Invalid a value");
+            }
+        }
+
+        const auto createGRF = [&grfMap, &title, &optionalEmptyString,
+                                &datumNameSuffix,
+                                &pm](const EllipsoidNNPtr &ellipsoid) {
+            return GeodeticReferenceFrame::create(
+                grfMap.set(IdentifiedObject::NAME_KEY,
+                           title.empty() ? "unknown" + datumNameSuffix : title),
+                ellipsoid, optionalEmptyString,
+                fixupPrimeMeridan(ellipsoid, pm));
+        };
+
+        if (a > 0 && !bStr.empty()) {
+            double b = -1.0;
+            try {
+                b = c_locale_stod(bStr);
+            } catch (const std::invalid_argument &) {
+                throw ParsingException("Invalid b value");
+            }
+            auto ellipsoid =
+                Ellipsoid::createTwoAxis(createMapWithUnknownName(), Length(a),
+                                         Length(b), guessBodyName(a))
+                    ->identify();
+            return createGRF(ellipsoid);
+        }
+
+        else if (a > 0 && (rf >= 0 || !rfStr.empty())) {
+            if (!rfStr.empty()) {
+                try {
+                    rf = c_locale_stod(rfStr);
+                } catch (const std::invalid_argument &) {
+                    throw ParsingException("Invalid rf value");
+                }
+            }
+            auto ellipsoid = Ellipsoid::createFlattenedSphere(
+                                 createMapWithUnknownName(), Length(a),
+                                 Scale(rf), guessBodyName(a))
+                                 ->identify();
+            return createGRF(ellipsoid);
+        }
+
+        else if (a > 0 && !fStr.empty()) {
+            double f;
+            try {
+                f = c_locale_stod(fStr);
+            } catch (const std::invalid_argument &) {
+                throw ParsingException("Invalid f value");
+            }
+            auto ellipsoid =
+                Ellipsoid::createFlattenedSphere(
+                    createMapWithUnknownName(), Length(a),
+                    Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
+                    ->identify();
+            return createGRF(ellipsoid);
+        }
+
+        else if (a > 0 && !eStr.empty()) {
+            double e;
+            try {
+                e = c_locale_stod(eStr);
+            } catch (const std::invalid_argument &) {
+                throw ParsingException("Invalid e value");
+            }
+            double alpha = asin(e);    /* angular eccentricity */
+            double f = 1 - cos(alpha); /* = 1 - sqrt (1 - es); */
+            auto ellipsoid =
+                Ellipsoid::createFlattenedSphere(
+                    createMapWithUnknownName(), Length(a),
+                    Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
+                    ->identify();
+            return createGRF(ellipsoid);
+        }
+
+        else if (a > 0 && !esStr.empty()) {
+            double es;
+            try {
+                es = c_locale_stod(esStr);
+            } catch (const std::invalid_argument &) {
+                throw ParsingException("Invalid es value");
+            }
+            double f = 1 - sqrt(1 - es);
+            auto ellipsoid =
+                Ellipsoid::createFlattenedSphere(
+                    createMapWithUnknownName(), Length(a),
+                    Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
+                    ->identify();
+            return createGRF(ellipsoid);
+        }
+
+        // If only a is specified, create a sphere
+        if (a > 0 && bStr.empty() && rfStr.empty() && eStr.empty() &&
+            esStr.empty()) {
+            auto ellipsoid = Ellipsoid::createSphere(
+                createMapWithUnknownName(), Length(a), guessBodyName(a));
+            return createGRF(ellipsoid);
+        }
+
+        if (!bStr.empty() && aStr.empty()) {
+            throw ParsingException("b found, but a missing");
+        }
+
+        if (!rfStr.empty() && aStr.empty()) {
+            throw ParsingException("rf found, but a missing");
+        }
+
+        if (!fStr.empty() && aStr.empty()) {
+            throw ParsingException("f found, but a missing");
+        }
+
+        if (!eStr.empty() && aStr.empty()) {
+            throw ParsingException("e found, but a missing");
+        }
+
+        if (!esStr.empty() && aStr.empty()) {
+            throw ParsingException("es found, but a missing");
+        }
+
+        return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6326);
+    };
+
+    const auto createDatumFromEllps = [&]() -> GeodeticReferenceFrameNNPtr {
+        if (ellpsStr == "WGS84") {
+            return GeodeticReferenceFrame::create(
+                grfMap.set(IdentifiedObject::NAME_KEY,
+                           title.empty() ? "Unknown based on WGS84 ellipsoid" +
+                                               datumNameSuffix
+                                         : title),
+                Ellipsoid::WGS84, optionalEmptyString, pm);
+        } else if (ellpsStr == "GRS80") {
+            return GeodeticReferenceFrame::create(
+                grfMap.set(IdentifiedObject::NAME_KEY,
+                           title.empty() ? "Unknown based on GRS80 ellipsoid" +
+                                               datumNameSuffix
+                                         : title),
+                Ellipsoid::GRS1980, optionalEmptyString, pm);
+        } else {
+            auto proj_ellps = proj_list_ellps();
+            for (int i = 0; proj_ellps[i].id != nullptr; i++) {
+                if (ellpsStr == proj_ellps[i].id) {
+                    assert(strncmp(proj_ellps[i].major, "a=", 2) == 0);
+                    const double a_iter =
+                        c_locale_stod(proj_ellps[i].major + 2);
+                    EllipsoidPtr ellipsoid;
+                    PropertyMap ellpsMap;
+                    if (strncmp(proj_ellps[i].ell, "b=", 2) == 0) {
+                        const double b_iter =
+                            c_locale_stod(proj_ellps[i].ell + 2);
+                        ellipsoid = Ellipsoid::createTwoAxis(
+                                        ellpsMap.set(IdentifiedObject::NAME_KEY,
+                                                     proj_ellps[i].name),
+                                        Length(a_iter), Length(b_iter))
+                                        .as_nullable();
+                    } else {
+                        assert(strncmp(proj_ellps[i].ell, "rf=", 3) == 0);
+                        const double rf_iter =
+                            c_locale_stod(proj_ellps[i].ell + 3);
+                        ellipsoid = Ellipsoid::createFlattenedSphere(
+                                        ellpsMap.set(IdentifiedObject::NAME_KEY,
+                                                     proj_ellps[i].name),
+                                        Length(a_iter), Scale(rf_iter))
+                                        .as_nullable();
+                    }
+                    return GeodeticReferenceFrame::create(
+                        grfMap.set(IdentifiedObject::NAME_KEY,
+                                   title.empty()
+                                       ? std::string("Unknown based on ") +
+                                             proj_ellps[i].name + " ellipsoid" +
+                                             datumNameSuffix
+                                       : title),
+                        NN_NO_CHECK(ellipsoid), optionalEmptyString, pm);
+                }
+            }
+            throw ParsingException("unknown ellipsoid " + ellpsStr);
+        }
+    };
+
     if (!datumStr.empty()) {
         auto l_datum = [&datumStr, &overridePmIfNeeded, &grfMap,
                         &optionalEmptyString, &pm]() {
@@ -9442,206 +9623,57 @@ PROJStringParser::Private::buildDatum(Step &step, const std::string &title) {
             }
             throw ParsingException("unknown datum " + datumStr);
         }();
-        if (!numericParamPresent) {
-            return l_datum;
+        if (numericParamPresent) {
+            const auto datumFromNumericParams =
+                createDatumFromNumericParams(/* a= */ -1.0, /* rf= */ -1.0);
+            if (!datumFromNumericParams->ellipsoid()->_isEquivalentTo(
+                    l_datum->ellipsoid().get())) {
+                throw ParsingException("datum " + datumStr +
+                                       " is incompatible of numeric parameters "
+                                       "that specify an ellipsoid");
+            }
         }
-        a = l_datum->ellipsoid()->semiMajorAxis().getSIValue();
-        rf = l_datum->ellipsoid()->computedInverseFlattening();
+        if (!ellpsStr.empty()) {
+            const auto datumFromEllps = createDatumFromEllps();
+            if (!datumFromEllps->ellipsoid()->_isEquivalentTo(
+                    l_datum->ellipsoid().get())) {
+                throw ParsingException("datum " + datumStr +
+                                       " is incompatible of ellipsoid " +
+                                       ellpsStr);
+            }
+        }
+        return l_datum;
     }
 
     else if (!ellpsStr.empty()) {
-        auto l_datum = [&ellpsStr, &title, &grfMap, &optionalEmptyString, &pm,
-                        &datumNameSuffix]() {
-            if (ellpsStr == "WGS84") {
-                return GeodeticReferenceFrame::create(
-                    grfMap.set(IdentifiedObject::NAME_KEY,
-                               title.empty()
-                                   ? "Unknown based on WGS84 ellipsoid" +
-                                         datumNameSuffix
-                                   : title),
-                    Ellipsoid::WGS84, optionalEmptyString, pm);
-            } else if (ellpsStr == "GRS80") {
-                return GeodeticReferenceFrame::create(
-                    grfMap.set(IdentifiedObject::NAME_KEY,
-                               title.empty()
-                                   ? "Unknown based on GRS80 ellipsoid" +
-                                         datumNameSuffix
-                                   : title),
-                    Ellipsoid::GRS1980, optionalEmptyString, pm);
-            } else {
-                auto proj_ellps = proj_list_ellps();
-                for (int i = 0; proj_ellps[i].id != nullptr; i++) {
-                    if (ellpsStr == proj_ellps[i].id) {
-                        assert(strncmp(proj_ellps[i].major, "a=", 2) == 0);
-                        const double a_iter =
-                            c_locale_stod(proj_ellps[i].major + 2);
-                        EllipsoidPtr ellipsoid;
-                        PropertyMap ellpsMap;
-                        if (strncmp(proj_ellps[i].ell, "b=", 2) == 0) {
-                            const double b_iter =
-                                c_locale_stod(proj_ellps[i].ell + 2);
-                            ellipsoid =
-                                Ellipsoid::createTwoAxis(
-                                    ellpsMap.set(IdentifiedObject::NAME_KEY,
-                                                 proj_ellps[i].name),
-                                    Length(a_iter), Length(b_iter))
-                                    .as_nullable();
-                        } else {
-                            assert(strncmp(proj_ellps[i].ell, "rf=", 3) == 0);
-                            const double rf_iter =
-                                c_locale_stod(proj_ellps[i].ell + 3);
-                            ellipsoid =
-                                Ellipsoid::createFlattenedSphere(
-                                    ellpsMap.set(IdentifiedObject::NAME_KEY,
-                                                 proj_ellps[i].name),
-                                    Length(a_iter), Scale(rf_iter))
-                                    .as_nullable();
-                        }
-                        return GeodeticReferenceFrame::create(
-                            grfMap.set(IdentifiedObject::NAME_KEY,
-                                       title.empty()
-                                           ? std::string("Unknown based on ") +
-                                                 proj_ellps[i].name +
-                                                 " ellipsoid" + datumNameSuffix
-                                           : title),
-                            NN_NO_CHECK(ellipsoid), optionalEmptyString, pm);
-                    }
-                }
-                throw ParsingException("unknown ellipsoid " + ellpsStr);
+        const auto l_datum = createDatumFromEllps();
+        if (numericParamPresent) {
+            if (!aStr.empty() && bStr.empty() && rfStr.empty() &&
+                fStr.empty() &&
+                l_datum->ellipsoid()->inverseFlattening().has_value()) {
+                // Special case: we use the shape given by +ellps to intialize
+                // rf. This is in particular use by cases like +ellps=WGS84 +a=1
+                // to get the reverse flattening of WGS84
+                const double rf =
+                    l_datum->ellipsoid()->computedInverseFlattening();
+                return createDatumFromNumericParams(/* a = */ -1.0, rf);
+            } else if (aStr.empty() && bStr.empty() && rfStr.empty() &&
+                       fStr == "0" && step.name == "ortho") {
+                // special case +proj=ortho +ellps=WGS84 +f=0
+                return l_datum;
             }
-        }();
-        if (!numericParamPresent) {
-            return l_datum;
-        }
-        a = l_datum->ellipsoid()->semiMajorAxis().getSIValue();
-        if (l_datum->ellipsoid()->semiMinorAxis().has_value()) {
-            b = l_datum->ellipsoid()->semiMinorAxis()->getSIValue();
-        } else {
-            rf = l_datum->ellipsoid()->computedInverseFlattening();
-        }
-    }
-
-    if (!aStr.empty()) {
-        try {
-            a = c_locale_stod(aStr);
-        } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid a value");
-        }
-    }
-
-    const auto createGRF = [&grfMap, &title, &optionalEmptyString,
-                            &datumNameSuffix,
-                            &pm](const EllipsoidNNPtr &ellipsoid) {
-        return GeodeticReferenceFrame::create(
-            grfMap.set(IdentifiedObject::NAME_KEY,
-                       title.empty() ? "unknown" + datumNameSuffix : title),
-            ellipsoid, optionalEmptyString, fixupPrimeMeridan(ellipsoid, pm));
-    };
-
-    if (a > 0 && (b > 0 || !bStr.empty())) {
-        if (!bStr.empty()) {
-            try {
-                b = c_locale_stod(bStr);
-            } catch (const std::invalid_argument &) {
-                throw ParsingException("Invalid b value");
+            if (!createDatumFromNumericParams(/* a= */ -1.0, /* rf= */ -1.0)
+                     ->ellipsoid()
+                     ->_isEquivalentTo(l_datum->ellipsoid().get())) {
+                throw ParsingException("ellipsoid " + ellpsStr +
+                                       " is incompatible of numeric parameters "
+                                       "that specify an ellipsoid");
             }
         }
-        auto ellipsoid =
-            Ellipsoid::createTwoAxis(createMapWithUnknownName(), Length(a),
-                                     Length(b), guessBodyName(a))
-                ->identify();
-        return createGRF(ellipsoid);
+        return l_datum;
     }
 
-    else if (a > 0 && (rf >= 0 || !rfStr.empty())) {
-        if (!rfStr.empty()) {
-            try {
-                rf = c_locale_stod(rfStr);
-            } catch (const std::invalid_argument &) {
-                throw ParsingException("Invalid rf value");
-            }
-        }
-        auto ellipsoid = Ellipsoid::createFlattenedSphere(
-                             createMapWithUnknownName(), Length(a), Scale(rf),
-                             guessBodyName(a))
-                             ->identify();
-        return createGRF(ellipsoid);
-    }
-
-    else if (a > 0 && !fStr.empty()) {
-        double f;
-        try {
-            f = c_locale_stod(fStr);
-        } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid f value");
-        }
-        auto ellipsoid = Ellipsoid::createFlattenedSphere(
-                             createMapWithUnknownName(), Length(a),
-                             Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
-                             ->identify();
-        return createGRF(ellipsoid);
-    }
-
-    else if (a > 0 && !eStr.empty()) {
-        double e;
-        try {
-            e = c_locale_stod(eStr);
-        } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid e value");
-        }
-        double alpha = asin(e);    /* angular eccentricity */
-        double f = 1 - cos(alpha); /* = 1 - sqrt (1 - es); */
-        auto ellipsoid = Ellipsoid::createFlattenedSphere(
-                             createMapWithUnknownName(), Length(a),
-                             Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
-                             ->identify();
-        return createGRF(ellipsoid);
-    }
-
-    else if (a > 0 && !esStr.empty()) {
-        double es;
-        try {
-            es = c_locale_stod(esStr);
-        } catch (const std::invalid_argument &) {
-            throw ParsingException("Invalid es value");
-        }
-        double f = 1 - sqrt(1 - es);
-        auto ellipsoid = Ellipsoid::createFlattenedSphere(
-                             createMapWithUnknownName(), Length(a),
-                             Scale(f != 0.0 ? 1.0 / f : 0.0), guessBodyName(a))
-                             ->identify();
-        return createGRF(ellipsoid);
-    }
-
-    // If only a is specified, create a sphere
-    if (a > 0 && bStr.empty() && rfStr.empty() && eStr.empty() &&
-        esStr.empty()) {
-        auto ellipsoid = Ellipsoid::createSphere(createMapWithUnknownName(),
-                                                 Length(a), guessBodyName(a));
-        return createGRF(ellipsoid);
-    }
-
-    if (!bStr.empty() && aStr.empty()) {
-        throw ParsingException("b found, but a missing");
-    }
-
-    if (!rfStr.empty() && aStr.empty()) {
-        throw ParsingException("rf found, but a missing");
-    }
-
-    if (!fStr.empty() && aStr.empty()) {
-        throw ParsingException("f found, but a missing");
-    }
-
-    if (!eStr.empty() && aStr.empty()) {
-        throw ParsingException("e found, but a missing");
-    }
-
-    if (!esStr.empty() && aStr.empty()) {
-        throw ParsingException("es found, but a missing");
-    }
-
-    return overridePmIfNeeded(GeodeticReferenceFrame::EPSG_6326);
+    return createDatumFromNumericParams(/* a= */ -1.0, /* rf= */ -1.0);
 }
 
 // ---------------------------------------------------------------------------
