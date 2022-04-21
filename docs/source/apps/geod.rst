@@ -151,7 +151,7 @@ statute miles from Boston, MA, to Portland, OR:
 
 .. code-block:: console
 
-    geod +ellps=clrk66 <<EOF -I +units=us-mi
+    geod +ellps=clrk66 -I +units=us-mi <<EOF
     42d15'N 71d07'W 45d31'N 123d41'W
     EOF
 
@@ -169,7 +169,7 @@ and determine Portland's location by azimuth and distance:
 
 .. code-block:: console
 
-    geod +ellps=clrk66 <<EOF +units=us-mi
+    geod +ellps=clrk66 +units=us-mi <<EOF
     42d15'N 71d07'W -66d31'50.141" 2587.504
     EOF
 
