@@ -842,6 +842,22 @@ static int GeodSolve94() {
   return result;
 }
 
+static int GeodSolve96() {
+  /* Failure with long doubles found with test case from Nowak + Nowak Da
+   * Costa (2022).  Problem was using somg12 > 1 as a test that it needed
+   * to be set when roundoff could result in somg12 slightly bigger that 1.
+   * Found + fixed 2022-03-30. */
+  double S12;
+  struct geod_geodesic g;
+  int result = 0;
+  geod_init(&g, 6378137, 1/298.257222101);
+  geod_geninverse(&g, 0, 0, 60.0832522871723, 89.8492185074635,
+                  nullptr, nullptr, nullptr,
+                  nullptr, nullptr, nullptr, &S12);
+  result += checkEquals(S12, 42426932221845, 0.5);
+  return result;
+}
+
 static int Planimeter0() {
   /* Check fix for pole-encircling bug found 2011-03-16 */
   double pa[4][2] = {{89, 0}, {89, 90}, {89, 180}, {89, 270}};
@@ -1147,6 +1163,7 @@ int main() {
   if ((i = GeodSolve84())) {++n; printf("GeodSolve84 fail: %d\n", i);}
   if ((i = GeodSolve92())) {++n; printf("GeodSolve92 fail: %d\n", i);}
   if ((i = GeodSolve94())) {++n; printf("GeodSolve94 fail: %d\n", i);}
+  if ((i = GeodSolve96())) {++n; printf("GeodSolve96 fail: %d\n", i);}
   if ((i = Planimeter0())) {++n; printf("Planimeter0 fail: %d\n", i);}
   if ((i = Planimeter5())) {++n; printf("Planimeter5 fail: %d\n", i);}
   if ((i = Planimeter6())) {++n; printf("Planimeter6 fail: %d\n", i);}

@@ -17,9 +17,6 @@
  * Copyright (c) Charles Karney (2012-2022) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * https://geographiclib.sourceforge.io/
- *
- * This library was distributed with
- * <a href="../index.html">GeographicLib</a> 2.0.
  **********************************************************************/
 
 #if !defined(GEODESIC_H)

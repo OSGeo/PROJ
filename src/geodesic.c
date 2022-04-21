@@ -14,7 +14,7 @@
  *   Algorithms for geodesics,
  *   J. Geodesy <b>87</b>, 43--55 (2013);
  *   https://doi.org/10.1007/s00190-012-0578-z
- *   Addenda: https://geographiclib.sourceforge.io/misc/geod-addenda.html
+ *   Addenda: https://geographiclib.sourceforge.io/geod-addenda.html
  *
  * See the comments in geodesic.h for documentation.
  *
@@ -46,10 +46,13 @@
 #define nC    (GEOGRAPHICLIB_GEODESIC_ORDER + 1)
 
 typedef int boolx;
+enum booly { FALSE = 0, TRUE = 1 };
+/* qd = quarter turn / degree
+ * hd = half turn / degree
+ * td = full turn / degree */
+enum dms { qd = 90, hd = 2 * qd, td = 2 * hd };
 
 static unsigned init = 0;
-static const int FALSE = 0;
-static const int TRUE = 1;
 static unsigned digits, maxit1, maxit2;
 static double epsilon, realmin, pi, degree, NaN,
   tiny, tol0, tol1, tol2, tolb, xthresh;
@@ -76,7 +79,7 @@ static void Init(void) {
     /* Check on bisection interval */
     tolb = tol0 * tol2;
     xthresh = 1000 * tol2;
-    degree = pi/180;
+    degree = pi/hd;
     NaN = nan("0");
     init = 1;
   }
@@ -136,22 +139,22 @@ static void norm2(double* sinx, double* cosx) {
 }
 
 static double AngNormalize(double x) {
-  double y = remainder(x, 360.0);
-  return fabs(y) == 180.0 ? copysign(180.0, x) : y;
+  double y = remainder(x, (double)td);
+  return fabs(y) == hd ? copysign((double)hd, x) : y;
 }
 
 static double LatFix(double x)
-{ return fabs(x) > 90 ? NaN : x; }
+{ return fabs(x) > qd ? NaN : x; }
 
 static double AngDiff(double x, double y, double* e) {
   /* Use remainder instead of AngNormalize, since we treat boundary cases
    * later taking account of the error */
-  double t, d = sumx(remainder(-x, 360.0), remainder( y, 360.0), &t);
+  double t, d = sumx(remainder(-x, (double)td), remainder( y, (double)td), &t);
   /* This second sum can only change d if abs(d) < 128, so don't need to
    * apply remainder yet again. */
-  d = sumx(remainder(d, 360.0), t, &t);
+  d = sumx(remainder(d, (double)td), t, &t);
   /* Fix the sign if d = -180, 0, 180. */
-  if (d == 0 || fabs(d) == 180)
+  if (d == 0 || fabs(d) == hd)
     /* If t == 0, take sign from y - x
      * else (t != 0, implies d = +/-180), d and t must have opposite signs */
     d = copysign(d, t == 0 ? y - x : -t);
@@ -173,7 +176,7 @@ static void sincosdx(double x, double* sinx, double* cosx) {
   /* In order to minimize round-off errors, this function exactly reduces
    * the argument to the range [-45, 45] before converting it to radians. */
   double r, s, c; int q = 0;
-  r = remquo(x, 90.0, &q);
+  r = remquo(x, (double)qd, &q);
   /* now abs(r) <= 45 */
   r *= degree;
   /* Possibly could call the gnu extension sincos */
@@ -194,7 +197,7 @@ static void sincosde(double x, double t, double* sinx, double* cosx) {
   /* In order to minimize round-off errors, this function exactly reduces
    * the argument to the range [-45, 45] before converting it to radians. */
   double r, s, c; int q = 0;
-  r = AngRound(remquo(x, 90.0, &q) + t);
+  r = AngRound(remquo(x, (double)qd, &q) + t);
   /* now abs(r) <= 45 */
   r *= degree;
   /* Possibly could call the gnu extension sincos */
@@ -222,9 +225,9 @@ static double atan2dx(double y, double x) {
   /* here x >= 0 and x >= abs(y), so angle is in [-pi/4, pi/4] */
   ang = atan2(y, x) / degree;
   switch (q) {
-  case 1: ang = copysign(180.0, y) - ang; break;
-  case 2: ang =           90       - ang; break;
-  case 3: ang =          -90       + ang; break;
+  case 1: ang = copysign((double)hd, y) - ang; break;
+  case 2: ang =                  qd       - ang; break;
+  case 3: ang =                 -qd       + ang; break;
   default: break;
   }
   return ang;
@@ -704,7 +707,7 @@ static double geod_geninverse_int(const struct geod_geodesic* g,
   double a12 = 0, sig12, calp1 = 0, salp1 = 0, calp2 = 0, salp2 = 0;
   double Ca[nC];
   boolx meridian;
-  /* somg12 > 1 marks that it needs to be calculated */
+  /* somg12 == 2 marks that it needs to be calculated */
   double omg12 = 0, somg12 = 2, comg12 = 0;
 
   unsigned outmask =
@@ -724,7 +727,7 @@ static double geod_geninverse_int(const struct geod_geodesic* g,
   lam12 = lon12 * degree;
   /* Calculate sincos of lon12 + error (this applies AngRound internally). */
   sincosde(lon12, lon12s, &slam12, &clam12);
-  lon12s = (180 - lon12) - lon12s; /* the supplementary longitude difference */
+  lon12s = (hd - lon12) - lon12s; /* the supplementary longitude difference */
 
   /* If really close to the equator, treat as on equator. */
   lat1 = AngRound(LatFix(lat1));
@@ -736,14 +739,14 @@ static double geod_geninverse_int(const struct geod_geodesic* g,
     lonsign *= -1;
     swapx(&lat1, &lat2);
   }
-  /* Make lat1 <= 0 */
+  /* Make lat1 <= -0 */
   latsign = signbit(lat1) ? 1 : -1;
   lat1 *= latsign;
   lat2 *= latsign;
   /* Now we have
    *
    *     0 <= lon12 <= 180
-   *     -90 <= lat1 <= 0
+   *     -90 <= lat1 <= -0
    *     lat1 <= lat2 <= -lat1
    *
    * longsign, swapp, latsign register the transformation to bring the
@@ -779,7 +782,7 @@ static double geod_geninverse_int(const struct geod_geodesic* g,
   dn1 = sqrt(1 + g->ep2 * sq(sbet1));
   dn2 = sqrt(1 + g->ep2 * sq(sbet2));
 
-  meridian = lat1 == -90 || slam12 == 0;
+  meridian = lat1 == -qd || slam12 == 0;
 
   if (meridian) {
 
@@ -826,7 +829,7 @@ static double geod_geninverse_int(const struct geod_geodesic* g,
   if (!meridian &&
       sbet1 == 0 &&           /* and sbet2 == 0 */
       /* Mimic the way Lambda12 works with calp1 = 0 */
-      (g->f <= 0 || lon12s >= g->f * 180)) {
+      (g->f <= 0 || lon12s >= g->f * hd)) {
 
     /* Geodesic runs along equator */
     calp1 = calp2 = 0; salp1 = salp2 = 1;
@@ -971,7 +974,7 @@ static double geod_geninverse_int(const struct geod_geodesic* g,
       /* Avoid problems with indeterminate sig1, sig2 on equator */
       S12 = 0;
 
-    if (!meridian && somg12 > 1) {
+    if (!meridian && somg12 == 2) {
       somg12 = sin(omg12); comg12 = cos(omg12);
     }
 
@@ -1041,7 +1044,8 @@ static double geod_geninverse_int(const struct geod_geodesic* g,
 double geod_geninverse(const struct geod_geodesic* g,
                        double lat1, double lon1, double lat2, double lon2,
                        double* ps12, double* pazi1, double* pazi2,
-                       double* pm12, double* pM12, double* pM21, double* pS12) {
+                       double* pm12, double* pM12, double* pM21,
+                       double* pS12) {
   double salp1, calp1, salp2, calp2,
     a12 = geod_geninverse_int(g, lat1, lon1, lat2, lon2, ps12,
                               &salp1, &calp1, &salp2, &calp2,
@@ -1752,9 +1756,9 @@ int transit(double lon1, double lon2) {
 int transitdirect(double lon1, double lon2) {
   /* Compute exactly the parity of
    *   int(floor(lon2 / 360)) - int(floor(lon1 / 360)) */
-  lon1 = remainder(lon1, 720.0); lon2 = remainder(lon2, 720.0);
-  return ( (lon2 >= 0 && lon2 < 360 ? 0 : 1) -
-           (lon1 >= 0 && lon1 < 360 ? 0 : 1) );
+  lon1 = remainder(lon1, 2.0 * td); lon2 = remainder(lon2, 2.0 * td);
+  return ( (lon2 >= 0 && lon2 < td ? 0 : 1) -
+           (lon1 >= 0 && lon1 < td ? 0 : 1) );
 }
 
 void accini(double s[]) {
@@ -1815,7 +1819,7 @@ void geod_polygon_addpoint(const struct geod_geodesic* g,
     p->lat0 = p->lat = lat;
     p->lon0 = p->lon = lon;
   } else {
-    double s12, S12 = 0;       /* Initialize S12 to stop Visual Studio warning */
+    double s12, S12 = 0;     /* Initialize S12 to stop Visual Studio warning */
     geod_geninverse(g, p->lat, p->lon, lat, lon,
                     &s12, nullptr, nullptr, nullptr, nullptr, nullptr,
                     p->polyline ? nullptr : &S12);
@@ -1892,7 +1896,7 @@ unsigned geod_polygon_testpoint(const struct geod_geodesic* g,
   tempsum = p->polyline ? 0 : p->A[0];
   crossings = p->crossings;
   for (i = 0; i < (p->polyline ? 1 : 2); ++i) {
-    double s12, S12 = 0;       /* Initialize S12 to stop Visual Studio warning */
+    double s12, S12 = 0;     /* Initialize S12 to stop Visual Studio warning */
     geod_geninverse(g,
                     i == 0 ? p->lat  : lat, i == 0 ? p->lon  : lon,
                     i != 0 ? p->lat0 : lat, i != 0 ? p->lon0 : lon,
