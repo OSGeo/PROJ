@@ -5,7 +5,10 @@ add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${PROJ_CXX_WARN_FLAGS}>")
 # First configure proj library
 include(lib_proj.cmake)
 add_subdirectory(apps)
-add_subdirectory(tests)
+
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
 
 if(APPLE)
   # Directory name for installed targets
