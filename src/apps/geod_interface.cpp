@@ -29,6 +29,9 @@ void geod_inv(void) {
     lat2 = phi2 / DEG_TO_RAD, lon2 = lam2 / DEG_TO_RAD,
     azi1, azi2, s12;
   geod_inverse(&GlobalGeodesic, lat1, lon1, lat2, lon2, &s12, &azi1, &azi2);
-  azi2 += azi2 >= 0 ? -180 : 180; /* Compute back azimuth */
+  /* Compute back azimuth
+   * map +/-0 -> -/+180; +/-180 -> -/+0
+   * this depends on abs(azi2) <= 180 */
+  azi2 = copysign(azi2 + copysign(180.0, -azi2), -azi2);
   al12 = azi1 * DEG_TO_RAD; al21 = azi2 * DEG_TO_RAD; geod_S = s12;
 }
