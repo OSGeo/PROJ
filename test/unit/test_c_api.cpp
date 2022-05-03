@@ -2426,12 +2426,23 @@ TEST_F(CApi, check_coord_op_obj_can_be_used_with_proj_trans) {
         ObjectKeeper keeper_projCRS(projCRS);
         ASSERT_NE(projCRS, nullptr);
 
+        {
+            PJ *pj_used = proj_trans_get_last_used_operation(projCRS);
+            ASSERT_EQ(pj_used, nullptr);
+        }
+
         PJ_COORD coord;
         coord.xyzt.x = proj_torad(3.0);
         coord.xyzt.y = 0;
         coord.xyzt.z = 0;
         coord.xyzt.t = 0;
         EXPECT_NEAR(proj_trans(projCRS, PJ_FWD, coord).xyzt.x, 500000.0, 1e-9);
+
+        {
+            PJ *pj_used = proj_trans_get_last_used_operation(projCRS);
+            ASSERT_TRUE(proj_is_equivalent_to(pj_used, projCRS, PJ_COMP_STRICT));
+            proj_destroy(pj_used);
+        }
     }
 }
 
@@ -3004,6 +3015,10 @@ TEST_F(CApi, proj_clone_of_obj_with_alternative_operations) {
     EXPECT_NE(c_trans_ref.xyzt.x, c.xyzt.x);
     EXPECT_NEAR(c_trans_ref.xyzt.x, c.xyzt.x, 1e-3);
     EXPECT_NEAR(c_trans_ref.xyzt.y, c.xyzt.y, 1e-3);
+
+    PJ *pj_used = proj_trans_get_last_used_operation(obj);
+    ASSERT_NE(pj_used, nullptr);
+    proj_destroy(pj_used);
 
     auto clone = proj_clone(m_ctxt, obj);
     ObjectKeeper keeperClone(clone);
