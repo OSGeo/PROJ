@@ -1668,7 +1668,8 @@ TransformationNNPtr Transformation::inverseAsTransformation() const {
         return Private::registerInv(
             this, createChangeVerticalUnit(
                       createPropertiesForInverse(this, false, false),
-                      l_targetCRS, l_sourceCRS, common::Scale(1.0 / convFactor),
+                      l_targetCRS, l_sourceCRS,
+                      common::Scale(convFactor == 0.0 ? 0.0 : 1.0 / convFactor),
                       coordinateOperationAccuracies()));
     }
 
