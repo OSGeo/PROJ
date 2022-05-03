@@ -1633,15 +1633,18 @@ static NS_PROJ::io::DatabaseContextPtr getDBcontext(PJ_CONTEXT *ctx) {
 /************************************************************************/
 
 std::unique_ptr<NS_PROJ::File>
-NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
+NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
+                                         char *out_full_filename,
+                                         size_t out_full_filename_size) {
 
     if (ctx == nullptr) {
         ctx = pj_get_default_ctx();
     }
 
-    auto file = std::unique_ptr<NS_PROJ::File>(
-        reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
-            ctx, name, "rb", pj_open_file_with_manager, nullptr, 0)));
+    auto file =
+        std::unique_ptr<NS_PROJ::File>(reinterpret_cast<NS_PROJ::File *>(
+            pj_open_lib_internal(ctx, name, "rb", pj_open_file_with_manager,
+                                 out_full_filename, out_full_filename_size)));
 
     // Retry with the new proj grid name if the file name doesn't end with .tif
     std::string tmpString; // keep it in this upper scope !
@@ -1657,8 +1660,9 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
                 if (!filename.empty()) {
                     file.reset(reinterpret_cast<NS_PROJ::File *>(
                         pj_open_lib_internal(ctx, filename.c_str(), "rb",
-                                             pj_open_file_with_manager, nullptr,
-                                             0)));
+                                             pj_open_file_with_manager,
+                                             out_full_filename,
+                                             out_full_filename_size)));
                     if (file) {
                         proj_context_errno_set(ctx, 0);
                     } else {
@@ -1687,8 +1691,9 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
                 if (!filename.empty()) {
                     file.reset(reinterpret_cast<NS_PROJ::File *>(
                         pj_open_lib_internal(ctx, filename.c_str(), "rb",
-                                             pj_open_file_with_manager, nullptr,
-                                             0)));
+                                             pj_open_file_with_manager,
+                                             out_full_filename,
+                                             out_full_filename_size)));
                     if (file) {
                         proj_context_errno_set(ctx, 0);
                     }
@@ -1713,6 +1718,11 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
             file =
                 open(ctx, remote_file.c_str(), NS_PROJ::FileAccess::READ_ONLY);
             if (file) {
+                if (out_full_filename) {
+                    strncpy(out_full_filename, remote_file.c_str(),
+                            out_full_filename_size);
+                    out_full_filename[out_full_filename_size - 1] = '\0';
+                }
                 pj_log(ctx, PJ_LOG_DEBUG, "Using %s", remote_file.c_str());
                 proj_context_errno_set(ctx, 0);
             }
@@ -1739,32 +1749,13 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name) {
  */
 int pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
                  char *out_full_filename, size_t out_full_filename_size) {
-    auto file = std::unique_ptr<NS_PROJ::File>(
-        reinterpret_cast<NS_PROJ::File *>(pj_open_lib_internal(
-            ctx, short_filename, "rb", pj_open_file_with_manager,
-            out_full_filename, out_full_filename_size)));
-
-    // Retry with the old proj grid name if the file name ends with .tif
-    if (file == nullptr && strstr(short_filename, ".tif") != nullptr) {
-
-        auto dbContext = getDBcontext(ctx);
-        if (dbContext) {
-            try {
-                auto filename = dbContext->getOldProjGridName(short_filename);
-                if (!filename.empty()) {
-                    file.reset(reinterpret_cast<NS_PROJ::File *>(
-                        pj_open_lib_internal(ctx, filename.c_str(), "rb",
-                                             pj_open_file_with_manager,
-                                             out_full_filename,
-                                             out_full_filename_size)));
-                }
-            } catch (const std::exception &e) {
-                pj_log(ctx, PJ_LOG_DEBUG, "%s", e.what());
-                return false;
-            }
-        }
-    }
-
+    const bool old_network_enabled = proj_context_is_network_enabled(ctx);
+    if (old_network_enabled)
+        proj_context_set_enable_network(ctx, false);
+    auto file = NS_PROJ::FileManager::open_resource_file(
+        ctx, short_filename, out_full_filename, out_full_filename_size);
+    if (old_network_enabled)
+        proj_context_set_enable_network(ctx, true);
     return file != nullptr;
 }
 

@@ -1542,6 +1542,9 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
     ASSERT_NE(op, nullptr);
     ObjectKeeper keeper(op);
 
+    const std::string old_endpoint = proj_context_get_url_endpoint(m_ctxt);
+    proj_context_set_url_endpoint(m_ctxt, "https://example.com");
+
     EXPECT_EQ(proj_coordoperation_get_grid_used_count(m_ctxt, op), 1);
     const char *shortName = nullptr;
     const char *fullName = nullptr;
@@ -1569,9 +1572,11 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
     EXPECT_EQ(shortName, std::string("ca_nrc_ntv1_can.tif"));
     // EXPECT_EQ(fullName, std::string(""));
     EXPECT_EQ(packageName, std::string(""));
-    EXPECT_EQ(std::string(url), "https://cdn.proj.org/ca_nrc_ntv1_can.tif");
+    EXPECT_EQ(std::string(url), "https://example.com/ca_nrc_ntv1_can.tif");
     EXPECT_EQ(directDownload, 1);
     EXPECT_EQ(openLicense, 1);
+
+    proj_context_set_url_endpoint(m_ctxt, old_endpoint.c_str());
 }
 
 // ---------------------------------------------------------------------------
@@ -2440,7 +2445,8 @@ TEST_F(CApi, check_coord_op_obj_can_be_used_with_proj_trans) {
 
         {
             PJ *pj_used = proj_trans_get_last_used_operation(projCRS);
-            ASSERT_TRUE(proj_is_equivalent_to(pj_used, projCRS, PJ_COMP_STRICT));
+            ASSERT_TRUE(
+                proj_is_equivalent_to(pj_used, projCRS, PJ_COMP_STRICT));
             proj_destroy(pj_used);
         }
     }
