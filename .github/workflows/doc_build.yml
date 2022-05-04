@@ -15,6 +15,7 @@ jobs:
 
       - name: Install PROJ build dependencies
         run: |
+            sudo apt-get update
             DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends -o APT::Immediate-Configure=0  \
                 cmake g++ sqlite3 pkg-config libsqlite3-dev libtiff-dev libcurl4-openssl-dev
 
