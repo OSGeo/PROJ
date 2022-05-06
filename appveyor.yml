@@ -29,8 +29,8 @@ build_script:
   # The checkout of a precise sha1 for VS2015 is a workaround for https://github.com/microsoft/vcpkg/issues/11666
   - if not exist %VCPKG_INSTALLED%\bin (
       cd "%VCPKG_ROOT%" &
-      git pull > nul &
-      (if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" (git checkout a64dc07690bc8806e717e190f62eb58e198b599c)) &
+      git fetch --depth=1 origin 2022.04.12 &
+      (if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" (git -c advice.detachedHead=false checkout FETCH_HEAD)) &
       .\bootstrap-vcpkg.bat -disableMetrics &
       vcpkg install sqlite3[core,tool]:"%platform%"-windows &
       vcpkg install tiff:"%platform%"-windows &
