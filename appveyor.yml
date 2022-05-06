@@ -38,7 +38,7 @@ build_script:
       cd %APPVEYOR_BUILD_FOLDER%
     )
   - dir %VCPKG_INSTALLED%\bin
-  - set PATH=%VCPKG_INSTALLED%\bin;%PATH%
+  - set PATH=%VCPKG_INSTALLED%\tools;%PATH%
   # See https://www.appveyor.com/docs/lang/cpp/
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" if %platform%==x86
       (call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86)
@@ -66,10 +66,11 @@ test_script:
   - set PROJ_LIB=%PROJ_DIR%\share\proj
   - cd %PROJ_BUILD%
   - ctest --output-on-failure -C Release
-  - set PATH=%PROJ_DIR%\bin;%PATH%
   - set BUILD_MODE=shared
   - if BUILD_SHARED_LIBS==OFF (set BUILD_MODE=static)
   - call %APPVEYOR_BUILD_FOLDER%\test\postinstall\test_cmake.bat %PROJ_DIR% %BUILD_MODE%
+  # Executables in %PROJ_DIR%\bin need runtime from %VCPKG_INSTALLED%\bin
+  - set PATH=%PROJ_DIR%\bin;%VCPKG_INSTALLED%\bin;%PATH%
   - proj
 
 deploy: off
