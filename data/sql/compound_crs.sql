@@ -770,3 +770,5 @@ INSERT INTO "compound_crs" VALUES('EPSG','9973','SCM22 Grid + ODN height',NULL,'
 INSERT INTO "usage" VALUES('EPSG','17442','compound_crs','EPSG','9973','EPSG','4665','EPSG','1141');
 INSERT INTO "compound_crs" VALUES('EPSG','9978','FNL22 Grid + ODN height',NULL,'EPSG','9977','EPSG','5701',0);
 INSERT INTO "usage" VALUES('EPSG','17459','compound_crs','EPSG','9978','EPSG','4664','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
+INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
