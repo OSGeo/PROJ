@@ -63,8 +63,10 @@ class FileManager {
     static std::string getProjLibEnvVar(PJ_CONTEXT *ctx);
 
     // "High-level" interface, honoring PROJ_LIB and the like.
-    static std::unique_ptr<File> open_resource_file(PJ_CONTEXT *ctx,
-                                                    const char *name);
+    static std::unique_ptr<File>
+    open_resource_file(PJ_CONTEXT *ctx, const char *name,
+                       char *out_full_filename = nullptr,
+                       size_t out_full_filename_size = 0);
 
     static void fillDefaultNetworkInterface(PJ_CONTEXT *ctx);
 

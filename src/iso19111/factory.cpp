@@ -3260,20 +3260,16 @@ bool DatabaseContext::lookForGridInfo(
     openLicense = false;
     directDownload = false;
 
-    if (considerKnownGridsAsAvailable) {
-        fullFilename = projFilename;
-    } else {
-        fullFilename.resize(2048);
-        if (d->pjCtxt() == nullptr) {
-            d->setPjCtxt(pj_get_default_ctx());
-        }
-        int errno_before = proj_context_errno(d->pjCtxt());
-        gridAvailable =
-            pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
-                         fullFilename.size() - 1) != 0;
-        proj_context_errno_set(d->pjCtxt(), errno_before);
-        fullFilename.resize(strlen(fullFilename.c_str()));
+    fullFilename.resize(2048);
+    if (d->pjCtxt() == nullptr) {
+        d->setPjCtxt(pj_get_default_ctx());
     }
+    int errno_before = proj_context_errno(d->pjCtxt());
+    gridAvailable =
+        pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
+                     fullFilename.size() - 1) != 0;
+    proj_context_errno_set(d->pjCtxt(), errno_before);
+    fullFilename.resize(strlen(fullFilename.c_str()));
 
     auto res =
         d->run("SELECT "
@@ -3305,10 +3301,7 @@ bool DatabaseContext::lookForGridInfo(
             old_proj_grid_name == projFilename) {
             std::string fullFilenameNewName;
             fullFilenameNewName.resize(2048);
-            if (d->pjCtxt() == nullptr) {
-                d->setPjCtxt(pj_get_default_ctx());
-            }
-            int errno_before = proj_context_errno(d->pjCtxt());
+            errno_before = proj_context_errno(d->pjCtxt());
             bool gridAvailableWithNewName =
                 pj_find_file(d->pjCtxt(), proj_grid_name.c_str(),
                              &fullFilenameNewName[0],
@@ -3328,6 +3321,13 @@ bool DatabaseContext::lookForGridInfo(
 
         info.fullFilename = fullFilename;
         info.packageName = packageName;
+        std::string endpoint(proj_context_get_url_endpoint(d->pjCtxt()));
+        if (!endpoint.empty() && starts_with(url, "https://cdn.proj.org/")) {
+            if (endpoint.back() != '/') {
+                endpoint += '/';
+            }
+            url = endpoint + url.substr(strlen("https://cdn.proj.org/"));
+        }
         info.url = url;
         info.directDownload = directDownload;
         info.openLicense = openLicense;

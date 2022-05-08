@@ -273,6 +273,21 @@ Coordinate transformation
     :returns: :c:type:`PJ_COORD`
 
 
+
+.. c:function:: PJ* proj_trans_get_last_used_operation(PJ *P)
+
+    .. versionadded:: 9.1.0
+
+    Return the operation used during the last invokation of proj_trans().
+    This is especially useful when P has been created with proj_create_crs_to_crs()
+    and has several alternative operations.
+    The returned object must be freed with proj_destroy().
+
+    :param P: Transformation object
+    :type P: :c:type:`PJ` *
+    :returns:  :c:type:`PJ` *
+
+
 .. c:function:: size_t proj_trans_generic(PJ *P, PJ_DIRECTION direction, \
                                           double *x, size_t sx, size_t nx, \
                                           double *y, size_t sy, size_t ny, \

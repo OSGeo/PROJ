@@ -374,13 +374,28 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
         return proj_coord_error ();
     }
 
+    P->iCurCoordOp = 0; // dummy value, to be used by proj_trans_get_last_used_operation()
     if (direction == PJ_FWD)
         return pj_fwd4d (coord, P);
     else
         return pj_inv4d (coord, P);
 }
 
-
+/*****************************************************************************/
+PJ* proj_trans_get_last_used_operation(PJ* P)
+/******************************************************************************
+    Return the operation used during the last invokation of proj_trans().
+    This is especially useful when P has been created with proj_create_crs_to_crs()
+    and has several alternative operations.
+    The returned object must be freed with proj_destroy().
+******************************************************************************/
+{
+    if( nullptr==P || P->iCurCoordOp < 0 )
+        return nullptr;
+    if( P->alternativeCoordinateOperations.empty() )
+        return proj_clone(P->ctx, P);
+    return proj_clone(P->ctx, P->alternativeCoordinateOperations[P->iCurCoordOp].pj);
+}
 
 /*****************************************************************************/
 int proj_trans_array (PJ *P, PJ_DIRECTION direction, size_t n, PJ_COORD *coord) {
@@ -2200,13 +2215,16 @@ PJ_PROJ_INFO proj_pj_info(PJ *P) {
         return pjinfo;
 
     /* coordinate operation description */
-    if( P->iCurCoordOp >= 0 ) {
-        P = P->alternativeCoordinateOperations[P->iCurCoordOp].pj;
-    } else if( !P->alternativeCoordinateOperations.empty() ) {
-        pjinfo.id = "unknown";
-        pjinfo.description = "unavailable until proj_trans is called";
-        pjinfo.definition = "unavailable until proj_trans is called";
-        return pjinfo;
+    if( !P->alternativeCoordinateOperations.empty() )
+    {
+        if( P->iCurCoordOp >= 0 ) {
+            P = P->alternativeCoordinateOperations[P->iCurCoordOp].pj;
+        } else {
+            pjinfo.id = "unknown";
+            pjinfo.description = "unavailable until proj_trans is called";
+            pjinfo.definition = "unavailable until proj_trans is called";
+            return pjinfo;
+        }
     }
 
     /* projection id */
