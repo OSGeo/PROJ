@@ -466,6 +466,8 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9923','GNTRANS height',NULL,'EPSG','64
 INSERT INTO "usage" VALUES('EPSG','17285','vertical_crs','EPSG','9923','EPSG','3339','EPSG','1141');
 INSERT INTO "vertical_crs" VALUES('EPSG','9927','GNTRANS2016 height',NULL,'EPSG','6499','EPSG','1318',0);
 INSERT INTO "usage" VALUES('EPSG','17286','vertical_crs','EPSG','9927','EPSG','3339','EPSG','1141');
+INSERT INTO "vertical_crs" VALUES('EPSG','20000','SVD2006 height',NULL,'EPSG','6499','EPSG','1323',0);
+INSERT INTO "usage" VALUES('EPSG','17962','vertical_crs','EPSG','20000','EPSG','4058','EPSG','1180');
 INSERT INTO "vertical_crs" VALUES('EPSG','5336','Black Sea depth',NULL,'EPSG','6498','EPSG','5134',0);
 INSERT INTO "usage" VALUES('EPSG','3936','vertical_crs','EPSG','5336','EPSG','1102','EPSG','1198');
 INSERT INTO "vertical_crs" VALUES('EPSG','5612','Baltic 1977 depth',NULL,'EPSG','6498','EPSG','5105',0);
