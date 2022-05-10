@@ -2174,3 +2174,7 @@ INSERT INTO "geodetic_crs" VALUES('EPSG','9969','SCM22-IRF',NULL,'geographic 2D'
 INSERT INTO "usage" VALUES('EPSG','17438','geodetic_crs','EPSG','9969','EPSG','4665','EPSG','1141');
 INSERT INTO "geodetic_crs" VALUES('EPSG','9974','FNL22-IRF',NULL,'geographic 2D','EPSG','6422','EPSG','1321',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','17451','geodetic_crs','EPSG','9974','EPSG','4664','EPSG','1141');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9988','ITRF2020',NULL,'geocentric','EPSG','6500','EPSG','1322',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17904','geodetic_crs','EPSG','9988','EPSG','2830','EPSG','1027');
+INSERT INTO "geodetic_crs" VALUES('EPSG','9990','ITRF2020',NULL,'geographic 2D','EPSG','6422','EPSG','1322',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','17901','geodetic_crs','EPSG','9990','EPSG','1262','EPSG','1027');
