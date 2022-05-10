@@ -1233,6 +1233,14 @@ std::string WKTNode::toString() const {
 
 //! @cond Doxygen_Suppress
 struct WKTParser::Private {
+
+    struct ci_less_struct {
+        bool operator()(const std::string &lhs,
+                        const std::string &rhs) const noexcept {
+            return ci_less(lhs, rhs);
+        }
+    };
+
     bool strict_ = true;
     std::list<std::string> warningList_{};
     std::vector<double> toWGS84Parameters_{};
@@ -1355,6 +1363,22 @@ struct WKTParser::Private {
                             const WKTNodeNNPtr &projectionNode,
                             const UnitOfMeasure &defaultLinearUnit,
                             const UnitOfMeasure &defaultAngularUnit);
+
+    const ESRIMethodMapping *
+    getESRIMapping(const WKTNodeNNPtr &projCRSNode,
+                   const WKTNodeNNPtr &projectionNode,
+                   std::map<std::string, std::string, ci_less_struct>
+                       &mapParamNameToValue);
+
+    ConversionNNPtr
+    buildProjectionFromESRI(const GeodeticCRSNNPtr &baseGeodCRS,
+                            const WKTNodeNNPtr &projCRSNode,
+                            const WKTNodeNNPtr &projectionNode,
+                            const UnitOfMeasure &defaultLinearUnit,
+                            const UnitOfMeasure &defaultAngularUnit,
+                            const ESRIMethodMapping *esriMapping,
+                            std::map<std::string, std::string, ci_less_struct>
+                                &mapParamNameToValue);
 
     ConversionNNPtr
     buildProjectionFromESRI(const GeodeticCRSNNPtr &baseGeodCRS,
@@ -3487,10 +3511,9 @@ selectSphericalOrEllipsoidal(const MethodMapping *mapping,
 
 // ---------------------------------------------------------------------------
 
-ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
-    const GeodeticCRSNNPtr &baseGeodCRS, const WKTNodeNNPtr &projCRSNode,
-    const WKTNodeNNPtr &projectionNode, const UnitOfMeasure &defaultLinearUnit,
-    const UnitOfMeasure &defaultAngularUnit) {
+const ESRIMethodMapping *WKTParser::Private::getESRIMapping(
+    const WKTNodeNNPtr &projCRSNode, const WKTNodeNNPtr &projectionNode,
+    std::map<std::string, std::string, ci_less_struct> &mapParamNameToValue) {
     const std::string esriProjectionName =
         stripQuotes(projectionNode->GP()->children()[0]);
 
@@ -3499,19 +3522,10 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     // on the parameters / their values
     const auto esriMappings = getMappingsFromESRI(esriProjectionName);
     if (esriMappings.empty()) {
-        return buildProjectionStandard(baseGeodCRS, projCRSNode, projectionNode,
-                                       defaultLinearUnit, defaultAngularUnit);
+        return nullptr;
     }
 
-    struct ci_less_struct {
-        bool operator()(const std::string &lhs,
-                        const std::string &rhs) const noexcept {
-            return ci_less(lhs, rhs);
-        }
-    };
-
     // Build a map of present parameters
-    std::map<std::string, std::string, ci_less_struct> mapParamNameToValue;
     for (const auto &childNode : projCRSNode->GP()->children()) {
         if (ci_equal(childNode->GP()->value(), WKTConstants::PARAMETER)) {
             const auto &childNodeChildren = childNode->GP()->children();
@@ -3564,11 +3578,18 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
             bestMatchCount = matchCount;
         }
     }
-    if (esriMapping == nullptr) {
-        return buildProjectionStandard(baseGeodCRS, projCRSNode, projectionNode,
-                                       defaultLinearUnit, defaultAngularUnit);
-    }
 
+    return esriMapping;
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
+    const GeodeticCRSNNPtr &baseGeodCRS, const WKTNodeNNPtr &projCRSNode,
+    const WKTNodeNNPtr &projectionNode, const UnitOfMeasure &defaultLinearUnit,
+    const UnitOfMeasure &defaultAngularUnit,
+    const ESRIMethodMapping *esriMapping,
+    std::map<std::string, std::string, ci_less_struct> &mapParamNameToValue) {
     std::map<std::string, const char *> mapWKT2NameToESRIName;
     for (const auto *param = esriMapping->params; param->esri_name; ++param) {
         if (param->wkt2_name) {
@@ -3576,6 +3597,8 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
         }
     }
 
+    const std::string esriProjectionName =
+        stripQuotes(projectionNode->GP()->children()[0]);
     const char *projectionMethodWkt2Name = esriMapping->wkt2_name;
     if (ci_equal(esriProjectionName, "Krovak")) {
         const std::string projCRSName =
@@ -3683,6 +3706,26 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
                                      : "unnamed"),
                propertiesMethod, parameters, values)
         ->identify();
+}
+
+// ---------------------------------------------------------------------------
+
+ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
+    const GeodeticCRSNNPtr &baseGeodCRS, const WKTNodeNNPtr &projCRSNode,
+    const WKTNodeNNPtr &projectionNode, const UnitOfMeasure &defaultLinearUnit,
+    const UnitOfMeasure &defaultAngularUnit) {
+
+    std::map<std::string, std::string, ci_less_struct> mapParamNameToValue;
+    const auto esriMapping =
+        getESRIMapping(projCRSNode, projectionNode, mapParamNameToValue);
+    if (esriMapping == nullptr) {
+        return buildProjectionStandard(baseGeodCRS, projCRSNode, projectionNode,
+                                       defaultLinearUnit, defaultAngularUnit);
+    }
+
+    return buildProjectionFromESRI(baseGeodCRS, projCRSNode, projectionNode,
+                                   defaultLinearUnit, defaultAngularUnit,
+                                   esriMapping, mapParamNameToValue);
 }
 
 // ---------------------------------------------------------------------------
@@ -3842,6 +3885,20 @@ ConversionNNPtr WKTParser::Private::buildProjectionStandard(
     std::string projectionName(wkt1ProjectionName);
     const MethodMapping *mapping =
         tryToIdentifyWKT1Method ? getMappingFromWKT1(projectionName) : nullptr;
+
+    if (!mapping) {
+        // Sometimes non-WKT1:ESRI looking WKT can actually use WKT1:ESRI
+        // projection definitions
+        std::map<std::string, std::string, ci_less_struct> mapParamNameToValue;
+        const auto esriMapping =
+            getESRIMapping(projCRSNode, projectionNode, mapParamNameToValue);
+        if (esriMapping != nullptr) {
+            return buildProjectionFromESRI(
+                baseGeodCRS, projCRSNode, projectionNode, defaultLinearUnit,
+                defaultAngularUnit, esriMapping, mapParamNameToValue);
+        }
+    }
+
     if (mapping) {
         mapping = selectSphericalOrEllipsoidal(mapping, baseGeodCRS);
     } else if (metadata::Identifier::isEquivalentName(
