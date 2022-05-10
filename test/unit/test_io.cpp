@@ -6935,6 +6935,36 @@ TEST(wkt_parse, wkt1_lcc_1sp_without_1sp_suffix) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_pseudo_wkt1_gdal_pseudo_wkt1_esri) {
+    // WKT from https://github.com/OSGeo/PROJ/issues/3186
+    auto wkt = "PROJCS[\"Equidistant_Cylindrical\","
+               "GEOGCS[\"WGS 84\",DATUM[\"wgs_1984\","
+               "SPHEROID[\"WGS 84\",6378137,298.257223563,"
+               "AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],"
+               "PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],"
+               "UNIT[\"degree\",0.0174532925199433,"
+               "AUTHORITY[\"EPSG\",\"9102\"]],"
+               "AUTHORITY[\"EPSG\",\"4326\"]],"
+               "PROJECTION[\"Equidistant_Cylindrical\"],"
+               "PARAMETER[\"false_easting\",0],"
+               "PARAMETER[\"false_northing\",0],"
+               "PARAMETER[\"central_meridian\",0],"
+               "PARAMETER[\"standard_parallel_1\",37],"
+               "UNIT[\"Meter\",1,AUTHORITY[\"EPSG\",\"9001\"]],"
+               "AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]";
+
+    auto dbContext = DatabaseContext::create();
+    auto obj = WKTParser().attachDatabaseContext(dbContext).createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    EXPECT_EQ(crs->derivingConversion()->method()->nameStr(),
+              "Equidistant Cylindrical");
+    EXPECT_EQ(crs->derivingConversion()->method()->getEPSGCode(), 1028);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, invalid) {
     EXPECT_THROW(WKTParser().createFromWKT(""), ParsingException);
     EXPECT_THROW(WKTParser().createFromWKT("A"), ParsingException);
