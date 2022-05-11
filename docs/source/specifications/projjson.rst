@@ -235,52 +235,54 @@ GeographicCRS
 Using a datum member, implicit prime meridian
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The EPSG:4326 / "WGS 84" geographic CRS can be expressed as
+The EPSG:6318 / "NAD83(2011)" geographic CRS can be expressed as
 
 .. code-block:: json
 
     {
-        "$schema": "https://proj.org/schemas/v0.1/projjson.schema.json",
-        "type": "GeographicCRS",
-        "name": "WGS 84",
-        "datum": {
-            "type": "GeodeticReferenceFrame",
-            "name": "World Geodetic System 1984",
-            "ellipsoid": {
-                "name": "WGS 84",
-                "semi_major_axis": 6378137,
-                "inverse_flattening": 298.257223563
-            }
-        },
-        "coordinate_system": {
-            "subtype": "ellipsoidal",
-            "axis": [
-            {
-                "name": "Geodetic latitude",
-                "abbreviation": "Lat",
-                "direction": "north",
-                "unit": "degree"
-            },
-            {
-                "name": "Geodetic longitude",
-                "abbreviation": "Lon",
-                "direction": "east",
-                "unit": "degree"
-            }
-            ]
-        },
-        "area": "World",
-        "bbox": {
-            "south_latitude": -90,
-            "west_longitude": -180,
-            "north_latitude": 90,
-            "east_longitude": 180
-        },
-        "id": {
-            "authority": "EPSG",
-            "code": 4326
+      "$schema": "https://proj.org/schemas/v0.4/projjson.schema.json",
+      "type": "GeographicCRS",
+      "name": "NAD83(2011)",
+      "datum": {
+        "type": "GeodeticReferenceFrame",
+        "name": "NAD83 (National Spatial Reference System 2011)",
+        "ellipsoid": {
+          "name": "GRS 1980",
+          "semi_major_axis": 6378137,
+          "inverse_flattening": 298.257222101
         }
+      },
+      "coordinate_system": {
+        "subtype": "ellipsoidal",
+        "axis": [
+          {
+            "name": "Geodetic latitude",
+            "abbreviation": "Lat",
+            "direction": "north",
+            "unit": "degree"
+          },
+          {
+            "name": "Geodetic longitude",
+            "abbreviation": "Lon",
+            "direction": "east",
+            "unit": "degree"
+          }
+        ]
+      },
+      "scope": "Horizontal component of 3D system.",
+      "area": "Puerto Rico - onshore and offshore. United States (USA) onshore and offshore - Alabama; Alaska; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Virgin Islands - onshore and offshore.",
+      "bbox": {
+        "south_latitude": 14.92,
+        "west_longitude": 167.65,
+        "north_latitude": 74.71,
+        "east_longitude": -63.88
+      },
+      "id": {
+        "authority": "EPSG",
+        "code": 6318
+      }
     }
+
 
 Note the omission of a prime meridian member, which is conformant with the
 WKT2:2019 conditionality rules, as the prime meridian of the WGS 84 datum is the
@@ -455,6 +457,15 @@ of the PROJ software version 9.0.0
 ::
 
     projinfo EPSG:4326 -o PROJJSON -q
+
+.. note::
+
+    PROJ versions prior to PROJ 8.0.0 used versions of the EPSG dataset that
+    did not have the datum ensemble concept. Consquently they used a ``datum``
+    member instead of a ``datum_ensemble``. The number of elements in the
+    datum ensemble may also vary over time when new realizations of WGS 84 are
+    added to the ensemble.
+
 
 ProjectedCRS
 ++++++++++++
