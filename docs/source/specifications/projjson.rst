@@ -1051,8 +1051,8 @@ Deviations with the WKT2:2019 specification
 While most of this specification is intended to be interoperable with WKT2:2019,
 there are a few deviations, reflecting the needs of the PROJ software implementation.
 
-PROJSON extensions
-++++++++++++++++++
+PROJJSON extensions
++++++++++++++++++++
 
 This specification allows a Bound CRS to be used wherever a CRS object is allowed
 in the OGC Topic 2 abstract specification / ISO-19111:2019. In particular,
