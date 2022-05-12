@@ -7610,6 +7610,7 @@ struct PROJStringFormatter::Private {
         PROJStringFormatter::Convention::PROJ_5;
     std::vector<double> toWGS84Parameters_{};
     std::string vDatumExtension_{};
+    std::string geoidCRSValue_{};
     std::string hDatumExtension_{};
     crs::GeographicCRSPtr geogCRSOfCompoundCRS_{};
 
@@ -8902,14 +8903,22 @@ std::set<std::string> PROJStringFormatter::getUsedGridNames() const {
 
 // ---------------------------------------------------------------------------
 
-void PROJStringFormatter::setVDatumExtension(const std::string &filename) {
+void PROJStringFormatter::setVDatumExtension(const std::string &filename,
+                                             const std::string &geoidCRSValue) {
     d->vDatumExtension_ = filename;
+    d->geoidCRSValue_ = geoidCRSValue;
 }
 
 // ---------------------------------------------------------------------------
 
 const std::string &PROJStringFormatter::getVDatumExtension() const {
     return d->vDatumExtension_;
+}
+
+// ---------------------------------------------------------------------------
+
+const std::string &PROJStringFormatter::getGeoidCRSValue() const {
+    return d->geoidCRSValue_;
 }
 
 // ---------------------------------------------------------------------------
@@ -10107,21 +10116,48 @@ PROJStringParser::Private::buildBoundOrCompoundCRSIfNeeded(int iStep,
             VerticalCRS::create(createMapWithUnknownName(), vdatum,
                                 VerticalCS::createGravityRelatedHeight(unit));
 
-        auto geogCRSOfCompoundCRS = crs->extractGeographicCRS();
-        auto geogCRS =
-            geogCRSOfCompoundCRS &&
+        CRSNNPtr geogCRS = GeographicCRS::EPSG_4979; // default
+        const auto &geoid_crs = getParamValue(step, "geoid_crs");
+        if (!geoid_crs.empty()) {
+            if (geoid_crs == "WGS84") {
+                // nothing to do
+            } else if (geoid_crs == "horizontal_crs") {
+                auto geogCRSOfCompoundCRS = crs->extractGeographicCRS();
+                if (geogCRSOfCompoundCRS &&
                     geogCRSOfCompoundCRS->primeMeridian()
                             ->longitude()
                             .getSIValue() == 0 &&
                     geogCRSOfCompoundCRS->coordinateSystem()
                             ->axisList()[0]
-                            ->unit() == UnitOfMeasure::DEGREE
-                ? geogCRSOfCompoundCRS->promoteTo3D(std::string(), nullptr)
-                : GeographicCRS::EPSG_4979;
+                            ->unit() == UnitOfMeasure::DEGREE) {
+                    geogCRS = geogCRSOfCompoundCRS->promoteTo3D(std::string(),
+                                                                nullptr);
+                } else if (geogCRSOfCompoundCRS) {
+                    auto geogCRSOfCompoundCRSDatum =
+                        geogCRSOfCompoundCRS->datumNonNull(nullptr);
+                    geogCRS = GeographicCRS::create(
+                        createMapWithUnknownName(),
+                        datum::GeodeticReferenceFrame::create(
+                            util::PropertyMap().set(
+                                common::IdentifiedObject::NAME_KEY,
+                                geogCRSOfCompoundCRSDatum->nameStr() +
+                                    " (with Greenwich prime meridian)"),
+                            geogCRSOfCompoundCRSDatum->ellipsoid(),
+                            util::optional<std::string>(),
+                            datum::PrimeMeridian::GREENWICH),
+                        EllipsoidalCS::createLongitudeLatitudeEllipsoidalHeight(
+                            UnitOfMeasure::DEGREE, UnitOfMeasure::METRE));
+                }
+            } else {
+                throw ParsingException("Unsupported value for geoid_crs: "
+                                       "should be 'WGS84' or 'horizontal_crs'");
+            }
+        }
         auto transformation =
             Transformation::createGravityRelatedHeightToGeographic3D(
                 PropertyMap().set(IdentifiedObject::NAME_KEY,
-                                  "unknown to WGS84 ellipsoidal height"),
+                                  "unknown to " + geogCRS->nameStr() +
+                                      " ellipsoidal height"),
                 VerticalCRS::create(createMapWithUnknownName(), vdatum,
                                     VerticalCS::createGravityRelatedHeight(
                                         common::UnitOfMeasure::METRE)),
@@ -11048,6 +11084,14 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
                         }
                     } else if (strcmp(cur->param, kv.key.c_str()) == 0) {
                         recognizedByPROJ = (cur->used == 1);
+                        break;
+                    }
+                }
+            }
+            if (!recognizedByPROJ && kv.key == "geoid_crs") {
+                for (auto &pair : step.paramValues) {
+                    if (ci_equal(pair.key, "geoidgrids")) {
+                        recognizedByPROJ = true;
                         break;
                     }
                 }

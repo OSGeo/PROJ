@@ -2922,7 +2922,8 @@ TEST(operation, ETRS89_3D_to_proj_string_with_geoidgrids_nadgrids) {
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 "
         "+k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel "
-        "+nadgrids=rdtrans2008.gsb +geoidgrids=naptrans2008.gtx +units=m "
+        "+nadgrids=rdtrans2008.gsb +geoidgrids=naptrans2008.gtx "
+        "+geoid_crs=horizontal_crs +units=m "
         "+type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
@@ -4030,6 +4031,7 @@ TEST(operation, geocent_to_compoundCRS) {
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
@@ -4053,6 +4055,7 @@ TEST(operation, geocent_to_compoundCRS_context) {
     auto src = authFactory->createCoordinateReferenceSystem("4978");
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
@@ -4163,11 +4166,13 @@ TEST(operation, compoundCRS_to_compoundCRS_with_vertical_transform) {
 TEST(operation, compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +nadgrids=@bar.gsb +geoidgrids=@bar.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
@@ -4190,11 +4195,13 @@ TEST(
     compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert_same_geoidgrids) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +nadgrids=@bar.gsb +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
@@ -4218,11 +4225,13 @@ TEST(
     compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert_same_geoidgrids_different_vunits) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +nadgrids=@bar.gsb +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+vunits=us-ft +type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
@@ -4247,11 +4256,13 @@ TEST(
     compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert_same_nadgrids_same_geoidgrids) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS67 +nadgrids=@foo.gsb +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +nadgrids=@foo.gsb +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
@@ -4269,11 +4280,13 @@ TEST(
     compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert_same_towgs84_same_geoidgrids) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS67 +towgs84=0,0,0 +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +towgs84=0,0,0 +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
@@ -4297,11 +4310,13 @@ TEST(
     compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert_same_ellsp_but_different_towgs84_different_geoidgrids) {
     auto objSrc = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +towgs84=1,2,3 +geoidgrids=@foo.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +towgs84=4,5,6 +geoidgrids=@bar.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);
@@ -6474,6 +6489,7 @@ TEST(operation, boundCRS_to_compoundCRS) {
     ASSERT_TRUE(src != nullptr);
     auto objDst = PROJStringParser().createFromPROJString(
         "+proj=longlat +ellps=GRS80 +nadgrids=@bar.gsb +geoidgrids=@bar.gtx "
+        "+geoid_crs=horizontal_crs "
         "+type=crs");
     auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
     ASSERT_TRUE(dst != nullptr);

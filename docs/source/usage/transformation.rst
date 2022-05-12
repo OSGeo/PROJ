@@ -143,6 +143,8 @@ PROJ 4.x/5.x paradigm
     ============   ==============================================================
     +datum         Datum name (see ``proj -ld``)
     +geoidgrids    Filename of GTX grid file to use for vertical datum transforms
+    +geoid_crs     (Added in PROJ 9.1) Value can be "WGS84" or "horizontal_crs".
+                   Only used if geoidgrids is specified.
     +nadgrids      Filename of NTv2 grid file to use for datum transforms
     +towgs84       3 or 7 term datum transform parameters
     +to_meter      Multiplier to convert map units to 1.0m
@@ -182,6 +184,42 @@ operation is non-linear. Similar to the horizontal grid correction, ``+geoidgrid
 can be used to perform grid corrections in the vertical component.
 Both grid correction methods allow inclusion of more than one grid in the same
 transformation
+
+The ``+geoid_crs=WGS84/horizontal_crs`` parameter was added in PROJ 9.1 to solve
+an ambiguity that has been rampant for a long time. Before PROJ 6, the interpolation
+CRS of the geoid transformation was assumed to be the one of the horizontal CRS.
+Starting with PROJ 6, this was inadvertently changed to be WGS84.
+
+When transforming from a CRS that specifies a horizontal datum shift
+with ``+towgs84`` or ``+nadgrids``, and a vertical one with ``+geoidgrids`` with
+``+geoid_crs=horizontal_crs``, to WGS84, the vertical transformation is done before
+the horizontal one.
+
+::
+
+    $ projinfo -s "+proj=longlat +ellps=GRS80 +nadgrids=@foo +geoidgrids=@bar +geoid_crs=horizontal_crs +type=crs" -t EPSG:4979  -o PROJ -q
+
+    +proj=pipeline
+      +step +proj=unitconvert +xy_in=deg +xy_out=rad
+      +step +proj=vgridshift +grids=@bar +multiplier=1
+      +step +proj=hgridshift +grids=@foo
+      +step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m
+      +step +proj=axisswap +order=2,1
+
+Conversely, when ``+geoid_crs=WGS84`` (or omitting it with PROJ >= 6),
+the horizontal transformation is done before the vertical one.
+
+::
+
+    $ projinfo -s "+proj=longlat +ellps=GRS80 +nadgrids=@foo +geoidgrids=@bar +geoid_crs=WGS84 +type=crs" -t EPSG:4979  -o PROJ -q
+
+    +proj=pipeline
+      +step +proj=unitconvert +xy_in=deg +xy_out=rad
+      +step +proj=hgridshift +grids=@foo
+      +step +proj=vgridshift +grids=@bar +multiplier=1
+      +step +proj=unitconvert +xy_in=rad +xy_out=deg
+      +step +proj=axisswap +order=2,1
+
 
 In contrast to the *transformation pipeline* framework, transformations with the
 *cs2cs* framework in PROJ 4 and 5 were expressed as two separate proj-strings. One proj-string *to*

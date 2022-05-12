@@ -1056,8 +1056,9 @@ class PROJ_GCC_DLL BoundCRS final : public CRS,
     PROJ_INTERNAL BoundCRSNNPtr shallowCloneAsBoundCRS() const;
     PROJ_INTERNAL bool isTOWGS84Compatible() const;
     PROJ_INTERNAL std::string getHDatumPROJ4GRIDS() const;
-    PROJ_INTERNAL std::string getVDatumPROJ4GRIDS(
-        const crs::GeographicCRS *geogCRSOfCompoundCRS = nullptr) const;
+    PROJ_INTERNAL std::string
+    getVDatumPROJ4GRIDS(const crs::GeographicCRS *geogCRSOfCompoundCRS,
+                        const char **outGeoidCRSValue) const;
 
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
