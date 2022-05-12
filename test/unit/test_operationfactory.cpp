@@ -4812,6 +4812,51 @@ TEST(
 
 // ---------------------------------------------------------------------------
 
+TEST(
+    operation,
+    compoundCRS_to_compoundCRS_concatenated_operation_with_two_vert_transformation_and_different_source_dest_interp) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // "BD72 + Ostend height"
+    auto srcObj = createFromUserInput("EPSG:4313+5710",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+
+    // "Amersfoort + NAP height"
+    auto dstObj = createFromUserInput("EPSG:4289+5709",
+                                      authFactory->databaseContext(), false);
+    auto dst = nn_dynamic_pointer_cast<CRS>(dstObj);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(), "BD72 to ETRS89 (3) + "
+                                  "Inverse of ETRS89 to Ostend height (1) + "
+                                  "ETRS89 to NAP height (2) + "
+                                  "Inverse of Amersfoort to ETRS89 (9)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=hgridshift +grids=be_ign_bd72lb72_etrs89lb08.tif "
+              "+step +proj=vgridshift +grids=be_ign_hBG18.tif +multiplier=1 "
+              "+step +inv +proj=vgridshift +grids=nl_nsgi_nlgeo2018.tif "
+              "+multiplier=1 "
+              "+step +inv +proj=hgridshift +grids=nl_nsgi_rdtrans2018.tif "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_to_compoundCRS_issue_2720) {
     auto dbContext = DatabaseContext::create();
     auto objSrc = WKTParser().attachDatabaseContext(dbContext).createFromWKT(

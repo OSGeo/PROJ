@@ -203,13 +203,30 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
         }
         lastTargetCRS = l_targetCRS;
     }
+
+    // When chaining VerticalCRS -> GeographicCRS -> VerticalCRS, use
+    // GeographicCRS as the interpolationCRS
+    const auto l_sourceCRS = NN_NO_CHECK(operationsIn[0]->sourceCRS());
+    const auto l_targetCRS = NN_NO_CHECK(operationsIn.back()->targetCRS());
+    if (operationsIn.size() == 2 && interpolationCRS == nullptr &&
+        dynamic_cast<const crs::VerticalCRS *>(l_sourceCRS.get()) != nullptr &&
+        dynamic_cast<const crs::VerticalCRS *>(l_targetCRS.get()) != nullptr) {
+        const auto geog1 = dynamic_cast<crs::GeographicCRS *>(
+            operationsIn[0]->targetCRS().get());
+        const auto geog2 = dynamic_cast<crs::GeographicCRS *>(
+            operationsIn[1]->sourceCRS().get());
+        if (geog1 != nullptr && geog2 != nullptr &&
+            geog1->_isEquivalentTo(geog2,
+                                   util::IComparable::Criterion::EQUIVALENT)) {
+            interpolationCRS = operationsIn[0]->targetCRS();
+        }
+    }
+
     auto op = ConcatenatedOperation::nn_make_shared<ConcatenatedOperation>(
         operationsIn);
     op->assignSelf(op);
     op->setProperties(properties);
-    op->setCRSs(NN_NO_CHECK(operationsIn[0]->sourceCRS()),
-                NN_NO_CHECK(operationsIn.back()->targetCRS()),
-                interpolationCRS);
+    op->setCRSs(l_sourceCRS, l_targetCRS, interpolationCRS);
     op->setAccuracies(accuracies);
 #ifdef DEBUG_CONCATENATED_OPERATION
     {
