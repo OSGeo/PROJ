@@ -5467,14 +5467,17 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                 return false;
             };
 
-        const bool hasNonTrivialSrcTransf =
-            !opsSrcToGeog.empty() &&
-            (!opsSrcToGeog.front()->hasBallparkTransformation() ||
-             hasKnownGrid(opsSrcToGeog.front()));
+        const auto hasNonTrivialTransf =
+            [&hasKnownGrid](const std::vector<CoordinateOperationNNPtr> &ops) {
+                return !ops.empty() &&
+                       (!ops.front()->hasBallparkTransformation() ||
+                        hasKnownGrid(ops.front()));
+            };
+
+        const bool hasNonTrivialSrcTransf = hasNonTrivialTransf(opsSrcToGeog);
         const bool hasNonTrivialTargetTransf =
-            !opsGeogToTarget.empty() &&
-            (!opsGeogToTarget.front()->hasBallparkTransformation() ||
-             hasKnownGrid(opsGeogToTarget.front()));
+            hasNonTrivialTransf(opsGeogToTarget);
+        double bestAccuracy = -1;
         if (hasNonTrivialSrcTransf && hasNonTrivialTargetTransf) {
             const auto opsGeogSrcToGeogDst =
                 createOperations(intermGeogSrc, intermGeogDst, context);
@@ -5515,11 +5518,102 @@ void CoordinateOperationFactory::Private::createOperationsCompoundToCompound(
                                                                             op2,
                                                                             op3},
                                         disallowEmptyIntersection));
+                                const double accuracy = getAccuracy(res.back());
+                                if (accuracy >= 0 &&
+                                    (bestAccuracy < 0 ||
+                                     accuracy < bestAccuracy)) {
+                                    bestAccuracy = accuracy;
+                                }
                             } catch (const std::exception &) {
                             }
                         }
                     }
                 }
+            }
+        }
+
+        const auto createOpsInTwoSteps =
+            [&res,
+             bestAccuracy](const std::vector<CoordinateOperationNNPtr> &ops1,
+                           const std::vector<CoordinateOperationNNPtr> &ops2) {
+                std::vector<CoordinateOperationNNPtr> res2;
+                double bestAccuracy2 = -1;
+
+                // In first pass, exclude (horizontal) ballpark operations, but
+                // accept them in second pass.
+                for (int pass = 0; pass <= 1 && res2.empty(); pass++) {
+                    for (const auto &op1 : ops1) {
+                        if (pass == 0 && op1->hasBallparkTransformation()) {
+                            // std::cerr << "excluded " << op1->nameStr() <<
+                            // std::endl;
+                            continue;
+                        }
+                        if (op1->nameStr().find(
+                                BALLPARK_VERTICAL_TRANSFORMATION) !=
+                            std::string::npos) {
+                            continue;
+                        }
+                        for (const auto &op2 : ops2) {
+                            if (pass == 0 && op2->hasBallparkTransformation()) {
+                                // std::cerr << "excluded " << op2->nameStr() <<
+                                // std::endl;
+                                continue;
+                            }
+                            if (op2->nameStr().find(
+                                    BALLPARK_VERTICAL_TRANSFORMATION) !=
+                                std::string::npos) {
+                                continue;
+                            }
+                            try {
+                                res2.emplace_back(
+                                    ConcatenatedOperation::
+                                        createComputeMetadata(
+                                            {op1, op2},
+                                            disallowEmptyIntersection));
+                                const double accuracy =
+                                    getAccuracy(res2.back());
+                                if (accuracy >= 0 &&
+                                    (bestAccuracy2 < 0 ||
+                                     accuracy < bestAccuracy2)) {
+                                    bestAccuracy2 = accuracy;
+                                }
+                            } catch (const std::exception &) {
+                            }
+                        }
+                    }
+                }
+
+                // Keep the results of this new attempt, if there are better
+                // than the previous ones
+                if (bestAccuracy2 >= 0 &&
+                    (bestAccuracy < 0 || bestAccuracy2 < bestAccuracy)) {
+                    res = std::move(res2);
+                }
+            };
+
+        // If the promoted-to-3D source geographic CRS is not a known object,
+        // transformations from it to another 3D one may not be relevant,
+        // so try doing source -> geogDst 3D -> dest, if geogDst 3D is a known
+        // object
+        if (!srcGeog->identifiers().empty() &&
+            intermGeogSrc->identifiers().empty() &&
+            !intermGeogDst->identifiers().empty() &&
+            hasNonTrivialTargetTransf) {
+            const auto opsSrcToIntermGeog =
+                createOperations(sourceCRS, intermGeogDst, context);
+            if (hasNonTrivialTransf(opsSrcToIntermGeog)) {
+                createOpsInTwoSteps(opsSrcToIntermGeog, opsGeogToTarget);
+            }
+        }
+        // Symetrical situation with the promoted-to-3D target geographic CRS
+        else if (!dstGeog->identifiers().empty() &&
+                 intermGeogDst->identifiers().empty() &&
+                 !intermGeogSrc->identifiers().empty() &&
+                 hasNonTrivialSrcTransf) {
+            const auto opsIntermGeogToDst =
+                createOperations(intermGeogSrc, targetCRS, context);
+            if (hasNonTrivialTransf(opsIntermGeogToDst)) {
+                createOpsInTwoSteps(opsSrcToGeog, opsIntermGeogToDst);
             }
         }
 
