@@ -4705,6 +4705,75 @@ TEST(operation, compoundCRS_to_compoundCRS_WGS84_EGM96_to_WGS84_Belfast) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation,
+     compoundCRS_to_compoundCRS_OSGB36_BNG_ODN_height_to_WGS84_EGM96) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // "OSGB36 / British National Grid + ODN height
+    auto srcObj = createFromUserInput("EPSG:27700+5701", dbContext, false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto authFactoryEPSG =
+        AuthorityFactory::create(dbContext, std::string("EPSG"));
+    auto dst = authFactoryEPSG->createCoordinateReferenceSystem(
+        "9707"); // "WGS 84 + EGM96 height"
+
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(src), dst, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(), "Inverse of British National Grid + "
+                                      "OSGB36 to ETRS89 (2) + "
+                                      "Inverse of ETRS89 to ODN height (2) + "
+                                      "ETRS89 to WGS 84 (1) + "
+                                      "WGS 84 to EGM96 height (1)");
+        const char *expected_proj =
+            "+proj=pipeline "
+            "+step +inv +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 "
+            "+x_0=400000 +y_0=-100000 +ellps=airy "
+            "+step +proj=hgridshift +grids=uk_os_OSTN15_NTv2_OSGBtoETRS.tif "
+            "+step +proj=vgridshift +grids=uk_os_OSGM15_GB.tif +multiplier=1 "
+            "+step +inv +proj=vgridshift +grids=us_nga_egm96_15.tif "
+            "+multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1";
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            expected_proj);
+    }
+
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            dst, NN_NO_CHECK(src), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
+                                      "Inverse of ETRS89 to WGS 84 (1) + "
+                                      "ETRS89 to ODN height (2) + "
+                                      "Inverse of OSGB36 to ETRS89 (2) + "
+                                      "British National Grid");
+        const char *expected_proj =
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=vgridshift +grids=us_nga_egm96_15.tif +multiplier=1 "
+            "+step +inv +proj=vgridshift +grids=uk_os_OSGM15_GB.tif "
+            "+multiplier=1 "
+            "+step +inv +proj=hgridshift "
+            "+grids=uk_os_OSTN15_NTv2_OSGBtoETRS.tif "
+            "+step +proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 "
+            "+x_0=400000 +y_0=-100000 +ellps=airy";
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            expected_proj);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(
     operation,
     compoundCRS_to_compoundCRS_concatenated_operation_with_two_vert_transformation) {
@@ -4739,6 +4808,51 @@ TEST(
                                                  "1957 height to ETRS89 + "
                                                  "EVRF2007 height (1)'");
     }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(
+    operation,
+    compoundCRS_to_compoundCRS_concatenated_operation_with_two_vert_transformation_and_different_source_dest_interp) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    // "BD72 + Ostend height"
+    auto srcObj = createFromUserInput("EPSG:4313+5710",
+                                      authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+
+    // "Amersfoort + NAP height"
+    auto dstObj = createFromUserInput("EPSG:4289+5709",
+                                      authFactory->databaseContext(), false);
+    auto dst = nn_dynamic_pointer_cast<CRS>(dstObj);
+    ASSERT_TRUE(dst != nullptr);
+
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(list[0]->nameStr(), "BD72 to ETRS89 (3) + "
+                                  "Inverse of ETRS89 to Ostend height (1) + "
+                                  "ETRS89 to NAP height (2) + "
+                                  "Inverse of Amersfoort to ETRS89 (9)");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=hgridshift +grids=be_ign_bd72lb72_etrs89lb08.tif "
+              "+step +proj=vgridshift +grids=be_ign_hBG18.tif +multiplier=1 "
+              "+step +inv +proj=vgridshift +grids=nl_nsgi_nlgeo2018.tif "
+              "+multiplier=1 "
+              "+step +inv +proj=hgridshift +grids=nl_nsgi_rdtrans2018.tif "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -5014,6 +5128,72 @@ TEST(operation, compoundCRS_to_compoundCRS_issue_3152_ch1903lv03_ln02_bound) {
               "ETRS89 to WGS 84 (1) + "
               "Inverse of MyTransformation from CH1903 to WGS84 + "
               "Map projection of CH1903 / LV03");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation,
+     compoundCRS_to_compoundCRS_issue_3191_BD72_Ostend_height_to_WGS84_EGM96) {
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    // BD72 + Ostend height
+    auto srcObj = createFromUserInput("EPSG:4313+5710", dbContext, false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    auto authFactoryEPSG =
+        AuthorityFactory::create(dbContext, std::string("EPSG"));
+    auto dst = authFactoryEPSG->createCoordinateReferenceSystem(
+        "9707"); // "WGS 84 + EGM96 height"
+
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(src), dst, ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(),
+                  "BD72 to ETRS89 (3) + "
+                  "Inverse of ETRS89 to Ostend height (1) + "
+                  "ETRS89 to WGS 84 (1) + "
+                  "WGS 84 to EGM96 height (1)");
+        const char *expected_proj =
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=hgridshift +grids=be_ign_bd72lb72_etrs89lb08.tif "
+            "+step +proj=vgridshift +grids=be_ign_hBG18.tif +multiplier=1 "
+            "+step +inv +proj=vgridshift +grids=us_nga_egm96_15.tif "
+            "+multiplier=1 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1";
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            expected_proj);
+    }
+
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            dst, NN_NO_CHECK(src), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
+                                      "Inverse of ETRS89 to WGS 84 (1) + "
+                                      "ETRS89 to Ostend height (1) + "
+                                      "Inverse of BD72 to ETRS89 (3)");
+        const char *expected_proj =
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=vgridshift +grids=us_nga_egm96_15.tif +multiplier=1 "
+            "+step +inv +proj=vgridshift +grids=be_ign_hBG18.tif +multiplier=1 "
+            "+step +inv +proj=hgridshift +grids=be_ign_bd72lb72_etrs89lb08.tif "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1";
+        EXPECT_EQ(
+            list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            expected_proj);
+    }
 }
 
 // ---------------------------------------------------------------------------

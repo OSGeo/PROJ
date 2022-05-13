@@ -8228,6 +8228,42 @@ const std::string &PROJStringFormatter::toString() const {
                 }
             }
 
+            // detect a step and its inverse
+            if (curStep.inverted != prevStep.inverted &&
+                curStep.name == prevStep.name &&
+                curStepParamCount == prevStepParamCount) {
+                bool allSame = true;
+                for (size_t j = 0; j < curStepParamCount; j++) {
+                    if (curStep.paramValues[j] != prevStep.paramValues[j]) {
+                        allSame = false;
+                        break;
+                    }
+                }
+                if (allSame) {
+                    deletePrevAndCurIter();
+                    continue;
+                }
+            }
+
+            ++iterCur;
+        }
+    }
+
+    {
+        auto iterCur = steps.begin();
+        if (iterCur != steps.end()) {
+            ++iterCur;
+        }
+        while (iterCur != steps.end()) {
+
+            assert(iterCur != steps.begin());
+            auto iterPrev = std::prev(iterCur);
+            auto &prevStep = *iterPrev;
+            auto &curStep = *iterCur;
+
+            const auto curStepParamCount = curStep.paramValues.size();
+            const auto prevStepParamCount = prevStep.paramValues.size();
+
             // +step +proj=hgridshift +grids=grid_A
             // +step +proj=vgridshift [...] <== curStep
             // +step +inv +proj=hgridshift +grids=grid_A
@@ -8265,42 +8301,6 @@ const std::string &PROJStringFormatter::toString() const {
                     continue;
                 }
             }
-
-            // detect a step and its inverse
-            if (curStep.inverted != prevStep.inverted &&
-                curStep.name == prevStep.name &&
-                curStepParamCount == prevStepParamCount) {
-                bool allSame = true;
-                for (size_t j = 0; j < curStepParamCount; j++) {
-                    if (curStep.paramValues[j] != prevStep.paramValues[j]) {
-                        allSame = false;
-                        break;
-                    }
-                }
-                if (allSame) {
-                    deletePrevAndCurIter();
-                    continue;
-                }
-            }
-
-            ++iterCur;
-        }
-    }
-
-    {
-        auto iterCur = steps.begin();
-        if (iterCur != steps.end()) {
-            ++iterCur;
-        }
-        while (iterCur != steps.end()) {
-
-            assert(iterCur != steps.begin());
-            auto iterPrev = std::prev(iterCur);
-            auto &prevStep = *iterPrev;
-            auto &curStep = *iterCur;
-
-            const auto curStepParamCount = curStep.paramValues.size();
-            const auto prevStepParamCount = prevStep.paramValues.size();
 
             // +step +proj=unitconvert +xy_in=rad +xy_out=deg
             // +step +proj=axisswap +order=2,1
