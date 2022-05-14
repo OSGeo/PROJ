@@ -20,5 +20,6 @@ systems are based on different datums.
    molobadekas
    hgridshift
    tinshift
+   vertoffset
    vgridshift
    xyzgridshift
