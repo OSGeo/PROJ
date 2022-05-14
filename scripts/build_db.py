@@ -669,7 +669,8 @@ def fill_other_transformation(proj_db_cursor):
     # 9660: Geographic3D offsets
     # 1068: Height Depth Reversal
     # 1069: Change of Vertical Unit
-    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660, 1068, 1069)")
+    # 1046: Vertical Offset and Slope
+    proj_db_cursor.execute("SELECT coord_op_code, coord_op_name, coord_op_method_code, coord_op_method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, epsg_coordoperation.deprecated, epsg_coordoperation.remarks FROM epsg.epsg_coordoperation LEFT JOIN epsg.epsg_coordoperationmethod USING (coord_op_method_code) WHERE coord_op_method_code IN (9601, 9616, 9618, 9619, 9624, 9660, 1068, 1069, 1046)")
     for (code, name, method_code, method_name, source_crs_code, target_crs_code, coord_op_accuracy, coord_tfm_version, deprecated, remarks) in proj_db_cursor.fetchall():
 
         # 1068 and 1069 are Height Depth Reversal and Change of Vertical Unit
@@ -700,11 +701,19 @@ def fill_other_transformation(proj_db_cursor):
         param_value = [None for i in range(max_n_params)]
         param_uom_auth_name = [None for i in range(max_n_params)]
         param_uom_code = [None for i in range(max_n_params)]
+        interpolation_crs_auth_name = None
+        interpolation_crs_code = None
 
         iterator = proj_db_cursor.execute("SELECT sort_order, cop.parameter_code, parameter_name, parameter_value, uom_code from epsg_coordoperationparam cop LEFT JOIN epsg_coordoperationparamvalue copv LEFT JOIN epsg_coordoperationparamusage copu ON cop.parameter_code = copv.parameter_code AND copu.parameter_code = copv.parameter_code WHERE copu.coord_op_method_code = copv.coord_op_method_code AND coord_op_code = ? AND copv.coord_op_method_code = ? ORDER BY sort_order", (code, method_code))
         for (order, parameter_code, parameter_name, parameter_value, uom_code) in iterator:
             assert order <= max_n_params
             assert order == expected_order
+            if method_code == 1046 and order == 6: # Vertical offset and slope
+                assert parameter_code == 1037 # EPSG code for Horizontal CRS
+                interpolation_crs_auth_name = EPSG_AUTHORITY
+                interpolation_crs_code = str(int(parameter_value)) # needed to avoid codes like XXXX.0
+                break
+
             param_auth_name[order - 1] = EPSG_AUTHORITY
             param_code[order - 1] = parameter_code
             param_name[order - 1] = parameter_name
@@ -712,6 +721,7 @@ def fill_other_transformation(proj_db_cursor):
             param_uom_auth_name[order - 1] = EPSG_AUTHORITY
             param_uom_code[order - 1] = uom_code
             expected_order += 1
+
 
         arg = (EPSG_AUTHORITY, code, name,
                remarks, 
@@ -733,7 +743,7 @@ def fill_other_transformation(proj_db_cursor):
                param_uom_auth_name[5], param_uom_code[5], param_auth_name[6],
                param_code[6], param_name[6], param_value[6],
                param_uom_auth_name[6], param_uom_code[6],
-               None, None, # interpolation CRS
+               interpolation_crs_auth_name, interpolation_crs_code,
                coord_tfm_version,
                deprecated)
 
