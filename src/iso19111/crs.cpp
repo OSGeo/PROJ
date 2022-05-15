@@ -3466,9 +3466,13 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 void VerticalCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
-    auto geoidgrids = formatter->getVDatumExtension();
+    const auto &geoidgrids = formatter->getVDatumExtension();
     if (!geoidgrids.empty()) {
         formatter->addParam("geoidgrids", geoidgrids);
+    }
+    const auto &geoidCRS = formatter->getGeoidCRSValue();
+    if (!geoidCRS.empty()) {
+        formatter->addParam("geoid_crs", geoidCRS);
     }
 
     auto &axisList = coordinateSystem()->axisList();
@@ -5133,9 +5137,14 @@ void CompoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                                     : io::WKTConstants::COMPD_CS,
                              !identifiers().empty());
         formatter->addQuotedString(nameStr());
+        if (!l_components.empty()) {
+            formatter->setGeogCRSOfCompoundCRS(
+                l_components[0]->extractGeographicCRS());
+        }
         for (const auto &crs : l_components) {
             crs->_exportToWKT(formatter);
         }
+        formatter->setGeogCRSOfCompoundCRS(nullptr);
         ObjectUsage::baseExportToWKT(formatter);
         formatter->endNode();
     }
@@ -5177,13 +5186,19 @@ void CompoundCRS::_exportToJSON(
 void CompoundCRS::_exportToPROJString(
     io::PROJStringFormatter *formatter) const // throw(io::FormattingException)
 {
-    for (const auto &crs : componentReferenceSystems()) {
+    const auto &l_components = componentReferenceSystems();
+    if (!l_components.empty()) {
+        formatter->setGeogCRSOfCompoundCRS(
+            l_components[0]->extractGeographicCRS());
+    }
+    for (const auto &crs : l_components) {
         auto crs_exportable =
             dynamic_cast<const IPROJStringExportable *>(crs.get());
         if (crs_exportable) {
             crs_exportable->_exportToPROJString(formatter);
         }
     }
+    formatter->setGeogCRSOfCompoundCRS(nullptr);
 }
 
 // ---------------------------------------------------------------------------
@@ -5687,9 +5702,22 @@ std::string BoundCRS::getHDatumPROJ4GRIDS() const {
 
 // ---------------------------------------------------------------------------
 
-std::string BoundCRS::getVDatumPROJ4GRIDS() const {
+std::string
+BoundCRS::getVDatumPROJ4GRIDS(const crs::GeographicCRS *geogCRSOfCompoundCRS,
+                              const char **outGeoidCRSValue) const {
+    // When importing from WKT1 PROJ4_GRIDS extension, we used to hardcode
+    // "WGS 84" as the hub CRS, so let's test that for backward compatibility.
     if (dynamic_cast<VerticalCRS *>(d->baseCRS().get()) &&
         ci_equal(d->hubCRS()->nameStr(), "WGS 84")) {
+        if (outGeoidCRSValue)
+            *outGeoidCRSValue = "WGS84";
+        return d->transformation()->getHeightToGeographic3DFilename();
+    } else if (geogCRSOfCompoundCRS &&
+               dynamic_cast<VerticalCRS *>(d->baseCRS().get()) &&
+               ci_equal(d->hubCRS()->nameStr(),
+                        geogCRSOfCompoundCRS->nameStr())) {
+        if (outGeoidCRSValue)
+            *outGeoidCRSValue = "horizontal_crs";
         return d->transformation()->getHeightToGeographic3DFilename();
     }
     return std::string();
@@ -5715,7 +5743,8 @@ void BoundCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         formatter->endNode();
     } else {
 
-        auto vdatumProj4GridName = getVDatumPROJ4GRIDS();
+        auto vdatumProj4GridName = getVDatumPROJ4GRIDS(
+            formatter->getGeogCRSOfCompoundCRS().get(), nullptr);
         if (!vdatumProj4GridName.empty()) {
             formatter->setVDatumExtension(vdatumProj4GridName);
             d->baseCRS()->_exportToWKT(formatter);
@@ -5789,11 +5818,13 @@ void BoundCRS::_exportToPROJString(
             "baseCRS of BoundCRS cannot be exported as a PROJ string");
     }
 
-    auto vdatumProj4GridName = getVDatumPROJ4GRIDS();
+    const char *geoidCRSValue = "";
+    auto vdatumProj4GridName = getVDatumPROJ4GRIDS(
+        formatter->getGeogCRSOfCompoundCRS().get(), &geoidCRSValue);
     if (!vdatumProj4GridName.empty()) {
-        formatter->setVDatumExtension(vdatumProj4GridName);
+        formatter->setVDatumExtension(vdatumProj4GridName, geoidCRSValue);
         crs_exportable->_exportToPROJString(formatter);
-        formatter->setVDatumExtension(std::string());
+        formatter->setVDatumExtension(std::string(), std::string());
     } else {
         auto hdatumProj4GridName = getHDatumPROJ4GRIDS();
         if (!hdatumProj4GridName.empty()) {

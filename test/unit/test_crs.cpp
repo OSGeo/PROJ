@@ -5099,7 +5099,7 @@ TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_WKT2) {
         "                    ORDER[3],\n"
         "                    LENGTHUNIT[\"metre\",1]],\n"
         "            ID[\"EPSG\",4979]]],\n"
-        "    ABRIDGEDTRANSFORMATION[\"EGM2008 geoid height to WGS84 "
+        "    ABRIDGEDTRANSFORMATION[\"EGM2008 geoid height to WGS 84 "
         "ellipsoidal height\",\n"
         "        METHOD[\"GravityRelatedHeight to Geographic3D\"],\n"
         "        PARAMETERFILE[\"Geoid (height correction) model "
@@ -5128,7 +5128,8 @@ TEST(crs, WKT1_VERT_DATUM_EXTENSION_to_PROJ_string) {
     ASSERT_TRUE(crs != nullptr);
 
     EXPECT_EQ(crs->exportToPROJString(PROJStringFormatter::create().get()),
-              "+geoidgrids=egm08_25.gtx +vunits=m +no_defs +type=crs");
+              "+geoidgrids=egm08_25.gtx +geoid_crs=WGS84 +vunits=m +no_defs "
+              "+type=crs");
 }
 
 // ---------------------------------------------------------------------------
@@ -6194,7 +6195,7 @@ TEST(crs, crs_createBoundCRSToWGS84IfPossible) {
         EXPECT_EQ(compoundCRS->exportToPROJString(
                       PROJStringFormatter::create().get()),
                   "+proj=longlat +datum=WGS84 +geoidgrids=us_nga_egm08_25.tif "
-                  "+vunits=m +no_defs +type=crs");
+                  "+geoid_crs=WGS84 +vunits=m +no_defs +type=crs");
     }
 #ifdef disabled_since_epsg_10_035
     // There are now too many transformations from NGF-IGN69 height to WGS 84

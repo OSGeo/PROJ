@@ -4431,7 +4431,7 @@ TEST(wkt_parse, WKT1_VERT_DATUM_EXTENSION) {
               crs->hubCRS()->nameStr());
 
     EXPECT_EQ(crs->transformation()->nameStr(),
-              "EGM2008 geoid height to WGS84 ellipsoidal height");
+              "EGM2008 geoid height to WGS 84 ellipsoidal height");
     EXPECT_EQ(crs->transformation()->method()->nameStr(),
               "GravityRelatedHeight to Geographic3D");
     ASSERT_EQ(crs->transformation()->parameterValues().size(), 1U);
@@ -4466,13 +4466,54 @@ TEST(wkt_parse, WKT1_VERT_DATUM_EXTENSION_units_ftUS) {
     ASSERT_TRUE(crs != nullptr);
 
     EXPECT_EQ(crs->transformation()->nameStr(),
-              "NAVD88 height to WGS84 ellipsoidal height"); // no (ftUS)
+              "NAVD88 height to WGS 84 ellipsoidal height"); // no (ftUS)
     auto sourceTransformationCRS = crs->transformation()->sourceCRS();
     auto sourceTransformationVertCRS =
         nn_dynamic_pointer_cast<VerticalCRS>(sourceTransformationCRS);
     EXPECT_EQ(
         sourceTransformationVertCRS->coordinateSystem()->axisList()[0]->unit(),
         UnitOfMeasure::METRE);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, WKT1_COMPD_CS_VERT_DATUM_EXTENSION) {
+    auto wkt =
+        "COMPD_CS[\"NAD83 + NAVD88 height\",\n"
+        "    GEOGCS[\"NAD83\",\n"
+        "        DATUM[\"North_American_Datum_1983\",\n"
+        "            SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
+        "                AUTHORITY[\"EPSG\",\"7019\"]],\n"
+        "            AUTHORITY[\"EPSG\",\"6269\"]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            AUTHORITY[\"EPSG\",\"8901\"]],\n"
+        "        UNIT[\"degree\",0.0174532925199433,\n"
+        "            AUTHORITY[\"EPSG\",\"9122\"]],\n"
+        "        AUTHORITY[\"EPSG\",\"4269\"]],\n"
+        "    VERT_CS[\"NAVD88 height\",\n"
+        "        VERT_DATUM[\"North American Vertical Datum 1988\",2005,\n"
+        "            EXTENSION[\"PROJ4_GRIDS\",\"@foo.gtx\"],\n"
+        "            AUTHORITY[\"EPSG\",\"5103\"]],\n"
+        "        UNIT[\"metre\",1,\n"
+        "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
+        "        AXIS[\"Gravity-related height\",UP],\n"
+        "        AUTHORITY[\"EPSG\",\"5703\"]]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    auto boundVertCRS =
+        nn_dynamic_pointer_cast<BoundCRS>(crs->componentReferenceSystems()[1]);
+    ASSERT_TRUE(boundVertCRS != nullptr);
+
+    EXPECT_EQ(boundVertCRS->transformation()->nameStr(),
+              "NAVD88 height to NAD83 ellipsoidal height");
+
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
+        wkt);
 }
 
 // ---------------------------------------------------------------------------
@@ -9196,10 +9237,8 @@ TEST(io, projparse_longlat_geoidgrids) {
     crs->exportToWKT(f.get());
 
     auto wkt = f->toString();
-    EXPECT_TRUE(
-        wkt.find(
-            "ABRIDGEDTRANSFORMATION[\"unknown to WGS84 ellipsoidal height\"") !=
-        std::string::npos)
+    EXPECT_TRUE(wkt.find("ABRIDGEDTRANSFORMATION[\"unknown to WGS 84 "
+                         "ellipsoidal height\"") != std::string::npos)
         << wkt;
     EXPECT_TRUE(wkt.find("PARAMETERFILE[\"Geoid (height correction) model "
                          "file\",\"foo.gtx\"]") != std::string::npos)
@@ -9209,7 +9248,8 @@ TEST(io, projparse_longlat_geoidgrids) {
         crs->exportToPROJString(
             PROJStringFormatter::create(PROJStringFormatter::Convention::PROJ_4)
                 .get()),
-        "+proj=longlat +ellps=GRS80 +geoidgrids=foo.gtx +vunits=m +no_defs "
+        "+proj=longlat +ellps=GRS80 +geoidgrids=foo.gtx +geoid_crs=WGS84 "
+        "+vunits=m +no_defs "
         "+type=crs");
 }
 

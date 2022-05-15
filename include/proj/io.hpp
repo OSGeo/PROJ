@@ -311,6 +311,10 @@ class PROJ_GCC_DLL WKTFormatter {
     PROJ_INTERNAL void setHDatumExtension(const std::string &filename);
     PROJ_INTERNAL const std::string &getHDatumExtension() const;
 
+    PROJ_INTERNAL void
+    setGeogCRSOfCompoundCRS(const crs::GeographicCRSPtr &crs);
+    PROJ_INTERNAL const crs::GeographicCRSPtr &getGeogCRSOfCompoundCRS() const;
+
     PROJ_INTERNAL static std::string morphNameToESRI(const std::string &name);
 
 #ifdef unused
@@ -440,11 +444,17 @@ class PROJ_GCC_DLL PROJStringFormatter {
     PROJ_INTERNAL void setTOWGS84Parameters(const std::vector<double> &params);
     PROJ_INTERNAL const std::vector<double> &getTOWGS84Parameters() const;
 
-    PROJ_INTERNAL void setVDatumExtension(const std::string &filename);
+    PROJ_INTERNAL void setVDatumExtension(const std::string &filename,
+                                          const std::string &geoidCRSValue);
     PROJ_INTERNAL const std::string &getVDatumExtension() const;
+    PROJ_INTERNAL const std::string &getGeoidCRSValue() const;
 
     PROJ_INTERNAL void setHDatumExtension(const std::string &filename);
     PROJ_INTERNAL const std::string &getHDatumExtension() const;
+
+    PROJ_INTERNAL void
+    setGeogCRSOfCompoundCRS(const crs::GeographicCRSPtr &crs);
+    PROJ_INTERNAL const crs::GeographicCRSPtr &getGeogCRSOfCompoundCRS() const;
 
     PROJ_INTERNAL void setOmitProjLongLatIfPossible(bool omit);
     PROJ_INTERNAL bool omitProjLongLatIfPossible() const;
