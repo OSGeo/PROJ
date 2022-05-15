@@ -28,7 +28,9 @@
 #include "proj.h"
 #include "proj_internal.h"
 
-PROJ_HEAD(vertoffset, "Vertical Offset and Slope");
+PROJ_HEAD(vertoffset, "Vertical Offset and Slope")
+    "\n\tTransformation"
+    "\n\tlat_0= lon_0= dh= slope_lat= slope_lon=";
 
 namespace { // anonymous namespace
 struct pj_opaque_vertoffset {
