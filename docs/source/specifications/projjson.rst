@@ -1075,6 +1075,7 @@ PROJJSON omissions
 ++++++++++++++++++
 
 This specification does not define an encoding for:
+
 - point motion operations (``POINTMOTIONOPERATION`` WKT keyword)
 - triaxial ellipsoid (``TRIAXIAL`` WKT keyword)
 - coordinate metadata (``COORDINATEMETADATA`` WKT keyword)
