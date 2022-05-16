@@ -383,16 +383,29 @@ TEST(metadata, id) {
 // ---------------------------------------------------------------------------
 
 TEST(metadata, Identifier_isEquivalentName) {
+    EXPECT_TRUE(Identifier::isEquivalentName("", ""));
+    EXPECT_TRUE(Identifier::isEquivalentName("x", "x"));
+    EXPECT_TRUE(Identifier::isEquivalentName("x", "X"));
+    EXPECT_TRUE(Identifier::isEquivalentName("X", "x"));
+    EXPECT_FALSE(Identifier::isEquivalentName("x", ""));
+    EXPECT_FALSE(Identifier::isEquivalentName("", "x"));
+    EXPECT_FALSE(Identifier::isEquivalentName("x", "y"));
     EXPECT_TRUE(Identifier::isEquivalentName("Central_Meridian",
                                              "Central_- ()/Meridian"));
 
     EXPECT_TRUE(Identifier::isEquivalentName("\xc3\xa1", "a"));
+    EXPECT_FALSE(Identifier::isEquivalentName("\xc3", "a"));
 
     EXPECT_TRUE(Identifier::isEquivalentName("a", "\xc3\xa1"));
+    EXPECT_FALSE(Identifier::isEquivalentName("a", "\xc3"));
 
     EXPECT_TRUE(Identifier::isEquivalentName("\xc3\xa4", "\xc3\xa1"));
 
     EXPECT_TRUE(Identifier::isEquivalentName(
         "Unknown based on International 1924 (Hayford 1909, 1910) ellipsoid",
         "Unknown_based_on_International_1924_Hayford_1909_1910_ellipsoid"));
+
+    EXPECT_TRUE(Identifier::isEquivalentName("foo + ", "foo + "));
+    EXPECT_TRUE(Identifier::isEquivalentName("foo + bar", "foo + bar"));
+    EXPECT_TRUE(Identifier::isEquivalentName("foo + bar", "foobar"));
 }
