@@ -966,6 +966,7 @@ const struct MethodNameCode methodNameCodes[] = {
     METHOD_NAME_CODE(GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS),
     METHOD_NAME_CODE(GEOGRAPHIC3D_OFFSETS),
     METHOD_NAME_CODE(VERTICAL_OFFSET),
+    METHOD_NAME_CODE(VERTICAL_OFFSET_AND_SLOPE),
     METHOD_NAME_CODE(NTV2),
     METHOD_NAME_CODE(NTV1),
     METHOD_NAME_CODE(NADCON),
@@ -1050,6 +1051,8 @@ const struct ParamNameCode paramNameCodes[] = {
     PARAM_NAME_CODE(ORDINATE_2_EVAL_POINT),
     PARAM_NAME_CODE(ORDINATE_3_EVAL_POINT),
     PARAM_NAME_CODE(GEOCENTRIC_TRANSLATION_FILE),
+    PARAM_NAME_CODE(INCLINATION_IN_LATITUDE),
+    PARAM_NAME_CODE(INCLINATION_IN_LONGITUDE),
 };
 
 const ParamNameCode *getParamNameCodes(size_t &nElts) {
@@ -1256,6 +1259,21 @@ static const ParamMapping *const paramsGeographic3DOffsets[] = {
 static const ParamMapping *const paramsVerticalOffsets[] = {
     &paramVerticalOffset, nullptr};
 
+static const ParamMapping paramInclinationInLatitude = {
+    EPSG_NAME_PARAMETER_INCLINATION_IN_LATITUDE,
+    EPSG_CODE_PARAMETER_INCLINATION_IN_LATITUDE, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping paramInclinationInLongitude = {
+    EPSG_NAME_PARAMETER_INCLINATION_IN_LONGITUDE,
+    EPSG_CODE_PARAMETER_INCLINATION_IN_LONGITUDE, nullptr,
+    common::UnitOfMeasure::Type::ANGULAR, nullptr};
+
+static const ParamMapping *const paramsVerticalOffsetAndSlope[] = {
+    &paramOrdinate1EvalPoint,     &paramOrdinate2EvalPoint,
+    &paramVerticalOffset,         &paramInclinationInLatitude,
+    &paramInclinationInLongitude, nullptr};
+
 static const ParamMapping paramLatitudeLongitudeDifferenceFile = {
     EPSG_NAME_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE,
     EPSG_CODE_PARAMETER_LATITUDE_LONGITUDE_DIFFERENCE_FILE, nullptr,
@@ -1449,6 +1467,10 @@ static const MethodMapping otherMethodMappings[] = {
 
     {EPSG_NAME_METHOD_VERTICAL_OFFSET, EPSG_CODE_METHOD_VERTICAL_OFFSET,
      nullptr, nullptr, nullptr, paramsVerticalOffsets},
+
+    {EPSG_NAME_METHOD_VERTICAL_OFFSET_AND_SLOPE,
+     EPSG_CODE_METHOD_VERTICAL_OFFSET_AND_SLOPE, nullptr, nullptr, nullptr,
+     paramsVerticalOffsetAndSlope},
 
     {EPSG_NAME_METHOD_NTV2, EPSG_CODE_METHOD_NTV2, nullptr, nullptr, nullptr,
      paramsNTV2},

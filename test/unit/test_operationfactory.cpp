@@ -4785,9 +4785,24 @@ TEST(
             authFactory->createCoordinateReferenceSystem("8360"),
             // ETRS89 + EVRF2007 height
             authFactory->createCoordinateReferenceSystem("7423"), ctxt);
-        ASSERT_GE(list.size(), 1U);
+        ASSERT_GE(list.size(), 2U);
+
+        // For Czechia
         EXPECT_EQ(
             list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+            "+proj=pipeline "
+            "+step +proj=axisswap +order=2,1 "
+            "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+            "+step +proj=vertoffset +lat_0=49.9166666666667 "
+            "+lon_0=15.25 +dh=0.13 +slope_lat=0.026 +slope_lon=0 "
+            "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+            "+step +proj=axisswap +order=2,1");
+        EXPECT_EQ(list[0]->nameStr(),
+                  "Baltic 1957 height to EVRF2007 height (1)");
+
+        // For Slovakia
+        EXPECT_EQ(
+            list[1]->exportToPROJString(PROJStringFormatter::create().get()),
             "+proj=pipeline "
             "+step +proj=axisswap +order=2,1 "
             "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
@@ -4798,9 +4813,9 @@ TEST(
             "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
             "+step +proj=axisswap +order=2,1");
         EXPECT_EQ(
-            list[0]->nameStr(),
+            list[1]->nameStr(),
             "ETRS89 + Baltic 1957 height to ETRS89 + EVRF2007 height (1)");
-        EXPECT_EQ(list[0]->inverse()->nameStr(), "Inverse of 'ETRS89 + Baltic "
+        EXPECT_EQ(list[1]->inverse()->nameStr(), "Inverse of 'ETRS89 + Baltic "
                                                  "1957 height to ETRS89 + "
                                                  "EVRF2007 height (1)'");
     }
