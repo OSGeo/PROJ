@@ -1243,14 +1243,14 @@ bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
     size_t j = 0;
     char lastValidA = 0;
     char lastValidB = 0;
-    while (a[i] != 0 && b[j] != 0) {
+    while (a[i] != 0 || b[j] != 0) {
         char aCh = a[i];
         char bCh = b[j];
-        if (aCh == ' ' && a[i + 1] == '+' && a[i + 2] == ' ') {
+        if (aCh == ' ' && a[i + 1] == '+' && a[i + 2] == ' ' && a[i + 3] != 0) {
             i += 3;
             continue;
         }
-        if (bCh == ' ' && b[j + 1] == '+' && b[j + 2] == ' ') {
+        if (bCh == ' ' && b[j + 1] == '+' && b[j + 2] == ' ' && b[j + 3] != 0) {
             j += 3;
             continue;
         }
@@ -1288,21 +1288,18 @@ bool Identifier::isEquivalentName(const char *a, const char *b) noexcept {
                 j += strlen(replacement->utf8) - 1;
             }
         }
-        if (::tolower(aCh) != ::tolower(bCh)) {
+        if ((aCh == 0 && bCh != 0) || (aCh != 0 && bCh == 0) ||
+            ::tolower(aCh) != ::tolower(bCh)) {
             return false;
         }
         lastValidA = aCh;
         lastValidB = bCh;
-        ++i;
-        ++j;
+        if (aCh != 0)
+            ++i;
+        if (bCh != 0)
+            ++j;
     }
-    while (a[i] != 0 && isIgnoredChar(a[i])) {
-        ++i;
-    }
-    while (b[j] != 0 && isIgnoredChar(b[j])) {
-        ++j;
-    }
-    return a[i] == b[j];
+    return true;
 }
 
 // ---------------------------------------------------------------------------
