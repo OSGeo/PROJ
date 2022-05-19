@@ -1749,7 +1749,8 @@ NS_PROJ::FileManager::open_resource_file(PJ_CONTEXT *ctx, const char *name,
  */
 int pj_find_file(PJ_CONTEXT *ctx, const char *short_filename,
                  char *out_full_filename, size_t out_full_filename_size) {
-    const bool old_network_enabled = proj_context_is_network_enabled(ctx);
+    const bool old_network_enabled =
+        proj_context_is_network_enabled(ctx) != FALSE;
     if (old_network_enabled)
         proj_context_set_enable_network(ctx, false);
     auto file = NS_PROJ::FileManager::open_resource_file(
