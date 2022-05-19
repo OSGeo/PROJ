@@ -1429,6 +1429,8 @@ createApproximateInverseIfPossible(const Transformation *op) {
                      metadata::Identifier::EPSG)
                 .set(metadata::Identifier::CODE_KEY, method_epsg_code);
         }
+        bool exactInverse =
+            (neg_rx == 0 && neg_ry == 0 && neg_rz == 0 && neg_scaleDiff == 0);
         if (fifteenParamsTransform) {
             double neg_rate_x = negate(op->parameterValueNumeric(
                 EPSG_CODE_PARAMETER_RATE_X_AXIS_TRANSLATION,
@@ -1454,9 +1456,11 @@ createApproximateInverseIfPossible(const Transformation *op) {
             double referenceEpochYear =
                 op->parameterValueNumeric(EPSG_CODE_PARAMETER_REFERENCE_EPOCH,
                                           common::UnitOfMeasure::YEAR);
+            exactInverse &= (neg_rate_rx == 0 && neg_rate_ry == 0 &&
+                             neg_rate_rz == 0 && neg_rate_scaleDiff == 0);
             return util::nn_static_pointer_cast<CoordinateOperation>(
                        createFifteenParamsTransform(
-                           createPropertiesForInverse(op, false, true),
+                           createPropertiesForInverse(op, false, !exactInverse),
                            methodProperties, op->targetCRS(), op->sourceCRS(),
                            neg_x, neg_y, neg_z, neg_rx, neg_ry, neg_rz,
                            neg_scaleDiff, neg_rate_x, neg_rate_y, neg_rate_z,
@@ -1467,7 +1471,7 @@ createApproximateInverseIfPossible(const Transformation *op) {
         } else {
             return util::nn_static_pointer_cast<CoordinateOperation>(
                        createSevenParamsTransform(
-                           createPropertiesForInverse(op, false, true),
+                           createPropertiesForInverse(op, false, !exactInverse),
                            methodProperties, op->targetCRS(), op->sourceCRS(),
                            neg_x, neg_y, neg_z, neg_rx, neg_ry, neg_rz,
                            neg_scaleDiff, op->coordinateOperationAccuracies()))
