@@ -5864,6 +5864,23 @@ static const struct {
          {"False northing", 2},
      }},
 
+    // Non standard parameter names longitude_of_center/latitude_of_center
+    // used in https://github.com/OSGeo/PROJ/issues/3210
+    {"Stereographic",
+     {{"False_Easting", 1},
+      {"False_Northing", 2},
+      {"longitude_of_center", 3},
+      {"Scale_Factor", 4},
+      {"latitude_of_center", 5}},
+     "Stereographic",
+     {
+         {"Latitude of natural origin", 5},
+         {"Longitude of natural origin", 3},
+         {"Scale factor at natural origin", 4},
+         {"False easting", 1},
+         {"False northing", 2},
+     }},
+
     {"Stereographic",
      {{"False_Easting", 1},
       {"False_Northing", 2},

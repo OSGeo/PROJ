@@ -3625,8 +3625,10 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
     const auto *wkt2_mapping = getMapping(projectionMethodWkt2Name);
     if (ci_equal(esriProjectionName, "Stereographic")) {
         try {
-            if (std::fabs(io::asDouble(
-                    mapParamNameToValue["Latitude_Of_Origin"])) == 90.0) {
+            const auto iterLatitudeOfOrigin =
+                mapParamNameToValue.find("Latitude_Of_Origin");
+            if (iterLatitudeOfOrigin != mapParamNameToValue.end() &&
+                std::fabs(io::asDouble(iterLatitudeOfOrigin->second)) == 90.0) {
                 wkt2_mapping =
                     getMapping(EPSG_CODE_METHOD_POLAR_STEREOGRAPHIC_VARIANT_A);
             }
