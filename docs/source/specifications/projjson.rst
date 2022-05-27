@@ -178,6 +178,7 @@ Units
 A unit may be described either as:
 
 - an object with the following members:
+
     * ``type``: (required) one of the following types:
       ``LinearUnit``, ``AngularUnit``, ``ScaleUnit``, ``TimeUnit``, ``ParametricUnit``, ``Unit``
     * ``name``: (required) string.
