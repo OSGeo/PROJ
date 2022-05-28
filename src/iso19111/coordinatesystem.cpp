@@ -141,6 +141,34 @@ void Meridian::_exportToWKT(
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
+void Meridian::_exportToJSON(
+    io::JSONFormatter *formatter) const // throw(FormattingException)
+{
+    auto writer = formatter->writer();
+    auto objectContext(
+        formatter->MakeObjectContext("Meridian", !identifiers().empty()));
+
+    const auto &l_long = longitude();
+    writer->AddObjKey("longitude");
+    const auto &unit = l_long.unit();
+    if (unit == common::UnitOfMeasure::DEGREE) {
+        writer->Add(l_long.value(), 15);
+    } else {
+        auto longitudeContext(formatter->MakeObjectContext(nullptr, false));
+        writer->AddObjKey("value");
+        writer->Add(l_long.value(), 15);
+        writer->AddObjKey("unit");
+        unit._exportToJSON(formatter);
+    }
+    if (formatter->outputId()) {
+        formatID(formatter);
+    }
+}
+//! @endcond
+
+// ---------------------------------------------------------------------------
+
+//! @cond Doxygen_Suppress
 struct CoordinateSystemAxis::Private {
     std::string abbreviation{};
     const AxisDirection *direction = &(AxisDirection::UNSPECIFIED);
@@ -410,6 +438,13 @@ void CoordinateSystemAxis::_exportToJSON(
 
     writer->AddObjKey("direction");
     writer->Add(direction().toString());
+
+    const auto &l_meridian = meridian();
+    if (l_meridian) {
+        writer->AddObjKey("meridian");
+        formatter->setOmitTypeInImmediateChild();
+        l_meridian->_exportToJSON(formatter);
+    }
 
     const auto &l_unit(unit());
     if (l_unit == common::UnitOfMeasure::METRE ||

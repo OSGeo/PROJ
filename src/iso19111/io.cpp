@@ -107,10 +107,10 @@ NS_PROJ_START
 namespace io {
 
 //! @cond Doxygen_Suppress
-const char *JSONFormatter::PROJJSON_v0_4 =
-    "https://proj.org/schemas/v0.4/projjson.schema.json";
+const char *JSONFormatter::PROJJSON_v0_5 =
+    "https://proj.org/schemas/v0.5/projjson.schema.json";
 
-#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_4
+#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_5
 
 //! @endcond
 
@@ -5327,6 +5327,7 @@ class JSONParser {
     EllipsoidNNPtr buildEllipsoid(const json &j);
     PrimeMeridianNNPtr buildPrimeMeridian(const json &j);
     CoordinateSystemNNPtr buildCS(const json &j);
+    MeridianNNPtr buildMeridian(const json &j);
     CoordinateSystemAxisNNPtr buildAxis(const json &j);
     VerticalCRSNNPtr buildVerticalCRS(const json &j);
     CRSNNPtr buildCRS(const json &j);
@@ -5841,6 +5842,9 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     if (type == "ConcatenatedOperation") {
         return buildConcatenatedOperation(j);
     }
+    if (type == "Axis") {
+        return buildAxis(j);
+    }
     throw ParsingException("Unsupported value of \"type\"");
 }
 
@@ -6167,6 +6171,22 @@ JSONParser::buildConcatenatedOperation(const json &j) {
 
 // ---------------------------------------------------------------------------
 
+MeridianNNPtr JSONParser::buildMeridian(const json &j) {
+    if (!j.contains("longitude")) {
+        throw ParsingException("Missing \"longitude\" key");
+    }
+    auto longitude = j["longitude"];
+    if (longitude.is_number()) {
+        return Meridian::create(
+            Angle(longitude.get<double>(), UnitOfMeasure::DEGREE));
+    } else if (longitude.is_object()) {
+        return Meridian::create(Angle(getMeasure(longitude)));
+    }
+    throw ParsingException("Unexpected type for value of \"longitude\"");
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateSystemAxisNNPtr JSONParser::buildAxis(const json &j) {
     auto dirString = getString(j, "direction");
     auto abbreviation = getString(j, "abbreviation");
@@ -6177,9 +6197,11 @@ CoordinateSystemAxisNNPtr JSONParser::buildAxis(const json &j) {
     if (!direction) {
         throw ParsingException(concat("unhandled axis direction: ", dirString));
     }
+    auto meridian = j.contains("meridian")
+                        ? buildMeridian(getObject(j, "meridian")).as_nullable()
+                        : nullptr;
     return CoordinateSystemAxis::create(buildProperties(j), abbreviation,
-                                        *direction, unit,
-                                        nullptr /* meridian */);
+                                        *direction, unit, meridian);
 }
 
 // ---------------------------------------------------------------------------

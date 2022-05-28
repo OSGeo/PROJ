@@ -123,7 +123,8 @@ using MeridianNNPtr = util::nn<MeridianPtr>;
  *
  * \remark Implements MERIDIAN from \ref WKT2
  */
-class PROJ_GCC_DLL Meridian : public common::IdentifiedObject {
+class PROJ_GCC_DLL Meridian : public common::IdentifiedObject,
+                              public io::IJSONExportable {
   public:
     //! @cond Doxygen_Suppress
     PROJ_DLL ~Meridian() override;
@@ -137,6 +138,9 @@ class PROJ_GCC_DLL Meridian : public common::IdentifiedObject {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
+
+    PROJ_INTERNAL void _exportToJSON(io::JSONFormatter *formatter)
+        const override; // throw(FormattingException)
                         //! @endcond
 
   protected:
