@@ -12256,6 +12256,83 @@ TEST(json_import,
 
 // ---------------------------------------------------------------------------
 
+TEST(json_import, vertical_extent) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"GeodeticReferenceFrame\",\n"
+                "  \"name\": \"World Geodetic System 1984\",\n"
+                "  \"ellipsoid\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"semi_major_axis\": 6378137,\n"
+                "    \"inverse_flattening\": 298.257223563\n"
+                "  },\n"
+                "  \"vertical_extent\": {\n"
+                "    \"minimum\": -1000,\n"
+                "    \"maximum\": 0\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gdrf = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(gdrf != nullptr);
+    EXPECT_EQ(gdrf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, vertical_extent_with_unit) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"GeodeticReferenceFrame\",\n"
+                "  \"name\": \"World Geodetic System 1984\",\n"
+                "  \"ellipsoid\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"semi_major_axis\": 6378137,\n"
+                "    \"inverse_flattening\": 298.257223563\n"
+                "  },\n"
+                "  \"vertical_extent\": {\n"
+                "    \"minimum\": -1000,\n"
+                "    \"maximum\": 0,\n"
+                "    \"unit\": {\n"
+                "      \"type\": \"LinearUnit\",\n"
+                "      \"name\": \"my_metre\",\n"
+                "      \"conversion_factor\": 1\n"
+                "    }\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gdrf = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(gdrf != nullptr);
+    EXPECT_EQ(gdrf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, temporal_extent) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"GeodeticReferenceFrame\",\n"
+                "  \"name\": \"World Geodetic System 1984\",\n"
+                "  \"ellipsoid\": {\n"
+                "    \"name\": \"WGS 84\",\n"
+                "    \"semi_major_axis\": 6378137,\n"
+                "    \"inverse_flattening\": 298.257223563\n"
+                "  },\n"
+                "  \"temporal_extent\": {\n"
+                "    \"start\": \"my start\",\n"
+                "    \"end\": \"my end\"\n"
+                "  }\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gdrf = nn_dynamic_pointer_cast<GeodeticReferenceFrame>(obj);
+    ASSERT_TRUE(gdrf != nullptr);
+    EXPECT_EQ(gdrf->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(json_import, geodetic_reference_frame_errors) {
     EXPECT_THROW(
         createFromUserInput(

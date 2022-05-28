@@ -5569,14 +5569,38 @@ ObjectDomainPtr JSONParser::buildObjectDomain(const json &j) {
         geogExtent.emplace_back(
             GeographicBoundingBox::create(west, south, east, north));
     }
-    if (scope.has_value() || !area.empty() || !geogExtent.empty()) {
+
+    std::vector<VerticalExtentNNPtr> verticalExtent;
+    if (j.contains("vertical_extent")) {
+        const auto vertical_extent = getObject(j, "vertical_extent");
+        const auto min = getNumber(vertical_extent, "minimum");
+        const auto max = getNumber(vertical_extent, "maximum");
+        const auto unit = vertical_extent.contains("unit")
+                              ? getUnit(vertical_extent, "unit")
+                              : UnitOfMeasure::METRE;
+        verticalExtent.emplace_back(VerticalExtent::create(
+            min, max, util::nn_make_shared<UnitOfMeasure>(unit)));
+    }
+
+    std::vector<TemporalExtentNNPtr> temporalExtent;
+    if (j.contains("temporal_extent")) {
+        const auto temporal_extent = getObject(j, "temporal_extent");
+        const auto start = getString(temporal_extent, "start");
+        const auto end = getString(temporal_extent, "end");
+        temporalExtent.emplace_back(TemporalExtent::create(start, end));
+    }
+
+    if (scope.has_value() || !area.empty() || !geogExtent.empty() ||
+        !verticalExtent.empty() || !temporalExtent.empty()) {
         util::optional<std::string> description;
         if (!area.empty())
             description = area;
         ExtentPtr extent;
-        if (description.has_value() || !geogExtent.empty()) {
-            extent =
-                Extent::create(description, geogExtent, {}, {}).as_nullable();
+        if (description.has_value() || !geogExtent.empty() ||
+            !verticalExtent.empty() || !temporalExtent.empty()) {
+            extent = Extent::create(description, geogExtent, verticalExtent,
+                                    temporalExtent)
+                         .as_nullable();
         }
         return ObjectDomain::create(scope, extent).as_nullable();
     }

@@ -52,7 +52,7 @@ in the WKT2:2019 specification also apply, as supplement to the JSON schema cons
 History of the schema
 ---------------------
 
-* v0.5: add "meridian" member in Axis object type. Implemented in PROJ 9.1.
+* v0.5: add "meridian" member in Axis object type. Add "temporal_extent" and "vertical_extent" members in object usage. Implemented in PROJ 9.1.
 * v0.4: additional properties allowed in id object (version, authority_citation, uri). Implemented in PROJ 8.2.
 * v0.3: additional properties allowed in BoundCRS object (name, scope, area, bbox, usages, remarks, id, ids). Implemented in PROJ 8.1.
 * v0.2: addition of geoid_model in VerticalCRS object.
