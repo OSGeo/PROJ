@@ -120,8 +120,6 @@ struct horner {
 } // anonymous namespace
 
 typedef struct horner HORNER;
-static HORNER *horner_alloc (size_t order, int complex_polynomia);
-static void    horner_free (HORNER *h);
 
 /* e.g. degree = 2: a + bx + cy + dxx + eyy + fxy, i.e. 6 coefficients */
 #define horner_number_of_coefficients(order) \
@@ -141,7 +139,7 @@ static void horner_free (HORNER *h) {
 }
 
 
-static HORNER *horner_alloc (size_t order, int complex_polynomia) {
+static HORNER *horner_alloc (size_t order, bool complex_polynomia) {
     /* size_t is unsigned, so we need not check for order > 0 */
     int n = (int)horner_number_of_coefficients(order);
     int polynomia_ok = 0;
@@ -387,15 +385,15 @@ static PJ_COORD horner_forward_4d (PJ_COORD point, PJ *P) {
     return point;
 }
 
-static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
+static PJ_COORD horner_inverse_4d (PJ_COORD point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
-    const bool iterative_inverse = !transformation->has_inv;
+    point.uv = real_default_impl(P, transformation, PJ_INV, point.uv);
+    return point;
+}
 
-    if (iterative_inverse) {
-        point.uv = real_iterative_inverse_impl(P, transformation, point.uv);
-    } else {
-        point.uv = real_default_impl(P, transformation, PJ_INV, point.uv);
-    }
+static PJ_COORD horner_iterative_inverse_4d(PJ_COORD point, PJ *P) {
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    point.uv = real_iterative_inverse_impl(P, transformation, point.uv);
     return point;
 }
 
@@ -485,16 +483,18 @@ static PJ_COORD complex_horner_forward_4d (PJ_COORD point, PJ *P) {
     return point;
 }
 
-static PJ_COORD complex_horner_reverse_4d (PJ_COORD point, PJ *P) {
+static PJ_COORD complex_horner_inverse_4d (PJ_COORD point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
-    const bool iterative_inverse = !transformation->has_inv;
-    if (iterative_inverse) {
-        point.uv = complex_iterative_inverse_impl(P, transformation, point.uv);
-    } else {
-        point.uv = complex_default_impl(P, transformation, PJ_INV, point.uv);
-    }
+    point.uv = complex_default_impl(P, transformation, PJ_INV, point.uv);
     return point;
 }
+
+static PJ_COORD complex_horner_iterative_inverse_4d (PJ_COORD point, PJ *P) {
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    point.uv = complex_iterative_inverse_impl(P, transformation, point.uv);
+    return point;
+}
+
 
 static PJ *horner_freeup (PJ *P, int errlev) {                        /* Destructor */
     if (nullptr==P)
@@ -543,11 +543,8 @@ static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
 /*********************************************************************/
 PJ *PROJECTION(horner) {
 /*********************************************************************/
-    int   degree = 0, n, complex_polynomia = 0;
-    bool has_inv = false;
+    int   degree = 0, n;
     HORNER *Q;
-    P->fwd4d  = horner_forward_4d;
-    P->inv4d  = horner_reverse_4d;
     P->fwd3d  =  nullptr;
     P->inv3d  =  nullptr;
     P->fwd    =  nullptr;
@@ -568,14 +565,16 @@ PJ *PROJECTION(horner) {
         return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
+    bool complex_polynomia = false;
     if (pj_param (P->ctx, P->params, "tfwd_c").i || pj_param (P->ctx, P->params, "tinv_c").i) /* complex polynomium? */
-		complex_polynomia = 1;
+		complex_polynomia = true;
 
     Q = horner_alloc (degree, complex_polynomia);
     if (Q == nullptr)
         return horner_freeup (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
+    bool has_inv = false;
     if (!complex_polynomia) {
         has_inv =
             pj_param_exists(P->params, "inv_u") ||
@@ -587,6 +586,15 @@ PJ *PROJECTION(horner) {
             pj_param_exists(P->params, "inv_origin");
     }
     Q->has_inv = has_inv;
+
+    // setup callbacks
+    if (complex_polynomia) {
+        P->fwd4d = complex_horner_forward_4d;
+        P->inv4d = has_inv ? complex_horner_inverse_4d : complex_horner_iterative_inverse_4d;
+    } else {
+        P->fwd4d = horner_forward_4d;
+        P->inv4d = has_inv ? horner_inverse_4d : horner_iterative_inverse_4d;
+    }
 
     if (complex_polynomia) {
         /* Westings and/or southings? */
@@ -604,11 +612,7 @@ PJ *PROJECTION(horner) {
             proj_log_error (P, _("missing inv_c"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
-        P->fwd4d = complex_horner_forward_4d;
-        P->inv4d = complex_horner_reverse_4d;
-    }
-
-    else {
+    } else {
         n = horner_number_of_coefficients (degree);
         if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
         {
