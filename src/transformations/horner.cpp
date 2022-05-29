@@ -122,9 +122,13 @@ struct horner {
 typedef struct horner HORNER;
 
 /* e.g. degree = 2: a + bx + cy + dxx + eyy + fxy, i.e. 6 coefficients */
-#define horner_number_of_coefficients(order) \
-            (((order + 1)*(order + 2)/2))
+constexpr int horner_number_of_real_coefficients(int order) {
+    return (order + 1)*(order + 2)/2;
+}
 
+constexpr int horner_number_of_complex_coefficients(int order) {
+    return 2*order + 2;
+}
 
 static void horner_free (HORNER *h) {
     horner_dealloc (h->inv_v);
@@ -141,23 +145,24 @@ static void horner_free (HORNER *h) {
 
 static HORNER *horner_alloc (size_t order, bool complex_polynomia) {
     /* size_t is unsigned, so we need not check for order > 0 */
-    int n = (int)horner_number_of_coefficients(order);
-    int polynomia_ok = 0;
+    bool polynomia_ok = false;
     HORNER *h = static_cast<HORNER*>(horner_calloc (1, sizeof (HORNER)));
 
     if (nullptr==h)
         return nullptr;
 
-    if (complex_polynomia)
-        n = 2*(int)order + 2;
-    h->order = (int)order;
+    int n = complex_polynomia ? 
+        horner_number_of_complex_coefficients(order) :
+        horner_number_of_real_coefficients(order);
+
+    h->order = order;
     h->coefs = n;
 
     if (complex_polynomia) {
         h->fwd_c = static_cast<double*>(horner_calloc (n, sizeof(double)));
         h->inv_c = static_cast<double*>(horner_calloc (n, sizeof(double)));
         if (h->fwd_c && h->inv_c)
-            polynomia_ok = 1;
+            polynomia_ok = true;
     }
     else {
         h->fwd_u = static_cast<double*>(horner_calloc (n, sizeof(double)));
@@ -165,7 +170,7 @@ static HORNER *horner_alloc (size_t order, bool complex_polynomia) {
         h->inv_u = static_cast<double*>(horner_calloc (n, sizeof(double)));
         h->inv_v = static_cast<double*>(horner_calloc (n, sizeof(double)));
         if (h->fwd_u && h->fwd_v && h->inv_u && h->inv_v)
-            polynomia_ok = 1;
+            polynomia_ok = true;
     }
 
     h->fwd_origin = static_cast<PJ_UV*>(horner_calloc (1, sizeof(PJ_UV)));
@@ -189,7 +194,7 @@ inline static PJ_UV double_real_horner_eval(int order, const double *cx, const d
      */
     const double n = en.v;
     const double e = en.u;
-    const int sz =  horner_number_of_coefficients(order); /* Number of coefficients per polynomial */
+    const int sz =  horner_number_of_real_coefficients(order);
     cx += sz;
     cy += sz;
     double N = *--cy;
@@ -222,7 +227,7 @@ inline static PJ_UV complex_horner_eval(int order, const double *c, PJ_UV en, in
 {
     // the coefficients are ordered like this:
     // (Cn0+i*Ce0, Cn1+i*Ce1, ...)
-    const int sz =  2*order + 2; // number of coefficients
+    const int sz =  horner_number_of_complex_coefficients(order);
     const double e = en.u;
     const double n = en.v;
     const double *cbeg = c + order_offset*2;
@@ -543,7 +548,7 @@ static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
 /*********************************************************************/
 PJ *PROJECTION(horner) {
 /*********************************************************************/
-    int   degree = 0, n;
+    int   degree = 0;
     HORNER *Q;
     P->fwd3d  =  nullptr;
     P->inv3d  =  nullptr;
@@ -601,7 +606,7 @@ PJ *PROJECTION(horner) {
         Q->uneg = pj_param_exists (P->params, "uneg") ? 1 : 0;
         Q->vneg = pj_param_exists (P->params, "vneg") ? 1 : 0;
 
-        n = 2*degree + 2;
+        const int n = horner_number_of_complex_coefficients(degree);
         if (0==parse_coefs (P, Q->fwd_c, "fwd_c", n))
         {
             proj_log_error (P, _("missing fwd_c"));
@@ -613,7 +618,7 @@ PJ *PROJECTION(horner) {
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
     } else {
-        n = horner_number_of_coefficients (degree);
+        const int n = horner_number_of_real_coefficients (degree);
         if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
         {
             proj_log_error (P, _("missing fwd_u"));
