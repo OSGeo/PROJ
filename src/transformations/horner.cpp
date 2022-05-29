@@ -397,71 +397,50 @@ static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
     return point;
 }
 
-
-
-
-/**********************************************************************/
-static PJ_UV complex_horner (PJ *P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
+template<PJ_DIRECTION DIRECTION>
+static PJ_UV complex_default_impl(PJ *P, const HORNER *transformation, PJ_UV position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex
 polynomial evaluation engine.
 
 ***********************************************************************/
-
-    /* These variable names follow the Engsager/Poder  implementation */
-    double  range; /* Equivalent to the gen_pol's FLOATLIMIT constant */
     double  n, e;
-    PJ_UV uv_error;
-    uv_error.u = uv_error.v = HUGE_VAL;
-
-    if (nullptr==transformation)
-        return uv_error;
-
-    /* Check for valid value of direction (-1, 0, 1) */
-    switch (direction) {
-        case PJ_IDENT:    /*  no-op  */
-            return position;
-        case PJ_FWD:   /* forward */
-        case PJ_INV:   /* inverse */
-            break;
-        default:   /* invalid */
-            return uv_error;
-    }
-
-    /* Prepare for double Horner */
-    range =  transformation->range;
-
-    const bool iterative_inverse = direction == PJ_INV && !transformation->has_inv;
-
-    if (direction==PJ_FWD) {                              /* forward */
+    if (DIRECTION==PJ_FWD) {                              /* forward */
         e  =  position.u - transformation->fwd_origin->u;
         n  =  position.v - transformation->fwd_origin->v;
-        if (transformation->uneg)
-            e  =  -e;
-        if (transformation->vneg)
-            n  =  -n;
     } else {                                              /* inverse */
-        if (!iterative_inverse) {
-            e  =  position.u - transformation->inv_origin->u;
-            n  =  position.v - transformation->inv_origin->v;
-            if (transformation->uneg)
-                e  =  -e;
-            if (transformation->vneg)
-                n  =  -n;
-        } else {
-            // in this case fwd_origin and any existing flipping needs to be added in the end
-            e = position.u;
-            n = position.v;
-        }
+        e  =  position.u - transformation->inv_origin->u;
+        n  =  position.v - transformation->inv_origin->v;
+    }
+    if (transformation->uneg)
+        e  =  -e;
+    if (transformation->vneg)
+        n  =  -n;
+
+    if (coords_out_of_range(P, transformation, n, e)) {
+        return generate_error_coords();
     }
 
-    if ((fabs(n) > range) || (fabs(e) > range)) {
-        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-        return uv_error;
+    // coefficient pointers
+    double *cb = DIRECTION == PJ_FWD ? transformation->fwd_c : transformation->inv_c;
+    PJ_UV en = { e, n };
+    position = complex_horner_eval(transformation->order, cb, en);
+    return position;
+}
+
+static PJ_UV complex_iterative_inverse_impl(PJ *P, const HORNER *transformation, PJ_UV position) {
+
+    double  n, e;
+    // in this case fwd_origin and any existing flipping needs to be added in the end
+    e = position.u;
+    n = position.v;
+
+    if (coords_out_of_range(P, transformation, n, e)) {
+        return generate_error_coords();
     }
 
-    if (iterative_inverse) {
+    {
         // complex real part corresponds to Northing, imag part to Easting
         const double tol = transformation->inverse_tolerance;
         const std::complex<double> dZ(n-transformation->fwd_c[0], e-transformation->fwd_c[1]);
@@ -482,7 +461,7 @@ polynomial evaluation engine.
         // we are never going to converge
         if (!converged) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM);
-            position = uv_error;
+            position = generate_error_coords();
         } else {
             double E = w0.imag();
             double N = w0.real();
@@ -495,26 +474,24 @@ polynomial evaluation engine.
         }
         return position;
     }
-
-    // coefficient pointers
-    double *cb = direction == PJ_FWD ? transformation->fwd_c : transformation->inv_c;
-    PJ_UV en = { e, n };
-    position = complex_horner_eval(transformation->order, cb, en);
-    return position;
 }
 
-
-
 static PJ_COORD complex_horner_forward_4d (PJ_COORD point, PJ *P) {
-    point.uv = complex_horner (P, (HORNER *) P->opaque, PJ_FWD, point.uv);
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    point.uv = complex_default_impl<PJ_FWD>(P, transformation, point.uv);
     return point;
 }
 
 static PJ_COORD complex_horner_reverse_4d (PJ_COORD point, PJ *P) {
-    point.uv = complex_horner (P, (HORNER *) P->opaque, PJ_INV, point.uv);
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    const bool iterative_inverse = !transformation->has_inv;
+    if (iterative_inverse) {
+        point.uv = complex_iterative_inverse_impl(P, transformation, point.uv);
+    } else {
+        point.uv = complex_default_impl<PJ_INV>(P, transformation, point.uv);
+    }
     return point;
 }
-
 
 static PJ *horner_freeup (PJ *P, int errlev) {                        /* Destructor */
     if (nullptr==P)
