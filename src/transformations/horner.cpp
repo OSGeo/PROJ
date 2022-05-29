@@ -83,6 +83,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <complex>
+#include <cassert>
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -258,8 +259,7 @@ inline static bool coords_out_of_range(PJ *P, const HORNER *transformation, doub
 }
 
 
-template<PJ_DIRECTION DIRECTION>
-static PJ_UV real_default_impl(PJ *P, const HORNER *transformation, PJ_UV position) {
+static PJ_UV real_default_impl(PJ *P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -292,8 +292,10 @@ P = sum (i = [0 : order])
             pow(par_1, i) * pow(par_2, j) * coef(index(order, i, j))
 
 ***********************************************************************/
+    assert(direction == PJ_FWD || direction == PJ_INV);
+
     double n, e;
-    if (DIRECTION==PJ_FWD) {                              /* forward */
+    if (direction==PJ_FWD) {                              /* forward */
         e = position.u - transformation->fwd_origin->u;
         n = position.v - transformation->fwd_origin->v;
     } else {                                              /* inverse */
@@ -305,8 +307,8 @@ P = sum (i = [0 : order])
         return generate_error_coords();
     }
 
-    const double *tcx = DIRECTION == PJ_FWD ? transformation->fwd_u : transformation->inv_u;
-    const double *tcy = DIRECTION == PJ_FWD ? transformation->fwd_v : transformation->inv_v;
+    const double *tcx = direction == PJ_FWD ? transformation->fwd_u : transformation->inv_u;
+    const double *tcy = direction == PJ_FWD ? transformation->fwd_v : transformation->inv_v;
     PJ_UV en = { e, n };
     position = double_real_horner_eval(transformation->order, tcx, tcy, en);
 
@@ -381,7 +383,7 @@ static PJ_UV real_iterative_inverse_impl(PJ *P, const HORNER *transformation, PJ
 
 static PJ_COORD horner_forward_4d (PJ_COORD point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
-    point.uv = real_default_impl<PJ_FWD>(P, transformation, point.uv);
+    point.uv = real_default_impl(P, transformation, PJ_FWD, point.uv);
     return point;
 }
 
@@ -392,21 +394,22 @@ static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
     if (iterative_inverse) {
         point.uv = real_iterative_inverse_impl(P, transformation, point.uv);
     } else {
-        point.uv = real_default_impl<PJ_INV>(P, transformation, point.uv);
+        point.uv = real_default_impl(P, transformation, PJ_INV, point.uv);
     }
     return point;
 }
 
-template<PJ_DIRECTION DIRECTION>
-static PJ_UV complex_default_impl(PJ *P, const HORNER *transformation, PJ_UV position) {
+static PJ_UV complex_default_impl(PJ *P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex
 polynomial evaluation engine.
 
 ***********************************************************************/
+    assert(direction == PJ_FWD || direction == PJ_INV);
+
     double  n, e;
-    if (DIRECTION==PJ_FWD) {                              /* forward */
+    if (direction == PJ_FWD) {                              /* forward */
         e  =  position.u - transformation->fwd_origin->u;
         n  =  position.v - transformation->fwd_origin->v;
     } else {                                              /* inverse */
@@ -423,7 +426,7 @@ polynomial evaluation engine.
     }
 
     // coefficient pointers
-    double *cb = DIRECTION == PJ_FWD ? transformation->fwd_c : transformation->inv_c;
+    double *cb = direction == PJ_FWD ? transformation->fwd_c : transformation->inv_c;
     PJ_UV en = { e, n };
     position = complex_horner_eval(transformation->order, cb, en);
     return position;
@@ -478,7 +481,7 @@ static PJ_UV complex_iterative_inverse_impl(PJ *P, const HORNER *transformation,
 
 static PJ_COORD complex_horner_forward_4d (PJ_COORD point, PJ *P) {
     const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
-    point.uv = complex_default_impl<PJ_FWD>(P, transformation, point.uv);
+    point.uv = complex_default_impl(P, transformation, PJ_FWD, point.uv);
     return point;
 }
 
@@ -488,7 +491,7 @@ static PJ_COORD complex_horner_reverse_4d (PJ_COORD point, PJ *P) {
     if (iterative_inverse) {
         point.uv = complex_iterative_inverse_impl(P, transformation, point.uv);
     } else {
-        point.uv = complex_default_impl<PJ_INV>(P, transformation, point.uv);
+        point.uv = complex_default_impl(P, transformation, PJ_INV, point.uv);
     }
     return point;
 }
