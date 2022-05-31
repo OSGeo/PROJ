@@ -84,6 +84,7 @@
 #include <string.h>
 #include <complex>
 #include <cassert>
+#include <cstdint>
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -98,8 +99,7 @@ namespace { // anonymous namespace
 struct horner {
     int    uneg;     /* u axis negated? */
     int    vneg;     /* v axis negated? */
-    int    order;    /* maximum degree of polynomium */
-    int    coefs;    /* number of coefficients for each polynomium  */
+    uint32_t    order;    /* maximum degree of polynomium */
     double range;    /* radius of the region of validity */
     bool has_inv;  /* inv parameters are specified */
     double inverse_tolerance; /* in the units of the destination coords,
@@ -122,11 +122,11 @@ struct horner {
 typedef struct horner HORNER;
 
 /* e.g. degree = 2: a + bx + cy + dxx + eyy + fxy, i.e. 6 coefficients */
-constexpr int horner_number_of_real_coefficients(int order) {
+constexpr uint32_t horner_number_of_real_coefficients(uint32_t order) {
     return (order + 1)*(order + 2)/2;
 }
 
-constexpr int horner_number_of_complex_coefficients(int order) {
+constexpr uint32_t horner_number_of_complex_coefficients(uint32_t order) {
     return 2*order + 2;
 }
 
@@ -143,20 +143,19 @@ static void horner_free (HORNER *h) {
 }
 
 
-static HORNER *horner_alloc (size_t order, bool complex_polynomia) {
-    /* size_t is unsigned, so we need not check for order > 0 */
+static HORNER *horner_alloc (uint32_t order, bool complex_polynomia) {
+    /* uint32_t is unsigned, so we need not check for order > 0 */
     bool polynomia_ok = false;
     HORNER *h = static_cast<HORNER*>(horner_calloc (1, sizeof (HORNER)));
 
     if (nullptr==h)
         return nullptr;
 
-    int n = complex_polynomia ? 
+    uint32_t n = complex_polynomia ?
         horner_number_of_complex_coefficients(order) :
         horner_number_of_real_coefficients(order);
 
     h->order = order;
-    h->coefs = n;
 
     if (complex_polynomia) {
         h->fwd_c = static_cast<double*>(horner_calloc (n, sizeof(double)));
@@ -184,7 +183,7 @@ static HORNER *horner_alloc (size_t order, bool complex_polynomia) {
     return nullptr;
 }
 
-inline static PJ_UV double_real_horner_eval(int order, const double *cx, const double *cy, PJ_UV en, int order_offset = 0)
+inline static PJ_UV double_real_horner_eval(uint32_t order, const double *cx, const double *cy, PJ_UV en, uint32_t order_offset = 0)
 {
     /* 
        The melody of this block is straight out of the great Engsager/Poder songbook.
@@ -194,15 +193,15 @@ inline static PJ_UV double_real_horner_eval(int order, const double *cx, const d
      */
     const double n = en.v;
     const double e = en.u;
-    const int sz =  horner_number_of_real_coefficients(order);
+    const uint32_t sz =  horner_number_of_real_coefficients(order);
     cx += sz;
     cy += sz;
     double N = *--cy;
     double E = *--cx;
-    for (int r = order; r > order_offset; r--) {
+    for (uint32_t r = order; r > order_offset; r--) {
         double u = *--cy;
         double v = *--cx;
-        for (int c = order; c >= r; c--) {
+        for (uint32_t c = order; c >= r; c--) {
             u = n*u + *--cy;
             v = e*v + *--cx;
         }
@@ -212,22 +211,22 @@ inline static PJ_UV double_real_horner_eval(int order, const double *cx, const d
     return { E, N };
 }
 
-inline static double single_real_horner_eval(int order, const double *cx, double x, int order_offset = 0)
+inline static double single_real_horner_eval(uint32_t order, const double *cx, double x, uint32_t order_offset = 0)
 {
-    const int sz = order + 1; /* Number of coefficients per polynomial */
+    const uint32_t sz = order + 1; /* Number of coefficients per polynomial */
     cx += sz;
     double u = *--cx;
-    for (int r = order; r > order_offset; r--) {
+    for (uint32_t r = order; r > order_offset; r--) {
         u = x*u + *--cx;
     }
     return u;
 }
 
-inline static PJ_UV complex_horner_eval(int order, const double *c, PJ_UV en, int order_offset = 0)
+inline static PJ_UV complex_horner_eval(uint32_t order, const double *c, PJ_UV en, uint32_t order_offset = 0)
 {
     // the coefficients are ordered like this:
     // (Cn0+i*Ce0, Cn1+i*Ce1, ...)
-    const int sz =  horner_number_of_complex_coefficients(order);
+    const uint32_t sz =  horner_number_of_complex_coefficients(order);
     const double e = en.u;
     const double n = en.v;
     const double *cbeg = c + order_offset*2;
@@ -340,7 +339,7 @@ static PJ_UV real_iterative_inverse_impl(PJ *P, const HORNER *transformation, PJ
      * |   | = |-------- |   |       |
      * | y |   | Mc ' Md |   | N-v00 |
      */
-    const int order = transformation->order;
+    const uint32_t order = transformation->order;
     const double tol = transformation->inverse_tolerance;
     const double de = e - transformation->fwd_u[0];
     const double dn = n - transformation->fwd_v[0];
@@ -606,7 +605,7 @@ PJ *PROJECTION(horner) {
         Q->uneg = pj_param_exists (P->params, "uneg") ? 1 : 0;
         Q->vneg = pj_param_exists (P->params, "vneg") ? 1 : 0;
 
-        const int n = horner_number_of_complex_coefficients(degree);
+        const int n = static_cast<int>(horner_number_of_complex_coefficients(degree));
         if (0==parse_coefs (P, Q->fwd_c, "fwd_c", n))
         {
             proj_log_error (P, _("missing fwd_c"));
@@ -618,7 +617,7 @@ PJ *PROJECTION(horner) {
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
     } else {
-        const int n = horner_number_of_real_coefficients (degree);
+        const int n = static_cast<int>(horner_number_of_real_coefficients (degree));
         if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
         {
             proj_log_error (P, _("missing fwd_u"));
