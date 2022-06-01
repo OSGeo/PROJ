@@ -83,6 +83,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <complex>
+#include <cassert>
+#include <cstdint>
 
 #include "proj.h"
 #include "proj_internal.h"
@@ -97,8 +99,7 @@ namespace { // anonymous namespace
 struct horner {
     int    uneg;     /* u axis negated? */
     int    vneg;     /* v axis negated? */
-    int    order;    /* maximum degree of polynomium */
-    int    coefs;    /* number of coefficients for each polynomium  */
+    uint32_t    order;    /* maximum degree of polynomium */
     double range;    /* radius of the region of validity */
     bool has_inv;  /* inv parameters are specified */
     double inverse_tolerance; /* in the units of the destination coords,
@@ -119,14 +120,15 @@ struct horner {
 } // anonymous namespace
 
 typedef struct horner HORNER;
-static PJ_UV   horner_func (PJ* P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position);
-static HORNER *horner_alloc (size_t order, int complex_polynomia);
-static void    horner_free (HORNER *h);
 
 /* e.g. degree = 2: a + bx + cy + dxx + eyy + fxy, i.e. 6 coefficients */
-#define horner_number_of_coefficients(order) \
-            (((order + 1)*(order + 2)/2))
+constexpr uint32_t horner_number_of_real_coefficients(uint32_t order) {
+    return (order + 1)*(order + 2)/2;
+}
 
+constexpr uint32_t horner_number_of_complex_coefficients(uint32_t order) {
+    return 2*order + 2;
+}
 
 static void horner_free (HORNER *h) {
     horner_dealloc (h->inv_v);
@@ -141,25 +143,25 @@ static void horner_free (HORNER *h) {
 }
 
 
-static HORNER *horner_alloc (size_t order, int complex_polynomia) {
-    /* size_t is unsigned, so we need not check for order > 0 */
-    int n = (int)horner_number_of_coefficients(order);
-    int polynomia_ok = 0;
+static HORNER *horner_alloc (uint32_t order, bool complex_polynomia) {
+    /* uint32_t is unsigned, so we need not check for order > 0 */
+    bool polynomia_ok = false;
     HORNER *h = static_cast<HORNER*>(horner_calloc (1, sizeof (HORNER)));
 
     if (nullptr==h)
         return nullptr;
 
-    if (complex_polynomia)
-        n = 2*(int)order + 2;
-    h->order = (int)order;
-    h->coefs = n;
+    uint32_t n = complex_polynomia ?
+        horner_number_of_complex_coefficients(order) :
+        horner_number_of_real_coefficients(order);
+
+    h->order = order;
 
     if (complex_polynomia) {
         h->fwd_c = static_cast<double*>(horner_calloc (n, sizeof(double)));
         h->inv_c = static_cast<double*>(horner_calloc (n, sizeof(double)));
         if (h->fwd_c && h->inv_c)
-            polynomia_ok = 1;
+            polynomia_ok = true;
     }
     else {
         h->fwd_u = static_cast<double*>(horner_calloc (n, sizeof(double)));
@@ -167,7 +169,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
         h->inv_u = static_cast<double*>(horner_calloc (n, sizeof(double)));
         h->inv_v = static_cast<double*>(horner_calloc (n, sizeof(double)));
         if (h->fwd_u && h->fwd_v && h->inv_u && h->inv_v)
-            polynomia_ok = 1;
+            polynomia_ok = true;
     }
 
     h->fwd_origin = static_cast<PJ_UV*>(horner_calloc (1, sizeof(PJ_UV)));
@@ -181,7 +183,7 @@ static HORNER *horner_alloc (size_t order, int complex_polynomia) {
     return nullptr;
 }
 
-inline static PJ_UV double_real_horner_eval(int order, const double *cx, const double *cy, PJ_UV en, int order_offset = 0)
+inline static PJ_UV double_real_horner_eval(uint32_t order, const double *cx, const double *cy, PJ_UV en, uint32_t order_offset = 0)
 {
     /* 
        The melody of this block is straight out of the great Engsager/Poder songbook.
@@ -191,15 +193,15 @@ inline static PJ_UV double_real_horner_eval(int order, const double *cx, const d
      */
     const double n = en.v;
     const double e = en.u;
-    const int sz =  horner_number_of_coefficients(order); /* Number of coefficients per polynomial */
+    const uint32_t sz =  horner_number_of_real_coefficients(order);
     cx += sz;
     cy += sz;
     double N = *--cy;
     double E = *--cx;
-    for (int r = order; r > order_offset; r--) {
+    for (uint32_t r = order; r > order_offset; r--) {
         double u = *--cy;
         double v = *--cx;
-        for (int c = order; c >= r; c--) {
+        for (uint32_t c = order; c >= r; c--) {
             u = n*u + *--cy;
             v = e*v + *--cx;
         }
@@ -209,22 +211,22 @@ inline static PJ_UV double_real_horner_eval(int order, const double *cx, const d
     return { E, N };
 }
 
-inline static double single_real_horner_eval(int order, const double *cx, double x, int order_offset = 0)
+inline static double single_real_horner_eval(uint32_t order, const double *cx, double x, uint32_t order_offset = 0)
 {
-    const int sz = order + 1; /* Number of coefficients per polynomial */
+    const uint32_t sz = order + 1; /* Number of coefficients per polynomial */
     cx += sz;
     double u = *--cx;
-    for (int r = order; r > order_offset; r--) {
+    for (uint32_t r = order; r > order_offset; r--) {
         u = x*u + *--cx;
     }
     return u;
 }
 
-inline static PJ_UV complex_horner_eval(int order, const double *c, PJ_UV en, int order_offset = 0)
+inline static PJ_UV complex_horner_eval(uint32_t order, const double *c, PJ_UV en, uint32_t order_offset = 0)
 {
     // the coefficients are ordered like this:
     // (Cn0+i*Ce0, Cn1+i*Ce1, ...)
-    const int sz =  2*order + 2; // number of coefficients
+    const uint32_t sz =  horner_number_of_complex_coefficients(order);
     const double e = en.u;
     const double n = en.v;
     const double *cbeg = c + order_offset*2;
@@ -241,8 +243,25 @@ inline static PJ_UV complex_horner_eval(int order, const double *c, PJ_UV en, in
     return { E, N };
 }
 
-/**********************************************************************/
-static PJ_UV horner_func (PJ* P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
+inline static PJ_UV generate_error_coords()
+{
+    PJ_UV uv_error;
+    uv_error.u = uv_error.v = HUGE_VAL;
+    return uv_error;
+}
+
+inline static bool coords_out_of_range(PJ *P, const HORNER *transformation, double n, double e)
+{
+    const double range = transformation->range;
+    if ((fabs(n) > range) || (fabs(e) > range)) {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
+        return true;
+    }
+    return false;
+}
+
+
+static PJ_UV real_default_impl(PJ *P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
 /***********************************************************************
 
 A reimplementation of the classic Engsager/Poder 2D Horner polynomial
@@ -275,194 +294,158 @@ P = sum (i = [0 : order])
             pow(par_1, i) * pow(par_2, j) * coef(index(order, i, j))
 
 ***********************************************************************/
+    assert(direction == PJ_FWD || direction == PJ_INV);
 
-    /* These variable names follow the Engsager/Poder  implementation */
-    double  range; /* Equivalent to the gen_pol's FLOATLIMIT constant */
-    double  n, e;
-    PJ_UV uv_error;
-    uv_error.u = uv_error.v = HUGE_VAL;
-
-    if (nullptr==transformation)
-        return uv_error;
-
-    /* Check for valid value of direction (-1, 0, 1) */
-    switch (direction) {
-        case PJ_IDENT:    /*  no-op  */
-            return position;
-        case PJ_FWD:   /* forward */
-        case PJ_INV:   /* inverse */
-            break;
-        default:   /* invalid */
-            return uv_error;
-    }
-
-    /* Prepare for double Horner */
-    range =  transformation->range;
-
-    const bool iterative_inverse = direction == PJ_INV && !transformation->has_inv;
-
+    double n, e;
     if (direction==PJ_FWD) {                              /* forward */
-        e   = position.u - transformation->fwd_origin->u;
-        n   = position.v - transformation->fwd_origin->v;
+        e = position.u - transformation->fwd_origin->u;
+        n = position.v - transformation->fwd_origin->v;
     } else {                                              /* inverse */
-        if (!iterative_inverse) {
-            e   = position.u - transformation->inv_origin->u;
-            n   = position.v - transformation->inv_origin->v;
-        } else {
-            // in this case fwd_origin needs to be added in the end
-            e = position.u;
-            n = position.v;
-        }
+        e = position.u - transformation->inv_origin->u;
+        n = position.v - transformation->inv_origin->v;
     }
 
-    if ((fabs(n) > range) || (fabs(e) > range)) {
-        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-        return uv_error;
-    } else if (iterative_inverse) {
-        /*
-         * solve iteratively
-         *
-         * | E |   | u00 |   | u01 + u02*x + ...         ' u10 + u11*x + u20*y + ... | | x |
-         * |   | = |     | + |-------------------------- ' --------------------------| |   |
-         * | N |   | v00 |   | v10 + v11*y + v20*x + ... ' v01 + v02*y + ...         | | y |
-         *
-         * | x |   | Ma ' Mb |-1 | E-u00 |
-         * |   | = |-------- |   |       |
-         * | y |   | Mc ' Md |   | N-v00 |
-         */
-        const int order = transformation->order;
-        const double tol = transformation->inverse_tolerance;
-        const double de = e - transformation->fwd_u[0];
-        const double dn = n - transformation->fwd_v[0];
-        double x0 = 0.0;
-        double y0 = 0.0;
-        int loops = 32; // usually converges really fast (1-2 loops)
-        bool converged = false;
-        while (loops-- > 0 && !converged) {
-            double Ma = 0.0;
-            double Mb = 0.0;
-            double Mc = 0.0;
-            double Md = 0.0;
-            {
-                const double *tcx = transformation->fwd_u;
-                const double *tcy = transformation->fwd_v;
-                PJ_UV x0y0 = { x0, y0 };
-                // sum the i > 0 coefficients
-                PJ_UV Mbc = double_real_horner_eval(order, tcx, tcy, x0y0, 1);
-                Mb = Mbc.u;
-                Mc = Mbc.v;
-                // sum the i = 0, j > 0 coefficients
-                Ma = single_real_horner_eval(order, tcx, x0, 1);
-                Md = single_real_horner_eval(order, tcy, y0, 1);
-            }
-            double idet = 1.0 / (Ma*Md - Mb*Mc);
-            double x = idet * (Md*de - Mb*dn);
-            double y = idet * (Ma*dn - Mc*de);
-            converged = (fabs(x-x0) < tol) && (fabs(y-y0) < tol);
-            x0 = x;
-            y0 = y;
-        }
-        // if loops have been exhausted and we have not converged yet,
-        // we are never going to converge
-        if (!converged) {
-            proj_errno_set(P, PROJ_ERR_COORD_TRANSFM);
-            return uv_error;
-        } else {
-            position.u = x0 + transformation->fwd_origin->u;
-            position.v = y0 + transformation->fwd_origin->v;
-        }
+    if (coords_out_of_range(P, transformation, n, e)) {
+        return generate_error_coords();
     }
-    else {
-        const double *tcx = direction == PJ_FWD ? transformation->fwd_u : transformation->inv_u;
-        const double *tcy = direction == PJ_FWD ? transformation->fwd_v : transformation->inv_v;
-        PJ_UV en = { e, n };
-        position = double_real_horner_eval(transformation->order, tcx, tcy, en);
-    }
+
+    const double *tcx = direction == PJ_FWD ? transformation->fwd_u : transformation->inv_u;
+    const double *tcy = direction == PJ_FWD ? transformation->fwd_v : transformation->inv_v;
+    PJ_UV en = { e, n };
+    position = double_real_horner_eval(transformation->order, tcx, tcy, en);
 
     return position;
 }
 
+static PJ_UV real_iterative_inverse_impl(PJ *P, const HORNER *transformation, PJ_UV position) {
 
+    double n, e;
+    // in this case fwd_origin needs to be added in the end
+    e = position.u;
+    n = position.v;
 
+    if (coords_out_of_range(P, transformation, n, e)) {
+        return generate_error_coords();
+    }
 
-
-
+    /*
+     * solve iteratively
+     *
+     * | E |   | u00 |   | u01 + u02*x + ...         ' u10 + u11*x + u20*y + ... | | x |
+     * |   | = |     | + |-------------------------- ' --------------------------| |   |
+     * | N |   | v00 |   | v10 + v11*y + v20*x + ... ' v01 + v02*y + ...         | | y |
+     *
+     * | x |   | Ma ' Mb |-1 | E-u00 |
+     * |   | = |-------- |   |       |
+     * | y |   | Mc ' Md |   | N-v00 |
+     */
+    const uint32_t order = transformation->order;
+    const double tol = transformation->inverse_tolerance;
+    const double de = e - transformation->fwd_u[0];
+    const double dn = n - transformation->fwd_v[0];
+    double x0 = 0.0;
+    double y0 = 0.0;
+    int loops = 32; // usually converges really fast (1-2 loops)
+    bool converged = false;
+    while (loops-- > 0 && !converged) {
+        double Ma = 0.0;
+        double Mb = 0.0;
+        double Mc = 0.0;
+        double Md = 0.0;
+        {
+            const double *tcx = transformation->fwd_u;
+            const double *tcy = transformation->fwd_v;
+            PJ_UV x0y0 = { x0, y0 };
+            // sum the i > 0 coefficients
+            PJ_UV Mbc = double_real_horner_eval(order, tcx, tcy, x0y0, 1);
+            Mb = Mbc.u;
+            Mc = Mbc.v;
+            // sum the i = 0, j > 0 coefficients
+            Ma = single_real_horner_eval(order, tcx, x0, 1);
+            Md = single_real_horner_eval(order, tcy, y0, 1);
+        }
+        double idet = 1.0 / (Ma*Md - Mb*Mc);
+        double x = idet * (Md*de - Mb*dn);
+        double y = idet * (Ma*dn - Mc*de);
+        converged = (fabs(x-x0) < tol) && (fabs(y-y0) < tol);
+        x0 = x;
+        y0 = y;
+    }
+    // if loops have been exhausted and we have not converged yet,
+    // we are never going to converge
+    if (!converged) {
+        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM);
+        return generate_error_coords();
+    } else {
+        position.u = x0 + transformation->fwd_origin->u;
+        position.v = y0 + transformation->fwd_origin->v;
+        return position;
+    }
+}
 
 static PJ_COORD horner_forward_4d (PJ_COORD point, PJ *P) {
-    point.uv = horner_func (P, (HORNER *) P->opaque, PJ_FWD, point.uv);
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    point.uv = real_default_impl(P, transformation, PJ_FWD, point.uv);
     return point;
 }
 
-static PJ_COORD horner_reverse_4d (PJ_COORD point, PJ *P) {
-    point.uv = horner_func (P, (HORNER *) P->opaque, PJ_INV, point.uv);
+static PJ_COORD horner_inverse_4d (PJ_COORD point, PJ *P) {
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    point.uv = real_default_impl(P, transformation, PJ_INV, point.uv);
     return point;
 }
 
+static PJ_COORD horner_iterative_inverse_4d(PJ_COORD point, PJ *P) {
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    point.uv = real_iterative_inverse_impl(P, transformation, point.uv);
+    return point;
+}
 
-
-
-/**********************************************************************/
-static PJ_UV complex_horner (PJ *P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
+static PJ_UV complex_default_impl(PJ *P, const HORNER *transformation, PJ_DIRECTION direction, PJ_UV position) {
 /***********************************************************************
 
 A reimplementation of a classic Engsager/Poder Horner complex
 polynomial evaluation engine.
 
 ***********************************************************************/
+    assert(direction == PJ_FWD || direction == PJ_INV);
 
-    /* These variable names follow the Engsager/Poder  implementation */
-    double  range; /* Equivalent to the gen_pol's FLOATLIMIT constant */
     double  n, e;
-    PJ_UV uv_error;
-    uv_error.u = uv_error.v = HUGE_VAL;
-
-    if (nullptr==transformation)
-        return uv_error;
-
-    /* Check for valid value of direction (-1, 0, 1) */
-    switch (direction) {
-        case PJ_IDENT:    /*  no-op  */
-            return position;
-        case PJ_FWD:   /* forward */
-        case PJ_INV:   /* inverse */
-            break;
-        default:   /* invalid */
-            return uv_error;
-    }
-
-    /* Prepare for double Horner */
-    range =  transformation->range;
-
-    const bool iterative_inverse = direction == PJ_INV && !transformation->has_inv;
-
-    if (direction==PJ_FWD) {                              /* forward */
+    if (direction == PJ_FWD) {                              /* forward */
         e  =  position.u - transformation->fwd_origin->u;
         n  =  position.v - transformation->fwd_origin->v;
-        if (transformation->uneg)
-            e  =  -e;
-        if (transformation->vneg)
-            n  =  -n;
     } else {                                              /* inverse */
-        if (!iterative_inverse) {
-            e  =  position.u - transformation->inv_origin->u;
-            n  =  position.v - transformation->inv_origin->v;
-            if (transformation->uneg)
-                e  =  -e;
-            if (transformation->vneg)
-                n  =  -n;
-        } else {
-            // in this case fwd_origin and any existing flipping needs to be added in the end
-            e = position.u;
-            n = position.v;
-        }
+        e  =  position.u - transformation->inv_origin->u;
+        n  =  position.v - transformation->inv_origin->v;
+    }
+    if (transformation->uneg)
+        e  =  -e;
+    if (transformation->vneg)
+        n  =  -n;
+
+    if (coords_out_of_range(P, transformation, n, e)) {
+        return generate_error_coords();
     }
 
-    if ((fabs(n) > range) || (fabs(e) > range)) {
-        proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
-        return uv_error;
+    // coefficient pointers
+    double *cb = direction == PJ_FWD ? transformation->fwd_c : transformation->inv_c;
+    PJ_UV en = { e, n };
+    position = complex_horner_eval(transformation->order, cb, en);
+    return position;
+}
+
+static PJ_UV complex_iterative_inverse_impl(PJ *P, const HORNER *transformation, PJ_UV position) {
+
+    double  n, e;
+    // in this case fwd_origin and any existing flipping needs to be added in the end
+    e = position.u;
+    n = position.v;
+
+    if (coords_out_of_range(P, transformation, n, e)) {
+        return generate_error_coords();
     }
 
-    if (iterative_inverse) {
+    {
         // complex real part corresponds to Northing, imag part to Easting
         const double tol = transformation->inverse_tolerance;
         const std::complex<double> dZ(n-transformation->fwd_c[0], e-transformation->fwd_c[1]);
@@ -483,7 +466,7 @@ polynomial evaluation engine.
         // we are never going to converge
         if (!converged) {
             proj_errno_set(P, PROJ_ERR_COORD_TRANSFM);
-            position = uv_error;
+            position = generate_error_coords();
         } else {
             double E = w0.imag();
             double N = w0.real();
@@ -496,23 +479,23 @@ polynomial evaluation engine.
         }
         return position;
     }
-
-    // coefficient pointers
-    double *cb = direction == PJ_FWD ? transformation->fwd_c : transformation->inv_c;
-    PJ_UV en = { e, n };
-    position = complex_horner_eval(transformation->order, cb, en);
-    return position;
 }
 
-
-
 static PJ_COORD complex_horner_forward_4d (PJ_COORD point, PJ *P) {
-    point.uv = complex_horner (P, (HORNER *) P->opaque, PJ_FWD, point.uv);
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    point.uv = complex_default_impl(P, transformation, PJ_FWD, point.uv);
     return point;
 }
 
-static PJ_COORD complex_horner_reverse_4d (PJ_COORD point, PJ *P) {
-    point.uv = complex_horner (P, (HORNER *) P->opaque, PJ_INV, point.uv);
+static PJ_COORD complex_horner_inverse_4d (PJ_COORD point, PJ *P) {
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    point.uv = complex_default_impl(P, transformation, PJ_INV, point.uv);
+    return point;
+}
+
+static PJ_COORD complex_horner_iterative_inverse_4d (PJ_COORD point, PJ *P) {
+    const HORNER *transformation = reinterpret_cast<const HORNER*>(P->opaque);
+    point.uv = complex_iterative_inverse_impl(P, transformation, point.uv);
     return point;
 }
 
@@ -564,11 +547,8 @@ static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
 /*********************************************************************/
 PJ *PROJECTION(horner) {
 /*********************************************************************/
-    int   degree = 0, n, complex_polynomia = 0;
-    bool has_inv = false;
+    int   degree = 0;
     HORNER *Q;
-    P->fwd4d  = horner_forward_4d;
-    P->inv4d  = horner_reverse_4d;
     P->fwd3d  =  nullptr;
     P->inv3d  =  nullptr;
     P->fwd    =  nullptr;
@@ -589,14 +569,16 @@ PJ *PROJECTION(horner) {
         return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
     }
 
+    bool complex_polynomia = false;
     if (pj_param (P->ctx, P->params, "tfwd_c").i || pj_param (P->ctx, P->params, "tinv_c").i) /* complex polynomium? */
-		complex_polynomia = 1;
+		complex_polynomia = true;
 
     Q = horner_alloc (degree, complex_polynomia);
     if (Q == nullptr)
         return horner_freeup (P, PROJ_ERR_OTHER /*ENOMEM*/);
     P->opaque = Q;
 
+    bool has_inv = false;
     if (!complex_polynomia) {
         has_inv =
             pj_param_exists(P->params, "inv_u") ||
@@ -609,12 +591,21 @@ PJ *PROJECTION(horner) {
     }
     Q->has_inv = has_inv;
 
+    // setup callbacks
+    if (complex_polynomia) {
+        P->fwd4d = complex_horner_forward_4d;
+        P->inv4d = has_inv ? complex_horner_inverse_4d : complex_horner_iterative_inverse_4d;
+    } else {
+        P->fwd4d = horner_forward_4d;
+        P->inv4d = has_inv ? horner_inverse_4d : horner_iterative_inverse_4d;
+    }
+
     if (complex_polynomia) {
         /* Westings and/or southings? */
         Q->uneg = pj_param_exists (P->params, "uneg") ? 1 : 0;
         Q->vneg = pj_param_exists (P->params, "vneg") ? 1 : 0;
 
-        n = 2*degree + 2;
+        const int n = static_cast<int>(horner_number_of_complex_coefficients(degree));
         if (0==parse_coefs (P, Q->fwd_c, "fwd_c", n))
         {
             proj_log_error (P, _("missing fwd_c"));
@@ -625,12 +616,8 @@ PJ *PROJECTION(horner) {
             proj_log_error (P, _("missing inv_c"));
             return horner_freeup (P, PROJ_ERR_INVALID_OP_MISSING_ARG);
         }
-        P->fwd4d = complex_horner_forward_4d;
-        P->inv4d = complex_horner_reverse_4d;
-    }
-
-    else {
-        n = horner_number_of_coefficients (degree);
+    } else {
+        const int n = static_cast<int>(horner_number_of_real_coefficients (degree));
         if (0==parse_coefs (P, Q->fwd_u, "fwd_u", n))
         {
             proj_log_error (P, _("missing fwd_u"));
