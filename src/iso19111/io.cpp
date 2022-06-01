@@ -107,10 +107,10 @@ NS_PROJ_START
 namespace io {
 
 //! @cond Doxygen_Suppress
-const char *JSONFormatter::PROJJSON_v0_4 =
-    "https://proj.org/schemas/v0.4/projjson.schema.json";
+const char *JSONFormatter::PROJJSON_v0_5 =
+    "https://proj.org/schemas/v0.5/projjson.schema.json";
 
-#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_4
+#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_5
 
 //! @endcond
 
@@ -5327,6 +5327,7 @@ class JSONParser {
     EllipsoidNNPtr buildEllipsoid(const json &j);
     PrimeMeridianNNPtr buildPrimeMeridian(const json &j);
     CoordinateSystemNNPtr buildCS(const json &j);
+    MeridianNNPtr buildMeridian(const json &j);
     CoordinateSystemAxisNNPtr buildAxis(const json &j);
     VerticalCRSNNPtr buildVerticalCRS(const json &j);
     CRSNNPtr buildCRS(const json &j);
@@ -5568,14 +5569,38 @@ ObjectDomainPtr JSONParser::buildObjectDomain(const json &j) {
         geogExtent.emplace_back(
             GeographicBoundingBox::create(west, south, east, north));
     }
-    if (scope.has_value() || !area.empty() || !geogExtent.empty()) {
+
+    std::vector<VerticalExtentNNPtr> verticalExtent;
+    if (j.contains("vertical_extent")) {
+        const auto vertical_extent = getObject(j, "vertical_extent");
+        const auto min = getNumber(vertical_extent, "minimum");
+        const auto max = getNumber(vertical_extent, "maximum");
+        const auto unit = vertical_extent.contains("unit")
+                              ? getUnit(vertical_extent, "unit")
+                              : UnitOfMeasure::METRE;
+        verticalExtent.emplace_back(VerticalExtent::create(
+            min, max, util::nn_make_shared<UnitOfMeasure>(unit)));
+    }
+
+    std::vector<TemporalExtentNNPtr> temporalExtent;
+    if (j.contains("temporal_extent")) {
+        const auto temporal_extent = getObject(j, "temporal_extent");
+        const auto start = getString(temporal_extent, "start");
+        const auto end = getString(temporal_extent, "end");
+        temporalExtent.emplace_back(TemporalExtent::create(start, end));
+    }
+
+    if (scope.has_value() || !area.empty() || !geogExtent.empty() ||
+        !verticalExtent.empty() || !temporalExtent.empty()) {
         util::optional<std::string> description;
         if (!area.empty())
             description = area;
         ExtentPtr extent;
-        if (description.has_value() || !geogExtent.empty()) {
-            extent =
-                Extent::create(description, geogExtent, {}, {}).as_nullable();
+        if (description.has_value() || !geogExtent.empty() ||
+            !verticalExtent.empty() || !temporalExtent.empty()) {
+            extent = Extent::create(description, geogExtent, verticalExtent,
+                                    temporalExtent)
+                         .as_nullable();
         }
         return ObjectDomain::create(scope, extent).as_nullable();
     }
@@ -5840,6 +5865,9 @@ BaseObjectNNPtr JSONParser::create(const json &j)
     }
     if (type == "ConcatenatedOperation") {
         return buildConcatenatedOperation(j);
+    }
+    if (type == "Axis") {
+        return buildAxis(j);
     }
     throw ParsingException("Unsupported value of \"type\"");
 }
@@ -6167,6 +6195,22 @@ JSONParser::buildConcatenatedOperation(const json &j) {
 
 // ---------------------------------------------------------------------------
 
+MeridianNNPtr JSONParser::buildMeridian(const json &j) {
+    if (!j.contains("longitude")) {
+        throw ParsingException("Missing \"longitude\" key");
+    }
+    auto longitude = j["longitude"];
+    if (longitude.is_number()) {
+        return Meridian::create(
+            Angle(longitude.get<double>(), UnitOfMeasure::DEGREE));
+    } else if (longitude.is_object()) {
+        return Meridian::create(Angle(getMeasure(longitude)));
+    }
+    throw ParsingException("Unexpected type for value of \"longitude\"");
+}
+
+// ---------------------------------------------------------------------------
+
 CoordinateSystemAxisNNPtr JSONParser::buildAxis(const json &j) {
     auto dirString = getString(j, "direction");
     auto abbreviation = getString(j, "abbreviation");
@@ -6177,9 +6221,11 @@ CoordinateSystemAxisNNPtr JSONParser::buildAxis(const json &j) {
     if (!direction) {
         throw ParsingException(concat("unhandled axis direction: ", dirString));
     }
+    auto meridian = j.contains("meridian")
+                        ? buildMeridian(getObject(j, "meridian")).as_nullable()
+                        : nullptr;
     return CoordinateSystemAxis::create(buildProperties(j), abbreviation,
-                                        *direction, unit,
-                                        nullptr /* meridian */);
+                                        *direction, unit, meridian);
 }
 
 // ---------------------------------------------------------------------------

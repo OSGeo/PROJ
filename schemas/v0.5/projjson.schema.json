@@ -123,8 +123,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -147,8 +145,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -173,8 +169,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -313,8 +307,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -338,8 +330,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -362,8 +352,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -386,8 +374,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -410,8 +396,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -434,8 +418,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -459,8 +441,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -482,8 +462,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -551,8 +529,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -572,8 +548,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -599,8 +573,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -627,8 +599,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -724,8 +694,6 @@
             "scope": { "type": "string" },
             "area": { "type": "string" },
             "bbox": { "$ref": "#/definitions/bbox" },
-            "vertical_extent": { "$ref": "#/definitions/vertical_extent" },
-            "temporal_extent": { "$ref": "#/definitions/temporal_extent" },
             "remarks": { "type": "string" },
             "id": { "$ref": "#/definitions/id" },
             "ids": { "$ref": "#/definitions/ids" }
@@ -785,8 +753,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -806,8 +772,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -854,8 +818,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -876,8 +838,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -898,23 +858,11 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
       },
       "required" : [ "name", "calendar" ],
-      "additionalProperties": false
-    },
-
-    "temporal_extent": {
-      "type": "object",
-      "properties": {
-        "start": { "type": "string" },
-        "end": { "type": "string" }
-      },
-      "required" : [ "start", "end" ],
       "additionalProperties": false
     },
 
@@ -937,8 +885,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -980,9 +926,7 @@
           "properties": {
             "scope": { "type": "string" },
             "area": { "type": "string" },
-            "bbox": { "$ref": "#/definitions/bbox" },
-            "vertical_extent": { "$ref": "#/definitions/vertical_extent" },
-            "temporal_extent": { "$ref": "#/definitions/temporal_extent" }
+            "bbox": { "$ref": "#/definitions/bbox" }
            },
           "additionalProperties": false
         }
@@ -1039,8 +983,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
@@ -1051,17 +993,6 @@
         { "$ref": "#/definitions/object_usage" },
         { "$ref": "#/definitions/one_and_only_one_of_datum_or_datum_ensemble" }
       ],
-      "additionalProperties": false
-    },
-
-    "vertical_extent": {
-      "type": "object",
-      "properties": {
-        "minimum": { "type": "number" },
-        "maximum": { "type": "number" },
-        "unit": { "$ref": "#/definitions/unit" }
-      },
-      "required" : [ "minimum", "maximum" ],
       "additionalProperties": false
     },
 
@@ -1076,8 +1007,6 @@
         "scope": {},
         "area": {},
         "bbox": {},
-        "vertical_extent": {},
-        "temporal_extent": {},
         "usages": {},
         "remarks": {},
         "id": {}, "ids": {}
