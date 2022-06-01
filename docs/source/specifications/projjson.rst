@@ -228,6 +228,15 @@ For the following cases, the unit may be omitted if it is metre:
 For the following cases, the unit may be omitted if it is degree:
 ``longitude`` of a prime meridian.
 
+Coordinate system
++++++++++++++++++
+
+In WKT, a `ORDER <http://docs.opengeospatial.org/is/18-010r7/18-010r7.html#49>`_
+keyword may be present in an axis definition. As the value of that element
+is equal to the index of axis in the list of axis of the coordinate system
+(with 1 as the value of the first index), it is absent from the PROJJSON encoding,
+to avoid any risk of misuse.
+
 Examples
 --------
 
