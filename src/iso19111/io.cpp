@@ -6328,6 +6328,7 @@ DatumEnsembleNNPtr JSONParser::buildDatumEnsemble(const json &j) {
                 "Unexpected type for value of a \"members\" member");
         }
         auto datumName(getName(memberJ));
+        bool datumAdded = false;
         if (dbContext_ && memberJ.contains("id")) {
             auto id = getObject(memberJ, "id");
             auto authority = getString(id, "authority");
@@ -6344,11 +6345,16 @@ DatumEnsembleNNPtr JSONParser::buildDatumEnsemble(const json &j) {
             }
             try {
                 datums.push_back(authFactory->createDatum(codeStr));
+                datumAdded = true;
             } catch (const std::exception &) {
-                throw ParsingException("No Datum of code " + codeStr);
+                // Silently ignore, as this isn't necessary an error.
+                // If an older PROJ version parses a DatumEnsemble object of
+                // a more recent PROJ version where the datum ensemble got
+                // a new member, it might be unknown from the older PROJ.
             }
-            continue;
-        } else if (dbContext_) {
+        }
+
+        if (dbContext_ && !datumAdded) {
             auto authFactory = AuthorityFactory::create(NN_NO_CHECK(dbContext_),
                                                         std::string());
             auto list = authFactory->createObjectsFromName(
@@ -6360,19 +6366,21 @@ DatumEnsembleNNPtr JSONParser::buildDatumEnsemble(const json &j) {
                     throw ParsingException(
                         "DatumEnsemble member is not a datum");
                 datums.push_back(NN_NO_CHECK(datum));
-                continue;
+                datumAdded = true;
             }
         }
 
-        // Fallback if no db match
-        if (hasEllipsoid) {
-            datums.emplace_back(GeodeticReferenceFrame::create(
-                buildProperties(memberJ),
-                buildEllipsoid(getObject(j, "ellipsoid")),
-                optional<std::string>(), PrimeMeridian::GREENWICH));
-        } else {
-            datums.emplace_back(
-                VerticalReferenceFrame::create(buildProperties(memberJ)));
+        if (!datumAdded) {
+            // Fallback if no db match
+            if (hasEllipsoid) {
+                datums.emplace_back(GeodeticReferenceFrame::create(
+                    buildProperties(memberJ),
+                    buildEllipsoid(getObject(j, "ellipsoid")),
+                    optional<std::string>(), PrimeMeridian::GREENWICH));
+            } else {
+                datums.emplace_back(
+                    VerticalReferenceFrame::create(buildProperties(memberJ)));
+            }
         }
     }
     return DatumEnsemble::create(
