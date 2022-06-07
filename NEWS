@@ -1,3 +1,69 @@
+9.0.1 Release Notes
+-------------------
+
+ Database updates
+ -------
+
+ o Update to EPSG 10.064 (#3208)
+
+ o Add OGC:CRS84h (WGS 84 longitude-latitude-height) (#3155)
+
+ Bug fixes
+ ---------
+
+ o Use CMAKE_INSTALL_MANDIR to override default (#3081)
+
+ o Increase MAX_ITER so Mollweide forward projection works near the poles (#3082)
+
+ o Fix wrong results with SQLite 3.38.0 (#3091)
+
+ o Fix issue when transforming from/to BoundCRS of 3D CRS with non-Greenwhich
+  prime meridian, created from WKT (#3098)
+
+ o Fix issues with WKT of concatenated operations (#3105)
+
+ o CMake: fix installation of proj.pc on Windows (#3109)
+
+ o createOperations(): fix issue in transformation northing, easting
+   projected CRS -> +proj=longlat +lon_wrap (#3110)
+
+ o unitconvert: round to nearest date when converting to yyyymmdd (#3111)
+
+ o Fix comparison of GeodeticRefrenceFrame vs DynamicGeodeticReferenceFrame (#3120)
+
+ o createOperations(): fix transformation involving CompoundCRS, ToWGS84
+   and PROJ4_GRIDS (#3124)
+
+ o Fix datum names when importing from PROJ4 crs strings (affects some
+   transformations using geoidgrids) (#3129)
+
+ o Deal with PARAMETER["EPSG code for Interpolation CRS",crs_code] (#3149)
+
+ o createOperations(): fix CompoundCRS[BoundCRS[ProjectedCRS],BoundCRS[VerticalCRS]]
+   to Geog3DCrs (#3151)
+
+ o ITRF2014: fix ITRF2014:ITRF88,ITRF94 and ITRF96 definitions (#3159)
+
+ o createBoundCRSToWGS84IfPossible(): improve selection logic to generate +towgs84=
+   taking into account extent (#3160)
+
+ o createOperations(): fix some complex cases involving TOWGS84 and CompoundCRS (#3163)
+
+ o Fix cmake CURL dependency, update appveyor - vcpkg interaction (#3185)
+
+ o WKT import: deal with Projected CRS that is a mix of WKT1:GDAL / WKT1:ESRI (#3189)
+
+ o createOperations(): fix/improve result of 'BD72 + Ostend height ' to 'WGS84+EGM96 height' (#3199)
+
+ o Identifier::isEquivalentName(): fix when ending by ' + ' which could indirectly cause
+   an infinite stack call in master (#3202)
+
+ o WKT import: correctly deal with absence of Latitude_Of_Origin parameter in
+   WKT1 ESRI with Stereographic projection (#3212)
+
+ o PROJJSON parser: do not error out if a datum ensemble member is unknown in the database (#3223)
+
+
 9.0.0 Release Notes
 -------------------
 
