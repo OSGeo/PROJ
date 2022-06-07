@@ -3098,7 +3098,7 @@ CoordinateOperationFactory::Private::createOperations(
         return applyInverse(createOperations(targetCRS, sourceCRS, context));
     }
 
-    // Order of comparison between the geogDst vs geodDst is impotant
+    // Order of comparison between the geogDst vs geodDst is important
     if (boundSrc && geogDst) {
         createOperationsBoundToGeog(sourceCRS, targetCRS, context, boundSrc,
                                     geogDst, res);
@@ -3153,7 +3153,7 @@ CoordinateOperationFactory::Private::createOperations(
     }
 
     auto compoundSrc = dynamic_cast<crs::CompoundCRS *>(sourceCRS.get());
-    // Order of comparison between the geogDst vs geodDst is impotant
+    // Order of comparison between the geogDst vs geodDst is important
     if (compoundSrc && geogDst) {
         createOperationsCompoundToGeog(sourceCRS, targetCRS, context,
                                        compoundSrc, geogDst, res);
