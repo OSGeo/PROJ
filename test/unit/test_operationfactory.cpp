@@ -8123,3 +8123,89 @@ TEST(
               "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
               "+step +proj=axisswap +order=2,1");
 }
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_ossfuzz_47873) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=ob_tran +o_proj=longlat +o_lat_1=1 +o_lat_2=2 +datum=WGS84 "
+        "+geoidgrids=@x +geoid_crs=horizontal_crs +type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=longlat +datum=WGS84 +geoidgrids=@y +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+
+    // Just check that we don't go into an infinite recursion
+    try {
+        CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+    } catch (const std::exception &) {
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, createOperation_ossfuzz_47873_simplified_if_i_might_say) {
+    auto wkt =
+        "BOUNDCRS[\n"
+        "    SOURCECRS[\n"
+        "        VERTCRS[\"unknown\",\n"
+        "            VDATUM[\"unknown using geoidgrids=@x\"],\n"
+        "            CS[vertical,1],\n"
+        "                AXIS[\"gravity-related height (H)\",up,\n"
+        "                    LENGTHUNIT[\"metre\",1,\n"
+        "                        ID[\"EPSG\",9001]]]]],\n"
+        "    TARGETCRS[\n"
+        "        GEOGCRS[\"unnamed\",\n"
+        "            BASEGEOGCRS[\"unknown\",\n"
+        "                DATUM[\"World Geodetic System 1984\",\n"
+        "                    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                        LENGTHUNIT[\"metre\",1]],\n"
+        "                    ID[\"EPSG\",6326]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                    ID[\"EPSG\",8901]]],\n"
+        "            DERIVINGCONVERSION[\"unknown\",\n"
+        "                METHOD[\"PROJ ob_tran o_proj=longlat\"],\n"
+        "                PARAMETER[\"o_lat_1\",1,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                        ID[\"EPSG\",9122]]],\n"
+        "                PARAMETER[\"o_lat_2\",2,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                        ID[\"EPSG\",9122]]]],\n"
+        "            CS[ellipsoidal,3],\n"
+        "                AXIS[\"longitude\",east,\n"
+        "                    ORDER[1],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                        ID[\"EPSG\",9122]]],\n"
+        "                AXIS[\"latitude\",north,\n"
+        "                    ORDER[2],\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                        ID[\"EPSG\",9122]]],\n"
+        "                AXIS[\"ellipsoidal height (h)\",up,\n"
+        "                    ORDER[3],\n"
+        "                    LENGTHUNIT[\"metre\",1,\n"
+        "                        ID[\"EPSG\",9001]]]]],\n"
+        "    ABRIDGEDTRANSFORMATION[\"unknown to unnamed ellipsoidal "
+        "height\",\n"
+        "        METHOD[\"GravityRelatedHeight to Geographic3D\"],\n"
+        "        PARAMETERFILE[\"Geoid (height correction) model "
+        "file\",\"@x\",\n"
+        "            ID[\"EPSG\",8666]]]]";
+    auto objSrc = WKTParser().createFromWKT(wkt);
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto dst = authFactory->createCoordinateReferenceSystem("4979");
+
+    // Just check that we don't go into an infinite recursion
+    try {
+        CoordinateOperationFactory::create()->createOperation(
+            NN_CHECK_ASSERT(src), dst);
+    } catch (const std::exception &) {
+    }
+}
