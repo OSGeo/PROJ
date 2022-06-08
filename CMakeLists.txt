@@ -116,7 +116,7 @@ message(STATUS "Configuring PROJ:")
 ################################################################################
 include(ProjVersion)
 proj_version(MAJOR 9 MINOR 0 PATCH 1)
-set(PROJ_SOVERSION 26)
+set(PROJ_SOVERSION 25)
 set(PROJ_BUILD_VERSION "${PROJ_SOVERSION}.${PROJ_VERSION}")
 
 ################################################################################
