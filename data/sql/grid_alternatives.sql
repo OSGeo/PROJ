@@ -137,6 +137,7 @@ VALUES
 ('RAF09.mnt','fr_ign_RAF09.tif','RAF09.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_RAF09.tif',1,1,NULL),
 ('RAF18.mnt','fr_ign_RAF18.tif','RAF18.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_RAF18.tif',1,1,NULL),
 ('RAF18b.mnt','fr_ign_RAF18b.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_RAF18b.tif',1,1,NULL),
+('RAF20.tac','fr_ign_RAF20.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_RAF20.tif',1,1,NULL),
 -- The following is a bit an abusive mapping. The ggf97a.txt is the one pointed for the "RGF93 v1 to NGF-IGN69 height" transformation
 -- but we have never ingested that grid. So we point to RAF18.mnt instead...
 -- If we didn't do this, we wouldn't get a grid at all, since RAF09 and RAF18 are now only available for RGF93 v2
