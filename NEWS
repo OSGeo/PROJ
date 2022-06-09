@@ -17,7 +17,7 @@
 
  o Fix wrong results with SQLite 3.38.0 (#3091)
 
- o Fix issue when transforming from/to BoundCRS of 3D CRS with non-Greenwhich
+ o Fix issue when transforming from/to BoundCRS of 3D CRS with non-Greenwich
   prime meridian, created from WKT (#3098)
 
  o Fix issues with WKT of concatenated operations (#3105)
