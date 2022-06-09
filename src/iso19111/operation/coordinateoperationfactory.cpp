@@ -4374,7 +4374,12 @@ void CoordinateOperationFactory::Private::createOperationsBoundToGeog(
 
     auto vertCRSOfBaseOfBoundSrc =
         dynamic_cast<const crs::VerticalCRS *>(boundSrc->baseCRS().get());
-    if (vertCRSOfBaseOfBoundSrc && hubSrcGeog) {
+    // The test for hubSrcGeog not being a DerivedCRS is to avoid infinite
+    // recursion in a scenario involving a
+    // BoundCRS[SourceCRS[VertCRS],TargetCRS[DerivedGeographicCRS]] to a
+    // GeographicCRS
+    if (vertCRSOfBaseOfBoundSrc && hubSrcGeog &&
+        dynamic_cast<const crs::DerivedCRS *>(hubSrcGeog) == nullptr) {
         auto opsFirst = createOperations(sourceCRS, hubSrc, context);
         if (context.skipHorizontalTransformation) {
             if (!opsFirst.empty()) {
