@@ -4083,11 +4083,6 @@ void Conversion::_exportToPROJString(
             const auto &components = compound->componentReferenceSystems();
             if (!components.empty()) {
                 horiz = components.front().get();
-                const auto boundCRS =
-                    dynamic_cast<const crs::BoundCRS *>(horiz);
-                if (boundCRS) {
-                    horiz = boundCRS->baseCRS().get();
-                }
             }
         }
 
@@ -4110,6 +4105,13 @@ void Conversion::_exportToPROJString(
         }
 
         auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(horiz);
+        if (projCRS == nullptr) {
+            auto boundCRS = dynamic_cast<const crs::BoundCRS *>(horiz);
+            if (boundCRS) {
+                projCRS = dynamic_cast<const crs::ProjectedCRS *>(
+                    boundCRS->baseCRS().get());
+            }
+        }
         if (projCRS) {
             formatter->pushOmitZUnitConversion();
             projCRS->addUnitConvertAndAxisSwap(formatter, bAxisSpecFound);

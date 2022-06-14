@@ -2783,6 +2783,28 @@ TEST(operation, boundCRS_of_projCRS_towgs84_to_boundCRS_of_projCRS_nadgrids) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, boundCRS_of_projCRS_towgs84_non_metre_unit_to_geocentric) {
+    auto objSrc = PROJStringParser().createFromPROJString(
+        "+proj=merc +ellps=GRS80 +towgs84=0,0,0 +units=ft +vunits=ft "
+        "+type=crs");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+    auto objDst = PROJStringParser().createFromPROJString(
+        "+proj=geocent +datum=WGS84 +type=crs");
+    auto dst = nn_dynamic_pointer_cast<CRS>(objDst);
+    ASSERT_TRUE(dst != nullptr);
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        NN_CHECK_ASSERT(src), NN_CHECK_ASSERT(dst));
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=unitconvert +xy_in=ft +z_in=ft +xy_out=m +z_out=m "
+              "+step +inv +proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=GRS80 "
+              "+step +proj=cart +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
 static CRSNNPtr buildCRSFromProjStrThroughWKT(const std::string &projStr) {
     auto crsFromProj = nn_dynamic_pointer_cast<CRS>(
         PROJStringParser().createFromPROJString(projStr));
