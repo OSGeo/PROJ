@@ -3,6 +3,73 @@
 News
 ###############################################################################
 
+9.0.1 Release Notes
++++++++++++++++++++
+*June 15th 2022*
+
+Database updates
+-----------------
+
+* Update to EPSG 10.064 (`#3208 <https://github.com/OSGeo/PROJ/issues/3208>`_)
+
+* Add OGC:CRS84h (WGS 84 longitude-latitude-height) (`#3155 <https://github.com/OSGeo/PROJ/issues/3155>`_)
+
+Bug fixes
+---------
+
+* Use :envvar:`CMAKE_INSTALL_MANDIR`` to override default (`#3081 <https://github.com/OSGeo/PROJ/issues/3081>`_)
+
+* Increase ``MAX_ITER`` so Mollweide forward projection works near the poles (`#3082 <https://github.com/OSGeo/PROJ/issues/3082>`_)
+
+* Fix wrong results with SQLite 3.38.0 (`#3091 <https://github.com/OSGeo/PROJ/issues/3091>`_)
+
+* Fix issue when transforming from/to BoundCRS of 3D CRS with non-Greenwich
+ prime meridian, created from WKT (`#3098 <https://github.com/OSGeo/PROJ/issues/3098>`_)
+
+* Fix issues with WKT of concatenated operations (`#3105 <https://github.com/OSGeo/PROJ/issues/3105>`_)
+
+* CMake: fix installation of ``proj.pc`` on Windows (`#3109 <https://github.com/OSGeo/PROJ/issues/3109>`_)
+
+* :cpp:func:`createOperations()``: fix issue in transformation northing, easting
+  projected CRS -> +proj=longlat +lon_wrap (`#3110 <https://github.com/OSGeo/PROJ/issues/3110>`_)
+
+* ``unitconvert``: round to nearest date when converting to yyyymmdd (`#3111 <https://github.com/OSGeo/PROJ/issues/3111>`_)
+
+* Fix comparison of GeodeticRefrenceFrame vs DynamicGeodeticReferenceFrame (`#3120 <https://github.com/OSGeo/PROJ/issues/3120>`_)
+
+* :cpp:func:``createOperations()``: fix transformation involving CompoundCRS, ToWGS84
+  and PROJ4_GRIDS (`#3124 <https://github.com/OSGeo/PROJ/issues/3124>`_)
+
+* Fix datum names when importing from PROJ4 crs strings (affects some
+  transformations using geoidgrids) (`#3129 <https://github.com/OSGeo/PROJ/issues/3129>`_)
+
+* Deal with ``PARAMETER["EPSG code for Interpolation CRS",crs_code]`` (`#3149 <https://github.com/OSGeo/PROJ/issues/3149>`_)
+
+* :cpp:func:`createOperations()`: fix ``CompoundCRS[BoundCRS[ProjectedCRS],BoundCRS[VerticalCRS]]``
+  to Geog3DCrs (`#3151 <https://github.com/OSGeo/PROJ/issues/3151>`_)
+
+* ITRF2014: fix ITRF2014:ITRF88,ITRF94 and ITRF96 definitions (`#3159 <https://github.com/OSGeo/PROJ/issues/3159>`_)
+
+* :cpp:func:`createBoundCRSToWGS84IfPossible()``: improve selection logic to generate +towgs84=
+  taking into account extent (`#3160 <https://github.com/OSGeo/PROJ/issues/3160>`_)
+
+* :cpp:func:`createOperations()`: fix some complex cases involving TOWGS84 and CompoundCRS (`#3163 <https://github.com/OSGeo/PROJ/issues/3163>`_)
+
+* Fix CMake CURL dependency (`#3185 <https://github.com/OSGeo/PROJ/issues/3185>`_)
+
+* WKT import: deal with Projected CRS that is a mix of WKT1:GDAL / WKT1:ESRI (`#3189 <https://github.com/OSGeo/PROJ/issues/3189>`_)
+
+* :cpp:func:`createOperations()``: fix/improve result of 'BD72 + Ostend height ' to 'WGS84+EGM96 height' (`#3199 <https://github.com/OSGeo/PROJ/issues/3199>`_)
+
+* :cpp:func:`Identifier::isEquivalentName()``: fix when ending by ' + ' which could indirectly cause
+  an infinite stack call in master (`#3202 <https://github.com/OSGeo/PROJ/issues/3202>`_)
+
+* WKT import: correctly deal with absence of Latitude_Of_Origin parameter in
+  WKT1 ESRI with Stereographic projection (`#3212 <https://github.com/OSGeo/PROJ/issues/3212>`_)
+
+* PROJJSON parser: do not error out if a datum ensemble member is unknown in the database (`#3223 <https://github.com/OSGeo/PROJ/issues/3223>`_)
+
+
 9.0.0 Release Notes
 +++++++++++++++++++
 *March 1st 2022*
