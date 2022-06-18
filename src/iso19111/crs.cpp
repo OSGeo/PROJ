@@ -1497,33 +1497,28 @@ bool SingleCRS::baseIsEquivalentTo(
     }
 
     // Check datum
-    if (criterion == util::IComparable::Criterion::STRICT) {
-        const auto &thisDatum = d->datum;
-        const auto &otherDatum = otherSingleCRS->d->datum;
-        if (thisDatum) {
-            if (otherDatum == nullptr ||
-                !thisDatum->_isEquivalentTo(otherDatum.get(), criterion,
-                                            dbContext)) {
-                return false;
-            }
-        } else {
-            if (otherDatum) {
-                return false;
-            }
+    const auto &thisDatum = d->datum;
+    const auto &otherDatum = otherSingleCRS->d->datum;
+    const auto &thisDatumEnsemble = d->datumEnsemble;
+    const auto &otherDatumEnsemble = otherSingleCRS->d->datumEnsemble;
+    if (thisDatum && otherDatum) {
+        if (!thisDatum->_isEquivalentTo(otherDatum.get(), criterion,
+                                        dbContext)) {
+            return false;
         }
+    } else if (thisDatumEnsemble && otherDatumEnsemble) {
+        if (!thisDatumEnsemble->_isEquivalentTo(otherDatumEnsemble.get(),
+                                                criterion, dbContext)) {
+            return false;
+        }
+    }
 
-        const auto &thisDatumEnsemble = d->datumEnsemble;
-        const auto &otherDatumEnsemble = otherSingleCRS->d->datumEnsemble;
-        if (thisDatumEnsemble) {
-            if (otherDatumEnsemble == nullptr ||
-                !thisDatumEnsemble->_isEquivalentTo(otherDatumEnsemble.get(),
-                                                    criterion, dbContext)) {
-                return false;
-            }
-        } else {
-            if (otherDatumEnsemble) {
-                return false;
-            }
+    if (criterion == util::IComparable::Criterion::STRICT) {
+        if ((thisDatum != nullptr) ^ (otherDatum != nullptr)) {
+            return false;
+        }
+        if ((thisDatumEnsemble != nullptr) ^ (otherDatumEnsemble != nullptr)) {
+            return false;
         }
     } else {
         if (!datumNonNull(dbContext)->_isEquivalentTo(
