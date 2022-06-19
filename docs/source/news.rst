@@ -17,27 +17,27 @@ Database updates
 Bug fixes
 ---------
 
-* Use :envvar:`CMAKE_INSTALL_MANDIR`` to override default (`#3081 <https://github.com/OSGeo/PROJ/issues/3081>`_)
+* Use :envvar:`CMAKE_INSTALL_MANDIR` to override default (`#3081 <https://github.com/OSGeo/PROJ/issues/3081>`_)
 
 * Increase ``MAX_ITER`` so Mollweide forward projection works near the poles (`#3082 <https://github.com/OSGeo/PROJ/issues/3082>`_)
 
 * Fix wrong results with SQLite 3.38.0 (`#3091 <https://github.com/OSGeo/PROJ/issues/3091>`_)
 
 * Fix issue when transforming from/to BoundCRS of 3D CRS with non-Greenwich
- prime meridian, created from WKT (`#3098 <https://github.com/OSGeo/PROJ/issues/3098>`_)
+  prime meridian, created from WKT (`#3098 <https://github.com/OSGeo/PROJ/issues/3098>`_)
 
 * Fix issues with WKT of concatenated operations (`#3105 <https://github.com/OSGeo/PROJ/issues/3105>`_)
 
 * CMake: fix installation of ``proj.pc`` on Windows (`#3109 <https://github.com/OSGeo/PROJ/issues/3109>`_)
 
-* :cpp:func:`createOperations()``: fix issue in transformation northing, easting
+* :cpp:func:`createOperations`: fix issue in transformation northing, easting
   projected CRS -> +proj=longlat +lon_wrap (`#3110 <https://github.com/OSGeo/PROJ/issues/3110>`_)
 
 * ``unitconvert``: round to nearest date when converting to yyyymmdd (`#3111 <https://github.com/OSGeo/PROJ/issues/3111>`_)
 
 * Fix comparison of GeodeticRefrenceFrame vs DynamicGeodeticReferenceFrame (`#3120 <https://github.com/OSGeo/PROJ/issues/3120>`_)
 
-* :cpp:func:``createOperations()``: fix transformation involving CompoundCRS, ToWGS84
+* :cpp:func:`createOperations`: fix transformation involving CompoundCRS, ToWGS84
   and PROJ4_GRIDS (`#3124 <https://github.com/OSGeo/PROJ/issues/3124>`_)
 
 * Fix datum names when importing from PROJ4 crs strings (affects some
@@ -45,23 +45,23 @@ Bug fixes
 
 * Deal with ``PARAMETER["EPSG code for Interpolation CRS",crs_code]`` (`#3149 <https://github.com/OSGeo/PROJ/issues/3149>`_)
 
-* :cpp:func:`createOperations()`: fix ``CompoundCRS[BoundCRS[ProjectedCRS],BoundCRS[VerticalCRS]]``
+* :cpp:func:`createOperations`: fix ``CompoundCRS[BoundCRS[ProjectedCRS],BoundCRS[VerticalCRS]]``
   to Geog3DCrs (`#3151 <https://github.com/OSGeo/PROJ/issues/3151>`_)
 
 * ITRF2014: fix ITRF2014:ITRF88,ITRF94 and ITRF96 definitions (`#3159 <https://github.com/OSGeo/PROJ/issues/3159>`_)
 
-* :cpp:func:`createBoundCRSToWGS84IfPossible()``: improve selection logic to generate +towgs84=
+* :cpp:func:`createBoundCRSToWGS84IfPossible()`: improve selection logic to generate +towgs84=
   taking into account extent (`#3160 <https://github.com/OSGeo/PROJ/issues/3160>`_)
 
-* :cpp:func:`createOperations()`: fix some complex cases involving TOWGS84 and CompoundCRS (`#3163 <https://github.com/OSGeo/PROJ/issues/3163>`_)
+* :cpp:func:`createOperations`: fix some complex cases involving TOWGS84 and CompoundCRS (`#3163 <https://github.com/OSGeo/PROJ/issues/3163>`_)
 
 * Fix CMake CURL dependency (`#3185 <https://github.com/OSGeo/PROJ/issues/3185>`_)
 
 * WKT import: deal with Projected CRS that is a mix of WKT1:GDAL / WKT1:ESRI (`#3189 <https://github.com/OSGeo/PROJ/issues/3189>`_)
 
-* :cpp:func:`createOperations()``: fix/improve result of 'BD72 + Ostend height ' to 'WGS84+EGM96 height' (`#3199 <https://github.com/OSGeo/PROJ/issues/3199>`_)
+* :cpp:func:`createOperations`: fix/improve result of 'BD72 + Ostend height' to 'WGS84+EGM96 height' (`#3199 <https://github.com/OSGeo/PROJ/issues/3199>`_)
 
-* :cpp:func:`Identifier::isEquivalentName()``: fix when ending by ' + ' which could indirectly cause
+* :cpp:func:`Identifier::isEquivalentName()`: fix when ending by ' + ' which could indirectly cause
   an infinite stack call in master (`#3202 <https://github.com/OSGeo/PROJ/issues/3202>`_)
 
 * WKT import: correctly deal with absence of Latitude_Of_Origin parameter in
@@ -125,7 +125,7 @@ Bug fixes
 
 * Set more precise error code for parsing errors in :c:func:`proj_create()` (`#3037 <https://github.com/OSGeo/PROJ/issues/3037>`_)
 
-* :cpp:func:`createOperations()`: fix transformations from/to a BoundCRS of a
+* :cpp:func:`createOperations`: fix transformations from/to a BoundCRS of a
   DerivedGeographicCRS coming from WKT (`#3046 <https://github.com/OSGeo/PROJ/issues/3046>`_)
 
 * Better deal with importing strings like ``+init=epsg:XXXX +over`` (`#3055 <https://github.com/OSGeo/PROJ/issues/3055>`_)
@@ -153,7 +153,7 @@ Bug fixes
 
 * Ensure CApi test are cross-platform (`#2934 <https://github.com/OSGeo/PROJ/issues/2934>`_)
 
-* :cpp:func:`createOperations()`: do not stop at the first operation in the PROJ namespace for vertical transformations (`#2937 <https://github.com/OSGeo/PROJ/issues/2937>`_)
+* :cpp:func:`createOperations`: do not stop at the first operation in the PROJ namespace for vertical transformations (`#2937 <https://github.com/OSGeo/PROJ/issues/2937>`_)
 
 * :cpp:func:`createOperationsCompoundToCompound()`: fix null pointer dereference when connection to ``proj.db`` doesn't exist. (`#2938 <https://github.com/OSGeo/PROJ/issues/2938>`_)
 
@@ -161,7 +161,7 @@ Bug fixes
 
 * Cache result of :c:func:`proj_get_type()` to help for performance of :c:func:`proj_factors()` (`#2967 <https://github.com/OSGeo/PROJ/issues/2967>`_)
 
-* :cpp:func:`createOperations()`: improvement for "NAD83(CSRS) + CGVD28 height" to "NAD83(CSRS) + CGVD2013(CGG2013) height" (`#2977 <https://github.com/OSGeo/PROJ/issues/2977>`_)
+* :cpp:func:`createOperations`: improvement for "NAD83(CSRS) + CGVD28 height" to "NAD83(CSRS) + CGVD2013(CGG2013) height" (`#2977 <https://github.com/OSGeo/PROJ/issues/2977>`_)
 
 * WKT1 import: correctly deal with missing rectified_grid_angle parameter (`#2986 <https://github.com/OSGeo/PROJ/issues/2986>`_)
 
@@ -326,7 +326,7 @@ Bug Fixes
 
 * Make sure that :c:func:`proj_crs_promote_to_3D` returns a derived CRS (`#2806 <https://github.com/OSGeo/PROJ/issues/2806>`_)
 
-* :cpp:func:`createOperations()`: fix missing deg<-->rad conversion when transforming with a
+* :cpp:func:`createOperations`: fix missing deg<-->rad conversion when transforming with a
   CRS that has a fallback-to-PROJ4-string behaviour and is a BoundCRS of a
   GeographicCRS (`#2808 <https://github.com/OSGeo/PROJ/issues/2808>`_)
 
@@ -447,7 +447,7 @@ Bug fixes
 
 * fix wrong capitalization of CHENyx06_ETRS.gsb (`#2597 <https://github.com/OSGeo/PROJ/issues/2597>`_)
 
-* :cpp:func:`createOperations()`: improve handling of vertical transforms when
+* :cpp:func:`createOperations`: improve handling of vertical transforms when
   when compound CRSs are used (`#2592 <https://github.com/OSGeo/PROJ/issues/2592>`_)
 
 * :cpp:func:`CRS::promoteTo3D()`: propagate the extent from the 2D CRS (`#2589 <https://github.com/OSGeo/PROJ/issues/2589>`_)
@@ -538,7 +538,7 @@ Bug fixes
 * Do not restrict longitude to [-90;90] range in spherical transverse Mercator
   forward projection (`#2471 <https://github.com/OSGeo/PROJ/issues/2471>`_)
 
-* :cpp:func:`createOperations()`: fix Compound to Geog3D/Projected3D CRS with non-metre ellipsoidal height (`#2500 <https://github.com/OSGeo/PROJ/issues/2500>`_)
+* :cpp:func:`createOperations`: fix Compound to Geog3D/Projected3D CRS with non-metre ellipsoidal height (`#2500 <https://github.com/OSGeo/PROJ/issues/2500>`_)
 
 * Avoid error messages to be emitted log level is set to ``PJ_LOG_NONE`` (`#2527 <https://github.com/OSGeo/PROJ/issues/2527>`_)
 
@@ -673,7 +673,7 @@ Bug fixes
 * Adjust :cpp:func:`createBoundCRSToWGS84IfPossible()` and operation filtering
   (for POSGAR 2007 to WGS84 issues) (`#2357 <https://github.com/OSGeo/PROJ/issues/2357>`_)
 
-* :cpp:func:`createOperations()`: several fixes affecting NAD83 -> NAD83(2011) (`#2364 <https://github.com/OSGeo/PROJ/issues/2364>`_)
+* :cpp:func:`createOperations`: several fixes affecting NAD83 -> NAD83(2011) (`#2364 <https://github.com/OSGeo/PROJ/issues/2364>`_)
 
 * WKT2:2019 import/export: handle DATUM (at top level object) with PRIMEM
 
@@ -831,7 +831,7 @@ Updates
 Bug fixes
 ---------
 
-* :cpp:func:`createOperations()`: do not remove ballpark transformation if there are only grid
+* :cpp:func:`createOperations`: do not remove ballpark transformation if there are only grid
   based operations, even if they cover the whole area of use (`#2155 <https://github.com/OSGeo/PROJ/issues/2155>`_)
 
 * :cpp:func:`createFromProjString()`: handle default parameters of '+krovak +type=crs', and
