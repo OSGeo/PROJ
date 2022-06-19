@@ -707,6 +707,8 @@ IComparable::~IComparable() = default;
 bool IComparable::isEquivalentTo(
     const IComparable *other, Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
+    if (this == other)
+        return true;
     return _isEquivalentTo(other, criterion, dbContext);
 }
 
