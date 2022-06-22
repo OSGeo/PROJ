@@ -2330,7 +2330,8 @@ TEST(wkt_parse, vertcrs_with_GEOIDMODEL) {
                "        AXIS[\"gravity-related height (H)\",up,\n"
                "            LENGTHUNIT[\"metre\",1]],\n"
                "    GEOIDMODEL[\"CGG2013\",\n"
-               "        ID[\"EPSG\",6648]]]";
+               "        ID[\"EPSG\",6648]],\n"
+               "    GEOIDMODEL[\"other\"]]";
 
     auto obj = WKTParser().createFromWKT(wkt);
     auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);

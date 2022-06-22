@@ -4667,15 +4667,24 @@ CRSNNPtr WKTParser::Private::buildVerticalCRS(const WKTNodeNNPtr &node) {
 
     auto &geoidModelNode = nodeP->lookForChild(WKTConstants::GEOIDMODEL);
     if (!isNull(geoidModelNode)) {
-        auto &propsModel = buildProperties(geoidModelNode);
-        const auto dummyCRS = VerticalCRS::create(
-            PropertyMap(), vdatum, datumEnsemble, NN_NO_CHECK(verticalCS));
-        const auto model(Transformation::create(
-            propsModel, dummyCRS, dummyCRS, nullptr,
-            OperationMethod::create(PropertyMap(),
-                                    std::vector<OperationParameterNNPtr>()),
-            {}, {}));
-        props.set("GEOID_MODEL", model);
+        ArrayOfBaseObjectNNPtr arrayModels = ArrayOfBaseObject::create();
+        for (const auto &childNode : nodeP->children()) {
+            const auto &childNodeChildren = childNode->GP()->children();
+            if (childNodeChildren.size() >= 1 &&
+                ci_equal(childNode->GP()->value(), WKTConstants::GEOIDMODEL)) {
+                auto &propsModel = buildProperties(childNode);
+                const auto dummyCRS =
+                    VerticalCRS::create(PropertyMap(), vdatum, datumEnsemble,
+                                        NN_NO_CHECK(verticalCS));
+                const auto model(Transformation::create(
+                    propsModel, dummyCRS, dummyCRS, nullptr,
+                    OperationMethod::create(
+                        PropertyMap(), std::vector<OperationParameterNNPtr>()),
+                    {}, {}));
+                arrayModels->add(model);
+            }
+        }
+        props.set("GEOID_MODEL", arrayModels);
     }
 
     auto crs = nn_static_pointer_cast<CRS>(VerticalCRS::create(

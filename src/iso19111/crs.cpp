@@ -3443,11 +3443,12 @@ void VerticalCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     formatter->setOutputAxis(oldAxisOutputRule);
 
     if (isWKT2 && formatter->use2019Keywords() && !d->geoidModel.empty()) {
-        const auto &model = d->geoidModel[0];
-        formatter->startNode(io::WKTConstants::GEOIDMODEL, false);
-        formatter->addQuotedString(model->nameStr());
-        model->formatID(formatter);
-        formatter->endNode();
+        for (const auto &model : d->geoidModel) {
+            formatter->startNode(io::WKTConstants::GEOIDMODEL, false);
+            formatter->addQuotedString(model->nameStr());
+            model->formatID(formatter);
+            formatter->endNode();
+        }
     }
 
     ObjectUsage::baseExportToWKT(formatter);
@@ -3605,9 +3606,19 @@ VerticalCRS::create(const util::PropertyMap &properties,
     crs->setProperties(properties);
     const auto geoidModelPtr = properties.get("GEOID_MODEL");
     if (geoidModelPtr) {
-        auto transf = util::nn_dynamic_pointer_cast<operation::Transformation>(
-            *geoidModelPtr);
-        if (transf) {
+        if (auto array = util::nn_dynamic_pointer_cast<util::ArrayOfBaseObject>(
+                *geoidModelPtr)) {
+            for (const auto &item : *array) {
+                auto transf =
+                    util::nn_dynamic_pointer_cast<operation::Transformation>(
+                        item);
+                if (transf) {
+                    crs->d->geoidModel.emplace_back(NN_NO_CHECK(transf));
+                }
+            }
+        } else if (auto transf =
+                       util::nn_dynamic_pointer_cast<operation::Transformation>(
+                           *geoidModelPtr)) {
             crs->d->geoidModel.emplace_back(NN_NO_CHECK(transf));
         }
     }
