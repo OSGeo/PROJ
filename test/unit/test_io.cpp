@@ -12241,7 +12241,6 @@ TEST(json_import,
                 "  \"type\": \"DynamicGeodeticReferenceFrame\",\n"
                 "  \"name\": \"World Geodetic System 1984\",\n"
                 "  \"frame_reference_epoch\": 1,\n"
-                "  \"deformation_model\": \"foo\",\n"
                 "  \"ellipsoid\": {\n"
                 "    \"name\": \"WGS 84\",\n"
                 "    \"semi_major_axis\": 6378137,\n"
@@ -12349,8 +12348,7 @@ TEST(json_import, dynamic_vertical_reference_frame) {
                 "  \"$schema\": \"foo\",\n"
                 "  \"type\": \"DynamicVerticalReferenceFrame\",\n"
                 "  \"name\": \"bar\",\n"
-                "  \"frame_reference_epoch\": 1,\n"
-                "  \"deformation_model\": \"foo\"\n"
+                "  \"frame_reference_epoch\": 1\n"
                 "}";
     auto obj = createFromUserInput(json, nullptr);
     auto dvrf = nn_dynamic_pointer_cast<DynamicVerticalReferenceFrame>(obj);
@@ -12439,6 +12437,53 @@ TEST(json_import, geographic_crs) {
                 "    \"code\": 4326\n"
                 "  },\n"
                 "  \"remarks\": \"my_remarks\"\n"
+                "}";
+    auto obj = createFromUserInput(json, nullptr);
+    auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(gcrs != nullptr);
+    EXPECT_EQ(gcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, geographic_crs_with_deformation_models) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"GeographicCRS\",\n"
+                "  \"name\": \"test\",\n"
+                "  \"datum\": {\n"
+                "    \"type\": \"DynamicGeodeticReferenceFrame\",\n"
+                "    \"name\": \"test\",\n"
+                "    \"frame_reference_epoch\": 2005,\n"
+                "    \"ellipsoid\": {\n"
+                "      \"name\": \"WGS 84\",\n"
+                "      \"semi_major_axis\": 6378137,\n"
+                "      \"inverse_flattening\": 298.257223563\n"
+                "    }\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"ellipsoidal\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Geodetic latitude\",\n"
+                "        \"abbreviation\": \"Lat\",\n"
+                "        \"direction\": \"north\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      },\n"
+                "      {\n"
+                "        \"name\": \"Geodetic longitude\",\n"
+                "        \"abbreviation\": \"Lon\",\n"
+                "        \"direction\": \"east\",\n"
+                "        \"unit\": \"degree\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"deformation_models\": [\n"
+                "    {\n"
+                "      \"name\": \"my_model\"\n"
+                "    }\n"
+                "  ]\n"
                 "}";
     auto obj = createFromUserInput(json, nullptr);
     auto gcrs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
@@ -14109,6 +14154,44 @@ TEST(json_import, vertical_crs_with_geoid_models) {
                 "    },\n"
                 "    {\n"
                 "      \"name\": \"other\"\n"
+                "    }\n"
+                "  ]\n"
+                "}";
+
+    // No database
+    auto obj = createFromUserInput(json, nullptr);
+    auto vcrs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+    ASSERT_TRUE(vcrs != nullptr);
+    EXPECT_EQ(vcrs->exportToJSON(&(JSONFormatter::create()->setSchema("foo"))),
+              json);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(json_import, vertical_crs_with_deformation_models) {
+    auto json = "{\n"
+                "  \"$schema\": \"foo\",\n"
+                "  \"type\": \"VerticalCRS\",\n"
+                "  \"name\": \"test\",\n"
+                "  \"datum\": {\n"
+                "    \"type\": \"DynamicVerticalReferenceFrame\",\n"
+                "    \"name\": \"test\",\n"
+                "    \"frame_reference_epoch\": 2005\n"
+                "  },\n"
+                "  \"coordinate_system\": {\n"
+                "    \"subtype\": \"vertical\",\n"
+                "    \"axis\": [\n"
+                "      {\n"
+                "        \"name\": \"Gravity-related height\",\n"
+                "        \"abbreviation\": \"H\",\n"
+                "        \"direction\": \"up\",\n"
+                "        \"unit\": \"metre\"\n"
+                "      }\n"
+                "    ]\n"
+                "  },\n"
+                "  \"deformation_models\": [\n"
+                "    {\n"
+                "      \"name\": \"my_model\"\n"
                 "    }\n"
                 "  ]\n"
                 "}";

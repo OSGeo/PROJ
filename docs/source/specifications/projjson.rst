@@ -57,9 +57,9 @@ History of the schema
         + add "meridian" member in Axis object type.
         + add "temporal_extent" and "vertical_extent" members in object usage.
         + add "geoid_models" for VerticalCRS if several models are needed.
+        + add "deformation_models" members to GeodeticCRS and VerticalCRS (replaces "deformation_model" in DynamicGeodeticReferenceFrame/DynamicVerticalReferenceFrame)
     - Added in schema, but not implemented in PROJ:
         + add top-level object PointMotionOperation
-        + add "deformation_models" members to GeodeticCRS and VerticalCRS
 * v0.4: additional properties allowed in id object (version, authority_citation, uri). Implemented in PROJ 8.2.
 * v0.3: additional properties allowed in BoundCRS object (name, scope, area, bbox, usages, remarks, id, ids). Implemented in PROJ 8.1.
 * v0.2: addition of geoid_model in VerticalCRS object.

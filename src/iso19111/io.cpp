@@ -5306,6 +5306,7 @@ BaseObjectNNPtr WKTParser::Private::build(const WKTNodeNNPtr &node) {
 
 class JSONParser {
     DatabaseContextPtr dbContext_{};
+    std::string deformationModelName_{};
 
     static std::string getString(const json &j, const char *key);
     static json getObject(const json &j, const char *key);
@@ -5888,12 +5889,23 @@ void JSONParser::buildGeodeticDatumOrDatumEnsemble(
     DatumEnsemblePtr &datumEnsemble) {
     if (j.contains("datum")) {
         auto datumJ = getObject(j, "datum");
+
+        if (j.contains("deformation_models")) {
+            auto deformationModelsJ = getArray(j, "deformation_models");
+            if (!deformationModelsJ.empty()) {
+                const auto &deformationModelJ = deformationModelsJ[0];
+                deformationModelName_ = getString(deformationModelJ, "name");
+                // We can handle only one for now
+            }
+        }
+
         datum = util::nn_dynamic_pointer_cast<GeodeticReferenceFrame>(
             create(datumJ));
         if (!datum) {
             throw ParsingException("datum of wrong type");
         }
 
+        deformationModelName_.clear();
     } else {
         datumEnsemble =
             buildDatumEnsemble(getObject(j, "datum_ensemble")).as_nullable();
@@ -5980,6 +5992,16 @@ VerticalCRSNNPtr JSONParser::buildVerticalCRS(const json &j) {
     DatumEnsemblePtr datumEnsemble;
     if (j.contains("datum")) {
         auto datumJ = getObject(j, "datum");
+
+        if (j.contains("deformation_models")) {
+            auto deformationModelsJ = getArray(j, "deformation_models");
+            if (!deformationModelsJ.empty()) {
+                const auto &deformationModelJ = deformationModelsJ[0];
+                deformationModelName_ = getString(deformationModelJ, "name");
+                // We can handle only one for now
+            }
+        }
+
         datum = util::nn_dynamic_pointer_cast<VerticalReferenceFrame>(
             create(datumJ));
         if (!datum) {
@@ -6432,7 +6454,10 @@ JSONParser::buildDynamicGeodeticReferenceFrame(const json &j) {
                                 UnitOfMeasure::YEAR);
     optional<std::string> deformationModel;
     if (j.contains("deformation_model")) {
+        // Before PROJJSON v0.5 / PROJ 9.1
         deformationModel = getString(j, "deformation_model");
+    } else if (!deformationModelName_.empty()) {
+        deformationModel = deformationModelName_;
     }
     return DynamicGeodeticReferenceFrame::create(
         buildProperties(j), buildEllipsoid(ellipsoidJ), getAnchor(j), pm,
@@ -6454,7 +6479,10 @@ JSONParser::buildDynamicVerticalReferenceFrame(const json &j) {
                                 UnitOfMeasure::YEAR);
     optional<std::string> deformationModel;
     if (j.contains("deformation_model")) {
+        // Before PROJJSON v0.5 / PROJ 9.1
         deformationModel = getString(j, "deformation_model");
+    } else if (!deformationModelName_.empty()) {
+        deformationModel = deformationModelName_;
     }
     return DynamicVerticalReferenceFrame::create(
         buildProperties(j), getAnchor(j), util::optional<RealizationMethod>(),
