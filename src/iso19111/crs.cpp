@@ -3516,22 +3516,32 @@ void VerticalCRS::_exportToJSON(
     formatter->setOmitTypeInImmediateChild();
     coordinateSystem()->_exportToJSON(formatter);
 
-    if (!d->geoidModel.empty()) {
-        const auto &model = d->geoidModel[0];
-        writer->AddObjKey("geoid_model");
-        auto objectContext2(formatter->MakeObjectContext(nullptr, false));
-        writer->AddObjKey("name");
-        writer->Add(model->nameStr());
+    const auto geoidModelExport =
+        [&writer, &formatter](const operation::TransformationNNPtr &model) {
+            auto objectContext2(formatter->MakeObjectContext(nullptr, false));
+            writer->AddObjKey("name");
+            writer->Add(model->nameStr());
 
-        if (model->identifiers().empty()) {
-            const auto &interpCRS = model->interpolationCRS();
-            if (interpCRS) {
-                writer->AddObjKey("interpolation_crs");
-                interpCRS->_exportToJSON(formatter);
+            if (model->identifiers().empty()) {
+                const auto &interpCRS = model->interpolationCRS();
+                if (interpCRS) {
+                    writer->AddObjKey("interpolation_crs");
+                    interpCRS->_exportToJSON(formatter);
+                }
             }
-        }
 
-        model->formatID(formatter);
+            model->formatID(formatter);
+        };
+
+    if (d->geoidModel.size() == 1) {
+        writer->AddObjKey("geoid_model");
+        geoidModelExport(d->geoidModel[0]);
+    } else if (d->geoidModel.size() > 1) {
+        writer->AddObjKey("geoid_models");
+        auto geoidModelsArrayContext(writer->MakeArrayContext(false));
+        for (const auto &model : d->geoidModel) {
+            geoidModelExport(model);
+        }
     }
 
     ObjectUsage::baseExportToJSON(formatter);

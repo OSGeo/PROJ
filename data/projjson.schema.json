@@ -637,6 +637,17 @@
       "additionalProperties": false
     },
 
+    "geoid_model": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "interpolation_crs": { "$ref": "#/definitions/crs" },
+        "id": { "$ref": "#/definitions/id" }
+      },
+      "required" : [ "name" ],
+      "additionalProperties": false
+    },
+
     "id": {
       "type": "object",
       "properties": {
@@ -1025,15 +1036,10 @@
         },
         "datum_ensemble": { "$ref": "#/definitions/datum_ensemble" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
-        "geoid_model": {
-          "type": "object",
-          "properties": {
-            "name": { "type": "string" },
-            "interpolation_crs": { "$ref": "#/definitions/crs" },
-            "id": { "$ref": "#/definitions/id" }
-          },
-          "required" : [ "name" ],
-          "additionalProperties": false
+        "geoid_model": { "$ref": "#/definitions/geoid_model" },
+        "geoid_models": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/geoid_model" }
         },
         "$schema" : {},
         "scope": {},
@@ -1049,7 +1055,13 @@
       "description": "One and only one of datum and datum_ensemble must be provided",
       "allOf": [
         { "$ref": "#/definitions/object_usage" },
-        { "$ref": "#/definitions/one_and_only_one_of_datum_or_datum_ensemble" }
+        { "$ref": "#/definitions/one_and_only_one_of_datum_or_datum_ensemble" },
+        {
+            "not": {
+                "type": "object",
+                "required": [ "geoid_model", "geoid_models" ]
+            }
+        }
       ],
       "additionalProperties": false
     },
