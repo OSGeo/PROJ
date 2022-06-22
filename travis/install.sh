@@ -140,6 +140,8 @@ test_projjson EPSG:4326+3855
 test_projjson "+proj=longlat +ellps=GRS80 +nadgrids=@foo +type=crs"
 test_projjson -s EPSG:3111 -t GDA2020
 
+validate_json $TRAVIS_BUILD_DIR/schemas/v0.5/examples/point_motion_operation.json
+
 cd ..
 
 echo "Check that we can retrieve the resource directory in a relative way after renaming the installation prefix"

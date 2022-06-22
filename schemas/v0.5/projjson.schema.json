@@ -299,6 +299,17 @@
       "additionalProperties": false
     },
 
+    "deformation_model": {
+      "description": "Association to a PointMotionOperation",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "id": { "$ref": "#/definitions/id" }
+      },
+      "required" : [ "name" ],
+      "additionalProperties": false
+    },
+
     "derived_engineering_crs": {
       "type": "object",
       "allOf": [{ "$ref": "#/definitions/object_usage" }],
@@ -595,6 +606,10 @@
         },
         "datum_ensemble": { "$ref": "#/definitions/datum_ensemble" },
         "coordinate_system": { "$ref": "#/definitions/coordinate_system" },
+        "deformation_models": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/deformation_model" }
+        },
         "$schema" : {},
         "scope": {},
         "area": {},
@@ -827,6 +842,34 @@
       "additionalProperties": false
     },
 
+    "point_motion_operation": {
+      "$comment": "Not implemented in PROJ (at least as of PROJ 9.1)",
+      "type": "object",
+      "allOf": [{ "$ref": "#/definitions/object_usage" }],
+      "properties": {
+        "type": { "type": "string", "enum": ["PointMotionOperation"] },
+        "name": { "type": "string" },
+        "source_crs": { "$ref": "#/definitions/crs" },
+        "method": { "$ref": "#/definitions/method" },
+        "parameters": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/parameter_value" }
+        },
+        "accuracy": { "type": "string" },
+        "$schema" : {},
+        "scope": {},
+        "area": {},
+        "bbox": {},
+        "vertical_extent": {},
+        "temporal_extent": {},
+        "usages": {},
+        "remarks": {},
+        "id": {}, "ids": {}
+      },
+      "required" : [ "name", "source_crs", "method", "parameters" ],
+      "additionalProperties": false
+    },
+
     "prime_meridian": {
       "type": "object",
       "properties": {
@@ -847,7 +890,8 @@
     "single_operation": {
       "oneOf": [
         { "$ref": "#/definitions/conversion" },
-        { "$ref": "#/definitions/transformation" }
+        { "$ref": "#/definitions/transformation" },
+        { "$ref": "#/definitions/point_motion_operation" }
       ]
     },
 
@@ -1040,6 +1084,10 @@
         "geoid_models": {
           "type": "array",
           "items": { "$ref": "#/definitions/geoid_model" }
+        },
+        "deformation_models": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/deformation_model" }
         },
         "$schema" : {},
         "scope": {},
