@@ -49,8 +49,8 @@ CREATE TABLE ellipsoid (
     semi_minor_axis FLOAT CHECK (semi_minor_axis > 0 AND semi_minor_axis <= semi_major_axis),
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_ellipsoid PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_ellipsoid_celestial_body FOREIGN KEY (celestial_body_auth_name, celestial_body_code) REFERENCES celestial_body(auth_name, code),
-    CONSTRAINT fk_ellipsoid_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code),
+    CONSTRAINT fk_ellipsoid_celestial_body FOREIGN KEY (celestial_body_auth_name, celestial_body_code) REFERENCES celestial_body(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_ellipsoid_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
     CONSTRAINT check_ellipsoid_inv_flattening_semi_minor_mutually_exclusive CHECK ((inv_flattening IS NULL AND semi_minor_axis IS NOT NULL) OR (inv_flattening IS NOT NULL AND semi_minor_axis IS NULL))
 ) WITHOUT ROWID;
 
@@ -98,8 +98,8 @@ CREATE TABLE usage(
     scope_auth_name TEXT NOT NULL,
     scope_code INTEGER_OR_TEXT NOT NULL,
     CONSTRAINT pk_usage PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_usage_extent FOREIGN KEY (extent_auth_name, extent_code) REFERENCES extent(auth_name, code),
-    CONSTRAINT fk_usage_scope FOREIGN KEY (scope_auth_name, scope_code) REFERENCES scope(auth_name, code)
+    CONSTRAINT fk_usage_extent FOREIGN KEY (extent_auth_name, extent_code) REFERENCES extent(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_usage_scope FOREIGN KEY (scope_auth_name, scope_code) REFERENCES scope(auth_name, code) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_usage_object ON usage(object_table_name, object_auth_name, object_code);
@@ -131,7 +131,7 @@ CREATE TABLE prime_meridian(
     uom_code INTEGER_OR_TEXT NOT NULL,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_prime_meridian PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_prime_meridian_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code)
+    CONSTRAINT fk_prime_meridian_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE TRIGGER prime_meridian_insert_trigger
@@ -156,8 +156,8 @@ CREATE TABLE geodetic_datum (
     anchor TEXT,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_datum PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_geodetic_datum_ellipsoid FOREIGN KEY (ellipsoid_auth_name, ellipsoid_code) REFERENCES ellipsoid(auth_name, code),
-    CONSTRAINT fk_geodetic_datum_prime_meridian FOREIGN KEY (prime_meridian_auth_name, prime_meridian_code) REFERENCES prime_meridian(auth_name, code)
+    CONSTRAINT fk_geodetic_datum_ellipsoid FOREIGN KEY (ellipsoid_auth_name, ellipsoid_code) REFERENCES ellipsoid(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_geodetic_datum_prime_meridian FOREIGN KEY (prime_meridian_auth_name, prime_meridian_code) REFERENCES prime_meridian(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE TRIGGER geodetic_datum_insert_trigger
@@ -177,8 +177,8 @@ CREATE TABLE geodetic_datum_ensemble_member (
     member_auth_name TEXT NOT NULL,
     member_code INTEGER_OR_TEXT NOT NULL,
     sequence INTEGER NOT NULL CHECK (sequence >= 1),
-    CONSTRAINT fk_geodetic_datum_ensemble_member_ensemble FOREIGN KEY (ensemble_auth_name, ensemble_code) REFERENCES geodetic_datum(auth_name, code),
-    CONSTRAINT fk_geodetic_datum_ensemble_member_ensemble_member FOREIGN KEY (member_auth_name, member_code) REFERENCES geodetic_datum(auth_name, code),
+    CONSTRAINT fk_geodetic_datum_ensemble_member_ensemble FOREIGN KEY (ensemble_auth_name, ensemble_code) REFERENCES geodetic_datum(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_geodetic_datum_ensemble_member_ensemble_member FOREIGN KEY (member_auth_name, member_code) REFERENCES geodetic_datum(auth_name, code) ON DELETE CASCADE,
     CONSTRAINT unique_geodetic_datum_ensemble_member UNIQUE (ensemble_auth_name, ensemble_code, sequence)
 );
 
@@ -201,8 +201,8 @@ CREATE TABLE vertical_datum_ensemble_member (
     member_auth_name TEXT NOT NULL,
     member_code INTEGER_OR_TEXT NOT NULL,
     sequence INTEGER NOT NULL CHECK (sequence >= 1),
-    CONSTRAINT fk_vertical_datum_ensemble_member_ensemble FOREIGN KEY (ensemble_auth_name, ensemble_code) REFERENCES vertical_datum(auth_name, code),
-    CONSTRAINT fk_vertical_datum_ensemble_member_ensemble_member FOREIGN KEY (member_auth_name, member_code) REFERENCES vertical_datum(auth_name, code),
+    CONSTRAINT fk_vertical_datum_ensemble_member_ensemble FOREIGN KEY (ensemble_auth_name, ensemble_code) REFERENCES vertical_datum(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_vertical_datum_ensemble_member_ensemble_member FOREIGN KEY (member_auth_name, member_code) REFERENCES vertical_datum(auth_name, code) ON DELETE CASCADE,
     CONSTRAINT unique_vertical_datum_ensemble_member UNIQUE (ensemble_auth_name, ensemble_code, sequence)
 );
 
@@ -229,8 +229,8 @@ CREATE TABLE axis(
     uom_auth_name TEXT,
     uom_code INTEGER_OR_TEXT,
     CONSTRAINT pk_axis PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_axis_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
-    CONSTRAINT fk_axis_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code)
+    CONSTRAINT fk_axis_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_axis_unit_of_measure FOREIGN KEY (uom_auth_name, uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE TRIGGER axis_insert_trigger
@@ -255,8 +255,8 @@ CREATE TABLE geodetic_crs(
     text_definition TEXT, -- PROJ string or WKT string. Use of this is discouraged as prone to definition ambiguities
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_geodetic_crs PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_geodetic_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
-    CONSTRAINT fk_geodetic_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES geodetic_datum(auth_name, code),
+    CONSTRAINT fk_geodetic_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_geodetic_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES geodetic_datum(auth_name, code) ON DELETE CASCADE,
     CONSTRAINT check_geodetic_crs_cs CHECK (NOT ((coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL) AND text_definition IS NULL)),
     CONSTRAINT check_geodetic_crs_cs_bis CHECK (NOT ((NOT(coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL)) AND text_definition IS NOT NULL)),
     CONSTRAINT check_geodetic_crs_datum CHECK (NOT ((datum_auth_name IS NULL OR datum_code IS NULL) AND text_definition IS NULL)),
@@ -300,8 +300,8 @@ CREATE TABLE vertical_crs(
     datum_code INTEGER_OR_TEXT NOT NULL,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_vertical_crs PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_vertical_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
-    CONSTRAINT fk_vertical_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES vertical_datum(auth_name, code)
+    CONSTRAINT fk_vertical_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_vertical_crs_datum FOREIGN KEY (datum_auth_name, datum_code) REFERENCES vertical_datum(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE TRIGGER vertical_crs_insert_trigger
@@ -399,15 +399,15 @@ CREATE TABLE conversion_table(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_conversion PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_conversion_method FOREIGN KEY (method_auth_name, method_code) REFERENCES conversion_method(auth_name, code),
-    --CONSTRAINT fk_conversion_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
-    CONSTRAINT fk_conversion_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_conversion_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_conversion_param3_uom FOREIGN KEY (param3_uom_auth_name, param3_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_conversion_param4_uom FOREIGN KEY (param4_uom_auth_name, param4_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_conversion_param5_uom FOREIGN KEY (param5_uom_auth_name, param5_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_conversion_param6_uom FOREIGN KEY (param6_uom_auth_name, param6_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_conversion_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code)
+    CONSTRAINT fk_conversion_method FOREIGN KEY (method_auth_name, method_code) REFERENCES conversion_method(auth_name, code) ON DELETE CASCADE,
+    --CONSTRAINT fk_conversion_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_conversion_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_conversion_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_conversion_param3_uom FOREIGN KEY (param3_uom_auth_name, param3_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_conversion_param4_uom FOREIGN KEY (param4_uom_auth_name, param4_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_conversion_param5_uom FOREIGN KEY (param5_uom_auth_name, param5_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_conversion_param6_uom FOREIGN KEY (param6_uom_auth_name, param6_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_conversion_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE VIEW conversion AS SELECT
@@ -701,9 +701,9 @@ CREATE TABLE projected_crs(
     text_definition TEXT, -- PROJ string or WKT string. Use of this is discouraged as prone to definition ambiguities
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_projected_crs PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_projected_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code),
-    CONSTRAINT fk_projected_crs_geodetic_crs FOREIGN KEY (geodetic_crs_auth_name, geodetic_crs_code) REFERENCES geodetic_crs(auth_name, code),
-    CONSTRAINT fk_projected_crs_conversion FOREIGN KEY (conversion_auth_name, conversion_code) REFERENCES conversion_table(auth_name, code),
+    CONSTRAINT fk_projected_crs_coordinate_system FOREIGN KEY (coordinate_system_auth_name, coordinate_system_code) REFERENCES coordinate_system(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_projected_crs_geodetic_crs FOREIGN KEY (geodetic_crs_auth_name, geodetic_crs_code) REFERENCES geodetic_crs(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_projected_crs_conversion FOREIGN KEY (conversion_auth_name, conversion_code) REFERENCES conversion_table(auth_name, code) ON DELETE CASCADE,
     CONSTRAINT check_projected_crs_cs CHECK (NOT((coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL) AND text_definition IS NULL)),
     CONSTRAINT check_projected_crs_cs_bis CHECK (NOT((NOT(coordinate_system_auth_name IS NULL OR coordinate_system_code IS NULL)) AND text_definition IS NOT NULL)),
     CONSTRAINT check_projected_crs_geodetic_crs CHECK (NOT((geodetic_crs_auth_name IS NULL OR geodetic_crs_code IS NULL) AND text_definition IS NULL)),
@@ -748,7 +748,7 @@ CREATE TABLE compound_crs(
     vertical_crs_code INTEGER_OR_TEXT NOT NULL,
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
     CONSTRAINT pk_compound_crs PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_compound_crs_vertical_crs FOREIGN KEY (vertical_crs_auth_name, vertical_crs_code) REFERENCES vertical_crs(auth_name, code)
+    CONSTRAINT fk_compound_crs_vertical_crs FOREIGN KEY (vertical_crs_auth_name, vertical_crs_code) REFERENCES vertical_crs(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE TRIGGER compound_crs_insert_trigger
@@ -840,18 +840,18 @@ CREATE TABLE helmert_transformation_table(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_helmert_transformation PRIMARY KEY (auth_name, code),
-    CONSTRAINT fk_helmert_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES geodetic_crs(auth_name, code),
-    CONSTRAINT fk_helmert_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES geodetic_crs(auth_name, code),
-    CONSTRAINT fk_helmert_transformation_method FOREIGN KEY (method_auth_name, method_code) REFERENCES coordinate_operation_method(auth_name, code),
-    --CONSTRAINT fk_helmert_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
-    CONSTRAINT fk_helmert_translation_uom FOREIGN KEY (translation_uom_auth_name, translation_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_helmert_rotation_uom FOREIGN KEY (rotation_uom_auth_name, rotation_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_helmert_scale_difference_uom FOREIGN KEY (scale_difference_uom_auth_name, scale_difference_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_helmert_rate_translation_uom FOREIGN KEY (rate_translation_uom_auth_name, rate_translation_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_helmert_rate_rotation_uom FOREIGN KEY (rate_rotation_uom_auth_name, rate_rotation_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_helmert_rate_scale_difference_uom FOREIGN KEY (rate_scale_difference_uom_auth_name, rate_scale_difference_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_helmert_epoch_uom FOREIGN KEY (epoch_uom_auth_name, epoch_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_helmert_pivot_uom FOREIGN KEY (pivot_uom_auth_name, pivot_uom_code) REFERENCES unit_of_measure(auth_name, code)
+    CONSTRAINT fk_helmert_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES geodetic_crs(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES geodetic_crs(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_transformation_method FOREIGN KEY (method_auth_name, method_code) REFERENCES coordinate_operation_method(auth_name, code) ON DELETE CASCADE,
+    --CONSTRAINT fk_helmert_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_translation_uom FOREIGN KEY (translation_uom_auth_name, translation_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_rotation_uom FOREIGN KEY (rotation_uom_auth_name, rotation_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_scale_difference_uom FOREIGN KEY (scale_difference_uom_auth_name, scale_difference_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_rate_translation_uom FOREIGN KEY (rate_translation_uom_auth_name, rate_translation_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_rate_rotation_uom FOREIGN KEY (rate_rotation_uom_auth_name, rate_rotation_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_rate_scale_difference_uom FOREIGN KEY (rate_scale_difference_uom_auth_name, rate_scale_difference_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_epoch_uom FOREIGN KEY (epoch_uom_auth_name, epoch_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_helmert_pivot_uom FOREIGN KEY (pivot_uom_auth_name, pivot_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE VIEW helmert_transformation AS SELECT
@@ -1050,10 +1050,10 @@ CREATE TABLE grid_transformation(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_grid_transformation PRIMARY KEY (auth_name, code),
-    --CONSTRAINT fk_grid_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
-    --CONSTRAINT fk_grid_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
-    --CONSTRAINT fk_grid_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code)
+    --CONSTRAINT fk_grid_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE,
+    --CONSTRAINT fk_grid_transformation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code) ON DELETE CASCADE,
+    --CONSTRAINT fk_grid_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_grid_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE TRIGGER grid_transformation_insert_trigger
@@ -1106,7 +1106,7 @@ CREATE TABLE grid_alternatives(
     open_license BOOLEAN CHECK (open_license IN (0, 1)),
     directory TEXT,                                 -- optional directory where the file might be located
 
-    CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name),
+    CONSTRAINT fk_grid_alternatives_grid_packages FOREIGN KEY (package_name) REFERENCES grid_packages(package_name) ON DELETE CASCADE,
     CONSTRAINT check_grid_alternatives_grid_fromat CHECK (proj_grid_format IN ('GTiff', 'GTX', 'NTv2', 'JSON')),
     CONSTRAINT check_grid_alternatives_proj_method CHECK (proj_method IN ('hgridshift', 'vgridshift', 'geoid_like', 'geocentricoffset', 'tinshift', 'velocity_grid')),
     CONSTRAINT check_grid_alternatives_inverse_direction CHECK (NOT(proj_method = 'geoid_like' AND inverse_direction = 1)),
@@ -1212,17 +1212,17 @@ CREATE TABLE other_transformation(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_other_transformation PRIMARY KEY (auth_name, code),
-    --CONSTRAINT fk_other_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
-    --CONSTRAINT fk_other_transformation_source_crs FOREIGN1 KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
-    --CONSTRAINT fk_other_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
-    CONSTRAINT fk_other_transformation_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_other_transformation_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_other_transformation_param3_uom FOREIGN KEY (param3_uom_auth_name, param3_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_other_transformation_param4_uom FOREIGN KEY (param4_uom_auth_name, param4_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_other_transformation_param5_uom FOREIGN KEY (param5_uom_auth_name, param5_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_other_transformation_param6_uom FOREIGN KEY (param6_uom_auth_name, param6_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_other_transformation_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code),
-    CONSTRAINT fk_other_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code),
+    --CONSTRAINT fk_other_transformation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE,
+    --CONSTRAINT fk_other_transformation_source_crs FOREIGN1 KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code) ON DELETE CASCADE,
+    --CONSTRAINT fk_other_transformation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_other_transformation_param1_uom FOREIGN KEY (param1_uom_auth_name, param1_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_other_transformation_param2_uom FOREIGN KEY (param2_uom_auth_name, param2_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_other_transformation_param3_uom FOREIGN KEY (param3_uom_auth_name, param3_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_other_transformation_param4_uom FOREIGN KEY (param4_uom_auth_name, param4_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_other_transformation_param5_uom FOREIGN KEY (param5_uom_auth_name, param5_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_other_transformation_param6_uom FOREIGN KEY (param6_uom_auth_name, param6_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_other_transformation_param7_uom FOREIGN KEY (param7_uom_auth_name, param7_uom_code) REFERENCES unit_of_measure(auth_name, code) ON DELETE CASCADE,
+    CONSTRAINT fk_other_transformation_interpolation_crs FOREIGN KEY (interpolation_crs_auth_name, interpolation_crs_code) REFERENCES geodetic_crs(auth_name, code) ON DELETE CASCADE,
     CONSTRAINT check_other_transformation_method CHECK (NOT (method_auth_name = 'PROJ' AND method_code NOT IN ('PROJString', 'WKT')))
 ) WITHOUT ROWID;
 
@@ -1265,9 +1265,9 @@ CREATE TABLE concatenated_operation(
     deprecated BOOLEAN NOT NULL CHECK (deprecated IN (0, 1)),
 
     CONSTRAINT pk_concatenated_operation PRIMARY KEY (auth_name, code)
-    --CONSTRAINT fk_concatenated_operation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code),
-    --CONSTRAINT fk_concatenated_operation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code),
-    --CONSTRAINT fk_concatenated_operation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code),
+    --CONSTRAINT fk_concatenated_operation_coordinate_operation FOREIGN KEY (auth_name, code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE,
+    --CONSTRAINT fk_concatenated_operation_source_crs FOREIGN KEY (source_crs_auth_name, source_crs_code) REFERENCES crs(auth_name, code) ON DELETE CASCADE,
+    --CONSTRAINT fk_concatenated_operation_target_crs FOREIGN KEY (target_crs_auth_name, target_crs_code) REFERENCES crs(auth_name, code) ON DELETE CASCADE,
 ) WITHOUT ROWID;
 
 CREATE TRIGGER concatenated_operation_insert_trigger
@@ -1297,7 +1297,7 @@ CREATE TABLE concatenated_operation_step(
     step_code INTEGER_OR_TEXT NOT NULL CHECK (length(step_code) >= 1),
 
     CONSTRAINT pk_concatenated_operation_step PRIMARY KEY (operation_auth_name, operation_code, step_number)
-    --CONSTRAINT fk_concatenated_operation_step_to_operation FOREIGN KEY (step_auth_name, step_code) REFERENCES coordinate_operation(auth_name, code)
+    --CONSTRAINT fk_concatenated_operation_step_to_operation FOREIGN KEY (step_auth_name, step_code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE TRIGGER concatenated_operation_step_insert_trigger
@@ -1318,7 +1318,7 @@ CREATE TABLE geoid_model(
     operation_auth_name TEXT NOT NULL,
     operation_code INTEGER_OR_TEXT NOT NULL,
     CONSTRAINT pk_geoid_model PRIMARY KEY (name, operation_auth_name, operation_code)
-    -- CONSTRAINT fk_geoid_model_operation FOREIGN KEY (operation_auth_name, operation_code) REFERENCES coordinate_operation(auth_name, code)
+    -- CONSTRAINT fk_geoid_model_operation FOREIGN KEY (operation_auth_name, operation_code) REFERENCES coordinate_operation(auth_name, code) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE TRIGGER geoid_model_insert_trigger
@@ -1331,7 +1331,7 @@ END;
 
 CREATE TABLE alias_name(
     table_name TEXT NOT NULL CHECK (table_name IN (
-        'unit_of_measure', 'celestial_body', 'ellipsoid', 
+        'unit_of_measure', 'celestial_body', 'ellipsoid',
         'extent', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
         'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
         'helmert_transformation', 'other_transformation', 'concatenated_operation')),
@@ -1355,14 +1355,14 @@ END;
 -- For EPSG, used to track superseded coordinate operations.
 CREATE TABLE supersession(
     superseded_table_name TEXT NOT NULL CHECK (superseded_table_name IN (
-        'unit_of_measure', 'celestial_body', 'ellipsoid', 
+        'unit_of_measure', 'celestial_body', 'ellipsoid',
         'extent', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
         'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
         'helmert_transformation', 'other_transformation', 'concatenated_operation')),
     superseded_auth_name TEXT NOT NULL,
     superseded_code INTEGER_OR_TEXT NOT NULL,
     replacement_table_name TEXT NOT NULL CHECK (replacement_table_name IN (
-        'unit_of_measure', 'celestial_body', 'ellipsoid', 
+        'unit_of_measure', 'celestial_body', 'ellipsoid',
         'extent', 'prime_meridian', 'geodetic_datum', 'vertical_datum', 'geodetic_crs',
         'projected_crs', 'vertical_crs', 'compound_crs', 'conversion', 'grid_transformation',
         'helmert_transformation', 'other_transformation', 'concatenated_operation')),
@@ -1526,4 +1526,3 @@ CREATE TABLE versioned_auth_name_mapping(
     CONSTRAINT unique_auth_name_version UNIQUE (auth_name, version),
     CONSTRAINT unique_auth_name_priority UNIQUE (auth_name, priority)
 );
-
