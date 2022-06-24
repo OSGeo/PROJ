@@ -2,6 +2,10 @@ name: Linux GCC 32bit
 
 on: [push, pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   linux_gcc_32bit:

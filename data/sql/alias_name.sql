@@ -7698,3 +7698,10 @@ INSERT INTO "alias_name" VALUES('projected_crs','EPSG','22249','NAD83(CSRS) 1997
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','22249','NAD83(CSRS98) / SCoPQ zone 9','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','22250','NAD83(CSRS) 1997 / MTM zone 10','EPSG');
 INSERT INTO "alias_name" VALUES('projected_crs','EPSG','22250','NAD83(CSRS98) / SCoPQ zone 10','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9988','802','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9988','ITRF2020 - XYZ','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9989','803','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9989','ITRF2020 - LatLonEHt','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9990','804','EPSG');
+INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','9990','ITRF2020 - LatLon','EPSG');
+INSERT INTO "alias_name" VALUES('vertical_crs','EPSG','5721','IGN78C','EPSG');

@@ -2,6 +2,10 @@ name: mingw_w64 build
 
 on: [push, pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   mingw_w64_build:
