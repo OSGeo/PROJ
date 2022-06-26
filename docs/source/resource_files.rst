@@ -99,6 +99,7 @@ related to 'WGS 84' ellipsoid:
             o.auth_name = object_auth_name AND
             o.code = object_code));
     VACUUM;
+    PRAGMA foreign_key_check;
 
 .. _proj-ini:
 
