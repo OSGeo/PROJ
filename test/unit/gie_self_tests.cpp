@@ -411,6 +411,14 @@ TEST(gie, info_functions) {
     ASSERT_NE(std::string(grid_info.filename), "");
     ASSERT_EQ(std::string(grid_info.gridname), "tests/test_hgrid.tif");
     ASSERT_EQ(std::string(grid_info.format), "gtiff");
+    EXPECT_EQ(grid_info.n_lon, 4);
+    EXPECT_EQ(grid_info.n_lat, 4);
+    EXPECT_NEAR(grid_info.cs_lon, 0.017453292519943295, 1e-15);
+    EXPECT_NEAR(grid_info.cs_lat, 0.017453292519943295, 1e-15);
+    EXPECT_NEAR(grid_info.lowerleft.lam, 0.069813170079773182, 1e-15);
+    EXPECT_NEAR(grid_info.lowerleft.phi, 0.90757121103705141, 1e-15);
+    EXPECT_NEAR(grid_info.upperright.lam, 0.12217304763960307, 1e-15);
+    EXPECT_NEAR(grid_info.upperright.phi, 0.95993108859688125, 1e-15);
 
     grid_info = proj_grid_info("nonexistinggrid");
     ASSERT_EQ(std::string(grid_info.filename), "");
