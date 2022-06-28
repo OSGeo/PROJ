@@ -96,6 +96,25 @@ $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_static_install_fr
 
 echo "Run PROJJSON tests only with shared configuration"
 
+export SCHEMA_FILENAME=/tmp/proj_shared_install_from_dist/share/proj/projjson.schema.json
+
+validate_json(){
+  if [ $(jsonschema --version) = "3.2.0" ]; then
+    # workaround for this version, which does not validate UTF-8
+    tr -cd '\11\12\15\40-\176' < $1 > tmp.ascii.json
+    jsonschema -i tmp.ascii.json ${SCHEMA_FILENAME}
+  else
+    jsonschema -i $1 ${SCHEMA_FILENAME}
+  fi
+  ret=$?
+  if [ $ret != 0 ]; then
+    return $ret
+  else
+    echo "Valid!"
+  fi
+  return 0
+}
+
 test_projjson(){
   printf "Testing PROJJSON output with $* ... "
   case "$1" in
@@ -104,18 +123,10 @@ test_projjson(){
     *)
       /tmp/proj_shared_install_from_dist/bin/projinfo $* -o PROJJSON -q > out.json ;;
   esac
-  # cat out.json
-  if [ $(jsonschema --version) = "3.2.0" ]; then
-    # workaround for this version, which does not validate UTF-8
-    tr -cd '\11\12\15\40-\176' < out.json > out.ascii
-    mv out.ascii out.json
-  fi
-  jsonschema -i out.json /tmp/proj_shared_install_from_dist/share/proj/projjson.schema.json
+  validate_json out.json
   ret=$?
   if [ $ret != 0 ]; then
     return $ret
-  else
-    echo "Valid!"
   fi
   /tmp/proj_shared_install_from_dist/bin/projinfo @out.json -o PROJJSON -q > out2.json
   diff -u out.json out2.json
@@ -128,6 +139,8 @@ test_projjson EPSG:32631
 test_projjson EPSG:4326+3855
 test_projjson "+proj=longlat +ellps=GRS80 +nadgrids=@foo +type=crs"
 test_projjson -s EPSG:3111 -t GDA2020
+
+validate_json $TRAVIS_BUILD_DIR/schemas/v0.5/examples/point_motion_operation.json
 
 cd ..
 

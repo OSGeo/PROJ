@@ -350,6 +350,10 @@ class PROJ_GCC_DLL GeodeticCRS : virtual public SingleCRS,
 
     PROJ_INTERNAL CRSNNPtr _shallowClone() const override;
 
+    PROJ_INTERNAL void _exportToJSONInternal(
+        io::JSONFormatter *formatter,
+        const char *objectName) const; // throw(FormattingException)
+
     PROJ_INTERNAL std::list<std::pair<CRSNNPtr, int>>
     _identify(const io::AuthorityFactoryPtr &authorityFactory) const override;
 

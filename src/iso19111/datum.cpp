@@ -1388,12 +1388,6 @@ void GeodeticReferenceFrame::_exportToJSON(
     if (dynamicGRF) {
         writer->AddObjKey("frame_reference_epoch");
         writer->Add(dynamicGRF->frameReferenceEpoch().value());
-
-        const auto &deformationModel = dynamicGRF->deformationModelName();
-        if (deformationModel.has_value()) {
-            writer->AddObjKey("deformation_model");
-            writer->Add(*deformationModel);
-        }
     }
 
     writer->AddObjKey("ellipsoid");
@@ -2109,12 +2103,6 @@ void VerticalReferenceFrame::_exportToJSON(
     if (dynamicGRF) {
         writer->AddObjKey("frame_reference_epoch");
         writer->Add(dynamicGRF->frameReferenceEpoch().value());
-
-        const auto &deformationModel = dynamicGRF->deformationModelName();
-        if (deformationModel.has_value()) {
-            writer->AddObjKey("deformation_model");
-            writer->Add(*deformationModel);
-        }
     }
 
     ObjectUsage::baseExportToJSON(formatter);
