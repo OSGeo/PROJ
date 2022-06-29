@@ -69,6 +69,7 @@ set(SRC_LIBPROJ_PROJECTIONS
   projections/labrd.cpp
   projections/lsat.cpp
   projections/misrsom.cpp
+  projections/genericsom.cpp
   projections/merc.cpp
   projections/mill.cpp
   projections/ocea.cpp
