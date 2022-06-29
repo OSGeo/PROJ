@@ -160,9 +160,41 @@ bool NullVerticalShiftGrid::valueAt(int, int, float &out) const {
 
 // ---------------------------------------------------------------------------
 
+class FloatLineCache {
+
+  private:
+    typedef uint64_t Key;
+    lru11::Cache<Key, std::vector<float>, lru11::NullLock> cache_;
+
+  public:
+    explicit FloatLineCache(size_t maxSize) : cache_(maxSize) {}
+    void insert(uint32_t subgridIdx, uint32_t lineNumber,
+                const std::vector<float> &data);
+    const std::vector<float> *get(uint32_t subgridIdx, uint32_t lineNumber);
+};
+
+// ---------------------------------------------------------------------------
+
+void FloatLineCache::insert(uint32_t subgridIdx, uint32_t lineNumber,
+                            const std::vector<float> &data) {
+    cache_.insert((static_cast<uint64_t>(subgridIdx) << 32) | lineNumber, data);
+}
+
+// ---------------------------------------------------------------------------
+
+const std::vector<float> *FloatLineCache::get(uint32_t subgridIdx,
+                                              uint32_t lineNumber) {
+    return cache_.getPtr((static_cast<uint64_t>(subgridIdx) << 32) |
+                         lineNumber);
+}
+
+// ---------------------------------------------------------------------------
+
 class GTXVerticalShiftGrid : public VerticalShiftGrid {
     PJ_CONTEXT *m_ctx;
     std::unique_ptr<File> m_fp;
+    std::unique_ptr<FloatLineCache> m_cache;
+    mutable std::vector<float> m_buffer;
 
     GTXVerticalShiftGrid(const GTXVerticalShiftGrid &) = delete;
     GTXVerticalShiftGrid &operator=(const GTXVerticalShiftGrid &) = delete;
@@ -170,9 +202,10 @@ class GTXVerticalShiftGrid : public VerticalShiftGrid {
   public:
     explicit GTXVerticalShiftGrid(PJ_CONTEXT *ctx, std::unique_ptr<File> &&fp,
                                   const std::string &nameIn, int widthIn,
-                                  int heightIn, const ExtentAndRes &extentIn)
+                                  int heightIn, const ExtentAndRes &extentIn,
+                                  std::unique_ptr<FloatLineCache> &&cache)
         : VerticalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
-          m_fp(std::move(fp)) {}
+          m_fp(std::move(fp)), m_cache(std::move(cache)) {}
 
     ~GTXVerticalShiftGrid() override;
 
@@ -230,7 +263,8 @@ GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx,
     memcpy(&rows, header + 32, 4);
     memcpy(&columns, header + 36, 4);
 
-    if (xorigin < -360 || xorigin > 360 || yorigin < -90 || yorigin > 90) {
+    if (columns <= 0 || rows <= 0 || xorigin < -360 || xorigin > 360 ||
+        yorigin < -90 || yorigin > 90) {
         pj_log(ctx, PJ_LOG_ERROR,
                _("gtx file header has invalid extents, corrupt?"));
         proj_context_errno_set(ctx,
@@ -259,8 +293,11 @@ GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx,
     extent.north = (yorigin + ystep * (rows - 1)) * DEG_TO_RAD;
     extent.computeInvRes();
 
+    // Cache up to 1 megapixel per GTX file
+    const int maxLinesInCache = 1024 * 1024 / columns;
+    auto cache = internal::make_unique<FloatLineCache>(maxLinesInCache);
     return new GTXVerticalShiftGrid(ctx, std::move(fp), name, columns, rows,
-                                    extent);
+                                    extent, std::move(cache));
 }
 
 // ---------------------------------------------------------------------------
@@ -268,15 +305,37 @@ GTXVerticalShiftGrid *GTXVerticalShiftGrid::open(PJ_CONTEXT *ctx,
 bool GTXVerticalShiftGrid::valueAt(int x, int y, float &out) const {
     assert(x >= 0 && y >= 0 && x < m_width && y < m_height);
 
-    m_fp->seek(40 + sizeof(float) * (y * m_width + x));
-    if (m_fp->read(&out, sizeof(out)) != sizeof(out)) {
-        proj_context_errno_set(m_ctx,
-                               PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
-        return false;
+    const std::vector<float> *pBuffer = m_cache->get(0, y);
+    if (pBuffer == nullptr) {
+        try {
+            m_buffer.resize(m_width);
+        } catch (const std::exception &e) {
+            pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
+            return false;
+        }
+
+        const size_t nLineSizeInBytes = sizeof(float) * m_width;
+        m_fp->seek(40 + nLineSizeInBytes * static_cast<unsigned long long>(y));
+        if (m_fp->read(&m_buffer[0], nLineSizeInBytes) != nLineSizeInBytes) {
+            proj_context_errno_set(
+                m_ctx, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+            return false;
+        }
+
+        if (IS_LSB) {
+            swap_words(&m_buffer[0], sizeof(float), m_width);
+        }
+
+        pBuffer = &m_buffer;
+        try {
+            m_cache->insert(0, y, m_buffer);
+        } catch (const std::exception &e) {
+            // Should normally not happen
+            pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
+        }
     }
-    if (IS_LSB) {
-        swap_words(&out, sizeof(float), 1);
-    }
+
+    out = (*pBuffer)[x];
     return true;
 }
 
@@ -1780,6 +1839,7 @@ bool CTable2Grid::valueAt(int x, int y, bool compensateNTConvention,
 
 class NTv2GridSet : public HorizontalShiftGridSet {
     std::unique_ptr<File> m_fp;
+    std::unique_ptr<FloatLineCache> m_cache;
 
     NTv2GridSet(const NTv2GridSet &) = delete;
     NTv2GridSet &operator=(const NTv2GridSet &) = delete;
@@ -1804,23 +1864,29 @@ class NTv2GridSet : public HorizontalShiftGridSet {
 class NTv2Grid : public HorizontalShiftGrid {
     friend class NTv2GridSet;
 
-    PJ_CONTEXT *m_ctx; // owned by the parent NTv2GridSet
-    File *m_fp;        // owned by the parent NTv2GridSet
+    PJ_CONTEXT *m_ctx;                 // owned by the parent NTv2GridSet
+    File *m_fp;                        // owned by the parent NTv2GridSet
+    FloatLineCache *m_cache = nullptr; // owned by the parent NTv2GridSet
+    uint32_t m_gridIdx;
     unsigned long long m_offset;
     bool m_mustSwap;
+    mutable std::vector<float> m_buffer;
 
     NTv2Grid(const NTv2Grid &) = delete;
     NTv2Grid &operator=(const NTv2Grid &) = delete;
 
   public:
     NTv2Grid(const std::string &nameIn, PJ_CONTEXT *ctx, File *fp,
-             unsigned long long offsetIn, bool mustSwapIn, int widthIn,
-             int heightIn, const ExtentAndRes &extentIn)
+             uint32_t gridIdx, unsigned long long offsetIn, bool mustSwapIn,
+             int widthIn, int heightIn, const ExtentAndRes &extentIn)
         : HorizontalShiftGrid(nameIn, widthIn, heightIn, extentIn), m_ctx(ctx),
-          m_fp(fp), m_offset(offsetIn), m_mustSwap(mustSwapIn) {}
+          m_fp(fp), m_gridIdx(gridIdx), m_offset(offsetIn),
+          m_mustSwap(mustSwapIn) {}
 
     bool valueAt(int, int, bool, float &lonShift,
                  float &latShift) const override;
+
+    void setCache(FloatLineCache *cache) { m_cache = cache; }
 
     void reassign_context(PJ_CONTEXT *ctx) override {
         m_ctx = ctx;
@@ -1836,25 +1902,55 @@ bool NTv2Grid::valueAt(int x, int y, bool compensateNTConvention,
                        float &lonShift, float &latShift) const {
     assert(x >= 0 && y >= 0 && x < m_width && y < m_height);
 
-    float two_float[2];
-    // NTv2 is organized from east to west !
-    // there are 4 components: lat shift, lon shift, lat error, lon error
-    m_fp->seek(m_offset + 4 * sizeof(float) *
-                              (static_cast<unsigned long long>(y) * m_width +
-                               m_width - 1 - x));
-    if (m_fp->read(&two_float[0], sizeof(two_float)) != sizeof(two_float)) {
-        proj_context_errno_set(m_ctx,
-                               PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
-        return false;
+    const std::vector<float> *pBuffer = m_cache->get(m_gridIdx, y);
+    if (pBuffer == nullptr) {
+        try {
+            m_buffer.resize(4 * m_width);
+        } catch (const std::exception &e) {
+            pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
+            return false;
+        }
+
+        const size_t nLineSizeInBytes = 4 * sizeof(float) * m_width;
+        // there are 4 components: lat shift, lon shift, lat error, lon error
+        m_fp->seek(m_offset +
+                   nLineSizeInBytes * static_cast<unsigned long long>(y));
+        if (m_fp->read(&m_buffer[0], nLineSizeInBytes) != nLineSizeInBytes) {
+            proj_context_errno_set(
+                m_ctx, PROJ_ERR_INVALID_OP_FILE_NOT_FOUND_OR_INVALID);
+            return false;
+        }
+        // Remove lat and lon error
+        for (int i = 1; i < m_width; ++i) {
+            m_buffer[2 * i] = m_buffer[4 * i];
+            m_buffer[2 * i + 1] = m_buffer[4 * i + 1];
+        }
+        m_buffer.resize(2 * m_width);
+        if (m_mustSwap) {
+            swap_words(&m_buffer[0], sizeof(float), 2 * m_width);
+        }
+        // NTv2 is organized from east to west !
+        for (int i = 0; i < m_width / 2; ++i) {
+            std::swap(m_buffer[2 * i], m_buffer[2 * (m_width - 1 - i)]);
+            std::swap(m_buffer[2 * i + 1], m_buffer[2 * (m_width - 1 - i) + 1]);
+        }
+
+        pBuffer = &m_buffer;
+        try {
+            m_cache->insert(m_gridIdx, y, m_buffer);
+        } catch (const std::exception &e) {
+            // Should normally not happen
+            pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
+        }
     }
-    if (m_mustSwap) {
-        swap_words(&two_float[0], sizeof(float), 2);
-    }
+
     /* convert seconds to radians */
-    latShift = static_cast<float>(two_float[0] * ((M_PI / 180.0) / 3600.0));
+    latShift =
+        static_cast<float>((*pBuffer)[2 * x] * ((M_PI / 180.0) / 3600.0));
     // west longitude positive convention !
-    lonShift = (compensateNTConvention ? -1 : 1) *
-               static_cast<float>(two_float[1] * ((M_PI / 180.0) / 3600.0));
+    lonShift =
+        (compensateNTConvention ? -1 : 1) *
+        static_cast<float>((*pBuffer)[2 * x + 1] * ((M_PI / 180.0) / 3600.0));
     return true;
 }
 
@@ -1914,6 +2010,7 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
     /* ==================================================================== */
     /*      Step through the subfiles, creating a grid for each.            */
     /* ==================================================================== */
+    int largestLine = 1;
     for (unsigned subfile = 0; subfile < num_subfiles; subfile++) {
         // Read header
         if (fpRaw->read(header, sizeof(header)) != sizeof(header)) {
@@ -1975,6 +2072,8 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
             fabs((extent.east - extent.west) * extent.invResX + 0.5) + 1);
         const int rows = static_cast<int>(
             fabs((extent.north - extent.south) * extent.invResY + 0.5) + 1);
+        if (columns > largestLine)
+            largestLine = columns;
 
         pj_log(ctx, PJ_LOG_TRACE,
                "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)", gridName.c_str(),
@@ -1995,8 +2094,8 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
 
         const auto offset = fpRaw->tell();
         auto grid = std::unique_ptr<NTv2Grid>(
-            new NTv2Grid(filename + ", " + gridName, ctx, fpRaw, offset,
-                         must_swap, columns, rows, extent));
+            new NTv2Grid(filename + ", " + gridName, ctx, fpRaw, subfile,
+                         offset, must_swap, columns, rows, extent));
         std::string parentName;
         parentName.assign(header + 24, 8);
         auto iter = mapGrids.find(parentName);
@@ -2012,6 +2111,14 @@ std::unique_ptr<NTv2GridSet> NTv2GridSet::open(PJ_CONTEXT *ctx,
         fpRaw->seek(static_cast<unsigned long long>(gs_count) * 4 * 4,
                     SEEK_CUR);
     }
+
+    // Cache up to 1 megapixel per NTv2 file
+    const int maxLinesInCache = 1024 * 1024 / largestLine;
+    set->m_cache = internal::make_unique<FloatLineCache>(maxLinesInCache);
+    for (const auto &kv : mapGrids) {
+        kv.second->setCache(set->m_cache.get());
+    }
+
     return set;
 }
 
