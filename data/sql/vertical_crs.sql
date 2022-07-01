@@ -392,7 +392,7 @@ INSERT INTO "vertical_crs" VALUES('EPSG','8911','DACR52 height',NULL,'EPSG','649
 INSERT INTO "usage" VALUES('EPSG','6027','vertical_crs','EPSG','8911','EPSG','3232','EPSG','1178');
 INSERT INTO "vertical_crs" VALUES('EPSG','9130','IGN 2008 LD height',NULL,'EPSG','6499','EPSG','1250',0);
 INSERT INTO "usage" VALUES('EPSG','6138','vertical_crs','EPSG','9130','EPSG','2893','EPSG','1178');
-INSERT INTO "vertical_crs" VALUES('EPSG','9245','CGVD2013(CGG2013a) height',NULL,'EPSG','6499','EPSG','1256',0);
+INSERT INTO "vertical_crs" VALUES('EPSG','9245','CGVD2013a(2010) height',NULL,'EPSG','6499','EPSG','1256',0);
 INSERT INTO "usage" VALUES('EPSG','13877','vertical_crs','EPSG','9245','EPSG','1061','EPSG','1180');
 INSERT INTO "vertical_crs" VALUES('EPSG','9255','SRVN16 height',NULL,'EPSG','6499','EPSG','1260',0);
 INSERT INTO "usage" VALUES('EPSG','13908','vertical_crs','EPSG','9255','EPSG','4573','EPSG','1178');
@@ -468,6 +468,10 @@ INSERT INTO "vertical_crs" VALUES('EPSG','9927','GNTRANS2016 height',NULL,'EPSG'
 INSERT INTO "usage" VALUES('EPSG','17286','vertical_crs','EPSG','9927','EPSG','3339','EPSG','1141');
 INSERT INTO "vertical_crs" VALUES('EPSG','20000','SVD2006 height',NULL,'EPSG','6499','EPSG','1323',0);
 INSERT INTO "usage" VALUES('EPSG','17962','vertical_crs','EPSG','20000','EPSG','4058','EPSG','1180');
+INSERT INTO "vertical_crs" VALUES('EPSG','20034','CGVD2013a(2002) height',NULL,'EPSG','6499','EPSG','1325',0);
+INSERT INTO "usage" VALUES('EPSG','18311','vertical_crs','EPSG','20034','EPSG','1061','EPSG','1180');
+INSERT INTO "vertical_crs" VALUES('EPSG','20035','CGVD2013a(1997) height',NULL,'EPSG','6499','EPSG','1326',0);
+INSERT INTO "usage" VALUES('EPSG','18313','vertical_crs','EPSG','20035','EPSG','1061','EPSG','1180');
 INSERT INTO "vertical_crs" VALUES('EPSG','5336','Black Sea depth',NULL,'EPSG','6498','EPSG','5134',0);
 INSERT INTO "usage" VALUES('EPSG','3936','vertical_crs','EPSG','5336','EPSG','1102','EPSG','1198');
 INSERT INTO "vertical_crs" VALUES('EPSG','5612','Baltic 1977 depth',NULL,'EPSG','6498','EPSG','5105',0);

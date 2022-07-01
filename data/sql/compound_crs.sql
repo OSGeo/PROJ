@@ -210,7 +210,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','6190','BD72 / Belgian Lambert 72 + Ost
 INSERT INTO "usage" VALUES('EPSG','4507','compound_crs','EPSG','6190','EPSG','1347','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','6349','NAD83(2011) + NAVD88 height',NULL,'EPSG','6318','EPSG','5703',0);
 INSERT INTO "usage" VALUES('EPSG','4583','compound_crs','EPSG','6349','EPSG','3664','EPSG','1142');
-INSERT INTO "compound_crs" VALUES('EPSG','6649','NAD83(CSRS) + CGVD2013 height',NULL,'EPSG','4617','EPSG','6647',0);
+INSERT INTO "compound_crs" VALUES('EPSG','6649','NAD83(CSRS) + CGVD2013(CGG2013) height',NULL,'EPSG','4617','EPSG','6647',0);
 INSERT INTO "usage" VALUES('EPSG','4868','compound_crs','EPSG','6649','EPSG','1061','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','6650','NAD83(CSRS) / UTM zone 7N + CGVD2013 height',NULL,'EPSG','3154','EPSG','6647',0);
 INSERT INTO "usage" VALUES('EPSG','4869','compound_crs','EPSG','6650','EPSG','3409','EPSG','1142');
@@ -688,7 +688,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','9542','RRAF 1991 + IGN 2008 LD height'
 INSERT INTO "usage" VALUES('EPSG','14501','compound_crs','EPSG','9542','EPSG','2893','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9543','ITRF2005 + SA LLD height',NULL,'EPSG','8998','EPSG','9279',0);
 INSERT INTO "usage" VALUES('EPSG','14522','compound_crs','EPSG','9543','EPSG','3309','EPSG','1026');
-INSERT INTO "compound_crs" VALUES('EPSG','9544','NAD83(CSRS)v6 + CGVD2013(CGG2013a) height',NULL,'EPSG','8252','EPSG','9245',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9544','NAD83(CSRS)v6 + CGVD2013a(2010) height',NULL,'EPSG','8252','EPSG','9245',0);
 INSERT INTO "usage" VALUES('EPSG','14525','compound_crs','EPSG','9544','EPSG','1061','EPSG','1026');
 INSERT INTO "compound_crs" VALUES('EPSG','9656','ETRF2000-PL + Baltic 1986 height',NULL,'EPSG','9702','EPSG','9650',0);
 INSERT INTO "usage" VALUES('EPSG','15108','compound_crs','EPSG','9656','EPSG','3293','EPSG','1270');
@@ -702,7 +702,7 @@ INSERT INTO "compound_crs" VALUES('EPSG','9711','NAD83(CSRS) / UTM zone 23N + CG
 INSERT INTO "usage" VALUES('EPSG','15205','compound_crs','EPSG','9711','EPSG','2153','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','9714','NAD83(CSRS) / UTM zone 24N + CGVD2013 height',NULL,'EPSG','9713','EPSG','6647',0);
 INSERT INTO "usage" VALUES('EPSG','15197','compound_crs','EPSG','9714','EPSG','4617','EPSG','1142');
-INSERT INTO "compound_crs" VALUES('EPSG','9715','NAD83(CSRS) / UTM zone 15N + CGVD2013a height',NULL,'EPSG','3159','EPSG','9245',0);
+INSERT INTO "compound_crs" VALUES('EPSG','9715','NAD83(CSRS) / UTM zone 15N + CGVD2013a(2010) height',NULL,'EPSG','3159','EPSG','9245',0);
 INSERT INTO "usage" VALUES('EPSG','15200','compound_crs','EPSG','9715','EPSG','3414','EPSG','1142');
 INSERT INTO "compound_crs" VALUES('EPSG','9723','ETRS89 + Genoa 1942 height',NULL,'EPSG','4258','EPSG','5214',0);
 INSERT INTO "usage" VALUES('EPSG','15255','compound_crs','EPSG','9723','EPSG','3736','EPSG','1270');
@@ -772,3 +772,9 @@ INSERT INTO "compound_crs" VALUES('EPSG','9978','FNL22 Grid + ODN height',NULL,'
 INSERT INTO "usage" VALUES('EPSG','17459','compound_crs','EPSG','9978','EPSG','4664','EPSG','1141');
 INSERT INTO "compound_crs" VALUES('EPSG','20001','ETRS89 + SVD2006 height',NULL,'EPSG','4258','EPSG','20000',0);
 INSERT INTO "usage" VALUES('EPSG','17956','compound_crs','EPSG','20001','EPSG','4058','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','20003','MWC18 Grid + ODN height',NULL,'EPSG','20002','EPSG','5701',0);
+INSERT INTO "usage" VALUES('EPSG','18337','compound_crs','EPSG','20003','EPSG','4666','EPSG','1141');
+INSERT INTO "compound_crs" VALUES('EPSG','20037','NAD83(CSRS)v4 + CGVD2013a(2002) height',NULL,'EPSG','8246','EPSG','20034',0);
+INSERT INTO "usage" VALUES('EPSG','18294','compound_crs','EPSG','20037','EPSG','1061','EPSG','1026');
+INSERT INTO "compound_crs" VALUES('EPSG','20038','NAD83(CSRS)v3 + CGVD2013a(1997) height',NULL,'EPSG','8240','EPSG','20035',0);
+INSERT INTO "usage" VALUES('EPSG','18314','compound_crs','EPSG','20038','EPSG','1061','EPSG','1026');

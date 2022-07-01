@@ -2153,6 +2153,16 @@ createNTv1(const util::PropertyMap &properties,
 
 // ---------------------------------------------------------------------------
 
+static bool isRegularVerticalGridMethod(int methodEPSGCode) {
+    return methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
+           methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_BEV_AT ||
+           methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX ||
+           methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_PL_TXT ||
+           methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NRCAN_BYN;
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Return an equivalent transformation to the current one, but using
  * PROJ alternative grid names.
  */
@@ -2356,10 +2366,7 @@ TransformationNNPtr Transformation::substitutePROJAlternativeGridNames(
     }
 
     if (methodEPSGCode == EPSG_CODE_METHOD_VERTCON ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_BEV_AT ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_PL_TXT) {
+        isRegularVerticalGridMethod(methodEPSGCode)) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
@@ -3306,10 +3313,7 @@ void Transformation::_exportToPROJString(
         }
     }
 
-    if (methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_NZLVD ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_BEV_AT ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_GTX ||
-        methodEPSGCode == EPSG_CODE_METHOD_VERTICALGRID_PL_TXT) {
+    if (isRegularVerticalGridMethod(methodEPSGCode)) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE,
                            EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE);
