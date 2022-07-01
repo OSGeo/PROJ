@@ -83,6 +83,24 @@ A proj installation includes a SQLite database of transformation information
 that must be accessible for the library to work properly.  The library will
 print an error if the database can't be found.
 
+The database may be customized/reduced by deleting entries not relevant for a
+certain use-case. An example for a simple SQL script removing all entries not
+related to 'WGS 84' ellipsoid:
+
+::
+
+    PRAGMA FOREIGN_KEYS=1;
+    DELETE FROM ellipsoid WHERE name != 'WGS 84';
+    -- clean up table usage
+    DELETE FROM usage WHERE (object_table_name, object_auth_name, object_code) IN (
+      SELECT object_table_name, object_auth_name, object_code FROM usage WHERE NOT EXISTS (
+        SELECT 1 FROM object_view o WHERE
+            o.table_name = object_table_name AND
+            o.auth_name = object_auth_name AND
+            o.code = object_code));
+    VACUUM;
+    PRAGMA foreign_key_check;
+
 .. _proj-ini:
 
 :file:`proj.ini`

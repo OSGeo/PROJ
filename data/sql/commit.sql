@@ -296,6 +296,15 @@ FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'Value of PROJ.VERSION entry of metadata tables not substituted by actual value')
         WHERE (SELECT 1 FROM metadata WHERE key = 'PROJ.VERSION' AND value LIKE '$%');
 
+    -- Only available in sqlite >= 3.16. May be activated as soon as support for ubuntu 16 is dropped
+    -- check all foreign key contraints have an 'ON DELETE CASCADE'
+    -- SELECT RAISE(ABORT, 'FK constraint with missing "ON DELETE CASCADE"')
+    --     WHERE EXISTS (SELECT 1 FROM
+    --             pragma_foreign_key_list(name),
+    --             (SELECT name from sqlite_master WHERE type='table')
+    --             WHERE upper(on_delete) != 'CASCADE');
+
+
 END;
 INSERT INTO dummy DEFAULT VALUES;
 DROP TRIGGER final_checks;
