@@ -4974,6 +4974,25 @@ TEST(
     auto dst = nn_dynamic_pointer_cast<CRS>(dstObj);
     ASSERT_TRUE(dst != nullptr);
 
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(),
+                  "Ballpark geographic offset from "
+                  "NAD83(CSRS) to NAD83(CSRS)v6 + "
+                  "Inverse of NAD83(CSRS)v6 to CGVD28 height (1) + "
+                  "NAD83(CSRS)v6 to CGVD2013(CGG2013) height (1) + "
+                  "Ballpark geographic offset from "
+                  "NAD83(CSRS)v6 to NAD83(CSRS)");
+    }
+#if 0
+    // Note: below situation is no longer triggered since EPSG v10.066 update
+    // Not obvious to find an equivalent one.
+
     // That transformation involves doing CGVD28 height to CGVD2013(CGG2013)
     // height by doing:
     // - CGVD28 height to NAD83(CSRS): EPSG registered operation
@@ -5010,6 +5029,7 @@ TEST(
             "Ballpark geographic offset from NAD83(CSRS)v6 to NAD83(CSRS) + "
             "NAD83(CSRS) to CGVD28 height (1)");
     }
+#endif
 }
 
 // ---------------------------------------------------------------------------

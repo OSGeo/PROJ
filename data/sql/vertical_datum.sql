@@ -93,7 +93,7 @@ INSERT INTO "usage" VALUES('EPSG','13177','vertical_datum','EPSG','1125','EPSG',
 INSERT INTO "vertical_datum" VALUES('EPSG','1126','Guam Vertical Datum of 2004',NULL,'2009-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13178','vertical_datum','EPSG','1126','EPSG','3255','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1127','Canadian Geodetic Vertical Datum of 2013 (CGG2013)',NULL,'2013-11-28',NULL,NULL,NULL,0);
-INSERT INTO "usage" VALUES('EPSG','13179','vertical_datum','EPSG','1127','EPSG','1061','EPSG','1180');
+INSERT INTO "usage" VALUES('EPSG','18090','vertical_datum','EPSG','1127','EPSG','1061','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1129','Japanese Standard Levelling Datum 1972',NULL,'1972-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13181','vertical_datum','EPSG','1129','EPSG','4168','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1130','Japanese Geodetic Datum 2000 (vertical)',NULL,'2002-04-01',NULL,NULL,NULL,0);
@@ -160,7 +160,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1250','IGN 2008 LD',NULL,'2008-01-01
 INSERT INTO "usage" VALUES('EPSG','13302','vertical_datum','EPSG','1250','EPSG','2893','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1255','Nivellement General de Nouvelle Caledonie 2008',NULL,'2008-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13979','vertical_datum','EPSG','1255','EPSG','3430','EPSG','1026');
-INSERT INTO "vertical_datum" VALUES('EPSG','1256','Canadian Geodetic Vertical Datum of 2013 (CGG2013a)',NULL,'2015-12-05',NULL,NULL,NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1256','Canadian Geodetic Vertical Datum of 2013 (CGG2013a) epoch 2010',NULL,'2015-12-05',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13972','vertical_datum','EPSG','1256','EPSG','1061','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1260','Sistema de Referencia Vertical Nacional 2016',NULL,'2016-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13893','vertical_datum','EPSG','1260','EPSG','4573','EPSG','1178');
@@ -234,6 +234,10 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1318','GNTRANS2016',NULL,'2016-01-01
 INSERT INTO "usage" VALUES('EPSG','17278','vertical_datum','EPSG','1318','EPSG','3339','EPSG','1141');
 INSERT INTO "vertical_datum" VALUES('EPSG','1323','Svalbard vertical datum 2006',NULL,'2006-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','17963','vertical_datum','EPSG','1323','EPSG','4058','EPSG','1180');
+INSERT INTO "vertical_datum" VALUES('EPSG','1325','Canadian Geodetic Vertical Datum of 2013 (CGG2013a) epoch 2002',NULL,'2019-02-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','18301','vertical_datum','EPSG','1325','EPSG','1061','EPSG','1180');
+INSERT INTO "vertical_datum" VALUES('EPSG','1326','Canadian Geodetic Vertical Datum of 2013 (CGG2013a) epoch 1997',NULL,'2019-02-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','18302','vertical_datum','EPSG','1326','EPSG','1061','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,0);

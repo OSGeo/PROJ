@@ -3641,3 +3641,4 @@ INSERT INTO "extent" VALUES('EPSG','4662','Iceland - onshore','Iceland - onshore
 INSERT INTO "extent" VALUES('EPSG','4663','UK - Leeds to Hull','United Kingdom (UK) - on or related to the rail route from the Morley tunnel through Leeds to Hull.',53.6,53.9,-1.7,0.27,0);
 INSERT INTO "extent" VALUES('EPSG','4664','UK - Inverness to Thurso','United Kingdom (UK) - on or related to the rail route from Inverness to Thurso and Wick.',57.4,58.64,-4.6,-3.0,0);
 INSERT INTO "extent" VALUES('EPSG','4665','UK - Motherwell to Inverness','United Kingdom (UK) - on or related to the Scottish central mainline rail route from Motherwell through Perth and Pitlochry to Inverness.',55.7,57.55,-4.4,-3.3,0);
+INSERT INTO "extent" VALUES('EPSG','4666','UK - Manchester, Wigan and Chester','United Kingdom (UK) - on or related to the rail route from Manchester via Wigan and Liverpool to Chester.',53.09,53.65,-3.15,-2.1,0);
