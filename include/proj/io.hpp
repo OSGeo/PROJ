@@ -476,6 +476,8 @@ class PROJ_GCC_DLL PROJStringFormatter {
 
     PROJ_INTERNAL Convention convention() const;
 
+    PROJ_INTERNAL size_t getStepCount() const;
+
     //! @endcond
 
   protected:
