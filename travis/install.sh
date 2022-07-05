@@ -80,11 +80,15 @@ echo "Build static ${CMAKE_BUILD_TYPE} configuration from generated tarball"
 cd ..
 mkdir static_build
 cd static_build
+# Also test setting CMAKE_INSTALL_INCLUDEDIR/CMAKE_INSTALL_LIBDIR/CMAKE_INSTALL_BINDIR to absolute directories
 cmake \
   -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D USE_CCACHE=${USE_CCACHE} \
   -D BUILD_SHARED_LIBS=OFF \
   -D CMAKE_INSTALL_PREFIX=/tmp/proj_static_install_from_dist \
+  -D CMAKE_INSTALL_INCLUDEDIR=/tmp/proj_static_install_from_dist/include \
+  -D CMAKE_INSTALL_LIBDIR=/tmp/proj_static_install_from_dist/lib \
+  -D CMAKE_INSTALL_BINDIR=/tmp/proj_static_install_from_dist/bin \
   ..
 make
 
@@ -93,6 +97,11 @@ make install
 # find /tmp/proj_static_install_from_dist
 $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_static_install_from_dist static
 $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_static_install_from_dist static
+
+# Re-run by unsetting CMAKE_INSTALL_INCLUDEDIR/CMAKE_INSTALL_LIBDIR/CMAKE_INSTALL_BINDIR
+# so that later test which involve renaming/moving the installation prefix work.
+cmake -UCMAKE_INSTALL_INCLUDEDIR -UCMAKE_INSTALL_LIBDIR -UCMAKE_INSTALL_BINDIR ..
+make install
 
 echo "Run PROJJSON tests only with shared configuration"
 
