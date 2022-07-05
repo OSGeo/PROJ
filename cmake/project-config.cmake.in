@@ -12,9 +12,11 @@ if(@PROJECT_VARIANT_NAME@ STREQUAL "PROJ4")
 endif()
 
 include(CMakeFindDependencyMacro)
-if("@CURL_ENABLED@" STREQUAL "TRUE")
-  # Chainload CURL usage requirements
-  find_dependency(CURL)
+if(NOT "@BUILD_SHARED_LIBS@")
+    if("@CURL_ENABLED@" STREQUAL "TRUE")
+      # Chainload CURL usage requirements
+      find_dependency(CURL)
+    endif()
 endif()
 
 # Tell the user project where to find our headers and libraries
