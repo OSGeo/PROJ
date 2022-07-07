@@ -166,13 +166,14 @@ function.  Like other :doc:`resource files<../resource_files>`,
 it is located using a set of search
 paths.  In most cases, the following paths are checked in order:
 
-    - A path provided by the environment variable :envvar:`PROJ_LIB`.
+    - A path provided by the environment variable :envvar:`PROJ_DATA`
+      (called ``PROJ_LIB`` before PROJ 9.1)
     - A path built into PROJ as its resource installation directory
       (typically ../share/proj relative to the PROJ library).
     - The current directory.
 
 Note that if you're using conda, activating an environment sets
-:envvar:`PROJ_LIB` to a resource directory located in that environment.
+:envvar:`PROJ_DATA` to a resource directory located in that environment.
 
 
 What happened to PROJ.4?

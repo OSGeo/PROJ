@@ -51,11 +51,11 @@ int LLVMFuzzerInitialize(int* /*argc*/, char*** argv)
     if( lastslash )
     {
         *lastslash = '\0';
-        setenv("PROJ_LIB", path, 1);
+        setenv("PROJ_DATA", path, 1);
     }
     else
     {
-        setenv("PROJ_LIB", ".", 1);
+        setenv("PROJ_DATA", ".", 1);
     }
     free(path);
     return 0;

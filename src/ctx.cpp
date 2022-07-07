@@ -153,7 +153,7 @@ pj_ctx::pj_ctx(const pj_ctx& other) :
     cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),
     use_proj4_init_rules(other.use_proj4_init_rules),
     epsg_file_exists(other.epsg_file_exists),
-    env_var_proj_lib(other.env_var_proj_lib),
+    env_var_proj_data(other.env_var_proj_data),
     file_finder(other.file_finder),
     file_finder_user_data(other.file_finder_user_data),
     custom_sqlite3_vfs_name(other.custom_sqlite3_vfs_name),

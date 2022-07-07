@@ -46,7 +46,7 @@ jobs:
         working-directory: ./docs/plot
         run: |
             export PATH=/opt/proj/bin:$PATH
-            export PROJ_LIB=/opt/proj/share/proj
+            export PROJ_DATA=/opt/proj/share/proj
             ./plot.py plotdefs.json images/
 
       - uses: actions/upload-artifact@v2

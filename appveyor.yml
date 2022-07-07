@@ -63,7 +63,7 @@ build_script:
 
 test_script:
   - echo test_script
-  - set PROJ_LIB=%PROJ_DIR%\share\proj
+  - set PROJ_DATA=%PROJ_DIR%\share\proj
   - cd %PROJ_BUILD%
   - ctest --output-on-failure -C Release
   - set BUILD_MODE=shared

@@ -225,9 +225,14 @@ endif()
 
 ################################################################################
 
-option(PROJ_LIB_ENV_VAR_TRIED_LAST "Whether the PROJ_LIB environment variable should be tried after the hardcoded location" OFF)
-if(PROJ_LIB_ENV_VAR_TRIED_LAST)
-    add_definitions(-DPROJ_LIB_ENV_VAR_TRIED_LAST)
+if(DEFINED PROJ_LIB_ENV_VAR_TRIED_LAST)
+  set(PROJ_DATA_ENV_VAR_TRIED_LAST ${PROJ_LIB_ENV_VAR_TRIED_LAST})
+  message(WARNING "PROJ_LIB_ENV_VAR_TRIED_LAST option has been renamed to PROJ_DATA_ENV_VAR_TRIED_LAST. PROJ_LIB_ENV_VAR_TRIED_LAST is still working for now, but may be completely replaced by PROJ_DATA_ENV_VAR_TRIED_LAST in a future release")
+else()
+  option(PROJ_DATA_ENV_VAR_TRIED_LAST "Whether the PROJ_DATA environment variable should be tried after the hardcoded location" OFF)
+endif()
+if(PROJ_DATA_ENV_VAR_TRIED_LAST)
+    add_definitions(-DPROJ_DATA_ENV_VAR_TRIED_LAST)
 endif()
 
 ################################################################################
@@ -287,7 +292,7 @@ link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 ################################################################################
 include(ProjInstallPath)
 include(GNUInstallDirs)
-set(PROJ_LIB_PATH "${CMAKE_INSTALL_FULL_DATADIR}/proj")
+set(PROJ_DATA_PATH "${CMAKE_INSTALL_FULL_DATADIR}/proj")
 
 ################################################################################
 # Tests
