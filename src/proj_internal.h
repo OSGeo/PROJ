@@ -928,6 +928,8 @@ void pj_stderr_logger( void *, int, const char * );
 int pj_find_file(PJ_CONTEXT * ctx, const char *short_filename,
                  char* out_full_filename, size_t out_full_filename_size);
 
+// To remove when PROJ_LIB definitely goes away
+void PROJ_DLL pj_stderr_proj_lib_deprecation_warning();
 
 
 #endif /* ndef PROJ_INTERNAL_H */

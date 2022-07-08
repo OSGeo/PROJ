@@ -1020,7 +1020,7 @@ std::string FileManager::getProjDataEnvVar(PJ_CONTEXT *ctx) {
         if( envvar )
         {
             pj_log(ctx, PJ_LOG_DEBUG,
-                   "PROJ_LIB environment variable is deprecated, and may be "
+                   "PROJ_LIB environment variable is deprecated, and will be "
                    "removed in a future release. You are encouraged to set "
                    "PROJ_DATA instead");
         }
@@ -1989,5 +1989,18 @@ void proj_context_set_ca_bundle_path(PJ_CONTEXT *ctx, const char *path) {
     try {
         ctx->set_ca_bundle_path(path != nullptr ? path : "");
     } catch (const std::exception &) {
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void pj_stderr_proj_lib_deprecation_warning()
+{
+    if( getenv("PROJ_LIB") != nullptr && getenv("PROJ_DATA") == nullptr )
+    {
+        fprintf(stderr,
+                "DeprecationWarning: PROJ_LIB environment variable is "
+                "deprecated, and will be removed in a future release. "
+                "You are encouraged to set PROJ_DATA instead.\n");
     }
 }

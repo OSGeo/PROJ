@@ -110,6 +110,9 @@ static std::vector<double> get_bbox(const json &j) {
 // ---------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
+
+    pj_stderr_proj_lib_deprecation_warning();
+
     auto ctx = pj_get_default_ctx();
 
     std::string targetDir;

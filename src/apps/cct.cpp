@@ -223,6 +223,8 @@ int main(int argc, char **argv) {
 
     fout = stdout;
 
+    pj_stderr_proj_lib_deprecation_warning();
+
     /* coverity[tainted_data] */
     o = opt_parse (argc, argv, "hvI", "cdozts", longflags, longkeys);
     if (nullptr==o)
