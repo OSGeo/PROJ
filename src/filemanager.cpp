@@ -1014,11 +1014,10 @@ std::string FileManager::getProjDataEnvVar(PJ_CONTEXT *ctx) {
     (void)ctx;
     std::string str;
     const char *envvar = getenv("PROJ_DATA");
-    if (!envvar)
-    {
-        envvar = getenv("PROJ_LIB"); // Legacy name. We should probably keep it for a long time for nostalgic people :-)
-        if( envvar )
-        {
+    if (!envvar) {
+        envvar = getenv("PROJ_LIB"); // Legacy name. We should probably keep it
+                                     // for a long time for nostalgic people :-)
+        if (envvar) {
             pj_log(ctx, PJ_LOG_DEBUG,
                    "PROJ_LIB environment variable is deprecated, and will be "
                    "removed in a future release. You are encouraged to set "
@@ -1533,7 +1532,8 @@ static void *pj_open_lib_internal(
             sysname = fname.c_str();
         }
 
-        /* if the environment PROJ_DATA defined, and tried as last possibility */
+        /* if the environment PROJ_DATA defined, and tried as last possibility
+         */
         else if (gbPROJ_DATA_ENV_VAR_TRIED_LAST &&
                  !(projLib = NS_PROJ::FileManager::getProjDataEnvVar(ctx))
                       .empty()) {
@@ -1587,7 +1587,8 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
         ret.push_back(proj_context_get_user_writable_directory(ctx, false));
     }
 
-    const std::string envPROJ_DATA = NS_PROJ::FileManager::getProjDataEnvVar(ctx);
+    const std::string envPROJ_DATA =
+        NS_PROJ::FileManager::getProjDataEnvVar(ctx);
     const std::string relativeSharedProj = pj_get_relative_share_proj(ctx);
 
     if (gbPROJ_DATA_ENV_VAR_TRIED_LAST) {
@@ -1994,13 +1995,10 @@ void proj_context_set_ca_bundle_path(PJ_CONTEXT *ctx, const char *path) {
 
 // ---------------------------------------------------------------------------
 
-void pj_stderr_proj_lib_deprecation_warning()
-{
-    if( getenv("PROJ_LIB") != nullptr && getenv("PROJ_DATA") == nullptr )
-    {
-        fprintf(stderr,
-                "DeprecationWarning: PROJ_LIB environment variable is "
-                "deprecated, and will be removed in a future release. "
-                "You are encouraged to set PROJ_DATA instead.\n");
+void pj_stderr_proj_lib_deprecation_warning() {
+    if (getenv("PROJ_LIB") != nullptr && getenv("PROJ_DATA") == nullptr) {
+        fprintf(stderr, "DeprecationWarning: PROJ_LIB environment variable is "
+                        "deprecated, and will be removed in a future release. "
+                        "You are encouraged to set PROJ_DATA instead.\n");
     }
 }
