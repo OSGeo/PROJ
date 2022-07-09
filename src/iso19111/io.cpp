@@ -149,6 +149,7 @@ struct WKTFormatter::Private {
         bool use2019Keywords_ = false;
         bool useESRIDialect_ = false;
         bool allowEllipsoidalHeightAsVerticalCRS_ = false;
+        bool allowLINUNITNode_ = false;
         OutputAxisRule outputAxis_ = WKTFormatter::OutputAxisRule::YES;
     };
     Params params_{};
@@ -298,6 +299,29 @@ bool WKTFormatter::isAllowedEllipsoidalHeightAsVerticalCRS() const noexcept {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set whether the formatter should export, in WKT1_ESRI, a Geographic
+ * 3D CRS with the relatively new (ArcGIS Pro >= 2.7) LINUNIT node.
+ * Defaults to true.
+ * @since PROJ 9.1
+ */
+WKTFormatter &WKTFormatter::setAllowLINUNITNode(bool allow) noexcept {
+    d->params_.allowLINUNITNode_ = allow;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return whether the formatter should export, in WKT1_ESRI, a
+ * Geographic 3D CRS with the relatively new (ArcGIS Pro >= 2.7) LINUNIT node.
+ * Defaults to true.
+ * @since PROJ 9.1
+ */
+bool WKTFormatter::isAllowedLINUNITNode() const noexcept {
+    return d->params_.allowLINUNITNode_;
+}
+
+// ---------------------------------------------------------------------------
+
 /** Returns the WKT string from the formatter. */
 const std::string &WKTFormatter::toString() const {
     if (d->indentLevel_ > 0 || d->level_ > 0) {
@@ -372,6 +396,7 @@ WKTFormatter::WKTFormatter(Convention convention)
         d->params_.useESRIDialect_ = true;
         d->params_.multiLine_ = false;
         d->params_.outputAxis_ = WKTFormatter::OutputAxisRule::NO;
+        d->params_.allowLINUNITNode_ = true;
         break;
 
     default:

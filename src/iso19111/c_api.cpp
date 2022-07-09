@@ -1524,6 +1524,9 @@ const char *proj_get_id_code(const PJ *obj, int index) {
  * to YES and type == PJ_WKT1_GDAL, a Geographic 3D CRS or a Projected 3D CRS
  * will be exported as a compound CRS whose vertical part represents an
  * ellipsoidal height (for example for use with LAS 1.4 WKT1).</li>
+ * <li>ALLOW_LINUNIT_NODE=YES/NO. Default is YES starting with PROJ 9.1.
+ * Only taken into account with type == PJ_WKT1_ESRI on a Geographic 3D
+ * CRS.</li>
  * </ul>
  * @return a string, or NULL in case of error.
  */
@@ -1580,6 +1583,8 @@ const char *proj_as_wkt(PJ_CONTEXT *ctx, const PJ *obj, PJ_WKT_TYPE type,
                             "ALLOW_ELLIPSOIDAL_HEIGHT_AS_VERTICAL_CRS="))) {
                 formatter->setAllowEllipsoidalHeightAsVerticalCRS(
                     ci_equal(value, "YES"));
+            } else if ((value = getOptionValue(*iter, "ALLOW_LINUNIT_NODE="))) {
+                formatter->setAllowLINUNITNode(ci_equal(value, "YES"));
             } else {
                 std::string msg("Unknown option :");
                 msg += *iter;

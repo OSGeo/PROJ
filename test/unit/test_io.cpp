@@ -3113,12 +3113,10 @@ TEST(wkt_parse, implicit_compound_CRS_geographic_with_ellipsoidal_height_ESRI) {
     auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
     ASSERT_TRUE(crs != nullptr);
     EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
-
-    EXPECT_EQ(
-        crs->exportToWKT(
-            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
-                .get()),
-        wkt);
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext));
+    f->setAllowLINUNITNode(false);
+    EXPECT_EQ(crs->exportToWKT(f.get()), wkt);
 }
 
 // ---------------------------------------------------------------------------

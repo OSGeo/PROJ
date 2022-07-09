@@ -187,10 +187,10 @@ void UnitOfMeasure::_exportToWKT(
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
 
     const auto l_type = type();
-    if (formatter->forceUNITKeyword() && l_type != Type::PARAMETRIC) {
-        formatter->startNode(WKTConstants::UNIT, !codeSpace().empty());
-    } else if (!unitType.empty()) {
+    if (!unitType.empty()) {
         formatter->startNode(unitType, !codeSpace().empty());
+    } else if (formatter->forceUNITKeyword() && l_type != Type::PARAMETRIC) {
+        formatter->startNode(WKTConstants::UNIT, !codeSpace().empty());
     } else {
         if (isWKT2 && l_type == Type::LINEAR) {
             formatter->startNode(WKTConstants::LENGTHUNIT,

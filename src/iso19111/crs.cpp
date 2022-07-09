@@ -1982,28 +1982,34 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     const auto &cs = coordinateSystem();
     const auto &axisList = cs->axisList();
+    const bool isGeographic3D = isGeographic && axisList.size() == 3;
     const auto oldAxisOutputRule = formatter->outputAxis();
     auto l_name = nameStr();
     const auto &dbContext = formatter->databaseContext();
 
-    if (!isWKT2 && formatter->useESRIDialect() && axisList.size() == 3) {
+    const bool isESRIExport = !isWKT2 && formatter->useESRIDialect();
+    const auto &l_identifiers = identifiers();
+
+    if (isESRIExport && axisList.size() == 3) {
         if (!isGeographic) {
             io::FormattingException::Throw(
                 "Geocentric CRS not supported in WKT1_ESRI");
         }
-        // Try to format the Geographic 3D CRS as a GEOGCS[],VERTCS[...,DATUM[]]
-        // if we find corresponding objects
-        if (dbContext) {
-            if (exportAsESRIWktCompoundCRSWithEllipsoidalHeight(this, this,
-                                                                formatter)) {
-                return;
+        if (!formatter->isAllowedLINUNITNode()) {
+            // Try to format the Geographic 3D CRS as a
+            // GEOGCS[],VERTCS[...,DATUM[]] if we find corresponding objects
+            if (dbContext) {
+                if (exportAsESRIWktCompoundCRSWithEllipsoidalHeight(
+                        this, this, formatter)) {
+                    return;
+                }
             }
+            io::FormattingException::Throw(
+                "Cannot export this Geographic 3D CRS in WKT1_ESRI");
         }
-        io::FormattingException::Throw(
-            "Cannot export this Geographic 3D CRS in WKT1_ESRI");
     }
 
-    if (!isWKT2 && formatter->isStrict() && isGeographic &&
+    if (!isWKT2 && !isESRIExport && formatter->isStrict() && isGeographic &&
         axisList.size() == 3 &&
         oldAxisOutputRule != io::WKTFormatter::OutputAxisRule::NO) {
 
@@ -2048,7 +2054,6 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             "WKT1 does not support Geographic 3D CRS.");
     }
 
-    const auto &l_identifiers = identifiers();
     formatter->startNode(isWKT2
                              ? ((formatter->use2019Keywords() && isGeographic)
                                     ? io::WKTConstants::GEOGCRS
@@ -2057,15 +2062,14 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                                               : io::WKTConstants::GEOGCS,
                          !l_identifiers.empty());
 
-    if (formatter->useESRIDialect()) {
+    if (isESRIExport) {
+        std::string l_esri_name;
         if (l_name == "WGS 84") {
-            l_name = "GCS_WGS_1984";
+            l_esri_name = isGeographic3D ? "WGS_1984_3D" : "GCS_WGS_1984";
         } else {
-            std::string l_esri_name;
             if (dbContext) {
-                const auto tableName = isGeographic && axisList.size() == 3
-                                           ? "geographic_3D_crs"
-                                           : "geodetic_crs";
+                const auto tableName =
+                    isGeographic3D ? "geographic_3D_crs" : "geodetic_crs";
                 if (!l_identifiers.empty()) {
                     // Try to find the ESRI alias from the CRS identified by its
                     // id
@@ -2105,8 +2109,8 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                     l_esri_name = "GCS_" + l_esri_name;
                 }
             }
-            l_name = l_esri_name;
         }
+        l_name = l_esri_name;
     } else if (!isWKT2 && isDeprecated()) {
         l_name += " (deprecated)";
     }
@@ -2120,6 +2124,9 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     if (!isWKT2) {
         unit._exportToWKT(formatter);
     }
+    if (isGeographic3D && isESRIExport) {
+        axisList[2]->unit()._exportToWKT(formatter, io::WKTConstants::LINUNIT);
+    }
 
     if (oldAxisOutputRule ==
             io::WKTFormatter::OutputAxisRule::WKT1_GDAL_EPSG_STYLE &&
@@ -2131,7 +2138,7 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     ObjectUsage::baseExportToWKT(formatter);
 
-    if (!isWKT2 && !formatter->useESRIDialect()) {
+    if (!isWKT2 && !isESRIExport) {
         const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
         if (!extensionProj4.empty()) {
             formatter->startNode(io::WKTConstants::EXTENSION, false);
