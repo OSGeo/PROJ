@@ -2004,7 +2004,7 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     }
 
     if (!isWKT2 && formatter->isStrict() && isGeographic &&
-        axisList.size() != 2 &&
+        axisList.size() == 3 &&
         oldAxisOutputRule != io::WKTFormatter::OutputAxisRule::NO) {
 
         auto geogCRS2D = demoteTo2D(std::string(), dbContext);
@@ -2048,49 +2048,66 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
             "WKT1 does not support Geographic 3D CRS.");
     }
 
+    const auto &l_identifiers = identifiers();
     formatter->startNode(isWKT2
                              ? ((formatter->use2019Keywords() && isGeographic)
                                     ? io::WKTConstants::GEOGCRS
                                     : io::WKTConstants::GEODCRS)
                              : isGeocentric() ? io::WKTConstants::GEOCCS
                                               : io::WKTConstants::GEOGCS,
-                         !identifiers().empty());
+                         !l_identifiers.empty());
 
     if (formatter->useESRIDialect()) {
         if (l_name == "WGS 84") {
             l_name = "GCS_WGS_1984";
         } else {
-            bool aliasFound = false;
+            std::string l_esri_name;
             if (dbContext) {
-                auto l_alias = dbContext->getAliasFromOfficialName(
-                    l_name, "geodetic_crs", "ESRI");
-                if (!l_alias.empty()) {
-                    l_name = l_alias;
-                    aliasFound = true;
+                const auto tableName = isGeographic && axisList.size() == 3
+                                           ? "geographic_3D_crs"
+                                           : "geodetic_crs";
+                if (!l_identifiers.empty()) {
+                    // Try to find the ESRI alias from the CRS identified by its
+                    // id
+                    const auto aliases =
+                        dbContext->getAliases(*(l_identifiers[0]->codeSpace()),
+                                              l_identifiers[0]->code(),
+                                              std::string(), // officialName,
+                                              tableName, "ESRI");
+                    if (aliases.size() == 1)
+                        l_esri_name = aliases.front();
+                }
+                if (l_esri_name.empty()) {
+                    // Then find the ESRI alias from the CRS name
+                    l_esri_name = dbContext->getAliasFromOfficialName(
+                        l_name, tableName, "ESRI");
+                }
+                if (l_esri_name.empty()) {
+                    // Then try to build an ESRI CRS from the CRS name, and if
+                    // there's one, the ESRI name is the CRS name
+                    auto authFactory = io::AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext), "ESRI");
+                    const bool found = authFactory
+                                           ->createObjectsFromName(
+                                               l_name,
+                                               {io::AuthorityFactory::
+                                                    ObjectType::GEODETIC_CRS},
+                                               false // approximateMatch
+                                               )
+                                           .size() == 1;
+                    if (found)
+                        l_esri_name = l_name;
                 }
             }
-            if (!aliasFound && dbContext) {
-                auto authFactory = io::AuthorityFactory::create(
-                    NN_NO_CHECK(dbContext), "ESRI");
-                aliasFound =
-                    authFactory
-                        ->createObjectsFromName(
-                            l_name,
-                            {io::AuthorityFactory::ObjectType::GEODETIC_CRS},
-                            false // approximateMatch
-                            )
-                        .size() == 1;
-            }
-            if (!aliasFound) {
-                l_name = io::WKTFormatter::morphNameToESRI(l_name);
-                if (!starts_with(l_name, "GCS_")) {
-                    l_name = "GCS_" + l_name;
+            if (l_esri_name.empty()) {
+                l_esri_name = io::WKTFormatter::morphNameToESRI(l_name);
+                if (!starts_with(l_esri_name, "GCS_")) {
+                    l_esri_name = "GCS_" + l_esri_name;
                 }
             }
+            l_name = l_esri_name;
         }
-    }
-
-    if (!isWKT2 && !formatter->useESRIDialect() && isDeprecated()) {
+    } else if (!isWKT2 && isDeprecated()) {
         l_name += " (deprecated)";
     }
     formatter->addQuotedString(l_name);
@@ -4114,9 +4131,24 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     std::string l_esri_name;
     if (formatter->useESRIDialect() && dbContext) {
-        l_esri_name = dbContext->getAliasFromOfficialName(
-            l_name, "projected_crs", "ESRI");
+
+        if (!l_identifiers.empty()) {
+            // Try to find the ESRI alias from the CRS identified by its id
+            const auto aliases = dbContext->getAliases(
+                *(l_identifiers[0]->codeSpace()), l_identifiers[0]->code(),
+                std::string(), // officialName,
+                "projected_crs", "ESRI");
+            if (aliases.size() == 1)
+                l_esri_name = aliases.front();
+        }
         if (l_esri_name.empty()) {
+            // Then find the ESRI alias from the CRS name
+            l_esri_name = dbContext->getAliasFromOfficialName(
+                l_name, "projected_crs", "ESRI");
+        }
+        if (l_esri_name.empty()) {
+            // Then try to build an ESRI CRS from the CRS name, and if there's
+            // one, the ESRI name is the CRS name
             auto authFactory =
                 io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI");
             const bool found =
@@ -4134,6 +4166,8 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         if (!isWKT2 && !l_identifiers.empty() &&
             *(l_identifiers[0]->codeSpace()) == "ESRI") {
             try {
+                // If the id of the objet is in the ESRI namespace, then
+                // try to find the full ESRI WKT from the database
                 const auto definition = dbContext->getTextDefinition(
                     "projected_crs", "ESRI", l_identifiers[0]->code());
                 if (starts_with(definition, "PROJCS")) {

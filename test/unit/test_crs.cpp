@@ -2263,6 +2263,45 @@ TEST(crs,
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, projectedCRS_with_other_deprecated_crs_of_same_name_as_WKT1_ESRI) {
+    auto dbContext = DatabaseContext::create();
+    // EPSG:3800 is the non-deprecated version of EPSG:3774
+    // This used to cause an issue when looking for the ESRI CRS name
+    auto crs =
+        AuthorityFactory::create(dbContext, "EPSG")->createProjectedCRS("3800");
+
+    auto esri_wkt =
+        "PROJCS[\"NAD_1927_3TM_120\",GEOGCS[\"GCS_North_American_1927\","
+        "DATUM[\"D_North_American_1927\","
+        "SPHEROID[\"Clarke_1866\",6378206.4,294.978698213898]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Transverse_Mercator\"],"
+        "PARAMETER[\"False_Easting\",0.0],"
+        "PARAMETER[\"False_Northing\",0.0],"
+        "PARAMETER[\"Central_Meridian\",-120.0],"
+        "PARAMETER[\"Scale_Factor\",0.9999],"
+        "PARAMETER[\"Latitude_Of_Origin\",0.0],UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        esri_wkt);
+
+    auto obj =
+        WKTParser().attachDatabaseContext(dbContext).createFromWKT(esri_wkt);
+    auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs2 != nullptr);
+    EXPECT_EQ(crs2->nameStr(), "NAD27 / Alberta 3TM ref merid 120 W");
+
+    EXPECT_EQ(
+        crs2->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        esri_wkt);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, projectedCRS_with_ESRI_code_as_WKT1_ESRI) {
     auto dbContext = DatabaseContext::create();
     auto crs = AuthorityFactory::create(dbContext, "ESRI")
