@@ -509,6 +509,28 @@ TEST(wkt_parse, wkt1_esri_EPSG_4901_grad) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse, wkt1_esri_LINUNIT) {
+    const auto wkt = "GEOGCS[\"WGS_1984_3D\",DATUM[\"D_WGS_1984\","
+                     "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+                     "PRIMEM[\"Greenwich\",0.0],"
+                     "UNIT[\"Degree\",0.0174532925199433],"
+                     "LINUNIT[\"Meter\",1.0]]";
+    auto obj = WKTParser()
+                   .attachDatabaseContext(DatabaseContext::create())
+                   .createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<GeographicCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+    const auto &axisList = crs->coordinateSystem()->axisList();
+    ASSERT_EQ(axisList.size(), 3U);
+    EXPECT_NEAR(axisList[0]->unit().conversionToSI(), 0.0174532925199433,
+                1e-15);
+    EXPECT_NEAR(axisList[1]->unit().conversionToSI(), 0.0174532925199433,
+                1e-15);
+    EXPECT_EQ(axisList[2]->unit(), UnitOfMeasure::METRE);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(wkt_parse, wkt2_epsg_org_EPSG_4901_PRIMEM_weird_sexagesimal_DMS) {
     // Current epsg.org output may use the EPSG:9110 "sexagesimal DMS"
     // unit and a DD.MMSSsss value, but this will likely be changed to

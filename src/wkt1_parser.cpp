@@ -89,6 +89,7 @@ static const osr_cs_wkt_tokens tokens[] = {
     PAIR(COMPD_CS),
     PAIR(AXIS),           PAIR(TOWGS84),    PAIR(FITTED_CS),  PAIR(LOCAL_CS),
     PAIR(LOCAL_DATUM),
+    PAIR(LINUNIT),
 
     PAIR(EXTENSION)};
 

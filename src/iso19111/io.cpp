@@ -2663,6 +2663,17 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
                 if (unit == UnitOfMeasure::NONE) {
                     ThrowParsingExceptionMissingUNIT();
                 }
+
+                // ESRI WKT for geographic 3D CRS
+                auto &linUnitNode =
+                    parentNode->GP()->lookForChild(WKTConstants::LINUNIT);
+                if (!isNull(linUnitNode)) {
+                    return EllipsoidalCS::
+                        createLongitudeLatitudeEllipsoidalHeight(
+                            unit, buildUnit(linUnitNode,
+                                            UnitOfMeasure::Type::LINEAR));
+                }
+
                 // WKT1 --> long/lat
                 return EllipsoidalCS::createLongitudeLatitude(unit);
             }
