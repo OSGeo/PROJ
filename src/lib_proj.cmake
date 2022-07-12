@@ -294,8 +294,8 @@ include_directories(${PROJ_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 source_group("CMake Files" FILES CMakeLists.txt)
 
-# Embed PROJ_LIB data files location
-add_definitions(-DPROJ_LIB="${PROJ_LIB_PATH}")
+# Embed PROJ_DATA data files location
+add_definitions(-DPROJ_DATA="${PROJ_DATA_PATH}")
 
 
 ###########################################################

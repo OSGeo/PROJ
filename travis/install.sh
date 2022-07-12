@@ -185,13 +185,13 @@ prefix=/tmp/proj_static_install_from_dist_renamed/subdir' /tmp/proj_static_insta
 
 if [ $BUILD_NAME = "linux_gcc" ]; then
     $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_shared_install_from_dist_renamed/subdir shared
-    PROJ_LIB=/tmp/proj_static_install_from_dist_renamed/subdir/share/proj $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_static_install_from_dist_renamed/subdir static
+    PROJ_DATA=/tmp/proj_static_install_from_dist_renamed/subdir/share/proj $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_static_install_from_dist_renamed/subdir static
 else
     echo "Skipping test_autotools.sh test for $BUILD_NAME"
 fi
 
 $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_shared_install_from_dist_renamed/subdir shared
-PROJ_LIB=/tmp/proj_static_install_from_dist_renamed/subdir/share/proj $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_static_install_from_dist_renamed/subdir static
+PROJ_DATA=/tmp/proj_static_install_from_dist_renamed/subdir/share/proj $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_static_install_from_dist_renamed/subdir static
 
 if [ "$BUILD_NAME" != "linux_gcc8" -a "$BUILD_NAME" != "linux_gcc_32bit" ]; then
     echo "Build PROJ as a subproject"

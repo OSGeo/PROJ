@@ -927,6 +927,8 @@ static void outputOperations(
 
 int main(int argc, char **argv) {
 
+    pj_stderr_proj_lib_deprecation_warning();
+
     if (argc == 1) {
         std::cerr << pj_get_release() << std::endl;
         usage();

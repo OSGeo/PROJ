@@ -233,7 +233,7 @@ Internally, :program:`cs2cs` uses the :c:func:`proj_create_crs_to_crs` function
 to compute the appropriate coordinate operation, so implementation details of
 this function directly impact the results returned by the program.
 
-The environment parameter :envvar:`PROJ_LIB` establishes the
+The environment parameter :envvar:`PROJ_DATA` establishes the
 directory for resource files (database, datum shift grids, etc.)
 
 One or more files (processed in left to right order) specify the source of

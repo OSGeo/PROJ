@@ -115,7 +115,7 @@ make
 # Run a subset of tests that should pass
 ctest --output-on-failure -R "proj_test_cpp_api|geodesic-test|proj_errno_string_test|proj_angular_io_test|proj_context_test|pj_phi2_test|gie_self_tests|test_network|test_defmodel|test_tinshift|test_misc|test_fork"
 # TODO: fix failing tests with .gie files; see #2168 and run
-# PROJ_LIB=./data/for_tests wine64 ./bin/gie.exe ../test/gie/more_builtins.gie
+# PROJ_DATA=./data/for_tests wine64 ./bin/gie.exe ../test/gie/more_builtins.gie
 
 make install
 

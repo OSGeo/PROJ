@@ -381,7 +381,7 @@ TEST(gie, info_functions) {
         ASSERT_EQ(std::string(info.version), std::string(tmpstr));
     }
     ASSERT_NE(std::string(info.release), "");
-    if (getenv("HOME") || getenv("PROJ_LIB")) {
+    if (getenv("HOME") || getenv("PROJ_LIB") || getenv("PROJ_DATA")) {
         ASSERT_NE(std::string(info.searchpath), std::string());
     }
 

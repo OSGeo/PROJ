@@ -780,6 +780,7 @@ pj_param(pj_ctx*, ARG_list*, char const*)
 pj_phi2(pj_ctx*, double, double)
 pj_pr_list(PJconsts*)
 pj_shrink(char*)
+pj_stderr_proj_lib_deprecation_warning()
 proj_alter_id
 proj_alter_name
 proj_angular_input

@@ -22,8 +22,8 @@ if test ! -x ${EXE}; then
     exit 1
 fi
 
-if test -z "${PROJ_LIB}"; then
-    export PROJ_LIB="`dirname $0`/../../data"
+if test -z "${PROJ_DATA}"; then
+    export PROJ_DATA="`dirname $0`/../../data"
 fi
 
 # Would be great to have a universale way of selecting a locale with

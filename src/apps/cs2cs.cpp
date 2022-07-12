@@ -346,6 +346,8 @@ int main(int argc, char **argv) {
     int have_to_flag = 0, inverse = 0;
     int use_env_locale = 0;
 
+    pj_stderr_proj_lib_deprecation_warning();
+
     if( argc == 0 ) {
         exit(1);
     }

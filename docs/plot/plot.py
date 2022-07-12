@@ -66,7 +66,7 @@ if not os.path.exists(PROJ_COMMAND):
         raise ValueError("specify PROJ_EXE or modify PATH to find proj")
 else:
     PROJ = PROJ_COMMAND
-PROJ_LIB = os.environ.get('PROJ_LIB', '../../data')
+PROJ_DATA = os.environ.get('PROJ_DATA', os.environ.get('PROJ_LIB', '../../data'))
 
 LINE_LOW = 'data/coastline.geojson'
 LINE_MED = 'data/coastline50.geojson'
@@ -163,7 +163,8 @@ def project(coordinates, proj_string, in_radians=False):
 
     try:
         proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                env={'PROJ_LIB': os.path.abspath(PROJ_LIB)})
+                                env={'PROJ_DATA': os.path.abspath(PROJ_DATA),
+                                     'PROJ_LIB': os.path.abspath(PROJ_DATA)})
     except FileNotFoundError as e:
         print("'proj' binary not found, set the PROJ_EXE environment variable "
               "to point to your local 'proj' binary --%s--" % e)

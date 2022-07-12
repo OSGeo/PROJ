@@ -1007,13 +1007,23 @@ bool FileManager::rename(PJ_CONTEXT *ctx, const char *oldPath,
 
 // ---------------------------------------------------------------------------
 
-std::string FileManager::getProjLibEnvVar(PJ_CONTEXT *ctx) {
-    if (!ctx->env_var_proj_lib.empty()) {
-        return ctx->env_var_proj_lib;
+std::string FileManager::getProjDataEnvVar(PJ_CONTEXT *ctx) {
+    if (!ctx->env_var_proj_data.empty()) {
+        return ctx->env_var_proj_data;
     }
     (void)ctx;
     std::string str;
-    const char *envvar = getenv("PROJ_LIB");
+    const char *envvar = getenv("PROJ_DATA");
+    if (!envvar) {
+        envvar = getenv("PROJ_LIB"); // Legacy name. We should probably keep it
+                                     // for a long time for nostalgic people :-)
+        if (envvar) {
+            pj_log(ctx, PJ_LOG_DEBUG,
+                   "PROJ_LIB environment variable is deprecated, and will be "
+                   "removed in a future release. You are encouraged to set "
+                   "PROJ_DATA instead");
+        }
+    }
     if (!envvar)
         return str;
     str = envvar;
@@ -1031,7 +1041,7 @@ std::string FileManager::getProjLibEnvVar(PJ_CONTEXT *ctx) {
             str = envvar;
     }
 #endif
-    ctx->env_var_proj_lib = str;
+    ctx->env_var_proj_data = str;
     return str;
 }
 
@@ -1383,17 +1393,17 @@ static const char dirSeparator = ';';
 static const char dirSeparator = ':';
 #endif
 
-static const char *proj_lib_name =
-#ifdef PROJ_LIB
-    PROJ_LIB;
+static const char *proj_data_name =
+#ifdef PROJ_DATA
+    PROJ_DATA;
 #else
     nullptr;
 #endif
 
-#ifdef PROJ_LIB_ENV_VAR_TRIED_LAST
-static bool gbPROJ_LIB_ENV_VAR_TRIED_LAST = true;
+#ifdef PROJ_DATA_ENV_VAR_TRIED_LAST
+static bool gbPROJ_DATA_ENV_VAR_TRIED_LAST = true;
 #else
-static bool gbPROJ_LIB_ENV_VAR_TRIED_LAST = false;
+static bool gbPROJ_DATA_ENV_VAR_TRIED_LAST = false;
 #endif
 
 static bool dontReadUserWritableDirectory() {
@@ -1498,10 +1508,10 @@ static void *pj_open_lib_internal(
             sysname = fname.c_str();
         }
 
-        /* if the environment PROJ_LIB defined, and *not* tried as last
+        /* if the environment PROJ_DATA defined, and *not* tried as last
            possibility */
-        else if (!gbPROJ_LIB_ENV_VAR_TRIED_LAST &&
-                 !(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
+        else if (!gbPROJ_DATA_ENV_VAR_TRIED_LAST &&
+                 !(projLib = NS_PROJ::FileManager::getProjDataEnvVar(ctx))
                       .empty()) {
             fid = open_lib_from_paths(projLib);
         }
@@ -1509,22 +1519,23 @@ static void *pj_open_lib_internal(
         else if ((sysname = get_path_from_relative_share_proj(
                       ctx, name, fname)) != nullptr) {
             /* check if it lives in a ../share/proj dir of the proj dll */
-        } else if (proj_lib_name != nullptr &&
+        } else if (proj_data_name != nullptr &&
                    (fid = open_file(
                         ctx,
-                        (std::string(proj_lib_name) + DIR_CHAR + name).c_str(),
+                        (std::string(proj_data_name) + DIR_CHAR + name).c_str(),
                         mode)) != nullptr) {
 
             /* or hardcoded path */
-            fname = proj_lib_name;
+            fname = proj_data_name;
             fname += DIR_CHAR;
             fname += name;
             sysname = fname.c_str();
         }
 
-        /* if the environment PROJ_LIB defined, and tried as last possibility */
-        else if (gbPROJ_LIB_ENV_VAR_TRIED_LAST &&
-                 !(projLib = NS_PROJ::FileManager::getProjLibEnvVar(ctx))
+        /* if the environment PROJ_DATA defined, and tried as last possibility
+         */
+        else if (gbPROJ_DATA_ENV_VAR_TRIED_LAST &&
+                 !(projLib = NS_PROJ::FileManager::getProjDataEnvVar(ctx))
                       .empty()) {
             fid = open_lib_from_paths(projLib);
         }
@@ -1576,30 +1587,31 @@ std::vector<std::string> pj_get_default_searchpaths(PJ_CONTEXT *ctx) {
         ret.push_back(proj_context_get_user_writable_directory(ctx, false));
     }
 
-    const std::string envPROJ_LIB = NS_PROJ::FileManager::getProjLibEnvVar(ctx);
+    const std::string envPROJ_DATA =
+        NS_PROJ::FileManager::getProjDataEnvVar(ctx);
     const std::string relativeSharedProj = pj_get_relative_share_proj(ctx);
 
-    if (gbPROJ_LIB_ENV_VAR_TRIED_LAST) {
-/* Situation where PROJ_LIB environment variable is tried in last */
-#ifdef PROJ_LIB
-        ret.push_back(PROJ_LIB);
+    if (gbPROJ_DATA_ENV_VAR_TRIED_LAST) {
+/* Situation where PROJ_DATA environment variable is tried in last */
+#ifdef PROJ_DATA
+        ret.push_back(PROJ_DATA);
 #endif
         if (!relativeSharedProj.empty()) {
             ret.push_back(relativeSharedProj);
         }
-        if (!envPROJ_LIB.empty()) {
-            ret.push_back(envPROJ_LIB);
+        if (!envPROJ_DATA.empty()) {
+            ret.push_back(envPROJ_DATA);
         }
     } else {
-        /* Situation where PROJ_LIB environment variable is used if defined */
-        if (!envPROJ_LIB.empty()) {
-            ret.push_back(envPROJ_LIB);
+        /* Situation where PROJ_DATA environment variable is used if defined */
+        if (!envPROJ_DATA.empty()) {
+            ret.push_back(envPROJ_DATA);
         } else {
             if (!relativeSharedProj.empty()) {
                 ret.push_back(relativeSharedProj);
             }
-#ifdef PROJ_LIB
-            ret.push_back(PROJ_LIB);
+#ifdef PROJ_DATA
+            ret.push_back(PROJ_DATA);
 #endif
         }
     }
@@ -1978,5 +1990,15 @@ void proj_context_set_ca_bundle_path(PJ_CONTEXT *ctx, const char *path) {
     try {
         ctx->set_ca_bundle_path(path != nullptr ? path : "");
     } catch (const std::exception &) {
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+void pj_stderr_proj_lib_deprecation_warning() {
+    if (getenv("PROJ_LIB") != nullptr && getenv("PROJ_DATA") == nullptr) {
+        fprintf(stderr, "DeprecationWarning: PROJ_LIB environment variable is "
+                        "deprecated, and will be removed in a future release. "
+                        "You are encouraged to set PROJ_DATA instead.\n");
     }
 }

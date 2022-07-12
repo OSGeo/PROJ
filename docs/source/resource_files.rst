@@ -44,7 +44,10 @@ The following paths are checked in order:
     * on other platforms (Linux), ``${XDG_DATA_HOME}/proj`` if
       :envvar:`XDG_DATA_HOME` is defined. Else ``${HOME}/.local/share/proj``
 
-- Path(s) set with by the environment variable :envvar:`PROJ_LIB`.
+- Path(s) set with by the environment variable :envvar:`PROJ_DATA`.
+  Prior to PROJ 9.1, this environment variable was called :envvar:`PROJ_LIB`.
+  This older name is still supported in PROJ 9.1 as a fallback, but support for it
+  may be removed in future release.
   On Linux/macOS/Unix, use ``:`` to separate paths. On Windows, ``;``
 
 - .. versionadded:: 7.0
@@ -63,9 +66,10 @@ The following paths are checked in order:
 
   .. note::
 
-    If PROJ is built with the ``PROJ_LIB_ENV_VAR_TRIED_LAST`` CMake option
+    If PROJ is built with the ``PROJ_DATA_ENV_VAR_TRIED_LAST`` CMake option
+    (called ``PROJ_LIB_ENV_VAR_TRIED_LAST`` before PROJ 9.1),
     then this hard-wired path will be tried before looking at the environment
-    variable :envvar:`PROJ_LIB`.
+    variable :envvar:`PROJ_DATA`.
 
 - The current directory
 
@@ -169,7 +173,7 @@ freely available for use with PROJ. The package is maintained on
 `GitHub <https://github.com/OSGeo/PROJ-data>`_ and the contents of the package
 are show-cased on the `PROJ CDN <https://cdn.proj.org/>`_. The contents of the
 package can be installed using the :program:`projsync` package or by downloading
-the zip archive of the package and unpacking in the :envvar:`PROJ_LIB` directory.
+the zip archive of the package and unpacking in the :envvar:`PROJ_DATA` directory.
 
 proj-datumgrid
 ++++++++++++++
@@ -438,7 +442,7 @@ ITRF init file is a good example of that.
 
 A number of init files come pre-bundled with PROJ but it is also possible to
 add your own custom init files. PROJ looks for the init files in the directory
-listed in the :envvar:`PROJ_LIB` environment variable.
+listed in the :envvar:`PROJ_DATA` environment variable.
 
 The format of init files is an identifier in angled brackets and a
 proj-string:
