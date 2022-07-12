@@ -1786,6 +1786,10 @@ def import_hvcoordsys():
             authority = row[idx_authority]
             esri_name = row[idx_name]
 
+            if authority == 'Esri' and code in ('9897',):
+                # .csv file pretents this is a Esri code, but it is a EPSG one
+                authority = 'EPSG'
+
             if authority == 'EPSG':
 
                 map_compoundcrs_esri_name_to_auth_code[esri_name] = [
