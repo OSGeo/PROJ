@@ -559,7 +559,31 @@ TEST(crs, EPSG_4979_as_WKT1_ESRI) {
     auto crs = GeographicCRS::EPSG_4979;
     WKTFormatterNNPtr f(
         WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI));
-    EXPECT_THROW(crs->exportToWKT(f.get()), FormattingException);
+    const auto wkt = "GEOGCS[\"WGS_1984_3D\",DATUM[\"D_WGS_1984\","
+                     "SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],"
+                     "PRIMEM[\"Greenwich\",0.0],"
+                     "UNIT[\"Degree\",0.0174532925199433],"
+                     "LINUNIT[\"Meter\",1.0]]";
+
+    EXPECT_EQ(crs->exportToWKT(f.get()), wkt);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, geographic3D_crs_as_WKT1_ESRI_database) {
+    auto dbContext = DatabaseContext::create();
+    auto factory = AuthorityFactory::create(dbContext, "EPSG");
+    auto crs = factory->createCoordinateReferenceSystem("7087");
+    WKTFormatterNNPtr f(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext));
+    const auto wkt = "GEOGCS[\"RGTAAF07_(lon-lat)_3D\","
+                     "DATUM[\"D_Reseau_Geodesique_des_Terres_Australes_et_"
+                     "Antarctiques_Francaises_2007\","
+                     "SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],"
+                     "PRIMEM[\"Greenwich\",0.0],"
+                     "UNIT[\"Degree\",0.0174532925199433],"
+                     "LINUNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(crs->exportToWKT(f.get()), wkt);
 }
 
 // ---------------------------------------------------------------------------
@@ -772,6 +796,7 @@ TEST(crs,
     EXPECT_EQ(crs->coordinateSystem()->axisList().size(), 3U);
     WKTFormatterNNPtr f(WKTFormatter::create(
         WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+    f->setAllowLINUNITNode(false);
     // Situation where there is no EPSG official name
     EXPECT_EQ(crs->exportToWKT(f.get()),
               "GEOGCS[\"California_SRS_Epoch_2017.50_(NAD83)\","
@@ -794,6 +819,7 @@ TEST(crs, implicit_compound_ESRI_104971_to_3D_as_WKT1_ESRI_with_database) {
         std::string(), dbContext);
     WKTFormatterNNPtr f(WKTFormatter::create(
         WKTFormatter::Convention::WKT1_ESRI, DatabaseContext::create()));
+    f->setAllowLINUNITNode(false);
     // Situation where there is no ESRI vertical CRS, but the GEOGCS does exist
     // This will be only partly recognized by ESRI software.
     // See https://github.com/OSGeo/PROJ/issues/2757
@@ -2259,6 +2285,45 @@ TEST(crs,
               "        UNIT[\"metre\",1,\n"
               "            AUTHORITY[\"EPSG\",\"9001\"]],\n"
               "        AXIS[\"Ellipsoidal height\",UP]]]");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, projectedCRS_with_other_deprecated_crs_of_same_name_as_WKT1_ESRI) {
+    auto dbContext = DatabaseContext::create();
+    // EPSG:3800 is the non-deprecated version of EPSG:3774
+    // This used to cause an issue when looking for the ESRI CRS name
+    auto crs =
+        AuthorityFactory::create(dbContext, "EPSG")->createProjectedCRS("3800");
+
+    auto esri_wkt =
+        "PROJCS[\"NAD_1927_3TM_120\",GEOGCS[\"GCS_North_American_1927\","
+        "DATUM[\"D_North_American_1927\","
+        "SPHEROID[\"Clarke_1866\",6378206.4,294.978698213898]],"
+        "PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],"
+        "PROJECTION[\"Transverse_Mercator\"],"
+        "PARAMETER[\"False_Easting\",0.0],"
+        "PARAMETER[\"False_Northing\",0.0],"
+        "PARAMETER[\"Central_Meridian\",-120.0],"
+        "PARAMETER[\"Scale_Factor\",0.9999],"
+        "PARAMETER[\"Latitude_Of_Origin\",0.0],UNIT[\"Meter\",1.0]]";
+    EXPECT_EQ(
+        crs->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        esri_wkt);
+
+    auto obj =
+        WKTParser().attachDatabaseContext(dbContext).createFromWKT(esri_wkt);
+    auto crs2 = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs2 != nullptr);
+    EXPECT_EQ(crs2->nameStr(), "NAD27 / Alberta 3TM ref merid 120 W");
+
+    EXPECT_EQ(
+        crs2->exportToWKT(
+            WKTFormatter::create(WKTFormatter::Convention::WKT1_ESRI, dbContext)
+                .get()),
+        esri_wkt);
 }
 
 // ---------------------------------------------------------------------------

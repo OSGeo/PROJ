@@ -437,8 +437,10 @@ osgeo::proj::io::PROJStringParser::warningList() const
 osgeo::proj::io::WKTFormatter::create(dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::io::WKTFormatter, std::default_delete<osgeo::proj::io::WKTFormatter> > > const&)
 osgeo::proj::io::WKTFormatter::create(osgeo::proj::io::WKTFormatter::Convention, std::shared_ptr<osgeo::proj::io::DatabaseContext>)
 osgeo::proj::io::WKTFormatter::isAllowedEllipsoidalHeightAsVerticalCRS() const
+osgeo::proj::io::WKTFormatter::isAllowedLINUNITNode() const
 osgeo::proj::io::WKTFormatter::isStrict() const
 osgeo::proj::io::WKTFormatter::setAllowEllipsoidalHeightAsVerticalCRS(bool)
+osgeo::proj::io::WKTFormatter::setAllowLINUNITNode(bool)
 osgeo::proj::io::WKTFormatter::setIndentationWidth(int)
 osgeo::proj::io::WKTFormatter::setMultiLine(bool)
 osgeo::proj::io::WKTFormatter::setOutputAxis(osgeo::proj::io::WKTFormatter::OutputAxisRule)

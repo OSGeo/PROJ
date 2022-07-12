@@ -1982,29 +1982,35 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     const auto &cs = coordinateSystem();
     const auto &axisList = cs->axisList();
+    const bool isGeographic3D = isGeographic && axisList.size() == 3;
     const auto oldAxisOutputRule = formatter->outputAxis();
     auto l_name = nameStr();
     const auto &dbContext = formatter->databaseContext();
 
-    if (!isWKT2 && formatter->useESRIDialect() && axisList.size() == 3) {
+    const bool isESRIExport = !isWKT2 && formatter->useESRIDialect();
+    const auto &l_identifiers = identifiers();
+
+    if (isESRIExport && axisList.size() == 3) {
         if (!isGeographic) {
             io::FormattingException::Throw(
                 "Geocentric CRS not supported in WKT1_ESRI");
         }
-        // Try to format the Geographic 3D CRS as a GEOGCS[],VERTCS[...,DATUM[]]
-        // if we find corresponding objects
-        if (dbContext) {
-            if (exportAsESRIWktCompoundCRSWithEllipsoidalHeight(this, this,
-                                                                formatter)) {
-                return;
+        if (!formatter->isAllowedLINUNITNode()) {
+            // Try to format the Geographic 3D CRS as a
+            // GEOGCS[],VERTCS[...,DATUM[]] if we find corresponding objects
+            if (dbContext) {
+                if (exportAsESRIWktCompoundCRSWithEllipsoidalHeight(
+                        this, this, formatter)) {
+                    return;
+                }
             }
+            io::FormattingException::Throw(
+                "Cannot export this Geographic 3D CRS in WKT1_ESRI");
         }
-        io::FormattingException::Throw(
-            "Cannot export this Geographic 3D CRS in WKT1_ESRI");
     }
 
-    if (!isWKT2 && formatter->isStrict() && isGeographic &&
-        axisList.size() != 2 &&
+    if (!isWKT2 && !isESRIExport && formatter->isStrict() && isGeographic &&
+        axisList.size() == 3 &&
         oldAxisOutputRule != io::WKTFormatter::OutputAxisRule::NO) {
 
         auto geogCRS2D = demoteTo2D(std::string(), dbContext);
@@ -2054,43 +2060,58 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                                     : io::WKTConstants::GEODCRS)
                              : isGeocentric() ? io::WKTConstants::GEOCCS
                                               : io::WKTConstants::GEOGCS,
-                         !identifiers().empty());
+                         !l_identifiers.empty());
 
-    if (formatter->useESRIDialect()) {
+    if (isESRIExport) {
+        std::string l_esri_name;
         if (l_name == "WGS 84") {
-            l_name = "GCS_WGS_1984";
+            l_esri_name = isGeographic3D ? "WGS_1984_3D" : "GCS_WGS_1984";
         } else {
-            bool aliasFound = false;
             if (dbContext) {
-                auto l_alias = dbContext->getAliasFromOfficialName(
-                    l_name, "geodetic_crs", "ESRI");
-                if (!l_alias.empty()) {
-                    l_name = l_alias;
-                    aliasFound = true;
+                const auto tableName =
+                    isGeographic3D ? "geographic_3D_crs" : "geodetic_crs";
+                if (!l_identifiers.empty()) {
+                    // Try to find the ESRI alias from the CRS identified by its
+                    // id
+                    const auto aliases =
+                        dbContext->getAliases(*(l_identifiers[0]->codeSpace()),
+                                              l_identifiers[0]->code(),
+                                              std::string(), // officialName,
+                                              tableName, "ESRI");
+                    if (aliases.size() == 1)
+                        l_esri_name = aliases.front();
+                }
+                if (l_esri_name.empty()) {
+                    // Then find the ESRI alias from the CRS name
+                    l_esri_name = dbContext->getAliasFromOfficialName(
+                        l_name, tableName, "ESRI");
+                }
+                if (l_esri_name.empty()) {
+                    // Then try to build an ESRI CRS from the CRS name, and if
+                    // there's one, the ESRI name is the CRS name
+                    auto authFactory = io::AuthorityFactory::create(
+                        NN_NO_CHECK(dbContext), "ESRI");
+                    const bool found = authFactory
+                                           ->createObjectsFromName(
+                                               l_name,
+                                               {io::AuthorityFactory::
+                                                    ObjectType::GEODETIC_CRS},
+                                               false // approximateMatch
+                                               )
+                                           .size() == 1;
+                    if (found)
+                        l_esri_name = l_name;
                 }
             }
-            if (!aliasFound && dbContext) {
-                auto authFactory = io::AuthorityFactory::create(
-                    NN_NO_CHECK(dbContext), "ESRI");
-                aliasFound =
-                    authFactory
-                        ->createObjectsFromName(
-                            l_name,
-                            {io::AuthorityFactory::ObjectType::GEODETIC_CRS},
-                            false // approximateMatch
-                            )
-                        .size() == 1;
-            }
-            if (!aliasFound) {
-                l_name = io::WKTFormatter::morphNameToESRI(l_name);
-                if (!starts_with(l_name, "GCS_")) {
-                    l_name = "GCS_" + l_name;
+            if (l_esri_name.empty()) {
+                l_esri_name = io::WKTFormatter::morphNameToESRI(l_name);
+                if (!starts_with(l_esri_name, "GCS_")) {
+                    l_esri_name = "GCS_" + l_esri_name;
                 }
             }
         }
-    }
-
-    if (!isWKT2 && !formatter->useESRIDialect() && isDeprecated()) {
+        l_name = l_esri_name;
+    } else if (!isWKT2 && isDeprecated()) {
         l_name += " (deprecated)";
     }
     formatter->addQuotedString(l_name);
@@ -2103,6 +2124,9 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
     if (!isWKT2) {
         unit._exportToWKT(formatter);
     }
+    if (isGeographic3D && isESRIExport) {
+        axisList[2]->unit()._exportToWKT(formatter, io::WKTConstants::LINUNIT);
+    }
 
     if (oldAxisOutputRule ==
             io::WKTFormatter::OutputAxisRule::WKT1_GDAL_EPSG_STYLE &&
@@ -2114,7 +2138,7 @@ void GeodeticCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     ObjectUsage::baseExportToWKT(formatter);
 
-    if (!isWKT2 && !formatter->useESRIDialect()) {
+    if (!isWKT2 && !isESRIExport) {
         const auto &extensionProj4 = CRS::getPrivate()->extensionProj4_;
         if (!extensionProj4.empty()) {
             formatter->startNode(io::WKTConstants::EXTENSION, false);
@@ -4114,9 +4138,24 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
 
     std::string l_esri_name;
     if (formatter->useESRIDialect() && dbContext) {
-        l_esri_name = dbContext->getAliasFromOfficialName(
-            l_name, "projected_crs", "ESRI");
+
+        if (!l_identifiers.empty()) {
+            // Try to find the ESRI alias from the CRS identified by its id
+            const auto aliases = dbContext->getAliases(
+                *(l_identifiers[0]->codeSpace()), l_identifiers[0]->code(),
+                std::string(), // officialName,
+                "projected_crs", "ESRI");
+            if (aliases.size() == 1)
+                l_esri_name = aliases.front();
+        }
         if (l_esri_name.empty()) {
+            // Then find the ESRI alias from the CRS name
+            l_esri_name = dbContext->getAliasFromOfficialName(
+                l_name, "projected_crs", "ESRI");
+        }
+        if (l_esri_name.empty()) {
+            // Then try to build an ESRI CRS from the CRS name, and if there's
+            // one, the ESRI name is the CRS name
             auto authFactory =
                 io::AuthorityFactory::create(NN_NO_CHECK(dbContext), "ESRI");
             const bool found =
@@ -4134,6 +4173,8 @@ void ProjectedCRS::_exportToWKT(io::WKTFormatter *formatter) const {
         if (!isWKT2 && !l_identifiers.empty() &&
             *(l_identifiers[0]->codeSpace()) == "ESRI") {
             try {
+                // If the id of the objet is in the ESRI namespace, then
+                // try to find the full ESRI WKT from the database
                 const auto definition = dbContext->getTextDefinition(
                     "projected_crs", "ESRI", l_identifiers[0]->code());
                 if (starts_with(definition, "PROJCS")) {

@@ -500,6 +500,23 @@ TEST_F(CApi, proj_as_wkt) {
             << wkt;
     }
 
+    // ALLOW_LINUNIT_NODE default value
+    {
+        auto wkt = proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_ESRI, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("LINUNIT") != std::string::npos)
+            << wkt;
+    }
+
+    // ALLOW_LINUNIT_NODE=NO
+    {
+        const char *const options[] = {"ALLOW_LINUNIT_NODE=NO", nullptr};
+        auto wkt = proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_ESRI, options);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("LINUNIT") == std::string::npos)
+            << wkt;
+    }
+
     // unsupported option
     {
         const char *const options[] = {"unsupported=yes", nullptr};
