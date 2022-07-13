@@ -8662,6 +8662,13 @@ PROJStringFormatter::Convention PROJStringFormatter::convention() const {
 
 // ---------------------------------------------------------------------------
 
+// Return the number of steps in the pipeline.
+// Note: this value will change after calling toString() that will run
+// optimizations.
+size_t PROJStringFormatter::getStepCount() const { return d->steps_.size(); }
+
+// ---------------------------------------------------------------------------
+
 bool PROJStringFormatter::getUseApproxTMerc() const {
     return d->useApproxTMerc_;
 }

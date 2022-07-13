@@ -1732,6 +1732,40 @@ TEST(operation, esri_projectedCRS_to_geogCRS_with_ITRF_intermediate_context) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_WGS84_to_GDA2020) {
+    // 2D reduction of use case of https://github.com/OSGeo/PROJ/issues/2348
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            // GDA2020
+            authFactory->createCoordinateReferenceSystem("7844"),
+            // WGS 84
+            authFactory->createCoordinateReferenceSystem("4326"), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(), "GDA2020 to WGS 84 (2)");
+    }
+
+    // Inverse
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            // WGS 84
+            authFactory->createCoordinateReferenceSystem("4326"),
+            // GDA2020
+            authFactory->createCoordinateReferenceSystem("7844"), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(), "Inverse of GDA2020 to WGS 84 (2)");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 static ProjectedCRSNNPtr createUTM31_WGS84() {
     return ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,
@@ -5921,6 +5955,42 @@ TEST(operation,
                       PROJStringFormatter::Convention::PROJ_5, dbContext)
                       .get()),
               expected_proj);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(operation, compoundCRS_to_geogCRS_3D_WGS84_to_GDA2020_AHD_Height) {
+    // Use case of https://github.com/OSGeo/PROJ/issues/2348
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            // GDA2020 + AHD height
+            authFactory->createCoordinateReferenceSystem("9463"),
+            // WGS 84 3D
+            authFactory->createCoordinateReferenceSystem("4979"), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(), "Inverse of GDA2020 to AHD height (1) + "
+                                      "GDA2020 to WGS 84 (2)");
+    }
+
+    // Inverse
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            // WGS 84 3D
+            authFactory->createCoordinateReferenceSystem("4979"),
+            // GDA2020 + AHD height
+            authFactory->createCoordinateReferenceSystem("9463"), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        EXPECT_EQ(list[0]->nameStr(), "Inverse of GDA2020 to WGS 84 (2) + "
+                                      "GDA2020 to AHD height (1)");
+    }
 }
 
 // ---------------------------------------------------------------------------

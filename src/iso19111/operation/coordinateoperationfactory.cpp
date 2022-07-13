@@ -704,6 +704,7 @@ struct PrecomputedOpCharacteristics {
     bool gridsAvailable_ = false;
     bool gridsKnown_ = false;
     size_t stepCount_ = 0;
+    size_t projStepCount_ = 0;
     bool isApprox_ = false;
     bool hasBallparkVertical_ = false;
     bool isNullTransformation_ = false;
@@ -712,12 +713,13 @@ struct PrecomputedOpCharacteristics {
     PrecomputedOpCharacteristics(double area, double accuracy,
                                  bool isPROJExportable, bool hasGrids,
                                  bool gridsAvailable, bool gridsKnown,
-                                 size_t stepCount, bool isApprox,
-                                 bool hasBallparkVertical,
+                                 size_t stepCount, size_t projStepCount,
+                                 bool isApprox, bool hasBallparkVertical,
                                  bool isNullTransformation)
         : area_(area), accuracy_(accuracy), isPROJExportable_(isPROJExportable),
           hasGrids_(hasGrids), gridsAvailable_(gridsAvailable),
-          gridsKnown_(gridsKnown), stepCount_(stepCount), isApprox_(isApprox),
+          gridsKnown_(gridsKnown), stepCount_(stepCount),
+          projStepCount_(projStepCount), isApprox_(isApprox),
           hasBallparkVertical_(hasBallparkVertical),
           isNullTransformation_(isNullTransformation) {}
 };
@@ -858,6 +860,18 @@ struct SortFunction {
         }
         if (iterB->second.stepCount_ < iterA->second.stepCount_) {
             return false;
+        }
+
+        // Compare number of steps in PROJ pipeline, and prefer the ones
+        // with less operations.
+        if (iterA->second.projStepCount_ != 0 &&
+            iterB->second.projStepCount_ != 0) {
+            if (iterA->second.projStepCount_ < iterB->second.projStepCount_) {
+                return true;
+            }
+            if (iterB->second.projStepCount_ < iterA->second.projStepCount_) {
+                return false;
+            }
         }
 
         const auto &a_name = a->nameStr();
@@ -1259,11 +1273,20 @@ struct FilterResults {
 
             bool isPROJExportable = false;
             auto formatter = io::PROJStringFormatter::create();
+            size_t projStepCount = 0;
             try {
-                op->exportToPROJString(formatter.get());
+                const auto str = op->exportToPROJString(formatter.get());
                 // Grids might be missing, but at least this is something
                 // PROJ could potentially process
                 isPROJExportable = true;
+
+                // We exclude pipelines with +proj=xyzgridshift as they
+                // generate more steps, but are more precise.
+                if (str.find("+proj=xyzgridshift") == std::string::npos) {
+                    auto formatter2 = io::PROJStringFormatter::create();
+                    formatter2->ingestPROJString(str);
+                    projStepCount = formatter2->getStepCount();
+                }
             } catch (const std::exception &) {
             }
 
@@ -1282,7 +1305,7 @@ struct FilterResults {
 #endif
             map[op.get()] = PrecomputedOpCharacteristics(
                 area, getAccuracy(op), isPROJExportable, hasGrids,
-                gridsAvailable, gridsKnown, stepCount,
+                gridsAvailable, gridsKnown, stepCount, projStepCount,
                 op->hasBallparkTransformation(),
                 op->nameStr().find(BALLPARK_VERTICAL_TRANSFORMATION) !=
                     std::string::npos,
