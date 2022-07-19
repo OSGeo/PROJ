@@ -481,6 +481,7 @@ struct CoordinateOperationFactory::Private {
         bool inCreateOperationsGeogToVertWithAlternativeGeog = false;
         bool inCreateOperationsGeogToVertWithIntermediateVert = false;
         bool skipHorizontalTransformation = false;
+        int nRecLevelCreateOperations = 0;
         std::map<std::pair<io::AuthorityFactory::ObjectType, std::string>,
                  std::list<std::pair<std::string, std::string>>>
             cacheNameToCRS{};
@@ -3030,6 +3031,31 @@ CoordinateOperationFactory::Private::createOperations(
     ENTER_BLOCK("createOperations(" + objectAsStr(sourceCRS.get()) + " --> " +
                 objectAsStr(targetCRS.get()) + ")");
 #endif
+
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    // 10 is arbitrary and hopefully large enough for all transformations PROJ
+    // can handle.
+    // At time of writing 7 is the maximum known to be required by a few tests
+    // like
+    // operation.compoundCRS_to_compoundCRS_with_bound_crs_in_horiz_and_vert_WKT1_same_geoidgrids_context
+    // We don't enable that check for fuzzing, to be able to detect
+    // the root cause of recursions.
+    if (context.nRecLevelCreateOperations == 10) {
+        throw InvalidOperation("Too deep recursion in createOperations()");
+    }
+#endif
+
+    struct RecLevelIncrementer {
+        Private::Context &context_;
+
+        explicit inline RecLevelIncrementer(Private::Context &contextIn)
+            : context_(contextIn) {
+            ++context_.nRecLevelCreateOperations;
+        }
+
+        inline ~RecLevelIncrementer() { --context_.nRecLevelCreateOperations; }
+    };
+    RecLevelIncrementer recLevelIncrementer(context);
 
     std::vector<CoordinateOperationNNPtr> res;
 

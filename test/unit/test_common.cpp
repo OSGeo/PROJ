@@ -33,6 +33,8 @@
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
 
+#include <limits>
+
 using namespace osgeo::proj::common;
 using namespace osgeo::proj::metadata;
 using namespace osgeo::proj::operation;
@@ -69,7 +71,23 @@ TEST(common, unit_of_measure) {
 
 // ---------------------------------------------------------------------------
 
-TEST(common, measure) { EXPECT_TRUE(Measure(1.0) == Measure(1.0)); }
+TEST(common, measure) {
+    EXPECT_TRUE(Measure(0.0) == Measure(0.0));
+    EXPECT_TRUE(Measure(1.0) == Measure(1.0));
+    EXPECT_FALSE(Measure(1.0) == Measure(2.0));
+    EXPECT_FALSE(Measure(1.0) == Measure(0.0));
+    EXPECT_FALSE(Measure(0.0) == Measure(1.0));
+    EXPECT_TRUE(Measure(std::numeric_limits<double>::infinity()) ==
+                Measure(std::numeric_limits<double>::infinity()));
+    EXPECT_TRUE(Measure(-std::numeric_limits<double>::infinity()) ==
+                Measure(-std::numeric_limits<double>::infinity()));
+    EXPECT_FALSE(Measure(std::numeric_limits<double>::infinity()) ==
+                 Measure(-std::numeric_limits<double>::infinity()));
+    EXPECT_FALSE(Measure(std::numeric_limits<double>::infinity()) ==
+                 Measure(1.0));
+    EXPECT_FALSE(Measure(1.0) ==
+                 Measure(std::numeric_limits<double>::infinity()));
+}
 
 // ---------------------------------------------------------------------------
 
