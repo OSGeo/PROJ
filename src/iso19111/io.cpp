@@ -8399,6 +8399,68 @@ const std::string &PROJStringFormatter::toString() const {
                 }
             }
 
+            // The following should be optimized as a no-op
+            // +step +proj=helmert +x=25 +y=-141 +z=-78.5 +rx=0 +ry=-0.35
+            // +rz=-0.736 +s=0 +convention=coordinate_frame
+            // +step +inv +proj=helmert +x=25 +y=-141 +z=-78.5 +rx=0 +ry=0.35
+            // +rz=0.736 +s=0 +convention=position_vector
+            if (curStep.name == "helmert" && prevStep.name == "helmert" &&
+                ((curStep.inverted && !prevStep.inverted) ||
+                 (!curStep.inverted && prevStep.inverted)) &&
+                curStepParamCount == prevStepParamCount) {
+                std::set<std::string> leftParamsSet;
+                std::set<std::string> rightParamsSet;
+                std::map<std::string, std::string> leftParamsMap;
+                std::map<std::string, std::string> rightParamsMap;
+                for (const auto &kv : prevStep.paramValues) {
+                    leftParamsSet.insert(kv.key);
+                    leftParamsMap[kv.key] = kv.value;
+                }
+                for (const auto &kv : curStep.paramValues) {
+                    rightParamsSet.insert(kv.key);
+                    rightParamsMap[kv.key] = kv.value;
+                }
+                if (leftParamsSet == rightParamsSet) {
+                    bool doErase = true;
+                    try {
+                        for (const auto &param : leftParamsSet) {
+                            if (param == "convention") {
+                                // Convention must be different
+                                if (leftParamsMap[param] ==
+                                    rightParamsMap[param]) {
+                                    doErase = false;
+                                    break;
+                                }
+                            } else if (param == "rx" || param == "ry" ||
+                                       param == "rz" || param == "drx" ||
+                                       param == "dry" || param == "drz") {
+                                // Rotational parameters should have opposite
+                                // value
+                                if (c_locale_stod(leftParamsMap[param]) !=
+                                    -c_locale_stod(rightParamsMap[param])) {
+                                    doErase = false;
+                                    break;
+                                }
+                            } else {
+                                // Non rotational parameters should have the
+                                // same value
+                                if (leftParamsMap[param] !=
+                                    rightParamsMap[param]) {
+                                    doErase = false;
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (const std::invalid_argument &) {
+                        break;
+                    }
+                    if (doErase) {
+                        deletePrevAndCurIter();
+                        continue;
+                    }
+                }
+            }
+
             // detect a step and its inverse
             if (curStep.inverted != prevStep.inverted &&
                 curStep.name == prevStep.name &&

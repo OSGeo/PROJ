@@ -8476,6 +8476,158 @@ TEST(io, projstringformatter_merge_consecutive_helmert_3_param_noop) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_merge_inverted_helmert_with_opposite_conventions) {
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1);
+        fmt->addParam("ry", 2);
+        fmt->addParam("rz", 3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector");
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", -1);
+        fmt->addParam("ry", -2);
+        fmt->addParam("rz", -3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "coordinate_frame");
+        EXPECT_EQ(fmt->toString(), "+proj=noop");
+    }
+
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1);
+        fmt->addParam("ry", 2);
+        fmt->addParam("rz", 3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "coordinate_frame");
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", -1);
+        fmt->addParam("ry", -2);
+        fmt->addParam("rz", -3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector");
+        EXPECT_EQ(fmt->toString(), "+proj=noop");
+    }
+
+    // Cannot be optimized
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1);
+        fmt->addParam("ry", 2);
+        fmt->addParam("rz", 3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector");
+        fmt->addStep("helmert");
+        // fmt->setCurrentStepInverted(true); <== CAUSE
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", -1);
+        fmt->addParam("ry", -2);
+        fmt->addParam("rz", -3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "coordinate_frame");
+        EXPECT_TRUE(fmt->toString() != "+proj=noop");
+    }
+
+    // Cannot be optimized
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1);
+        fmt->addParam("ry", 2);
+        fmt->addParam("rz", 3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector");
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", -1);
+        fmt->addParam("ry", -2);
+        fmt->addParam("rz", -3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector"); // <== CAUSE
+        EXPECT_TRUE(fmt->toString() != "+proj=noop");
+    }
+
+    // Cannot be optimized
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1);
+        fmt->addParam("ry", 2);
+        fmt->addParam("rz", 3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector");
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", -10); // <== CAUSE
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", -1);
+        fmt->addParam("ry", -2);
+        fmt->addParam("rz", -3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "coordinate_frame");
+        EXPECT_TRUE(fmt->toString() != "+proj=noop");
+    }
+
+    // Cannot be optimized
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("helmert");
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1);
+        fmt->addParam("ry", 3);
+        fmt->addParam("rz", 2);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "position_vector");
+        fmt->addStep("helmert");
+        fmt->setCurrentStepInverted(true);
+        fmt->addParam("x", 10);
+        fmt->addParam("y", 20);
+        fmt->addParam("z", 30);
+        fmt->addParam("rx", 1); // <== CAUSE
+        fmt->addParam("ry", -2);
+        fmt->addParam("rz", -3);
+        fmt->addParam("s", 4);
+        fmt->addParam("convention", "coordinate_frame");
+        EXPECT_TRUE(fmt->toString() != "+proj=noop");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projstringformatter_cart_grs80_wgs84) {
     auto fmt = PROJStringFormatter::create();
     fmt->addStep("cart");
