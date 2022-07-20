@@ -443,8 +443,14 @@ bool Measure::_isEquivalentTo(const Measure &other,
     if (criterion == util::IComparable::Criterion::STRICT) {
         return operator==(other);
     }
-    return std::fabs(getSIValue() - other.getSIValue()) <=
-           maxRelativeError * std::fabs(getSIValue());
+    const double SIValue = getSIValue();
+    const double otherSIValue = other.getSIValue();
+    // It is arguable that we have to deal with infinite values, but this
+    // helps robustify some situations.
+    if (std::isinf(SIValue) && std::isinf(otherSIValue))
+        return SIValue * otherSIValue > 0;
+    return std::fabs(SIValue - otherSIValue) <=
+           maxRelativeError * std::fabs(SIValue);
 }
 
 // ---------------------------------------------------------------------------
