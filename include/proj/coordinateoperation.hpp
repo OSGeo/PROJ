@@ -93,6 +93,12 @@ using CoordinateOperationPtr = std::shared_ptr<CoordinateOperation>;
 /** Non-null shared pointer of CoordinateOperation */
 using CoordinateOperationNNPtr = util::nn<CoordinateOperationPtr>;
 
+class Transformation;
+/** Shared pointer of Transformation */
+using TransformationPtr = std::shared_ptr<Transformation>;
+/** Non-null shared pointer of Transformation */
+using TransformationNNPtr = util::nn<TransformationPtr>;
+
 /** \brief Abstract class for a mathematical operation on coordinates.
  *
  * A mathematical operation:
@@ -608,6 +614,9 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
 
     PROJ_DLL std::list<std::string> validateParameters() const;
 
+    PROJ_DLL TransformationNNPtr substitutePROJAlternativeGridNames(
+        io::DatabaseContextNNPtr databaseContext) const;
+
     PROJ_PRIVATE :
         //! @cond Doxygen_Suppress
 
@@ -628,6 +637,9 @@ class PROJ_GCC_DLL SingleOperation : virtual public CoordinateOperation {
         util::IComparable::Criterion criterion =
             util::IComparable::Criterion::STRICT,
         const io::DatabaseContextPtr &dbContext = nullptr) const override;
+
+    PROJ_INTERNAL bool isLongitudeRotation() const;
+
     //! @endcond
 
   protected:
@@ -1418,12 +1430,6 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
 
 // ---------------------------------------------------------------------------
 
-class Transformation;
-/** Shared pointer of Transformation */
-using TransformationPtr = std::shared_ptr<Transformation>;
-/** Non-null shared pointer of Transformation */
-using TransformationNNPtr = util::nn<TransformationPtr>;
-
 /** \brief A mathematical operation on coordinates in which parameters are
  * empirically derived from data containing the coordinates of a series of
  * points in both coordinate reference systems.
@@ -1577,9 +1583,6 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
         const crs::CRSNNPtr &targetCRSIn, const common::Length &offsetHeight,
         const std::vector<metadata::PositionalAccuracyNNPtr> &accuracies);
 
-    PROJ_DLL TransformationNNPtr substitutePROJAlternativeGridNames(
-        io::DatabaseContextNNPtr databaseContext) const;
-
     PROJ_DLL static TransformationNNPtr createChangeVerticalUnit(
         const util::PropertyMap &properties, const crs::CRSNNPtr &sourceCRSIn,
         const crs::CRSNNPtr &targetCRSIn, const common::Scale &factor,
@@ -1594,8 +1597,6 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     getTOWGS84Parameters() const; // throw(io::FormattingException)
 
     PROJ_INTERNAL const std::string &getHeightToGeographic3DFilename() const;
-
-    PROJ_INTERNAL bool isLongitudeRotation() const;
 
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
@@ -1629,6 +1630,7 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
         const override; // throw(FormattingException)
 
     PROJ_FRIEND(CoordinateOperationFactory);
+    PROJ_FRIEND(SingleOperation);
     PROJ_INTERNAL TransformationNNPtr inverseAsTransformation() const;
 
     PROJ_INTERNAL CoordinateOperationNNPtr _shallowClone() const override;

@@ -686,6 +686,7 @@ osgeo::proj::operation::SingleOperation::parameterValueNumeric(int, osgeo::proj:
 osgeo::proj::operation::SingleOperation::parameterValues() const
 osgeo::proj::operation::SingleOperation::parameterValue(std::string const&, int) const
 osgeo::proj::operation::SingleOperation::~SingleOperation()
+osgeo::proj::operation::SingleOperation::substitutePROJAlternativeGridNames(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> >) const
 osgeo::proj::operation::SingleOperation::validateParameters() const
 osgeo::proj::operation::Transformation::createAbridgedMolodensky(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, double, double, double, double, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
 osgeo::proj::operation::Transformation::createChangeVerticalUnit(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, osgeo::proj::common::Scale const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
@@ -709,7 +710,6 @@ osgeo::proj::operation::Transformation::createVerticalOffset(osgeo::proj::util::
 osgeo::proj::operation::Transformation::getTOWGS84Parameters() const
 osgeo::proj::operation::Transformation::inverse() const
 osgeo::proj::operation::Transformation::sourceCRS() const
-osgeo::proj::operation::Transformation::substitutePROJAlternativeGridNames(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> >) const
 osgeo::proj::operation::Transformation::targetCRS() const
 osgeo::proj::operation::Transformation::~Transformation()
 osgeo::proj::util::ArrayOfBaseObject::add(osgeo::proj::util::BaseObjectNNPtr const&)
