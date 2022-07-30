@@ -177,12 +177,15 @@ class PROJ_GCC_DLL CoordinateOperation : public common::ObjectUsage,
     PROJ_FRIEND(io::AuthorityFactory);
     PROJ_FRIEND(CoordinateOperationFactory);
     PROJ_FRIEND(ConcatenatedOperation);
+    PROJ_FRIEND(io::WKTParser);
     PROJ_INTERNAL void
     setWeakSourceTargetCRS(std::weak_ptr<crs::CRS> sourceCRSIn,
                            std::weak_ptr<crs::CRS> targetCRSIn);
     PROJ_INTERNAL void setCRSs(const crs::CRSNNPtr &sourceCRSIn,
                                const crs::CRSNNPtr &targetCRSIn,
                                const crs::CRSPtr &interpolationCRSIn);
+    PROJ_INTERNAL void
+    setInterpolationCRS(const crs::CRSPtr &interpolationCRSIn);
     PROJ_INTERNAL void setCRSs(const CoordinateOperation *in,
                                bool inverseSourceTarget);
     PROJ_INTERNAL

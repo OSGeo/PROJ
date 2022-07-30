@@ -233,6 +233,14 @@ void CoordinateOperation::setCRSs(const crs::CRSNNPtr &sourceCRSIn,
     d->targetCRSWeak_ = targetCRSIn.as_nullable();
     d->interpolationCRS_ = interpolationCRSIn;
 }
+
+// ---------------------------------------------------------------------------
+
+void CoordinateOperation::setInterpolationCRS(
+    const crs::CRSPtr &interpolationCRSIn) {
+    d->interpolationCRS_ = interpolationCRSIn;
+}
+
 // ---------------------------------------------------------------------------
 
 void CoordinateOperation::setCRSs(const CoordinateOperation *in,
