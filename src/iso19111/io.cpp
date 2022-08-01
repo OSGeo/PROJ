@@ -3334,7 +3334,12 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
             Conversion::create(invConvProps, invMethodProps, parameters, values)
                 ->inverse()));
     }
-    return Conversion::create(convProps, methodProps, parameters, values);
+    auto conv = Conversion::create(convProps, methodProps, parameters, values);
+    auto interpolationCRS =
+        dealWithEPSGCodeForInterpolationCRSParameter(parameters, values);
+    if (interpolationCRS)
+        conv->setInterpolationCRS(interpolationCRS);
+    return conv;
 }
 
 // ---------------------------------------------------------------------------
@@ -3346,8 +3351,13 @@ CRSPtr WKTParser::Private::dealWithEPSGCodeForInterpolationCRSParameter(
     // crs_epsg_code] into proper interpolation CRS
     if (dbContext_ != nullptr) {
         for (size_t i = 0; i < parameters.size(); ++i) {
-            if (parameters[i]->nameStr() ==
-                EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS) {
+            const auto &l_name = parameters[i]->nameStr();
+            const auto epsgCode = parameters[i]->getEPSGCode();
+            if (l_name == EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS ||
+                epsgCode ==
+                    EPSG_CODE_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS ||
+                l_name == EPSG_NAME_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS ||
+                epsgCode == EPSG_CODE_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS) {
                 const int code =
                     static_cast<int>(values[i]->value().getSIValue());
                 try {
