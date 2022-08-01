@@ -599,6 +599,10 @@ PJ *proj_create(PJ_CONTEXT *ctx, const char *text) {
  * <ul>
  * <li>STRICT=YES/NO. Defaults to NO. When set to YES, strict validation will
  * be enabled.</li>
+ * <li>UNSET_IDENTIFIERS_IF_INCOMPATIBLE_DEF=YES/NO. Defaults to YES.
+ *     When set to YES, object identifiers are unset when there is
+ *     a contradiction between the definition from WKT and the one from
+ *     the database./<li>
  * </ul>
  * @param out_warnings Pointer to a PROJ_STRING_LIST object, or NULL.
  * If provided, *out_warnings will contain a list of warnings, typically for
@@ -639,6 +643,10 @@ PJ *proj_create_from_wkt(PJ_CONTEXT *ctx, const char *wkt,
             const char *value;
             if ((value = getOptionValue(*iter, "STRICT="))) {
                 parser.setStrict(ci_equal(value, "YES"));
+            } else if ((value = getOptionValue(
+                            *iter, "UNSET_IDENTIFIERS_IF_INCOMPATIBLE_DEF="))) {
+                parser.setUnsetIdentifiersIfIncompatibleDef(
+                    ci_equal(value, "YES"));
             } else {
                 std::string msg("Unknown option :");
                 msg += *iter;

@@ -1260,19 +1260,92 @@ TEST(wkt_parse, wkt1_projected_wrong_axis_geogcs) {
                "    UNIT[\"metre\",1,\n"
                "        AUTHORITY[\"EPSG\",\"9001\"]],\n"
                "    AUTHORITY[\"EPSG\",\"32631\"]]";
-    WKTParser parser;
-    parser.setStrict(false).attachDatabaseContext(DatabaseContext::create());
-    auto obj = parser.createFromWKT(wkt);
-    EXPECT_TRUE(!parser.warningList().empty());
-    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
-    ASSERT_TRUE(crs != nullptr);
+    {
+        WKTParser parser;
+        parser.setStrict(false).attachDatabaseContext(
+            DatabaseContext::create());
+        auto obj = parser.createFromWKT(wkt);
+        EXPECT_TRUE(!parser.warningList().empty());
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
 
-    EXPECT_TRUE(crs->baseCRS()->identifiers().empty());
+        EXPECT_TRUE(crs->baseCRS()->identifiers().empty());
 
-    auto cs = crs->baseCRS()->coordinateSystem();
-    ASSERT_EQ(cs->axisList().size(), 2U);
-    EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::EAST);
-    EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::NORTH);
+        auto cs = crs->baseCRS()->coordinateSystem();
+        ASSERT_EQ(cs->axisList().size(), 2U);
+        EXPECT_EQ(cs->axisList()[0]->direction(), AxisDirection::EAST);
+        EXPECT_EQ(cs->axisList()[1]->direction(), AxisDirection::NORTH);
+    }
+    {
+        WKTParser parser;
+        parser.setStrict(false)
+            .setUnsetIdentifiersIfIncompatibleDef(false)
+            .attachDatabaseContext(DatabaseContext::create());
+        auto obj = parser.createFromWKT(wkt);
+        EXPECT_TRUE(parser.warningList().empty());
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        EXPECT_TRUE(!crs->baseCRS()->identifiers().empty());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(wkt_parse, wkt1_projected_wrong_angular_unit) {
+    auto wkt = "PROJCS[\"Merchich / Nord Maroc\","
+               "    GEOGCS[\"Merchich\","
+               "        DATUM[\"Merchich\","
+               "            SPHEROID[\"Clarke 1880 (IGN)\","
+               "6378249.2,293.466021293627]],"
+               "        PRIMEM[\"Greenwich\",0],"
+               "        UNIT[\"grad\",0.015707963267949,"
+               "            AUTHORITY[\"EPSG\",\"9105\"]],"
+               "        AUTHORITY[\"EPSG\",\"4261\"]],"
+               "    PROJECTION[\"Lambert_Conformal_Conic_1SP\"],"
+               "    PARAMETER[\"latitude_of_origin\",37],"
+               "    PARAMETER[\"central_meridian\",-6],"
+               "    PARAMETER[\"scale_factor\",0.999625769],"
+               "    PARAMETER[\"false_easting\",500000],"
+               "    PARAMETER[\"false_northing\",300000],"
+               "    UNIT[\"metre\",1,"
+               "        AUTHORITY[\"EPSG\",\"9001\"]],"
+               "    AXIS[\"Easting\",EAST],"
+               "    AXIS[\"Northing\",NORTH]]";
+    {
+        WKTParser parser;
+        parser.setStrict(false).attachDatabaseContext(
+            DatabaseContext::create());
+        auto obj = parser.createFromWKT(wkt);
+        EXPECT_TRUE(!parser.warningList().empty());
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        // No base CRS identifiers
+        EXPECT_TRUE(crs->baseCRS()->identifiers().empty());
+
+        auto cs = crs->baseCRS()->coordinateSystem();
+        ASSERT_EQ(cs->axisList().size(), 2U);
+        EXPECT_NEAR(cs->axisList()[0]->unit().conversionToSI(),
+                    UnitOfMeasure::GRAD.conversionToSI(), 1e-10);
+    }
+    {
+        WKTParser parser;
+        parser.setUnsetIdentifiersIfIncompatibleDef(false)
+            .attachDatabaseContext(DatabaseContext::create());
+        auto obj = parser.createFromWKT(wkt);
+        EXPECT_TRUE(parser.warningList().empty());
+        auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+        ASSERT_TRUE(crs != nullptr);
+
+        // Base CRS identifier preserved
+        EXPECT_TRUE(!crs->baseCRS()->identifiers().empty());
+
+        auto cs = crs->baseCRS()->coordinateSystem();
+        ASSERT_EQ(cs->axisList().size(), 2U);
+        EXPECT_NEAR(cs->axisList()[0]->unit().conversionToSI(),
+                    UnitOfMeasure::GRAD.conversionToSI(), 1e-10);
+    }
 }
 
 // ---------------------------------------------------------------------------
