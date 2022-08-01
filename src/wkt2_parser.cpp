@@ -182,15 +182,6 @@ int pj_wkt2_lex(YYSTYPE * /*pNode */, pj_wkt2_parse_context *context) {
     /* -------------------------------------------------------------------- */
     if (*pszInput == '"') {
         pszInput++;
-
-        if( strncmp(pszInput, EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS,
-                    strlen(EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS)) == 0 &&
-            pszInput[strlen(EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS)] == '"' )
-        {
-            context->pszNext = pszInput + strlen(EPSG_NAME_PARAMETER_EPSG_CODE_FOR_INTERPOLATION_CRS) + 1;
-            return T_EPSG_CODE_FOR_INTERPOLATION;
-        }
-
         while (*pszInput != '\0') {
             if (*pszInput == '"') {
                 if (pszInput[1] == '"')
