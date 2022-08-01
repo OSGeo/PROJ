@@ -437,3 +437,5 @@ INSERT INTO "concatenated_operation" VALUES('EPSG','9731','ETRS89 to ETRS89 + Ca
 INSERT INTO "usage" VALUES('EPSG','15285','concatenated_operation','EPSG','9731','EPSG','2340','EPSG','1270');
 INSERT INTO "concatenated_operation" VALUES('EPSG','9750','ETRS89 to Catania 1965 height (1)','','EPSG','4937','EPSG','9721',0.035,'IGM-Ita 2005 Sicily',0);
 INSERT INTO "usage" VALUES('EPSG','15385','concatenated_operation','EPSG','9750','EPSG','2340','EPSG','1133');
+INSERT INTO "concatenated_operation" VALUES('EPSG','10146','INAGeoid2020 v1 height to INAGeoid v2 height (1)','In central Java INAGeoid2020 v2 height minus INAGeoid2020 v1 height is approximately +0.2m (v1 surface is above the v2 surface). This difference varies significantly across Indonesia.','EPSG','9471','EPSG','20036',0.2,'BIG-Idn 2022',0);
+INSERT INTO "usage" VALUES('EPSG','18452','concatenated_operation','EPSG','10146','EPSG','1122','EPSG','1178');

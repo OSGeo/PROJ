@@ -49,7 +49,7 @@ VALUES
 ('CGG2013n83.byn','ca_nrc_CGG2013n83.tif','CGG2013n83.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013n83.tif',1,1,NULL),
 ('HT2_0.byn','ca_nrc_HT2_2010v70.tif','HT2_2010v70.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70.tif',1,1,NULL), -- deprecated name
 ('HT2_2010v70.byn','ca_nrc_HT2_2010v70.tif','HT2_2010v70.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70.tif',1,1,NULL),
-('HT2_2010_CGG2013a.byn','ca_nrc_HT2_2010v70_CGG2013a.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70_CGG2013a.tif',1,1,NULL),
+('HT2_2010v70_CGG2013a.byn','ca_nrc_HT2_2010v70_CGG2013a.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70_CGG2013a.tif',1,1,NULL),
 -- the PROJ grid is the reverse way of the EPSG one
 ('NTv1_0.gsb','ca_nrc_ntv1_can.tif','ntv1_can.dat','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_ntv1_can.tif',1,1,NULL),
 -- just a case change

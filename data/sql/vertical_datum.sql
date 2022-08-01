@@ -206,7 +206,7 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1290','Lowest Astronomical Tide Neth
 INSERT INTO "usage" VALUES('EPSG','14120','vertical_datum','EPSG','1290','EPSG','1630','EPSG','1198');
 INSERT INTO "vertical_datum" VALUES('EPSG','1292','Australian Vertical Working Surface',NULL,'2020-07-14',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14134','vertical_datum','EPSG','1292','EPSG','4177','EPSG','1264');
-INSERT INTO "vertical_datum" VALUES('EPSG','1294','Indonesian Geoid 2020',NULL,'2020-01-01',NULL,NULL,NULL,0);
+INSERT INTO "vertical_datum" VALUES('EPSG','1294','Indonesian Geoid 2020 version 1',NULL,'2020-06-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14149','vertical_datum','EPSG','1294','EPSG','1122','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','1296','Baltic 1986',NULL,'1986-01-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','14975','vertical_datum','EPSG','1296','EPSG','3293','EPSG','1178');
@@ -238,6 +238,8 @@ INSERT INTO "vertical_datum" VALUES('EPSG','1325','Canadian Geodetic Vertical Da
 INSERT INTO "usage" VALUES('EPSG','18301','vertical_datum','EPSG','1325','EPSG','1061','EPSG','1180');
 INSERT INTO "vertical_datum" VALUES('EPSG','1326','Canadian Geodetic Vertical Datum of 2013 (CGG2013a) epoch 1997',NULL,'2019-02-01',NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18302','vertical_datum','EPSG','1326','EPSG','1061','EPSG','1180');
+INSERT INTO "vertical_datum" VALUES('EPSG','1328','Indonesian Geoid 2020 version 2',NULL,'2022-06-01',NULL,NULL,NULL,0);
+INSERT INTO "usage" VALUES('EPSG','18439','vertical_datum','EPSG','1328','EPSG','1122','EPSG','1178');
 INSERT INTO "vertical_datum" VALUES('EPSG','5100','Mean Sea Level',NULL,NULL,NULL,NULL,NULL,0);
 INSERT INTO "usage" VALUES('EPSG','13307','vertical_datum','EPSG','5100','EPSG','1262','EPSG','1199');
 INSERT INTO "vertical_datum" VALUES('EPSG','5101','Ordnance Datum Newlyn',NULL,'1956-01-01',NULL,NULL,NULL,0);
