@@ -1280,6 +1280,7 @@ struct WKTParser::Private {
     };
 
     bool strict_ = true;
+    bool unsetIdentifiersIfIncompatibleDef_ = true;
     std::list<std::string> warningList_{};
     std::vector<double> toWGS84Parameters_{};
     std::string datumPROJ4Grids_{};
@@ -1498,6 +1499,20 @@ WKTParser::~WKTParser() = default;
  */
 WKTParser &WKTParser::setStrict(bool strict) {
     d->strict_ = strict;
+    return *this;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Set whether object identifiers should be unset when there is
+ *         a contradiction between the definition from WKT and the one from
+ *         the database.
+ *
+ * At time of writing, this only applies to the base geographic CRS of a
+ * projected CRS, when comparing its coordinate system.
+ */
+WKTParser &WKTParser::setUnsetIdentifiersIfIncompatibleDef(bool unset) {
+    d->unsetIdentifiersIfIncompatibleDef_ = unset;
     return *this;
 }
 
@@ -3084,19 +3099,40 @@ WKTParser::Private::buildGeodeticCRS(const WKTNodeNNPtr &node) {
                     !ellipsoidalCS->_isEquivalentTo(
                         dbCRS->coordinateSystem().get(),
                         util::IComparable::Criterion::EQUIVALENT)) {
-                    emitRecoverableWarning(
-                        "Coordinate system of GeographicCRS in the WKT "
-                        "definition is different from the one of the "
-                        "authority. Unsetting the identifier to avoid "
-                        "confusion");
-                    props.unset(Identifier::CODESPACE_KEY);
-                    props.unset(Identifier::AUTHORITY_KEY);
-                    props.unset(IdentifiedObject::IDENTIFIERS_KEY);
+                    if (unsetIdentifiersIfIncompatibleDef_) {
+                        emitRecoverableWarning(
+                            "Coordinate system of GeographicCRS in the WKT "
+                            "definition is different from the one of the "
+                            "authority. Unsetting the identifier to avoid "
+                            "confusion");
+                        props.unset(Identifier::CODESPACE_KEY);
+                        props.unset(Identifier::AUTHORITY_KEY);
+                        props.unset(IdentifiedObject::IDENTIFIERS_KEY);
+                    }
                     crs = GeographicCRS::create(props, datum, datumEnsemble,
                                                 NN_NO_CHECK(ellipsoidalCS));
                 } else if (dbCRS) {
+                    auto csFromDB = dbCRS->coordinateSystem();
+                    auto csFromDBAltered = csFromDB;
+                    if (!isNull(nodeP->lookForChild(WKTConstants::UNIT))) {
+                        csFromDBAltered =
+                            csFromDB->alterAngularUnit(angularUnit);
+                        if (unsetIdentifiersIfIncompatibleDef_ &&
+                            !csFromDBAltered->_isEquivalentTo(
+                                csFromDB.get(),
+                                util::IComparable::Criterion::EQUIVALENT)) {
+                            emitRecoverableWarning(
+                                "Coordinate system of GeographicCRS in the WKT "
+                                "definition is different from the one of the "
+                                "authority. Unsetting the identifier to avoid "
+                                "confusion");
+                            props.unset(Identifier::CODESPACE_KEY);
+                            props.unset(Identifier::AUTHORITY_KEY);
+                            props.unset(IdentifiedObject::IDENTIFIERS_KEY);
+                        }
+                    }
                     crs = GeographicCRS::create(props, datum, datumEnsemble,
-                                                dbCRS->coordinateSystem());
+                                                csFromDBAltered);
                 }
             }
             return crs;
