@@ -7436,7 +7436,6 @@ TEST(operation, compoundCRS_with_derived_vertical_CRS) {
         "                ANGLEUNIT[\"arc-second\",4.84813681109536E-06],\n"
         "                ID[\"EPSG\",8731]],\n"
         "            PARAMETER[\"EPSG code for Horizontal CRS\",4326,\n"
-        "                UNIT[\"none\",1],\n"
         "                ID[\"EPSG\",1037]]],\n"
         "        CS[vertical,1],\n"
         "            AXIS[\"gravity-related height (H)\",up,\n"
