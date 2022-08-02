@@ -75,10 +75,13 @@ slightly since not all authors has properly configured their names in git.
 *Commit the changes to master.*
 
 
-1.4 Update `CITATION`
+1.4 Update `CITATION.cff` and `CITATION`
 -------------------------------------------------------------------------------
 
-If needed, update the year in `CITATION`.
+Update the "version" and "date-released" fields in `CITATION.cff`. The
+"doi" does not need to be updated.
+
+If needed, update the two instances of year in `CITATION`.
 
 *Commit the changes to master.*
 
