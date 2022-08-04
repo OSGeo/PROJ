@@ -7770,6 +7770,52 @@ void proj_operation_factory_context_set_area_of_interest(
 
 // ---------------------------------------------------------------------------
 
+/** \brief Set the name of the desired area of interest for the resulting
+ * coordinate transformations.
+ *
+ * @param ctx PROJ context, or NULL for default context
+ * @param factory_ctx Operation factory context. must not be NULL
+ * @param area_name Area name. Must be known of the database.
+ */
+void proj_operation_factory_context_set_area_of_interest_name(
+    PJ_CONTEXT *ctx, PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+    const char *area_name) {
+    SANITIZE_CTX(ctx);
+    if (!factory_ctx || !area_name) {
+        proj_context_errno_set(ctx, PROJ_ERR_OTHER_API_MISUSE);
+        proj_log_error(ctx, __FUNCTION__, "missing required input");
+        return;
+    }
+    try {
+        auto extent = factory_ctx->operationContext->getAreaOfInterest();
+        if (extent == nullptr) {
+            auto dbContext = getDBcontext(ctx);
+            auto factory = AuthorityFactory::create(dbContext, std::string());
+            auto res = factory->listAreaOfUseFromName(area_name, false);
+            if (res.size() == 1) {
+                factory_ctx->operationContext->setAreaOfInterest(
+                    AuthorityFactory::create(dbContext, res.front().first)
+                        ->createExtent(res.front().second)
+                        .as_nullable());
+            } else {
+                proj_log_error(ctx, __FUNCTION__, "cannot find area");
+                return;
+            }
+        } else {
+            factory_ctx->operationContext->setAreaOfInterest(
+                metadata::Extent::create(util::optional<std::string>(area_name),
+                                         extent->geographicElements(),
+                                         extent->verticalElements(),
+                                         extent->temporalElements())
+                    .as_nullable());
+        }
+    } catch (const std::exception &e) {
+        proj_log_error(ctx, __FUNCTION__, e.what());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 /** \brief Set how source and target CRS extent should be used
  * when considering if a transformation can be used (only takes effect if
  * no area of interest is explicitly defined).

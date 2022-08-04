@@ -66,8 +66,8 @@ $EXE --bbox -141.01,40.04,-47.74,83.17 NAD27 NAD83 >>${OUT} <<EOF
 EOF
 
 echo "##############################################################" >> ${OUT}
-echo "Test --area \"USA - CONUS - onshore\" NAD27 NAD83 (using conus)" >> ${OUT}
-$EXE --area "USA - CONUS - onshore" NAD27 NAD83 >>${OUT} <<EOF
+echo "Test --area \"USA - CONUS including EEZ\" NAD27 NAD83 (using conus)" >> ${OUT}
+$EXE --area "USA - CONUS including EEZ" NAD27 NAD83 >>${OUT} <<EOF
 44 -111
 40.5 -60
 EOF

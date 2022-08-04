@@ -10,7 +10,7 @@ As above, but without ntv1 everything goes through conus file.
 Test --bbox -141.01,40.04,-47.74,83.17 NAD27 NAD83 (using NTv2)
 40d30'0.368"N	59d59'56.617"W 0.000
 ##############################################################
-Test --area "USA - CONUS - onshore" NAD27 NAD83 (using conus)
+Test --area "USA - CONUS including EEZ" NAD27 NAD83 (using conus)
 43d59'59.725"N	111d0'2.788"W 0.000
 *	* inf
 ##############################################################
