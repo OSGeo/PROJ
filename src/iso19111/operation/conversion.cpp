@@ -4086,8 +4086,12 @@ void Conversion::_exportToPROJString(
             }
         }
 
+        auto derivedProjCRS =
+            dynamic_cast<const crs::DerivedProjectedCRS *>(horiz);
+
         // horiz != nullptr: only to make clang static analyzer happy
-        if (!bEllipsoidParametersDone && horiz != nullptr) {
+        if (!bEllipsoidParametersDone && horiz != nullptr &&
+            derivedProjCRS == nullptr) {
             auto targetGeodCRS = horiz->extractGeodeticCRS();
             auto targetGeogCRS =
                 std::dynamic_pointer_cast<crs::GeographicCRS>(targetGeodCRS);
@@ -4118,6 +4122,12 @@ void Conversion::_exportToPROJString(
             formatter->popOmitZUnitConversion();
             if (projCRS->hasOver()) {
                 formatter->addParam("over");
+            }
+        } else {
+            if (derivedProjCRS) {
+                formatter->pushOmitZUnitConversion();
+                derivedProjCRS->addUnitConvertAndAxisSwap(formatter);
+                formatter->popOmitZUnitConversion();
             }
         }
 
