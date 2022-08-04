@@ -1926,6 +1926,38 @@ TEST(wkt_parse, wkt1_hotine_oblique_mercator_with_rectified_grid_angle) {
 
 // ---------------------------------------------------------------------------
 
+TEST(wkt_parse,
+     wkt1_hotine_oblique_mercator_azimuth_center_with_rectified_grid_angle) {
+    auto wkt = "PROJCS[\"unknown\","
+               "GEOGCS[\"unknown\","
+               "    DATUM[\"WGS_1984\","
+               "        SPHEROID[\"WGS 84\",6378137,298.257223563]],"
+               "    PRIMEM[\"Greenwich\",0],"
+               "    UNIT[\"degree\",0.0174532925199433]],"
+               "PROJECTION[\"Hotine_Oblique_Mercator_Azimuth_Center\"],"
+               "PARAMETER[\"latitude_of_center\",0],"
+               "PARAMETER[\"longitude_of_center\",0],"
+               "PARAMETER[\"azimuth\",30],"
+               "PARAMETER[\"rectified_grid_angle\",0],"
+               "PARAMETER[\"scale_factor\",1],"
+               "PARAMETER[\"false_easting\",0],"
+               "PARAMETER[\"false_northing\",0],"
+               "UNIT[\"metre\",1]]";
+
+    auto obj = WKTParser().createFromWKT(wkt);
+    auto crs = nn_dynamic_pointer_cast<ProjectedCRS>(obj);
+    ASSERT_TRUE(crs != nullptr);
+
+    // Check that we have not overriden rectified_grid_angle
+    auto got_wkt = crs->exportToWKT(
+        WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get());
+    EXPECT_TRUE(got_wkt.find("PARAMETER[\"rectified_grid_angle\",0]") !=
+                std::string::npos)
+        << got_wkt;
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(proj_export, wkt2_hotine_oblique_mercator_without_rectified_grid_angle) {
     auto wkt = "PROJCRS[\"NAD_1983_Michigan_GeoRef_Meters\",\n"
                "    BASEGEOGCRS[\"NAD83(1986)\",\n"
