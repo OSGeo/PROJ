@@ -895,7 +895,7 @@ For use by pipeline init function.
 
 /** Create an area of use */
 PJ_AREA * proj_area_create(void) {
-    return static_cast<PJ_AREA*>(calloc(1, sizeof(PJ_AREA)));
+    return new PJ_AREA();
 }
 
 /** Assign a bounding box to an area of use. */
@@ -911,9 +911,15 @@ void proj_area_set_bbox(PJ_AREA *area,
     area->north_lat_degree = north_lat_degree;
 }
 
+/** Assign the name of an area of use. */
+void proj_area_set_name(PJ_AREA *area,
+                        const char* name) {
+    area->name = name;
+}
+
 /** Free an area of use */
 void proj_area_destroy(PJ_AREA* area) {
-    free(area);
+    delete area;
 }
 
 /************************************************************************/
@@ -1910,6 +1916,13 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
                                             area->south_lat_degree,
                                             area->east_lon_degree,
                                             area->north_lat_degree);
+
+        if( !area->name.empty() ) {
+            proj_operation_factory_context_set_area_of_interest_name(
+                                            ctx,
+                                            operation_ctx,
+                                            area->name.c_str());
+        }
     }
 
     proj_operation_factory_context_set_spatial_criterion(
@@ -1940,7 +1953,7 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, cons
     PJ* P = proj_list_get(ctx, op_list, 0);
     assert(P);
 
-    if( P == nullptr || op_count == 1 || (area && area->bbox_set) ||
+    if( P == nullptr || op_count == 1 ||
         proj_get_type(source_crs) == PJ_TYPE_GEOCENTRIC_CRS ||
         proj_get_type(target_crs) == PJ_TYPE_GEOCENTRIC_CRS ) {
         proj_list_destroy(op_list);

@@ -1014,6 +1014,7 @@ struct FilterResults {
                   bool forceStrictContainmentTest)
         : sourceList(sourceListIn), context(contextIn), extent1(extent1In),
           extent2(extent2In), areaOfInterest(context->getAreaOfInterest()),
+          areaOfInterestUserSpecified(areaOfInterest != nullptr),
           desiredAccuracy(context->getDesiredAccuracy()),
           sourceAndTargetCRSExtentUse(
               context->getSourceAndTargetCRSExtentUse()) {
@@ -1047,6 +1048,7 @@ struct FilterResults {
     const metadata::ExtentPtr &extent1;
     const metadata::ExtentPtr &extent2;
     metadata::ExtentPtr areaOfInterest;
+    const bool areaOfInterestUserSpecified;
     const double desiredAccuracy = context->getDesiredAccuracy();
     const CoordinateOperationContext::SourceTargetCRSExtentUse
         sourceAndTargetCRSExtentUse;
@@ -1100,6 +1102,23 @@ struct FilterResults {
         bool hasNonBallparkWithoutExtent = false;
         bool hasNonBallparkOpWithExtent = false;
         const bool allowBallpark = context->getAllowBallparkTransformations();
+
+        bool foundExtentWithExpectedDescription = false;
+        if (areaOfInterestUserSpecified &&
+            areaOfInterest && areaOfInterest->description().has_value()) {
+            for (const auto &op : sourceList) {
+                bool emptyIntersection = false;
+                auto extent = getExtent(op, true, emptyIntersection);
+                if (extent && extent->description().has_value()) {
+                    if (*(areaOfInterest->description()) ==
+                        *(extent->description())) {
+                        foundExtentWithExpectedDescription = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         for (const auto &op : sourceList) {
             if (desiredAccuracy != 0) {
                 const double accuracy = getAccuracy(op);
@@ -1117,6 +1136,12 @@ struct FilterResults {
                     if (!op->hasBallparkTransformation()) {
                         hasNonBallparkWithoutExtent = true;
                     }
+                    continue;
+                }
+                if (foundExtentWithExpectedDescription &&
+                    (!extent->description().has_value() ||
+                     *(areaOfInterest->description()) !=
+                         *(extent->description()))) {
                     continue;
                 }
                 if (!op->hasBallparkTransformation()) {

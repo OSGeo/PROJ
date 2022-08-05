@@ -722,6 +722,11 @@ int main(int argc, char **argv) {
                                    bbox->southBoundLatitude(),
                                    bbox->eastBoundLongitude(),
                                    bbox->northBoundLatitude());
+                if( bboxFilter->description().has_value() )
+                {
+                    proj_area_set_name(pj_area,
+                                       bboxFilter->description()->c_str());
+                }
             }
         }
     }

@@ -236,11 +236,12 @@ struct PJ_REGION_S {
 };
 
 struct PJ_AREA {
-    int     bbox_set;
-    double  west_lon_degree;
-    double  south_lat_degree;
-    double  east_lon_degree;
-    double  north_lat_degree;
+    bool     bbox_set = false;
+    double  west_lon_degree = 0;
+    double  south_lat_degree = 0;
+    double  east_lon_degree = 0;
+    double  north_lat_degree = 0;
+    std::string name{};
 };
 
 

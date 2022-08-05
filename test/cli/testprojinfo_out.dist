@@ -921,12 +921,10 @@ unknown id, Inverse of UTM zone 31N + ED50 to WGS 84 (42), 5 m, Portugal - mainl
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area EPSG:3237 --summary
 Candidate operations found: 1
-Note: using '--spatial-test intersects' would bring more results (2)
 EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore.
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark - onshore' --summary
 Candidate operations found: 1
-Note: using '--spatial-test intersects' would bring more results (2)
 EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore.
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark -' --summary
@@ -1568,7 +1566,6 @@ Testing -s "ETRS89 / TM35FIN(E,N) + N2000 height" -t "KKJ / Finland Uniform Coor
 
 Testing NKG: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark
 Candidate operations found: 1
-Note: using '--spatial-test intersects' would bring more results (2)
 NKG:ITRF2014_TO_DK, ITRF2014 to ETRS89(DK), 0.01 m, Denmark - onshore and offshore.
 
 Testing projinfo --dump-db-structure | head -n 5
