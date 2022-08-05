@@ -661,6 +661,10 @@ class PROJ_GCC_DLL ProjectedCRS final : public DerivedCRS,
         addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter,
                                   bool axisSpecFound) const;
 
+    PROJ_INTERNAL static void addUnitConvertAndAxisSwap(
+        const std::vector<cs::CoordinateSystemAxisNNPtr> &axisListIn,
+        io::PROJStringFormatter *formatter, bool axisSpecFound);
+
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
 
@@ -1272,7 +1276,10 @@ class PROJ_GCC_DLL DerivedProjectedCRS final : public DerivedCRS {
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
-                        //! @endcond
+
+    PROJ_INTERNAL void
+    addUnitConvertAndAxisSwap(io::PROJStringFormatter *formatter) const;
+    //! @endcond
 
   protected:
     PROJ_INTERNAL
