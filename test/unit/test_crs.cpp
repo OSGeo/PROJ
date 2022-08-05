@@ -4204,6 +4204,22 @@ static CompoundCRSNNPtr createCompoundCRS() {
 
 // ---------------------------------------------------------------------------
 
+static DerivedProjectedCRSNNPtr createDerivedProjectedCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "derived projectedCRS"),
+        createProjected(), derivingConversion,
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, compoundCRS_valid) {
     // geographic 2D + vertical
     CompoundCRS::create(
@@ -4214,6 +4230,11 @@ TEST(crs, compoundCRS_valid) {
     CompoundCRS::create(
         PropertyMap(),
         std::vector<CRSNNPtr>{createProjected(), createVerticalCRS()});
+
+    // derived projected 2D + vertical
+    CompoundCRS::create(PropertyMap(),
+                        std::vector<CRSNNPtr>{createDerivedProjectedCRS(),
+                                              createVerticalCRS()});
 }
 
 // ---------------------------------------------------------------------------
@@ -5551,22 +5572,6 @@ TEST(crs, derivedGeodeticCRS_WKT1) {
         createDerivedGeodeticCRS()->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         FormattingException);
-}
-
-// ---------------------------------------------------------------------------
-
-static DerivedProjectedCRSNNPtr createDerivedProjectedCRS() {
-
-    auto derivingConversion = Conversion::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
-        std::vector<OperationParameterNNPtr>{},
-        std::vector<ParameterValueNNPtr>{});
-
-    return DerivedProjectedCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "derived projectedCRS"),
-        createProjected(), derivingConversion,
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 }
 
 // ---------------------------------------------------------------------------
