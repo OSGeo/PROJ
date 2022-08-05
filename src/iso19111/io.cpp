@@ -7604,10 +7604,17 @@ WKTParser::guessDialect(const std::string &wkt) noexcept {
     for (const auto &pointerKeyword : wkt1_keywords) {
         if (ci_starts_with(wkt, *pointerKeyword)) {
 
-            if (ci_find(wkt, "GEOGCS[\"GCS_") != std::string::npos ||
-                (!ci_starts_with(wkt, WKTConstants::LOCAL_CS) &&
-                 ci_find(wkt, "AXIS[") == std::string::npos &&
-                 ci_find(wkt, "AUTHORITY[") == std::string::npos)) {
+            if ((ci_find(wkt, "GEOGCS[\"GCS_") != std::string::npos ||
+                 (!ci_starts_with(wkt, WKTConstants::LOCAL_CS) &&
+                  ci_find(wkt, "AXIS[") == std::string::npos &&
+                  ci_find(wkt, "AUTHORITY[") == std::string::npos)) &&
+                // WKT1:GDAL and WKT1:ESRI have both a
+                // Hotine_Oblique_Mercator_Azimuth_Center If providing a
+                // WKT1:GDAL without AXIS, we may wrongly detect it as WKT1:ESRI
+                // and skip the rectified_grid_angle parameter cf
+                // https://github.com/OSGeo/PROJ/issues/3279
+                ci_find(wkt, "PARAMETER[\"rectified_grid_angle") ==
+                    std::string::npos) {
                 return WKTGuessedDialect::WKT1_ESRI;
             }
 
