@@ -5045,6 +5045,7 @@ CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
     }
     auto comp0Geog = dynamic_cast<const GeographicCRS *>(comp0);
     auto comp0Proj = dynamic_cast<const ProjectedCRS *>(comp0);
+    auto comp0DerPr = dynamic_cast<const DerivedProjectedCRS *>(comp0);
     auto comp0Eng = dynamic_cast<const EngineeringCRS *>(comp0);
 
     auto comp1 = components[1].get();
@@ -5057,20 +5058,22 @@ CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
     // Loose validation based on
     // http://docs.opengeospatial.org/as/18-005r4/18-005r4.html#34
     bool ok = false;
+    const bool comp1IsVertOrEng1 =
+        comp1Vert ||
+        (comp1Eng && comp1Eng->coordinateSystem()->axisList().size() == 1);
     if ((comp0Geog && comp0Geog->coordinateSystem()->axisList().size() == 2 &&
-         (comp1Vert ||
-          (comp1Eng &&
-           comp1Eng->coordinateSystem()->axisList().size() == 1))) ||
+         comp1IsVertOrEng1) ||
         (comp0Proj && comp0Proj->coordinateSystem()->axisList().size() == 2 &&
-         (comp1Vert ||
-          (comp1Eng &&
-           comp1Eng->coordinateSystem()->axisList().size() == 1))) ||
+         comp1IsVertOrEng1) ||
+        (comp0DerPr && comp0DerPr->coordinateSystem()->axisList().size() == 2 &&
+         comp1IsVertOrEng1) ||
         (comp0Eng && comp0Eng->coordinateSystem()->axisList().size() <= 2 &&
          comp1Vert)) {
         // Spatial compound coordinate reference system
         ok = true;
     } else {
-        bool isComp0Spatial = comp0Geog || comp0Proj || comp0Eng ||
+        bool isComp0Spatial = comp0Geog || comp0Proj || comp0DerPr ||
+                              comp0Eng ||
                               dynamic_cast<const GeodeticCRS *>(comp0) ||
                               dynamic_cast<const VerticalCRS *>(comp0);
         if (isComp0Spatial && dynamic_cast<const TemporalCRS *>(comp1)) {

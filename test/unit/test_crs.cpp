@@ -4204,6 +4204,38 @@ static CompoundCRSNNPtr createCompoundCRS() {
 
 // ---------------------------------------------------------------------------
 
+static DerivedProjectedCRSNNPtr createDerivedProjectedCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "derived projectedCRS"),
+        createProjected(), derivingConversion,
+        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
+static DerivedVerticalCRSNNPtr createDerivedVerticalCRS() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedVerticalCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived vertCRS"),
+        createVerticalCRS(), derivingConversion,
+        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, compoundCRS_valid) {
     // geographic 2D + vertical
     CompoundCRS::create(
@@ -4214,6 +4246,16 @@ TEST(crs, compoundCRS_valid) {
     CompoundCRS::create(
         PropertyMap(),
         std::vector<CRSNNPtr>{createProjected(), createVerticalCRS()});
+
+    // derived projected 2D + vertical
+    CompoundCRS::create(PropertyMap(),
+                        std::vector<CRSNNPtr>{createDerivedProjectedCRS(),
+                                              createVerticalCRS()});
+
+    // derived projected 2D + derived vertical
+    CompoundCRS::create(PropertyMap(),
+                        std::vector<CRSNNPtr>{createDerivedProjectedCRS(),
+                                              createDerivedVerticalCRS()});
 }
 
 // ---------------------------------------------------------------------------
@@ -5555,22 +5597,6 @@ TEST(crs, derivedGeodeticCRS_WKT1) {
 
 // ---------------------------------------------------------------------------
 
-static DerivedProjectedCRSNNPtr createDerivedProjectedCRS() {
-
-    auto derivingConversion = Conversion::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
-        std::vector<OperationParameterNNPtr>{},
-        std::vector<ParameterValueNNPtr>{});
-
-    return DerivedProjectedCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "derived projectedCRS"),
-        createProjected(), derivingConversion,
-        CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
-}
-
-// ---------------------------------------------------------------------------
-
 TEST(crs, derivedProjectedCRS_WKT2_2019) {
 
     auto expected =
@@ -5932,22 +5958,6 @@ TEST(crs, parametricCRS_WKT1) {
         createParametricCRS()->exportToWKT(
             WKTFormatter::create(WKTFormatter::Convention::WKT1_GDAL).get()),
         FormattingException);
-}
-
-// ---------------------------------------------------------------------------
-
-static DerivedVerticalCRSNNPtr createDerivedVerticalCRS() {
-
-    auto derivingConversion = Conversion::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
-        std::vector<OperationParameterNNPtr>{},
-        std::vector<ParameterValueNNPtr>{});
-
-    return DerivedVerticalCRS::create(
-        PropertyMap().set(IdentifiedObject::NAME_KEY, "Derived vertCRS"),
-        createVerticalCRS(), derivingConversion,
-        VerticalCS::createGravityRelatedHeight(UnitOfMeasure::METRE));
 }
 
 // ---------------------------------------------------------------------------
