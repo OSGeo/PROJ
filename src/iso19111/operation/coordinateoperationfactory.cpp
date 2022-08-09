@@ -1104,8 +1104,8 @@ struct FilterResults {
         const bool allowBallpark = context->getAllowBallparkTransformations();
 
         bool foundExtentWithExpectedDescription = false;
-        if (areaOfInterestUserSpecified &&
-            areaOfInterest && areaOfInterest->description().has_value()) {
+        if (areaOfInterestUserSpecified && areaOfInterest &&
+            areaOfInterest->description().has_value()) {
             for (const auto &op : sourceList) {
                 bool emptyIntersection = false;
                 auto extent = getExtent(op, true, emptyIntersection);

@@ -8527,16 +8527,15 @@ TEST(operation,
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4979, compound);
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(
-        op->exportToPROJString(PROJStringFormatter::create().get()),
-        "+proj=pipeline "
-        "+step +proj=axisswap +order=2,1 "
-        "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
-        "+step +inv +proj=vgridshift +grids=us_nga_egm08_25.tif "
-        "+multiplier=1 "
-        "+step +proj=tmerc +lat_0=29.5 +lon_0=-88.8333333333333 "
-        "+k=0.99995 +x_0=300000 +y_0=0 +ellps=GRS80 "
-        "+step +proj=unitconvert +xy_in=m +xy_out=us-ft "
-        "+step +proj=affine +xoff=20 "
-        "+step +proj=axisswap +order=2,1");
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +inv +proj=vgridshift +grids=us_nga_egm08_25.tif "
+              "+multiplier=1 "
+              "+step +proj=tmerc +lat_0=29.5 +lon_0=-88.8333333333333 "
+              "+k=0.99995 +x_0=300000 +y_0=0 +ellps=GRS80 "
+              "+step +proj=unitconvert +xy_in=m +xy_out=us-ft "
+              "+step +proj=affine +xoff=20 "
+              "+step +proj=axisswap +order=2,1");
 }
