@@ -17,7 +17,7 @@ PROJ_HEAD(putp6p, "Putnins P6'") "\n\tPCyl, Sph";
 
 #define EPS      1e-10
 #define NITER    10
-#define CON_POLE 1.732050807568877
+#define CON_POLE 1.732050807568877 /* sqrt(3) */
 
 
 static PJ_XY putp6_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forward */
@@ -35,9 +35,21 @@ static PJ_XY putp6_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         if (fabs(V) < EPS)
             break;
     }
+    double sqrt_1_plus_phi2;
     if (!i)
+    {
+        // Note: it seems this case is rarely reached as from experimenting,
+        // i seems to be >= 6
         lp.phi = p < 0. ? -CON_POLE : CON_POLE;
-    xy.x = Q->C_x * lp.lam * (Q->D - sqrt(1. + lp.phi * lp.phi));
+        // the formula of the else case would also work, but this makes
+        // some cppcheck versions happier.
+        sqrt_1_plus_phi2 = 2;
+    }
+    else
+    {
+        sqrt_1_plus_phi2 = sqrt(1. + lp.phi * lp.phi);
+    }
+    xy.x = Q->C_x * lp.lam * (Q->D - sqrt_1_plus_phi2);
     xy.y = Q->C_y * lp.phi;
 
     return xy;
