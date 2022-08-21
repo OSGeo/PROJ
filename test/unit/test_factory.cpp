@@ -3022,6 +3022,18 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
             EXPECT_EQ(res.front().first->nameStr(), "WKT1_GDAL");
         }
     }
+
+    {
+        const auto list = factory->getCRSInfoList();
+        bool found = false;
+        for (const auto &info : list) {
+            if (info.authName == "TEST_NS" && info.code == "TEST_BOUND") {
+                found = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(found);
+    }
 }
 
 // ---------------------------------------------------------------------------

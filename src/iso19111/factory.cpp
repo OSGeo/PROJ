@@ -7934,26 +7934,26 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
 std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
 
     const auto getSqlArea = [](const char *table_name) {
-        std::string sql("JOIN usage u ON u.object_table_name = '");
+        std::string sql("LEFT JOIN usage u ON u.object_table_name = '");
         sql += table_name;
         sql += "' AND "
                "u.object_auth_name = c.auth_name AND "
                "u.object_code = c.code "
-               "JOIN extent a "
+               "LEFT JOIN extent a "
                "ON a.auth_name = u.extent_auth_name AND "
                "a.code = u.extent_code ";
         return sql;
     };
 
     const auto getJoinCelestialBody = [](const char *crs_alias) {
-        std::string sql("JOIN geodetic_datum gd ON gd.auth_name = ");
+        std::string sql("LEFT JOIN geodetic_datum gd ON gd.auth_name = ");
         sql += crs_alias;
         sql += ".datum_auth_name AND gd.code = ";
         sql += crs_alias;
         sql += ".datum_code "
-               "JOIN ellipsoid e ON e.auth_name = gd.ellipsoid_auth_name "
+               "LEFT JOIN ellipsoid e ON e.auth_name = gd.ellipsoid_auth_name "
                "AND e.code = gd.ellipsoid_code "
-               "JOIN celestial_body cb ON "
+               "LEFT JOIN celestial_body cb ON "
                "cb.auth_name = e.celestial_body_auth_name "
                "AND cb.code = e.celestial_body_code ";
         return sql;
@@ -7982,7 +7982,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
            "LEFT JOIN conversion_method cm ON "
            "conv.method_auth_name = cm.auth_name AND "
            "conv.method_code = cm.code "
-           "JOIN geodetic_crs gcrs ON "
+           "LEFT JOIN geodetic_crs gcrs ON "
            "gcrs.auth_name = c.geodetic_crs_auth_name "
            "AND gcrs.code = c.geodetic_crs_code ";
     sql += getSqlArea("projected_crs");
@@ -8001,7 +8001,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
-    // FIXME: we can't handle non-EARTH vertical CRS for now
+    // FIXME: we can't handle non-EARTH compound CRS for now
     sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'compound', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "
