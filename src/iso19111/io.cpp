@@ -11046,7 +11046,6 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             if (d->ctx_) {
                 ctx->set_search_paths(d->ctx_->search_paths);
                 ctx->file_finder = d->ctx_->file_finder;
-                ctx->file_finder_legacy = d->ctx_->file_finder_legacy;
                 ctx->file_finder_user_data = d->ctx_->file_finder_user_data;
             }
 
