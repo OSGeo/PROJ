@@ -14,7 +14,6 @@ struct pj_opaque {
         double cosphi, sinphi;
         VECT v;
         PJ_XY  p;
-        double Az;
     } c[3];
     PJ_XY p;
     double beta_0, beta_1, beta_2;
