@@ -693,7 +693,6 @@ struct pj_ctx{
     std::vector<std::string> search_paths{};
     const char **c_compat_paths = nullptr; // same, but for projinfo usage
 
-    const char* (*file_finder_legacy) (const char*) = nullptr; // Only for proj_api compat. To remove once it is removed
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
 
