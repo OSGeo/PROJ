@@ -1,3 +1,110 @@
+9.1.0 Release Notes
+-------------------
+
+ Updates
+ --------
+
+ + Database
+
+  o Database: update to EPSG v10.074 (#3273)
+
+  o Update ESRI objects to version 3.0.0 (#3257)
+
+  o Generate null transformation between geodetic/vertical datum ensemble and   
+    its members (#3266)
+
+  o Add fk delete cascade to database tables for improved customizability
+    of the database (#3237)
+
+  o Add Svalbard geoid grid no_kv_arcgp-2006-sk to grid alternatives (#3292) 
+
+  o Added French grid fr_ign_RAF20 to grid alternatives (#3228)
+
+ + WKT & PROJJSON
+
+  o WKT2 parser: allow unit-less PARAMETER for coordinate operations (#3271)
+
+  o WKT and PROJJSON adjustments (#3234)
+
+  o Bump PROJJSON to v0.5 (#3216)
+
+  o Change order of horizontal and vertical operations when dealing with
+    WKT1 / PROJ4 compound CRS (#3127)
+
+ + Coordinate Operations
+
+  o Implement Vertical Offset and slope transformation method (#3200)
+
+  o Add Interrupted Mollweide (land and ocean view) projections (#3139)
+
+  o Add invertible Horner polynomials (#3133)
+
+ + Optimizations
+
+  o NTv2 and GTX grid readers: add a cache of lines to speed-up (#3241)
+  
+  o IComparable::isEquivalentTo() optimizations (#3233)
+
+ + Various Updates
+
+  o createOperations() / proj_trans(): better take into account area of 
+    interest name / do not only keep first returned coordinate operation (#3282)
+
+  o createOperations(): take into account axis unit and inversion of target    
+    DerivedProjectedCRS (#3281)
+
+  o Allow a Compound CRS with derived projected (#3283)
+
+  o Make "Vertical Offset and Slope" method usable as a deriving conversion of 
+    a DerivedVerticalCRS (#3270)
+
+  o PROJ pipeline generator: recognize opposite Helmert transformations using
+    a different convention (#3265)
+
+  o createOperations(): prefer simpler pipelines / affects WGS 84 to 
+    GDA94/GDA2020 (#3248)
+  
+  o Make it possible to determine which grid files were actually used during a
+    transformation (#3180)
+  
+  o Transformation: no longer do vertical trasnformation when doing compound CRS
+    to 2D CRS / add --3d to cs2cs (#3119)
+
+  o Deprecate PROJ4 CMake name (#3094)
+
+  o Use GNUInstallDirs for CMake install locations (#3100)
+
+  o Introduce PROJ_DATA environment variable to deprecate PROJ_LIB (#3253)
+
+
+ Bug fixes
+ --------
+ 
+ o projinfo: fix crash on --list-crs when proj.db cannot be opened (#3290)
+
+ o getCRSInfoList(): fix retrieval of projected_crs given by text_definition
+   only (#3289)
+
+ o WKT parser: fix issue when parsing some WKT1 with 
+   Hotine_Oblique_Mercator_Azimuth_Center and ignoring rectified_grid_angle (#3280)
+
+ o WKT1 import: better deal when the angular unit of the GEOGCS[] of the 
+   PROJCS[] doesn't match the one from the database (#3274)
+
+ o createOperations(): avoid potential infinite recursions (#3264)
+
+ o WKT ESRI: fix related to projected CRS export and add support for geographic
+   3D CRS with LINUNIT node (#3256)
+
+ o proj_grid_info(): make it work again with remote grids (#3239)
+
+ o createOperations(): fix projected CRS with non-metre horiz&vertical unit and
+   towgs84 to gencentric CRS (#3231)
+
+ o createOperations(): fix infinite recursion in a complex case (#3226)
+ 
+ 
+
 9.0.1 Release Notes
 -------------------
 
