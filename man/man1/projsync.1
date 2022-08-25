@@ -1,8 +1,5 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "PROJSYNC" "1" "Mar 1, 2022" "9.0.0" "PROJ"
-.SH NAME
-projsync \- Downloading tool of resource files
 .
 .nr rst2man-indent-level 0
 .
@@ -30,6 +27,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
+.TH "PROJSYNC" "1" "Sep 1, 2022" "9.1.0" "PROJ"
+.SH NAME
+projsync \- Downloading tool of resource files
 .SH SYNOPSIS
 .INDENT 0.0
 .INDENT 3.5
@@ -55,14 +55,14 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .sp
 \fBprojsync\fP is a program that downloads remote resource files
 into a local directory. This is an alternative to downloading a proj\-data\-X.Y.Z
-archive file, or using the on\-demand networking capabilities of PROJ.
+archive file, or using the on\-demand \fI\%networking capabilities\fP of PROJ.
 .sp
 The following control parameters can appear in any order:
 .INDENT 0.0
 .TP
 .B \-\-endpoint URL
 Defines the URL where to download the master \fBfiles.geojson\fP file and then
-the resource files. Defaults to the value set in proj\-ini
+the resource files. Defaults to the value set in \fI\%proj.ini\fP
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -74,7 +74,7 @@ Defaults to \fB${endpoint}/files.geojson\fP
 .TP
 .B \-\-user\-writable\-directory
 Specifies that resource files must be downloaded in the
-user writable directory\&. This is the default.
+\fI\%user writable directory\fP\&. This is the default.
 .UNINDENT
 .INDENT 0.0
 .TP

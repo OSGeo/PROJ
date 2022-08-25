@@ -1,8 +1,5 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CS2CS" "1" "Mar 1, 2022" "9.0.0" "PROJ"
-.SH NAME
-cs2cs \- Cartographic coordinate system filter
 .
 .nr rst2man-indent-level 0
 .
@@ -30,6 +27,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
+.TH "CS2CS" "1" "Sep 1, 2022" "9.1.0" "PROJ"
+.SH NAME
+cs2cs \- Cartographic coordinate system filter
 .SH SYNOPSIS
 .INDENT 0.0
 .INDENT 3.5
@@ -37,7 +37,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 \fBcs2cs\fP [\fB\-eEfIlrstvwW\fP [args]]
 .in +2
 [[\-\-area <name_or_code>] | [\-\-bbox <west_long,south_lat,east_long,north_lat>]]
-[\-\-authority <name>] [\-\-no\-ballpark] [\-\-accuracy <accuracy>]
+[\-\-authority <name>] [\-\-no\-ballpark] [\-\-accuracy <accuracy>] [\-\-3d]
 ([\fI+opt[=arg]\fP ...] [+to \fI+opt[=arg]\fP ...] | {source_crs} {target_crs})
 file ...
 .in -2
@@ -45,34 +45,34 @@ file ...
 .sp
 .sp
 where {source_crs} or {target_crs} is one of the possibilities accepted
-by \fBproj_create()\fP, provided it expresses a CRS
+by \fI\%proj_create()\fP, provided it expresses a CRS
 .INDENT 0.0
 .IP \(bu 2
 a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like "EPSG:4326", "urn:ogc:def:crs:EPSG::4326",
-"urn:ogc:def:coordinateOperation:EPSG::1671"),
+an object code (like \(dqEPSG:4326\(dq, \(dqurn:ogc:def:crs:EPSG::4326\(dq,
+\(dqurn:ogc:def:coordinateOperation:EPSG::1671\(dq),
 .IP \(bu 2
-an Object name. e.g "WGS 84", "WGS 84 / UTM zone 31N". In that case as
+an Object name. e.g \(dqWGS 84\(dq, \(dqWGS 84 / UTM zone 31N\(dq. In that case as
 uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
 .IP \(bu 2
 a OGC URN combining references for compound coordinate reference systems
-(e.g "\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP" or custom abbreviated
-syntax "EPSG:2393+5717"),
+(e.g \(dq\fI\%urn:ogc:def:crs,crs:EPSG::2393,crs:EPSG::5717\fP\(dq or custom abbreviated
+syntax \(dqEPSG:2393+5717\(dq),
 .IP \(bu 2
 a OGC URN combining references for references for projected or derived CRSs
-e.g. for Projected 3D CRS "UTM zone 31N / WGS 84 (3D)":
-"\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP"
+e.g. for Projected 3D CRS \(dqUTM zone 31N / WGS 84 (3D)\(dq:
+\(dq\fI\%urn:ogc:def:crs,crs:EPSG::4979,cs:PROJ::ENh,coordinateOperation:EPSG::16031\fP\(dq
 (\fIadded in 6.2\fP)
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
+(e.g. \(dq\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP\(dq)
 .IP \(bu 2
 a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP (\fIadded in 6.2\fP)
 .IP \(bu 2
-a compound CRS made from two object names separated with " + ". e.g. "WGS 84 + EGM96 height" (\fIadded in 7.1\fP)
+a compound CRS made from two object names separated with \(dq + \(dq. e.g. \(dqWGS 84 + EGM96 height\(dq (\fIadded in 7.1\fP)
 .UNINDENT
 .sp
 New in version 6.0.0.
@@ -178,7 +178,7 @@ third.
 Where \fIformat\fP is a printf format string to control the form of the output values.
 For inverse projections, the output will be in degrees when this option is
 employed. If a format is specified for inverse projection the output data
-will be in decimal degrees. The default format is \fB"%.2f"\fP for forward
+will be in decimal degrees. The default format is \fB\(dq%.2f\(dq\fP for forward
 projection and DMS for inverse.
 .UNINDENT
 .INDENT 0.0
@@ -208,7 +208,7 @@ New in version 8.0.0.
 .sp
 Specify an area of interest to restrict the results when researching
 coordinate operations between 2 CRS. The area of interest can be specified either
-as a name (e.g "Denmark \- onshore") or a AUTHORITY:CODE (EPSG:3237)
+as a name (e.g \(dqDenmark \- onshore\(dq) or a AUTHORITY:CODE (EPSG:3237)
 .sp
 This option is mutually exclusive with \fI\%\-\-bbox\fP\&.
 .UNINDENT
@@ -233,7 +233,7 @@ New in version 8.0.0.
 
 .sp
 Disallow any coordinate operation that is, or contains, a
-Ballpark transformation
+\fI\%Ballpark transformation\fP
 .UNINDENT
 .INDENT 0.0
 .TP
@@ -260,6 +260,19 @@ will be searched only in that authority namespace (e.g \fBEPSG\fP).
 .sp
 This option is mutually exclusive with \fI\%\-\-bbox\fP\&.
 .UNINDENT
+.INDENT 0.0
+.TP
+.B \-\-3d
+New in version 9.1.
+
+.sp
+\(dqPromote\(dq 2D CRS(s) to their 3D version, where the vertical axis is the
+ellipsoidal height in metres, using the ellipsoid of the base geodetic CRS.
+Depending on PROJ versions and the exact nature of the CRS involved,
+especially before PROJ 9.1, a mix of 2D and 3D CRS could lead to 2D or 3D
+transformations. Starting with PROJ 9.1, both CRS need to be 3D for vertical
+transformation to possibly happen.
+.UNINDENT
 .sp
 The \fI+opt\fP run\-line arguments are associated with cartographic
 parameters.
@@ -277,11 +290,11 @@ When using a WKT definition or a AUTHORITY:CODE, the axis order of the CRS will
 be enforced. So for example if using EPSG:4326, the first value expected (or
 returned) will be a latitude.
 .sp
-Internally, \fBcs2cs\fP uses the \fBproj_create_crs_to_crs()\fP function
+Internally, \fBcs2cs\fP uses the \fI\%proj_create_crs_to_crs()\fP function
 to compute the appropriate coordinate operation, so implementation details of
 this function directly impact the results returned by the program.
 .sp
-The environment parameter \fBPROJ_LIB\fP establishes the
+The environment parameter \fI\%PROJ_DATA\fP establishes the
 directory for resource files (database, datum shift grids, etc.)
 .sp
 One or more files (processed in left to right order) specify the source of
@@ -302,11 +315,11 @@ places), while projected (cartesian) coordinates will be in linear
 New in version 7.0.0.
 
 .sp
-If the \fBPROJ_NETWORK\fP environment variable is set to \fBON\fP,
+If the \fI\%PROJ_NETWORK\fP environment variable is set to \fBON\fP,
 \fBcs2cs\fP will attempt to use remote grids stored on CDN (Content
 Delivery Network) storage, when they are not available locally.
 .sp
-More details are available in the network section.
+More details are available in the \fI\%Network capabilities\fP section.
 .SH EXAMPLES
 .SS Using PROJ strings
 .sp
@@ -317,7 +330,7 @@ The following script
 .nf
 .ft C
 cs2cs +proj=latlong +datum=NAD83 +to +proj=utm +zone=10 +datum=NAD27 \-r <<EOF
-45°15\(aq33.1" 111.5W
+45°15\(aq33.1\(dq 111.5W
 45d15.551666667N \-111d30
 +45.25919444444 111d30\(aq000w
 EOF
@@ -376,7 +389,7 @@ UTM Zone 31N/WGS 84 with WGS84 ellipsoidal height
 .sp
 .nf
 .ft C
-echo 45 2 0 | cs2cs "WGS 84 + EGM96 height" "WGS 84 / UTM zone 31N"
+echo 45 2 0 | cs2cs \(dqWGS 84 + EGM96 height\(dq \(dqWGS 84 / UTM zone 31N\(dq
 .ft P
 .fi
 .UNINDENT
