@@ -13,7 +13,9 @@ include(CheckFunctionExists)
 # if C flags have -Werror, temporarily remove these while running some checks
 string(FIND "${CMAKE_C_FLAGS}" "-Werror" FIND_WERROR)
 if(FIND_WERROR GREATER_EQUAL 0)
-  string(REPLACE "-Werror" "" _tmp_CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+  # we must be careful about not matching -Werror=something, so let's append
+  # a space at the end of CMAKE_C_FLAGS and match -Werror with a trailing space
+  string(REPLACE "-Werror " " " _tmp_CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ")
   set(_prev_CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
   set(CMAKE_C_FLAGS "${_tmp_CMAKE_C_FLAGS}")
 endif()
