@@ -8,4 +8,5 @@ Tutorials
    :maxdepth: 1
 
    EUREF2019/index
+   geodesics
 
