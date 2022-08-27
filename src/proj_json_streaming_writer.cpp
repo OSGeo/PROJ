@@ -28,6 +28,7 @@
 
 /*! @cond Doxygen_Suppress */
 
+#include <limits>
 #include <vector>
 #include <string>
 
@@ -276,6 +277,14 @@ void CPLJSonStreamingWriter::Add(double dfVal, int nPrecision)
     else if( CPLIsInf(dfVal) )
     {
         Print( dfVal > 0 ? "\"Infinity\"" : "\"-Infinity\"" );
+    }
+    else if( dfVal >= std::numeric_limits<int>::min() &&
+             dfVal <= std::numeric_limits<int>::max() &&
+             static_cast<int>(dfVal) == dfVal )
+    {
+        // Avoid rounding issues on some platforms like armel, with numbers
+        // like 2005. See https://github.com/OSGeo/PROJ/issues/3297
+        Print(CPLSPrintf("%d", static_cast<int>(dfVal)));
     }
     else
     {
