@@ -291,7 +291,20 @@ link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 # Installation
 ################################################################################
 include(ProjInstallPath)
+
+# By default GNUInstallDirs will use the upper case project name
+# for CMAKE_INSTALL_DOCDIR, resulting in something like share/doc/PROJ
+# instead of share/doc/proj which historically have been the path used
+# by the project. 
+# Here force the use of a lower case project name and reset after
+# GNUInstallDirs has done its thing
+set(PROJECT_NAME_ORIGINAL "${PROJECT_NAME}")
+string(TOLOWER "${PROJECT_NAME}" PROJECT_NAME)
+
 include(GNUInstallDirs)
+
+set(PROJECT_NAME "${PROJECT_NAME_ORIGINAL}")
+
 set(PROJ_DATA_PATH "${CMAKE_INSTALL_FULL_DATADIR}/proj")
 
 ################################################################################
