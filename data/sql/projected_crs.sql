@@ -7510,10 +7510,14 @@ INSERT INTO "projected_crs" VALUES('EPSG','20032','Pulkovo 1995 / Gauss-Kruger z
 INSERT INTO "usage" VALUES('EPSG','6205','projected_crs','EPSG','20032','EPSG','1791','EPSG','1211');
 INSERT INTO "projected_crs" VALUES('EPSG','20042','SIRGAS-Chile 2021 / UTM zone 12S',NULL,'EPSG','4400','EPSG','20041','EPSG','16112',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18383','projected_crs','EPSG','20042','EPSG','4667','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','20047','GDA2020 / BCSG2020',NULL,'EPSG','4400','EPSG','7844','EPSG','10147',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','18477','projected_crs','EPSG','20047','EPSG','2990','EPSG','1029');
 INSERT INTO "projected_crs" VALUES('EPSG','20048','SIRGAS-Chile 2021 / UTM zone 18S',NULL,'EPSG','4400','EPSG','20041','EPSG','16118',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18384','projected_crs','EPSG','20048','EPSG','3829','EPSG','1142');
 INSERT INTO "projected_crs" VALUES('EPSG','20049','SIRGAS-Chile 2021 / UTM zone 19S',NULL,'EPSG','4400','EPSG','20041','EPSG','16119',NULL,0);
 INSERT INTO "usage" VALUES('EPSG','18385','projected_crs','EPSG','20049','EPSG','3811','EPSG','1142');
+INSERT INTO "projected_crs" VALUES('EPSG','20050','NAD83(2011) / Amtrak NECCS21 (ft)',NULL,'EPSG','4495','EPSG','6318','EPSG','10148',NULL,0);
+INSERT INTO "usage" VALUES('EPSG','18480','projected_crs','EPSG','20050','EPSG','4669','EPSG','1141');
 INSERT INTO "projected_crs" VALUES('EPSG','20064','Pulkovo 1995 / Gauss-Kruger 4N',NULL,'EPSG','4530','EPSG','4200','EPSG','16304',NULL,1);
 INSERT INTO "usage" VALUES('EPSG','6206','projected_crs','EPSG','20064','EPSG','1763','EPSG','1209');
 INSERT INTO "projected_crs" VALUES('EPSG','20065','Pulkovo 1995 / Gauss-Kruger 5N',NULL,'EPSG','4530','EPSG','4200','EPSG','16305',NULL,1);
