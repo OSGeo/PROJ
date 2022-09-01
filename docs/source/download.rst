@@ -123,7 +123,7 @@ Past Releases
 .. _`proj-4.9.2.tar.gz`: https://download.osgeo.org/proj/proj-4.9.2.tar.gz
 .. _`proj-4.9.3.tar.gz`: https://download.osgeo.org/proj/proj-4.9.3.tar.gz
 
-.. _`proj-data-1.10.tar.gz`: https://download.osgeo.org/proj/proj-data-1.11.tar.gz
+.. _`proj-data-1.11.tar.gz`: https://download.osgeo.org/proj/proj-data-1.11.tar.gz
 .. _`proj-data-1.10.tar.gz`: https://download.osgeo.org/proj/proj-data-1.10.tar.gz
 .. _`proj-data-1.9.tar.gz`: https://download.osgeo.org/proj/proj-data-1.9.tar.gz
 .. _`proj-data-1.8.tar.gz`: https://download.osgeo.org/proj/proj-data-1.8.tar.gz
