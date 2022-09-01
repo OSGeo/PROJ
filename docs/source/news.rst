@@ -3,6 +3,99 @@
 News
 ###############################################################################
 
+9.1.0 Release Notes
++++++++++++++++++++
+*September 1st 2022*
+
+Updates
+--------
+
+* Database:
+
+  * Database: update to EPSG v10.074 (`#3273 <https://github.com/OSGeo/PROJ/issues/3273>`_)
+
+  * Update ESRI objects to version 3.0.0 (`#3257 <https://github.com/OSGeo/PROJ/issues/3257>`_)
+
+  * Generate null transformation between geodetic/vertical datum ensemble and its members (`#3266 <https://github.com/OSGeo/PROJ/issues/3266>`_)
+
+  * Add ``fk delete cascade`` to database tables for improved customizability of the database (`#3237 <https://github.com/OSGeo/PROJ/issues/3237>`_)
+
+  * Add Svalbard geoid grid ``no_kv_arcgp-2006-sk`` to grid alternatives (`#3292 <https://github.com/OSGeo/PROJ/issues/3292>`_)
+
+  * Added French grid ``fr_ign_RAF20`` to grid alternatives (`#3228 <https://github.com/OSGeo/PROJ/issues/3228>`_)
+
+* WKT & PROJJSON:
+
+  * WKT2 parser: allow unit-less PARAMETER for coordinate operations (`#3271 <https://github.com/OSGeo/PROJ/issues/3271>`_)
+
+  * WKT and PROJJSON adjustments (`#3234 <https://github.com/OSGeo/PROJ/issues/3234>`_)
+
+  * Bump PROJJSON to v0.5 (`#3216 <https://github.com/OSGeo/PROJ/issues/3216>`_)
+
+  * Change order of horizontal and vertical operations when dealing with WKT1 / PROJ4 compound CRS (`#3127 <https://github.com/OSGeo/PROJ/issues/3127>`_)
+
+* Coordinate Operations:
+
+  * Implement Vertical Offset and slope transformation method (`#3200 <https://github.com/OSGeo/PROJ/issues/3200>`_)
+
+  * Add Interrupted Mollweide (land and ocean view) projections (`#3139 <https://github.com/OSGeo/PROJ/issues/3139>`_)
+
+  * Add invertible Horner polynomials (`#3133 <https://github.com/OSGeo/PROJ/issues/3133>`_)
+
+* Optimizations:
+
+  * NTv2 and GTX grid readers: add a cache of lines to speed-up (`#3241 <https://github.com/OSGeo/PROJ/issues/3241>`_)
+
+  * :cpp:func:`IComparable::isEquivalentTo()` optimizations (`#3233 <https://github.com/OSGeo/PROJ/issues/3233>`_)
+
++ Various Updates:
+
+  * :cpp:func:`createOperations()` / :c:func:`proj_trans()`: better take into account area of interest name / do not only keep first returned coordinate operation (`#3282 <https://github.com/OSGeo/PROJ/issues/3282>`_)
+
+  * :cpp:func:`createOperations()`: take into account axis unit and inversion of target DerivedProjectedCRS (`#3281 <https://github.com/OSGeo/PROJ/issues/3281>`_)
+
+  * Allow a Compound CRS with derived projected (`#3283 <https://github.com/OSGeo/PROJ/issues/3283>`_)
+
+  * Make "Vertical Offset and Slope" method usable as a deriving conversion of a DerivedVerticalCRS (`#3270 <https://github.com/OSGeo/PROJ/issues/3270>`_)
+
+  * PROJ pipeline generator: recognize opposite Helmert transformations using a different convention (`#3265 <https://github.com/OSGeo/PROJ/issues/3265>`_)
+
+  * :cpp:func:`createOperations()`: prefer simpler pipelines / affects WGS 84 to GDA94/GDA2020 (`#3248 <https://github.com/OSGeo/PROJ/issues/3248>`_)
+
+  * Make it possible to determine which grid files were actually used during a transformation (`#3180 <https://github.com/OSGeo/PROJ/issues/3180>`_)
+
+  * Transformation: no longer do vertical trasnformation when doing compound CRS to 2D CRS / add --3d to cs2cs (`#3119 <https://github.com/OSGeo/PROJ/issues/3119>`_)
+
+  * Deprecate PROJ4 CMake name (`#3094 <https://github.com/OSGeo/PROJ/issues/3094>`_)
+
+  * Use GNUInstallDirs for CMake install locations (`#3100 <https://github.com/OSGeo/PROJ/issues/3100>`_)
+
+  * Introduce ``PROJ_DATA``` environment variable to deprecate ``PROJ_LIB`` (`#3253 <https://github.com/OSGeo/PROJ/issues/3253>`_)
+
+
+Bug fixes
+----------
+
+* :program:`projinfo`: fix crash on --list-crs when proj.db cannot be opened (`#3290 <https://github.com/OSGeo/PROJ/issues/3290>`_)
+
+* :cpp:func:`getCRSInfoList()`: fix retrieval of projected_crs given by text_definition only (`#3289 <https://github.com/OSGeo/PROJ/issues/3289>`_)
+
+* WKT parser: fix issue when parsing some WKT1 with Hotine_Oblique_Mercator_Azimuth_Center and ignoring rectified_grid_angle (`#3280 <https://github.com/OSGeo/PROJ/issues/3280>`_)
+
+* WKT1 import: better deal when the angular unit of the GEOGCS[] of the PROJCS[] doesn't match the one from the database (`#3274 <https://github.com/OSGeo/PROJ/issues/3274>`_)
+
+* :cpp:func:`createOperations()`: avoid potential infinite recursions (`#3264 <https://github.com/OSGeo/PROJ/issues/3264>`_)
+
+* WKT ESRI: fix related to projected CRS export and add support for geographic 3D CRS with LINUNIT node (`#3256 <https://github.com/OSGeo/PROJ/issues/3256>`_)
+
+* :c:func:`proj_grid_info()`: make it work again with remote grids (`#3239 <https://github.com/OSGeo/PROJ/issues/3239>`_)
+
+* :cpp:func:`createOperations()`: fix projected CRS with non-metre horiz&vertical unit and towgs84 to gencentric CRS (`#3231 <https://github.com/OSGeo/PROJ/issues/3231>`_)
+
+* :cpp:func:`createOperations()`: fix infinite recursion in a complex case (`#3226 <https://github.com/OSGeo/PROJ/issues/3226>`_)
+
+
+
 9.0.1 Release Notes
 +++++++++++++++++++
 *June 15th 2022*
