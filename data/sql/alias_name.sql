@@ -7747,3 +7747,5 @@ INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','20040','SIRGAS-Chile real
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','20040','SIRGAS-Chile epoch 2021.00','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','20041','SIRGAS-Chile realización 5','EPSG');
 INSERT INTO "alias_name" VALUES('geodetic_crs','EPSG','20041','SIRGAS-Chile epoch 2021.00','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','20050','NAD83(2011) / Amtrak CS21 (ft)','EPSG');
+INSERT INTO "alias_name" VALUES('projected_crs','EPSG','20050','ACS21 (ft)','EPSG');
