@@ -645,3 +645,9 @@ been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/north-am
 
 It contains 114 subgrids. All essential metadata to list the subgrids and their
 georeferencing is contained within the first 40 KB of the file.
+
+Revisions
++++++++++
+
+* v0.2: addition of "arc-seconds per year" as a valid unit (PROJ 9.1.1)
+* v0.1: initial version for PROJ 7.0
