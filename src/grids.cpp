@@ -2400,7 +2400,8 @@ GTiffHGridShiftSet::open(PJ_CONTEXT *ctx, std::unique_ptr<File> fp,
                 return nullptr;
             }
             if (!unitLatShift.empty()) {
-                if (unitLatShift == "arc-second") {
+                if (unitLatShift == "arc-second" ||
+                    unitLatShift == "arc-seconds per year") {
                     convFactorToRadian = ARC_SECOND_TO_RADIAN;
                 } else if (unitLatShift == "radian") {
                     convFactorToRadian = 1.0;

@@ -214,7 +214,8 @@ is an easy way to inspect such grid files:
 
     - ``HORIZONTAL_OFFSET``: implies the presence of at least two samples.
       The first sample must contain the latitude offset and the second
-      sample must contain the longitude offset.
+      sample must contain the longitude offset. The offset may also be expressed
+      as a speed per year for temporal gridshifting.
       Corresponds to PROJ :ref:`hgridshift` method.
 
     - ``VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL``: implies the presence of at least one sample.
@@ -330,6 +331,7 @@ is an easy way to inspect such grid files:
 
     - ``degree``
     - ``arc-second`` (default value assumed if absent for longitude and latitude offset samples of horizontal shift grid files, and value used for files stored on PROJ CDN)
+    - ``arc-seconds per year`` (when used with the :ref:`hgridshift` method with temporal gridshifting)
 
     For velocity units:
 
@@ -643,3 +645,9 @@ been converted from https://github.com/OSGeo/proj-datumgrid/blob/master/north-am
 
 It contains 114 subgrids. All essential metadata to list the subgrids and their
 georeferencing is contained within the first 40 KB of the file.
+
+Revisions
++++++++++
+
+* v0.2: addition of "arc-seconds per year" as a valid unit (PROJ 9.1.1)
+* v0.1: initial version for PROJ 7.0
