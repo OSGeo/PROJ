@@ -32,13 +32,11 @@ deformations can be modelled and then applied to the coordinates so that
 they represent the physical world better. In PROJ this is done with the deformation
 operation.
 
-The horizontal grid is stored in CTable2 format and the vertical grid is stored in the
-GTX format. Both grids are expected to contain grid-values in units of
-mm/year. GDAL both reads and writes both file formats. Using GDAL for
-construction of new grids is recommended.
-
-Starting with PROJ 7.0, use of a GeoTIFF format is recommended to store both
-the horizontal and vertical velocities.
+Starting with PROJ 7.0, it is recommended to store both the horizontal and vertical
+velocities in a single GeoTIFF file (:ref:`geodetictiffgrids`).
+Grid values are expected to be in units of mm/year. Using GDAL for construction of new grids is recommended.
+Prior to PROJ 7.0, the horizontal grid used to be stored in CTable2 format and the
+vertical grid in the GTX format. Both grids  GDAL both reads and writes both file formats. 
 
 More complex deformations can be done with the :ref:`Multi-component time-based deformation model <defmodel>` transformation.
 
@@ -83,34 +81,10 @@ model. The first use of the deformation operation is::
 
 Here we set the central epoch of the transformation, 2000.0. The observation epoch
 is expected as part of the input coordinate tuple. The deformation model is
-described by two grids, specified with :option:`+xy_grids` and :option:`+z_grids`.
-The first is the horizontal part of the model and the second is the vertical
-component.
+described by a single grid, specified with :option:`+grids`.
 
 Parameters
 -------------------------------------------------------------------------------
-
-.. option:: +xy_grids=<list>
-
-    Comma-separated list of grids to load. If a grid is prefixed by an ``@`` the
-    grid is considered optional and PROJ will the not complain if the grid is
-    not available.
-
-    Grids for the horizontal component of a deformation model is expected to be
-    in CTable2 format.
-
-    .. note:: :option:`+xy_grids` is mutually exclusive with :option:`+grids`
-
-.. option:: +z_grids=<list>
-
-    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
-    grid is considered optional and PROJ will the not complain if the grid is
-    not available.
-
-    Grids for the vertical component of a deformation model is expected to be
-    in either GTX format.
-
-    .. note:: :option:`+z_grids` is mutually exclusive with :option:`+grids`
 
 .. option:: +grids=<list>
 
@@ -120,7 +94,7 @@ Parameters
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
-    Grids should be in GeoTIFF format with the first 3 components being
+    Grids should be in GeoTIFF format (:ref:`geodetictiffgrids`) with the first 3 components being
     respectively the easting, northing and up velocities in mm/year.
     Setting the Description and Unit Type GDAL band metadata items is strongly
     recommended, so that gdalinfo reports:
@@ -158,6 +132,33 @@ Parameters
     transformation. :math:`dt` is given in units of decimalyears.
 
     .. note:: :option:`+dt` is mutually exclusive with :option:`+t_epoch`
+
+.. option:: +xy_grids=<list>
+
+    .. deprecated:: 7.0
+
+    Comma-separated list of grids to load. If a grid is prefixed by an ``@`` the
+    grid is considered optional and PROJ will the not complain if the grid is
+    not available.
+
+    Grids for the horizontal component of a deformation model is expected to be
+    in CTable2 format.
+
+    .. note:: :option:`+xy_grids` is mutually exclusive with :option:`+grids`
+
+.. option:: +z_grids=<list>
+
+    .. deprecated:: 7.0
+
+    Comma-separated list of grids to load. If a grid is prefixed by an `@` the
+    grid is considered optional and PROJ will the not complain if the grid is
+    not available.
+
+    Grids for the vertical component of a deformation model is expected to be
+    in either GTX format.
+
+    .. note:: :option:`+z_grids` is mutually exclusive with :option:`+grids`
+
 
 Mathematical description
 -------------------------------------------------------------------------------
