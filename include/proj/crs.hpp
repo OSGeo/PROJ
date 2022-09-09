@@ -1273,6 +1273,10 @@ class PROJ_GCC_DLL DerivedProjectedCRS final : public DerivedCRS {
            const operation::ConversionNNPtr &derivingConversionIn,
            const cs::CoordinateSystemNNPtr &csIn);
 
+    PROJ_DLL DerivedProjectedCRSNNPtr
+    demoteTo2D(const std::string &newName,
+               const io::DatabaseContextPtr &dbContext) const;
+
     //! @cond Doxygen_Suppress
     PROJ_INTERNAL void _exportToWKT(io::WKTFormatter *formatter)
         const override; // throw(io::FormattingException)
