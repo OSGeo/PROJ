@@ -1261,12 +1261,12 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
     }
 
     else if (auto derivedProjCRS =
-            dynamic_cast<const DerivedProjectedCRS *>(this)) {
+                 dynamic_cast<const DerivedProjectedCRS *>(this)) {
         const auto &axisList = derivedProjCRS->coordinateSystem()->axisList();
         if (axisList.size() == 2) {
-            auto cs = cs::CartesianCS::create(
-                util::PropertyMap(), axisList[0], axisList[1],
-                verticalAxisIfNotAlreadyPresent);
+            auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                              axisList[1],
+                                              verticalAxisIfNotAlreadyPresent);
             auto baseProj3DCRS = util::nn_dynamic_pointer_cast<ProjectedCRS>(
                 derivedProjCRS->baseCRS()->promoteTo3D(
                     std::string(), dbContext, verticalAxisIfNotAlreadyPresent));
@@ -1375,7 +1375,8 @@ CRSNNPtr CRS::demoteTo2D(const std::string &newName,
         return derivedGeogCRS->demoteTo2D(newName, dbContext);
     }
 
-    else if (auto derivedProjCRS = dynamic_cast<const DerivedProjectedCRS *>(this)) {
+    else if (auto derivedProjCRS =
+                 dynamic_cast<const DerivedProjectedCRS *>(this)) {
         return derivedProjCRS->demoteTo2D(newName, dbContext);
     }
 
@@ -6525,13 +6526,14 @@ DerivedProjectedCRSNNPtr DerivedProjectedCRS::create(
  * applicable.
  * @since 9.1.1
  */
-DerivedProjectedCRSNNPtr DerivedProjectedCRS::demoteTo2D(
-    const std::string &newName, const io::DatabaseContextPtr &dbContext) const {
+DerivedProjectedCRSNNPtr
+DerivedProjectedCRS::demoteTo2D(const std::string &newName,
+                                const io::DatabaseContextPtr &dbContext) const {
 
     const auto &axisList = coordinateSystem()->axisList();
     if (axisList.size() == 3) {
         auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
-                                            axisList[1]);
+                                          axisList[1]);
         auto baseProj2DCRS = util::nn_dynamic_pointer_cast<ProjectedCRS>(
             baseCRS()->demoteTo2D(std::string(), dbContext));
         return DerivedProjectedCRS::create(
