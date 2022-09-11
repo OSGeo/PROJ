@@ -40,8 +40,8 @@ is not found in the PROJ search path. The list of grids is prioritized so that
 grids in the start of the list takes precedence over the grids in the back of the
 list.
 
-PROJ supports the GTX file format for vertical grid corrections. Details
-about all the format can be found in the GDAL documentation. GDAL both reads and
+PROJ supports the GeoTIFF (:ref:`geodetictiffgrids`) and GTX file formats for vertical grid corrections. Details
+about all the formats can be found in the GDAL documentation. GDAL both reads and
 writes the format. Using GDAL for construction of new grids is recommended.
 
 Temporal gridshifting
@@ -105,7 +105,7 @@ Required
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
-    Grids are expected to be in GTX format.
+    Grids are expected to be in GeoTIFF (:ref:`geodetictiffgrids`) or GTX formats.
 
 Optional
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
