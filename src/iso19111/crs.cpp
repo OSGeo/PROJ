@@ -1260,6 +1260,23 @@ CRSNNPtr CRS::promoteTo3D(const std::string &newName,
         }
     }
 
+    else if (auto derivedProjCRS =
+                 dynamic_cast<const DerivedProjectedCRS *>(this)) {
+        const auto &axisList = derivedProjCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 2) {
+            auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                              axisList[1],
+                                              verticalAxisIfNotAlreadyPresent);
+            auto baseProj3DCRS = util::nn_dynamic_pointer_cast<ProjectedCRS>(
+                derivedProjCRS->baseCRS()->promoteTo3D(
+                    std::string(), dbContext, verticalAxisIfNotAlreadyPresent));
+            return util::nn_static_pointer_cast<CRS>(
+                DerivedProjectedCRS::create(
+                    createProperties(), NN_CHECK_THROW(baseProj3DCRS),
+                    derivedProjCRS->derivingConversion(), cs));
+        }
+    }
+
     else if (auto geogCRS = dynamic_cast<const GeographicCRS *>(this)) {
         const auto &axisList = geogCRS->coordinateSystem()->axisList();
         if (axisList.size() == 2) {
@@ -1356,6 +1373,11 @@ CRSNNPtr CRS::demoteTo2D(const std::string &newName,
     if (auto derivedGeogCRS =
             dynamic_cast<const DerivedGeographicCRS *>(this)) {
         return derivedGeogCRS->demoteTo2D(newName, dbContext);
+    }
+
+    else if (auto derivedProjCRS =
+                 dynamic_cast<const DerivedProjectedCRS *>(this)) {
+        return derivedProjCRS->demoteTo2D(newName, dbContext);
     }
 
     else if (auto geogCRS = dynamic_cast<const GeographicCRS *>(this)) {
@@ -6489,6 +6511,39 @@ DerivedProjectedCRSNNPtr DerivedProjectedCRS::create(
     crs->setProperties(properties);
     crs->setDerivingConversionCRS();
     return crs;
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Return a variant of this CRS "demoted" to a 2D one, if not already
+ * the case.
+ *
+ *
+ * @param newName Name of the new CRS. If empty, nameStr() will be used.
+ * @param dbContext Database context to look for potentially already registered
+ *                  2D CRS. May be nullptr.
+ * @return a new CRS demoted to 2D, or the current one if already 2D or not
+ * applicable.
+ * @since 9.1.1
+ */
+DerivedProjectedCRSNNPtr
+DerivedProjectedCRS::demoteTo2D(const std::string &newName,
+                                const io::DatabaseContextPtr &dbContext) const {
+
+    const auto &axisList = coordinateSystem()->axisList();
+    if (axisList.size() == 3) {
+        auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                          axisList[1]);
+        auto baseProj2DCRS = util::nn_dynamic_pointer_cast<ProjectedCRS>(
+            baseCRS()->demoteTo2D(std::string(), dbContext));
+        return DerivedProjectedCRS::create(
+            util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                    !newName.empty() ? newName : nameStr()),
+            NN_CHECK_THROW(baseProj2DCRS), derivingConversion(), cs);
+    }
+
+    return NN_NO_CHECK(std::dynamic_pointer_cast<DerivedProjectedCRS>(
+        shared_from_this().as_nullable()));
 }
 
 // ---------------------------------------------------------------------------
