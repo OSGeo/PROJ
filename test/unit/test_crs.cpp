@@ -6485,6 +6485,19 @@ TEST(crs, crs_alterCSLinearUnit) {
     }
 
     {
+        auto crs = createDerivedProjectedCRS()->alterCSLinearUnit(
+            UnitOfMeasure("my unit", 2));
+        auto derivedProjCRS = dynamic_cast<DerivedProjectedCRS *>(crs.get());
+        ASSERT_TRUE(derivedProjCRS != nullptr);
+        auto cs = derivedProjCRS->coordinateSystem();
+        ASSERT_EQ(cs->axisList().size(), 2U);
+        EXPECT_EQ(cs->axisList()[0]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[0]->unit().conversionToSI(), 2);
+        EXPECT_EQ(cs->axisList()[1]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[1]->unit().conversionToSI(), 2);
+    }
+
+    {
         auto crs = GeodeticCRS::EPSG_4978->alterCSLinearUnit(
             UnitOfMeasure("my unit", 2));
         auto geodCRS = dynamic_cast<GeodeticCRS *>(crs.get());

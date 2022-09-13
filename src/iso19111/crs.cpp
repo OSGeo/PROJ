@@ -368,6 +368,16 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
         }
     }
 
+    {
+        auto derivedProjCRS = dynamic_cast<const DerivedProjectedCRS *>(this);
+        if (derivedProjCRS) {
+            return DerivedProjectedCRS::create(
+                createPropertyMap(this), derivedProjCRS->baseCRS(),
+                derivedProjCRS->derivingConversion(),
+                derivedProjCRS->baseCRS()->coordinateSystem()->alterUnit(unit));
+        }
+    }
+
     return NN_NO_CHECK(
         std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
