@@ -6551,11 +6551,25 @@ TEST(crs, crs_alterCSLinearUnit) {
     }
 
     {
-        // Not implemented on compoundCRS
         auto crs =
             createCompoundCRS()->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
-        EXPECT_TRUE(createCompoundCRS()->isEquivalentTo(crs.get()));
+        auto compoundCRS = dynamic_cast<CompoundCRS *>(crs.get());
+        ASSERT_TRUE(compoundCRS != nullptr);
+        EXPECT_EQ(compoundCRS->componentReferenceSystems().size(), 2U);
+        for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
+            auto singleCrs = dynamic_cast<SingleCRS *>(subCrs.get());
+            ASSERT_TRUE(singleCrs != nullptr);
+            auto cs = singleCrs->coordinateSystem();
+            ASSERT_GE(cs->axisList().size(), 1U);
+            EXPECT_EQ(cs->axisList()[0]->unit().name(), "my unit");
+            EXPECT_EQ(cs->axisList()[0]->unit().conversionToSI(), 2);
+        }
     }
+
+    // Not implemented on parametricCRS
+    auto crs =
+        createParametricCRS()->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
+    EXPECT_TRUE(createParametricCRS()->isEquivalentTo(crs.get()));
 }
 
 // ---------------------------------------------------------------------------

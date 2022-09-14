@@ -378,6 +378,18 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
         }
     }
 
+    {
+        auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
+        if (compoundCRS) {
+            std::vector<CRSNNPtr> components;
+            for (const auto &subCrs :
+                 compoundCRS->componentReferenceSystems()) {
+                components.push_back(subCrs->alterCSLinearUnit(unit));
+            }
+            return CompoundCRS::create(createPropertyMap(this), components);
+        }
+    }
+
     return NN_NO_CHECK(
         std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }
