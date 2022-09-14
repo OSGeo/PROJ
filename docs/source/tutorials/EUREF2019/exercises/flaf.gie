@@ -1,0 +1,10 @@
+<gie>
+
+operation   +proj=utm +zone=22
+#tolerance   <your answer here>
+tolerance   1 nm
+
+accept      -20.0   74      # Daneborg, Greenland (~30 degrees from central meridian)
+roundtrip   1000
+
+</gie>
