@@ -1,0 +1,71 @@
+###############################################################################
+
+                                The UTM Projection
+
+In this exercise we will learn how to define a simple projection using PROJ.
+We will investigate a few aspects of the UTM projection, as well as learn how
+to use a different ellipsoid than the default (GRS80).
+
+###############################################################################
+<gie>
+
+
+1. Set up a UTM projection for use in Estonia.
+-------------------------------------------------------------------------------
+Hints:
+
+  * Consult the documentation at
+    https://proj.org/operations/projections/utm.html
+-------------------------------------------------------------------------------
+
+operation   <your answer here>
+tolerance   1 cm
+
+accept      24.745          59.437       # Talinn, Estonia
+expect      372106.37       6590881.40
+
+-------------------------------------------------------------------------------
+
+
+
+2. Set up a UTM projection for use on the North Island of New Zealand
+-------------------------------------------------------------------------------
+Hints:
+
+  * Consult the documentation at
+    https://proj.org/operations/projections/utm.html
+
+-------------------------------------------------------------------------------
+
+operation   <your answer here>
+tolerance   1 cm
+
+accept      174.740        -36.841      # Auckland, New Zealand
+expect      298481.34       5920382.04
+
+-------------------------------------------------------------------------------
+
+
+
+3. Set up a UTM projection based on the Hayford ellipsoid for use in Estonia
+-------------------------------------------------------------------------------
+Hints:
+
+  * Consult the documentation at
+    https://proj.org/operations/projections/utm.html
+
+  *  A list of available ellipsoids can be seen by running the command:
+
+        proj -le
+
+-------------------------------------------------------------------------------
+
+operation   <your answer here>
+tolerance   1 cm
+
+accept      24.745          59.437       # Talinn, Estonia
+expect      372099.99       6591034.35
+
+-------------------------------------------------------------------------------
+
+</gie>
