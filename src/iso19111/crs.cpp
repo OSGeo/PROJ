@@ -390,6 +390,16 @@ CRSNNPtr CRS::alterCSLinearUnit(const common::UnitOfMeasure &unit) const {
         }
     }
 
+    {
+        auto boundCRS = dynamic_cast<const BoundCRS *>(this);
+        if (boundCRS) {
+            return BoundCRS::create(
+                createPropertyMap(this),
+                boundCRS->baseCRS()->alterCSLinearUnit(unit),
+                boundCRS->hubCRS(), boundCRS->transformation());
+        }
+    }
+
     return NN_NO_CHECK(
         std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
 }

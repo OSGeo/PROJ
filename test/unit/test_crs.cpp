@@ -6566,6 +6566,24 @@ TEST(crs, crs_alterCSLinearUnit) {
         }
     }
 
+    {
+        auto crs =
+            BoundCRS::createFromTOWGS84(
+                createProjected(), std::vector<double>{1, 2, 3, 4, 5, 6, 7})
+                ->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
+
+        auto boundCRS = dynamic_cast<BoundCRS *>(crs.get());
+        ASSERT_TRUE(boundCRS != nullptr);
+        auto baseCRS = boundCRS->baseCRS();
+        auto projCRS = dynamic_cast<ProjectedCRS *>(baseCRS.get());
+        ASSERT_TRUE(projCRS != nullptr);
+        auto cs = projCRS->coordinateSystem();
+        EXPECT_EQ(cs->axisList()[0]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[0]->unit().conversionToSI(), 2);
+        EXPECT_EQ(cs->axisList()[1]->unit().name(), "my unit");
+        EXPECT_EQ(cs->axisList()[1]->unit().conversionToSI(), 2);
+    }
+
     // Not implemented on parametricCRS
     auto crs =
         createParametricCRS()->alterCSLinearUnit(UnitOfMeasure("my unit", 2));
