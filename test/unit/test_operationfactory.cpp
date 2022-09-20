@@ -4741,10 +4741,9 @@ TEST(operation, compoundCRS_to_compoundCRS_WGS84_EGM96_to_WGS84_Belfast) {
     auto list = CoordinateOperationFactory::create()->createOperations(
         NN_NO_CHECK(srcCrs), NN_NO_CHECK(destCrs), ctxt);
     ASSERT_GE(list.size(), 1U);
-    EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
-                                  "Inverse of ETRS89 to WGS 84 (1) + "
-                                  "ETRS89 to Belfast height (2) + "
-                                  "ETRS89 to WGS 84 (1)");
+    EXPECT_EQ(list[0]->nameStr(),
+              "Inverse of WGS 84 to EGM96 height (1) + "
+              "ETRS89 to Belfast height (2) using ETRS89 to WGS 84 (1)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline +step +proj=axisswap +order=2,1 "
               "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
@@ -5016,9 +5015,8 @@ TEST(operation, compoundCRS_to_compoundCRS_issue_3328) {
         NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
     ASSERT_GE(list.size(), 1U);
     EXPECT_EQ(list[0]->nameStr(), "Inverse of WGS 84 to EGM96 height (1) + "
-                                  "Inverse of NAD83(CSRS) to WGS 84 (2) + "
-                                  "NAD83(CSRS) to CGVD28 height (1) + "
-                                  "NAD83(CSRS) to WGS 84 (2)");
+                                  "NAD83(CSRS) to CGVD28 height (1) "
+                                  "using NAD83(CSRS) to WGS 84 (2)");
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
               "+proj=pipeline "
               "+step +proj=push +v_1 +v_2 "
@@ -5073,12 +5071,10 @@ TEST(
             NN_NO_CHECK(src), NN_NO_CHECK(dst), ctxt);
         ASSERT_GE(list.size(), 1U);
         EXPECT_EQ(list[0]->nameStr(),
-                  "Ballpark geographic offset from "
-                  "NAD83(CSRS) to NAD83(CSRS)v6 + "
                   "Inverse of NAD83(CSRS)v6 to CGVD28 height (1) + "
-                  "NAD83(CSRS)v6 to CGVD2013(CGG2013) height (1) + "
-                  "Ballpark geographic offset from "
-                  "NAD83(CSRS)v6 to NAD83(CSRS)");
+                  "NAD83(CSRS)v6 to CGVD2013(CGG2013) height (1) "
+                  "using Ballpark geographic offset "
+                  "from NAD83(CSRS) to NAD83(CSRS)v6");
     }
 #if 0
     // Note: below situation is no longer triggered since EPSG v10.066 update
