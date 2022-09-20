@@ -3,7 +3,7 @@
 Answers to the PROJ tutorial exercises
 ++++++++++++++++++++++++++++++++++++++++
 
-Projections.1: UTM
+Projections1: UTM
 -------------------
 
 .. code-block::
@@ -13,7 +13,7 @@ Projections.1: UTM
     3.      +proj=utm +zone=35 +ellps=intl
 
 
-Projections2.: LCC
+Projections2: LCC
 -------------------
 
 .. code-block::
@@ -117,7 +117,7 @@ Pipelines
                 Without the push/pop steps the height would be affected by
                 the Helmert step.
 
-Projections.3: Tranverse Mercator
+Projections3: Tranverse Mercator
 ---------------------------------
 
 .. code-block::

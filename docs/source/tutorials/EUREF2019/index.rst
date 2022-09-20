@@ -10,7 +10,7 @@ Introduction
 
 This tutorial was developed for the EUREF 2019 Symposium as an introduction
 to geodetic transformations in PROJ. The intended audience was geodesist in
-governental geodetic agencies but the tutorial should be of interest to a
+governmental geodetic agencies but the tutorial should be of interest to a
 broader group of people within GIS, remote sensing and related fields.
 
 The tutorials gives insight into how transformations are set up using the
@@ -18,7 +18,7 @@ The tutorials gives insight into how transformations are set up using the
 packaged with PROJ. In the tutorial properties of several common projections
 and transformations are investigated.
 
-The turotial requires a working installation of PROJ. Consult the
+The tutorial requires a working installation of PROJ. Consult the
 :ref:`chapter on installing PROJ <install>`.
 
 How to fill out the PROJ tutorial exercises

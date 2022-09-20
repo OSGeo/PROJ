@@ -10,7 +10,7 @@ to use a different ellipsoid than the default (GRS80).
 
 Download the :program:`gie` file for the exercise: :download:`projections1.gie <projections1.gie>`.
 
-Exercise 1: Seting up a projection
+Exercise 1: Setting up a projection
 -----------------------------------
 
 Set up a UTM projection for use in Estonia.

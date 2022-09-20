@@ -127,7 +127,7 @@ the pipeline and answer the following questions:
     reading
 
 .. hint:: 
-    You can use projinfo to get more knownledge about a particular CRS::
+    You can use projinfo to get more knowledge about a particular CRS::
 
         projinfo <CRS name or code>
 

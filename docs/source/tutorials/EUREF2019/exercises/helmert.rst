@@ -74,7 +74,7 @@ for further detail.
 3. Position vector/Coordinate frame
 ------------------------------------
 
-Effectively, the difference between the two rotation convetions is the sign of
+Effectively, the difference between the two rotation conventions is the sign of
 the rotation parameters. In this exercise we will examine this property by
 looking at a transformation between the German DHDN reference system and ETRS89.
 
@@ -116,7 +116,7 @@ transformation from ITRF2008 to ITRF2014.
 
 .. hint:: 
 
-    Pay attention to the units of the parameteres output by projinfo,
+    Pay attention to the units of the parameters output by projinfo,
     you may have to convert them to standard units (e.g. mm -> m).
 
 .. hint:: 
