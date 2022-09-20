@@ -8942,6 +8942,49 @@ TEST(io, projstringformatter_optim_hgridshift_vgridshift_hgridshift_inv) {
 
 // ---------------------------------------------------------------------------
 
+TEST(io, projstringformatter_optim_as_uc_vgridshift_uc_as_push_as_uc) {
+    // Nominal case
+    {
+        auto fmt = PROJStringFormatter::create();
+        fmt->addStep("axisswap");
+        fmt->addParam("order", "2,1");
+
+        fmt->addStep("unitconvert");
+        fmt->addParam("xy_in", "deg");
+        fmt->addParam("xy_out", "rad");
+
+        fmt->addStep("vgridshift");
+        fmt->addParam("grids", "foo");
+
+        fmt->addStep("unitconvert");
+        fmt->addParam("xy_in", "rad");
+        fmt->addParam("xy_out", "deg");
+
+        fmt->addStep("axisswap");
+        fmt->addParam("order", "2,1");
+
+        fmt->addStep("push");
+        fmt->addParam("v_1");
+        fmt->addParam("v_2");
+
+        fmt->addStep("axisswap");
+        fmt->addParam("order", "2,1");
+
+        fmt->addStep("unitconvert");
+        fmt->addParam("xy_in", "deg");
+        fmt->addParam("xy_out", "rad");
+
+        EXPECT_EQ(fmt->toString(),
+                  "+proj=pipeline "
+                  "+step +proj=push +v_1 +v_2 "
+                  "+step +proj=axisswap +order=2,1 "
+                  "+step +proj=unitconvert +xy_in=deg +xy_out=rad "
+                  "+step +proj=vgridshift +grids=foo");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(io, projparse_longlat) {
 
     auto expected = "GEODCRS[\"unknown\",\n"
