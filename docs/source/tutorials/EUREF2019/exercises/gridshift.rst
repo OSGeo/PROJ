@@ -46,7 +46,7 @@ Define the operation that converts from DE_DHDN to ETRS89 using a gridshift.
 -------------------------
 
 The most common use case for vertical grid shifts is transformation from
-ellipsoidal heights to physical heights. In most cases this is equvialent to
+ellipsoidal heights to physical heights. In most cases this is equivalent to
 applying an offset from a geoid model, which is exactly what we will do in this
 exercise.
 
