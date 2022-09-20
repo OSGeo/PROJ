@@ -73,14 +73,14 @@ FOR EACH ROW BEGIN
                       AND g1.source_crs_code = g2.source_crs_code
                       AND g1.target_crs_auth_name = g2.target_crs_auth_name
                       AND g1.target_crs_code = g2.target_crs_code
-                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG')
+                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG' AND g2.deprecated = 0)
         OR EXISTS (SELECT 1 FROM grid_transformation g1
                       JOIN grid_transformation g2
                       ON g1.source_crs_auth_name = g2.target_crs_auth_name
                       AND g1.source_crs_code = g2.target_crs_code
                       AND g1.target_crs_auth_name = g1.source_crs_auth_name
                       AND g1.target_crs_code = g1.source_crs_code
-                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG');
+                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG' AND g2.deprecated = 0);
 
     SELECT RAISE(ABORT, 'Arg! there is now a EPSG:102100 object. Hack in createFromUserInput() will no longer work')
         WHERE EXISTS(SELECT 1 FROM crs_view WHERE auth_name = 'EPSG' AND code = '102100');
