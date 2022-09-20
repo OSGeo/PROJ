@@ -149,7 +149,7 @@ Hints:
       to your advantage and put each step on it's own separate line for easier
       reading
 
-    - You can use projinfo to get more knownledge about a particular CRS:
+    - You can use projinfo to get more knowledge about a particular CRS:
 
         projinfo <CRS name or code>
 
