@@ -116,7 +116,7 @@ ConcatenatedOperation::operations() const {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static bool compareStepCRS(const crs::CRS *a, const crs::CRS *b) {
+static bool areCRSMoreOrLessEquivalent(const crs::CRS *a, const crs::CRS *b) {
     const auto &aIds = a->identifiers();
     const auto &bIds = b->identifiers();
     if (aIds.size() == 1 && bIds.size() == 1 &&
@@ -124,7 +124,23 @@ static bool compareStepCRS(const crs::CRS *a, const crs::CRS *b) {
         *aIds[0]->codeSpace() == *bIds[0]->codeSpace()) {
         return true;
     }
-    return a->_isEquivalentTo(b, util::IComparable::Criterion::EQUIVALENT);
+    if (a->_isEquivalentTo(b, util::IComparable::Criterion::EQUIVALENT)) {
+        return true;
+    }
+    // This is for example for EPSG:10146 which is EPSG:9471
+    // (INAGeoid2020 v1 height)
+    // to EPSG:20036 (INAGeoid2020 v2 height), but chains
+    // EPSG:9629 (SRGI2013 to SRGI2013 + INAGeoid2020 v1 height (1))
+    // with EPSG:10145 (SRGI2013 to SRGI2013 + INAGeoid2020 v2 height (1))
+    const auto compoundA = dynamic_cast<const crs::CompoundCRS *>(a);
+    const auto compoundB = dynamic_cast<const crs::CompoundCRS *>(b);
+    if (compoundA && !compoundB)
+        return areCRSMoreOrLessEquivalent(
+            compoundA->componentReferenceSystems()[1].get(), b);
+    else if (!compoundA && compoundB)
+        return areCRSMoreOrLessEquivalent(
+            a, compoundB->componentReferenceSystems()[1].get());
+    return false;
 }
 //! @endcond
 
@@ -176,7 +192,8 @@ ConcatenatedOperationNNPtr ConcatenatedOperation::create(
                                    "source and/or target CRS");
         }
         if (i >= 1) {
-            if (!compareStepCRS(l_sourceCRS.get(), lastTargetCRS.get())) {
+            if (!areCRSMoreOrLessEquivalent(l_sourceCRS.get(),
+                                            lastTargetCRS.get())) {
 #ifdef DEBUG_CONCATENATED_OPERATION
                 std::cerr << "Step " << i - 1 << ": "
                           << operationsIn[i - 1]->nameStr() << std::endl;
@@ -321,10 +338,10 @@ void ConcatenatedOperation::fixStepsDirection(
                     // except if it looks like the next operation should
                     // actually be reversed !!!
                     if (l_targetCRS &&
-                        !compareStepCRS(l_targetCRS.get(),
-                                        derivedCRS->baseCRS().get()) &&
+                        !areCRSMoreOrLessEquivalent(
+                            l_targetCRS.get(), derivedCRS->baseCRS().get()) &&
                         operationsInOut[i + 1]->targetCRS() &&
-                        compareStepCRS(
+                        areCRSMoreOrLessEquivalent(
                             operationsInOut[i + 1]->targetCRS().get(),
                             derivedCRS->baseCRS().get())) {
                         l_targetCRS = operationsInOut[i + 1]->targetCRS();
@@ -363,10 +380,10 @@ void ConcatenatedOperation::fixStepsDirection(
                     // except if it looks like the previous operation should
                     // actually be reversed !!!
                     if (l_sourceCRS &&
-                        !compareStepCRS(l_sourceCRS.get(),
-                                        derivedCRS->baseCRS().get()) &&
+                        !areCRSMoreOrLessEquivalent(
+                            l_sourceCRS.get(), derivedCRS->baseCRS().get()) &&
                         operationsInOut[i - 1]->sourceCRS() &&
-                        compareStepCRS(
+                        areCRSMoreOrLessEquivalent(
                             operationsInOut[i - 1]->sourceCRS().get(),
                             derivedCRS->baseCRS().get())) {
                         l_targetCRS = operationsInOut[i - 1]->sourceCRS();
@@ -457,9 +474,11 @@ void ConcatenatedOperation::fixStepsDirection(
                     "Cannot determine targetCRS of operation at step " +
                     toString(static_cast<int>(i)));
             }
-            if (compareStepCRS(l_sourceCRS.get(), prevOpTarget.get())) {
+            if (areCRSMoreOrLessEquivalent(l_sourceCRS.get(),
+                                           prevOpTarget.get())) {
                 // do nothing
-            } else if (compareStepCRS(l_targetCRS.get(), prevOpTarget.get())) {
+            } else if (areCRSMoreOrLessEquivalent(l_targetCRS.get(),
+                                                  prevOpTarget.get())) {
                 op = op->inverse();
             }
             // Below is needed for EPSG:9103 which chains NAD83(2011) geographic
@@ -486,8 +505,8 @@ void ConcatenatedOperation::fixStepsDirection(
 
     if (!operationsInOut.empty()) {
         auto l_sourceCRS = operationsInOut.front()->sourceCRS();
-        if (l_sourceCRS &&
-            !compareStepCRS(l_sourceCRS.get(), concatOpSourceCRS.get())) {
+        if (l_sourceCRS && !areCRSMoreOrLessEquivalent(
+                               l_sourceCRS.get(), concatOpSourceCRS.get())) {
             throw InvalidOperation("The source CRS of the first step of "
                                    "concatenated operation is not the same "
                                    "as the source CRS of the concatenated "
@@ -495,8 +514,8 @@ void ConcatenatedOperation::fixStepsDirection(
         }
 
         auto l_targetCRS = operationsInOut.back()->targetCRS();
-        if (l_targetCRS &&
-            !compareStepCRS(l_targetCRS.get(), concatOpTargetCRS.get())) {
+        if (l_targetCRS && !areCRSMoreOrLessEquivalent(
+                               l_targetCRS.get(), concatOpTargetCRS.get())) {
             if (l_targetCRS->nameStr() == concatOpTargetCRS->nameStr() &&
                 ((isGeographic(l_targetCRS.get()) &&
                   isGeocentric(concatOpTargetCRS.get())) ||

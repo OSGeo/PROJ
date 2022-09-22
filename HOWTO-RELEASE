@@ -138,7 +138,7 @@ md5 proj-x.y.zRCn.zip > proj-x.y.zRCn.zip.md5
 Upload to the OSGeo download server:
 
 ```
-scp proj-x.y.zRCn.* warmerdam@download.osgeo.org:/osgeo/download/proj
+scp proj-x.y.zRCn.* warmerdam@upload.osgeo.org:/osgeo/download/proj
 ```
 
 Adjust version numbers and usernames accordingly.

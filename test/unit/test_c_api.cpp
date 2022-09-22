@@ -301,6 +301,39 @@ TEST_F(CApi, proj_create_from_wkt) {
     {
         PROJ_STRING_LIST warningList = nullptr;
         PROJ_STRING_LIST errorList = nullptr;
+        const char *const options[] = {
+            "UNSET_IDENTIFIERS_IF_INCOMPATIBLE_DEF=NO", nullptr};
+        auto wkt = "PROJCS[\"Merchich / Nord Maroc\","
+                   "    GEOGCS[\"Merchich\","
+                   "        DATUM[\"Merchich\","
+                   "            SPHEROID[\"Clarke 1880 (IGN)\","
+                   "6378249.2,293.466021293627]],"
+                   "        PRIMEM[\"Greenwich\",0],"
+                   "        UNIT[\"grad\",0.015707963267949,"
+                   "            AUTHORITY[\"EPSG\",\"9105\"]],"
+                   "        AUTHORITY[\"EPSG\",\"4261\"]],"
+                   "    PROJECTION[\"Lambert_Conformal_Conic_1SP\"],"
+                   "    PARAMETER[\"latitude_of_origin\",37],"
+                   "    PARAMETER[\"central_meridian\",-6],"
+                   "    PARAMETER[\"scale_factor\",0.999625769],"
+                   "    PARAMETER[\"false_easting\",500000],"
+                   "    PARAMETER[\"false_northing\",300000],"
+                   "    UNIT[\"metre\",1,"
+                   "        AUTHORITY[\"EPSG\",\"9001\"]],"
+                   "    AXIS[\"Easting\",EAST],"
+                   "    AXIS[\"Northing\",NORTH]]";
+        auto obj = proj_create_from_wkt(m_ctxt, wkt, options, &warningList,
+                                        &errorList);
+        ObjectKeeper keeper(obj);
+        EXPECT_NE(obj, nullptr);
+        EXPECT_EQ(warningList, nullptr);
+        proj_string_list_destroy(warningList);
+        EXPECT_EQ(errorList, nullptr);
+        proj_string_list_destroy(errorList);
+    }
+    {
+        PROJ_STRING_LIST warningList = nullptr;
+        PROJ_STRING_LIST errorList = nullptr;
         auto obj = proj_create_from_wkt(
             m_ctxt,
             GeographicCRS::EPSG_4326->exportToWKT(WKTFormatter::create().get())
@@ -497,6 +530,23 @@ TEST_F(CApi, proj_as_wkt) {
         ASSERT_NE(wkt, nullptr);
         EXPECT_TRUE(std::string(wkt).find(
                         "COMPD_CS[\"WGS 84 + Ellipsoid (metre)\"") == 0)
+            << wkt;
+    }
+
+    // ALLOW_LINUNIT_NODE default value
+    {
+        auto wkt = proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_ESRI, nullptr);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("LINUNIT") != std::string::npos)
+            << wkt;
+    }
+
+    // ALLOW_LINUNIT_NODE=NO
+    {
+        const char *const options[] = {"ALLOW_LINUNIT_NODE=NO", nullptr};
+        auto wkt = proj_as_wkt(m_ctxt, crs4979, PJ_WKT1_ESRI, options);
+        ASSERT_NE(wkt, nullptr);
+        EXPECT_TRUE(std::string(wkt).find("LINUNIT") == std::string::npos)
             << wkt;
     }
 
@@ -5110,10 +5160,9 @@ TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
     ASSERT_TRUE(name != nullptr);
     EXPECT_EQ(name,
               std::string("Inverse of UTM zone 11N + "
-                          "NAD83(2011) to WGS 84 (1) + "
                           "Conversion from myVertCRS to myVertCRS (metre) + "
-                          "Transformation from myVertCRS (metre) to WGS 84 + "
-                          "Inverse of NAD83(2011) to WGS 84 (1)"));
+                          "Transformation from myVertCRS (metre) to WGS 84 "
+                          "using NAD83(2011) to WGS 84 (1)"));
 
     auto proj_5 = proj_as_proj_string(m_ctxt, P, PJ_PROJ_5, nullptr);
     ASSERT_NE(proj_5, nullptr);

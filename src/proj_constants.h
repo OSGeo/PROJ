@@ -586,6 +586,9 @@
 #define EPSG_CODE_METHOD_VERTICALGRID_PL_TXT 1101
 #define EPSG_NAME_METHOD_VERTICALGRID_PL_TXT "Vertical Offset by Grid Interpolation (PL txt)"
 
+#define EPSG_CODE_METHOD_VERTICALGRID_NRCAN_BYN 1112
+#define EPSG_NAME_METHOD_VERTICALGRID_NRCAN_BYN "Vertical Offset by Grid Interpolation (NRCan byn)"
+
 #define EPSG_NAME_PARAMETER_VERTICAL_OFFSET_FILE "Vertical offset file"
 #define EPSG_CODE_PARAMETER_VERTICAL_OFFSET_FILE 8732
 
@@ -654,6 +657,9 @@
 
 #define EPSG_NAME_PARAMETER_INCLINATION_IN_LONGITUDE "Inclination in longitude"
 #define EPSG_CODE_PARAMETER_INCLINATION_IN_LONGITUDE 8731
+
+#define EPSG_NAME_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS "EPSG code for Horizontal CRS"
+#define EPSG_CODE_PARAMETER_EPSG_CODE_FOR_HORIZONTAL_CRS 1037
 
 /* ------------------------------------------------------------------------ */
 

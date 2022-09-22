@@ -69,6 +69,7 @@ class WKTConstants {
     static const std::string EXTENSION;   // WKT1 only - GDAL specific
     static const std::string LOCAL_CS;    // WKT1 only
     static const std::string LOCAL_DATUM; // WKT1 only
+    static const std::string LINUNIT;     // WKT1 ESRI (ArcGIS Pro >= 2.7)
 
     // WKT2 preferred
     static const std::string GEODCRS;

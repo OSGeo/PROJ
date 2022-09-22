@@ -77,8 +77,8 @@ copyright = u'1983-{0}'.format(now.year)
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-version = '9.1.0'
-data_version = '1.9'
+version = '9.2.0'
+data_version = '1.11'
 
 # use same |release| as |version|
 release = version
@@ -88,7 +88,7 @@ release = version
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+# language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -206,7 +206,7 @@ html_context = {
     'github_user': 'OSGeo',
     'github_repo': 'PROJ',
     # TODO: edit when switching active branch
-    'github_version': '9.0/docs/source/',
+    'github_version': '9.1/docs/source/',
 }
 
 # Add any extra paths that contain custom files (such as robots.txt or

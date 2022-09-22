@@ -1347,8 +1347,7 @@ TEST(factory, AuthorityFactory_build_all_concatenated) {
         AuthorityFactory::ObjectType::CONCATENATED_OPERATION, false);
     EXPECT_LT(setConcatenatedNoDeprecated.size(), setConcatenated.size());
     for (const auto &code : setConcatenated) {
-        if (in(code,
-               {"8422", "8481", "8482", "8565", "8566", "8572", "9731"})) {
+        if (in(code, {"8422", "8481", "8482", "8565", "8566", "8572"})) {
             EXPECT_THROW(factory->createCoordinateOperation(code, false),
                          FactoryException)
                 << code;
@@ -3022,6 +3021,18 @@ TEST_F(FactoryWithTmpDatabase, custom_projected_crs) {
         if (!res.empty()) {
             EXPECT_EQ(res.front().first->nameStr(), "WKT1_GDAL");
         }
+    }
+
+    {
+        const auto list = factory->getCRSInfoList();
+        bool found = false;
+        for (const auto &info : list) {
+            if (info.authName == "TEST_NS" && info.code == "TEST_BOUND") {
+                found = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(found);
     }
 }
 

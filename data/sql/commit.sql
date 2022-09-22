@@ -73,14 +73,14 @@ FOR EACH ROW BEGIN
                       AND g1.source_crs_code = g2.source_crs_code
                       AND g1.target_crs_auth_name = g2.target_crs_auth_name
                       AND g1.target_crs_code = g2.target_crs_code
-                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG')
+                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG' AND g2.deprecated = 0)
         OR EXISTS (SELECT 1 FROM grid_transformation g1
                       JOIN grid_transformation g2
                       ON g1.source_crs_auth_name = g2.target_crs_auth_name
                       AND g1.source_crs_code = g2.target_crs_code
                       AND g1.target_crs_auth_name = g1.source_crs_auth_name
                       AND g1.target_crs_code = g1.source_crs_code
-                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG');
+                      WHERE g1.auth_name = 'PROJ' AND g1.code NOT LIKE '%_RESTRICTED_TO_VERTCRS%' AND g2.auth_name = 'EPSG' AND g2.deprecated = 0);
 
     SELECT RAISE(ABORT, 'Arg! there is now a EPSG:102100 object. Hack in createFromUserInput() will no longer work')
         WHERE EXISTS(SELECT 1 FROM crs_view WHERE auth_name = 'EPSG' AND code = '102100');
@@ -295,6 +295,15 @@ FOR EACH ROW BEGIN
     -- check PROJ.VERSION value
     SELECT RAISE(ABORT, 'Value of PROJ.VERSION entry of metadata tables not substituted by actual value')
         WHERE (SELECT 1 FROM metadata WHERE key = 'PROJ.VERSION' AND value LIKE '$%');
+
+    -- Only available in sqlite >= 3.16. May be activated as soon as support for ubuntu 16 is dropped
+    -- check all foreign key contraints have an 'ON DELETE CASCADE'
+    -- SELECT RAISE(ABORT, 'FK constraint with missing "ON DELETE CASCADE"')
+    --     WHERE EXISTS (SELECT 1 FROM
+    --             pragma_foreign_key_list(name),
+    --             (SELECT name from sqlite_master WHERE type='table')
+    --             WHERE upper(on_delete) != 'CASCADE');
+
 
 END;
 INSERT INTO dummy DEFAULT VALUES;

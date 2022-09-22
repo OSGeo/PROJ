@@ -136,6 +136,7 @@ osgeo::proj::crs::DerivedGeographicCRS::demoteTo2D(std::string const&, std::shar
 osgeo::proj::crs::DerivedGeographicCRS::~DerivedGeographicCRS()
 osgeo::proj::crs::DerivedProjectedCRS::baseCRS() const
 osgeo::proj::crs::DerivedProjectedCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::ProjectedCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::CoordinateSystem> > const&)
+osgeo::proj::crs::DerivedProjectedCRS::demoteTo2D(std::string const&, std::shared_ptr<osgeo::proj::io::DatabaseContext> const&) const
 osgeo::proj::crs::DerivedProjectedCRS::~DerivedProjectedCRS()
 osgeo::proj::crs::DerivedVerticalCRS::baseCRS() const
 osgeo::proj::crs::DerivedVerticalCRS::create(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::VerticalCRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::operation::Conversion> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::cs::VerticalCS> > const&)
@@ -437,8 +438,10 @@ osgeo::proj::io::PROJStringParser::warningList() const
 osgeo::proj::io::WKTFormatter::create(dropbox::oxygen::nn<std::unique_ptr<osgeo::proj::io::WKTFormatter, std::default_delete<osgeo::proj::io::WKTFormatter> > > const&)
 osgeo::proj::io::WKTFormatter::create(osgeo::proj::io::WKTFormatter::Convention, std::shared_ptr<osgeo::proj::io::DatabaseContext>)
 osgeo::proj::io::WKTFormatter::isAllowedEllipsoidalHeightAsVerticalCRS() const
+osgeo::proj::io::WKTFormatter::isAllowedLINUNITNode() const
 osgeo::proj::io::WKTFormatter::isStrict() const
 osgeo::proj::io::WKTFormatter::setAllowEllipsoidalHeightAsVerticalCRS(bool)
+osgeo::proj::io::WKTFormatter::setAllowLINUNITNode(bool)
 osgeo::proj::io::WKTFormatter::setIndentationWidth(int)
 osgeo::proj::io::WKTFormatter::setMultiLine(bool)
 osgeo::proj::io::WKTFormatter::setOutputAxis(osgeo::proj::io::WKTFormatter::OutputAxisRule)
@@ -460,6 +463,7 @@ osgeo::proj::io::WKTParser::attachDatabaseContext(std::shared_ptr<osgeo::proj::i
 osgeo::proj::io::WKTParser::createFromWKT(std::string const&)
 osgeo::proj::io::WKTParser::guessDialect(std::string const&)
 osgeo::proj::io::WKTParser::setStrict(bool)
+osgeo::proj::io::WKTParser::setUnsetIdentifiersIfIncompatibleDef(bool)
 osgeo::proj::io::WKTParser::warningList() const
 osgeo::proj::io::WKTParser::~WKTParser()
 osgeo::proj::io::WKTParser::WKTParser()
@@ -684,6 +688,7 @@ osgeo::proj::operation::SingleOperation::parameterValueNumeric(int, osgeo::proj:
 osgeo::proj::operation::SingleOperation::parameterValues() const
 osgeo::proj::operation::SingleOperation::parameterValue(std::string const&, int) const
 osgeo::proj::operation::SingleOperation::~SingleOperation()
+osgeo::proj::operation::SingleOperation::substitutePROJAlternativeGridNames(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> >) const
 osgeo::proj::operation::SingleOperation::validateParameters() const
 osgeo::proj::operation::Transformation::createAbridgedMolodensky(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, double, double, double, double, double, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
 osgeo::proj::operation::Transformation::createChangeVerticalUnit(osgeo::proj::util::PropertyMap const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::crs::CRS> > const&, osgeo::proj::common::Scale const&, std::vector<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> >, std::allocator<dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::metadata::PositionalAccuracy> > > > const&)
@@ -707,7 +712,6 @@ osgeo::proj::operation::Transformation::createVerticalOffset(osgeo::proj::util::
 osgeo::proj::operation::Transformation::getTOWGS84Parameters() const
 osgeo::proj::operation::Transformation::inverse() const
 osgeo::proj::operation::Transformation::sourceCRS() const
-osgeo::proj::operation::Transformation::substitutePROJAlternativeGridNames(dropbox::oxygen::nn<std::shared_ptr<osgeo::proj::io::DatabaseContext> >) const
 osgeo::proj::operation::Transformation::targetCRS() const
 osgeo::proj::operation::Transformation::~Transformation()
 osgeo::proj::util::ArrayOfBaseObject::add(osgeo::proj::util::BaseObjectNNPtr const&)
@@ -780,6 +784,7 @@ pj_param(pj_ctx*, ARG_list*, char const*)
 pj_phi2(pj_ctx*, double, double)
 pj_pr_list(PJconsts*)
 pj_shrink(char*)
+pj_stderr_proj_lib_deprecation_warning()
 proj_alter_id
 proj_alter_name
 proj_angular_input
@@ -787,6 +792,7 @@ proj_angular_output
 proj_area_create
 proj_area_destroy
 proj_area_set_bbox
+proj_area_set_name
 proj_as_projjson
 proj_as_proj_string
 proj_assign_context
@@ -1030,6 +1036,7 @@ proj_operation_factory_context_set_allow_ballpark_transformations
 proj_operation_factory_context_set_allowed_intermediate_crs
 proj_operation_factory_context_set_allow_use_intermediate_crs
 proj_operation_factory_context_set_area_of_interest
+proj_operation_factory_context_set_area_of_interest_name
 proj_operation_factory_context_set_crs_extent_use
 proj_operation_factory_context_set_desired_accuracy
 proj_operation_factory_context_set_discard_superseded

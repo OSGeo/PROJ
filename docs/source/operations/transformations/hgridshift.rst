@@ -38,7 +38,7 @@ is not found in the PROJ search path. The list of grids is prioritized so that
 grids in the start of the list takes precedence over the grids in the back of the
 list.
 
-PROJ supports CTable2, NTv1 and NTv2 files for horizontal grid corrections. Details
+PROJ supports GeoTIFF (:ref:`geodetictiffgrids`), CTable2 and NTv2 files for horizontal grid corrections. Details
 about all three formats can be found in the GDAL documentation and/or driver source
 code. GDAL reads and writes all three formats. Using GDAL for construction of
 new grids is recommended.
@@ -106,7 +106,8 @@ Required
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
-    Grids are expected to be in CTable2, NTv1 or NTv2 format.
+    Grids are expected to be in GeoTIFF (:ref:`geodetictiffgrids`) or NTv2 format (or CTable2 for legacy
+    grids)
 
 Optional
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

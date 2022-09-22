@@ -1,0 +1,84 @@
+{
+  "$schema": "https://proj.org/schemas/v0.5/projjson.schema.json",
+  "type": "PointMotionOperation",
+  "name": "Canada velocity grid v6",
+  "source_crs": {
+      "type": "GeographicCRS",
+      "name": "NAD83(CSRS)v6",
+      "datum": {
+        "type": "GeodeticReferenceFrame",
+        "name": "North American Datum of 1983 (CSRS) version 6",
+        "ellipsoid": {
+          "name": "GRS 1980",
+          "semi_major_axis": 6378137,
+          "inverse_flattening": 298.257222101
+        }
+      },
+      "coordinate_system": {
+        "subtype": "ellipsoidal",
+        "axis": [
+          {
+            "name": "Geodetic latitude",
+            "abbreviation": "Lat",
+            "direction": "north",
+            "unit": "degree"
+          },
+          {
+            "name": "Geodetic longitude",
+            "abbreviation": "Lon",
+            "direction": "east",
+            "unit": "degree"
+          },
+          {
+            "name": "Ellipsoidal height",
+            "abbreviation": "h",
+            "direction": "up",
+            "unit": "metre"
+          }
+        ]
+      },
+      "scope": "Geodesy.",
+      "area": "Canada - onshore and offshore - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon.",
+      "bbox": {
+        "south_latitude": 38.21,
+        "west_longitude": -141.01,
+        "north_latitude": 86.46,
+        "east_longitude": -40.73
+      },
+      "id": {
+        "authority": "EPSG",
+        "code": 8251
+      }
+    }
+    ,
+  "method": {
+    "name": "Point motion by grid (Canada NTv2_Vel)",
+    "id": {
+      "authority": "1070",
+      "code": 1053
+    }
+  },
+  "parameters": [
+    {
+      "name": "Point motion velocity grid file",
+      "value": "cvg60.cvb",
+      "id": {
+        "authority": "EPSG",
+        "code": 1050
+      }
+    }
+  ],
+  "accuracy": "0.01",
+  "scope": "Change of coordinate epoch for points referenced to NAD83(CSRS)v6.",
+  "area": "Canada - 41°N to 85°N, west of 50°W",
+  "bbox": {
+    "south_latitude": 41.0,
+    "west_longitude": -141.01,
+    "north_latitude": 85.0,
+    "east_longitude": -50.0
+  },
+  "id": {
+    "authority": "EPSG",
+    "code": 8676
+  }
+}

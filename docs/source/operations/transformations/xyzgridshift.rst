@@ -68,7 +68,7 @@ Required
     grid is considered optional and PROJ will the not complain if the grid is
     not available.
 
-    Grids are expected to be in GeoTIFF format. If no metadata is provided,
+    Grids are expected to be in GeoTIFF format (:ref:`geodetictiffgrids`). If no metadata is provided,
     the first, second and third samples are assumed to be the geocentric
     translation along X, Y and Z axis respectively, in metres.
 

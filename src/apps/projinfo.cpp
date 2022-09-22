@@ -927,6 +927,8 @@ static void outputOperations(
 
 int main(int argc, char **argv) {
 
+    pj_stderr_proj_lib_deprecation_warning();
+
     if (argc == 1) {
         std::cerr << pj_get_release() << std::endl;
         usage();
@@ -1328,7 +1330,7 @@ int main(int argc, char **argv) {
             DatabaseContext::create(mainDBPath, auxDBPath).as_nullable();
     } catch (const std::exception &e) {
         if (!mainDBPath.empty() || !auxDBPath.empty() || !area.empty() ||
-            dumpDbStructure) {
+            dumpDbStructure || listCRSSpecified) {
             std::cerr << "ERROR: Cannot create database connection: "
                       << e.what() << std::endl;
             std::exit(1);
@@ -1352,6 +1354,7 @@ int main(int argc, char **argv) {
     }
 
     if (listCRSSpecified) {
+        assert(dbContext);
         bool allow_deprecated = false;
         std::set<AuthorityFactory::ObjectType> types;
         auto tokens = split(listCRSFilter, ',');

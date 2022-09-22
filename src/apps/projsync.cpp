@@ -110,6 +110,9 @@ static std::vector<double> get_bbox(const json &j) {
 // ---------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
+
+    pj_stderr_proj_lib_deprecation_warning();
+
     auto ctx = pj_get_default_ctx();
 
     std::string targetDir;
@@ -142,9 +145,9 @@ int main(int argc, char *argv[]) {
             // do nothing
         } else if (arg == "--system-directory") {
             targetDir = pj_get_relative_share_proj(ctx);
-#ifdef PROJ_LIB
+#ifdef PROJ_DATA
             if (targetDir.empty()) {
-                targetDir = PROJ_LIB;
+                targetDir = PROJ_DATA;
             }
 #endif
         } else if (arg == "--target-dir" && i + 1 < argc) {

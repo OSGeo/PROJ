@@ -146,7 +146,6 @@ namespace { // anonymous namespace
 struct isea_dgg {
     int polyhedron; /* ignored, icosahedron */
     double  o_lat, o_lon, o_az; /* orientation, radians */
-    int pole; /* true if standard snyder */
     int topology; /* ignored, hexagon */
     int aperture; /* valid values depend on partitioning method */
     int resolution;

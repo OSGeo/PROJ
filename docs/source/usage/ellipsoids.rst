@@ -137,23 +137,23 @@ Spherical earth with radius 7000km:
 
 ::
 
-    proj=laton R=7000000
+    +proj=latlon +R=7000000
 
 Using the GRS80 ellipsoid:
 
 ::
 
-    proj=laton ellps=GRS80
+    +proj=latlon +ellps=GRS80
 
 Expressing ellipsoid by semi-major axis and reverse flattening (:math:`1/f`):
 
 ::
 
-    proj=laton a=6378137.0 rf=298.25
+    +proj=latlon +a=6378137.0 +rf=298.25
 
 Spherical earth based on volume of ellipsoid
 
 ::
 
-    proj=laton a=6378137.0 rf=298.25 +R_V
+    +proj=latlon +a=6378137.0 +rf=298.25 +R_V
 

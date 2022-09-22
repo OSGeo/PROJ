@@ -5,7 +5,7 @@ Environment variables
 ================================================================================
 
 PROJ can be controlled by setting environment variables. Most users will
-have a use for the :envvar:`PROJ_LIB`.
+have a use for the :envvar:`PROJ_DATA`.
 
 On UNIX systems environment variables can be set for a shell-session with::
 
@@ -28,7 +28,11 @@ done by setting the variable with no content::
 
     > set VAR=
 
-.. envvar:: PROJ_LIB
+.. envvar:: PROJ_DATA
+
+    Prior to PROJ 9.1, this environment variable was called :envvar:`PROJ_LIB`.
+    This older name is still supported in PROJ 9.1 as a fallback, but support for it
+    may be removed in future release.
 
     The location of PROJ :doc:`resource files<../resource_files>`.
 
@@ -48,7 +52,7 @@ done by setting the variable with no content::
 
     Starting with PROJ version 6.1.0, the paths set by
     :func:`proj_context_set_search_paths` will have priority over the
-    :envvar:`PROJ_LIB` to allow for multiple versions of PROJ
+    :envvar:`PROJ_DATA` to allow for multiple versions of PROJ
     resource files on your system without conflicting.
 
 
@@ -83,7 +87,7 @@ done by setting the variable with no content::
     .. versionadded:: 7.0.0
 
     Define the endpoint of the CDN storage. Normally defined through the
-    :file:`proj.ini` configuration file locale in :envvar:`PROJ_LIB`.
+    :file:`proj.ini` configuration file locale in :envvar:`PROJ_DATA`.
     Alternatively, the :c:func:`proj_context_set_url_endpoint` function can
     be used.
 

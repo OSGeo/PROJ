@@ -34,8 +34,8 @@
 /* Undocumented macros, especially those whose name start with YY_,
    are private implementation details.  Do not rely on them.  */
 
-#ifndef YY_PJ_WKT1_SRC_WKT1_GENERATED_PARSER_H_INCLUDED
-# define YY_PJ_WKT1_SRC_WKT1_GENERATED_PARSER_H_INCLUDED
+#ifndef YY_PJ_WKT1_WKT1_GENERATED_PARSER_H_INCLUDED
+# define YY_PJ_WKT1_WKT1_GENERATED_PARSER_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -61,23 +61,24 @@ extern int pj_wkt1_debug;
     T_SPHEROID = 266,
     T_PRIMEM = 267,
     T_UNIT = 268,
-    T_GEOCCS = 269,
-    T_AUTHORITY = 270,
-    T_VERT_CS = 271,
-    T_VERTCS = 272,
-    T_VERT_DATUM = 273,
-    T_VDATUM = 274,
-    T_COMPD_CS = 275,
-    T_AXIS = 276,
-    T_TOWGS84 = 277,
-    T_FITTED_CS = 278,
-    T_LOCAL_CS = 279,
-    T_LOCAL_DATUM = 280,
-    T_PARAMETER = 281,
-    T_EXTENSION = 282,
-    T_STRING = 283,
-    T_NUMBER = 284,
-    T_IDENTIFIER = 285
+    T_LINUNIT = 269,
+    T_GEOCCS = 270,
+    T_AUTHORITY = 271,
+    T_VERT_CS = 272,
+    T_VERTCS = 273,
+    T_VERT_DATUM = 274,
+    T_VDATUM = 275,
+    T_COMPD_CS = 276,
+    T_AXIS = 277,
+    T_TOWGS84 = 278,
+    T_FITTED_CS = 279,
+    T_LOCAL_CS = 280,
+    T_LOCAL_DATUM = 281,
+    T_PARAMETER = 282,
+    T_EXTENSION = 283,
+    T_STRING = 284,
+    T_NUMBER = 285,
+    T_IDENTIFIER = 286
   };
 #endif
 
@@ -92,4 +93,4 @@ typedef int YYSTYPE;
 
 int pj_wkt1_parse (pj_wkt1_parse_context *context);
 
-#endif /* !YY_PJ_WKT1_SRC_WKT1_GENERATED_PARSER_H_INCLUDED  */
+#endif /* !YY_PJ_WKT1_WKT1_GENERATED_PARSER_H_INCLUDED  */

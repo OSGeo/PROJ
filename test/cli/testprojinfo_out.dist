@@ -525,7 +525,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (1)",
     USAGE[
         SCOPE["Transformation of coordinates at 0.2m level of accuracy."],
         AREA["United States (USA) - CONUS including EEZ - onshore and offshore - Alabama; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Gulf of Mexico (GoM) OCS."],
-        BBOX[23.81,-129.16,49.38,-65.69]],
+        BBOX[23.81,-129.17,49.38,-65.69]],
     ID["DERIVED_FROM(EPSG)",1241],
     REMARK["Uses NADCON method which expects longitudes positive west; EPSG GeogCRS NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east. For application in Gulf of Mexico refer to IOGP report 373-26."]]
 
@@ -921,12 +921,10 @@ unknown id, Inverse of UTM zone 31N + ED50 to WGS 84 (42), 5 m, Portugal - mainl
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area EPSG:3237 --summary
 Candidate operations found: 1
-Note: using '--spatial-test intersects' would bring more results (2)
 EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore.
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark - onshore' --summary
 Candidate operations found: 1
-Note: using '--spatial-test intersects' would bring more results (2)
 EPSG:1626, ED50 to ETRS89 (4), 1.0 m, Denmark - onshore.
 
 Testing projinfo -s EPSG:4230 -t EPSG:4258 --area 'Denmark -' --summary
@@ -992,7 +990,7 @@ PROJCRS["Monte Mario (Rome) / Italy zone 1",
     USAGE[
         SCOPE["Engineering survey, topographic mapping."],
         AREA["Italy - onshore and offshore - west of 12°E."],
-        BBOX[36.53,5.94,47.04,12]],
+        BBOX[36.53,5.93,47.04,12]],
     ID["EPSG",26591]]
 
 Testing non compliant WKT1
@@ -1568,7 +1566,6 @@ Testing -s "ETRS89 / TM35FIN(E,N) + N2000 height" -t "KKJ / Finland Uniform Coor
 
 Testing NKG: -s EPSG:7789 -t EPSG:4936 --area  EPSG:1080 --summary --hide-ballpark
 Candidate operations found: 1
-Note: using '--spatial-test intersects' would bring more results (2)
 NKG:ITRF2014_TO_DK, ITRF2014 to ETRS89(DK), 0.01 m, Denmark - onshore and offshore.
 
 Testing projinfo --dump-db-structure | head -n 5

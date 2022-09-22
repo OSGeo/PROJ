@@ -67,11 +67,19 @@ endfunction()
 # See also ProjInstallPath.cmake
 #
 
+function(set_variable_from_rel_or_absolute_path var root rel_or_abs_path)
+  if(IS_ABSOLUTE "${rel_or_abs_path}")
+    set(${var} "${rel_or_abs_path}" PARENT_SCOPE)
+  else()
+    set(${var} "${root}/${rel_or_abs_path}" PARENT_SCOPE)
+  endif()
+endfunction()
+
 function(configure_proj_pc)
   set(prefix ${CMAKE_INSTALL_PREFIX})
-  set(libdir "$\{prefix\}/${CMAKE_INSTALL_LIBDIR}")
-  set(includedir "$\{prefix\}/${CMAKE_INSTALL_INCLUDEDIR}")
-  set(datarootdir "$\{prefix\}/${CMAKE_INSTALL_DATAROOTDIR}")
+  set_variable_from_rel_or_absolute_path("libdir" "$\{prefix\}" "${CMAKE_INSTALL_LIBDIR}")
+  set_variable_from_rel_or_absolute_path("includedir" "$\{prefix\}" "${CMAKE_INSTALL_INCLUDEDIR}")
+  set_variable_from_rel_or_absolute_path("datarootdir" "$\{prefix\}" "${CMAKE_INSTALL_DATAROOTDIR}")
   set(datadir "$\{datarootdir\}")
   set(PACKAGE "proj")
   set(VERSION ${PROJ_VERSION})

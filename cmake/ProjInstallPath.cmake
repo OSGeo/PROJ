@@ -18,6 +18,3 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX ${DEFAULT_PROJ_ROOT_DIR}
     CACHE PATH "Proj install prefix" FORCE)
 endif()
-
-#TODO
-# for data install testing the PROJ_LIB envVar

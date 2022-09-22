@@ -178,7 +178,7 @@ typedef struct {
     char crs_dst[MAX_OPERATION+1];
     char crs_src[MAX_OPERATION+1];
     PJ *P;
-    PJ_COORD a, b, c, e;
+    PJ_COORD a, b, e;
     PJ_DIRECTION dir;
     int verbosity;
     int skip;

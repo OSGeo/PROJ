@@ -3377,7 +3377,10 @@ std::string DatabaseContext::getOldProjGridName(const std::string &gridName) {
 /** \brief Gets the alias name from an official name.
  *
  * @param officialName Official name. Mandatory
- * @param tableName Table name/category. Mandatory
+ * @param tableName Table name/category. Mandatory.
+ *                  "geographic_2D_crs" and "geographic_3D_crs" are also
+ *                  accepted as special names to add a constraint on the "type"
+ *                  column of the "geodetic_crs" table.
  * @param source Source of the alias. Mandatory
  * @return Alias name (or empty if not found).
  * @throw FactoryException
@@ -3387,29 +3390,38 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
                                           const std::string &tableName,
                                           const std::string &source) const {
     std::string sql("SELECT auth_name, code FROM \"");
-    sql += replaceAll(tableName, "\"", "\"\"");
+    const auto genuineTableName =
+        tableName == "geographic_2D_crs" || tableName == "geographic_3D_crs"
+            ? "geodetic_crs"
+            : tableName;
+    sql += replaceAll(genuineTableName, "\"", "\"\"");
     sql += "\" WHERE name = ?";
-    if (tableName == "geodetic_crs") {
+    if (tableName == "geodetic_crs" || tableName == "geographic_2D_crs") {
         sql += " AND type = " GEOG_2D_SINGLE_QUOTED;
+    } else if (tableName == "geographic_3D_crs") {
+        sql += " AND type = " GEOG_3D_SINGLE_QUOTED;
     }
+    sql += " ORDER BY deprecated";
     auto res = d->run(sql, {officialName});
     if (res.empty()) {
         res = d->run(
             "SELECT auth_name, code FROM alias_name WHERE table_name = ? AND "
             "alt_name = ? AND source IN ('EPSG', 'PROJ')",
-            {tableName, officialName});
+            {genuineTableName, officialName});
         if (res.size() != 1) {
             return std::string();
         }
     }
-    const auto &row = res.front();
-    res = d->run("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
-                 "auth_name = ? AND code = ? AND source = ?",
-                 {tableName, row[0], row[1], source});
-    if (res.empty()) {
-        return std::string();
+    for (const auto &row : res) {
+        auto res2 =
+            d->run("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
+                   "auth_name = ? AND code = ? AND source = ?",
+                   {genuineTableName, row[0], row[1], source});
+        if (!res2.empty()) {
+            return res2.front()[0];
+        }
     }
-    return res.front()[0];
+    return std::string();
 }
 
 // ---------------------------------------------------------------------------
@@ -3421,7 +3433,10 @@ DatabaseContext::getAliasFromOfficialName(const std::string &officialName,
  * @param authName Authority.
  * @param code Code.
  * @param officialName Official name.
- * @param tableName Table name/category. Mandatory
+ * @param tableName Table name/category. Mandatory.
+ *                  "geographic_2D_crs" and "geographic_3D_crs" are also
+ *                  accepted as special names to add a constraint on the "type"
+ *                  column of the "geodetic_crs" table.
  * @param source Source of the alias. May be empty.
  * @return Aliases
  */
@@ -3438,19 +3453,26 @@ std::list<std::string> DatabaseContext::getAliases(
 
     std::string resolvedAuthName(authName);
     std::string resolvedCode(code);
+    const auto genuineTableName =
+        tableName == "geographic_2D_crs" || tableName == "geographic_3D_crs"
+            ? "geodetic_crs"
+            : tableName;
     if (authName.empty() || code.empty()) {
         std::string sql("SELECT auth_name, code FROM \"");
-        sql += replaceAll(tableName, "\"", "\"\"");
+        sql += replaceAll(genuineTableName, "\"", "\"\"");
         sql += "\" WHERE name = ?";
-        if (tableName == "geodetic_crs") {
+        if (tableName == "geodetic_crs" || tableName == "geographic_2D_crs") {
             sql += " AND type = " GEOG_2D_SINGLE_QUOTED;
+        } else if (tableName == "geographic_3D_crs") {
+            sql += " AND type = " GEOG_3D_SINGLE_QUOTED;
         }
+        sql += " ORDER BY deprecated";
         auto resSql = d->run(sql, {officialName});
         if (resSql.empty()) {
             resSql = d->run("SELECT auth_name, code FROM alias_name WHERE "
                             "table_name = ? AND "
                             "alt_name = ? AND source IN ('EPSG', 'PROJ')",
-                            {tableName, officialName});
+                            {genuineTableName, officialName});
             if (resSql.size() != 1) {
                 d->cacheAliasNames_.insert(key, res);
                 return res;
@@ -3462,7 +3484,7 @@ std::list<std::string> DatabaseContext::getAliases(
     }
     std::string sql("SELECT alt_name FROM alias_name WHERE table_name = ? AND "
                     "auth_name = ? AND code = ?");
-    ListOfParams params{tableName, resolvedAuthName, resolvedCode};
+    ListOfParams params{genuineTableName, resolvedAuthName, resolvedCode};
     if (!source.empty()) {
         sql += " AND source = ?";
         params.emplace_back(source);
@@ -7912,26 +7934,26 @@ AuthorityFactory::getDescriptionText(const std::string &code) const {
 std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
 
     const auto getSqlArea = [](const char *table_name) {
-        std::string sql("JOIN usage u ON u.object_table_name = '");
+        std::string sql("LEFT JOIN usage u ON u.object_table_name = '");
         sql += table_name;
         sql += "' AND "
                "u.object_auth_name = c.auth_name AND "
                "u.object_code = c.code "
-               "JOIN extent a "
+               "LEFT JOIN extent a "
                "ON a.auth_name = u.extent_auth_name AND "
                "a.code = u.extent_code ";
         return sql;
     };
 
     const auto getJoinCelestialBody = [](const char *crs_alias) {
-        std::string sql("JOIN geodetic_datum gd ON gd.auth_name = ");
+        std::string sql("LEFT JOIN geodetic_datum gd ON gd.auth_name = ");
         sql += crs_alias;
         sql += ".datum_auth_name AND gd.code = ";
         sql += crs_alias;
         sql += ".datum_code "
-               "JOIN ellipsoid e ON e.auth_name = gd.ellipsoid_auth_name "
+               "LEFT JOIN ellipsoid e ON e.auth_name = gd.ellipsoid_auth_name "
                "AND e.code = gd.ellipsoid_code "
-               "JOIN celestial_body cb ON "
+               "LEFT JOIN celestial_body cb ON "
                "cb.auth_name = e.celestial_body_auth_name "
                "AND cb.code = e.celestial_body_code ";
         return sql;
@@ -7960,7 +7982,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
            "LEFT JOIN conversion_method cm ON "
            "conv.method_auth_name = cm.auth_name AND "
            "conv.method_code = cm.code "
-           "JOIN geodetic_crs gcrs ON "
+           "LEFT JOIN geodetic_crs gcrs ON "
            "gcrs.auth_name = c.geodetic_crs_auth_name "
            "AND gcrs.code = c.geodetic_crs_code ";
     sql += getSqlArea("projected_crs");
@@ -7979,7 +8001,7 @@ std::list<AuthorityFactory::CRSInfo> AuthorityFactory::getCRSInfoList() const {
         sql += "WHERE c.auth_name = ? ";
         params.emplace_back(d->authority());
     }
-    // FIXME: we can't handle non-EARTH vertical CRS for now
+    // FIXME: we can't handle non-EARTH compound CRS for now
     sql += "UNION ALL SELECT c.auth_name, c.code, c.name, 'compound', "
            "c.deprecated, "
            "a.west_lon, a.south_lat, a.east_lon, a.north_lat, "

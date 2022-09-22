@@ -144,6 +144,50 @@ UPDATE grid_transformation SET accuracy = 2.0 WHERE auth_name = 'EPSG' AND code 
 
 UPDATE grid_transformation SET accuracy = 2.0 WHERE auth_name = 'EPSG' AND code = '1462';
 
+
+-- Create a PROJ copy of EPSG:9123 "NAD83(CSRS) to CGVD28 height (1)" by
+-- removing the deprecation flag.
+-- Having a transformation from/to CGVD28 using the "generic" NAD83(CSRS) is much
+-- more convenient for low accuracy cases like https://github.com/OSGeo/PROJ/issues/3328
+INSERT INTO grid_transformation SELECT
+    'PROJ' AS auth_name,
+    'EPSG_9123' AS code,
+    name,
+    description || ' Imported from EPSG:9123 with deprecation flag removed by PROJ' AS description,
+    method_auth_name,
+    method_code,
+    method_name,
+    source_crs_auth_name,
+    source_crs_code,
+    target_crs_auth_name,
+    target_crs_code,
+    accuracy,
+    grid_param_auth_name,
+    grid_param_code,
+    grid_param_name,
+    grid_name,
+    grid2_param_auth_name,
+    grid2_param_code,
+    grid2_param_name,
+    grid2_name,
+    interpolation_crs_auth_name,
+    interpolation_crs_code,
+    operation_version,
+    0 AS deprecated
+    FROM grid_transformation WHERE auth_name = 'EPSG' AND code = '9123';
+
+INSERT INTO usage SELECT
+    'PROJ' AS auth_name,
+    'USAGE_PROJ_EPSG_9123' AS code,
+    object_table_name,
+    'PROJ' AS object_auth_name,
+    'EPSG_9123' AS object_code,
+    extent_auth_name,
+    extent_code,
+    scope_auth_name,
+    scope_code
+    FROM usage WHERE object_table_name = 'grid_transformation' AND object_auth_name = 'EPSG' AND object_code = '9123';
+
 -- Define the allowed authorities, and their precedence, when researching a
 -- coordinate operation
 
@@ -183,73 +227,6 @@ INSERT INTO "coordinate_system" VALUES('PROJ','ENh','Cartesian',3);
 INSERT INTO "axis" VALUES('PROJ','1','Easting','E','east','PROJ','ENh',1,'EPSG','9001');
 INSERT INTO "axis" VALUES('PROJ','2','Northing','N','north','PROJ','ENh',2,'EPSG','9001');
 INSERT INTO "axis" VALUES('PROJ','3','Ellipsoidal height','h','up','PROJ','ENh',2,'EPSG','9001');
-
--- Consider all WGS84 related CRS are equivalent with an accuracy of 2m
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G730','WGS 84 to WGS 84 (G730)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9053',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "usage" VALUES(
-    'PROJ',
-    'WGS84_TO_WGS84_G730_USAGE',
-    'helmert_transformation',
-    'PROJ',
-    'WGS84_TO_WGS84_G730',
-    'EPSG','1262', -- extent
-    'EPSG','1024'  -- unknown
-);
-
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G873','WGS 84 to WGS 84 (G873)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9054',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "usage" VALUES(
-    'PROJ',
-    'WGS84_TO_WGS84_G873_USAGE',
-    'helmert_transformation',
-    'PROJ',
-    'WGS84_TO_WGS84_G873',
-    'EPSG','1262', -- extent
-    'EPSG','1024'  -- unknown
-);
-
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1150','WGS 84 to WGS 84 (G1150)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9055',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "usage" VALUES(
-    'PROJ',
-    'WGS84_TO_WGS84_G1150_USAGE',
-    'helmert_transformation',
-    'PROJ',
-    'WGS84_TO_WGS84_G1150',
-    'EPSG','1262', -- extent
-    'EPSG','1024'  -- unknown
-);
-
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1674','WGS 84 to WGS 84 (G1674)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9056',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "usage" VALUES(
-    'PROJ',
-    'WGS84_TO_WGS84_G1674_USAGE',
-    'helmert_transformation',
-    'PROJ',
-    'WGS84_TO_WGS84_G1674',
-    'EPSG','1262', -- extent
-    'EPSG','1024'  -- unknown
-);
-
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_G1762','WGS 84 to WGS 84 (G1762)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','9057',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "usage" VALUES(
-    'PROJ',
-    'WGS84_TO_WGS84_G1762_USAGE',
-    'helmert_transformation',
-    'PROJ',
-    'WGS84_TO_WGS84_G1762',
-    'EPSG','1262', -- extent
-    'EPSG','1024'  -- unknown
-);
-
-INSERT INTO "helmert_transformation" VALUES('PROJ','WGS84_TO_WGS84_TRANSIT','WGS 84 to WGS 84 (Transit)','Accuracy 2m','EPSG','9603','Geocentric translations (geog2D domain)','EPSG','4326','EPSG','8888',2.0,0,0,0,'EPSG','9001',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'',0);
-INSERT INTO "usage" VALUES(
-    'PROJ',
-    'WGS84_TO_WGS84_TRANSIT_USAGE',
-    'helmert_transformation',
-    'PROJ',
-    'WGS84_TO_WGS84_TRANSIT',
-    'EPSG','1262', -- extent
-    'EPSG','1024'  -- unknown
-);
 
 ---- Geoid models -----
 

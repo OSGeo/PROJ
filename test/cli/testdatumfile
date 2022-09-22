@@ -27,8 +27,8 @@ echo "Running ${0} using ${EXE}:"
 echo "============================================"
 
 mkdir "dir with \" space"
-if test -f "${PROJ_LIB}/conus"; then
-    cp "${PROJ_LIB}/conus" "dir with \" space/myconus"
+if test -f "${PROJ_DATA}/conus"; then
+    cp "${PROJ_DATA}/conus" "dir with \" space/myconus"
 else
     cp "`dirname $0`/../../data/conus" "dir with \" space/myconus"
 fi
@@ -66,8 +66,8 @@ $EXE --bbox -141.01,40.04,-47.74,83.17 NAD27 NAD83 >>${OUT} <<EOF
 EOF
 
 echo "##############################################################" >> ${OUT}
-echo "Test --area \"USA - CONUS - onshore\" NAD27 NAD83 (using conus)" >> ${OUT}
-$EXE --area "USA - CONUS - onshore" NAD27 NAD83 >>${OUT} <<EOF
+echo "Test --area \"USA - CONUS including EEZ\" NAD27 NAD83 (using conus)" >> ${OUT}
+$EXE --area "USA - CONUS including EEZ" NAD27 NAD83 >>${OUT} <<EOF
 44 -111
 40.5 -60
 EOF

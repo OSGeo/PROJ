@@ -43,11 +43,14 @@ VALUES
 ('SAD96_003.gsb','br_ibge_SAD96_003.tif',NULL,'GTiff','hgridshift',0,NULL,'https://cdn.proj.org/br_ibge_SAD96_003.tif',1,1,NULL),
 
 -- ca_nrc - Natural Resources Canada
-('CGG2013i08a.byn','ca_nrc_CGG2013ai08.tif','CGG2013ai08.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013ai08.tif',1,1,NULL),
-('CGG2013n83a.byn','ca_nrc_CGG2013an83.tif','CGG2013an83.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013an83.tif',1,1,NULL),
+('CGG2013ai08.byn','ca_nrc_CGG2013ai08.tif','CGG2013ai08.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013ai08.tif',1,1,NULL),
+('CGG2013an83.byn','ca_nrc_CGG2013an83.tif','CGG2013an83.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013an83.tif',1,1,NULL),
 ('CGG2013i83.byn','ca_nrc_CGG2013i08.tif','CGG2013i08.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013i08.tif',1,1,NULL),
 ('CGG2013n83.byn','ca_nrc_CGG2013n83.tif','CGG2013n83.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_CGG2013n83.tif',1,1,NULL),
-('HT2_0.byn','ca_nrc_HT2_2010v70.tif','HT2_2010v70.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70.tif',1,1,NULL),
+('HT2_0.byn','ca_nrc_HT2_2010v70.tif','HT2_2010v70.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70.tif',1,1,NULL), -- deprecated name. dubious mapping !!!
+('HT2_1997.byn','ca_nrc_HT2_2010v70.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70.tif',1,1,NULL), -- dubious mapping !!!
+('HT2_2010v70.byn','ca_nrc_HT2_2010v70.tif','HT2_2010v70.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70.tif',1,1,NULL),
+('HT2_2010v70_CGG2013a.byn','ca_nrc_HT2_2010v70_CGG2013a.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_HT2_2010v70_CGG2013a.tif',1,1,NULL),
 -- the PROJ grid is the reverse way of the EPSG one
 ('NTv1_0.gsb','ca_nrc_ntv1_can.tif','ntv1_can.dat','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/ca_nrc_ntv1_can.tif',1,1,NULL),
 -- just a case change
@@ -137,6 +140,7 @@ VALUES
 ('RAF09.mnt','fr_ign_RAF09.tif','RAF09.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_RAF09.tif',1,1,NULL),
 ('RAF18.mnt','fr_ign_RAF18.tif','RAF18.gtx','GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_RAF18.tif',1,1,NULL),
 ('RAF18b.mnt','fr_ign_RAF18b.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_RAF18b.tif',1,1,NULL),
+('RAF20.tac','fr_ign_RAF20.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/fr_ign_RAF20.tif',1,1,NULL),
 -- The following is a bit an abusive mapping. The ggf97a.txt is the one pointed for the "RGF93 v1 to NGF-IGN69 height" transformation
 -- but we have never ingested that grid. So we point to RAF18.mnt instead...
 -- If we didn't do this, we wouldn't get a grid at all, since RAF09 and RAF18 are now only available for RGF93 v2
@@ -203,6 +207,7 @@ VALUES
 ('no_kv_NKGETRF14_EPSG7922_2000.tif','no_kv_NKGETRF14_EPSG7922_2000.tif',NULL,'GTiff','geocentricoffset',0,NULL,'https://cdn.proj.org/no_kv_NKGETRF14_EPSG7922_2000.tif',1,1,NULL),
 ('ChartDatum_above_Ellipsoid_EUREF89_v2021a.bin','no_kv_CD_above_Ell_ETRS89_v2021a.tif',NULL,'GTiff','vgridshift',0,NULL,'https://cdn.proj.org/no_kv_CD_above_Ell_ETRS89_v2021a.tif',1,1,NULL),
 ('no_kv_ETRS89NO_NGO48_TIN.json','no_kv_ETRS89NO_NGO48_TIN.json',NULL,'JSON','tinshift',0,NULL,'https://cdn.proj.org/no_kv_ETRS89NO_NGO48_TIN.json',1,1,NULL),
+('arcgp-2006-sk.bin','no_kv_arcgp-2006-sk.tif',NULL,'GTiff','geoid_like',0,NULL,'https://cdn.proj.org/no_kv_arcgp-2006-sk.tif',1,1,NULL),
 
 -- nz_linz - New Zealand
 ('nzgd2kgrid0005.gsb','nz_linz_nzgd2kgrid0005.tif','nzgd2kgrid0005.gsb','GTiff','hgridshift',0,NULL,'https://cdn.proj.org/nz_linz_nzgd2kgrid0005.tif',1,1,NULL),

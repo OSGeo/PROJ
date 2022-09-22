@@ -1,8 +1,5 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "CCT" "1" "Mar 1, 2022" "9.0.0" "PROJ"
-.SH NAME
-cct \- Coordinate Conversion and Transformation
 .
 .nr rst2man-indent-level 0
 .
@@ -30,6 +27,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
+.TH "CCT" "1" "Sep 1, 2022" "9.1.0" "PROJ"
+.SH NAME
+cct \- Coordinate Conversion and Transformation
 .SH SYNOPSIS
 .INDENT 0.0
 .INDENT 3.5
@@ -45,7 +45,7 @@ or
 .UNINDENT
 .sp
 Where {object_definition}\ is one of the possibilities accepted
-by \fBproj_create()\fP, provided it expresses a coordinate operation
+by \fI\%proj_create()\fP, provided it expresses a coordinate operation
 .INDENT 0.0
 .INDENT 3.5
 .INDENT 0.0
@@ -54,13 +54,13 @@ a proj\-string,
 .IP \(bu 2
 a WKT string,
 .IP \(bu 2
-an object code (like "EPSG:1671" "urn:ogc:def:coordinateOperation:EPSG::1671"),
+an object code (like \(dqEPSG:1671\(dq \(dqurn:ogc:def:coordinateOperation:EPSG::1671\(dq),
 .IP \(bu 2
-an object name. e.g. "ITRF2014 to ETRF2014 (1)". In that case as
+an object name. e.g. \(dqITRF2014 to ETRF2014 (1)\(dq. In that case as
 uniqueness is not guaranteed, heuristics are applied to determine the appropriate best match.
 .IP \(bu 2
 a OGC URN combining references for concatenated operations
-(e.g. "\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP")
+(e.g. \(dq\fI\%urn:ogc:def:coordinateOperation,coordinateOperation:EPSG::3895,coordinateOperation:EPSG::1618\fP\(dq)
 .IP \(bu 2
 a PROJJSON string. The jsonschema is at \fI\%https://proj.org/schemas/v0.4/projjson.schema.json\fP
 .UNINDENT
@@ -162,7 +162,7 @@ Usage varies with operation.
 \fBcct\fP is an acronym meaning \fICoordinate Conversion and Transformation\fP\&.
 .sp
 The acronym refers to definitions given in the OGC 08\-015r2/ISO\-19111
-standard "Geographical Information \-\- Spatial Referencing by Coordinates",
+standard \(dqGeographical Information \-\- Spatial Referencing by Coordinates\(dq,
 which defines two different classes of \fIcoordinate operations\fP:
 .sp
 \fICoordinate Conversions\fP, which are coordinate operations where input
@@ -176,11 +176,11 @@ input and output datums differ (e.g. change of reference frame).
 New in version 7.0.0.
 
 .sp
-If the \fBPROJ_NETWORK\fP environment variable is set to \fBON\fP,
+If the \fI\%PROJ_NETWORK\fP environment variable is set to \fBON\fP,
 \fBcct\fP will attempt to use remote grids stored on CDN (Content
 Delivery Network) storage, when they are not available locally.
 .sp
-More details are available in the network section.
+More details are available in the \fI\%Network capabilities\fP section.
 .SH EXAMPLES
 .INDENT 0.0
 .IP 1. 3
@@ -319,7 +319,7 @@ Coordinate operation referenced through its name
 .sp
 .nf
 .ft C
-$ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct "ITRF2014 to ETRF2014 (1)"
+$ echo 3541657.3778 948984.2343 5201383.5231 2020.5 | cct \(dqITRF2014 to ETRF2014 (1)\(dq
 3541657.9112    948983.7503  5201383.2482     2020.5000
 .ft P
 .fi

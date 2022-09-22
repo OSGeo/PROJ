@@ -50,6 +50,7 @@
 %token T_SPHEROID               "SPHEROID"
 %token T_PRIMEM                 "PRIMEM"
 %token T_UNIT                   "UNIT"
+%token T_LINUNIT                "LINUNIT"
 %token T_GEOCCS                 "GEOCCS"
 %token T_AUTHORITY              "AUTHORITY"
 %token T_VERT_CS                "VERT_CS"
@@ -166,7 +167,17 @@ projection:
 
 geographic_cs:
     T_GEOGCS begin_node_name',' datum ',' prime_meridian ','
-                    angular_unit opt_twin_axis_extension_authority end_node
+                    angular_unit opt_linunit_or_twin_axis_extension_authority end_node
+
+/* ESRI extension for geographic 3D CRS */
+linunit:
+    T_LINUNIT begin_node_name',' conversion_factor opt_authority end_node
+
+opt_linunit_or_twin_axis_extension_authority:
+    | ',' linunit opt_authority
+    | ',' twin_axis opt_extension_authority
+    | ',' extension opt_authority
+    | ',' authority
 
 datum:
     T_DATUM begin_node_name ',' spheroid opt_towgs84_authority_extension end_node

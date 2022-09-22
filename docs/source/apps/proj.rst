@@ -157,7 +157,7 @@ Additional projection control parameters may be contained in two auxiliary
 control files: the first is optionally referenced with the
 *+init=file:id* and the second is always processed after the name of the
 projection has been established from either the run-line or the contents of
-+init file. The environment parameter :envvar:`PROJ_LIB` establishes the
++init file. The environment parameter :envvar:`PROJ_DATA` establishes the
 default directory for a file reference without an absolute path. This is
 also used for supporting files like datum shift files.
 

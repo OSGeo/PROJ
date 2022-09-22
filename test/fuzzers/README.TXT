@@ -13,7 +13,7 @@ https://bugs.chromium.org/p/oss-fuzz/issues/list?q=proj4
     $ g++ -g -std=c++11 standard_fuzzer.cpp -o standard_fuzzer -fvisibility=hidden -DSTANDALONE ../../build/lib/libproj.a -lpthread -lsqlite3 -I../../src -I../../include
 
   Run it:
-    $ PROJ_LIB=../../data ./standard_fuzzer {file_generated_by_oss_fuzz}
+    $ PROJ_DATA=../../data ./standard_fuzzer {file_generated_by_oss_fuzz}
 
 - Run locally OSS Fuzz:
     $ git clone https://github.com/google/oss-fuzz.git

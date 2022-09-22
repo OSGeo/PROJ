@@ -196,8 +196,6 @@
 %token T_STRING                 "string"
 %token T_UNSIGNED_INTEGER_DIFFERENT_ONE_TWO_THREE       "unsigned integer"
 
-%token T_EPSG_CODE_FOR_INTERPOLATION "EPSG code for interpolation CRS"
-
 %token END 0                    "end of string"
 
 %%
@@ -1115,8 +1113,12 @@ vertical_cs_opt_geoid_model_id_scope_extent_identifier_remark:
 
 opt_separator_cs_unit_opt_geoid_model_id_scope_extent_identifier_remark:
   | wkt_separator cs_unit opt_separator_scope_extent_identifier_remark
-  | wkt_separator cs_unit wkt_separator geoid_model_id opt_separator_scope_extent_identifier_remark
-  | wkt_separator geoid_model_id opt_separator_scope_extent_identifier_remark
+  | wkt_separator cs_unit wkt_separator geoid_model_id opt_geoid_model_id_list_opt_separator_scope_extent_identifier_remark
+  | wkt_separator geoid_model_id opt_geoid_model_id_list_opt_separator_scope_extent_identifier_remark
+  | wkt_separator no_opt_separator_scope_extent_identifier_remark
+
+opt_geoid_model_id_list_opt_separator_scope_extent_identifier_remark:
+  | wkt_separator geoid_model_id opt_geoid_model_id_list_opt_separator_scope_extent_identifier_remark
   | wkt_separator no_opt_separator_scope_extent_identifier_remark
 
 geoid_model_id: geoid_model_keyword left_delimiter
@@ -1231,16 +1233,15 @@ operation_method_keyword: T_METHOD
 operation_method_name: quoted_latin_text
 
 // Derived CRS conversion parameter
-operation_parameter: parameter_keyword left_delimiter operation_parameter_body right_delimiter
+operation_parameter: parameter_keyword left_delimiter
+                     parameter_name
+                     wkt_separator parameter_value
+                     opt_separator_parameter_unit_identifier_list
+                     right_delimiter
 
-// The way the WKT output of epsg.org (e.g https://epsg.org/transformation/wkt/id/9617)
-// conveys interpolation CRS is with a PARAMETER without unit
-// (e.g  PARAMETER["EPSG code for Interpolation CRS",7886,ID["EPSG",1048]]),
-// whereas it is normally required. As an exception, accept this lack of unit.
-operation_parameter_body:
-    parameter_name wkt_separator parameter_value wkt_separator parameter_unit opt_separator_identifier
-  | T_EPSG_CODE_FOR_INTERPOLATION wkt_separator parameter_value opt_separator_identifier
-  | T_EPSG_CODE_FOR_INTERPOLATION wkt_separator parameter_value wkt_separator parameter_unit opt_separator_identifier
+opt_separator_parameter_unit_identifier_list:
+    | wkt_separator parameter_unit opt_separator_identifier_list
+    | wkt_separator identifier opt_separator_identifier_list
 
 parameter_unit: length_or_angle_or_scale_or_time_or_parametric_unit
 
@@ -1625,9 +1626,5 @@ opt_end_abridged_coordinate_transformation:
 abridged_transformation_keyword: T_ABRIDGEDTRANSFORMATION
 
 abridged_transformation_parameter: parameter_keyword left_delimiter
-                                   abridged_transformation_parameter_body
+                                   parameter_name wkt_separator parameter_value opt_separator_identifier_list
                                    right_delimiter
-
-abridged_transformation_parameter_body:
-    parameter_name wkt_separator parameter_value opt_separator_identifier_list
-  | T_EPSG_CODE_FOR_INTERPOLATION wkt_separator parameter_value opt_separator_identifier_list

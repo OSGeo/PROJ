@@ -187,10 +187,10 @@ void UnitOfMeasure::_exportToWKT(
     const bool isWKT2 = formatter->version() == WKTFormatter::Version::WKT2;
 
     const auto l_type = type();
-    if (formatter->forceUNITKeyword() && l_type != Type::PARAMETRIC) {
-        formatter->startNode(WKTConstants::UNIT, !codeSpace().empty());
-    } else if (!unitType.empty()) {
+    if (!unitType.empty()) {
         formatter->startNode(unitType, !codeSpace().empty());
+    } else if (formatter->forceUNITKeyword() && l_type != Type::PARAMETRIC) {
+        formatter->startNode(WKTConstants::UNIT, !codeSpace().empty());
     } else {
         if (isWKT2 && l_type == Type::LINEAR) {
             formatter->startNode(WKTConstants::LENGTHUNIT,
@@ -443,8 +443,14 @@ bool Measure::_isEquivalentTo(const Measure &other,
     if (criterion == util::IComparable::Criterion::STRICT) {
         return operator==(other);
     }
-    return std::fabs(getSIValue() - other.getSIValue()) <=
-           maxRelativeError * std::fabs(getSIValue());
+    const double SIValue = getSIValue();
+    const double otherSIValue = other.getSIValue();
+    // It is arguable that we have to deal with infinite values, but this
+    // helps robustify some situations.
+    if (std::isinf(SIValue) && std::isinf(otherSIValue))
+        return SIValue * otherSIValue > 0;
+    return std::fabs(SIValue - otherSIValue) <=
+           maxRelativeError * std::fabs(SIValue);
 }
 
 // ---------------------------------------------------------------------------

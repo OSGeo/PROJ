@@ -63,7 +63,7 @@ To install PROJ do the following:
     already installed. Type "OSGeo4W Shell" in your start menu and check whether
     that gives a match.
 
-1. Download either the `32 bit`_ or `64 bit`_ installer.
+1. Download the `64 bit`_ installer.
 2. Run the OSGeo4W setup program.
 3. Select "Advanced Install" and press Next.
 4. Select "Install from Internet" and press Next.
@@ -81,11 +81,10 @@ including proj.
 For those who are more inclined to the command line, steps 2--10 above can be
 accomplished by executing the following command::
 
-   C:\temp\osgeo4w-setup-x86-64.exe -q -k -r -A -s https://download.osgeo.org/osgeo4w/ -a x86_64 -P proj
+   C:\temp\osgeo4w-setup.exe -q -k -r -A -s https://download.osgeo.org/osgeo4w/v2/ -P proj
 
 .. _`OSGeo4W`: https://trac.osgeo.org/osgeo4w/
-.. _`32 bit`: https://download.osgeo.org/osgeo4w/osgeo4w-setup-x86.exe
-.. _`64 bit`: https://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe
+.. _`64 bit`: https://download.osgeo.org/osgeo4w/osgeo4w-setup.exe
 
 Linux
 --------------------------------------------------------------------------------
@@ -207,7 +206,8 @@ can be modified to suit the users needs. See :ref:`projsync` for more options.
 
     As an alternative on systems where network access is disabled, the
     :ref:`proj-data <datumgrid>`
-    package can be downloaded and added to the :envvar:`PROJ_LIB` directory.
+    package can be downloaded and added to the :envvar:`PROJ_DATA` directory
+    (called ``PROJ_LIB`` before PROJ 9.1)
 
 
 

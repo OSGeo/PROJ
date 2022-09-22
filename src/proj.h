@@ -173,7 +173,7 @@ extern "C" {
 
 /* The version numbers should be updated with every release! **/
 #define PROJ_VERSION_MAJOR 9
-#define PROJ_VERSION_MINOR 1
+#define PROJ_VERSION_MINOR 2
 #define PROJ_VERSION_PATCH 0
 
 /* Note: the following 3 defines have been introduced in PROJ 8.0.1 */
@@ -576,6 +576,7 @@ void PROJ_DLL proj_area_set_bbox(PJ_AREA *area,
                                  double south_lat_degree,
                                  double east_lon_degree,
                                  double north_lat_degree);
+void PROJ_DLL proj_area_set_name(PJ_AREA* area, const char* name);
 void PROJ_DLL proj_area_destroy(PJ_AREA* area);
 
 /* Apply transformation to observation - in forward or inverse direction */
@@ -1305,6 +1306,11 @@ void PROJ_DLL proj_operation_factory_context_set_area_of_interest(
                                             double south_lat_degree,
                                             double east_lon_degree,
                                             double north_lat_degree);
+
+void PROJ_DLL proj_operation_factory_context_set_area_of_interest_name(
+                                            PJ_CONTEXT *ctx,
+                                            PJ_OPERATION_FACTORY_CONTEXT *factory_ctx,
+                                            const char* area_name);
 
 void PROJ_DLL proj_operation_factory_context_set_crs_extent_use(
                                             PJ_CONTEXT *ctx,

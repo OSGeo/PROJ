@@ -4083,16 +4083,15 @@ void Conversion::_exportToPROJString(
             const auto &components = compound->componentReferenceSystems();
             if (!components.empty()) {
                 horiz = components.front().get();
-                const auto boundCRS =
-                    dynamic_cast<const crs::BoundCRS *>(horiz);
-                if (boundCRS) {
-                    horiz = boundCRS->baseCRS().get();
-                }
             }
         }
 
+        auto derivedProjCRS =
+            dynamic_cast<const crs::DerivedProjectedCRS *>(horiz);
+
         // horiz != nullptr: only to make clang static analyzer happy
-        if (!bEllipsoidParametersDone && horiz != nullptr) {
+        if (!bEllipsoidParametersDone && horiz != nullptr &&
+            derivedProjCRS == nullptr) {
             auto targetGeodCRS = horiz->extractGeodeticCRS();
             auto targetGeogCRS =
                 std::dynamic_pointer_cast<crs::GeographicCRS>(targetGeodCRS);
@@ -4110,12 +4109,25 @@ void Conversion::_exportToPROJString(
         }
 
         auto projCRS = dynamic_cast<const crs::ProjectedCRS *>(horiz);
+        if (projCRS == nullptr) {
+            auto boundCRS = dynamic_cast<const crs::BoundCRS *>(horiz);
+            if (boundCRS) {
+                projCRS = dynamic_cast<const crs::ProjectedCRS *>(
+                    boundCRS->baseCRS().get());
+            }
+        }
         if (projCRS) {
             formatter->pushOmitZUnitConversion();
             projCRS->addUnitConvertAndAxisSwap(formatter, bAxisSpecFound);
             formatter->popOmitZUnitConversion();
             if (projCRS->hasOver()) {
                 formatter->addParam("over");
+            }
+        } else {
+            if (derivedProjCRS) {
+                formatter->pushOmitZUnitConversion();
+                derivedProjCRS->addUnitConvertAndAxisSwap(formatter);
+                formatter->popOmitZUnitConversion();
             }
         }
 

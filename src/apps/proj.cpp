@@ -300,6 +300,8 @@ int main(int argc, char **argv) {
     FILE *fid;
     int eargc = 0, mon = 0;
 
+    pj_stderr_proj_lib_deprecation_warning();
+
     if( argc == 0 ) {
         exit(1);
     }

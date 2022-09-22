@@ -143,19 +143,23 @@ void pj_ctx::set_ca_bundle_path(const std::string& ca_bundle_path_in)
 }
 
 /************************************************************************/
-/*                  pj_ctx(const pj_ctx& other)                   */
+/*                  pj_ctx(const pj_ctx& other)                         */
 /************************************************************************/
 
 pj_ctx::pj_ctx(const pj_ctx& other) :
+    lastFullErrorMessage(std::string()),
+    last_errno(0),
     debug_level(other.debug_level),
     logger(other.logger),
     logger_app_data(other.logger_app_data),
     cpp_context(other.cpp_context ? other.cpp_context->clone(this) : nullptr),
     use_proj4_init_rules(other.use_proj4_init_rules),
+    forceOver(other.forceOver),
     epsg_file_exists(other.epsg_file_exists),
-    env_var_proj_lib(other.env_var_proj_lib),
+    env_var_proj_data(other.env_var_proj_data),
     file_finder(other.file_finder),
     file_finder_user_data(other.file_finder_user_data),
+    defer_grid_opening(false),
     custom_sqlite3_vfs_name(other.custom_sqlite3_vfs_name),
     user_writable_directory(other.user_writable_directory),
     // BEGIN ini file settings
@@ -164,8 +168,10 @@ pj_ctx::pj_ctx(const pj_ctx& other) :
     networking(other.networking),
     ca_bundle_path(other.ca_bundle_path),
     gridChunkCache(other.gridChunkCache),
-    defaultTmercAlgo(other.defaultTmercAlgo)
+    defaultTmercAlgo(other.defaultTmercAlgo),
     // END ini file settings
+    projStringParserCreateFromPROJStringRecursionCounter(0),
+    pipelineInitRecursiongCounter(0)
 {
     set_search_paths(other.search_paths);
 }

@@ -236,11 +236,12 @@ struct PJ_REGION_S {
 };
 
 struct PJ_AREA {
-    int     bbox_set;
-    double  west_lon_degree;
-    double  south_lat_degree;
-    double  east_lon_degree;
-    double  north_lat_degree;
+    bool     bbox_set = false;
+    double  west_lon_degree = 0;
+    double  south_lat_degree = 0;
+    double  east_lon_degree = 0;
+    double  north_lat_degree = 0;
+    std::string name{};
 };
 
 
@@ -688,11 +689,10 @@ struct pj_ctx{
     bool     forceOver = false; 
     int     epsg_file_exists = -1; /* -1 = unknown, 0 = no, 1 = yes */
 
-    std::string env_var_proj_lib{}; // content of PROJ_LIB environment variable. Use Filemanager::getProjLibEnvVar() to access
+    std::string env_var_proj_data{}; // content of PROJ_DATA (or legacy PROJ_LIB) environment variable. Use Filemanager::getProjDataEnvVar() to access
     std::vector<std::string> search_paths{};
     const char **c_compat_paths = nullptr; // same, but for projinfo usage
 
-    const char* (*file_finder_legacy) (const char*) = nullptr; // Only for proj_api compat. To remove once it is removed
     const char* (*file_finder) (PJ_CONTEXT *, const char*, void* user_data) = nullptr;
     void* file_finder_user_data = nullptr;
 
@@ -928,6 +928,8 @@ void pj_stderr_logger( void *, int, const char * );
 int pj_find_file(PJ_CONTEXT * ctx, const char *short_filename,
                  char* out_full_filename, size_t out_full_filename_size);
 
+// To remove when PROJ_LIB definitely goes away
+void PROJ_DLL pj_stderr_proj_lib_deprecation_warning();
 
 
 #endif /* ndef PROJ_INTERNAL_H */

@@ -175,7 +175,7 @@ The following control parameters can appear in any order:
     operations are returned, but the actual availability of the grids is used
     to determine the sorting order. That is, if a coordinate operation involves
     using a grid that is not available in the PROJ resource directories
-    (determined by the :envvar:`PROJ_LIB` environment variable, it will be listed in
+    (determined by the :envvar:`PROJ_DATA` environment variable, it will be listed in
     the bottom of the results.
     The ``none`` strategy completely disables the checks of presence of grids and
     this returns the results as if all the grids where available.
