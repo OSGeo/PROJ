@@ -144,6 +144,50 @@ UPDATE grid_transformation SET accuracy = 2.0 WHERE auth_name = 'EPSG' AND code 
 
 UPDATE grid_transformation SET accuracy = 2.0 WHERE auth_name = 'EPSG' AND code = '1462';
 
+
+-- Create a PROJ copy of EPSG:9123 "NAD83(CSRS) to CGVD28 height (1)" by
+-- removing the deprecation flag.
+-- Having a transformation from/to CGVD28 using the "generic" NAD83(CSRS) is much
+-- more convenient for low accuracy cases like https://github.com/OSGeo/PROJ/issues/3328
+INSERT INTO grid_transformation SELECT
+    'PROJ' AS auth_name,
+    'EPSG_9123' AS code,
+    name,
+    description || ' Imported from EPSG:9123 with deprecation flag removed by PROJ' AS description,
+    method_auth_name,
+    method_code,
+    method_name,
+    source_crs_auth_name,
+    source_crs_code,
+    target_crs_auth_name,
+    target_crs_code,
+    accuracy,
+    grid_param_auth_name,
+    grid_param_code,
+    grid_param_name,
+    grid_name,
+    grid2_param_auth_name,
+    grid2_param_code,
+    grid2_param_name,
+    grid2_name,
+    interpolation_crs_auth_name,
+    interpolation_crs_code,
+    operation_version,
+    0 AS deprecated
+    FROM grid_transformation WHERE auth_name = 'EPSG' AND code = '9123';
+
+INSERT INTO usage SELECT
+    'PROJ' AS auth_name,
+    'USAGE_PROJ_EPSG_9123' AS code,
+    object_table_name,
+    'PROJ' AS object_auth_name,
+    'EPSG_9123' AS object_code,
+    extent_auth_name,
+    extent_code,
+    scope_auth_name,
+    scope_code
+    FROM usage WHERE object_table_name = 'grid_transformation' AND object_auth_name = 'EPSG' AND object_code = '9123';
+
 -- Define the allowed authorities, and their precedence, when researching a
 -- coordinate operation
 
