@@ -8618,7 +8618,8 @@ const std::string &PROJStringFormatter::toString() const {
                         iterNext = std::next(iterNext);
                     }
                 }
-                if (ok && iterNext != steps.end()) {
+                ok &= iterNext != steps.end();
+                if (ok) {
                     ok = false;
                     auto &nextStep = *iterNext;
                     if (nextStep.name == "axisswap" &&
@@ -8628,7 +8629,8 @@ const std::string &PROJStringFormatter::toString() const {
                         iterNext = std::next(iterNext);
                     }
                 }
-                if (ok && iterNext != steps.end()) {
+                ok &= iterNext != steps.end();
+                if (ok) {
                     ok = false;
                     auto &nextStep = *iterNext;
                     if (nextStep.name == "unitconvert" &&
@@ -8640,7 +8642,8 @@ const std::string &PROJStringFormatter::toString() const {
                     }
                 }
                 auto iterVgridshift = iterNext;
-                if (ok && iterNext != steps.end()) {
+                ok &= iterNext != steps.end();
+                if (ok) {
                     ok = false;
                     auto &nextStep = *iterNext;
                     if (nextStep.name == "vgridshift") {
@@ -8648,7 +8651,8 @@ const std::string &PROJStringFormatter::toString() const {
                         iterNext = std::next(iterNext);
                     }
                 }
-                if (ok && iterNext != steps.end()) {
+                ok &= iterNext != steps.end();
+                if (ok) {
                     ok = false;
                     auto &nextStep = *iterNext;
                     if (nextStep.name == "unitconvert" &&
@@ -8659,7 +8663,8 @@ const std::string &PROJStringFormatter::toString() const {
                         iterNext = std::next(iterNext);
                     }
                 }
-                if (ok && iterNext != steps.end()) {
+                ok &= iterNext != steps.end();
+                if (ok) {
                     ok = false;
                     auto &nextStep = *iterNext;
                     if (nextStep.name == "axisswap" &&
@@ -8669,7 +8674,8 @@ const std::string &PROJStringFormatter::toString() const {
                         iterNext = std::next(iterNext);
                     }
                 }
-                if (ok && iterNext != steps.end()) {
+                ok &= iterNext != steps.end();
+                if (ok) {
                     ok = false;
                     auto &nextStep = *iterNext;
                     if (nextStep.name == "pop" &&
@@ -8677,6 +8683,7 @@ const std::string &PROJStringFormatter::toString() const {
                         nextStep.paramValues[0].keyEquals("v_1") &&
                         nextStep.paramValues[1].keyEquals("v_2")) {
                         ok = true;
+                        // iterNext = std::next(iterNext);
                     }
                 }
                 if (ok) {
@@ -8684,6 +8691,107 @@ const std::string &PROJStringFormatter::toString() const {
                     steps.erase(iterNext, std::next(iterNext));
                     iterPrev = std::prev(iterVgridshift);
                     iterCur = iterVgridshift;
+                    continue;
+                }
+            }
+
+            // +step +proj=axisswap +order=2,1
+            // +step +proj=unitconvert +xy_in=deg +xy_out=rad
+            // +step +proj=vgridshift ...
+            // +step +proj=unitconvert +xy_in=rad +xy_out=deg
+            // +step +proj=axisswap +order=2,1
+            // +step +proj=push +v_1 +v_2
+            // +step +proj=axisswap +order=2,1
+            // +step +proj=unitconvert +xy_in=deg +xy_out=rad
+            // ==>
+            // +step +proj=push +v_1 +v_2
+            // +step +proj=axisswap +order=2,1
+            // +step +proj=unitconvert +xy_in=deg +xy_out=rad
+            // +step +proj=vgridshift ...
+
+            if (prevStep.name == "axisswap" && prevStepParamCount == 1 &&
+                prevStep.paramValues[0].equals("order", "2,1") &&
+                curStep.name == "unitconvert" && curStepParamCount == 2 &&
+                !curStep.inverted &&
+                curStep.paramValues[0].equals("xy_in", "deg") &&
+                curStep.paramValues[1].equals("xy_out", "rad")) {
+                auto iterNext = std::next(iterCur);
+                bool ok = false;
+                auto iterVgridshift = iterNext;
+                if (iterNext != steps.end()) {
+                    auto &nextStep = *iterNext;
+                    if (nextStep.name == "vgridshift") {
+                        ok = true;
+                        iterNext = std::next(iterNext);
+                    }
+                }
+                ok &= iterNext != steps.end();
+                if (ok) {
+                    ok = false;
+                    auto &nextStep = *iterNext;
+                    if (nextStep.name == "unitconvert" && !nextStep.inverted &&
+                        nextStep.paramValues.size() == 2 &&
+                        nextStep.paramValues[0].equals("xy_in", "rad") &&
+                        nextStep.paramValues[1].equals("xy_out", "deg")) {
+                        ok = true;
+                        iterNext = std::next(iterNext);
+                    }
+                }
+                ok &= iterNext != steps.end();
+                if (ok) {
+                    ok = false;
+                    auto &nextStep = *iterNext;
+                    if (nextStep.name == "axisswap" &&
+                        nextStep.paramValues.size() == 1 &&
+                        nextStep.paramValues[0].equals("order", "2,1")) {
+                        ok = true;
+                        iterNext = std::next(iterNext);
+                    }
+                }
+                auto iterPush = iterNext;
+                ok &= iterNext != steps.end();
+                if (ok) {
+                    ok = false;
+                    auto &nextStep = *iterNext;
+                    if (nextStep.name == "push" &&
+                        nextStep.paramValues.size() == 2 &&
+                        nextStep.paramValues[0].keyEquals("v_1") &&
+                        nextStep.paramValues[1].keyEquals("v_2")) {
+                        ok = true;
+                        iterNext = std::next(iterNext);
+                    }
+                }
+                ok &= iterNext != steps.end();
+                if (ok) {
+                    ok = false;
+                    auto &nextStep = *iterNext;
+                    if (nextStep.name == "axisswap" &&
+                        nextStep.paramValues.size() == 1 &&
+                        nextStep.paramValues[0].equals("order", "2,1")) {
+                        ok = true;
+                        iterNext = std::next(iterNext);
+                    }
+                }
+                ok &= iterNext != steps.end();
+                if (ok) {
+                    ok = false;
+                    auto &nextStep = *iterNext;
+                    if (nextStep.name == "unitconvert" &&
+                        nextStep.paramValues.size() == 2 &&
+                        !nextStep.inverted &&
+                        nextStep.paramValues[0].equals("xy_in", "deg") &&
+                        nextStep.paramValues[1].equals("xy_out", "rad")) {
+                        ok = true;
+                        // iterNext = std::next(iterNext);
+                    }
+                }
+
+                if (ok) {
+                    auto stepVgridshift = *iterVgridshift;
+                    steps.erase(iterPrev, iterPush);
+                    steps.insert(std::next(iterNext), stepVgridshift);
+                    iterPrev = iterPush;
+                    iterCur = std::next(iterPush);
                     continue;
                 }
             }
