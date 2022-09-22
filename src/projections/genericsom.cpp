@@ -3,14 +3,14 @@
  * Multi-angle Imaging SpectroRadiometer (MISR) products, from the NASA EOS Terra
  * platform among others (e.g. ASTER).
  *
- * The code is identical to that of MISR SOM (misrsom.c) with the following
- * parameter, now taken as input rather than derived from path number:
+ * For the path based SOM projection, the code is identical to that of Landsat SOM
+ * (PJ_lsat.c) with the following parameter changes:
  *
- *   inclination angle
- *   period of revolution
- *   ascending longitude
+ *   inclination angle = 98.30382 degrees
+ *   period of revolution = 98.88 minutes
+ *   ascending longitude = 129.3056 degrees - (360 / 233) * path_number
  *
- * This code preserves the following code change with respect to the lsat.cc:
+ * and the following code change:
  *
  *   Q->rlm = PI * (1. / 248. + .5161290322580645);
  *
@@ -18,6 +18,13 @@
  *
  *   Q->rlm = 0
  *
+ * For the generic SOM projection, the code is identical to the above except
+ * that the following parameters are now taken as input rather than derived
+ * from path number:
+ *
+ *   inclination angle
+ *   period of revolution
+ *   ascending longitude
  *
  *****************************************************************************/
 /* based upon Snyder and Linck, USGS-NMD */
@@ -31,6 +38,10 @@
 
 PROJ_HEAD(genericsom, "Generic Space Oblique Mercator")
         "\n\tCyl, Sph&Ell\n\tinc_angle= ps_rev= asc_lon= ";
+PROJ_HEAD(misrsom, "Space oblique for MISR")
+        "\n\tCyl, Sph&Ell\n\tpath=";
+
+enum SOMProjectionType { Generic, Path };
 
 #define TOL 1e-7
 
@@ -38,6 +49,7 @@ namespace { // anonymous namespace
 struct pj_opaque {
     double a2, a4, b, c1, c3;
     double q, t, u, w, p22, sa, ca, xj, rlm, rlm2;
+    double alf;
 };
 } // anonymous namespace
 
@@ -174,41 +186,11 @@ static PJ_LP genericsom_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, i
     return lp;
 }
 
-
-PJ *PROJECTION(genericsom) {
-    double lam, alf, esc, ess;
-
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
-    P->opaque = Q;
-
-    // ascending longitude (radians)
-    P->lam0 = pj_param(P->ctx, P->params, "dasc_lon").f;
-    if (P->lam0 < -M_TWOPI || P->lam0 > M_TWOPI)
-    {
-        proj_log_error(P, _("Invalid value for ascending longitude: should be in [-2pi, 2pi] range"));
-        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
-    }
-
-    // inclination angle (radians)
-    alf = pj_param(P->ctx, P->params, "dinc_angle").f;
-    if (alf < 0 || alf > M_PI)
-    {
-        proj_log_error(P, _("Invalid value for inclination angle: should be in [0, pi] range"));
-        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
-    }
-
-    // period of revolution (day / rev)
-    Q->p22 = pj_param(P->ctx, P->params, "dps_rev").f;
-    if (Q->p22 < 0)
-    {
-        proj_log_error(P, _("Number of days per rotation should be positive"));
-        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
-    }
-
-    Q->sa = sin(alf);
-    Q->ca = cos(alf);
+static PJ *setup(PJ *P, SOMProjectionType somProjType) {
+    double esc, ess, lam;
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    Q->sa = sin(Q->alf);
+    Q->ca = cos(Q->alf);
     if (fabs(Q->ca) < 1e-9)
         Q->ca = 1e-9;
     esc = P->es * Q->ca * Q->ca;
@@ -238,4 +220,58 @@ PJ *PROJECTION(genericsom) {
     P->fwd = genericsom_e_forward;
 
    return P;
+}
+
+PJ *PROJECTION(genericsom) {
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
+    if (nullptr==Q)
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = Q;
+
+    // ascending longitude (radians)
+    P->lam0 = pj_param(P->ctx, P->params, "dasc_lon").f;
+    if (P->lam0 < -M_TWOPI || P->lam0 > M_TWOPI)
+    {
+        proj_log_error(P, _("Invalid value for ascending longitude: should be in [-2pi, 2pi] range"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    // inclination angle (radians)
+    Q->alf = pj_param(P->ctx, P->params, "dinc_angle").f;
+    if (Q->alf < 0 || Q->alf > M_PI)
+    {
+        proj_log_error(P, _("Invalid value for inclination angle: should be in [0, pi] range"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    // period of revolution (day / rev)
+    Q->p22 = pj_param(P->ctx, P->params, "dps_rev").f;
+    if (Q->p22 < 0)
+    {
+        proj_log_error(P, _("Number of days per rotation should be positive"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    return setup (P, SOMProjectionType::Generic);
+}
+
+PJ *PROJECTION(misrsom) {
+    int path;
+
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
+    if (nullptr==Q)
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = Q;
+
+    path = pj_param(P->ctx, P->params, "ipath").i;
+    if (path <= 0 || path > 233)
+    {
+        proj_log_error(P, _("Invalid value for path: path should be in [1, 233] range"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    P->lam0 = DEG_TO_RAD * 129.3056 - M_TWOPI / 233. * path;
+    Q->alf = 98.30382 * DEG_TO_RAD;
+    Q->p22 = 98.88 / 1440.0;
+    return setup (P, SOMProjectionType::Path);
 }
