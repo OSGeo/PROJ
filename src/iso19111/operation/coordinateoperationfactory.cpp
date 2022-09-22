@@ -2099,7 +2099,17 @@ struct MyPROJStringExportableHorizVerticalHorizPROJBased final
                               ->demoteTo2D(std::string(), nullptr)
                               .get(),
                           util::IComparable::Criterion::EQUIVALENT)) {
-            const int methodEPSGCode = transf->method()->getEPSGCode();
+            int methodEPSGCode = transf->method()->getEPSGCode();
+            if (methodEPSGCode == 0) {
+                // If the transformation is actually an inverse transformation,
+                // we will not get the EPSG code. So get the forward
+                // transformation.
+                const auto invTrans = transf->inverse();
+                const auto invTransAsTrans =
+                    dynamic_cast<Transformation *>(invTrans.get());
+                if (invTransAsTrans)
+                    methodEPSGCode = invTransAsTrans->method()->getEPSGCode();
+            }
 
             const bool bGeocentricTranslation =
                 methodEPSGCode ==
