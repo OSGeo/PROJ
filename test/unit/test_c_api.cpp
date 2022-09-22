@@ -5160,10 +5160,9 @@ TEST_F(CApi, proj_create_vertical_crs_ex_with_geog_crs) {
     ASSERT_TRUE(name != nullptr);
     EXPECT_EQ(name,
               std::string("Inverse of UTM zone 11N + "
-                          "NAD83(2011) to WGS 84 (1) + "
                           "Conversion from myVertCRS to myVertCRS (metre) + "
-                          "Transformation from myVertCRS (metre) to WGS 84 + "
-                          "Inverse of NAD83(2011) to WGS 84 (1)"));
+                          "Transformation from myVertCRS (metre) to WGS 84 "
+                          "using NAD83(2011) to WGS 84 (1)"));
 
     auto proj_5 = proj_as_proj_string(m_ctxt, P, PJ_PROJ_5, nullptr);
     ASSERT_NE(proj_5, nullptr);
