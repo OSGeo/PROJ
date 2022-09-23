@@ -131,6 +131,7 @@ Projections map the spherical 3D space to a flat 2D space.
    s2
    sch
    sinu
+   som
    somerc
    stere
    sterea
