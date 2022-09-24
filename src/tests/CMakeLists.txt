@@ -2,6 +2,9 @@
 
 add_executable(geodtest geodtest.c)
 target_link_libraries(geodtest ${PROJ_LIBRARIES})
+if(HAVE_LIBM)
+  target_link_libraries(geodtest m)
+endif()
 
 add_executable(geodsigntest geodsigntest.c)
 # geodsigntest includes geodesic.c directly so it doesn't need to link
