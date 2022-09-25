@@ -5145,6 +5145,13 @@ WKTParser::Private::buildDerivedProjectedCRS(const WKTNodeNNPtr &node) {
         ThrowMissing(WKTConstants::CS_);
     }
     auto cs = buildCS(csNode, node, UnitOfMeasure::NONE);
+
+    if (cs->axisList().size() == 3 &&
+        baseProjCRS->coordinateSystem()->axisList().size() == 2) {
+        baseProjCRS = NN_NO_CHECK(util::nn_dynamic_pointer_cast<ProjectedCRS>(
+            baseProjCRS->promoteTo3D(std::string(), dbContext_)));
+    }
+
     return DerivedProjectedCRS::create(buildProperties(node), baseProjCRS,
                                        conversion, cs);
 }
