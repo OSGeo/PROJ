@@ -243,7 +243,7 @@ PJ *PROJECTION(som) {
     P->opaque = Q;
 
     // ascending longitude (radians)
-    P->lam0 = pj_param(P->ctx, P->params, "dasc_lon").f;
+    P->lam0 = pj_param(P->ctx, P->params, "rasc_lon").f;
     if (P->lam0 < -M_TWOPI || P->lam0 > M_TWOPI)
     {
         proj_log_error(P, _("Invalid value for ascending longitude: should be in [-2pi, 2pi] range"));
@@ -251,7 +251,7 @@ PJ *PROJECTION(som) {
     }
 
     // inclination angle (radians)
-    Q->alf = pj_param(P->ctx, P->params, "dinc_angle").f;
+    Q->alf = pj_param(P->ctx, P->params, "rinc_angle").f;
     if (Q->alf < 0 || Q->alf > M_PI)
     {
         proj_log_error(P, _("Invalid value for inclination angle: should be in [0, pi] range"));

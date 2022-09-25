@@ -1328,7 +1328,7 @@
         "lonmax": 180,
         "lonmin": -180,
         "name": "som",
-        "projstring": "+proj=som +inc_angle=1.7157253262878522 +ps_rev=0.06866666666666667 +asc_lon=1.1242171183417042",
+        "projstring": "+proj=som +proj=som +inc_angle=98.303820000243860022 +ps_rev=0.06866666666666667 +asc_lon=64.412896137498847793",
         "res": "low",
         "type": "line",
         "delta_cut": 1e7
