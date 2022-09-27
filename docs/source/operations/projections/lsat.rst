@@ -4,6 +4,14 @@
 Space oblique for LANDSAT
 ********************************************************************************
 
+Space oblique for LANDSAT is a specialization of :doc:`Space Oblique Mercator<som>`
+which specifies the appropriate ascending longitude, inclination angle, and 
+orbital period for Landsat satellites, based on their satellite designation / id
+and path number.
+
+"Paths" are the repeating ground tracks that are traced by sun-synchronous
+satellites like those of the Landsat program.
+
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Cylindrical                                              |
 +---------------------+----------------------------------------------------------+
@@ -56,3 +64,10 @@ Optional
 .. include:: ../options/x_0.rst
 
 .. include:: ../options/y_0.rst
+
+Further reading
+###############
+
+#. `Landsat Wikipedia <https://en.wikipedia.org/wiki/Landsat_program>`_
+#. :doc:`Space Oblique Mercator Projection<som>`
+

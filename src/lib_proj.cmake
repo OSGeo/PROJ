@@ -67,8 +67,7 @@ set(SRC_LIBPROJ_PROJECTIONS
   projections/eqc.cpp
   projections/gall.cpp
   projections/labrd.cpp
-  projections/lsat.cpp
-  projections/misrsom.cpp
+  projections/som.cpp
   projections/merc.cpp
   projections/mill.cpp
   projections/ocea.cpp

@@ -1,22 +1,45 @@
 /******************************************************************************
- * This implements Space Oblique Mercator (SOM) projection, used by the
+ * This implements the Space Oblique Mercator (SOM) projection, used by the
  * Multi-angle Imaging SpectroRadiometer (MISR) products, from the NASA EOS Terra
- * platform.
+ * platform among others (e.g. ASTER).
  *
- * The code is identical to that of Landsat SOM (PJ_lsat.c) with the following
- * parameter changes:
+ * This code was originally developed for the Landsat SOM projection with the
+ * following parameters set for Landsat satellites 1, 2, and 3:
+ *
+ *   inclination angle = 99.092 degrees
+ *   period of revolution = 103.2669323 minutes
+ *   ascending longitude = 128.87 degrees - (360 / 251) * path_number
+ *
+ * or for Landsat satellites greater than 3:
+ *
+ *   inclination angle = 98.2 degrees
+ *   period of revolution = 98.8841202 minutes
+ *   ascending longitude = 129.3 degrees - (360 / 233) * path_number
+ *
+ * For the MISR path based SOM projection, the code is identical to that of Landsat
+ * SOM with the following parameter changes:
  *
  *   inclination angle = 98.30382 degrees
  *   period of revolution = 98.88 minutes
  *   ascending longitude = 129.3056 degrees - (360 / 233) * path_number
  *
- * and the following code change:
+ * and the following code used for Landsat:
  *
  *   Q->rlm = PI * (1. / 248. + .5161290322580645);
  *
  * changed to:
  *
  *   Q->rlm = 0
+ *
+ * For the generic SOM projection, the code is identical to the above for MISR
+ * except that the following parameters are now taken as input rather than derived
+ * from path number:
+ *
+ *   inclination angle
+ *   period of revolution
+ *   ascending longitude
+ *
+ * The change of Q->rlm = 0 is kept.
  *
  *****************************************************************************/
 /* based upon Snyder and Linck, USGS-NMD */
@@ -28,8 +51,12 @@
 #include "proj.h"
 #include "proj_internal.h"
 
+PROJ_HEAD(som, "Space Oblique Mercator")
+        "\n\tCyl, Sph&Ell\n\tinc_angle= ps_rev= asc_lon= ";
 PROJ_HEAD(misrsom, "Space oblique for MISR")
         "\n\tCyl, Sph&Ell\n\tpath=";
+PROJ_HEAD(lsat, "Space oblique for LANDSAT")
+    "\n\tCyl, Sph&Ell\n\tlsat= path=";
 
 #define TOL 1e-7
 
@@ -37,12 +64,13 @@ namespace { // anonymous namespace
 struct pj_opaque {
     double a2, a4, b, c1, c3;
     double q, t, u, w, p22, sa, ca, xj, rlm, rlm2;
+    double alf;
 };
 } // anonymous namespace
 
 static void seraz0(double lam, double mult, PJ *P) {
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double sdsq, h, s, fc, sd, sq, d__1;
+    double sdsq, h, s, fc, sd, sq, d__1 = 0;
 
     lam *= DEG_TO_RAD;
     sd = sin(lam);
@@ -63,7 +91,7 @@ static void seraz0(double lam, double mult, PJ *P) {
 }
 
 
-static PJ_XY misrsom_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
+static PJ_XY som_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward */
     PJ_XY xy = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int l, nn;
@@ -88,7 +116,7 @@ static PJ_XY misrsom_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forw
                 fac = lampp + sin(lampp) * M_HALFPI;
             else
                 fac = lampp - sin(lampp) * M_HALFPI;
-            for (l = 50; l; --l) {
+            for (l = 50; l >= 0; --l) {
                     lamt = lp.lam + Q->p22 * sav;
                     c = cos(lamt);
                     if (fabs(c) < TOL)
@@ -125,7 +153,7 @@ static PJ_XY misrsom_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forw
 }
 
 
-static PJ_LP misrsom_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
+static PJ_LP som_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
     int nn;
@@ -173,29 +201,11 @@ static PJ_LP misrsom_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inve
     return lp;
 }
 
-
-PJ *PROJECTION(misrsom) {
-    int path;
-    double lam, alf, esc, ess;
-
-    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
-    if (nullptr==Q)
-        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
-    P->opaque = Q;
-
-    path = pj_param(P->ctx, P->params, "ipath").i;
-    if (path <= 0 || path > 233)
-    {
-        proj_log_error(P, _("Invalid value for path: path should be in [1, 233] range"));
-        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
-    }
-
-    P->lam0 = DEG_TO_RAD * 129.3056 - M_TWOPI / 233. * path;
-    alf = 98.30382 * DEG_TO_RAD;
-    Q->p22 = 98.88 / 1440.0;
-
-    Q->sa = sin(alf);
-    Q->ca = cos(alf);
+static PJ *setup(PJ *P) {
+    double esc, ess, lam;
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
+    Q->sa = sin(Q->alf);
+    Q->ca = cos(Q->alf);
     if (fabs(Q->ca) < 1e-9)
         Q->ca = 1e-9;
     esc = P->es * Q->ca * Q->ca;
@@ -206,7 +216,6 @@ PJ *PROJECTION(misrsom) {
     Q->t = ess * (2. - P->es) * P->rone_es * P->rone_es;
     Q->u = esc * P->rone_es;
     Q->xj = P->one_es * P->one_es * P->one_es;
-    Q->rlm = 0;
     Q->rlm2 = Q->rlm + M_TWOPI;
     Q->a2 = Q->a4 = Q->b = Q->c1 = Q->c3 = 0.;
     seraz0(0., 1., P);
@@ -221,8 +230,105 @@ PJ *PROJECTION(misrsom) {
     Q->c1 /= 15.;
     Q->c3 /= 45.;
 
-    P->inv = misrsom_e_inverse;
-    P->fwd = misrsom_e_forward;
+    P->inv = som_e_inverse;
+    P->fwd = som_e_forward;
 
    return P;
+}
+
+PJ *PROJECTION(som) {
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
+    if (nullptr==Q)
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = Q;
+
+    // ascending longitude (radians)
+    P->lam0 = pj_param(P->ctx, P->params, "rasc_lon").f;
+    if (P->lam0 < -M_TWOPI || P->lam0 > M_TWOPI)
+    {
+        proj_log_error(P, _("Invalid value for ascending longitude: should be in [-2pi, 2pi] range"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    // inclination angle (radians)
+    Q->alf = pj_param(P->ctx, P->params, "rinc_angle").f;
+    if (Q->alf < 0 || Q->alf > M_PI)
+    {
+        proj_log_error(P, _("Invalid value for inclination angle: should be in [0, pi] range"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    // period of revolution (day / rev)
+    Q->p22 = pj_param(P->ctx, P->params, "dps_rev").f;
+    if (Q->p22 < 0)
+    {
+        proj_log_error(P, _("Number of days per rotation should be positive"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    Q->rlm = 0;
+
+    return setup(P);
+}
+
+PJ *PROJECTION(misrsom) {
+    int path;
+
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
+    if (nullptr==Q)
+        return pj_default_destructor (P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = Q;
+
+    path = pj_param(P->ctx, P->params, "ipath").i;
+    if (path <= 0 || path > 233)
+    {
+        proj_log_error(P, _("Invalid value for path: path should be in [1, 233] range"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    P->lam0 = DEG_TO_RAD * 129.3056 - M_TWOPI / 233. * path;
+    Q->alf = 98.30382 * DEG_TO_RAD;
+    Q->p22 = 98.88 / 1440.0;
+
+    Q->rlm = 0;
+
+    return setup(P);
+}
+
+PJ *PROJECTION(lsat) {
+    int land, path;
+    struct pj_opaque *Q = static_cast<struct pj_opaque*>(calloc (1, sizeof (struct pj_opaque)));
+    if (nullptr==Q)
+        return pj_default_destructor(P, PROJ_ERR_OTHER /*ENOMEM*/);
+    P->opaque = Q;
+
+    land = pj_param(P->ctx, P->params, "ilsat").i;
+    if (land <= 0 || land > 5)
+    {
+        proj_log_error(P, _("Invalid value for lsat: lsat should be in [1, 5] range"));
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    path = pj_param(P->ctx, P->params, "ipath").i;
+    const int maxPathVal = (land <= 3 ? 251 : 233);
+    if (path <= 0 || path > maxPathVal)
+    {
+        proj_log_error(P, _("Invalid value for path: path should be in [1, %d] range"), maxPathVal);
+        return pj_default_destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    }
+
+    if (land <= 3) {
+        P->lam0 = DEG_TO_RAD * 128.87 - M_TWOPI / 251. * path;
+        Q->p22 = 103.2669323;
+        Q->alf = DEG_TO_RAD * 99.092;
+    } else {
+        P->lam0 = DEG_TO_RAD * 129.3 - M_TWOPI / 233. * path;
+        Q->p22 = 98.8841202;
+        Q->alf = DEG_TO_RAD * 98.2;
+    }
+    Q->p22 /= 1440.;
+
+    Q->rlm = M_PI * (1. / 248. + .5161290322580645);
+
+    return setup(P);
 }

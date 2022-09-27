@@ -123,6 +123,7 @@ ogc
 omerc
 OSGeo
 osgeo
+som
 srs
 tmerc
 towgs
