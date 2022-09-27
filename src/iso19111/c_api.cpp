@@ -8825,6 +8825,7 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
             pjNew->descr = "Set of coordinate operations";
             pjNew->left = obj->left;
             pjNew->right = obj->right;
+            pjNew->over = obj->over;
 
             for (const auto &alt : obj->alternativeCoordinateOperations) {
                 auto co = dynamic_cast<const CoordinateOperation *>(
@@ -8857,11 +8858,14 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
                             std::swap(maxxDst, maxyDst);
                         }
                     }
+                    auto pjNormalized =
+                        pj_obj_create(ctx, co->normalizeForVisualization());
+                    pjNormalized->over = alt.pj->over;
                     pjNew->alternativeCoordinateOperations.emplace_back(
                         alt.idxInOriginalList, minxSrc, minySrc, maxxSrc,
                         maxySrc, minxDst, minyDst, maxxDst, maxyDst,
-                        pj_obj_create(ctx, co->normalizeForVisualization()),
-                        co->nameStr(), alt.accuracy, alt.isOffshore);
+                        pjNormalized, co->nameStr(), alt.accuracy,
+                        alt.isOffshore);
                 }
             }
             return pjNew.release();
@@ -8890,7 +8894,9 @@ PJ *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ *obj) {
         return nullptr;
     }
     try {
-        return pj_obj_create(ctx, co->normalizeForVisualization());
+        auto pjNormalized = pj_obj_create(ctx, co->normalizeForVisualization());
+        pjNormalized->over = obj->over;
+        return pjNormalized;
     } catch (const std::exception &e) {
         proj_log_debug(ctx, __FUNCTION__, e.what());
         return nullptr;
