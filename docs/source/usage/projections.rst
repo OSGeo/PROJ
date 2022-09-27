@@ -85,9 +85,9 @@ suffix to input values.
     | R              |                     |
     +----------------+---------------------+
 
-Example of use.  The longitude ``long=90``, can also be expressed more explictly
-with units of decimal degrees as ``long=90d`` and can also be expressed in radian
-units as ``long=1.5708r`` (approximately).
+Example of use.  The longitude of the central meridian ``+lon_0=90``, can also be expressed more explictly
+with units of decimal degrees as ``+lon_0=90d`` or in radian
+units as ``+lon_0=1.5708r`` (approximately).
 
 
 False Easting/Northing
