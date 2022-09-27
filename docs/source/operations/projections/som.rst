@@ -4,6 +4,17 @@
 Space Oblique Mercator (SOM)
 ********************************************************************************
 
+The Space Oblique Mercator (SOM) projection is a generalization of the Oblique
+Mercator projection, itself an (oblique) aspect of the Mercator projection with
+origins in the 16th century. In the previously available map projections, ground
+tracks of satellites traced curved lines which complicated their use in
+representing satellite remote sensing data. In response, SOM was specifically
+designed to represent satellite ground tracks as straight lines. This had the
+effect of minimizing distortions of data along a ground track and allowing
+satellite data to be represented accurately as a rectangular array.
+ 
+
+
 +---------------------+----------------------------------------------------------+
 | **Classification**  | Conformal                                                |
 +---------------------+----------------------------------------------------------+
@@ -69,3 +80,9 @@ Optional
 .. include:: ../options/x_0.rst
 
 .. include:: ../options/y_0.rst
+
+Further reading
+###############
+
+#. `Space Oblique Mercator Wikipedia <https://en.wikipedia.org/wiki/Space-oblique_Mercator_projection>`_
+#. `USGS Report on Space Olblique Mercator Mathematical Development <https://web.archive.org/web/20211213011807/https://pubs.usgs.gov/bul/1518/report.pdf>`_
