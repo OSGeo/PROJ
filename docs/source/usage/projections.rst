@@ -38,6 +38,8 @@ documenting the individual :doc:`projections<../operations/projections/index>`.
 
 In the sections below most of the parameters are explained in details.
 
+.. _projection_units:
+
 Units
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
