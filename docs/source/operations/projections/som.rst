@@ -85,4 +85,4 @@ Further reading
 ###############
 
 #. `Space Oblique Mercator Wikipedia <https://en.wikipedia.org/wiki/Space-oblique_Mercator_projection>`_
-#. `USGS Report on Space Olblique Mercator Mathematical Development <https://web.archive.org/web/20211213011807/https://pubs.usgs.gov/bul/1518/report.pdf>`_
+#. `USGS Report on Space Oblique Mercator Mathematical Development <https://web.archive.org/web/20211213011807/https://pubs.usgs.gov/bul/1518/report.pdf>`_
