@@ -1105,6 +1105,10 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         EXPECT_NEAR(input_over.xyz.x, input_over_inv.xyz.x, 1e-8);
         EXPECT_NEAR(input_over.xyz.y, input_over_inv.xyz.y, 1e-8);
 
+        auto Pnormalized = proj_normalize_for_visualization(ctx, P);
+        ASSERT_TRUE(Pnormalized->over);
+        proj_destroy(Pnormalized);
+
         proj_destroy(P);
     }
 
@@ -1195,6 +1199,13 @@ TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
         EXPECT_NEAR(output.xyz.y, 14467212.882603768, 1e-8);
         EXPECT_NEAR(output_over.xyz.x, 4980122.749364435, 1e-8);
         EXPECT_NEAR(output_over.xyz.y, 14467212.882603768, 1e-8);
+
+        auto Pnormalized = proj_normalize_for_visualization(ctx, P);
+        ASSERT_TRUE(Pnormalized->over);
+        for (const auto &op : Pnormalized->alternativeCoordinateOperations) {
+            ASSERT_TRUE(op.pj->over);
+        }
+        proj_destroy(Pnormalized);
 
         proj_destroy(P);
     }
