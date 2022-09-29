@@ -6646,6 +6646,151 @@ TEST(operation,
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, compoundCRS_of_bound_horizCRS_and_bound_vertCRS_to_geogCRS) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+    auto wkt =
+        "COMPOUNDCRS[\"CH1903 / LV03 + EGM96 height\",\n"
+        "    BOUNDCRS[\n"
+        "        SOURCECRS[\n"
+        "            PROJCRS[\"CH1903 / LV03\",\n"
+        "                BASEGEOGCRS[\"CH1903\",\n"
+        "                    DATUM[\"CH1903\",\n"
+        "                        ELLIPSOID[\"Bessel "
+        "1841\",6377397.155,299.1528128,\n"
+        "                            LENGTHUNIT[\"metre\",1]]],\n"
+        "                    PRIMEM[\"Greenwich\",0,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                    ID[\"EPSG\",4149]],\n"
+        "                CONVERSION[\"Swiss Oblique Mercator 1903M\",\n"
+        "                    METHOD[\"Hotine Oblique Mercator (variant B)\",\n"
+        "                        ID[\"EPSG\",9815]],\n"
+        "                    PARAMETER[\"Latitude of projection "
+        "centre\",46.9524055555556,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8811]],\n"
+        "                    PARAMETER[\"Longitude of projection "
+        "centre\",7.43958333333333,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8812]],\n"
+        "                    PARAMETER[\"Azimuth of initial line\",90,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8813]],\n"
+        "                    PARAMETER[\"Angle from Rectified to Skew "
+        "Grid\",90,\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "                        ID[\"EPSG\",8814]],\n"
+        "                    PARAMETER[\"Scale factor on initial line\",1,\n"
+        "                        SCALEUNIT[\"unity\",1],\n"
+        "                        ID[\"EPSG\",8815]],\n"
+        "                    PARAMETER[\"Easting at projection "
+        "centre\",600000,\n"
+        "                        LENGTHUNIT[\"metre\",1],\n"
+        "                        ID[\"EPSG\",8816]],\n"
+        "                    PARAMETER[\"Northing at projection "
+        "centre\",200000,\n"
+        "                        LENGTHUNIT[\"metre\",1],\n"
+        "                        ID[\"EPSG\",8817]]],\n"
+        "                CS[Cartesian,2],\n"
+        "                    AXIS[\"easting (Y)\",east,\n"
+        "                        ORDER[1],\n"
+        "                        LENGTHUNIT[\"metre\",1]],\n"
+        "                    AXIS[\"northing (X)\",north,\n"
+        "                        ORDER[2],\n"
+        "                        LENGTHUNIT[\"metre\",1]]]],\n"
+        "        TARGETCRS[\n"
+        "            GEOGCRS[\"WGS 84\",\n"
+        "                DATUM[\"World Geodetic System 1984\",\n"
+        "                    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                CS[ellipsoidal,2],\n"
+        "                    AXIS[\"latitude\",north,\n"
+        "                        ORDER[1],\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                    AXIS[\"longitude\",east,\n"
+        "                        ORDER[2],\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                ID[\"EPSG\",4326]]],\n"
+        "        ABRIDGEDTRANSFORMATION[\"CH1903 to WGS 84 (2)\",\n"
+        "            VERSION[\"BfL-CH 2\"],\n"
+        "            METHOD[\"Geocentric translations (geog2D domain)\",\n"
+        "                ID[\"EPSG\",9603]],\n"
+        "            PARAMETER[\"X-axis translation\",674.374,\n"
+        "                ID[\"EPSG\",8605]],\n"
+        "            PARAMETER[\"Y-axis translation\",15.056,\n"
+        "                ID[\"EPSG\",8606]],\n"
+        "            PARAMETER[\"Z-axis translation\",405.346,\n"
+        "                ID[\"EPSG\",8607]]]],\n"
+        "    BOUNDCRS[\n"
+        "        SOURCECRS[\n"
+        "            VERTCRS[\"EGM96 height\",\n"
+        "                VDATUM[\"EGM96 geoid\"],\n"
+        "                CS[vertical,1],\n"
+        "                    AXIS[\"gravity-related height (H)\",up,\n"
+        "                        LENGTHUNIT[\"metre\",1]],\n"
+        "                USAGE[\n"
+        "                    SCOPE[\"Geodesy.\"],\n"
+        "                    AREA[\"World.\"],\n"
+        "                    BBOX[-90,-180,90,180]],\n"
+        "                ID[\"EPSG\",5773]]],\n"
+        "        TARGETCRS[\n"
+        "            GEOGCRS[\"WGS 84\",\n"
+        "                DATUM[\"World Geodetic System 1984\",\n"
+        "                    ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n"
+        "                        LENGTHUNIT[\"metre\",1]]],\n"
+        "                PRIMEM[\"Greenwich\",0,\n"
+        "                    ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                CS[ellipsoidal,3],\n"
+        "                    AXIS[\"latitude\",north,\n"
+        "                        ORDER[1],\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                    AXIS[\"longitude\",east,\n"
+        "                        ORDER[2],\n"
+        "                        ANGLEUNIT[\"degree\",0.0174532925199433]],\n"
+        "                    AXIS[\"ellipsoidal height\",up,\n"
+        "                        ORDER[3],\n"
+        "                        LENGTHUNIT[\"metre\",1]],\n"
+        "                ID[\"EPSG\",4979]]],\n"
+        "        ABRIDGEDTRANSFORMATION[\"WGS 84 to EGM96 height (1)\",\n"
+        "            METHOD[\"Geographic3D to GravityRelatedHeight (EGM)\",\n"
+        "                ID[\"EPSG\",9661]],\n"
+        "            PARAMETERFILE[\"Geoid (height correction) model "
+        "file\",\"us_nga_egm96_15.tif\"]]]]";
+    auto srcObj =
+        createFromUserInput(wkt, authFactory->databaseContext(), false);
+    auto src = nn_dynamic_pointer_cast<CRS>(srcObj);
+    ASSERT_TRUE(src != nullptr);
+    // WGS 84 3D
+    auto dst = authFactory->createCoordinateReferenceSystem("4979");
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        NN_NO_CHECK(src), dst, ctxt);
+    ASSERT_EQ(list.size(), 1U);
+    auto op_proj =
+        list[0]->exportToPROJString(PROJStringFormatter::create().get());
+    EXPECT_EQ(op_proj,
+              "+proj=pipeline "
+              "+step +inv +proj=somerc +lat_0=46.9524055555556 "
+              "+lon_0=7.43958333333333 +k_0=1 "
+              "+x_0=600000 +y_0=200000 +ellps=bessel "
+              "+step +proj=push +v_3 "
+              "+step +proj=cart +ellps=bessel "
+              "+step +proj=helmert +x=674.374 +y=15.056 +z=405.346 "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=pop +v_3 "
+              "+step +proj=vgridshift +grids=us_nga_egm96_15.tif +multiplier=1 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, compoundCRS_from_WKT2_to_geogCRS_3D_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
