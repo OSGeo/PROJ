@@ -1617,6 +1617,9 @@ class PROJ_GCC_DLL Transformation : public SingleOperation {
     demoteTo2D(const std::string &newName,
                const io::DatabaseContextPtr &dbContext) const;
 
+    PROJ_INTERNAL static bool
+    isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
+                                         bool allowInverse);
     //! @endcond
 
   protected:

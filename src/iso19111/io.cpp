@@ -1472,10 +1472,6 @@ struct WKTParser::Private {
 
     CRSPtr buildCRS(const WKTNodeNNPtr &node);
 
-    CRSPtr dealWithEPSGCodeForInterpolationCRSParameter(
-        std::vector<OperationParameterNNPtr> &parameters,
-        std::vector<ParameterValueNNPtr> &values);
-
     TransformationNNPtr buildCoordinateOperation(const WKTNodeNNPtr &node);
 
     ConcatenatedOperationNNPtr
@@ -3337,6 +3333,11 @@ void WKTParser::Private::consumeParameters(
 
 // ---------------------------------------------------------------------------
 
+static CRSPtr dealWithEPSGCodeForInterpolationCRSParameter(
+    DatabaseContextPtr &dbContext,
+    std::vector<OperationParameterNNPtr> &parameters,
+    std::vector<ParameterValueNNPtr> &values);
+
 ConversionNNPtr
 WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
                                     const UnitOfMeasure &defaultLinearUnit,
@@ -3371,8 +3372,8 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
                 ->inverse()));
     }
     auto conv = Conversion::create(convProps, methodProps, parameters, values);
-    auto interpolationCRS =
-        dealWithEPSGCodeForInterpolationCRSParameter(parameters, values);
+    auto interpolationCRS = dealWithEPSGCodeForInterpolationCRSParameter(
+        dbContext_, parameters, values);
     if (interpolationCRS)
         conv->setInterpolationCRS(interpolationCRS);
     return conv;
@@ -3380,12 +3381,13 @@ WKTParser::Private::buildConversion(const WKTNodeNNPtr &node,
 
 // ---------------------------------------------------------------------------
 
-CRSPtr WKTParser::Private::dealWithEPSGCodeForInterpolationCRSParameter(
+static CRSPtr dealWithEPSGCodeForInterpolationCRSParameter(
+    DatabaseContextPtr &dbContext,
     std::vector<OperationParameterNNPtr> &parameters,
     std::vector<ParameterValueNNPtr> &values) {
     // Transform EPSG hacky PARAMETER["EPSG code for Interpolation CRS",
     // crs_epsg_code] into proper interpolation CRS
-    if (dbContext_ != nullptr) {
+    if (dbContext != nullptr) {
         for (size_t i = 0; i < parameters.size(); ++i) {
             const auto &l_name = parameters[i]->nameStr();
             const auto epsgCode = parameters[i]->getEPSGCode();
@@ -3398,7 +3400,7 @@ CRSPtr WKTParser::Private::dealWithEPSGCodeForInterpolationCRSParameter(
                     static_cast<int>(values[i]->value().getSIValue());
                 try {
                     auto authFactory = AuthorityFactory::create(
-                        NN_NO_CHECK(dbContext_), Identifier::EPSG);
+                        NN_NO_CHECK(dbContext), Identifier::EPSG);
                     auto interpolationCRS =
                         authFactory
                             ->createGeographicCRS(internal::toString(code))
@@ -3461,8 +3463,8 @@ WKTParser::Private::buildCoordinateOperation(const WKTNodeNNPtr &node) {
                       defaultAngularUnit);
 
     if (interpolationCRS == nullptr)
-        interpolationCRS =
-            dealWithEPSGCodeForInterpolationCRSParameter(parameters, values);
+        interpolationCRS = dealWithEPSGCodeForInterpolationCRSParameter(
+            dbContext_, parameters, values);
 
     std::vector<PositionalAccuracyNNPtr> accuracies;
     auto &accuracyNode = nodeP->lookForChild(WKTConstants::OPERATIONACCURACY);
@@ -4883,6 +4885,50 @@ CRSNNPtr WKTParser::Private::buildCompoundCRS(const WKTNodeNNPtr &node) {
 
 // ---------------------------------------------------------------------------
 
+static TransformationNNPtr buildTransformationForBoundCRS(
+    DatabaseContextPtr &dbContext,
+    const util::PropertyMap &abridgedNodeProperties,
+    const util::PropertyMap &methodNodeProperties, const CRSNNPtr &sourceCRS,
+    const CRSNNPtr &targetCRS, std::vector<OperationParameterNNPtr> &parameters,
+    std::vector<ParameterValueNNPtr> &values) {
+
+    auto interpolationCRS = dealWithEPSGCodeForInterpolationCRSParameter(
+        dbContext, parameters, values);
+
+    const auto sourceTransformationCRS(
+        createBoundCRSSourceTransformationCRS(sourceCRS, targetCRS));
+    auto transformation = Transformation::create(
+        abridgedNodeProperties, sourceTransformationCRS, targetCRS,
+        interpolationCRS, methodNodeProperties, parameters, values,
+        std::vector<PositionalAccuracyNNPtr>());
+
+    // If the transformation is a "Geographic3D to GravityRelatedHeight" one,
+    // then the sourceCRS is expected to be a GeographicCRS and the target a
+    // VerticalCRS. Due to how things work in a BoundCRS, we have the opposite,
+    // so use our "GravityRelatedHeight to Geographic3D" method instead.
+    if (Transformation::isGeographic3DToGravityRelatedHeight(
+            transformation->method(), true) &&
+        dynamic_cast<VerticalCRS *>(sourceTransformationCRS.get()) &&
+        dynamic_cast<GeographicCRS *>(targetCRS.get())) {
+        auto fileParameter = transformation->parameterValue(
+            EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME,
+            EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME);
+        if (fileParameter &&
+            fileParameter->type() == ParameterValue::Type::FILENAME) {
+            auto filename = fileParameter->valueFile();
+
+            transformation =
+                Transformation::createGravityRelatedHeightToGeographic3D(
+                    abridgedNodeProperties, sourceTransformationCRS, targetCRS,
+                    interpolationCRS, filename,
+                    std::vector<PositionalAccuracyNNPtr>());
+        }
+    }
+    return transformation;
+}
+
+// ---------------------------------------------------------------------------
+
 BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
     const auto *nodeP = node->GP();
     auto &abridgedNode =
@@ -4926,15 +4972,11 @@ BoundCRSNNPtr WKTParser::Private::buildBoundCRS(const WKTNodeNNPtr &node) {
     consumeParameters(abridgedNode, true, parameters, values, defaultLinearUnit,
                       defaultAngularUnit);
 
-    auto interpolationCRS =
-        dealWithEPSGCodeForInterpolationCRSParameter(parameters, values);
-
-    const auto sourceTransformationCRS(
-        createBoundCRSSourceTransformationCRS(sourceCRS, targetCRS));
-    auto transformation = Transformation::create(
-        buildProperties(abridgedNode), sourceTransformationCRS,
-        NN_NO_CHECK(targetCRS), interpolationCRS, buildProperties(methodNode),
-        parameters, values, std::vector<PositionalAccuracyNNPtr>());
+    const auto nnSourceCRS = NN_NO_CHECK(sourceCRS);
+    const auto nnTargetCRS = NN_NO_CHECK(targetCRS);
+    const auto transformation = buildTransformationForBoundCRS(
+        dbContext_, buildProperties(abridgedNode), buildProperties(methodNode),
+        nnSourceCRS, nnTargetCRS, parameters, values);
 
     return BoundCRS::create(buildProperties(node, false, false),
                             NN_NO_CHECK(sourceCRS), NN_NO_CHECK(targetCRS),
@@ -6236,12 +6278,9 @@ BoundCRSNNPtr JSONParser::buildBoundCRS(const json &j) {
         values.emplace_back(ParameterValue::create(getMeasure(param)));
     }
 
-    const auto sourceTransformationCRS(
-        createBoundCRSSourceTransformationCRS(sourceCRS, targetCRS));
-    auto transformation = Transformation::create(
-        buildProperties(transformationJ), sourceTransformationCRS, targetCRS,
-        nullptr, buildProperties(methodJ), parameters, values,
-        std::vector<PositionalAccuracyNNPtr>());
+    const auto transformation = buildTransformationForBoundCRS(
+        dbContext_, buildProperties(transformationJ), buildProperties(methodJ),
+        sourceCRS, targetCRS, parameters, values);
 
     return BoundCRS::create(buildProperties(j,
                                             /* removeInverseOf= */ false,
