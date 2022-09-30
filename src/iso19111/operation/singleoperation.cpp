@@ -1842,9 +1842,8 @@ _getHeightToGeographic3DFilename(const SingleOperation *op, bool allowInverse) {
 // ---------------------------------------------------------------------------
 
 //! @cond Doxygen_Suppress
-static bool
-isGeographic3DToGravityRelatedHeight(const OperationMethodNNPtr &method,
-                                     bool allowInverse) {
+bool Transformation::isGeographic3DToGravityRelatedHeight(
+    const OperationMethodNNPtr &method, bool allowInverse) {
     const auto &methodName = method->nameStr();
     static const char *const methodCodes[] = {
         "1025", // Geographic3D to GravityRelatedHeight (EGM2008)
@@ -2155,7 +2154,7 @@ TransformationNNPtr SingleOperation::substitutePROJAlternativeGridNames(
         }
     }
 
-    if (isGeographic3DToGravityRelatedHeight(method(), false)) {
+    if (Transformation::isGeographic3DToGravityRelatedHeight(method(), false)) {
         const auto &fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME,
                            EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME);
@@ -3648,7 +3647,7 @@ bool SingleOperation::exportToPROJStringGeneric(
         return true;
     }
 
-    if (isGeographic3DToGravityRelatedHeight(method(), true)) {
+    if (Transformation::isGeographic3DToGravityRelatedHeight(method(), true)) {
         auto fileParameter =
             parameterValue(EPSG_NAME_PARAMETER_GEOID_CORRECTION_FILENAME,
                            EPSG_CODE_PARAMETER_GEOID_CORRECTION_FILENAME);
