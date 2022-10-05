@@ -11105,10 +11105,11 @@ TEST(io, projparse_cart_unit) {
         GeographicCRS::EPSG_4326, NN_NO_CHECK(crs));
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-              "+ellps=WGS84 +step +proj=unitconvert +xy_in=m +z_in=m "
-              "+xy_out=km +z_out=km");
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=m +z_in=m +xy_out=km +z_out=km");
 }
 
 // ---------------------------------------------------------------------------
@@ -11123,11 +11124,13 @@ TEST(io, projparse_cart_unit_numeric) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4326, NN_NO_CHECK(crs));
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-              "+ellps=WGS84 +step +proj=unitconvert +xy_in=m +z_in=m "
-              "+xy_out=500 +z_out=500");
+    EXPECT_EQ(
+        op->exportToPROJString(PROJStringFormatter::create().get()),
+        "+proj=pipeline "
+        "+step +proj=axisswap +order=2,1 "
+        "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+        "+step +proj=cart +ellps=WGS84 "
+        "+step +proj=unitconvert +xy_in=m +z_in=m +xy_out=500 +z_out=500");
 }
 
 // ---------------------------------------------------------------------------
