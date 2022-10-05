@@ -346,6 +346,26 @@ int main(int argc, char **argv) {
             /* if we didn't get a auth:code combo we try to see if the input matches */
             /* anything else */
             P = proj_create(nullptr, input.c_str());
+            if( P ) {
+                const auto type = proj_get_type(P);
+                switch( type )
+                {
+                    case PJ_TYPE_CONVERSION:
+                    case PJ_TYPE_TRANSFORMATION:
+                    case PJ_TYPE_CONCATENATED_OPERATION:
+                    case PJ_TYPE_OTHER_COORDINATE_OPERATION:
+                        // ok;
+                        break;
+                    default:
+                        print (PJ_LOG_ERROR, "%s: Input object is not a coordinate operation%s.",
+                               o->progname, proj_is_crs(P) ? ", but a CRS" : "");
+                        free (o);
+                        proj_destroy(P);
+                        if (stdout != fout)
+                            fclose (fout);
+                        return 1;
+                }
+            }
         }
 
         /* If instantiating operation without +-options optargpm thinks the input is  */

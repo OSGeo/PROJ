@@ -17,6 +17,8 @@ Testing echo 0.5 2 | cct -d 6 -z 0 -t 0 +proj=pipeline +step +proj=unitconvert +
 
 Test cct with object code initialization
  3541657.9112    948983.7503  5201383.2482     2020.5000
+Test cct with object that is not a CRS
+cct: Input object is not a coordinate operation, but a CRS.
 Test cct with object name initialization
  3541657.9112    948983.7503  5201383.2482     2020.5000
 Test cct with object code initialization and file input
