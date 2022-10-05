@@ -209,7 +209,10 @@ can be modified to suit the users needs. See :ref:`projsync` for more options.
     package can be downloaded and added to the :envvar:`PROJ_DATA` directory
     (called ``PROJ_LIB`` before PROJ 9.1)
 
+Starting with PROJ 9.2, a ``uninstall`` target is available to remove files
+installed by the ``install`` target::
 
+    cmake --build . --target uninstall
 
 
 CMake configure options
