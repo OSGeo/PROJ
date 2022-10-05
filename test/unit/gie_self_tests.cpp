@@ -1041,6 +1041,23 @@ TEST(gie, proj_trans_generic) {
     proj_destroy(P);
 }
 
+// ---------------------------------------------------------------------------
+
+TEST(gie, proj_trans_with_a_crs) {
+    auto P = proj_create(PJ_DEFAULT_CTX, "EPSG:4326");
+    PJ_COORD input;
+    input.xyzt.x = 0;
+    input.xyzt.y = 0;
+    input.xyzt.z = 0;
+    input.xyzt.t = 0;
+    auto output = proj_trans(P, PJ_FWD, input);
+    EXPECT_EQ(proj_errno(P), PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+    proj_destroy(P);
+    EXPECT_EQ(HUGE_VAL, output.xyzt.x);
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(gie, proj_create_crs_to_crs_from_pj_force_over) {
 
     PJ_CONTEXT *ctx;

@@ -276,6 +276,13 @@ similarly, but prefers the 2D resp. 3D interfaces if available.
     if (P->inverted)
         direction = opposite_direction(direction);
 
+    if (P->iso_obj != nullptr &&
+        dynamic_cast<NS_PROJ::operation::CoordinateOperation*>(P->iso_obj.get()) == nullptr ) {
+        pj_log(P->ctx, PJ_LOG_ERROR, "Object is not a coordinate operation");
+        proj_errno_set (P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+        return proj_coord_error ();
+    }
+
     if( !P->alternativeCoordinateOperations.empty() ) {
         constexpr int N_MAX_RETRY = 2;
         int iExcluded[N_MAX_RETRY] = {-1, -1};
