@@ -76,6 +76,15 @@ make install
 $TRAVIS_BUILD_DIR/test/postinstall/test_cmake.sh /tmp/proj_shared_install_from_dist shared
 $TRAVIS_BUILD_DIR/test/postinstall/test_autotools.sh /tmp/proj_shared_install_from_dist shared
 
+# Test install and uninstall targets with DESTDIR
+make install DESTDIR=/tmp/destdir
+make uninstall DESTDIR=/tmp/destdir
+if [ ! -z "$(ls -A /tmp/destdir/tmp/proj_shared_install_from_dist)" ]; then
+    echo "Directory /tmp/destdir/tmp/proj_shared_install_from_dist should be empty, but its content is:"
+    find /tmp/destdir/tmp/proj_shared_install_from_dist
+    exit 1
+fi
+
 echo "Build static ${CMAKE_BUILD_TYPE} configuration from generated tarball"
 cd ..
 mkdir static_build
