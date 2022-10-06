@@ -550,7 +550,7 @@ TEST(operation, geogCRS_to_geogCRS_context_helmert_geog3D_to_geocentirc) {
         authFactory->createCoordinateReferenceSystem("4939"),
         // GDA2020 geocentric
         authFactory->createCoordinateReferenceSystem("7842"), ctxt);
-    ASSERT_EQ(list.size(), 1U);
+    ASSERT_GE(list.size(), 1U);
 
     // Check there is no push / pop of v_3
     EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
@@ -1331,13 +1331,13 @@ TEST(operation, geocentricCRS_to_geogCRS_different_datum) {
         createGeocentricDatumWGS84(), GeographicCRS::EPSG_4269);
     ASSERT_TRUE(op != nullptr);
     EXPECT_EQ(op->nameStr(),
-              "Ballpark geocentric translation from WGS 84 to NAD83 "
-              "(geocentric) + Conversion from NAD83 "
-              "(geocentric) to NAD83");
+              "Conversion from WGS 84 to WGS 84 (geographic) + "
+              "Ballpark geographic offset from WGS 84 (geographic) to NAD83");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +inv +proj=cart +ellps=GRS80 +step "
-              "+proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap "
-              "+order=2,1");
+              "+proj=pipeline "
+              "+step +inv +proj=cart +ellps=WGS84 "
+              "+step +proj=unitconvert +xy_in=rad +xy_out=deg "
+              "+step +proj=axisswap +order=2,1");
 }
 
 // ---------------------------------------------------------------------------
@@ -1347,13 +1347,14 @@ TEST(operation, geogCRS_to_geocentricCRS_different_datum) {
     auto op = CoordinateOperationFactory::create()->createOperation(
         GeographicCRS::EPSG_4269, createGeocentricDatumWGS84());
     ASSERT_TRUE(op != nullptr);
-    EXPECT_EQ(op->nameStr(), "Conversion from NAD83 to NAD83 (geocentric) + "
-                             "Ballpark geocentric translation from NAD83 "
-                             "(geocentric) to WGS 84");
+    EXPECT_EQ(op->nameStr(),
+              "Ballpark geographic offset from NAD83 to WGS 84 (geographic) + "
+              "Conversion from WGS 84 (geographic) to WGS 84");
     EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
-              "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
-              "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart "
-              "+ellps=GRS80");
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=WGS84");
 }
 
 // ---------------------------------------------------------------------------
