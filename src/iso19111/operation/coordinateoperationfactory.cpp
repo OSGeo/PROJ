@@ -4011,6 +4011,10 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
             res.emplace_back(
                 Conversion::createGeographicGeocentric(sourceCRS, targetCRS));
         } else if (isSrcGeocentric && geogDst) {
+#if 0
+            // The below logic was used between PROJ >= 6.0 and < 9.2
+            // It assumed that the geocentric origin of the 2 datums
+            // matched.
             std::string interm_crs_name(geogDst->nameStr());
             interm_crs_name += " (geocentric)";
             auto interm_crs =
@@ -4027,15 +4031,42 @@ void CoordinateOperationFactory::Private::createOperationsGeodToGeod(
                 createBallparkGeocentricTranslation(sourceCRS, interm_crs);
             auto opSecond =
                 Conversion::createGeographicGeocentric(interm_crs, targetCRS);
-            res.emplace_back(ConcatenatedOperation::createComputeMetadata(
-                {opFirst, opSecond}, disallowEmptyIntersection));
+#else
+            // The below logic is used since PROJ >= 9.2. It emulates the
+            // behavior of PROJ < 6 by converting from the source geocentric CRS
+            // to its corresponding geographic CRS, and then doing a null
+            // geographic offset between that CRS and the target geographic CRS
+            std::string interm_crs_name(geodSrc->nameStr());
+            interm_crs_name += " (geographic)";
+            auto interm_crs = util::nn_static_pointer_cast<crs::CRS>(
+                crs::GeographicCRS::create(
+                    addDomains(util::PropertyMap().set(
+                                   common::IdentifiedObject::NAME_KEY,
+                                   interm_crs_name),
+                               geodSrc),
+                    geodSrc->datum(), geodSrc->datumEnsemble(),
+                    cs::EllipsoidalCS::createLongitudeLatitudeEllipsoidalHeight(
+                        common::UnitOfMeasure::DEGREE,
+                        common::UnitOfMeasure::METRE)));
+            auto opFirst =
+                Conversion::createGeographicGeocentric(sourceCRS, interm_crs);
+            auto opsSecond = createOperations(interm_crs, targetCRS, context);
+            for (const auto &opSecond : opsSecond) {
+                try {
+                    res.emplace_back(
+                        ConcatenatedOperation::createComputeMetadata(
+                            {opFirst, opSecond}, disallowEmptyIntersection));
+                } catch (const InvalidOperationEmptyIntersection &) {
+                }
+            }
+#endif
         } else {
             // Apply previous case in reverse way
             std::vector<CoordinateOperationNNPtr> resTmp;
             createOperationsGeodToGeod(targetCRS, sourceCRS, context, geodDst,
                                        geodSrc, resTmp);
-            assert(resTmp.size() == 1);
-            res.emplace_back(resTmp.front()->inverse());
+            resTmp = applyInverse(resTmp);
+            res.insert(res.end(), resTmp.begin(), resTmp.end());
         }
 
         return;
