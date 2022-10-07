@@ -100,15 +100,21 @@ Virtually all coordinate systems allow for the presence of a false easting
 meters even if the coordinate system is some other units.  Some coordinate
 systems (such as UTM) have implicit false easting and northing values.
 
+.. _longitude_wrapping:
+
 Longitude Wrapping
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 By default PROJ wraps output longitudes in the range -180 to 180.  The ``+over``
 switch can be used to disable the default wrapping which is done at a low level
 in ``pj_inv()``.  This is particularly useful with projections like the
-:doc:`equidistant cylindrical<../operations/projections/eqc>`
-where it would be desirable for X values past -20000000 (roughly) to continue
+:ref:`eqc` or :ref:`merc`
+where it could be desirable for X values past -20000000 (roughly) to continue
 past -180 instead of wrapping to +180.
+
+Note however that for most projections where the 180 meridian does not project
+to a straight line, ``+over`` will have no effect or will not lead to expected
+results.
 
 The ``+lon_wrap`` option can be used to provide an alternative means of doing
 longitude wrapping within ``pj_transform()``.  The argument to this option is a
