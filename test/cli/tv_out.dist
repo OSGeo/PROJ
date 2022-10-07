@@ -500,3 +500,7 @@ Check that we can use a transformation spanning the antimeridian (should use Pul
 ##############################################################
 Check that we select the operation that has the smallest area of use, when 2 have the same accuracy
 34 -120	33d59'59.983"N	119d59'59.955"W 0.000
+##############################################################
+Check that we promote CRS specified by name to 3D when the other one is 3D
+49 2 50	49.000	2.000 4.936
+49 2 0	49.000	2.000 45.064

@@ -1033,6 +1033,16 @@ $EXE -E EPSG:4326 "NAD83(HARN)" >> ${OUT} <<EOF
 34 -120
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Check that we promote CRS specified by name to 3D when the other one is 3D" >> ${OUT}
+$EXE -d 3 -E "WGS 84" "WGS 84 + EGM96 height" >> ${OUT} <<EOF
+49 2 50
+EOF
+
+$EXE -d 3 -E "WGS 84 + EGM96 height" "WGS 84" >> ${OUT} <<EOF
+49 2 0
+EOF
+
 
 # Done!
 # do 'diff' with distribution results
