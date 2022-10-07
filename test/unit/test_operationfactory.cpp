@@ -1767,6 +1767,87 @@ TEST(operation, geogCRS_to_geogCRS_WGS84_to_GDA2020) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_geogCRS_with_intermediate_no_ids) {
+
+    auto dbContext = DatabaseContext::create();
+    auto authFactory = AuthorityFactory::create(dbContext, std::string());
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0.0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+    ctxt->setGridAvailabilityUse(
+        CoordinateOperationContext::GridAvailabilityUse::
+            IGNORE_GRID_AVAILABILITY);
+
+    auto objSrc = WKTParser().createFromWKT(
+        "GEOGCRS[\"input\",\n"
+        "    DATUM[\"International Terrestrial Reference Frame 2014\",\n"
+        "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        ID[\"EPSG\",1165]],\n"
+        "    PRIMEM[\"Greenwich\",0,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8901]],\n"
+        "    CS[ellipsoidal,3],\n"
+        "        AXIS[\"longitude\",east,\n"
+        "            ORDER[1],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                ID[\"EPSG\",9122]]],\n"
+        "        AXIS[\"latitude\",north,\n"
+        "            ORDER[2],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                ID[\"EPSG\",9122]]],\n"
+        "        AXIS[\"ellipsoidal height (h)\",up,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"metre\",1]]]");
+    auto src = nn_dynamic_pointer_cast<CRS>(objSrc);
+    ASSERT_TRUE(src != nullptr);
+
+    auto objDest = WKTParser().createFromWKT(
+        "GEOGCRS[\"output\",\n"
+        "    DATUM[\"Estonia 1997\",\n"
+        "        ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n"
+        "            LENGTHUNIT[\"metre\",1]],\n"
+        "        ID[\"EPSG\",6180]],\n"
+        "    PRIMEM[\"Greenwich\",0,\n"
+        "        ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "        ID[\"EPSG\",8901]],\n"
+        "    CS[ellipsoidal,3],\n"
+        "        AXIS[\"longitude\",east,\n"
+        "            ORDER[1],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                ID[\"EPSG\",9122]]],\n"
+        "        AXIS[\"latitude\",north,\n"
+        "            ORDER[2],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                ID[\"EPSG\",9122]]],\n"
+        "        AXIS[\"ellipsoidal height (h)\",up,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"metre\",1]]]");
+    auto dest = nn_dynamic_pointer_cast<CRS>(objDest);
+    ASSERT_TRUE(dest != nullptr);
+
+    {
+        auto list = CoordinateOperationFactory::create()->createOperations(
+            NN_NO_CHECK(src), NN_NO_CHECK(dest), ctxt);
+        ASSERT_GE(list.size(), 1U);
+        // Test that a non-noop operation is returned
+        EXPECT_EQ(
+            list[0]->nameStr(),
+            "axis order change (geographic3D horizontal) + "
+            "Conversion from ITRF2014 (geog3D) to ITRF2014 (geocentric) + "
+            "ITRF2014 to ETRF2014 (1) + "
+            "Inverse of NKG_ETRF14 to ETRF2014 + "
+            "NKG_ETRF14 to ETRF96@2000.0 + "
+            "ETRF96@2000.0 to ETRF96@1997.56 + "
+            "Conversion from ETRS89 (geocentric) to ETRS89 (geog2D) + "
+            "Inverse of EST97 to ETRS89 (1) + "
+            "Null geographic offset from EST97 (geog2D) to EST97 (geog3D) + "
+            "axis order change (geographic3D horizontal)");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 static ProjectedCRSNNPtr createUTM31_WGS84() {
     return ProjectedCRS::create(
         PropertyMap(), GeographicCRS::EPSG_4326,
