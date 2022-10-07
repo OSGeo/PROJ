@@ -1814,6 +1814,56 @@ CoordinateOperationFactory::Private::findOpsInRegistryDirectTo(
 
 // ---------------------------------------------------------------------------
 
+static std::vector<crs::GeodeticCRSNNPtr>
+findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
+                             const crs::GeodeticCRS *crs,
+                             const datum::GeodeticReferenceFrame *datum) {
+    std::vector<crs::GeodeticCRSNNPtr> candidates;
+    assert(datum);
+    const auto &ids = datum->identifiers();
+    const auto &datumName = datum->nameStr();
+    if (!ids.empty()) {
+        for (const auto &id : ids) {
+            const auto &authName = *(id->codeSpace());
+            const auto &code = id->code();
+            if (!authName.empty()) {
+                const auto crsIds = crs->identifiers();
+                const auto tmpFactory =
+                    (crsIds.size() == 1 &&
+                     *(crsIds.front()->codeSpace()) == authName)
+                        ? io::AuthorityFactory::create(
+                              authFactory->databaseContext(), authName)
+                              .as_nullable()
+                        : authFactory;
+                auto l_candidates = tmpFactory->createGeodeticCRSFromDatum(
+                    authName, code, std::string());
+                for (const auto &candidate : l_candidates) {
+                    candidates.emplace_back(candidate);
+                }
+            }
+        }
+    } else if (datumName != "unknown" && datumName != "unnamed") {
+        auto matches = authFactory->createObjectsFromName(
+            datumName,
+            {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, false,
+            2);
+        if (matches.size() == 1) {
+            const auto &match = matches.front();
+            if (datum->_isEquivalentTo(
+                    match.get(), util::IComparable::Criterion::EQUIVALENT) &&
+                !match->identifiers().empty()) {
+                return findCandidateGeodCRSForDatum(
+                    authFactory, crs,
+                    dynamic_cast<const datum::GeodeticReferenceFrame *>(
+                        match.get()));
+            }
+        }
+    }
+    return candidates;
+}
+
+// ---------------------------------------------------------------------------
+
 //! @cond Doxygen_Suppress
 
 // Look in the authority registry for operations from sourceCRS to targetCRS
@@ -1834,9 +1884,59 @@ CoordinateOperationFactory::Private::findsOpsInRegistryWithIntermediate(
     assert(authFactory);
 
     std::list<std::pair<std::string, std::string>> sourceIds;
-    std::list<std::pair<std::string, std::string>> targetIds;
     buildCRSIds(sourceCRS, context, sourceIds);
+    if (sourceIds.empty()) {
+        auto geodSrc = dynamic_cast<crs::GeodeticCRS *>(sourceCRS.get());
+        if (geodSrc) {
+            const auto candidatesSrcGeod(findCandidateGeodCRSForDatum(
+                authFactory, geodSrc,
+                geodSrc
+                    ->datumNonNull(authFactory->databaseContext().as_nullable())
+                    .get()));
+            std::vector<CoordinateOperationNNPtr> res;
+            for (const auto &candidateSrcGeod : candidatesSrcGeod) {
+                if (candidateSrcGeod->coordinateSystem()->axisList().size() ==
+                        geodSrc->coordinateSystem()->axisList().size() &&
+                    ((dynamic_cast<crs::GeographicCRS *>(sourceCRS.get()) !=
+                      nullptr) ==
+                     (dynamic_cast<crs::GeographicCRS *>(
+                          candidateSrcGeod.get()) != nullptr))) {
+                    const auto opsWithIntermediate =
+                        findsOpsInRegistryWithIntermediate(
+                            candidateSrcGeod, targetCRS, context,
+                            useCreateBetweenGeodeticCRSWithDatumBasedIntermediates);
+                    if (!opsWithIntermediate.empty()) {
+                        const auto opsFirst = createOperations(
+                            sourceCRS, candidateSrcGeod, context);
+                        for (const auto &opFirst : opsFirst) {
+                            for (const auto &opSecond : opsWithIntermediate) {
+                                try {
+                                    res.emplace_back(
+                                        ConcatenatedOperation::
+                                            createComputeMetadata(
+                                                {opFirst, opSecond},
+                                                disallowEmptyIntersection));
+                                } catch (
+                                    const InvalidOperationEmptyIntersection &) {
+                                }
+                            }
+                        }
+                        if (!res.empty())
+                            return res;
+                    }
+                }
+            }
+        }
+        return std::vector<CoordinateOperationNNPtr>();
+    }
+
+    std::list<std::pair<std::string, std::string>> targetIds;
     buildCRSIds(targetCRS, context, targetIds);
+    if (targetIds.empty()) {
+        return applyInverse(findsOpsInRegistryWithIntermediate(
+            targetCRS, sourceCRS, context,
+            useCreateBetweenGeodeticCRSWithDatumBasedIntermediates));
+    }
 
     const auto gridAvailabilityUse = context.context->getGridAvailabilityUse();
     for (const auto &idSrc : sourceIds) {
@@ -2655,56 +2755,6 @@ static bool hasIdentifiers(const CoordinateOperationNNPtr &op) {
         }
     }
     return false;
-}
-
-// ---------------------------------------------------------------------------
-
-static std::vector<crs::CRSNNPtr>
-findCandidateGeodCRSForDatum(const io::AuthorityFactoryPtr &authFactory,
-                             const crs::GeodeticCRS *crs,
-                             const datum::GeodeticReferenceFrame *datum) {
-    std::vector<crs::CRSNNPtr> candidates;
-    assert(datum);
-    const auto &ids = datum->identifiers();
-    const auto &datumName = datum->nameStr();
-    if (!ids.empty()) {
-        for (const auto &id : ids) {
-            const auto &authName = *(id->codeSpace());
-            const auto &code = id->code();
-            if (!authName.empty()) {
-                const auto crsIds = crs->identifiers();
-                const auto tmpFactory =
-                    (crsIds.size() == 1 &&
-                     *(crsIds.front()->codeSpace()) == authName)
-                        ? io::AuthorityFactory::create(
-                              authFactory->databaseContext(), authName)
-                              .as_nullable()
-                        : authFactory;
-                auto l_candidates = tmpFactory->createGeodeticCRSFromDatum(
-                    authName, code, std::string());
-                for (const auto &candidate : l_candidates) {
-                    candidates.emplace_back(candidate);
-                }
-            }
-        }
-    } else if (datumName != "unknown" && datumName != "unnamed") {
-        auto matches = authFactory->createObjectsFromName(
-            datumName,
-            {io::AuthorityFactory::ObjectType::GEODETIC_REFERENCE_FRAME}, false,
-            2);
-        if (matches.size() == 1) {
-            const auto &match = matches.front();
-            if (datum->_isEquivalentTo(
-                    match.get(), util::IComparable::Criterion::EQUIVALENT) &&
-                !match->identifiers().empty()) {
-                return findCandidateGeodCRSForDatum(
-                    authFactory, crs,
-                    dynamic_cast<const datum::GeodeticReferenceFrame *>(
-                        match.get()));
-            }
-        }
-    }
-    return candidates;
 }
 
 // ---------------------------------------------------------------------------
