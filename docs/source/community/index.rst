@@ -17,16 +17,18 @@ contributor the community is always very welcoming.
    code_of_conduct
    rfc/index
 
-Conference
-----------
+.. Below section commented. to be refreshed for FOSS4G 2023
 
-.. image::   ../../images/foss4g2021.jpg
-   :alt:     FOSS4G 2021
-   :target:  https://2021.foss4g.org/
+   Conference
+   ----------
 
-`FOSS4G 2021 <https://2021.foss4g.org/>`_ is the leading annual conference for
-free and open source geospatial software. It will include presentations related
-to PROJ, and some of the PROJ development community will be attending. It is the
-event for those interested in PROJ, other FOSS geospatial technologies and the
-community around them. The conference will due to COVID-19 be held in a virtual
-setting September 27th - October 2nd, 2021.
+   .. image::   ../../images/foss4g2021.jpg
+      :alt:     FOSS4G 2021
+      :target:  https://2021.foss4g.org/
+
+   `FOSS4G 2021 <https://2021.foss4g.org/>`_ is the leading annual conference for
+   free and open source geospatial software. It will include presentations related
+   to PROJ, and some of the PROJ development community will be attending. It is the
+   event for those interested in PROJ, other FOSS geospatial technologies and the
+   community around them. The conference will due to COVID-19 be held in a virtual
+   setting September 27th - October 2nd, 2021.
