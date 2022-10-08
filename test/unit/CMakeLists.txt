@@ -160,9 +160,15 @@ add_executable(test_network
   main.cpp
   test_network.cpp)
 if(CURL_ENABLED)
-  include_directories(${CURL_INCLUDE_DIR})
   target_compile_definitions(test_network PRIVATE -DCURL_ENABLED)
-  target_link_libraries(test_network PRIVATE ${CURL_LIBRARY})
+  if( CMAKE_VERSION VERSION_LESS 3.11 AND CMAKE_CROSSCOMPILING )
+      # Hack needed for ubuntu:18.04 mingw64 cross compiling to avoid
+      # -isystem to be emitted (similar to https://discourse.cmake.org/t/use-of-isystem/1574)
+      target_include_directories(test_network PRIVATE ${CURL_INCLUDE_DIRS})
+      target_link_libraries(test_network PRIVATE ${CURL_LIBRARIES})
+  else()
+      target_link_libraries(test_network PRIVATE CURL::libcurl)
+  endif()
 endif()
 target_link_libraries(test_network
   PRIVATE GTest::gtest

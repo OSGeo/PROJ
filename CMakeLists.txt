@@ -218,6 +218,16 @@ if(ENABLE_CURL)
   find_package(CURL REQUIRED)
   if(CURL_FOUND)
     set(CURL_ENABLED TRUE)
+
+    # Target CURL::libcurl only defined since CMake 3.12
+    # TODO: remove this when CMake >= 3.12 required
+    if(NOT TARGET CURL::libcurl)
+      add_library(CURL::libcurl INTERFACE IMPORTED)
+      set_target_properties(CURL::libcurl PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES      "${CURL_LIBRARIES}"
+      )
+    endif()
   else()
     message(SEND_ERROR "curl dependency not found!")
   endif()
