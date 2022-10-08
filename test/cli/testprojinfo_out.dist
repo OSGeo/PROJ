@@ -1240,6 +1240,14 @@ PROJCRS["WGS 84 / UTM zone 31N",
         BBOX[0,0,84,6]],
     REMARK["Promoted to 3D from EPSG:32631"]]
 
+Testing -s WGS 84 -t WGS 84 + EGM96 height --hide-ballpark --summary
+Candidate operations found: 1
+unknown id, WGS 84 to EGM96 height (1), 1 m, World.
+
+Testing -s WGS 84 + EGM96 height -t WGS 84 --hide-ballpark --summary
+Candidate operations found: 1
+unknown id, Inverse of WGS 84 to EGM96 height (1), 1 m, World.
+
 Testing -s EPSG:32631 -t EPSG:4326+3855 --summary
 Candidate operations found: 1
 unknown id, Inverse of UTM zone 31N + Inverse of Null geographic offset from WGS 84 to WGS 84, 0 m, World.

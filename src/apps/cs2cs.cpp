@@ -332,6 +332,19 @@ static std::string get_geog_crs_proj_string_from_proj_crs(PJ *src,
     return ret;
 }
 
+// ---------------------------------------------------------------------------
+
+static bool is3DCRS(const PJ* crs) {
+    auto type = proj_get_type(crs);
+    if( type == PJ_TYPE_COMPOUND_CRS )
+        return true;
+    if( type == PJ_TYPE_GEOGRAPHIC_3D_CRS )
+        return true;
+    if( type == PJ_TYPE_GEODETIC_CRS || type == PJ_TYPE_PROJECTED_CRS )
+        return proj_cs_get_axis_count(nullptr, crs) == 3;
+    return false;
+}
+
 /************************************************************************/
 /*                                main()                                */
 /************************************************************************/
@@ -807,6 +820,39 @@ int main(int argc, char **argv) {
         if( dst3D ) {
             proj_destroy(dst);
             dst = dst3D;
+        }
+    } else {
+        // Auto-promote source/target CRS if it is specified by its name,
+        // if it has a known 3D version of it and that the other CRS is 3D.
+        // e.g cs2cs "WGS 84 + EGM96 height" "WGS 84"
+        if (is3DCRS(dst) && !is3DCRS(src) &&
+            proj_get_id_code(src, 0) != nullptr &&
+            Identifier::isEquivalentName(fromStr.c_str(),
+                                         proj_get_name(src))) {
+            auto promoted = proj_crs_promote_to_3D(nullptr, nullptr, src);
+            if (promoted)
+            {
+                if (proj_get_id_code(promoted, 0) != nullptr) {
+                    proj_destroy(src);
+                    src = promoted;
+                } else {
+                    proj_destroy(promoted);
+                }
+            }
+        } else if (is3DCRS(src) && !is3DCRS(dst) &&
+                   proj_get_id_code(dst, 0) != nullptr &&
+                   Identifier::isEquivalentName(toStr.c_str(),
+                                                proj_get_name(dst))) {
+            auto promoted = proj_crs_promote_to_3D(nullptr, nullptr, dst);
+            if (promoted)
+            {
+                if (proj_get_id_code(promoted, 0) != nullptr) {
+                    proj_destroy(dst);
+                    dst = promoted;
+                } else {
+                    proj_destroy(promoted);
+                }
+            }
         }
     }
 
