@@ -804,6 +804,20 @@ static void outputOperationSummary(
 
 // ---------------------------------------------------------------------------
 
+static bool is3DCRS(const CRSPtr &crs) {
+    if (dynamic_cast<CompoundCRS *>(crs.get()))
+        return true;
+    auto geodCRS = dynamic_cast<GeodeticCRS *>(crs.get());
+    if (geodCRS)
+        return geodCRS->coordinateSystem()->axisList().size() == 3U;
+    auto projCRS = dynamic_cast<ProjectedCRS *>(crs.get());
+    if (projCRS)
+        return projCRS->coordinateSystem()->axisList().size() == 3U;
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+
 static void outputOperations(
     DatabaseContextPtr dbContext, const std::string &sourceCRSStr,
     const std::string &targetCRSStr, const ExtentPtr &bboxFilter,
@@ -825,7 +839,6 @@ static void outputOperations(
         std::cerr << "source CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
-    auto nnSourceCRS = NN_NO_CHECK(sourceCRS);
 
     auto targetObj =
         buildObject(dbContext, targetCRSStr, "crs", "target CRS", false,
@@ -836,8 +849,34 @@ static void outputOperations(
         std::cerr << "target CRS string is not a CRS" << std::endl;
         std::exit(1);
     }
-    auto nnTargetCRS = NN_NO_CHECK(targetCRS);
 
+    if (dbContext && !promoteTo3D) {
+        // Auto-promote source/target CRS if it is specified by its name,
+        // if it has a known 3D version of it and that the other CRS is 3D.
+        // e.g projinfo -s "WGS 84 + EGM96 height" -t "WGS 84"
+        if (is3DCRS(targetCRS) && !is3DCRS(sourceCRS) &&
+            !sourceCRS->identifiers().empty() &&
+            Identifier::isEquivalentName(sourceCRSStr.c_str(),
+                                         sourceCRS->nameStr().c_str())) {
+            auto promoted =
+                sourceCRS->promoteTo3D(std::string(), dbContext).as_nullable();
+            if (!promoted->identifiers().empty()) {
+                sourceCRS = promoted;
+            }
+        } else if (is3DCRS(sourceCRS) && !is3DCRS(targetCRS) &&
+                   !targetCRS->identifiers().empty() &&
+                   Identifier::isEquivalentName(targetCRSStr.c_str(),
+                                                targetCRS->nameStr().c_str())) {
+            auto promoted =
+                targetCRS->promoteTo3D(std::string(), dbContext).as_nullable();
+            if (!promoted->identifiers().empty()) {
+                targetCRS = promoted;
+            }
+        }
+    }
+
+    auto nnSourceCRS = NN_NO_CHECK(sourceCRS);
+    auto nnTargetCRS = NN_NO_CHECK(targetCRS);
     std::vector<CoordinateOperationNNPtr> list;
     size_t spatialCriterionPartialIntersectionResultCount = 0;
     bool spatialCriterionPartialIntersectionMoreRelevant = false;
