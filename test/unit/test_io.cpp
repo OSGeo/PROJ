@@ -11912,6 +11912,14 @@ TEST(io, createFromUserInput) {
     EXPECT_NO_THROW(createFromUserInput("ID74", dbContext));
 
     {
+        // Approximate match of a vertical CRS
+        auto obj = createFromUserInput("NGF IGN69 height", dbContext);
+        auto crs = nn_dynamic_pointer_cast<VerticalCRS>(obj);
+        EXPECT_TRUE(crs != nullptr);
+        EXPECT_EQ(crs->nameStr(), "NGF-IGN69 height");
+    }
+
+    {
         // Exact match on each piece of the compound CRS
         auto obj = createFromUserInput("WGS 84 + EGM96 height", dbContext);
         auto crs = nn_dynamic_pointer_cast<CompoundCRS>(obj);

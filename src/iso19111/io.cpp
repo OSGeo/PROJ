@@ -7329,6 +7329,24 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                     }
                 }
 
+                // If there's exactly only one object whose name is equivalent
+                // to the user input, return it.
+                IdentifiedObjectPtr identifiedObj;
+                for (const auto &obj : res) {
+                    if (Identifier::isEquivalentName(obj->nameStr().c_str(),
+                                                     objectName.c_str())) {
+                        if (identifiedObj == nullptr) {
+                            identifiedObj = obj.as_nullable();
+                        } else {
+                            identifiedObj = nullptr;
+                            break;
+                        }
+                    }
+                }
+                if (identifiedObj) {
+                    return identifiedObj;
+                }
+
                 std::string msg("several objects matching this name: ");
                 bool first = true;
                 for (const auto &obj : res) {
