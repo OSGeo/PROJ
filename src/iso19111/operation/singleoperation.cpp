@@ -3751,16 +3751,21 @@ bool SingleOperation::exportToPROJStringGeneric(
         double offsetDeg =
             parameterValueNumeric(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET,
                                   common::UnitOfMeasure::DEGREE);
-
+        auto l_sourceCRS = sourceCRS();
         auto sourceCRSGeog =
-            dynamic_cast<const crs::GeographicCRS *>(sourceCRS().get());
+            l_sourceCRS ? extractGeographicCRSIfGeographicCRSOrEquivalent(
+                              NN_NO_CHECK(l_sourceCRS))
+                        : nullptr;
         if (!sourceCRSGeog) {
             throw io::FormattingException(
                 concat("Can apply ", methodName, " only to GeographicCRS"));
         }
 
+        auto l_targetCRS = targetCRS();
         auto targetCRSGeog =
-            dynamic_cast<const crs::GeographicCRS *>(targetCRS().get());
+            l_targetCRS ? extractGeographicCRSIfGeographicCRSOrEquivalent(
+                              NN_NO_CHECK(l_targetCRS))
+                        : nullptr;
         if (!targetCRSGeog) {
             throw io::FormattingException(
                 concat("Can apply ", methodName + " only to GeographicCRS"));
