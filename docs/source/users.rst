@@ -14,6 +14,7 @@ Free and open source software
 - `PDAL <https://pdal.io>`_  Point Cloud Data Abstraction Library
 - `PostGIS <http://www.postgis.net>`_ Spatial database extender for PostgreSQL
 - `pyproj <https://pyproj4.github.io/pyproj>`_ Python interface to PROJ
+- `proj crate <https://crates.io/crates/proj>`_ Rust interface to PROJ
 - `QGIS <http://www.qgis.org>`_ A cross platform desktop GIS.
 - `R <http://www.r-project.org>`_ A free software environment for statistical computing and graphics
 
