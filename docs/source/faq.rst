@@ -199,7 +199,7 @@ output.
 Who uses PROJ ?
 ---------------
 
-See :ref:`users`:
+See :ref:`users`
 
 .. toctree::
    :hidden:
