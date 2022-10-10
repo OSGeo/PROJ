@@ -43,6 +43,7 @@ Private organizations
 ---------------------
 
 (add yourself here if you are a direct user of PROJ API or utilities)
+Mor Ndiaye
 
 Sponsors
 --------
