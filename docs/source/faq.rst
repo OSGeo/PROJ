@@ -194,3 +194,14 @@ call the software PROJ.
 Use of name PROJ.4 is now strictly reserved for describing legacy behavior
 of the software, e.g. "PROJ.4 strings" as seen in :program:`projinfo`
 output.
+
+
+Who uses PROJ ?
+---------------
+
+See :ref:`users`:
+
+.. toctree::
+   :hidden:
+
+   users
