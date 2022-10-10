@@ -15,6 +15,7 @@ Free and open source software
 - `PostGIS <http://www.postgis.net>`_ Spatial database extender for PostgreSQL
 - `pyproj <https://pyproj4.github.io/pyproj>`_ Python interface to PROJ
 - `QGIS <http://www.qgis.org>`_ A cross platform desktop GIS.
+- `QField <http://qfield.org>`_ Mobile data collection app for Android, iOS and Windows.
 - `R <http://www.r-project.org>`_ A free software environment for statistical computing and graphics
 
 Proprietary licensed software
