@@ -31,9 +31,11 @@ Geodetic organizations
 - `National Land Survey of Finland (NLS) <https://www.maanmittauslaitos.fi/en>`_
 - `National Land Survey of Iceland (NLS) <https://www.lmi.is/>`_
 - `Netherlands Partnership Geodetic Infrastructure (NSGI) <https://www.nsgi.nl/>`_
- - `Netherlands' Cadastre, Land Registry and Mapping Agency (Kadaster) <https://www.kadaster.nl/about-us>`_
- - `Directorate-General for Public Works and Water Management (Rijkswaterstaat) <https://www.rijkswaterstaat.nl/en>`_
- - `Hydrographic Service of the Royal Netherlands Navy <https://english.defensie.nl/organisation/navy/navy-units/hydrographic-service/>`_
+
+  * `Netherlands' Cadastre, Land Registry and Mapping Agency (Kadaster) <https://www.kadaster.nl/about-us>`_
+  * `Directorate-General for Public Works and Water Management (Rijkswaterstaat) <https://www.rijkswaterstaat.nl/en>`_
+  * `Hydrographic Service of the Royal Netherlands Navy <https://english.defensie.nl/organisation/navy/navy-units/hydrographic-service/>`_
+
 - `Nordic Geodetic commission (NKG) <https://www.nordicgeodeticcommission.com/>`_
 - `Norwegian Mapping Authority (Kartverket) <https://kartverket.no/en>`_
 - `Swedish mapping, cadastral and land registration authority (Lantmäteriet) <https://www.lantmateriet.se/>`_
