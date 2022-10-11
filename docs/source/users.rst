@@ -27,6 +27,7 @@ Proprietary licensed software
 -----------------------------
 
 - `FME <http://www.safe.com>`_  A GIS translator package. Includes a PROJ based transformer.
+- `Avenza Maps <https://www.avenzamaps.com>`_  Top mobile mapping app for offline navigation and data collection.
 
 Geodetic organizations
 ----------------------
