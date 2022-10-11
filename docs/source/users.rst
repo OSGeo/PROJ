@@ -44,6 +44,7 @@ Geodetic organizations
 Public organizations
 --------------------
 
+- `Istituto Nazioanle di Astrofisica (INAF) <https://www.inaf.it/> -- Planetary Mapping and GIS Laboratory <https://gislab.iaps.inaf.it/> `_
 (add yourself here if you are a direct user of PROJ API or utilities)
 
 Private organizations
