@@ -457,16 +457,28 @@ endif()
 
 if(TIFF_ENABLED)
   target_compile_definitions(proj PRIVATE -DTIFF_ENABLED)
-  target_include_directories(proj PRIVATE ${TIFF_INCLUDE_DIR})
-  target_link_libraries(proj PRIVATE ${TIFF_LIBRARY})
+  if( CMAKE_VERSION VERSION_LESS 3.11 AND CMAKE_CROSSCOMPILING )
+      # Hack needed for ubuntu:18.04 mingw64 cross compiling to avoid
+      # -isystem to be emitted (similar to https://discourse.cmake.org/t/use-of-isystem/1574)
+      target_include_directories(proj PRIVATE ${TIFF_INCLUDE_DIRS})
+      target_link_libraries(proj PRIVATE ${TIFF_LIBRARIES})
+  else()
+      target_link_libraries(proj PRIVATE TIFF::TIFF)
+  endif()
 endif()
 
 if(CURL_ENABLED)
   target_compile_definitions(proj PRIVATE -DCURL_ENABLED)
-  target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIRS})
+  if( CMAKE_VERSION VERSION_LESS 3.11 AND CMAKE_CROSSCOMPILING )
+      # Hack needed for ubuntu:18.04 mingw64 cross compiling to avoid
+      # -isystem to be emitted (similar to https://discourse.cmake.org/t/use-of-isystem/1574)
+      target_include_directories(proj PRIVATE ${CURL_INCLUDE_DIRS})
+      target_link_libraries(proj PRIVATE ${CURL_LIBRARIES})
+  else()
+      target_link_libraries(proj PRIVATE CURL::libcurl)
+  endif()
   target_link_libraries(proj
     PRIVATE
-      ${CURL_LIBRARIES}
       $<$<CXX_COMPILER_ID:MSVC>:ws2_32>
       $<$<CXX_COMPILER_ID:MSVC>:wldap32>
       $<$<CXX_COMPILER_ID:MSVC>:advapi32>
