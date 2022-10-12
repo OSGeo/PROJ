@@ -50,7 +50,9 @@ Required
 
 .. option:: +model=<filename>
 
-    Filename to the JSON master file for the deformation model.
+    Filename to the JSON master file for the deformation model. This file must validate
+    against the `deformation_model.schema.json <https://raw.githubusercontent.com/OSGeo/PROJ/master/data/deformation_model.schema.json>`__
+    JSON schema.
 
 
 Example
