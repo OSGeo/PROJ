@@ -341,7 +341,13 @@ static bool is3DCRS(const PJ* crs) {
     if( type == PJ_TYPE_GEOGRAPHIC_3D_CRS )
         return true;
     if( type == PJ_TYPE_GEODETIC_CRS || type == PJ_TYPE_PROJECTED_CRS )
-        return proj_cs_get_axis_count(nullptr, crs) == 3;
+    {
+        auto cs = proj_crs_get_coordinate_system(nullptr, crs);
+        assert(cs);
+        const bool ret = proj_cs_get_axis_count(nullptr, cs) == 3;
+        proj_destroy(cs);
+        return ret;
+    }
     return false;
 }
 
