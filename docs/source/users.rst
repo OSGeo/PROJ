@@ -51,6 +51,7 @@ Public organizations
 --------------------
 
 - `Istituto Nazioanle di Astrofisica (INAF) <https://www.inaf.it/>`_ : `Planetary Mapping and GIS Laboratory <https://gislab.iaps.inaf.it/>`_
+- `Ecole Nationale des Sciences Géographiques (ENSG-géomatique) <https://www.ensg.eu/>`_ : `french geomatic school which depends on the National Institute of Geographic and Forest Information (IGN)`_
 
 (add yourself here if you are a direct user of PROJ API or utilities)
 
