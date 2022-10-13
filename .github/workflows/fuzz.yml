@@ -6,12 +6,12 @@ jobs:
     steps:
     - name: Build Fuzzers
       id: build
-      uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
+      uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@cifuzz-proj4
       with:
         oss-fuzz-project-name: 'proj4'
         dry-run: false
     - name: Run Fuzzers
-      uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
+      uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@cifuzz-proj4
       with:
         oss-fuzz-project-name: 'proj4'
         fuzz-seconds: 600
