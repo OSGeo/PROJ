@@ -91,8 +91,9 @@ static void logger(void *data, int level, const char *msg);
 static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...);
 
 /* Prototypes from functions in this file */
-char *column (char *buf, int n);
-PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time);
+static const char *column (const char *buf, int n);
+static char *column (char *buf, int n);
+PJ_COORD parse_input_line (const char *buf, int *columns, double fixed_height, double fixed_time);
 
 
 static const char usage[] = {
@@ -203,9 +204,6 @@ int main(int argc, char **argv) {
     OPTARGS *o;
     char blank_comment[] = "";
     char whitespace[] = " ";
-    char *comment;
-    char *comment_delimiter;
-    char *buf;
     int i, nfields = 4, skip_lines = 0, verbose;
     double fixed_z = HUGE_VAL, fixed_time = HUGE_VAL;
     int decimals_angles = 10;
@@ -406,7 +404,8 @@ int main(int argc, char **argv) {
     direction = PJ_FWD;
 
     /* Allocate input buffer */
-    buf = static_cast<char*>(calloc (1, 10000));
+    constexpr int BUFFER_SIZE = 10000;
+    char* buf = static_cast<char*>(calloc (1, BUFFER_SIZE));
     if (nullptr==buf) {
         print (PJ_LOG_ERROR, "%s: Out of memory", o->progname);
         proj_destroy (P);
@@ -418,30 +417,43 @@ int main(int argc, char **argv) {
 
 
     /* Loop over all records of all input files */
+    int previous_index = -1;
     while (opt_input_loop (o, optargs_file_format_text)) {
         int err;
-        void *ret = fgets (buf, 10000, o->input);
-        char *c = column (buf, 1);
+        char *bufptr = fgets (buf, BUFFER_SIZE - 1, o->input);
         opt_eof_handler (o);
-        if (nullptr==ret) {
+        if (nullptr==bufptr) {
             print (PJ_LOG_ERROR, "Read error in record %d", (int) o->record_index);
             continue;
         }
-        point = parse_input_line (buf, columns_xyzt, fixed_z, fixed_time);
+
+        const bool bFirstLine = o->input_index != previous_index;
+        previous_index = o->input_index;
+        if( bFirstLine &&
+            static_cast<uint8_t>(bufptr[0]) == 0xEF &&
+            static_cast<uint8_t>(bufptr[1]) == 0xBB &&
+            static_cast<uint8_t>(bufptr[2]) == 0xBF )
+        {
+            // Skip UTF-8 Byte Order Marker (BOM)
+            bufptr += 3;
+        }
+
+        point = parse_input_line (bufptr, columns_xyzt, fixed_z, fixed_time);
         if (skip_lines > 0) {
             skip_lines--;
             continue;
         }
 
         /* if it's a comment or blank line, we reflect it */
+        const char *c = column (bufptr, 1);
         if (c && ((*c=='\0') || (*c=='#'))) {
-            fprintf (fout, "%s", buf);
+            fprintf (fout, "%s", bufptr);
             continue;
         }
 
         if (HUGE_VAL==point.xyzt.x) {
             /* otherwise, it must be a syntax error */
-            print (PJ_LOG_NONE, "# Record %d UNREADABLE: %s", (int) o->record_index, buf);
+            print (PJ_LOG_NONE, "# Record %d UNREADABLE: %s", (int) o->record_index, bufptr);
             print (PJ_LOG_ERROR, "%s: Could not parse file '%s' line %d", o->progname, opt_filename (o), opt_record (o));
             continue;
         }
@@ -457,27 +469,27 @@ int main(int argc, char **argv) {
         if (HUGE_VAL==point.xyzt.x) {
             /* transformation error */
             print (PJ_LOG_NONE, "# Record %d TRANSFORMATION ERROR: %s (%s)",
-                   (int) o->record_index, buf, proj_errno_string (proj_errno(P)));
+                   (int) o->record_index, bufptr, proj_errno_string (proj_errno(P)));
             proj_errno_restore (P, err);
             continue;
         }
         proj_errno_restore (P, err);
 
         /* handle comment string */
-        comment = column(buf, nfields+1);
+        char* comment = column(bufptr, nfields+1);
         if (opt_given(o, "c")) {
             /* what number is the last coordinate column in the input data? */
             int colmax = 0;
             for (i=0; i<4; i++)
                 colmax = MAX(colmax, columns_xyzt[i]);
-            comment = column(buf, colmax+1);
+            comment = column(bufptr, colmax+1);
         }
         /* remove the line feed from comment, as logger() above, invoked
            by print() below (output), will add one */
         size_t len = strlen(comment);
         if (len >= 1)
             comment[len - 1] = '\0';
-        comment_delimiter = *comment ? whitespace : blank_comment;
+        const char* comment_delimiter = *comment ? whitespace : blank_comment;
 
         /* Time to print the result */
         /* use same arguments to printf format string for both radians and
@@ -520,7 +532,7 @@ int main(int argc, char **argv) {
 
 
 /* return a pointer to the n'th column of buf */
-char *column (char *buf, int n) {
+static const char *column (const char *buf, int n) {
     int i;
     if (n <= 0)
         return buf;
@@ -535,19 +547,22 @@ char *column (char *buf, int n) {
     return buf;
 }
 
+static char *column (char *buf, int n) {
+    return const_cast<char*>(column(const_cast<const char*>(buf), n));
+}
+
 /* column to double */
-static double cold (char *args, int col) {
+static double cold (const char *args, int col) {
     char *endp;
-    char *target;
     double d;
-    target = column (args, col);
+    const char* target = column (args, col);
     d = proj_strtod (target, &endp);
     if (endp==target)
         return HUGE_VAL;
     return d;
 }
 
-PJ_COORD parse_input_line (char *buf, int *columns, double fixed_height, double fixed_time) {
+PJ_COORD parse_input_line (const char *buf, int *columns, double fixed_height, double fixed_time) {
     PJ_COORD err = proj_coord (HUGE_VAL, HUGE_VAL, HUGE_VAL, HUGE_VAL);
     PJ_COORD result = err;
     int prev_errno = errno;
