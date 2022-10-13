@@ -11,6 +11,12 @@ Python
 `pyproj <https://pypi.python.org/pypi/pyproj>`_:
 Python interface (wrapper for PROJ)
 
+Java
+====
+
+`PROJ-JNI <https://github.com/OSGeo/PROJ-JNI>`_:
+Java Native Interface for PROJ
+
 Ruby
 =======
 
