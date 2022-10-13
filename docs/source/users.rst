@@ -16,6 +16,7 @@ Free and open source software
 - `QGIS <http://www.qgis.org>`_ A cross platform desktop GIS.
 - `QField <http://qfield.org>`_ Mobile data collection app for Android, iOS and Windows.
 - `R <http://www.r-project.org>`_ A free software environment for statistical computing and graphics
+- `mundipy <https://docs.mundi.ai>`_ A Python framework for spatial data analysis
 
 PROJ bindings in other languages
 --------------------------------
@@ -28,6 +29,7 @@ Proprietary licensed software
 
 - `FME <http://www.safe.com>`_  A GIS translator package. Includes a PROJ based transformer.
 - `Avenza Maps <https://www.avenzamaps.com>`_  Top mobile mapping app for offline navigation and data collection.
+- `Bunting Labs <https://buntinglabs.com/>`_ No-code GIS infrastructure
 
 Geodetic organizations
 ----------------------
