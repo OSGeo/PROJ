@@ -1043,6 +1043,9 @@ $EXE -d 3 -E "WGS 84 + EGM96 height" "WGS 84" >> ${OUT} <<EOF
 49 2 0
 EOF
 
+echo  "##############################################################" >> ${OUT}
+echo  "Test input file with UTF-8 BOM marker" >> ${OUT}
+$EXE -d 3 -E EPSG:4326 EPSG:32631 ${TEST_CLI_DIR}/input_with_utf8_bom.txt >> ${OUT}
 
 # Done!
 # do 'diff' with distribution results

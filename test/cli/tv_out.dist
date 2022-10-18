@@ -504,3 +504,6 @@ Check that we select the operation that has the smallest area of use, when 2 hav
 Check that we promote CRS specified by name to 3D when the other one is 3D
 49 2 50	49.000	2.000 4.936
 49 2 0	49.000	2.000 45.064
+##############################################################
+Test input file with UTF-8 BOM marker
+0 3 0	500000.000	0.000 0.000
