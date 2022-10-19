@@ -24,3 +24,5 @@ Test cct with object code initialization and file input
  3541658.5334    948984.5160  5201383.7251     2020.5000
 Test cct with WKT in a file
  3541657.9112    948983.7503  5201383.2482     2020.5000
+Test cct with input file with UTF-8 BOM marker
+       0.0000         3.0000        0.0000           inf

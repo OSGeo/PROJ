@@ -99,13 +99,25 @@ static void process(FILE *fid)
 {
     char line[MAX_LINE + 3], *s, pline[40];
     PJ_UV data;
+    bool bFirstLine = true;
 
-    for (;;) {
+    for (;; bFirstLine = false ) {
         double z;
 
         ++emess_dat.File_line;
         if (!(s = fgets(line, MAX_LINE, fid)))
             break;
+
+        if( bFirstLine &&
+            static_cast<uint8_t>(s[0]) == 0xEF &&
+            static_cast<uint8_t>(s[1]) == 0xBB &&
+            static_cast<uint8_t>(s[2]) == 0xBF )
+        {
+            // Skip UTF-8 Byte Order Marker (BOM)
+            s += 3;
+        }
+        const char* pszLineAfterBOM = s;
+
         if (!strchr(s, '\n')) { /* overlong line */
             int c;
             (void)strcat(s, "\n");
@@ -151,7 +163,7 @@ static void process(FILE *fid)
             char temp;
             temp = *s;
             *s = '\0';
-            (void)fputs(line, stdout);
+            (void)fputs(pszLineAfterBOM, stdout);
             *s = temp;
             putchar('\t');
         }

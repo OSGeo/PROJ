@@ -159,6 +159,9 @@ echo "Test cct with WKT in a file" >> ${OUT}
 echo "3541657.3778 948984.2343 5201383.5231 2020.5" | $EXE @in.wkt >>${OUT}
 rm in.wkt
 
+echo "Test cct with input file with UTF-8 BOM marker" >> ${OUT}
+$EXE +proj=noop ${TEST_CLI_DIR}/input_with_utf8_bom.txt >> ${OUT}
+
 # do 'diff' with distribution results
 echo "diff ${OUT} with testcct_out.dist"
 diff -u ${OUT} ${TEST_CLI_DIR}/testcct_out.dist
