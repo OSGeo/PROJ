@@ -5962,6 +5962,19 @@ TEST(crs, parametricCRS_WKT1) {
 
 // ---------------------------------------------------------------------------
 
+TEST(crs, derivedVerticalCRS_basic) {
+
+    auto crs = createDerivedVerticalCRS();
+    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
+    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
+
+    EXPECT_FALSE(crs->isEquivalentTo(crs->baseCRS().get()));
+    EXPECT_FALSE(crs->baseCRS()->isEquivalentTo(crs.get()));
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(crs, DerivedVerticalCRS_WKT2) {
 
     auto expected = "VERTCRS[\"Derived vertCRS\",\n"
@@ -5976,10 +5989,6 @@ TEST(crs, DerivedVerticalCRS_WKT2) {
                     "                ID[\"EPSG\",9001]]]]";
 
     auto crs = createDerivedVerticalCRS();
-    EXPECT_TRUE(crs->isEquivalentTo(crs.get()));
-    EXPECT_TRUE(crs->shallowClone()->isEquivalentTo(crs.get()));
-    EXPECT_TRUE(!crs->isEquivalentTo(createUnrelatedObject().get()));
-
     EXPECT_EQ(crs->exportToWKT(
                   WKTFormatter::create(WKTFormatter::Convention::WKT2).get()),
               expected);
