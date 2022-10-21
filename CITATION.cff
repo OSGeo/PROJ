@@ -1,0 +1,69 @@
+cff-version: 1.2.0
+message: Please cite this software using these metadata or in the CITATION file.
+type: software
+title: PROJ
+version: 9.1.0
+date-released: 2022-09-01
+doi: 10.5281/zenodo.5884394
+abstract: PROJ is a generic coordinate transformation software that transforms
+  geospatial coordinates from one coordinate reference system (CRS) to another.
+  This includes cartographic projections as well as geodetic transformations.
+url: https://proj.org
+repository-code: https://github.com/OSGeo/PROJ/
+license: MIT
+authors:
+  - given-names: Gerald I.
+    family-names: Evenden
+    affiliation: United States Geological Survey
+  - given-names: Even
+    family-names: Rouault
+    affiliation: Spatialys
+    orcid: https://orcid.org/0000-0002-5068-0476
+  - given-names: Frank
+    family-names: Warmerdam
+    affiliation: Planet Labs Inc
+  - given-names: Kristian
+    family-names: Evers
+    affiliation: Danish Agency for Data Supply and Infrastructure
+    orcid: https://orcid.org/0000-0002-1310-4576
+  - given-names: Thomas
+    family-names: Knudsen
+    affiliation: Danish Agency for Data Supply and Infrastructure
+  - given-names: Howard
+    family-names: Butler
+    affiliation: Hobu Inc
+    orcid: https://orcid.org/0000-0002-5340-1380
+  - given-names: Mike W.
+    family-names: Taves
+    affiliation: GNS Science
+    orcid: https://orcid.org/0000-0003-3657-7963
+  - given-names: Kurt
+    family-names: Schwehr
+    affiliation: Google Inc
+    orcid: https://orcid.org/0000-0002-5624-8190
+  - given-names: Elliott
+    family-names: Sales de Andrade
+    orcid: https://orcid.org/0000-0001-7310-8942
+  - given-names: Charles
+    family-names: Karney
+    affiliation: SRI International
+    orcid: https://orcid.org/0000-0002-5006-5836
+  - given-names: Sebastiaan
+    family-names: Couwenberg
+  - given-names: Nyall
+    family-names: Dawson
+    affiliation: North Road
+    orcid: https://orcid.org/0000-0001-9812-7584
+  - given-names: Alan D.
+    family-names: Snow
+    affiliation: Corteva
+    orcid: https://orcid.org/0000-0002-7333-3100
+  - given-names: Javier
+    family-names: Jimenez Shaw
+keywords:
+  - PROJ
+  - geodesy
+  - cartography
+  - coordinates
+  - projections
+  - conversion
