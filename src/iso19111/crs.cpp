@@ -3728,6 +3728,10 @@ bool VerticalCRS::_isEquivalentTo(
     const util::IComparable *other, util::IComparable::Criterion criterion,
     const io::DatabaseContextPtr &dbContext) const {
     auto otherVertCRS = dynamic_cast<const VerticalCRS *>(other);
+    if (otherVertCRS == nullptr ||
+        !util::isOfExactType<VerticalCRS>(*otherVertCRS)) {
+        return false;
+    }
     // TODO test geoidModel and velocityModel
     return otherVertCRS != nullptr &&
            SingleCRS::baseIsEquivalentTo(other, criterion, dbContext);
