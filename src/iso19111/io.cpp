@@ -3201,6 +3201,14 @@ CRSNNPtr WKTParser::Private::buildDerivedGeodeticCRS(const WKTNodeNNPtr &node) {
 
     auto ellipsoidalCS = nn_dynamic_pointer_cast<EllipsoidalCS>(cs);
     if (ellipsoidalCS) {
+
+        if (ellipsoidalCS->axisList().size() == 3 &&
+            baseGeodCRS->coordinateSystem()->axisList().size() == 2) {
+            baseGeodCRS =
+                NN_NO_CHECK(util::nn_dynamic_pointer_cast<GeodeticCRS>(
+                    baseGeodCRS->promoteTo3D(std::string(), dbContext_)));
+        }
+
         return DerivedGeographicCRS::create(buildProperties(node), baseGeodCRS,
                                             derivingConversion,
                                             NN_NO_CHECK(ellipsoidalCS));
