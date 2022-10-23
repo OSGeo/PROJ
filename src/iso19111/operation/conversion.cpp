@@ -3465,12 +3465,16 @@ void Conversion::_exportToPROJString(
         methodEPSGCode == EPSG_CODE_METHOD_AFFINE_PARAMETRIC_TRANSFORMATION;
     const bool isGeographicGeocentric =
         methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC_GEOCENTRIC;
+    const bool isGeographicOffsets =
+        methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS ||
+        methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS ||
+        methodEPSGCode == EPSG_CODE_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS;
     const bool isHeightDepthReversal =
         methodEPSGCode == EPSG_CODE_METHOD_HEIGHT_DEPTH_REVERSAL;
     const bool applySourceCRSModifiers =
         !isZUnitConversion && !isAffineParametric &&
         !isAxisOrderReversal(methodEPSGCode) && !isGeographicGeocentric &&
-        !isHeightDepthReversal;
+        !isGeographicOffsets && !isHeightDepthReversal;
     bool applyTargetCRSModifiers = applySourceCRSModifiers;
 
     if (formatter->getCRSExport()) {

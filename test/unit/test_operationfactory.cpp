@@ -635,6 +635,73 @@ TEST(operation, geogCRS_to_geogCRS_context_datum_ensemble) {
 
 // ---------------------------------------------------------------------------
 
+TEST(operation, geogCRS_to_derived_geogCRS_3D) {
+    auto authFactory =
+        AuthorityFactory::create(DatabaseContext::create(), "EPSG");
+    auto ctxt = CoordinateOperationContext::create(authFactory, nullptr, 0);
+    ctxt->setSpatialCriterion(
+        CoordinateOperationContext::SpatialCriterion::PARTIAL_INTERSECTION);
+
+    auto dst_wkt =
+        "GEOGCRS[\"CH1903+ with 10m offset on ellipsoidal height\",\n"
+        "    BASEGEOGCRS[\"CH1903+\",\n"
+        "        DATUM[\"CH1903+\",\n"
+        "            ELLIPSOID[\"Bessel 1841\",6377397.155,299.1528128,\n"
+        "                LENGTHUNIT[\"metre\",1]],\n"
+        "            ID[\"EPSG\",6150]],\n"
+        "        PRIMEM[\"Greenwich\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8901]]],\n"
+        "    DERIVINGCONVERSION[\"Offset on ellipsoidal height\",\n"
+        "        METHOD[\"Geographic3D offsets\",\n"
+        "            ID[\"EPSG\",9660]],\n"
+        "        PARAMETER[\"Latitude offset\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8601]],\n"
+        "        PARAMETER[\"Longitude offset\",0,\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433],\n"
+        "            ID[\"EPSG\",8602]],\n"
+        "        PARAMETER[\"Vertical Offset\",10,\n"
+        "            LENGTHUNIT[\"metre\",1],\n"
+        "            ID[\"EPSG\",8603]]],\n"
+        "    CS[ellipsoidal,3],\n"
+        "        AXIS[\"geodetic latitude (Lat)\",north,\n"
+        "            ORDER[1],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                ID[\"EPSG\",9122]]],\n"
+        "        AXIS[\"geodetic longitude (Lon)\",east,\n"
+        "            ORDER[2],\n"
+        "            ANGLEUNIT[\"degree\",0.0174532925199433,\n"
+        "                ID[\"EPSG\",9122]]],\n"
+        "        AXIS[\"ellipsoidal height (h)\",up,\n"
+        "            ORDER[3],\n"
+        "            LENGTHUNIT[\"metre\",1,\n"
+        "                ID[\"EPSG\",9001]]]]";
+    auto dstObj = WKTParser().createFromWKT(dst_wkt);
+    auto dstCRS = nn_dynamic_pointer_cast<CRS>(dstObj);
+    ASSERT_TRUE(dstCRS != nullptr);
+
+    auto list = CoordinateOperationFactory::create()->createOperations(
+        authFactory->createCoordinateReferenceSystem("4979"), // WGS 84 3D
+        NN_NO_CHECK(dstCRS), ctxt);
+    ASSERT_GE(list.size(), 1U);
+    EXPECT_EQ(
+        list[0]->nameStr(),
+        "Inverse of CH1903+ to WGS 84 (1) + Offset on ellipsoidal height");
+    EXPECT_EQ(list[0]->exportToPROJString(PROJStringFormatter::create().get()),
+              "+proj=pipeline "
+              "+step +proj=axisswap +order=2,1 "
+              "+step +proj=unitconvert +xy_in=deg +z_in=m +xy_out=rad +z_out=m "
+              "+step +proj=cart +ellps=WGS84 "
+              "+step +proj=helmert +x=-674.374 +y=-15.056 +z=-405.346 "
+              "+step +inv +proj=cart +ellps=bessel "
+              "+step +proj=geogoffset +dlat=0 +dlon=0 +dh=10 "
+              "+step +proj=unitconvert +xy_in=rad +z_in=m +xy_out=deg +z_out=m "
+              "+step +proj=axisswap +order=2,1");
+}
+
+// ---------------------------------------------------------------------------
+
 TEST(operation, vertCRS_to_geogCRS_context) {
     auto authFactory =
         AuthorityFactory::create(DatabaseContext::create(), "EPSG");
