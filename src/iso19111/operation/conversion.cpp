@@ -4260,5 +4260,110 @@ ConversionNNPtr Conversion::identify() const {
 
 // ---------------------------------------------------------------------------
 
+/** \brief Instantiate a conversion with method Geographic 2D offsets
+ *
+ * This method is defined as [EPSG:9619]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9619)
+ * *
+ * @param properties See \ref general_properties of the conversion.
+ * At minimum the name should be defined.
+ * @param offsetLat Latitude offset to add.
+ * @param offsetLon Longitude offset to add.
+ * @return new conversion.
+ */
+ConversionNNPtr
+Conversion::createGeographic2DOffsets(const util::PropertyMap &properties,
+                                      const common::Angle &offsetLat,
+                                      const common::Angle &offsetLon) {
+    return create(
+        properties,
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_GEOGRAPHIC2D_OFFSETS),
+        VectorOfParameters{
+            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LATITUDE_OFFSET),
+            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET)},
+        VectorOfValues{offsetLat, offsetLon});
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion with method Geographic 3D offsets
+ *
+ * This method is defined as [EPSG:9660]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9660)
+ * *
+ * @param properties See \ref general_properties of the Conversion.
+ * At minimum the name should be defined.
+ * @param offsetLat Latitude offset to add.
+ * @param offsetLon Longitude offset to add.
+ * @param offsetHeight Height offset to add.
+ * @return new Conversion.
+ */
+ConversionNNPtr Conversion::createGeographic3DOffsets(
+    const util::PropertyMap &properties, const common::Angle &offsetLat,
+    const common::Angle &offsetLon, const common::Length &offsetHeight) {
+    return create(
+        properties,
+        createMethodMapNameEPSGCode(EPSG_CODE_METHOD_GEOGRAPHIC3D_OFFSETS),
+        VectorOfParameters{
+            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LATITUDE_OFFSET),
+            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET),
+            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_VERTICAL_OFFSET)},
+        VectorOfValues{offsetLat, offsetLon, offsetHeight});
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion with method Geographic 2D with
+ * height
+ * offsets
+ *
+ * This method is defined as [EPSG:9618]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9618)
+ * *
+ * @param properties See \ref general_properties of the Conversion.
+ * At minimum the name should be defined.
+ * @param offsetLat Latitude offset to add.
+ * @param offsetLon Longitude offset to add.
+ * @param offsetHeight Geoid undulation to add.
+ * @return new Conversion.
+ */
+ConversionNNPtr Conversion::createGeographic2DWithHeightOffsets(
+    const util::PropertyMap &properties, const common::Angle &offsetLat,
+    const common::Angle &offsetLon, const common::Length &offsetHeight) {
+    return create(
+        properties,
+        createMethodMapNameEPSGCode(
+            EPSG_CODE_METHOD_GEOGRAPHIC2D_WITH_HEIGHT_OFFSETS),
+        VectorOfParameters{
+            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LATITUDE_OFFSET),
+            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_LONGITUDE_OFFSET),
+            createOpParamNameEPSGCode(EPSG_CODE_PARAMETER_GEOID_UNDULATION)},
+        VectorOfValues{offsetLat, offsetLon, offsetHeight});
+}
+
+// ---------------------------------------------------------------------------
+
+/** \brief Instantiate a conversion with method Vertical Offset.
+ *
+ * This method is defined as [EPSG:9616]
+ * (https://www.epsg-registry.org/export.htm?gml=urn:ogc:def:method:EPSG::9616)
+ * *
+ * @param properties See \ref general_properties of the Conversion.
+ * At minimum the name should be defined.
+ * @param offsetHeight Geoid undulation to add.
+ * @return new Conversion.
+ */
+ConversionNNPtr
+Conversion::createVerticalOffset(const util::PropertyMap &properties,
+                                 const common::Length &offsetHeight) {
+    return create(properties,
+                  createMethodMapNameEPSGCode(EPSG_CODE_METHOD_VERTICAL_OFFSET),
+                  VectorOfParameters{createOpParamNameEPSGCode(
+                      EPSG_CODE_PARAMETER_VERTICAL_OFFSET)},
+                  VectorOfValues{offsetHeight});
+}
+
+// ---------------------------------------------------------------------------
+
 } // namespace operation
 NS_PROJ_END
