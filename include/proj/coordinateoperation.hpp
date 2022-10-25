@@ -1376,6 +1376,23 @@ class PROJ_GCC_DLL Conversion : public SingleOperation {
     PROJ_DLL static ConversionNNPtr
     createGeographicGeocentric(const util::PropertyMap &properties);
 
+    PROJ_DLL static ConversionNNPtr
+    createGeographic2DOffsets(const util::PropertyMap &properties,
+                              const common::Angle &offsetLat,
+                              const common::Angle &offsetLon);
+
+    PROJ_DLL static ConversionNNPtr createGeographic3DOffsets(
+        const util::PropertyMap &properties, const common::Angle &offsetLat,
+        const common::Angle &offsetLon, const common::Length &offsetHeight);
+
+    PROJ_DLL static ConversionNNPtr createGeographic2DWithHeightOffsets(
+        const util::PropertyMap &properties, const common::Angle &offsetLat,
+        const common::Angle &offsetLon, const common::Length &offsetHeight);
+
+    PROJ_DLL static ConversionNNPtr
+    createVerticalOffset(const util::PropertyMap &properties,
+                         const common::Length &offsetHeight);
+
     PROJ_DLL ConversionPtr convertToOtherMethod(int targetEPSGCode) const;
 
     PROJ_PRIVATE :
