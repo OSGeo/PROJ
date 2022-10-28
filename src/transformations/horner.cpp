@@ -515,18 +515,19 @@ static int parse_coefs (PJ *P, double *coefs, const char *param, int ncoefs) {
     char *buf, *init, *next = nullptr;
     int i;
 
-    buf = static_cast<char*>(calloc (strlen (param) + 2, sizeof(char)));
+    size_t buf_size = strlen (param) + 2;
+    buf = static_cast<char*>(calloc (buf_size, sizeof(char)));
     if (nullptr==buf) {
         proj_log_error (P, "No memory left");
         return 0;
     }
 
-    sprintf (buf, "t%s", param);
+    snprintf (buf, buf_size, "t%s", param);
     if (0==pj_param (P->ctx, P->params, buf).i) {
         free (buf);
         return 0;
     }
-    sprintf (buf, "s%s", param);
+    snprintf (buf, buf_size, "s%s", param);
     init = pj_param(P->ctx, P->params, buf).s;
     free (buf);
 

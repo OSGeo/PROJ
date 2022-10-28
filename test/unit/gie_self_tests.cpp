@@ -377,7 +377,7 @@ TEST(gie, info_functions) {
 
     if (info.version[0] != '\0') {
         char tmpstr[64];
-        sprintf(tmpstr, "%d.%d.%d", info.major, info.minor, info.patch);
+        snprintf(tmpstr, sizeof(tmpstr), "%d.%d.%d", info.major, info.minor, info.patch);
         ASSERT_EQ(std::string(info.version), std::string(tmpstr));
     }
     ASSERT_NE(std::string(info.release), "");

@@ -183,13 +183,14 @@ static void print(PJ_LOG_LEVEL log_level, const char *fmt, ...) {
 
     va_start( args, fmt );
 
-    msg_buf = (char *) malloc(100000);
+    const size_t msg_buf_size = 100000;
+    msg_buf = (char *) malloc(msg_buf_size);
     if( msg_buf == nullptr ) {
         va_end( args );
         return;
     }
 
-    vsprintf( msg_buf, fmt, args );
+    vsnprintf( msg_buf, msg_buf_size, fmt, args );
 
     logger((void *) fout, log_level, msg_buf);
 
