@@ -1375,6 +1375,9 @@ expect    failure errno invalid_op_illegal_arg_value
 operation +proj=eqdc   +R=1 +lat_1=1e-9
 expect    failure errno invalid_op_illegal_arg_value
 
+operation +proj=eqdc +lat_1=1 +ellps=GRS80 +b=.1
+expect    failure errno invalid_op_illegal_arg_value
+
 ===============================================================================
 # Euler
 # 	Conic, Sph
