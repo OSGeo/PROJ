@@ -149,7 +149,7 @@ Examples
 
       projsync --all
 
-2. Download resource files covering specified point and attributing to an agency
+2. Download resource files covering specified point and attributed to an agency
 
 .. code-block:: console
 
