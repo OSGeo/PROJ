@@ -119,8 +119,12 @@ PJ *PROJECTION(eqdc) {
         if (secant) { /* secant cone */
             sinphi = sin(Q->phi2);
             cosphi = cos(Q->phi2);
-            Q->n = (m1 - pj_msfn(sinphi, cosphi, P->es)) /
-                (pj_mlfn(Q->phi2, sinphi, cosphi, Q->en) - ml1);
+            const double ml2 = pj_mlfn(Q->phi2, sinphi, cosphi, Q->en);
+            if (ml1 == ml2) {
+                proj_log_error(P, _("Eccentricity too close to 1"));
+                return destructor(P, PROJ_ERR_INVALID_OP_ILLEGAL_ARG_VALUE);
+            }
+            Q->n = (m1 - pj_msfn(sinphi, cosphi, P->es)) / (ml2 - ml1);
             if (Q->n == 0) {
                 // Not quite, but es is very close to 1...
                 proj_log_error(P, _("Invalid value for eccentricity"));
