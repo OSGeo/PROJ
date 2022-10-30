@@ -19,14 +19,14 @@ RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && \
 ENV LANG en_GB.UTF-8
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y curl flex bison && \
-        curl -LOs https://doxygen.nl/files/doxygen-1.9.3.src.tar.gz && \
-        tar xvzf doxygen-1.9.3.src.tar.gz && \
-        rm -rf doxygen-1.9.3.src.tar.gz && \
-        cd doxygen-1.9.3 && \
+        curl -LOs https://doxygen.nl/files/doxygen-1.9.5.src.tar.gz && \
+        tar xvzf doxygen-1.9.5.src.tar.gz && \
+        rm -rf doxygen-1.9.5.src.tar.gz && \
+        cd doxygen-1.9.5 && \
         mkdir build && \
         cd build && \
         cmake .. -DCMAKE_INSTALL_PREFIX=/usr && \
         make -j$(nproc) && \
         make install && \
         cd ../.. && \
-        rm -rf doxygen-1.9.3
+        rm -rf doxygen-1.9.5
