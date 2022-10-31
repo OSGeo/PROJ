@@ -28,7 +28,6 @@
 #ifndef FROM_PROJ_CPP
 #define FROM_PROJ_CPP
 #endif
-#define LRU11_DO_NOT_DEFINE_OUT_OF_CLASS_METHODS
 
 #if defined(HAVE_LIBDL) && !defined(_GNU_SOURCE)
 // Required for dladdr() on Cygwin
@@ -71,9 +70,6 @@
 #endif
 
 //! @cond Doxygen_Suppress
-
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
 
 using namespace NS_PROJ::internal;
 

@@ -4,7 +4,6 @@
 
 #include "proj.h"
 
-#define PJ_UNITS__
 #include "proj_internal.h"
 
 /* Field 2 that contains the multiplier to convert named units to meters

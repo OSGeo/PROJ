@@ -82,8 +82,6 @@ struct pj_opaque {
 } // anonymous namespace
 PROJ_HEAD(s2, "S2") "\n\tMisc, Sph&Ell";
 
-#define EPS10 1.e-10
-
 /* The four areas on a cube face. AREA_0 is the area of definition,
  * the other three areas are counted counterclockwise. */
 namespace { // anonymous namespace
