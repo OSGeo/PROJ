@@ -154,7 +154,7 @@ class Measure : public util::BaseObject {
 
     //! @cond Doxygen_Suppress
     PROJ_DLL Measure(const Measure &other);
-    PROJ_DLL ~Measure();
+    PROJ_DLL ~Measure() override;
     //! @endcond
 
     PROJ_DLL const UnitOfMeasure &unit() PROJ_PURE_DECL;
