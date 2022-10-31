@@ -481,9 +481,6 @@ static int isea_snyder_forward(struct isea_geo * ll, struct isea_pt * out)
             PJ_TODEG(ll->lon), PJ_TODEG(ll->lat));
 
     exit(EXIT_FAILURE);
-
-    /* not reached */
-    return 0;       /* suppresses a warning */
 }
 
 #ifdef _MSC_VER
