@@ -109,9 +109,9 @@ PJ *PROJECTION(chamb) {
 
 
     for (i = 0; i < 3; ++i) { /* get control point locations */
-        (void)sprintf(line, "rlat_%d", i+1);
+        (void)snprintf(line, sizeof(line), "rlat_%d", i+1);
         Q->c[i].phi = pj_param(P->ctx, P->params, line).f;
-        (void)sprintf(line, "rlon_%d", i+1);
+        (void)snprintf(line, sizeof(line), "rlon_%d", i+1);
         Q->c[i].lam = pj_param(P->ctx, P->params, line).f;
         Q->c[i].lam = adjlon(Q->c[i].lam - P->lam0);
         Q->c[i].cosphi = cos(Q->c[i].phi);

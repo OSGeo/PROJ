@@ -2291,7 +2291,7 @@ void GeodeticCRS::addAngularUnitConvertAndAxisSwap(
     if (order[0] && order[1] && (order[0] != one || order[1] != two)) {
         formatter->addStep("axisswap");
         char orderStr[10];
-        sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
+        snprintf(orderStr, sizeof(orderStr), "%.2s,%.2s", order[0], order[1]);
         formatter->addParam("order", orderStr);
     }
 }
@@ -4607,7 +4607,7 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(
             if (order[0] && order[1]) {
                 formatter->addStep("axisswap");
                 char orderStr[10];
-                sprintf(orderStr, "%.2s,%.2s", order[0], order[1]);
+                snprintf(orderStr, sizeof(orderStr), "%.2s,%.2s", order[0], order[1]);
                 formatter->addParam("order", orderStr);
             }
         } else {

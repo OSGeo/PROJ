@@ -681,10 +681,11 @@ Returns 1 on success, 0 on failure
 
     /* Don't axisswap if data are already in "enu" order */
     if (p && (0!=strcmp ("enu", p->param))) {
-        char *def = static_cast<char*>(malloc (100+strlen(P->axis)));
+        size_t def_size = 100+strlen(P->axis);
+        char *def = static_cast<char*>(malloc (def_size));
         if (nullptr==def)
             return 0;
-        sprintf (def, "break_cs2cs_recursion     proj=axisswap  axis=%s", P->axis);
+        snprintf (def, def_size, "break_cs2cs_recursion     proj=axisswap  axis=%s", P->axis);
         Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
@@ -696,11 +697,12 @@ Returns 1 on success, 0 on failure
     p = pj_param_exists (P->params, "geoidgrids");
     if (!disable_grid_presence_check && p  &&  strlen (p->param) > strlen ("geoidgrids=")) {
         char *gridnames = p->param + strlen ("geoidgrids=");
-        char *def = static_cast<char*>(malloc (100+2*strlen(gridnames)));
+        size_t def_size = 100+2*strlen(gridnames);
+        char *def = static_cast<char*>(malloc (def_size));
         if (nullptr==def)
             return 0;
-        sprintf (def, "break_cs2cs_recursion     proj=vgridshift  grids=%s",
-                 pj_double_quote_string_param_if_needed(gridnames).c_str());
+        snprintf (def, def_size, "break_cs2cs_recursion     proj=vgridshift  grids=%s",
+                  pj_double_quote_string_param_if_needed(gridnames).c_str());
         Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
@@ -712,11 +714,12 @@ Returns 1 on success, 0 on failure
     p = pj_param_exists (P->params, "nadgrids");
     if (!disable_grid_presence_check && p  &&  strlen (p->param) > strlen ("nadgrids=")) {
         char *gridnames = p->param + strlen ("nadgrids=");
-        char *def = static_cast<char*>(malloc (100+2*strlen(gridnames)));
+        size_t def_size = 100+2*strlen(gridnames);
+        char *def = static_cast<char*>(malloc (def_size));
         if (nullptr==def)
             return 0;
-        sprintf (def, "break_cs2cs_recursion     proj=hgridshift  grids=%s",
-                 pj_double_quote_string_param_if_needed(gridnames).c_str());
+        snprintf (def, def_size, "break_cs2cs_recursion     proj=hgridshift  grids=%s",
+                  pj_double_quote_string_param_if_needed(gridnames).c_str());
         Q = pj_create_internal (P->ctx, def);
         free (def);
         if (nullptr==Q)
@@ -745,10 +748,11 @@ Returns 1 on success, 0 on failure
         if (n <= 8) /* 8==strlen ("towgs84=") */
             return 0;
 
-        def = static_cast<char*>(malloc (100+n));
+        size_t def_size = 100+n;
+        def = static_cast<char*>(malloc (def_size));
         if (nullptr==def)
             return 0;
-        sprintf (def, "break_cs2cs_recursion     proj=helmert exact %s convention=position_vector", s);
+        snprintf (def, def_size, "break_cs2cs_recursion     proj=helmert exact %s convention=position_vector", s);
         Q = pj_create_internal (P->ctx, def);
         free(def);
         if (nullptr==Q)
@@ -763,7 +767,7 @@ Returns 1 on success, 0 on failure
     /* geocentric/cartesian space or we need to do a Helmert transform.         */
     if (P->is_geocent || P->helmert || do_cart) {
         char def[150];
-        sprintf (def, "break_cs2cs_recursion     proj=cart   a=%40.20g  es=%40.20g", P->a_orig, P->es_orig);
+        snprintf (def, sizeof(def), "break_cs2cs_recursion     proj=cart   a=%40.20g  es=%40.20g", P->a_orig, P->es_orig);
         {
             /* In case the current locale does not use dot but comma as decimal */
             /* separator, replace it with dot, so that proj_atof() behaves */
@@ -781,7 +785,7 @@ Returns 1 on success, 0 on failure
         P->cart = skip_prep_fin (Q);
 
         if (!P->is_geocent) {
-            sprintf (def, "break_cs2cs_recursion     proj=cart  ellps=WGS84");
+            snprintf (def, sizeof(def), "break_cs2cs_recursion     proj=cart  ellps=WGS84");
             Q = pj_create_internal (P->ctx, def);
             if (nullptr==Q)
                 return 0;
@@ -2185,10 +2189,9 @@ PJ_INFO proj_info (void) {
     info.minor = PROJ_VERSION_MINOR;
     info.patch = PROJ_VERSION_PATCH;
 
-    /* This is a controlled environment, so no risk of sprintf buffer
-    overflow. A normal version string is xx.yy.zz which is 8 characters
+    /* A normal version string is xx.yy.zz which is 8 characters
     long and there is room for 64 bytes in the version string. */
-    sprintf (version, "%d.%d.%d", info.major, info.minor, info.patch);
+    snprintf (version, sizeof(version), "%d.%d.%d", info.major, info.minor, info.patch);
 
     info.version    = version;
     info.release    = pj_get_release ();

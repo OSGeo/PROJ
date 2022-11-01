@@ -33,9 +33,9 @@ set_rtodms(int fract, int con_w) {
 		RES60 = RES * 60.;
 		CONV = 180. * 3600. * RES / M_PI;
 		if (! con_w)
-			(void)sprintf(format,"%%dd%%d'%%.%df\"%%c", fract);
+			(void)snprintf(format,sizeof(format),"%%dd%%d'%%.%df\"%%c", fract);
 		else
-			(void)sprintf(format,"%%dd%%02d'%%0%d.%df\"%%c",
+			(void)snprintf(format,sizeof(format),"%%dd%%02d'%%0%d.%df\"%%c",
 				fract+2+(fract?1:0), fract);
 		dolong = con_w;
 	}

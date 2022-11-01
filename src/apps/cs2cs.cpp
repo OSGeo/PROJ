@@ -613,7 +613,7 @@ int main(int argc, char **argv) {
                 case 'd':
                     if (--argc <= 0)
                         goto noargument;
-                    sprintf(oform_buffer, "%%.%df", atoi(*++argv));
+                    snprintf(oform_buffer, sizeof(oform_buffer), "%%.%df", atoi(*++argv));
                     oform = oform_buffer;
                     break;
                 default:
