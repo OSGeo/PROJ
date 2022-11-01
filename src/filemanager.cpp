@@ -52,13 +52,12 @@
 
 #include "proj_config.h"
 
+#ifdef _WIN32
 #if defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)
 #define UWP 1
 #else
 #define UWP 0
 #endif
-
-#ifdef _WIN32
 #include <shlobj.h>
 #include <windows.h>
 #else
