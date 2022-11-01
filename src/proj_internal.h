@@ -40,7 +40,10 @@
 #  ifndef _CRT_NONSTDC_NO_DEPRECATE
 #    define _CRT_NONSTDC_NO_DEPRECATE
 #  endif
-/* enable predefined math constants M_* for MS Visual Studio workaround */
+#endif
+
+/* enable predefined math constants M_* for MS Visual Studio */
+#if defined(_MSC_VER) || defined(_WIN32)
 #  ifndef _USE_MATH_DEFINES
 #     define _USE_MATH_DEFINES
 #  endif

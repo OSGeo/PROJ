@@ -48,7 +48,13 @@
  ****************************************************************************/
 
 #define PJ_LIB__
-#define _USE_MATH_DEFINES  // needed for M_1_PI availability with MSVC
+
+/* enable predefined math constants M_* for MS Visual Studio */
+#if defined(_MSC_VER) || defined(_WIN32)
+#  ifndef _USE_MATH_DEFINES
+#     define _USE_MATH_DEFINES
+#  endif
+#endif
 
 #include <errno.h>
 #include <cmath>

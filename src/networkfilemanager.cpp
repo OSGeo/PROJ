@@ -30,7 +30,7 @@
 #endif
 #define LRU11_DO_NOT_DEFINE_OUT_OF_CLASS_METHODS
 
-#if !defined(_WIN32) && !defined(_GNU_SOURCE)
+#if !defined(_WIN32) && !defined(__APPLE__) && !defined(_GNU_SOURCE)
 // For usleep() on Cygwin
 #define _GNU_SOURCE
 #endif
