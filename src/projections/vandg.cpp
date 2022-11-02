@@ -1,3 +1,5 @@
+// Changes to handle +over are: Copyright 2011-2014 Morelli Informatik
+
 #define PJ_LIB__
 #include "proj.h"
 #include "proj_internal.h"
@@ -22,6 +24,9 @@ static PJ_XY vandg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         proj_errno_set(P, PROJ_ERR_COORD_TRANSFM_OUTSIDE_PROJECTION_DOMAIN);
         return xy;
     }
+    int sign = 1;
+    if( P->over && fabs(lp.lam) > M_PI )
+        sign = -1;
     if (p2 > 1.)
         p2 = 1.;
     if (fabs(lp.phi) <= TOL) {
@@ -32,7 +37,7 @@ static PJ_XY vandg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         xy.y = M_PI * tan(.5 * asin(p2));
         if (lp.phi < 0.) xy.y = -xy.y;
     } else {
-        al = .5 * fabs(M_PI / lp.lam - lp.lam / M_PI); // A from (29-3)
+        al = .5 * sign * fabs(M_PI / lp.lam - lp.lam / M_PI); // A from (29-3)
         al2 = al * al;                                 // A^2
         g = sqrt(1. - p2 * p2);                        // cos(theta)
         g = g / (p2 + g - 1.);                         // G from (29-4)
@@ -50,7 +55,7 @@ static PJ_XY vandg_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwar
         xy.x = g - p2;                                 // G - P^2
         g = p2 + al2;                                  // P^2 + A^2
         // (29-1)
-        xy.x = M_PI * (al * xy.x + sqrt(al2 * xy.x * xy.x - g * (g2 - p2))) / g;
+        xy.x = M_PI * fabs(al * xy.x + sqrt(al2 * xy.x * xy.x - g * (g2 - p2))) / g;
         if (lp.lam < 0.) xy.x = -xy.x;
         xy.y = fabs(xy.x / M_PI);
         // y from (29-2) has been expressed in terms of x here
@@ -102,6 +107,10 @@ static PJ_LP vandg_s_inverse (PJ_XY xy, PJ *P) {           /* Spheroidal, invers
     t = fabs(d);
     if ((t - TOL) <= 1.) {
         d = t > 1. ? (d > 0. ? 0. : M_PI) : acos(d); // 3*theta1 (29-17)
+        if( r > PISQ ) {
+            // This code path is triggered for coordinates generated in the forward path when |lon|>180deg and +over
+            d = M_TWOPI - d;
+        }
         // (29-18) but change pi/3 to 4*pi/3 to flip sign of cos
         lp.phi = M_PI * (m * cos(d * THIRD + PI4_3) - THIRD * c2);
         if (xy.y < 0.) lp.phi = -lp.phi;
