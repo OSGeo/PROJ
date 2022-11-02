@@ -26,11 +26,11 @@
  * DEALINGS IN THE SOFTWARE.
  ****************************************************************************/
 
-#if defined(_WIN32) && defined(MUTEX_pthread)
-#undef MUTEX_pthread
+#if defined(_WIN32) && defined(PROJ_HAS_PTHREADS)
+#undef PROJ_HAS_PTHREADS
 #endif
 
-#ifdef MUTEX_pthread
+#ifdef PROJ_HAS_PTHREADS
 
 #include <unistd.h>
 #include <sys/types.h>

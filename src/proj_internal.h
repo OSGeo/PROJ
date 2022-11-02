@@ -919,7 +919,6 @@ char *pj_strdup(const char *str);
 const char PROJ_DLL *pj_get_release(void);
 void pj_acquire_lock(void);
 void pj_release_lock(void);
-void pj_cleanup_lock(void);
 
 bool pj_log_active( PJ_CONTEXT *ctx, int level );
 void pj_log( PJ_CONTEXT * ctx, int level, const char *fmt, ... );

@@ -39,13 +39,13 @@
 
 #include <algorithm>
 #include <limits>
+#include <mutex>
 #include <string>
 
 #include "filemanager.hpp"
 #include "proj.h"
 #include "proj/internal/internal.hpp"
 #include "proj/internal/lru_cache.hpp"
-#include "proj/internal/mutex.hpp"
 #include "proj_internal.h"
 #include "sqlite3_utils.hpp"
 
@@ -142,7 +142,7 @@ class NetworkChunkCache {
     };
 
     lru11::Cache<
-        Key, std::shared_ptr<std::vector<unsigned char>>, NS_PROJ::mutex,
+        Key, std::shared_ptr<std::vector<unsigned char>>, std::mutex,
         std::unordered_map<
             Key,
             typename std::list<lru11::KeyValuePair<
@@ -166,7 +166,7 @@ class NetworkFilePropertiesCache {
     void clearMemoryCache();
 
   private:
-    lru11::Cache<std::string, FileProperties, NS_PROJ::mutex> cache_{};
+    lru11::Cache<std::string, FileProperties, std::mutex> cache_{};
 };
 
 // ---------------------------------------------------------------------------

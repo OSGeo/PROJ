@@ -42,7 +42,6 @@
 #include "proj/internal/internal.hpp"
 #include "proj/internal/io_internal.hpp"
 #include "proj/internal/lru_cache.hpp"
-#include "proj/internal/mutex.hpp"
 #include "proj/internal/tracing.hpp"
 
 #include "operation/coordinateoperation_internal.hpp"
@@ -60,6 +59,7 @@
 #include <locale>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <sstream> // std::ostringstream
 #include <stdexcept>
 #include <string>
@@ -78,8 +78,8 @@
 // parallel. This is slightly faster
 #define ENABLE_CUSTOM_LOCKLESS_VFS
 
-#if defined(_WIN32) && defined(MUTEX_pthread)
-#undef MUTEX_pthread
+#if defined(_WIN32) && defined(PROJ_HAS_PTHREADS)
+#undef PROJ_HAS_PTHREADS
 #endif
 
 /* SQLite3 might use seak()+read() or pread[64]() to read data */
@@ -87,7 +87,7 @@
 /* children of a parent process, while the former doesn't. */
 /* So we use pthread_atfork() to set a flag in forked children, to ask them */
 /* to close and reopen their database handle. */
-#if defined(MUTEX_pthread) && !defined(SQLITE_USE_PREAD)
+#if defined(PROJ_HAS_PTHREADS) && !defined(SQLITE_USE_PREAD)
 #include <pthread.h>
 #define REOPEN_SQLITE_DB_AFTER_FORK
 #endif
@@ -576,7 +576,7 @@ class SQLiteHandleCache {
     bool firstTime_ = true;
 #endif
 
-    NS_PROJ::mutex sMutex_{};
+    std::mutex sMutex_{};
 
     // Map dbname to SQLiteHandle
     lru11::Cache<std::string, std::shared_ptr<SQLiteHandle>> cache_{};
@@ -605,7 +605,7 @@ SQLiteHandleCache &SQLiteHandleCache::get() {
 // ---------------------------------------------------------------------------
 
 void SQLiteHandleCache::clear() {
-    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    std::lock_guard<std::mutex> lock(sMutex_);
     cache_.clear();
 }
 
@@ -613,7 +613,7 @@ void SQLiteHandleCache::clear() {
 
 std::shared_ptr<SQLiteHandle>
 SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
-    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    std::lock_guard<std::mutex> lock(sMutex_);
 
 #ifdef REOPEN_SQLITE_DB_AFTER_FORK
     if (firstTime_) {
@@ -636,7 +636,7 @@ SQLiteHandleCache::getHandle(const std::string &path, PJ_CONTEXT *ctx) {
 // ---------------------------------------------------------------------------
 
 void SQLiteHandleCache::invalidateHandles() {
-    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(sMutex_);
+    std::lock_guard<std::mutex> lock(sMutex_);
     const auto lambda =
         [](const lru11::KeyValuePair<std::string, std::shared_ptr<SQLiteHandle>>
                &kvp) { kvp.value->invalidate(); };
