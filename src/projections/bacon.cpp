@@ -1,6 +1,6 @@
 # define HLFPI2	2.46740110027233965467      /* (pi/2)^2 */
 # define EPS	1e-10
-#define PJ_LIB__
+#define PJ_LIB_
 #include <errno.h>
 #include <math.h>
 

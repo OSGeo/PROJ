@@ -52,7 +52,7 @@ operation:
 *
 ***********************************************************************/
 
-#define PJ_LIB__
+#define PJ_LIB_
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>

@@ -9,7 +9,7 @@
   Port to PROJ by Philippe Rivière, 21 September 2018
 */
 
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>

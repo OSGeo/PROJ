@@ -38,7 +38,7 @@
  * Port to PROJ.4 by Micah Cochran, 26 March 2016
  */
 
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <math.h>
 

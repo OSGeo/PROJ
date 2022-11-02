@@ -12,7 +12,7 @@ where they meet the horizontal pole line. This improvement is by intention
 and designed in collaboration with Tom Patterson.
 Port to PROJ.4 by Bernhard Jenny, 6 June 2011
 */
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <math.h>
 

@@ -11,7 +11,7 @@ DOI: 10.1080/13658816.2018.1504949
 Port to PROJ by Juernjakob Dugge, 16 August 2018
 Added ellipsoidal equations by Bojan Savric, 22 August 2018
 */
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>
