@@ -732,7 +732,7 @@ struct pj_ctx{
 };
 
 /* Generate pj_list external or make list from include file */
-#ifndef PJ_DATUMS__
+#ifndef PJ_DATUMS_
 C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[];
 #endif
 
