@@ -8,19 +8,9 @@ message(STATUS "Configuring proj library:")
 option(BUILD_SHARED_LIBS
   "Build PROJ library shared." ON)
 
-option(USE_THREAD "Build libproj with thread/mutex support " ON)
-if(NOT USE_THREAD)
-  add_definitions(-DMUTEX_stub)
-endif()
 find_package(Threads QUIET)
-if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_WIN32_THREADS_INIT)
-  add_definitions(-DMUTEX_win32)
-elseif(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
-  add_definitions(-DMUTEX_pthread)
-elseif(USE_THREAD AND NOT Threads_FOUND)
-  message(FATAL_ERROR
-    "No thread library found and thread/mutex support is "
-    "required by USE_THREAD option")
+if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+  add_definitions(-DPROJ_HAS_PTHREADS)
 endif()
 
 option(ENABLE_IPO
@@ -442,7 +432,7 @@ if(UNIX)
     target_link_libraries(proj PRIVATE -ldl)
   endif()
 endif()
-if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+if(Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
   target_link_libraries(proj PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endif()
 

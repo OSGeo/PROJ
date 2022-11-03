@@ -1,17 +1,17 @@
 #define PJ_LIB__
 
 #include <errno.h>
+#include <mutex>
 #include <stddef.h>
 #include <string.h>
 #include <time.h>
 
 #include "proj_internal.h"
-#include "proj/internal/mutex.hpp"
 #include "grids.hpp"
 
 PROJ_HEAD(vgridshift, "Vertical grid shift");
 
-static NS_PROJ::mutex gMutex{};
+static std::mutex gMutex{};
 static std::set<std::string> gKnownGrids{};
 
 using namespace NS_PROJ;
@@ -234,6 +234,6 @@ PJ *TRANSFORMATION(vgridshift,0) {
 }
 
 void pj_clear_vgridshift_knowngrids_cache() {
-    NS_PROJ::lock_guard<NS_PROJ::mutex> lock(gMutex);
+    std::lock_guard<std::mutex> lock(gMutex);
     gKnownGrids.clear();
 }

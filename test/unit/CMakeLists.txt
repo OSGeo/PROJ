@@ -208,8 +208,8 @@ add_test(NAME test_misc COMMAND test_misc)
 set_property(TEST test_misc
   PROPERTY ENVIRONMENT ${PROJ_TEST_ENVIRONMENT})
 
-if (USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
-add_definitions(-DMUTEX_pthread)
+if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+add_definitions(-DPROJ_HAS_PTHREADS)
 add_executable(test_fork
   test_fork.c)
 target_link_libraries(test_fork
