@@ -71,10 +71,6 @@
 #define COMPILER_WARNS_ABOUT_ABSTRACT_VBASE_INIT
 #endif
 
-#if !(defined(__clang__) && __clang_major__ < 5) && !defined(__INTEL_COMPILER)
-#define SUPPORT_DELETED_FUNCTION
-#endif
-
 NS_PROJ_START
 
 namespace operation {
@@ -151,9 +147,7 @@ PROJ_FOR_TEST std::vector<std::string> split(const std::string &osStr,
 
 bool ci_equal(const char *a, const char *b) noexcept;
 
-#ifdef SUPPORT_DELETED_FUNCTION
 bool ci_equal(const char *a, const std::string &b) = delete;
-#endif
 
 PROJ_FOR_TEST bool ci_equal(const std::string &a, const char *b) noexcept;
 
@@ -169,18 +163,13 @@ PROJ_FOR_TEST std::string toString(double val, int precision = 15);
 PROJ_FOR_TEST double
 c_locale_stod(const std::string &s); // throw(std::invalid_argument)
 
-#ifdef SUPPORT_DELETED_FUNCTION
 std::string concat(const std::string &, const std::string &) = delete;
 std::string concat(const char *, const char *) = delete;
-#endif
 std::string concat(const char *a, const std::string &b);
-#ifdef SUPPORT_DELETED_FUNCTION
 std::string concat(const std::string &, const char *) = delete;
 std::string concat(const char *, const char *, const char *) = delete;
 std::string concat(const char *, const char *, const std::string &) = delete;
-#endif
 std::string concat(const char *a, const std::string &b, const char *c);
-#ifdef SUPPORT_DELETED_FUNCTION
 std::string concat(const char *, const std::string &,
                    const std::string &) = delete;
 std::string concat(const std::string &, const char *, const char *) = delete;
@@ -190,8 +179,6 @@ std::string concat(const std::string &, const std::string &,
                    const char *) = delete;
 std::string concat(const std::string &, const std::string &,
                    const std::string &) = delete;
-#endif
-
 } // namespace internal
 
 NS_PROJ_END
