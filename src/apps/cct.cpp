@@ -422,7 +422,9 @@ int main(int argc, char **argv) {
     while (opt_input_loop (o, optargs_file_format_text)) {
         int err;
         char *bufptr = fgets (buf, BUFFER_SIZE - 1, o->input);
-        opt_eof_handler (o);
+        if (opt_eof (o)) {
+            continue;
+        }
         if (nullptr==bufptr) {
             print (PJ_LOG_ERROR, "Read error in record %d", (int) o->record_index);
             continue;
