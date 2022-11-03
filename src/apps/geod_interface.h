@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-#ifndef _IN_GEOD_SET
+#ifndef GEOD_IN_GEOD_SET
 #  define GEOD_EXTERN extern
 #else
 #  define GEOD_EXTERN

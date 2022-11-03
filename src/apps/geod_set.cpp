@@ -1,4 +1,4 @@
-#define _IN_GEOD_SET
+#define GEOD_IN_GEOD_SET
 
 #include <math.h>
 #include <stdlib.h>

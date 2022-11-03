@@ -28,7 +28,7 @@
  *****************************************************************************/
 
 /* very loosely based upon DMA code by Bradford W. Drew */
-#define PJ_LIB__
+#define PJ_LIB_
 #include "proj_internal.h"
 
 PROJ_HEAD(lonlat, "Lat/long (Geodetic)")  "\n\t";

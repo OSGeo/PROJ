@@ -25,7 +25,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <math.h>
 

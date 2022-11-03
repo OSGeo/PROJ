@@ -94,7 +94,7 @@ Thomas Knudsen, thokn@sdfe.dk, 2016-05-20
 *
 ********************************************************************************/
 
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <math.h>
 #include <stddef.h>

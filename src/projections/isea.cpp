@@ -12,7 +12,7 @@
 
 #include <limits>
 
-#define PJ_LIB__
+#define PJ_LIB_
 #include "proj.h"
 #include "proj_internal.h"
 #include <math.h>

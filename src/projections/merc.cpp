@@ -1,4 +1,4 @@
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <float.h>
 #include <math.h>

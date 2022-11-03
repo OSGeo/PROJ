@@ -5,7 +5,7 @@ developed by Bojan Savric and Bernhard Jenny, College of Earth, Ocean,
 and Atmospheric Sciences, Oregon State University.
 Port to PROJ.4 by Bojan Savric, 4 April 2016
 */
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <math.h>
 

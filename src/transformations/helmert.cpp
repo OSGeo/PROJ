@@ -47,7 +47,7 @@ Last update: 2018-10-26
 *
 ***********************************************************************/
 
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>

@@ -38,7 +38,7 @@
  * three areas of a cube face are handled by rotation of AREA_0.
  */
 
-#define PJ_LIB__
+#define PJ_LIB_
 
 #include <errno.h>
 #include <math.h>
