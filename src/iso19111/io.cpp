@@ -2883,7 +2883,7 @@ WKTParser::Private::buildCS(const WKTNodeNNPtr &node, /* maybe null */
         axisList.emplace_back(
             buildAxis(parentNode->GP()->lookForChild(WKTConstants::AXIS, i),
                       unit, unitType, isGeocentric, i + 1));
-    };
+    }
 
     const PropertyMap &csMap = emptyPropertyMap;
     if (ci_equal(csType, "ellipsoidal")) {

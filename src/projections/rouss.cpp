@@ -68,7 +68,7 @@ static PJ_XY rouss_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forwar
 static PJ_LP rouss_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse */
     PJ_LP lp = {0.0,0.0};
     struct pj_opaque *Q = static_cast<struct pj_opaque*>(P->opaque);
-    double s, al, x = xy.x / P->k0, y = xy.y / P->k0, x2, y2;;
+    double s, al, x = xy.x / P->k0, y = xy.y / P->k0, x2, y2;
 
     x2 = x * x;
     y2 = y * y;

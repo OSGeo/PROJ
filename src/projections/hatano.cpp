@@ -29,7 +29,7 @@ static PJ_XY hatano_s_forward (PJ_LP lp, PJ *P) {           /* Spheroidal, forwa
 
     const double c = sin(lp.phi) * (lp.phi < 0. ? CSz : CN);
     for (i = NITER; i; --i) {
-        const double th1 = (lp.phi + sin(lp.phi) - c) / (1. + cos(lp.phi));;
+        const double th1 = (lp.phi + sin(lp.phi) - c) / (1. + cos(lp.phi));
         lp.phi -= th1;
         if (fabs(th1) < EPS) break;
     }
