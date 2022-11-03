@@ -359,7 +359,7 @@ WKTFormatter::WKTFormatter(Convention convention)
     switch (convention) {
     case Convention::WKT2_2019:
         d->params_.use2019Keywords_ = true;
-        PROJ_FALLTHROUGH
+        PROJ_FALLTHROUGH;
     case Convention::WKT2:
         d->params_.version_ = WKTFormatter::Version::WKT2;
         d->params_.outputAxisOrder_ = true;
@@ -367,7 +367,7 @@ WKTFormatter::WKTFormatter(Convention convention)
 
     case Convention::WKT2_2019_SIMPLIFIED:
         d->params_.use2019Keywords_ = true;
-        PROJ_FALLTHROUGH
+        PROJ_FALLTHROUGH;
     case Convention::WKT2_SIMPLIFIED:
         d->params_.version_ = WKTFormatter::Version::WKT2;
         d->params_.idOnTopLevelOnly_ = true;

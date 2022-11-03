@@ -136,8 +136,8 @@ static void fwd_finalize (PJ *P, PJ_COORD& coo) {
     case PJ_IO_UNITS_CLASSIC:
         coo.xy.x *= P->a;
         coo.xy.y *= P->a;
+        PROJ_FALLTHROUGH;
 
-    /* Falls through */ /* (<-- GCC warning silencer) */
     /* to continue processing in common with PJ_IO_UNITS_PROJECTED */
     case PJ_IO_UNITS_PROJECTED:
         coo.xyz.x = P->fr_meter  * (coo.xyz.x + P->x0);

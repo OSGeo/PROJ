@@ -49,6 +49,22 @@
 #  endif
 #endif
 
+// Use "PROJ_FALLTHROUGH;" to annotate deliberate fall-through in switches,
+// use it analogously to "break;".  The trailing semi-colon is required.
+#if !defined(PROJ_FALLTHROUGH) && defined(__has_cpp_attribute)
+#if __cplusplus >= 201703L && __has_cpp_attribute(fallthrough)
+#define PROJ_FALLTHROUGH [[fallthrough]]
+#elif __cplusplus >= 201103L && __has_cpp_attribute(gnu::fallthrough)
+#define PROJ_FALLTHROUGH [[gnu::fallthrough]]
+#elif __cplusplus >= 201103L && __has_cpp_attribute(clang::fallthrough)
+#define PROJ_FALLTHROUGH [[clang::fallthrough]]
+#endif
+#endif
+
+#ifndef PROJ_FALLTHROUGH
+#define PROJ_FALLTHROUGH ((void)0)
+#endif
+
 /* standard inclusions */
 #include <limits.h>
 #include <math.h>
