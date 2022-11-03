@@ -1,10 +1,7 @@
 /* Projection System: default list of projections
-** Use local definition of PJ_LIST_H for subset.
 */
 
 #include "proj.h"
-
-#define USE_PJ_LIST_H 1
 #include "proj_internal.h"
 
 

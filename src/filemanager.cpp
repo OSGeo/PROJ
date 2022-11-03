@@ -28,7 +28,6 @@
 #ifndef FROM_PROJ_CPP
 #define FROM_PROJ_CPP
 #endif
-#define LRU11_DO_NOT_DEFINE_OUT_OF_CLASS_METHODS
 
 #if defined(HAVE_LIBDL) && !defined(_GNU_SOURCE)
 // Required for dladdr() on Cygwin
@@ -53,13 +52,12 @@
 
 #include "proj_config.h"
 
+#ifdef _WIN32
 #if defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)
 #define UWP 1
 #else
 #define UWP 0
 #endif
-
-#ifdef _WIN32
 #include <shlobj.h>
 #include <windows.h>
 #else
@@ -71,9 +69,6 @@
 #endif
 
 //! @cond Doxygen_Suppress
-
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
 
 using namespace NS_PROJ::internal;
 

@@ -30,7 +30,7 @@
 #endif
 #define LRU11_DO_NOT_DEFINE_OUT_OF_CLASS_METHODS
 
-#if !defined(_WIN32) && !defined(_GNU_SOURCE)
+#if !defined(_WIN32) && !defined(__APPLE__) && !defined(_GNU_SOURCE)
 // For usleep() on Cygwin
 #define _GNU_SOURCE
 #endif
@@ -2374,7 +2374,7 @@ int proj_download_file(PJ_CONTEXT *ctx, const char *url_or_filename,
     const int nPID = getpid();
 #endif
     char szUniqueSuffix[128];
-    snprintf(szUniqueSuffix, sizeof(szUniqueSuffix), "%d_%p", nPID, &url);
+    snprintf(szUniqueSuffix, sizeof(szUniqueSuffix), "%d_%p", nPID, static_cast<const void*>(&url));
     const auto localFilenameTmp(localFilename + szUniqueSuffix);
     auto f = NS_PROJ::FileManager::open(ctx, localFilenameTmp.c_str(),
                                         NS_PROJ::FileAccess::CREATE);

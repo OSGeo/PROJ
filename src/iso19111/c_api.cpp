@@ -289,7 +289,7 @@ PJ_OBJ_LIST::~PJ_OBJ_LIST() = default;
  * @param ctx Ignored
  * @param autoclose Ignored
  * @since 6.2
- * @deprecated Since 8.1
+ * deprecated Since 8.1
  */
 void proj_context_set_autoclose_database(PJ_CONTEXT *ctx, int autoclose) {
     (void)ctx;

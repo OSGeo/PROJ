@@ -67,7 +67,7 @@ class PROJ_GCC_DLL Citation : public util::BaseObject {
     //! @cond Doxygen_Suppress
     PROJ_DLL Citation();
     PROJ_DLL Citation(const Citation &other);
-    PROJ_DLL ~Citation();
+    PROJ_DLL ~Citation() override;
     //! @endcond
 
     PROJ_DLL const util::optional<std::string> &title() PROJ_PURE_DECL;

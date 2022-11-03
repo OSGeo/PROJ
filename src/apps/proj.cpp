@@ -20,7 +20,6 @@
 #endif
 
 #define MAX_LINE 1000
-#define MAX_PARGS 100
 #define PJ_INVERSE(P) (P->inv ? 1 : 0)
 
 static PJ *Proj;
