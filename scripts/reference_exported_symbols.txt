@@ -1052,6 +1052,7 @@ proj_prime_meridian_get_parameters
 proj_query_geodetic_crs_from_datum
 proj_roundtrip
 proj_rtodms
+proj_rtodms2
 proj_string_destroy
 proj_string_list_destroy
 proj_suggests_code_for
@@ -1066,5 +1067,5 @@ proj_unit_list_destroy
 proj_uom_get_info_from_database
 proj_xy_dist
 proj_xyz_dist
-rtodms(char*, double, int, int)
+rtodms(char*, unsigned long, double, int, int)
 set_rtodms(int, int)

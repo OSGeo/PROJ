@@ -638,7 +638,14 @@ double proj_dmstor(const char *is, char **rs) {
 }
 
 char*  proj_rtodms(char *s, double r, int pos, int neg) {
-    return rtodms(s, r, pos, neg);
+    // 40 is the size used for the buffer in proj.cpp
+    size_t arbitrary_size = 40;
+    return rtodms(s, arbitrary_size, r, pos, neg);
+}
+
+char * proj_rtodms2(char *s, size_t sizeof_s, double r, int pos, int neg)
+{
+    return rtodms(s, sizeof_s, r, pos, neg);
 }
 
 /*************************************************************************************/

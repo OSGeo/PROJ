@@ -41,7 +41,7 @@ set_rtodms(int fract, int con_w) {
 	}
 }
 	char *
-rtodms(char *s, double r, int pos, int neg) {
+rtodms(char *s, size_t sizeof_s, double r, int pos, int neg) {
 	int deg, min, sign;
 	char *ss = s;
 	double sec;
@@ -60,13 +60,13 @@ rtodms(char *s, double r, int pos, int neg) {
 	deg = (int)r;
 
 	if (dolong)
-		(void)sprintf(ss,format,deg,min,sec,sign);
+		(void)snprintf(ss,sizeof_s,format,deg,min,sec,sign);
 	else if (sec != 0.0) {
 		char *p, *q;
 		/* double prime + pos/neg suffix (if included) + NUL */
 		size_t suffix_len = sign ? 3 : 2;
 
-		(void)sprintf(ss,format,deg,min,sec,sign);
+		(void)snprintf(ss,sizeof_s,format,deg,min,sec,sign);
                 /* Replace potential decimal comma by decimal point for non C locale */
                 for( p = ss; *p != '\0'; ++p ) {
                     if( *p == ',' ) {
@@ -80,8 +80,8 @@ rtodms(char *s, double r, int pos, int neg) {
 		if (++q != p)
 			(void)memmove(p, q, suffix_len);
 	} else if (min)
-		(void)sprintf(ss,"%dd%d'%c",deg,min,sign);
+		(void)snprintf(ss,sizeof_s,"%dd%d'%c",deg,min,sign);
 	else
-		(void)sprintf(ss,"%dd%c",deg, sign);
+		(void)snprintf(ss,sizeof_s,"%dd%c",deg, sign);
 	return s;
 }
