@@ -48,7 +48,8 @@ static PJ_LP wink2_s_inverse(PJ_XY xy, PJ *P)
     lpInit.phi = xy.y;
     lpInit.lam = xy.x;
 
-    return pj_generic_inverse_2d(xy, P, lpInit);
+    constexpr double deltaXYTolerance = 1e-10;
+    return pj_generic_inverse_2d(xy, P, lpInit, deltaXYTolerance);
 }
 
 
