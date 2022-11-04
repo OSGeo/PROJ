@@ -828,8 +828,8 @@ Various
 
     Convert radians to string representation of degrees, minutes and seconds.
 
-    Note: starting with PROJ 9.2, this function is deprecated by
-    :cpp:func:`proj_rtodms2`
+    .. deprecated:: 9.2
+       Use :cpp:func:`proj_rtodms2` instead.
 
     :param s: Buffer that holds the output string
     :type s: `char *`
