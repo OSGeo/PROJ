@@ -43,7 +43,7 @@ static PJ_XY cass_e_forward (PJ_LP lp, PJ *P) {          /* Ellipsoidal, forward
     const double A2 = A * A;
 
     xy.x = nu * A * (1. - A2 * T *
-        (C1 - (8. - T + 8. * C) * A2 * C2));
+        (C1 + (8. - T + 8. * C) * A2 * C2));
     xy.y = M - Q->m0 + nu * tanphi * A2 *
         (.5 + (5. - T + 6. * C) * A2 * C3);
     if( Q->hyperbolic )
