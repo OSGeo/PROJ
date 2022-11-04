@@ -82,13 +82,13 @@ static PJ_LP cass_e_inverse (PJ_XY xy, PJ *P) {          /* Ellipsoidal, inverse
     lp.lam = D * (1. + T1 * D2 *
         (-C4 + (1. + 3. * T1) * D2 * C5)) / cos (phi1);
 
-    if( Q->hyperbolic )
-    {
-        // EPSG guidance note 7-2 suggests a custom approximation for the
-        // 'Vanua Levu 1915 / Vanua Levu Grid' case, but better use the
-        // generic inversion method
-        lp = pj_generic_inverse_2d(xy, P, lp);
-    }
+    // EPSG guidance note 7-2 suggests a custom approximation for the
+    // 'Vanua Levu 1915 / Vanua Levu Grid' case, but better use the
+    // generic inversion method
+    // Actually use it in the non-hyperbolic case. It enables to make the
+    // 5108.gie roundtripping tests to success, with at most 2 iterations.
+    constexpr double deltaXYTolerance = 1e-12;
+    lp = pj_generic_inverse_2d(xy, P, lp, deltaXYTolerance);
 
     return lp;
 }
