@@ -35,7 +35,7 @@ Required
 --------------------------------------------------------------------------------
 
 For the Oblique Cylindrical Equal Area projection a pole of rotation is needed.
-The pole can be defined in two ways: By a point and azimuth or by providing to
+The pole can be defined in two ways: By a point and azimuth or by providing two
 points that make up the pole.
 
 Point & azimuth
