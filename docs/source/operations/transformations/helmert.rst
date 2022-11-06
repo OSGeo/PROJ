@@ -215,7 +215,7 @@ Superscripts of vectors denote the reference frame the coordinates in the vector
 
 The simplest version of the Helmert transform is the 2D case. In the 2-dimensional
 case only the horizontal coordinates are changed. The coordinates can be
-translated, rotated and scale. Translation is controlled with the `x` and `y`
+translated, rotated and scaled. Translation is controlled with the `x` and `y`
 parameters. The rotation is determined by `theta` and the scale is controlled with
 the `s` parameters.
 
