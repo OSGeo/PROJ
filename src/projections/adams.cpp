@@ -296,7 +296,9 @@ static PJ_LP adams_inverse(PJ_XY xy, PJ *P)
     lp.lam = fabs(lp.phi) >= M_HALFPI ? 0 :
         std::max(std::min(xy.x / 2.62205760 / cos(lp.phi), 1.0), -1.0) * M_PI;
 
-    return pj_generic_inverse_2d(xy, P, lp);
+
+    constexpr double deltaXYTolerance = 1e-10;
+    return pj_generic_inverse_2d(xy, P, lp, deltaXYTolerance);
 }
 
 static PJ_LP peirce_q_square_inverse(PJ_XY xy, PJ *P)
@@ -339,7 +341,9 @@ static PJ_LP peirce_q_square_inverse(PJ_XY xy, PJ *P)
     }
     else /* if( xy.x <= 0 && xy.y <= 0 ) */
         lp.lam = -M_PI / 2;
-    return pj_generic_inverse_2d(xy, P, lp);
+
+    constexpr double deltaXYTolerance = 1e-10;
+    return pj_generic_inverse_2d(xy, P, lp, deltaXYTolerance);
 }
 
 static PJ_LP peirce_q_diamond_inverse(PJ_XY xy, PJ *P)
@@ -382,7 +386,8 @@ static PJ_LP peirce_q_diamond_inverse(PJ_XY xy, PJ *P)
         lp.phi = -M_PI / 4;
     }
 
-    return pj_generic_inverse_2d(xy, P, lp);
+    constexpr double deltaXYTolerance = 1e-10;
+    return pj_generic_inverse_2d(xy, P, lp, deltaXYTolerance);
 }
 
 static PJ *setup(PJ *P, projection_type mode) {

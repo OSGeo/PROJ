@@ -41,7 +41,7 @@
  *
  * Starts with initial guess provided by user in lpInitial
  */
-PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial) {
+PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial, double deltaXYTolerance) {
     PJ_LP lp = lpInitial;
     double deriv_lam_X = 0;
     double deriv_lam_Y = 0;
@@ -51,7 +51,7 @@ PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial) {
         PJ_XY xyApprox = P->fwd(lp, P);
         const double deltaX = xyApprox.x - xy.x;
         const double deltaY = xyApprox.y - xy.y;
-        if (fabs(deltaX) < 1e-10 && fabs(deltaY) < 1e-10) {
+        if (fabs(deltaX) < deltaXYTolerance && fabs(deltaY) < deltaXYTolerance) {
             return lp;
         }
 

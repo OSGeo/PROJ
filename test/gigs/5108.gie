@@ -4,18 +4,19 @@ Test 5108, Cassini-Soldner, v2-0_2011-06-28.
 
 --------------------------------------------------------------------------------
 
+<gie-strict>
+
+use_proj4_init_rules true
+
 # GDM2000
-<4742> +proj=longlat +ellps=GRS80  <>
+# <4742> +proj=longlat +ellps=GRS80  <>
 
 # GDM2000 / Johor Grid
-<3377> +proj=cass +lat_0=2.121679744444445 +lon_0=103.4279362361111 +x_0=-14810.562 +y_0=8758.32 +ellps=GRS80 +units=m  <>
-
-
-<gie>
+# <3377> +proj=cass +lat_0=2.121679744444445 +lon_0=103.4279362361111 +x_0=-14810.562 +y_0=8758.32 +ellps=GRS80 +units=m  <>
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4742 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4742 +inv \
            +step +init=epsg:3377
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -87,8 +88,8 @@ accept    104 5
 expect    48630.563 327067.097
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:3377 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:3377 +inv \
            +step +init=epsg:4742
 --------------------------------------------------------------------------------
 tolerance  0.05 m
@@ -160,8 +161,8 @@ accept    48630.563 327067.097
 expect    104 5
 
 --------------------------------------------------------------------------------
-operation  +proj=pipeline
-           +step +init=epsg:4742 +inv
+operation  +proj=pipeline \
+           +step +init=epsg:4742 +inv \
            +step +init=epsg:3377
 --------------------------------------------------------------------------------
 tolerance  0.006 m
@@ -232,4 +233,4 @@ tolerance  0.006 m
 accept    104 5
 roundtrip 1000
 
-</gie>
+</gie-strict>
