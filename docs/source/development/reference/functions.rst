@@ -828,8 +828,30 @@ Various
 
     Convert radians to string representation of degrees, minutes and seconds.
 
+    .. deprecated:: 9.2
+       Use :cpp:func:`proj_rtodms2` instead.
+
     :param s: Buffer that holds the output string
     :type s: `char *`
+    :param r: Value to convert to dms-representation
+    :type r: `double`
+    :param pos: Character denoting positive direction, typically `'N'` or `'E'`.
+    :type pos: `int`
+    :param neg: Character denoting negative direction, typically `'S'` or `'W'`.
+    :type neg: `int`
+    :returns: `char*` Pointer to output buffer (same as :c:data:`s`)
+
+
+.. c:function:: char *proj_rtodms2(char *s, size_t sizeof_s, double r, int pos, int neg)
+
+    .. versionadded:: 9.2.0
+
+    Convert radians to string representation of degrees, minutes and seconds.
+
+    :param s: Buffer that holds the output string
+    :type s: `char *`
+    :param sizeof_s: Size of s buffer
+    :type sizeof_s: `size_t`
     :param r: Value to convert to dms-representation
     :type r: `double`
     :param pos: Character denoting positive direction, typically `'N'` or `'E'`.

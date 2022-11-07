@@ -440,12 +440,12 @@ TEST(gie, info_functions) {
     ASSERT_EQ(std::string(init_info.name), "epsg");
 
     /* test proj_rtodms() and proj_dmstor() */
-    ASSERT_EQ(std::string("180dN"), proj_rtodms(buf, M_PI, 'N', 'S'));
+    ASSERT_EQ(std::string("180dN"), proj_rtodms2(buf, sizeof(buf), M_PI, 'N', 'S'));
 
     ASSERT_EQ(proj_dmstor(&buf[0], NULL), M_PI);
 
     ASSERT_EQ(std::string("114d35'29.612\"S"),
-              proj_rtodms(buf, -2.0, 'N', 'S'));
+              proj_rtodms2(buf, sizeof(buf), -2.0, 'N', 'S'));
 
     /* we can't expect perfect numerical accuracy so testing with a tolerance */
     ASSERT_NEAR(-2.0, proj_dmstor(&buf[0], NULL), 1e-7);

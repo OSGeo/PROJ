@@ -199,22 +199,22 @@ static void process(FILE *fid)
 
             if (destIsLatLong) {
                 if (reverseout) {
-                    fputs(rtodms(pline, data.v, 'E', 'W'), stdout);
+                    fputs(rtodms(pline, sizeof(pline), data.v, 'E', 'W'), stdout);
                     putchar('\t');
-                    fputs(rtodms(pline, data.u, 'N', 'S'), stdout);
+                    fputs(rtodms(pline, sizeof(pline), data.u, 'N', 'S'), stdout);
                 } else {
-                    fputs(rtodms(pline, data.u, 'N', 'S'), stdout);
+                    fputs(rtodms(pline, sizeof(pline), data.u, 'N', 'S'), stdout);
                     putchar('\t');
-                    fputs(rtodms(pline, data.v, 'E', 'W'), stdout);
+                    fputs(rtodms(pline, sizeof(pline), data.v, 'E', 'W'), stdout);
                 }
             } else if (reverseout) {
-                fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
+                fputs(rtodms(pline, sizeof(pline), data.v, 'N', 'S'), stdout);
                 putchar('\t');
-                fputs(rtodms(pline, data.u, 'E', 'W'), stdout);
+                fputs(rtodms(pline, sizeof(pline), data.u, 'E', 'W'), stdout);
             } else {
-                fputs(rtodms(pline, data.u, 'E', 'W'), stdout);
+                fputs(rtodms(pline, sizeof(pline), data.u, 'E', 'W'), stdout);
                 putchar('\t');
-                fputs(rtodms(pline, data.v, 'N', 'S'), stdout);
+                fputs(rtodms(pline, sizeof(pline), data.v, 'N', 'S'), stdout);
             }
 
         } else { /* x-y or decimal degree ascii output */
