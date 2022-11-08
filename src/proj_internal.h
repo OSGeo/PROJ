@@ -872,7 +872,7 @@ void pj_clear_vgridshift_knowngrids_cache();
 
 void pj_clear_sqlite_cache();
 
-PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial);
+PJ_LP pj_generic_inverse_2d(PJ_XY xy, PJ *P, PJ_LP lpInitial, double deltaXYTolerance);
 
 
 
