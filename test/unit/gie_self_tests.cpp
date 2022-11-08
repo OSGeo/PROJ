@@ -360,7 +360,7 @@ TEST(gie, info_functions) {
     const PJ_ELLPS *ellps_list;
     const PJ_PRIME_MERIDIANS *pm_list;
 
-    char buf[40];
+    std::vector<char> buf(40);
     PJ *P;
     char arg[50] = {"+proj=utm; +zone=32; +ellps=GRS80"};
     PJ_COORD a;
@@ -377,7 +377,8 @@ TEST(gie, info_functions) {
 
     if (info.version[0] != '\0') {
         char tmpstr[64];
-        snprintf(tmpstr, sizeof(tmpstr), "%d.%d.%d", info.major, info.minor, info.patch);
+        snprintf(tmpstr, sizeof(tmpstr), "%d.%d.%d", info.major, info.minor,
+                 info.patch);
         ASSERT_EQ(std::string(info.version), std::string(tmpstr));
     }
     ASSERT_NE(std::string(info.release), "");
@@ -440,12 +441,35 @@ TEST(gie, info_functions) {
     ASSERT_EQ(std::string(init_info.name), "epsg");
 
     /* test proj_rtodms() and proj_dmstor() */
-    ASSERT_EQ(std::string("180dN"), proj_rtodms2(buf, sizeof(buf), M_PI, 'N', 'S'));
+    ASSERT_EQ(std::string("180dN"),
+              proj_rtodms2(&buf[0], buf.size(), M_PI, 'N', 'S'));
 
     ASSERT_EQ(proj_dmstor(&buf[0], NULL), M_PI);
 
     ASSERT_EQ(std::string("114d35'29.612\"S"),
-              proj_rtodms2(buf, sizeof(buf), -2.0, 'N', 'S'));
+              proj_rtodms2(&buf[0], buf.size(), -2.0, 'N', 'S'));
+
+    // buffer of just one byte
+    ASSERT_EQ(std::string(""), proj_rtodms2(&buf[0], 1, -2.0, 'N', 'S'));
+
+    // last character truncated
+    ASSERT_EQ(std::string("114d35'29.612\""),
+              proj_rtodms2(&buf[0], 15, -2.0, 'N', 'S'));
+
+    // just enough bytes to store the string and the terminating nul character
+    ASSERT_EQ(std::string("114d35'29.612\"S"),
+              proj_rtodms2(&buf[0], 16, -2.0, 'N', 'S'));
+
+    // buffer of just one byte
+    ASSERT_EQ(std::string(""), proj_rtodms2(&buf[0], 1, -2.0, 0, 0));
+
+    // last character truncated
+    ASSERT_EQ(std::string("-114d35'29.612"),
+              proj_rtodms2(&buf[0], 15, -2.0, 0, 0));
+
+    // just enough bytes to store the string and the terminating nul character
+    ASSERT_EQ(std::string("-114d35'29.612\""),
+              proj_rtodms2(&buf[0], 16, -2.0, 0, 0));
 
     /* we can't expect perfect numerical accuracy so testing with a tolerance */
     ASSERT_NEAR(-2.0, proj_dmstor(&buf[0], NULL), 1e-7);

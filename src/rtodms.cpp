@@ -45,10 +45,19 @@ rtodms(char *s, size_t sizeof_s, double r, int pos, int neg) {
 	int deg, min, sign;
 	char *ss = s;
 	double sec;
+	size_t sizeof_ss = sizeof_s;
 
 	if (r < 0) {
 		r = -r;
-		if  (!pos) { *ss++ = '-'; sign = 0; }
+		if  (!pos) {
+		    if( sizeof_s == 1 ) {
+		        *s = 0;
+		        return s;
+		    }
+		    sizeof_ss --;
+		    *ss++ = '-';
+		    sign = 0;
+		}
 		else sign = neg;
 	} else
 		sign = pos;
@@ -60,13 +69,13 @@ rtodms(char *s, size_t sizeof_s, double r, int pos, int neg) {
 	deg = (int)r;
 
 	if (dolong)
-		(void)snprintf(ss,sizeof_s,format,deg,min,sec,sign);
+		(void)snprintf(ss,sizeof_ss,format,deg,min,sec,sign);
 	else if (sec != 0.0) {
 		char *p, *q;
 		/* double prime + pos/neg suffix (if included) + NUL */
 		size_t suffix_len = sign ? 3 : 2;
 
-		(void)snprintf(ss,sizeof_s,format,deg,min,sec,sign);
+		(void)snprintf(ss,sizeof_ss,format,deg,min,sec,sign);
                 /* Replace potential decimal comma by decimal point for non C locale */
                 for( p = ss; *p != '\0'; ++p ) {
                     if( *p == ',' ) {
@@ -74,14 +83,16 @@ rtodms(char *s, size_t sizeof_s, double r, int pos, int neg) {
                         break;
                     }
                 }
+        if( suffix_len > strlen(ss) )
+            return s;
 		for (q = p = ss + strlen(ss) - suffix_len; *p == '0'; --p) ;
 		if (*p != '.')
 			++p;
 		if (++q != p)
 			(void)memmove(p, q, suffix_len);
 	} else if (min)
-		(void)snprintf(ss,sizeof_s,"%dd%d'%c",deg,min,sign);
+		(void)snprintf(ss,sizeof_ss,"%dd%d'%c",deg,min,sign);
 	else
-		(void)snprintf(ss,sizeof_s,"%dd%c",deg, sign);
+		(void)snprintf(ss,sizeof_ss,"%dd%c",deg, sign);
 	return s;
 }
