@@ -4607,7 +4607,8 @@ void ProjectedCRS::addUnitConvertAndAxisSwap(
             if (order[0] && order[1]) {
                 formatter->addStep("axisswap");
                 char orderStr[10];
-                snprintf(orderStr, sizeof(orderStr), "%.2s,%.2s", order[0], order[1]);
+                snprintf(orderStr, sizeof(orderStr), "%.2s,%.2s", order[0],
+                         order[1]);
                 formatter->addParam("order", orderStr);
             }
         } else {
