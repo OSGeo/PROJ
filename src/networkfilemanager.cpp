@@ -1299,28 +1299,22 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
         errorBuffer.resize(1024);
 
         auto handle = ctx->networking.open(
-            ctx, filename, 0, buffer.size(), &buffer[0], &size_read,
+            ctx, filename, 0, buffer.size(), buffer.data(), &size_read,
             errorBuffer.size(), &errorBuffer[0], ctx->networking.user_data);
-        buffer.resize(size_read);
         if (!handle) {
             errorBuffer.resize(strlen(errorBuffer.data()));
             pj_log(ctx, PJ_LOG_ERROR, "Cannot open %s: %s", filename,
                    errorBuffer.c_str());
             proj_context_errno_set(ctx, PROJ_ERR_OTHER_NETWORK_ERROR);
+        } else if (get_props_from_headers(ctx, handle, props)) {
+            gNetworkFileProperties.insert(ctx, filename, props);
+            buffer.resize(size_read);
+            gNetworkChunkCache.insert(ctx, filename, 0, std::move(buffer));
+            return std::unique_ptr<File>(
+                new NetworkFile(ctx, filename, handle, size_read, props));
         }
 
-        bool ok = false;
-        if (handle) {
-            if (get_props_from_headers(ctx, handle, props)) {
-                ok = true;
-                gNetworkFileProperties.insert(ctx, filename, props);
-                gNetworkChunkCache.insert(ctx, filename, 0, std::move(buffer));
-            }
-        }
-
-        return std::unique_ptr<File>(
-            ok ? new NetworkFile(ctx, filename, handle, size_read, props)
-               : nullptr);
+        return std::unique_ptr<File>(nullptr);
     }
 }
 

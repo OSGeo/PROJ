@@ -1410,7 +1410,7 @@ struct WKTParser::Private {
                    std::map<std::string, std::string, ci_less_struct>
                        &mapParamNameToValue);
 
-    ConversionNNPtr
+    static ConversionNNPtr
     buildProjectionFromESRI(const GeodeticCRSNNPtr &baseGeodCRS,
                             const WKTNodeNNPtr &projCRSNode,
                             const WKTNodeNNPtr &projectionNode,
@@ -1601,26 +1601,30 @@ IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
             codeSpace.resize(codeSpace.size() - 1);
         }
 
-        std::string version;
+        PropertyMap propertiesId;
         if (nodeChildren.size() >= 3 &&
             nodeChildren[2]->GP()->childrenSize() == 0) {
-            version = stripQuotes(nodeChildren[2]);
-        }
+            std::string version = stripQuotes(nodeChildren[2]);
 
-        // IAU + 2015 -> IAU_2015
-        if (dbContext_ && !version.empty()) {
-            std::string codeSpaceOut;
-            if (dbContext_->getVersionedAuthority(codeSpace, version,
-                                                  codeSpaceOut)) {
-                codeSpace = codeSpaceOut;
-                version.clear();
+            // IAU + 2015 -> IAU_2015
+            if (dbContext_) {
+                std::string codeSpaceOut;
+                if (dbContext_->getVersionedAuthority(codeSpace, version,
+                                                      codeSpaceOut)) {
+                    codeSpace = codeSpaceOut;
+                    version.clear();
+                }
+            }
+
+            if (!version.empty()) {
+                propertiesId.set(Identifier::VERSION_KEY, version);
             }
         }
 
         auto code = stripQuotes(nodeChildren[1]);
         auto &citationNode = nodeP->lookForChild(WKTConstants::CITATION);
         auto &uriNode = nodeP->lookForChild(WKTConstants::URI);
-        PropertyMap propertiesId;
+
         propertiesId.set(Identifier::CODESPACE_KEY, codeSpace);
         bool authoritySet = false;
         /*if (!isNull(citationNode))*/ {
@@ -1640,9 +1644,6 @@ IdentifierPtr WKTParser::Private::buildId(const WKTNodeNNPtr &node,
                 propertiesId.set(Identifier::URI_KEY,
                                  stripQuotes(uriNodeP->children()[0]));
             }
-        }
-        if (!version.empty()) {
-            propertiesId.set(Identifier::VERSION_KEY, version);
         }
         return Identifier::create(code, propertiesId);
     } else if (strict_ || !tolerant) {
@@ -10253,12 +10254,15 @@ PROJStringParser::Private::processAxisSwap(Step &step,
                                      : AxisDirection::NORTH;
     CoordinateSystemAxisNNPtr north = createAxis(
         northName, northAbbev, northDir, unit,
-        (!isGeographic && axisType == AxisType::NORTH_POLE)
-            ? Meridian::create(Angle(180, UnitOfMeasure::DEGREE)).as_nullable()
-            : (!isGeographic && axisType == AxisType::SOUTH_POLE)
-                  ? Meridian::create(Angle(0, UnitOfMeasure::DEGREE))
+        isGeographic
+            ? nullMeridian
+            : (axisType == AxisType::NORTH_POLE)
+                  ? Meridian::create(Angle(180, UnitOfMeasure::DEGREE))
                         .as_nullable()
-                  : nullMeridian);
+                  : (axisType == AxisType::SOUTH_POLE)
+                        ? Meridian::create(Angle(0, UnitOfMeasure::DEGREE))
+                              .as_nullable()
+                        : nullMeridian);
 
     CoordinateSystemAxisNNPtr west = createAxis(
         isSpherical ? "Planetocentric longitude"
