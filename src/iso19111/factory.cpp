@@ -3319,7 +3319,6 @@ bool DatabaseContext::lookForGridInfo(
             gridAvailable = true;
         }
 
-        info.fullFilename = fullFilename;
         info.packageName = packageName;
         std::string endpoint(proj_context_get_url_endpoint(d->pjCtxt()));
         if (!endpoint.empty() && starts_with(url, "https://cdn.proj.org/")) {
@@ -3332,6 +3331,8 @@ bool DatabaseContext::lookForGridInfo(
         info.directDownload = directDownload;
         info.openLicense = openLicense;
     }
+
+    info.fullFilename = fullFilename;
     info.gridAvailable = gridAvailable;
     info.found = ret;
     d->cache(key, info);
