@@ -326,16 +326,17 @@ bool GTXVerticalShiftGrid::valueAt(int x, int y, float &out) const {
             swap_words(&m_buffer[0], sizeof(float), m_width);
         }
 
-        pBuffer = &m_buffer;
+        out = m_buffer[x];
         try {
             m_cache->insert(0, y, m_buffer);
         } catch (const std::exception &e) {
             // Should normally not happen
             pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
         }
+    } else {
+        out = (*pBuffer)[x];
     }
 
-    out = (*pBuffer)[x];
     return true;
 }
 
@@ -1935,7 +1936,6 @@ bool NTv2Grid::valueAt(int x, int y, bool compensateNTConvention,
             std::swap(m_buffer[2 * i + 1], m_buffer[2 * (m_width - 1 - i) + 1]);
         }
 
-        pBuffer = &m_buffer;
         try {
             m_cache->insert(m_gridIdx, y, m_buffer);
         } catch (const std::exception &e) {
@@ -1943,14 +1943,14 @@ bool NTv2Grid::valueAt(int x, int y, bool compensateNTConvention,
             pj_log(m_ctx, PJ_LOG_ERROR, _("Exception %s"), e.what());
         }
     }
+    const std::vector<float> &buffer = pBuffer ? *pBuffer : m_buffer;
 
     /* convert seconds to radians */
-    latShift =
-        static_cast<float>((*pBuffer)[2 * x] * ((M_PI / 180.0) / 3600.0));
+    latShift = static_cast<float>(buffer[2 * x] * ((M_PI / 180.0) / 3600.0));
     // west longitude positive convention !
     lonShift =
         (compensateNTConvention ? -1 : 1) *
-        static_cast<float>((*pBuffer)[2 * x + 1] * ((M_PI / 180.0) / 3600.0));
+        static_cast<float>(buffer[2 * x + 1] * ((M_PI / 180.0) / 3600.0));
     return true;
 }
 

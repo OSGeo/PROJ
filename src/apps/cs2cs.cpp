@@ -99,16 +99,16 @@ static void process(FILE *fid)
 {
     char line[MAX_LINE + 3], *s, pline[40];
     PJ_UV data;
-    bool bFirstLine = true;
+    int nLineNumber = 0;
 
-    for (;; bFirstLine = false ) {
+    while(true) {
         double z;
-
+        ++nLineNumber;
         ++emess_dat.File_line;
         if (!(s = fgets(line, MAX_LINE, fid)))
             break;
 
-        if( bFirstLine &&
+        if( nLineNumber == 1 &&
             static_cast<uint8_t>(s[0]) == 0xEF &&
             static_cast<uint8_t>(s[1]) == 0xBB &&
             static_cast<uint8_t>(s[2]) == 0xBF )
