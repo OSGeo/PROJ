@@ -1312,6 +1312,8 @@ std::unique_ptr<File> NetworkFile::open(PJ_CONTEXT *ctx, const char *filename) {
             gNetworkChunkCache.insert(ctx, filename, 0, std::move(buffer));
             return std::unique_ptr<File>(
                 new NetworkFile(ctx, filename, handle, size_read, props));
+        } else {
+            ctx->networking.close(ctx, handle, ctx->networking.user_data);
         }
 
         return std::unique_ptr<File>(nullptr);
