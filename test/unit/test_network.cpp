@@ -1926,4 +1926,52 @@ TEST(networking, file_api) {
 
 #endif
 
+// ---------------------------------------------------------------------------
+
+#ifdef CURL_ENABLED
+
+TEST(networking, proj_coordoperation_get_grid_used) {
+    if (!networkAccessOK) {
+        return;
+    }
+
+    auto ctx = proj_context_create();
+    proj_grid_cache_set_enable(ctx, false);
+    proj_context_set_enable_network(ctx, true);
+
+    // Test bugfix for
+    // https://github.com/OSGeo/PROJ/issues/3444#issuecomment-1309499342
+    for (int i = 0; i < 2; ++i) {
+        // This file is not in grid_alternatives, but in the CDN
+        const char *proj_string =
+            "proj=vgridshift grids=nz_linz_nzgd2000-c120100904-grid01.tif";
+        PJ *P = proj_create(ctx, proj_string);
+
+        const char *shortName = nullptr;
+        const char *fullName = nullptr;
+        const char *packageName = nullptr;
+        const char *url = nullptr;
+        int directDownload = 0;
+        int openLicense = 0;
+        int available = 0;
+
+        proj_coordoperation_get_grid_used(ctx, P, 0, &shortName, &fullName,
+                                          &packageName, &url, &directDownload,
+                                          &openLicense, &available);
+
+        EXPECT_EQ(std::string(shortName),
+                  "nz_linz_nzgd2000-c120100904-grid01.tif");
+        EXPECT_EQ(std::string(fullName), "");
+        EXPECT_EQ(
+            std::string(url),
+            "https://cdn.proj.org/nz_linz_nzgd2000-c120100904-grid01.tif");
+
+        proj_destroy(P);
+    }
+
+    proj_context_destroy(ctx);
+}
+
+#endif
+
 } // namespace
