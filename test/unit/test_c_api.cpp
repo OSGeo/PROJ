@@ -1631,6 +1631,36 @@ TEST_F(CApi, proj_coordoperation_get_grid_used) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_coordoperation_get_grid_used_fullname_caching) {
+    // Test bugfix for
+    // https://github.com/OSGeo/PROJ/issues/3444#issuecomment-1309499342
+    for (int i = 0; i < 2; ++i) {
+        const char *proj_string =
+            "proj=vgridshift grids=tests/test_vgrid_int16.tif";
+        PJ *P = proj_create(m_ctxt, proj_string);
+        ObjectKeeper keeper(P);
+
+        const char *shortName = nullptr;
+        const char *fullName = nullptr;
+        const char *packageName = nullptr;
+        const char *url = nullptr;
+        int directDownload = 0;
+        int openLicense = 0;
+        int available = 0;
+
+        proj_coordoperation_get_grid_used(m_ctxt, P, 0, &shortName, &fullName,
+                                          &packageName, &url, &directDownload,
+                                          &openLicense, &available);
+
+        EXPECT_EQ(std::string(shortName), "tests/test_vgrid_int16.tif");
+        EXPECT_TRUE(std::string(fullName).find("tests/test_vgrid_int16.tif") !=
+                    std::string::npos)
+            << std::string(fullName);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_coordoperation_is_instantiable) {
     auto op = proj_create_from_database(m_ctxt, "EPSG", "1671",
                                         PJ_CATEGORY_COORDINATE_OPERATION, true,
