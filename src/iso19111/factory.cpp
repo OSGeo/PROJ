@@ -47,6 +47,7 @@
 #include "operation/coordinateoperation_internal.hpp"
 #include "operation/parammappings.hpp"
 
+#include "filemanager.hpp"
 #include "sqlite3_utils.hpp"
 
 #include <algorithm>
@@ -3261,14 +3262,16 @@ bool DatabaseContext::lookForGridInfo(
     directDownload = false;
 
     fullFilename.resize(2048);
-    if (d->pjCtxt() == nullptr) {
-        d->setPjCtxt(pj_get_default_ctx());
+    auto ctxt = d->pjCtxt();
+    if (ctxt == nullptr) {
+        ctxt = pj_get_default_ctx();
+        d->setPjCtxt(ctxt);
     }
-    int errno_before = proj_context_errno(d->pjCtxt());
-    gridAvailable =
-        pj_find_file(d->pjCtxt(), projFilename.c_str(), &fullFilename[0],
-                     fullFilename.size() - 1) != 0;
-    proj_context_errno_set(d->pjCtxt(), errno_before);
+    int errno_before = proj_context_errno(ctxt);
+    gridAvailable = NS_PROJ::FileManager::open_resource_file(
+                        ctxt, projFilename.c_str(), &fullFilename[0],
+                        fullFilename.size() - 1) != nullptr;
+    proj_context_errno_set(ctxt, errno_before);
     fullFilename.resize(strlen(fullFilename.c_str()));
 
     auto res =
@@ -3301,12 +3304,12 @@ bool DatabaseContext::lookForGridInfo(
             old_proj_grid_name == projFilename) {
             std::string fullFilenameNewName;
             fullFilenameNewName.resize(2048);
-            errno_before = proj_context_errno(d->pjCtxt());
+            errno_before = proj_context_errno(ctxt);
             bool gridAvailableWithNewName =
-                pj_find_file(d->pjCtxt(), proj_grid_name.c_str(),
+                pj_find_file(ctxt, proj_grid_name.c_str(),
                              &fullFilenameNewName[0],
                              fullFilenameNewName.size() - 1) != 0;
-            proj_context_errno_set(d->pjCtxt(), errno_before);
+            proj_context_errno_set(ctxt, errno_before);
             fullFilenameNewName.resize(strlen(fullFilenameNewName.c_str()));
             if (gridAvailableWithNewName) {
                 gridAvailable = true;
@@ -3319,7 +3322,6 @@ bool DatabaseContext::lookForGridInfo(
             gridAvailable = true;
         }
 
-        info.fullFilename = fullFilename;
         info.packageName = packageName;
         std::string endpoint(proj_context_get_url_endpoint(d->pjCtxt()));
         if (!endpoint.empty() && starts_with(url, "https://cdn.proj.org/")) {
@@ -3328,10 +3330,18 @@ bool DatabaseContext::lookForGridInfo(
             }
             url = endpoint + url.substr(strlen("https://cdn.proj.org/"));
         }
-        info.url = url;
         info.directDownload = directDownload;
         info.openLicense = openLicense;
+    } else {
+        if (starts_with(fullFilename, "http://") ||
+            starts_with(fullFilename, "https://")) {
+            url = fullFilename;
+            fullFilename.clear();
+        }
     }
+
+    info.fullFilename = fullFilename;
+    info.url = url;
     info.gridAvailable = gridAvailable;
     info.found = ret;
     d->cache(key, info);
@@ -3938,8 +3948,38 @@ util::PropertyMap AuthorityFactory::Private::createPropertiesSearchUsages(
 bool AuthorityFactory::Private::rejectOpDueToMissingGrid(
     const operation::CoordinateOperationNNPtr &op,
     bool considerKnownGridsAsAvailable) {
+
+    struct DisableNetwork {
+        const DatabaseContextNNPtr &m_dbContext;
+        bool m_old_network_enabled;
+
+        explicit DisableNetwork(const DatabaseContextNNPtr &l_context)
+            : m_dbContext(l_context) {
+            auto ctxt = m_dbContext->d->pjCtxt();
+            if (ctxt == nullptr) {
+                ctxt = pj_get_default_ctx();
+                m_dbContext->d->setPjCtxt(ctxt);
+            }
+            m_old_network_enabled =
+                proj_context_is_network_enabled(ctxt) != FALSE;
+            if (m_old_network_enabled)
+                proj_context_set_enable_network(ctxt, false);
+        }
+
+        ~DisableNetwork() {
+            if (m_old_network_enabled) {
+                auto ctxt = m_dbContext->d->pjCtxt();
+                proj_context_set_enable_network(ctxt, true);
+            }
+        }
+    };
+
+    auto &l_context = context();
+    // Temporarily disable networking as we are only interested in known grids
+    DisableNetwork disabler(l_context);
+
     for (const auto &gridDesc :
-         op->gridsNeeded(context(), considerKnownGridsAsAvailable)) {
+         op->gridsNeeded(l_context, considerKnownGridsAsAvailable)) {
         if (!gridDesc.available) {
             return true;
         }
