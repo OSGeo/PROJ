@@ -5918,22 +5918,42 @@ void BoundCRS::_exportToJSON(
 
     auto objectContext(formatter->MakeObjectContext("BoundCRS", false));
 
-    if (!l_name.empty() && l_name != d->baseCRS()->nameStr()) {
+    const auto &l_sourceCRS = d->baseCRS();
+
+    if (!l_name.empty() && l_name != l_sourceCRS->nameStr()) {
         writer->AddObjKey("name");
         writer->Add(l_name);
     }
 
     writer->AddObjKey("source_crs");
-    d->baseCRS()->_exportToJSON(formatter);
+    l_sourceCRS->_exportToJSON(formatter);
 
     writer->AddObjKey("target_crs");
-    d->hubCRS()->_exportToJSON(formatter);
+    const auto &l_targetCRS = d->hubCRS();
+    l_targetCRS->_exportToJSON(formatter);
 
     writer->AddObjKey("transformation");
     formatter->setOmitTypeInImmediateChild();
     formatter->setAbridgedTransformation(true);
+    // Only write the source_crs of the transformation if it is different from
+    // the source_crs of the BoundCRS. But don't do it for projectedCRS if its
+    // base CRS matches the source_crs of the transformation and the targetCRS
+    // is geographic
+    const auto sourceCRSAsProjectedCRS =
+        dynamic_cast<const ProjectedCRS *>(l_sourceCRS.get());
+    if (!l_sourceCRS->_isEquivalentTo(
+            d->transformation()->sourceCRS().get(),
+            util::IComparable::Criterion::EQUIVALENT) &&
+        (sourceCRSAsProjectedCRS == nullptr ||
+         (dynamic_cast<GeographicCRS *>(l_targetCRS.get()) &&
+          !sourceCRSAsProjectedCRS->baseCRS()->_isEquivalentTo(
+              d->transformation()->sourceCRS().get(),
+              util::IComparable::Criterion::EQUIVALENT)))) {
+        formatter->setAbridgedTransformationWriteSourceCRS(true);
+    }
     d->transformation()->_exportToJSON(formatter);
     formatter->setAbridgedTransformation(false);
+    formatter->setAbridgedTransformationWriteSourceCRS(false);
 
     ObjectUsage::baseExportToJSON(formatter);
 }
