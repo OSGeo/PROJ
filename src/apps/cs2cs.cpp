@@ -574,11 +574,13 @@ int main(int argc, char **argv) {
                 case 'w': /* -W for constant field width */
                 {
                     char c = arg[1];
-                    if (c != 0 && isdigit(c)) {
+                    // Check that the value is in the [0, 8] range
+                    if (c >= '0' && c <= '8' &&
+                        ((arg[2] == 0 || !(arg[2] >= '0' && arg[2] <= '9')))) {
                         set_rtodms(c - '0', *arg == 'W');
                         ++arg;
                     } else
-                        emess(1, "-W argument missing or non-digit");
+                        emess(1, "-W argument missing or not in range [0,8]");
                     continue;
                 }
                 case 'f': /* alternate output format degrees or xy */

@@ -507,3 +507,24 @@ Check that we promote CRS specified by name to 3D when the other one is 3D
 ##############################################################
 Test input file with UTF-8 BOM marker
 0 3 0	500000.000	0.000 0.000
+##############################################################
+Test cs2cs -W0
+0 0	0d00'00"E	0d00'00"N 0.000
+##############################################################
+Test cs2cs -W8
+0 0	0d00'00.00000000"E	0d00'00.00000000"N 0.000
+##############################################################
+Test cs2cs -W
+
+-W argument missing or not in range [0,8]
+program abnormally terminated
+##############################################################
+Test cs2cs -W9
+
+-W argument missing or not in range [0,8]
+program abnormally terminated
+##############################################################
+Test cs2cs -W10
+
+-W argument missing or not in range [0,8]
+program abnormally terminated
