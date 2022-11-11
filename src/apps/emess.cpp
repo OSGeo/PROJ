@@ -27,8 +27,15 @@ emess(int code, const char *fmt, ...) {
 	va_start(args, fmt);
 	/* prefix program name, if given */
 	if (emess_dat.Prog_name != nullptr)
-		(void)fprintf(stderr,"%s\n<%s>: ",pj_get_release(),
-                              emess_dat.Prog_name);
+    {
+        // For unit test purposes, allow PROJ_DISPLAY_PROGRAM_NAME=NO
+        const char* pszDisplayProgramName = getenv("PROJ_DISPLAY_PROGRAM_NAME");
+        if( !(pszDisplayProgramName && strcmp(pszDisplayProgramName, "NO") == 0) )
+        {
+            (void)fprintf(stderr,"%s\n<%s>: ",pj_get_release(),
+                                  emess_dat.Prog_name);
+        }
+    }
 	/* print file name and line, if given */
 	if (emess_dat.File_name != nullptr && *emess_dat.File_name) {
 		(void)fprintf(stderr,"while processing file: %s", emess_dat.File_name);
