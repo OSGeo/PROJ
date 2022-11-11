@@ -137,7 +137,7 @@ The following control parameters can appear in any order:
 
     Where *n* is the number of significant fractional digits to employ for seconds
     output. When ``-W`` is employed the fields will be constant width
-    with leading zeroes.
+    with leading zeroes. Valid range: -W0 through -W8.
 
 .. option:: -v
 
