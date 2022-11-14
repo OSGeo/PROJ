@@ -48,8 +48,13 @@ file referenced by the {object_reference} must contain a valid
 {object_definition}.
 
     .. versionadded:: 8.0.0
-
-
+    
+Input should be lines of consisting of:
+longitude (in degrees),
+latitude (in degrees),
+height (in meters),
+time (in seconds),
+all separated by whitespace.
 
 Description
 ***********
