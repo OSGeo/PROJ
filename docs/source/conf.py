@@ -279,6 +279,8 @@ preamble = r"""
 \ifdefined\DeclareUnicodeCharacter
   \DeclareUnicodeCharacter{2032}{$'$}% prime
 \fi
+
+\usepackage[notbib]{tocbibind}
 """
 
 latex_elements = {
@@ -290,7 +292,8 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 'preamble': preamble,
-'inputenc':'\\usepackage[utf8]{inputenc}'
+'inputenc': r'\usepackage[utf8]{inputenc}',
+'makeindex': r'\usepackage[columns=1]{idxlayout}\makeindex',
 
 # Latex figure (float) alignment
 #'figure_align': 'htbp',
