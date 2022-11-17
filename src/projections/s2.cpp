@@ -52,6 +52,7 @@
 
 #include <errno.h>
 #include <cmath>
+#include <cstdint>
 
 #include "proj.h"
 #include "proj_internal.h"
