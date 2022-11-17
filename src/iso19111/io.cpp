@@ -107,10 +107,10 @@ NS_PROJ_START
 namespace io {
 
 //! @cond Doxygen_Suppress
-const char *JSONFormatter::PROJJSON_v0_5 =
-    "https://proj.org/schemas/v0.5/projjson.schema.json";
+const char *JSONFormatter::PROJJSON_v0_6 =
+    "https://proj.org/schemas/v0.6/projjson.schema.json";
 
-#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_5
+#define PROJJSON_DEFAULT_VERSION JSONFormatter::PROJJSON_v0_6
 
 //! @endcond
 
@@ -6287,9 +6287,27 @@ BoundCRSNNPtr JSONParser::buildBoundCRS(const json &j) {
         values.emplace_back(ParameterValue::create(getMeasure(param)));
     }
 
-    const auto transformation = buildTransformationForBoundCRS(
-        dbContext_, buildProperties(transformationJ), buildProperties(methodJ),
-        sourceCRS, targetCRS, parameters, values);
+    const auto transformation = [&]() {
+        // Unofficial extension / mostly for testing purposes.
+        // Allow to explicitly specify the source_crs of the transformation of
+        // the boundCRS if it is not the source_crs of the BoundCRS. Cf
+        // https://github.com/OSGeo/PROJ/issues/3428 use case
+        if (transformationJ.contains("source_crs")) {
+            auto sourceTransformationCRS =
+                buildCRS(getObject(transformationJ, "source_crs"));
+            auto interpolationCRS =
+                dealWithEPSGCodeForInterpolationCRSParameter(
+                    dbContext_, parameters, values);
+            return Transformation::create(
+                buildProperties(transformationJ), sourceTransformationCRS,
+                targetCRS, interpolationCRS, buildProperties(methodJ),
+                parameters, values, std::vector<PositionalAccuracyNNPtr>());
+        }
+
+        return buildTransformationForBoundCRS(
+            dbContext_, buildProperties(transformationJ),
+            buildProperties(methodJ), sourceCRS, targetCRS, parameters, values);
+    }();
 
     return BoundCRS::create(buildProperties(j,
                                             /* removeInverseOf= */ false,
@@ -11666,6 +11684,7 @@ struct JSONFormatter::Private {
     bool allowIDInImmediateChild_ = false;
     bool omitTypeInImmediateChild_ = false;
     bool abridgedTransformation_ = false;
+    bool abridgedTransformationWriteSourceCRS_ = false;
     std::string schema_ = PROJJSON_DEFAULT_VERSION;
 
     std::string result_{};
@@ -11812,6 +11831,18 @@ void JSONFormatter::setAbridgedTransformation(bool outputIn) {
 
 bool JSONFormatter::abridgedTransformation() const {
     return d->abridgedTransformation_;
+}
+
+// ---------------------------------------------------------------------------
+
+void JSONFormatter::setAbridgedTransformationWriteSourceCRS(bool writeCRS) {
+    d->abridgedTransformationWriteSourceCRS_ = writeCRS;
+}
+
+// ---------------------------------------------------------------------------
+
+bool JSONFormatter::abridgedTransformationWriteSourceCRS() const {
+    return d->abridgedTransformationWriteSourceCRS_;
 }
 
 //! @endcond

@@ -1788,6 +1788,12 @@ void Transformation::_exportToJSON(
             formatter->setAllowIDInImmediateChild();
             l_interpolationCRS->_exportToJSON(formatter);
         }
+    } else {
+        if (formatter->abridgedTransformationWriteSourceCRS()) {
+            writer->AddObjKey("source_crs");
+            formatter->setAllowIDInImmediateChild();
+            sourceCRS()->_exportToJSON(formatter);
+        }
     }
 
     writer->AddObjKey("method");

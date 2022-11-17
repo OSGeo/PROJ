@@ -41,7 +41,7 @@ Schema
 ------
 
 A JSON schema of PROJJSON grammar is available at
-https://proj.org/schemas/v0.5/projjson.schema.json
+https://proj.org/schemas/v0.6/projjson.schema.json
 
 This schema defines a minimum set of constraints that apply to well-formed PROJJSON.
 Number of specific CRS and coordinate operation domain constraints are not expressed
@@ -52,6 +52,7 @@ in the WKT2:2019 specification also apply, as supplement to the JSON schema cons
 History of the schema
 ---------------------
 
+* v0.6: additional optional "source_crs" property in "abridged_transformation". Implemented in PROJ 9.2
 * v0.5:
     - Implemented in PROJ 9.1:
         + add "meridian" member in Axis object type.
