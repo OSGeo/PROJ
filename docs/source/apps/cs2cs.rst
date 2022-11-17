@@ -284,8 +284,12 @@ The x-y output data will appear as three lines of:
 
 ::
 
-    1402293.44  5076292.68 0.00
+    1402285.98  5076292.42 0.00
 
+.. note::
+
+    To get those exact values, you have need to have all current grids installed
+    locally or use networking capabilities mentioned above.
 
 Using EPSG CRS codes
 --------------------
@@ -312,13 +316,19 @@ UTM Zone 31N/WGS 84 with WGS84 ellipsoidal height
 
 ::
 
-    echo 45 2 0 | cs2cs "WGS 84 + EGM96 height" "WGS 84 / UTM zone 31N"
+    echo 45 2 0 | cs2cs "WGS 84 + EGM96 height" "WGS 84 / UTM zone 31N" --3d
 
 outputs
 
 ::
 
     421184.70   4983436.77 50.69
+
+
+.. note::
+
+    To get those exact values, you have need to have the EGM96 grid installed
+    locally or use networking capabilities mentioned above.
 
 
 .. only:: man
