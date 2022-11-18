@@ -1076,6 +1076,21 @@ CRSNNPtr CRS::applyAxisOrderReversal(const char *nameSuffix) const {
                                  projCRS->derivingConversion(), cs));
     }
 
+    const DerivedProjectedCRS *derivedProjCRS =
+        dynamic_cast<const DerivedProjectedCRS *>(this);
+    if (derivedProjCRS) {
+        const auto &axisList = derivedProjCRS->coordinateSystem()->axisList();
+        auto cs =
+            axisList.size() == 2
+                ? cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                          axisList[0])
+                : cs::CartesianCS::create(util::PropertyMap(), axisList[1],
+                                          axisList[0], axisList[2]);
+        return util::nn_static_pointer_cast<CRS>(DerivedProjectedCRS::create(
+            createProperties(), derivedProjCRS->baseCRS(),
+            derivedProjCRS->derivingConversion(), cs));
+    }
+
     throw util::UnsupportedOperationException(
         "axis order reversal not supported on this type of CRS");
 }
@@ -1104,6 +1119,15 @@ CRSNNPtr CRS::normalizeForVisualization() const {
     const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
     if (projCRS) {
         const auto &axisList = projCRS->coordinateSystem()->axisList();
+        if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
+            return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
+        }
+    }
+
+    const DerivedProjectedCRS *derivedProjCRS =
+        dynamic_cast<const DerivedProjectedCRS *>(this);
+    if (derivedProjCRS) {
+        const auto &axisList = derivedProjCRS->coordinateSystem()->axisList();
         if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
             return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
         }
