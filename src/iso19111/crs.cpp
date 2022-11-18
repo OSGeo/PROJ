@@ -1031,8 +1031,8 @@ CRSNNPtr CRS::applyAxisOrderReversal(const char *nameSuffix) const {
             return props;
         };
 
-    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
-    if (compoundCRS) {
+    if (const CompoundCRS *compoundCRS =
+            dynamic_cast<const CompoundCRS *>(this)) {
         const auto &comps = compoundCRS->componentReferenceSystems();
         if (!comps.empty()) {
             std::vector<CRSNNPtr> newComps;
@@ -1048,8 +1048,8 @@ CRSNNPtr CRS::applyAxisOrderReversal(const char *nameSuffix) const {
         }
     }
 
-    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
-    if (geogCRS) {
+    if (const GeographicCRS *geogCRS =
+            dynamic_cast<const GeographicCRS *>(this)) {
         const auto &axisList = geogCRS->coordinateSystem()->axisList();
         auto cs =
             axisList.size() == 2
@@ -1062,8 +1062,8 @@ CRSNNPtr CRS::applyAxisOrderReversal(const char *nameSuffix) const {
                                   geogCRS->datumEnsemble(), cs));
     }
 
-    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
-    if (projCRS) {
+    if (const ProjectedCRS *projCRS =
+            dynamic_cast<const ProjectedCRS *>(this)) {
         const auto &axisList = projCRS->coordinateSystem()->axisList();
         auto cs =
             axisList.size() == 2
@@ -1076,9 +1076,8 @@ CRSNNPtr CRS::applyAxisOrderReversal(const char *nameSuffix) const {
                                  projCRS->derivingConversion(), cs));
     }
 
-    const DerivedProjectedCRS *derivedProjCRS =
-        dynamic_cast<const DerivedProjectedCRS *>(this);
-    if (derivedProjCRS) {
+    if (const DerivedProjectedCRS *derivedProjCRS =
+            dynamic_cast<const DerivedProjectedCRS *>(this)) {
         const auto &axisList = derivedProjCRS->coordinateSystem()->axisList();
         auto cs =
             axisList.size() == 2
@@ -1099,8 +1098,8 @@ CRSNNPtr CRS::applyAxisOrderReversal(const char *nameSuffix) const {
 
 CRSNNPtr CRS::normalizeForVisualization() const {
 
-    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
-    if (compoundCRS) {
+    if (const CompoundCRS *compoundCRS =
+            dynamic_cast<const CompoundCRS *>(this)) {
         const auto &comps = compoundCRS->componentReferenceSystems();
         if (!comps.empty() &&
             comps[0]->mustAxisOrderBeSwitchedForVisualization()) {
@@ -1108,25 +1107,24 @@ CRSNNPtr CRS::normalizeForVisualization() const {
         }
     }
 
-    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
-    if (geogCRS) {
+    if (const GeographicCRS *geogCRS =
+            dynamic_cast<const GeographicCRS *>(this)) {
         const auto &axisList = geogCRS->coordinateSystem()->axisList();
         if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
             return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
         }
     }
 
-    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
-    if (projCRS) {
+    if (const ProjectedCRS *projCRS =
+            dynamic_cast<const ProjectedCRS *>(this)) {
         const auto &axisList = projCRS->coordinateSystem()->axisList();
         if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
             return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
         }
     }
 
-    const DerivedProjectedCRS *derivedProjCRS =
-        dynamic_cast<const DerivedProjectedCRS *>(this);
-    if (derivedProjCRS) {
+    if (const DerivedProjectedCRS *derivedProjCRS =
+            dynamic_cast<const DerivedProjectedCRS *>(this)) {
         const auto &axisList = derivedProjCRS->coordinateSystem()->axisList();
         if (mustAxisOrderBeSwitchedForVisualizationInternal(axisList)) {
             return applyAxisOrderReversal(NORMALIZED_AXIS_ORDER_SUFFIX_STR);
