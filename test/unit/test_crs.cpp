@@ -6452,6 +6452,20 @@ TEST(crs, crs_stripVerticalComponent) {
         ASSERT_TRUE(projCRS != nullptr);
         EXPECT_EQ(projCRS->coordinateSystem()->axisList().size(), 2U);
     }
+
+    {
+        auto crs3D =
+            createDerivedProjectedCRS()->promoteTo3D(std::string(), nullptr);
+        auto derivedProj3D =
+            nn_dynamic_pointer_cast<DerivedProjectedCRS>(crs3D);
+        ASSERT_TRUE(derivedProj3D != nullptr);
+        EXPECT_EQ(derivedProj3D->coordinateSystem()->axisList().size(), 3U);
+
+        auto derivedProj2D = nn_dynamic_pointer_cast<DerivedProjectedCRS>(
+            derivedProj3D->stripVerticalComponent());
+        ASSERT_TRUE(derivedProj2D != nullptr);
+        EXPECT_EQ(derivedProj2D->coordinateSystem()->axisList().size(), 2U);
+    }
 }
 
 // ---------------------------------------------------------------------------
