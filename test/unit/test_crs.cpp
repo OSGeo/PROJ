@@ -6488,6 +6488,15 @@ TEST(crs, crs_alterGeodeticCRS) {
             createVerticalCRS()->alterGeodeticCRS(GeographicCRS::EPSG_4979);
         EXPECT_TRUE(crs->isEquivalentTo(createVerticalCRS().get()));
     }
+
+    {
+        auto crs = createDerivedProjectedCRS()->alterGeodeticCRS(
+            GeographicCRS::EPSG_4979);
+        auto derivedProjCRS = dynamic_cast<DerivedProjectedCRS *>(crs.get());
+        ASSERT_TRUE(derivedProjCRS != nullptr);
+        EXPECT_TRUE(derivedProjCRS->baseCRS()->baseCRS()->isEquivalentTo(
+            GeographicCRS::EPSG_4979.get()));
+    }
 }
 
 // ---------------------------------------------------------------------------

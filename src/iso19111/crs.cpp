@@ -275,20 +275,27 @@ createPropertyMap(const common::IdentifiedObject *obj) {
 
 //! @cond Doxygen_Suppress
 CRSNNPtr CRS::alterGeodeticCRS(const GeodeticCRSNNPtr &newGeodCRS) const {
-    auto geodCRS = dynamic_cast<const GeodeticCRS *>(this);
-    if (geodCRS) {
+    if (dynamic_cast<const GeodeticCRS *>(this)) {
         return newGeodCRS;
     }
 
-    auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
-    if (projCRS) {
+    if (auto projCRS = dynamic_cast<const ProjectedCRS *>(this)) {
         return ProjectedCRS::create(createPropertyMap(this), newGeodCRS,
                                     projCRS->derivingConversion(),
                                     projCRS->coordinateSystem());
     }
 
-    auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
-    if (compoundCRS) {
+    if (auto derivedProjCRS = dynamic_cast<const DerivedProjectedCRS *>(this)) {
+        auto newProjCRS =
+            NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<ProjectedCRS>(
+                derivedProjCRS->baseCRS()->alterGeodeticCRS(newGeodCRS)));
+
+        return DerivedProjectedCRS::create(createPropertyMap(this), newProjCRS,
+                                           derivedProjCRS->derivingConversion(),
+                                           derivedProjCRS->coordinateSystem());
+    }
+
+    if (auto compoundCRS = dynamic_cast<const CompoundCRS *>(this)) {
         std::vector<CRSNNPtr> components;
         for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
             components.emplace_back(subCrs->alterGeodeticCRS(newGeodCRS));
