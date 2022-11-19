@@ -4218,6 +4218,20 @@ static DerivedProjectedCRSNNPtr createDerivedProjectedCRS() {
         CartesianCS::createEastingNorthing(UnitOfMeasure::METRE));
 }
 
+static DerivedProjectedCRSNNPtr createDerivedProjectedCRSNorthingEasting() {
+
+    auto derivingConversion = Conversion::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "PROJ unimplemented"),
+        std::vector<OperationParameterNNPtr>{},
+        std::vector<ParameterValueNNPtr>{});
+
+    return DerivedProjectedCRS::create(
+        PropertyMap().set(IdentifiedObject::NAME_KEY, "derived projectedCRS"),
+        createProjected(), derivingConversion,
+        CartesianCS::createNorthingEasting(UnitOfMeasure::FOOT));
+}
+
 // ---------------------------------------------------------------------------
 
 static DerivedVerticalCRSNNPtr createDerivedVerticalCRS() {
@@ -6885,6 +6899,77 @@ TEST(crs, promoteTo3D_and_demoteTo2D) {
             crs.get(), IComparable::Criterion::EQUIVALENT));
         EXPECT_TRUE(demoted->demoteTo2D(std::string(), nullptr)
                         ->isEquivalentTo(demoted.get()));
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, normalizeForVisualization_derivedprojected_operation) {
+    auto crs = createDerivedProjectedCRSNorthingEasting();
+
+    auto op = CoordinateOperationFactory::create()->createOperation(
+        GeographicCRS::EPSG_4326, crs);
+
+    auto proj_string =
+        "+proj=pipeline +step +proj=axisswap +order=2,1 +step "
+        "+proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=31 "
+        "+ellps=WGS84 +step +proj=unimplemented +step +proj=unitconvert "
+        "+xy_in=m +xy_out=ft +step +proj=axisswap +order=2,1";
+
+    ASSERT_TRUE(op != nullptr);
+    EXPECT_EQ(op->exportToPROJString(PROJStringFormatter::create().get()),
+              proj_string);
+
+    auto opNormalized = op->normalizeForVisualization();
+    auto proj_string_normalized =
+        "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step "
+        "+proj=utm +zone=31 +ellps=WGS84 +step +proj=unimplemented +step "
+        "+proj=unitconvert +xy_in=m +xy_out=ft";
+    EXPECT_EQ(
+        opNormalized->exportToPROJString(PROJStringFormatter::create().get()),
+        proj_string_normalized);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST(crs, normalizeForVisualization_derivedprojected) {
+
+    auto crs = createDerivedProjectedCRSNorthingEasting();
+
+    {
+        const auto &axisList = crs->coordinateSystem()->axisList();
+        ASSERT_EQ(axisList.size(), 2U);
+        EXPECT_EQ(axisList[0]->direction(),
+                  osgeo::proj::cs::AxisDirection::NORTH);
+        EXPECT_EQ(axisList[1]->direction(),
+                  osgeo::proj::cs::AxisDirection::EAST);
+    }
+
+    {
+        auto normalized = nn_dynamic_pointer_cast<SingleCRS>(
+            crs->normalizeForVisualization());
+        const auto &normalizedAxisList =
+            normalized->coordinateSystem()->axisList();
+        ASSERT_EQ(normalizedAxisList.size(), 2U);
+        EXPECT_EQ(normalizedAxisList[0]->direction(),
+                  osgeo::proj::cs::AxisDirection::EAST);
+        EXPECT_EQ(normalizedAxisList[1]->direction(),
+                  osgeo::proj::cs::AxisDirection::NORTH);
+    }
+
+    {
+        auto normalized3D = nn_dynamic_pointer_cast<SingleCRS>(
+            crs->promoteTo3D(std::string(), nullptr)
+                ->normalizeForVisualization());
+        const auto &normalized3DAxisList =
+            normalized3D->coordinateSystem()->axisList();
+        ASSERT_EQ(normalized3DAxisList.size(), 3U);
+        EXPECT_EQ(normalized3DAxisList[0]->direction(),
+                  osgeo::proj::cs::AxisDirection::EAST);
+        EXPECT_EQ(normalized3DAxisList[1]->direction(),
+                  osgeo::proj::cs::AxisDirection::NORTH);
+        EXPECT_EQ(normalized3DAxisList[2]->direction(),
+                  osgeo::proj::cs::AxisDirection::UP);
     }
 }
 

@@ -893,24 +893,30 @@ static bool mustAxisOrderBeSwitchedForVisualizationInternal(
 
 bool CRS::mustAxisOrderBeSwitchedForVisualization() const {
 
-    const CompoundCRS *compoundCRS = dynamic_cast<const CompoundCRS *>(this);
-    if (compoundCRS) {
+    if (const CompoundCRS *compoundCRS =
+            dynamic_cast<const CompoundCRS *>(this)) {
         const auto &comps = compoundCRS->componentReferenceSystems();
         if (!comps.empty()) {
             return comps[0]->mustAxisOrderBeSwitchedForVisualization();
         }
     }
 
-    const GeographicCRS *geogCRS = dynamic_cast<const GeographicCRS *>(this);
-    if (geogCRS) {
+    if (const GeographicCRS *geogCRS =
+            dynamic_cast<const GeographicCRS *>(this)) {
         return mustAxisOrderBeSwitchedForVisualizationInternal(
             geogCRS->coordinateSystem()->axisList());
     }
 
-    const ProjectedCRS *projCRS = dynamic_cast<const ProjectedCRS *>(this);
-    if (projCRS) {
+    if (const ProjectedCRS *projCRS =
+            dynamic_cast<const ProjectedCRS *>(this)) {
         return mustAxisOrderBeSwitchedForVisualizationInternal(
             projCRS->coordinateSystem()->axisList());
+    }
+
+    if (const DerivedProjectedCRS *derivedProjCRS =
+            dynamic_cast<const DerivedProjectedCRS *>(this)) {
+        return mustAxisOrderBeSwitchedForVisualizationInternal(
+            derivedProjCRS->coordinateSystem()->axisList());
     }
 
     return false;
