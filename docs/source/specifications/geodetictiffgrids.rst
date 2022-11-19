@@ -35,8 +35,7 @@ is an easy way to inspect such grid files:
   to readers that are not official GeoTIFF 1.1 compliant.
 
 - Files hosted on the CDN will use a Geographic 2D CRS for the GeoTIFF GeoKeys.
-  That CRS is intended to be the interpolation CRS as defined in
-  `OGC Abstract Specification Topic 2 <http://docs.opengeospatial.org/as/18-005r4/18-005r4.html>`_,
+  That CRS is intended to be the interpolation CRS as defined in :cite:`ISO19111`,
   that is the CRS to which grid values are referred to.
 
   Given that they will nominally be related to the EPSG dataset, the `GeodeticCRSGeoKey
