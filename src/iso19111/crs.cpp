@@ -5120,7 +5120,7 @@ CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
     auto comp1Vert = dynamic_cast<const VerticalCRS *>(comp1);
     auto comp1Eng = dynamic_cast<const EngineeringCRS *>(comp1);
     // Loose validation based on
-    // http://docs.opengeospatial.org/as/18-005r4/18-005r4.html#34
+    // http://docs.opengeospatial.org/as/18-005r5/18-005r5.html#34
     bool ok = false;
     const bool comp1IsVertOrEng1 =
         comp1Vert ||
@@ -5153,7 +5153,7 @@ CompoundCRSNNPtr CompoundCRS::create(const util::PropertyMap &properties,
         throw InvalidCompoundCRSException(
             "components of the compound CRS do not belong to one of the "
             "allowed combinations of "
-            "http://docs.opengeospatial.org/as/18-005r4/18-005r4.html#34");
+            "http://docs.opengeospatial.org/as/18-005r5/18-005r5.html#34");
     }
 
     auto compoundCRS(CompoundCRS::nn_make_shared<CompoundCRS>(components));
