@@ -124,11 +124,13 @@ Central point and azimuth method
 
 .. option:: +lonc=<value>
 
-    Longitude of the central point.
+    Longitude of the projection centre. Note that this value is used to
+    override the :option:`+lon_0` parameter, so the latter should not be
+    specified as it would get ignored.
 
 .. option:: +lat_0=<value>
 
-    Latitude of the central point.
+    Latitude of the projection centre.
 
 Two point method
 --------------------------------------------------------------------------------
@@ -165,8 +167,6 @@ Optional
     Do not offset origin to center of projection.
 
 .. include:: ../options/k_0.rst
-
-.. include:: ../options/lon_0.rst
 
 .. include:: ../options/x_0.rst
 
