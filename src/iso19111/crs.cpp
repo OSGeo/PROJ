@@ -275,20 +275,27 @@ createPropertyMap(const common::IdentifiedObject *obj) {
 
 //! @cond Doxygen_Suppress
 CRSNNPtr CRS::alterGeodeticCRS(const GeodeticCRSNNPtr &newGeodCRS) const {
-    auto geodCRS = dynamic_cast<const GeodeticCRS *>(this);
-    if (geodCRS) {
+    if (dynamic_cast<const GeodeticCRS *>(this)) {
         return newGeodCRS;
     }
 
-    auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
-    if (projCRS) {
+    if (auto projCRS = dynamic_cast<const ProjectedCRS *>(this)) {
         return ProjectedCRS::create(createPropertyMap(this), newGeodCRS,
                                     projCRS->derivingConversion(),
                                     projCRS->coordinateSystem());
     }
 
-    auto compoundCRS = dynamic_cast<const CompoundCRS *>(this);
-    if (compoundCRS) {
+    if (auto derivedProjCRS = dynamic_cast<const DerivedProjectedCRS *>(this)) {
+        auto newProjCRS =
+            NN_CHECK_ASSERT(util::nn_dynamic_pointer_cast<ProjectedCRS>(
+                derivedProjCRS->baseCRS()->alterGeodeticCRS(newGeodCRS)));
+
+        return DerivedProjectedCRS::create(createPropertyMap(this), newProjCRS,
+                                           derivedProjCRS->derivingConversion(),
+                                           derivedProjCRS->coordinateSystem());
+    }
+
+    if (auto compoundCRS = dynamic_cast<const CompoundCRS *>(this)) {
         std::vector<CRSNNPtr> components;
         for (const auto &subCrs : compoundCRS->componentReferenceSystems()) {
             components.emplace_back(subCrs->alterGeodeticCRS(newGeodCRS));
@@ -706,8 +713,7 @@ CRSNNPtr CRS::stripVerticalComponent() const {
     auto self = NN_NO_CHECK(
         std::dynamic_pointer_cast<CRS>(shared_from_this().as_nullable()));
 
-    auto geogCRS = dynamic_cast<const GeographicCRS *>(this);
-    if (geogCRS) {
+    if (auto geogCRS = dynamic_cast<const GeographicCRS *>(this)) {
         const auto &axisList = geogCRS->coordinateSystem()->axisList();
         if (axisList.size() == 3) {
             auto cs = cs::EllipsoidalCS::create(util::PropertyMap(),
@@ -718,8 +724,8 @@ CRSNNPtr CRS::stripVerticalComponent() const {
                 geogCRS->datum(), geogCRS->datumEnsemble(), cs));
         }
     }
-    auto projCRS = dynamic_cast<const ProjectedCRS *>(this);
-    if (projCRS) {
+
+    if (auto projCRS = dynamic_cast<const ProjectedCRS *>(this)) {
         const auto &axisList = projCRS->coordinateSystem()->axisList();
         if (axisList.size() == 3) {
             auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
@@ -730,6 +736,21 @@ CRSNNPtr CRS::stripVerticalComponent() const {
                 projCRS->baseCRS(), projCRS->derivingConversion(), cs));
         }
     }
+
+    if (auto derivedProjCRS = dynamic_cast<const DerivedProjectedCRS *>(this)) {
+        const auto &axisList = derivedProjCRS->coordinateSystem()->axisList();
+        if (axisList.size() == 3) {
+            auto cs = cs::CartesianCS::create(util::PropertyMap(), axisList[0],
+                                              axisList[1]);
+            return util::nn_static_pointer_cast<CRS>(
+                DerivedProjectedCRS::create(
+                    util::PropertyMap().set(common::IdentifiedObject::NAME_KEY,
+                                            nameStr()),
+                    derivedProjCRS->baseCRS(),
+                    derivedProjCRS->derivingConversion(), cs));
+        }
+    }
+
     return self;
 }
 
