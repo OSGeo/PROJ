@@ -42,5 +42,5 @@ However, the parameters below can be used in a declarative manner when used with
 
 .. option:: +towgs84=<list>
 
-    A list of three or seven :ref:`Helmert <helmert>` parameters that maps
+    A list of three or seven comma separated :ref:`Helmert <helmert>` parameters that maps
     the input coordinates to the WGS84 datum.
