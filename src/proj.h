@@ -803,6 +803,8 @@ typedef enum
     PJ_TYPE_TEMPORAL_DATUM,
     PJ_TYPE_ENGINEERING_DATUM,
     PJ_TYPE_PARAMETRIC_DATUM,
+
+    PJ_TYPE_DERIVED_PROJECTED_CRS,
 } PJ_TYPE;
 
 /** Comparison criterion. */
