@@ -11956,6 +11956,15 @@ TEST(io, createFromUserInput) {
         ASSERT_TRUE(ensemble != nullptr);
         EXPECT_EQ(ensemble->identifiers().size(), 1U);
     }
+
+    // Check that "foo" doesn't match with "Amersfoort"
+    EXPECT_THROW(createFromUserInput("foo", dbContext), ParsingException);
+
+    // Check that "omerc" doesn't match with "WGS 84 / Pseudo-Mercator"
+    EXPECT_THROW(createFromUserInput("omerc", dbContext), ParsingException);
+
+    // Missing space, dash: OK
+    EXPECT_NO_THROW(createFromUserInput("WGS84 PseudoMercator", dbContext));
 }
 
 // ---------------------------------------------------------------------------
