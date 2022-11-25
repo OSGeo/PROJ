@@ -4,19 +4,82 @@
  Updates
  --------
 
+ o Database: register at_bev_AT_GIS_GRID_2021_09_28 grid (#3442)
+
+ Bug fixes
+ ----------
+
+ o Implement alterGeodeticCRS and stripVerticalComponent for DerivedProjected (#3482)
+
+ o Various improvements to handling of DerivedProjectedCRS
+   (#3482, #3477, #3342, #3319, #3317)
+
+ o Add missing <cstdint> includes (#3459)
+
+ o cs2cs: better validate value of -W option (#3453)
+
+ o DatabaseContext::lookForGridInfo(): fix caching of filenames and set
+   correct URLs (#3448)
+
+ o Database: register in grid_alternatives grids from PROJ-data that have no
+   corresponding transformation record (#3446)
+
+ o cass projection: fix forward computation of easting (#3433)
+
+ o Implement Geographic/Vertical Offset conversions (#3413)
+
+ o vandg projection: handle +over to extend the validity domain outside of
+  |lon|>180deg (#3427)
+
+ o eqdc projection: avoid floating point division by zero in non-nominal case (#3415)
+
+ o createOperations(): fix issues when transforming between Geog3D and
+   DerivedGeog3D CRS with Geographic3D offsets method (#3411)
+
+ o VerticalCRS::_isEquivalentTo(): do not consider VerticalCRS and
+   DerivedVerticalCRS as equivalent (#3408)
+
+ o cct and cs2cs: Avoid problems when encountering UTF-8 BOM characters at
+    beginning of input files (#3395)
+
+ o createFromUserInput(): Improved lookup when approximate name is provided (#3371)
+
+ o projinfo / cs2cs : auto promotion to 3D of CRS specified by name (#3367)
+
+ o findsOpsInRegistryWithIntermediate(): make it work when source/target geodetic
+   CRS has no known id (#3365)
+
+ o createOperations(): emulate PROJ < 6 behavior when doing geocentric <-->
+   geographic transformation between datum with unknown transformation (#3361)
+
+ o Fix issue when transforming from/into a WKT2 Bound VerticalCRS with a
+   'Geographic3D to GravityRelatedHeight' method (#3355)
+
+ o proj_normalize_for_visualization(): take into account FORCE_OVER property
+   from source operation (#3350)
+
+ o Link geodtest against libm when available (#3341)
+
+
+9.1.0 Release Notes
+-------------------
+
+ Updates
+ --------
+
  + Database
 
   o Database: update to EPSG v10.074 (#3273)
 
   o Update ESRI objects to version 3.0.0 (#3257)
 
-  o Generate null transformation between geodetic/vertical datum ensemble and   
+  o Generate null transformation between geodetic/vertical datum ensemble and
     its members (#3266)
 
   o Add fk delete cascade to database tables for improved customizability
     of the database (#3237)
 
-  o Add Svalbard geoid grid no_kv_arcgp-2006-sk to grid alternatives (#3292) 
+  o Add Svalbard geoid grid no_kv_arcgp-2006-sk to grid alternatives (#3292)
 
   o Added French grid fr_ign_RAF20 to grid alternatives (#3228)
 
@@ -42,31 +105,31 @@
  + Optimizations
 
   o NTv2 and GTX grid readers: add a cache of lines to speed-up (#3241)
-  
+
   o IComparable::isEquivalentTo() optimizations (#3233)
 
  + Various Updates
 
-  o createOperations() / proj_trans(): better take into account area of 
+  o createOperations() / proj_trans(): better take into account area of
     interest name / do not only keep first returned coordinate operation (#3282)
 
-  o createOperations(): take into account axis unit and inversion of target    
+  o createOperations(): take into account axis unit and inversion of target
     DerivedProjectedCRS (#3281)
 
   o Allow a Compound CRS with derived projected (#3283)
 
-  o Make "Vertical Offset and Slope" method usable as a deriving conversion of 
+  o Make "Vertical Offset and Slope" method usable as a deriving conversion of
     a DerivedVerticalCRS (#3270)
 
   o PROJ pipeline generator: recognize opposite Helmert transformations using
     a different convention (#3265)
 
-  o createOperations(): prefer simpler pipelines / affects WGS 84 to 
+  o createOperations(): prefer simpler pipelines / affects WGS 84 to
     GDA94/GDA2020 (#3248)
-  
+
   o Make it possible to determine which grid files were actually used during a
     transformation (#3180)
-  
+
   o Transformation: no longer do vertical trasnformation when doing compound CRS
     to 2D CRS / add --3d to cs2cs (#3119)
 
@@ -79,16 +142,16 @@
 
  Bug fixes
  --------
- 
+
  o projinfo: fix crash on --list-crs when proj.db cannot be opened (#3290)
 
  o getCRSInfoList(): fix retrieval of projected_crs given by text_definition
    only (#3289)
 
- o WKT parser: fix issue when parsing some WKT1 with 
+ o WKT parser: fix issue when parsing some WKT1 with
    Hotine_Oblique_Mercator_Azimuth_Center and ignoring rectified_grid_angle (#3280)
 
- o WKT1 import: better deal when the angular unit of the GEOGCS[] of the 
+ o WKT1 import: better deal when the angular unit of the GEOGCS[] of the
    PROJCS[] doesn't match the one from the database (#3274)
 
  o createOperations(): avoid potential infinite recursions (#3264)
@@ -102,8 +165,8 @@
    towgs84 to gencentric CRS (#3231)
 
  o createOperations(): fix infinite recursion in a complex case (#3226)
- 
- 
+
+
 
 9.0.1 Release Notes
 -------------------
