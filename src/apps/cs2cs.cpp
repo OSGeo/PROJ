@@ -352,7 +352,8 @@ static bool is3DCRS(const PJ* crs) {
         return true;
     if( type == PJ_TYPE_GEOGRAPHIC_3D_CRS )
         return true;
-    if( type == PJ_TYPE_GEODETIC_CRS || type == PJ_TYPE_PROJECTED_CRS )
+    if( type == PJ_TYPE_GEODETIC_CRS || type == PJ_TYPE_PROJECTED_CRS  ||
+        type == PJ_TYPE_DERIVED_PROJECTED_CRS)
     {
         auto cs = proj_crs_get_coordinate_system(nullptr, crs);
         assert(cs);

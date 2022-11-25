@@ -1052,6 +1052,10 @@ convertPJObjectTypeToObjectType(PJ_TYPE type, bool &valid) {
         cppType = AuthorityFactory::ObjectType::PROJECTED_CRS;
         break;
 
+    case PJ_TYPE_DERIVED_PROJECTED_CRS:
+        valid = false;
+        break;
+
     case PJ_TYPE_COMPOUND_CRS:
         cppType = AuthorityFactory::ObjectType::COMPOUND_CRS;
         break;
@@ -1201,25 +1205,19 @@ PJ_TYPE proj_get_type(const PJ *obj) {
             return PJ_TYPE_PARAMETRIC_DATUM;
         }
 
-        {
-            auto crs = dynamic_cast<GeographicCRS *>(ptr);
-            if (crs) {
-                if (crs->coordinateSystem()->axisList().size() == 2) {
-                    return PJ_TYPE_GEOGRAPHIC_2D_CRS;
-                } else {
-                    return PJ_TYPE_GEOGRAPHIC_3D_CRS;
-                }
+        if (auto crs = dynamic_cast<GeographicCRS *>(ptr)) {
+            if (crs->coordinateSystem()->axisList().size() == 2) {
+                return PJ_TYPE_GEOGRAPHIC_2D_CRS;
+            } else {
+                return PJ_TYPE_GEOGRAPHIC_3D_CRS;
             }
         }
 
-        {
-            auto crs = dynamic_cast<GeodeticCRS *>(ptr);
-            if (crs) {
-                if (crs->isGeocentric()) {
-                    return PJ_TYPE_GEOCENTRIC_CRS;
-                } else {
-                    return PJ_TYPE_GEODETIC_CRS;
-                }
+        if (auto crs = dynamic_cast<GeodeticCRS *>(ptr)) {
+            if (crs->isGeocentric()) {
+                return PJ_TYPE_GEOCENTRIC_CRS;
+            } else {
+                return PJ_TYPE_GEODETIC_CRS;
             }
         }
 
@@ -1228,6 +1226,9 @@ PJ_TYPE proj_get_type(const PJ *obj) {
         }
         if (dynamic_cast<ProjectedCRS *>(ptr)) {
             return PJ_TYPE_PROJECTED_CRS;
+        }
+        if (dynamic_cast<DerivedProjectedCRS *>(ptr)) {
+            return PJ_TYPE_DERIVED_PROJECTED_CRS;
         }
         if (dynamic_cast<CompoundCRS *>(ptr)) {
             return PJ_TYPE_COMPOUND_CRS;
