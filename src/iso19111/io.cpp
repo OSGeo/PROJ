@@ -7433,7 +7433,14 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
         // Second pass: exact match on other objects
         // Third pass: approximate match on CRS objects
         // Fourth pass: approximate match on other objects
-        for (int pass = 0; pass <= 3; ++pass) {
+        // But only allow approximate matching if the size of the text is
+        // large enough (>= 5), otherwise we get a lot of false positives:
+        // "foo" -> "Amersfoort", "bar" -> "Barbados 1938"
+        // Also only accept approximate matching if the ratio between the
+        // input and match size is not too small, so that "omerc" doesn't match
+        // with "WGS 84 / Pseudo-Mercator"
+        const int maxNumberPasses = text.size() <= 4 ? 2 : 4;
+        for (int pass = 0; pass < maxNumberPasses; ++pass) {
             const bool approximateMatch = (pass >= 2);
             auto ret = searchObject(
                 text, approximateMatch,
@@ -7447,10 +7454,14 @@ static BaseObjectNNPtr createFromUserInput(const std::string &text,
                           AuthorityFactory::ObjectType::DATUM_ENSEMBLE,
                           AuthorityFactory::ObjectType::COORDINATE_OPERATION});
             if (ret) {
-                return NN_NO_CHECK(ret);
+                if (!approximateMatch ||
+                    ret->nameStr().size() < 2 * text.size())
+                    return NN_NO_CHECK(ret);
             }
             if (compoundCRS) {
-                return NN_NO_CHECK(compoundCRS);
+                if (!approximateMatch ||
+                    compoundCRS->nameStr().size() < 2 * text.size())
+                    return NN_NO_CHECK(compoundCRS);
             }
         }
     }
