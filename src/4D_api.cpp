@@ -879,8 +879,6 @@ a null-pointer is returned. The definition arguments may use '+' as argument sta
 indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
 "zone=32"}.
 **************************************************************************************/
-    PJ *P;
-    const char *c;
 
     if (nullptr==ctx)
         ctx = pj_get_default_ctx ();
@@ -890,13 +888,13 @@ indicator, as in {"+proj=utm", "+zone=32"}, or leave it out, as in {"proj=utm",
     }
 
     /* We assume that free format is used, and build a full proj_create compatible string */
-    c = pj_make_args (argc, argv);
+    char *c = pj_make_args (argc, argv);
     if (nullptr==c) {
         proj_context_errno_set(ctx, PROJ_ERR_INVALID_OP /* ENOMEM */);
         return nullptr;
     }
 
-    P = proj_create (ctx, c);
+    PJ *P = proj_create (ctx, c);
 
     free ((char *) c);
     return P;
