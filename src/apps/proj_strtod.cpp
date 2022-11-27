@@ -100,7 +100,7 @@ double proj_strtod(const char *str, char **endptr) {
     int exponent = 0;
     int fraction_is_nonzero = 0;
     int sign = 0;
-    char *p = (char *) str;
+    const char *p = str;
     int n = 0;
     int num_digits_total        = 0;
     int num_digits_after_comma  = 0;
@@ -109,7 +109,7 @@ double proj_strtod(const char *str, char **endptr) {
     if (nullptr==str) {
         errno = EFAULT;
         if (endptr)
-            *endptr = p;
+            *endptr = nullptr;
         return HUGE_VAL;
     }
 
@@ -120,14 +120,14 @@ double proj_strtod(const char *str, char **endptr) {
     /* Empty string? */
     if (0==*p) {
         if (endptr)
-            *endptr = (char *) str;
+            *endptr = const_cast<char*>(str);
         return 0;
     }
 
     /* non-numeric? */
     if (nullptr==strchr("0123456789+-._", *p)) {
         if (endptr)
-            *endptr = (char *) str;
+            *endptr = const_cast<char*>(str);
         return 0;
     }
 
@@ -145,14 +145,14 @@ double proj_strtod(const char *str, char **endptr) {
             if (isdigit(*p) || '_'==*p || '.'==*p)
                 break;
             if (endptr)
-                *endptr = (char *) str;
+                *endptr = const_cast<char*>(str);
             return 0;
     }
 
     /* stray sign, as in "+/-"? */
     if (0!=sign && (nullptr==strchr ("0123456789._", *p) || 0==*p)) {
         if (endptr)
-            *endptr = (char *) str;
+            *endptr = const_cast<char*>(str);
         return 0;
     }
 
@@ -163,7 +163,7 @@ double proj_strtod(const char *str, char **endptr) {
     /* zero? */
     if ((0==*p) || nullptr==strchr ("0123456789eE.", *p) || isspace(*p)) {
         if (endptr)
-            *endptr = p;
+            *endptr = const_cast<char*>(p);
         return sign==-1? -0: 0;
     }
 
@@ -182,7 +182,7 @@ double proj_strtod(const char *str, char **endptr) {
     /* Done? */
     if (0==*p) {
         if (endptr)
-            *endptr = p;
+            *endptr = const_cast<char*>(p);
         if (sign==-1)
             return -number;
         return number;
@@ -204,7 +204,7 @@ double proj_strtod(const char *str, char **endptr) {
         /* if the next character is nonnumeric, we have reached the end */
         if (0==*p || nullptr==strchr ("_0123456789eE+-", *p)) {
             if (endptr)
-                *endptr = p;
+                *endptr = const_cast<char*>(p);
             if (sign==-1)
                 return -number;
             return number;
@@ -237,7 +237,7 @@ double proj_strtod(const char *str, char **endptr) {
     if (0==num_digits_total) {
         errno = EINVAL;
         if (endptr)
-            *endptr = p;
+            *endptr = const_cast<char*>(p);
         return HUGE_VAL;
     }
 
@@ -265,7 +265,7 @@ double proj_strtod(const char *str, char **endptr) {
         if (0==sign) {
             if (!(isdigit(*p) || *p=='_')) {
                 if (endptr)
-                    *endptr = p;
+                    *endptr = const_cast<char*>(p);
                 return HUGE_VAL;
             }
         }
@@ -291,7 +291,7 @@ double proj_strtod(const char *str, char **endptr) {
     }
 
     if (endptr)
-        *endptr = p;
+        *endptr = const_cast<char*>(p);
 
     if ((exponent < DBL_MIN_EXP) || (exponent > DBL_MAX_EXP)) {
         errno = ERANGE;
