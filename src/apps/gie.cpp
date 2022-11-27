@@ -572,7 +572,7 @@ static void finish_previous_operation (const char *args) {
 
 
 /*****************************************************************************/
-static int operation (char *args) {
+static int operation (const char *args) {
 /*****************************************************************************
 Define the operation to apply to the input data (in ISO 19100 lingo,
 an operation is the general term describing something that can be
@@ -1084,7 +1084,7 @@ Indicate that the remaining material should be skipped. Mostly for debugging.
 static int dispatch (const char *cmnd, const char *args) {
     if (T.skip)
         return SKIP;
-    if  (0==strcmp (cmnd, "operation")) return  operation ((char *) args);
+    if  (0==strcmp (cmnd, "operation")) return  operation (args);
     if  (0==strcmp (cmnd, "crs_src"))   return  crs_src   (args);
     if  (0==strcmp (cmnd, "crs_dst"))   return  crs_dst   (args);
     if (T.skip_test)
