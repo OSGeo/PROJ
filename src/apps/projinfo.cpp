@@ -83,7 +83,7 @@ struct OutputOptions {
 
 // ---------------------------------------------------------------------------
 
-static void usage() {
+[[noreturn]] static void usage() {
     std::cerr
         << "usage: projinfo [-o formats] "
            "[-k crs|operation|datum|ensemble|ellipsoid] "

@@ -59,7 +59,7 @@ class ParsingException : public std::exception {
 
 // ---------------------------------------------------------------------------
 
-static void usage() {
+[[noreturn]] static void usage() {
     std::cerr << "usage: projsync " << std::endl;
     std::cerr << "          [--endpoint URL]" << std::endl;
     std::cerr << "          [--local-geojson-file FILENAME]" << std::endl;
