@@ -121,14 +121,6 @@
 #  define ABS(x)        ((x<0) ? (-1*(x)) : x)
 #endif
 
-#if INT_MAX == 2147483647
-typedef int pj_int32;
-#elif LONG_MAX == 2147483647
-typedef long pj_int32;
-#else
-#warning It seems no 32-bit integer type is available
-#endif
-
 /* maximum path/filename */
 #ifndef MAX_PATH_FILENAME
 #define MAX_PATH_FILENAME 1024
