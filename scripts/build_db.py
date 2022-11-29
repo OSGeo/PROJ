@@ -294,7 +294,7 @@ def create_datumensemble_transformations(proj_db_cursor):
                 # Insert a null transformation between the representative CRS of the datum ensemble
                 # and each representative CRS of its members.
                 crs_code, crs_name, crs_extent = find_crs_code_name_extent_from_geodetic_datum_code(proj_db_cursor, member_code)
-                assert crs_extent == ensemble_crs_extent, (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
+                assert crs_extent == ensemble_crs_extent or (crs_extent in (2830, 1262) and ensemble_crs_extent in (2830, 1262)), (ensemble_crs_code, ensemble_crs_name, ensemble_crs_extent, crs_code, crs_name, crs_extent)
 
                 code = '%s_TO_%s' % (ensemble_crs_name, crs_name)
                 code = code.replace(' ', '')
@@ -768,7 +768,8 @@ def fill_grid_transformation(proj_db_cursor):
         # 1105: Geog3D to Geog2D+GravityRelatedHeight (ITAL2005)
         # 1110: Geog3D to Geog2D+Depth (Gravsoft)
         # 1112: Vertical Offset by Grid Interpolation (NRCan byn)
-        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1100, 1101, 1103, 1105, 1110, 1112) and n_params == 2:
+        # 1115: Geog3D to Geog2D+Depth (txt)
+        elif method_code in (1071, 1080, 1081, 1083, 1084, 1085, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1100, 1101, 1103, 1105, 1110, 1112, 1115) and n_params == 2:
             assert param_code[1] == 1048, (code, method_code, param_code[1])
             interpolation_crs_auth_name = EPSG_AUTHORITY
             interpolation_crs_code = str(int(param_value[1])) # needed to avoid codes like XXXX.0
