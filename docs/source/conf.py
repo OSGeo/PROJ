@@ -77,8 +77,8 @@ copyright = u'1983-{0}'.format(now.year)
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-version = '9.1.0'
-data_version = '1.11'
+version = '9.1.1'
+data_version = '1.12'
 
 # use same |release| as |version|
 release = version
