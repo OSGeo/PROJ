@@ -5080,7 +5080,12 @@ WKTParser::Private::buildEngineeringCRSFromLocalCS(const WKTNodeNNPtr &node) {
             :
             // In theory OGC 01-009 mandates LOCAL_DATUM, but GDAL has a
             // tradition of emitting just LOCAL_CS["foo"]
-            emptyPropertyMap);
+            []() {
+                PropertyMap map;
+                map.set(IdentifiedObject::NAME_KEY,
+                        "Unknown engineering datum");
+                return map;
+            }());
     return EngineeringCRS::create(buildProperties(node), datum, cs);
 }
 

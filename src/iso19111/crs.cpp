@@ -6929,7 +6929,9 @@ void EngineeringCRS::_exportToWKT(io::WKTFormatter *formatter) const {
                                 : io::WKTConstants::LOCAL_CS,
                          !identifiers().empty());
     formatter->addQuotedString(nameStr());
-    if (isWKT2 || !datum()->nameStr().empty()) {
+    const auto &datumName = datum()->nameStr();
+    if (isWKT2 ||
+        (!datumName.empty() && datumName != "Unknown engineering datum")) {
         datum()->_exportToWKT(formatter);
     }
     if (!isWKT2) {
