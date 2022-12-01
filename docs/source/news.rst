@@ -3,6 +3,71 @@
 News
 ###############################################################################
 
+
+9.1.1 Release Notes
+++++++++++++++++++++
+*December 1st 2022*
+
+Updates
+--------
+
+* Database: register ``at_bev_AT_GIS_GRID_2021_09_28`` grid (`#3442 <https://github.com/OSGeo/PROJ/issues/3442>`_)
+
+Bug fixes
+----------
+
+* Implement ``alterGeodeticCRS`` and ``stripVerticalComponent`` for ``DerivedProjected`` (`#3482 <https://github.com/OSGeo/PROJ/issues/3482>`_)
+
+* Various improvements to handling of ``DerivedProjectedCRS``
+  (`#3482 <https://github.com/OSGeo/PROJ/issues/3482>`_, `#3477 <https://github.com/OSGeo/PROJ/issues/3477>`_ , `#3342 <https://github.com/OSGeo/PROJ/issues/3342>`_ , `#3319 <https://github.com/OSGeo/PROJ/issues/3319>`_, `#3317 <https://github.com/OSGeo/PROJ/issues/3317>`_)
+
+* Add missing ``<cstdint>`` includes (`#3459 <https://github.com/OSGeo/PROJ/issues/3459>`_)
+
+* cs2cs: better validate value of ``-W`` option (`#3453 <https://github.com/OSGeo/PROJ/issues/3453>`_)
+
+* ``DatabaseContext::lookForGridInfo()``: fix caching of filenames and set
+  correct URLs (`#3448 <https://github.com/OSGeo/PROJ/issues/3448>`_)
+
+* Database: register in ``grid_alternatives`` grids from PROJ-data that have no
+  corresponding transformation record (`#3446 <https://github.com/OSGeo/PROJ/issues/3446>`_)
+
+* ``cass`` projection: fix forward computation of easting (`#3433 <https://github.com/OSGeo/PROJ/issues/3433>`_)
+
+* Implement ``Geographic/Vertical Offset`` conversions (`#3413 <https://github.com/OSGeo/PROJ/issues/3413>`_)
+
+* ``vandg`` projection: handle ``+over`` to extend the validity domain outside of ``|lon|>180deg`` (`#3427 <https://github.com/OSGeo/PROJ/issues/3427>`_)
+
+* ``eqdc`` projection: avoid floating point division by zero in non-nominal case (`#3415 <https://github.com/OSGeo/PROJ/issues/3415>`_)
+
+* :cpp:func:`createOperations()`: fix issues when transforming between ``Geog3D`` and
+  ``DerivedGeog3D`` CRS with ``Geographic3D`` offsets method (`#3411 <https://github.com/OSGeo/PROJ/issues/3411>`_)
+
+* :cpp:func:`VerticalCRS::_isEquivalentTo()`: do not consider ``VerticalCRS`` and
+  ``DerivedVerticalCRS`` as equivalent (`#3408 <https://github.com/OSGeo/PROJ/issues/3408>`_)
+
+* cct and cs2cs: Avoid problems when encountering UTF-8 `BOM`` characters at
+   beginning of input files (`#3395 <https://github.com/OSGeo/PROJ/issues/3395>`_)
+
+* :cpp:func:`createFromUserInput()`: Improved lookup when approximate name is provided (`#3371 <https://github.com/OSGeo/PROJ/issues/3371>`_)
+
+* projinfo / cs2cs : auto promotion to 3D of CRS specified by name (`#3367 <https://github.com/OSGeo/PROJ/issues/3367>`_)
+
+* :cpp:func:`findsOpsInRegistryWithIntermediate()`: make it work when source/target geodetic
+  CRS has no known id (`#3365 <https://github.com/OSGeo/PROJ/issues/3365>`_)
+
+* :cpp:func:`createOperations()`: emulate PROJ < 6 behavior when doing geocentric <-->
+  geographic transformation between datum with unknown transformation (`#3361 <https://github.com/OSGeo/PROJ/issues/3361>`_)
+
+* Fix issue when transforming from/into a WKT2 Bound ``VerticalCRS`` with a
+  'Geographic3D to GravityRelatedHeight' method (`#3355 <https://github.com/OSGeo/PROJ/issues/3355>`_)
+
+* :c:func:`proj_normalize_for_visualization()`: take into account ``FORCE_OVER`` property
+  from source operation (`#3350 <https://github.com/OSGeo/PROJ/issues/3350>`_)
+
+* Link geodtest against libm when available (`#3341 <https://github.com/OSGeo/PROJ/issues/3341>`_)
+
+
+
 9.1.0 Release Notes
 +++++++++++++++++++
 *September 1st 2022*

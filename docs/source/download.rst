@@ -13,8 +13,8 @@ distribution of the source code and various resource file archives. See
 Current Release
 --------------------------------------------------------------------------------
 
-* **2022-09-01** `proj-9.1.0.tar.gz`_ (`md5`_)
-* **2022-09-01** `proj-data-1.11.tar.gz`_
+* **2022-12-01** `proj-9.1.1.tar.gz`_ (`md5`_)
+* **2022-12-01** `proj-data-1.12.tar.gz`_
 * **PDF Manual** `proj.pdf`_
 
 .. note::
@@ -28,8 +28,9 @@ Current Release
 Past Releases
 --------------------------------------------------------------------------------
 
+* **2022-09-01** `proj-9.1.0.tar.gz`_
 * **2022-06-15** `proj-9.0.1.tar.gz`_
-* **2022-03-01** `proj-9.0.0.tar.gz`_ 
+* **2022-03-01** `proj-9.0.0.tar.gz`_
 * **2022-01-01** `proj-8.2.1.tar.gz`_
 * **2021-11-01** `proj-8.2.0.tar.gz`_
 * **2021-09-01** `proj-8.1.1.tar.gz`_
@@ -58,6 +59,7 @@ Past Releases
 * **2015-09-13** `proj-4.9.2.tar.gz`_
 * **2015-03-04** `proj-4.9.1.tar.gz`_
 
+* **2022-09-01** `proj-data-1.11.tar.gz`_
 * **2022-06-15** `proj-data-1.10.tar.gz`_
 * **2022-03-01** `proj-data-1.9.tar.gz`_
 * **2021-11-01** `proj-data-1.8.tar.gz`_
@@ -90,8 +92,9 @@ Past Releases
 * **2018-03-01** `proj-datumgrid-oceania-1.1.zip`_
 * **2018-03-01** `proj-datumgrid-oceania-1.0.zip`_
 
+.. _`proj-9.1.1.tar.gz`: https://download.osgeo.org/proj/proj-9.1.1.tar.gz
+.. _`md5`: https://download.osgeo.org/proj/proj-9.1.1.tar.gz.md5
 .. _`proj-9.1.0.tar.gz`: https://download.osgeo.org/proj/proj-9.1.0.tar.gz
-.. _`md5`: https://download.osgeo.org/proj/proj-9.1.0.tar.gz.md5
 .. _`proj-9.0.1.tar.gz`: https://download.osgeo.org/proj/proj-9.0.1.tar.gz
 .. _`proj-9.0.0.tar.gz`: https://download.osgeo.org/proj/proj-9.0.0.tar.gz
 .. _`proj-8.2.1.tar.gz`: https://download.osgeo.org/proj/proj-8.2.1.tar.gz
@@ -123,6 +126,7 @@ Past Releases
 .. _`proj-4.9.2.tar.gz`: https://download.osgeo.org/proj/proj-4.9.2.tar.gz
 .. _`proj-4.9.3.tar.gz`: https://download.osgeo.org/proj/proj-4.9.3.tar.gz
 
+.. _`proj-data-1.12.tar.gz`: https://download.osgeo.org/proj/proj-data-1.12.tar.gz
 .. _`proj-data-1.11.tar.gz`: https://download.osgeo.org/proj/proj-data-1.11.tar.gz
 .. _`proj-data-1.10.tar.gz`: https://download.osgeo.org/proj/proj-data-1.10.tar.gz
 .. _`proj-data-1.9.tar.gz`: https://download.osgeo.org/proj/proj-data-1.9.tar.gz
