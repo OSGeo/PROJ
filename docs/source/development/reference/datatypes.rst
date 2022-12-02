@@ -4,10 +4,10 @@
 Data types
 ================================================================================
 
-This section describes the numerous data types in use in PROJ.4. As a rule
-of thumb PROJ.4 data types are prefixed with ``PJ_``, or in one particular case,
+This section describes the numerous data types in use in PROJ. As a rule
+of thumb PROJ data types are prefixed with ``PJ_``, or in one particular case,
 is simply called :c:type:`PJ`. A few notable exceptions can be traced
-back to the very early days of PROJ.4 when the ``PJ_`` prefix was not
+back to the very early days of PROJ when the ``PJ_`` prefix was not
 consistently used.
 
 Transformation objects
@@ -16,7 +16,7 @@ Transformation objects
 .. c:type:: PJ
 
     Object containing everything related to a given projection or transformation.
-    As a user of the PROJ.4 library you are only exposed to pointers to this
+    As a user of the PROJ library you are only exposed to pointers to this
     object and the contents is hidden behind the public API. :c:type:`PJ` objects
     are created with :c:func:`proj_create` and destroyed with
     :c:func:`proj_destroy`.
@@ -51,7 +51,7 @@ Transformation objects
 
 .. c:type:: PJ_CONTEXT
 
-    Context objects enable safe multi-threaded usage of PROJ.4. Each :c:type:`PJ`
+    Context objects enable safe multi-threaded usage of PROJ. Each :c:type:`PJ`
     object is connected to a context (if not specified, the default context is
     used). All operations within a context should be performed in the same thread.
     :c:type:`PJ_CONTEXT` objects are created with :c:func:`proj_context_create`
@@ -525,7 +525,7 @@ List structures
 
 .. c:type:: PJ_OPERATIONS
 
-    Description a PROJ.4 operation
+    Description a PROJ operation
 
     .. code-block:: C
 
@@ -550,7 +550,7 @@ List structures
 
 .. c:type:: PJ_ELLPS
 
-    Description of ellipsoids defined in PROJ.4
+    Description of ellipsoids defined in PROJ
 
     .. code-block:: C
 
