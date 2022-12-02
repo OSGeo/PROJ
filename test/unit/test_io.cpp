@@ -5273,7 +5273,7 @@ TEST(wkt_parse, LOCAL_CS_short) {
     ASSERT_TRUE(crs != nullptr);
 
     EXPECT_EQ(crs->nameStr(), "Engineering CRS");
-    EXPECT_FALSE(!crs->datum()->nameStr().empty());
+    EXPECT_EQ(crs->datum()->nameStr(), "Unknown engineering datum");
     auto cs = crs->coordinateSystem();
     ASSERT_EQ(cs->axisList().size(), 2U);
 
